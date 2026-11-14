@@ -165,9 +165,7 @@ func _bake_tone(list: Array) -> ArrayMesh:
 	if not fine.is_empty():
 		arrs[Mesh.ARRAY_INDEX] = fine
 	var far := EmptySlim.reduce(arrs, EmptySlim.LOD_KEEP)
-	var shown: PackedInt32Array = arrs[Mesh.ARRAY_INDEX]
-	var lods := {} if far.is_empty() or far.size() >= shown.size() else {0.05: far}
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], lods)
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], {} if far.is_empty() else {0.05: far})
 	return am
 
 ## How much a cloth vertex follows each bone. legs: cloth below the hip follows the leg on its side, more toward

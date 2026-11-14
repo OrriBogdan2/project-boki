@@ -8,7 +8,7 @@ extends RefCounted
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
-const FOOT_TOLERANCE := 0.03     # m: how far the lowest foot may sit off the ground (a bare foot has no sole)
+const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
 
 var bad := 0
 
@@ -64,11 +64,10 @@ func _old_looks() -> void:
 	ok(Unmasked.clean({}) == Unmasked.default_look(), "no look gives the default")
 	var old := {"race": 2, "gender": 0, "body": 2, "face": 4, "skin": 5, "outfit": 1, "hair": 3, "glider": "kite"}
 	var u := Unmasked.clean(old)
-	var frame := EmptyFrame.clean(EmptyFrame.from_steps(2, 2))
-	var want := [0, frame, Unmasked.HOLLOW_FROM_EYES[4], Unmasked.GHOST_FROM_BROWS[4]]
-	var got := [u["gender"], u["frame"], u["hollow"], u["ghost"]]
+	var want := [0, 2, 2, Unmasked.HOLLOW_FROM_EYES[4], Unmasked.GHOST_FROM_BROWS[4]]
+	var got := [u["gender"], u["build"], u["height"], u["hollow"], u["ghost"]]
 	ok(got == want and not u.has("eyes") and not u.has("brows") and not u.has("blush"),
-		"an old Stoneborn sturdy fierce look keeps sex, build, height; its face a hollow (%s)" % str(got))
+		"an old Stoneborn sturdy fierce look keeps sex and build, reads tall, its face a hollow (%s)" % str(got))
 	var marks_look := {"unmasked": true, "gender": 1, "eyes": 2, "brows": 1, "blush": 2, "outfit": 3, "colour": 4}
 	var m2 := Unmasked.clean(marks_look)
 	ok(m2["hollow"] == Unmasked.HOLLOW_FROM_EYES[2] and m2["ghost"] == Unmasked.GHOST_FROM_BROWS[1]
@@ -77,8 +76,7 @@ func _old_looks() -> void:
 	var sexes: Array = Unmasked.ROWS[0][2]
 	ok(String(Unmasked.ROWS[0][1]) == "Sex" and sexes == ["Female", "Male"] and not str(Unmasked.ROWS).contains("emin")
 		and not str(Unmasked.ROWS).contains("ascul"), "the creator says Male / Female (%s)" % str(sexes))
-	ok(String(u["glider"]) == "kite" and not u.has("race") and int(u["hair"]) < Unmasked.HAIRS.size(),
-		"the glider stays; race goes and hair is one of the creator's styles")
+	ok(String(u["glider"]) == "kite" and not u.has("race") and not u.has("hair"), "the glider stays; race and hair go")
 	ok(Unmasked.clean(u) == u, "cleaning an Unmasked changes nothing")
 	_shroud_migration()
 	var data := {"look": old.duplicate()}
@@ -107,11 +105,11 @@ func _model(main: Node) -> void:
 	var base := _build(Unmasked.default_look())
 	var rig_ok := String(base.get_meta("race")) == "human" and String(base.get_meta("arch")) == "unmasked"
 	ok(rig_ok, "it is the human rig with no hunter's gear (arch %s)" % base.get_meta("arch"))
-	var tall := _build({"unmasked": true, "frame": {"height": 1.0}})
-	var short := _build({"unmasked": true, "frame": {"height": 0.0}})
+	var tall := _build({"unmasked": true, "height": 2})
+	var short := _build({"unmasked": true, "height": 0})
 	var tops := [_top(short), _top(base), _top(tall)]
-	ok(tops[2] > tops[1] * 1.04 and tops[1] > tops[0] * 1.04,
-		"the height slider changes how tall the model stands (%.2f / %.2f / %.2f m)" % tops)
+	ok(tops[2] > tops[1] * 1.07 and tops[1] > tops[0] * 1.07,
+		"height changes how tall the model stands, by about a tenth a step (%.2f / %.2f / %.2f m)" % tops)
 	ok(tall.get_node("TeamRing").scale.x < short.get_node("TeamRing").scale.x * 1.01,
 		"the ring under your feet (your real footprint) stays the size it was")
 	var hollow := base.find_child("Hollow", true, false) as MeshInstance3D
@@ -128,20 +126,20 @@ func _model(main: Node) -> void:
 	ok(int(sm.get_shader_parameter("shape")) == 2 and int(sm.get_shader_parameter("ghost")) == 3
 		and (sm.get_shader_parameter("glow") as Color).is_equal_approx(Unmasked.GLOWS[2]),
 		"the hollow's shape, ghost features and glow follow the look")
-	var woman := _build({"unmasked": true, "gender": 0, "shroud": 0})
-	var man := _build({"unmasked": true, "gender": 1, "shroud": 0})
+	var woman := _build({"unmasked": true, "gender": 0})
+	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
-	var narrow := _width(woman.get_node("Rig/Torso/ShroudBones")) < _width(man.get_node("Rig/Torso/ShroudBones"))
-	ok(absf(w_sh) < absf(m_sh) * 0.9 and narrow, "a woman has narrower shoulders and a cloak that follows them")
+	var flare := _width(woman.get_node("Rig/Torso/ShroudBones")) > _width(man.get_node("Rig/Torso/ShroudBones"))
+	ok(absf(w_sh) < absf(m_sh) * 0.9 and flare,
+		"a woman has narrower shoulders and a shroud that flares wider at the hem")
 	ok(String(woman.get_meta("stance")) == "empty_f" and String(man.get_meta("stance")) == "empty_m"
 		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance(),
 		"and her own stance (weight on one hip); his is square")
-	var slight := _build({"unmasked": true, "frame": {"build": 0.0}})
-	var sturdy := _build({"unmasked": true, "frame": {"build": 1.0}})
+	var slight := _build({"unmasked": true, "build": 0})
+	var sturdy := _build({"unmasked": true, "build": 2})
 	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
-		"the build slider changes the body's mass (%.2f / %.2f / %.2f m wide)"
-		% [_width(slight), _width(base), _width(sturdy)])
+		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(base), _width(sturdy)])
 	for n in [styled, woman, man, slight, sturdy]:
 		n.free()
 	var marked := _build({"unmasked": true, "marks": [{"x": 0.0, "y": 0.9, "col": "#ff4040"}]})
@@ -208,7 +206,7 @@ func _with_glider(lk: Dictionary) -> Dictionary:
 	return lk
 
 func _blend(main: Node) -> void:
-	Save.d["look"] = {"unmasked": true, "frame": {"height": 1.0, "build": 1.0}, "colour": 9, "marks": []}
+	Save.d["look"] = {"unmasked": true, "height": 2, "build": 2, "colour": 9, "marks": []}
 	var hero := Models.hunter("medium", Data.TEAM_COLORS[0], "smg", "", Unmasked.mask_look(), "gunslinger")
 	var before_scale := hero.scale
 	var mat := (hero.get_meta("mats") as Array)[0] as ShaderMaterial
@@ -240,9 +238,9 @@ func _feet(main: Node) -> void:
 	var cases := 0
 	var tree := main.get_tree()
 	for g in 2:
-		for h in [0.0, 0.5, 1.0]:
-			for b in [0.0, 0.5, 1.0]:
-				var m := _build({"unmasked": true, "gender": g, "frame": {"height": h, "build": b}})
+		for h in Unmasked.HEIGHTS.size():
+			for b in Unmasked.BUILDS.size():
+				var m := _build({"unmasked": true, "gender": g, "height": h, "build": b})
 				main.add_child(m)
 				var anim := HunterAnim.new(m)
 				var lows := []
@@ -282,8 +280,8 @@ func _shroud_migration() -> void:
 	for row in Unmasked.ROWS:
 		labels.append(String(row[1]).to_lower())
 	var old_label := func(l: String) -> bool: return l.contains("skin") or l == "motes"
-	ok(not labels.any(old_label) and "aura" in labels,
-		"the creator has no skin colour, and Aura where Motes was (%s)" % str(labels))
+	ok(not labels.any(old_label) and "shroud colour" in labels and "aura" in labels,
+		"the creator has no skin colour: a shroud colour in its place, and Aura where Motes was (%s)" % str(labels))
 
 ## Item 79b: no skin shows, the body is under a shroud in the chosen colour, the styles differ, the silhouette
 ## still follows sex, height and build.
@@ -296,9 +294,9 @@ func _shroud() -> void:
 	var hand := cloak.find_child("Hand", true, false)
 	var hand_dark := false
 	for mi in hand.find_children("*", "MeshInstance3D", false, false):
-		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
-		hand_dark = hand_dark or mat.shader == EmptyWear.VOID_BODY
-	ok(hand_dark, "the hands are void: no skin colour on them")
+		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
+		hand_dark = hand_dark or (c is Color and (c as Color).v < 0.12)
+	ok(hand_dark, "the hands are void-dark: no skin colour on them")
 	var wrapped := _build({"unmasked": true, "shroud": 1})
 	var tatters := _build({"unmasked": true, "shroud": 2})
 	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]

@@ -445,7 +445,6 @@ const CHECKS := {
 	# boss keyed moves, strikes on the tell
 	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)
-	"--empty-creator-check": ["res://tools/empty_creator_check.gd", "empty_creator_check", null],   # the Empty creator
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# the loading screen: splash, tip, bar

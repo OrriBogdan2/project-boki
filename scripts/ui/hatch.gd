@@ -29,7 +29,6 @@ const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
 const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
 const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
-const STICK_DEAD := 0.2         # of the right stick's travel: less than this does not turn the creator's preview
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -408,25 +407,82 @@ func _show_create() -> void:
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
 	if sub_lbl:
-		sub_lbl.text = "You are one of the Empty. Drag, hold %s / %s or use the right stick to turn round." % [
+		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round." % [
 				Settings.key_cap("left"), Settings.key_cap("right")]
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
 	look_at_t = CREATE_LOOK
-	var panel := CreatorPanel.make(look)
-	panel.player_name = String(Save.d.get("name", "Hunter"))
-	panel.changed.connect(func(lk: Dictionary):
-		look = lk
-		_rebuild_preview())
-	panel.done.connect(func(lk: Dictionary):
-		look = lk
-		Save.d["name"] = panel.player_name
-		_looks_good())
-	create_box = panel
-	root_ui.add_child(panel)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	panel.offset_top += 46
-	panel.offset_bottom += 46       # clear of the title
+	var card := UI.card(UI.CARD, 14, 16)
+	card.custom_minimum_size = Vector2(500, 0)
+	create_box = card
+	var v := UI.vbox(8); card.add_child(v)
+	for r in Unmasked.ROWS.size():
+		var row: Array = Unmasked.ROWS[r]
+		if r == 0 or r == Unmasked.HOLLOW_ROW:
+			v.add_child(UI.section("Body" if r == 0 else "The hollow"))
+		var key: String = row[0]
+		var opts: Array = row[2]
+		var hr := UI.hbox(8)
+		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if row.size() > 3:
+			l.tooltip_text = row[3]
+			l.mouse_filter = Control.MOUSE_FILTER_STOP
+		hr.add_child(l)
+		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
+		var i := int(look[key])
+		if opts[0] is Color:
+			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
+			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
+			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			hr.add_child(sw)
+		else:
+			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
+			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			hr.add_child(val)
+		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
+		v.add_child(hr)
+	_mastery_rows(v)
+	var nr := UI.hbox(8)
+	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
+	nr.add_child(nl)
+	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
+	nr.add_child(ne)
+	v.add_child(nr)
+	var br := UI.hbox(10)
+	br.alignment = BoxContainer.ALIGNMENT_END
+	br.add_child(UI.ghost("Random", func():
+		var kept: Dictionary = look["features"]
+		look = Unmasked.random_look()
+		look["features"] = kept
+		_show_create(), 120, "swap"))
+	br.add_child(UI.primary("Looks good", _looks_good, 200))
+	v.add_child(br)
+	root_ui.add_child(card)
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
+	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+
+## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
+func _mastery_rows(v: VBoxContainer) -> void:
+	var feats := MasteryLook.features().filter(func(f): return (look["features"] as Dictionary).has(String(f["id"])))
+	if feats.is_empty():
+		return
+	v.add_child(UI.label("Left by your Relics", 12, UI.ACCENT, UI.caps))
+	for f in feats:
+		var id := String(f["id"])
+		var hr := UI.hbox(8)
+		var l := UI.label("%s  (%s)" % [f["name"], HeroTitle.base_name(String(f["hunter"]))], UI.T_BODY, UI.MUTED)
+		l.custom_minimum_size.x = 250
+		hr.add_child(l)
+		var kept := bool(look["features"][id])
+		var b := UI.ghost("Keep" if kept else "Faded", func():
+			MasteryLook.toggle(look, id)
+			_show_create(), 120)
+		b.name = "Feature_%s" % id
+		hr.add_child(b)
+		v.add_child(hr)
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -450,6 +506,11 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
+func _step_look(key: String, d: int, n: int) -> void:
+	look[key] = posmod(int(look[key]) + d, n)
+	Sfx.play("hover", null, -6.0)
+	_show_create()
+
 var preview_yaw := PI
 var preview_anim: HunterAnim
 func _rebuild_preview() -> void:
@@ -462,11 +523,6 @@ func _rebuild_preview() -> void:
 	preview.rotation.y = preview_yaw
 	add_child(preview)
 	preview_anim = HunterAnim.new(preview)
-
-## The turntable: A / D, or the right stick past its dead zone.
-func _turn_input() -> float:
-	var stick := Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
-	return Input.get_axis("left", "right") + (stick if absf(stick) > STICK_DEAD else 0.0)
 
 func _show_pick() -> void:
 	_clear_bottom()
@@ -604,7 +660,7 @@ func _process(delta: float) -> void:
 	elif stage == "create":
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
-			preview.rotation.y += _turn_input() * delta * 2.5
+			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
 		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
 		# it (see _unhandled_input)
 		if preview and preview_anim:

@@ -5,8 +5,9 @@ extends RefCounted
 ## face come from the Warden; the hitbox (Hunter.r and the ring that shows it) never changes; the
 ## silhouette at the match camera still reads as its own Hunter at both slider extremes; at home the
 ## player is their own person. A v7 save migrates (to the Unmasked) and its Bearer is exactly the
-## Warden (the player's own creator is --empty-creator-check). With --shots-dir=<dir>: one Hunter at 5
-## slider settings and one player's look across 4 Hunters. Never touches the real save.
+## Warden; the slider creator panel works on its own. With
+## --shots-dir=<dir>: one Hunter at 5 slider settings, one player's look across 4 Hunters, and the
+## creator step. Never touches the real save.
 
 const EPS := 0.0005
 const GRID := 48              # cells across the silhouette window
@@ -40,6 +41,7 @@ func run(m: Node) -> void:
 	_own_person()
 	await _silhouettes(tree)
 	_save_round_trip()
+	await _creator_step(tree)
 	if shots != "":
 		await _shot_settings(tree)
 		await _shot_across(tree)
@@ -325,6 +327,43 @@ func _write(path: String, d: Dictionary) -> void:
 	f.store_string(JSON.stringify(d))
 	f.close()
 
+# ---------------------------------------------------------------- 8. the slider creator
+## The new-game flow and Change your look are main's Unmasked creator (--unmasked-check,
+## --class-unlock-check); the slider CreatorPanel is checked on its own until it is wired in.
+func _creator_step(tree: SceneTree) -> void:
+	var c := CreatorPanel.make(PlayerLook.neutral(), ClassUnlock.open_ids())
+	var ui := CanvasLayer.new()
+	main.add_child(ui)
+	ui.add_child(c)
+	for i in 4: await tree.process_frame
+	ok(_find_text(c, "Randomise") != null and _find_text(c, "Looks good") != null,
+			"Randomise and Looks good are there, so a player who doesn't mind is through in one click")
+	await _shot(tree, "creator_body", 30)
+	var before: Dictionary = c.look.duplicate(true)
+	c.randomise()
+	ok(c.look != before and (c.look["sliders"] as Dictionary).values().all(func(v): return v >= 0.0 and v <= 1.0),
+			"Randomise makes a new person, every slider in range")
+	c.show_tab("Face")
+	await _shot(tree, "creator_face", 12)
+	c.show_tab("Colours")
+	await _shot(tree, "creator_colours", 12)
+	var made := [{}]
+	c.done.connect(func(lk: Dictionary): made[0] = lk)
+	var want: Dictionary = c.look.duplicate(true)
+	(_find_text(c, "Looks good") as Button).pressed.emit()
+	for i in 3: await tree.process_frame
+	ok(PlayerLook.clean(made[0]) == PlayerLook.clean(want), "Looks good hands back the look it shows")
+	ui.queue_free()
+	for i in 3: await tree.process_frame
+
+func _find_text(nd: Node, txt: String) -> Control:
+	if nd is Button and (nd as Button).text == txt:
+		return nd
+	for ch in nd.get_children():
+		var f := _find_text(ch, txt)
+		if f: return f
+	return null
+
 func _shot(tree: SceneTree, file: String, frames := 25) -> void:
 	if shots == "": return
 	for i in frames: await tree.process_frame
@@ -335,7 +374,7 @@ func _save_scaled(img: Image, path: String) -> void:
 		img.resize(1280, int(img.get_height() * 1280.0 / img.get_width()), Image.INTERPOLATE_LANCZOS)
 	img.save_png(path)
 
-# ---------------------------------------------------------------- 8. screenshots
+# ---------------------------------------------------------------- 9. screenshots
 ## One Hunter (the Dark Archer's Warden) at 5 slider settings, side by side.
 func _shot_settings(tree: SceneTree) -> void:
 	var looks := [flat(0.0, {"skin": 0, "hair_col": 3, "eyes": 4}), flat(0.25, {"skin": 2, "hair_col": 1}),

@@ -79,7 +79,6 @@ static func accessory(t: ShroudTailor, kind: int, fit: Dictionary) -> void:
 		3: _charm(t, fit)
 		4: _lantern(t, fit)
 		5: _bandolier(t, fit)
-		6: _scarf(t, fit)
 
 ## A strap round the body in a ring tilted from one shoulder to the other hip.
 static func _strap(t: ShroudTailor, nm: String, fit: Dictionary, sgn: float, wide: float) -> Mesh:
@@ -139,14 +138,3 @@ static func _bandolier(t: ShroudTailor, fit: Dictionary) -> void:
 		var a := -0.55 + 0.275 * k
 		var at := Vector3(a * 0.5, 0.34 + 0.58 * a * 0.5, -cr)
 		t.rigid(t.torso, Models.box(0.05, 0.075, 0.03), t.m["trim"], at, Vector3(0, 0, -0.5))
-
-## A scarf wound twice round the neck, its two ends hanging down the front.
-static func _scarf(t: ShroudTailor, fit: Dictionary) -> void:
-	var r := float(fit["neck"])
-	var wound := HeroKit.mantle("shroud|scarf|%.3f" % r, r, r * 0.92, 0.05, 6.0)
-	t.rigid(t.torso, wound, t.m["leather"], Vector3(0, 0.64, 0))
-	for sx in [-1.0, 1.0]:
-		var top := Vector3(0.06 * sx, 0.62, -r - 0.01)
-		var tail := [top, top + Vector3(0.01 * sx, -0.12, -0.03), top + Vector3(0.02 * sx, -0.26, -0.035)]
-		var end := HeroKit.lock_mesh("shroud|scarf_end%.0f|%.3f" % [sx, r], tail, 0.07, 0.3, Vector3.FORWARD)
-		t.rigid(t.torso, end, t.m["trim"])
