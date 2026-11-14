@@ -24,10 +24,9 @@ its engines droning and its shadow sweeping over the islands below.
 - Your squad has a **drop leader**. The leader launches the squad's **mini rocket** and steers it down;
   everyone else rides along, and a ring on the ground shows where it will hit. Do nothing and the
   squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
-- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket) and **Jump** again opens
-  your glider to travel further. Anyone still aboard the ship at the far side is launched.
-- Aboard the rocket the screen is bare: the map, the landing ring, and the keys (the leader's
-  "Steer with WASD", everyone's "Jump out"). No health or ability bars until you are out.
+- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket, still fast; steer it like any
+  jump) and a second **Jump** or the glide key opens your glider at any height to travel further. Holding
+  Jump never opens it; never opening it, it opens by itself just above the ground. Anyone still aboard the ship at the far side is launched.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around

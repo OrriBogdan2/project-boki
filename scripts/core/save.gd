@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 15
+const VERSION := 20
 const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
@@ -17,8 +17,9 @@ const LOG_CAP := 200
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14",
-		14: "_migrate_14_to_15"}
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
+		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
+		19: "_migrate_19_to_20"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -73,6 +74,8 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
+		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
@@ -90,6 +93,7 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -324,8 +328,42 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 func _migrate_13_to_14(data: Dictionary) -> void:
 	data["active2"] = ""
 
-## v14 -> v15: matches played per Hunter (the Stats tab, HunterStats).
+## v14 -> v15: the movement drills keep a best time per drill (MoveDrills). The 12 -> 13 step runs again
+## first: a dev save from the line that used v13 for first-time hints gets the garden half it skipped.
+## The order from here on is docs/SAVE_CHAIN_0245.md (main took v14 for carry 2, so that chain moved up by
+## one: drills v15 .. sleepovers v19); every step only adds what is missing.
 func _migrate_14_to_15(data: Dictionary) -> void:
+	_migrate_12_to_13(data)
+	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
+		data["drills"] = {}
+
+## v15 -> v16: the combat tutorial resumes (TutorialResume); a save that is past it is marked finished.
+func _migrate_15_to_16(data: Dictionary) -> void:
+	TutorialResume.migrate(data)
+
+## v16 -> v17: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
+## with the same id; everyone else gets the empty dict (Social.clan_for). A clan it already has stays.
+func _migrate_16_to_17(data: Dictionary) -> void:
+	if typeof(data.get("clan", null)) == TYPE_DICTIONARY:
+		return
+	var gid := String(data.get("guild_id", ""))
+	var who := String(data.get("profile", {}).get("id", ""))
+	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
+
+## v17 -> v18: the XP first-time lines have their "seen" flags (XpHints).
+func _migrate_17_to_18(data: Dictionary) -> void:
+	XpHints.migrate(data)
+
+## v18 -> v19: sleepovers. No Boki is away: d["sleepovers"] = [] (Sleepover). A dev save from the save chain
+## line (v14-v18 there, before main took v14 for carry 2) skipped the carry step: it gets an empty second here.
+func _migrate_18_to_19(data: Dictionary) -> void:
+	if not data.has("sleepovers"):
+		data["sleepovers"] = []
+	if not data.has("active2"):
+		data["active2"] = ""
+
+## v19 -> v20: matches played per Hunter (the Stats tab, HunterStats).
+func _migrate_19_to_20(data: Dictionary) -> void:
 	HunterStats.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm

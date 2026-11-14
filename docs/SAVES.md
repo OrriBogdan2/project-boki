@@ -11,7 +11,7 @@ save marked "from a newer game", a lost kin or field, or a key `Settings` no lon
 | `feedback.json` | `Feedback` | `Feedback._load` reads minutes, answered versions and the queue back |
 | `warm_stamp.json` | `WarmStamp.save` (a cache; a stale one is ignored) | the file still has its fields |
 
-`save_v1.json` is the oldest format (hand-made, v1); `save_v13_*` and `save_v15_*` (v15: per-Hunter stats) are the newest pairs: `save_v15_fresh.json` is a new save, `save_v15_farm.json` a
+`save_v1.json` is the oldest format (hand-made, v1); `save_v13_*`, `save_v14_*`, `save_v15_*`, `save_v19_*` and `save_v20_*` (v20: per-Hunter stats) are the pairs, v20 the newest: `save_v20_fresh.json` is a new save, `save_v20_farm.json` a
 populated farm (kin, bonds, incubator egg, home layout).
 
 ## Changing a format on purpose

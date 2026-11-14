@@ -208,6 +208,8 @@ func draw(sz: Vector2) -> void:
 	HeartHud.full_map(self)
 	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
+	if m.zone:
+		m.zone.full_map(self, kk)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
