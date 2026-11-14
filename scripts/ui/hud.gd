@@ -135,18 +135,13 @@ func _place_msgs() -> void:
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
-## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
-## them, so two lines of text never overlap on screen; they come back as it goes.
+## World labels (damage numbers, monster plates, the lairs' name boards) never print over
+## each other or over a message card: the lower-priority one fades back and returns as it clears.
 func _clear_under_toasts(delta: float) -> void:
-	if m == null or m.lairs == null or m.cam == null:
+	if m == null or m.cam == null:
 		return
-	LabelClash.fade_orbs(m, delta)
-	var rects := msgs.rects()
-	for L in m.lairs.list:
-		var lnodes = L.get("nodes")
-		var lbl = lnodes.get("label") if lnodes is Dictionary else null
-		if lbl is Label3D and is_instance_valid(lbl):
-			MsgLane.yield_label(lbl, m.cam, rects, delta)
+	LabelClash.fade_orbs(m, delta)       # perk orb names yield to the claimed plates, bars and numbers
+	LabelSpacing.update(m, msgs.rects(), delta)
 
 ## A message in the lane (MsgLane).
 func toast(text: String, col: Color) -> void:
