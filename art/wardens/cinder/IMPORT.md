@@ -80,3 +80,7 @@ Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clip
 `python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
 stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
 glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
