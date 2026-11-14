@@ -92,9 +92,11 @@ func _tables() -> void:
 		ok(want.size() == have.size() and want.all(func(w): return have.has(w)),
 			"%s: a move for each of its %d states and attack halves, and no stray ones" % [kind, want.size()])
 		var prim: bool = body.get_parent().get_node_or_null("MobGlb") == null
-		var bare := BossAnim.pairs(kind).filter(
-			func(pc): return pc[0] != "." and body.get_node_or_null(pc[0]) == null and not (prim and MODEL_ONLY.has(pc[0]))
-		)
+		var bare: Array = []
+		for pc in BossAnim.pairs(kind):
+			var skip: bool = pc[0] == "." or (prim and MODEL_ONLY.has(pc[0]))
+			if not skip and body.get_node_or_null(pc[0]) == null:
+				bare.append(pc)
 		ok(bare.is_empty(), "%s: every pivot the moves name is on the model %s" % [kind, str(bare)])
 		for mv in want:
 			var span := _travel(kind, mv)
@@ -241,7 +243,10 @@ func _legendary(b: Boss) -> void:
 	var linked := {}
 	for l in f._links:
 		linked[String((l[1] as Node3D).name)] = l
-	var posed := BossAnim.pairs(b.mkind).filter(func(pc): return pc[0] != ".").map(func(pc): return String(pc[0]).get_file())
+	var posed: Array = []
+	for pc in BossAnim.pairs(b.mkind):
+		if pc[0] != ".":
+			posed.append(String(pc[0]).get_file())
 	var loose := posed.filter(func(n): return not linked.has(n))
 	ok(loose.is_empty(), "%s: every pivot the moves pose drives a bone %s" % [b.mkind, str(loose)])
 	var tris := 0

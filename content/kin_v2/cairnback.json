@@ -7,7 +7,7 @@
 		"Ibex"
 	],
 	"theme": "titan",
-	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on its shell. Hatched from the Stone Colossus's egg.",
+	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on its shell. Hatched from the egg Siegephant guards.",
 	"colors": {
 		"body": "#6a6f7a",
 		"belly": "#d8c59a",
@@ -116,7 +116,7 @@
 	"egg": {
 		"name": "Cairn Egg",
 		"temper": "Ancient",
-		"desc": "Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. The Colossus guarded it.",
+		"desc": "Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. Siegephant guarded it.",
 		"play": "A wall of stone. Heaves boulders that quake and stun."
 	}
 }

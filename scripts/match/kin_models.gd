@@ -8,9 +8,9 @@ class_name KinModels
 ##   Gravadillo (pebbit) armadillo + rhino beetle Gravity
 ##   Lunowl   (wisplet) owl + luna moth         Lunar
 ## and the three rare kin from boss eggs:
-##   Cairnback (cairnback) tortoise + ibex, a rune cairn on its shell    Titan    (the Stone Colossus)
-##   Zephyrak  (zephyrak)  moray eel + swift, a little sky serpent       Tempest  (Stormcoil)
-##   Hivara    (hivara)    honeybee + praying mantis, a wax crown        Swarm    (the Brood Mother)
+##   Cairnback (cairnback) tortoise + ibex, a rune cairn on its shell    Titan    (Siegephant's egg)
+##   Zephyrak  (zephyrak)  moray eel + swift, a little sky serpent       Tempest  (Sarcobra's egg)
+##   Hivara    (hivara)    honeybee + praying mantis, a wax crown        Swarm    (Calderoise's egg)
 ##
 ## Everything goes under `flex` (the part KinPuppet squashes). Front is -z, the ground is y = 0, and
 ## the whole kin stays about 0.8 tall so worn accessories and evolution parts still sit right.

@@ -7,7 +7,7 @@
 		"Praying mantis"
 	],
 	"theme": "swarm",
-	"flavor": "A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows it everywhere. Hatched from the Brood Mother's egg.",
+	"flavor": "A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows it everywhere. Hatched from the egg Calderoise guards.",
 	"colors": {
 		"body": "#d9a42a",
 		"belly": "#3b2a1c",
@@ -111,7 +111,7 @@
 	"egg": {
 		"name": "Hive Egg",
 		"temper": "Busy",
-		"desc": "Waxy and golden, and it hums. Something inside is drumming to get out. The Brood Mother guarded it.",
+		"desc": "Waxy and golden, and it hums. Something inside is drumming to get out. Calderoise guarded it.",
 		"play": "Stings in swarms. Poisons, slows and never stops buzzing."
 	}
 }
