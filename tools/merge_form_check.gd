@@ -1207,6 +1207,7 @@ func _sounds() -> void:
 	m.net_on = false
 	Sfx.listener = P.pos
 	Sfx.last_played.clear()
+	for v in Sfx.voice_all: v.stop()      # (the parts above ran in no real time: their voices fill the cap)
 	for slot in ["ult", "dash"]:
 		var extra := "%s|%.1f|%.1f|5.0|1.0" % [slot, R.pos.x, R.pos.z]
 		KinNet.on_event(m, ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, extra])
