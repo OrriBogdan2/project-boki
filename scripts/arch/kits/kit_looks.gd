@@ -27,9 +27,6 @@ const TINT_SH := preload("res://shaders/cel_tint.gdshader")
 const BASALT := Color("1f2633")         # Tenzo's rock: dark blue-grey basalt in the cracks and shadows
 const BASALT_HI := Color("4a566e")      # and on its faces
 const COBALT_HOT := Color("9ad0ff")     # the rim light: Tenzo's hot slot colour (docs/VFX_QUALITY.md)
-## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
-## so a rock's crack pattern must not change what a bot decides).
-static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
 const ORB_CORE := [Color("06322b"), Color("1aa88c")]      # the orb's glass core, plain and at full charge
@@ -43,6 +40,9 @@ const WELL_RIM := Color(0.18, 0.9, 0.75, 0.95)     # the Nightwell's lit rim (it
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 const MASK_TILT := 0.58       # rad: the Trade lantern's mask tipped back toward the match camera (pitch 57 deg)
+## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
+## so a rock's crack pattern must not change what a bot decides).
+static var vis_rng := RandomNumberGenerator.new()
 
 var m: Node
 var pools := {}               # kind -> Array[Node3D] (hidden, free)
