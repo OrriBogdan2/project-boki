@@ -65,8 +65,10 @@ func run(main: Node) -> void:
 	# ---- 1. a monster: last hit and squadmates in range
 	var want := 10.0 * KillXp.XP_PER_HP
 	var seen: Dictionary = Save.d["tutorial"]
-	ok(not seen.has(LastHitHint.KILL_FLAG) and not seen.has(LastHitHint.STOLEN_FLAG),
-		"a fresh save has seen neither kill hint")
+	ok(
+		not seen.has(LastHitHint.KILL_FLAG) and not seen.has(LastHitHint.STOLEN_FLAG),
+		"a fresh save has seen neither kill hint"
+	)
 	ok(is_equal_approx(KillXp.SHARE_R, 30.0), "the share radius is 30 m")
 	_spot(P, spot)
 	_spot(C, spot + Vector3(25, 0, 0))
@@ -75,8 +77,10 @@ func run(main: Node) -> void:
 		is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want),
 		"killer and a squadmate at 25 m get the monster's XP in full (%.1f, %.1f of %.1f)" % [P.xp, C.xp, want]
 	)
-	ok(seen.get(LastHitHint.KILL_FLAG, false) and not seen.has(LastHitHint.STOLEN_FLAG),
-		"the squad's first kill shows the last-hit hint, not the stolen one")
+	ok(
+		seen.get(LastHitHint.KILL_FLAG, false) and not seen.has(LastHitHint.STOLEN_FLAG),
+		"the squad's first kill shows the last-hit hint, not the stolen one"
+	)
 	_zero_xp()
 	_spot(C, spot + Vector3(40, 0, 0))
 	_kill(spot, [[P, 10.0]])
@@ -95,8 +99,10 @@ func run(main: Node) -> void:
 	_kill(spot, [[P, 10.0]])
 	_kill(spot, [[P, 9.0], [Q, 1.0]])
 	var shown: Array = m.hud.msgs.texts()
-	ok(LastHitHint.KILL_TEXT in shown and LastHitHint.STOLEN_TEXT in shown,
-		"each hint shows once on the hint card, a second kill of each kind adds nothing (%s)" % str(shown))
+	ok(
+		LastHitHint.KILL_TEXT in shown and LastHitHint.STOLEN_TEXT in shown,
+		"each hint shows once on the hint card, a second kill of each kind adds nothing (%s)" % str(shown)
+	)
 	_zero_xp()
 	# ---- 2. a stolen last hit
 	_spot(Q, spot)

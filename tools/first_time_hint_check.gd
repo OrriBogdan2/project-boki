@@ -6,16 +6,19 @@ extends RefCounted
 ##   3. through Match._tips: shown once on the hint lane, remembered in the save, never with tips off or in the
 ##      tutorial course; the line is short and plain (no key names)
 
-const SIDE_M := 8.0        # m: where the probe rival stands (outside the near circle, inside the view range)
-const NEAR_M := 1.5        # m: inside the near circle (NEAR_SENSE 2.0)
-const LINE_MAX := 52       # characters: one line on the hint lane
-const TURN_TEST := VisionHint.TURN_DEG + 20.0      # degrees: the probe turn, a little over the hint's
+const SIDE_M := 8.0  # m: where the probe rival stands (outside the near circle, inside the view range)
+const NEAR_M := 1.5  # m: inside the near circle (NEAR_SENSE 2.0)
+const LINE_MAX := 52  # characters: one line on the hint lane
+const TURN_TEST := VisionHint.TURN_DEG + 20.0  # degrees: the probe turn, a little over the hint's
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FTHINT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -26,7 +29,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5101, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
-	for h in m.hunters: h.ctrl = "idle"
+	for h in m.hunters:
+		h.ctrl = "idle"
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
 	var a := _open_angle(m)
 	ok(a != INF, "found open ground in front of and behind the player")
@@ -38,30 +42,37 @@ func run(main: Node) -> void:
 	print("FTHINT DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 ## An aim angle with open ground at SIDE_M ahead and behind and at NEAR_M behind, in clear line; INF if none.
 func _open_angle(m: Match) -> float:
 	for i in 32:
 		var a := TAU * i / 32.0
-		if _spot(m, a, SIDE_M) != Vector3.INF and _spot(m, a + PI, SIDE_M) != Vector3.INF \
-				and _spot(m, a + PI, NEAR_M) != Vector3.INF:
+		if (
+			_spot(m, a, SIDE_M) != Vector3.INF
+			and _spot(m, a + PI, SIDE_M) != Vector3.INF
+			and _spot(m, a + PI, NEAR_M) != Vector3.INF
+		):
 			return a
 	return INF
 
+
 func _spot(m: Match, b: float, d: float) -> Vector3:
-	var P := m.player
-	var q := P.pos + Vector3(cos(b), 0, sin(b)) * d
+	var pp := m.player
+	var q := pp.pos + Vector3(cos(b), 0, sin(b)) * d
 	if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z) or m.world.in_bush(q.x, q.z) or m.in_smoke(q):
 		return Vector3.INF
 	q.y = m.world.ground_at(q.x, q.z)
-	if absf(q.y - P.pos.y) > 0.5 or not m.world.los(P.pos, q, P.pos.y + 1.1):
+	if absf(q.y - pp.pos.y) > 0.5 or not m.world.los(pp.pos, q, pp.pos.y + 1.1):
 		return Vector3.INF
 	return q
+
 
 func _place(m: Match, rival: Hunter, a: float, b: float, d: float) -> void:
 	m.player.inp["aim"] = m.player.pos + Vector3(cos(a), 0, sin(a)) * 6.0
 	rival.pos = _spot(m, b, d)
 	rival.crouch = false
 	rival.unseen = not m.can_see(m.player.team, rival)
+
 
 func _hidden(m: Match, rival: Hunter, a: float) -> void:
 	_place(m, rival, a, a + PI, SIDE_M)
@@ -73,6 +84,7 @@ func _hidden(m: Match, rival: Hunter, a: float) -> void:
 	var near := "one %.1f m behind you is in the near circle: no hint" % NEAR_M
 	ok(not rival.unseen and not VisionHint.hidden_rival(m), near)
 
+
 func _turns(m: Match) -> void:
 	var swing := _turn_due(m, VisionHint.TURN_S * 0.5)
 	var slow := _turn_due(m, VisionHint.TURN_S * 4.0)
@@ -80,19 +92,21 @@ func _turns(m: Match) -> void:
 	ok(swing, fast)
 	ok(not slow, "the same turn over %.1fs does not" % (VisionHint.TURN_S * 4.0))
 
+
 ## Whether a turn of TURN_TEST degrees spread over `over` seconds (frames of Match.DT) makes the hint due.
 func _turn_due(m: Match, over: float) -> bool:
 	var vh := VisionHint.new()
-	var P := m.player
+	var pp := m.player
 	var n := int(over / Match.DT)
 	var total := deg_to_rad(TURN_TEST)
 	var hit := false
 	for i in n + 1:
 		var b := total * i / n
-		P.inp["aim"] = P.pos + Vector3(cos(b), 0, sin(b)) * 6.0
+		pp.inp["aim"] = pp.pos + Vector3(cos(b), 0, sin(b)) * 6.0
 		m.time += Match.DT
-		hit = vh._turned(P.aim_dir(), m.time) or hit
+		hit = vh._turned(pp.aim_dir(), m.time) or hit
 	return hit
+
 
 func _said(m: Match, rival: Hunter, a: float) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
@@ -118,6 +132,7 @@ func _said(m: Match, rival: Hunter, a: float) -> void:
 	var txt := VisionHint.TEXT
 	var plain := txt.length() <= LINE_MAX and not txt.contains("%") and not txt.contains("[")
 	ok(plain, "one short plain line ('%s')" % txt)
+
 
 func _on_lane(m: Match) -> bool:
 	return m.hud.msgs.texts().has(VisionHint.TEXT)

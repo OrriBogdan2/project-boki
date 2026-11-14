@@ -128,6 +128,7 @@ var hit_from := Vector2.ZERO   # which way the last hit pushed
 var stagger_t := 0.0           # staggered by a big hit (Oomph)
 var extracted := false
 var extract_prog := 0.0
+var vis_k := 1.0               # the scale fit_scale last put on this model (VIS_SCALE)
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
 ## "" or one of HOLD_KINDS. Set every tick by whatever the hold works on; it lapses when not refreshed.
 const HOLD_KINDS := ["scan", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
@@ -3064,7 +3065,6 @@ func _anim_state(stretch: float) -> void:
 ## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
 ## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
-var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
 	if n == null:

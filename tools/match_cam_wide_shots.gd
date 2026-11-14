@@ -10,21 +10,22 @@ extends RefCounted
 
 const PerfBench := preload("res://tools/perf_bench.gd")
 const DT := 1.0 / 60.0
-const SETTLE := 90               # frames the view eases for before a still or a timed run
-const TIMED := 300               # frames timed per view
-const FIGHT_AT := 2.0            # s into the match: the rivals and the pack are brought to the player
-const EDGE_IN := 0.85            # of the outermost island's radius: where the edge still stands
-const NOTCH_EVERY := 8           # video frames between wheel notches
-const HOLD := 45                 # video frames held still between the wheel's runs
+const SETTLE := 90  # frames the view eases for before a still or a timed run
+const TIMED := 300  # frames timed per view
+const FIGHT_AT := 2.0  # s into the match: the rivals and the pack are brought to the player
+const EDGE_IN := 0.85  # of the outermost island's radius: where the edge still stands
+const NOTCH_EVERY := 8  # video frames between wheel notches
+const HOLD := 45  # video frames held still between the wheel's runs
 const OLD_STYLE := "supervive_close"
-const START_FRAMES := 150        # video frames of an expedition's start (5 s)
+const START_FRAMES := 150  # video frames of an expedition's start (5 s)
 
 var main: Node
 var bench := PerfBench.new()
 var dir := ""
 var m: Match
 var label: Label
-var n := 0                       # video frame counter
+var n := 0  # video frame counter
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -39,7 +40,7 @@ func run(main_node: Node) -> void:
 	bench.setup(main)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
-	Settings.v["cam_follow"] = "locked"      # no cursor lean: the idle cursor sits on the HUD
+	Settings.v["cam_follow"] = "locked"  # no cursor lean: the idle cursor sits on the HUD
 	Settings.v["tips"] = false
 	if start:
 		await _starts()
@@ -50,6 +51,7 @@ func run(main_node: Node) -> void:
 	await _style("new", "supervive", [["new", 1.0], ["max", out]], video)
 	print("WIDECAM DONE")
 	main.get_tree().quit()
+
 
 ## A fresh match under one camera style (its draw and shadow distances are set when it is built), then its views.
 func _style(tag: String, style: String, views: Array, video: bool) -> void:
@@ -63,10 +65,12 @@ func _style(tag: String, style: String, views: Array, video: bool) -> void:
 		m.cam.user_zoom = 1.0
 		await _video()
 
+
 func _build(expedition := false) -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "demo_kin": "cindle",
-		"seed": 4101}, true)
+	o.merge(
+		{"teams": 3, "squad": 2, "total": 6, "no_drop": true, "god": true, "demo_kin": "cindle", "seed": 4101}, true
+	)
 	if not expedition:
 		o["autoplay"] = true
 	o.erase("demo_match")
@@ -79,11 +83,12 @@ func _build(expedition := false) -> void:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
-	m.player.max_hp *= 20.0      # the fight must not end the run
+	m.player.max_hp *= 20.0  # the fight must not end the run
 	m.hud.guide_hidden = true
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
+
 
 ## One frame of the live match; returns its timing.
 func _tick(steps := 1) -> Dictionary:
@@ -98,6 +103,7 @@ func _tick(steps := 1) -> Dictionary:
 	var script_ms := (Time.get_ticks_usec() - last) / 1000.0
 	await main.get_tree().process_frame
 	return bench.frame("wide", 0, (Time.get_ticks_usec() - last) / 1000.0, script_ms)
+
 
 func _view(view: String, tag: String) -> void:
 	for spot in ["mid", "edge"]:
@@ -117,8 +123,24 @@ func _view(view: String, tag: String) -> void:
 		low += float(w[w.size() - 1 - k]) / 3.0
 	var line := "WIDECAM %s (style %s, zoom %.2f, reach %.2f): avg %.2f ms = %.0f fps, 1%% low %.0f fps, "
 	line += "gpu %.2f ms, draws %.0f, tris %.0fk"
-	print(line % [view, tag, m.cam.zoom, m.cam.reach(), bench.avg(fl, "wall"), 1000.0 / bench.avg(fl, "wall"),
-		1000.0 / maxf(low, 0.001), bench.avg(fl, "gpu"), bench.avg(fl, "draws"), bench.avg(fl, "tris") / 1000.0])
+	print(
+		(
+			line
+			% [
+				view,
+				tag,
+				m.cam.zoom,
+				m.cam.reach(),
+				bench.avg(fl, "wall"),
+				1000.0 / bench.avg(fl, "wall"),
+				1000.0 / maxf(low, 0.001),
+				bench.avg(fl, "gpu"),
+				bench.avg(fl, "draws"),
+				bench.avg(fl, "tris") / 1000.0
+			]
+		)
+	)
+
 
 ## The player on the shore of the island furthest from the map's middle, the camera jumped there.
 func _to_edge() -> void:
@@ -134,6 +156,7 @@ func _to_edge() -> void:
 	var at: Vector3 = m.world.free_spot_near(Vector3(at2.x, m.world.ground_at(at2.x, at2.y), at2.y), [], 1.2, 0.5, 6.0)
 	m.player.teleport(at)
 	m.cam.snap(at)
+
 
 ## The new default's live fight as frames: the wheel scrolled out to its furthest, in to its closest, then back.
 func _video() -> void:
@@ -151,24 +174,29 @@ func _video() -> void:
 		await _hold(HOLD)
 	layer.queue_free()
 
+
 ## An expedition's first seconds under the default style: the old start (the style's framing, zoom 1, what a
 ## player got before) and a new player's (no saved zoom: the widest), each from a fresh match.
 func _starts() -> void:
 	Settings.v["cam_style"] = "supervive"
-	Settings.v["lobby_enabled"] = false      # (straight into the match, as after the lobby)
+	Settings.v["lobby_enabled"] = false  # (straight into the match, as after the lobby)
 	_label()
-	var runs := [["before", 1.0, "BEFORE: expedition starts at zoom 1.00"],
-		["after", 0.0, "AFTER: a new player's expedition"]]
+	var runs := [
+		["before", 1.0, "BEFORE: expedition starts at zoom 1.00"], ["after", 0.0, "AFTER: a new player's expedition"]
+	]
 	for run in runs:
 		Settings.v["cam_zoom"] = float(run[1])
 		await _build(true)
 		print("WIDECAM START %s: expedition %s, zoom %.2f" % [run[0], Prematch.expedition(m.opts), m.cam.user_zoom])
 		for i in START_FRAMES:
 			await _tick(2)
-			label.text = "%s  ·  wheel zoom %.2f  ·  %.0f m across" % [run[2], m.cam.user_zoom,
-				CamRig.style_across(m.cam.style_id) * m.cam.zoom]
+			label.text = (
+				"%s  ·  wheel zoom %.2f  ·  %.0f m across"
+				% [run[2], m.cam.user_zoom, CamRig.style_across(m.cam.style_id) * m.cam.zoom]
+			)
 			await RenderingServer.frame_post_draw
 			main.get_viewport().get_texture().get_image().save_png(dir.path_join("start_%s_%03d.png" % [run[0], i]))
+
 
 func _label() -> void:
 	var layer := CanvasLayer.new()
@@ -179,14 +207,16 @@ func _label() -> void:
 	label.add_theme_font_size_override("font_size", 28)
 	layer.add_child(label)
 
+
 func _hold(frames: int) -> void:
 	for i in frames:
-		await _tick(2)      # (two match steps a frame: the video plays at 30 fps in real time)
+		await _tick(2)  # (two match steps a frame: the video plays at 30 fps in real time)
 		var across := CamRig.style_across(m.cam.style_id) * m.cam.zoom
 		label.text = "wheel zoom %.2f  ·  %.0f m of ground across" % [m.cam.user_zoom, across]
 		await RenderingServer.frame_post_draw
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("video_%03d.png" % n))
 		n += 1
+
 
 func _wheel(button: int) -> InputEventMouseButton:
 	var ev := InputEventMouseButton.new()

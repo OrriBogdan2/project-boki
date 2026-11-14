@@ -10,9 +10,12 @@ const DT := 1.0 / 60.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SHRINKZONE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _match(main: Node, seed_v: int) -> Match:
 	var m := Match.new()
@@ -20,6 +23,7 @@ func _match(main: Node, seed_v: int) -> Match:
 	m.start({"teams": 6, "squad": 3, "tier": 0, "seed": seed_v, "no_drop": true, "sim_keep": true})
 	m.set_process(false)
 	return m
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -30,6 +34,7 @@ func run(main: Node) -> void:
 	_bots(main)
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
+
 
 ## Phases close in, nest, finish in time, end on an exit; same seed same zone.
 func _shape(main: Node) -> void:
@@ -68,6 +73,7 @@ func _shape(main: Node) -> void:
 	var varies := "the final area varies between matches (%d of %d outposts)" % [finals.size(), outposts]
 	ok(finals.size() >= outposts, varies)
 
+
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.
 func _hurt(main: Node) -> void:
 	var m := _match(main, 5)
@@ -101,9 +107,9 @@ func _hurt(main: Node) -> void:
 	# the last close ends: whoever is on an island with no ground in the final circle falls
 	var gone_p := Vector3.INF
 	for ii in m.world.islands.size():
-		var I: Dictionary = m.world.islands[ii]
-		var cen := Vector2(I["c"])
-		if cen.distance_to(z.cs[z.last()]) - float(I["r"]) * 1.6 > z.rs[z.last()]:
+		var isl: Dictionary = m.world.islands[ii]
+		var cen := Vector2(isl["c"])
+		if cen.distance_to(z.cs[z.last()]) - float(isl["r"]) * 1.6 > z.rs[z.last()]:
 			gone_p = m.world.free_spot_near(Vector3(cen.x, 0, cen.y), [], 1.0, 0.45, 12.0)
 			break
 	b.pos = gone_p
@@ -113,11 +119,12 @@ func _hurt(main: Node) -> void:
 	ok(z.fallen and b.out, "the last close: a hunter on an island outside the final circle falls")
 	m.free()
 
+
 ## Bots come into the circle and stay in: from just after close 2 to just after close 3.
 func _bots(main: Node) -> void:
 	var m := _match(main, 9)
 	var z := m.zone
-	Game.god = true      # (the local player stands idle: keep the match going)
+	Game.god = true  # (the local player stands idle: keep the match going)
 	m.time = z.t1[2]
 	z.tick(DT)
 	# five minutes in, the squads are inside close 2's circle: put each bot somewhere in it
@@ -129,7 +136,7 @@ func _bots(main: Node) -> void:
 			if Vector2(p.x, p.z).distance_to(z.cur_c) < z.cur_r - 4.0:
 				h.pos = p
 				break
-	var lost := {}      # bots knocked out since (a revive brings them back somewhere else: not counted)
+	var lost := {}  # bots knocked out since (a revive brings them back somewhere else: not counted)
 	var start := _share_in(m, z.cs[3], z.rs[3], lost)
 	var at_closed := -1.0
 	var inside := 0.0
@@ -153,8 +160,10 @@ func _bots(main: Node) -> void:
 	ok(inside >= 0.8, "bots keep inside the moving edge (%d%% of the time)" % int(inside * 100.0))
 	m.free()
 
+
 func _in_final(z: ShrinkZone, p: Vector3) -> bool:
 	return z.cs[z.last()].distance_to(Vector2(p.x, p.z)) <= z.rs[z.last()]
+
 
 func _share_in(m: Match, c: Vector2, r: float, lost: Dictionary) -> float:
 	var n := 0

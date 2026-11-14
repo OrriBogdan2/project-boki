@@ -5,12 +5,14 @@ extends RefCounted
 ## `k` is the distance factor to scale the camera's distance by: 1 is the screen's own framing, under 1 closer.
 ## Numbers: content/rules/camera.json "zoom"."preview".
 
-const STICK_DEAD := 0.2         # stick/trigger travel ignored below this
-var k := 1.0                    # the factor now (eased)
-var want := 1.0                 # where the wheel and stick have set it
+const STICK_DEAD := 0.2  # stick/trigger travel ignored below this
+var k := 1.0  # the factor now (eased)
+var want := 1.0  # where the wheel and stick have set it
+
 
 static func rules() -> Dictionary:
 	return CamRig.RULES["zoom"]["preview"]
+
 
 ## A wheel notch. True when it was one (the caller marks the event handled).
 func wheel(event: InputEvent) -> bool:
@@ -24,6 +26,7 @@ func wheel(event: InputEvent) -> bool:
 	want = clampf(want + notch, float(r["min"]), float(r["max"]))
 	return true
 
+
 ## Once a frame: the pad, then the ease toward `want`.
 func tick(dt: float) -> void:
 	var r := rules()
@@ -32,11 +35,13 @@ func tick(dt: float) -> void:
 		pad(Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y), tr, dt)
 	k = lerpf(k, want, 1.0 - exp(-float(r["ease"]) * dt))
 
+
 ## The pad for `dt` s: right stick y (up, negative, zooms in) and right-minus-left trigger (positive zooms in).
 func pad(stick_y: float, trig: float, dt: float) -> void:
 	var r := rules()
 	var v := _dead(stick_y) - _dead(trig)
 	want = clampf(want + v * float(r["pad_rate"]) * dt, float(r["min"]), float(r["max"]))
+
 
 func _dead(x: float) -> float:
 	return x if absf(x) > STICK_DEAD else 0.0

@@ -7,14 +7,14 @@ extends RefCounted
 ## A save that has already bred is marked by the v13 -> v14 migration.
 ## Without a ready pair, the Nook's intro names the gate that is missing (missing_line).
 
-const SEEN := "first_breed"      # Save.d.tutorial key: the card has been shown (or the Nook opened)
-const POLL_SEC := 1.0            # s between looks for a ready pair
-const LEAD_SEC := 90.0           # s a walk lasts before the Boki gives up (it tries again in RETRY_SEC)
-const RETRY_SEC := 120.0         # s before a Boki that gave up leads again
-const WAIT_GAP := 7.0            # m: the Boki stops and looks back when you are this far behind
-const NEAR_NOOK := 4.5           # m: you are this close to the Nook, the card opens
-const FRONT := Vector3(0, 0, 1.7)    # m: where the Boki waits, in front of the Nook
-const CARD_W := 470.0            # px, the card's width
+const SEEN := "first_breed"  # Save.d.tutorial key: the card has been shown (or the Nook opened)
+const POLL_SEC := 1.0  # s between looks for a ready pair
+const LEAD_SEC := 90.0  # s a walk lasts before the Boki gives up (it tries again in RETRY_SEC)
+const RETRY_SEC := 120.0  # s before a Boki that gave up leads again
+const WAIT_GAP := 7.0  # m: the Boki stops and looks back when you are this far behind
+const NEAR_NOOK := 4.5  # m: you are this close to the Nook, the card opens
+const FRONT := Vector3(0, 0, 1.7)  # m: where the Boki waits, in front of the Nook
+const CARD_W := 470.0  # px, the card's width
 const BREED_LINE := "Two Grown Boki who are friends can leave an egg here. The baby takes after both."
 ## What stops the best pair, in the order the gates are checked (index = the stage a pair has reached).
 const MISSING := [
@@ -24,21 +24,24 @@ const MISSING := [
 	"There's no room for a baby: your farm and the Burrow are full.",
 ]
 
-var h                                   # the Home screen
-var lead: Dictionary = {}               # the kin leading you to the Nook (home.kins entry)
-var pair: Array = []                    # its pair: [a, b] (kin records)
+var h  # the Home screen
+var lead: Dictionary = {}  # the kin leading you to the Nook (home.kins entry)
+var pair: Array = []  # its pair: [a, b] (kin records)
 var marker: Label3D = null
-var look_t := 0.0                       # s until the next scan for a ready pair
-var lead_t := 0.0                       # s this walk has lasted
-var cool_t := 0.0                       # s until a Boki that gave up may lead again
-var nag_t := 0.0                        # s until the leader calls out again
+var look_t := 0.0  # s until the next scan for a ready pair
+var lead_t := 0.0  # s this walk has lasted
+var cool_t := 0.0  # s until a Boki that gave up may lead again
+var nag_t := 0.0  # s until the leader calls out again
+
 
 func _init(home) -> void:
 	h = home
 
+
 static func seen() -> bool:
 	mark_if_bred(Save.d)
 	return bool(Save.d["tutorial"].get(SEEN, false))
+
 
 ## The first pair among these kin records that meets every gate ([] when none).
 static func ready_pair(recs: Array) -> Array:
@@ -47,6 +50,7 @@ static func ready_pair(recs: Array) -> Array:
 			if NookRules.pair_why(recs[i], recs[j]) == "":
 				return [recs[i], recs[j]]
 	return []
+
 
 ## The gate stopping the furthest-along pair, in one plain line ("" when a pair is ready).
 static func missing_line(recs: Array) -> String:
@@ -62,6 +66,7 @@ static func missing_line(recs: Array) -> String:
 		return MISSING[0] % NookRules.GROWN_LV
 	return MISSING[best]
 
+
 ## How many gates this pair has passed: Grown, friends, rested, room for a baby.
 static func _stage(a: Dictionary, b: Dictionary) -> int:
 	if mini(int(a["level"]), int(b["level"])) < NookRules.GROWN_LV:
@@ -71,6 +76,7 @@ static func _stage(a: Dictionary, b: Dictionary) -> int:
 	if not (NookRules.rested(a) and NookRules.rested(b)):
 		return 2
 	return 3 if KinBox.full() else MISSING.size()
+
 
 ## A save that has already bred (an egg in the nest, or a kin with parents) never sees the prompt: marked
 ## here when first asked, so no save version step is needed (the tutorial flags are an open dictionary).
@@ -83,6 +89,7 @@ static func mark_if_bred(data: Dictionary) -> void:
 			bred = true
 	if bred and typeof(data.get("tutorial")) == TYPE_DICTIONARY:
 		data["tutorial"][SEEN] = true
+
 
 func tick(d: float) -> void:
 	if not h.visit.is_empty() or seen():
@@ -101,10 +108,19 @@ func tick(d: float) -> void:
 		return
 	_walk(d)
 
+
 func _free(k: Dictionary) -> bool:
 	# (a chore is not a reason: the farm hands every idle Boki one, and the lead drops it for the walk)
-	return not (k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("fetch")
-			or k.has("bath") or float(k.get("nap_t", 0.0)) > 0.0 or k.has("called_t"))
+	return not (
+		k.get("busy", false)
+		or k.has("indoors")
+		or k.has("leap")
+		or k.has("fetch")
+		or k.has("bath")
+		or float(k.get("nap_t", 0.0)) > 0.0
+		or k.has("called_t")
+	)
+
 
 func _try_start() -> void:
 	if cool_t > 0.0 or h.panel_open != "" or h.NEST_AT.x < -100.0 or FarmTutorial.active():
@@ -123,6 +139,7 @@ func _try_start() -> void:
 	nag_t = 0.0
 	h._say(lead, "Follow me! There's something I want to show you.", 3.5)
 
+
 func _walk(d: float) -> void:
 	if not is_instance_valid(lead["node"]) or not _free(lead):
 		_stop(RETRY_SEC)
@@ -131,9 +148,9 @@ func _walk(d: float) -> void:
 	if lead_t > LEAD_SEC:
 		_stop(RETRY_SEC)
 		return
-	lead["t"] = 3.0      # it keeps to this walk instead of picking its own goal
-	lead.erase("chase")      # and does not run off after a friend in a game of tag
-	lead.erase("job")        # or back to a chore
+	lead["t"] = 3.0  # it keeps to this walk instead of picking its own goal
+	lead.erase("chase")  # and does not run off after a friend in a game of tag
+	lead.erase("job")  # or back to a chore
 	var pos: Vector3 = lead["pos"]
 	var spot: Vector3 = h.NEST_AT + FRONT
 	if Vector2(h.ppos.x - h.NEST_AT.x, h.ppos.z - h.NEST_AT.z).length() < NEAR_NOOK:
@@ -141,7 +158,7 @@ func _walk(d: float) -> void:
 		return
 	var behind := Vector2(h.ppos.x - pos.x, h.ppos.z - pos.z).length() > WAIT_GAP
 	var arrived := Vector2(spot.x - pos.x, spot.z - pos.z).length() < 1.0
-	lead["goal"] = pos if (behind or arrived) else spot      # waits, and (standing) turns to look back at you
+	lead["goal"] = pos if (behind or arrived) else spot  # waits, and (standing) turns to look back at you
 	if behind or arrived:
 		nag_t -= d
 		if nag_t <= 0.0:
@@ -149,6 +166,7 @@ func _walk(d: float) -> void:
 			lead["joy_t"] = 0.9
 			h._emote(lead, "!")
 	_mark()
+
 
 func _mark() -> void:
 	if not is_instance_valid(marker):
@@ -164,6 +182,7 @@ func _mark() -> void:
 	marker.text = "Nesting Nook\n▼"
 	marker.position = h.NEST_AT + Vector3(0, 3.6 + sin(lead_t * 3.0) * 0.18, 0)
 
+
 func _stop(retry: float) -> void:
 	if not lead.is_empty():
 		lead["t"] = 0.0
@@ -174,11 +193,13 @@ func _stop(retry: float) -> void:
 		marker.queue_free()
 	marker = null
 
+
 ## You opened the Nook yourself, or the card was shown: the prompt is done for good.
 func _finish() -> void:
 	Save.d["tutorial"][SEEN] = true
 	Save.save_game()
 	_stop(0.0)
+
 
 func _show_card() -> void:
 	var a: Dictionary = pair[0]

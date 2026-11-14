@@ -22,7 +22,7 @@ func run(m: Node) -> void:
 	await super.run(m)
 
 func guidance() -> Array:
-	_note(home.guide.hint_lbl.text if is_instance_valid(home.guide.hint_box) else "", "tutorial line")
+	_note(home.guide.hint_text(), "tutorial line")
 	for r in GoalTracker.lines():
 		goals_seen[String(r["text"])] = r["source"]
 		_note(String(r["text"]), "Goals row (%s)" % r["source"], r["source"] in MATCH_SOURCES)

@@ -34,7 +34,6 @@ var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
 var spin_t := 0.0             # s the stage has run
 var zoom := ViewZoom.new()    # the wheel over the stage, or the pad's right stick and triggers
-var _stage_box: Control       # the stage's frame: the wheel only zooms while the mouse is over it
 var stage_only := false       # just the stage, standing front on (the lobby): no header, clips or frame
 var lockin_t := -1.0          # s into the lock-in pose (-1: not playing)
 var lockin_len := 0.0         # s the pose runs
@@ -49,6 +48,7 @@ var plinth: StandardMaterial3D
 var cam: Camera3D
 var fx: Control               # the 2D sparks, rings and flash over the stage
 var rows: Array = []          # one Control per ability, in `slots` order (an AbilityClip or a line)
+var _stage_box: Control       # the stage's frame: the wheel only zooms while the mouse is over it
 var _body: Control            # everything but the stage, rebuilt when the Hunter changes
 var _cols: HBoxContainer
 var _cam_k := 1.0             # the zoom the camera was last aimed at

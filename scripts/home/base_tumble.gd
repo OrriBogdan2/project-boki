@@ -187,20 +187,20 @@ class Run:
 ## Pays out a finished bout: joy, trust (with what following earned), a memory, energy and gems. A visitor is
 ## not yours, so only your Boki change. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var rr := rules()
 	var wi := run.winner()
 	var win: Dictionary = run.recs[wi]
 	var lose: Dictionary = run.recs[1 - wi]
 	var own: Array = [run.recs[0]] if run.visitor else run.recs
-	var bonus := float(run.follows) * float(R["follow_trust"])
+	var bonus := float(run.follows) * float(rr["follow_trust"])
 	for rec in own:
-		Care.change(rec, "energy", -float(R["energy"]))
+		Care.change(rec, "energy", -float(rr["energy"]))
 		var won: bool = rec == win
-		Care.change(rec, "joy", float(R["win_joy"] if won else R["lose_joy"]))
+		Care.change(rec, "joy", float(rr["win_joy"] if won else rr["lose_joy"]))
 		var text := "tumbled %s out of the ring" % lose["name"] if won else "lost a Tumble to %s" % win["name"]
-		var trust := float(R["win_trust"]) if won else 0.0
+		var trust := float(rr["win_trust"]) if won else 0.0
 		Save.remember(rec, "tumble", text, trust + (bonus if rec == run.recs[0] else 0.0))
-	var gems := int(R["gems_win"]) if wi == 0 else int(R["gems_ran"])
+	var gems := int(rr["gems_win"]) if wi == 0 else int(rr["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": wi == 0}
 
@@ -231,9 +231,9 @@ func place() -> void:
 	ring = null
 	if h.hshove == null or not is_instance_valid(h.hshove.stump):
 		return
-	var R := rules()
-	var off: Array = R["ring_off"]
-	var r := float(R["depth"]) * float(R["step_m"]) + float(R["gap_m"])
+	var rr := rules()
+	var off: Array = rr["ring_off"]
+	var r := float(rr["depth"]) * float(rr["step_m"]) + float(rr["gap_m"])
 	var tm := TorusMesh.new()
 	tm.inner_radius = r - 0.04
 	tm.outer_radius = r + 0.04
@@ -379,10 +379,10 @@ func _clips(mine: String, theirs: String) -> void:
 
 ## The pair face off along the ring's line; the contact point slides with the push.
 func _place_pair(d: float) -> void:
-	var R := rules()
-	shown_pos = lerpf(shown_pos, run.pos, minf(1.0, d * float(R["slide_rate"])))
-	var gap := float(R["gap_m"]) - (float(R["charge_m"]) if run.state == "resolve" else 0.0)
-	var mid := ring.position + Vector3(shown_pos * float(R["step_m"]), 0, 0)
+	var rr := rules()
+	shown_pos = lerpf(shown_pos, run.pos, minf(1.0, d * float(rr["slide_rate"])))
+	var gap := float(rr["gap_m"]) - (float(rr["charge_m"]) if run.state == "resolve" else 0.0)
+	var mid := ring.position + Vector3(shown_pos * float(rr["step_m"]), 0, 0)
 	for i in 2:
 		var side := -1.0 if i == 0 else 1.0
 		var p := mid + Vector3(side * gap, 0, 0)

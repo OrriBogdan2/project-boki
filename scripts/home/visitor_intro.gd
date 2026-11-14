@@ -6,10 +6,12 @@ extends RefCounted
 ## The lead lasts until you walk up to the visitor or lead_s runs out (Save.d["visitor"]["lead"] = end, unix s).
 ## Tuning and the tip text: content/rules/garden_visitor.json "intro".
 
-const TIP_COL := Color("f3e6c8")      # the hub hints' colour
+const TIP_COL := Color("f3e6c8")  # the hub hints' colour
+
 
 static func rules() -> Dictionary:
 	return GardenVisitor.rules()["intro"]
+
 
 ## `r` has just arrived in `h`'s zone: the first one on this save starts the lead and shows its tip.
 static func start(h, r: Dictionary, now: float) -> void:
@@ -17,7 +19,7 @@ static func start(h, r: Dictionary, now: float) -> void:
 	if seen.get("visitor_intro", false) or FarmTutorial.current() != "" or not Settings.get_v("tips") or Record.clean():
 		return
 	if h.kins.any(func(k): return k.get("busy", false)):
-		return      # a game is running
+		return  # a game is running
 	seen["visitor_intro"] = true
 	Save.d["visitor"]["lead"] = now + float(rules()["lead_s"])
 	var text := String(rules()["text"]).replace("{interact}", Settings.key_cap("interact"))
@@ -25,6 +27,7 @@ static func start(h, r: Dictionary, now: float) -> void:
 	text = text.replace("{zone}", String(GardenZones.info(String(Save.d["visitor"]["zone"])).get("name", "")))
 	text = text.replace("{food}", Care.food_name(String(r["likes"]["food"])))
 	MsgLane.of(h.root_ui).push(text, TIP_COL, MsgLane.NORMAL, float(rules()["tip_s"]))
+
 
 ## Where your partner `k` leads now: the visitor's spot, or INF when no lead is on (BaseTutLead.target).
 static func lead_at(h, k: Dictionary) -> Vector3:

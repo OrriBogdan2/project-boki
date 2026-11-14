@@ -5,10 +5,10 @@ extends RefCounted
 ## and a skip or a finished drill is saved so it never returns. Kael's own drill (clip.drill): combo, LMB hold,
 ## RMB tap and hold, the chain and its pull, the Riposte guard against a dummy that swings, Rampage; one line each.
 
-var bad := 0
 const ONE_LINE := 72        # chars: a step line fits the banner on one line (DECISIONS 11-08, shorter tutorials)
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"training": true, "practice": true}
+var bad := 0
 
 func ok(cond: bool, what: String) -> void:
 	print("KITDRILL %s %s" % ["ok  " if cond else "FAIL", what])

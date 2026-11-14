@@ -7,23 +7,39 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("ARMOURHINT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _match(main: Node) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-		"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	return m
+
 
 func _rival(m: Match) -> Hunter:
 	for h in m.hunters:
 		if h != m.player and h.team != m.player.team:
 			return h
 	return null
+
 
 ## The player hits `target` through Match.on_damage; returns whether the hint is up next to the
 ## armour readout, after clearing it.
@@ -37,6 +53,7 @@ func _hit(m: Match, target: Ent) -> bool:
 	var n: Array = m.hud.get_meta("armor_note", [])
 	ok(not m.hud.msgs.texts().has(ArmourHint.TEXT), "the hint is never in the message lane")
 	return not n.is_empty() and n[0] == ArmourHint.TEXT
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

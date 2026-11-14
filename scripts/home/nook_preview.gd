@@ -2,18 +2,27 @@ class_name NookPreview
 ## The Nesting Nook's preview card for a picked pair (briefs/design/GARDEN.md section 6): what an egg of
 ## theirs would be, read from Care.breed's own inputs. It adds no rules of its own.
 
-const PIC_PX := 56.0     # px, each possible baby's picture on the card
+const PIC_PX := 56.0  # px, each possible baby's picture on the card
+
 
 ## What Care.breed would give these two: {species: the kinds it can be, lean: its head start,
 ## lean_from: whose lean that is ("" for none), look: the blended rolls, unstable: a clashing mix}.
 static func facts(a: Dictionary, b: Dictionary) -> Dictionary:
 	var kinds: Array = [String(a["species"])]
-	if b["species"] != a["species"]: kinds.append(String(b["species"]))
+	if b["species"] != a["species"]:
+		kinds.append(String(b["species"]))
 	var locket: String = NestItems.plan(a, b)["species"]
-	if locket != "": kinds = [locket]
+	if locket != "":
+		kinds = [locket]
 	var lean := Care.head_start(a, b)
-	return {"species": kinds, "lean": lean, "lean_from": "" if lean.is_empty() else String(Care.stronger(a, b)["name"]),
-		"look": Unique.blend_center(a, b), "unstable": UnstableMix.unstable(a, b)}
+	return {
+		"species": kinds,
+		"lean": lean,
+		"lean_from": "" if lean.is_empty() else String(Care.stronger(a, b)["name"]),
+		"look": Unique.blend_center(a, b),
+		"unstable": UnstableMix.unstable(a, b)
+	}
+
 
 ## The card: each possible baby in the blended look, its size and coats, the lean head start, the
 ## unstable note, and why the pair can't have an egg yet (if so).
@@ -39,20 +48,25 @@ static func card(a: Dictionary, b: Dictionary, tree: SceneTree) -> PanelContaine
 		row.add_child(pv)
 	v.add_child(row)
 	var coats := Unique.mark_name(a)
-	if Unique.mark_name(b) != coats: coats += " or " + Unique.mark_name(b)
+	if Unique.mark_name(b) != coats:
+		coats += " or " + Unique.mark_name(b)
 	v.add_child(UI.kv("Size", Unique.size_tag({"dna": f["look"]})))
 	v.add_child(UI.kv("Coat", coats))
 	v.add_child(UI.kv("Head start", _lean_text(f)))
 	if f["unstable"]:
 		v.add_child(UI.para(UnstableMix.preview_line(a, b), UI.T_SMALL, UI.GOLD))
 	var why := NookRules.pair_why(a, b)
-	if why != "": v.add_child(UI.para(why, UI.T_SMALL, UI.BAD))
+	if why != "":
+		v.add_child(UI.para(why, UI.T_SMALL, UI.BAD))
 	return c
+
 
 ## "ember 3, storm 0.5 (from Ash)", or "none" when neither parent leans anywhere yet.
 static func _lean_text(f: Dictionary) -> String:
 	var lean: Dictionary = f["lean"]
-	if lean.is_empty(): return "none"
+	if lean.is_empty():
+		return "none"
 	var parts: Array = []
-	for el in lean: parts.append("%s %s" % [el, String.num(float(lean[el]), 1)])
+	for el in lean:
+		parts.append("%s %s" % [el, String.num(float(lean[el]), 1)])
 	return "%s (from %s)" % [", ".join(parts), f["lean_from"]]

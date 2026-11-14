@@ -341,8 +341,8 @@ func _teach(tb: BaseTumble, home) -> void:
 	var tri := tb.teach.card.find_children("*", "Control", true, false).filter(
 			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
 	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
-	var R := BaseTumble.rules()
-	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(R["pick_s"]),
+	var rr := BaseTumble.rules()
+	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(rr["pick_s"]),
 			"teach: practice is one exchange with a longer pick window")
 	var lines := {}
 	var bar_speed := 0.0

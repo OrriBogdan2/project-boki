@@ -6,18 +6,19 @@ extends RefCounted
 
 const LiveCheck := preload("res://tools/muzzle_live_check.gd")
 const DT := 1.0 / 60.0
-const EVERY := 3                 # sim frames per saved frame
-const CROP := Vector2i(640, 440) # px round the Hunter
-const ZOOM := 0.7                # the wheel's closest: the Hunter fills more of the crop
-const SETTLE := 60               # frames before the first press
-const GAP := 55                  # frames after each press
-const SLOTS := ["lmb", "lmb", "rmb", "e", "r", "x", "lmb"]      # (the last LMB: Lace's Starpiercer arrow)
+const EVERY := 3  # sim frames per saved frame
+const CROP := Vector2i(640, 440)  # px round the Hunter
+const ZOOM := 0.7  # the wheel's closest: the Hunter fills more of the crop
+const SETTLE := 60  # frames before the first press
+const GAP := 55  # frames after each press
+const SLOTS := ["lmb", "lmb", "rmb", "e", "r", "x", "lmb"]  # (the last LMB: Lace's Starpiercer arrow)
 
 var main: Node
 var m: Match
 var label: Label
 var dir := ""
 var n := 0
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -46,12 +47,13 @@ func run(main_node: Node) -> void:
 	print("MUZZLE_SHOTS_DONE")
 	main.get_tree().quit()
 
-func _frame(P: Hunter, save: bool) -> void:
+
+func _frame(pp: Hunter, save: bool) -> void:
 	m.step(DT)
 	m._process(DT)
 	if save and n % EVERY == 0:
 		var view: Vector2 = main.get_viewport().get_visible_rect().size
-		var at: Vector2 = m.cam.unproject_position(P.position + Vector3(0, 1.6, 0))
+		var at: Vector2 = m.cam.unproject_position(pp.position + Vector3(0, 1.6, 0))
 		var k: Vector2 = Vector2(main.get_window().size) / view
 		label.position = at - Vector2(CROP) / k * 0.5 + Vector2(10, 8) / k
 	await main.get_tree().process_frame
@@ -59,15 +61,30 @@ func _frame(P: Hunter, save: bool) -> void:
 		await RenderingServer.frame_post_draw
 		var img := main.get_viewport().get_texture().get_image()
 		var px: Vector2 = Vector2(img.get_size()) / main.get_viewport().get_visible_rect().size
-		var at := Vector2i(m.cam.unproject_position(P.position + Vector3(0, 1.6, 0)) * px)
+		var at := Vector2i(m.cam.unproject_position(pp.position + Vector3(0, 1.6, 0)) * px)
 		var rect := Rect2i(at - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-		img.get_region(rect).save_jpg(dir.path_join("%s_%03d.jpg" % [P.arch, n / EVERY]), 0.85)
+		img.get_region(rect).save_jpg(dir.path_join("%s_%03d.jpg" % [pp.arch, n / EVERY]), 0.85)
 	n += 1
+
 
 func _hunter(arch: String) -> void:
 	var o := Match.demo_opts()
-	o.merge({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch), "god": true}, true)
+	o.merge(
+		{
+			"training": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"cls": Arch.weight(arch),
+			"arch": arch,
+			"weapon": Arch.signature(arch),
+			"god": true
+		},
+		true
+	)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -81,41 +98,46 @@ func _hunter(arch: String) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var P: Hunter = m.player
+	var pp: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P.unlock_all()
-	P.lvl = 6
-	P.slot_lv["ult"] = 1
-	P.dashes = P.max_dashes()
-	P.ult = 0.0
+	pp.unlock_all()
+	pp.lvl = 6
+	pp.slot_lv["ult"] = 1
+	pp.dashes = pp.max_dashes()
+	pp.ult = 0.0
 	m.hud.guide_hidden = true
 	m.cam.user_zoom = ZOOM
-	P.inp["aim"] = P.pos + Vector3(11, 0.9, 0)
-	P.inp["aim_y"] = P.pos.y
+	pp.inp["aim"] = pp.pos + Vector3(11, 0.9, 0)
+	pp.inp["aim_y"] = pp.pos.y
 	n = 0
 	var who := String(Arch.def(arch).get("base_name", arch))
 	label.text = who
 	for f in SETTLE:
-		await _frame(P, true)
+		await _frame(pp, true)
 	for slot in SLOTS:
 		label.text = "%s  %s" % [who, slot.to_upper()]
-		P.fire_cd = 0.0
-		P.ammo = int(P.wpn.get("mag", 12))
-		for k in P.ak.cd:
-			P.ak.cd[k] = 0.0
+		pp.fire_cd = 0.0
+		pp.ammo = int(pp.wpn.get("mag", 12))
+		for k in pp.ak.cd:
+			pp.ak.cd[k] = 0.0
 		match slot:
-			"lmb": P.inp["fire"] = true
-			"rmb": P.inp["sec"] = true
-			"e": P.ak.use_e()
-			"r": P.ak.use_r()
-			"x": HunterKeys.ult_pressed(P)
-		P.inp["sec_hold"] = slot == "rmb"
+			"lmb":
+				pp.inp["fire"] = true
+			"rmb":
+				pp.inp["sec"] = true
+			"e":
+				pp.ak.use_e()
+			"r":
+				pp.ak.use_r()
+			"x":
+				HunterKeys.ult_pressed(pp)
+		pp.inp["sec_hold"] = slot == "rmb"
 		for f in GAP:
 			if f == 2:
-				P.inp["fire"] = false
-				P.inp["sec"] = false
+				pp.inp["fire"] = false
+				pp.inp["sec"] = false
 			if f == 40:
-				P.inp["sec_hold"] = false
-			await _frame(P, true)
+				pp.inp["sec_hold"] = false
+			await _frame(pp, true)

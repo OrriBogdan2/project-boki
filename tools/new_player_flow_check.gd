@@ -338,26 +338,26 @@ func _first_expedition(home) -> void:
 
 ## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
 func _knock_tip(m: Match) -> void:
-	var P: Hunter = m.player
-	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var pp: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != pp.team)[0]
 	var mob: Mob = m.mobs[0]
 	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
-	m.on_damage(P, mob, 30.0, {})
-	m.on_damage(P, rival, 20.0, {})
-	m.on_damage(P, mob, 50.0, {})
+	m.on_damage(pp, mob, 30.0, {})
+	m.on_damage(pp, rival, 20.0, {})
+	m.on_damage(pp, mob, 50.0, {})
 	var want: String = KnockTip.card("monster")
-	m.knock(P, mob, {})
+	m.knock(pp, mob, {})
 	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
 	var texts: Array = lane.map(func(e): return e["text"])
 	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
 	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
-	P.downed = false
-	m.on_damage(P, rival, 90.0, {})
-	m.knock(P, rival, {})
+	pp.downed = false
+	m.on_damage(pp, rival, 90.0, {})
+	m.knock(pp, rival, {})
 	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
-	P.downed = false
-	P.hp = P.max_hp
+	pp.downed = false
+	pp.hp = pp.max_hp
 	var k := KnockTip.for_match(m, m.guide)
 	k.note(rival, 40.0, {})
 	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
@@ -380,48 +380,48 @@ func _toward(p: Hunter, at: Vector3) -> Vector2:
 	return Vector2(at.x - p.pos.x, at.z - p.pos.z).normalized()
 
 func _ways_out(m: Match) -> void:
-	var P: Hunter = m.player
+	var pp: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
 	var fall_t := 0.0
-	ok(P.riding, "you start on the skyship")
-	while (P.riding or P.dropping or not P.grounded) and fall_t < DROP_S:
+	ok(pp.riding, "you start on the skyship")
+	while (pp.riding or pp.dropping or not pp.grounded) and fall_t < DROP_S:
 		# jump launches the rocket (DropRocket); aboard it, no keys: a press would jump out of it
-		P.inp["jump"] = (P.riding and P.rocket == null and fall_t > float(P.ai.get("jump_at", 0.0))
+		pp.inp["jump"] = (pp.riding and pp.rocket == null and fall_t > float(pp.ai.get("jump_at", 0.0))
 				and int(fall_t * 20.0) % 2 == 0)
-		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
+		pp.inp["move"] = _toward(pp, pp.ai.get("land", pp.pos)) if not pp.riding else Vector2.ZERO
 		m.step(Match.DT)
 		fall_t += Match.DT
-	P.inp["jump"] = false
-	P.inp["move"] = Vector2.ZERO
-	var landed: bool = P.grounded and not P.riding and not P.dropping
+	pp.inp["jump"] = false
+	pp.inp["move"] = Vector2.ZERO
+	var landed: bool = pp.grounded and not pp.riding and not pp.dropping
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
 	var x: Dictionary = m.exits.uplink_x()
 	ok(not x.is_empty() and m.exits.seats != null, "there is an Uplink to take out (the Ways Out seat)")
-	P.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
-	P.hp = P.max_hp
+	pp.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
+	pp.hp = pp.max_hp
 	m.time = float(x["open_at"]) + 1.0      # (the seat opens at 6:00: the drop and the walk are not what this tests)
-	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+	pp.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	for i in int(2.5 / Match.DT):
-		P.inp["interact"] = true
+		pp.inp["interact"] = true
 		m.step(Match.DT)
-	P.inp["interact"] = false
-	ok(x["state"] == "charging" and int(x["team"]) == P.team, "holding interact at the console starts the uplink")
+	pp.inp["interact"] = false
+	ok(x["state"] == "charging" and int(x["team"]) == pp.team, "holding interact at the console starts the uplink")
 	var t0 := m.time
 	while x["state"] == "charging" and m.time - t0 < 120.0:
-		P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
-		P.hp = P.max_hp
+		pp.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+		pp.hp = pp.max_hp
 		for h in m.hunters:
-			if h.team != P.team and m.exits.in_yard(x, h):
+			if h.team != pp.team and m.exits.in_yard(x, h):
 				h.teleport(m.world.random_ground())      # a rival in the yard stalls the charge past the seat's window
 		m.step(Match.DT)
 	ok(x["state"] == "open", "holding the yard charges it and opens the lift (%.0f s)" % (m.time - t0))
-	while not P.extracted and m.time - t0 < 150.0:
-		P.teleport(x["pos"])
-		P.hp = P.max_hp
+	while not pp.extracted and m.time - t0 < 150.0:
+		pp.teleport(x["pos"])
+		pp.hp = pp.max_hp
 		m.step(Match.DT)
-	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
+	ok(pp.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
 	await _press(main.current, "Back to the farm")

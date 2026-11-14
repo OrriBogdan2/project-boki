@@ -8,14 +8,15 @@ extends RefCounted
 ## tutorial.crouch_hint keeps it from coming back.
 
 const TIP := "crouch_camp"
-const NEAR := 22.0          # m: this close to an idle camp monster the line comes up
-const LIFE := 6.0           # s the line stays up at most
-const LOOK_EVERY := 0.5     # s between scans of the monsters
+const NEAR := 22.0  # m: this close to an idle camp monster the line comes up
+const LIFE := 6.0  # s the line stays up at most
+const LOOK_EVERY := 0.5  # s between scans of the monsters
 
 var m: Match
-var line := ""              # the line on screen ("" for none)
-var _t := 0.0               # s the line has been up
-var _look := 0.0            # s until the next scan
+var line := ""  # the line on screen ("" for none)
+var _t := 0.0  # s the line has been up
+var _look := 0.0  # s until the next scan
+
 
 ## The hint for a match that is a real Extraction and a save that hasn't had it yet, else null.
 static func for_match(mt: Match, opts: Dictionary) -> CrouchHint:
@@ -28,6 +29,7 @@ static func for_match(mt: Match, opts: Dictionary) -> CrouchHint:
 	h.m = mt
 	return h
 
+
 ## Old saves: one that has played already doesn't get the new-player hint.
 static func migrate(data: Dictionary) -> void:
 	var tut: Dictionary = data.get("tutorial", {})
@@ -35,13 +37,14 @@ static func migrate(data: Dictionary) -> void:
 		tut["crouch_hint"] = true
 		data["tutorial"] = tut
 
+
 func tick(dt: float) -> void:
 	var p := m.player
 	if p == null or p.out or p.extracted or p.downed or p.dropping:
 		line = ""
 		return
 	if m.guide != null and m.guide.line != "":
-		return      # the first-match guide owns the banner lane while it speaks
+		return  # the first-match guide owns the banner lane while it speaks
 	if line != "":
 		_t += dt
 		if _t >= LIFE or p.crouch:
@@ -55,10 +58,11 @@ func tick(dt: float) -> void:
 		return
 	Save.d["tutorial"]["crouch_hint"] = true
 	if p.crouch:
-		m.crouch_hint = null      # already doing it
+		m.crouch_hint = null  # already doing it
 		return
 	line = TipPick.text(TIP)
 	_t = 0.0
+
 
 ## Is an idle camp monster within NEAR (and so not yet alerted to you)?
 func _camp_near(p: Hunter) -> bool:
@@ -68,6 +72,7 @@ func _camp_near(p: Hunter) -> bool:
 		if mb.flat_dist(p) <= NEAR and absf(mb.pos.y - p.pos.y) < 3.0:
 			return true
 	return false
+
 
 func draw(h, sz: Vector2) -> void:
 	if m.guide == null or m.guide.line == "":

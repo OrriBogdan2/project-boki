@@ -10,11 +10,13 @@ static var last: Array = []
 static var _down_key := ""
 static var _down_tip := ""
 
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/tips.json"))
 		_rules = d if d is Dictionary else {}
 	return _rules
+
 
 ## The triggers a run's counts raise, most pressing first. stats and used are the local Hunter's
 ## (stats, used), why is how it ended ("abyss"), time is seconds played. The habit triggers
@@ -36,12 +38,14 @@ static func triggers(stats: Dictionary, used: Dictionary, why: String, time: flo
 			out.append("few_glide")
 	return out
 
+
 ## Remembers what a finished expedition (Game.apply_result's r) says you missed. The tutorial run
 ## says nothing: it already teaches all of it.
 static func note_run(r: Dictionary) -> void:
 	if r.get("tutorial", false):
 		return
 	last = triggers(r.get("stats", {}), r.get("used", {}), String(r.get("why", "")), float(r.get("time", 0.0)))
+
 
 ## A tip's text by id, with its keys filled in (the in-match hints read their line from the table).
 static func text(id: String) -> String:
@@ -50,9 +54,11 @@ static func text(id: String) -> String:
 			return render(String(t["text"]))
 	return ""
 
+
 ## The tip for the loading screen. blight: false drops the tips that talk about the Blight.
 static func for_loading(blight: bool) -> String:
 	return pick(last, blight)
+
 
 ## The tip under "You're down", chosen once per knock (the HUD asks every frame).
 static func for_downed(p: Hunter, time: float, blight: bool) -> String:
@@ -62,11 +68,13 @@ static func for_downed(p: Hunter, time: float, blight: bool) -> String:
 		_down_tip = pick(triggers(p.stats, p.used, "", time), blight)
 	return _down_tip
 
+
 ## The most relevant unseen tip for these triggers, else a random unseen one; marks it seen.
 static func pick(trig: Array, blight := true) -> String:
 	var seen: Array = Save.d["tutorial"].get("tips_seen", [])
 	var pool: Array = (rules()["tips"] as Array).filter(
-		func(t): return blight or not String(t["text"]).contains("Blight"))
+		func(t): return blight or not String(t["text"]).contains("Blight")
+	)
 	var fresh := pool.filter(func(t): return not seen.has(t["id"]))
 	if fresh.is_empty():
 		seen = []
@@ -80,6 +88,7 @@ static func pick(trig: Array, blight := true) -> String:
 	seen.append(chosen["id"])
 	Save.d["tutorial"]["tips_seen"] = seen
 	return render(String(chosen["text"]))
+
 
 ## A tip's text with each {action} turned into that action's key.
 static func render(s: String) -> String:

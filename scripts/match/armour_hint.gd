@@ -9,6 +9,7 @@ extends RefCounted
 const FLAG := "armour_not_xp"
 const TEXT := "Hits on Hunters build armour. XP comes from monster kills."
 
+
 ## `credit` dealt damage to `target` that went into armour progress.
 static func hit(m: Match, credit: Ent, target: Ent) -> void:
 	if credit != m.player or not target is Hunter or m.hud == null or m.opts.get("tutorial", false):

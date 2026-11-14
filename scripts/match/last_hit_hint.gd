@@ -12,7 +12,8 @@ const KILL_TEXT := "Last hit on a monster gives XP to you and teammates nearby."
 const STOLEN_FLAG := "last_hit_stolen"
 const STOLEN_TEXT := "They landed the last hit, so they got its XP."
 const SHARE_FLAG := "xp_share"
-const SHARE_TEXT := "Stay near your squad: kill XP is shared within %d m."    # KillXp.SHARE_R
+const SHARE_TEXT := "Stay near your squad: kill XP is shared within %d m."  # KillXp.SHARE_R
+
 
 ## `mb` died to `by` (a Hunter, or a Boki whose owner gets the credit). Runs on the host
 ## (Match.on_mob_dead) and on each client (the "mobdead" event), so every player gets their hints.
@@ -21,7 +22,7 @@ static func kill(m: Match, mb: Mob, by: Ent) -> void:
 	if killer == null or m.player == null or m.opts.get("tutorial", false) or not Settings.get_v("tips"):
 		return
 	if killer.team == m.player.team:
-		if killer != m.player and m.player.flat_dist(mb) > KillXp.SHARE_R:    # (a squadmate's kill paid you nothing)
+		if killer != m.player and m.player.flat_dist(mb) > KillXp.SHARE_R:  # (a squadmate's kill paid you nothing)
 			m._tip(SHARE_FLAG, SHARE_TEXT % int(KillXp.SHARE_R))
 		else:
 			m._tip(KILL_FLAG, KILL_TEXT)

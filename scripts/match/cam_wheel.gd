@@ -7,11 +7,13 @@ extends RefCounted
 ## a match, and where the player left it is kept (Settings "cam_zoom"); if a player binds it to an action in
 ## Settings, that action wins and the wheel stops zooming.
 
-const HINT := "cam_zoom"      # Save.d["tutorial"] key: the wheel hint was shown or the wheel was used
-const HINT_AFTER_S := 8.0      # s into the match before the hint, after the move hint (6 s) has gone
+const HINT := "cam_zoom"  # Save.d["tutorial"] key: the wheel hint was shown or the wheel was used
+const HINT_AFTER_S := 8.0  # s into the match before the hint, after the move hint (6 s) has gone
+
 
 static func rules() -> Dictionary:
 	return CamRig.RULES["zoom"]
+
 
 ## The wheel in a match. True when it zoomed (the caller marks the event handled).
 static func input(m: Match, event: InputEvent) -> bool:
@@ -22,17 +24,21 @@ static func input(m: Match, event: InputEvent) -> bool:
 	var button := (event as InputEventMouseButton).button_index
 	var step := 0.0
 	match button:
-		MOUSE_BUTTON_WHEEL_UP: step = -1.0
-		MOUSE_BUTTON_WHEEL_DOWN: step = 1.0
-		_: return false
+		MOUSE_BUTTON_WHEEL_UP:
+			step = -1.0
+		MOUSE_BUTTON_WHEEL_DOWN:
+			step = 1.0
+		_:
+			return false
 	var popup: bool = m.hud != null and (m.hud.map_open() or m.hud.swap_open() or m.hud.pack_open())
 	if popup or _bound(button):
 		return false
 	var r: Dictionary = rules()["match"]
 	m.cam.user_zoom = clampf(m.cam.user_zoom + step * float(r["step"]), float(r["min"]), float(r["max"]))
 	Settings.set_v("cam_zoom", m.cam.user_zoom, false)
-	Save.d["tutorial"][HINT] = true      # zoomed: the hint has done its job
+	Save.d["tutorial"][HINT] = true  # zoomed: the hint has done its job
 	return true
+
 
 ## The first-match hint for the wheel (Match._tips calls it once the player is on the ground): one line,
 ## until the wheel has zoomed or the line has shown once. Skipped when the player bound the wheel to an action.
@@ -40,6 +46,7 @@ static func hint(m: Match) -> void:
 	if _bound(MOUSE_BUTTON_WHEEL_UP) or _bound(MOUSE_BUTTON_WHEEL_DOWN):
 		return
 	m._tip(HINT, "Mouse wheel zooms the view  ·  hold %s to sneak and see wider" % Settings.key_cap("crouch"))
+
 
 ## The zoom a match starts at: where the player left the wheel (Settings "cam_zoom"), inside the range; until
 ## they first turn it, the widest for an expedition (`host` is its Match) and the style's own framing elsewhere.
@@ -50,6 +57,7 @@ static func saved(host: Node) -> float:
 		z = float(r["max"]) if host is Match and Prematch.expedition((host as Match).opts) else 1.0
 	return clampf(z, float(r["min"]), float(r["max"]))
 
+
 ## Whether a player's Settings put this mouse button on an action.
 static func _bound(button: int) -> bool:
 	for a in InputMap.get_actions():
@@ -58,12 +66,14 @@ static func _bound(button: int) -> bool:
 				return true
 	return false
 
+
 ## The widening for what the player is doing (1 = none): gliding, or sneaking on the ground.
 static func widen(p: Hunter) -> float:
 	var w: Dictionary = rules()["widen"]
 	if p.gliding:
 		return float(w["glide"])
 	return float(w["ctrl"]) if p.crouch and p.grounded else 1.0
+
 
 ## The camera zoom for a base zoom: the wheel's factor on top, and sneaking never less than "ctrl_floor" x the max.
 static func final(base: float, user_zoom: float, p: Hunter) -> float:

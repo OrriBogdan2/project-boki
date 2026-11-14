@@ -23,9 +23,6 @@ extends RefCounted
 ##      of the step (a walk to a far stop: by the time you get there; the marker's edge arrow and the Boki
 ##      lead the way meanwhile) and, where it is a thing, at least MIN_PX tall. One row per step is printed.
 
-var bad := 0
-var m: Match
-var main: Node
 
 const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (the fresh-run log found 157)
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
@@ -33,6 +30,9 @@ const STARTERS := ["archer", "juggernaut", "gunslinger"]
 const FRAME_VIEW := Vector2(1280, 720)   # the smallest screen the tutorial is built for
 const MIN_PX := 24.0                     # px at 1280x720: the least a thing to act on may be drawn tall
 const ON_SHARE := 0.6                    # of a step's frames: its thing is on screen at least this often
+var bad := 0
+var m: Match
+var main: Node
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
