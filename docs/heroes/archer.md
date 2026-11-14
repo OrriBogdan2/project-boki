@@ -244,7 +244,7 @@ interaction is chainable", read through DashFlow's default (decision 0015: a mis
 goes and the first runs on) and AirLimits ("an open glider is never folded"). Each is one assert in
 `--archer-combo-check` ("Lace cancel ...", tools/lace_cancel_rows_check.gd). Any pair not in the table: both (ArchKit
 has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack
-key does nothing from a glide (`Hunter.can_fire`; the glide row below says that is a mismatch).
+key draws from an open glider (`ArcherKit.fires_in_glide`; the glide row below).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
@@ -258,7 +258,7 @@ key does nothing from a glide (`Hunter.can_fire`; the glide row below says that 
 | X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
 | X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
 | X window | RMB, E | not shown (the card: "next 3 Bow shots", so RMB and E are not among them) | both: the Heavy Shot draw starts, the wall goes up, the three shots stay | both (match) | rule; [D] :77 |
-| Glide | LMB | not shown | ignored (`Hunter.can_fire` refuses while gliding) | both: the bow draws from the open glider, which stays open. **Mismatch, not fixed** (doc and assert only; the kit change is named in the pass report) | rule; AirLimits "an open glider is never folded" |
+| Glide | LMB | not shown | both: the bow draws from the open glider, which stays open (`ArcherKit.fires_in_glide`, as Vex and Cinder) | **fixed, rule ours** (was ignored: `Hunter.can_fire` refused while gliding) | rule; AirLimits "an open glider is never folded" |
 | Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) and the glider stays open | both (match) | rule |
 
 Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the data nor the frames show the
@@ -313,11 +313,11 @@ Release snap (anim-lace-release-snap): the three release moves blend in over 0.0
 
 ## In the air
 
-What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide draws the bow (`ArcherKit.fires_in_glide`, the Cancels glide row; the source is silent on it). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
 
 | Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
 |---|---|---|---|---|
-| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | blocked | stays open | silent |
+| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | the draw and shot (Cancels: Glide + LMB) | stays open | silent |
 | RMB tap | nothing, as on the ground (Heartpiercer is hold only; no air Plunge) | nothing | - | data: hold to charge |
 | RMB hold | the Heavy Shot, charged and loosed in the air | the same | stays open | data: Heartpiercer |
 | E | Rain of Arrows, as on the ground | the same | stays open | silent |
@@ -344,3 +344,34 @@ Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`,
 - Gait: run slide 13 %, arms against the legs +0.61, bob 5.3 cm: unchanged. The bow arm hangs static in a gait by design (reach 0.05 body heights); the free arm stands out for 21 % of the loose and perfect clips: unchanged.
 - Bow on the hand: the bow rides the closed bow hand (`anchor_bow_root`, `anchor_nock`); the string hand reaches the nock at draw length in `draw`, `loose` and `heavy`.
 - Timing table above: re-run through `--archer-combo-check` on the v2 clips: 159 checks, 0 failures; no row moved.
+
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/hem.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+The bow tip is the point that jumps: her idle, rest stance and walk carry the bow low on the left hand, every shot clip starts with it raised across the body (0.65 to 0.75 m at the tip, under 0.25 m at the hands). The blend-in cannot grow past the release key (0.04 to 0.06 s on the taps), so the shots keep their snap and the gap in stays; the blend back to the legs now takes the bow down over 0.24 to 0.40 s instead of 0.16. `arc_heavy_wind`, `pin_walk`, `arc_hail` and `mf_xform` start slower (their first keys allow it).
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `arc_draw` | 0.06 | **0.66** weapon | **0.22** hand.L | **0.75** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_tap` | **0.65** weapon | 0.06 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.25 |
+| `arc_loose` | **0.69** weapon | 0.03 | **0.73** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.29 |
+| `arc_perfect` | **0.65** weapon | 0.05 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.28 |
+| `arc_super` | **0.69** weapon | 0.03 | **0.72** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.30 |
+| `arc_over` | **0.66** weapon | **0.64** weapon | **0.75** weapon | **0.72** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_over_loose` | **0.67** weapon | 0.04 | **0.71** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.31 |
+| `arc_heavy_wind` | 0.04 | **0.57** weapon | **0.49** foot.L | **0.66** weapon | 0.10 / 0.16 | 0.20 / 0.40 |
+| `arc_heavy` | **0.57** weapon | 0.04 | **0.66** weapon | **0.49** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `arc_hail` | 0.03 | 0.03 | **0.23** hand.L | **0.20** hand.L | 0.10 / 0.16 | 0.12 / 0.31 |
+| `pin_roll` | 0.04 | 0.06 | **0.49** foot.L | **0.49** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_walk` | 0.03 | **0.39** hand.L | **0.20** hand.L | **0.32** weapon | 0.10 / 0.16 | 0.20 / 0.40 |
+| `pin_flick` | 0.04 | 0.08 | **0.49** foot.L | **0.48** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_cast` | 0.07 | **0.66** weapon | **0.21** hand.L | **0.75** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_nock` | **0.65** weapon | **0.68** weapon | **0.74** weapon | **0.73** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_loose` | **0.69** weapon | **0.66** weapon | **0.72** weapon | **0.76** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `pin_ult_final` | **0.65** weapon | 0.04 | **0.74** weapon | **0.20** hand.L | 0.10 / 0.16 | 0.10 / 0.31 |
+| `mf_xform` | 0.04 | 0.04 | **0.49** foot.L | **0.49** foot.L | 0.10 / 0.16 | 0.18 / 0.40 |
