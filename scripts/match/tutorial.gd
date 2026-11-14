@@ -601,6 +601,7 @@ func _words() -> void:
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	var was := detail
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 	key_cap = ""
 	if sid == "land":
