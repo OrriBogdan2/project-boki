@@ -10,6 +10,7 @@ extends RefCounted
 enum { OFF, IDLE, ACTIVE, USED }
 
 const BEAM_SHADER: Shader = preload("res://shaders/exit_beam.gdshader")
+const CONTESTED := Color("ff7a5a")   # a rival in an uplink's yard
 const SKY_H := 70.0                  # m, the beam's full height: seen over the walls and the trees
 const STUB_H := 9.0                  # m, an idle exit's marker
 const BEAM_R := 0.45                 # m, an active beam's radius (a used one is twice as thick)
@@ -35,18 +36,20 @@ static func left(x: Dictionary) -> float:
 		"open" when t < 1e8: return clampf(t / Exits.LIFT_T, 0.0, 1.0)
 	return 1.0
 
+static func team_color(team: int) -> Color:
+	return Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
+
 ## The beam's and zone's colours and alphas for `ph`, as [beam colour, zone colour].
-## `viewer` is the local player's team: squad and rival read in the colour-vision palette's colours.
-static func colors(x: Dictionary, ph: int, who: int, pulse: float, viewer: int) -> Array:
+static func colors(x: Dictionary, ph: int, who: int, pulse: float) -> Array:
 	var kind: Color = ExitModels.UPLINK
 	var holder := int(x["team"])
-	var beam := SideColor.of_team(viewer, holder) if ph >= ACTIVE and holder >= 0 else kind
+	var beam := team_color(holder) if ph >= ACTIVE and holder >= 0 else kind
 	var zone := kind
 	if ph == USED:
-		beam = SideColor.of_team(viewer, who)
+		beam = team_color(who)
 		zone = beam
 	elif ph == ACTIVE and x.get("contested", false):
-		zone = SideColor.foe()      # (a rival in the yard)
+		zone = CONTESTED
 	var wave := 0.7 + 0.3 * pulse if ph == ACTIVE else 1.0
 	return [Color(beam, float(BEAM_A[ph]) * wave), Color(zone, float(ZONE_A[ph]) * wave)]
 
@@ -75,7 +78,7 @@ static func attach(root: Node3D, kind: Color, zone_d: float) -> void:
 	root.add_child(sig)
 
 ## Puts the exit's model in state `ph` (called every tick; it only touches the scene when the look changed).
-static func show(x: Dictionary, ph: int, who: int, time: float, viewer: int) -> void:
+static func show(x: Dictionary, ph: int, who: int, time: float) -> void:
 	var n: Node3D = x["node"]
 	var sig := n.get_node("Signal") as Node3D
 	var zone := n.get_node("Zone") as MeshInstance3D
@@ -86,7 +89,7 @@ static func show(x: Dictionary, ph: int, who: int, time: float, viewer: int) -> 
 	var pulse := 0.0
 	if ph == ACTIVE:
 		pulse = 0.5 + 0.5 * sin(time * lerpf(PULSE_FAST, PULSE_SLOW, left(x)))
-	var cols := colors(x, ph, who, pulse, viewer)
+	var cols := colors(x, ph, who, pulse)
 	var key := [ph, cols[0], cols[1]]
 	if key == x.get("signal"):
 		return

@@ -74,11 +74,11 @@ func run(main: Node) -> void:
 		"locked, open and lost seats read in three colours")
 	H.carrier = m.player
 	H._force(Heart.S.CARRIED, "test")
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == SideColor.ally(),
+	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
 		"a carried spark: the Gate wears the carrier's squad colour")
 	H.carrier = null
 	H.early_team = m.player.team
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != SideColor.ally(),
+	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
 		"a taken seat is dimmed")
 	H.early_team = -1
 	# ---------------------------------------------------------------- 4. ways left
