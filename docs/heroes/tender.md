@@ -401,3 +401,13 @@ Ring table with what was cut and recoloured: docs/VFX_QUALITY.md (Meeko and Albe
 - R: the shared ult base `HeroUlt` (`scripts/arch/hero_ult.gd`, byte-identical across the six ult branches) plugs into main's R path: `HunterKeys.ult_pressed` (the `hunter_ult` key, the level gate) calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_call)` (the cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/tender.json`. A downed online teammate rides home on the existing "carry" event and stands up through "rev".
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. The carry uses the existing "carry" event; heals and revives reuse "heal" and "rev". The Burrseed area and the thrown disc are local looks; remote players see the existing Net rings.
 - Checks: `--support-check` (all), `--tender-combo-check` (support + combos, `tools/care_combo_check.gd`).
+
+## v2 re-audit (Nov 9: models-v2 merged)
+Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep against the pre-v2 tree `54df2f18a^`, `--anim-shots --close`; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 walk and run strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/tender.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![tender v2 strips](../art/anim_audit/v2_tender.jpg)
+
+- Gait: run slide 17 %, arms against the legs +0.39 (the weakest of the roster, the stride cap is 3.9 of 4.65 m/s), 6.7 steps a second on a 0.65 m body: all as on Nov 8.
+- Free arm: `seed` and `shot_r` hold an arm out for 88 % and 71 % of the clip and fling the free arm 1.16 and 1.02 body heights: as on Nov 8 (open there).
+- Sun and cloud: the weapon is the sun at the left shoulder (skinned on `pauldron.L`), the cloud rides `pauldron.R`; there is no prop in a hand. The FX anchors still carry the v1 names `anchor_lantern_top` / `anchor_hang_lantern` (they ride the sun; the names are data, kept). The sun is 0.12 m long, 0.25 to 0.33 m from the left hand in `shot_r` (before 0.39 to 0.50 m, the v2 sun floats nearer), and the palm anchor `anchor_palm_L` follows the left hand to 0.06 m at rest, identical to the pre-v2 tree.
+- Timing tables above: re-run through `--tender-combo-check` and `--pip-live-check` on the v2 clips: 87 checks, 0 failures; no row moved.

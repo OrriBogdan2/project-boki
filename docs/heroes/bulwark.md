@@ -299,3 +299,14 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
 ## Payoff
 Crushed (no word): stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+CRUSHED: stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+
+## v2 re-audit (Nov 9: models-v2 merged)
+Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep against the pre-v2 tree `54df2f18a^`, `--anim-shots --close`; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 walk and run strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/bulwark.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![bulwark v2 strips](../art/anim_audit/v2_bulwark.jpg)
+
+- Gait: run slide 19 % (gate 25 %), arms against the legs +0.64, hip bob 4.1 cm: unchanged from Nov 8. The model is 2.03 m on a 0.50 m hitbox; slide is measured on the model, at the move speed.
+- Free arm: `lmb_throw` and `lmb_slam` jump the hand 0.51 and 0.64 body heights in one frame, `lmb_slam` holds an arm out for 29 % of the clip: as on Nov 8 (open there).
+- Hammer in the hand: `anchor_hammer_grip` sits 0.15 to 0.16 m from `hand.R` at rest (the haft thickness; before 0.15 to 0.16 m), the hammer is 1.11 m long (before 1.06 m, the squared blade of the v2 model). In `lmb_throw` the hammer leaves the hand (up to 1.96 m, before 2.14 m), in `lmb_slam` it stays 0.76 to 1.78 m off the right hand's bone (before 0.87 to 1.88 m): the same clip trait in both versions, a little closer on v2.
+- Timing tables above: re-run through `--bulwark-combo-check` (`--hero-combo-check`) on the v2 clips: 304 checks (shared with the archer), 0 failures; no row moved.
