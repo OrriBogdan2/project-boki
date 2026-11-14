@@ -14,7 +14,7 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Ability", "e": "Utility",
 		"x": "Ultimate", "r": "Fusion with your Boki"}
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",

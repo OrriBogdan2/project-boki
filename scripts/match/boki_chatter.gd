@@ -27,7 +27,7 @@ static func say(m: Match, k: Kin, trigger_id: String) -> void:
 const TUT_HINT := {
 	"land": ["That meadow looks nice and quiet!", "(peeks over your shoulder at the ground below)"],
 	"points": ["One point to start. Pick well!", "(holds up one paw, very serious)"],
-	"pick_sec": ["That one! Your right click!", "(points its nose at the glowing button)"],
+	"pick_sec": ["That one! Your ability!", "(points its nose at the glowing button)"],
 	"sec": ["Use your power on them!", "(watches your hands, tail going)"],
 	"shoot": ["Get them! They're worth XP!", "(growls at the monster)"],
 	"pick_dash": ["You leveled up! Take the dash!", "(zips off to the side and back, showing you)"],

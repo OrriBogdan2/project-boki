@@ -11,6 +11,8 @@ const CAP := 1500              # lines kept per font and size before that bucket
 static var _lines := {}        # font id * 256 + size -> {text: TextLine}
 static var world := false      # drawing world-hung text (the plates over heads): no Text size scaling
 static var shaped := 0         # lines shaped so far (checks and the probe read it)
+static var seen: Array = []    # --keys-check: every string drawn while `recording`
+static var recording := false
 
 static func line(font: Font, s: String, design_fs: int) -> TextLine:
 	var fs := design_fs if world else UI.fs(design_fs)      # Settings > Text size
@@ -37,6 +39,7 @@ static func draw(c: CanvasItem, font: Font, p: Vector2, s: String, fs: int, col:
 		outline_col := Color(0, 0, 0, 0.55)) -> void:
 	if s == "":
 		return
+	if recording: seen.append(s)
 	var tl := line(font, s, fs)
 	var at := Vector2(p.x, p.y - tl.get_line_ascent())
 	var rid := c.get_canvas_item()
