@@ -169,6 +169,7 @@ Other checks:
 ## What changed (all in clearly marked `(movefeel)` blocks)
 
 - **Input to screen:** the local player is drawn at the present (`Hunter.render_pos`, `LOCAL_RENDER_LEAD`), extrapolated by the fraction of a step since the last one. Before, it was interpolated up to a step in the past, so a press showed a frame late and the camera trailed. Everyone else is still interpolated, and a teleport snaps.
+- **Camera before the cursor:** each frame moves the view first (`MatchCam.update`, following where the last frame drew you), then reads the cursor, then steps the sim. A shot fired while the view moves (a dash, a knock, the skyship) leaves on the reticle as drawn; with the old order it trailed by one camera step (0.35 m at 15 m in a 10 m knock). The cost is one more frame of follow lag, about 0.1 m at a run. `--dash-aim-check` (steady rows) holds it to 0.25 m at 15 m for Vex, Lace, Sparkle and Neve.
 - **Ground:** acceleration 70 → 90 m/s², deceleration 90 → 110 m/s².
 - **Air:** steering 22/3 → 40/9 m/s², so letting go in a jump stops you. Speed above run speed (a dash, a pad, a knockback) still carries at 3 m/s².
 - **Falls:** gravity x1.2 straight to a 10 m/s terminal speed, which matches the footage depth and tightens the jump arc. It replaces the slow 3.2/s ease to 9 m/s. The camera's soft vertical follow keeps falls from jolting the view.
