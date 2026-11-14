@@ -10,24 +10,46 @@ const POP := 0.5               # seconds the badge pops after a level-up
 const RADIUS := 19.0           # px: the badge at rest
 const BAR_H := 2.0             # px: the progress bar under the armour strip
 const TICK := 0.5              # seconds the head tick shows after armour progress grows
+const NOTE_PX := 14            # px: the first-time hint's text
+
+## Makes the badge pop (a level-up, or a hint pointing at it).
+static func pop(hud) -> void:
+	hud.set_meta("armor_pop", POP)
+
+## The first-time armour hint (ArmourHint, via Hud.tip "armor"): one line just over the armour
+## readout at `at`, fading out over its last second. The meta is [text, match time it ends]
+## (match time, as in bar(): the vitals redraw at HudPanels.REDRAW_HZ).
+static func note(hud, at: Vector2) -> void:
+	var n: Array = hud.get_meta("armor_note", [])
+	if n.is_empty():
+		return
+	var left: float = float(n[1]) - hud.m.time
+	if left <= 0.0:
+		hud.set_meta("armor_note", [])
+		return
+	var a := clampf(left, 0.0, 1.0)
+	var tw: float = HudStyle.BIG.get_string_size(n[0], HORIZONTAL_ALIGNMENT_LEFT, -1, NOTE_PX).x
+	hud.c.draw_style_box(HudStyle.box(Color(HudStyle.SHADE, 0.86 * a), 8, Color(0, 0, 0, 0), 0),
+			Rect2(at + Vector2(-8, -17), Vector2(tw + 16, 24)))
+	HudStyle.text(hud.c, at, n[0], NOTE_PX, Color(hud.TIP_COL, a))
 
 ## The badge at the portrait's bottom-right corner: a shield in the tier's colour ringed by progress.
 static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	var c: CanvasItem = hud.c
 	var seen: int = int(hud.get_meta("armor_seen", -1))
 	if seen >= 0 and p.armor_tier > seen:
-		hud.set_meta("armor_pop", POP)
+		pop(hud)
 	hud.set_meta("armor_seen", p.armor_tier)
-	var pop: float = maxf(0.0, float(hud.get_meta("armor_pop", 0.0)) - hud.get_process_delta_time())
-	hud.set_meta("armor_pop", pop)
-	var k := 1.0 - pop / POP
+	var left: float = maxf(0.0, float(hud.get_meta("armor_pop", 0.0)) - hud.get_process_delta_time())
+	hud.set_meta("armor_pop", left)
+	var k := 1.0 - left / POP
 	var grow := 1.0
-	if pop > 0.0:
+	if left > 0.0:
 		grow = 1.0 + 0.35 * sin(k * PI)
 	var col: Color = p.armor_col()
 	var at := pr.position + Vector2(pr.size.x - 6, pr.size.y - 6)
 	var r := RADIUS * grow
-	if pop > 0.0:
+	if left > 0.0:
 		c.draw_style_box(HudStyle.box(Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4), pr.grow(4.0 + k * 18.0))
 	c.draw_circle(at, r, HudStyle.SHADE)
 	c.draw_arc(at, r, 0, TAU, 40, HudStyle.SHADE_EDGE, 1.0, true)
