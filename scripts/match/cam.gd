@@ -13,6 +13,8 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+## The held far look's ease and sight (ScoutLook).
+static var SCOUT: Dictionary = RULES["scout"]
 
 var focus := Vector3.ZERO
 var target: Node3D = null
@@ -79,11 +81,16 @@ const CAST_EASE := 16.0       # 1/s
 const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
 const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
 static var POSE_FAR_M: float = RULES["pose_far_m"]   # m (flat) from the focus: on screen past it is far (SimLod)
+const BODY_H := 2.0           # m: a hunter's head above its feet, kept on screen with them
 static var EDGE: float = RULES["lean_edge_m"]      # m the cursor lean and a cast keep between you and the screen's edge
 var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
 var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
 var cast_left := 0.0
 var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
+## The held far look (ScoutLook): Match sets scout_on from the player's hold each frame.
+var scout_on := false
+var scout_k := 0.0            # 0 = the usual view, 1 = fully out toward the cursor
+var scout_pan := Vector3.ZERO # the framing at scout_k 1, taking over from the cursor pan and a cast
 
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
@@ -147,23 +154,57 @@ func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
 	var pan_by := 0.0 if follow_mode == "locked" else minf(reach * 0.5, _cast_room(dir, zoom_k))
 	cast_pan = Vector3(dir.x, 0.0, dir.y) * pan_by
 
-## Metres the view can lean along `dir` at that zoom with the hunter still EDGE inside the screen. Up and down the
-## screen it is perspective's ground between the centre and the edge: less toward the camera than away from it.
+## Metres the view can lean along `dir` at that zoom with you (feet and head) still EDGE inside the screen. Each
+## screen edge is a straight line on the ground in perspective, so every limit solves exactly: s * a <= b.
 func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var view := get_viewport().get_visible_rect().size
 	var d := dist * dist_mul * zoom * (1.0 + zoom_k)
-	var half := deg_to_rad(fov) * 0.5
-	var turned := dir.rotated(yaw)
-	# a lean away from the camera (turned.y < 0) puts you below the centre, toward the near edge
-	var down := d * sin(half) / sin(pitch + (half if turned.y < 0.0 else -half))
-	var room := Vector2(d * tan(half) * view.x / maxf(1.0, view.y), down) - Vector2.ONE * EDGE
-	return minf(room.x / maxf(0.001, absf(turned.x)), room.y / maxf(0.001, absf(turned.y)))
+	var t := tan(deg_to_rad(fov) * 0.5)
+	var wide := t * view.x / maxf(1.0, view.y)
+	var turned := dir.rotated(yaw)      # (turned.y > 0: toward the camera, which puts you up the screen)
+	var sp := sin(pitch)
+	var cp := cos(pitch)
+	var room := INF
+	for h in [-rise, BODY_H - rise]:      # feet and head, against the point the view aims at
+		var deep: float = d - h * sp            # the depth there, before the lean; the lean adds s * turned.y * cp
+		room = _under(room, absf(turned.x) - turned.y * cp * wide, deep * wide)      # the side edge
+		room = _under(room, turned.y * (sp - cp * t), deep * t - h * cp)            # the top edge
+		room = _under(room, -turned.y * (sp + cp * t), deep * t + h * cp)           # the bottom edge
+	return room - EDGE
+
+## The smaller of `room` and the largest s with s * a <= b (no limit when a <= 0).
+static func _under(room: float, a: float, b: float) -> float:
+	return minf(room, b / a) if a > 0.0001 else room
 
 func _tick_cast(delta: float) -> void:
 	cast_left = maxf(0.0, cast_left - minf(delta, CAST_STEP))      # (a slow frame mustn't outlast the kit's request)
 	cast_k = lerpf(cast_k, 1.0 if cast_left > 0.0 else 0.0, 1.0 - exp(-CAST_EASE * delta))
 	if cast_k < 0.001:
 		cast_k = 0.0
+
+const SCOUT_DEAD := 0.1       # share of the half-screen: a cursor this near the centre gives the far look no lean
+
+## The far look's framing for the cursor at `rel` (-1..1 from the screen's centre on each axis): that way, a share of
+## the room the widened view (SCOUT zoom) has (all of it at the edge) with you still EDGE inside. Read off the
+## screen, not the ground, so the view moving under a still cursor never steers where it goes.
+func scout_to(rel: Vector2) -> Vector3:
+	var l := rel.length()
+	if l < SCOUT_DEAD:
+		return Vector3.ZERO
+	var way := Vector3(rel.x / l, 0.0, rel.y / l).rotated(Vector3.UP, yaw)
+	var share := minf(1.0, (l - SCOUT_DEAD) / (1.0 - SCOUT_DEAD))
+	return way * maxf(0.0, _cast_room(Vector2(way.x, way.z), float(SCOUT["zoom"]))) * share
+
+func _tick_scout(delta: float, mouse_lead: bool) -> void:
+	var on := scout_on and mouse_lead
+	if on:
+		var vp := get_viewport()
+		var half := vp.get_visible_rect().size * 0.5
+		scout_pan = scout_to((vp.get_mouse_position() - half) / half)
+	var secs := float(SCOUT["ease_in_s"] if on else SCOUT["ease_out_s"])
+	scout_k = lerpf(scout_k, 1.0 if on else 0.0, 1.0 - exp(-ScoutLook.rate(secs) * delta))
+	if scout_k < 0.001:
+		scout_k = 0.0
 
 ## The zoom an aimed cast adds right now.
 func cast_wide() -> float:
@@ -243,7 +284,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
-	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
+	_tick_scout(delta, mouse_lead)
+	focus = base + pan.lerp(cast_pan, cast_k).lerp(scout_pan, scout_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
@@ -270,7 +312,8 @@ func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull) * cast_wide()
+	var scout_wide := 1.0 + float(SCOUT["zoom"]) * scout_k
+	var z := zoom * (1.0 + pull) * cast_wide() * scout_wide
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

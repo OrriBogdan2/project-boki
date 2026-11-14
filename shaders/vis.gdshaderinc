@@ -9,6 +9,7 @@ global uniform vec2 vis_dir;
 global uniform vec2 vis_size;
 global uniform sampler2D vis_blocks : filter_linear;
 global uniform float vis_range;
+global uniform vec2 vis_scout;     // the held far look (ScoutLook): x extra share of range inside the cone, y its half-angle's cosine
 global uniform float vis_allies;
 global uniform vec4 vis_ally0;     // xy = position (x, z), zw = aim direction
 global uniform vec4 vis_ally1;
@@ -34,13 +35,16 @@ float vis_side(vec2 d, float dist, vec2 dir) {
 	return dist * sin(clamp(a, -1.5707, 1.5707));
 }
 
-// How lit a point is by one viewer: 1 inside the circle or the unblocked cone, 0 outside.
-float vis_one(vec2 eye, vec2 dir, float range, vec2 wp, int max_steps) {
+// How lit a point is by one viewer: 1 inside the circle or the unblocked cone, 0 outside. `scout` reaches
+// that share further inside the far look's narrow cone (0 for teammates).
+float vis_one(vec2 eye, vec2 dir, float range, float scout, vec2 wp, int max_steps) {
 	vec2 d = wp - eye;
 	float dist = length(d);
 	float near_v = 1.0 - smoothstep(VIS_NEAR, VIS_NEAR + 0.6, dist);
 	if (near_v >= 1.0) { return 1.0; }
-	float cone = (1.0 - smoothstep(-VIS_SOFT, 0.0, vis_side(d, dist, dir))) * (1.0 - smoothstep(range - 2.5, range + 0.5, dist));
+	float c = dot(d / max(dist, 0.001), dir);
+	float reach = range * (1.0 + scout * smoothstep(vis_scout.y - 0.006, vis_scout.y + 0.006, c));
+	float cone = (1.0 - smoothstep(-VIS_SOFT, 0.0, vis_side(d, dist, dir))) * (1.0 - smoothstep(reach - 2.5, reach + 0.5, dist));
 	if (cone > 0.001) {
 		// sight shadows: march toward the point through a smoothed map of what blocks sight
 		float steps = clamp(floor(dist / 0.4), 1.0, float(max_steps));
@@ -66,10 +70,10 @@ float vis_reveal(vec3 r, vec2 wp) {
 
 float vis_fog(vec3 wp) {
 	if (vis_on < 0.5) { return 0.0; }
-	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, wp.xz, 60);
-	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, wp.xz, 28)); }
+	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, vis_scout.x, wp.xz, 60);
+	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, 0.0, wp.xz, 28)); }
 	if (lit < 0.999 && vis_reveals > 0.5) { lit = max(lit, vis_reveal(vis_reveal0, wp.xz)); }
 	if (lit < 0.999 && vis_reveals > 1.5) { lit = max(lit, vis_reveal(vis_reveal1, wp.xz)); }
 	if (lit < 0.999 && vis_reveals > 2.5) { lit = max(lit, vis_reveal(vis_reveal2, wp.xz)); }

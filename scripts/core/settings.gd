@@ -157,6 +157,7 @@ const KEYS_V := 3
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["scout", "Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone)"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
@@ -548,7 +549,7 @@ func holders(code: String, except := "") -> Array:
 
 ## Actions that only run at home (the garden) and ones that only run in a match.
 const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
-const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
 
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
 ## training-only actions, the lobby's push to talk).

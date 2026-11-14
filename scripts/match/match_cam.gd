@@ -15,6 +15,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 		m.cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	cam.scout_on = player != null and player.scout
 	if player and player.riding and player.rocket == null:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
