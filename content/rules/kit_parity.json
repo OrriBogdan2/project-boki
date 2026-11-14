@@ -448,6 +448,22 @@
 			"evidence": "D Feysteel Chain 30 vs 43"
 		},
 		{
+			"hero": "juggernaut",
+			"slot": "E",
+			"field": "e.reel_speed",
+			"value": 22.5,
+			"tol": 7.5,
+			"evidence": "F Tether Chain pull: about 5 bh in about 0.4 s (0333) = 22.5 m/s, 2 frames at 5 fps so coarse; wiki 1900 uu/s = 19"
+		},
+		{
+			"hero": "juggernaut",
+			"slot": "E",
+			"field": "e.speed",
+			"value": 31.5,
+			"tol": 6.0,
+			"evidence": "F Tether Chain throw: about 7 bh in about 0.4 s to the wall (0303-0305) = 31.5 m/s"
+		},
+		{
 			"hero": "ostra",
 			"slot": "LMB",
 			"field": "lmb.prime_dmg",
@@ -562,6 +578,38 @@
 			"evidence": "D Fusillade +48 near the edge, of 2364 = 2.0% = 3.1 of 154"
 		},
 		{
+			"hero": "thief",
+			"slot": "Shift",
+			"field": "dash.dist",
+			"value": 4.5,
+			"tol": 0.0,
+			"evidence": "F Cartwheel 105-144 px, about 4.5m (hero-ref/dancer.md section 4)"
+		},
+		{
+			"hero": "thief",
+			"slot": "Shift",
+			"field": "dash.time",
+			"value": 0.48,
+			"tol": 0.0,
+			"evidence": "F Cartwheel start to upright 0.45-0.5s (section 4)"
+		},
+		{
+			"hero": "thief",
+			"slot": "Shift",
+			"field": "dash.haste",
+			"value": 0.18,
+			"tol": 0.03,
+			"evidence": "F 127-136 px/s after a Cartwheel, +15-20% (section 2)"
+		},
+		{
+			"hero": "thief",
+			"slot": "Shift",
+			"field": "dash.prime_bonus",
+			"value": 1.34,
+			"tol": 0.005,
+			"evidence": "D Quickflip: Empower next Arcslinger for +214 dmg on a 160 bolt"
+		},
+		{
 			"hero": "archer",
 			"slot": "X",
 			"field": "x.final_dmg",
@@ -569,6 +617,14 @@
 			"value": 1.2945,
 			"tol": 0.01,
 			"evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"
+		},
+		{
+			"hero": "archer",
+			"slot": "E",
+			"field": "e.reach",
+			"value": 10.8,
+			"tol": 0.54,
+			"evidence": "F Rain of Arrows wall centred on the cursor at about 6 bh = 10.8 m (hero-ref/pin.md 0498; 0457 at 4.5 bh); a floor, the cap is not seen; tol 0.3 bh read error"
 		},
 		{
 			"hero": "bulwark",

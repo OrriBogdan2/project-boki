@@ -806,6 +806,7 @@ func _cc(id: String, dd: Dictionary) -> void:
 func _cc_run(id: String, key: String) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
+	HunterAnim.rest_pose(m)      # (the same seeded Rig pose in every run: Ostra stands on the Rig, as in _run_hit)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
