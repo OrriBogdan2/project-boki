@@ -1846,6 +1846,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
+	HoverHum.tick(self)
 	abyss_snd.tick(self)
 	if remote:
 		net_follow(dt)
