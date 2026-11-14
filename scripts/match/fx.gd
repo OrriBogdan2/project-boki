@@ -26,6 +26,12 @@ var sparks: Array[CPUParticles3D] = []    # velocity-stretched streaks (shaders/
 var si := 0
 var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
+## Ring, after-image, beam and swing meshes come from pools made at load (FxPool): a fight makes and frees none.
+var ring_pool: FxPool
+var ghost_pool: FxPool
+var beam_pool: FxPool
+var slash_pool: FxPool
+var _slash_arcs := {}          # arc in whole degrees -> its crescent mesh at 1 m reach
 
 func _ready() -> void:
 	wall_impact = WallImpact.new(self)
@@ -77,10 +83,39 @@ func _ready() -> void:
 		add_child(l)
 		num_pool.append(l)
 	_build_sparks()
+	_build_pools()
 	# no effect casts a shadow: rings, telegraphs, decals, particles, bolts (item 94, ShadowPolicy)
 	ShadowPolicy.off(self)
 	child_entered_tree.connect(ShadowPolicy.off)
 	ShadowPolicy.watch_particles(get_tree())     # and no particle system anywhere in the match does
+
+## Warm counts: about the most the fight worst case (tools/perf_fight.gd) has out at once.
+func _build_pools() -> void:
+	var quad := QuadMesh.new()          # 1 x 1: a beam stretches it
+	var flat := Models.flat_quad(2.0)
+	var capsule := Models.capsule(0.3, 1.25)
+	ring_pool = FxPool.new(self, func() -> MeshInstance3D: return _mesh_node(flat, _ring_look()), 24)
+	ghost_pool = FxPool.new(self, func() -> MeshInstance3D: return _mesh_node(capsule, Models.glow_mat(Color.WHITE)), 24)
+	beam_pool = FxPool.new(self, func() -> MeshInstance3D:
+		return _mesh_node(quad, _shader_mat("res://shaders/light_shaft.gdshader")), 48)      # (a bolt takes 10)
+	slash_pool = FxPool.new(self, func() -> MeshInstance3D:
+		return _mesh_node(null, _shader_mat("res://shaders/swoosh.gdshader")), 8)
+
+func _ring_look() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = RING
+	return m
+
+func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	return mi
+
+func _shader_mat(path: String) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load(path)
+	return m
 
 func _build_sparks() -> void:
 	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
@@ -179,31 +214,23 @@ func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, 
 
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
-var _beam_sh: Shader
 func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> void:
-	if _beam_sh == null:
-		_beam_sh = load("res://shaders/light_shaft.gdshader")
 	var ln := a.distance_to(b)
 	if ln < 0.2:
 		return
 	var axis := (b - a) / ln
 	for k in 2:
-		var mi := MeshInstance3D.new()
-		var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
-		mi.mesh = qm
-		var m := ShaderMaterial.new(); m.shader = _beam_sh
+		var mi := beam_pool.take()
+		var m := mi.material_override as ShaderMaterial
 		m.set_shader_parameter("color", col if k == 0 else col.lerp(Color.WHITE, 0.75))
 		m.set_shader_parameter("intensity", 2.2 if k == 0 else 3.0)
-		mi.material_override = m
 		var w := width * (1.0 if k == 0 else 0.3)
 		var x_axis := axis.cross(Vector3.UP if absf(axis.y) < 0.95 else Vector3.RIGHT).normalized() * w
 		var z_axis := x_axis.cross(axis).normalized()
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(mi)
 		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (a + b) * 0.5)
 		var tw := mi.create_tween()
 		tw.tween_method(func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur).set_ease(Tween.EASE_IN)
-		tw.tween_callback(mi.queue_free)
+		tw.tween_callback(beam_pool.give.bind(mi))
 
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
@@ -265,17 +292,11 @@ func dash_trail(h) -> void:
 var ghosts: Array = []
 const GLOW_DUR := 0.5      # s: a body glow's life
 const GLOW_RISE := 1.4     # m/s: how fast it drifts up
-var _ghost_mesh: Mesh
 
 ## A fading after-image of a dashing hunter.
 func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
-	if _ghost_mesh == null:
-		_ghost_mesh = Models.capsule(0.3, 1.25)
-	var mi := MeshInstance3D.new()
-	mi.mesh = _ghost_mesh
-	mi.material_override = Models.glow_mat(Color(col, 0.55))
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	var mi := ghost_pool.take()
+	mi.material_override.set_shader_parameter("color", Color(col, 0.55))
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
@@ -293,12 +314,12 @@ func body_glow(at: Vector3, col: Color) -> void:
 ## single label that counts up while they keep landing (a burn, a zone, a minigun), then floats off;
 ## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge.
 ## Numbers stay out of the screen area round the reticle.
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "") -> void:
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", small := false) -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
 	at = _off_reticle(at)
 	for n in nums:
-		if n.has("val") and _rolls_into(n, at, prefix, crit, key):
+		if n.has("val") and _rolls_into(n, at, prefix, crit, key, small):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -311,7 +332,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 			elif not n.get("crit", false):
 				ln.modulate = col
 			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), bool(n["small"]))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
@@ -323,17 +344,17 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	l.font_size = _num_size(v, crit, small)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "small": small})
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
-func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String) -> bool:
-	if String(n["pre"]) != prefix:
+func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, small: bool) -> bool:
+	if String(n["pre"]) != prefix or bool(n["small"]) != small:
 		return false
 	if key == "":
 		return String(n["key"]) == "" and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
@@ -345,7 +366,7 @@ func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: St
 
 ## A hit on `target` from `src`, over its head; one source's hits on one target roll together.
 func hit_number(target: Ent, src: Ent, v: float, col: Color, crit: bool) -> void:
-	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target))
+	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target), target is Kin)
 
 ## The roll key for damage from `src` onto `target`.
 static func roll_key(src: Ent, target: Ent) -> String:
@@ -394,12 +415,13 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_size = 20 if crit else 14
 
 ## Big hits read big: the size steps up with the damage tier, a crit is larger again.
-static func _num_size(v: float, crit: bool) -> int:
+static func _num_size(v: float, crit: bool, small := false) -> int:
 	var px := 0
 	for t in SIZE_TIERS:
 		if v >= float(t[0]):
 			px = int(t[1])
-	return px + (CRIT_SIZE if crit else 0)
+	px += CRIT_SIZE if crit else 0
+	return int(px * Juice.BOKI_NUM_K) if small else px
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -444,51 +466,54 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	if own_look:
 		return
 	radial += 1
-	var mi := MeshInstance3D.new()
-	mi.mesh = Models.flat_quad(2.0)
-	var mat := ShaderMaterial.new()
-	mat.shader = RING
+	var mi := ring_pool.take()
+	var mat: ShaderMaterial = mi.material_override
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("seed", rng.randf() * 10.0)
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	mat.set_shader_parameter("life", 0.0)
 	mi.global_position = at + Vector3(0, 0.08, 0)
 	mi.scale = Vector3.ONE * radius / RING_REACH
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "col": col})
 
 ## A melee swing: a bright crescent sweeping the arc in front of you, gone in a blink.
 func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy := false) -> void:
+	var mi := slash_pool.take()
+	mi.mesh = _slash_mesh(arc)
+	var m := mi.material_override as ShaderMaterial
+	m.set_shader_parameter("color", col.lightened(0.15))
+	m.set_shader_parameter("progress", 0.0)
+	mi.global_position = at
+	mi.rotation = Vector3(0, -a0, 0)
+	mi.scale = Vector3.ONE * reach * (0.8 if not heavy else 0.9)
+	var grown := Vector3.ONE * reach * (1.05 if not heavy else 1.15)
+	var tw := mi.create_tween().set_parallel()
+	tw.tween_property(mi, "scale", grown, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_method(func(v: float) -> void: m.set_shader_parameter("progress", v), 0.0, 1.0, 0.2 if not heavy else 0.26)
+	tw.chain().tween_callback(slash_pool.give.bind(mi))
+
+## The swing's crescent at 1 m reach centred on +X, one per arc in whole degrees (slash turns and scales it).
+func _slash_mesh(arc: float) -> ArrayMesh:
+	var deg := roundi(rad_to_deg(arc))
+	if _slash_arcs.has(deg):
+		return _slash_arcs[deg]
+	arc = deg_to_rad(deg)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := 14
-	var r0 := reach * 0.45
+	var r0 := 0.45
 	for i in n:
-		var u0 := a0 - arc * 0.5 + arc * float(i) / n
-		var u1 := a0 - arc * 0.5 + arc * float(i + 1) / n
+		var u0 := -arc * 0.5 + arc * float(i) / n
+		var u1 := -arc * 0.5 + arc * float(i + 1) / n
 		# thickest in the middle of the sweep, thin at the ends
 		var w0 := sin(PI * float(i) / n); var w1 := sin(PI * float(i + 1) / n)
-		var o0 := Vector3(cos(u0), 0, sin(u0)); var o1 := Vector3(cos(u1), 0, sin(u1))
-		var a := o0 * reach; var b := o1 * reach
-		var c := o1 * lerpf(reach, r0, w1); var d := o0 * lerpf(reach, r0, w0)
+		var a := Vector3(cos(u0), 0, sin(u0)); var b := Vector3(cos(u1), 0, sin(u1))
+		var c := b * lerpf(1.0, r0, w1); var d := a * lerpf(1.0, r0, w0)
 		var ua := float(i) / n; var ub := float(i + 1) / n
 		# UV.x along the sweep, UV.y from the blade's tip (0) to the inner edge (1)
 		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 0)); st.add_vertex(b); st.set_uv(Vector2(ub, 1)); st.add_vertex(c)
 		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 1)); st.add_vertex(c); st.set_uv(Vector2(ua, 1)); st.add_vertex(d)
-	var mi := MeshInstance3D.new()
-	mi.mesh = st.commit()
-	var m := ShaderMaterial.new()
-	m.shader = load("res://shaders/swoosh.gdshader")
-	m.set_shader_parameter("color", col.lightened(0.15))
-	mi.material_override = m
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
-	mi.global_position = at
-	mi.scale = Vector3.ONE * (0.8 if not heavy else 0.9)
-	var tw := mi.create_tween().set_parallel()
-	tw.tween_property(mi, "scale", Vector3.ONE * (1.05 if not heavy else 1.15), 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_method(func(v: float) -> void: m.set_shader_parameter("progress", v), 0.0, 1.0, 0.2 if not heavy else 0.26)
-	tw.chain().tween_callback(mi.queue_free)
+	_slash_arcs[deg] = st.commit()
+	return _slash_arcs[deg]
 
 static var _impact_quad: QuadMesh
 const FLASH_MIN := 0.1         # s an impact flash holds at least: ~6 frames, so the hit frame reads
@@ -605,7 +630,7 @@ func _process(delta: float) -> void:
 		var mi: MeshInstance3D = rg["node"]
 		mi.material_override.set_shader_parameter("life", minf(k, 1.0))
 		if k >= 1.0:
-			mi.queue_free(); rings.erase(rg)
+			ring_pool.give(mi); rings.erase(rg)
 	for f in flashes.duplicate():
 		f["t"] += delta
 		var mi: MeshInstance3D = f["node"]
@@ -622,4 +647,4 @@ func _process(delta: float) -> void:
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
-			gm.queue_free(); ghosts.erase(g)
+			ghost_pool.give(gm); ghosts.erase(g)

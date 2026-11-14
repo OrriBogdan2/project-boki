@@ -6,11 +6,14 @@ extends RefCounted
 ## step, and carries an arrow and the distance while the target is off screen or under the hunter), a
 ## quiet check beside it, and the message lane in the top-right. Nothing sits in the middle or the
 ## bottom of the screen, where the hunter, the Boki and the hotbar are. While a new panel is fresh
-## (Tutorial.card_up) other popups (messages, Boki bubbles, the scout hint) wait.
+## (Tutorial.card_up) other popups (messages, Boki bubbles, the scout hint, the world's F prompt) wait,
+## so one prompt shows at a time; what a fight needs now (MsgLane.URGENT, FIGHT_PROMPTS) still shows.
 
 const MINT := TutorialStrip.MINT
 const GOLD := TutorialStrip.GOLD
 const PANEL := TutorialStrip.PANEL
+
+const FIGHT_PROMPTS := ["revive", "finish", "stomping", "boxrev"]     # Match.interact kinds that never wait
 
 static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
 
@@ -24,6 +27,10 @@ static func lanes(sz: Vector2) -> Dictionary:
 		"toast": Rect2(Vector2(sz.x * 0.72, sz.y * 0.02), Vector2(sz.x * 0.28 - 12.0, sz.y * 0.21)),
 		"intro": Rect2(Vector2(sz.x * 0.3, sz.y * 0.36), Vector2(sz.x * 0.4, sz.y * 0.28)),
 	}
+
+## The world prompt (Hud._draw_prompt) may show: no fresh panel is up, or it is one a fight needs.
+static func prompt_shows(m: Match) -> bool:
+	return m.tut == null or not m.tut.card_up() or String(m.interact.get("kind", "")) in FIGHT_PROMPTS
 
 static func draw(h, sz: Vector2) -> void:
 	var tu: Tutorial = h.m.tut

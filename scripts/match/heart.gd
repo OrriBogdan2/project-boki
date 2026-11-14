@@ -37,6 +37,7 @@ const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
 const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
+const HELD_SCALE := 0.45             # the Heartspark in a carrier's hand, against 0.9 floating over the head
 const NEAR_LABEL := 7.0
 const TIDE_STAGES := 11          # the source's death circle has stages 0-10; our one close is split into as many
 const RING_DY := 3.0                # metres above or below the Heart that still count as in the ring
@@ -79,19 +80,17 @@ static func tide_out(m: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; tide_r1 once the ring holds).
-static func next_r(m: Match) -> float:
+## tide starts, so the drop map shows it; tide_r1 once the ring holds). `ahead` 2: two such steps on (bots).
+static func next_r(m: Match, ahead := 1) -> float:
 	if m.heart == null:
 		return 0.0
-	return ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale)
+	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
 
-## Extra Skitter spawn heat per second for a squad out in the tide.
-static func tide_heat(m: Match, p: Vector3) -> float:
-	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+## (A squad out in the tide also stirs the nearest Blight nest on a clock: BlightNests._tide.)
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).
@@ -293,6 +292,10 @@ func _apply_carrier() -> void:
 		h.set_meta("heart_slow", r("carrier_slow") if on else 0.0)
 		if on and bool(rules()["carrier_reveal"]):
 			h.reveal_t = maxf(h.reveal_t, 0.3)
+
+## Is h holding the Heartspark right now (what its model's carry layer reads)?
+static func carrying(h: Hunter) -> bool:
+	return float(h.get_meta("heart_slow", 0.0)) > 0.0 and not h.downed and not h.out and not h.extracted
 
 func carrier_pos() -> Vector3:
 	return carrier.pos if carrier else spark_pos
@@ -600,8 +603,12 @@ func _update_nodes() -> void:
 	var lying := spark_live() and carrier == null
 	_spark.visible = state == S.CHARGING or spark_live()
 	if carrier:
-		_spark.position = carrier.pos + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
-		_spark.scale = Vector3.ONE * 0.9
+		var held := carrier.model != null and carrier.model.has_meta(WardenCarry.MOTE)
+		if held:
+			_spark.position = carrier.model.get_meta(WardenCarry.MOTE)      # (in the off hand)
+		else:
+			_spark.position = carrier.pos + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
+		_spark.scale = Vector3.ONE * (HELD_SCALE if held else 0.9)
 	else:
 		var sf := 1.0 if lying else clampf(0.15 + f * 0.85, 0.15, 1.0)
 		_spark.position = (spark_pos if lying else site) + Vector3(0, 2.7 + sin(t * 2.0) * 0.12, 0)

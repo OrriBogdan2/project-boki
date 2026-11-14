@@ -98,10 +98,11 @@ func _break_wall(w: Dictionary) -> void:
 static func blocks_sight(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
-## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
-static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
+## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
+## crosser class (Blockers): "phase" for a Spirit Walk.
+static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not w["move"]:
+		if not w["move"] or not Blockers.wall_stops(w, cls):
 			continue
 		if absf(y - float(w["y"])) > 1.9:
 			continue
@@ -312,9 +313,10 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
-## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only.)
-func _stops(w: Dictionary, team: int, p: Vector3, r: float) -> bool:
-	if w["block"] != "all" and int(w["team"]) == team:
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only;
+## cls is the shot's crosser class, Blockers: a "pierce" shot passes rocks.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float, cls := "solid") -> bool:
+	if (w["block"] != "all" and int(w["team"]) == team) or not Blockers.wall_stops(w, cls):
 		return false
 	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
 		return false
@@ -335,8 +337,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
+	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if not _stops(w, int(s["team"]), p, float(s["r"])):
+		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
