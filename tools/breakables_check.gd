@@ -6,6 +6,9 @@ extends RefCounted
 ##   3. a powder keg fuses first, then blows with the configured radius (inside hurt, outside not)
 ##   4. a chain reaction: a blast lights the kegs in reach, which blow a beat later
 ##   5. a bot standing by a lit keg is steered away from it
+##   6. the sounds: a break plays its material's own sound, a different take each time; a powder keg hisses its own
+##      fuse when lit and blows with its own blast (not the shared fuse_hiss or boom), and a chain-lit keg's hiss
+##      plays faster so it ends on the shorter fuse
 
 var main: Node
 var fails := 0
@@ -37,6 +40,7 @@ func run(main_node: Node) -> void:
 	_loot_and_pools(m, spot)
 	_fuse_and_radius(m, spot)
 	_chain(m, spot)
+	_sounds(m, spot)
 	_bots(m, spot)
 	print("BRKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -142,6 +146,41 @@ func _chain(m: Match, spot: Vector3) -> void:
 	ok("a pot in the blast broke at once", pot["dead"])
 	step(m, float(ex["chain_fuse"]) + 0.1)
 	ok("the chained keg blew a beat later", second["dead"])
+
+## The sounds `act` starts (Sfx's play log, cleared first so no repeat gap or stack limit holds one back).
+func _heard(act: Callable) -> Array:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	act.call()
+	return Sfx.last_played.keys()
+
+func _sounds(m: Match, spot: Vector3) -> void:
+	Sfx.listener = spot
+	var rules := Breakables.rules()
+	for kind_s in rules["kinds"]:
+		var want := String(rules["debris"][rules["kinds"][kind_s]["material"]]["sound"])
+		var takes := []
+		for i in 4:
+			var b := _fresh(m, kind_s, spot)
+			if _heard(func(): m.brk.smash(b, m.player)).has(want):
+				takes.append(int(Sfx.last_take.get(want, -1)))
+		var again := range(1, takes.size()).filter(func(k): return takes[k] == takes[k - 1])
+		ok("%s: a break plays %s, a different take each time" % [kind_s, want], takes.size() == 4 and again.is_empty(),
+				str(takes))
+	var ex: Dictionary = Breakables.spec("keg")["explosive"]
+	var keg := _fresh(m, "keg", spot)
+	var lit := _heard(func(): m.brk.hit(keg, m.player))
+	var own_fuse := lit.has(ex["fuse_sound"]) and not lit.has(ex["blast_sound"]) and not lit.has("fuse_hiss")
+	ok("a keg lit by a hit hisses its own fuse", own_fuse, str(lit))
+	var blew := _heard(func(): step(m, float(ex["fuse"]) + 0.05))
+	ok("...then blows with its own blast", blew.has(ex["blast_sound"]) and not blew.has("boom"), str(blew))
+	var chained := _fresh(m, "keg", spot)
+	_heard(func(): m.brk.hit(chained, m.player, true))
+	var voice: AudioStreamPlayer = Sfx.players[(Sfx.next - 1 + Sfx.players.size()) % Sfx.players.size()]
+	var faster := float(ex["fuse"]) / float(ex["chain_fuse"])
+	ok("a chain-lit keg's hiss plays faster to end on its fuse", absf(voice.pitch_scale / faster - 1.0) < 0.08,
+			"pitch %.2f for %.2f" % [voice.pitch_scale, faster])
+	step(m, float(ex["chain_fuse"]) + 0.1)
 
 func _bots(m: Match, spot: Vector3) -> void:
 	var b := _fresh(m, "keg", spot)

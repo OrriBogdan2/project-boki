@@ -121,13 +121,14 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss",
 	"axe_bite",
 	"trunk_creak",
 	"tree_down",
 	"pick_strike",
 	"rock_crack",
 	"rock_break",
+	"keg_fuse",
+	"keg_blast",
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -161,7 +162,8 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
-	"fuse_hiss": 80,
+	"keg_fuse": 80,
+	"keg_blast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
