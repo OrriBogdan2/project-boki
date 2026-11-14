@@ -245,6 +245,7 @@ const CHECKS := {
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
 	"--duel-sim": ["res://tools/duel_sim.gd", "duel_sim", null],      # 12x12 bot duels (docs/BALANCE_1111.md)
+	"--boss-focus-check": ["res://tools/boss_focus_check.gd", "boss_focus_check", null],      # decision 0061
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
 	"--dash-streak-check": ["res://tools/dash_streak_check.gd", "dash_streak_check", null],
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],

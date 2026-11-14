@@ -1139,6 +1139,7 @@ func lock_in(L: Dictionary) -> void:
 	L["locked"] = true
 	L["lock_at"] = m.time
 	L["sealed_in"] = ins
+	L["grudges"] = {}         # fighter -> {rival who hit them in here: true}
 	L["heard"] = {}
 	L["flown"] = []
 	L["escaped"] = []
@@ -1197,6 +1198,29 @@ func sealed_lair(h: Hunter) -> Dictionary:
 		if L.get("locked", false) and (L["sealed_in"] as Array).has(h):
 			return L
 	return {}
+
+## Is this hunter in a boss fight: sealed in a lair whose boss is still up? (The lair, or {}.)
+func boss_fight(h: Hunter) -> Dictionary:
+	var L := sealed_lair(h)
+	if L.is_empty() or L.get("victory", false):
+		return {}
+	var b := boss_of(L)
+	return L if b and not b.dead and not b.dormant else {}
+
+## In a boss fight the boss is the target (decision 0061): a bot (and its Boki) leaves alone a rival
+## sealed in with it until that rival lands a hit of their own on it (see _note_grudges).
+func spares(h: Hunter, o: Hunter) -> bool:
+	var L := boss_fight(h)
+	return not L.is_empty() and not (L["grudges"].get(h, {}) as Dictionary).has(o)
+
+## Match.on_damage: a rival sealed in with a fighter hits them, themselves (not their Boki, which picks
+## its own fights). Remembered for the rest of the fight (spares).
+func on_damage(target: Ent, by: Ent) -> void:
+	if not (target is Hunter and by is Hunter) or by.team == target.team:
+		return
+	var L := boss_fight(target)
+	if not L.is_empty() and (L["sealed_in"] as Array).has(by):
+		(L["grudges"].get_or_add(target, {}) as Dictionary)[by] = true
 
 ## Seconds until the seal fails on its own.
 func lock_left(L: Dictionary) -> float:

@@ -481,7 +481,8 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			dz = st; dd = 0.0
 	if dz == null:
 		for o in m.hunters:
-			if o.team == h.team or o.downed or o.out or not o.targetable() or (m.truce and m.truce.holds(h, o)):
+			if o.team == h.team or o.downed or o.out or not o.targetable() or (m.truce and m.truce.holds(h, o)) \
+					or (m.lairs and m.lairs.spares(h, o)):
 				continue
 			var d := h.flat_dist(o)
 			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
@@ -704,10 +705,11 @@ func _choose(m: Match, h: Hunter) -> void:
 	var best: Ent = null; var bs := -1e9
 	var ign: Dictionary = a.get("ignore", {})
 	var ign_e = ign.get("e") if m.time < float(ign.get("until", 0.0)) else null
+	var fight_boss: Boss = m.lairs.boss_of(m.lairs.boss_fight(h)) if m.lairs else null      # (sealed in with it)
 	var helping: Array = BotSquad.foes(m, h, a)       # rivals our squadmates are fighting (bot_squad.gd)
 	var called: Hunter = BotSquad.called(m, h, helping)
 	for o in m.hunters:
-		if o.team == h.team or not o.targetable() or o == ign_e:
+		if o.team == h.team or not o.targetable() or o == ign_e or (m.lairs and m.lairs.spares(h, o)):
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
@@ -744,6 +746,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			if mb is Boss and (mb as Boss).dormant: continue
 			var d := h.flat_dist(mb)
 			var reach := 16.0 if mb is Boss else 8.0
+			if mb == fight_boss: reach = 1e9      # (wherever it is in the lair, it's the fight)
 			if mb is Blight:
 				# the Blight: fight what's coming for us (a Warden's bolts reach further); hurt and
 				# with nothing to drink, step away instead (_blight_flee) unless it's right on us
@@ -753,11 +756,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			if d < reach and absf(mb.pos.y - h.pos.y) < 2.0 and m.world.los(h.pos, mb.pos, h.pos.y + 0.95):
 				var s := 10.0 - d + (TGT_KEEP if mb == a["tgt"] else 0.0)
 				if mb.tgt == h: s += 5.0
+				if mb == fight_boss: s += 20.0      # the boss over its adds
 				if s > bs: bs = s; best = mb
 	# finish off downed rivals before their kin or team picks them up
 	if best == null:
 		for o in m.hunters:
-			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
+			if o.team != h.team and o.downed and not o.out and not (m.lairs and m.lairs.spares(h, o)) and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
 				best = o; break
 	# angry wild kin also count (a calm one only when no knocked-out Boki is close enough to scan)
 	if best == null:

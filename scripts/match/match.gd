@@ -1716,6 +1716,7 @@ func add_feed(t: String) -> void:
 func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	# (damage a kin's owner shield soaked still counts as an attack)
 	if truce: truce.on_damage(target, by, d + float(o.get("soaked", 0.0)))
+	if lairs: lairs.on_damage(target, by)      # (a hit inside a boss fight: Bot leaves the hitter alone until then)
 	var tags: Array = o.get("tags", [])
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
