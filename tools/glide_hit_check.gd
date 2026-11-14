@@ -143,7 +143,7 @@ func _air_hits() -> Dictionary:
 	return {
 		"light (Kael LMB)": {"kb": float(kael["lmb"]["kb"])},
 		"heavy (Kael RMB)": {"kb": float(kael["rmb"]["slam"]["push"])},
-		"heavy (Crushing Blow)": {"kb": float(blow["smash_kb"][1])},
+		"heavy (Crushing Blow)": {"kb": float(blow["smash_kb"][1]), "stun": float(blow.get("smash_stun", 0.0))},
 		"stun": {"stun": STUN},
 	}
 

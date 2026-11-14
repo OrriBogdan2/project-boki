@@ -30,6 +30,9 @@ const SOURCE_ROWS := [
 	["juggernaut", "ground", "x", "cancel"], ["bulwark", "ground", "x", "cancel"], ["ashwick", "ground", "x", "cancel"],
 ]
 
+## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
+## and one the source can't settle ("Not determinable: <why>") runs the default.
+const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -344,6 +347,17 @@ func _combos(m: Match, hero: String, slot: String) -> void:
 		var kept := _hold(m, slot, move)
 		var hrow := _mode(hero, "hold", slot, move)
 		_judge(kept == hrow, kept, "%s hold %s through %s: %s (row: %s)" % [hero, slot, move, kept, hrow])
+		if hero in SOURCED_HOLDS:
+			_sourced_hold(hero, slot, move)
+
+## A hold row of a SOURCED_HOLDS hero names its source; one the source leaves open stays at the default.
+func _sourced_hold(hero: String, slot: String, move: String) -> void:
+	var row := DashFlow.hold_row_of(hero, slot, move)
+	var source := String(row["source"])
+	var unsettled := source.begins_with("Not determinable:")
+	var how: String = "not determinable, keep" if unsettled else row["mode"]
+	ok(source != "" and (not unsettled or row["mode"] == DashFlow.COMBINE["hold"]),
+			"%s hold %s through %s: sourced (%s)" % [hero, slot, move, how])
 
 ## A trial that couldn't be set up here ("n/a ...") is skipped, not judged.
 func _judge(right: bool, got: String, what: String) -> void:
