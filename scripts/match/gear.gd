@@ -54,6 +54,15 @@ static func empty_slots() -> Array:
 static func active(id: String) -> bool:
 	return float(ALL.get(id, {}).get("cd", 0.0)) > 0.0
 
+## A glove's cast sound. Its content "sfx": {"cast": name} names it (no "cast" there is silence: the effects
+## carry their own); a glove with no "sfx" plays the stock sound given, at the stock volume and pitch.
+static func cast_sfx(m: Node, id: String, at: Vector3, stock: String, vol: float, pitch: float) -> void:
+	var own = ALL.get(id, {}).get("sfx", null)
+	if own == null:
+		m.sfx(stock, at, vol, pitch)
+	else:
+		m.sfx(String(own.get("cast", "")), at)
+
 ## Which slot a piece goes in: its "slot" key, else gloves by cooldown (0 the active slot, 1 passive).
 static func slot_of(id: String) -> int:
 	var sn := String(ALL.get(id, {}).get("slot", ""))
