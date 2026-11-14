@@ -3052,15 +3052,6 @@ func _make_deco(kind_s: String, col: Color, size: float, rope: bool) -> Node3D:
 	add_child(n)
 	return n
 
-## Shots in flight drawn `alpha` of the way through a step (reels that step the match themselves call it too).
-func render_shots(alpha: float) -> void:
-	for s in shots:
-		if s.has("deco"):
-			_render_deco(s, alpha)
-		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		Oomph.place_shot(s, alpha)
-
 func _render_deco(s: Dictionary, alpha: float) -> void:
 	var n: Node3D = s["deco"]
 	if not is_instance_valid(n):
