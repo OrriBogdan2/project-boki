@@ -51,5 +51,5 @@ func run(main_node: Node) -> void:
 		shown = t
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("t%.1f.png" % t))
 		print("CHARGESHOT t=%.1f" % t)
-	m.over = true
+	m.flow.finish("check done")
 	main.get_tree().quit(0)

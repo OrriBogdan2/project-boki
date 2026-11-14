@@ -54,7 +54,9 @@ var time := 0.0
 var acc := 0.0
 var flyby := Flyby.new()     # rival shots passing close sound (see Flyby)
 var player: Hunter = null
-var over := false
+var flow := MatchFlow.new(self)     # the match phase, LOADING to OVER (see MatchFlow, 0061)
+var over: bool:                     # the results are due (tools stop a match with flow.finish)
+	get: return flow.is_over()
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
@@ -132,7 +134,6 @@ var ents_by_id := {}
 var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
-var _finish_now := false
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
@@ -3384,7 +3385,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.close_swap(); hud.close_pack()
 		get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed("menu") and not over and not result.get("ending", false) and not Overlay.is_open():
+	if event.is_action_pressed("menu") and flow.can_pause() and not Overlay.is_open():
 		Overlay.open_pause("match")
 	elif event.is_action_pressed("inventory") and hud and player and not player.out and not opts.get("training", false):
 		hud.toggle_pack()
@@ -3401,8 +3402,8 @@ func _on_menu_closed() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func step(dt: float) -> void:
-	if over:
-		return
+	if not flow.tick(dt):
+		return      # over: nothing moves
 	if skydrop and skydrop.planning:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
@@ -4894,7 +4895,7 @@ func _watch_death() -> void:
 		if n:
 			var soul: Node3D = n.get_node_or_null("Soul")
 			if soul: soul.visible = Life.soul_here(self, b)
-	if player == null or not player.out or result.get("ending", false) or over:
+	if player == null or not player.out or flow.ending():
 		return
 	if player.gone or not Life.team_alive(self, player.team):
 		var mate: Hunter = null
@@ -4914,23 +4915,21 @@ func spectating() -> Hunter:
 
 ## Leave while dead and waiting on your team.
 func give_up() -> void:
-	if player and player.out and not result.get("ending", false):
+	if player and player.out and not flow.ending():
 		Life.make_gone(self, player)
 		result = {"extracted": false, "why": String(player.get_meta("died_why", "knocked out"))}
 		_end_soon(0.5)
 
 func _end_soon(after: float) -> void:
-	if result.get("ending", false):
+	if not flow.end("decided"):
 		return
-	result["ending"] = true
 	if opts.get("sim_keep", false) and time < length:
 		return      # (the dev-only rolling session runs on to 30:00 after the player is done)
 	get_tree().create_timer(after).timeout.connect(_finish)
 
 func _finish() -> void:
-	if over:
+	if not flow.finish("results"):
 		return
-	over = true
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
