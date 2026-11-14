@@ -617,6 +617,9 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	# (her Shift, 12.5% longer since 11-11, can carry her past the rock by now: stand clear west of it first)
+	P.teleport(Vector3(bx - 1.0, home.y, home.z))
+	step(m, 0.05)
 	P.teleport(Vector3(bx + 0.5, home.y, home.z))
 	P.vel = Vector3.ZERO
 	P.inp["move"] = Vector2.ZERO
