@@ -73,6 +73,11 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 
 Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
 allies in his 1.5m ring as he leaves (32.6% of his health, 47 on 145, for 3s; see the data pass); none at the landing; the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
+allies beside him when he leaves or at the landing (26, 3s: the data's 375 shield as a share of a level-15 hunter's health,
+on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
+Source line for the burn (supervive_kits.md, Void, E Unstable Anomaly): "plant a bomb that grows over time; reactivate to
+detonate, 365 dmg @15 ... Upg: +10% x2 / -2s, 250 dmg/s DoT on overlap". The burn is 250/365 of the seed's damage a second;
+`burn` 8.2 stays (the data wins). `--ostra-combo-check` now reads that number from the data instead of a fixed 11 to 14.
 
 **Unfolded:** the kit pass had folded the source's Black Hole into Brimseed rank 3 (the pop dragging foes from 1.3x its radius
 to the middle). Now that Black Hole is Nightwell on R, the pull is gone from the pop; the burn stays, as it is the source's own

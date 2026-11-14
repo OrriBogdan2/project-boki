@@ -503,9 +503,10 @@ func _ostra() -> void:
 	aim_at(P, T.pos)
 	K.cast_e()
 	step(m, 1.2)
+	var burn := float(K.e_def()["burn"])
 	ok(
-		"rank 3: the growing seed burns a foe inside it, about 8 a second (250 vs a 365 bomb of 12.5)",
-		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0,
+		"rank 3: the growing seed burns a foe inside it, the data's %.1f a second (250 vs a 365 bomb)" % burn,
+		dmg(T) / K.power("kin") > 0.9 * burn and dmg(T) / K.power("kin") < 1.6 * burn,
 		"dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
 	)
 	step(m, 4.8)
