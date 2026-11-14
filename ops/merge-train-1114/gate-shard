@@ -223,7 +223,7 @@ N_RAN=$(wc -l < "$OUT/cand.txt") N_WANT=$(pick "$CT" | grep -c .)
 [ "$N_NEW" -gt 0 ] || [ "$EXPORT_BAD" -gt 0 ] || [ "$PE_C" -gt "$PE_M" ] || [ "$N_RAN" -ne "$N_WANT" ] && VERDICT=RED
 {
 	echo "GATE $VERDICT checks=$N_RAN new_red=$N_NEW fixed=$FIXED flaky=$FLAKY unrun=$(echo "$UNRUN" | grep -c .)" \
-		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
+		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD export_mb=$(grep -oP ' rc=0 \K[0-9]+(?= MB)' "$OUT/export.txt" | sort -n | tail -1) wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
 		"(cand ${CSHA:0:10} vs main ${MSHA:0:10}; jobs $SUBMITTED, main cached $CACHED)"
 	[ "$N_NEW" -gt 0 ] && echo "NEW-RED: $(echo $NEW_RED)"
 	[ -s "$OUT/not_confirmed.txt" ] && echo "Red twice but not confirmed (passed in a confirm run, or main failed every confirm run): $(echo $(cat "$OUT/not_confirmed.txt"))"
