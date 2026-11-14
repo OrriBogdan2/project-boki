@@ -371,7 +371,7 @@ func _redraw(hud) -> void:
 	await main.get_tree().process_frame
 
 ## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
-## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
+## DamageDir.hit) weights the left edge, and a second later the wash is even again.
 func _check_wash(P: Hunter) -> void:
 	var hud = P.m.hud
 	var hp_was := P.hp
@@ -383,16 +383,18 @@ func _check_wash(P: Hunter) -> void:
 	var low := HurtWash.strength(P)
 	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
 		% [int(HurtWash.BELOW * 100.0), high, low])
-	hud.hurt_dirs.clear()
-	ok(HurtWash.weight_at(hud.hurt_dirs, PI) == 0.0, "no recent hits: the wash is even all round")
-	hud.hurt_from(P.pos + Vector3(-6.0, 0.0, 0.0))
-	var left := HurtWash.weight_at(hud.hurt_dirs, PI)
-	var right := HurtWash.weight_at(hud.hurt_dirs, 0.0)
-	var top := HurtWash.weight_at(hud.hurt_dirs, -PI * 0.5)
+	var foe: Hunter = P.m.hunters.filter(func(x): return x.team != P.team)[0]
+	foe.pos = P.pos + Vector3(-6.0, 0.0, 0.0)
+	hud.dmg_dir.hits.clear()
+	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.dmg_dir.hit(P.m, foe, P, 30.0)
+	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
+	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
 	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
 	ok(left > 0.9 and right == 0.0 and top < left, said)
 	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
-	var eased := HurtWash.weight_at(hud.hurt_dirs, PI)
+	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
 	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
 	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
 	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
