@@ -6,6 +6,10 @@
 	"week_days_doc": "in-game days in a drift week; the cap below resets when a Boki's week ends.",
 	"week_cap": 0.12,
 	"week_cap_doc": "most a single trait may move (either way, summed) in one drift week, in trait units (0..1).",
+	"young_stages": ["Hatchling", "Youngling"],
+	"young_stages_doc": "Care.STAGES names (by level) that drift at the full step and week_cap; GARDEN.md 3 lever 3: a base of brave Boki makes a timid baby braver.",
+	"adult_share": 0.15,
+	"adult_share_doc": "share (0..1) of step and week_cap a Grown or Elder Boki gets, so adults barely move (0.15: at most 0.018 per trait per drift week).",
 	"bands": [0.33, 0.67],
 	"bands_doc": "trait values at which a trait changes band (low, middle, high); crossing one writes a journal line.",
 	"words": {

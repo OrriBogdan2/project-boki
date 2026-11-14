@@ -167,6 +167,10 @@ func _farm() -> void:
 	HomeClasses.open(h, Arch.of_save())
 	await _wait(1.2)
 	await _shot("hunter_pick")
+	for b in h.panel_host.find_children("*", "Button", true, false):      # (the fold of locked Relics, ExpFold)
+		if b.text.begins_with("Locked Relics"): b.pressed.emit()
+	await _wait(0.5)
+	await _shot("hunter_pick_all")
 	h._close_panel()
 
 func _first_match() -> void:

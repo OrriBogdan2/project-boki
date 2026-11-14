@@ -33,6 +33,13 @@ var shown := {}
 static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
+## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
+## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
+static func hidden(m: Match, h: Hunter) -> bool:
+	if m.player == null or h.team == m.player.team or h.downed or h.reveal_t > 0.0:
+		return false
+	return h.crouch or m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)
+
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:
 	now += dt
@@ -100,16 +107,17 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
-	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
-	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
-	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.stun_t > 0.0: out.append(["status_stunned", BodyTell.STUN_COL, "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
+	if KitStatus.grounded(e):
+		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["status_slowed", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
+	if e.burn_t > 0.0: out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
-	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
-	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
-	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
+	if hunter and hunter.weak_t > 0.0: out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.shield > 0.0: out.append(["status_shielded", Color("d8ecff"), "", -1.0])
+	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
 	return out
 
 ## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
@@ -154,7 +162,8 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
-	# the name, or what's being done to them (stunned, rooted ...) in its colour
+	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
+	# body (BodyTell, KitStatus), so no icon tiles beside the plate
 	var sts := statuses(h)
 	var word := ""
 	var word_col := Color("9ae8ff")
@@ -168,12 +177,10 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
-	if not sts.is_empty():
-		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:

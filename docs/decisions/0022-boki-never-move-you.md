@@ -20,7 +20,7 @@ Option 2. Moon Swap becomes Moon Mark. A carried Boki jumps off to do its own da
 form is the player's own commanded form, so its moves stay. Your own Boki's body no longer shoves you. On the
 Return order a Boki heavier than `follow.shoulder_max_mass` guards at your side: `guard_side_m` from you
 on the flank it holds, and it takes the other flank when that one is blocked. It never comes closer than
-`guard_min_m` and its feet are never below yours. While you glide or cross a gap it curls up on your back.
+`guard_min_m` and it stays on its own ground (your jumps do not lift it). While you glide or cross a gap it curls up on your back.
 Only the giant Fusion form is still ridden.
 
 ## Consequences

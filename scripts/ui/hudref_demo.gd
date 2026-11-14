@@ -4,7 +4,7 @@ extends RefCounted
 ## known states so before/after pictures line up. Match calls tick() every step while the option is on.
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
-##           cooling down. Everyone else stands still.
+##           cooling down, and a heal shield on you (the vitals' shield strip). Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
@@ -101,6 +101,8 @@ static func _plates(m, P: Hunter) -> void:
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
+	ShieldSrc.give(P, 40.0, ShieldSrc.HEAL)
+	P.shield_t = 30.0
 	if P.ak and P.ak.cd.has("e"): P.ak.cd["e"] = 6.4
 	if foes.size() < 5:
 		return

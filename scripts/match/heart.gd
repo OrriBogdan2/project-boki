@@ -7,7 +7,9 @@ extends RefCounted
 ##     holds there gate_hold_s, and every member of that squad within gate_take_r of the Gate leaves: MINOR.
 ##   - the final seat: at final_s (or at once, rush_k faster, when one squad is left) the Heart ring opens.
 ##     A squad holding it alone fills it (faster with more of them, Exits.crew_rate); a standing rival stalls
-##     it; an empty ring drains. Full: that squad's members in the ring leave, MAJOR, the islands fall soon.
+##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
+##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
+##     members in the ring leave, MAJOR, the islands fall soon.
 ##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
@@ -35,6 +37,7 @@ const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
 const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
+const HELD_SCALE := 0.45             # the Heartspark in a carrier's hand, against 0.9 floating over the head
 const NEAR_LABEL := 7.0
 const TIDE_STAGES := 11          # the source's death circle has stages 0-10; our one close is split into as many
 const RING_DY := 3.0                # metres above or below the Heart that still count as in the ring
@@ -77,19 +80,17 @@ static func tide_out(m: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; tide_r1 once the ring holds).
-static func next_r(m: Match) -> float:
+## tide starts, so the drop map shows it; tide_r1 once the ring holds). `ahead` 2: two such steps on (bots).
+static func next_r(m: Match, ahead := 1) -> float:
 	if m.heart == null:
 		return 0.0
-	return ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale)
+	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
 
-## Extra Skitter spawn heat per second for a squad out in the tide.
-static func tide_heat(m: Match, p: Vector3) -> float:
-	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+## (A squad out in the tide also stirs the nearest Blight nest on a clock: BlightNests._tide.)
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).
@@ -126,6 +127,7 @@ var early_team := -1           # the squad that took the early seat
 var final_team := -1           # the squad whose progress the Heart ring holds
 var final_prog := 0.0          # 0..1
 var rush := false              # one squad left: the final seat is open and faster
+var locked := false            # Heart Raid: no timer or last squad opens it, only HeartRaid (its boss down)
 var drops := 0
 var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
@@ -240,7 +242,7 @@ func tick(dt: float) -> void:
 
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
-	if state == S.ASLEEP and t >= r("wake_s"):
+	if state == S.ASLEEP and t >= r("wake_s") and not locked:
 		go(S.CHARGING, "wake")
 	if state == S.CHARGING:
 		charge += dt
@@ -250,14 +252,14 @@ func _host_tick(dt: float) -> void:
 			go(S.READY, "charged")
 	if carrier != null and (carrier.downed or carrier.out or carrier.extracted):
 		_drop(carrier.pos)
-	if t >= r("final_s") and state < S.FINAL:
+	if t >= r("final_s") and state < S.FINAL and not locked:
 		go(S.FINAL, "time")
 	if state == S.FINAL:
 		_ring_tick(dt)
 
 ## Only one squad is left (Match._check_last): the final seat opens for them at once, faster.
 func on_last_team() -> void:
-	if site == Vector3.INF or not host() or state == S.DONE:
+	if site == Vector3.INF or not host() or state == S.DONE or locked:
 		return
 	rush = true
 	if state != S.FINAL:
@@ -292,6 +294,10 @@ func _apply_carrier() -> void:
 		if on and bool(rules()["carrier_reveal"]):
 			h.reveal_t = maxf(h.reveal_t, 0.3)
 
+## Is h holding the Heartspark right now (what its model's carry layer reads)?
+static func carrying(h: Hunter) -> bool:
+	return float(h.get_meta("heart_slow", 0.0)) > 0.0 and not h.downed and not h.out and not h.extracted
+
 func carrier_pos() -> Vector3:
 	return carrier.pos if carrier else spark_pos
 
@@ -315,6 +321,9 @@ func _ring_crews() -> Dictionary:
 
 func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
+	if final_team >= 0 and not crews.has(final_team) and crews.size() == 1:
+		final_team = -1      # the holders are out of the ring or down: a squad standing in it alone takes it over
+		final_prog = 0.0
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
 		audio.call_out("start", "final", final_team)
@@ -430,7 +439,8 @@ func interact_for(h: Hunter) -> Dictionary:
 	var say := ""
 	match state:
 		S.ASLEEP:
-			say = "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
+			say = "The Heart sleeps until the raid's boss falls" if locked \
+				else "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
 		S.CHARGING:
 			say = "The Heartspark is charging  ·  %d%%  ·  everyone can see it" % int(charge / r("charge_s") * 100.0)
 		S.WAITING:
@@ -470,10 +480,12 @@ func act(what: String, h: Hunter) -> void:
 ## settles them at home).
 func pay(h: Hunter, how: String) -> Dictionary:
 	var rw: Dictionary = rules()["reward"]["major" if how == HOW_FINAL else "minor"]
+	if m.heart_raid:
+		rw = HeartRaid.reward()
 	var out := {"egg": {}, "goods": (rw["goods"] as Dictionary).duplicate(),
 		"seeds": (rw["seeds"] as Dictionary).duplicate(), "gems": int(rw["gems"]), "trust": float(rw["trust"])}
 	if bool(rw["egg"]):
-		var sp := _egg_species()
+		var sp: String = m.heart_raid.egg_species() if m.heart_raid else _egg_species()
 		out["egg"] = {"sp": sp, "boss": String(Data.KIN.get(sp, {}).get("boss", ""))}
 	for s in out["seeds"]:
 		h.seeds[s] = int(h.seeds.get(s, 0)) + int(out["seeds"][s])
@@ -550,9 +562,11 @@ func _build() -> void:
 	_root.add_child(h)
 	Models.part(h, Models.cyl(1.5, 1.7, 0.3, 14), Models.toon(Color("cfc6c8")), Vector3(0, 0.15, 0))
 	Models.part(h, Models.cyl(1.1, 1.25, 0.2, 14), Models.toon(Color("e6dde0")), Vector3(0, 0.4, 0))
-	var glass := Models.toon(GLASS, false, 0.45)
-	Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
-	Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
+	# the sculpted glass heart; without its model, a glass egg
+	if ItemArt.add(h, "heart", 0.5, Color.WHITE, 0.3) == null:
+		var glass := Models.toon(GLASS, false, 0.45)
+		Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
+		Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
 	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(COL, 0.1)), Vector3(0, 1.6, 0))
 	_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new()
@@ -593,8 +607,12 @@ func _update_nodes() -> void:
 	var lying := spark_live() and carrier == null
 	_spark.visible = state == S.CHARGING or spark_live()
 	if carrier:
-		_spark.position = carrier.pos + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
-		_spark.scale = Vector3.ONE * 0.9
+		var held := carrier.model != null and carrier.model.has_meta(WardenCarry.MOTE)
+		if held:
+			_spark.position = carrier.model.get_meta(WardenCarry.MOTE)      # (in the off hand)
+		else:
+			_spark.position = carrier.pos + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
+		_spark.scale = Vector3.ONE * (HELD_SCALE if held else 0.9)
 	else:
 		var sf := 1.0 if lying else clampf(0.15 + f * 0.85, 0.15, 1.0)
 		_spark.position = (spark_pos if lying else site) + Vector3(0, 2.7 + sin(t * 2.0) * 0.12, 0)
