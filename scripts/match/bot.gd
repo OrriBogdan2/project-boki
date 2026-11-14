@@ -311,9 +311,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			inp["aim_y"] = o.pos.y
 	else:
 		a.erase("rv")
-	var carry := BotRescue.carry_move(m, h)       # a Meeko bot with a wisp on her shoulder walks it out of the fight
-	if carry != Vector2.ZERO:
-		move = carry
 	# ---- don't walk off edges (except onto the jump pad we're heading for), and keep off other pads
 	var to_pad: bool = (a.has("pad_at") and h.flat_dist(a["pad_at"]) < 2.5) or (a.has("cross") and h.flat_dist(a["cross"]["take"]) < 2.5)
 	for pd in m.world.pads:
@@ -467,14 +464,14 @@ const RV_ON := 1.1            # stand this close (the revive ring is Life.R["rev
 func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 	var best: Hunter = null; var bs := 1e9
 	for o in m.hunters:
-		if o == h or o.team != h.team or not o.downed or o.out or o.extracted or not BotRescue.revive_ok(m, h, o):
+		if o == h or o.team != h.team or not o.downed or o.out or o.extracted:
 			continue
 		var d := h.flat_dist(o)
 		if d > RV_RANGE or m.world.is_void(o.pos.x, o.pos.z) or BotRing.must_run(m, o):
 			continue
 		var sc := d - (8.0 if o == m.player else 0.0)
 		if sc < bs: bs = sc; best = o
-	if best == null or BotRescue.gives_up(m, h):
+	if best == null:
 		return {}
 	var plan := {"o": best}
 	# who's a threat: a rival on the wisp (blocks the revive), or anything hostile right next to us
@@ -495,8 +492,6 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			var d := h.flat_dist(mb)
 			if d < RV_DANGER * 0.8 and d < dd and absf(mb.pos.y - h.pos.y) < 2.0 and mb.tgt == h:
 				dz = mb; dd = d
-	if dz == null:
-		dz = BotRescue.shooter(m, h)       # under fire: beat the shooter before walking into it
 	if dz:
 		plan["danger"] = dz
 	return plan
@@ -783,7 +778,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
-		if o != h and o.team == h.team and o.downed and not o.out and BotRescue.revive_ok(m, h, o):
+		if o != h and o.team == h.team and o.downed and not o.out:
 			goal = o.pos; gk = "revive"; break
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it

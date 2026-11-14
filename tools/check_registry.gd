@@ -292,7 +292,7 @@ const CHECKS := {
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
-	"--cursor-mode-check": ["res://tools/cursor_mode_check.gd", "cursor_mode_check", null],      # cursor confined in a fight, shown in menus
+	"--cursor-mode-check": ["res://tools/cursor_mode_check.gd", "cursor_mode_check", null],  # fight cursor
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--lace-1111-check": ["res://tools/lace_1111_check.gd", "lace_1111_check", null],      # Lace 11-11 notes
@@ -650,7 +650,6 @@ const CHECKS := {
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],  # shields never hide a Hunter
 	# the shell follows amount and time
 	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],
-	"--bot-downed-check": ["res://tools/bot_downed_check.gd", "bot_downed_check", null],      # bots revive, carry, finish (bot_rescue.gd)
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
