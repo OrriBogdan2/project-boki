@@ -155,11 +155,14 @@ static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 		return {}
 	var before := form_name(rec)
 	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
-	rec["was"].append(String(rec["species"]))
+	var from_id := String(rec["species"])
+	rec["was"].append(from_id)
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	rec.erase("wait_told")
+	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item,
+		"from_id": from_id, "to_id": to, "lv": int(rec.get("level", 1))}
 	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
 	if part != "":
 		ev["lean_part"] = part
@@ -176,6 +179,11 @@ static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
 	if not has_art(to):
 		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
 	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
+
+## The species a Boki is ready to become by level but can't yet because its art isn't in the game; "" if none.
+static func waiting(rec: Dictionary) -> String:
+	var to := next_for(rec, "level")
+	return to if to != "" and not has_art(to) else ""
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:

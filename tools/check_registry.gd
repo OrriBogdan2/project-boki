@@ -357,6 +357,8 @@ const CHECKS := {
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],
 	# a Boki taking a hit, strips
 	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
@@ -696,6 +698,16 @@ const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
 	# mashing LMB never beats holding
+	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
+	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
+	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
+	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
+	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
+	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
+	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
+	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
+	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
+	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
