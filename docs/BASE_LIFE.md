@@ -6,7 +6,7 @@ check: `--base-life-check`.
 
 - One explicit machine per farm Boki (`Fsm`, briefs/STATE_MACHINES.md), kept on the kin entry as `k["life"]`:
   Roam, Eat, Nap, Play (a toy), PlayWith (tag with another Boki), Watch (a rival, or whoever took its toy),
-  React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
+  React (a newcomer), Greet (you arrived). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
 - home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
@@ -25,6 +25,12 @@ check: `--base-life-check`.
   open ground, so Bramblebank's per-save island keeps its spots. Claims live on the runtime Boki (`life_spot`),
   nothing is saved. Checks: `--base-life-check` (walk, beside, a third spot), `--garden-zones-check` (spots on
   open ground in each built zone).
+- Greeting you (`scripts/home/base_greet.gd`, base_life.json `greet`): when you arrive in a zone (the teleporter,
+  or KinWelcome's long absence handed over in base_mode), every awake, free Boki within `radius_m` m enters the
+  Greet state once, the most trusting first (`notice_s` + `stagger_s` each). Close (trust 50+) or Soulbound runs to
+  you at the whistle's run speed and hops; sulky (the whistle's `sulky_joy`) turns its back and walks off; shy (the
+  whistle's `shy_trust`) peeks and waves; Friendly runs with chance cling x `cling_run`, else peeks. Napping Boki
+  sleep on, and the player is never held. Checked in `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
