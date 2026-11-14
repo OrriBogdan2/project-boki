@@ -131,6 +131,7 @@ var hit_from := Vector2.ZERO   # which way the last hit pushed
 var stagger_t := 0.0           # staggered by a big hit (Oomph)
 var extracted := false
 var extract_prog := 0.0
+var dash_glide := DashGlide.new()      # an air dash's exit eases out, and Shift hands over to the glider
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
 ## "" or one of HOLD_KINDS. Set every tick by whatever the hold works on; it lapses when not refreshed.
 const HOLD_KINDS := ["scan", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
@@ -188,7 +189,6 @@ var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed int
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
-var dash_glide := DashGlide.new()      # an air dash's exit eases out, and Shift hands over to the glider
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
 var wslam_t := 0.0
