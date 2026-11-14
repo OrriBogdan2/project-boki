@@ -222,6 +222,8 @@ def step_inflight(gh, st):
         log("merged", n, f"{wait:.0f} min after GATE GREEN, {(parse_iso(p['merged_at']) - f['main_time']) / 60:.0f} min after main moved")
     elif p["state"] != "open" or p["head"]["sha"] != f["new"]:
         log("released", n, f"PR {p['state']}, head {p['head']['sha'][:10]}")
+    elif git("fetch", "-q", "origin", "main") is not None and not is_ancestor("origin/main", f["new"]):
+        log("released", n, "main moved past the new gate before merge-ready-watch took it: re-queued as stale")
     elif wait > MERGE_WAIT_MIN:
         log("not-merged", n, f"GATE GREEN posted {wait:.0f} min ago, merge-ready-watch has not merged it; moving on")
     else:
