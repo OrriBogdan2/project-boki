@@ -1967,7 +1967,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var b: Kin = p.kin2
 			if b == null: return []
 			out.append(["Swap to %s" % b.rec.get("name", "your other Boki"), Data.KIN[b.species]["color"]])
-			out.append(["Second Boki  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
+			out.append(["Second Boki  ·  %s  ·  carry passive on too" % Settings.key_cap("swap_kin"), MUTED, 12])
 			var names := []
 			for sl in ["k1", "k2"]:
 				var bd: AbilitySpec = b.runner.def_of(sl)

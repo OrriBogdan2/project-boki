@@ -98,6 +98,52 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
+const SECOND_SIZE := 26.0       # px: the second Boki's badge above the Boki box's top-left corner
+const SECOND_OUT := Vector2(-16.0, -24.0)  # px: where its top-left sits relative to the box's (clear of the box's tags)
+const LEAD_MARK := 0.17         # the lead's type badge on a locked or fused box, as a fraction of the box
+const SECOND_RING := 3.0        # px: the swap cooldown ring sits this far outside the badge
+const PASSIVE_ICON := {         # owner stat of a carry passive -> its Icons id
+	"move_speed": "dash", "extra_jumps": "jump", "air_dashes": "dash", "dodge_charges": "dash", "dodge_regen": "dash",
+	"glide": "updraft", "armor": "fortify", "damage_reduction": "bulwark", "knockback_resist": "anvil",
+	"regen": "heart", "damage": "burst", "fire_rate": "smg", "reload": "rifle", "reveal_radius": "pulse",
+	"cooldown": "clock"}
+
+## The lead Boki on the Boki box: its type badge above the padlock while the Merge is locked or running (the open box
+## already is the badge), and its summon ring round the box: the recall cooldown filling back up, then a full ring in
+## the Boki's colour while it can go out (no ring while it is fused, resting or down: the box says so).
+static func lead_ring(H, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k):
+		return
+	if int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p):
+		var at := r.get_center() + Vector2(0, -r.size.y * 0.24)
+		DexView.draw_type(H.c, DexView.type_of(k.species), at, r.size.y * LEAD_MARK)
+	if KinMerge.active(p) or not k.ready_to_fight():
+		return
+	var cd := float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
+	_ring(H, r.grow(RING_GROW + 3.0), 1.0 - clampf(k.throw_cd / cd, 0.0, 1.0), Color(k.sp["color"], 0.9), 3.0)
+
+## The second Boki as a small badge on the Boki box's corner: its first carry passive's icon, the swap key's cap, a ring
+## for the swap cooldown. Hover says what swapping brings out (hud id "swap").
+static func second_badge(H, p: Hunter, r: Rect2) -> void:
+	var b: Kin = p.kin2
+	if b == null or not is_instance_valid(b) or b.dead:
+		return
+	var br := Rect2(r.position + SECOND_OUT, Vector2(SECOND_SIZE, SECOND_SIZE))
+	var cd := float(Content.rules("kin_ai").get("swap_cooldown", 3.0))
+	var passives: Array = b.ks.carry_passives if b.ks else []
+	var icon: String = PASSIVE_ICON.get(String(passives[0]["stat"]), "bond") if not passives.is_empty() else "bond"
+	var col: Color = b.sp["color"]
+	var ready := p.swap_cd <= 0.0 and b.hp > 0.0
+	H._ab_slot("swap", br, icon, Settings.key_cap("swap_kin"), col, p.swap_cd / cd, p.swap_cd, ready)
+	var ctr := br.get_center()
+	var rr := SECOND_SIZE * 0.5 + SECOND_RING
+	H.c.draw_arc(ctr, rr, 0.0, TAU, 28, Color(1, 1, 1, 0.1), 2.0, true)
+	var left := 1.0 - clampf(p.swap_cd / cd, 0.0, 1.0)
+	H.c.draw_arc(ctr, rr, -PI / 2, -PI / 2 + TAU * left, 28, Color(col, 0.9), 2.0, true)
+	if b.hp <= 0.0:
+		H._ctext(Vector2(ctr.x, br.position.y - SECOND_RING - 5.0), "DOWN", 8, DOWN_COL, H.big)
+
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if frac <= 0.0:
@@ -198,6 +244,21 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
+	return slots_strip(H, p, x + 42.0, y, s)
+
+## The carry-out slot (claimed Boki riding home, plus a stolen one). Returns the x where the next badge starts.
+static func slots_strip(H, p: Hunter, x: float, y: float, s: float) -> float:
+	var orr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
+	var full := not Capture.room(p)
+	H._rounded(orr, Color(0.05, 0.06, 0.09, 0.7), 8)
+	var st := Capture.stolen_count(p)
+	var paw := Color("ffb0d0") if p.caught.size() > st else Color(H.INK, 0.35)
+	Icons.draw(H.c, "paw", orr.get_center() + Vector2(0, -3), 8.0, paw)
+	H._ctext(orr.get_center() + Vector2(0, 13), "%d/%d" % [p.caught.size() - st, Capture.box_cap()], 9,
+		Color("ffb08a") if full else Color(H.INK, 0.8), H.big)
+	if st > 0:
+		H._ctext(Vector2(orr.get_center().x, orr.position.y - 17.0), "+%d STOLEN" % st, 8, Color("ffd23f"), H.big)
+	H._ctext(Vector2(orr.get_center().x, orr.position.y - 5.0), "CARRY-OUT", 8, Color(H.INK, 0.9), H.big)
 	return x + 42.0
 
 ## The flick wheel, drawn round where the mouse was when you started holding G. Four wedges with a label and a

@@ -8,9 +8,10 @@ extends RefCounted
 ##   - while it runs you are rooted and can aim but not shoot. Space or a dash cancels it. Crowd control
 ##     on you (stun, root, a knockback, Grounded, a hex, a grapple) interrupts it; plain damage does not.
 ##     The Boki's daze timer waits (Kin.scan_by) and picks up again if you are interrupted, so you can retry.
-##   - success puts a capsule in your box (Hunter.caught, capacity in content/rules/capture.json); a full box
-##     blocks the scan. The capsule stays in the box for the match: it never follows you, fights, or joins
-##     your Boki (one active Boki per hunter). It spills into your deathbox like the rest and comes home when
+##   - success puts a capsule in your carry-out slot (Hunter.caught: carry_out slots for claims, stolen slots for
+##     other hunters' Boki, wisp_cap in all, content/rules/capture.json); a full slot blocks the scan. The
+##     capsule stays in the box for the match: it never follows you, fights, or joins your Boki (no passive, no
+##     summon). It spills into your deathbox like the rest and comes home when
 ##     you extract.
 ##   - the beam (in the scanner's ability colour) and the hum are in the world: rivals see and hear it
 ##     (Match.note_sound), and other players
@@ -27,18 +28,60 @@ const FIZZLE_COL := Color("c9c2b8")     # the dull grey of a scan that was inter
 static func rules() -> Dictionary:
 	return Content.rules("capture")
 
+## The carry-out slots (Boki claimed in the match), from content/rules/capture.json.
 static func box_cap() -> int:
-	return int(rules()["box_capacity"])
+	return int(rules()["carry_out"])
 
-## Is there a place left in the box?
-static func room(h: Hunter) -> bool:
-	return h.caught.size() < box_cap()
+## Someone else's own Boki (a lost or stolen one): it takes a stolen slot, not a carry-out slot.
+static func is_stolen(h: Hunter, rec: Dictionary) -> bool:
+	var lf := String(rec.get("lost_from", ""))
+	return lf != "" and lf != h.pname and not (lf == "you" and h == h.m.player)
 
-## "Box full" for the local player (the capsule stays where it was: a deathbox, the ground).
-static func full_note(m, h: Hunter) -> void:
+static func stolen_count(h: Hunter) -> int:
+	return h.caught.filter(func(r): return is_stolen(h, r)).size()
+
+## Every Boki the hunter holds: lead, second, carry-out and stolen (capped at wisp_cap).
+static func wisps(h: Hunter) -> int:
+	var own := [h.kin, h.kin2].filter(func(k): return k != null and is_instance_valid(k) and not k.dead).size()
+	return own + h.caught.size()
+
+## Is there a slot left for this Boki (a wild claim when `rec` is empty)?
+static func room(h: Hunter, rec := {}) -> bool:
+	if wisps(h) >= int(rules()["wisp_cap"]):
+		return false
+	if is_stolen(h, rec):
+		return stolen_count(h) < int(rules()["stolen"])
+	return h.caught.size() - stolen_count(h) < box_cap()
+
+## The nearest teammate still in the match with a slot for this Boki, or null.
+static func mate_with_room(m, h: Hunter, rec := {}) -> Hunter:
+	var best: Hunter = null
+	for o in m.hunters:
+		if o != h and o.team == h.team and not o.out and not o.extracted and room(o, rec) \
+				and (best == null or h.flat_dist(o) < h.flat_dist(best)):
+			best = o
+	return best
+
+## "Full" for the local player (the Boki stays where it was: a deathbox, the ground); the kin points
+## out a teammate with room.
+static func full_note(m, h: Hunter, rec := {}) -> void:
 	if h.is_local() and m.hud and m.time - float(h.get_meta("cap_full_msg", -9.0)) > 1.5:
 		h.set_meta("cap_full_msg", m.time)
-		m.hud.toast("Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()], Color("ffb0a0"))
+		m.hud.toast(full_text(m, h, rec), Color("ffb0a0"))
+		var mate := mate_with_room(m, h, rec)
+		if mate:
+			m.ping(mate.pos, Color("8fe3c8"))
+
+static func full_text(m, h: Hunter, rec := {}) -> String:
+	var mate := mate_with_room(m, h, rec)
+	var slot := "Stolen slot" if is_stolen(h, rec) else "Carry-out"
+	return "%s full: %s" % [slot, ("%s has room" % mate.pname) if mate else "release a capsule first"]
+
+## The feed line for a capsule that just joined the hunter.
+static func caught_line(h: Hunter, rec: Dictionary) -> String:
+	var nm: String = Data.KIN.get(String(rec.get("species", "")), {}).get("name", "A Boki")
+	var slot := "stolen slot" if is_stolen(h, rec) else "carry-out slot"
+	return "%s rides in your %s. Extract to bring it home." % [nm, slot]
 
 ## The colour of a scanner's beam and pop: their Hunter's ability colour (DECISIONS 2026-11-08).
 static func beam_col(h: Hunter) -> Color:
@@ -68,8 +111,9 @@ static func block_reason(h: Hunter, k: Kin) -> String:
 		return "That Boki is on your side"
 	if KinLoss.cradled(k):
 		return "Its owner is picking it up"
-	if h.caught.size() >= box_cap():
-		return "Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()]
+	var probe := {"lost_from": k.lost_from}
+	if not room(h, probe):
+		return full_text(h.m, h, probe)
 	return ""
 
 # ------------------------------------------------------------------ the hold (the interact handler calls this each step)
