@@ -649,6 +649,7 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],  # docs/decisions/0018
 	"--stomp-cc-check": ["res://tools/stomp_cc_check.gd", "stomp_cc_check", null],      # every KIT_PARITY hard CC
 	"--stomp-film": ["res://tools/stomp_film.gd", "stomp_film", null],      # GPU, --shots-dir=
+	"--stomp-shots": ["res://tools/stomp_shots.gd", "stomp_shots", null],      # GPU: every Hunter's stomp, one beat
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],  # --shots-dir=<dir> [--seed=N]
 	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],

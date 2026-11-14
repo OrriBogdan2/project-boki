@@ -79,6 +79,10 @@ static func _up(beat: float) -> float:
 static func legs(st: Dictionary, beat: float) -> Vector4:
 	var up := _up(beat)
 	var crouch := float(st["crouch"])
+	if st["foot"] == "none":
+		# both feet stay down (a weapon or the hands strike): the knees give on each hit
+		var give := crouch * (1.0 - up)
+		return Vector4(0.1 + give * 0.6, -0.2 - give * 0.9, 0.1 + give * 0.6, -0.2 - give * 0.9)
 	if st["foot"] == "both":
 		var hip := 0.5 * float(st["lift"]) * up + crouch * 0.6 + 0.1
 		var knee := 0.6 * float(st["knee"]) * up - 0.2 - crouch * 0.9
@@ -92,11 +96,61 @@ static func legs(st: Dictionary, beat: float) -> Vector4:
 		return Vector4(stand_hip, stand_knee, lift_hip, lift_knee)
 	return Vector4(lift_hip, lift_knee, stand_hip, stand_knee)
 
-## The body: Vector3(forward lean, shoulder turn, rise in metres).
+## The body: Vector3(forward lean, shoulder turn, rise in metres). lean_up is the lean at the top of the
+## lift (a weapon raised overhead arches the back); without it the lean holds.
 static func body(st: Dictionary, beat: float) -> Vector3:
 	var up := _up(beat)
 	var crouch := float(st["crouch"])
-	return Vector3(float(st["lean"]) + crouch * 0.1, float(st["twist"]) * up, float(st["hop"]) * up - crouch * 0.12)
+	var lean := lerpf(float(st["lean"]), float(st.get("lean_up", st["lean"])), up)
+	return Vector3(lean + crouch * 0.1, float(st["twist"]) * up, float(st["hop"]) * up - crouch * 0.12)
+
+## How far a swung weapon is up at a beat phase (0..1): a slow wind-up to the top, then a fast drop that
+## lands on Stomp.SLAM, the same frame the feet land.
+static func _swing_up(beat: float) -> float:
+	var ph := fposmod(beat, 1.0)
+	var top := Stomp.SLAM * 0.65
+	if ph < top:
+		return sin(ph / top * PI * 0.5)
+	return cos((ph - top) / (Stomp.SLAM - top) * PI * 0.5) if ph < Stomp.SLAM else 0.0
+
+## The weapon in the Aim node's space (forward -Z) for a style with "swing" (pitch at the top and at the
+## hit, a yaw, the grip's reach from the chest, "two": both hands on it); null when the style has none.
+static func weapon(st: Dictionary, beat: float) -> Variant:
+	if not st.has("swing"):
+		return null
+	var sw: Dictionary = st["swing"]
+	var pitch := lerpf(float(sw["hit"]), float(sw["top"]), _swing_up(beat))
+	var rot := Basis.from_euler(Vector3(pitch, float(sw.get("yaw", 0.0)), 0.0))
+	return Transform3D(rot, Vector3(0.1, -0.06, 0.0) + rot * Vector3(0, 0, -float(sw.get("reach", 0.35))))
+
+## A 3D model's skinned weapon rides its hand bone (WardenGlb Sync puts the Gun back on the blade you see), so it
+## points where the forearm does. Its blade's line in the rig hand's own space, read off last frame's hand and Gun
+## (a constant of the model, whatever the wrist did); Vector3.ZERO when there is nothing to read.
+static func blade_in_hand(arm: Node3D, elbow: Node3D, hand: Node3D, aim: Node3D, gun: Node3D) -> Vector3:
+	if gun == null or hand == null or arm == null or elbow == null:
+		return Vector3.ZERO
+	var hand_b := (arm.basis * elbow.basis * hand.basis).orthonormalized()
+	var gun_b := (aim.basis * gun.basis).orthonormalized()
+	return (hand_b.inverse() * gun_b * Vector3.FORWARD).normalized()
+
+## The wrist turn (the rig hand's basis under its elbow) that lays that blade along a swung weapon's line
+## (StompLook.weapon, in the Aim's space), blended by k; identity for no swing.
+static func wrist(blade: Vector3, arm: Node3D, elbow: Node3D, aim: Node3D, want: Basis, k: float) -> Basis:
+	if blade == Vector3.ZERO or k <= 0.0:
+		return Basis.IDENTITY
+	var chain := (arm.basis * elbow.basis).orthonormalized()
+	var line := (chain.inverse() * aim.basis.orthonormalized() * want * Vector3.FORWARD).normalized()
+	return Basis(Quaternion.IDENTITY.slerp(Quaternion(blade, line), k))
+
+## Whether the left hand also grips a swung weapon (just behind the right hand on the haft).
+static func two_hands(st: Dictionary) -> bool:
+	return bool((st.get("swing", {}) as Dictionary).get("two", false))
+
+## Where in its beat a stomp strikes (0 on the hit, 1 at the top): the most of the feet, the body and a
+## swung weapon. Every style is 0 on the same frames (Stomp.SLAM in each beat): the sounds and the hits
+## stay in sync whatever the look.
+static func strike(st: Dictionary, beat: float) -> float:
+	return maxf(_up(beat), _swing_up(beat) if st.has("swing") else 0.0)
 
 ## Whether a style needs both hands (the weapon is put away for it).
 static func two_handed(st: Dictionary) -> bool:
@@ -112,6 +166,7 @@ static func hand(st: Dictionary, beat: float, sh: Vector3, side: float) -> Vecto
 		"up": off = Vector3(-0.1, -0.3, -0.3).lerp(Vector3(-0.05, 0.42, -0.1), up)
 		"fists": off = Vector3(-0.12, -0.6, -0.4).lerp(Vector3(-0.1, 0.1, -0.25), up)
 		"hips": off = Vector3(-0.14, -0.42, 0.06)
+		"cast": off = Vector3(-0.24, -0.5, -0.45).lerp(Vector3(-0.28, 0.32, -0.1), up)
 	if off == Vector3.INF:
 		return off
 	return sh + Vector3(off.x * -side, off.y, off.z)
