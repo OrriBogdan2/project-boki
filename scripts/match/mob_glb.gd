@@ -10,19 +10,21 @@ extends Node
 const PATH := "res://art/mobs/%s/%s.glb"
 ## Primitive parts that stay drawn over the model, per kind: lights the model's paint can't give.
 const KEEP := {"bomber": ["Spark"], "sentinel": ["Shards"]}
-const BAND_WIDTH := 0.05      # half-width of the repainted hue band (fraction of the colour wheel)
-const BAND_MIN_SAT := 0.3     # greys, bone whites and cream bellies below this saturation keep their paint
-const BAND_MIN_VAL := 0.55    # parts darker than this share of the body's brightness (spines, fists) keep theirs
+const BAND_WIDTH := 0.05  # half-width of the repainted hue band (fraction of the colour wheel)
+const BAND_MIN_SAT := 0.3  # greys, bone whites and cream bellies below this saturation keep their paint
+const BAND_MIN_VAL := 0.55  # parts darker than this share of the body's brightness (spines, fists) keep theirs
 
 static var _scenes := {}
 
 var _skel: Skeleton3D
 var _body: Node3D
-var _links: Array = []        # [bone, pivot, pivot rest in Body space (inverse), bone global rest]
-var _skel_rel: Transform3D    # the skeleton in Body space
+var _links: Array = []  # [bone, pivot, pivot rest in Body space (inverse), bone global rest]
+var _skel_rel: Transform3D  # the skeleton in Body space
+
 
 static func has(kind: String) -> bool:
 	return ResourceLoader.exists(PATH % [kind, kind])
+
 
 ## Swaps a MobModels body for the kind's model, if it has one. Call after the primitives are built and merged.
 static func dress(root: Node3D, kind: String) -> void:
@@ -43,6 +45,7 @@ static func dress(root: Node3D, kind: String) -> void:
 	f._add_pivots(skel)
 	f._link(body, skel)
 
+
 static func _hide_primitives(body: Node3D, keep: Array) -> void:
 	var stack: Array = [body]
 	while not stack.is_empty():
@@ -53,6 +56,7 @@ static func _hide_primitives(body: Node3D, keep: Array) -> void:
 			(n as MeshInstance3D).visible = false
 		for ch in n.get_children():
 			stack.append(ch)
+
 
 ## One toon material for the whole model: its texture, the body hue band repainted to the region's colour
 ## (the Blight keep their own ash and ember paint everywhere).
@@ -79,6 +83,7 @@ static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
 			m.set_shader_parameter("albedo_tex", src.albedo_texture)
 		(mi as MeshInstance3D).material_override = m
 	return m
+
 
 ## A bare pivot (Node3D, no turn) at the rest of each bone that has none, nested as the bones are; the root bone
 ## named like the body is the body itself.
@@ -107,6 +112,7 @@ func _link(body: Node3D, skel: Skeleton3D) -> void:
 		if pv and not pv is MeshInstance3D:
 			_links.append([bi, pv, _rel(pv).affine_inverse(), skel.get_bone_global_rest(bi)])
 
+
 ## n's transform in Body space (the model may not be in the tree yet).
 func _rel(n: Node3D) -> Transform3D:
 	var xf := Transform3D.IDENTITY
@@ -114,6 +120,7 @@ func _rel(n: Node3D) -> Transform3D:
 		xf = n.transform * xf
 		n = n.get_parent() as Node3D
 	return xf
+
 
 func _process(_delta: float) -> void:
 	if not _body.is_visible_in_tree():

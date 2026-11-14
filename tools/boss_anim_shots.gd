@@ -6,17 +6,18 @@ extends RefCounted
 ## --reel-frames also saves every other drawn frame, cropped round the boss at the match camera, as
 ## <dir>/reel_<id>/NNNNN.jpg, for a clip made off the box: ffmpeg -framerate 30 -i <dir>/reel_<id>/%05d.jpg ...
 
-const CROP := 460                       # px, the square round the boss
-const SETTLE_S := 1.0                   # s the camera gets to settle
-const FOE_AWAY := 5.0                   # m the player stands from the boss
-const REEL := Vector2i(960, 640)        # px, each --reel-frames frame round the boss
+const CROP := 460  # px, the square round the boss
+const SETTLE_S := 1.0  # s the camera gets to settle
+const FOE_AWAY := 5.0  # m the player stands from the boss
+const REEL := Vector2i(960, 640)  # px, each --reel-frames frame round the boss
 
 var main: Node
 var m: Match
-var reel := false                       # --reel-frames
-var reel_dir := ""                      # where the boss being filmed has its frames
+var reel := false  # --reel-frames
+var reel_dir := ""  # where the boss being filmed has its frames
 var reel_b: Boss
 var reel_n := 0
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -44,7 +45,8 @@ func run(mn: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	for o in m.hunters:
-		if o != m.player: o.ctrl = "idle"
+		if o != m.player:
+			o.ctrl = "idle"
 	m.hud.visible = false
 	for id in Data.BOSSES:
 		if only == "" or only == id:
@@ -52,9 +54,11 @@ func run(mn: Node) -> void:
 	print("BOSSANIMSHOT DONE")
 	main.get_tree().quit()
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await _tick()
+
 
 ## One frame; with --reel-frames every other one is kept, round the boss.
 func _tick() -> void:
@@ -68,6 +72,7 @@ func _tick() -> void:
 	var y := clampi(c.y - REEL.y / 2, 0, maxi(0, img.get_height() - REEL.y))
 	img.get_region(Rect2i(x, y, REEL.x, REEL.y)).save_jpg(reel_dir.path_join("%05d.jpg" % (reel_n / 2)), 0.9)
 
+
 ## Waits until `secs` after `t0` on match time, then crops the boss out of the screen into column `col` of row `row`.
 func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) -> void:
 	while m.time - t0 < secs:
@@ -80,15 +85,21 @@ func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) ->
 	var y := clampi(c.y - CROP / 2, 0, img.get_height() - CROP)
 	strip.blit_rect(img, Rect2i(x, y, CROP, CROP), Vector2i(col * CROP, row * CROP))
 
+
 ## A move to film: its times in seconds from the trigger, or (negative) fractions of the hit.
 func _times(b: Boss, row_name: String) -> Array:
 	match row_name:
-		"wake": return [0.0, 0.3, 0.6, 0.9, 1.2, 1.5]
-		"stagger": return [0.1, 0.5, 0.9, 1.3, 1.7]
-		"phase": return [0.05, 0.25, 0.6, 1.0, 1.6, 2.2]
-		"death": return [0.1, 0.3, 0.5, 0.75, 1.0, 1.3]
+		"wake":
+			return [0.0, 0.3, 0.6, 0.9, 1.2, 1.5]
+		"stagger":
+			return [0.1, 0.5, 0.9, 1.3, 1.7]
+		"phase":
+			return [0.05, 0.25, 0.6, 1.0, 1.6, 2.2]
+		"death":
+			return [0.1, 0.3, 0.5, 0.75, 1.0, 1.3]
 	var h := BossAnim.hit_t(b)
 	return [h * 0.25, h * 0.5, h * 0.8, h, h + 0.15, h + 0.4]
+
 
 func _trigger(b: Boss, row_name: String) -> void:
 	b.next_cd = 1e9
@@ -103,6 +114,7 @@ func _trigger(b: Boss, row_name: String) -> void:
 			b.hurt(b.hp + b.max_hp, m.player, {"src": "shot"})
 		_:
 			b.call("_atk_" + row_name)
+
 
 func _boss(dir: String, id: String) -> void:
 	var L: Dictionary = m.lairs.list.filter(func(x): return x["boss"] == id)[0]
