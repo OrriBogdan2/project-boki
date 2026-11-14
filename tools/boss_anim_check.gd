@@ -3,25 +3,31 @@ extends RefCounted
 ## wind-up and strike has tracks that name real pivots, really move, loop cleanly and meet without a pop. Live: each
 ## attack's blow lands on the frame its ground tell fills, the wind-up move is the same fraction as the tell and
 ## ends exactly there, each state picks its own move, a posed pivot sits on its key, and the death move is over
-## before the body is gone.
+## before the body is gone. Each lair holds its legendary Boki, drawn from its skinned model: every pivot the moves pose
+## drives a bone, inside the triangle budget.
 ## Never touches the save.
 
-const MIN_MOVE := 0.02        # rad / m / scale: a move whose largest track moves less than this is static
-const MIN_WINDUP := 0.3       # rad / m: a wind-up must swing at least this much to read at the match camera
-const MEET := 0.05            # the wind-up's last pose and the strike's first may differ by at most this
-const SLACK_S := 0.02         # s: how close the blow and the tell's end must be
+const MIN_MOVE := 0.02  # rad / m / scale: a move whose largest track moves less than this is static
+const MIN_WINDUP := 0.3  # rad / m: a wind-up must swing at least this much to read at the match camera
+const MEET := 0.05  # the wind-up's last pose and the strike's first may differ by at most this
+const SLACK_S := 0.02  # s: how close the blow and the tell's end must be
 const LOOPS := ["sleep", "idle", "walk", "stagger"]
 ## attacks whose first ground tell ends on the blow (the others throw or hatch, so their tell ends later)
 const GROUND_TELL := ["slam", "fissure", "dash", "storm", "static", "spit", "burrow"]
-const PERF_MS := 0.5          # ms: posing the three bosses in a frame
+const PERF_MS := 0.5  # ms: posing the three bosses in a frame
 const PERF_FRAMES := 300
 const DT := 1.0 / 60.0
+const LEGENDARY_TRIS := 9000  # per lair boss model: one draw call (the primitive bodies were 5-12k in many)
+const MODEL_ONLY := ["LegFL", "LegBR", "LegFR", "LegBL"]  # Siegephant's legs: the primitive Colossus walks on its clip
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BOSSANIM %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -46,10 +52,12 @@ func run(main: Node) -> void:
 			_attack(b, atk, false)
 			_attack(b, atk, true)
 		_posed(b)
+		_legendary(b)
 	_perf(bosses)
 	m.queue_free()
 	print("BOSSANIM DONE, failures: %d" % bad)
 	main.get_tree().quit(mini(bad, 1))
+
 
 func _moves_of(kind: String) -> Array:
 	var out: Array = BossAnim.STATES.duplicate()
@@ -57,6 +65,7 @@ func _moves_of(kind: String) -> Array:
 		out.append(atk + "_windup")
 		out.append(atk + "_strike")
 	return out
+
 
 ## The value of every pivot channel a move poses, at phase p.
 func _values(kind: String, move_name: String, p: float) -> Dictionary:
@@ -66,6 +75,7 @@ func _values(kind: String, move_name: String, p: float) -> Dictionary:
 		for j in (tr[0] as PackedInt32Array).size():
 			out[(tr[0] as PackedInt32Array)[j]] = v * (tr[1] as PackedFloat32Array)[j]
 	return out
+
 
 ## How far the largest track of a move travels over the whole move.
 func _travel(kind: String, move_name: String) -> float:
@@ -80,14 +90,22 @@ func _travel(kind: String, move_name: String) -> float:
 		far = maxf(far, hi - lo)
 	return far
 
+
 func _tables() -> void:
 	for kind in Data.BOSSES:
 		var body := BossModels.build(kind).get_node("Body")
 		var want := _moves_of(kind)
 		var have: Array = (BossAnim.MOVES[kind] as Dictionary).keys()
-		ok(want.size() == have.size() and want.all(func(w): return have.has(w)),
-			"%s: a move for each of its %d states and attack halves, and no stray ones" % [kind, want.size()])
-		var bare := BossAnim.pairs(kind).filter(func(pc): return pc[0] != "." and body.get_node_or_null(pc[0]) == null)
+		ok(
+			want.size() == have.size() and want.all(func(w): return have.has(w)),
+			"%s: a move for each of its %d states and attack halves, and no stray ones" % [kind, want.size()]
+		)
+		var prim: bool = body.get_parent().get_node_or_null("MobGlb") == null
+		var bare: Array = []
+		for pc in BossAnim.pairs(kind):
+			var skip: bool = pc[0] == "." or (prim and MODEL_ONLY.has(pc[0]))
+			if not skip and body.get_node_or_null(pc[0]) == null:
+				bare.append(pc)
 		ok(bare.is_empty(), "%s: every pivot the moves name is on the model %s" % [kind, str(bare)])
 		for mv in want:
 			var span := _travel(kind, mv)
@@ -102,14 +120,17 @@ func _tables() -> void:
 				ok(meets, "%s %s hands over to its strike" % [kind, mv])
 	_clips()
 
+
 func _loops(kind: String, move_name: String) -> bool:
 	return BossAnim.tracks(kind, move_name).all(func(tr): return absf(tr[2][1] - tr[2][tr[2].size() - 1]) < 0.001)
+
 
 func _meets(a: Dictionary, b: Dictionary) -> bool:
 	for k in a.keys() + b.keys():
 		if absf(float(a.get(k, 0.0)) - float(b.get(k, 0.0))) > MEET:
 			return false
 	return true
+
 
 ## The Colossus's clips: each move cues one the pack has, and the scrub stretches cover the clip.
 func _clips() -> void:
@@ -128,6 +149,7 @@ func _clips() -> void:
 	for key in names:
 		ok(spec.has(key) and ap.has_animation(String(spec[key])), "colossus clip '%s' exists" % key)
 
+
 ## Starts the boss's attack by name; `rage` runs it enraged in the last phase (shorter wind-ups).
 func _start(b: Boss, atk: String, rage: bool) -> void:
 	b._clear_attack()
@@ -136,13 +158,14 @@ func _start(b: Boss, atk: String, rage: bool) -> void:
 	b.enraged = rage
 	b.call("_atk_" + atk)
 
+
 ## One attack: the blow, the tell and the body all agree on when it lands.
 func _attack(b: Boss, atk: String, rage: bool) -> void:
 	_start(b, atk, rage)
 	var tag := "%s %s%s" % [b.mkind, atk, " (enraged, phase 3)" if rage else ""]
 	var hit := BossAnim.hit_t(b)
 	ok(b.atk == atk and hit > 0.0, "%s: wind-up %.2f s" % [tag, hit])
-	var born: Array = b.teles.map(func(_tl): return 0.0)      # when each tell appeared, by index
+	var born: Array = b.teles.map(func(_tl): return 0.0)  # when each tell appeared, by index
 	var steps := b.steps.duplicate()
 	steps.sort_custom(func(x, y): return float(x["t"]) < float(y["t"]))
 	for s in steps:
@@ -162,6 +185,7 @@ func _attack(b: Boss, atk: String, rage: bool) -> void:
 	_phases(b, tag, hit)
 	b._clear_attack()
 
+
 ## The move follows the attack's clock: wind-up 0..1 over the tell, strike from its end.
 func _phases(b: Boss, tag: String, hit: float) -> void:
 	var at := {0.0: "_windup", 0.5: "_windup", 0.999: "_windup", 1.0: "_strike", 1.2: "_strike"}
@@ -172,6 +196,7 @@ func _phases(b: Boss, tag: String, hit: float) -> void:
 		var k_ok := absf(BossAnim.cur_k - float(f)) < 0.01 if String(at[f]) == "_windup" else BossAnim.cur_k >= 0.0
 		var what := "%s: %.0f%% of the way to the hit plays %s at %.2f"
 		ok(right and k_ok, what % [tag, float(f) * 100.0, BossAnim.cur_move, BossAnim.cur_k])
+
 
 ## Each state asks for its own move.
 func _states(b: Boss) -> void:
@@ -203,9 +228,11 @@ func _states(b: Boss) -> void:
 	ok(over, "%s: the death move is over before the body is gone" % b.mkind)
 	b.dead = false
 
+
 func _picks(b: Boss, want: String) -> void:
 	BossAnim.pick(b)
 	ok(BossAnim.cur_move == want, "%s: %s picks '%s'" % [b.mkind, want, BossAnim.cur_move])
+
 
 ## A posed pivot sits on its key: the wind-up's last frame, held, leaves the first track's pivot there.
 func _posed(b: Boss) -> void:
@@ -221,6 +248,44 @@ func _posed(b: Boss) -> void:
 	var got := BossAnim.rest_of(rig.nodes[i0], rig.chans[i0])
 	ok(absf(got - want) < 0.01, "%s: the pivot sits on its key (%.3f vs %.3f)" % [b.mkind, got, want])
 	b._clear_attack()
+
+
+## The lair's legendary Boki: its model's bones follow the pivots BossAnim poses.
+func _legendary(b: Boss) -> void:
+	var f := b.model.get_node_or_null("MobGlb") as MobGlb
+	if not Assets.on():
+		ok(f == null, "%s: --prim-art draws the primitive body" % b.mkind)
+		return
+	ok(f != null, "%s: %s is drawn from its model" % [b.mkind, b.md["name"]])
+	if f == null:
+		return
+	var linked := {}
+	for l in f._links:
+		linked[String((l[1] as Node3D).name)] = l
+	var posed: Array = []
+	for pc in BossAnim.pairs(b.mkind):
+		if pc[0] != ".":
+			posed.append(String(pc[0]).get_file())
+	var loose := posed.filter(func(n): return not linked.has(n))
+	ok(loose.is_empty(), "%s: every pivot the moves pose drives a bone %s" % [b.mkind, str(loose)])
+	var tris := 0
+	for mi in b.model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		if (mi as MeshInstance3D).visible and mesh:
+			for si in mesh.get_surface_count():
+				tris += mesh.surface_get_array_index_len(si) / 3
+	ok(tris > 0 and tris <= LEGENDARY_TRIS, "%s: %d triangles (<= %d)" % [b.mkind, tris, LEGENDARY_TRIS])
+	if loose.is_empty():
+		var l: Array = linked[posed[0]]
+		var skel := f._skel
+		var rest := skel.get_bone_global_pose(int(l[0]))
+		(l[1] as Node3D).rotation.x += 0.5
+		f._process(DT)
+		var moved := not skel.get_bone_global_pose(int(l[0])).is_equal_approx(rest)
+		(l[1] as Node3D).rotation.x -= 0.5
+		f._process(DT)
+		ok(moved, "%s: turning pivot %s turns its bone" % [b.mkind, posed[0]])
+
 
 func _perf(bosses: Array) -> void:
 	var t0 := Time.get_ticks_usec()
