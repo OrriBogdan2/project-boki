@@ -104,6 +104,10 @@ func own_aim_line() -> bool:
 func charge_orb() -> bool:
 	return false
 
+## The bow draws from an open glider, which stays open (docs/heroes/archer.md Cancels: Glide + LMB, both).
+func fires_in_glide() -> bool:
+	return true
+
 ## Her dash after-image: orchid fletch streaks instead of the shared ghost.
 func dash_afterimage() -> bool:
 	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
