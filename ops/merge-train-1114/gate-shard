@@ -63,8 +63,9 @@ submit() {  # submit SIDE TREE < flags : the flags dealt round-robin (slowest fi
 	n=$(grep -c . <<< "$flags"); [ "$n" -gt 0 ] || return 0
 	k=$(( n < SHARDS ? n : SHARDS ))
 	awk -v k="$k" '{ s[(NR - 1) % k] = s[(NR - 1) % k] "," $1 } END { for (i = 0; i < k; i++) print substr(s[i], 2) }' <<< "$flags" \
-		| xargs -P "$SUBMIT_P" -I{} sh -c 'id=$(jobq submit --tree "$2" --needs any --label "$3-$1" --timeout "$4" \
-			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1); [ -n "$id" ] || id=NOID$$; echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
+		| xargs -P "$SUBMIT_P" -I{} sh -c 'for try in 1 2 3; do id=$(timeout 60 jobq submit --tree "$2" --needs any --label "$3-$1" --timeout "$4" \
+			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1 | grep -E "^[0-9]{8}-[0-9]{6}-[0-9]+$"); [ -n "$id" ] && break; sleep $((try * 5)); done
+			[ -n "$id" ] || id=NOID$$; echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
 }
 
 collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag> <rc> <errs> <secs>" per flag to stdout
@@ -125,14 +126,14 @@ awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$
 [ "$CTREE" = "$MTREE" ] || awk '$1=="c" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$CTREE.txt"
 SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 
-# 4. re-run once, one flag per job, on both sides: every flag that is lost on either side (a relay failure says nothing) and
+# 4. re-run once, on both sides, sharded again but GS_PAR2 (2) at a time so CPU contention flakes clear: every flag that is lost on either side (a relay failure says nothing) and
 #    every flag red only on the candidate; the re-run result replaces the first one
 lost() { awk '$2=="lost" {print $1}' "$1" | sort -u; }
 SUSPECT=$({ comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"); lost "$OUT/cand.txt"; lost "$OUT/main.txt"; } | sort -u | grep .)
 : > "$OUT/round2.txt"
 if [ -n "$SUSPECT" ]; then
-	echo "$SUSPECT" | SHARDS=999 PAR=1 submit c "$CT"
-	echo "$SUSPECT" | comm -12 - <(pick "$MT") | SHARDS=999 PAR=1 submit m "$MT"
+	echo "$SUSPECT" | PAR=${GS_PAR2:-2} submit c "$CT"
+	echo "$SUSPECT" | comm -12 - <(pick "$MT") | PAR=${GS_PAR2:-2} submit m "$MT"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
 	for side in c m; do
