@@ -6,6 +6,7 @@ extends "res://tools/hero_pair_check.gd"
 ## size, the bond once per cast and only on a catch, the cooldown, the merge (the placed well stays) and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
+const EXIT := preload("res://tools/ult_exit.gd")
 
 ## Every ult assertion; returns when done (the caller prints the totals).
 func ult(main_node: Node) -> void:
@@ -16,6 +17,9 @@ func ult(main_node: Node) -> void:
 	await _swollen_and_merge()
 	await _lock_breaks()
 	await _burst()
+	var got: Dictionary = await EXIT.run(self, "ostra")
+	ok("lock: Shift, LMB and jump pressed 0.1s before it ends go on its first free step", EXIT.on_time(got),
+		EXIT.said(got))
 
 ## The pair check's strip and dummy, with a Boki ready at his side (the bond only fills with one).
 func setup_ult(arch: String, dist: float) -> Array:

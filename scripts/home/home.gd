@@ -719,7 +719,7 @@ func _ready_rest() -> void:
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty() and not play_hub:     # (the hub counts as a visit; the picker opens there too)
-		pass
+		ClanBase.draw(self, world, kins, visit.get("clan_base", {}))
 	elif play_hub:
 		MinigameHub.open(self)
 	elif hb.needs_making():
@@ -731,6 +731,9 @@ func _ready_rest() -> void:
 	if visit.is_empty() and Social.available():
 		Social.publish_profile(true)
 		Social.collect_gifts(func(lines: Array):
+			if lines.size() > 0 and is_inside_tree():
+				_show_when_free(lines))
+		Sleepover.collect(func(lines: Array):
 			if lines.size() > 0 and is_inside_tree():
 				_show_when_free(lines))
 		Social.collect_payouts(func(total: int):
@@ -1124,8 +1127,7 @@ var gliding := false
 var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
 var dash_t := 0.0
 var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
-var dash_charges := 2.0
-var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
+var dash := DashState.new()    # the dash charges and the long dash cooldown, the same object a match hunter owns
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
@@ -1173,8 +1175,6 @@ var climb := {}                # (unused since the ledge float; kept for anythin
 var lfl := {}
 var _mv := Vector2.ZERO
 
-## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
-## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
 ## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
@@ -1192,19 +1192,9 @@ func _keep_off_hub(c) -> void:
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
+## Your class's dodge with the match's numbers (DashState.profile: the same rank-1 charges, recharge and long dash).
 func _dodge() -> Dictionary:
-	var ck := Data.class_of_save()
-	var dd := Content.class_dodge(ck)
-	var cdat: Dictionary = Data.CLASSES.get(ck, {})
-	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
-		"ex_cd": float(cdat.get("ex_cd", Hunter.EX_DASH_CD)), "ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
-	if dd:
-		out["charges"] = dd.charges; out["cd"] = dd.cooldown
-		for e in dd.effects:
-			if typeof(e) == TYPE_DICTIONARY and String(e.get("type", "")) == "dash":
-				out["speed"] = float(e.get("speed", out["speed"])); out["time"] = float(e.get("time", out["time"]))
-				break
-	return out
+	return DashState.profile(Data.class_of_save())
 
 func dashing() -> bool:
 	return dash_t > 0.0
@@ -1214,13 +1204,12 @@ func dashing() -> bool:
 func try_dash(mv: Vector2, air: bool) -> bool:
 	var dg := _dodge()
 	var dir := mv if mv.length() > 0.1 else Vector2(-sin(pface), -cos(pface))
-	if not air and dash_charges >= 1.0:
-		dash_charges -= 1.0
+	if not dash.wants_long(not air):
+		dash.spend_short()
 		start_dash(dir, float(dg["speed"]), float(dg["time"]))
 		return true
-	if ex_cd > 0.0:
+	if not dash.spend_long(float(dg["ex_cd"])):
 		return false
-	ex_cd = float(dg["ex_cd"])
 	var et := float(dg["ex_time"])
 	start_dash(dir, float(dg["ex_dist"]) / maxf(0.01, et), et)
 	pvy = maxf(pvy, 0.0)
@@ -1250,8 +1239,8 @@ func _move_player(d: float) -> void:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
 	var dg := _dodge()
-	dash_charges = minf(float(dg["charges"]), dash_charges + d / maxf(0.1, float(dg["cd"])))
-	ex_cd = maxf(0.0, ex_cd - d)
+	dash.charges = minf(dash.charges, float(dg["charges"]))      # a class with fewer dashes takes the extra
+	dash.tick(d, float(dg["charges"]), float(dg["cd"]))
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
 	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match
@@ -2546,6 +2535,9 @@ func open_build() -> void:
 func _refresh_top() -> void:
 	if _visiting():
 		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
+		if visit.has("clan_base"):
+			topbar.text = "%s's clan base   ·   Every member has a corner   ·   The portal takes you home" \
+					% visit["name"]
 		topbar.visible = true
 		return
 	topbar.visible = false
@@ -3920,7 +3912,8 @@ func _use_visiting(it: Dictionary) -> void:
 				_emote(it["k"], "♥")
 				return
 			petted[rec["uid"]] = true
-			Social.send_gift(visit_id, "pet", String(rec["uid"]))
+			# a clan base's Boki each have their own owner
+			Social.send_gift(String(rec.get("owner", visit_id)), "pet", String(rec["uid"]))
 			_emote(it["k"], "♥")
 			Sfx.play(KinVoice.cue(rec["species"], "happy"))
 			_toast("%s will remember your visit" % rec["name"])
@@ -3935,6 +3928,9 @@ func _open_gift_panel(owner_name: String) -> void:
 	var v := _new_panel("Leave a gift for %s" % owner_name, 520)
 	v.add_child(UI.primary("Go inside %s's house" % owner_name, func(): Game.goto("interior", {"room": "house", "visit": visit, "visit_id": visit_id}), 300))
 	v.add_child(UI.label("They'll find it next time they're home.", 14, UI.MUTED))
+	SleepoverPanel.fill(v, visit_id, owner_name, func(text: String):
+		_close_panel()
+		_toast(text))
 	var any := false
 	for kind in ["seed", "crop"]:
 		var store: Dictionary = Save.d["seeds"] if kind == "seed" else Save.d["crops"]
@@ -4808,6 +4804,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	br.add_child(UI.fill())
 	br.add_child(UI.ghost("Details", func(): _open_kin(rec)))
 	dv.add_child(br)
+	ClanLoanPanel.lend_rows(dv, rec, _open_nook)
 
 ## The side panel with two picked: both, their IVs side by side, what an egg could take.
 func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
@@ -4828,10 +4825,10 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
+	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
-	NookRules.preview(dv, a, b)
 	NestItemRows.add(dv, a, b, _open_nook)
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
@@ -4855,6 +4852,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	elif not egg_in:
 		dv.add_child(UI.spacer(4))
 		dv.add_child(UI.label("Click a Boki to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
+	ClanLoanPanel.side_rows(dv, _open_nook)
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
@@ -4933,7 +4931,9 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair":
+			pa["lean"] = {"ember": 6.0, "storm": 2.0}
+			nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"egg":
 			ppos = NEST_AT + Vector3(0, 0, 2.2)
 			player.position = ppos

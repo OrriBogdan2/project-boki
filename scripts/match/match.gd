@@ -43,6 +43,7 @@ var meteors: Array = []     # {at, t, tele}
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
+var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -566,6 +567,7 @@ func _spawn_pads_and_exits() -> void:
 		add_child(arc)
 		pd["arc"] = arc
 	await _slice()
+	zone = ShrinkZone.make(self)
 	exits = Exits.new()
 	await exits.setup(self)
 	await _slice()
@@ -2172,6 +2174,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	KeyCarry.on_mob_dead(self, mb)
 	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
+	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
@@ -2462,7 +2465,7 @@ const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc 
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or HawkSense.seen_by(target, team_i):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -4880,7 +4883,8 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
 	_check_last()
 
-func _update_rules(_dt: float) -> void:
+func _update_rules(dt: float) -> void:
+	if zone: zone.tick(dt)
 	var left := length - time
 	if left < 30.0 and not collapse_warned:
 		collapse_warned = true
@@ -5569,6 +5573,7 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
 var vision_hint := VisionHint.new()
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
@@ -5629,6 +5634,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 func _tips() -> void:
+	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
@@ -5636,6 +5642,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	tips_live = true
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
