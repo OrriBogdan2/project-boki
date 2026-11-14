@@ -2,7 +2,7 @@ class_name ShrinkZone
 extends RefCounted
 ## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
-## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
+## the same one: an outpost, and the circle round it leaning into its island, so the last exits
 ## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
 ## holds for a phase's wait, then closes to the phase's radius, each circle inside the one before.
 ## Outside the edge hurts, more each phase; when the last close ends, the islands wholly outside the
@@ -65,7 +65,7 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return _rules
 
-## The zone for a real fixed-length expedition with a dock or outpost to close on; null otherwise
+## The zone for a real fixed-length expedition with an outpost to close on; null otherwise
 ## (tutorial, training, duels, the arena, rolling sessions).
 static func make(match_node: Match) -> ShrinkZone:
 	var o := match_node.opts
@@ -73,7 +73,7 @@ static func make(match_node: Match) -> ShrinkZone:
 		return null
 	if ["tutorial", "training", "duel", "arena"].any(func(x): return o.get(x, false)):
 		return null
-	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) in ["dock", "outpost"]):
+	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) == "outpost"):
 		return null
 	return ShrinkZone.new(match_node)
 
@@ -86,7 +86,7 @@ func _init(match_node: Match) -> void:
 	var n := ph.size()
 	for arr in [cs, rs, t0, t1, dps]:
 		arr.resize(n + 1)
-	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) in ["dock", "outpost"])
+	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) == "outpost")
 	exit_at = picks[posmod(hash([m.seed_val, "shrink_zone"]), picks.size())]["at"]
 	rs[n] = float(ph[n - 1]["r"]) * mk
 	cs[n] = exit_at
@@ -145,19 +145,6 @@ func out_at(p: Vector3) -> float:
 		if q.distance_to(cs[j]) > rs[j]:
 			return t1[j]
 	return 1e9
-
-## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
-func time_docks(docks: Array) -> void:
-	var best := -1
-	var bd := 1e9
-	for i in docks.size():
-		docks[i]["close_at"] = out_at(docks[i]["pos"])
-		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
-		if d < bd:
-			bd = d
-			best = i
-	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
-		docks[best]["last"] = true
 
 func tick(dt: float) -> void:
 	var e := edge_at(m.time)
