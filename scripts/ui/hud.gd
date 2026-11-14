@@ -255,12 +255,8 @@ func _draw_all() -> void:
 	# (movefeel) measured against the real point of no return (Hunter.abyss_kill_y, via AbyssFx.danger)
 	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
-	# warning near the end
+	# warning near the end (the falling wind and the warning sound are AbyssFallSfx)
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
-	if want_a <= 0.02:
-		abyss_cued = false
-	if want_a <= 0.7:
-		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
@@ -276,13 +272,6 @@ func _draw_all() -> void:
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		# (owner) an audio cue: a falling whoosh as the tint starts, a warning when it turns deep red
-		if p == m.player and abyss_a > 0.08 and not abyss_cued:
-			abyss_cued = true
-			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.85 and not abyss_warned:
-			abyss_warned = true
-			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
@@ -1857,8 +1846,6 @@ func _draw_scores(sz: Vector2) -> void:
 		score_mute.draw(self, h, r.position.x + 606, y)
 		y += 28
 
-var abyss_cued := false
-var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
