@@ -7,6 +7,9 @@ extends RefCounted
 ##   6. the Gate prompt is only the carrier's leave prompt, says "Leave now: small reward", holds gate_hold_s,
 ##      and its second line names the final seat's time
 ##   7. the real HUD draws the strip in every state without a script error (frames run with the Hud on)
+##   8. the quest tracker (scripts/ui/quest_tracker.gd) under the strip and above the message lane, only while your
+##      squad is on a quest seat: the Uplink's charge or the boss's health taken off, the leading rival squad's
+##      progress on a quest seat, the distance to the site; hidden with no seat of yours, out, or in the boss fight
 ## Never touches the save.
 
 var bad := 0
@@ -128,6 +131,81 @@ func run(main: Node) -> void:
 		for i in 3:
 			await main.get_tree().process_frame
 	ok(true, "seven states drawn through the real HUD")
+	await _tracker(main, m)
 	m.queue_free()
 	print("WAYSHUD DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
+
+# ---------------------------------------------------------------- 8. the quest tracker
+## The quest tracker's rows, on the real HUD with the match paused (so the host does not move the seats).
+func _tracker(main: Node, m: Match) -> void:
+	m.set_process(false)
+	var P: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var qs: QuestSeats = m.exits.seats
+	var x: Dictionary = qs.uplink_x()
+	var b: Boss = m.lairs.boss_of(qs.lair.ref) if qs.lair else null
+	ok(qs.uplink != null and b != null, "the map has both quest seats and the Sealed Lair has its boss")
+	if qs.uplink == null or b == null:
+		return
+	ok(QuestTracker.WORDS.has(qs.lair.kind) and QuestTracker.WORDS.has(qs.uplink.kind),
+		"both quest seats have their plain words")
+	m.interact = {}
+	var away := m.world.free_spot_near(x["pos"] + Vector3(40, 0, 0), [], 1.0, 0.45, 6.0)
+	P.teleport(away)
+	qs.lair._force(QuestSeat.S.LOCKED, "check")
+	qs.uplink._force(QuestSeat.S.LOCKED, "check")
+	var r := await _tracker_rect(main, m)
+	ok(QuestTracker.seat_of(m, P.team) == null and not r.has_area(), "no quest seat in use: no tracker")
+	x["state"] = "charging"
+	x["team"] = P.team
+	x["prog"] = 0.4
+	qs.uplink._force(QuestSeat.S.IN_USE, "check", P.team)
+	var on_it := QuestTracker.seat_of(m, P.team) == qs.uplink
+	ok(on_it and is_equal_approx(QuestTracker.progress(m, qs.uplink), 0.4),
+		"your squad charging the Uplink: the tracker is the Uplink and reads its charge")
+	var far := "%d m" % roundi(P.flat_dist(x["pos"]))
+	var nums := QuestTracker.numbers(m, qs.uplink, QuestTracker.rival_seat(m, P.team))
+	ok(QuestTracker.rival_seat(m, P.team) == null and nums == "40%  ·  " + far,
+		"no rival on a quest seat: no rival bar; the numbers are your charge and the distance (%s)" % nums)
+	r = await _tracker_rect(main, m)
+	var strip: Rect2 = SafeArea.seen.get("ways_strip", [Rect2()])[0]
+	ok(r.has_area() and r.position.y >= strip.end.y and r.end.y <= m.hud.msgs.top,
+		"drawn under the strip (%s) and above the message lane (y %d): %s" % [strip, int(m.hud.msgs.top), r])
+	b.hp = b.max_hp * 0.7
+	qs.lair._force(QuestSeat.S.IN_USE, "check", foe.team)
+	nums = QuestTracker.numbers(m, qs.uplink, QuestTracker.rival_seat(m, P.team))
+	ok(QuestTracker.rival_seat(m, P.team) == qs.lair and nums == "40%  ·  rival 30%  ·  " + far,
+		"a rival sealed in the Sealed Lair: the rival bar is the boss's health taken off (%s)" % nums)
+	qs.uplink._force(QuestSeat.S.IN_USE, "check", foe.team)
+	r = await _tracker_rect(main, m)
+	ok(QuestTracker.seat_of(m, P.team) == null and not r.has_area(), "a rival took the Uplink: no tracker")
+	qs.lair._force(QuestSeat.S.IN_USE, "check", P.team)
+	r = await _tracker_rect(main, m)
+	var boss_k := QuestTracker.progress(m, qs.lair)
+	var lair_on := QuestTracker.seat_of(m, P.team) == qs.lair and is_equal_approx(boss_k, 0.3)
+	ok(lair_on and r.has_area(), "your squad sealed in the Sealed Lair, you outside: the tracker reads the boss, 30%")
+	b.dormant = false
+	P.teleport(qs.lair.site())
+	r = await _tracker_rect(main, m)
+	ok(m.lairs.boss_for(P) == b and not r.has_area(), "inside the fight the boss bar is the objective: no tracker")
+	b.dormant = true
+	P.teleport(away)
+	P.out = true
+	r = await _tracker_rect(main, m)
+	ok(not r.has_area(), "you are out: no tracker")
+	P.out = false
+	qs.lair._force(QuestSeat.S.TAKEN, "check", P.team)
+	r = await _tracker_rect(main, m)
+	ok(QuestTracker.seat_of(m, P.team) == null and not r.has_area(), "the quest finished (taken): no tracker")
+
+## The tracker's rect on the HUD this frame (no area when it is not drawn). SafeArea records the panel pass.
+func _tracker_rect(main: Node, m: Match) -> Rect2:
+	SafeArea.seen.clear()
+	SafeArea.recording = true
+	m.hud.panels.queue_redraw()
+	for i in 3:
+		await main.get_tree().process_frame
+	SafeArea.recording = false
+	var got: Array = SafeArea.seen.get("quest_tracker", [])
+	return got[0] if not got.is_empty() else Rect2()

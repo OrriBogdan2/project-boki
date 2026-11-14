@@ -1736,10 +1736,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
-		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)      # (under the message lane, like the killcam line)
+		var sw := TextCache.width(big, String(st["text"]), 24)
+		SafeArea.note_as("exit_status", Rect2(Vector2(sz.x * 0.5 - sw * 0.5, sy - 22.0), Vector2(sw, 42.0)))
+		_ctext(Vector2(sz.x * 0.5, sy), String(st["text"]), 24, st["col"], big)
+		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sy + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 		if st.has("hint"):
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.2 + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
+			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
