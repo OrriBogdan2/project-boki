@@ -405,8 +405,8 @@ func _vex_tracer(main: Node) -> void:
 			for e: Dictionary in mine:
 				thin = maxf(thin, float(e["width"]))
 				var pts: Array = e["pts"]
-				if pts.size() > 1 and (pts[0][0] as Vector3).distance_to((sd["node"] as Node3D).global_position) < 0.1:
-					drawn = maxf(drawn, (pts[0][0] as Vector3).distance_to(pts[-1][0]))
+				if pts.size() > 1 and HeroVfx._at(pts[0]).distance_to((sd["node"] as Node3D).global_position) < 0.1:
+					drawn = maxf(drawn, HeroVfx._at(pts[0]).distance_to(HeroVfx._at(pts[-1])))
 			var age := i - int(born[sd["sid"]])          # steps since it was fired (the kit picks it up a step on)
 			if (mine.is_empty() and age > 0) or (age >= TRACER_FULL and (drawn < 2.0 or drawn > 4.5)):
 				bare += 1
@@ -446,7 +446,7 @@ func _zones(main: Node) -> void:
 	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
 	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
 	# care_disc: body * 1.6 at the centre, cel steps of 0.25
-	var hearth_a := TenderKit.HEARTH_FILL * 0.18 * 1.6 * 1.1
+	var hearth_a := TenderKit.THROWN_FILL * 0.18 * 1.6 * 1.1
 	ok(roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
 			"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A)
 	_meeko_field()
@@ -967,8 +967,8 @@ func _rocket(main: Node) -> void:
 			"the trail is in the squad colour and thin (%.2f m)" % float(e["width"]))
 	_ride(m, V, ROCKET_RIDE)
 	var pts: Array = e["pts"]
-	var up: Vector3 = (pts[-1][0] as Vector3) - (pts[0][0] as Vector3)
-	ok((pts[0][0] as Vector3).distance_to(nozzle.global_position) < 0.01, "its head rides the nozzle")
+	var up: Vector3 = HeroVfx._at(pts[-1]) - HeroVfx._at(pts[0])
+	ok(HeroVfx._at(pts[0]).distance_to(nozzle.global_position) < 0.01, "its head rides the nozzle")
 	ok(up.y > 0.0 and up.length() >= ROCKET_TRAIL_M, "it streams up behind the dive (%.1f m)" % up.length())
 	_rocket_out(m, r)
 	var high_dots := _rocket_land(m, V, r)
@@ -1095,7 +1095,7 @@ func _streak_span(V: HeroVfx, fps: float) -> float:
 		dot.global_position += Vector3.DOWN * DropRocket.FALL / fps
 		V._process(1.0 / fps)
 	var pts: Array = e["pts"]
-	var span := (pts[-1][0] as Vector3).distance_to(pts[0][0])
+	var span := HeroVfx._at(pts[-1]).distance_to(HeroVfx._at(pts[0]))
 	dot.queue_free()
 	_clear(V)
 	return span
