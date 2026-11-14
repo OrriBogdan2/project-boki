@@ -1,10 +1,10 @@
 extends RefCounted
 ## --clip-cadence-check: a warden clip must fit the kit's cadence. Per Hunter and move listed in
 ## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "scale" speeds it up,
-## "fit" plays it over that many seconds, "cut" ends it early, "lead" skips its start; a "hold_from" move loops and is exempt) lasts no longer
-## than the move's cadence (else it restarts mid-swing or pops into the next move), and its strike (the frame its hand
-## moves fastest in the .glb) lands no more than the slack after the kit's hit time. Prints the table. Never touches
-## the save.
+## "fit" plays it over that many seconds, "cut" ends it early, "lead" skips its start; a "hold_from" move loops and
+## is exempt) lasts no longer than the move's cadence (else it restarts mid-swing or pops into the next move), and
+## its strike (the frame its hand moves fastest in the .glb) lands no more than the slack after the kit's hit time.
+## Prints the table. Never touches the save.
 
 const TABLE := "res://content/rules/clip_cadence.json"
 const DT := 1.0 / 60.0
