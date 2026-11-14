@@ -229,6 +229,7 @@ Shares of the standard target against the source (docs/TTK.md, no LMB source num
 | Starpiercer then a merge on a full-health light hunter | Standing (burst cap) | same |
 | Draw, then Shift (the roll or the air flick) or a jump (item 51) | The draw carries through and charges on; let go mid-roll and it looses as the roll ends, let go in the air and she keeps her speed. The source shows nothing ending a draw on the roll, so it combines (content/dash_flow/archer.json) | `--archer-combo-check` (`pin early release: a dash keeps the draw...`, `pin item 51: ...`), `--dash-flow-check` |
 
+<<<<<<< HEAD
 ## Cancels (ability to ability)
 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first ends),
@@ -265,7 +266,10 @@ Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the
 source's answer, so the newer press cancels the held draw with no shot, the rule the LMB -> X row already follows
 (`ArcherKit.drop_draw`, `lmb_override`). The X window's own nock is left out of it (the X window | RMB row stays both).
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesPin and KMovesBjorn ids per ability; timed to 5 fps footage frames)
+=======
+## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
+>>>>>>> origin/ext/split-kmoves-pin-bjorn
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB draw | `arc_draw` (held) | side-on to the cursor in 0.2 s, string hand to the chest, deeper by Empowered |
