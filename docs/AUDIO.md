@@ -187,6 +187,21 @@ Steps are how you hear a flank. Both layers of a Hunter's step (the plain contac
 - A line shares one voice (seeded by the line id): source, vowel, flutter rate, texture and a motif unique to the line. The stage shapes it: first higher, shorter, squeakier; middle fuller; final lower, longer, with a growl and a low octave. Branch forms bend the last note and carry their own type's tint.
 - Levelled to the `boki` category. `python3 tools/cries_stats.py` measures loudness, clicks, length and the family rule (line-mates closer than unrelated cries, no unrelated near-twins); `--boki-cries-check` asserts every species in `Data.KIN` has a cry and the manifest is whole.
 - In game: `BokiCry.play(species_id)` (`scripts/ui/boki_cry.gd`), played when a Bokidex entry opens. Listening page: `python3 tools/cries_preview.py` writes `tools/cries_preview/index.html`.
+## Held fire (`scripts/core/fire_sfx.gd`)
+A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG, minigun, flamethrower's weapon row, and Neve's darts once they run that fast) plays its shot through `FireSfx.shot`, not one sample per round. At 0.08 s (about 12 rounds a second) the old path stacked 4 to 10 pool voices per Hunter.
+- **First shot of a burst** (a gap over 0.3 s): the base take, no pitch jitter, full level. **The rest**: the other three takes in turn (never the same twice running), pitch +-3%, volume +-1 dB, `Sfx.STACK_DB` under the first, which is the level the stacking rule gave them already.
+- **Cap**: one emitter keeps at most 3 takes sounding (`FireSfx.VOICES`); a round that would be the 4th sounds nothing (the shot itself still fires). Four Hunters holding fire cost 12 pool voices, the SFX bus budget of `ext/sfx-voice-cap`. Neve's heavy darts and skating beams, and Cinder's hose (its roar already plays one breath a 0.4 s), keep their own path.
+- **`--sfx-set-check` section 11**: 3 s of fire every 80 ms per held-fire sound, plain path vs `FireSfx`; fails over 3 voices, a first shot that is not the base take, a repeated take, or fewer than 3 other takes.
+
+| 3 s at 80 ms (pool voices sounding at most; sustained peak / RMS, 20-seed offline mix of the takes) | before | after |
+|---|---|---|
+| smg (0.44 s takes) | 7-8 voices; -6.8 / -24.8 dBFS | 3; -7.3 / -30.2 |
+| quill_rifle `vn_rifle` (0.31 s) | 5; -7.0 / -23.6 | 3; -6.5 / -27.9 |
+| rifle (0.64 s) | 10; -5.9 / -21.3 | 3; -6.5 / -28.1 |
+| hoar_fan `rime_shard` (0.24 s) | 4; -6.2 / -20.9 | 3; -7.3 / -24.1 |
+
+Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dBFS) and never clips; a hold is 3 to 7 dB lower in RMS, so it reads as a rattle with a crack on top rather than a smear. Not built: a shorter "hold" take per weapon (would let the cap pass every round; costs new files), and the voice priority table of `ext/sfx-voice-limits` (not on main; the cap here is per emitter and does not depend on it).
+
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
