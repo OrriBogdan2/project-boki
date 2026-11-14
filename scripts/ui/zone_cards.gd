@@ -100,7 +100,8 @@ static func lock_line(id: String) -> String:
 	var seed := "Find its Wayseed in a run's lair or at the trader"
 	return seed + "." if keys["lean"] else seed + ", and " + food + "."
 
-## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects (DecorComfort) and your best at it.
+## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects
+## (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)
