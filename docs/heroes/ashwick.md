@@ -298,31 +298,36 @@ What a second press does during the first action's wind-up, active part and reco
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
 briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+that can't be seen), [W] the wiki page linked above, [O] the owner (DECISIONS / OWNER_REVIEW_1103). The 11-09
+cancel-matrix pass read the code and probed it headless; the 11-12 pass settled the 9 rows it had left unsettled.
+None of [D], [F] (briefs/hero-ref/linwick.md) or [W] shows those pairs: Felix's card lines (supervive_kits.md:38-45)
+give no cancel, and the clips never press a second key during these moves. So each row follows the owner where
+they have a line (Nov 5: in the flight only E works; item 11: the cloak is instant), otherwise **rule**: DECISIONS
+11-07 "every interaction is chainable" (the second press goes now and the first runs on). Each settled row is one
+assert in `--ashwick-combo-check` ("Cinder cancel ...", tools/ashwick_cancel_rows_check.gd). Any pair not in the
+table: both (ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or
+downed, and the attack key does nothing from a glide unless the kit's `ArchKit.fires_in_glide` says so (Cinder's
+hose does).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB hose (held) | RMB | not shown | both: the bolt leaves and the hose keeps burning | unsettled | |
-| LMB hose | E | not shown | both: the cloak blasts and the hose keeps burning | unsettled | |
+| LMB hose (held) | RMB | not shown | both: the bolt leaves and the hose keeps burning | both | rule |
+| LMB hose | E | not shown | both: the cloak blasts and the hose keeps burning | both | rule |
 | LMB hose | jump | not shown | the hose burns on through the jump | ours | content/dash_flow `hold.lmb` |
-| LMB hose | X | not shown | the flight starts; the hose goes out for the flight | unsettled | |
+| LMB hose | X | not shown | the flight starts at once; the hose goes out for the flight | cancels | rule (X goes now); [O] Nov 5: no LMB in the flight |
 | LMB released | walk | "a 0.35 second self-slow after letting go of the ability" | (a slow, not a cancel: see Small mechanics) | n/a | [W] patch 20.11.2024 |
-| RMB Cinder Shot | LMB, E | not shown | both | unsettled | |
-| E Furnace Cloak (the 0.2 s ring, then the blast) | any | not shown | the blast is on the press: everything goes at once | unsettled | [F] 0181-0182 |
+| RMB Cinder Shot | LMB, E | not shown | both: the lance lights and the cloak blasts the next step | both | rule |
+| E Furnace Cloak (the 0.2 s ring, then the blast) | any | not shown | no ring wait: the blast is on the press, and LMB, RMB and X go at once inside the 0.24 s flare | both | [O] item 11 (instant, no 0.2 s ring); rule; [F] 0181-0182 shows no second press |
 | X Flue Flight (1.8 s) | E | "Heat Shield (Q) and some Powers ... can be cast during Flight of the Firefox" | the cloak works, the flight goes on | match | [W]; `--ashwick-combo-check` (ult 66) |
 | X flight | X | "Reactivate to end the effect early" | lands at once | match | [W]; [D] |
 | X flight | RMB, gear, items | only Heat Shield and some Powers are named | dropped, not buffered (a soft "can't" tick); an RMB hold carried in is cancelled | match (by the wiki's list) | [W]; owner item 66 |
-| X flight | LMB | not shown | ignored (the "can't" tick); a hose under way goes out | unsettled | |
+| X flight | LMB | not shown | ignored (the "can't" tick); a hose under way goes out | ignored | [O] DECISIONS Nov 5: only E works in the flight |
 | X flight | jump | not shown | leaps off, keeping the speed (ends the flight) | ours | content/dash_flow `into_jump.x` |
-| X flight | glide | not shown | shut (the lift-off closes a glider) | unsettled | |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes | unsettled | |
+| X flight | glide | not shown | ignored: the glider stays shut while the flight runs (the lift-off closes one) | ignored | [O] DECISIONS Nov 5: only E works in the flight |
+| Glide | LMB | not shown | both: the hose roars from the open glider, which stays open (was ignored) | both, **fixed** | rule; [O] DECISIONS: "the glider never blocks it" (Tarek), the source decides |
+| Glide | RMB, E, X | not shown | each goes (RMB on the press, its air variant) | both | rule |
 
-Fixes made: none (every source line above already matches).
+Fixes made (11-12): the hose roars from an open glider (`AshwickKit.fires_in_glide`); the glider stays open.
 
 ## Animation moves
 Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`), timed
@@ -337,6 +342,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
 | Flue Flight (R) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
+| Flue Flight (X) | `lw_jet` (held; `bank`), `lw_land` (`owns_land`, `upper: moving`) | a crouch as the ember ring bursts (0.08s), then she springs up into the hover (0.22s: palms out and down, the fire gathering in both hands), and holds one steady lean into the jet, legs trailing; the whole body rolls into the flight's turns like the glider (up to 25 degrees); the landing is `jet_land`, 0.2s, and the generic `land` clip no longer follows it, so the settle ends when control is back (legs keep walking if she moves) |
 
 ## Animation timing
 Measured against the footage (briefs/hero-ref/linwick.md on ext/agent-briefs, a frame = 0.2 s) and the kit's own timings; "ours" is
@@ -356,8 +362,9 @@ cadence override. Checked by `--ashwick-combo-check` (timing rows, the ram row) 
 | Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
 | Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
 | Flue Flight lift-off | ember ring, then he hangs 0.13-0.2 s before moving (15 fps: cast 1 ring +0.40, moving +0.5; cast 2 ring +0.47, moving +0.65) | ring on press, `lw_jet` crouch 0.08, flight pose 0.22, moving at once | hangs `lift_t` 0.15 s, risen to the 0.45 m hover (`--move-feel-check` `flue_lift_hold_s`, `flue_hover_m`) |
+| Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same; palm embers gather in both hands over the 0.22 s (`liftoff`) |
 | Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
-| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke |
+| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke; the 0.4 s `land` clip used to run after it (settle 0.6 s): fixed |
 | Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (0.339 s clip, half on the ground, played at 0.88: 0.384 s cycle), feet planted |
 | Stop / turn | instant | loco blend 12/s (every warden) | same |
 | Stoke, hop, jump, hit, death | no source footage | our beats | same |
@@ -456,3 +463,10 @@ Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`,
 - Palms: the muzzles are the palms (`weapon_muzzle` right, `weapon_muzzle_l` left); both sit within 0.06 m of the hand bones in `lance` and `shot`.
 - Idle to walk first-pose gap 0.38 body heights, unchanged (blend-covered).
 - Timing: Cinder's move timing table is on the unmerged `ext/anim-time-cinder*` branches (it conflicts with this one in `warden_clips.gd` and `cinder.json`, so it was not re-run here); `--ashwick-combo-check` on the v2 clips passes (119 checks, 0 failures).
+
+Flue Flight clips still wanted (Blender host; the game plays `jet` 1.0 s, hold from 0.22, and `jet_land` 0.2 s today):
+- `jet_up` 0.22 s: the take-off hover with both palms turned down and out, fingers spread, the fire gathering (the shipped `jet` keeps
+  the hands at her sides, so only the new palm embers show it). The map takes one clip per kit move, so the kit would need a `lw_jet_up` move for it.
+- `jet_bank_l` / `jet_bank_r` (optional): a lean of the whole pose into a turn; the procedural roll (`bank`) covers it until then.
+- Strip: `--flue-flight-shots` (docs/shots/cinder-flue-clips/flight_strip.jpg, xvfb; back row over side row: cast, hover, flight, turn left, turn right, early landing, settle; the shown body rolls -15 to +22 degrees into the turns and is upright again 0.2 s after the landing; she touches down 0.25 s after X, `--ashwick-combo-check` times it).
+- The glb still holds a weapon in her right hand in these clips (DECISIONS 2026-11-07: no weapons); that is the art pass, not the clip map.

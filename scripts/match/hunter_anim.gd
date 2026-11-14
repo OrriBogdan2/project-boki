@@ -189,6 +189,7 @@ var flipping := false
 var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
+var bank_k := 0.0              # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -313,7 +314,7 @@ var hip_y := 0.42              # the torso's rest height on the legs (longer leg
 var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
 var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
-func _init(m: Node3D) -> void:
+func _init(m: Node3D, fixed_seed := -1) -> void:
 	model = m
 	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
@@ -352,7 +353,7 @@ func _init(m: Node3D) -> void:
 		gait = EmptyGait.new(legs, st)
 		legs_sway = 0.0
 	ws = WardenStance.new(stance)
-	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
+	rng = int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
 	weight_to = weight
@@ -366,11 +367,12 @@ func _init(m: Node3D) -> void:
 		gun = aim.get_node_or_null("Gun")
 	_setup_weapon(String(m.get_meta("wid", "")))
 
-## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits).
+## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits); the same pose on
+## every build (a fixed seed, not the instance id's: a Hero's root bone can follow this Rig, Ostra's rig_root).
 static func rest_pose(m: Node3D) -> void:
 	if not m.has_node("Rig/Torso/ArmLPivot"):
 		return
-	var a := HunterAnim.new(m)
+	var a := HunterAnim.new(m, 1)
 	a.snap = true
 	a.update(1.0 / 60.0, {"fired": 99.0})
 
@@ -576,6 +578,7 @@ func update(dt: float, s: Dictionary) -> void:
 	air_k = _ease(air_k, 0.0 if grounded or gliding or diving else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
 	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
+	bank_k = _ease(bank_k, 1.0 if (gliding and not diving) or km_bank else 0.0, 7.0, dt)
 	crouch_k = _ease(crouch_k, float(s.get("crouch", 0.0)), 12.0, dt)
 	var ledge: bool = s.get("ledge", false)
 	var mant := float(s.get("mantle", -1.0))
@@ -761,7 +764,7 @@ func update(dt: float, s: Dictionary) -> void:
 	hr += spot.lift(1)
 	kr -= spot.lift(1) * TurnStep.FOLD
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
-	if gait != null:
+	if gait != null and gait.legs.is_inside_tree():      # rest_pose's model has no world yet
 		gait.crouch = crouch_k
 		gait.squat = act_k * HunterVerbs.squat(act_kind, act_t, act_need) if HunterVerbs.ACTS.has(act_kind) else 0.0
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
@@ -1041,8 +1044,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
 	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
-		var sole_l := FootPlant.reach(hl, kl, wl)
-		var sole_r := FootPlant.reach(hr, kr, wr)
+		var sole_l := FootPlant.reach(hl, kl, wl, leg_l.scale.z)
+		var sole_r := FootPlant.reach(hr, kr, wr, leg_r.scale.z)
 		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
 		dr2 = dl2
 		leg_ref = FootPlant.HIP
@@ -1144,6 +1147,7 @@ var km_id := ""
 var km_prev_t := 99.0
 var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
 var km_blend := KM_BLEND
+var km_bank := false           # the move rolls the body into the turns it flies (its "bank" key)
 var km_stance := false         # the move's legs are a standing stance: running, the legs keep running
 var km_swing := -1             # the weapon swing the move throws (its "swing" key), -1: the weapon's combo step
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
@@ -1151,12 +1155,13 @@ const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
 ## The whole body's turn in the air, about the hips: nose-down by the dive (DIVE_PITCH), and under the glider a roll
 ## into its turns by the turn rate (times the speed: the sideways pull), GLIDE_BANK at full steer, the glider's whole
-## steering pull (HunterMove.glide_accel); it leans toward the inside of the turn about the way it flies (the body
-## faces the aim, which need not be where it flies). Handed to a Hero's clips as AIR_TILT (WardenClips._air_tilt),
-## so the body you see, its glider and a Boki riding on it turn as one.
+## steering pull (HunterMove.glide_accel); a move keyed "bank" (Flue Flight) rolls the same; it leans toward the
+## inside of the turn about the way it flies (the body faces the aim, which need not be where it flies). Handed to a
+## Hero's clips as AIR_TILT (WardenClips._air_tilt), so the body you see, its glider and a Boki riding on it turn
+## as one.
 func _air_tilt(dt: float, turn: float, mf: float, ms: float, spd: float) -> Basis:
 	var steer := clampf(turn * spd / HunterMove.glide_accel, -1.0, 1.0)
-	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * glide_k, GLIDE_BANK_EASE, dt)
+	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * bank_k, GLIDE_BANK_EASE, dt)
 	var tilt := Basis(Vector3.RIGHT, -DIVE_PITCH * dive_k)
 	if absf(glide_bank) > 0.0005:
 		# (about the way it flies, reversed: a positive roll leans the head to the left of it)
@@ -1171,6 +1176,7 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 		km_blend = 0.0
 	if id != km_id:
 		km_stance = bool(km_def(id).get("stance", false))
+		km_bank = bool(km_def(id).get("bank", false))
 		km_swing = int(km_def(id).get("swing", -1))
 	km_id = id
 	km_prev_t = tt
