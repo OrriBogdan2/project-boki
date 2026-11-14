@@ -60,6 +60,9 @@ const CHECKS := {
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],  # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],  # GARDEN.md 9.2
 	"--base-check": ["res://tools/base_check.gd", "base_check", null],      # B: hold wheel, channel, cancels
+	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
+	"--base-check": ["res://tools/base_check.gd", "base_check", null],      # B: hold wheel, channel, cancels
+	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--base-stray-check": ["res://tools/base_stray_check.gd", "base_stray_check", null],
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],  # decision 0022
 	"--homecoming-react-check": ["res://tools/homecoming_react_check.gd", "homecoming_react_check", null],  # GARDEN 4
