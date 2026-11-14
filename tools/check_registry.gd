@@ -50,13 +50,7 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
 	"--photo-mode-check": ["res://tools/photo_mode_check.gd", "photo_mode_check", null],  # farm photo mode (GPU: PNG)
-	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
-	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
-	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
 	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
-	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
-	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
-	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
@@ -109,18 +103,6 @@ const CHECKS := {
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
 	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
-	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],      # wishes, away gifts
-	"--ridge-shots": ["res://tools/ridge_shots.gd", "ridge_shots", null],      # Kitewind Ridge, --shots-dir=<dir>
-	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],      # garden snack patch
-	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],      # food lean by type (base_mode)
-	"--lean-shots": ["res://tools/lean_shots.gd", "lean_shots", null],      # --shots-dir=<dir>
-	"--mentor-check": ["res://tools/mentor_check.gd", "mentor_check", null],      # GARDEN.md section 3
-	"--trait-drift-check": ["res://tools/trait_drift_check.gd", "trait_drift_check", null],      # GARDEN.md 3, lever 3
-	"--baby-parents-check": ["res://tools/baby_parents_check.gd", "baby_parents_check", null],      # GARDEN.md 6
-	"--family-tree-check": ["res://tools/family_tree_check.gd", "family_tree_check", null],      # GARDEN_MODERN 5.8
-	"--homecoming-check": ["res://tools/homecoming_check.gd", "homecoming_check", null],      # GARDEN.md 2
-	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
-	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
@@ -291,11 +273,6 @@ const CHECKS := {
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans 1-2 + weekly board
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans slice 1
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],  # clans: roster, saves, base, tags, deeds
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans 1-3: roll, base, ranks
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans 1-2: roll, base
 	"--clan-roles-check": ["res://tools/clan_roles_check.gd", "clan_roles_check", null],      # ranks, kick, hand-off
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
@@ -552,14 +529,10 @@ const CHECKS := {
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
 	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],      # a pat by personality
-	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],      # trust from care
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
 	"--garden-play-shots": ["res://tools/garden_play_shots.gd", "garden_play_shots", null],      # --shots-dir=<dir>
-	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],      # day 1, 5
-	"--garden-play-shots": ["res://tools/garden_play_shots.gd", "garden_play_shots", null],  # needs --hatch-auto=0
-	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],      # --zone= --shots-dir=
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],      # 0.24.2-0.24.4 saves load
 	"--garden-fit-check": ["res://tools/garden_fit_check.gd", "garden_fit_check", null],      # garden screens fit
@@ -605,8 +578,6 @@ const CHECKS := {
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],  # GARDEN_MODERN 4.2 game 3
 	"--show-ring-shots": ["res://tools/show_ring_shots.gd", "show_ring_shots", null],  # --shots-dir= (GPU)
 	"--decor-tags-check": ["res://tools/decor_tags_check.gd", "decor_tags_check", null],      # GARDEN_MODERN 5 rank 7
-	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
-	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],      # the Dash's showcase wall
 	"--seasons-check": ["res://tools/seasons_check.gd", "seasons_check", null],      # garden seasons
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
@@ -743,6 +714,7 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
@@ -751,16 +723,6 @@ const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
 	# mashing LMB never beats holding
-	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
-	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
-	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
-	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
-	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
-	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
-	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
-	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
-	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
-	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
