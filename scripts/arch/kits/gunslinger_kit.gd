@@ -42,7 +42,9 @@ const TUBE_BELL := "launcher_muzzle" # on the swinging launcher: over and forwar
 const TUBE_SWING := 0.1              # s from the press to the bell coming forward
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
-const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
+## The drum's reload cue, once as it runs dry. A stand-in for now: the rifle-cock take from her set; a library
+## reload sound (sfx-lib-1113) swaps in here.
+const RELOAD_SFX := "vn_cock"
 const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
@@ -254,8 +256,6 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
-	if m.time - round_at > SPIN_REST:
-		m.sfx("gunslinger_spinup", h.pos, -6.0)      # the shoulder cannon winds up as a string starts
 	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
@@ -288,8 +288,9 @@ func _tick_mag(dt: float) -> void:
 		dry = false
 		return
 	var mag := int(h.wpn["mag"])
-	if h.ammo <= 0:
+	if h.ammo <= 0 and not dry:
 		dry = true
+		m.sfx(RELOAD_SFX, h.pos, -4.0)
 	if h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
 		refill_part = 0.0
 		if h.ammo >= mag:
