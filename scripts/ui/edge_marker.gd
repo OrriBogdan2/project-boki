@@ -63,7 +63,7 @@ func draw(c: CanvasItem, time := 0.0) -> void:
 			c.draw_colored_polygon(_arrow(p, d, _size * 1.25), Color(0, 0, 0, 0.5))
 			HudStyle.ctext(c, _label_at(it, p) + Vector2(0, 5), it["text"], LABEL_PX, col, 3)
 		if it["downed"] != null:
-			DownedMarks.badge(c, _label_at(it, p) - Vector2(0, BADGE_DY), it["downed"], SideColor.ALLY, time, BADGE_R)
+			DownedMarks.badge(c, _label_at(it, p) - Vector2(0, BADGE_DY), it["downed"], SideColor.ally(), time, BADGE_R)
 		c.draw_colored_polygon(_arrow(p, d, _size), col)
 
 func _arrow(p: Vector2, d: Vector2, k: float) -> PackedVector2Array:

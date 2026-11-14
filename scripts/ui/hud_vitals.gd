@@ -38,7 +38,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	H.armor_lerp = move_toward(H.armor_lerp, af, dt * (0.5 if H.armor_lerp > af else 4.0))
 	H.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x

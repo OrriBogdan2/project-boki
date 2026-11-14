@@ -35,7 +35,7 @@ static func tick(m: Match, dt: float) -> void:
 		if on:
 			_lift(h, dt)
 			if fresh and h == m.player and m.hud:
-				m.hud.toast_small("LAST ONE UP  ·  quicker, mending", SideColor.YOU)
+				m.hud.toast_small("LAST ONE UP  ·  quicker, mending", SideColor.you())
 
 static func _lift(h: Hunter, dt: float) -> void:
 	h.add_buff("move_speed", SPEED, BUFF_HOLD)

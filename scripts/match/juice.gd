@@ -108,7 +108,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 		m.hud.knocks.knocked(m.player, h, credit)
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.9, 0)
 	m.fx.flash(c, Color(1.0, 0.95, 0.85), 1.1, 0.16)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.35), 22, 11.0, 75.0, 0.4, 14.0, 1.5)
@@ -121,7 +121,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.6, 0)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
