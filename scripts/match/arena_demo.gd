@@ -67,8 +67,6 @@ const ANIM_DEMO := {
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
 	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
-	"pin_ult_cast": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.8, 0.95]],
-	"pin_ult_nock": ["archer", "longbow", [0.5, 0.58, 0.66, 0.74, 0.8]],
 	"pin_ult_loose": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.1, 1.25]],
 	"pin_ult_final": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.08, 1.25]],
 	"bul_ult_wind": ["bulwark", "tower_shield", [0.5, 0.58, 0.66, 0.76, 0.86]],
@@ -418,7 +416,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 	match mv:
 		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
-		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
+		"pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
 		"bul_smash_late", "bul_launch", "bul_launch_glide", "bul_ult_walk", "bul_jump_swing", "bul_dash_hold", \
 				"bul_jump_launch":
@@ -521,13 +519,13 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	P.lvl = 6
 	K.res = 0.0                # no resource tell in the strip
-	var cast_at := 0.5 if mv in ["pin_ult_cast", "bul_ult_wind", "bul_ult_slam"] else 0.3
+	var cast_at := 0.5 if mv in ["bul_ult_wind", "bul_ult_slam"] else 0.3
 	if _at(t, dt, cast_at):
 		K.cd["x"] = 0.0
 		HunterKeys.ult_pressed(P)
 		if mv == "pin_ult_final":
 			(K as ArcherKit).ult.left = 1
-	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
+	P.inp["fire"] = mv.begins_with("pin_ult_") and t > 0.5 and t < 0.6
 
 ## Breaker's owner-review strips (#48, #49, #51): a full swing let go after the perfect window, one let go in it,
 ## one in it at an island's edge (it carries him over and he glides), Faultline cast with him walking off
