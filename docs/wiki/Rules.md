@@ -658,12 +658,13 @@ How many Boki are out on the island at once; the rest sleep in the Boki Burrow (
 
 | Setting | Value |
 |---|---|
-| doc | The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. pose_far_m: metres (flat) from the camera's focus past which a Hunter on screen is posed every 2nd frame (SimLod.pose_every): past the play view at zoom 1, small at a wide one. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them. |
+| doc | The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it; all 0 = centred on you, as the source footage shows, 'Camera lead' in docs/MOVEMENT_FEEL.md), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. pose_far_m: metres (flat) from the camera's focus past which a Hunter on screen is posed every 2nd frame (SimLod.pose_every): past the play view at zoom 1, small at a wide one. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean, an aimed cast and the far look keep between you and the screen's edge. scout: the held far look (ScoutLook, Settings 'Look ahead'): ease_in_s / ease_out_s seconds the view takes to go 90% of the way out toward the cursor and back, zoom how much wider it gets held (0.25: 25%, the sight's share, so the lean has room up and down too), sight_mul how much further you see inside a cone_deg cone along your aim while it is held (walking speed unchanged). source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them. |
 | styles | {"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Supervive"}, "supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"}, "high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"}, "classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"}, "low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"}} |
-| follow | {"supervive": [1.4, 0.42, 7.5, 6.0, false], "standard": [0.2, 0.8, 6.0, 7.0, true], "dynamic": [0.1, 0.9, 10.0, 10.0, false], "locked": [0.0, 0.0, 0.0, 0.0, false]} |
+| follow | {"supervive": [0.0, 0.0, 0.0, 6.0, false], "standard": [0.2, 0.8, 6.0, 7.0, true], "dynamic": [0.1, 0.9, 10.0, 10.0, false], "locked": [0.0, 0.0, 0.0, 0.0, false]} |
 | trail | {"doc": "The camera's follow across the ground [footage: briefs/hero-ref/dredge.md 4 and 8, ostra.md 2-3, mooshmoosh.md 2; 50 px = 1 m]. Each frame the view closes on you at min(follow_rate x gap, sqrt(2 x catch_decel x gap)) m/s: a run keeps it ~0.35 m behind and stopped with you in ~0.2 s, and a dash leaves it behind, then it eases in at a steady deceleration (Grimble's 4.6 m dash in 0.12 s: the pan peaks ~700 px/s, is down to ~300 px/s at 0.3 s and stops by ~0.5 s; ~0.4 s for a blink). follow_rate (1/s): the tight part, near you. catch_decel (m/s^2): fitted to that pan. max_gap (m): the furthest it may trail, just over the source dash's own ~3.2 m gap, so a long 40 m/s Wirerun can't take you off screen. cut_speed (m/s): a move faster than this in one frame is a teleport, and the view cuts to it, as the source does on Motley's Lantern Trade.", "follow_rate": 15.0, "catch_decel": 28.0, "max_gap": 3.5, "cut_speed": 90.0} |
 | lean_edge_m | 1.5 |
 | pose_far_m | 40 |
+| scout | {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0} |
 | source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0]} |
 
 ## capture (`content/rules/capture.json`)
@@ -745,16 +746,17 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. |
+| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. |
 | default | {"dist": 1.0, "time": 1.0} |
 | juggernaut | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
 | dredge | {"dist": 0.85, "time": 1.15} |
 | dolm | {"dist": 0.85, "time": 1.15} |
-| mage | {"dist": 1.0, "time": 1.15} |
-| gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
-| archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
-| thief | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
-| bulwark | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.15], [0.15, 1.2], [0.52, 1.22], [1, 0.66]]} |
+| mage | {"dist": 1.0, "time": 1.15, "moves": {"long": {"dist": 0.85, "time": 1.15}}} |
+| gunslinger | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
+| archer | {"dist": 1.0, "time": 1.0, "moves": {"flick": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
+| thief | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
+| bulwark | {"dist": 1.0, "time": 1.0, "moves": {"short": {"dist": 0.85, "time": 1.15}, "charge": {"dist": 0.85, "time": 1.15}, "lumber": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.15], [0.15, 1.2], [0.52, 1.22], [1, 0.66]]} |
+| gil | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}} |
 
 ## drop_poses (`content/rules/drop_poses.json`)
 
@@ -1440,6 +1442,18 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | max_top_frac | 0.2 |
 | _max_top_frac | the lowest its top goes for toasts (past it, it sits over them): the name pill stays above ~37%, clear of your Hunter |
 
+## knock_tip (`content/rules/knock_tip.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys. |
+| showings | 2 |
+| gap | 10 |
+| far_m | 22 |
+| sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
+
 ## lantern_match (`content/rules/lantern_match.json`)
 
 Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
@@ -1476,18 +1490,6 @@ Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6,
 | gems | 4 |
 | gems_doc | Gems to you when a game ends (win or not). |
 | card_s | 6 |
-
-## knock_tip (`content/rules/knock_tip.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| doc | The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys. |
-| showings | 2 |
-| gap | 10 |
-| far_m | 22 |
-| sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
 
 ## lean (`content/rules/lean.json`)
 
@@ -1845,6 +1847,19 @@ The mid-match spawns on a clock (scripts/match/timed_spawns.gd, docs/SPAWNS.md):
 | warden | {"at": 0.4, "warn_s": 30.0} |
 | _warden | the Watcher, at the Heart on the center island |
 
+## tips (`content/rules/tips.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Loading-screen and downed-screen tips (scripts/ui/tip_pick.gd). Each tip: id, text, and an optional 'when' trigger read from the last expedition's stats. {action} in a text becomes that action's key (Settings.key_cap). The most relevant unseen tip wins, else a random unseen one, else any. hints: one-line in-match hints said once per save (scripts/ui/recast_hint.gd: {key} the ability's key, {verb} its own verb from the ability text); they count toward the text budget with the tips. Tips that name the Blight are skipped when the Blight is off. |
+| triggers | {"abyss": "the last expedition ended with a fall into the abyss", "no_summon": "your Boki was never sent out", "no_e": "the E ability was never used", "few_glide": "you hardly glided", "wisp_stolen": "a rival took one of your Boki", "blight": "the Blight knocked you down or out"} |
+| hints | {"recast": "{key} AGAIN to {verb}"} |
+| min_time_s | 90 |
+| few_glide_s | 6 |
+| tips | [{"id": "abyss_catch", "when": "abyss", "text": "Falling all the way into the abyss is death. Glide (press {jump} again in the air, or {glide}, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it."}, {"id": "abyss_wall", "when": "abyss", "text": "Knocked off an edge? Touch the island's side and you float back up onto it."}, {"id": "abyss_kick", "when": "abyss", "text": "Short of the ledge? Jump at a wall in the air to kick off it, then glide the rest."}, {"id": "abyss_drop", "when": "abyss", "text": "Open your glider early when you jump off the skyship. A longer, slower fall means you land where you planned."}, {"id": "summon_basic", "when": "no_summon", "text": "{throw} sends your Boki out. It stuns what it hits; press again to call it back."}, {"id": "summon_hold", "when": "no_summon", "text": "Hold {throw} to give your Boki an order: chase, guard, return or follow."}, {"id": "summon_combo", "when": "no_summon", "text": "Your Boki stuns or roots a foe? Shoot it right away for a combo."}, {"id": "summon_bond", "when": "no_summon", "text": "Fight alongside your Boki to fill the bond meter, then {ultimate} fuses you for its bond ultimate."}, {"id": "e_basic", "when": "no_e", "text": "{signature} is your hunter's utility ability. It recharges by itself, so use it every fight."}, {"id": "e_combo", "when": "no_e", "text": "Open a fight with {signature}, then follow up with your weapon. Most kits chain the two."}, {"id": "e_secondary", "when": "no_e", "text": "Every weapon has its own right-click ability on {secondary}. Try them all in Training."}, {"id": "glide_basic", "when": "few_glide", "text": "Press {jump} again in the air (or {glide}) and hold to glide. You can open your glider off any booster too."}, {"id": "glide_hits", "when": "few_glide", "text": "Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you drop like a stone."}, {"id": "glide_dash", "when": "few_glide", "text": "Dash in mid-air, then glide: you cross gaps a plain jump can't."}, {"id": "wisp_sense", "when": "wisp_stolen", "text": "A rival took your Boki? You'll sense it when they're nearby. Take it back."}, {"id": "wisp_chase", "when": "wisp_stolen", "text": "Whoever carries a stolen Boki walks slower and shows up marked. Run them down and take it back."}, {"id": "wisp_guard", "when": "wisp_stolen", "text": "Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims."}, {"id": "blight_noise", "when": "blight", "text": "The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking with {crouch} doesn't."}, {"id": "blight_grow", "when": "blight", "text": "The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night. Leave before it catches up."}, {"id": "blight_watcher", "when": "blight", "text": "A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach."}, {"id": "exit_open", "text": "Exits open partway through. Stand inside one to fly home with everything you carry."}, {"id": "vision", "text": "You only see what's in front of you. Rivals behind you or past a wall stay hidden, and so do you."}, {"id": "grass", "text": "Tall grass hides you from anyone outside it. Shooting gives you away for a moment."}, {"id": "wall_stun", "text": "Get knocked into a wall and you're stunned. Do it to them first."}, {"id": "aim", "text": "Shots go exactly where you aim. Fast guns sway in the same small pattern every time, and firing slows your step."}, {"id": "breakables", "text": "One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear."}, {"id": "found_weapons", "text": "Weapons you find out here are stronger than your own, but only for this expedition."}, {"id": "tonic", "text": "Health and armor don't come back on their own. {util1} drinks a tonic, {util2} repairs your armor with a kit. You take more damage while you do either."}, {"id": "gloves", "text": "Gloves drop from chests, vaults and bosses. You carry one active glove ({gear1}) and one passive glove at a time; a new one replaces the old."}, {"id": "revive", "text": "A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold {interact} to finish them."}, {"id": "dash_dodge", "text": "Dash through a shot at the last moment and you take nothing."}] |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.
@@ -2066,6 +2081,17 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
 
+## words (`content/rules/words.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The Words page (Help in the pause menu, Help on the title): one plain line per term, in the canon wording (briefs/DECISIONS.md, briefs/LORE_MASKS.md). A term shows once its 'seen' rule holds: {} always, {tut: key} a Save.d tutorial flag, {matches: n} that many expeditions played. Budget (checked by --words-check): max_words per line, max_chars per line. |
+| max_words | 16 |
+| max_chars | 100 |
+| words | [{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}}, {"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}}, {"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}}, {"term": "Summon", "line": "Your Boki wisp bursts into the full Boki for a short time, then shrinks back.", "seen": {"tut": "hatched"}}, {"term": "Extract", "line": "Leave the expedition with what you carry. Only extracted loot comes home.", "seen": {"tut": "hatched"}}, {"term": "Wisp", "line": "A downed Hunter pops into a round glowing Wisp, until a friend revives them.", "seen": {"matches": 1}}, {"term": "Fusion", "line": "A Hunter merged with their Boki. It needs a full bond meter.", "seen": {"matches": 1}}, {"term": "The Blight", "line": "The Wyrm's blood. Each match it closes in toward the Heart.", "seen": {"matches": 1}}, {"term": "The Heart", "line": "The Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it.", "seen": {"matches": 1}}, {"term": "Heartspark", "line": "A mote of the Heart's light that charges at its site. Everyone sees where.", "seen": {"matches": 1}}] |
+
 ## zone_air (`content/rules/zone_air.json`)
 
 Each garden zone's ambient layer (scripts/home/zone_air.gd): one GPUParticles3D over the island, unshaded, no lights, no bursts. Off at the lowest quality preset, count x Settings fx above it. Keys are garden_zones.json ids.
@@ -2078,17 +2104,6 @@ Each garden zone's ambient layer (scripts/home/zone_air.gd): one GPUParticles3D 
 | box_doc | m, half-extents of the box round HomeLayout.LANDING the motes start in (the start island is about 32 x 24 m). |
 | zones_doc | col: colour (hex) · count: particles at fx 1 · life: s each lives · size: m [width, height] of its quad · y: m above the ground the box centre sits · vel: m/s start velocity · spread: degrees off vel · grav: m/s2 (y) · fade: share of its life it takes to fade in and out (a twinkle at 0.5) |
 | zones | {"bramblebank": {"name": "pollen", "col": "f6eaa0", "count": 40, "life": 9.0, "size": [0.07, 0.07], "y": 1.6, "vel": [0.25, 0.05, 0.1], "spread": 60.0, "grav": -0.02, "fade": 0.2}, "glasswater": {"name": "glints", "col": "e8fbff", "count": 36, "life": 1.4, "size": [0.12, 0.12], "y": 0.15, "vel": [0.0, 0.0, 0.0], "spread": 0.0, "grav": 0.0, "fade": 0.5}, "cinderstep": {"name": "embers", "col": "ff8a3a", "count": 36, "life": 5.0, "size": [0.06, 0.06], "y": 0.6, "vel": [0.1, 0.45, 0.0], "spread": 25.0, "grav": 0.0, "fade": 0.3}, "hushwood": {"name": "fireflies", "col": "d6ff7a", "count": 28, "life": 6.0, "size": [0.09, 0.09], "y": 1.2, "vel": [0.0, 0.08, 0.2], "spread": 180.0, "grav": 0.0, "fade": 0.5}, "ridge": {"name": "wind streaks", "col": "ffffff", "count": 18, "life": 1.6, "size": [1.1, 0.03], "y": 1.8, "vel": [6.0, 0.0, 0.6], "spread": 6.0, "grav": 0.0, "fade": 0.4}} |
-
-## words (`content/rules/words.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| doc | The Words page (Help in the pause menu, Help on the title): one plain line per term, in the canon wording (briefs/DECISIONS.md, briefs/LORE_MASKS.md). A term shows once its 'seen' rule holds: {} always, {tut: key} a Save.d tutorial flag, {matches: n} that many expeditions played. Budget (checked by --words-check): max_words per line, max_chars per line. |
-| max_words | 16 |
-| max_chars | 100 |
-| words | [{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}}, {"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}}, {"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}}, {"term": "Summon", "line": "Your Boki wisp bursts into the full Boki for a short time, then shrinks back.", "seen": {"tut": "hatched"}}, {"term": "Extract", "line": "Leave the expedition with what you carry. Only extracted loot comes home.", "seen": {"tut": "hatched"}}, {"term": "Wisp", "line": "A downed Hunter pops into a round glowing Wisp, until a friend revives them.", "seen": {"matches": 1}}, {"term": "Fusion", "line": "A Hunter merged with their Boki. It needs a full bond meter.", "seen": {"matches": 1}}, {"term": "The Blight", "line": "The Wyrm's blood. Each match it closes in toward the Heart.", "seen": {"matches": 1}}, {"term": "The Heart", "line": "The Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it.", "seen": {"matches": 1}}, {"term": "Heartspark", "line": "A mote of the Heart's light that charges at its site. Everyone sees where.", "seen": {"matches": 1}}] |
 
 ## Combos
 
