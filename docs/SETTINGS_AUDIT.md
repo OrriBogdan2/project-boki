@@ -41,6 +41,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `show_fps` | Video > Quality | `overlay.gd` | |
 | `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `text_size` | Accessibility > Readability | `settings.gd` (UI.set_text_size) | 100/125/150%; old configs load at 100% |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
 
