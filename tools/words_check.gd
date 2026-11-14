@@ -5,20 +5,24 @@ extends RefCounted
 ## opens from the pause menu and from the title. Never touches the real save.
 
 const TERMS := [
-	"Relic", "Hunter", "Boki wisp", "Summon", "Extract",
-	"Wisp", "Fusion", "The Blight", "The Heart", "Heartspark"]
+	"Relic", "Hunter", "Boki wisp", "Summon", "Extract", "Wisp", "Fusion", "The Blight", "The Heart", "Heartspark"
+]
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WORDS %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _terms() -> Array:
 	var out: Array = []
 	for w in WordsView.visible():
 		out.append(String(w["term"]))
 	return out
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -45,12 +49,14 @@ func run(m: Node) -> void:
 	Overlay.open_pause("home")
 	var pause_help := false
 	for b in Overlay.host.find_children("*", "Button", true, false):
-		if (b as Button).text.contains("Help"): pause_help = true
+		if (b as Button).text.contains("Help"):
+			pause_help = true
 	ok(pause_help, "the pause menu has Help")
 	Overlay.open_words()
 	var shown := 0
 	for l in Overlay.host.find_children("*", "Label", true, false):
-		if TERMS.has((l as Label).text): shown += 1
+		if TERMS.has((l as Label).text):
+			shown += 1
 	ok(Overlay.page == "words" and shown == 2, "Help opens the Words page with 2 terms on a fresh save (%d)" % shown)
 	Overlay.close()
 	print("WORDS CHECK DONE, failures: %d" % bad)

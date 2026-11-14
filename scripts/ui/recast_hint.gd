@@ -13,6 +13,7 @@ const FALLBACK_VERB := "finish it"
 const VERB_PATTERN := "(?:again|recast)\\b.*?\\bto (be \\w+|\\w+(?: (?:it|down|out|early|on|back))*)"
 static var _verb_re := RegEx.create_from_string(VERB_PATTERN)
 
+
 ## The window `w` just opened on the local hunter's kit: says the hint if this save hasn't seen it. Returns the
 ## line ("" when nothing was said).
 static func opened(k: ArchKit, w: Dictionary) -> String:
@@ -26,9 +27,11 @@ static func opened(k: ArchKit, w: Dictionary) -> String:
 		m.hud.tip(text, "", maxf(float(w["left"]), 1.0))
 	return text
 
+
 ## "<KEY> AGAIN to <verb>" for the kit's recast on `slot`.
 static func line(k: ArchKit, slot: String) -> String:
 	return String(TipPick.rules()["hints"]["recast"]).format({"key": RecastCue.key_of(slot), "verb": verb(k, slot)})
+
 
 ## The kit's own verb for the recast on `slot`, from its ability text (FALLBACK_VERB when the text has none).
 static func verb(k: ArchKit, slot: String) -> String:
@@ -38,6 +41,7 @@ static func verb(k: ArchKit, slot: String) -> String:
 		text = String((k.d.get("card", {}) as Dictionary).get(slot, ""))
 	var found := _verb_re.search(text)
 	return found.get_string(1) if found != null else FALLBACK_VERB
+
 
 ## Old saves: one that has played already has met two-step abilities; a new one is still to see the hint
 ## (keyed by its own field, like FirstMatchGuide).

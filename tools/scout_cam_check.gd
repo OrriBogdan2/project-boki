@@ -11,17 +11,19 @@ extends RefCounted
 ## view, the far look held, and half way back after release, one PNG each.
 
 const VIEW := Vector2i(1920, 1080)
-const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
-const STEP := 1.0 / 60.0             # s: one frame of the ease
-const CLEAR := 34                    # m: the flattened patch round the player (past the far look's reach)
-const SHOT_CURSOR := Vector2(0.8, 0.25)   # share of the screen the cursor sits at in the shots
+const HEAD := 2.0  # m: the top of a medium hunter's head above its feet
+const STEP := 1.0 / 60.0  # s: one frame of the ease
+const CLEAR := 34  # m: the flattened patch round the player (past the far look's reach)
+const SHOT_CURSOR := Vector2(0.8, 0.25)  # share of the screen the cursor sits at in the shots
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SCOUTCAM %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node, what: String) -> void:
 	if what == "shots":
@@ -44,11 +46,12 @@ func run(main: Node, what: String) -> void:
 	print("SCOUTCAM CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _distance(cam: CamRig) -> void:
 	ok(cam.scout_to(Vector2(CamRig.SCOUT_DEAD * 0.8, 0)) == Vector3.ZERO, "a cursor near the centre leans nowhere")
 	var halfway := cam.scout_to(Vector2(0.55, 0)).length()
 	ok(absf(halfway / cam.scout_to(Vector2(1, 0)).length() - 0.5) < 0.01, "a cursor halfway out leans half the room")
-	cam.scout_k = 1.0      # (the far look's wider view, for the on-screen test)
+	cam.scout_k = 1.0  # (the far look's wider view, for the on-screen test)
 	for z in [1.0, 1.45]:
 		cam.zoom = z
 		var worst := 1e9
@@ -58,22 +61,29 @@ func _distance(cam: CamRig) -> void:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / 16.0)
 			var p := cam.scout_to(Vector2(dir.x, dir.z))
 			var lean := cam.lean_to(dir * 200.0).length()
-			if p.length() + 0.001 < lean: short += 1
-			if p.length() > lean + 1.0: further += 1
+			if p.length() + 0.001 < lean:
+				short += 1
+			if p.length() > lean + 1.0:
+				further += 1
 			cam.snap(p)
 			for at in [Vector3.ZERO, Vector3(0, HEAD, 0)]:
 				var s := cam.unproject_position(at)
 				worst = minf(worst, minf(minf(s.x, VIEW.x - s.x), minf(s.y, VIEW.y - s.y)))
-		ok(short == 0 and further == 16,
-				"zoom %.2f: the far look reaches 1 m+ past the cursor lean %d of 16 ways" % [z, further])
-		ok(worst >= 20.0, "zoom %.2f: at the full far look every way you stay on screen (%.0f px to the nearest edge)"
-				% [z, worst])
+		ok(
+			short == 0 and further == 16,
+			"zoom %.2f: the far look reaches 1 m+ past the cursor lean %d of 16 ways" % [z, further]
+		)
+		ok(
+			worst >= 20.0,
+			"zoom %.2f: at the full far look every way you stay on screen (%.0f px to the nearest edge)" % [z, worst]
+		)
 	cam.zoom = 1.0
 	cam.scout_k = 0.0
 	cam.snap(Vector3.ZERO)
 	var side := cam.scout_to(Vector2(1, 0)).length()
 	var cap := float(CamRig.FOLLOW["supervive"][2])
 	print("SCOUTCAM far look across the screen: %.1f m (cursor lean cap %.1f m)" % [side, cap])
+
 
 ## Frames until scout_k crosses `to` with scout_on `on`, as seconds.
 func _ease_secs(cam: CamRig, on: bool, mouse_lead: bool, to: float) -> float:
@@ -83,6 +93,7 @@ func _ease_secs(cam: CamRig, on: bool, mouse_lead: bool, to: float) -> float:
 		cam._tick_scout(STEP, mouse_lead)
 		t += STEP
 	return t
+
 
 func _ease(cam: CamRig) -> void:
 	var r: Dictionary = CamRig.SCOUT
@@ -100,6 +111,7 @@ func _ease(cam: CamRig) -> void:
 	ok(t_ship < 1.0, "held off the mouse (the ship, the launch): the view still eases back (%.2f s)" % t_ship)
 	cam.scout_on = false
 	cam.scout_k = 0.0
+
 
 func _match(main: Node) -> Match:
 	var m := Match.new()
@@ -134,6 +146,7 @@ func _match(main: Node) -> Match:
 		m.step(Match.DT)
 	return m
 
+
 ## Seen by the player's team at `dist` m, `deg` degrees off the aim (+x), holding the far look or not.
 func _seen(m: Match, dist: float, deg: float, held: bool) -> bool:
 	var h := m.player
@@ -142,6 +155,7 @@ func _seen(m: Match, dist: float, deg: float, held: bool) -> bool:
 	var at := h.pos + Vector3(cos(deg_to_rad(deg)), 0, sin(deg_to_rad(deg))) * dist
 	return m.sees(h.team, at)
 
+
 func _cone(m: Match) -> void:
 	var rng := m.view_range()
 	var mul := float(CamRig.SCOUT["sight_mul"])
@@ -149,17 +163,24 @@ func _cone(m: Match) -> void:
 	var mid := rng * (1.0 + mul) * 0.5
 	ok(not _seen(m, mid, 0.0, false), "not held: %.1f m along the aim is past sight (%.1f m)" % [mid, rng])
 	ok(_seen(m, mid, 0.0, true), "held: %.1f m along the aim is seen (sight x%.2f)" % [mid, mul])
-	ok(_seen(m, mid, half - 3.0, true),
-			"held: seen %.0f deg off the aim, inside the %.0f deg cone" % [half - 3.0, half * 2.0])
+	ok(
+		_seen(m, mid, half - 3.0, true),
+		"held: seen %.0f deg off the aim, inside the %.0f deg cone" % [half - 3.0, half * 2.0]
+	)
 	ok(not _seen(m, mid, half + 3.0, true), "held: not seen %.0f deg off the aim, outside the cone" % [half + 3.0])
 	ok(not _seen(m, rng * mul + 1.0, 0.0, true), "held: not seen past %.1f m along the aim" % (rng * mul))
-	ok(_seen(m, rng * 0.8, 40.0, true) and _seen(m, rng * 0.8, 40.0, false),
-			"the usual wider cone is the same held or not")
+	ok(
+		_seen(m, rng * 0.8, 40.0, true) and _seen(m, rng * 0.8, 40.0, false),
+		"the usual wider cone is the same held or not"
+	)
 	m.player.scout = true
 	var f_on := m._flags(m.player)
 	m.player.scout = false
-	ok(f_on & ScoutLook.BIT != 0 and m._flags(m.player) & ScoutLook.BIT == 0,
-			"the hold rides the hunter flags (teammates share it online)")
+	ok(
+		f_on & ScoutLook.BIT != 0 and m._flags(m.player) & ScoutLook.BIT == 0,
+		"the hold rides the hunter flags (teammates share it online)"
+	)
+
 
 ## Flat speed after `secs` walking +x, holding the far look or not.
 func _speed(m: Match, held: bool) -> float:
@@ -178,24 +199,33 @@ func _speed(m: Match, held: bool) -> float:
 	h.teleport(h.pos - Vector3(6, 0, 0))
 	return v
 
+
 func _walk(m: Match) -> void:
 	var off := _speed(m, false)
 	var on := _speed(m, true)
-	ok(m.player.scout == false and off > 1.0 and absf(on - off) < 0.01,
-			"walking: %.2f m/s held, %.2f m/s not (unchanged)" % [on, off])
+	ok(
+		m.player.scout == false and off > 1.0 and absf(on - off) < 0.01,
+		"walking: %.2f m/s held, %.2f m/s not (unchanged)" % [on, off]
+	)
 	m.player.inp["scout"] = true
 	m.step(Match.DT)
 	ok(m.player.scout, "the hunter holds the far look while the key is down")
 	m.player.inp["scout"] = false
 	m.step(Match.DT)
 
+
 func _key() -> void:
 	var c := InputEventKey.new()
 	c.physical_keycode = KEY_C
-	ok(Settings.key_cap("scout") == "C" and InputMap.has_action("scout"), "the far look is on C by default (key cap %s)"
-			% Settings.key_cap("scout"))
-	ok(Settings.conflicts(c, "scout").is_empty(),
-			"C clashes with nothing in a match (home's Details shares it on purpose)")
+	ok(
+		Settings.key_cap("scout") == "C" and InputMap.has_action("scout"),
+		"the far look is on C by default (key cap %s)" % Settings.key_cap("scout")
+	)
+	ok(
+		Settings.conflicts(c, "scout").is_empty(),
+		"C clashes with nothing in a match (home's Details shares it on purpose)"
+	)
+
 
 func _shots(main: Node) -> void:
 	Save.no_write = true
@@ -209,7 +239,7 @@ func _shots(main: Node) -> void:
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
-		await fade.reveal(0.01)      # (the screen fade from start-up still covers the view)
+		await fade.reveal(0.01)  # (the screen fade from start-up still covers the view)
 	Settings.set_v("tips", false)
 	for h in m.hunters:
 		if h != m.player:
@@ -229,6 +259,10 @@ func _shots(main: Node) -> void:
 		vp.get_texture().get_image().save_png(dir.path_join(String(sh[0]) + ".png"))
 		var s := m.cam.unproject_position(m.player.pos)
 		var off := Vector2(m.cam.focus.x - m.player.pos.x, m.cam.focus.z - m.player.pos.z).length()
-		print("SCOUTCAM shot %s: scout_k %.2f, view %.1f m off you, feet at %.0f,%.0f px"
-				% [sh[0], m.cam.scout_k, off, s.x, s.y])
+		print(
+			(
+				"SCOUTCAM shot %s: scout_k %.2f, view %.1f m off you, feet at %.0f,%.0f px"
+				% [sh[0], m.cam.scout_k, off, s.x, s.y]
+			)
+		)
 	main.get_tree().quit(0)

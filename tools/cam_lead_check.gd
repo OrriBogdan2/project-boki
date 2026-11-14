@@ -7,20 +7,22 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const LEAD_EDGE_MAX_M := 0.35     # m: the footage's noise floor, 1.5% of the ~23.5 m across the view
-const FLICK_MOVE_MAX_M := 0.05    # m the view may drift off you in the second after a cursor flick (footage: 0)
-const DASH_BACK_S := 0.5          # s after a dash starts by which the view is back on you (footage: ~0.5 s)
-const DASH_BACK_SLACK_M := 0.1    # m over the usual running lag allowed at that moment
-const DASH_JUMP_MAX_M := 0.5      # m the view may move in one frame during a dash (no jump cut)
+const LEAD_EDGE_MAX_M := 0.35  # m: the footage's noise floor, 1.5% of the ~23.5 m across the view
+const FLICK_MOVE_MAX_M := 0.05  # m the view may drift off you in the second after a cursor flick (footage: 0)
+const DASH_BACK_S := 0.5  # s after a dash starts by which the view is back on you (footage: ~0.5 s)
+const DASH_BACK_SLACK_M := 0.1  # m over the usual running lag allowed at that moment
+const DASH_JUMP_MAX_M := 0.5  # m the view may move in one frame during a dash (no jump cut)
 const EDGE := Vector2(0.99, 0.5)  # where the shot holds the cursor, as a share of the window
 
 var main: Node
 var fails := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		fails += 1
 	print("CAMLEAD %s %s" % ["ok  " if cond else "FAIL", what])
+
 
 func run(main_node: Node, what: String) -> void:
 	main = main_node
@@ -33,10 +35,22 @@ func run(main_node: Node, what: String) -> void:
 		await _shots()
 	else:
 		await _area("expedition", {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
-		await _area("training", {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-			"training": true, "practice": true})
+		await _area(
+			"training",
+			{
+				"teams": 1,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 4242,
+				"no_drop": true,
+				"training": true,
+				"practice": true
+			}
+		)
 		print("CAMLEAD %s (%d fail)" % ["PASS" if fails == 0 else "FAIL", fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## The three measurements in one area: the edge lean, a flick, a dash.
 func _area(label: String, opts: Dictionary) -> void:
@@ -55,26 +69,33 @@ func _area(label: String, opts: Dictionary) -> void:
 	for i in 30:
 		_step(m, cam, P)
 	var sz := cam.get_viewport().get_visible_rect().size
-	var edge := maxf(cam.cursor_pan(Vector2(sz.x - 1.0, sz.y * 0.5), P.pos).length(),
-		cam.cursor_pan(Vector2(sz.x * 0.5, 1.0), P.pos).length())
-	ok(edge <= LEAD_EDGE_MAX_M, "%s: the view leans %.2f m with the cursor at the screen's edge (at most %.2f)"
-		% [label, edge, LEAD_EDGE_MAX_M])
+	var edge := maxf(
+		cam.cursor_pan(Vector2(sz.x - 1.0, sz.y * 0.5), P.pos).length(),
+		cam.cursor_pan(Vector2(sz.x * 0.5, 1.0), P.pos).length()
+	)
+	ok(
+		edge <= LEAD_EDGE_MAX_M,
+		"%s: the view leans %.2f m with the cursor at the screen's edge (at most %.2f)" % [label, edge, LEAD_EDGE_MAX_M]
+	)
 	var moved := 0.0
 	for i in 60:
 		_step(m, cam, P)
 		moved = maxf(moved, _off(cam, P))
-	ok(moved <= FLICK_MOVE_MAX_M, "%s: in the second after a cursor flick the view drifts %.3f m off you"
-		% [label, moved])
+	ok(
+		moved <= FLICK_MOVE_MAX_M,
+		"%s: in the second after a cursor flick the view drifts %.3f m off you" % [label, moved]
+	)
 	_dash(label, m, cam, P)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 ## A dash while running: the view trails you, eases back within DASH_BACK_S and never jumps.
 func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 	P.inp["move"] = Vector2(1, 0)
 	for i in 30:
 		_step(m, cam, P)
-	P.slot_lv["dash"] = maxi(1, int(P.slot_lv["dash"]))      # (an expedition starts with the dash slot locked)
+	P.slot_lv["dash"] = maxi(1, int(P.slot_lv["dash"]))  # (an expedition starts with the dash slot locked)
 	P.dashes = P.max_dashes()
 	P.ex_cd = 0.0
 	P.dash_buf = 0.0
@@ -95,24 +116,37 @@ func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 		if absf(t - DASH_BACK_S) < DT * 0.5:
 			back = _off(cam, P)
 	P.inp["move"] = Vector2.ZERO
-	ok(jump <= DASH_JUMP_MAX_M, "%s: the view moves at most %.2f m in one frame of a dash (at most %.2f, no jump cut)"
-		% [label, jump, DASH_JUMP_MAX_M])
-	ok(trail > run_lag + 0.05, "%s: the view trails the dash (%.2f m behind you, %.2f m at a run)"
-		% [label, trail, run_lag])
-	ok(back <= run_lag + DASH_BACK_SLACK_M, "%s: %.1f s into the dash the view is %.2f m behind you (a run: %.2f m)"
-		% [label, DASH_BACK_S, back, run_lag])
+	ok(
+		jump <= DASH_JUMP_MAX_M,
+		(
+			"%s: the view moves at most %.2f m in one frame of a dash (at most %.2f, no jump cut)"
+			% [label, jump, DASH_JUMP_MAX_M]
+		)
+	)
+	ok(
+		trail > run_lag + 0.05,
+		"%s: the view trails the dash (%.2f m behind you, %.2f m at a run)" % [label, trail, run_lag]
+	)
+	ok(
+		back <= run_lag + DASH_BACK_SLACK_M,
+		"%s: %.1f s into the dash the view is %.2f m behind you (a run: %.2f m)" % [label, DASH_BACK_S, back, run_lag]
+	)
+
 
 func _step(m: Match, cam: CamRig, P: Hunter) -> void:
 	m.step(DT)
 	P.render(DT, 0.0)
 	cam.follow(P.position, DT, true)
 
+
 static func _flat(v: Vector3) -> Vector3:
 	return Vector3(v.x, 0.0, v.z)
+
 
 ## How far the view's focus sits from you, across the ground.
 static func _off(cam: CamRig, P: Hunter) -> float:
 	return _flat(cam.focus - P.position).length()
+
 
 ## One review frame with the cursor held at the right edge of the window.
 func _shots() -> void:

@@ -13,52 +13,76 @@ var m: Match
 var main: Node
 var lines: Array = []
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TUTCAP %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _fresh(opts := {}) -> void:
-	if m: m.queue_free()
+	if m:
+		m.queue_free()
 	Save.d = Save.fresh()
-	Save.d["tutorial"]["move"] = true      # (the first tip of the match is out of the way)
+	Save.d["tutorial"]["move"] = true  # (the first tip of the match is out of the way)
 	m = Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true,
-			"weapon": "rifle", "cls": "medium", "demo_kin": "cindle"}
+	var o := {
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4243,
+		"no_drop": true,
+		"weapon": "rifle",
+		"cls": "medium",
+		"demo_kin": "cindle"
+	}
 	o.merge(opts, true)
 	m.start(o)
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		if h.team != m.player.team:
 			h.ctrl = "idle"
 			h.teleport(m.player.pos + Vector3(60.0, 0, 40.0))
 	m.hud.msgs.clear()
-	for i in 20: m.step(Match.DT)
+	for i in 20:
+		m.step(Match.DT)
+
 
 func _wild(species: String, dx: float, dazed := true) -> Kin:
 	var at: Vector3 = m.player.pos + Vector3(dx, 0, 0)
 	var k := m.spawn_wild(Save.new_kin(species, "", 77), Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), dazed)
-	for i in 5: m.step(Match.DT)
+	for i in 5:
+		m.step(Match.DT)
 	return k
+
 
 func _flag() -> bool:
 	return Save.d["tutorial"].get(FirstCapture.KEY, false)
 
+
 ## What the lane shows with the hint's words.
 func _shown(word: String) -> bool:
 	for l in m.hud.msgs.texts():
-		if String(l).contains(word): return true
+		if String(l).contains(word):
+			return true
 	return false
+
 
 ## One frame of Match's first-time tips (the hint is wired in there).
 func _tips() -> void:
 	m._tip_t = 5.0
 	m._tips()
 
+
 func _run_for(secs: float) -> void:
-	for i in int(secs / Match.DT): m.step(Match.DT)
+	for i in int(secs / Match.DT):
+		m.step(Match.DT)
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -69,6 +93,7 @@ func run(mn: Node) -> void:
 	_migration()
 	print("TUTCAP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _hint() -> void:
 	_fresh()
@@ -85,7 +110,7 @@ func _hint() -> void:
 	var named: bool = text.contains(k.sp["name"]) and text.contains(String(k.sp["type"]).capitalize())
 	var keyed: bool = text.contains("Hold %s to capture it" % Settings.key_cap("interact"))
 	var home: bool = text.contains("comes home with you if you get out")
-	ok(named and keyed and home, "the hint names the Boki, its type and the key: \"%s\"" % text)
+	ok(named and keyed and home, 'the hint names the Boki, its type and the key: "%s"' % text)
 	ok(_flag() and _shown("capture it"), "the hint is on screen and in the save, once per save")
 	var far := _wild("puddlet", 40.0)
 	m.player.teleport(far.pos + Vector3(1.5, 0, 0))
@@ -95,6 +120,7 @@ func _hint() -> void:
 	_wild("cindle", 2.0)
 	_tips()
 	ok(not _flag() and not m.player.has_meta("fc"), "the tutorial match never shows it")
+
 
 func _marker_and_rebind() -> void:
 	_fresh()
@@ -124,7 +150,9 @@ func _marker_and_rebind() -> void:
 	InputMap.action_add_event("interact", j)
 	ok(FirstCapture.hint_text(k).contains("Hold J to") and old != "J", "the key text follows a rebind (%s to J)" % old)
 	InputMap.action_erase_events("interact")
-	for e in evs: InputMap.action_add_event("interact", e)
+	for e in evs:
+		InputMap.action_add_event("interact", e)
+
 
 func _fails() -> void:
 	for why in ["far", "dash", "cc", "gone"]:
@@ -137,10 +165,14 @@ func _fails() -> void:
 		P.inp["interact"] = false
 		m.hud.msgs.clear()
 		match why:
-			"far": k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))
-			"dash": P.inp["dash"] = true
-			"cc": P.stun_t = 1.0
-			"gone": k.dead = true
+			"far":
+				k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))
+			"dash":
+				P.inp["dash"] = true
+			"cc":
+				P.stun_t = 1.0
+			"gone":
+				k.dead = true
 		_run_for(0.3)
 		P.inp["dash"] = false
 		var word: String = {"far": "Too far", "dash": "You dashed", "cc": "knocked you out", "gone": "got away"}[why]
@@ -151,11 +183,13 @@ func _fails() -> void:
 	_wild("cindle", 2.0)
 	ok(not FirstCapture.fail(m, P2, "dash"), "no hint behind it: the generic line is used")
 
+
 func _migration() -> void:
 	var a := {"tutorial": {}, "stats": {"caught": 2}}
 	var b := {"tutorial": {"catch": true}, "stats": {"caught": 0}}
 	var c := {"tutorial": {}, "stats": {"caught": 0}}
-	for d in [a, b, c]: FirstCapture.migrate(d)
+	for d in [a, b, c]:
+		FirstCapture.migrate(d)
 	var key := FirstCapture.KEY
 	var taught: bool = a["tutorial"].get(key, false) and b["tutorial"].get(key, false)
 	ok(taught and not c["tutorial"].has(key), "a save that caught or saw the old hint is not taught; a new one is")

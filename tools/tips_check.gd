@@ -9,20 +9,24 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TIPSCHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _fresh() -> void:
 	Save.d = Save.fresh()
 	TipPick.last = []
+
 
 func _id_of(text: String) -> String:
 	for t in TipPick.rules()["tips"]:
 		if TipPick.render(String(t["text"])) == text:
 			return String(t["id"])
 	return ""
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -32,6 +36,7 @@ func run(main_node: Node) -> void:
 	await _match_counts()
 	print("TIPSCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
 
 func _table() -> void:
 	var R := TipPick.rules()
@@ -61,6 +66,7 @@ func _table() -> void:
 	var n_trig := (R["triggers"] as Dictionary).size()
 	ok(used_triggers.size() == n_trig, "every trigger has tips (%d)" % n_trig)
 
+
 func _picking() -> void:
 	_fresh()
 	var tr := TipPick.triggers({"summons": 0, "glide_t": 30.0}, {"k1": 3}, "", 200.0)
@@ -71,11 +77,13 @@ func _picking() -> void:
 	ok(second != first and _id_of(second).begins_with("summon_"), "a seen tip is not repeated: the next one differs")
 	ok(TipPick.triggers({"summons": 0}, {}, "", 30.0).is_empty(), "a run shorter than min_time_s blames nothing")
 	var base := {"summons": 1, "glide_t": 60.0}
-	var checks := {"abyss": TipPick.triggers(base, {"k1": 1}, "abyss", 120.0),
+	var checks := {
+		"abyss": TipPick.triggers(base, {"k1": 1}, "abyss", 120.0),
 		"blight": TipPick.triggers(base.merged({"blight_downs": 1}, true), {"k1": 1}, "", 120.0),
 		"wisp_stolen": TipPick.triggers(base.merged({"wisp_stolen": 1}, true), {"k1": 1}, "", 120.0),
 		"no_e": TipPick.triggers(base, {}, "", 120.0),
-		"few_glide": TipPick.triggers(base.merged({"glide_t": 1.0}, true), {"k1": 1}, "", 120.0)}
+		"few_glide": TipPick.triggers(base.merged({"glide_t": 1.0}, true), {"k1": 1}, "", 120.0)
+	}
 	for k in checks:
 		_fresh()
 		var got := _id_of(TipPick.pick(checks[k]))
@@ -105,6 +113,7 @@ func _picking() -> void:
 	for o in old:
 		InputMap.action_add_event("signature", o)
 	ok(e_tip.begins_with("J "), "a rebound key reads from Settings.key_cap: '%s'" % e_tip)
+
 
 func _match_counts() -> void:
 	_fresh()
