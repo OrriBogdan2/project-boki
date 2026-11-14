@@ -158,7 +158,7 @@ func _recall_caught(m: Match, K: BulwarkKit) -> float:
 
 ## Where the recall clip closes the hand (bul_recall's third key; breaker.glb lmb_recall has it at 0.3 s too).
 func _catch_key() -> float:
-	return float(KMovesPinBjorn.MOVES["bul_recall"]["keys"][2][0])
+	return float(KMovesBjorn.MOVES["bul_recall"]["keys"][2][0])
 
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
