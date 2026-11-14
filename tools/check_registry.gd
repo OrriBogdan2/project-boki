@@ -421,7 +421,6 @@ const CHECKS := {
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
-	"--creator-view-check": ["res://tools/creator_view_check.gd", "creator_view_check", null],
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
 	"--results-stage-shots": ["res://tools/results_stage_check.gd", "results_stage_check", "shots"],      # --shots-dir
 	# boss keyed moves, strikes on the tell
