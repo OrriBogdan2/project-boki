@@ -30,6 +30,7 @@ const R := {
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
 }
 
+const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
@@ -151,7 +152,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
@@ -283,7 +284,7 @@ static func owner_col(m: Match, b: Dictionary) -> Color:
 	var o: Hunter = b["owner"]
 	if m.player != null and o.team == m.player.team:
 		return m.mate_col(o)
-	return SideColor.foe()
+	return RIVAL_BOX
 
 ## The box's body takes its owner's colour and a ring round it, so whose box it is reads at a glance
 ## (the beam and trim keep the value colour).

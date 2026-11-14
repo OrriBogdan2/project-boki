@@ -1,8 +1,8 @@
 extends RefCounted
 ## --clarity-shots --shots-dir=<dir>: the combat-clarity picture (run under xvfb with a renderer). A 2v2 at
 ## match zoom: you, a downed teammate whose Boki is beside them, two rivals and every Boki out. Writes
-## <dir>/clarity_2v2_<palette>.png (the whole screen) and ..._crop.png (the fight), once for each Settings >
-## Accessibility > Colour vision palette (SideColor.ORDER).
+## <dir>/clarity_2v2.png (the whole screen) and <dir>/clarity_2v2_crop.png (the fight). Only uses the match's
+## own setup calls, so the same scene can be taken on an older build for a before/after.
 
 const DT := 1.0 / 60.0
 const RUN_S := 1.6         # s the scene plays before the picture (the downed teammate's Boki reacts)
@@ -55,19 +55,14 @@ func run(main: Node) -> void:
 		m.cam.snap(base + Vector3(0, 0, 1.8))
 		await main.get_tree().process_frame
 		t += DT
+	await main.get_tree().process_frame
+	var img := main.get_viewport().get_texture().get_image()
+	img.save_png(dir.path_join("clarity_2v2.png"))
 	var vp := main.get_viewport()
-	for id in SideColor.ORDER:      # the same fight in each Settings > Colour vision palette
-		Settings.v[SideColor.KEY] = id
-		for i in 3:
-			m.step(DT)
-			for h in m.hunters: h.render(DT, 1.0)
-			await main.get_tree().process_frame
-		var img := vp.get_texture().get_image()
-		img.save_png(dir.path_join("clarity_2v2_%s.png" % id))
-		var c := vp.get_camera_3d().unproject_position(base + Vector3(0, 0.5, 1.8)) * Vector2(img.get_size()) \
-			/ vp.get_visible_rect().size
-		var box := Rect2i(Vector2i(c) - Vector2i(520, 330), Vector2i(1040, 660))
-		var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
-		crop.save_png(dir.path_join("clarity_2v2_%s_crop.png" % id))
+	var c := vp.get_camera_3d().unproject_position(base + Vector3(0, 0.5, 1.8)) * Vector2(img.get_size()) \
+		/ vp.get_visible_rect().size
+	var box := Rect2i(Vector2i(c) - Vector2i(520, 330), Vector2i(1040, 660))
+	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
+	crop.save_png(dir.path_join("clarity_2v2_crop.png"))
 	print("CLARITYSHOTS ", dir)
 	main.get_tree().quit(0)

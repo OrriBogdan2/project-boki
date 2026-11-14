@@ -7,6 +7,9 @@ extends RefCounted
 ## (spec task 4) the Lair seat is the first lair and the Uplink the outpost farther from it (the spec's rule).
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
+const LOCKED_COL := Color("9fb0d8")    # a seat not open yet: cool blue-grey
+const OPEN_COL := Color("fff4d0")
+const LOST_COL := Color("8a3a4a")
 const LINE_FS := 13
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
@@ -39,19 +42,16 @@ static func _uplink_site(m: Match, lair: Vector3) -> Vector3:
 			best = at
 	return best
 
-## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
-## squad's colour as the viewer sees it (squad or rival; a seat taken by nobody in particular goes locked-grey).
 static func color_of(s: Dictionary) -> Color:
 	match int(s["st"]):
 		WaysOutHud.St.LOCKED:
-			return SideColor.tone("seat_locked")
+			return LOCKED_COL
 		WaysOutHud.St.OPEN:
-			return SideColor.tone("seat_open")
+			return OPEN_COL
 		WaysOutHud.St.LOST:
-			return SideColor.tone("seat_lost")
-	if int(s["team"]) < 0:
-		return SideColor.tone("seat_locked")
-	var squad := SideColor.of_team(s["viewer"], s["team"])
+			return LOST_COL
+	var team: int = s["team"]
+	var squad: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	return squad.darkened(0.25) if int(s["st"]) == WaysOutHud.St.TAKEN else squad
 
 ## How much of the badge's ring is lit, 0..1: a locked seat fills up to its opening, an open one with a shut time
@@ -81,18 +81,15 @@ static func _open_at(i: int, q: Dictionary) -> float:
 
 ## The short word under a badge on the full map.
 static func word(i: int, s: Dictionary) -> String:
-	var who := ""
-	if int(s["team"]) >= 0:
-		who = " · " + WaysOutHud.state_word(s).to_lower()      # (whose: ours or rival)
 	match int(s["st"]):
 		WaysOutHud.St.LOCKED:
 			return "%s %s" % [WORDS[i], _clock(float(s["t"]))]
 		WaysOutHud.St.OPEN:
 			return "%s open" % WORDS[i]
 		WaysOutHud.St.USE:
-			return "%s in use%s" % [WORDS[i], who]
+			return "%s in use" % WORDS[i]
 		WaysOutHud.St.TAKEN:
-			return "%s taken%s" % [WORDS[i], who]
+			return "%s taken" % WORDS[i]
 	return "%s lost" % WORDS[i]
 
 static func _clock(t: float) -> String:
@@ -113,8 +110,6 @@ static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now:
 		c.draw_arc(pv, r, 0, TAU, 32, col, w, true)
 	elif f > 0.0:
 		c.draw_arc(pv, r, -PI * 0.5, -PI * 0.5 + TAU * f, 32, col, w, true)
-	if st == WaysOutHud.St.USE and int(s["team"]) >= 0:
-		WaysOutHud._pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)      # the squad's disc or a rival's diamond
 	if st == WaysOutHud.St.TAKEN or st == WaysOutHud.St.LOST:
 		c.draw_line(pv + Vector2(-r, r) * 0.7, pv + Vector2(r, -r) * 0.7, col, w, true)
 

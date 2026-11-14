@@ -6,11 +6,14 @@ extends RefCounted
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
 ##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
-##      printed, and filed in docs/DEBT.md for the declutter jobs
+##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
+##      the "Your kit" card is not at the landing (rule 4)
+##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
+##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 10, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
+const COUNTS := {"landing": 9, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -52,13 +55,16 @@ static func set_moment(m: Match, id: String) -> void:
 			H.charge = Heart.r("charge_s")
 			H._force(Heart.S.READY, "charged")
 			m.hud.toast("The Heartspark is ready", Color.WHITE)
-			m.interact = {"kind": "heart", "act": "leave", "prog": 0.0, "label": "F  Leave", "col": Heart.gate_col()}
+			m.interact = {"kind": "heart", "act": "leave", "prog": 0.0, "label": "F  Leave", "col": Heart.GATE_COL}
 		"race":
 			sess = float(q["lair_open_s"]) + 5.0
 			m.hud.kit_t0 = -100.0
 			m.hud.toast("The Sealed Lair is open", Color.WHITE)
 			m.interact = {"kind": "lair", "label": "F  Open the gate"}
 	m.sess_t0 = sess - m.time
+
+static func on_screen_has(hud, id: String) -> bool:
+	return HudGroups.on_screen(hud).has(id)
 
 func run(main: Node) -> void:
 	var m: Match = await make_match(main)
@@ -85,6 +91,28 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
+	# 4. what a new player's HUD holds back
+	var p: Hunter = m.player
+	set_moment(m, "landing")
+	hud.kit_t0 = m.time      # just landed: a veteran's kit card would be up
+	ok(HudGroups.new_player(), "a fresh save is a new player")
+	ok(not on_screen_has(hud, "kit"), "new player: no kit card at the landing")
+	m.opts["training"] = true
+	ok(on_screen_has(hud, "kit"), "new player: the training room keeps the kit card")
+	m.opts["training"] = false
+	ok(not HudGroups.own_numbers_shown(p, false), "new player: own kills/knocks/gems wait before the first one")
+	ok(HudGroups.own_numbers_shown(p, true), "new player: own numbers show while Tab is held")
+	for stat in ["kills", "knocks", "gems"]:
+		p.set(stat, 1)
+		ok(HudGroups.own_numbers_shown(p, false), "new player: own numbers show once %s is 1" % stat)
+		p.set(stat, 0)
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
+	ok(not HudGroups.new_player(), "a save with %d expeditions is not new" % HudGroups.NEW_PLAYER_MATCHES)
+	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
+		"veteran: kit card and own numbers as before")
+	for i in 3:
+		await main.get_tree().process_frame      # the real HUD draws the veteran's own-numbers row too
+	Save.d["matches"] = 0
 	# 2. the real HUD draws with the strip waiting and showing
 	for id in MOMENTS:
 		set_moment(m, id)

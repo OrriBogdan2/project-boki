@@ -30,6 +30,7 @@ var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
 var bot_hold := {"rmb": 0.0, "dash": 0.0}
+var bot_lead := {}             # a bot's delayed cast still being aimed (BotLead)
 var last_variant := ""         # the RMB variant that last fired (HUD, tests)
 var last_e := ""
 var st := {}                   # the subclass's own state
@@ -221,6 +222,7 @@ func tick(dt: float) -> void:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
+	if not bot_lead.is_empty(): BotLead.hold(self, dt)
 	if rmb_down:
 		if h.downed or h.stun_t > 0.0:
 			_drop_rmb()
@@ -720,7 +722,7 @@ func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 	var c := col
 	var p = m.get("player")
 	if p != null and int(p.team) != h.team:
-		c = col.lerp(SideColor.rim(), 0.45)
+		c = col.lerp(Feel.RIM_ENEMY, 0.45)
 	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -732,7 +734,7 @@ func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Colo
 	var c := col
 	var p = m.get("player")
 	if p != null and int(p.team) != h.team:
-		c = col.lerp(SideColor.rim(), 0.45)
+		c = col.lerp(Feel.RIM_ENEMY, 0.45)
 	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
 	if t > 0.0:
 		var tw := tele.create_tween()
@@ -1206,7 +1208,7 @@ func _tick_charge(dt: float) -> void:
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
 		var rc := col
 		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(SideColor.rim(), 0.45)
+		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
 		if charge_orb():
