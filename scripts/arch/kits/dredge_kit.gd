@@ -12,9 +12,10 @@ extends ArchKit
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
 ##   takes half the cooldown off.
-## - E, Anchor Drop: the fist raised through a short wind-up (he can walk slowly), then a giant ghost anchor
-##   slams the cone in front: a long stun. In the air you smash straight down, the anchor lands with you, a ring
-##   at the landing, and the height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
+## - E, Anchor Drop: a thin outline of the cone on the ground through a short wind-up (he can walk slowly) while
+##   a giant translucent fist falls into it (HeroVfx "anchor_fist"), then the slam hits the cone in front: a long
+##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the height
+##   adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
 ##   Just after it the barge turns badly.
 ## - Dash, Barge: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
 ##   touches nobody. A pounce in the air, further. Rank 3: it resets the gun's bloom.
@@ -32,6 +33,8 @@ const SLUG_CORE := Color("ffd0ec")
 const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
+const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
+const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
@@ -60,6 +63,7 @@ var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
+var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
@@ -205,6 +209,7 @@ func _tick(dt: float) -> void:
 		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
 	if stop_t > 0.0: _tick_stop(dt)
+	if m.time >= ball_open_at and anim_id == "dr_lunge": play("dr_lunge_out")
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
 	if coil > 0.0: _tick_coil(dt)
@@ -268,7 +273,6 @@ func _dress_volley() -> void:
 	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
-	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
@@ -324,9 +328,10 @@ func fire_rmb(c: Dictionary) -> void:
 	flying = true
 	scoop = []
 	# thrown mid-jump the hold keeps the speed he brought (up to his run: a dash's or launch's extra bleeds
-	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk
-	hook_aloft = not h.grounded
-	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
+	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk,
+	# steered as on the ground (item 31: the air's low control would leave him almost still)
+	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if not h.grounded else 0.0
+	hook_aloft = carry > float(rdf["fly_slow"])
 	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
 	m.sfx("dr_throw", h.pos, -2.0, 1.0)
@@ -424,9 +429,9 @@ func _grab(f: Ent, ally := false) -> void:
 		hook_hold = null
 		return
 	var rdf := rmb_def()
-	if f.mass() >= 6.0:
+	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
-		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
+		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul, or blocked (Blockers): a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -435,7 +440,8 @@ func _grab(f: Ent, ally := false) -> void:
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the
 	# way come along without the swing
-	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"])}
+	# the body stops adjacent, in front of him (footage 0130): `stop_gap` m of air left between the two bodies
+	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": h.r + f.r + float(rdf["stop_gap"])}
 	drag["dur"] = float(rdf["pull_max"])
 	var tow := drag.duplicate()
 	tow["swing"] = SWING
@@ -530,6 +536,8 @@ func cast_e() -> bool:
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
+	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
@@ -551,8 +559,6 @@ func _tick_wind(dt: float) -> void:
 	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
-	if tells_visible():
-		fx.orb(CareUtil.hand_at(h, false), BRASS, BRASS_HOT, 0.6 + 0.6 * k, 0.05)     # the raised fist, glowing hotter
 	if wind <= 0.0:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
@@ -570,11 +576,11 @@ func _hop(ed: Dictionary, t: float) -> void:
 	h.vel.x = v.x
 	h.vel.z = v.y
 
-## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
+## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "fill": clampf(k, 0.0, 1.0),
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
 		"all": true, "col": ANCHOR_COL, "alpha": 1.8, "hot": 0.5 * k
 	}
 
@@ -633,8 +639,6 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
 	m.displace.spike(f, -16.0, h)
-	# ANCHORED says it all: no separate GROUNDED word over the stun
-	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
 
@@ -747,7 +751,7 @@ func on_dash(use_ex: bool) -> bool:
 		var shove := {"invuln": 0.06, "trail": "", "dir": dir}        # Brute Dash hits nobody (data, footage)
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
-		if not _move_runs(): play("dr_lunge")
+		if not _move_runs(): _roll_ball()
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
@@ -758,6 +762,16 @@ func on_dash(use_ex: bool) -> bool:
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
+
+## The ground shove's pose: a chained shove joins the ball still rolling from the last one (the clip holds closed from
+## the gap's end), and it opens only after the run's last shove (no charge left) or once the next press is too late.
+func _roll_ball() -> void:
+	var chained: bool = anim_id == "dr_lunge" and m.time < ball_open_at
+	play("dr_lunge")
+	if chained:
+		anim_at = m.time - FOLD_T
+	var open_after := 0.0 if h.dashes < 1.0 else float(dash_def()["gap"]) + CHAIN_GRACE
+	ball_open_at = m.time + h.roll_t + open_after
 
 ## A move that runs on through a barge, keeping its own pose: the Anchor's wind-up or air smash, the Broadside.
 func _move_runs() -> bool:
@@ -809,9 +823,10 @@ func _clawed_turf(dir: Vector2) -> void:
 	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
-## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.
+## Not mid-reel, mid-Anchor or mid-dive. While the arm flies out it goes, like E, and the arm flies on: the
+## source locks only the pull (wiki), not the throw (docs/heroes/dredge.md, Cancels).
 func cast_ult() -> bool:
-	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
+	if not pull.is_empty() or wind > 0.0 or not dive.is_empty():
 		return false
 	return HeroUlt.press(self, broadside.start)
 

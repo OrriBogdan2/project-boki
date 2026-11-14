@@ -2,12 +2,12 @@
 
 Status: **proposal, for owner review before any art.** Revised after the owner's review: big Boki now have roles, not just riding. Phase 1 (design, no credits). The owner asked for
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
-total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.
+total, a range of sizes, and some big rideable ones (revised: big Boki get roles, the owner later loosened the 4-6 mount cap, DECISIONS 2026-11-08). Today's 9 count toward the 50, so this adds 41.
 
 - Stubs: `content/kin_v2/<id>.json`, one per new species, in the real kin grammar (docs/KIN_GRAMMAR.md), with home data in
   `content/kin/<id>.json`. All 50 are **loaded by the game** (see "Where the stubs live" below). A species with no model yet
   is drawn by the `KinModels` primitives of its `look`; the 21 with `art/kin/<id>/<id>.glb` use their rig.
-- Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, 4-6 rideables.
+- Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, any large kin with mount settings may be rideable (no 4-6 cap).
 - Big-Boki roles and riding: docs/boki/RIDING_SPEC.md (specs only, waiting for the owner's OK).
 
 ## Name map (creature-design pass, 2026-11-07)
@@ -58,11 +58,11 @@ The 21 species with models and the 8 kept designs are untouched; the 13 "v2 upgr
 - **Size classes.** small = rides a shoulder (or perches if it flies); medium = perches on the pack;
   large = a big Boki you don't ride (it has another big-Boki role, below); rideable = a mount you ride.
   In the grammar all 16 big ones are `body.size: "large"` with `carry.style: "mount"`, because that is the
-  only carry style a large kin may have today. `--roster-check` counts mount speed x1.1 and up as
-  rideable; the non-ridden big Boki are stubbed at x1.0 or below. The role itself lives in this doc only
+  only carry style a large kin may have today. `--roster-check` counts every large kin with mount settings as
+  rideable (no speed floor, no cap; the old 4-6 cap and x1.1 floor are gone). The role itself lives in this doc only
   (see "Big-Boki roles" for the grammar field it needs).
 - **Big-Boki roles (owner review, 02:30).** Large Boki aren't all mounts. The 16 big ones (today's
-  Cairnback and Gravadillo, 14 new) split into six roles, with at most 6 mounts. Each role has a pitch
+  Cairnback and Gravadillo, 14 new) split into six roles, with the mount count no longer capped. Each role has a pitch
   and a short spec in docs/boki/RIDING_SPEC.md (for owner approval).
 - **Themes are the grammar's cosmetic themes** (`KinParts.THEMES`): no new theme was invented, so every
   stub validates. There is no water theme; aquatic Boki wear frost, storm or lunar (decision 5).
@@ -80,7 +80,7 @@ The 21 species with models and the 8 kept designs are untouched; the 13 "v2 upgr
 
 **Body type:** quadruped 18 (13 new), winged 8 (7 new), biped 8 (8 new), aquatic 4 (3 new), insect 4 (3 new), serpent 4 (3 new), blob 4 (4 new)
 
-**Theme:** swarm 4 (3 new), ember 4 (4 new), stone 4 (4 new), frost 4 (4 new), bloom 4 (4 new), storm 4 (4 new), shadow 4 (4 new), spore 3 (2 new), venom 3 (2 new), prism 3 (2 new), lunar 3 (2 new), echo 3 (2 new), gravity 3 (2 new), titan 2 (1 new), tempest 2 (1 new)
+**Theme:** swarm 4 (3 new), ember 4 (4 new), stone 4 (4 new), frost 4 (4 new), bloom 4 (4 new), storm 4 (4 new), ghost 2 (2 new), dark 2 (2 new), spore 3 (2 new), venom 3 (2 new), prism 3 (2 new), lunar 3 (2 new), echo 3 (2 new), gravity 3 (2 new), titan 2 (1 new), tempest 2 (1 new)
 
 **Rarity:** uncommon 19 (18 new), rare 13 (13 new), common 12 (10 new), starter 3 (0 new), boss 3 (0 new)
 
@@ -130,7 +130,7 @@ block like `carry.mount` (for example `carry.pack: {"slots": 4}`). That is a cha
 | 12 | `rimeshrew` | Rimeshrew | Shrew + Hoarfrost | frost | small | - | quadruped (QUAD) | skirmisher | common | Frostreach |
 | 13 | `mossgrade` | Mossgrade | Tardigrade + Cushion moss | bloom | small | - | blob (BLOB) | support | common | Bloomwild |
 | 14 | `kestrike` | Kestrike | Kestrel + Copper lightning rod | storm | small | - | winged (WING) | skirmisher | uncommon | Stormcrest |
-| 15 | `gloamshell` | Gloamshell | Garden snail + Smoked obsidian | shadow | small | - | blob (BLOB) | controller | common | Gloomheart |
+| 15 | `gloamshell` | Gloamshell | Garden snail + Smoked obsidian | dark | small | - | blob (BLOB) | controller | common | Gloomheart |
 | 16 | `nettlynx` | Nettlynx | Lynx kitten + Stinging nettle | venom | small | - | quadruped (QUAD) | bruiser | uncommon | Bloomwild |
 | 17 | `thrumbird` | Thrumbird | Hummingbird + Tuning fork | echo | small | - | winged (WING) | support | uncommon | Greenreach |
 | 18 | `lodestick` | Lodestick | Stick insect + Lodestone | gravity | small | - | insect (HEXA) | trickster | uncommon | Gloomheart |
@@ -143,7 +143,7 @@ block like `carry.mount` (for example `carry.pack: {"slots": 4}`). That is a cha
 | 25 | `sentrikat` | Sentrikat | Meerkat + Copper weathervane | storm | medium | - | biped (BIPED) | support | common | Stormcrest |
 | 26 | `basaltoad` | Basaltoad | Cane toad + Basalt columns | stone | medium | - | quadruped (QUAD) | tank | common | Greenreach |
 | 27 | `orchisloth` | Orchisloth | Three-toed sloth + Orchid | bloom | medium | - | biped (BIPED) | support | uncommon | Bloomwild |
-| 28 | `caecilith` | Caecilith | Caecilian + Obsidian | shadow | medium | - | serpent (SERPENT) | trickster | uncommon | Gloomheart |
+| 28 | `caecilith` | Caecilith | Caecilian + Obsidian | dark | medium | - | serpent (SERPENT) | trickster | uncommon | Gloomheart |
 | 29 | `velvorm` | Velvorm | Velvet worm + Amethyst | venom | medium | - | serpent (SERPENT) | controller | uncommon | Bloomwild |
 | 30 | `gibbelle` | Gibbelle | Gibbon + Bellflower | echo | medium | - | biped (BIPED) | controller | uncommon | Greenreach |
 | 31 | `casquebill` | Casquebill | Hornbill + Iron meteorite | gravity | medium | - | winged (WING) | controller | rare | Gloomheart |
@@ -156,14 +156,14 @@ block like `carry.mount` (for example `carry.pack: {"slots": 4}`). That is a cha
 | 38 | `scaldamus` | Scaldamus | Hippopotamus + Volcanic mud | ember | large | companion | quadruped (QUAD-L) | tank | rare | Emberfall |
 | 39 | `floenatee` | Floenatee | Manatee + Pack ice | frost | large | packbeast | aquatic (FIN-L) | support | rare | Frostreach |
 | 40 | `limpetor` | Limpetor | Limpet + Granite tor | stone | large | bulwark | blob (BLOB-L) | tank | rare | Greenreach |
-| 41 | `umbrathere` | Umbrathere | Giant ground sloth + Night smoke | shadow | large | companion | biped (BIPED-L) | tank | rare | Gloomheart |
+| 41 | `umbrathere` | Umbrathere | Giant ground sloth + Night smoke | ghost | large | companion | biped (BIPED-L) | tank | rare | Gloomheart |
 | 42 | `moundvark` | Moundvark | Aardvark + Termite mound | swarm | large | watchtower | quadruped (QUAD-L) | tank | rare | Bloomwild |
 | 43 | `cindowary` | Cindowary | Cassowary + Charcoal | ember | rideable | mount | biped (BIPED-L) | bruiser | rare | Emberfall |
 | 44 | `glaciyak` | Glaciyak | Yak + Glacier ice | frost | rideable | mount | quadruped (QUAD-L) | tank | uncommon | Frostreach |
 | 45 | `nimbostrich` | Nimbostrich | Ostrich + Thunderhead | storm | rideable | mount | biped (BIPED-L) | skirmisher | rare | Stormcrest |
 | 46 | `goliathite` | Goliathite | Goliath beetle + Marble | stone | large | flyer | insect (HEXA-L) | tank | uncommon | Greenreach |
 | 47 | `lilybara` | Lilybara | Capybara + Water lily | bloom | rideable | mount | quadruped (QUAD-L) | support | uncommon | Bloomwild |
-| 48 | `duskapi` | Duskapi | Okapi + Dusk smoke | shadow | rideable | mount | quadruped (QUAD-L) | trickster | rare | Gloomheart |
+| 48 | `duskapi` | Duskapi | Okapi + Dusk smoke | ghost | rideable | mount | quadruped (QUAD-L) | trickster | rare | Gloomheart |
 | 49 | `spatewader` | Spatewader | Giant salamander + Flash flood | storm | large | packbeast | aquatic (FIN-L) | tank | rare | Stormcrest |
 | 50 | `heatherhorn` | Heatherhorn | Highland cow + Heather | bloom | rideable | mount | quadruped (QUAD-L) | tank | uncommon | Greenreach |
 
@@ -279,7 +279,7 @@ the image-gen turnaround (silhouette and palette).
 
 #### Gloamshell (`gloamshell`)
 
-- **Mix:** Garden snail + Smoked obsidian. **Theme:** shadow. **Size:** small. **Body:** blob, rig `BLOB`. **Fights as:** controller.
+- **Mix:** Garden snail + Smoked obsidian. **Theme:** dark. **Size:** small. **Body:** blob, rig `BLOB`. **Fights as:** controller.
 - **Personality:** Slow, private and oddly smug. Likes dark corners, and your pocket.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Spore Patch (auto, `thorn_patch`); merge stub: Sporewake (`thornwake`).
 - **Own ability later (grammar parts):** Dusk Trail: zone line, slow foes + reveal hiders.
@@ -398,7 +398,7 @@ the image-gen turnaround (silhouette and palette).
 
 #### Caecilith (`caecilith`)
 
-- **Mix:** Caecilian + Obsidian. **Theme:** shadow. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** trickster.
+- **Mix:** Caecilian + Obsidian. **Theme:** dark. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** trickster.
 - **Personality:** Secretive and sly, loves surprises. Appears where you least expect it, grinning.
 - **Abilities:** Moon Mark (E, `moon_mark`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Underpass: blink 7 m, then burst 2 m slow.
@@ -539,7 +539,7 @@ the image-gen turnaround (silhouette and palette).
 
 #### Umbrathere (`umbrathere`)
 
-- **Mix:** Giant ground sloth + Night smoke. **Theme:** shadow. **Size:** large. **Body:** biped, rig `BIPED-L`. **Fights as:** tank.
+- **Mix:** Giant ground sloth + Night smoke. **Theme:** ghost. **Size:** large. **Body:** biped, rig `BIPED-L`. **Fights as:** tank.
 - **Big-Boki role:** **companion**. Walks beside you and fights as a second body, drawing fire and holding a lane; never ridden.
 - **Personality:** Brooding and protective, slow to anger. Shelters smaller Boki under its arms.
 - **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`).
@@ -621,7 +621,7 @@ the image-gen turnaround (silhouette and palette).
 
 #### Duskapi (`duskapi`)
 
-- **Mix:** Okapi + Dusk smoke. **Theme:** shadow. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** trickster.
+- **Mix:** Okapi + Dusk smoke. **Theme:** ghost. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** trickster.
 - **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Shy and graceful, vanishes when strangers come. Trusts one rider and only one.
 - **Abilities:** Moon Mark (E, `moon_mark`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`); mount speed x1.25, jump x1.1, turn x0.85.
@@ -672,7 +672,7 @@ Notes for the rig plan:
 | Lilybara | quadruped | bloom | x1.15 / x0.9 / 0.7 | uncommon, Bloomwild | support; a calm healer |
 | Cindowary | biped | ember | x1.25 / x1.1 / 0.75 | rare, Emberfall | bruiser; a fast runner that kicks |
 | Nimbostrich | biped | storm | x1.3 / x1.0 / 0.7 | rare, Stormcrest | skirmisher; the fastest |
-| Duskapi | quadruped | shadow | x1.25 / x1.1 / 0.85 | rare, Gloomheart | trickster; nimble and hard to see |
+| Duskapi | quadruped | ghost | x1.25 / x1.1 / 0.85 | rare, Gloomheart | trickster; nimble and hard to see |
 
 The other ten big Boki have the roles in "Big-Boki roles" above.
 

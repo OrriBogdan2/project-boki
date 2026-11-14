@@ -28,6 +28,17 @@ feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trouser
 Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
 hip knives, the procedural pistols and the wing alpha cards.
 
+## Clip re-keys on the shipped model (2026-11-12, ext/anim-sable-first-pose)
+
+`sable_clips.py` also bakes onto the shipped sable.glb's own rig (imported with Blender's bone axes, so the rest
+re-exports unchanged; a no-change rebake matches the shipped clips to 0.04 degrees), and `glb_add_clips.py` puts the
+named clips back on it, every other byte the same. The quick moves' first poses at 0.0 (docs/heroes/thief.md,
+"Animation timing") went on this way:
+
+    B=~/tools/blender-4.5.15-linux-x64/blender; CL=vault_r,vault_l,vault_f,vault_b,vault_twist,exdash,knife,reset
+    $B -b --python tools/art1/sable_clips.py -- art/wardens/sable/sable.glb /tmp/sable_clips.glb $CL
+    python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb /tmp/sable_clips.glb $CL
+
 ## Previous build: v2 (2026-11-06)
 
 The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-briefs; its index.md and "Notes for 3D" win). Built by script from sable_v2_turnaround.jpg, with sable_v2_master_sheet.jpg for detail; nothing is hand-edited in Blender.

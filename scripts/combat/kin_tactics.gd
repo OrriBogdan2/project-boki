@@ -50,38 +50,50 @@ func retreat_frac() -> float:
 func idle_radius() -> float:
 	return 1.4 + (1.0 - loyalty) * 2.6
 
+## The foe it goes for: the best score among the foes within chase range that it can walk to. An idle
+## Boki asks every sim step, so the pass is one distance test per foe; the other filters, your focus and the
+## walk test (a line of ground samples) run only for the few in range, the walk test only for the winner.
 func pick_target() -> Ent:
 	var reach := chase_range()
 	var own := k.owner_h
-	var best: Ent = null
-	var bs := -1e9
-	var focus: Ent = KinFollow.owner_focus(k) if own else null       # what you are fighting
-	var attacker: Ent = own.last_hit_by if own else null
-	if attacker is Kin and (attacker as Kin).owner_h:
-		attacker = attacker
+	var near: Array = []
 	for f in k.m.foes_of(k.team, false):
+		if k.flat_dist(f) > reach:
+			continue
 		if f is Hunter and (f.downed or f.cloak_t > 0.0):
 			continue
 		if not f.hittable() or Shrubling.hidden(f):
 			continue      # (a disguised Shrubling is not given away by its Boki)
 		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
 			continue      # it gave up on this one a moment ago (couldn't reach it)
-		var d := k.flat_dist(f)
-		if d > reach:
-			continue
-		if not k.walkable_to(f.pos):
-			continue
-		var s := -d
-		if f == attacker: s += 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
-		if f == k.target: s += 1.5
-		if f == focus: s += 3.0
-		if f is Hunter: s += aggression * 1.5
-		if own:
-			s -= own.flat_dist(f) * loyalty * 0.25
-		if f.stun_t > 0.0 or f.root_t > 0.0: s += 1.0     # finish what was set up
-		if s > bs:
-			bs = s; best = f
-	return best
+		near.append(f)
+	if near.is_empty():
+		return null
+	var focus: Ent = KinFollow.owner_focus(k) if own else null       # what you are fighting
+	var attacker: Ent = own.last_hit_by if own else null
+	while not near.is_empty():
+		var best: Ent = null
+		var bs := -1e9
+		for f in near:
+			var s := _score(f, own, focus, attacker)
+			if s > bs:
+				bs = s; best = f
+		if k.walkable_to(best.pos):
+			return best
+		near.erase(best)      # unreachable (a gap, a ledge): the next best
+	return null
+
+## Nearer is better; whoever hit you, what it already chases, what you fight, Hunters and set-up foes count extra.
+func _score(f: Ent, own: Hunter, focus: Ent, attacker: Ent) -> float:
+	var s := -k.flat_dist(f)
+	if f == attacker: s += 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
+	if f == k.target: s += 1.5
+	if f == focus: s += 3.0
+	if f is Hunter: s += aggression * 1.5
+	if own:
+		s -= own.flat_dist(f) * loyalty * 0.25
+	if f.stun_t > 0.0 or f.root_t > 0.0: s += 1.0     # finish what was set up
+	return s
 
 ## Called a few times a second while the kin is out (or riding with you, for abilities that work
 ## on you). Uses abilities by itself when their cue (KinParts.CUES) fits:
@@ -96,6 +108,8 @@ func think_abilities(dt: float) -> void:
 	think_t = 0.35 + randf() * 0.25
 	if k.runner == null or k.owner_h == null or k.owner_h.out or k.owner_h.downed:
 		return
+	if k.owner_h.riding or k.owner_h.dropping:
+		return     # nothing fires on the ship or the way down (an Echolocate ping drew a big gold ring at the jump)
 	_low_hp()
 	for slot in ["k2", "k1"]:
 		if not k.runner.is_ready(slot) or not k.slot_open(slot):

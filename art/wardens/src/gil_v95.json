@@ -1,0 +1,62 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Gil's v95 master (current.json r2/v95a/cand_B, the first v95 face, a face pass), its own swordfish rapier left out (gil_v95_B_body.glb), onto gil.glb's skeleton, clips and anchors. gil.glb's own skinned swordfish (its own mesh, on hand.R) stays; its scripted tail and dorsal fin stand-ins go (drop_meshes): the master has a real fish tail and fin. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders: the master stands with his body column at y 0.2 and his head forward of it. The tail rides the tail bone, the hat and face the head.",
+ "master": "~/meshy/v95/Gil/r2/v95a/gil_v95_B_body.glb",
+ "game": "art/wardens/gil/gil.glb",
+ "tris": 12500,
+ "max_tris": 13500,
+ "head": {"centre": [0.0, 0.38, 1.47], "r": 0.22},
+ "head_tris": 2600,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "keep": [],
+ "drop_meshes": ["Tail", "Dorsal"],
+ "joints": {
+  "pelvis": [0.0, 0.2, 0.55],
+  "neck": [0.0, 0.25, 1.28],
+  "crown": [0.0, 0.33, 1.66],
+  "shoulder.R": [0.25, 0.24, 1.2],
+  "elbow.R": [0.38, 0.34, 1.06],
+  "wrist.R": [0.51, 0.44, 0.9],
+  "shoulder.L": [-0.25, 0.24, 1.2],
+  "elbow.L": [-0.38, 0.34, 1.06],
+  "wrist.L": [-0.51, 0.44, 0.9],
+  "hip.R": [0.13, 0.2, 0.53],
+  "knee.R": [0.13, 0.2, 0.31],
+  "ankle.R": [0.13, 0.17, 0.13],
+  "hip.L": [-0.135, 0.2, 0.53],
+  "knee.L": [-0.135, 0.2, 0.31],
+  "ankle.L": [-0.135, 0.17, 0.13]
+ },
+ "relax": {"CUTS": 0},
+ "past_wrist": {"R": "hand.R", "L": "hand.L"},
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {"bone": "hips", "box": [0.15, 0.43, -0.05, 0.4, 0.5, 0.86], "except_segs": [["forearm.R", 0.07]], "why": "the satchel at his right hip (bone heat put it on the right hand)"},
+  {"bone": "tail", "box": [-0.5, 0.5, -9, -0.14, 0, 0.85]},
+  {"bone": "head", "box": [-0.45, 0.45, 0.17, 9, 1.36, 9]},
+  {"bone": "head", "box": [-0.45, 0.45, -9, 9, 1.45, 9]}
+ ],
+ "slots": [
+  {"slot": "leather", "box": [-9, 9, -9, 9, 0, 0.25], "v": [0, 0.45], "why": "the boots' dark stripes and soles"},
+  {"slot": "cloth", "box": [-9, 9, -9, 9, 0, 0.25], "s": [0.45, 1], "v": [0.45, 1]},
+  {"slot": "leather", "h": [0.02, 0.13], "s": [0.35, 1], "v": [0.12, 0.6], "why": "satchel and strap"},
+  {"slot": "cloth", "h": [0.03, 0.13], "s": [0.5, 1], "v": [0.6, 1], "why": "the orange trims, hat band, boot stripes"},
+  {"slot": "cloth", "v": [0, 0.22], "why": "the near-black coat and hat"},
+  {"slot": "skin", "bone": "head"},
+  {"slot": "skin", "bone": "hand.R"},
+  {"slot": "skin", "bone": "hand.L"},
+  {"slot": "skin", "bone": "tail"},
+  {"slot": "skin", "bone": "shin.R"},
+  {"slot": "skin", "bone": "shin.L"},
+  {"slot": "skin", "box": [-0.13, 0.13, -9, -0.02, 0.9, 1.42], "why": "the dorsal fin"},
+  {"slot": "skin", "box": [-0.08, 0.08, 0.3, 9, 0.3, 0.8], "s": [0, 0.45], "v": [0.5, 1], "why": "the pale belly between the coat's fronts"}
+ ],
+ "slot_default": "cloth",
+ "room": {"*": 0.5},
+ "anchors": {
+  "anchor_head_top": [0.0, 0.3, 1.74],
+  "anchor_chest": [0.0, 0.42, 1.0]
+ }
+}
