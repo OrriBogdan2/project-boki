@@ -2072,8 +2072,9 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				var wish := HunterMove.along_wall(mv * spd, slide_n)
-				hv = Loco.accel_to(hv, wish, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
+				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
+				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():

@@ -102,10 +102,8 @@ static func blocks_sight(w: Dictionary) -> bool:
 ## crosser class (Blockers): "phase" for a Spirit Walk.
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not Blockers.wall_stops(w, cls):
-			continue
 		var top := wall_top(w, y)
-		if top <= 0.0:
+		if top <= 0.0 or not Blockers.wall_stops(w, cls):
 			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
