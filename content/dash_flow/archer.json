@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. into_cast.<first>.<second> (the Cast into cast table): <second> pressed at <first>'s at[0] s (windup) and at[1] s (recovery) after <first>'s press: fire (at once) | queue (goes <phase>_wait s later) | drop (never goes); lmb_hold is LMB held 0.75 s; asserted by --cast-into-cast-check.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "source": "Not determinable (re-checked 11-09): the roll is 0.1-0.15 s, under one 5 fps frame, and no draw shows in it or the Spirit Walk after it (pin frames 0349-0364, 0386-0407; open question pin.md:247); the data (supervive_kits.md:75-78), cancel-matrix-a's Cancels table and the patch lines on ext/agent-briefs (OWNER_REVIEW_1103.md:1824-1833) are silent. Kept: it goes mid-dash (owner item 51 default)."},
@@ -32,41 +32,6 @@
 			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Kept: the hold carries through (owner item 51)."},
 			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Air: the only airborne push in the clip is 0051-0053, a hop-sized 2 s push, not a clean air dash (pin.md:330-331). Kept: the hold carries through (owner item 51)."},
 			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Kept: the hold carries through (owner item 51)."}
-		}
-	},
-	"into_cast": {
-		"lmb": {
-			"at": [0.05, 0.6],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."}
-		},
-		"lmb_hold": {
-			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md)."}
-		},
-		"rmb": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110)."}
-		},
-		"e": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md)."}
-		},
-		"x": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "queue", "windup_wait": 0.52, "recovery": "queue", "recovery_wait": 0.52, "source": "Each empowered shot still shows a short magenta draw of about 0.4-0.8 s (briefs/hero-ref/pin.md:257,268): ours goes after 0.52 s. Matches."},
-			"lmb_hold": {"windup": "queue", "windup_wait": 0.52, "recovery": "queue", "recovery_wait": 0.52, "source": "Each empowered shot still shows a short magenta draw of about 0.4-0.8 s (briefs/hero-ref/pin.md:257,268): ours goes after 0.52 s. Matches."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."}
 		}
 	}
 }
