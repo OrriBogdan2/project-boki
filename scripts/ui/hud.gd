@@ -986,6 +986,7 @@ var _h_down := false
 func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
+	TermHints.watch(self, m.player)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# the fold_guide key (H) folds the training guide (G is send / recall your kin) and the kit panel away (and back)
 	var hd := Input.is_action_pressed("fold_guide")
@@ -1213,7 +1214,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
+		"active": st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
 		"returning": st = "coming back"
 		"downed": st = "down"
 		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"

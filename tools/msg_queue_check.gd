@@ -10,6 +10,7 @@ extends RefCounted
 ##   7. a world label under a card fades back
 ##   8. two world labels on one spot leave one drawn: the loot name waits, the nameplate stays (LabelClash);
 ##      a plate or lair board under a damage number fades, the number stays (LabelSpacing)
+##   9. a HUD word first changing (armor tier, Fever, the Boki out) gets one hint, once per save (TermHints)
 ## Never touches the save.
 
 var bad := 0
@@ -173,6 +174,14 @@ func _wiring() -> void:
 	m.hud.hitmarker(false)
 	m.hud._place_msgs()
 	ok(lane.fight, "a hit you land puts the HUD's lane on its fight budget")
+	lane.clear()
+	m.player.armor_tier = 1
+	TermHints.watch(m.hud, m.player)
+	ok(lane.count() == 1 and Save.d["tutorial"].get("term_armor", false),
+		"the first armor tier-up says what tiers are (%s)" % str(lane.texts()))
+	lane.clear()
+	TermHints.watch(m.hud, m.player)
+	ok(lane.count() == 0, "and only once per save")
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
