@@ -167,6 +167,8 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
+	var again := tip_shows.keys().filter(func(k): return int(tip_shows[k]) > 2)
+	ok(again.is_empty(), "each step's tip goes to the message lane once, not every frame (%s)" % str(tip_shows))
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
