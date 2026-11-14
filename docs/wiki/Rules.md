@@ -31,10 +31,6 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | extra_reviver | 0.5 | each extra teammate on you: +50% speed |
 | stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
-| execute_time | 3 | (old: hold interact on an enemy wisp; now the stomp below) |
-| stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
-| stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
-| stomp_cycle | 0.7 | one foot-lift-and-slam |
 | kin_revive_time | 8 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
@@ -624,6 +620,15 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 | mob_factor | 0.6 |
 | marked_factor | 2 |
 | mark_s | 4 |
+
+## bot_stomp (`content/rules/bot_stomp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How bots play the stomp (BotStomp, docs/BOT_KIT_USE.md 'Stomps'). rescue_r: metres; how far a bot goes to break a stomp on its teammate. The threat range (no stomp with a rival on its feet that close), which move breaks a stomp, its reach and cooldown are all read from the kits (BotStomp.punish_r, BotStomp.breaker), never listed per Hunter. |
+| rescue_r | 25 |
 
 ## branch_forms (`content/rules/branch_forms.json`)
 
@@ -1874,6 +1879,16 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 |---|---|
 | _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
 | at | 0.25 |
+
+## stomps (`content/rules/stomps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Stomp styles (docs/decisions/0061-stomp-lock.md): how a Hunter's stomp on an enemy wisp looks. Every style keeps the same timing (Stomp.TIME, Stomp.BEATS); only the body changes. A style lists what it changes from 'base'. 'hunter' marks a Hunter's own default (always owned); a style with 'cost' is a cosmetic you buy with gems and wear in the 'stomp' slot (Save.d.look.stomp). foot: r \| l \| both (a two-footed jump) \| alt (right, then left). lift and knee: hip and knee angles in radians at the top of the lift. hop: metres the body rises before the slam. lean: forward tilt in radians. twist: shoulder turn in radians at the top. crouch: 0..1 how low the standing leg sits. arms: out (left arm out for balance) \| wide (both out) \| up (both fists overhead, down with the slam) \| fists (both fists hammer the ground) \| hips (hands on hips) \| weapon (the weapon stays aimed down). |
+| base | {"foot": "r", "lift": 1.35, "knee": -1.6, "hop": 0.0, "lean": 0.12, "twist": 0.0, "crouch": 0.0, "arms": "out"} |
+| styles | {"needle_heel": {"name": "Needle Heel", "hunter": "archer", "lift": 1.0, "knee": -1.2, "lean": 0.05, "arms": "hips"}, "ember_grind": {"name": "Ember Grind", "hunter": "ashwick", "foot": "l", "twist": 0.55, "lean": 0.18}, "anchor_drop": {"name": "Anchor Drop", "hunter": "bulwark", "foot": "both", "lift": 0.9, "knee": -1.5, "hop": 0.3, "crouch": 0.3, "arms": "up"}, "stone_listen": {"name": "Stone Listen", "hunter": "dolm", "lift": 0.8, "knee": -1.0, "lean": -0.05, "arms": "wide"}, "junk_jump": {"name": "Junk Jump", "hunter": "dredge", "foot": "both", "lift": 1.1, "knee": -1.8, "hop": 0.45, "lean": 0.05, "arms": "wide"}, "fin_slap": {"name": "Fin Slap", "hunter": "gil", "foot": "l", "lift": 1.6, "knee": -0.5, "lean": -0.1, "arms": "up"}, "boot_heel": {"name": "Boot Heel", "hunter": "gunslinger", "lift": 1.2, "lean": 0.28, "arms": "weapon"}, "arena_slam": {"name": "Arena Slam", "hunter": "juggernaut", "lift": 1.5, "knee": -1.9, "crouch": 0.25, "lean": 0.4, "arms": "fists"}, "spark_hop": {"name": "Spark Hop", "hunter": "mage", "foot": "l", "lift": 1.1, "hop": 0.18, "twist": -0.45, "arms": "up"}, "jester_jig": {"name": "Jester Jig", "hunter": "ostra", "foot": "alt", "lift": 1.1, "knee": -1.4, "hop": 0.12, "arms": "wide"}, "toe_pick": {"name": "Toe Pick", "hunter": "rimewright", "lift": 0.9, "knee": -2.0, "lean": 0.3, "twist": 0.6, "arms": "wide"}, "pounce": {"name": "Pounce", "hunter": "tender", "foot": "both", "lift": 0.8, "knee": -1.6, "hop": 0.35, "lean": 0.35, "crouch": 0.3, "arms": "fists"}, "quiet_heel": {"name": "Quiet Heel", "hunter": "thief", "foot": "l", "lift": 0.7, "knee": -1.0, "crouch": 0.35, "lean": 0.25, "arms": "hips"}, "thunder_stomp": {"name": "Thunder Stomp", "desc": "A twisting leap and both feet down like a dropped anvil.", "cost": 300, "foot": "both", "lift": 1.2, "knee": -2.0, "hop": 0.5, "twist": 1.2, "lean": 0.1, "arms": "up"}} |
 
 ## summon_cc (`content/rules/summon_cc.json`)
 
