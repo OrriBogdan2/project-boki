@@ -10,27 +10,36 @@ var m: Match
 var P: Hunter
 var foe: Hunter
 
+
 func ok(cond: bool, what: String) -> void:
 	print("INCOMBAT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _step() -> void:
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	m.step(Match.DT)
 
+
 func _run_for(secs: float) -> void:
-	for i in int(round(secs / Match.DT)): _step()
+	for i in int(round(secs / Match.DT)):
+		_step()
+
 
 ## Out of every fight again (a fresh frame for the next case).
 func _calm() -> void:
 	_run_for(InCombat.window() + 0.5)
+
 
 func _case(what: String, want: bool, act: Callable) -> void:
 	_calm()
 	act.call()
 	_step()
 	ok(InCombat.is_in(P) == want, "%s: %s" % [what, "in combat" if want else "stays calm"])
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -47,9 +56,11 @@ func run(main: Node) -> void:
 	P = m.player
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != P and o.team != P.team and foe == null: foe = o
+		if o != P and o.team != P.team and foe == null:
+			foe = o
 	for o in m.hunters:
-		if o != P: o.teleport(m.world.random_ground())
+		if o != P:
+			o.teleport(m.world.random_ground())
 	var k: Kin = P.kin
 	k.state = "active"
 	k.cmd = "follow"
@@ -77,6 +88,7 @@ func run(main: Node) -> void:
 	print("INCOMBAT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Shield refill, drive music and the Boki's think, frame by frame from a hit until the window ends.
 func _same_frame() -> void:
 	P.kin_bonus = {"owner_shield": 40.0}
@@ -101,5 +113,7 @@ func _same_frame() -> void:
 			if first[key] < 0 and calm[key]:
 				first[key] = i
 	var frames: Array = first.values()
-	ok(frames[0] > 0 and frames.count(frames[0]) == frames.size(),
-		"shield, music and Boki think go calm on the same frame (%d, %d, %d)" % frames)
+	ok(
+		frames[0] > 0 and frames.count(frames[0]) == frames.size(),
+		"shield, music and Boki think go calm on the same frame (%d, %d, %d)" % frames
+	)
