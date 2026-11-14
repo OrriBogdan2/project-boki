@@ -164,9 +164,9 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 			Shake.incoming_big(m, at, 0.5, caster as Ent)
 
 ## What an ability hit does to the one it hit, readable at a glance and by ear (Juice.hit calls this
-## for every ability hit): the category's impact sound, then the status landing: a flash round the
-## head and a word (the status's body look itself is StatusLooks', the same from every source; nothing
-## flat on the ground, a ground ring means gameplay), a hard knock throws dust behind them.
+## for every ability hit): the category's impact sound, then the status landing: a flash round a stunned
+## head (the status's body look itself is StatusLooks', the same from every source; nothing flat on the
+## ground, a ground ring means gameplay), a hard knock throws dust behind them.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var fx: Fx = m.fx
 	var p: Hunter = m.player
@@ -182,6 +182,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 		fx.ring(head, 0.7, Color("fff27a"), 0.35)
 		fx.spark(head, Vector3.UP, Color("fff6b0"), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
 	elif root > 0.0:
+		pass      # the root's look is StatusLooks' body look (no callout words)
 	elif slow > 0.0:
 		fx.burst(target.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 10, 2.0, 0.5, -1.0, 1.0)
 		if mine: m.sfx("ab_slow", target.pos, -6.0)

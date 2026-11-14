@@ -570,7 +570,7 @@ func _badge() -> Dictionary:
 	var out: Array = []
 	K.combo_marks(out)
 	for b: Dictionary in out:
-		if b["e"] == T and b["label"] == "SPLASH":
+		if b["e"] == T:
 			return b
 	return {}
 

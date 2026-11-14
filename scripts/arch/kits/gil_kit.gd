@@ -208,7 +208,7 @@ func combo_marks(out: Array) -> void:
 		var n := marks_on(f)
 		var left: float = window - (m.time - float(have.values().min()))
 		if n > 0 and left > 0.0:
-			out.append(RecastCue.mark(f, n, left, window, "SPLASH", n >= int(pd.get("need", 3)) - 1))
+			out.append(RecastCue.mark(f, n, left, window, n >= int(pd.get("need", 3)) - 1))
 
 # ------------------------------------------------------------------ dash: Ground Swim
 func on_dash(use_ex: bool) -> bool:
