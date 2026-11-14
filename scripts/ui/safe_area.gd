@@ -79,6 +79,39 @@ static func problems(groups: Dictionary, sz: Vector2) -> Array:
 			if not safe.encloses(r):
 				bad.append("%s outside %s" % [names[i], r])
 			for j in range(i + 1, names.size()):
-				if (groups[names[j]] as Array).any(func(o: Rect2): return r.intersects(o)):
-					bad.append("%s overlaps %s" % [names[i], names[j]])
+				for o: Rect2 in groups[names[j]]:
+					if r.intersects(o):
+						bad.append("%s %s overlaps %s %s" % [names[i], r, names[j], o])
 	return bad
+
+
+## Text cut off under `root`: a label or button that is narrower than its text and neither wraps nor
+## elides, or a wrapped label with lines that don't show. The fix is wrapping or eliding, never a smaller font.
+static func clipped(root: Node) -> Array:
+	var bad: Array = []
+	for n in root.find_children("*", "Control", true, false):
+		var c := n as Control
+		if not c.is_visible_in_tree() or c.size.x <= 0.0:
+			continue
+		if c is Label:
+			var l := c as Label
+			var plain := l.autowrap_mode == TextServer.AUTOWRAP_OFF
+			plain = plain and l.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING
+			if plain and wider(l, l.text, l.size.x):
+				bad.append("clipped '%s'" % l.text.left(24))
+			elif l.get_line_count() > l.get_visible_line_count():
+				bad.append("hidden lines '%s'" % l.text.left(24))
+		elif c is Button:
+			var b := c as Button
+			var room := b.size.x - b.get_theme_stylebox("normal").get_minimum_size().x
+			if b.clip_text and b.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING and wider(b, b.text, room):
+				bad.append("clipped '%s'" % b.text.left(24))
+	return bad
+
+
+static func wider(c: Control, s: String, room: float) -> bool:
+	var font := c.get_theme_font("font")
+	var w := 0.0
+	for line in s.split("\n"):      # (a plain label with line breaks is as wide as its longest line)
+		w = maxf(w, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x)
+	return w > room + 1.0

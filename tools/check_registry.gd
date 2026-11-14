@@ -57,6 +57,8 @@ const CHECKS := {
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--knock-feed-check": ["res://tools/knock_feed_check.gd", "knock_feed_check", "check"],      # the kill feed
 	"--knock-feed-shots": ["res://tools/knock_feed_check.gd", "knock_feed_check", "shots"],      # GPU
+	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
+	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
@@ -464,6 +466,8 @@ const CHECKS := {
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
+	"--result-card-check": ["res://tools/result_card_check.gd", "result_card_check", null],     # the garden games' card
+	"--pause-menu-check": ["res://tools/pause_menu_check.gd", "pause_menu_check", null],     # 4 buttons, all reachable
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],  # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],  # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
@@ -538,6 +542,7 @@ const CHECKS := {
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
+	"--result-card-shots": ["res://tools/result_card_shots.gd", "result_card_shots", null],      # --shots-dir=<dir>
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],      # 0.24.2-0.24.4 saves load
 	"--garden-fit-check": ["res://tools/garden_fit_check.gd", "garden_fit_check", null],      # garden screens fit
