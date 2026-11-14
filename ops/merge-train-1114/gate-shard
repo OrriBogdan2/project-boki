@@ -25,6 +25,7 @@ CAP=${GS_CAP:-300}             # per-check timeout, s (suite.sh uses 300)
 SUBMIT_P=${GS_SUBMIT_P:-8}      # parallel submits (every jobq call goes through a slow relay)
 SHARDS=${GS_SHARDS:-32}         # jobs per side; each runs its flags PAR at a time
 PAR=${GS_PAR:-4}
+PER=${GS_PER:-15}               # flags per shard job (fewer jobs when few flags are left to run)
 HERE=$(cd "$(dirname "$0")" && pwd)
 JOB_CAP=${GS_JOB_CAP:-2400}    # s a whole shard job may run
 MAX_WAIT=${GS_MAX_WAIT:-900}
@@ -74,7 +75,7 @@ submit() {  # submit SIDE TREE < flags : the flags dealt round-robin (slowest fi
 	flags=$(awk -v H="$CACHE/secs.txt" 'BEGIN { while ((getline l < H) > 0) { split(l, a, " "); t[a[1]] = a[2] } }
 		{ print (($1 in t) ? t[$1] : 30), $1 }' | sort -k1,1nr -k2 | cut -d' ' -f2)  # no history: 30 s
 	n=$(grep -c . <<< "$flags"); [ "$n" -gt 0 ] || return 0
-	k=$(( n < SHARDS ? n : SHARDS ))
+	k=$(( (n + PER - 1) / PER )); [ "$k" -le "$SHARDS" ] || k=$SHARDS  # ~PER flags a job: a warm main side (88 flags) is 6 jobs, not 32 relay submits
 	awk -v k="$k" '{ s[(NR - 1) % k] = s[(NR - 1) % k] "," $1 } END { for (i = 0; i < k; i++) print substr(s[i], 2) }' <<< "$flags" \
 		| paste -d' ' - <(slots | head -"$k") | xargs -P "$SUBMIT_P" -L1 sh -c '  # $1 side $2 tree $3 tag $4 job cap $5 par $6 cap, then the line: $7 flags $8 host
 		only=; [ "$8" = any ] || only="--only $8"
@@ -157,10 +158,10 @@ if [ -n "$SUSPECT" ]; then
 	echo "$SUSPECT" | comm -12 - <(pick "$MT") > "$OUT/suspect_both.txt"
 	comm -23 <(echo "$SUSPECT") "$OUT/suspect_both.txt" > "$OUT/suspect_cand_only.txt"
 	export SLOTS_FILE=$OUT/slots2.txt
-	SHARDS=${GS_SHARDS2:-24} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_both.txt"
-	SHARDS=${GS_SHARDS2:-24} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit m "$MT" < "$OUT/suspect_both.txt"
+	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_both.txt"
+	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit m "$MT" < "$OUT/suspect_both.txt"
 	unset SLOTS_FILE
-	PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_cand_only.txt"
+	PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_cand_only.txt"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
 	for side in c m; do
@@ -172,8 +173,8 @@ if [ -n "$SUSPECT" ]; then
 	STILL=$({ lost "$OUT/cand.txt"; lost "$OUT/main.txt"; } | sort -u | grep .)
 	if [ -n "$STILL" ]; then
 		N2=$(wc -l < "$OUT/jobs.tsv")
-		lost "$OUT/cand.txt" | PAR=${GS_PAR2:-2} submit c "$CT"
-		lost "$OUT/main.txt" | PAR=${GS_PAR2:-2} submit m "$MT"
+		lost "$OUT/cand.txt" | PER=5 PAR=${GS_PAR2:-2} submit c "$CT"
+		lost "$OUT/main.txt" | PER=5 PAR=${GS_PAR2:-2} submit m "$MT"
 		tail -n +"$((N2 + 1))" "$OUT/jobs.tsv" > "$OUT/jobs3.tsv"
 		collect "$OUT/jobs3.tsv" > "$OUT/round3.txt"
 		for side in c m; do
@@ -195,8 +196,8 @@ if [ -n "$CONFIRM" ] && [ "${GS_CONFIRM:-2}" -gt 0 ]; then
 	echo "$CONFIRM" | comm -12 - <(pick "$MT") > "$OUT/confirm.txt"
 	N4=$(wc -l < "$OUT/jobs.tsv"); slots > "$OUT/slots4.txt"; export SLOTS_FILE=$OUT/slots4.txt
 	for i in $(seq "${GS_CONFIRM:-2}"); do
-		SHARDS=999 PAR=1 CAP=$((CAP * 2)) submit c "$CT" < "$OUT/confirm.txt"
-		SHARDS=999 PAR=1 CAP=$((CAP * 2)) submit m "$MT" < "$OUT/confirm.txt"
+		SHARDS=999 PER=1 PAR=1 CAP=$((CAP * 2)) submit c "$CT" < "$OUT/confirm.txt"
+		SHARDS=999 PER=1 PAR=1 CAP=$((CAP * 2)) submit m "$MT" < "$OUT/confirm.txt"
 		tail -1 "$OUT/slots4.txt" > "$OUT/slots4.rot"; head -n -1 "$OUT/slots4.txt" >> "$OUT/slots4.rot"; mv "$OUT/slots4.rot" "$OUT/slots4.txt"
 	done
 	unset SLOTS_FILE
