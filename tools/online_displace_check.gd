@@ -20,7 +20,6 @@ const SNAP := 4.0            # m in one frame on the mover's own game: no move h
 const BOT_AT := Vector3(-6.0, 0, 9.0)   # m from home: where the bot waits
 const GO := 0.3              # m from where it stood: the move has started (for the late-start columns)
 
-var flag := "--online-displace-check"   # starts the server and guest processes (a child check sets its own)
 var role := ""
 var delay_ms := 100
 var jitter_ms := 0
@@ -36,7 +35,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Engine.max_fps = 60
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with(flag + "="): role = a.get_slice("=", 1)
+		if a.begins_with("--online-displace-check="): role = a.get_slice("=", 1)
 		if a.begins_with("--dn-port="): port = int(a.substr(10))
 		if a.begins_with("--od-port="): relay_port = int(a.substr(10))
 		if a.begins_with("--od-dir="): dir = a.substr(9)
@@ -119,7 +118,7 @@ func _host() -> void:
 		DirAccess.remove_absolute(dir.path_join(f))
 	var common := "%s --headless -- --od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [
 		GODOT, dir, relay_port, port, delay_ms]
-	pids.append(_spawn("%s %s=server > '%s' 2>&1" % [common, flag, dir.path_join("server.log")]))
+	pids.append(_spawn("%s --online-displace-check=server > '%s' 2>&1" % [common, dir.path_join("server.log")]))
 	var t0 := Time.get_ticks_msec()
 	while not FileAccess.file_exists(dir.path_join("server.ready")) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
@@ -129,7 +128,7 @@ func _host() -> void:
 			port, relay_port, delay_ms, jitter_ms, dir.path_join("proxy.log")]))
 		await main.get_tree().create_timer(0.5).timeout
 	ok(await _connect(), "the host is on the server as %s (%d ms each way, jitter %d)" % [Net.me, delay_ms, jitter_ms])
-	pids.append(_spawn("%s %s=guest > '%s' 2>&1" % [common, flag, dir.path_join("guest.log")]))
+	pids.append(_spawn("%s --online-displace-check=guest > '%s' 2>&1" % [common, dir.path_join("guest.log")]))
 	t0 = Time.get_ticks_msec()
 	while peer_id == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
@@ -139,8 +138,11 @@ func _host() -> void:
 	if peer_id == "":
 		await _finish()
 		return
-	Net.lobby_emit("dn", {"c": "start", "d": _start_dict()})
-	await _build(_start_dict())
+	var d := {"mid": "od%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
+		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
+		{"peer": peer_id, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
+	Net.lobby_emit("dn", {"c": "start", "d": d})
+	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + peer_id, null)
 	t0 = Time.get_ticks_msec()
 	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -150,17 +152,6 @@ func _host() -> void:
 	if G == null:
 		await _finish()
 		return
-	await _scenario(G)
-	await _finish()
-
-## The match both games build: the host on team 0, the guest on team 1.
-func _start_dict() -> Dictionary:
-	return {"mid": "od%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
-		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
-		{"peer": peer_id, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
-
-## What the host plays once the guest's hunter is here (G): the displace moves.
-func _scenario(G: Hunter) -> void:
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + BOT_AT, {"arch": "none"})
 	await _move("Kael Warchain self-pull", "juggernaut", Vector3(6, 0, 0), _kael, 1.8, G, B, ["self"])
 	await _move("Kael Warchain sling", "juggernaut", Vector3(6, 0, 0), _sling, 1.8, G, B, ["self"])
@@ -173,6 +164,7 @@ func _scenario(G: Hunter) -> void:
 	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Neve Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
+	await _finish()
 
 ## One move: the same ability on a bot (the offline reference), then on the guest's hunter from the same spot.
 ## `who` lists whose path is measured: "self" (the caster, on the host) and/or "guest" (the one it moves).
@@ -262,20 +254,17 @@ func _knock(t: Hunter) -> void:
 	t.hurt(1.0, m.player, {"kb": Vector2(0, 16.0), "wallstun": 1.0, "src": "abil", "ab": "lmb", "melee": true})
 	await _run(DT)
 
-func _has_report() -> bool:
-	return rows.size() > 0
-
 func _finish() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.5).timeout
 	_dump("host")
 	FileAccess.open(dir.path_join("stop"), FileAccess.WRITE).close()
 	await main.get_tree().create_timer(1.5).timeout
-	if _has_report():
+	if rows.size() > 0:
 		_report()
 	for p in pids:
 		if OS.is_process_running(p): OS.kill(p)
-	print("%s DONE, %d checks, failures: %d" % [tag, n, bad])
+	print("DISPNET DONE, %d checks, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 # ------------------------------------------------------------------ the numbers
