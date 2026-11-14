@@ -42,7 +42,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 | Cinder | RMB range 14 `[?]`; 3 dash-flow `keep` rows and `dash.ground.lmb` unsourced `[?]` | none |
 | Albert | Invented Guard meter and Shield Slam (gap 15, owner 11-07 said cut), Shield Slam stun 0.6 s | branch ready: ext/parity-bulwark-guardcut b2e942eb4 |
 | Albert | RMB aegis/bash routing `[?]` | branch ready: ext/combat-albert-aegis-input 91c3dba10 |
-| Albert | Crushing Blow stun 0.4 s (no source row); R cd 40 vs 50 | none / ext/cooldown-parity-verify |
+| Albert | Crushing Blow stun removed; R cd 40 vs 50 | none / ext/cooldown-parity-verify |
 | Meeko | Empowered +40% range and Hearthlight self_k 0.33 are ours (source silent); R cd 46 vs 60 | branch ready: ext/parity-no-riders-meeko 0d6177875; ext/cooldown-parity-verify |
 | Grimble | E Grounds the foe (ours); RMB 12 vs 18, E 7 vs 12, R 21 vs 36 (0.58x to 0.67x) | branch ready: ext/parity-no-riders-grimble-tenzo 7b130d5c7; ext/cooldown-parity-verify |
 | Tenzo | Punch charge scaling (ours); rock slow 30% 0.8 s and Rock Hop crash slow 1.5 s (ours) | grimble-tenzo branch covers the punch; the slows have no branch |
@@ -604,11 +604,11 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 | Hem | Heartpiercer wall stun 1.2 s (rank 3: dash charge); Rain of Arrows slow 35% 0.8 s refreshed | "enemies that collide with terrain are Stunned", "Slow + Anti-Heal", no numbers; wall stun not shown cleanly [F] | match; numbers unsourced |
 | Cinder | Cinder Shot slow 30% 1.5 s; Flue Flight carpet slow 30% 0.5 s refreshed | "Slow" on both [D]; dummy read SLOWED once, maybe the jump pad [F] | match; numbers unsourced |
 | Pip | Burrseed root 1.1 s, +0.3 s at rank 3 | Root, +0.3 s upgrade [D]; root seen about 1 s or more [F] | match |
-| Tarek | Punch wall stun 0.9 s; Volcano slam centre stun 0.5 to 1.2 s by charge; Basalt Spine slow 35% 1.0 s; rocks slow 30% 0.8 s; Rock Hop crash slow 30% 1.5 s | wall stun and centre stun, slam stun about 1 s [F]; Tetraform slows [D]; no number | match for the stuns and Spine; rock and hop slows are ours-only |
+| Tarek | Punch wall stun 0.9 s; Volcano slam centre stun 0.5 to 1.2 s by charge; Basalt Spine slow 35% 1.0 s; Rock Hop's rolling rock slow 30% 1.5 s; punched, Rockwave and Spine rocks shred, no slow | wall stun and centre stun, slam stun about 1 s [F]; Tetraform slows [D]; Landslide's launched rock "160 and SLOWED" [D, F 0539-0540], no duration; punched rocks "explode and shred Armor", no slow [D] | match; the rock slow (0.8 s) was ours-only and is removed, the rolling rock's slow is sourced (strength and time unsourced) |
 | Grimble | Anchor stun 1.1 s (+0.1 s a rank, +0.2 s rank 3); the hook's foe is stunned the whole reel (0.2 s refreshed), Grimble Grounded while reeling; no Ground after the Anchor (ours-only rider cut, DECISIONS 11-07) | Anchor stun 1.2 to 1.4 s [F]; +0.1 s and +0.2 s steps [D]; reeled foe stunned, caster Grounded [F] | match. Dredge gap 3 ("about a third", it was 0.45 s) is **closed**: 1.1 s is 80 to 90% of the read, inside footage error |
 | Claire | Ice Spear zone slow 35% and hit slow 35% 0.6 to 0.8 s; Rimelock stun 0.75 s with a slow that builds 15% +12%/s to 55%; Rink Wall touch slow 30% 1 s; splinter slow 30% 1.2 s | Spear "slow zone", Ice Crash "slowing zone, stuns after a delay", slow stacks up to 3.5 s [D,F]; stun not legible, dummy encased about 0.5 s | match in shape; numbers unsourced |
 | Ostra | Snap stun 0.8 to 1.8 s by flight; Nightwell stun and pull 3.5 s; full orb slow 6% 1.5 s | 0.8 to 1.8 s; 3.5 s; "slow 6% for 1.5 s" [D, in-game card text read in the footage] | Snap and Nightwell match. Orb slow fixed 10% to 6% (2026-11-11): the data file only says "Slows"; the card text is game text, so D outranks the wiki 10%; 1.5 s agrees. `lmb.prime_slow` 0.06, locked in kit_parity.json, asserted in `--ostra-combo-check`; reasoning in `docs/heroes/ostra.md` "Orb slow" |
-| Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; Shield Slam stun 0.6 s; full Crushing Blow stun 0.4 s | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F] | **fixed**: 0.5 to 1.0 s. Shield Slam and the blow's stun are ours (no source row) |
+| Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; Shield Slam stun 0.6 s; no stun on the full Crushing Blow (knock only; removed) | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F] | **fixed**: 0.5 to 1.0 s; the blow's 0.4 s stun was ours-only and is removed (asserted `combo bjorn: a full slam only knocks`). Shield Slam stun is ours (no source row) |
 | Ryzz | Storm Rod wall stun 0.8 s; Skycall Grounded 1.5 s | Stun on a wall or second target [D]; Grounded 1.5 s or more [F] | match |
 | Sable | Bola: first foe Grounded 1.5 s and slowed 30% (owner item 53); a pair stun 0.9 s; Shadow Knife slow 50% 2.5 s | Grounded, rings about 1.5 bh [F]; pair "Stunned", the label showed about 1.8 s [F]; knife "Slows" | match for Ground and slow; pair stun 0.9 kept: the footage has no two-foe tie (0115-0125 is one dummy and a tree, and a dummy never acts), so the 1.8 s is label time, not a stun; not measurable, frames and verdict in `docs/heroes/thief.md` "Pair stun length"; asserted in --dancer-combo-check |
 | Sable | Bola: first foe Grounded 1.5 s and slowed 30% (owner item 53); a pair stun 0.9 s; Shadow Knife slow 50% 2.5 s | Grounded, rings about 1.5 bh [F]; pair "Stunned", the label showed about 1.8 s [F]; knife "Slows", 50% in the wiki row, no time anywhere (`docs/heroes/thief.md`, "Shadow Knife audit") | match for Ground and slow, knife time 2.5 s `[?]`; pair stun 0.9 vs 1.8 is noted in `docs/heroes/thief.md` as an owner pacing call, kept |
@@ -617,8 +617,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 
 **Suggestions, not built (PARITY FIRST):**
 - Zedran: drop the fireblast slow (`lmb.wave_slow`), the Chain Lunge stun and the Haul Slam stun (`rmb.haul.stun`): the source has no CC on them. Removing the Haul stun changes a documented move, so it needs the owner.
-- Tarek: drop `rock.slow_*` and `dash.slow_t` (the source rocks shred armour, they do not slow).
-- Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row.
+- Albert: the Shield Slam stun 0.6 s has no source row.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s (no footage clip can time it; needs a match clip with two tied foes).
 
 ## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
@@ -663,8 +662,7 @@ none, or has no number. **Checks:** the four combo checks (`--gunslinger-combo-c
 `--archer-combo-check`, `--ashwick-combo-check`) and `--move-feel-check`. **Footage to get:** a straight walk during Kael's
 wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, and Cinder's 0.35 s after the stream.
 - Zedran: drop the fireblast slow (`lmb.wave_slow`), the Chain Lunge stun and the Haul Slam stun (`rmb.haul.stun`): the source has no CC on them. Removing the Haul stun changes a documented move, so it needs the owner. **Re-audit 11-11: open**, all three still in `juggernaut.json` / `juggernaut_kit.gd`.
-- Tarek: drop `rock.slow_*` and `dash.slow_t` (the source rocks shred armour, they do not slow). **Open**: no branch; ext/parity-no-riders-grimble-tenzo removes only the punch charge scaling and Grimble's Ground.
-- Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row. **Open**: Shield Slam goes with ext/parity-bulwark-guardcut (branch ready); `lmb.smash_stun` 0.4 has no branch.
+- Albert: the Shield Slam stun 0.6 s has no source row. **Open**: Shield Slam goes with ext/parity-bulwark-guardcut (branch ready); `lmb.smash_stun` 0.4 has no branch.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s. **Owner**, both unchanged.
 - Ostra: full orb slow decided, 6% (card text = game data, over the wiki 10%), done 2026-11-11. Sable: pair stun 0.9 or about 1.8 s.
 
