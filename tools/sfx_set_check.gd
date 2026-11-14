@@ -242,8 +242,8 @@ func _nuke_fall() -> void:
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
-	var looks := FileAccess.get_file_as_string("res://content/vfx/gunslinger.json")
-	ok(looks.contains("\"n\": \"vn_nuke_fall\""), "the cast's HeroVfx look plays vn_nuke_fall (at the landing point)")
+	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
+	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

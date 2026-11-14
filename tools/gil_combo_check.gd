@@ -227,12 +227,13 @@ func _puddle() -> void:
 	var in_col: Color = inside.get_shader_parameter("color")
 	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
 		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
-			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
+			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * GilKit.PUDDLE_FILL <= 0.25,
 		"rim %s inside %s" % [steady, in_col])
 	var at: Vector3 = pd["at"]
 	var r := float(pd["r"])
 	var on_it := func(rg: Dictionary) -> bool:
-		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
+		var n := rg["node"] as Node3D       # (Fx.ring sizes its quad: scale x RING_REACH is the radius)
+		return absf(n.scale.x * Fx.RING_REACH - r) < 0.05 and n.global_position.distance_to(at) < 0.5
 	var strobe := false
 	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
 		step(m, DT)

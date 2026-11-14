@@ -285,18 +285,18 @@ const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slo
 const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
 const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
 const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
-const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
+const PUDDLE_IN_A := 0.8        # the inside's alpha: filled at PUDDLE_FILL of it (0.24, the zone rule's 0.25 cap)
+const PUDDLE_FILL := 0.3        # the ring shader's flat fill share under the rim
 
 ## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
-## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
+## Gil's lit rim over a faint flat inside in the slime's colour.
 func _add_puddle(at: Vector3, vd: Dictionary) -> void:
 	var r := float(vd["puddle_r"])
 	var n := Node3D.new()
 	var quad := Models.flat_quad(r * 2.0)
 	var inside := Models.ring_mat(Color(col_of(vd), PUDDLE_IN_A), 0.0)
-	inside.set_shader_parameter("wash", 1.0)
+	inside.set_shader_parameter("fill", PUDDLE_FILL)
 	var rim := Models.ring_mat(Arch.color(h.arch), PUDDLE_RIM)
-	rim.set_shader_parameter("halo", 1.0)
 	Models.part(n, quad, inside, Vector3(0, 0.06, 0))
 	Models.part(n, quad, rim, Vector3(0, 0.08, 0))
 	ShadowPolicy.off(n)

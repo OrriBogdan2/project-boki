@@ -1,7 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Tenzo's reel (--hero-vfx-reel --reel-hero=dolm): a boulder thrown, Stone Row raised then punched into flying
 ## rocks that burst, Rock Hop, a full Quakefall (and one at a dummy in its path), Basalt Spine erupting, and R
-## pressed while falling over the abyss (owner playtest 11-08).
+## pressed while falling over the abyss.
 
 ## Engine.time_scale while the reel runs: a software frame takes about half a second, so at this scale the
 ## looks (on process time) advance about one match step per frame, as the match itself does here.
