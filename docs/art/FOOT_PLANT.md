@@ -14,7 +14,7 @@ the feet used to float or sink. `scripts/match/foot_plant.gd` now plants them af
   rolling.
 - **Steps and rocks:** the body's height is the game's (`Hunter.pos.y`) and its ground counts a rock it overlaps as
   `Ent.ground` does (its radius). Walked onto a higher rock or up a terrace, the drawn body eases up
-  (`Hunter.step_vis`; `StoneStand.stand` for a rock's top, which used to pop it up in one frame) and the feet stay on
+  (`StepSmooth`; `StoneStand.stand` for a rock's top, which used to pop it up in one frame) and the feet stay on
   the top meanwhile (`lag`, not eased); the body's height going up or down a step at once keeps the feet where they
   were (`lift` rebased). Tenzo on his rocks, the ridge and steps between rocks: `--rock-feet-check` (below).
 - **Which body:** a .glb Hunter is planted on its bones (root, thighs, shins) by `FootPlant.bones` from WardenGlb's

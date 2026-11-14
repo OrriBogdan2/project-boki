@@ -16,6 +16,11 @@ static func ids() -> Array:
 		out.append(String(it["id"]))
 	return out
 
+## The stat bite a lair pile holds beside its gear, or "" when this pile has none (roll in 0..1).
+static func lair_drop(roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["lair_drop"]
+	return String(d["ids"][pick % d["ids"].size()]) if roll < float(d["chance"]) else ""
+
 static func has(id: String) -> bool:
 	return not item(id).is_empty()
 
@@ -77,11 +82,17 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	_remember(rec, id, String(pv["text"]))
 	return pv
 
+## A copy of rec as it would be after the preview pv (for what the change leads to, as the path meter).
+static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
+	var then := rec.duplicate(true)
+	_write(then, pv["deltas"])
+	return then
+
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
 	for key in deltas:
-		var after: Variant = deltas[key][1]
-		if key.begins_with("stats."): rec["stats"][key.substr(6)] = after
-		else: rec[key] = after.duplicate(true) if typeof(after) in [TYPE_ARRAY, TYPE_DICTIONARY] else after
+		var to: Variant = deltas[key][1]
+		if key.begins_with("stats."): rec["stats"][key.substr(6)] = to
+		else: rec[key] = to.duplicate(true) if typeof(to) in [TYPE_ARRAY, TYPE_DICTIONARY] else to
 
 static func _verb(id: String) -> String:
 	var it := item(id)
@@ -307,7 +318,7 @@ static func fed(id: String) -> bool:
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:
 	if fed(id):
-		return "Shapes a Boki: feed it from its card."
+		return "Shapes a Boki: hold it near one to see the change, or feed it from its card."
 	return "Goes in the Nesting Nook with a pair."
 
 ## The path an item's token pushes toward ("" for other items).
