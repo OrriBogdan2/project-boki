@@ -112,26 +112,24 @@ func _results(main: Node) -> void:
 	scr.show_result({"place": 3, "squads": 10})
 	for i in 5:
 		await tree.process_frame
-	ok(scr.cam != null, "results: the island camera is up")
-	if scr.cam == null:
+	var st: ResultsStage = scr.stage
+	ok(st != null and st._cam != null, "results: the squad stage and its camera are up")
+	if st == null or st._cam == null:
 		scr.queue_free()
 		return
-	var at: Vector3 = scr.CAM_AT
-	var d0: float = scr.cam.position.distance_to(at)
+	var k0 := st.zoom.k
 	var e := _wheel(MOUSE_BUTTON_WHEEL_UP)
 	for i in 3:
 		scr._unhandled_input(e)
 	for i in 60:
-		scr._process(DT)
-	var d1: float = scr.cam.position.distance_to(at)
-	ok(d1 < d0 - 0.3, "results: the wheel moves the camera in (%.2f -> %.2f m)" % [d0, d1])
+		st._process(DT)
+	ok(st.zoom.k < k0 - 0.05, "results: the wheel moves the stage camera in (zoom %.2f -> %.2f)" % [k0, st.zoom.k])
 	for i in 100:
 		scr._unhandled_input(_wheel(MOUSE_BUTTON_WHEEL_DOWN))
 	for i in 120:
-		scr._process(DT)
-	var d2: float = scr.cam.position.distance_to(at)
-	var far := d0 * float(ViewZoom.rules()["max"])
-	ok(is_equal_approx(d2, far), "results: wheel down stops at the furthest (%.2f m)" % d2)
+		st._process(DT)
+	var far := float(ViewZoom.rules()["max"])
+	ok(is_equal_approx(st.zoom.k, far), "results: wheel down stops at the furthest (zoom %.2f)" % st.zoom.k)
 	scr.queue_free()
 
 

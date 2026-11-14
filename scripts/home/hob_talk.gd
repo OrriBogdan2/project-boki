@@ -131,7 +131,7 @@ func _after_beat(id: String) -> void:
 
 func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
-	if at.x == INF or not look.look(at):
+	if look != null and (at.x == INF or not look.look(at)):      # (no look before the first tick)
 		look.release()
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))

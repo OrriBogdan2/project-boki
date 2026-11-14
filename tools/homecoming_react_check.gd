@@ -35,7 +35,8 @@ func _new_save() -> void:
 		rec["traits"]["bravery"] = BOKI[nm][2]
 		d["roster"].append(rec)
 	d["active"] = d["roster"][0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
+	# no base tutorial (Lead); the one-time whistle hint already seen (it would add a pill to root_ui)
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true, "whistle_hint": true}
 	Save.d = d
 	HomeLayout.ensure(d)
 
