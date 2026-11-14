@@ -80,7 +80,7 @@ func _build_ui() -> void:
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
-	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
+	var b1 := _menu_main(("Continue" if has else "New game"), _continue if has else func(): Game.goto("prologue"))
 	col.add_child(b1)
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
@@ -161,6 +161,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if nxt:
 		nxt.grab_focus()
 		get_viewport().set_input_as_handled()
+
+## Continue: back into the tutorial when it was left part-way, else to the farm.
+func _continue() -> void:
+	if TutorialResume.pending():
+		Game.start_match(TutorialResume.opts())
+	else:
+		Game.goto("home")
 
 func _menu_main(text: String, cb: Callable) -> Button:
 	var b := UI.button(text, cb)
