@@ -118,6 +118,7 @@ python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/gate" --jobs "$JOBS
 GRC=$?
 log "gate rc=$GRC: $(grep -m1 '^gate ' "$OUT/gate/summary.txt" 2> /dev/null)"
 [ "$GRC" = 3 ] && { kill "$EXP" 2> /dev/null; finish ERROR "gate ENV-BROKEN: $(grep -m1 ENV-BROKEN "$OUT/gate/summary.txt")"; }
+[ "$GRC" = 4 ] && { kill "$EXP" 2> /dev/null; finish ERROR "gate STALLED (no check finished for 20 min, see $OUT/gate/stall.txt): $(grep -m1 STALLED "$OUT/gate/summary.txt")"; }
 reds() { sed -n "s/^NEW-RED[^:]*: //p" "$1" | tr ' ' '\n' | sed '/^$/d' | sort -u; }
 RED=$(reds "$OUT/gate/summary.txt")
 if [ -n "$RED" ]; then  # flaky guard: the red flags once more, both sides, no cache, one at a time (net checks bind fixed ports)
@@ -125,6 +126,8 @@ if [ -n "$RED" ]; then  # flaky guard: the red flags once more, both sides, no c
 	log "NEW-RED $(echo $RED), re-running once"
 	python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/rerun" --jobs 1 --flags "$OUT/rerun-flags.txt" \
 		--no-cache --no-canary > "$OUT/rerun.stdout" 2>&1
+	RRC=$?
+	[ "$RRC" = 3 ] || [ "$RRC" = 4 ] && { kill "$EXP" 2> /dev/null; finish ERROR "flaky re-run rc=$RRC: $(grep -m1 -E 'STALLED|ENV-BROKEN' "$OUT/rerun/summary.txt")"; }
 	RED=$(reds "$OUT/rerun/summary.txt")
 	log "after re-run: NEW-RED $(echo $RED)"
 fi
@@ -137,6 +140,9 @@ TAG="[regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
 if [ -n "$RED" ] || [ "$EXPORT_BAD" != 0 ]; then
 	finish RED "$(echo $RED) export_bad=$EXPORT_BAD" "REGATE RED ${NEW} (not pushed): $BRANCH + origin/main ${MAIN:0:10} gives NEW-RED $(echo "$RED" | sed '/^$/d' | wc -l): $(echo $RED) (red twice, main green); export problems: $EXPORT_BAD.
 $SUM. Logs on the worker: $OUT. $TAG"
+fi
+if [ "$GATE_ONLY" = 1 ] && [ "$(g rev-parse "$GATED^{commit}")" = "$MAIN" ]; then  # 11-14: first gate (no earlier green)
+	finish GREEN "$NEW (first gate)" "GATE GREEN $NEW: regate-bot gated this head as it is (it already contains origin/main ${MAIN:0:10}; first gate, no earlier GATE GREEN), running every check whose inputs this branch changes vs main: $SUM; $BOTH (pre-existing on main); NEW-RED 0 (flaky reds re-run once); compile errors $PE_C vs $PE_M on main; export dry-run OK, ${EXPORT_MB:-?} MB. $TAG"
 fi
 if [ "$GATE_ONLY" = 1 ]; then
 	finish GREEN "$NEW (gate only)" "GATE GREEN $NEW: regate-bot gated this head as it is (it already contains origin/main ${MAIN:0:10}; only merge commits since GATE GREEN ${GATED:0:10}), re-running the checks whose inputs changed since that green: $SUM; $BOTH (pre-existing on main); NEW-RED 0 (flaky reds re-run once); compile errors $PE_C vs $PE_M on main; export dry-run OK, ${EXPORT_MB:-?} MB. $TAG"
