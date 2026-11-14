@@ -33,6 +33,7 @@ extends RefCounted
 ##      fallback such as "revive" fails), the stations and the duel ring play them, the count-in plays 3-2-1 and
 ##      one horn, the expanse has the full wind and a sky island less of it under its own bed, the beds sit on
 ##      the Ambience bus, and the grounds never play the match's beds
+##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -73,8 +74,25 @@ func run(main: Node) -> void:
 	_cc_cues()
 	_inv_cues()
 	_training()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _boki_cues() -> void:
+	var missing := []
+	for id in KinLib.kin_ids():
+		var cue := KinLib.cue_of(String(KinLib.species(id).get("type", "")))
+		if _takes(cue).is_empty() and not missing.has(cue):
+			missing.append(cue)
+	ok(missing.is_empty(), "every Boki type has a cast cue file %s" % str(missing))
+	var no_cue := KinLib.TYPES.filter(func(t): return _takes("k_" + t).is_empty())
+	ok(KinLib.TYPES.size() == 19 and no_cue.is_empty(), "each of the 19 types has a cast cue %s" % str(no_cue))
+	var mapped := KinLib.cue_of("shadow") == "k_dark" and KinLib.cue_of("ghost") == "k_ghost"
+	ok(mapped, "shadow maps to k_dark, ghost to k_ghost")
+	var types := {}
+	for theme in KinLib.TYPE_OF_THEME:
+		types[KinLib.TYPE_OF_THEME[theme]] = true
+	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
