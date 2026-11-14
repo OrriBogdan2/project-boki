@@ -27,6 +27,8 @@ its engines droning and its shadow sweeping over the islands below.
 - **Jump** jumps out of the rocket early: you free-fall (slower than the rocket, still fast; steer it like any
   jump) and a second **Jump** or the glide key opens your glider at any height to travel further. Holding
   Jump never opens it; never opening it, it opens by itself just above the ground. Anyone still aboard the ship at the far side is launched.
+- Aboard the rocket the screen is bare: the map, the landing ring, and the keys (the leader's
+  "Steer with WASD", everyone's "Jump out"). No health or ability bars until you are out.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
