@@ -84,3 +84,9 @@ glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, no
 on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
 blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
 a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `leap` (Soot Ram) re-keyed to the felt ram (3.4 m / 0.33 s, fastest at
+the start): flat out by 0.12 s, the stop on RAM_IMPACT_KEY 0.36 as before. The source .blend was not on the art worker, so
+the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade_root` (a control bake of `leap` and `hop`
+matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
+6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
+On the v95 swap the `leap` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... leap`.

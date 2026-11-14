@@ -31,3 +31,8 @@ through the chest; the bow passes through her open left hand.
 rig task), loops rebuilt, sole planted at loco speed. Blind Fable 5.2 judge (pilot1 rubric): walk 4.17 vs 3.67 current,
 run 4.17 vs 3.67. Licence: Meshy API output on the paid plan, commercial use allowed under Meshy's terms. Idle unchanged
 (owned by the pilot4 idle job).
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `roll` (Spirit Walk) re-keyed to her felt roll, 3.0 m in 0.386 s
+(roll_t 0.27 at tuning.json dash_speed 0.7): 0.52 s, the turn on the dash curve, low and crouched at 0.386 s where the walk
+takes over (PinSpirit.roll_time). Baked on this glb through `tools/art1/clip_blend.py ... pinch=fing_a2.R` (a control bake
+of `roll` and `flick` matched this glb's exactly) and copied on with `glb_add_clips.py ... roll`; `flick` unchanged.
+On the v95 swap (body6 pick, above) the `roll` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... roll`.

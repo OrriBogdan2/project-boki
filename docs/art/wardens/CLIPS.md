@@ -82,6 +82,8 @@ timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spo
 under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+A re-key with no source .blend at hand: `tools/art1/clip_blend.py` turns the game .glb into the .blend a `*_clips.py` keys on
+(control-bake an untouched clip against the glb first), and `glb_add_clips.py` copies the new clip back.
 
 ## The drop poses (WardenDropPose, `content/rules/drop_poses.json`)
 One pose set every Hero wears over its clips or rig, not a clip per Hero: `ride` (braced on the squad rocket's hull,
