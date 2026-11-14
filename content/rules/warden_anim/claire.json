@@ -31,6 +31,11 @@
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"turn": {"dur": 0.2, "lift": 0.62},
 	"cc": {"pull": 0.2, "tug_hz": 1.0, "twist": 0.2, "bow": 0.25},
+	"climb": {
+		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
+		"mantle": {"clip": "mantle", "rise": 0.28},
+		"ledge": {"clip": "ledge", "rise": 0.3}
+	},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
 }

@@ -23,6 +23,7 @@ const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, th
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides)
 const FADE_LOCO := 0.16      # s: an action back to the legs (a move's "fade_out" overrides)
+const CLIMB_FADE := 0.06     # s: into the climb clips (a rise is over in well under a second)
 const AIR_FADE := 0.12
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
@@ -82,6 +83,9 @@ var was_glide := false
 var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
 var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
 var land_t := LAND_DONE
+var climb_t := 0.0           # s since the ledge hang began (the "ledge" clip), or since the climb state ended
+var climb_was := ""          # "mantle" or "ledge" while the climb state runs; else the one that just ended
+var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
 var upper_move := false      # the move is an upper-body one (keyed "upper"), even standing: the aim lead stays on
@@ -447,6 +451,9 @@ func _extract_pick(xt: float) -> Dictionary:
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
+	var climb := _climb(s, dt)
+	if not climb.is_empty():
+		return climb
 	var fall := float(s.get("fall", -1.0))
 	if fall >= 0.0 and st.has("dead"):      # knocked down (HunterFall): the death clip, as far in as the beat is
 		var clip := String(st["dead"])
@@ -552,6 +559,41 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit,
 				"flinch": hk < Oomph.HEAVY_FLINCH, "flinch_w": Oomph.flinch_weight(hk)}
 	return {}
+
+## The "climb" data ({mantle|ledge: {clip, rise}}): a ledge rise plays its clip by how far up the face he is, so the
+## hands meet the lip when the body does (rise: the clip second that is); a ledge float hangs there for `rise` s. When
+## the state ends the clip runs on in time to its last frame (the pull-up over the lip), unless a move, the glider or a
+## fall takes over. {} when the Hero has no such clip: the procedural pose plays.
+func _climb(s: Dictionary, dt: float) -> Dictionary:
+	var cd: Dictionary = d.get("climb", {})
+	var blocked := bool(s.get("dead", false)) or String(s.get("kmove", "")) != ""
+	var live := ""
+	if float(s.get("mantle", -1.0)) >= 0.0:
+		live = "mantle"
+	elif bool(s.get("ledge", false)):
+		live = "ledge"
+	if live != "" and cd.has(live) and not blocked:
+		if live != climb_was or not climb_live:
+			climb_t = 0.0
+		climb_was = live
+		climb_live = true
+		climb_t += dt
+		var rise := float((cd[live] as Dictionary)["rise"])
+		var tt := float(s.get("mantle", 0.0)) * rise if live == "mantle" else minf(climb_t, rise)
+		return {"clip": String((cd[live] as Dictionary)["clip"]), "t": tt, "fade": CLIMB_FADE}
+	if climb_live:
+		climb_live = false
+		climb_t = float((cd[climb_was] as Dictionary)["rise"]) if cd.has(climb_was) else 0.0
+	var cut: bool = blocked or bool(s.get("gliding", false)) or bool(s.get("diving", false))
+	if climb_was == "" or not cd.has(climb_was) or cut:
+		climb_was = ""
+		return {}
+	climb_t += dt
+	var c: Dictionary = cd[climb_was]
+	if climb_t >= lib.get_animation(String(c["clip"])).length:
+		climb_was = ""
+		return {}
+	return {"clip": String(c["clip"]), "t": climb_t, "fade": CLIMB_FADE}
 
 ## The lobby's lock-in pose (data "lockin": clip, from, dur, rate, fade, settle): `t` s into it, a window of an
 ## existing clip.
