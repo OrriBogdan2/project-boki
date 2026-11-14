@@ -11,7 +11,6 @@ extends "res://tools/hero_vfx_reel.gd"
 ## then one past it, from the ground or a jump's top). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
-const EXTRA := ["dash_lmb"]             # parts played only by --reel-only (not in the shared reel's timeline)
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
 const KEYS := ["W", "A", "S", "D", "LMB", "RMB", "E", "R", "Shift", "Space"]
 const FAR := 12.0                       # m to the dummy for the moves that travel
