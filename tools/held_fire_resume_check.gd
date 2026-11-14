@@ -57,7 +57,7 @@ func _heroes() -> Array:
 func _trial(m: Match, hero: String, slot: String) -> void:
 	if hero == "gil":
 		skipped += 1
-		print("HELD-FIRE skip gil %s: LMB is a click thrust or the Tide Lunge charge, never a held fire (GilKit.lmb_override)" % slot)
+		print("HELD-FIRE skip gil %s: LMB is a click thrust or the Tide Lunge charge, not a held fire" % slot)
 		return
 	var a := _run(m, slot, HELD)
 	if a.has("skip"):
