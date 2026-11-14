@@ -138,12 +138,12 @@ func toast(text: String, col: Color) -> void:
 	msgs.push(text, col)
 
 ## A first-time hint, in the lane for longer (Match._tip says each once); `near` "armor" puts it
-## next to the armour readout instead (ArmorHud.note).
-func tip(text: String, near := "") -> void:
+## next to the armour readout instead (ArmorHud.note); `life` is how long it stays, s.
+func tip(text: String, near := "", life := TIP_LIFE) -> void:
 	if Record.clean():
 		return
-	if near == "armor": set_meta("armor_note", [text, m.time + TIP_LIFE])
-	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
+	if near == "armor": set_meta("armor_note", [text, m.time + life])
+	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
 const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget

@@ -1,5 +1,5 @@
 {
- "_doc": "Loading-screen and downed-screen tips (scripts/ui/tip_pick.gd). Each tip: id, text, and an optional 'when' trigger read from the last expedition's stats. {action} in a text becomes that action's key (Settings.key_cap). The most relevant unseen tip wins, else a random unseen one, else any. Tips that name the Blight are skipped when the Blight is off.",
+ "_doc": "Loading-screen and downed-screen tips (scripts/ui/tip_pick.gd). Each tip: id, text, and an optional 'when' trigger read from the last expedition's stats. {action} in a text becomes that action's key (Settings.key_cap). The most relevant unseen tip wins, else a random unseen one, else any. hints: one-line in-match hints said once per save (scripts/ui/recast_hint.gd: {key} the ability's key, {verb} its own verb from the ability text); they count toward the text budget with the tips. Tips that name the Blight are skipped when the Blight is off.",
  "triggers": {
   "abyss": "the last expedition ended with a fall into the abyss",
   "no_summon": "your Boki was never sent out",
@@ -8,6 +8,7 @@
   "wisp_stolen": "a rival took one of your Boki",
   "blight": "the Blight knocked you down or out"
  },
+ "hints": {"recast": "{key} AGAIN to {verb}"},
  "min_time_s": 90.0,
  "few_glide_s": 6.0,
  "tips": [
