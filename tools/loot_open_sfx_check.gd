@@ -53,7 +53,7 @@ func _step(m: Match, secs: float) -> void:
 func _chests(m: Match) -> void:
 	var P: Hunter = m.player
 	var list: Array = m.chests.filter(func(x): return not x.get("ride", false) and not x["open"])
-	P.chest_keys = 99
+	P.chest_keys = 0      # (a key opens a chest on the press, KeyChest: the hold channel is a keyless one)
 	var c: Dictionary = list[0]
 	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
 	P.vel = Vector3.ZERO
@@ -69,6 +69,7 @@ func _chests(m: Match) -> void:
 	m.step(DT)
 	ok(not Sfx.loop_on(key), "letting go stops the loop within one step")
 	ok(stings().is_empty() and not c["open"], "a cancelled open makes no sting")
+	P.chest_keys = 99
 	var seen := {}
 	var all_good := true
 	for ch in list.slice(0, 12):

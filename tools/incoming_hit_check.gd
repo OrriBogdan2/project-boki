@@ -139,7 +139,7 @@ func _downed() -> void:
 	P.downed = true
 	m.music_dir.tick(m, 0.0)
 	var near := _bus_of(_hit_from(P.pos + right * NEAR_M, 20.0))
-	var far := _bus_of(_hit_from(P.pos + right * R, 20.0))
+	var far := _bus_of(_hit_from(P.pos + right * (Sfx.FAR + 4.0), 20.0))      # (past FAR: the SFXFar bus)
 	var far_into := AudioServer.get_bus_send(AudioServer.get_bus_index("SFXFar"))
 	var dulled := near == "SFXWorld" and far == "SFXFar" and far_into == "SFXWorld"
 	ok(Sfx.muffle_state().fx and dulled,

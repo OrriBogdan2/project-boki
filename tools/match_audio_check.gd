@@ -118,7 +118,7 @@ const NEAR_SOUNDS := ["rifle", "smg", "thump", "hit", "crit", "shotgun", "sniper
 	"armor_hit", "kill", "knock", "dash", "jump", "land"]
 func _voice_cap(P: Hunter) -> void:
 	Sfx.listener = P.pos
-	var far := P.pos + Vector3(12, 0, 0)      # past FAR (9 m), inside hearing: the SFXFar bus
+	var far := P.pos + Vector3(Sfx.FAR + 3.0, 0, 0)      # past FAR, inside hearing: the SFXFar bus
 	var near := P.pos + Vector3(6, 0, 0)
 	var cap_far := SfxVoices.cap("SFXFar")
 	var cap_near := SfxVoices.cap("SFX")
@@ -252,9 +252,9 @@ func _tell_cues(m: Match, P: Hunter) -> void:
 	var spot := P.pos + Vector3(3, 0, 0)
 	ok(_tell(func(): R.ak.tele_circle(spot, 1.0, Color.RED, 0.5)),
 			"a rival's circle 40 m off, landing 3 m from you, is heard where it lands")
-	var small := _last_voice()
+	var small = _last_voice()
 	_tell(func(): R.ak.tele_circle(spot, 4.0, Color.RED, 0.5))
-	var big := _last_voice()
+	var big = _last_voice()
 	ok(big.volume_db > small.volume_db + 3.0 and big.pitch_scale < small.pitch_scale,
 			"...a bigger area is louder and lower (%.1f dB / %.2f vs %.1f dB / %.2f)" % [
 				big.volume_db, big.pitch_scale, small.volume_db, small.pitch_scale])
@@ -284,8 +284,8 @@ func _tell(cast: Callable) -> bool:
 	cast.call()
 	return Sfx.last_played.has("tell_foe")
 
-func _last_voice() -> AudioStreamPlayer:
-	return Sfx.players[posmod(Sfx.next - 1, Sfx.POOL)]
+func _last_voice():
+	return Sfx.last_voice      # (a placed one-shot plays on a 3D spot, not the plain pool)
 
 ## Footsteps by distance, both the foot's contact step and the surface step (Juice.footstep).
 func _steps(m: Match, P: Hunter) -> void:
@@ -435,6 +435,7 @@ func _barks(m: Match, P: Hunter) -> void:
 	var B := m.barks
 	var bark_of := func(h: Hunter, kind: String): return "%s_call_%s" % [h.arch, kind]
 	Sfx.listener = P.pos
+	P.hp = P.max_hp      # (the parts above leave you hurt: no "low" bark here)
 	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
 	P.ak.cd["x"] = 5.0
 	B.tick(m)

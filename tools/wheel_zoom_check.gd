@@ -97,7 +97,7 @@ func _results(main: Node) -> void:
 	var tree := main.get_tree()
 	var scr: Control = load("res://scripts/ui/results.gd").new()
 	main.add_child(scr)
-	scr.show_result({"place": 3, "squads": 10})
+	scr.show_result({"place": 1, "squads": 10, "extracted": true})      # (a win: the stage stands Hunters, not Wisps)
 	for i in 5: await tree.process_frame
 	var stage: ResultsStage = null
 	for c in scr.get_children():

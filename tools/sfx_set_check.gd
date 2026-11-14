@@ -202,6 +202,8 @@ func _check_set(path: String) -> void:
 		_check_hunter(group, d)
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
+	if group == "mob":
+		_check_mobs(d["sounds"])
 
 ## 11. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
 ## species on a shared cue fails, an unknown one falls back.
@@ -225,8 +227,6 @@ func _boki_voices(sounds: Dictionary) -> void:
 	for mood in KinVoice.GENERIC_CUE:
 		fell.append(KinVoice.cue("no_such_species", mood))
 	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
-	if group == "mob":
-		_check_mobs(sounds)
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]

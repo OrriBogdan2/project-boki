@@ -54,11 +54,12 @@ func loops_on() -> int:
 			n += 1
 	return n
 
-## A pool player sounding `sound` now (its pitch and volume), or null; not `but`, the one from before.
-func sounding(sound: String, but: AudioStreamPlayer = null) -> AudioStreamPlayer:
+## A voice sounding `sound` now (its pitch and volume), or null; not `but`, the one from before. Placed
+## one-shots play on Sfx's 3D spots, so every voice is looked at.
+func sounding(sound: String, but: Node = null) -> Node:
 	var st = Sfx.streams.get(sound)
 	var takes: Array = st if st is Array else [st]
-	for p in Sfx.players:
+	for p in Sfx.voice_all:
 		if p.playing and p != but and p.stream in takes:
 			return p
 	return null
@@ -111,13 +112,13 @@ func _body_statuses() -> void:
 	sc.step(m, 3.0)
 	await settle(m)
 	T.hurt(1.0, P, {"stun": 0.5})
-	var mine := sounding("st_stun")
-	var mine_db := mine.volume_db if mine else -99.0
+	var mine = sounding("st_stun")
+	var mine_db: float = mine.volume_db if mine else -99.0
 	sc.step(m, 3.0)
 	await settle(m)
 	T.hurt(1.0, A, {"stun": 0.5})
-	var other := sounding("st_stun", mine)
-	var other_db := other.volume_db if other else 99.0
+	var other = sounding("st_stun", mine)
+	var other_db: float = other.volume_db if other else 99.0
 	var gain := mine_db - other_db
 	ok(absf(gain - float(rules["mine_db"])) < 0.5, "yours is %.1f dB louder (rules %.1f)" % [gain, float(rules["mine_db"])])
 	await _free(m)
@@ -140,16 +141,16 @@ func _kit_statuses() -> void:
 	var t0 := Time.get_ticks_msec()
 	K.add_spark(T, 1)
 	ok(plays_since("mage_zap", t0) == 1, "Static: the first stack plays its cue once")
-	var low := sounding("mage_zap")
-	var low_pitch := low.pitch_scale if low else 0.0
+	var low = sounding("mage_zap")
+	var low_pitch: float = low.pitch_scale if low else 0.0
 	await main.get_tree().process_frame
 	ok(loops_on() == 1, "Static: the buzz loop runs while it is on the body")
 	await settle(m)
 	t0 = Time.get_ticks_msec()
 	K.add_spark(T, 2)
 	ok(plays_since("mage_zap", t0) == 1, "Static: another stack plays the cue again")
-	var high := sounding("mage_zap", low)
-	var high_pitch := high.pitch_scale if high else 0.0
+	var high = sounding("mage_zap", low)
+	var high_pitch: float = high.pitch_scale if high else 0.0
 	ok(high_pitch > low_pitch + 0.1, "Static: the cue climbs with the stacks (%.2f -> %.2f)" % [low_pitch, high_pitch])
 	K.clear_sparks(T)                                          # spent or cleansed
 	await main.get_tree().process_frame

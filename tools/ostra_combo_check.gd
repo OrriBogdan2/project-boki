@@ -679,6 +679,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 			T.vel = Vector3(5.0, 0, 0)
 			T.grounded = true
 			Sfx.listener = P.pos
+			for v in Sfx.voice_all: v.stop()      # (3 s run in no real time: voices never end, the cap would fill)
 			T.render(DT, 1.0)
 			n[0] += steps.call()
 		T.remote = false
