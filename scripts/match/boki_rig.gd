@@ -129,7 +129,7 @@ const STRIDE := {
 	"caecilith": [0.14, 0.38],
 	"glomwort": [1.50, 2.90],
 	"gibbelle": [1.50, 2.90],
-	"kestrike": [0.30, 1.04],
+	"kestrike": [0.19, 1.04],
 	"kindlewren": [0.39, 1.79],
 	"lodestick": [0.19, 0.60],
 	"marchleaf": [0.51, 2.02],
@@ -139,7 +139,7 @@ const STRIDE := {
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
-const CONTACT := {"cindle": 0.333, "puddlet": 0.367, "burrlet": 0.367}
+const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).

@@ -27,7 +27,7 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## re-keyed (docs/DEBT.md).
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.62,
-	"glintmole walk": 0.35, "glintmole run": 0.73, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
+	"glintmole walk": 0.35, "glintmole run": 0.73, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.65,
 	"kestrike run": 0.70, "kindlewren walk": 0.35, "kindlewren run": 0.45, "lodestick walk": 0.68,
 	"lodestick run": 0.90, "marchleaf walk": 0.52, "marchleaf run": 0.64, "mossgrade walk": 0.65,
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.78, "pebbit walk": 0.35, "pebbit run": 0.69,
@@ -42,6 +42,7 @@ const MAX_SEAM := 1.0
 const SEAM_OVER := {
 	"puddlet walk": 1.20, "burrlet walk": 1.05, "gloamshell walk": 2.05, "zapple run": 1.50, "kestrike walk": 2.45,
 	"kestrike run": 1.90, "mossgrade run": 1.35, "caecilith walk": 1.40,
+	"kindlewren run": 1.10,
 }
 const MAX_POP := 3.0          # the idle-to-walk hand-over's biggest bone jump over the steady walk's (pop())
 const SAMPLES := 48           # poses per loop
