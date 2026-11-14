@@ -429,6 +429,8 @@ const CHECKS := {
 	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],      # art/props models
+	"--miss-fx-check": ["res://tools/miss_fx_check.gd", "miss_fx_check", null],      # missed shots end in a puff
+	"--miss-shots": ["res://tools/miss_shots.gd", "miss_shots", null],      # --shots-dir=<dir>
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],
 	"--item-art-check": ["res://tools/item_art_check.gd", "item_art_check", null],      # sculpted item models
