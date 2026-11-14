@@ -113,7 +113,8 @@ func _gate(id: String, top: Dictionary) -> void:
 		bad += 1
 
 ## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction and the hips' up axis.
-static func points(sk: Skeleton3D) -> Dictionary:
+## `sole_at` is a model's soles (`_soles`): with them each foot also gets its heel and toe.
+static func points(sk: Skeleton3D, sole_at: Dictionary = {}) -> Dictionary:
 	var out := {}
 	var xf := sk.global_transform
 	var hips := WardenSkeleton.find(sk, "hips")
@@ -127,10 +128,10 @@ static func points(sk: Skeleton3D) -> Dictionary:
 		var gs := sk.get_bone_global_pose(shin)
 		var leg := (sk.get_bone_global_rest(shin).origin - sk.get_bone_global_rest(thigh).origin).length()
 		out["foot." + side] = xf * (gs.origin + gs.basis.y.normalized() * leg)
-		if soles.has(side):
+		if sole_at.has(side):
 			var ft := sk.get_bone_global_pose(WardenSkeleton.find(sk, "foot." + side))
-			out["heel." + side] = xf * ft * (soles[side][0] as Vector3)
-			out["toe." + side] = xf * ft * (soles[side][1] as Vector3)
+			out["heel." + side] = xf * ft * (sole_at[side][0] as Vector3)
+			out["toe." + side] = xf * ft * (sole_at[side][1] as Vector3)
 	return out
 
 ## Each foot's heel and toe: the back and front ends of the verts skinned mostly to it that sit on its sole at rest,
@@ -202,7 +203,7 @@ func _pose_at(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, t: f
 		sync.call("_process", DT)
 	clips.force = {"clip": clip, "t": t}
 	sync.call("_process", DT)
-	var p := points(sk)
+	var p := points(sk, soles)
 	clips.force = {}
 	return p
 
@@ -215,7 +216,7 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	for i in n:
 		clips.force = {"clip": clip, "t": minf(length * i / (n - 1), length - 0.001)}
 		sync.call("_process", DT)
-		out.append(points(sk))
+		out.append(points(sk, soles))
 	clips.force = {}
 	return out
 
@@ -228,7 +229,7 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	var fr: Array = []
 	for k in int(SAMPLE_S / DT):
 		sync.call("_process", DT)
-		fr.append(points(sk))
+		fr.append(points(sk, soles))
 	m.set_meta(WardenClips.STATE, {})
 	var out := _slide(fr, s, false)
 	out["sole_slide"] = _slide(fr, s, true)["slide"]
