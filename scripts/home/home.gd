@@ -64,7 +64,6 @@ var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
-var hboard: BaseBoard = null     # the Games board listing them (base_board.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
 var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_match.gd), base_mode only
@@ -187,14 +186,13 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
-		hboard = BaseBoard.new(self)
 		hfish = GlintFishing.new(self)
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
 		hlantern = LanternMatch.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern, hboard]
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -2260,7 +2258,6 @@ func _label_for(it: Dictionary) -> String:
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
-		"board": return hboard.label()
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
 		"show": return hshow.label()
@@ -2306,7 +2303,6 @@ func _use(it: Dictionary) -> void:
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
-		"board": hboard.use()
 		"tumble": htumble.use()
 		"echo": hecho.use()
 		"show": hshow.use()

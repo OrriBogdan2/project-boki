@@ -98,7 +98,7 @@ func pick(k: Dictionary, want := false) -> bool:
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or BaseRival.rival_near(h, k, tp):
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company

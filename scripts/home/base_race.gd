@@ -289,7 +289,6 @@ static func settle(run: Run) -> Dictionary:
 	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
-	BaseRival.result("race", win, lose)
 	nudge_bond(win, lose, -float(R["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
@@ -330,7 +329,6 @@ var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post, w
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
-var pair_force: Array = []     # a rematch's two kin entries, which every game takes before the rested ones (BaseRival)
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var practice := false          # the one first-time practice lap: ends at the first press, no gain, no cost
@@ -423,10 +421,6 @@ func find(p2: Vector2) -> Dictionary:
 		return relay.find(p2)
 	return {"kind": "race"}
 
-## True from the start until the game is over (the Games board starts none on top of it).
-func running() -> bool:
-	return run != null
-
 func label() -> String:
 	var fmt := String(tweak("dash").get("name", ""))
 	var back := "back %s" % Save.active_kin().get("name", "your partner")
@@ -434,8 +428,6 @@ func label() -> String:
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
-	if pair_force.size() == 2 and pair_force.all(func(k): return h.kins.has(k) and not BaseLife._taken(k)):
-		return pair_force
 	var R := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
