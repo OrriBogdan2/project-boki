@@ -859,6 +859,8 @@ func _distinct(a: Array) -> int:
 ## Fires `sname` every HELD_STEP_MS for HELD_S s; {peak: most pool voices sounding at once, takes: the take of each
 ## shot that sounded (FireSfx drops some), shots: rounds fired}.
 func _hold(main: Node, sname: String, held: bool) -> Dictionary:
+	for voice in Sfx.players:
+		voice.stop()          # the earlier sections' sounds are still ringing in the shared pool
 	var peak := 0
 	var shots := 0
 	var takes := []
