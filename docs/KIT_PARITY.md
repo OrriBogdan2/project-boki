@@ -93,6 +93,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] · **open** [?] |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) · **owner** |
 | Kael | RMB air slam disc, reach | 2.4, 0.8 m ahead (straight drop; was 2.2 at the cursor) | 1.2 bh (2.16), cursor to ~5 | differ · **owner** (11-10 down slam, ext/jugg-downslam); the check still pins 2.2 ±0.22 (see the re-audit) |
+| Kael | RMB air slam disc, reach | **2.4**, 0.8 ahead (straight down) | 1.2 bh (2.16), cursor to ~5 | owner 11-10 down slam (ext/jugg-downslam), not a gap |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not determinable (no clip pays out past the throw; 0305-0320: at most 5-6 bh, let go before a limit) | range match; tether max **not determinable**, 24 m ours (clips: docs/heroes/juggernaut.md "Tether length") |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) · **open** [?] (ext/kael-chain-length re-checked, no data) |

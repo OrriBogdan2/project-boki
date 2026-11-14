@@ -35,6 +35,7 @@
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.len", "value": 4.3, "tol": 0.18, "evidence": "F Execution Slam: strikes the dummy about 2.4 bh out (0158; 1 bh = 1.8 m)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.width", "value": 0.72, "tol": 0.09, "evidence": "F Execution Slam: a magenta lane 35-39 px wide at 1080p (0.4 bh), parallel sides, not a cone (0157; the Charge Dash lane is the same, 0125-0126, 0145)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.4, "tol": 0.22, "evidence": "Owner 11-10 (ext/jugg-downslam): straight down slam, a 2.4 m circle hit 0.8 m ahead; beats F Obsidian Slam cursor disc 1.2 bh = 2.2 m"},
+		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.4, "tol": 0.05, "evidence": "O owner 11-10 down slam: straight down, 2.4 m, 0.8 m ahead (ext/jugg-downslam); the source cursor disc was 2.2"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
 		{"hero": "juggernaut", "slot": "E", "field": "e.reel_speed", "value": 22.5, "tol": 7.5, "evidence": "F Tether Chain pull: about 5 bh in about 0.4 s (0333) = 22.5 m/s, 2 frames at 5 fps so coarse; wiki 1900 uu/s = 19"},
 		{"hero": "juggernaut", "slot": "E", "field": "e.speed", "value": 31.5, "tol": 6.0, "evidence": "F Tether Chain throw: about 7 bh in about 0.4 s to the wall (0303-0305) = 31.5 m/s"},
