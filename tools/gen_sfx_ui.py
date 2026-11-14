@@ -251,20 +251,12 @@ def main():
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
-<<<<<<< HEAD
-    S.save_cat('recast_open', recast_open(0), 'ui')
-    S.save_cat('recast_tick', recast_tick(0), 'ui')
     S.takes_cat('garden_feed', feed, 2, 'ui')
     S.takes_cat('garden_pet', pet, 3, 'ui')
     S.save_cat('garden_friend', friend(0), 'ui')
     S.save_cat('garden_trait', trait(0), 'ui')
     S.save_cat('garden_egg', egg(0), 'ui')
     S.save_cat('garden_toy', toy(0), 'ui')
-||||||| 8abcad1685 (Merge ext/recast-sounds into merge-lane-vfx1-1114)
-    S.save_cat('recast_open', recast_open(0), 'ui')
-    S.save_cat('recast_tick', recast_tick(0), 'ui')
-=======
->>>>>>> parent of 8abcad1685 (Merge ext/recast-sounds into merge-lane-vfx1-1114)
 
 
 if __name__ == '__main__':
