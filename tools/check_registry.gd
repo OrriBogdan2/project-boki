@@ -70,6 +70,7 @@ const CHECKS := {
 	"--garden-nav-check": ["res://tools/garden_nav_check.gd", "garden_nav_check", null],  # GARDEN nav sweep
 	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--wade-check": ["res://tools/wade_check.gd", "wade_check", null],  # GARDEN.md 4 Boki wading
+	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],  # wishes, away gifts
@@ -416,9 +417,11 @@ const CHECKS := {
 	"--tutorial-strip-shots": ["res://tools/tutorial_strip_shots.gd", "tutorial_strip_shots", null],
 	# walking off a ledge is never gated
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
+	"--label-spacing-shots": ["res://tools/label_spacing_shots.gd", "label_spacing_shots", null],    # --shots-dir=<dir>
+	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
+	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],     # 2 games, relay
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
-	"--label-spacing-shots": ["res://tools/label_spacing_shots.gd", "label_spacing_shots", null],    # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
@@ -592,8 +595,8 @@ const CHECKS := {
 	# Fx.number rolls, tiers, reticle
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],
 	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
-	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],  # docs/decisions/0019
 	"--wisp-hum-check": ["res://tools/wisp_hum_check.gd", "wisp_hum_check", null],      # the Hunter Wisp hum
+	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],  # docs/decisions/0019
 	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],  # --shots-dir=<dir>
 	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],  # --shots-dir=<dir>
@@ -617,6 +620,7 @@ const CHECKS := {
 	"--blight-edge-shots": ["res://tools/blight_edge_shots.gd", "blight_edge_shots", null],  # --shots-dir=
 	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],  # --shots-dir=<dir>
+	"--item-art-clip": ["res://tools/item_art_clip.gd", "item_art_clip", null],  # --shots-dir=<dir>, review clip frames
 	"--train-halts-shots": ["res://tools/train_halts_shots.gd", "train_halts_shots", null],  # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],  # shields never hide a Hunter
 	# the shell follows amount and time
