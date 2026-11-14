@@ -385,7 +385,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		bv.add_child(kl)
 		var nl := UI.label(String(info["name"]).split(" ")[0], 11, UI.INK, UI.big)
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(nl)
 		b.add_child(bv)

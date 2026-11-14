@@ -41,15 +41,15 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
-	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
+	var hw := TextCache.width(HudStyle.BIG, hp_txt, 26)
 	var max_txt := "/ %d" % int(p.max_hp)
 	HudStyle.text(c, Vector2(x0 + hw + 4, y0 + 1), max_txt, 14, HudStyle.MUTED)
 	if p.armor > 0.5:
 		var at := "%d" % int(ceil(p.armor))
-		var aw := HudStyle.BIG.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+		var aw := TextCache.width(HudStyle.BIG, at, 15)
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
 		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-		var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		var tw := TextCache.width(HudStyle.BIG, tn, 10)
 		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
@@ -92,7 +92,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 		txt = "HIDDEN" if grass else "CROUCHED"
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
-	var tw := HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	var tw := TextCache.width(HudStyle.BIG, txt, 13)
 	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)

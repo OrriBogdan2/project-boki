@@ -123,6 +123,11 @@ func _migration() -> void:
 	ok("an old settings file drops the removed keys on start", left.is_empty(), str(left))
 	var kept := is_equal_approx(float(after.get_value("s", "music", 0.0)), 0.42)
 	ok("...and keeps the others", kept and is_equal_approx(float(fresh.get_v("music")), 0.42))
+	ok("a config from before Text size loads at 100%", is_equal_approx(float(fresh.get_v("text_size")), 1.0))
+	var stray := [Settings.snap_text_size(1.1), Settings.snap_text_size(9.0), Settings.snap_text_size("big")]
+	ok("Text size keeps its three choices and snaps stray values",
+			Settings.TEXT_SIZES.all(func(x): return Settings.snap_text_size(x) == x) and stray == [1.0, 1.5, 1.0],
+			str(stray))
 	main.remove_child(fresh)
 	fresh.free()
 	if had:

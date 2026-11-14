@@ -76,7 +76,7 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.set_meta("mastery_goal", i)
 	var gl := UI.label(String(g["text"]), 12, UI.GOOD if done else UI.INK)
 	gl.custom_minimum_size.x = width * 0.5
-	gl.clip_text = true
+	gl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row.add_child(gl)
 	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 11, UI.MUTED))
 	var rw: Dictionary = g["reward"]

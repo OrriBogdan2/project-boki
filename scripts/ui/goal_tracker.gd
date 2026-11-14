@@ -156,7 +156,7 @@ static func _row_ui(r: Dictionary) -> Control:
 		head.add_child(Icons.Glyph.new("gem", UI.GOLD, 12.0))
 	var text := UI.label(String(r["text"]), 14, UI.GOLD if bool(r["ready"]) else UI.INK)
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
-	text.clip_text = true
+	text.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	text.custom_minimum_size.x = 190
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(text)

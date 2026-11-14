@@ -26,12 +26,15 @@ const DEFAULTS := {
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false,
+	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
+## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
+const TEXT_SIZES := [1.0, 1.25, 1.5]
+
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
@@ -198,6 +201,7 @@ func _ready() -> void:
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
+	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
@@ -225,6 +229,16 @@ func _ready() -> void:
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().root.size_changed.connect(_apply_render_scale)
+
+## The Text size choice nearest `x` (anything unreadable or out of range lands on 100%).
+static func snap_text_size(x: Variant) -> float:
+	if not (x is float or x is int):
+		return 1.0
+	var best: float = TEXT_SIZES[0]
+	for s: float in TEXT_SIZES:
+		if absf(s - float(x)) < absf(best - float(x)):
+			best = s
+	return best
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -324,6 +338,7 @@ func apply(k: String) -> void:
 		"quality", "quality_found":
 			_apply_quality()
 		"ui_scale": _apply_ui_scale()
+		"text_size": UI.set_text_size(float(v[k]))
 		"rec_level":
 			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
 			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):

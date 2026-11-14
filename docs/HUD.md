@@ -133,6 +133,31 @@ nothing else on screen:
   out of the window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
 - Shots (GPU, `--inv-shots --shots-size=1920x1080`): [before](shots/loot-simple/before_1920x1080.jpg),
   [after](shots/loot-simple/after_1920x1080.jpg), [full backpack hold](shots/loot-simple/after_full_pack_1280x720.jpg).
+## Safe area
+
+- `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
+  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
+  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+- The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
+  the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
+  margin (4% of the height) for the countdown banner.
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
+  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  --shots-dir=<dir>` takes the same screens with a real renderer.
+- **Text size** (Settings > Accessibility: 100, 125, 150%, `Settings.TEXT_SIZES`) scales every font through
+  `UI.fs(px)`: the menu theme, `UI.label`/`keycap`/`section`, and `TextCache` (so the HUD's `_text` and every
+  width measured through it). The check also runs 720p and 1080p at 125% and 150%, adds settings, inventory
+  and the Field Book, and `SafeArea.clipped` fails any label or button cut off by its box. Long one-line text
+  elides (`text_overrun_behavior = TRIM_ELLIPSIS`) or wraps; it never shrinks below the chosen size.
+  A new text-drawing call takes its size through `UI.fs` (or `TextCache`), never a bare number.
+
+- `--overflow-check` (headless): every garden panel (Nesting Nook tabs, Burrow, a Boki card's tabs, feed,
+  zone cards, games board, item pages) at Text size 150% in 1280x720: no clipped, trimmed or overlapping label,
+  nothing past the margin. A new garden panel gets a line in `_panels()` and `_open()` of `tools/overflow_check.gd`.
+  `--overflow-shots --shots-dir=<dir>` takes them with a renderer. A one-line name that may not fit uses
+  `FitLabel.shrink` (smaller text down to a floor, then an ellipsis); a sentence wraps.
 
 ## Looting with a full inventory
 

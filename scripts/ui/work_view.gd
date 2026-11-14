@@ -143,8 +143,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	if rec.get("overworked", false): line = "Overworked: let it rest"
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
-	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	FitLabel.shrink(dl)
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(dl)
 	row.add_child(pin_menu(h, rec, reopen))
@@ -168,7 +167,7 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 	if sel == 0:
 		opt.add_theme_color_override("font_color", UNSET_COLOR)
 	opt.custom_minimum_size.x = 170
-	opt.add_theme_font_size_override("font_size", 13)
+	opt.add_theme_font_size_override("font_size", UI.fs(13))
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
@@ -271,7 +270,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 					if k.has("job") and String(k["job"]["el"]) == el and pi == 0: h.hw.drop(k)
 			Sfx.play("click")
 			open(h), 0)
-		b.add_theme_font_size_override("font_size", 12)
+		b.add_theme_font_size_override("font_size", UI.fs(12))
 		b.custom_minimum_size = Vector2(52, 26)
 		# a compact segmented control: the chosen one filled, the rest faint
 		var on := cur == i
@@ -299,7 +298,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	nv.custom_minimum_size.x = 150
 	var nl := UI.label(String(rec["name"]), UI.T_BODY, Shiny.body(rec).lerp(UI.INK, 0.5), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nl.clip_text = true
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(nl)
 	nv.add_child(UI.label("%s · Lv %d" % [Data.KIN[rec["species"]]["name"], int(rec["level"])], 12, UI.MUTED))
 	r.add_child(nv)
@@ -313,7 +312,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	var el := String(w["el"])
 	var dl := UI.label(String(w["text"]), 13, Work.col_of(el).lerp(UI.INK, 0.4) if el != "" else UI.MUTED, UI.semi if el != "" else null)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dv.add_child(dl)
 	var mood := ""
 	if rec.get("overworked", false): mood = "Overworked: needs a rest"

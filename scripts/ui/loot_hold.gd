@@ -28,12 +28,12 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 	cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nm.custom_minimum_size.x = 200
 	cv.add_child(nm)
 	var sub := UI.label(Loot.sub_of(it), 12, MUTED)
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub.custom_minimum_size.x = 200
 	sub.tooltip_text = Loot.sub_of(it)
 	sub.mouse_filter = Control.MOUSE_FILTER_PASS

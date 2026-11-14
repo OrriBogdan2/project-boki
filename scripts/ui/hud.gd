@@ -202,6 +202,7 @@ func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBox
 	return sb
 
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
@@ -213,8 +214,8 @@ func _text(p: Vector2, s: String, size := 15, col := INK, font: Font = null, ali
 	if align == HORIZONTAL_ALIGNMENT_LEFT and width < 0.0:
 		TextCache.draw(c, f, p, s, size, col, 4)       # shaped once, kept while the text stays the same (item 94)
 		return
-	c.draw_string_outline(f, p, s, align, width, size, 4, Color(0, 0, 0, 0.55))
-	c.draw_string(f, p, s, align, width, size, col)
+	c.draw_string_outline(f, p, s, align, width, UI.fs(size), 4, Color(0, 0, 0, 0.55))
+	c.draw_string(f, p, s, align, width, UI.fs(size), col)
 
 func _ctext(p: Vector2, s: String, size := 15, col := INK, font: Font = null) -> void:
 	var f := font if font else body
@@ -518,14 +519,14 @@ func _draw_bubbles() -> void:
 			continue
 		var a := clampf((float(b.get("life", 2.6)) - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
 		var s: String = b["text"]
-		var tw := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, BokiSpeech.MATCH_PX).x
+		var tw := TextCache.width(body, s, BokiSpeech.MATCH_PX)
 		var r := Rect2(sp + Vector2(-tw * 0.5 - 12, -44), Vector2(tw + 24, 30))
 		var mine: bool = k.owner_h == m.player
 		var col := Color(0.98, 0.96, 0.9, 0.95 * a) if mine else Color(0.2, 0.22, 0.3, 0.85 * a)
 		var sb := StyleBoxFlat.new(); sb.bg_color = col; sb.set_corner_radius_all(12)
 		c.draw_style_box(sb, r)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -15), sp + Vector2(7, -15), sp + Vector2(0, -6)]), col)
-		c.draw_string(body, r.position + Vector2(12, 20), s, HORIZONTAL_ALIGNMENT_LEFT, -1, BokiSpeech.MATCH_PX, Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a))
+		c.draw_string(body, r.position + Vector2(12, 20), s, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(BokiSpeech.MATCH_PX), Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a))
 
 func _draw_pings(sz: Vector2) -> void:
 	var cam := m.cam
@@ -633,7 +634,7 @@ func _draw_feed(sz: Vector2) -> void:
 	for f in m.feed:
 		var a := clampf(6.0 - f["t"], 0.0, 1.0)
 		var s: String = f["text"]
-		var w := big.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		var w := TextCache.width(big, s, 13)
 		var ours := false; var first := ""
 		for nm in mine:
 			var at := s.find(String(nm))
@@ -649,9 +650,10 @@ func _draw_feed(sz: Vector2) -> void:
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
-	var s := 340.0 if riding else 196.0
+	var s := minf(340.0, sz.y * 0.44) if riding else 196.0      # (the big drop map leaves room under it for the squad)
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
+	SafeArea.note(r)
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
 	if riding:
@@ -843,18 +845,18 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
-	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
+	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(m.length - m.time), "ISLANDS FALLING" if m.length - m.time < 30.0 else "")), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
 	var phase := ""; var pc := MUTED
 	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
-	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+	var pw := TextCache.width(big, phase, 11)
 	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
 	if m.player:
 		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
+		_text(Vector2(r.end.x - 10 - TextCache.width(big, lt, 12), r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
@@ -867,7 +869,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
-		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
+		_text(Vector2(rr.end.x - 8 - TextCache.width(big, st, 10), rr.position.y + 14), st, 10, MUTED, big)
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
 
@@ -983,6 +985,7 @@ func toast_small(text: String, col: Color) -> void:
 	msgs.push(text, col, MsgLane.LOW)
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## The key label under a slot (HudStyle.key_pill).
@@ -1065,7 +1068,7 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
 	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
-	var tw := big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+	var tw := TextCache.width(big, txt, 11)
 	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
@@ -1215,8 +1218,10 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var kc: Color = Data.KIN[k.species]["color"]
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
-	var pc := o + Vector2(6, 6)
 	var rr := 20.0
+	var ring := Vector2(rr + 4.0, rr + 4.0)
+	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()      # (the corner of the portrait, kept on screen)
+	SafeArea.note(Rect2(pc - ring, ring * 2.0))
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
 	c.draw_arc(pc, rr + 1.5, -PI / 2, -PI / 2 + TAU * clampf(k.hp / k.max_hp, 0.0, 1.0), 40, kc, 3.0, true)
@@ -1242,8 +1247,8 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
 	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
-		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
+		var tw := TextCache.width(big, st.to_upper(), 9)
+		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
 
@@ -1282,7 +1287,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		_bar(Rect2(r.position + Vector2(78, 52), Vector2(170, 4)), 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"))
 	else:
 		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
-		var aw := big.get_string_size(str(p.ammo), HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x
+		var aw := TextCache.width(big, str(p.ammo), 28)
 		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
 	# the row of small slots above the weapon card
 	var s := 44.0; var gap := 8.0
@@ -1312,11 +1317,11 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
 		var pcol := Color("ffb0a0") if full else (INK if p.pack.size() > 0 else MUTED)
-		var gw := big.get_string_size("%d" % p.gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		var gw := TextCache.width(big, "%d" % p.gems, 18)
 		var px := gx + 30.0 + gw
 		Icons.draw(c, "satchel", Vector2(px + 8, cy + s - 10), 8.0, pcol)
 		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
-		var pw := big.get_string_size("%d/%d" % [p.pack.size(), p.pack_cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+		var pw := TextCache.width(big, "%d/%d" % [p.pack.size(), p.pack_cap], 14)
 		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
 
 ## Your squadmates down the left side.
@@ -1410,12 +1415,12 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		if m.skydrop and (h.riding or h.dropping):
 			# on the way in: who leads the drop, who follows, who's gone solo
 			if m.skydrop.is_lead(h):
-				_text(Vector2(tx + big.get_string_size(h.pname.substr(0, 13), HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 6, r.position.y + 18), "LEAD", 10, GOLD, big)
+				_text(Vector2(tx + TextCache.width(big, h.pname.substr(0, 13), 14) + 6, r.position.y + 18), "LEAD", 10, GOLD, big)
 		# how far, on the right of the name row
 		var at: Vector3 = st[2]
 		if at != Vector3.INF and lbl != "DEAD":
 			var dist_txt := "%dm" % int(round(Vector2(at.x - p.pos.x, at.z - p.pos.z).length()))
-			_text(Vector2(r.end.x - 8 - body.get_string_size(dist_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, r.position.y + 18), dist_txt, 11, MUTED, body)
+			_text(Vector2(r.end.x - 8 - TextCache.width(body, dist_txt, 11), r.position.y + 18), dist_txt, 11, MUTED, body)
 		match lbl:
 			"ALIVE":
 				var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
@@ -1566,8 +1571,8 @@ func _key_row(center: Vector2, keys: Array) -> void:
 	var tot := 0.0
 	for kk in keys:
 		var cap := Settings.key_cap(String(kk[0]))
-		var cw := maxf(26.0, big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0)
-		var lw := body.get_string_size(String(kk[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		var cw := maxf(26.0, TextCache.width(big, cap, 13) + 14.0)
+		var lw := TextCache.width(body, String(kk[1]), 13)
 		parts.append([cap, cw, String(kk[1]), lw])
 		tot += cw + 6.0 + lw + 22.0
 	var x := center.x - (tot - 22.0) * 0.5
@@ -1675,10 +1680,10 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	var y := box.position.y + 34
 	for i in lines.size():
 		var l: Array = lines[i]
-		var kw := big.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		var kw := TextCache.width(big, l[0], 13)
 		var ks := StyleBoxFlat.new(); ks.bg_color = Color(l[3], a); ks.set_corner_radius_all(5)
 		c.draw_style_box(ks, Rect2(Vector2(box.position.x + 14, y), Vector2(kw + 12, 20)))
-		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.07, 0.06, 0.08, a))
+		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(13), Color(0.07, 0.06, 0.08, a))
 		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, Color(INK, a))
 		if not compact:
 			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, Color(MUTED, a))
@@ -1723,7 +1728,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"heart": prog = float(it.get("prog", 0.0))
 		if not WaysOutHud.gate_prompt(self, sz, y, it):
 			var s: String = it["label"]
-			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			var w := TextCache.width(body, s, 16)
 			if not (m.tut and m.tut.prompt_quiet()):      # (the tutorial card says it: only the bar stays)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
@@ -2657,7 +2662,7 @@ func _draw_truce_marks() -> void:
 		if not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
-		var w := big.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + (40.0 if e["id"] == "truce" else 22.0)
+		var w := TextCache.width(big, label, 15) + (40.0 if e["id"] == "truce" else 22.0)
 		var r := Rect2(sp - Vector2(w * 0.5, 15), Vector2(w, 28))
 		_rounded(r, Color(0.05, 0.06, 0.09, 0.88 * a), 12, Color(e["col"], 0.8 * a), 2)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-6, 13), sp + Vector2(6, 13), sp + Vector2(0, 21)]), Color(0.05, 0.06, 0.09, 0.88 * a))
@@ -2855,7 +2860,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	_rounded(Rect2(r.position - Vector2(14, 22), r.size + Vector2(28, 50)), Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
 	_text(r.position + Vector2(0, -6), String(b.md["name"]).to_upper(), 15, col, big)
 	var ph := "PHASE %d" % (b.phase + 1)
-	_text(Vector2(r.end.x - big.get_string_size(ph, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x, r.position.y - 6), ph, 13, INK, big)
+	_text(Vector2(r.end.x - TextCache.width(big, ph, 13), r.position.y - 6), ph, 13, INK, big)
 	var frac := clampf(b.hp / b.max_hp, 0.0, 1.0)
 	c.draw_rect(r, Color(0, 0, 0, 0.6))
 	var ct := _chip_of(b, frac)

@@ -438,6 +438,9 @@ func _tab_video(v: VBoxContainer) -> void:
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
+	var sizes := Settings.TEXT_SIZES.map(func(x): return [x, "%d%%" % roundi(x * 100.0)])
+	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
+			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
@@ -699,7 +702,8 @@ func open_inventory() -> void:
 		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
+		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi)
+		tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		tc.add_child(tl)
 		if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
 		top.add_child(tc)
