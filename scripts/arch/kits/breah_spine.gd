@@ -12,41 +12,52 @@ extends RefCounted
 
 const CRACK_COL := Color("3a7cff")
 const PREVIEW_COL := Color("d8ecff")
-const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
-const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
-const HUSH_PAD := 0.1                  # s past the last rock the rocks make no rumble of their own
-const TELL_DB := -3.0                   # the cracks opening (the cast level of Stone Row's tell)
-const ROLL_DB := -4.0                   # each half of the rolling rumble (two voices sum to about -1)
-const END_DB := -1.0                    # the one heavy crack when the ridge is up (the ultimate's level)
+const PUSH_PAD := 0.15  # m past the rock's half thickness a body on the line is moved to
+const CRACK_LW := 0.16  # m: the cracks are a heavy line, wider than an aim reticle
+const FLOOR_SLACK := 0.05  # m: feet this far under a terrace's height still raise the floor at it
+const FLOOR_LEAD := 0.6  # m: Verbs.add_bridge lays its first slab this far along from its start
+const HUSH_PAD := 0.1  # s past the last rock the rocks make no rumble of their own
+const TELL_DB := -3.0  # the cracks opening (the cast level of Stone Row's tell)
+const ROLL_DB := -4.0  # each half of the rolling rumble (two voices sum to about -1)
+const END_DB := -1.0  # the one heavy crack when the ridge is up (the ultimate's level)
 
 var k: DolmKit
-var phase := ""                         # "" | "aim" (X held) | "tell" (the cracks) | "up" (rising, standing)
+var phase := ""  # "" | "aim" (X held) | "tell" (the cracks) | "up" (rising, standing)
 var phase_t := 0.0
 var center := Vector3.ZERO
-var press_aim := Vector3.ZERO           # the cursor at the press (the centre may sit short of it, clamped)
-var axis := Vector2.RIGHT               # along the ridge
-var bow := Vector2.ZERO                 # unit normal its middle bulges toward (away from him), fixed at the cast
-var spots: Array = []                   # [{at: Vector3, dir: Vector2 (the ridge there), delay: float, done: bool}]
+var press_aim := Vector3.ZERO  # the cursor at the press (the centre may sit short of it, clamped)
+var axis := Vector2.RIGHT  # along the ridge
+var bow := Vector2.ZERO  # unit normal its middle bulges toward (away from him), fixed at the cast
+var spots: Array = []  # [{at: Vector3, dir: Vector2 (the ridge there), delay: float, done: bool}]
 var cast_n := 0
 var erupt_at := -99.0
-var rock_dmg_taken := {}                # target instance id -> damage this cast's rocks dealt it
+var rock_dmg_taken := {}  # target instance id -> damage this cast's rocks dealt it
 # counters for the checks
 var casts := 0
 var rocks_raised := 0
 var slowed := 0
 var shoved := 0
-var rolling := false                    # the rumble is travelling out (the eruption's 0.4 s)
+var rolling := false  # the rumble is travelling out (the eruption's 0.4 s)
 var first_rise_t := -1.0
 var last_rise_t := -1.0
+var floors := 0  # rock floors raised under him on the press
+
 
 func _init(kit: DolmKit) -> void:
 	k = kit
 
-func xd() -> Dictionary: return k.x_def()
 
-func running() -> bool: return phase != ""
+func xd() -> Dictionary:
+	return k.x_def()
 
-func aiming() -> bool: return phase == "aim"
+
+func running() -> bool:
+	return phase != ""
+
+
+func aiming() -> bool:
+	return phase == "aim"
+
 
 ## X pressed: fix the centre at the cursor (clamped) and start aiming. The cast happens on release.
 func start() -> bool:
@@ -58,7 +69,44 @@ func start() -> bool:
 	phase = "aim"
 	phase_t = 0.0
 	k.vfx("eye_flare")
+	floor_under()
 	return true
+
+
+## Owner 11-08: the press raises a slab of rock ground under him on the same frame, so R saves him over the
+## abyss. The abyss tiles round him turn to ground for everyone (Verbs.add_bridge, sent through Net: over_void,
+## landings, mantles and paths all read it) at the level just under his feet, falling he stands on it at once;
+## it cracks and shakes for its last seconds, then crumbles. Over solid ground nothing changes.
+func floor_under() -> void:
+	var h := k.h
+	var fd: Dictionary = Loco.T["tenzo"]["r_floor"]
+	var g := maxi(0, floori((h.pos.y + FLOOR_SLACK) / World.LEVEL)) * World.LEVEL
+	var r := float(fd["r"])
+	var dir := h.aim_dir()
+	var from := Vector3(h.pos.x - dir.x * (r + FLOOR_LEAD), g, h.pos.z - dir.y * (r + FLOOR_LEAD))
+	var laid := HeroZones.bridge(
+		k.m,
+		h,
+		from,
+		dir,
+		2.0 * r + FLOOR_LEAD,
+		r,
+		float(fd["time"]),
+		true,
+		String(fd["col"]),
+		float(fd["warn"]),
+		float(fd["rise"])
+	)
+	if laid == 0:
+		return
+	floors += 1
+	k.m.fx.dust(Vector3(h.pos.x, g, h.pos.z), 10)
+	k.m.sfx("br_raise", h.pos, -2.0, 0.9)
+	if not h.grounded and h.vel.y <= 0.0 and k.m.world.ground_at(h.pos.x, h.pos.z) == g:
+		h.pos.y = g
+		h.vel.y = 0.0
+		h.gliding = false  # (his move step lands him on it this tick: the landing's own feel)
+
 
 ## A Boki merge (or a stun or knock) ends the aim before anything was cast: the ult is not spent.
 func drop() -> void:
@@ -67,7 +115,8 @@ func drop() -> void:
 		k.cd["x"] = 0.0
 		AimKit.hide(k.h, "x")
 		if k.anim_id == "breah_spine_aim":
-			k.anim_id = ""        # the aim pose goes with the hold
+			k.anim_id = ""  # the aim pose goes with the hold
+
 
 func tick(dt: float) -> void:
 	match phase:
@@ -78,10 +127,12 @@ func tick(dt: float) -> void:
 		"up":
 			_tick_up(dt)
 
+
 func _across_aim() -> Vector2:
 	var to := Vector2(center.x - k.h.pos.x, center.z - k.h.pos.z)
 	var dir := to.normalized() if to.length() > 0.2 else k.h.aim_dir()
 	return Vector2(-dir.y, dir.x)
+
 
 ## While X is held the ridge pivots on its centre toward the cursor once the cursor has moved
 ## `drag_min` from where it was pressed; a tap keeps it across the aim.
@@ -103,12 +154,14 @@ func _tick_aim(dt: float) -> void:
 	if not _held() or phase_t >= float(xd()["aim_max"]):
 		_erupt()
 
+
 ## Is X still down? Main's X path sends only the press, so the local player's key is read here; tests and
 ## scripted demos hold it through inp["x_down"]. Bots never hold (a tap).
 func _held() -> bool:
 	if bool(k.h.inp.get("x_down", false)):
 		return true
 	return k.h.is_local() and Input.is_action_pressed("hunter_ult")
+
 
 ## Release: the cracks show for everyone, the rocks are scheduled centre-out.
 func _erupt() -> void:
@@ -124,6 +177,7 @@ func _erupt() -> void:
 	k.m.sfx("br_crack", center, TELL_DB, 1.0)
 	k.vfx("spine_crack", Vector3(center.x, _base_y(), center.z), axis, {"len": float(xd()["len"])})
 
+
 ## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him, over the band the rise
 ## slows (slow_r each side of the line).
 func _span_p(extra: Dictionary) -> Dictionary:
@@ -132,7 +186,10 @@ func _span_p(extra: Dictionary) -> Dictionary:
 	extra["width"] = float(xd()["slow_r"]) * 2.0
 	return extra
 
-func _bend() -> float: return deg_to_rad(float(xd()["bend"]))
+
+func _bend() -> float:
+	return deg_to_rad(float(xd()["bend"]))
+
 
 ## The unit normal of the ridge on the side away from him (toward the aim), the way its middle bulges.
 func _bow() -> Vector2:
@@ -141,6 +198,7 @@ func _bow() -> Vector2:
 	if absf(away.dot(n)) < 0.05:
 		away = k.h.aim_dir()
 	return n if away.dot(n) >= 0.0 else -n
+
 
 ## The rock spots along the arc (the ridge's middle at the centre), nearest the centre first, each with its
 ## rise delay and the ridge's direction there. A spot over the abyss sits at the ridge's height; a spot on
@@ -159,18 +217,26 @@ func _plan() -> Array:
 		var g: float = k.m.world.ground_at(p2.x, p2.y)
 		if g > World.VOID + 1.0 and absf(g - base) > 0.9:
 			continue
-		out.append({
-			"at": Vector3(p2.x, g if g > World.VOID + 1.0 else base, p2.y),
-			"dir": AimShapes.bent_tangent(axis, bow, bend, len_, off),
-			"delay": float(xd()["rise"]) * absf(off) / half, "done": false,
-		})
+		(
+			out
+			. append(
+				{
+					"at": Vector3(p2.x, g if g > World.VOID + 1.0 else base, p2.y),
+					"dir": AimShapes.bent_tangent(axis, bow, bend, len_, off),
+					"delay": float(xd()["rise"]) * absf(off) / half,
+					"done": false,
+				}
+			)
+		)
 	out.sort_custom(func(a, b): return float(a["delay"]) < float(b["delay"]))
 	return out
+
 
 ## The height of the ridge: the ground under its centre, else (over the abyss) where he last stood.
 func _base_y() -> float:
 	var g: float = k.m.world.ground_at(center.x, center.z)
 	return g if g > World.VOID + 1.0 else k.h.last_gy
+
 
 func _tick_tell(dt: float) -> void:
 	phase_t += dt
@@ -184,6 +250,7 @@ func _tick_tell(dt: float) -> void:
 		rolling = true
 		RockLook.hush(k.m, float(xd()["rise"]) + HUSH_PAD)
 
+
 func _tick_up(dt: float) -> void:
 	phase_t += dt
 	if rolling:
@@ -194,6 +261,7 @@ func _tick_up(dt: float) -> void:
 			_raise(s["at"], s["dir"])
 	if phase_t >= float(xd()["rise"]) + float(xd()["time"]):
 		phase = ""
+
 
 ## One rumble for the whole eruption: two voices of it (one per half of the ridge) run out from the centre to the
 ## ends as the rocks rise, so it pans along the arc; when they arrive they stop and one heavy crack lands.
@@ -211,8 +279,10 @@ func _roll() -> void:
 			Sfx.loop_stop(_roll_key(side))
 		k.m.sfx("br_slam", center, END_DB, 1.0)
 
+
 func _roll_key(side: int) -> String:
 	return "spine_roll_%d_%d" % [k.h.get_instance_id(), side]
+
 
 func _raise(p: Vector3, along: Vector2) -> void:
 	var m := k.m
@@ -236,6 +306,7 @@ func _raise(p: Vector3, along: Vector2) -> void:
 			slowed += 1
 			HeroUlt.landed(k, f)
 
+
 ## A rock never rises inside a body: whoever stands on the line is moved to the side they were on.
 func _shove_off_line(p: Vector3, along: Vector2, across: Vector2) -> void:
 	var half_len := float(k.rock_def()["len"]) * 0.5
@@ -252,9 +323,11 @@ func _shove_off_line(p: Vector3, along: Vector2, across: Vector2) -> void:
 		k.m.displace.teleport(e, dest)
 		shoved += 1
 
+
 ## Is this rock one of the ult's, inside the window where its hits still fill the bond?
 func bond_open(w_cast: int) -> bool:
 	return w_cast == cast_n and k.m.time - erupt_at <= float(xd()["bond_t"])
+
 
 ## Rocks of one cast deal at most `rock_cap` to any one hunter, Shred included (the burst cap with a merge
 ## after it). Returns the damage to pass to the hit, before the target's Shred.

@@ -24,6 +24,7 @@ var dive := false              # a Quakefall in the air (the hop, a leap, an air
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
+var dive_t := 0.0              # ...how long the plunge has run (it hangs, then speeds up: tenzo.rmb in tuning.json)
 var sight_t := 0.0
 var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
@@ -211,7 +212,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and h.shield > 0.0:
 		HeroVfx.of(m).hold(h, "guard")      # Molten Guard: embers rising round her while it holds
 	if dive:
-		_tick_dive()
+		_tick_dive(dt)
 	hop.tick(dt)
 	slam.tick(dt)
 	spine.tick(dt)
@@ -235,7 +236,7 @@ func _tick_stones(dt: float) -> void:
 			best = f
 	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
 
-func _tick_dive() -> void:
+func _tick_dive(dt: float) -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)
 	if h.downed:
@@ -248,7 +249,13 @@ func _tick_dive() -> void:
 	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
 		_end_plunge()
 	elif dive_fall:
-		h.vel.y = minf(h.vel.y, -dive_speed())
+		# a readable plunge: a beat hanging at the top, then it gathers speed up to its cap
+		dive_t += dt
+		var fd := slam.feel()
+		if dive_t < float(fd["dive_hang"]):
+			h.vel.y = 0.0
+		else:
+			h.vel.y = maxf(-dive_speed(), minf(h.vel.y, 0.0) - float(fd["dive_acc"]) * dt)
 
 ## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never
 ## dunked): no ground to slam, so the slam is dropped and he falls on at the abyss's own pace, glider free.
