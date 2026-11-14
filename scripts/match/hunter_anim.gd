@@ -1228,11 +1228,7 @@ static func km_mix(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
 ## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
 static func km_def(id: String) -> Dictionary:
 	for t in [KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-<<<<<<< HEAD
 			KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesGil.MOVES]:
-=======
-			KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]:
->>>>>>> origin/ext/split-kmoves-pin-bjorn
 		if (t as Dictionary).has(id):
 			return t[id]
 	return {}
