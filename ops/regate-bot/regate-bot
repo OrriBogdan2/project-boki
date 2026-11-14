@@ -65,19 +65,21 @@ def waiting_listed():
 
 def scan(gh, st):
     """-> (main sha, [row]) where row = dict(pr, branch, head, gated, verdict, why, created)."""
-    git("fetch", "-q", "origin", "main")
+    prs = gh.open_prs()
+    # one fetch for main and every PR head (a fetch per PR took ~10 s each on the big repo)
+    git("fetch", "-q", "origin", "main", *[f"+refs/pull/{p['number']}/head:refs/regate/pr/{p['number']}" for p in prs], timeout=600)
     main = git("rev-parse", "origin/main")
     me = gh.login()
     waiting = waiting_listed()
     rows = []
-    for p in gh.open_prs():
+    for p in prs:
         n, branch, head = p["number"], p["head"]["ref"], p["head"]["sha"]
         row = dict(pr=n, branch=branch, head=head, gated="", created=p["created_at"], verdict="skip", why="")
         rows.append(row)
         if not branch.startswith("ext/") or (p["head"]["repo"] or {}).get("full_name") != p["base"]["repo"]["full_name"]:
             row["why"] = "not an ext/* branch of this repo"
             continue
-        if git("fetch", "-q", "origin", f"+refs/pull/{n}/head:refs/regate/pr/{n}") is None or git("rev-parse", f"refs/regate/pr/{n}") != head:
+        if git("rev-parse", "-q", "--verify", f"refs/regate/pr/{n}") != head:
             row["why"] = "fetch of the PR head failed"
             continue
         behind = not is_ancestor(main, head)

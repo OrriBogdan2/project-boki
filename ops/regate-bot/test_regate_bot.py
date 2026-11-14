@@ -29,9 +29,15 @@ class FakeGH:
     def pr(s, n): return s.state
     def post(s, n, body, dry=False): s.posted.append((n, body)); return "posted"
 
-rb.git = lambda *a, **k: H29 if a[:2] == ("rev-parse", "refs/regate/pr/1") or a[:2] == ("rev-parse", "refs/regate/pr/2") \
-    or a[:2] == ("rev-parse", "refs/regate/pr/3") or a[:2] == ("rev-parse", "refs/regate/pr/4") or a[:2] == ("rev-parse", "refs/regate/pr/6") \
-    else (MAIN if a[:2] == ("rev-parse", "refs/regate/pr/5") else ("" if a[0] == "fetch" else rc.git(*a, **k)))
+def fake_git(*a, **k):
+    if a[0] == "fetch":
+        return ""
+    if a[0] == "rev-parse" and a[-1].startswith("refs/regate/pr/"):
+        return MAIN if a[-1].endswith("/5") else H29
+    return rc.git(*a, **k)
+
+
+rb.git = fake_git
 rb.args = type("A", (), {"dry": False, "pr": 0, "ignore_owner": False})()
 G = f"GATE GREEN {H29[:10]}: ok"
 gh = FakeGH([pr(1, H29), pr(2, H29), pr(3, H29), pr(4, H29), pr(5, MAIN), pr(6, H29, "feature/x")], {
