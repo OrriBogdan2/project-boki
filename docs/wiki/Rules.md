@@ -31,16 +31,21 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | extra_reviver | 0.5 | each extra teammate on you: +50% speed |
 | stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
-| execute_time | 3 | (old: hold interact on an enemy wisp; now the stomp below) |
-| stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
-| stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
-| stomp_cycle | 0.7 | one foot-lift-and-slam |
 | kin_revive_time | 8 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
+
+## armor (`content/rules/armor.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Armor tiers, matched to the source (docs/ARMOUR_PARITY.md; read by ArmorRules into Hunter.ARMOR_TIERS). Every hunter starts on tier 0 and levels up by dealing damage (xp = damage dealt to reach the tier). While durability is above 0, a hit is cut by dr (the share blocked); what gets through hurts health and wears durability by the same amount. dur = durability in our health units: the source's durability x 0.14 (our Medium 145 HP / the source's medium ~1,040 HP), so the same for every class. xp = the source's 2,000 / 3,600 / 12,000 / 20,000 x 0.14. col = the bar colour. |
+| tiers | [{"name": "Common", "col": "dfe9f7", "xp": 0, "dr": 0.2, "dur": 350}, {"name": "Uncommon", "col": "7fe08a", "xp": 280, "dr": 0.25, "dur": 350}, {"name": "Rare", "col": "5fb6ff", "xp": 504, "dr": 0.3, "dur": 350}, {"name": "Epic", "col": "c27cff", "xp": 1680, "dr": 0.35, "dur": 420}, {"name": "Legendary", "col": "ffbf3a", "xp": 2800, "dr": 0.35, "dur": 490}] |
 
 ## audio_mix (`content/rules/audio_mix.json`)
 
@@ -616,6 +621,15 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 | marked_factor | 2 |
 | mark_s | 4 |
 
+## bot_stomp (`content/rules/bot_stomp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How bots play the stomp (BotStomp, docs/BOT_KIT_USE.md 'Stomps'). rescue_r: metres; how far a bot goes to break a stomp on its teammate. The threat range (no stomp with a rival on its feet that close), which move breaks a stomp, its reach and cooldown are all read from the kits (BotStomp.punish_r, BotStomp.breaker), never listed per Hunter. |
+| rescue_r | 25 |
+
 ## branch_forms (`content/rules/branch_forms.json`)
 
 Branching evolution lines whose two finals are alternate forms of ONE Field Book entry (owner decision 2026-11-08, GAME_RULES_NOV8.md). Each pair is two species ids; the first is the entry's number and default face. A species id that is not in the game yet is skipped, so the entry exists as soon as either form does.
@@ -631,7 +645,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | Setting | Value |
 |---|---|
 | _doc | Everything you can smash (scripts/match/breakables.gd). Any single hit breaks a breakable: a shot, a melee swing, an ability, a Boki strike, a blast or a dash through it; none has a health pool. 'weight' is the share of the random scatter on a map. 'material' picks the debris colours (see 'debris') and the break sound. 'loot' is rolled when it breaks: gems [min, max] worth gem_base each, odds for a tonic, armor shards (armor_amount) and a seed, and 'table' names a gear drop table. An 'explosive' kind is lit by its hit instead, burns 'fuse' seconds (or 'chain_fuse' when another blast lit it) with a ground ring showing 'radius', then blows: 'damage' at the middle falling to half at the edge, knockback and lift in m/s, 'shake' camera trauma. |
-| debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}} |
+| debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}, "stone": {"colors": ["8a8494", "5e5866", "b4aebc"], "sound": "br_crumble", "pitch": 0.8}} |
 | kinds | {"crate": {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}}, "pot": {"weight": 0.3, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}}, "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}}, "keg": {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {}, "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22, "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}} |
 
 ## build_sfx (`content/rules/build_sfx.json`)
@@ -685,8 +699,12 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | scan_s | 4 |
 | range | 3.5 |
 | cancel_range | 5 |
-| box_capacity | 3 |
-| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
+| carry_out | 1 |
+| carry_out_doc | Carry-out slots (owner 11-11, carry 2 in, 1 extra out): Boki claimed in the match (scanned wild, or taken from a deathbox) a hunter can ride home in Hunter.caught. No passive, no summon. Full: a scan is blocked and the kin points to a teammate with room. |
+| stolen | 1 |
+| stolen_doc | Stolen-Boki slots: other hunters' own Boki (lost_from set) a hunter can hold in Hunter.caught. |
+| wisp_cap | 4 |
+| wisp_cap_doc | Most Boki one hunter holds at once: lead + second + carry-out + stolen. |
 | noise_every_s | 0.5 |
 | hear_range | 26 |
 | rise_pitch | [0.8, 1.6] |
@@ -1861,6 +1879,16 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 |---|---|
 | _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
 | at | 0.25 |
+
+## stomps (`content/rules/stomps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Stomp styles (docs/decisions/0061-stomp-lock.md): how a Hunter's stomp on an enemy wisp looks. Every style keeps the same timing (Stomp.TIME, Stomp.BEATS); only the body changes. A style lists what it changes from 'base'. 'hunter' marks a Hunter's own default (always owned); a style with 'cost' is a cosmetic you buy with gems and wear in the 'stomp' slot (Save.d.look.stomp). foot: r \| l \| both (a two-footed jump) \| alt (right, then left). lift and knee: hip and knee angles in radians at the top of the lift. hop: metres the body rises before the slam. lean: forward tilt in radians. twist: shoulder turn in radians at the top. crouch: 0..1 how low the standing leg sits. arms: out (left arm out for balance) \| wide (both out) \| up (both fists overhead, down with the slam) \| fists (both fists hammer the ground) \| hips (hands on hips) \| weapon (the weapon stays aimed down). |
+| base | {"foot": "r", "lift": 1.35, "knee": -1.6, "hop": 0.0, "lean": 0.12, "twist": 0.0, "crouch": 0.0, "arms": "out"} |
+| styles | {"needle_heel": {"name": "Needle Heel", "hunter": "archer", "lift": 1.0, "knee": -1.2, "lean": 0.05, "arms": "hips"}, "ember_grind": {"name": "Ember Grind", "hunter": "ashwick", "foot": "l", "twist": 0.55, "lean": 0.18}, "anchor_drop": {"name": "Anchor Drop", "hunter": "bulwark", "foot": "both", "lift": 0.9, "knee": -1.5, "hop": 0.3, "crouch": 0.3, "arms": "up"}, "stone_listen": {"name": "Stone Listen", "hunter": "dolm", "lift": 0.8, "knee": -1.0, "lean": -0.05, "arms": "wide"}, "junk_jump": {"name": "Junk Jump", "hunter": "dredge", "foot": "both", "lift": 1.1, "knee": -1.8, "hop": 0.45, "lean": 0.05, "arms": "wide"}, "fin_slap": {"name": "Fin Slap", "hunter": "gil", "foot": "l", "lift": 1.6, "knee": -0.5, "lean": -0.1, "arms": "up"}, "boot_heel": {"name": "Boot Heel", "hunter": "gunslinger", "lift": 1.2, "lean": 0.28, "arms": "weapon"}, "arena_slam": {"name": "Arena Slam", "hunter": "juggernaut", "lift": 1.5, "knee": -1.9, "crouch": 0.25, "lean": 0.4, "arms": "fists"}, "spark_hop": {"name": "Spark Hop", "hunter": "mage", "foot": "l", "lift": 1.1, "hop": 0.18, "twist": -0.45, "arms": "up"}, "jester_jig": {"name": "Jester Jig", "hunter": "ostra", "foot": "alt", "lift": 1.1, "knee": -1.4, "hop": 0.12, "arms": "wide"}, "toe_pick": {"name": "Toe Pick", "hunter": "rimewright", "lift": 0.9, "knee": -2.0, "lean": 0.3, "twist": 0.6, "arms": "wide"}, "pounce": {"name": "Pounce", "hunter": "tender", "foot": "both", "lift": 0.8, "knee": -1.6, "hop": 0.35, "lean": 0.35, "crouch": 0.3, "arms": "fists"}, "quiet_heel": {"name": "Quiet Heel", "hunter": "thief", "foot": "l", "lift": 0.7, "knee": -1.0, "crouch": 0.35, "lean": 0.25, "arms": "hips"}, "thunder_stomp": {"name": "Thunder Stomp", "desc": "A twisting leap and both feet down like a dropped anvil.", "cost": 300, "foot": "both", "lift": 1.2, "knee": -2.0, "hop": 0.5, "twist": 1.2, "lean": 0.1, "arms": "up"}} |
 
 ## summon_cc (`content/rules/summon_cc.json`)
 

@@ -36,13 +36,13 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
+const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_breach", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
 	"seat", "ring", "gate"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
 	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in", "zone"]
 ## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
 const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
-const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
+const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_breach", "lair_lever", "lair_camp", "seat", "ring"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -90,6 +90,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
 		inp["move"] = m.skytrain.step_off_dir(h)
 		return
+	if BotStomp.rescue(m, h):
+		return       # a teammate is being stomped: our stun on the stomper before anything else
 	if a["think"] <= 0.0:
 		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"]) * SimLod.think_k(m, h)
 		_choose(m, h)
@@ -176,9 +178,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["strafe"] = -a["strafe"]
 		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
 		if finishing:
-			# walk onto the wisp to stomp it, and finish it
+			# walk onto the wisp to stomp it, and finish it (not with a rival close enough to punish it)
 			move = to if d > 0.7 else Vector2.ZERO
-			inp["interact"] = d < 1.5
+			inp["interact"] = d < 1.5 and BotStomp.safe(m, h, tgt as Hunter)
 		# aim with lead and some error that shrinks with skill
 		var lead: Vector2 = Vector2(tgt.vel.x, tgt.vel.z) * (d / float(h.wpn["speed"])) * a["skill"]
 		# the aim drifts smoothly around the target instead of jittering shot to shot
@@ -481,7 +483,8 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			dz = st; dd = 0.0
 	if dz == null:
 		for o in m.hunters:
-			if o.team == h.team or o.downed or o.out or not o.targetable() or (m.truce and m.truce.holds(h, o)):
+			if o.team == h.team or o.downed or o.out or not o.targetable() or (m.truce and m.truce.holds(h, o)) \
+					or (m.lairs and m.lairs.spares(h, o)):
 				continue
 			var d := h.flat_dist(o)
 			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
@@ -704,10 +707,11 @@ func _choose(m: Match, h: Hunter) -> void:
 	var best: Ent = null; var bs := -1e9
 	var ign: Dictionary = a.get("ignore", {})
 	var ign_e = ign.get("e") if m.time < float(ign.get("until", 0.0)) else null
+	var fight_boss: Boss = m.lairs.boss_of(m.lairs.boss_fight(h)) if m.lairs else null      # (sealed in with it)
 	var helping: Array = BotSquad.foes(m, h, a)       # rivals our squadmates are fighting (bot_squad.gd)
 	var called: Hunter = BotSquad.called(m, h, helping)
 	for o in m.hunters:
-		if o.team == h.team or not o.targetable() or o == ign_e:
+		if o.team == h.team or not o.targetable() or o == ign_e or (m.lairs and m.lairs.spares(h, o)):
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
@@ -742,8 +746,11 @@ func _choose(m: Match, h: Hunter) -> void:
 			if mb.dead or mb == ign_e or (mb is Shrubling and (mb as Shrubling).ss == "disguised"): continue
 			# a sleeping boss can't be hurt; an awake one is worth walking up to
 			if mb is Boss and (mb as Boss).dormant: continue
+			# a lair's Gate Seal only when we came to break it down (Lairs.bot_goal)
+			if mb.mkind == "gate" and a.get("goal_kind", "") != "lair_breach": continue
 			var d := h.flat_dist(mb)
 			var reach := 16.0 if mb is Boss else 8.0
+			if mb == fight_boss: reach = 1e9      # (wherever it is in the lair, it's the fight)
 			if mb is Blight:
 				# the Blight: fight what's coming for us (a Warden's bolts reach further); hurt and
 				# with nothing to drink, step away instead (_blight_flee) unless it's right on us
@@ -753,11 +760,13 @@ func _choose(m: Match, h: Hunter) -> void:
 			if d < reach and absf(mb.pos.y - h.pos.y) < 2.0 and m.world.los(h.pos, mb.pos, h.pos.y + 0.95):
 				var s := 10.0 - d + (TGT_KEEP if mb == a["tgt"] else 0.0)
 				if mb.tgt == h: s += 5.0
+				if mb == fight_boss: s += 20.0      # the boss over its adds
 				if s > bs: bs = s; best = mb
 	# finish off downed rivals before their kin or team picks them up
 	if best == null:
 		for o in m.hunters:
-			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
+			if o.team != h.team and o.downed and not o.out and not (m.lairs and m.lairs.spares(h, o)) and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)) \
+					and BotStomp.safe(m, h, o):
 				best = o; break
 	# angry wild kin also count (a calm one only when no knocked-out Boki is close enough to scan)
 	if best == null:

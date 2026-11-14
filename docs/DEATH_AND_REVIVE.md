@@ -18,7 +18,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Bleed-out | Wisp drains on its own | **15s** | [patch] |
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
-| Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
+| Execute (the stomp) | Enemy holds E on the wisp for 0.2 s and is committed to a stomp (`Stomp`, docs/decisions/0061): stomper and wisp are locked to their spots, the stomper has no move, attack, ability or dodge and takes damage as usual; hard crowd control on the stomper (a stun, a root, a real knock or launch, Grounded, a hex, a pull or push) breaks it and the wisp lives, while slows and Daze don't, and the hold can't commit under it; otherwise the wisp dies at the end. Each Hunter stomps its own way (`StompLook`, content/rules/stomps.json); other stomps are a cosmetic bought with gems, same timing | **3s** | [wiki] + [footage] |
 | Death recap | Down or out, one short card (`scripts/ui/death_recap.gd`): who got you (a Hunter, in their squad colour), the ability, the damage you took in the last 10s by source. Who you watch once out is Spectate's (below). Hits are kept per Hunter from `CombatBus.hit_landed`; nothing new on the wire | 10s window | owner (parity with the source) |
 | Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
 | Takedown reward | Knocking or killing an enemy hunter (not a mob): the knocker and every teammate whose damage or CC landed on the victim in the last 4 s get their dash back (a one-charge dash refills, a multi-charge dash gains one charge) and the long-dash cooldown clears; only the knocker heals 5% of max health (`DashReset`, docs/decisions/0022). The local hunter gets the reset cue (softer for an assist) and a pop on the Shift icon. A hero's `dash.knock_refresh: false` opts out (none do) | +250 HP, +1 dash; multi-charge +1 | [patch] / owner (159) |
@@ -119,7 +119,7 @@ All names and multipliers are placeholders.
 | Alone | Bled out at 15.0s; box holds all loot (2,100 value) |
 | Ally holds E at box | Revived in 5.0s, 25% HP, loot back |
 | Ally shot mid-channel | Channel reset to 0 |
-| Enemy execute | Dead after 3.0s |
+| Enemy execute | Dead after 3.2s (0.2s hold + the 3.0s stomp) |
 | Enemy loots box | Window: take items one by one or smart loot |
 | Beacon | Back in 6.0s at the beacon, full HP, no loot, −25% damage for 12s, beacon used up |
 | Enemy steps on beacon | Paused at 33%, resumes when they leave |
@@ -141,6 +141,7 @@ All names and multipliers are placeholders.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
 - A committed stomp (holding interact on a wisp for `stomp_commit`) runs its 2.4 s animation and cannot be cancelled or moved out of; only the animation ending (the wisp dies) or the stomper being hard-CC'd ends it, and then the wisp lives (decision 2026-11-11, `Life.cc_break`). Hard CC: a stun (wall stuns, Snap, Rimelock, Bola pair, Anchor, Nightwell included), a knock, a root, Grounded, a tow (Nightwell draw, a reel, a drag). Slows and Daze do not break it. `--stomp-check` sweeps every row of KIT_PARITY's Crowd control table.
 - Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+- Checked by `--stomp-check` (the hold commits it; neither stomper nor wisp moves through input, shoves and knocks; no shot, ability or glove goes off; damage lands and the stomp holds; a stun cancels it and the wisp lives and drifts again; every hard crowd control breaks it and the wisp is still alive past 3.0s, a knock or push still moves the stomper, a slow, Daze or Disoriented doesn't break it, and the hold doesn't fill while rooted; the kill lands at 3.0s; the online "stomp" event both ways; every Hunter's own style, buying and wearing the unlockable). Footage: `--stomp-film` (GPU).
 
 ## Watching your squad while you're out
 - Out with a teammate still in it, the camera, minimap and Boki card follow one of them (`scripts/match/spectate.gd`). The fire and secondary keys (rebindable) step to the next or previous living teammate, wrapping and skipping the out and the extracted.

@@ -18,10 +18,6 @@ const R := {
 	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
-	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)
-	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
-	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
-	"stomp_cycle": 0.7,         # one foot-lift-and-slam
 	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
@@ -141,77 +137,6 @@ static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
 		o.down_hp = maxf(0.0, o.down_hp - dmg)
 		o.last_hit_by = by
 	return 0.0
-
-# ------------------------------------------------------------------ the stomp
-## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
-## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
-## lives), and if the wisp drifts away (off a ledge, say) your stomps miss and it gets away.
-static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
-	h.stomp = {"o": o, "t": 0.0, "hits": 0}
-	h.finish_t = 0.0
-	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
-	if o == m.player and m.hud:
-		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
-
-static func end_stomp(m: Match, h: Hunter, why: String) -> void:
-	if h.stomp.is_empty():
-		return
-	trace(m, "stomp end %s (%s)" % [h.pname, why])
-	h.stomp = {}
-	if why == "broken":
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
-
-## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
-## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
-## (Nightwell, a reel, a drag). Slows and Daze never do; your own input never does. "" = still going.
-static func cc_break(m: Match, h: Hunter) -> String:
-	if h.downed or h.out: return "down"
-	if h.stun_t > 0.0: return "stun"
-	if m.time - h.kb_t < 0.08: return "knock"
-	if h.root_t > STOMP_ROOT + 0.001: return "root"
-	if KitStatus.grounded(h): return "ground"
-	for t in m.displace.tows:
-		if t["e"] == h: return "pulled"
-	return ""
-
-static func tick_stomps(m: Match, dt: float) -> void:
-	for h in m.hunters:
-		if h.stomp.is_empty() or h.remote:
-			continue
-		var o: Hunter = h.stomp["o"]
-		var why := cc_break(m, h)
-		if why != "":
-			trace(m, "stomp cc %s on %s" % [why, h.pname])
-			end_stomp(m, h, "broken")
-			continue
-		if o == null or o.out or not o.downed:
-			end_stomp(m, h, "gone")
-			continue
-		h.root_t = maxf(h.root_t, STOMP_ROOT)
-		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
-		var t0 := float(h.stomp["t"])
-		var t1 := t0 + dt
-		h.stomp["t"] = t1
-		var cyc: float = R["stomp_cycle"]
-		var hit_at := cyc * 0.7
-		var near: bool = h.flat_dist(o) <= float(R["revive_radius"]) + 0.5 and absf(h.pos.y - o.pos.y) < 1.6
-		if fmod(t0, cyc) < hit_at and fmod(t1, cyc) >= hit_at:
-			# a foot comes down
-			h.stomp["hits"] = int(h.stomp["hits"]) + 1
-			m.fx.dust(h.pos, 10)
-			m.sfx("thump", h.pos, -2.0, 0.85)
-			if near:
-				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
-				o.down_hp -= Data.MATCH["down_hp"] * 0.12
-		if t1 >= float(R["stomp_time"]):
-			if near:
-				end_stomp(m, h, "done")
-				m.eliminate(o, h, "executed")
-				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-				m.sfx("crit", o.pos, -2.0, 0.7)
-			else:
-				end_stomp(m, h, "missed")
 
 # ------------------------------------------------------------------ deathboxes
 ## Where a box goes: where you fell, or the last solid ground before the abyss.
@@ -364,8 +289,8 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 			var i := int(it["i"])
 			if i < (b["caught"] as Array).size():
 				var rec: Dictionary = b["caught"][i]
-				if not (h == m.player and String(rec.get("lost_from", "")) == "you") and not Capture.room(h):
-					Capture.full_note(m, h)         # no room in your box: the capsule stays in the deathbox
+				if not (h == m.player and String(rec.get("lost_from", "")) == "you") and not Capture.room(h, rec):
+					Capture.full_note(m, h, rec)         # no slot for it: the capsule stays in the deathbox
 					return
 				(b["caught"] as Array).remove_at(i)
 				if h == m.player and String(rec.get("lost_from", "")) == "you":
@@ -470,14 +395,13 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			m.give_kin(h, rec)
 			m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 			continue
-		if not Capture.room(h):
-			left.append(rec)               # the box is full: this capsule stays in the deathbox
+		if not Capture.room(h, rec):
+			left.append(rec)               # no slot for it: this capsule stays in the deathbox
+			Capture.full_note(m, h, rec)
 			continue
 		h.caught.append(rec)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
-	if not left.is_empty():
-		Capture.full_note(m, h)
 	b["caught"] = left
 	var belt_left: Array = []
 	for st in (b.get("belt", []) as Array):

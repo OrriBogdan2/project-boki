@@ -104,8 +104,8 @@ func tick(dt: float) -> void:
 						f.hurt(float(e["dmg"]) * float(z["pw"]), by, o)
 					else:
 						if by: DashReset.note(f, by)
-						if o.has("slow"): f.slow_t = maxf(f.slow_t, float(o["slow"]))
-						if o.has("root"): f.root_t = maxf(f.root_t, float(o["root"]))
+						if o.has("slow"): f.add_slow(float(o["slow"]))
+						if o.has("root"): f.add_root(float(o["root"]))
 			if float(e.get("heal", 0.0)) > 0.0:
 				for h in m.hunters:
 					if h.team == int(z["team"]) and not h.out and Vector2(h.pos.x - at.x, h.pos.z - at.z).length() < float(z["r"]):

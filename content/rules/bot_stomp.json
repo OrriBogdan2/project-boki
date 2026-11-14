@@ -1,0 +1,4 @@
+{
+	"_doc": "How bots play the stomp (BotStomp, docs/BOT_KIT_USE.md 'Stomps'). rescue_r: metres; how far a bot goes to break a stomp on its teammate. The threat range (no stomp with a rival on its feet that close), which move breaks a stomp, its reach and cooldown are all read from the kits (BotStomp.punish_r, BotStomp.breaker), never listed per Hunter.",
+	"rescue_r": 25.0
+}

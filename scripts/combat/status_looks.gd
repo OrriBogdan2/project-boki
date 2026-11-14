@@ -25,6 +25,7 @@ const BODIES := ["hunters", "kins", "mobs"]      # the Match lists whose bodies'
 const BODY_R := 0.38           # m: the hitbox radius the data is set on (a Hunter at scale 1, Arch.hit_r)
 const BODY_TALL := 2.0         # m: the body the data is set on (a Hunter at scale 1)
 const MOB_TALL_PER_R := 2.2    # a mob stands about this many hitbox radii tall (Data.MOBS "r")
+const SLOW_EPS := 0.0001     # s: Ent.slows keeps its clocks at Vector2 (32-bit) precision
 const NET_CC := ["stun", "root", "slow"]   # the timers a body's owner sends in its snapshot, bit i each
 const ANKLE := 0.15            # m: the lowest a look's ring goes on a 2 m body (a ring on the ground means gameplay)
 const FLAG_SHIFT := 25         # a Hunter's snapshot flags carry NET_CC in bits 25-27 (Match._flags; 15-24 are taken)
@@ -79,7 +80,10 @@ static func carries(e: Ent, st: String) -> bool:
 
 ## A slow, not a big hit's stagger (Oomph: a short slow that is the hit's own feel, no status look of its own).
 static func slowed(e: Ent) -> bool:
-	return e.slow_t > 0.0 and not (e is Hunter and (e as Hunter).stagger_t >= e.slow_t)
+	if e.slow_t <= 0.0:
+		return false
+	var stagger := (e as Hunter).stagger_t if e is Hunter else 0.0
+	return not (stagger > 0.0 and stagger >= e.slow_t - SLOW_EPS)
 
 ## Whether the body carries any status at all (the cheap test before asking for each one).
 static func _any(e: Ent) -> bool:

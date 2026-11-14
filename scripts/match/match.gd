@@ -617,8 +617,8 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
 		if Mutations.owner_stat(kin_rec, "armor") > 0.0:
 			h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
-	if TWO_KIN and not kin_rec2.is_empty() and not kin_rec.is_empty():
-		# (retired) everyone brought two kin: the second waited on the bench until you swapped
+	if not kin_rec2.is_empty() and not kin_rec.is_empty():
+		# the second Boki: in the satchel, its carry passive on (KinSlots), swapped in with the swap key
 		var k2 := Kin.new()
 		k2.init_kin(self, id + "k2", kin_rec2["species"], kin_rec2, h)
 		add_child(k2)
@@ -636,9 +636,6 @@ func player_altitude() -> float:
 		return 0.0
 	var g := world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else player.last_gy
 	return maxf(0.0, player.pos.y - g)
-
-## One kin per expedition: a short, readable kit. Flip back on to bring a benched second kin again.
-const TWO_KIN := false
 
 func my_kit() -> Dictionary:
 	return {"weapon": String(opts.get("weapon", Save.d.get("weapon", ""))), "perk": "", "arch": String(opts.get("arch", Save.d.get("arch", "")))}
@@ -789,8 +786,8 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 		brec = (held["rec"] as Dictionary).duplicate(true)
 		names.erase(bname)
 	var cls := Arch.weight(String(bk.get("arch", "")))
-	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
-	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
+	rng.randf()      # (the old roll for a bot's second Boki: kept so the match's stream doesn't shift)
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, bot_kin_record())      # bots bring two too
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
@@ -1715,6 +1712,7 @@ func add_feed(t: String) -> void:
 func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	# (damage a kin's owner shield soaked still counts as an attack)
 	if truce: truce.on_damage(target, by, d + float(o.get("soaked", 0.0)))
+	if lairs: lairs.on_damage(target, by)      # (a hit inside a boss fight: Bot leaves the hitter alone until then)
 	var tags: Array = o.get("tags", [])
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
@@ -2222,7 +2220,7 @@ func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 	sfx("swap", h.pos, -4.0)
 	if h == player:
 		train["_swapped"] = true
-		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
+		if hud: hud.toast("%s leads" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
 
 func on_bond_ready(h: Hunter) -> void:
 	if h.kin and is_instance_valid(h.kin) and not h.kin.dead:
@@ -3507,7 +3505,7 @@ func step(dt: float) -> void:
 			if time > 1.0 and time < 1.1 and not mates[0].downed: knock(mates[0], null, {})
 			if mates[0].downed and not opts.has("mates_revive") or (opts.has("mates_revive") and time < float(opts.get("mates_revive", 0.0))): mates[0].revive = 0.0
 			if time > 1.6 and time < 1.7 and not mates[1].out: eliminate(mates[1], null, "knocked out")
-			if time > 1.2: mates[2].hp = mates[2].max_hp * 0.4; mates[2].armor = mates[2].max_armor * 0.5; mates[2].slow_t = 2.0
+			if time > 1.2: mates[2].hp = mates[2].max_hp * 0.4; mates[2].armor = mates[2].max_armor * 0.5; mates[2].add_slow(2.0)
 			if opts.has("mates_revive") and time > float(opts["mates_revive"]) and mates[0].downed:
 				revive_hunter(mates[0], player)
 			# test: an enemy standing on the knocked teammate (the stomp signal), kept alive for the shot
@@ -3882,7 +3880,7 @@ func step(dt: float) -> void:
 		PerkOrbs.demo(self)      # test: a couple of perks taken and a boss's fan of orbs ahead
 		if hud: hud.ability_feedback("sec", "deny")
 	Life.tick_wisps(self, dt)
-	Life.tick_stomps(self, dt)
+	Stomp.tick(self, dt)
 	LastAlive.tick(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
@@ -4188,7 +4186,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
-			elif not o.remote:
+			else:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
@@ -4265,12 +4263,7 @@ func _update_interact(dt: float) -> void:
 					else:
 						take_pick(h, best["wp"])
 			"finish":
-				# a short hold commits you to the stomp (Life.start_stomp): no cancelling after that
-				var o: Hunter = best["ent"]
-				h.set_hold("windup")
-				h.finish_t += dt
-				if h.finish_t >= Life.R["stomp_commit"]:
-					Life.start_stomp(self, h, o)
+				Stomp.hold(self, h, best["ent"], dt)      # a short hold commits you: no cancelling after that
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -4348,7 +4341,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
-		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
+		add_feed(Capture.caught_line(h, rec))
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -4842,7 +4835,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	h.downed = false
 	var hb: Dictionary = heart.pay(h, how) if heart and how.begins_with("heart") else {}      # a Heart seat's reward
 	if heart: heart.on_leave(h, how)
-	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
+	if not h.stomp.is_empty(): Stomp.end(self, h, "extract")
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
@@ -5394,6 +5387,8 @@ func _net_ev(x, from: String) -> void:
 			if exits: exits.net_in(x)
 		"bcn":
 			Beacons.net_in(self, x)
+		"stomp":
+			Stomp.net_in(self, x)
 		"box", "brev", "back", "lost":
 			BoxRevive.net_in(self, x)
 		"ht":
@@ -5547,7 +5542,7 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+				add_feed(Capture.caught_line(player, rec))
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:

@@ -22,12 +22,14 @@ static func prompt(h: Hunter, k: Kin) -> String:
 static func progress(p: Hunter) -> float:
 	return Capture.scan_frac(p) if Capture.active(p) else Capture.hold_frac(p)
 
-## "Box 2/3" and its colour (warm when full).
+## "Carry-out 0/1" (and the stolen slot when used), warm when the carry-out slot is full.
 static func box_text(p: Hunter) -> String:
-	return "Box %d/%d" % [p.caught.size(), Capture.box_cap()]
+	var st := Capture.stolen_count(p)
+	var t := "Carry-out %d/%d" % [p.caught.size() - st, Capture.box_cap()]
+	return t + (" · stolen %d/%d" % [st, int(Capture.rules()["stolen"])] if st > 0 else "")
 
 static func box_col(p: Hunter, normal: Color) -> Color:
-	return Color("ffb08a") if p.caught.size() >= Capture.box_cap() else normal
+	return Color("ffb08a") if not Capture.room(p) else normal
 
 ## [progress 0..1, colour] of the scan on this Boki as any viewer sees it: the scanner's progress in the colour of
 ## their side (you, your squad, everyone else). [] when nobody is scanning it.

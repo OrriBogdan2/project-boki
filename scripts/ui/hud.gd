@@ -1630,8 +1630,8 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		var prog := 0.0
 		match it["kind"]:
 			"revive": prog = it["ent"].revive
-			"finish": prog = p.finish_t / Life.R["stomp_commit"]
-			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
+			"finish": prog = p.finish_t / Stomp.COMMIT
+			"stomping": prog = float(p.stomp.get("t", 0.0)) / Stomp.TIME
 			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
 			"loot": prog = p.box_t / Life.R["loot_time"]
 			"catch": prog = CaptureHud.progress(p)
@@ -1965,7 +1965,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var b: Kin = p.kin2
 			if b == null: return []
 			out.append(["Swap to %s" % b.rec.get("name", "your other Boki"), Data.KIN[b.species]["color"]])
-			out.append(["Second Boki  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
+			out.append(["Second Boki  ·  %s  ·  carry passive on too" % Settings.key_cap("swap_kin"), MUTED, 12])
 			var names := []
 			for sl in ["k1", "k2"]:
 				var bd: AbilitySpec = b.runner.def_of(sl)
