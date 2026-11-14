@@ -13,8 +13,9 @@ const SAMPLE_S := 6.0        # s sampled a speed: walk and run loops of unequal 
 const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0, 0), "r": Vector3(1, 0, 0)}
 ## m/s: the worst mean planted-foot slip each Hunter may show anywhere in the sweep, the measured worst of the
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
-const BAR := {"archer": 1.75, "juggernaut": 2.0, "gunslinger": 1.7, "bulwark": 1.3, "ashwick": 2.4, "tender": 1.9,
-		"dolm": 2.7, "dredge": 1.75, "mage": 2.1, "thief": 1.85}
+## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
+const BAR := {"archer": 1.75, "juggernaut": 1.0, "gunslinger": 1.2, "bulwark": 1.35, "ashwick": 1.4, "tender": 1.05,
+		"dolm": 2.7, "dredge": 0.95, "mage": 1.55, "thief": 1.5}
 
 var bad := 0
 var holder: Node3D

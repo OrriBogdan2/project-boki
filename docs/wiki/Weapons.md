@@ -28,7 +28,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Swordfish | the Novice Mage | light | 9.2 | 0.32s | none | none | 2.5m | Two quick thrusts and a longer lunge. Every thrust steps you in; the third slows. |
 | Tether Lantern | the Void Jester | medium | 9 | 0.6s | none | none | 12.25m | A quick violet orb every 0.6s, flying its full 12.25m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
-| War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
+| War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock): a flaming crescent in front that carries you forward. Right click raises the aegis. |
 | Twin Blades | none | light | 7 | 0.3s | none | none | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
 ## Weapon upgrades
@@ -66,6 +66,10 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Boki Idol | 58 | A little carved Boki. Collectors pay a lot. |
 | Crown Shard | 105 | A piece of an old crown. Worth a fortune. |
 | Soul Ember | 140 | A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back. |
+| Thumpnut | 40 | A hard sweet nut. At home a Boki eats it for Power. |
+| Shellbark Chew | 40 | A tough bark chew. At home a Boki eats it for Guard. |
+| Zipseed | 40 | A seed that rattles. At home a Boki eats it for Speed. |
+| Hushpearl | 40 | A calm little pearl. At home a Boki eats it for Focus. |
 | Glasswater Wayseed | 150 | A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal. |
 | Cinderstep Wayseed | 150 | A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon. |
 | Hushwood Wayseed | 150 | A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison. |
