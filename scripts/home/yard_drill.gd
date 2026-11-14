@@ -3,10 +3,10 @@ extends RefCounted
 ## Training at the yard: a timing game, three rounds, each a little faster. The session dict stays on
 ## Home.train (other systems read it to know a drill is running); the bar is the TimingBar in it.
 
-var h: Home  # the Home screen
+var h  # the Home screen (untyped: Home holds a YardDrill, and a typed back-reference is a load-order cycle)
 
 
-func _init(home: Home) -> void:
+func _init(home) -> void:
 	h = home
 
 
@@ -19,7 +19,7 @@ func quit() -> void:
 
 
 func start(rec: Dictionary, stat: String) -> void:
-	var k := h._kin_entry(rec)
+	var k: Dictionary = h._kin_entry(rec)
 	if k.is_empty():
 		return
 	if h.yard == null:  # the drill runs at the Training post's dummy
@@ -99,11 +99,11 @@ func anim(k: Dictionary, stat: String, r: String) -> void:
 	var n: Node3D = k["node"]
 	var body: Node3D = n.get_node("Body")
 	var dummy := h.yard.get_node("Dummy") as Node3D
-	var tw := h.create_tween()
+	var tw: Tween = h.create_tween()
 	var col: Color = Care.STATS[stat]["col"]
 	match stat:
 		"power":
-			var to := h.YARD_KIN.lerp(dummy.global_position, 0.55)
+			var to: Vector3 = h.YARD_KIN.lerp(dummy.global_position, 0.55)
 			tw.tween_property(n, "position", to, 0.12)
 			tw.tween_callback(
 				func():
@@ -111,7 +111,7 @@ func anim(k: Dictionary, stat: String, r: String) -> void:
 						var sparks := 12 if r == "great" else 6
 						h.fx.burst(dummy.global_position + Vector3(0, 1.0, 0), Color("e2c47a"), sparks, 3.0, 0.4)
 						Sfx.play("kinhit", dummy.global_position, -6.0)
-						var dt := h.create_tween()
+						var dt: Tween = h.create_tween()
 						dt.tween_property(dummy, "rotation:z", 0.35 if r == "great" else 0.18, 0.08)
 						dt.tween_property(dummy, "rotation:z", 0.0, 0.3)
 					else:
@@ -129,7 +129,7 @@ func anim(k: Dictionary, stat: String, r: String) -> void:
 			tw.tween_interval(0.3)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.15)
 		"speed":
-			var hoop := h.yard.global_position + Vector3(-1.4, 0, 0.2)
+			var hoop: Vector3 = h.yard.global_position + Vector3(-1.4, 0, 0.2)
 			tw.tween_property(n, "position", hoop, 0.18 if r != "miss" else 0.35)
 			tw.tween_callback(
 				func():
