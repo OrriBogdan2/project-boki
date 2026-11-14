@@ -7,9 +7,9 @@ Ember colours: warm low tones, dry ticks, no bright bells (those are the Heart's
   raid_phase          the boss changes phase: a crack, a falling bell and a thump
   raid_rockfall_warn  the Nightmare boss starts a rockfall: a rising rumble and three pebble ticks
 """
-import numpy as np
+
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf
+from sfx_lib import mix, at, lpf, bpf
 
 S.reseed(2312)
 
@@ -49,12 +49,12 @@ def rockfall_warn():
 
 
 def main():
-    S.save_cat('raid_gate_tick', gate_tick(), 'cast')
-    S.save_cat('raid_wave_open', wave_open(), 'cast')
-    S.save_cat('raid_boss_rise', boss_rise(), 'signature')
-    S.save_cat('raid_phase', phase(), 'impact')
-    S.save_cat('raid_rockfall_warn', rockfall_warn(), 'cast')
+    S.save_cat("raid_gate_tick", gate_tick(), "cast")
+    S.save_cat("raid_wave_open", wave_open(), "cast")
+    S.save_cat("raid_boss_rise", boss_rise(), "signature")
+    S.save_cat("raid_phase", phase(), "impact")
+    S.save_cat("raid_rockfall_warn", rockfall_warn(), "cast")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -10,12 +10,30 @@
   rocket_land       the rocket coming down: a short, clean thud with a metal tick and a puff of dust
 Original synthesis, no samples.
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, tail, ring, shape, soft_in, \
-    sweep_noise, wobble
+from sfx_lib import (
+    N,
+    noise,
+    lpf,
+    bpf,
+    env,
+    mix,
+    at,
+    kick,
+    click,
+    crack,
+    tail,
+    ring,
+    shape,
+    soft_in,
+    sweep_noise,
+    wobble,
+)
 
 S.reseed(6127)
 
@@ -66,13 +84,13 @@ def land():
 
 
 def build():
-    S.save_cat('rocket_ignite', ignite(), 'cast')
-    S.save_loop('rocket_ride', ride(), 'loop')
-    S.save_cat('rocket_jump', jump(), 'dash')
-    S.save_loop('drop_fall_wind', fall_wind(), 'loop')
-    S.save_cat('rocket_land', land(), 'impact')
+    S.save_cat("rocket_ignite", ignite(), "cast")
+    S.save_loop("rocket_ride", ride(), "loop")
+    S.save_cat("rocket_jump", jump(), "dash")
+    S.save_loop("drop_fall_wind", fall_wind(), "loop")
+    S.save_cat("rocket_land", land(), "impact")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()
-    print('gen_sfx_rocket: done')
+    print("gen_sfx_rocket: done")

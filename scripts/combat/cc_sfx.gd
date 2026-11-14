@@ -7,11 +7,12 @@ extends RefCounted
 ## KitStatus.apply (Ground, Daze, a kit's slow). Only a status that lands fresh plays (a refresh is silent),
 ## one hit with several plays its strongest, and each listener hears at most one cue per CAP_S.
 
-const KINDS := ["stun", "root", "ground", "daze", "slow"]   # strongest first: the one a stacked hit plays
-const CAP_S := 0.4          # s of match time: CC stacked inside this plays once (per audience: you, your squad)
-const MIN_SLOW_S := 0.4     # s: a shorter slow is a hit's nudge, not crowd control
-const OWN_DB := 0.0         # dB at the call: the file sits at the cast level, the clearest of the cues
-const MATE_DB := -4.0       # dB on top of the mate file's quieter category, so a squadmate's never masks yours
+const KINDS := ["stun", "root", "ground", "daze", "slow"]  # strongest first: the one a stacked hit plays
+const CAP_S := 0.4  # s of match time: CC stacked inside this plays once (per audience: you, your squad)
+const MIN_SLOW_S := 0.4  # s: a shorter slow is a hit's nudge, not crowd control
+const OWN_DB := 0.0  # dB at the call: the file sits at the cast level, the clearest of the cues
+const MATE_DB := -4.0  # dB on top of the mate file's quieter category, so a squadmate's never masks yours
+
 
 ## The strongest status this hit's opts land fresh on `e` ("" if none): call before the timers move.
 static func fresh_on_hit(e: Ent, o: Dictionary) -> String:
@@ -22,6 +23,7 @@ static func fresh_on_hit(e: Ent, o: Dictionary) -> String:
 	if float(o.get("slow", 0.0)) >= MIN_SLOW_S and e.slow_t <= 0.0:
 		return "slow"
 	return ""
+
 
 ## Plays `kind` (one of KINDS) landing on `e` for whoever should hear it in this game.
 static func play(e: Ent, kind: String) -> void:

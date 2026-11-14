@@ -122,6 +122,7 @@ const NAMES := [
 	"fuse_hiss"
 ]
 const POOL := 24
+const SAMPLE := "ping"  # the sound play_sample() puts through a bus
 ## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
 ## the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "elim_confirm"]
@@ -593,7 +594,6 @@ func _bus_for(pos, sname := "") -> StringName:
 
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
-const SAMPLE := "ping"
 func play_sample(bus_name: String) -> void:
 	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
 		return
