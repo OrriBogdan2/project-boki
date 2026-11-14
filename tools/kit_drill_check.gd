@@ -17,8 +17,6 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	_text()
 	_steps()
-	await _area(main, tree, false)
-	await _area(main, tree, true)
 	var sig = load("res://tools/signature_drill_check.gd").new()
 	await sig.drills(main)
 	bad += sig.fails
@@ -82,9 +80,9 @@ func _walk(k: KitDrill, hunter: String) -> void:
 		for i in n:
 			ok(k.step < k.plan.size() and k.plan[k.step]["slot"] == st["slot"], "step %s is open" % st["slot"])
 			if st["how"] == "tech":
-				k.tech_done("archer")
+				k.tech_done("juggernaut" if hunter != "juggernaut" else "archer")
 				ok(k.step == k.plan.size() - 1, "another Hunter's tech does not finish the step")
-				k.tech_done("juggernaut")
+				k.tech_done(hunter)
 			elif st["how"] == "hold":
 				k.on_held(st["action"], KitDrill.HOLD_S)
 			else:

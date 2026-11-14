@@ -227,19 +227,6 @@ func common_kin() -> Array:
 	var all: Array = KIN.keys().filter(func(k): return not KIN[k].get("rare", false))
 	return LAUNCH_KIN.filter(func(k): return all.has(k)) + all.filter(func(k): return not LAUNCH_KIN.has(k))
 
-const ZONE_POOLS := "res://content/zone_pools.json"
-var _zone_pools: Dictionary
-
-## Who spawns wild in an expedition tier: the tier's own list in content/zone_pools.json when it has one (the
-## early zones show only kin with a 3D model), else every common kin that no early zone claims.
-func wild_pool(tier: int) -> Array:
-	if _zone_pools.is_empty():
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ZONE_POOLS))
-		_zone_pools = (parsed as Dictionary).get("zones", {}) if parsed is Dictionary else {"": []}
-	if _zone_pools.has(str(tier)):
-		return _zone_pools[str(tier)]
-	return common_kin().filter(func(k): return not _zone_pools.values().any(func(z): return (z as Array).has(k)))
-
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 

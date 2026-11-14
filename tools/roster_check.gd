@@ -1,14 +1,11 @@
 extends RefCounted
-## --roster-check: the species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin_v2
+## --roster-check: the 50-species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin_v2
 ## loads through the grammar (KinLib), there are exactly 50 with no clashing display names, each has home data
 ## in content/kin, and any large kin with mount settings counts as rideable (DECISIONS 2026-11-08: the 4-6 cap is
 ## loosened; the ride code reads mount speed as a plain multiplier, so no minimum speed is needed).
 ## Never touches the save.
 
-const TARGET_TOTAL := 91      # the 50 of ROSTER_50.md plus 41 early-zone Meshy species (zone_sync.py)
-const RIDEABLE_SPEED := 1.1      # x; slower large kin have another big-Boki role (ROSTER_50.md)
-const RIDEABLE_MIN := 4
-const RIDEABLE_MAX := 6      # the owner capped mounts at about 6
+const TARGET_TOTAL := 50
 
 var bad := 0
 
@@ -31,8 +28,7 @@ func run(main: Node) -> void:
 		ok(FileAccess.file_exists("res://content/kin/%s.json" % id), "%s has home data" % id)
 		sizes[_size_class(k)] += 1
 		var n := Models.kin(id, Save.new_kin(id))
-		var drawn := n.find_child("BokiRig", true, false) or n.find_child("M3d", true, false)
-		var kind := "model" if drawn else "placeholder"
+		var kind := "model" if n.find_child("BokiRig", true, false) else "placeholder"
 		ok(_mesh_count(n) > 0, "%s draws (%s)" % [id, kind])
 		n.free()
 	var total := KinLib.kin_ids().size()
