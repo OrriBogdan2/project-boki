@@ -7,6 +7,7 @@ import numpy as np
 import boki_clips
 import kestrike as ks
 from boki_clips import add, s, seq
+from boki_gait import hind_legs, planted
 from kestrike import EAR_PTS, ROD, SIDES, SPARK_C, TAIL_PTS, ankle, on_wing, v3, wing_frame
 
 LOOK_UP = 0.3      # tips the face up to the high cameras
@@ -197,15 +198,12 @@ def run(t):
     p = {}
     air = seq(t, [(0, 0), (0.12, 0), (0.48, 1), (0.86, 0), (1, 0)])
     land = seq(t, [(0, 1), (0.1, 0), (0.88, 0), (1, 1)])
-    p["root_at"] = (0, 0.1 * air - 0.012 * land, 0)
-    p["root_sc"] = (1 + 0.05 * land, 1 - 0.07 * land + 0.03 * air, 1 + 0.04 * land)
+    p["root_at"] = (0, 0.03 * air - 0.004 * land, 0)
     add(p, "hips", rx=-0.5 - 0.06 * land)
     look(p, 1.6 + 0.3 * land)
     flap(p, t, 2, 0.75, 0.55, ph=0.1)
     tail(p, -0.3, 0.0)
     fan(p, 0.3)
-    k = seq(t, [(0, 0), (0.14, 0), (0.24, 1), (0.74, 1), (0.88, 0), (1, 0)])
-    both_legs(p, -0.5 * k + 0.25 * land, 1.0 * k)
     ears(p, 0.4)
     return p
 
@@ -377,8 +375,11 @@ def ability(t):
     return p
 
 
-CLIPS = {"idle": (3.6, True, idle), "walk": (0.7, True, walk), "run": (0.5, True, run), "hop": (1.3, True, hop),
-         "pet": (2.4, True, pet), "carry": (0.75, True, carry), "tend": (1.3, True, tend),
-         "attack": (0.8, False, attack), "ability": (1.5, False, ability), "sleep": (3.6, True, sleep),
-         "eat": (2.2, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
+CLIPS = {
+    "idle": (3.6, True, idle),
+    "walk": (0.7, True, planted(walk, BONES, hind_legs(0.0, 0.5), duty=0.4, reach=0.16, lift=0.045, drop=0.02)),
+    "run": (1.0, True, planted(run, BONES, hind_legs(0.92, 0.92), duty=0.1, reach=0.12, lift=0.1, drop=0.03)),
+    "hop": (1.3, True, hop), "pet": (2.4, True, pet), "carry": (0.75, True, carry), "tend": (1.3, True, tend),
+    "attack": (0.8, False, attack), "ability": (1.5, False, ability), "sleep": (3.6, True, sleep),
+    "eat": (2.2, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
 HIDE_AT = {"prop_berry": (0, 0.2, 0.26)}
