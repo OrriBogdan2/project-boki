@@ -12,9 +12,10 @@ extends RefCounted
 var delivery: PartSpec
 var effects: Array[PartSpec] = []
 var modifiers: Array[PartSpec] = []
-var then: Dictionary = {}       # event -> Array[StageSpec]
+var then: Dictionary = {}  # event -> Array[StageSpec]
 
 const FIELDS := ["delivery", "effects", "modifiers", "then"]
+
 
 ## depth 1 is a top-level stage; followups are deeper.
 static func parse(v: Variant, path: String, rep: GrammarReport, depth := 1) -> StageSpec:
@@ -31,7 +32,10 @@ static func parse(v: Variant, path: String, rep: GrammarReport, depth := 1) -> S
 	var dt := s.delivery.type if s.delivery else ""
 	var effs := rep.arr(d.get("effects", []), GrammarReport.join(path, "effects"))
 	if effs.size() > KinParts.MAX_EFFECTS:
-		rep.err(GrammarReport.join(path, "effects"), "%d effects; the most in one stage is %d" % [effs.size(), KinParts.MAX_EFFECTS])
+		rep.err(
+			GrammarReport.join(path, "effects"),
+			"%d effects; the most in one stage is %d" % [effs.size(), KinParts.MAX_EFFECTS]
+		)
 	for i in effs.size():
 		var ep := GrammarReport.join(GrammarReport.join(path, "effects"), i)
 		var e := PartSpec.parse("effect", effs[i], ep, rep)
@@ -47,7 +51,10 @@ static func parse(v: Variant, path: String, rep: GrammarReport, depth := 1) -> S
 			rep.err(GrammarReport.join(ep, "target"), "target 'wall' only makes sense when the delivery is a wall")
 	var mods := rep.arr(d.get("modifiers", []), GrammarReport.join(path, "modifiers"))
 	if mods.size() > KinParts.MAX_MODIFIERS:
-		rep.err(GrammarReport.join(path, "modifiers"), "%d modifiers; the most in one stage is %d" % [mods.size(), KinParts.MAX_MODIFIERS])
+		rep.err(
+			GrammarReport.join(path, "modifiers"),
+			"%d modifiers; the most in one stage is %d" % [mods.size(), KinParts.MAX_MODIFIERS]
+		)
 	var seen := {}
 	for i in mods.size():
 		var mp := GrammarReport.join(GrammarReport.join(path, "modifiers"), i)
@@ -58,7 +65,10 @@ static func parse(v: Variant, path: String, rep: GrammarReport, depth := 1) -> S
 			rep.err(mp, "%s is already on this stage; use it once and raise its numbers instead" % m.type)
 		seen[m.type] = true
 		if dt != "" and not (KinParts.MODIFIERS[m.type]["on"] as Array).has(dt):
-			rep.err(mp, "%s doesn't work on a %s (it works on: %s)" % [m.type, dt, ", ".join(KinParts.MODIFIERS[m.type]["on"])])
+			rep.err(
+				mp,
+				"%s doesn't work on a %s (it works on: %s)" % [m.type, dt, ", ".join(KinParts.MODIFIERS[m.type]["on"])]
+			)
 		s.modifiers.append(m)
 	if d.has("then"):
 		var tp := GrammarReport.join(path, "then")
@@ -66,29 +76,47 @@ static func parse(v: Variant, path: String, rep: GrammarReport, depth := 1) -> S
 		var evs: Array = KinParts.DELIVERIES[dt]["events"] if dt != "" else []
 		for ev in th:
 			if not evs.has(ev):
-				rep.err(GrammarReport.join(tp, ev), ("a %s has no '%s' event (it has: %s)" % [dt, ev, ", ".join(evs)]) if not evs.is_empty() else "a %s has no followup events" % dt)
+				rep.err(
+					GrammarReport.join(tp, ev),
+					(
+						("a %s has no '%s' event (it has: %s)" % [dt, ev, ", ".join(evs)])
+						if not evs.is_empty()
+						else "a %s has no followup events" % dt
+					)
+				)
 				continue
 			var list := rep.arr(th[ev], GrammarReport.join(tp, ev))
 			var out: Array = []
 			for i in list.size():
 				var sub := StageSpec.parse(list[i], GrammarReport.join(GrammarReport.join(tp, ev), i), rep, depth + 1)
-				if sub: out.append(sub)
+				if sub:
+					out.append(sub)
 			s.then[ev] = out
 	if s.delivery:
 		s._rules(path, rep, depth)
 	return s
 
+
 ## Rules across the parts of one stage.
 func _rules(path: String, rep: GrammarReport, depth: int) -> void:
 	var dt := delivery.type
 	if String(delivery.params.get("origin", "")) == "here" and depth == 1:
-		rep.err(GrammarReport.join(path, "delivery.origin"), "'here' is where the previous stage landed, so it only works in a followup (then)")
+		rep.err(
+			GrammarReport.join(path, "delivery.origin"),
+			"'here' is where the previous stage landed, so it only works in a followup (then)"
+		)
 	if effects.is_empty() and then.is_empty() and not KinParts.SELF_SUFFICIENT.has(dt):
 		rep.err(path, "this %s has no effects and no followups, so it does nothing" % dt)
 	if dt in ["burst", "zone", "aura"] and float(delivery.params.get("radius", 0.0)) > KinParts.BIG_RADIUS:
 		for e in effects:
 			if e.category() != "utility":
-				rep.err(GrammarReport.join(path, "delivery.radius"), "areas wider than %sm may only carry utility effects (mark, buff), but this one has %s" % [KinParts._num(KinParts.BIG_RADIUS), e.type])
+				rep.err(
+					GrammarReport.join(path, "delivery.radius"),
+					(
+						"areas wider than %sm may only carry utility effects (mark, buff), but this one has %s"
+						% [KinParts._num(KinParts.BIG_RADIUS), e.type]
+					)
+				)
 				break
 	var lingers := has_modifier("linger")
 	for e in effects:
@@ -99,20 +127,30 @@ func _rules(path: String, rep: GrammarReport, depth: int) -> void:
 	var n := 1.0
 	for m in modifiers:
 		match m.type:
-			"split": n *= float(m.params["count"])
-			"bounce", "chain", "pierce": n *= 1.0 + float(m.params["count"])
+			"split":
+				n *= float(m.params["count"])
+			"bounce", "chain", "pierce":
+				n *= 1.0 + float(m.params["count"])
 	if n > float(KinParts.MAX_HITS):
-		rep.err(GrammarReport.join(path, "modifiers"), "split, bounce, chain and pierce together could hit %d foes; the cap is %d" % [int(n), KinParts.MAX_HITS])
+		rep.err(
+			GrammarReport.join(path, "modifiers"),
+			"split, bounce, chain and pierce together could hit %d foes; the cap is %d" % [int(n), KinParts.MAX_HITS]
+		)
+
 
 func has_modifier(t: String) -> bool:
 	for m in modifiers:
-		if m.type == t: return true
+		if m.type == t:
+			return true
 	return false
+
 
 func modifier(t: String) -> PartSpec:
 	for m in modifiers:
-		if m.type == t: return m
+		if m.type == t:
+			return m
 	return null
+
 
 ## Every stage in this tree, this one first.
 func walk() -> Array[StageSpec]:
@@ -122,11 +160,15 @@ func walk() -> Array[StageSpec]:
 			out.append_array((s as StageSpec).walk())
 	return out
 
+
 ## Placeholder power: the sum of part costs (Phase 3 prices parameters too).
 func cost() -> float:
 	var c := delivery.cost() if delivery else 0.0
-	for e in effects: c += e.cost()
-	for m in modifiers: c += m.cost()
+	for e in effects:
+		c += e.cost()
+	for m in modifiers:
+		c += m.cost()
 	for ev in then:
-		for s in then[ev]: c += (s as StageSpec).cost()
+		for s in then[ev]:
+			c += (s as StageSpec).cost()
 	return c

@@ -8,7 +8,7 @@ class_name IslandDepth
 const RIM := 1.5      # m: how far an island's outer cliff drops before the rock underneath tapers in
 const HEAD := 1.6     # m: a body's height against an underside (feet at y, head at y + HEAD)
 
-static var T: Dictionary = Tuning.of("islands")
+static var T: Dictionary = Loco.T["islands"]
 
 ## Per tile: the height of the island's underside below it (0 on void tiles).
 static func fill(W: World) -> PackedFloat32Array:
@@ -143,7 +143,7 @@ const BUMP := 0.6     # m: rising this far into an underside from below is a hea
 ## Is there rock right in front of a body at pos facing n (the face it's climbing)?
 static func on_face(W: World, pos: Vector3, n: Vector2, r: float) -> bool:
 	var p := Vector2(pos.x, pos.z) + n * 0.35
-	return W.occupy(p.x, p.y, r, pos.y, false, true) > 0.0
+	return W.terrain_wall(p.x, p.y, r, pos.y) > 0.0
 
 const EDGE_OUT := 0.15     # m a step: how fast a climber edges out under a shelf (9 m/s)
 

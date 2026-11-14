@@ -1,0 +1,2 @@
+strip_compat.jpg: --wisp-shots, Compatibility/llvmpipe under xvfb on rpc3 (poses true, materials not GPU). Rows: thief (light), juggernaut (heavy). Columns: standing, 0.1 s stagger, 0.22 s knee, 0.35 s collapse (body fading, Wisp rising), Wisp idle.
+strip_gpu_juggernaut.jpg: GPU (jobq 20261112-004305-21116, Forward+), juggernaut, centre crops of standing / 0.1 s shove+ring / 0.22 s knee / 0.35 s collapsed and fading / Wisp. Light (thief) GPU job 20261112-004251-12287 was still queued when this was committed.

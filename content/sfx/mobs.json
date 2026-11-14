@@ -1,0 +1,12 @@
+{
+ "group": "mobs",
+ "name": "Monsters",
+ "script": "tools/gen_sfx_mobs.py",
+ "sounds": {
+  "mdie_skitter": "grunt", "mdie_spitter": "grunt", "mdie_brute": "grunt", "mdie_bomber": "grunt",
+  "mdie_sentinel": "grunt", "mdie_glimmer": "grunt", "mdie_warden": "grunt",
+  "mstag_open": "ui", "mstag_hit": "impact"
+ },
+ "signature": [],
+ "replaces": []
+}

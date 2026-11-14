@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oln1obq5wxhu"
+uid="uid://d2vnsvx6dyo80"
 path.bptc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex"
 path.astc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "9c6b7ac51d4e8487a4548479ed072fe6"
+"md5": "461c879ddf8c200c9558255bfbeff6a8"
 }
 
 [deps]

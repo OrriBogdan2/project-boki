@@ -45,7 +45,6 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	var need := time_for(o)
 	if h.box_t <= 0.0:
 		h.vuln_fx_t = 0.0
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 	h.box_t += dt
 	# everyone sees (and hears: Match._update_box_hums) a box revive going up, and who's doing it
 	b["rev_prog"] = h.box_t / need
@@ -61,7 +60,10 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	m.sfx("revive_done", b["pos"], 3.0)
 	m.fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, DONE_COL, 0.5)
 	m.fx.burst(b["pos"] + Vector3(0, 1.0, 0), DONE_COL, 26, 4.5, 0.7, -2.0, 1.2)
-	Life.box_revive(m, b, h)
+	if o.remote:
+		m.net_event(["brev", o.nid, h.nid])      # their own game brings them back (net_in)
+	else:
+		Life.box_revive(m, b, h)
 
 ## Every step while channelling (Hunter's input step): no attacks; moving, dashing, jumping,
 ## gliding or a stun breaks the channel instead.
@@ -70,7 +72,6 @@ static func guard_inputs(h: Hunter) -> void:
 	var leaping: bool = h.inp.get("dash", false) or h.inp.get("jump", false) or h.roll_t > 0.0
 	if walking or leaping or h.gliding or h.stun_t > 0.0:
 		if h.box_t > 0.0:        # (not when interact was just let go)
-			h.m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 			cancel(h)
 		return
 	for key in NO_ATTACK:
@@ -83,3 +84,25 @@ static func cancel(h: Hunter) -> void:
 	h.box_t = 0.0
 	h.box_rev_at = -9.0
 	h.set_meta("box_broke", true)
+
+## Another game's deathbox events. "box": a Hunter there died, here is their soul marker; "brev":
+## a teammate finished the channel at the box of a Hunter this game owns (every game's copy of
+## them is told by Life.bring_back's "back"); "back" / "lost": that Hunter is up again / gone for good.
+static func net_in(m: Match, x: Array) -> void:
+	var o: Hunter = m.ents_by_id.get(String(x[1]), null) as Hunter
+	if o == null:
+		return
+	match String(x[0]):
+		"box":
+			Life.mirror_box(m, o, Vector3(x[2], x[3], x[4]))
+		"brev":
+			var b := Life.box_of(m, o)
+			if not o.remote and not b.is_empty() and Life.soul_here(m, b):
+				Life.box_revive(m, b, m.ents_by_id.get(String(x[2]), o) as Hunter)
+		"back":
+			if o.remote:
+				o.out = false
+				o.gone = false
+				o.downed = false
+		"lost":
+			o.gone = true

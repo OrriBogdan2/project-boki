@@ -1,8 +1,9 @@
 extends RefCounted
 ## --arena-check: the Arena boots on its own map with its practice tools, dummies take damage and
-## show it, reset works, archetype / weapon / Boki / glove swaps apply, the toggles work, the kit
-## card builds for all six archetypes, the expedition loadout shows the card, and the training area
-## gets the same tools. Prints ARENACHECK PASS/FAIL.
+## show it, reset works, the Esc menu's Practice page sets your ranks (--practice-shot=<dir> saves
+## it), archetype / weapon / Boki / glove swaps apply, the toggles work, the kit card builds for all
+## six archetypes, the expedition loadout shows the card, and the Training Grounds gets the same
+## tools. Prints ARENACHECK PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -340,11 +341,85 @@ func _arena() -> void:
 	ok("kit card opens in the arena", A.card_layer != null)
 	A.toggle_card()
 	ok("kit card closes", A.card_layer == null and not m.paused)
+	await _practice_page(m)
 	A.teardown()
 	m.queue_free()
 	printerr("ARENACHECK (arena match freed)")
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
+
+## The Esc menu's Practice page (PracticeRanks), driven through its buttons: Max all, Pick your max
+## (that ability's top rank and data bonus, the rest at rank 1), Reset; the dummies' ranks stay theirs.
+func _practice_page(m: Match) -> void:
+	var tree := main.get_tree()
+	var P: Hunter = m.player
+	var D: Hunter = m.arena.dummies[0]["h"]
+	var dummy_ranks: Dictionary = D.slot_lv.duplicate()
+	var was: Node = main.get("current")
+	main.set("current", m)         # (the Esc menu finds the match through the current screen)
+	Overlay.open_pause("match")
+	await tree.process_frame
+	ok("practice: the Esc menu has Practice", await _press("Practice") and Overlay.page == "practice", Overlay.page)
+	var maxed := await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s])
+	ok("practice: Max all", maxed, str(P.slot_lv))
+	ok("practice: max rank shortens the cooldown", is_equal_approx(P.rank_cd_k("sec"), 0.8), str(P.rank_cd_k("sec")))
+	var dash := "Max %s " % P.slot_info("dash")["name"]
+	var bonus := String(Arch.next_ranks(P.arch, "dash", 1)[-1][1])
+	ok("practice: Pick your max shows its bonus", _button(dash).tooltip_text == bonus, bonus)
+	ok(
+		"practice: Pick your max maxes that ability only",
+		await _press(dash) and P.ak.rank("dash") == 3
+			and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
+		str(P.slot_lv)
+	)
+	await _practice_shot()
+	var buttons: Array = Overlay.host.find_children("*", "Button", true, false)
+	ok("practice: one-line labels", buttons.all(func(b): return not String(b.text).contains("\n")))
+	var sc: Control = Overlay.host.find_children("*", "ScrollContainer", true, false)[0]
+	var r := Rect2(Vector2.ZERO, main.get_viewport().get_visible_rect().size).intersection(sc.get_global_rect())
+	var cut: Array = sc.find_children("*", "Button", true, false).filter(
+		func(b): return not r.encloses(b.get_global_rect())
+	)
+	var names: Array = cut.map(func(b): return b.text)
+	ok("practice: the page fits the screen, no scrolling", cut.is_empty(), "%s cut: %s" % [r.size, names])
+	var rank1 := await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
+	ok("practice: Reset", rank1 and P.skill_pts == 0, str(P.slot_lv))
+	ok("practice: the dummies keep their ranks", D.slot_lv == dummy_ranks, str(D.slot_lv))
+	Overlay.close()
+	main.set("current", was)
+	await tree.process_frame
+
+## --practice-shot=<dir> (needs a renderer, jobq --needs gpu): the Practice page at 1280x720 as <dir>/practice_page.png.
+func _practice_shot() -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--practice-shot="): dir = a.trim_prefix("--practice-shot=")
+	if dir == "":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	main.get_window().size = Vector2i(1280, 720)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)     # the boot splash stays up when a check starts the match by hand
+	for i in 20: await main.get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("practice_page.png"))
+
+## The open page's button whose text starts with `start` (null when none).
+func _button(start: String) -> Button:
+	for b in Overlay.host.find_children("*", "Button", true, false):
+		if (b as Button).text.begins_with(start) and not b.is_queued_for_deletion():
+			return b
+	return null
+
+## Presses the open page's button whose text starts with `start`; false when there is none.
+func _press(start: String) -> bool:
+	var b := _button(start)
+	if b == null:
+		return false
+	b.pressed.emit()
+	await main.get_tree().process_frame
+	return true
 
 func _training() -> void:
 	var m := Match.new()
@@ -376,8 +451,49 @@ func _training() -> void:
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
+	_dodge_drill(m)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## The dodge drill: the Strafer's shot shows its lane first, standing still in it gets you caught (no
+## count, no damage), three dashes out of the lane finish the drill and tick the checklist row.
+func _dodge_drill(m: Match) -> void:
+	var P: Hunter = m.player
+	var dr: DodgeDrill = m.arena.drill
+	m.arena.cd_off = true
+	step(m, 1.0)        # the earlier dash is over
+	var start := P.pos
+	ok("drill: you start in the Strafer's reach", P.flat_dist(dr.thrower.pos) < DodgeDrill.REACH)
+	var hp := P.hp
+	_next_lane(m, dr)
+	ok("drill: the lane shows before the orb leaves", not dr._shot.is_empty() and dr._shot["t"] < DodgeDrill.WINDUP)
+	_finish_shot(m, dr)
+	ok("drill: standing still is caught, no count, no damage", dr.dodges == 0 and P.hp >= hp, "%d" % dr.dodges)
+	for i in DodgeDrill.NEED:
+		_next_lane(m, dr)
+		step(m, DodgeDrill.WINDUP * 0.5)
+		P.inp["move"] = (dr._shot["dir"] as Vector2).orthogonal()
+		P.do_dash()
+		_finish_shot(m, dr)
+		P.inp["move"] = Vector2.ZERO
+		P.teleport(start)
+	ok("drill: three dashes clear of the shot finish it", dr.done and dr.dodges == DodgeDrill.NEED, "%d" % dr.dodges)
+	step(m, 0.2)
+	ok("drill: the checklist row ticks", m.train.has("dodge"))
+	step(m, DodgeDrill.LOOP * 1.5)
+	ok("drill: done, the Strafer stops throwing", dr._shot.is_empty())
+
+func _next_lane(m: Match, dr: DodgeDrill) -> void:
+	var t := 0.0
+	while dr._shot.is_empty() and t < DodgeDrill.LOOP * 2.0:
+		m.step(DT)
+		t += DT
+
+func _finish_shot(m: Match, dr: DodgeDrill) -> void:
+	var t := 0.0
+	while not dr._shot.is_empty() and t < 4.0:
+		m.step(DT)
+		t += DT
 
 func _cards() -> void:
 	printerr("ARENACHECK (kit cards)")
@@ -427,4 +543,4 @@ func _loadout() -> void:
 		)
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
-	ok("expedition panel uses KitCard.strip", src.contains("KitCard.strip(cur_a"))
+	ok("expedition panel shows no ability strip", not src.contains("KitCard.strip("))
