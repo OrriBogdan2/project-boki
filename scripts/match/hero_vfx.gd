@@ -15,15 +15,16 @@ const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
 	"ring": 8, "sheen": 9, "fist": 10}
-const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
+const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7, "plus": 8}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 ## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
 ## the tracers riding Vex's rounds (6)
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "sheen": 6, "fist": 3, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
-	"drop": 6}
-const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
+	"drop": 6, "plus": 4}
+const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
+	"plus": 12}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
 const LOD_NEAR := 20.0         # m from the camera focus: full detail
@@ -452,7 +453,8 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	match kind:
 		"sweep":
 			mi.mesh = _arc(float(layer.get("arc", 120.0)))
-			b = b * Basis(Vector3(0, 0, 1), deg_to_rad(float(layer.get("tilt", 0.0))))
+			var cam := get_viewport().get_camera_3d()
+			b = b * Basis(Vector3(0, 0, 1), sweep_roll(layer, b, cam.global_basis.z if cam else Vector3.UP))
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
 			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
@@ -509,6 +511,14 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		e["cut"] = float(layer["cut"])
 		e["h"] = h
 	live.append(e)
+
+## A sweep's roll about its aim (rad): the layer's "tilt", turned by up to its "lean" (deg) toward `back` (the
+## camera's back axis) so a crescent stood up along the aim never shows edge-on.
+static func sweep_roll(layer: Dictionary, b: Basis, back: Vector3) -> float:
+	var tilt := deg_to_rad(float(layer.get("tilt", 0.0)))
+	var lean := deg_to_rad(float(layer.get("lean", 0.0)))
+	var c := b.transposed() * back
+	return tilt + clampf(wrapf(atan2(-c.x, c.y) - tilt, -PI * 0.5, PI * 0.5), -lean, lean)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))

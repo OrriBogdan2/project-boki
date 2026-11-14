@@ -714,6 +714,34 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
 	P.vel = Vector3.ZERO     # (she ends the charges still moving and teleport keeps that: it carried into the Slipstep)
 
+## Her rounds read at match zoom (docs/VFX_QUALITY.md backlog 3): `sd`, a round just fired, rides a lime tracer
+## (HeroVfx data, content/vfx/gunslinger.json); a short muzzle flash goes off on the rifle's mouth; a held string
+## reuses the pooled nodes. Ends rested, the drum full again.
+func _vex_rounds(m: Match, P: Hunter, sd: Dictionary) -> void:
+	var V := HeroVfx.of(m)
+	var traced := V.ribbons.any(func(r: Dictionary) -> bool: return r["follow"] == sd["node"])
+	ok("LMB: each round is a muzzle flash and a lime tracer riding it (HeroVfx data)",
+			int(V.plays.get("shot", 0)) >= 1 and traced)
+	var mouth := P.model.get_node_or_null(GunslingerKit.GUN_MUZZLE) as Node3D if P.model else null
+	var flares: Array = V.live.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "flare")
+	var off := INF
+	if mouth and not flares.is_empty():
+		off = (flares[-1]["node"] as Node3D).global_position.distance_to(mouth.global_position)
+	ok("LMB: a short muzzle flash on the rifle's mouth (0.1 s at most)",
+			off < 0.2 and float(flares[-1]["dur"]) <= 0.1, "%.2f m off the Muzzle" % off)
+	var frame := V._process.bind(DT)        # its looks end on frames, and a stepped check draws none: one a step
+	var held_string := func() -> void:
+		P.inp["fire"] = true
+		ac.step(m, 0.6, frame)
+		P.inp["fire"] = false
+		ac.step(m, 1.0, frame)
+	held_string.call()
+	var made := V.made
+	var shots := P.shot_n
+	held_string.call()
+	ok("LMB held: a second string makes no new effect nodes (pooled)", P.shot_n - shots >= 4 and V.made == made,
+			"%d rounds, %d new nodes" % [P.shot_n - shots, V.made - made])
+
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -725,7 +753,7 @@ func _gunslinger() -> void:
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
-	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +76% (the source's +39 on 51), a gold crit number
+	# 1. LMB: to full range past the cursor, a green-fire tracer; Dazed = +76% (source +39 on 51), a gold crit number
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
 	ac.step(m, 0.1)
@@ -736,10 +764,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
 			not sd.is_empty() and absf(_flight(sd) - 11.0) < 0.6, "%.1f m" % _flight(sd))
-	var V := HeroVfx.of(m)
-	var traced := V.ribbons.any(func(r: Dictionary) -> bool: return r["follow"] == sd["node"])
-	ok("LMB: each round is a muzzle flash and a lime tracer riding it (HeroVfx data)",
-			int(V.plays.get("shot", 0)) >= 1 and traced)
+	_vex_rounds(m, P, sd)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
 	ok("Dazed: the rifle does +76%", is_equal_approx(K.outgoing(T, 10.0, o), 17.6))

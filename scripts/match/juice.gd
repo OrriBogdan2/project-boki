@@ -135,9 +135,16 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
-	if credit == m.player and h != m.player:
-		m.sfx("kill", null, -3.0)
-		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
+	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
+		m.hud.flash(Color(tc, 1.0), 0.14)
+
+## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
+## whenever a squadmate downs or finishes a rival). Returns whether it played.
+static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
+	if m.player == null or not credit is Hunter or credit.team != m.player.team or h.team == credit.team:
+		return false
+	Sfx.play(cue, null, vol_db, 0.0)
+	return true
 
 ## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
 ## freeze for whoever broke it (Feel tier 3: 0.045s).

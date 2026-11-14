@@ -5,10 +5,10 @@ extends RefCounted
 ## or targeting. Per hunter, tick() runs a small state machine:
 ##   hero --down--> in: the knocked-down beat (HunterFall: the hero staggers along the hit, drops to a knee and
 ##   collapses, fading out as the Wisp rises out of it; a ring and a puff mark the down) -> on (hero hidden, slow
-##   bob, trails heavily behind the hunter and settles when they stop, a quiet hum)
+##   bob, trails heavily behind the hunter and settles when they stop, a low hum (WispHum))
 ##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
 ##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
-## The look (colours, body, drift, hum, timing) is WispLook's data. State lives in the hunter's meta "wisp".
+## The look (colours, body, drift, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
 const ON := "on"
@@ -42,10 +42,6 @@ static func node_of(h: Hunter) -> Node3D:
 
 static func mode_of(h: Hunter) -> String:
 	return String(_state(h)["mode"])
-
-## The key of this hunter's hum loop in Sfx.
-static func hum_key(h: Hunter) -> String:
-	return "wisp%d" % h.get_instance_id()
 
 static func _state(h: Hunter) -> Dictionary:
 	if not h.has_meta("wisp"):
@@ -99,7 +95,7 @@ static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	st["mode"] = OUT
 	st["t"] = 0.0
 	st["base"] = h.model.scale if h.model else Vector3.ONE
-	Sfx.loop_stop(hum_key(h))
+	WispHum.end(h)
 	_pop_fx(h, look["pop_out"], 0.5)
 
 ## Burst and sound of a pop; a Wisp nobody can see makes none.
@@ -117,7 +113,7 @@ static func _snuff(h: Hunter, st: Dictionary) -> void:
 	var at := h.position + Vector3(0, float((st["look"] as Dictionary)["hover"]), 0)
 	h.m.fx.burst(at, _team_col(h).lightened(0.4), int(spec["burst"]), 5.0, 0.7, 4.0, 1.0)
 	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
-	Sfx.loop_stop(hum_key(h))
+	WispHum.end(h)
 	HunterFall.stop(h)
 	_free_node(st)
 	st["mode"] = ""
@@ -161,14 +157,14 @@ static func _pose_in(h: Hunter, st: Dictionary, dt: float) -> void:
 	var floats := node.position
 	node.position = Vector3(lerpf(body.x, floats.x, out_k), lerpf(RISE_FROM, floats.y, _back(out_k)),
 			lerpf(body.z, floats.z, out_k))
-	_hum(h, st)
+	WispHum.hold(h)
 
 static func _pose_on(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
 	node.scale = Vector3.ONE
 	_set_glow(node, 1.0, 1.0)
 	_pose_body(h, st, dt)
-	_hum(h, st)
+	WispHum.hold(h)
 
 ## Slow and heavy: a slow bob, and the body stays behind in the world when the hunter moves (up to the
 ## look's drag), leaning back a little, then catches up over the look's settle time once they stop.
@@ -192,15 +188,6 @@ static func _pose_body(h: Hunter, st: Dictionary, dt: float) -> void:
 		body.basis = Basis(Vector3.UP.cross(forward).normalized(), -pull * float(look["lean"]))
 	else:
 		body.basis = Basis.IDENTITY
-
-## The quiet hum, held each frame so it stops on its own if the Wisp goes away any other way; a Wisp
-## nobody can see keeps quiet.
-static func _hum(h: Hunter, st: Dictionary) -> void:
-	if not h.visible:
-		Sfx.loop_stop(hum_key(h))
-		return
-	var hum: Dictionary = (st["look"] as Dictionary)["hum"]
-	Sfx.loop_hold(hum_key(h), String(hum["sfx"]), h.pos, float(hum["db"]))
 
 static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	var look: Dictionary = st["look"]

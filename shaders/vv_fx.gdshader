@@ -103,8 +103,6 @@ void fragment() {
 		glow = color2.rgb * core * k;
 	} else if (mode == 5) {
 		float d = abs(uv.y - 0.5) * 2.0;
-		float w = mix(0.9, 0.08, uv.x);
-		float shaft = 1.0 - smoothstep(w * 0.5, w, d);
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
 		body_a = shaft * (1.0 - uv.x) * k;
 		glow = color2.rgb * head * k;

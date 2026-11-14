@@ -185,6 +185,7 @@ var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
+var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
 var land_t := 0.0
@@ -500,7 +501,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	# (a hot glider or the tide never breaks a channel)
 	hurt_at = hurt_at if opts.get("src", "") == "heat" else m.time
 	if base_t > 0.0 and dmg > 0.0:
-		cancel_base("you took damage")
+		BaseRecall.cancel(self, "you took damage", true)
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
@@ -928,71 +929,13 @@ var dash_is_ex := false
 ## or a ledge climb it's buffered and fires the moment that ends; off a jump pad (after the first
 ## beat of the launch) it breaks the pad flight into a dash. Jump out of a ground dash keeps half
 ## its speed. Dash in the air and keep holding glide and the glider opens again as the dash ends.
-## B: base to a teammate (Supervive's recall-to-ally). A 3s channel where you stand still and can't
-## attack; moving, attacking or taking any damage cancels it. Everyone sees the channel ring on you
-## and a marker on the teammate. You arrive beside them weakened for 3s: half damage, and the crowd
-## control, healing and shields you apply are halved.
-const BASE_TIME := 3.0
-const BASE_CD := 40.0
-const WEAK_TIME := 3.0
-var base_t := 0.0
-var base_to: Hunter = null
+## B: base to a teammate (BaseRecall: the channel, its cancels and the arrival; BaseWheel: the hold-B pick).
+var base_t := 0.0                # s left on the channel (0: not basing)
+var base_to: Hunter = null       # the teammate you will appear beside
 var base_cd := 0.0
+var base_tele: Node3D = null     # the filling circle under that teammate, for everyone to see
 var weak_t := 0.0
 var dash_buf := 0.0
-
-func start_base(to: Hunter) -> void:
-	if to == null:
-		if is_local() and m.hud: m.hud.toast_small("No teammate to base to", Color("a2a8bb"))
-		_ab_feedback("base", "deny")
-		return
-	if base_cd > 0.0 or downed or out or dropping or riding or not grounded or base_t > 0.0:
-		_ab_feedback("base", "deny")
-		return
-	base_t = BASE_TIME
-	base_to = to
-	_ab_feedback("base", "cast")
-	m.sfx("portal", pos, -6.0, 1.2)
-	if is_local() and m.hud: m.hud.toast_small("Basing  ·  hold still", Color("8fe3c8"))
-
-func cancel_base(why := "") -> void:
-	if base_t <= 0.0:
-		return
-	base_t = 0.0
-	base_to = null
-	base_cd = 4.0          # a short lockout after an interrupted channel
-	m.sfx("warn", pos, -10.0, 0.8)
-	if is_local() and m.hud and why != "": m.hud.toast_small("Base interrupted: " + why, Color("ff9a8a"))
-
-func _tick_base(dt: float) -> void:
-	if base_t <= 0.0:
-		return
-	var o := base_to
-	if o == null or not is_instance_valid(o) or o.out or o.downed or o.extracted or downed or out:
-		cancel_base("your teammate can't take you")
-		return
-	var mv: Vector2 = inp.get("move", Vector2.ZERO)
-	if mv.length() > 0.2 or inp.get("fire", false) or inp["dash"] or inp["jump"] or inp["sig"] or inp["sec"] or inp["ult"] or inp.get("gear1", false) or inp.get("gear2", false) or inp.get("throw", false):
-		cancel_base("you moved")
-		return
-	base_t -= dt
-	if base_t <= 0.0:
-		base_t = 0.0
-		base_to = null
-		var at := o.pos
-		for i in 12:
-			var a := TAU * i / 12.0
-			var q := o.pos + Vector3(cos(a) * 1.3, 0, sin(a) * 1.3)
-			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z) and absf(m.world.ground_at(q.x, q.z) - o.pos.y) < 0.6:
-				at = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
-		m.fx.flash(pos + Vector3(0, 1.0, 0), Color("8fe3c8"), 1.2, 0.1)
-		teleport(at)
-		vel = Vector3.ZERO
-		weak_t = WEAK_TIME
-		base_cd = BASE_CD
-		m.fx.flash(at + Vector3(0, 1.0, 0), Color("8fe3c8"), 1.4, 0.12)
-		m.sfx("portal", at, -2.0, 1.5)
-		if is_local() and m.hud: m.hud.toast_small("Weakened 3s", Color("ffb36a"))
 var air_peak := 0.0              # the highest point of this time in the air (for skyfall landings)
 const SKYFALL_H := 8.0           # drop at least this far, fast, onto rivals and you land a skyfall
 
@@ -1848,10 +1791,10 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = rocket.pos if rocket else m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
-			if rocket == null:
-				prev = pos
-				vel = Vector3.ZERO
+			if rocket:
+				pos = rocket.pos
+			else:
+				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
@@ -1892,6 +1835,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
+	abyss_snd.tick(self)
 	if remote:
 		net_follow(dt)
 		return
@@ -1928,7 +1872,7 @@ func sim(dt: float) -> void:
 	# gloves need no point: Gloves
 	for gk in SLOT_GATES:
 		_gate(gk[0], gk[1], gk[2])
-	_tick_base(dt)
+	BaseRecall.tick(self, dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
 	if ak: ak.flow.route(dt)       # presses during a dash: fire, held to its end, or cancel it (DashFlow)
@@ -2096,7 +2040,9 @@ func _physics(dt: float) -> void:
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
 		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
-			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
+			var base := glide_lift.unswoop(hv)     # the swoop rides on top of the glide's steering
+			base = glide_dive.steer(base, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(base, mv * gs, gs, carry, dt)
+			hv = glide_lift.reswoop(base)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
@@ -2146,13 +2092,9 @@ func _physics(dt: float) -> void:
 		if dropping:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 		elif glide_dive.on:
-			vel.y = glide_dive.fall_vy(vel.y, dt)
+			vel.y = glide_lift.build(self, glide_dive.fall_vy(vel.y, dt), sink)
 		else:
-			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
-			if vel.y < -sink:
-				vel.y = move_toward(vel.y, -sink, Loco.glide_catch * dt)    # the canopy eases the fall: absorbed, never turned into speed
-			else:
-				vel.y = maxf(vel.y - GLIDE_GRAV * glide_lift.gravity_scale() * dt, -sink)
+			vel.y = glide_lift.fall_vy(self, sink, dt)     # pulled down high up, caught, swooping on a level-out
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
@@ -2211,7 +2153,6 @@ func _physics(dt: float) -> void:
 	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
-		step_vis -= step_up - pos.y
 		pos.y = step_up
 		prev.y = pos.y
 		var fw := mv.normalized() * spd * dt
@@ -2630,7 +2571,6 @@ func _try_ledge_grab(dt: float) -> void:
 	grap = {}
 	grap_cd = LEDGE_CD
 	push_t = 0.0
-	gliding = false
 	roll_t = 0.0
 	m.sfx("grab", pos, -8.0, 1.2)
 	m.on_ledge_grab(self)
@@ -2973,7 +2913,7 @@ func add_stat(k: String, n := 1) -> void:
 	stats[k] = int(stats.get(k, 0)) + n
 var unseen := false           # hidden from the local player (in a bush, or behind a wall)
 
-var step_vis := 0.0            # eases the model up a terrace you just stepped onto
+var drawn_y := INF             # m: where StepSmooth draws the body (INF until it first draws)
 ## The sniper's aiming laser while it winds up, and the minigun's barrels spinning.
 var laser: MeshInstance3D
 func _render_weapon_fx(delta: float) -> void:
@@ -3039,6 +2979,7 @@ func _dash_anim_kind() -> String:
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
+	s[WardenLookAt.LOOK] = WardenLookAt.aim_of(self)
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()
@@ -3088,7 +3029,7 @@ func _anim_state(stretch: float) -> void:
 	s["rooted"] = root_t > 0.0          # (a Hero's clips show both: WardenCc)
 	s["gnd"] = KitStatus.grounded(self)
 	s["heart"] = Heart.carrying(self)
-	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
+	s["base"] = BaseRecall.progress(self)
 	s["squash"] = squash
 	s["stretch"] = stretch
 	s["kin_on_shoulder"] = kin != null and (kin as Kin).state == "shoulder"
@@ -3149,11 +3090,9 @@ func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	if LOCAL_RENDER_LEAD and is_local() and freeze_t <= 0.0 and not remote:
 		position = render_pos(alpha)
-	if absf(step_vis) > 0.001:
-		position.y += step_vis
-		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
+	StepSmooth.ease(self, delta)
 	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
-			and not (riding and rocket == null) and not unseen
+			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
