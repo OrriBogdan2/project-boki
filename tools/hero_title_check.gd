@@ -10,11 +10,14 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
-	"archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm",
-	"dredge", "rimewright", "mage", "thief", "ostra", "gil",
+	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
+	"mage", "dredge", "tender", "thief", "ostra", "gil",
 ]
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
+const HOWTO_MAX := 64        # chars, one how-to line once its key caps are filled in (the pick cards are narrow)
+## Keys are written as {action} and shown through Settings.key_cap; a typed key name would ignore rebinds.
+const TYPED_KEY := "\\b(LMB|RMB|MMB|Shift|Space|Ctrl)\\b|\\b[A-Z]\\b(?!\\w)"
 
 var bad := 0
 
@@ -54,7 +57,9 @@ func run(main: Node) -> void:
 		var shown_name := HunterViewer.display_name(id)
 		ok(shown_name.begins_with(HeroTitle.base_name(id) + " the ") and not shown_name.contains("the The"),
 				"%s shows as '%s', with no gender line" % [id, shown_name])
+		_howto_check(id)
 	_lore_check()
+	_results_name_line(main)
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -81,6 +86,24 @@ func _lore_check() -> void:
 	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
 	ok(not meeko.replace("lantern_crook", "").to_lower().contains("lantern"), "Meeko: no lantern (her weapon id aside)")
 
+## The three how-to lines (what you do, the combo to learn first, what to avoid): short, with key caps from
+## Settings.key_cap and no typed key names.
+func _howto_check(id: String) -> void:
+	var raw: Array = Arch.def(id).get("howto", [])
+	var lines := ClassCard.howto_lines(id)
+	ok(raw.size() == 3 and lines.size() == 3, "%s has three how-to lines" % id)
+	var typed := RegEx.create_from_string(TYPED_KEY)
+	var short := true
+	var keyed := true
+	for i in lines.size():
+		short = short and String(lines[i]).length() <= HOWTO_MAX
+		keyed = keyed and typed.search(String(raw[i])) == null and not String(lines[i]).contains("{")
+	ok(short, "%s how-to lines are at most %d chars" % [id, HOWTO_MAX])
+	ok(keyed, "%s how-to keys go through key_cap, none typed" % id)
+	if lines.size() == 3:
+		ok(String(lines[0]).begins_with("Play:") and String(lines[1]).begins_with("Combo:")
+				and String(lines[2]).begins_with("Avoid:"), "%s how-to reads Play, Combo, Avoid" % id)
+
 ## The class JSON as text with the base-character fields removed: the rest is shown to players.
 func _plain_text(data: Dictionary) -> String:
 	var copy := data.duplicate(true)
@@ -100,3 +123,15 @@ func _old_name_in(text: String) -> String:
 
 func _all_titles() -> Array:
 	return Arch.ids().map(func(id): return HeroTitle.title(id))
+
+## The results headline carries the player name ("Hunter made it out"), never as a Relic title ("Hunter the Hired Gun").
+func _results_name_line(main: Node) -> void:
+	var screen: Control = load("res://scripts/ui/results.gd").new()
+	main.add_child(screen)
+	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
+	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var player := String(Save.d.get("name", "Hunter"))
+	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
+	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
+	ok(texts.has("HUNTERS DOWNED"), "results: the strip says Hunters downed (main's wording)")
+	screen.queue_free()

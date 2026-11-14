@@ -191,6 +191,11 @@ static func grant(h, id: String, n := 1, issued := false) -> int:
 		h.belt_free[id] = int(h.belt_free.get(id, 0)) + put
 	return put
 
+## Swaps two belt slots (the inventory drag): what answers each key, charges and cooldown going along.
+static func swap_slots(h, a: int, b: int) -> void:
+	var s: Dictionary = h.belt[a]
+	h.belt[a] = h.belt[b]
+	h.belt[b] = s
 
 ## Fills one slot outright (the match start): n charges, `issued` of them the everyday issue.
 static func set_slot(h, i: int, id: String, n: int, issued := 0) -> void:
