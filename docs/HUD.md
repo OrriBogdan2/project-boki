@@ -215,7 +215,7 @@ weapon card.** On top of them, per sample:
 | t (s) | Extra groups | Groups | Over 5 |
 |---|---|---|---|
 | 0 | "Your kit" card (8 rows), two toast cards (squad launch, map note) | 11 | yes |
-| 10 | "Your kit" card, the prompt "Rank up Longneedle: press Alt + E" | 11 | yes |
+| 10 | "Your kit" card, the prompt "Rank up Cash Out: press Alt + E" | 11 | yes |
 | 20 | the prompt (same) | 10 | yes |
 | 30 | the prompt "Send Ember at a monster: tap G", kill feed (truce lines) | 11 | yes |
 | 40 | prompt (same), kill feed | 11 | yes |

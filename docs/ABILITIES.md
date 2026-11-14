@@ -13,7 +13,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
 | **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Tally Gun | Slipstep | Fever | Coin Blast | Cash Out (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
 | **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
@@ -56,14 +56,14 @@ _The storm-kite runner. Charges you up shot by shot, then runs straight through 
 
 ### Marlowe (medium)
 
-_The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
+_The coin-flicking gun-for-hire. Tags a foe with a green-fire coin, lets the rifle and one long beam cash out the rest, and lives off every hit that lands._
 
-- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Passive: Fever.** Each ability that lands (Coin Blast, its blast, Cash Out) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Coin Blast counts twice, once when it sticks and once when it goes off. Hot Streak: a takedown or an assist gives 4s of 25% faster rounds, 15% more damage and Fever's lifesteal (the dash back is the game-wide rule).
 - **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
-- **RMB: Burr Charge** (9s):
+- **RMB: Coin Blast** (9s):
   - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
-  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
-- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Coin Blast's cooldown drops 40%.
+- **E: Cash Out** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Cashed. Hitting a hunter takes 30% off its cooldown.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)
@@ -136,7 +136,7 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 
 | Hunter (source) | LMB | RMB | Shift | E | X | Passive |
 |---|---|---|---|---|---|---|
-| gunslinger, Vex (Ghost) | weapon: flat | Burr Charge dmg: AP = AP | Slipstep: no number | Longneedle dmg: AP = AP | Cinderfall dmg: AP = AP | Hot Streak heal: a share of damage dealt |
+| gunslinger, Vex (Ghost) | weapon: flat | Coin Blast dmg: AP = AP | Slipstep: no number | Cash Out dmg: AP = AP | Cinderfall dmg: AP = AP | Hot Streak heal: a share of damage dealt |
 | juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
 | ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
 | tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
@@ -291,7 +291,7 @@ One rule for what stops what: `content/rules/blockers.json`, read by `scripts/co
 |---|---|---|---|---|---|---|
 | every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
 | Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
-| Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Vex's Cash Out (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
 | Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |
 | Albert's Faultline cells | solid | stop | stop | stop | stop | stop |

@@ -18,7 +18,8 @@ Ryzz/Sparkle keeps it although the source removed it from Joule ([O] 159: "ALL")
 | Hunter (source) | Trigger | Rule | Ours | Check |
 |---|---|---|---|---|
 | Vex (Ghost) | Knock | Combat Slide cd reset [D] | the game-wide rule (kit duplicate removed) | knock-reset |
-| Vex | Knock, Spike Grenade upgrade | RMB cd reset [D] | rank 3 Burr Charge: cd and charges back on his knock | knock-reset |
+| Vex | Knock, Spike Grenade upgrade | RMB cd reset [D] | rank 3 Coin Blast: cd and charges back on her takedown (not an assist) | knock-reset |
+| Vex | Takedown or assist (DashReset's credit) | none [D]; owner 11-14 | Hot Streak: 4 s of +25% fire rate, +15% damage and Fever's 6% lifesteal (`passive.streak`), renewed not stacked | knock-reset |
 | Kael (Brall) | Own knock, or minion kill | heal [D] | 20% of the foe's max health; a monster kill heals a share of its health | knock-reset |
 | Kael | Knock after Execution Slam | Volcanic Rebuke cd reset [D] | knock (own or assist) within 2 s of the Finishing Slam hitting them | knock-reset |
 | Kael | Rebuke kills a living enemy | Rebuke cd reset [D] | the cleave takes a hunter who was up down (our lethal hit is a knock); a downed hunter or a plain hit: no | knock-reset, juggernaut-combo |

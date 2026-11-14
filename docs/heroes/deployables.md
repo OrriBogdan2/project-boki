@@ -34,5 +34,5 @@ Fixes to kit JSON: none. Every number the source gives (6 s dagger, 5 s chain, 2
 1. **Brimseed fizzle (ours).** The source has no expiry for the Anomaly; ours drops an unpopped seed 10 s after it is full (anti-parking). Suggest raising `hold_full` or removing it; `--ostra-combo-check` asserts the fizzle today, so it moves with the rule.
 2. **Warchain on a barrier that breaks.** The hook anchors on a point; if the rock or Rink Wall under it breaks, the chain stays until its 5 s. The source says only "walls". Suggest snapping the chain with the barrier.
 3. **Sable's knife in a barrier** is left to `ext/sable-dagger-barriers`.
-4. **Only shots hurt a barrier.** Melee, zones and cones do not (the source has "explosive: more damage to destructibles", Kingpin and Void wiki rows, and the Longneedle "pierces destructibles"). `ext/barrier-block-parity` makes a beam hit one; a bigger rule (melee and blasts hurting rocks and ice) needs an owner call.
+4. **Only shots hurt a barrier.** Melee, zones and cones do not (the source has "explosive: more damage to destructibles", Kingpin and Void wiki rows, and the Cash Out "pierces destructibles"). `ext/barrier-block-parity` makes a beam hit one; a bigger rule (melee and blasts hurting rocks and ice) needs an owner call.
 5. **Tetraform rank rows** (+2.5 s of terrain per rank) wait for a rank system on X.

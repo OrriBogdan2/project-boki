@@ -226,7 +226,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Online, every `all` telegraph reaches the other games by itself (AimNet, section 6); aim reticles
     and cursor states stay on your own screen. Nothing to add in the kit.
   - Ground cones also have `ArchKit.net_cone`: `["fx", "cone", nid, at, dir, len, deg, dur, col]`, a static
-    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Burr Charge uses it.
+    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Coin Blast uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
@@ -278,7 +278,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | R | cone, fixed | fixed | match |
 | Vex (venator) | LMB | full, past the cursor | full | match |
 | | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
-| | E Longneedle | fixed long lane | full, 18 m | match |
+| | E Cash Out | fixed long lane | full, 18 m | match |
 | | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
 | Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
 | | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
@@ -323,7 +323,7 @@ Now all of them arrive through "tele".
 | Albert (bulwark, bjorn_*) | RMB push `aegis_push`: lane; E mend zone `e`: circle; R cells `x`: lane | a ring at the mend and per R cell |
 | Tenzo (dolm, breah_*) | RMB slam `rmb`: sweet circle; Shift hop `leap`: circle; E tells `e_tell<n>`: circle; X cracks `x_cracks`: span | a ring at the slam, the blast and the spine |
 | Grimble (dredge) | E `e_tell`, `e_hit`: cone; dive quake: circle; X fan `x_fan`: cone | a ring at the hit |
-| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Longneedle `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
+| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Cash Out `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
 | Kael (juggernaut) | RMB slam `slam`: cone; Meteor Drop `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
 | Sparkle (mage) | Shift end `dash_end`: circle; E Skycall `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Skycall and the X |
 | Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Nightwell `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
