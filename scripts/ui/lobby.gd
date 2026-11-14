@@ -141,9 +141,9 @@ func _refresh() -> void:
 		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
-		var ready: bool = p.get("ready", false)
+		var peer_ready: bool = p.get("ready", false)
 		if not duel:
-			h.add_child(UI.tag("Ready" if ready else "Not ready", UI.GOOD if ready else UI.MUTED))
+			h.add_child(UI.tag("Ready" if peer_ready else "Not ready", UI.GOOD if peer_ready else UI.MUTED))
 		list_box.add_child(row)
 	if duel:
 		_pair()

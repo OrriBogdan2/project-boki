@@ -10,9 +10,12 @@ const GROUNDS := {"training": true, "practice": true, "teams": 1, "squad": 1, "t
 var main: Node
 var bad := 0
 
+
 func ok(cond: bool, what: String, extra := "") -> void:
 	print("DUELHINT %s %s %s" % ["ok  " if cond else "FAIL", what, extra])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -54,6 +57,7 @@ func run(mn: Node) -> void:
 	again.queue_free()
 	print("DUELHINT %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _match() -> Match:
 	var m := Match.new()

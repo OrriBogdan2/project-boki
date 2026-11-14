@@ -11,7 +11,7 @@ extends RefCounted
 
 const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
-const START_S := 240.0       # s for the guest to come up and build its match
+const START_S := 240.0  # s for the guest to come up and build its match
 const LobbyScreen := preload("res://scripts/ui/lobby.gd")
 
 var main: Node
@@ -24,10 +24,13 @@ var m: Match = null
 var replies: Array = []
 var stop := false
 
+
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
 	print("DUELNET %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -35,13 +38,16 @@ func run(main_node: Node) -> void:
 	Engine.max_fps = 60
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--duel-online-check=guest": guest = true
-		if a.begins_with("--do-port="): port = int(a.substr(10))
+		if a == "--duel-online-check=guest":
+			guest = true
+		if a.begins_with("--do-port="):
+			port = int(a.substr(10))
 	Net.message.connect(_on_msg)
 	if guest:
 		await _guest()
 	else:
 		await _host()
+
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
@@ -54,8 +60,10 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --duel-online-check=guest --do-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
+	var cmd := (
+		"cd '%s' && %s --headless -- --duel-online-check=guest --do-port=%d > '%s' 2>&1"
+		% [ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
+	)
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var line: Array = [Net.me]
 	var t0 := Time.get_ticks_msec()
@@ -76,18 +84,19 @@ func _host() -> void:
 	var d := LobbyScreen.duel_start({"peer": Net.me, "name": "Host", "duel": 1}, them)
 	Net.lobby_emit("do", {"c": "start", "d": d})
 	await _build(d)
-	var G: Hunter = m.ents_by_id.get("P" + other, null)
+	var rival: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	while (rival == null or rival.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
 		await _run(0.2)
-		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	if G == null:
+		rival = m.ents_by_id.get("P" + other, null)
+	ok(rival != null and rival.remote, "the guest's hunter is here, driven by the guest's game")
+	if rival == null:
 		return _finish()
-	await _room_case(G)
-	await _fall_case(G)
-	await _knock_case(G)
+	await _room_case(rival)
+	await _fall_case(rival)
+	await _knock_case(rival)
 	_finish()
+
 
 func _line_case() -> void:
 	var line := ["c", "a", "b"]
@@ -97,42 +106,59 @@ func _line_case() -> void:
 	var teams: Array = d["roster"].map(func(r): return int(r["team"]))
 	ok(d["host"] == "a" and teams == [0, 1] and int(d["teams"]) == 2, "a duel is two teams of one, hosted by the first")
 	var o := LobbyScreen.duel_match(d)
-	ok(o.get("duel", false) and o.get("training", false) and o.has("net") and int(o["teams"]) == 2,
-		"the start message opens the duel room online")
+	ok(
+		o.get("duel", false) and o.get("training", false) and o.has("net") and int(o["teams"]) == 2,
+		"the start message opens the duel room online"
+	)
 
-func _room_case(G: Hunter) -> void:
-	var D := m.duel
-	ok(D != null and D.bot == null and D.rival == G, "the duel room holds the two players and no bot")
+
+func _room_case(foe: Hunter) -> void:
+	var duel_room := m.duel
+	ok(
+		duel_room != null and duel_room.bot == null and duel_room.rival == foe,
+		"the duel room holds the two players and no bot"
+	)
 	ok(m.hunters.size() == 2, "nobody else is in the room", "%d hunters" % m.hunters.size())
 	var g: Dictionary = await _ask()
-	var same := _v(g["home"]).distance_to(D.bot_at) < 0.1 and _v(g["bot_at"]).distance_to(D.home_at) < 0.1
+	var same := (
+		_v(g["home"]).distance_to(duel_room.bot_at) < 0.1 and _v(g["bot_at"]).distance_to(duel_room.home_at) < 0.1
+	)
 	ok(same, "both games use the same two marks, one each")
-	var gap := D.home_at.distance_to(D.bot_at)
+	var gap := duel_room.home_at.distance_to(duel_room.bot_at)
 	ok(gap > 4.0 and gap < 8.0, "the marks face each other a few steps apart", "%.1f m" % gap)
 
-func _fall_case(G: Hunter) -> void:
-	var D := m.duel
+
+func _fall_case(rival: Hunter) -> void:
+	var duel_room := m.duel
 	var g: Dictionary = await _say_do("fall", 0.8)
 	ok(bool(g["took"]) and bool(g["down"]), "the guest's fall is a knock on its own game")
 	g = await _ask()
-	ok(int(g["knocked"]) == 1 and int(D.stats["knocks"]) == 1, "the round is the host's on both games",
-		"guest knocked %d, host knocks %d" % [int(g["knocked"]), int(D.stats["knocks"])])
+	ok(
+		int(g["knocked"]) == 1 and int(duel_room.stats["knocks"]) == 1,
+		"the round is the host's on both games",
+		"guest knocked %d, host knocks %d" % [int(g["knocked"]), int(duel_room.stats["knocks"])]
+	)
 	await _run(2.5)
 	g = await _ask()
-	ok(not bool(g["down"]) and not G.downed and not G.out, "the guest is back up on both games")
-	ok(_v(g["pos"]).distance_to(D.bot_at) < 1.0, "back on its mark")
-	ok(int(g["round"]) == 2 and D.round_n == 2, "round 2 on both games")
+	ok(not bool(g["down"]) and not rival.downed and not rival.out, "the guest is back up on both games")
+	ok(_v(g["pos"]).distance_to(duel_room.bot_at) < 1.0, "back on its mark")
+	ok(int(g["round"]) == 2 and duel_room.round_n == 2, "round 2 on both games")
 
-func _knock_case(G: Hunter) -> void:
-	var D := m.duel
-	m.knock(m.player, G, {})
+
+func _knock_case(rival: Hunter) -> void:
+	var duel_room := m.duel
+	m.knock(m.player, rival, {})
 	await _run(0.8)
 	var g: Dictionary = await _ask()
-	ok(int(g["knocks"]) == 1 and int(D.stats["knocked"]) == 1, "the host's knock counts for the guest",
-		"guest knocks %d" % int(g["knocks"]))
+	ok(
+		int(g["knocks"]) == 1 and int(duel_room.stats["knocked"]) == 1,
+		"the host's knock counts for the guest",
+		"guest knocks %d" % int(g["knocks"])
+	)
 	await _run(2.5)
-	ok(not m.player.downed and m.player.pos.distance_to(D.home_at) < 1.0, "the host is up on its mark")
+	ok(not m.player.downed and m.player.pos.distance_to(duel_room.home_at) < 1.0, "the host is up on its mark")
 	ok(not m.over and not m.player.out, "the match goes on")
+
 
 func _finish() -> void:
 	Net.lobby_emit("do", {"c": "done"})
@@ -142,6 +168,7 @@ func _finish() -> void:
 		OS.kill(guest_pid)
 	print("DUELNET DONE, %d checks, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _read_pid() -> void:
 	if guest_pid > 0:
@@ -153,6 +180,7 @@ func _read_pid() -> void:
 		if line.begins_with("DUELNET guest pid="):
 			guest_pid = int(line.get_slice("=", 1))
 
+
 ## Tells the guest to do `c`, lets both games run `secs`, and returns what the guest says back.
 func _say_do(c: String, secs: float) -> Dictionary:
 	replies.clear()
@@ -161,8 +189,10 @@ func _say_do(c: String, secs: float) -> Dictionary:
 	await _run(secs)
 	return g
 
+
 func _ask() -> Dictionary:
 	return await _say_do("ask", 0.0)
+
 
 func _reply() -> Dictionary:
 	var t := 0.0
@@ -170,6 +200,7 @@ func _reply() -> Dictionary:
 		await _run(0.1)
 		t += 0.1
 	return replies[0] if not replies.is_empty() else {}
+
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
@@ -185,6 +216,7 @@ func _guest() -> void:
 		await _run(DT)
 	main.get_tree().quit(0)
 
+
 func _on_msg(topic: String, data, _from: String) -> void:
 	if typeof(data) != TYPE_DICTIONARY:
 		return
@@ -194,23 +226,34 @@ func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "do":
 		return
 	match String(data.get("c", "")):
-		"start": _build(data["d"])
-		"done": stop = true
+		"start":
+			_build(data["d"])
+		"done":
+			stop = true
 		"fall":
 			var took := m != null and m.duel.on_fell(m.player)
 			_say({"took": took})
-		"ask": _say({})
+		"ask":
+			_say({})
+
 
 func _say(extra: Dictionary) -> void:
 	if m == null or m.player == null or m.duel == null:
 		return
-	var P := m.player
-	var D := m.duel
-	var r := {"down": P.downed, "pos": [P.pos.x, P.pos.y, P.pos.z], "round": D.round_n,
-		"home": [D.home_at.x, D.home_at.y, D.home_at.z], "bot_at": [D.bot_at.x, D.bot_at.y, D.bot_at.z],
-		"knocks": int(D.stats["knocks"]), "knocked": int(D.stats["knocked"])}
+	var me := m.player
+	var duel_room := m.duel
+	var r := {
+		"down": me.downed,
+		"pos": [me.pos.x, me.pos.y, me.pos.z],
+		"round": duel_room.round_n,
+		"home": [duel_room.home_at.x, duel_room.home_at.y, duel_room.home_at.z],
+		"bot_at": [duel_room.bot_at.x, duel_room.bot_at.y, duel_room.bot_at.z],
+		"knocks": int(duel_room.stats["knocks"]),
+		"knocked": int(duel_room.stats["knocked"])
+	}
 	r.merge(extra)
 	Net.lobby_emit("do_r", r)
+
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:
@@ -219,8 +262,9 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
-	Net.set_presence({"name": "do", "duel": 1})      # in the duel line, as the lobby announces it
+	Net.set_presence({"name": "do", "duel": 1})  # in the duel line, as the lobby announces it
 	return Net.mode == "server"
+
 
 ## The match the lobby's start message opens, on both games.
 func _build(d: Dictionary) -> void:
@@ -230,6 +274,7 @@ func _build(d: Dictionary) -> void:
 	nm.set_process(false)
 	m = nm
 
+
 ## Runs the match `secs` in real time (one step a frame at 60 fps).
 func _run(secs: float) -> void:
 	var t := 0.0
@@ -237,6 +282,7 @@ func _run(secs: float) -> void:
 		m.step(DT)
 		t += DT
 		await main.get_tree().process_frame
+
 
 static func _v(a) -> Vector3:
 	return Vector3(float(a[0]), float(a[1]), float(a[2]))
