@@ -181,10 +181,13 @@ func _own_sounds() -> void:
 	var heard := Sfx.last_played.has("rocket_ignite") and not Sfx.last_played.has("whoosh")
 	ok(heard and Sfx.loop_on(r.snd.key), "launch: the rocket's ignition (not the stock whoosh) and its thrust loop")
 	var calm := _loop_now(r.snd.key)
-	var back := -Vector2(r.vel.x, r.vel.z).normalized() if Vector2(r.vel.x, r.vel.z).length() > 1.0 else Vector2(1, 0)
-	_steps(0.3, back)
+	# a hard turn across its course (not straight back: the rocket now dives, and braking flat out would
+	# take the speed, and so the pitch, down with it)
+	var fwd := Vector2(r.vel.x, r.vel.z).normalized() if Vector2(r.vel.x, r.vel.z).length() > 1.0 else Vector2(0, 1)
+	_steps(0.3, Vector2(-fwd.y, fwd.x))
 	var turned := _loop_now(r.snd.key)
-	var swell := turned.x > calm.x + 2.0 and turned.y > calm.y + 0.05
+	# (+0.03 pitch: the launch already eases the swell part way up, and the dive keeps less flat speed)
+	var swell := turned.x > calm.x + 2.0 and turned.y > calm.y + 0.03
 	ok(swell, "the thrust follows the steering: a hard turn %.1f dB, pitch %.2f (flying on %.1f dB, %.2f)"
 			% [turned.x, turned.y, calm.x, calm.y])
 	var P: Hunter = m.player
@@ -220,6 +223,12 @@ func _far_sounds() -> void:
 	if not m.skydrop.rockets.has(foe):
 		return
 	var r: DropRocket = m.skydrop.rockets[foe]
+	# over the middle of the map, so it comes down on ground (its own course can carry it out over the void,
+	# where it ejects its riders without a thud)
+	var w: World = m.world
+	if not w.is_void(w.w * 0.5, w.h * 0.5):
+		r.pos = Vector3(w.w * 0.5, w.ground_at(w.w * 0.5, w.h * 0.5) + 40.0, w.h * 0.5)
+		r.vel = Vector3(0.0, r.vel.y, 0.0)
 	Sfx.last_played.clear()
 	var t := 0.0
 	var loud := -80.0
