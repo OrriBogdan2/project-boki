@@ -9608,3 +9608,4 @@ READY ext/farm-loot-nudge-card a2461f4fb0 (bulk-rebase: origin/main merged in me
 READY ext/fold-vfx-vex-1112 8cf79eb9d9 (bulk-rebase: origin/main merged in mechanically, was 89256635c3; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/fix-ghost-shot-sfx-1113 150df83f37 (bulk-rebase: origin/main merged in mechanically, was b4001e5d07; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/items-3d-r2 219624aa86 (bulk-rebase: origin/main merged in mechanically, was c13659b48d; union 2 gen 0 files; the branch's own READY checks still apply)
+READY ext/boss-legendaries 7b38d2dd9b (SUPERSEDES ab542dc214: origin/main 195166f4d8 merged in; conflicts cairnback/hivara flavours + wiki resolved as main wording (species name, no "it") + branch egg line (Siegephant/Calderoise guards); --boss-anim-check 0 fail, --boki-lines-check 0 fail, --check 0 fail, health --strict OK)
