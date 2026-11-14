@@ -22,20 +22,33 @@ PR=$1 BRANCH=$2 HEAD_SHA=$3 GATED=$4 OUT=$(realpath -m "$5")
 REPO=${BOKI_REPO:-/home/boki/project-boki} WORK=${REGATE_WORK:-/home/boki/cj/regate-bot/work}
 JOBS=${REGATE_JOBS:-$(( $(nproc) / 3 > 2 ? $(nproc) / 3 : 2 ))}
 HERE=$(cd "$(dirname "$0")" && pwd)
-mkdir -p "$OUT" "$WORK"; : > "$OUT/run.log"; rm -f "$OUT/result" "$OUT/comment.md"
+# one run per work slot: two runs sharing a worktree reset each other's trees mid-gate (seen 11-14 on rpc7)
+for SLOT in 0 1 2; do
+	mkdir -p "$WORK/s$SLOT"; exec 9> "$WORK/s$SLOT/.lock"
+	flock -n 9 && break; exec 9>&-; SLOT=
+done
+mkdir -p "$OUT"; : > "$OUT/run.log"; rm -f "$OUT/result" "$OUT/comment.md"
 T0=$(date +%s)
+g() { git -C "$REPO" "$@"; }
 log() { echo "$(date -u +%H:%M:%S) $*" >> "$OUT/run.log"; }
 finish() {  # finish WORD TEXT [COMMENT]
+	if [[ $1 == RED || $1 == CONFLICT ]] && g fetch -q origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2> /dev/null \
+		&& [ "$(g rev-parse "origin/$BRANCH")" != "$HEAD_SHA" ]; then
+		set -- MOVED "$BRANCH moved during the run (was $1: ${2:0:200}); no comment"
+	fi
 	[ -n "${3:-}" ] && printf '%s\n' "$3" > "$OUT/comment.md"
 	echo "$1 $2" > "$OUT/result.tmp" && mv "$OUT/result.tmp" "$OUT/result"
 	log "result: $1 $2 ($(( ($(date +%s) - T0 + 59) / 60 )) min)"; [ "$1" = GREEN ]; exit $?
 }
 [[ $BRANCH == ext/* ]] || finish ERROR "branch $BRANCH is not ext/*"
-g() { git -C "$REPO" "$@"; }
+[ -n "$SLOT" ] || finish ERROR "all 3 work slots of $WORK are busy on $(hostname)"
+WORK=$WORK/s$SLOT
 g fetch -q origin main "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2>> "$OUT/run.log" || finish ERROR "git fetch failed"
 MAIN=$(g rev-parse origin/main) NOW=$(g rev-parse "origin/$BRANCH")
 [ "$NOW" = "$HEAD_SHA" ] || finish MOVED "$BRANCH is at ${NOW:0:10}, not ${HEAD_SHA:0:10}: a live job pushed, left to it"
-g merge-base --is-ancestor "$MAIN" "$HEAD_SHA" && finish ERROR "already contains origin/main ${MAIN:0:10}: nothing to re-gate"
+GATE_ONLY=0  # the head already contains main (someone merged main in after the last green): gate the head as it is
+g merge-base --is-ancestor "$MAIN" "$HEAD_SHA" && GATE_ONLY=1
+[ "$GATE_ONLY" = 1 ] && [ "$HEAD_SHA" = "$(g rev-parse "$GATED^{commit}")" ] && finish ERROR "head is the gated sha and contains main: nothing to re-gate"
 log "PR #$PR $BRANCH ${HEAD_SHA:0:10} (gated ${GATED:0:10}) + main ${MAIN:0:10}, jobs=$JOBS"
 
 tree_at() {  # tree_at DIR SHA : reused detached worktree (keeps .godot so imports stay incremental)
@@ -46,6 +59,9 @@ tree_at() {  # tree_at DIR SHA : reused detached worktree (keeps .godot so impor
 CT=$WORK/cand MT=$WORK/main
 tree_at "$CT" "$HEAD_SHA" && tree_at "$MT" "$MAIN" || finish ERROR "worktree setup failed"
 
+if [ "$GATE_ONLY" = 1 ]; then
+	NEW=$HEAD_SHA; log "head contains main: gate only, no merge, no push"
+else
 # 1. merge origin/main INTO the PR head
 POLICY=$OUT/merge_batch.sh; g show "$MAIN:ops/merge-rush-1113/merge_batch.sh" > "$POLICY" 2> /dev/null || POLICY=
 echo "origin/main $MAIN" > "$OUT/merge-list.txt"; : > "$OUT/merge-skips.txt"
@@ -64,6 +80,7 @@ git -C "$CT" commit -q --amend -m "Merge origin/main ${MAIN:0:10} into $BRANCH (
 NEW=$(git -C "$CT" rev-parse HEAD)
 [ "$(git -C "$CT" rev-parse HEAD^1)" = "$HEAD_SHA" ] || finish ERROR "merge commit's first parent is not the PR head"
 log "merged: ${NEW:0:10}"
+fi
 
 # 2. import both trees (compile gate)
 imp() {  # imp TREE NAME : import, count parse errors
@@ -118,8 +135,11 @@ SUM=$(sed -n '1p' "$OUT/gate/summary.txt" | sed 's/, jobs=.*//')
 BOTH=$(grep -m1 '^red on both' "$OUT/gate/summary.txt" | cut -d: -f1)
 TAG="[regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
 if [ -n "$RED" ] || [ "$EXPORT_BAD" != 0 ]; then
-	finish RED "$(echo $RED) export_bad=$EXPORT_BAD" "REGATE RED ${NEW} (not pushed): merging origin/main ${MAIN:0:10} into $BRANCH gives NEW-RED $(echo "$RED" | sed '/^$/d' | wc -l): $(echo $RED) (red twice, main green); export problems: $EXPORT_BAD.
+	finish RED "$(echo $RED) export_bad=$EXPORT_BAD" "REGATE RED ${NEW} (not pushed): $BRANCH + origin/main ${MAIN:0:10} gives NEW-RED $(echo "$RED" | sed '/^$/d' | wc -l): $(echo $RED) (red twice, main green); export problems: $EXPORT_BAD.
 $SUM. Logs on the worker: $OUT. $TAG"
+fi
+if [ "$GATE_ONLY" = 1 ]; then
+	finish GREEN "$NEW (gate only)" "GATE GREEN $NEW: regate-bot gated this head as it is (it already contains origin/main ${MAIN:0:10}; only merge commits since GATE GREEN ${GATED:0:10}), re-running the checks whose inputs changed since that green: $SUM; $BOTH (pre-existing on main); NEW-RED 0 (flaky reds re-run once); compile errors $PE_C vs $PE_M on main; export dry-run OK, ${EXPORT_MB:-?} MB. $TAG"
 fi
 [ "${REGATE_PUSH:-1}" = 1 ] || finish GREEN "$NEW (not pushed: REGATE_PUSH=0)" "GATE GREEN $NEW: (dry, not pushed) $SUM; $BOTH; NEW-RED 0; export ${EXPORT_MB:-?} MB. $TAG"
 g fetch -q origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"

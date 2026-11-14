@@ -11,6 +11,15 @@ import regate_common as rc
 
 MAIN = rc.git("rev-parse", "origin/main"); H29 = rc.git("rev-parse", "2183d5ae04")
 P29 = rc.git("rev-parse", H29 + "~1")
+H51, G51 = rc.git("rev-parse", "refs/regate/pr/51"), rc.git("rev-parse", "067b6cfcd0")
+H61, G61 = rc.git("rev-parse", "refs/regate/pr/61"), rc.git("rev-parse", "d187062f44")
+# owner jobs: a fake ~/cj with one running job titled merge-x-1 and one finished job titled merge-y-1
+cj = Path(tempfile.mkdtemp()); rc.CJ = cj
+for jid, title, done in (("20261114-000000-a1", "merge-x-1", False), ("20261114-000001-a1", "merge-y-1", True),
+                         ("20261114-000002-a1", "mentions merge-y-1 here", False)):
+    (cj / jid).mkdir(); (cj / jid / "prompt").write_text(f"TASK:\n{title}: do things\n")
+    if done:
+        (cj / jid / "rc").write_text("0")
 old = lambda m: rc.iso(time.time() - m * 60)
 
 def pr(n, head, branch="ext/x", created="2026-11-01T00:00:00Z"):
@@ -33,25 +42,29 @@ def fake_git(*a, **k):
     if a[0] == "fetch":
         return ""
     if a[0] == "rev-parse" and a[-1].startswith("refs/regate/pr/"):
-        return MAIN if a[-1].endswith("/5") else H29
+        return {"5": MAIN, "8": H51, "9": H61}.get(a[-1].rsplit("/", 1)[1], H29)
     return rc.git(*a, **k)
 
 
 rb.git = fake_git
 rb.args = type("A", (), {"dry": False, "pr": 0, "ignore_owner": False})()
 G = f"GATE GREEN {H29[:10]}: ok"
-gh = FakeGH([pr(1, H29), pr(2, H29), pr(3, H29), pr(4, H29), pr(5, MAIN), pr(6, H29, "feature/x")], {
+gh = FakeGH([pr(1, H29), pr(2, H29), pr(3, H29), pr(4, H29), pr(5, MAIN), pr(6, H29, "feature/x"), pr(7, H29), pr(8, H51), pr(9, H61)], {
     1: [c(G, 90)],                                                          # -> regate
-    2: [c("merge-driver-1114 owns this PR until merged.\n\n" + G, 90)],     # owner running (rpc7 has its prompt, no rc)
+    2: [c("merge-x-1 owns this PR until merged.\n\n" + G, 90)],             # owner job still running
+    7: [c("merge-y-1 owns this PR until merged.\n\n" + G, 90)],             # owner finished (another prompt only mentions it)
+    8: [c(f"GATE GREEN {G51[:10]}: before main was merged in", 90)],         # head has main + only merges: gate only
+    9: [c(f"GATE GREEN {G61[:10]}: before a fix commit", 90)],               # a non-merge commit after the green
     3: [c(G, 90), c(f"REGATE RED {H29}: x [regate-bot pr=3 head={H29[:10]} main=abc]", 30)],
     4: [c(f"GATE GREEN {P29[:10]}: older head", 90)],                       # head has ungated commits
-    5: [c(G, 90)],                                                          # contains main
+    5: [c(f"GATE GREEN {MAIN}: x", 90)],                                    # gated head contains main
 })
 main, rows = rb.scan(gh, {})
 got = {r["pr"]: (r["verdict"], r["why"]) for r in rows}
 for k, v in sorted(got.items()): print(k, v)
-assert main == MAIN and got[1][0] == "regate" and "owned by merge-driver-1114" in got[2][1]
-assert "already posted" in got[3][1] and "ungated commits" in got[4][1] and "contains origin/main" in got[5][1]
+assert main == MAIN and got[1][0] == "regate" and "owned by merge-x-1" in got[2][1] and got[7][0] == "regate"
+assert got[8][0] == "regate" and "gate the head as it is" in got[8][1] and "ungated commits" in got[9][1]
+assert "already posted" in got[3][1] and "ungated commits" in got[4][1] and "merge-ready-watch's case" in got[5][1]
 assert "not an ext/*" in got[6][1]
 gh.cs[1].append(c("a human note", 5)); _, rows = rb.scan(gh, {})
 assert [r for r in rows if r["pr"] == 1][0]["why"].startswith("live"), "20 min quiet rule"

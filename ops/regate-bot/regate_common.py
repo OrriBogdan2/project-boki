@@ -154,7 +154,8 @@ def job_running(label):
     st = claude_job_status()
     ids = [label] if JOB_ID_RE.match(label) else [
         d.name for d in sorted(CJ.glob("2026*-*"))[-400:]
-        if (d / "prompt").exists() and label in (d / "prompt").read_text(errors="replace")[-12000:]]
+        # the owner is the job whose task is titled "<label>: ..." (a line start), not any prompt that mentions it
+        if (d / "prompt").exists() and re.search(rf"(?m)^\s*{re.escape(label)}:", (d / "prompt").read_text(errors="replace"))]
     if not ids:
         return None
     for i in ids:

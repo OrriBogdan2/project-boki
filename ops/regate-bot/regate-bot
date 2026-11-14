@@ -83,13 +83,10 @@ def scan(gh, st):
             row["why"] = "fetch of the PR head failed"
             continue
         behind = not is_ancestor(main, head)
-        if not behind and n not in waiting:
-            row["why"] = "head contains origin/main (merge-ready-watch's case)"
-            continue
         cs = gh.comments(n)
         gates = [(c, m.group(1)) for c in cs if c["user"]["login"] == me for m in GATE_RE.finditer(c["body"])]
         if not gates:
-            row["why"] = "no GATE GREEN by " + me
+            row["why"] = "no GATE GREEN by " + me + ("" if behind else " (head contains main)")
             continue
         gc, short = gates[-1]
         gated = git("rev-parse", "--verify", "-q", f"{short}^{{commit}}") or ""
@@ -100,9 +97,11 @@ def scan(gh, st):
         if gated != head and not (is_ancestor(gated, head) and not git("rev-list", "--no-merges", head, f"^{gated}", f"^{main}")):
             row["why"] = f"head {head[:10]} has ungated commits after GATE GREEN {short}"
             continue
-        if not behind:
-            row["why"] = f"WAITING in merge-ready-state but head contains main (gate {short}): not a re-gate case"
+        if not behind and gated == head:
+            row["why"] = f"GATE GREEN {short} is the head and contains main: merge-ready-watch's case"
             continue
+        # not behind + gated != head: main was merged in after the green (a bulk rebase, a driver job) and nobody
+        # gated the new head, so merge-ready-watch can never take it: regate-run gates the head as it is (no push)
         red = [m for c in cs for m in REGATE_RE.finditer(c["body"]) if head.startswith(m.group(2)) or m.group(2).startswith(head[:10])]
         red += [m for c in cs for m in MARK_RE.finditer(c["body"])
                 if head.startswith(m.group(2)) and re.search(r"REGATE (RED|CONFLICT)", c["body"])]
@@ -127,7 +126,8 @@ def scan(gh, st):
             row["why"] = f"live: last push/comment {quiet:.0f} min ago (< {QUIET_MIN})"
             continue
         row["verdict"] = "regate"
-        row["why"] = f"GATE GREEN {gated[:10]}, head behind main {main[:10]}"
+        row["why"] = (f"GATE GREEN {gated[:10]}, head behind main {main[:10]}" if behind
+                      else f"head contains main but its last GATE GREEN is {gated[:10]}: gate the head as it is")
     return main, rows
 
 
@@ -241,7 +241,7 @@ def write_state(rows, st):
     cur = {}
     lines = []
     for r in rows:
-        if not r["gated"] or r["why"].startswith(("head contains", "not an ext", "no GATE")):
+        if not r["gated"] or r["why"].startswith(("not an ext", "no GATE")) or "merge-ready-watch" in r["why"]:
             continue
         k = f"{r['pr']}:{r['head'][:10]}"
         cur[k] = seen.get(k, now())
