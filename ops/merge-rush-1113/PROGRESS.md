@@ -86,3 +86,24 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
   hero_cat_fence_check Fx stub signature; stat_up_vfx_check FakeGame.find(); heart/side colour API drift.
 - Archived (tag only): ext/vfx-cel-ring-bursts (head reverts its only commit).
 - Batch D ships 73 branches (+ ui-ways-out-colourblind already in main via C2).
+
+## Batch E (job 20261114-025012-a3, rpc4; 11-14 03:00-)
+- Gap at start: **1054** (live unmerged READY 1297, 243 archive-tagged at head). Left out: 202 tips owned by other
+  lanes (open PRs #53 #60-#65 #45 #43, ext/integ-1113-C4, and the claimed batches 6/19/23 on their branches).
+- Candidates: the 850 other gap tips (139 contain main 55533bf67c or newer, 708 older) on main 195166f4d8.
+- **Tool bug found: the shared repo has `rerere.enabled` + `rerere.autoupdate` and ~10k recorded resolutions from
+  other sessions.** `git merge` then resolves a real conflict from the cache and merge_batch.sh committed it as a
+  clean merge (here: HubLayout.claim/vacant silently dropped, 29 parse errors). merge_batch.sh now merges with
+  `-c rerere.enabled=false`; 5 of the first 47 "clean" merges were really conflicts. Batches C and D used the old
+  script (suite-gated, so no known breakage, but their merges may hold reused resolutions). Other lanes' merge
+  scripts should do the same.
+- Clean on main: 42 (rerere off), then the gate dropped 4 (and 1 before the gate):
+  - ext/revive-source-numbers: its own bulk-rebase merge of main deletes 1008 .import files
+  - ext/ui-match-phase: --panel-input-check (Esc pause menu no longer opens), same as batch D
+  - ext/stuck-integ-b6204ee2: relay.gd `held`/`lost` vs lagcomp/remote-smooth checks' RelayServer subclasses
+  - ext/sfx-mask-puton: registry gains --relic-puton-check, its file is not in the tree
+  - ext/main-ratchet-1113: open PR #57 owns it (it was not in my exclusion list); with it --boki-rig-check
+    failed (fliers hover 0.05 m, needs 0.5-1.5), a note for PR #57
+- Fixes in the batch: registry dedupe; no new lint debt vs main (gdformat 14 files, gdlint names/order in 11
+  check tools, 3 shadowing locals); glider_heat_check stub HUD takes tip(text, near).
+- Skip list: `skip_batchE.tsv` (808 conflicts with files, 5 drops). Conflict size: ~100 one-file, ~100 two-file.
