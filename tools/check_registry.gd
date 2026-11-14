@@ -748,14 +748,6 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
-}
-
-## The strict runs of the advisory timing checks: the gate sends each through
-## `jobq submit --needs gpu --tree <tree> --out <name> -- <args>`, where frame times are stable.
-const GPU_HOST := {
-	"hitch-gpu": "--hitch-check --timing-strict",
-	"load-gpu": "--load-check --timing-strict",
-	# mashing LMB never beats holding
 	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
 	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
 	"--nook-check": ["res://tools/nook_check.gd", "nook_check", null],
@@ -764,6 +756,13 @@ const GPU_HOST := {
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
+}
+
+## The strict runs of the advisory timing checks: the gate sends each through
+## `jobq submit --needs gpu --tree <tree> --out <name> -- <args>`, where frame times are stable.
+const GPU_HOST := {
+	"hitch-gpu": "--hitch-check --timing-strict",
+	"load-gpu": "--load-check --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
