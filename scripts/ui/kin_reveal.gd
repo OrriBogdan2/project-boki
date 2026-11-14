@@ -14,6 +14,7 @@ extends CanvasLayer
 ##   add_child(rv); rv.proceed.connect(func(): _show_name())
 
 signal proceed
+signal revealed       # it has met you and its card is up (by itself or skipped to)
 
 const RATE := 22050
 
@@ -160,7 +161,8 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	hint = UI.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
+	var turn := "Drag to turn it round  ·  %s / %s" % [Settings.key_cap("left"), Settings.key_cap("right")]
+	hint = UI.label(turn, 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
 	hint.offset_top = -64
@@ -206,15 +208,16 @@ func _place_card() -> void:
 	info.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 func _info_card() -> PanelContainer:
-	var card := UI.card(Color(0.08, 0.08, 0.1, 0.92), 18, 14)
-	UI.set_card_border(card, UI.LINE, 1)
+	var card := PanelContainer.new()       # the theme's torn void panel with the neon edge
 	card.custom_minimum_size = Vector2(400, 0)
 	var v := UI.vbox(8); card.add_child(v)
 	var head := UI.hbox(10)
-	var nm := UI.title(String(sp["name"]), 30, _bright(col))
-	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UI.title(String(sp["name"]), 30, UI.DARK_INK)
+	nm.add_theme_stylebox_override("normal", UI.title_tab())
+	nm.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	head.add_child(nm)
-	head.add_child(_chip(String(sp.get("type", "")).capitalize(), UI.MUTED))
+	head.add_child(UI.fill())
+	head.add_child(UI.tag(String(sp.get("type", "")), _bright(col)))
 	v.add_child(head)
 	# one line on what it is, then who this one is: the Boki itself leads, its moves are tiles (item 82)
 	var desc := String(sp.get("desc", "")).get_slice(". ", 0).trim_suffix(".")
@@ -225,6 +228,9 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
 	if rec.get("shimmer", false):
 		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		v.add_child(_note("%s, a rare trait: %s" % [rare["name"], rare["note"]]))
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
 	if rec.has("parents"):
@@ -266,17 +272,6 @@ func _bright(c: Color) -> Color:
 		out = out.lerp(Color.WHITE, 0.2)
 	return out
 
-func _chip(text: String, c: Color) -> PanelContainer:
-	var p := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(c, 0.12); sb.border_color = Color(c, 0.5)
-	sb.set_border_width_all(1); sb.set_corner_radius_all(12)
-	sb.content_margin_left = 12; sb.content_margin_right = 12; sb.content_margin_top = 3; sb.content_margin_bottom = 3
-	p.add_theme_stylebox_override("panel", sb)
-	p.add_child(UI.label(text, 14, UI.INK))
-	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	return p
-
 func _stat(name: String, val: float, top: float) -> HBoxContainer:
 	var h := UI.hbox(10)
 	var l := UI.label(name, 14, UI.MUTED); l.custom_minimum_size.x = 70
@@ -311,24 +306,42 @@ func _play_intro() -> void:
 	moment.tween_interval(0.3)
 	moment.tween_callback(func():
 		_play(_cry())
-		title_lbl.text = String(sp["name"])
-		sub_lbl.text = "It's looking at you. It knows your face now."
-		var tt := create_tween().set_parallel(true)
-		tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
-		tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2))
+		_show_lines())
 	moment.tween_interval(0.8)
 	if body:
 		moment.tween_property(body, "rotation:x", 0.0, 0.4).set_trans(Tween.TRANS_SINE)
-	moment.tween_callback(func():
-		met = true
-		info.position.x += 30
-		var it := create_tween().set_parallel(true)
-		it.tween_property(info, "modulate:a", 1.0, 0.4)
-		it.tween_property(info, "position:x", info.position.x - 30, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		create_tween().tween_property(hint, "modulate:a", 1.0, 0.5)
-		ready_to_name = true
-		name_btn.disabled = false
-		name_btn.grab_focus())
+	moment.tween_callback(_open_card)
+
+## Jumps to the end of the moment: it has found you, and its card is up. Only the waiting is cut.
+func skip() -> void:
+	if met:
+		return
+	moment.kill()
+	kin.rotation.y = PI
+	var body := kin.get_node_or_null("Body") as Node3D
+	if body:
+		body.rotation.x = 0.0
+	_show_lines()
+	_open_card()
+
+func _show_lines() -> void:
+	title_lbl.text = String(sp["name"])
+	sub_lbl.text = "It's looking at you. It knows your face now."
+	var tt := create_tween().set_parallel(true)
+	tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
+	tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2)
+
+func _open_card() -> void:
+	met = true
+	info.position.x += 30
+	var it := create_tween().set_parallel(true)
+	it.tween_property(info, "modulate:a", 1.0, 0.4)
+	it.tween_property(info, "position:x", info.position.x - 30, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	create_tween().tween_property(hint, "modulate:a", 1.0, 0.5)
+	ready_to_name = true
+	name_btn.disabled = false
+	name_btn.grab_focus()
+	revealed.emit()
 
 func _blink() -> void:
 	for ch in kin.get_children():

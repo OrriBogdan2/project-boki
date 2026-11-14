@@ -3,7 +3,7 @@ extends RefCounted
 ## The aiming reticle at the cursor, in the player's own style (Settings > Gameplay > Reticle): shape,
 ## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs with a
 ## centre dot; the ring opens with weapon bloom, and on a hit it flashes. With the "hunter" colour (the
-## default) the ring stays pale and the dot and the aim arcs take the Hunter's own accent (Arch.reticle_color).
+## default) the ring stays pale and the dot and the aim arcs take the Hunter's own accent (Arch.color).
 ## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit marker and the AimKit
 ## cursor states on their own layer) draw on top of it. Every number is in content/rules/tuning.json "reticle".
 
@@ -44,12 +44,12 @@ static func tc(key: String) -> Color:
 ## The accent for the dot and the aim arcs of a Hunter: its own colour for the "hunter" setting, else the chosen colour.
 static func accent(arch_id: String) -> Color:
 	if Settings.get_v("reticle_col") == "hunter":
-		return Arch.reticle_color(arch_id)
+		return Arch.color(arch_id)
 	return (style()["col"] as Color)
 
 ## The swatch colour of a colour id in Settings; "hunter" shows the colour of the Hunter you play.
 static func swatch(id: String) -> Color:
-	return Arch.reticle_color(String(Save.d.get("arch", ""))) if id == "hunter" else COLORS[id][1]
+	return Arch.color(String(Save.d.get("arch", ""))) if id == "hunter" else COLORS[id][1]
 
 ## The style in effect: {shape, k (size factor), col (with the opacity), outline, hunter (the accent colour mode)}.
 static func style() -> Dictionary:

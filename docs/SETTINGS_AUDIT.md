@@ -11,6 +11,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `dash_hold` | Gameplay: "Hold Shift for the long dash" | Hold-dashes are per hunter now (`inp["dash_down"]`, Slide, Rampage). The option only stretched the old non-hero dash into an "ex" dash. Its read in `match.gd` and the stretch in `hunter.gd` are gone. |
 | `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own ability is ordered by you (G), and the Merge is on T. A switch that lets the Boki spend that cooldown on its own fights all of that, so it is off for everyone. |
 | `hud_opacity` | (no row in the menu) | Nothing has read it since the HUD rework. |
+| `warden_models` | Video: per Warden "3D model" switch (Hunter models) | The 3D model is the only look a Warden with a .glb has; the procedural model stays for Wardens without one. Design variants are picked with `--warden-variant=` only. |
 
 ## Kept, with where they now live
 
@@ -21,7 +22,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
 | `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
 | `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
-| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 90 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
+| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the pre-match lobby (load wait, then pick turns) before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
 | `bot_diff` | Admin tools page | `match.gd`, `duel.gd` | the duplicate row in Gameplay is gone: the Admin tools page already sets it |
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
@@ -33,7 +34,9 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
 | `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
+| `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
+| `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `show_fps` | Video > Quality | `overlay.gd` | |
