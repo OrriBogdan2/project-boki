@@ -2497,7 +2497,9 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		if d < near:
 			return true
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
-		if d > rng * (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight")) or (in_grass and not revealed):
+		var far: float = (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight"))
+		far *= ScoutLook.sight_mul(h, rel / maxf(d, 0.001))
+		if d > rng * far or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
@@ -2520,6 +2522,7 @@ func _update_vision() -> void:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
 		RenderingServer.global_shader_parameter_set("vis_range", view_range() * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_scout", ScoutLook.shader_arg(cam.scout_k))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3288,6 +3291,7 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
+	player.inp["scout"] = Input.is_action_pressed("scout") and not paused
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
 	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
@@ -5059,6 +5063,7 @@ func _flags(h: Hunter) -> int:
 	if h.riding: f |= 1024
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
+	if h.scout: f |= ScoutLook.BIT
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
@@ -5224,6 +5229,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.below_lip = f & (1 << 24) != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			h.scout = f & ScoutLook.BIT != 0
 			if f & 2048 != 0:
 				var hk := ((f >> 15) & 15) - 1
 				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
