@@ -11,8 +11,7 @@ extends "res://tools/displace_net_check.gd"
 const LEFT_TOL := 0.1            # s: the seconds a status has left may differ by this between the two games
 const CLEAR_S := 0.3            # s: a clear rides the next Net flush, and the question may overtake it
 const TAGS := ["ign", "chl", "sta", "mrk"]
-const LOOKS := {"ign": "Tag_ign", "chl": "Tag_chl", "sta": "Tag_sta", "mrk": "Tag_mrk",
-	"gnd": "Grounded", "rat": "Rattled"}
+const LOOKS := {"ign": "Tag_ign", "chl": "Tag_chl", "sta": "Tag_sta", "mrk": "Tag_mrk", "gnd": "", "rat": ""}
 const GUEST_ARG := "--status-net-check=guest"
 
 var st_at := 0.0                 # host m.time when the running plain status was put on
@@ -265,7 +264,7 @@ func _fresh(T: Hunter) -> void:
 	for k in ["burn_t", "slow_k", "vuln_t", "vuln_k", "blight_t", "blight_k"]:
 		T.set(k, 0.0)
 	for node in LOOKS.values():
-		var old := T.get_node_or_null(node)
+		var old := T.get_node_or_null(node) if node != "" else null
 		if old:
 			old.queue_free()
 			old.name = "Gone_" + node
@@ -294,6 +293,8 @@ func _say() -> void:
 
 ## Whether the body carries the look for `kind`: the pips of a stack show one per stack.
 func _look(P: Hunter, kind: String) -> bool:
+	if kind == "gnd" or kind == "rat":      # (StatusLooks draws these from the body's own timers, no word node)
+		return StatusLooks.carries(P, "gnd" if kind == "gnd" else "daze")
 	var node := P.get_node_or_null(LOOKS[kind])
 	if node == null:
 		return false
