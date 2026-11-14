@@ -28,7 +28,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. |
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
-| B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
+| B | Base to a teammate (squads): hold for a wheel of teammates, point at one and let go (let go in the middle to cancel); a 5.5s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
 | Y (hold) | Emote wheel, including the truce offer |
 | M | Full map; click to ping |
 | P / Z | During the drop: pass the drop lead / separate from your squad |

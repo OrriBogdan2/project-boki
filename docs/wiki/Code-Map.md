@@ -60,6 +60,8 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
 | `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket (its HUD: `scripts/ui/drop_hud.gd`) |
+| `squad_intro.gd` | The squad intro on the skyship deck before the planning map |
+| `skyship_model.gd`, `sky_deck.gd` | The skyship's look; the squad, wisps, shadow and engine sound aboard |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |

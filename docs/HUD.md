@@ -239,6 +239,75 @@ Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
 
+## First real match: the HUD over time (DECISIONS 2026-11-08 "UI is too much")
+
+Rules: no more than about 5 HUD groups at once, one highlighted "what to do next" prompt, nothing before it matters,
+no jargon before it is explained. Origin/main (92df78ce4) played from a fresh save that has finished the tutorial and
+the first farm visit: land on the first spawn, stand there for 90 s. `--hud-timeline-shots --before --shots-dir=<dir>`
+(`tools/hud_timeline_shots.gd`) writes a 1280x720 jpg every 10 s; shots in [`hud_timeline/before/`](hud_timeline/before).
+Group = a separately placed block the player has to scan (as in `UI_FIRST15.md`).
+
+**How the shots were made, and what they miss.** The GPU queue lost the job five times ("worker rp2-N restarted",
+rc 125, before any shot), so these are software renders (Xvfb, `--rendering-driver opengl3`, llvmpipe); the world is black
+because the match is stepped by hand with its own processing off. Layout, text and groups are exact; the 3D picture is not.
+The hunter did not walk: two scripted walks fell off the island ("You fell"), so no loot, fight or door moments are here.
+The rival hover card at 10 s is a stray mouse over a hunter, not counted.
+
+Nine groups are on screen the whole time: **minimap, clock strip (clock, "docks in", level, Dusk, Sight), top-right
+counters, vitals, ability row (with the Boki and G tiles), gear row (4 dots), belt 1-4 plus the Boki's G, Q/V/X boxes,
+weapon card.** On top of them, per sample:
+
+| t (s) | Extra groups | Groups | Over 5 |
+|---|---|---|---|
+| 0 | "Your kit" card (8 rows), two toast cards (squad launch, map note) | 11 | yes |
+| 10 | "Your kit" card, the prompt "Rank up Longneedle: press Alt + E" | 11 | yes |
+| 20 | the prompt (same) | 10 | yes |
+| 30 | the prompt "Send Ember at a monster: tap G", kill feed (truce lines) | 11 | yes |
+| 40 | prompt (same), kill feed | 11 | yes |
+| 50 | prompt "Loot a chest: stand next to it and hold F", kill feed | 11 | yes |
+| 60 | the prompt, a "LEVEL 2 - Quick Feed" toast, kill feed, the perk line "Quick Feed" | 12 | yes |
+| 70 | kill feed, perk line | 11 | yes |
+| 80 | kill feed, perk line | 11 | yes |
+| 90 | kill feed, perk line | 11 | yes |
+
+Every sample is over 5. The rule "one prompt" held here: the prompt is always one card. The nine standing groups alone are
+nearly twice the budget.
+
+**Shown before it matters** (at 0-30 s of a fresh save): the four top-right counters (squads, kills, knocks, gems, all 0), the
+"Your kit" card, the gear row (four empty dots), Q/V "Glove (empty)", the locked X box (LV 6) and R tile, belt slots 3 and 4
+(empty), the "Quick Feed" perk line, the kill feed's truce and knock lines for fights far away, the minimap's "Next train"
+label.
+
+**Jargon before it is explained:** UNLOCK (on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
+AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, DOCKS IN, SIGHT 85%, DUSK, "made a truce", "broke the truce", Quick
+Feed, "0 seeds · Box 0/3", the portrait caption "The Hired Gunslinger Medium", "went down / is out", the toast "Frostreach: ...
+hits slow you, and they shatter when they die".
+
+### The two fixed (`HudGroups`, `scripts/ui/hud_groups.gd`)
+
+Worst by groups removed and words shown with nothing to act on: **1. the top-right counters** (a whole group of four zeros plus a
+squads number; jargon icons "knock" and "burst"), **2. the "Your kit" card** (8 rows of ability names and words, "Ult level 6",
+"Sic", "Orders", "Glove (empty)" x2, during the first 14 s of every match, on top of the slots that already show the keys).
+For a save with fewer than `NEW_PLAYER_MATCHES` (3) expeditions:
+- the kit card does not appear (the slot hover cards still say what each ability does); the training room keeps it;
+- **merged with main (11-13):** main replaced the four counters with `AliveCounter` (squads and players left, big, plus your
+  own kills/knocks/gems in a quieter row under it, alive-counter-1111). The squads/players-left row is the match's
+  standing and always shows; only the quieter row of your own numbers waits, until the first kill, knock or gem or
+  while Tab or the map key is held (`HudGroups.own_numbers_shown`, `MapDetail.holding()`). So the counters are no
+  longer a group fewer, only four zeros and two jargon icons fewer. (Alternative, not taken: hide the whole block
+  as the branch first did; that would drop the alive count main added on purpose.)
+Saves with 3 or more expeditions see both as before. No save field, no Net change. The timeline numbers above
+(9 at 0-20 s, 10 at 30 s, 11 at 60 s on the branch) predate AliveCounter; with it the kit card alone is the group
+removed: `--hud-groups-check` pins the landing at 9 groups for a fresh save (main's pin was 10 with the kit card).
+[After shots](hud_timeline/after), 0-30 s only, taken before the merge (that run was stopped when the walk fell).
+Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh save in a real match, veterans unchanged).
+
+### Not fixed (suggestions, parity first)
+- A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
+  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
+- The tutorial and expedition HUD would want one staging table (`ext/ui-hud-reveal-1110` builds that: `HudReveal` and
+  `content/rules/hud_reveal.json`, not on main); `HudGroups`' reveal rules are to be folded into it when it lands.
+- Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
   title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
@@ -248,9 +317,15 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
 - The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
-  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+  message-lane tip when the step opens (once a step, not re-sent every frame), not a second line. The farm's Skip
+  sits just under the strip's right end.
 - The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
   shows once per save in any real Extraction, the first time the glider has been open for 1.5 s above 15 m (not
   in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
+- One prompt at a time (DECISIONS 2026-11-08): while a new step's strip is fresh (`Tutorial.card_up`, 1.5 s) the
+  message lane holds (`MsgLane.hold`), Boki bubbles and the scout hint wait, and the world's F prompt
+  (`TutorialHud.prompt_shows`) waits. Combat-critical things still show: `MsgLane.URGENT` lines (your Boki is down,
+  you are being stomped) and the revive / finish / stomp prompts (`TutorialHud.FIGHT_PROMPTS`).
+  `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
-  never again after a dive), `--tutorial-strip-shots`.
+  never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.

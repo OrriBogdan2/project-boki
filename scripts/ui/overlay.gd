@@ -5,6 +5,9 @@ extends CanvasLayer
 
 signal closed
 
+## The settings body's held height: as tall as the window allows on every tab (most tabs need more than a
+## 720p window has, and scroll), so switching tabs never resizes the panel.
+const SETTINGS_H := INF
 const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 
 var root: Control
@@ -312,6 +315,7 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
+	UI.hold(v, SETTINGS_H)
 	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
 		tab = t
 		_show_settings())
@@ -440,7 +444,7 @@ func _tab_access(v: VBoxContainer) -> void:
 	var sizes := Settings.TEXT_SIZES.map(func(x): return [x, "%d%%" % roundi(x * 100.0)])
 	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
 			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
-	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
@@ -512,7 +516,9 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lc.add_child(UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
+	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
+	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long action name wraps, never widens the panel
+	lc.add_child(head)
 	if hint != "":
 		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
@@ -725,7 +731,13 @@ func open_inventory() -> void:
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
-					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+					var take := Callable()
+					if GardenItems.fed(id) and GardenItems.item(id)["effect"]["kind"] != "twin":
+						take = func():
+							ItemHold.want(id)
+							close()
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD,
+							"Hold" if take.is_valid() else "", take)
 			if FarmUnlocks.base_mode():
 				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
 						"Open", open_bowl)

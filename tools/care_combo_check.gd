@@ -1019,14 +1019,18 @@ func tender() -> void:
 	K.cd["rmb"] = 0.0
 	var n0: int = _mine(m, P).size()
 	var wind := float(K.rmb_def()["windup"])
+	var glb_fit := float(WardenClips.data("pip")["kmoves"]["mm_seed_aim"].get("fit", 0.0))
 	ok(
-			"mm RMB: not a hold (no hold data), a quick wind-up (0.3-0.4 s, item 23), its clip as long",
-			not K.rmb_def().has("hold") and wind >= 0.3 and wind <= 0.4
+			"mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (the owner asked 0.2-0.5 s off 1 s; "
+			+ "the source's casts run 0.1-0.65 s), its clip and the model's clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.5 and wind <= 0.65
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
-			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
+			and absf(glb_fit - wind) < 0.01
+			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)),
+			"wind %.2f kmove %.2f glb fit %.2f" % [wind, KMovesCare.length("mm_seed_aim"), glb_fit])
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
-	step(m, 0.12)
+	step(m, 0.15)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
 			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
@@ -1042,21 +1046,15 @@ func tender() -> void:
 	var sync: Node = P.model.get_node_or_null("Warden/Sync")
 	var clips: WardenClips = sync.get("clips") if sync else null
 	var lib: AnimationLibrary = clips.lib if clips else null
-	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
-	var fit = clips.d["kmoves"]["mm_seed_aim"].get("fit") if clips else null
 	ok(
-			"mm RMB: Pip's hand-keyed stretch-and-gather is played over exactly the wind-up (kmove fit)",
-			aim_clip != null and fit != null and absf(float(fit) - wind) <= 0.04,
-			"clip %.2f fit %s wind %.2f" % [aim_clip.length if aim_clip else -1.0, fit, wind])
-	ok(
-			"mm RMB: no circle under her during the wind-up (item 23)",
-			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))
+			"mm RMB: nothing drawn at her feet during the wind-up",
+			not K.lk().live.any(func(b): return P.flat_dist(b["at"]) < 1.0))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.12)
+	step(m, 0.15)
 	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
-	var tt := 0.24
+	var tt := 0.3
 	while _mine(m, P).size() == n0 and tt < 1.5:
 		if tt >= wind - 0.1:
 			sc.aim_at(P, T.pos)
@@ -1067,6 +1065,16 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var from: Vector3 = _mine(m, P)[-1]["start"] if _mine(m, P).size() > n0 else P.pos
+	ok(
+			"mm RMB: the seed leaves from her hands, out in front at hand height, not on her",
+			P.flat_dist(from) >= 0.7 and from.y - P.pos.y < 0.8,
+			"%.2f m out, %.2f m up" % [P.flat_dist(from), from.y - P.pos.y])
+	var cast_fx: Array = HeroVfx.data("tender")["moves"]["seed_cast"]["fx"]
+	ok(
+			"mm RMB: the cast flare plays where the seed leaves (no body anchor), small",
+			cast_fx.all(func(l): return not l.has("at"))
+			and cast_fx.all(func(l): return String(l["p"]) != "flare" or float(l["size"]) <= 0.4))
 	ok(
 			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
 			m.time - K.anim_at <= 1.5 / 60.0,
@@ -1906,7 +1914,8 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
+			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
