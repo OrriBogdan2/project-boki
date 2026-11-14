@@ -17,6 +17,7 @@
   "dj_blink": "cast",
   "dj_heal": "cast",
   "dj_encore": "cast",
+  "dj_encore_rise": "cast",
   "dj_encore_whirr": "loop",
   "dj_blade": "fire",
   "dj_encore_hit": "impact",
@@ -30,6 +31,7 @@
  },
  "kit_files": ["thief_ult.gd"],
  "signature": ["thief_flintlock_crack", "dj_bolt", "thief_cock"],
+ "loops": ["dj_encore_whirr"],
  "replaces": ["dj_bolt", "dj_fizzle", "dj_bola_whirl", "dj_bola_throw", "dj_bola_wrap", "dj_knife_throw", "dj_blink",
   "dj_heal", "dj_encore", "dj_encore_whirr", "dj_blade", "dj_encore_hit"]
 }

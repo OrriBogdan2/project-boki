@@ -31,13 +31,16 @@ extends RefCounted
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ##  15. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
 ##      even when X is pressed again, and it is gone within one frame of every way the channel can end
-## Reads the files (and, for 15, one short training match); never touches the save.
+##  16. Sable's Encore: the blade whirr is a keyed loop that starts once the ring has grown, follows her
+##      through a dash and is gone in the frame the ring ends
+## Reads the files (and, for 15 and 16, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
+const FRAME := 1.0 / 60.0      # s: one simulation frame
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
 
@@ -71,6 +74,7 @@ func run(main: Node) -> void:
 	_cc_cues()
 	_inv_cues()
 	await _call_loop(main)
+	await _encore_loop(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -423,7 +427,6 @@ func _plays(sname: String, act: Callable) -> bool:
 
 ## 15. Meeko's channel loop, one training match per end path.
 const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
-const FRAME := 1.0 / 60.0
 
 func _call_loop(main: Node) -> void:
 	for path in END_PATHS:
@@ -694,3 +697,44 @@ func _boss_moves() -> void:
 	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
 	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
 	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
+## 16. Encore's whirr is held at Sable: off while the ring grows, on after, riding with her through a dash,
+## and stopped in the frame the ring ends (ThiefUlt.tick/drop, Sfx.loop_hold).
+func _encore_loop(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+			"cls": Arch.weight("thief"), "arch": "thief", "weapon": Arch.signature("thief")})
+	m.set_process(false)
+	var p: Hunter = m.player
+	p.lvl = 6
+	p.slot_lv["ult"] = 1
+	p.ak.cd["x"] = 0.0
+	var ring: ThiefUlt = (p.ak as ThiefKit).encore
+	var key := ring.whirr_key()
+	var grow := float(ring.data()["grow"])
+	HunterKeys.ult_pressed(p)
+	var cast_at := p.pos
+	_run(m, grow * 0.5)
+	ok(ring.running() and not Sfx.loop_on(key), "encore: no whirr while the ring is still growing")
+	_run(m, grow * 0.5 + 0.1)
+	ok(Sfx.loop_on(key), "encore: the whirr starts once the ring has grown")
+	p.dashes = p.max_dashes()
+	p.inp["move"] = Vector2(1, 0)
+	p.do_dash()
+	_run(m, 0.5)
+	p.inp["move"] = Vector2.ZERO
+	var away := Vector2(p.pos.x - cast_at.x, p.pos.z - cast_at.z).length()
+	var at_her: Vector3 = Sfx.loops[key]["pos"]
+	var off := Vector2(at_her.x - p.pos.x, at_her.z - p.pos.z).length()
+	ok(away > 2.0 and off < 0.3, "encore: dashed %.1f m off the cast point, the whirr %.2f m from her" % [away, off])
+	var late := 0
+	while ring.running() and late < 600:
+		m.step(FRAME)
+		late += 1
+	ok(not ring.running() and not Sfx.loop_on(key), "encore: the whirr is gone as the ring ends (%d frames in)" % late)
+	m.queue_free()
+	await main.get_tree().process_frame
+
+func _run(m: Match, secs: float) -> void:
+	for i in int(ceil(secs / FRAME)):
+		m.step(FRAME)
