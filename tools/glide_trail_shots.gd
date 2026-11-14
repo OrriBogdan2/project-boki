@@ -5,11 +5,12 @@ extends RefCounted
 ## glide_80m.png, and the same frames with the trails hidden (glide_<d>m_off.png) to judge what they add.
 
 const DT := 1.0 / 60.0
-const DISTS := [40.0, 80.0]     # m from the squads' middle to the camera
-const HEIGHT := 22.0            # m over the ground the squads glide at
-const SPEED := 9.0              # m/s: a drop glide, faster than a level one
-const RUN_S := 1.5              # s of gliding before the frame: the trails are full length
-const GAP := 4.0                # m between squad mates; the squads pass 10 m apart
+const DISTS := [40.0, 80.0]  # m from the squads' middle to the camera
+const HEIGHT := 22.0  # m over the ground the squads glide at
+const SPEED := 9.0  # m/s: a drop glide, faster than a level one
+const RUN_S := 1.5  # s of gliding before the frame: the trails are full length
+const GAP := 4.0  # m between squad mates; the squads pass 10 m apart
+
 
 func run(main: Node) -> void:
 	var dir := ""
@@ -32,12 +33,12 @@ func run(main: Node) -> void:
 	gt.set_process(false)
 	var mid: Vector3 = m.player.pos + Vector3(0, HEIGHT, 0)
 	for layer in main.find_children("*", "CanvasLayer", true, false):
-		layer.visible = false     # the HUD and the training drill panels sit over the middle of the frame
+		layer.visible = false  # the HUD and the training drill panels sit over the middle of the frame
 	var cam := Camera3D.new()
 	main.add_child(cam)
 	m.cam.snap(m.player.pos)
 	await main.get_tree().process_frame
-	cam.fov = m.cam.fov           # the match lens (32 deg), so 40 m and 80 m look as far as they do in play
+	cam.fov = m.cam.fov  # the match lens (32 deg), so 40 m and 80 m look as far as they do in play
 	cam.far = DISTS.max() + 60.0
 	var look := -main.get_viewport().get_camera_3d().global_basis.z
 	for d in DISTS:
@@ -57,6 +58,7 @@ func run(main: Node) -> void:
 	print("GLIDETRAILSHOTS %d frames in %s" % [DISTS.size() * 2, dir])
 	main.get_tree().quit(0)
 
+
 ## The player's squad in a line flying +x, the rival squad flying -x, 10 m further from the camera.
 func _place(m: Match, mid: Vector3) -> void:
 	var seen := {}
@@ -71,6 +73,7 @@ func _place(m: Match, mid: Vector3) -> void:
 		h.gliding = true
 		h.out = false
 		h.rotation.y = -dir * PI / 2
+
 
 ## Moves every Hunter along its glide by hand (the sim would steer the bots elsewhere) and draws a frame.
 func _fly(m: Match, gt: GlideTrail) -> void:
