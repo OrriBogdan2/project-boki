@@ -55,6 +55,7 @@ const T := {
 	# the glide's extra over run bleeds at tuning.json air.drag 2/s, the owner's 11-08 model (decision 0052)
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
+	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] a let-go brakes the same under a cast"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
@@ -292,6 +293,7 @@ func run(main: Node) -> void:
 	_airdash_fall()
 	_dash_exit()
 	_slow_ramp()
+	_brake_cast()
 	_dash_curves()
 	_plain_dash()
 	_kit_dashes()
@@ -942,6 +944,55 @@ func _run_up() -> float:
 	P.inp["move"] = Vector2(1, 0)
 	_steps(30)
 	return _hv(P).length()
+
+
+## Let go of the keys and press RMB in the same frame at full speed, all 12 Hunters: the source brakes a let-go
+## the same under a cast (UE CalcVelocity brakes whenever the keys are off; a cast's move scale only caps the
+## walk, a CastHold hover steers like the ground), so the stop slide must match the plain stop. A tap that
+## moves the Hunter itself (a step, a hop, a knock, leaving the ground) is printed and not compared.
+func _brake_cast() -> void:
+	var kit_was := P.arch
+	var cls_was := P.cls
+	var gap := 0.0
+	for id in Arch.ids():
+		P.reclass(Arch.weight(id), id)
+		var plain := _cast_stop(false)
+		var cast := _cast_stop(true)
+		var row := "brake_cast %-11s plain %.3f m %.3f s, cast %.3f m %.3f s" % [
+				id, plain["dist"], plain["t"], cast["dist"], cast["t"]]
+		if cast["moved"]:
+			print("MFEEL note %s: RMB moves him itself, no stop compare" % row)
+			continue
+		var d := absf(float(cast["dist"]) - float(plain["dist"]))
+		gap = maxf(gap, d)
+		ok(d <= 0.05 and float(cast["t"]) > 0.0, row)
+	rec("brake_cast_gap_m", gap)
+	P.reclass(cls_was, kit_was)
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = false
+	# (the casts left shots, areas and delayed steps in the match: later rows start without them)
+	for a in [m.shots, m.zones, m.fields, m.mobs, m._later]:
+		a.clear()
+	for a in [m.gpads, m.smokes, m.plats]:
+		a.clear()
+	_reset(flat)
+
+## A run to full speed, then the keys off (and RMB pressed the same frame when cast): the stop's distance
+## and time, and whether the kit moved him (a dash, a knock, leaving the ground).
+func _cast_stop(cast: bool) -> Dictionary:
+	_reset(flat + Vector3(-3.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	var x0 := P.pos.x
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = cast
+	var moved := false
+	var ts := -1.0
+	for i in 60:
+		m.step(DT)
+		moved = moved or P.roll_t > 0.0 or P.fly_t > 0.0 or P.knock_t > 0.0 or not P.grounded
+		if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
+	return {"dist": P.pos.x - x0, "t": ts, "moved": moved}
 
 
 ## Each fitted hero's plain ground dash, keys held the way it goes: the speed of every step on the curve, where
