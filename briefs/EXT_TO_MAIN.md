@@ -9712,3 +9712,4 @@ READY ext/merge-lane-hunters8-1114 8228175d71 (merge lane hunters8: 8 branches; 
 READY ext/merge-lane-hunters7-1114-b 485929886702120199afc391432cbcc2818f3b16 (hunters7 part b, stacked on ext/merge-lane-hunters7-1114: split-kmoves-pin-bjorn)
 READY ext/merge-lane-hunters2-1114 8892e2b7e992f9417759cc7101b83024cc30cb68 (merge lane hunters2 bundle: armour-parity, boss-bot-focus-1111, boss-gate-1111, boki-gait-plant, anim-wild-boki on current main; NEW-RED 0 after check fixes, export 445 MB OK)
 READY ext/merge-lane-vfx4-1114 1eab088823 (merge lane vfx4 bundle a: 5 VFX branches: statue-break, miss-impacts, motley-trade-teal, zone-rims, revive-read; health+wiki+export OK, hero-vfx/miss-fx/box-revive/life checks green)
+READY ext/merge-lane-vfx3-1114 a03d714ea2751fe920e3563aaf7c240b916cac43 (merge lane vfx3: 8 sfx/vfx branches, NEW-RED 0 in 95 touched flags, export OK 445 MB)
