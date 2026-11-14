@@ -43,6 +43,7 @@ var meteors: Array = []     # {at, t, tele}
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
+var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -567,6 +568,7 @@ func _spawn_pads_and_exits() -> void:
 		add_child(arc)
 		pd["arc"] = arc
 	await _slice()
+	zone = ShrinkZone.make(self)
 	exits = Exits.new()
 	await exits.setup(self)
 	await _slice()
@@ -1742,6 +1744,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
+			ArmourHint.hit(self, credit, target)
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
@@ -2174,6 +2177,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if biomes: biomes.on_mob_dead(mb)
 	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
+	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
@@ -2443,7 +2447,7 @@ const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc 
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or HawkSense.seen_by(target, team_i):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -4863,7 +4867,8 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
 	_check_last()
 
-func _update_rules(_dt: float) -> void:
+func _update_rules(dt: float) -> void:
+	if zone: zone.tick(dt)
 	var left := length - time
 	if left < 30.0 and not collapse_warned:
 		collapse_warned = true
@@ -5559,6 +5564,8 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
+var vision_hint := VisionHint.new()
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5605,9 +5612,9 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
 
-func _tip(key: String, text: String) -> void:
+func _tip(key: String, text: String, near := "") -> void:
 	if hud != null and tip_once(key):
-		hud.tip(text)
+		hud.tip(text, near)
 
 ## The first-time hints' once-per-save gate (Save.d.tutorial): true the one time key is asked for.
 func tip_once(key: String) -> bool:
@@ -5618,6 +5625,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 func _tips() -> void:
+	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
@@ -5625,6 +5633,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	tips_live = true
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
@@ -5638,6 +5647,8 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
+		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var k: Kin = player.kin

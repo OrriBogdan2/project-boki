@@ -281,6 +281,9 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
+## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
@@ -522,22 +525,20 @@ func _bond_tell() -> void:
 ## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
+	return float(air.get("cd", DashState.long_cd(h.cdat))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
-		if h.ex_cd > 0.0:
+		if not h.dash.spend_long(long_dash_cd()):
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:
-		if h.dashes < 1.0:
+		if not h.dash.spend_short():
 			h._ab_feedback("dash", "deny")
 			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on

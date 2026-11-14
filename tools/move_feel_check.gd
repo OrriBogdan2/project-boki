@@ -14,6 +14,7 @@ var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const DIRS := preload("res://tools/move_feel_dirs.gd")      # the W A S D and diagonal rows
 const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
@@ -146,12 +147,21 @@ const T := {
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
 	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
 	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
+	# a glider on a cliff face, a ruin wall or a Tenzo rock (UE CharacterMovementComponent slide, no source row
+	# for the glider itself [?]): the part of its speed into the wall is dropped, the part along it kept, no
+	# bounce, and the canopy stays open; the glide force then holds the along-wall speed at cruise x sin(angle)
+	"glide_wall_tangent_lo":   [">=", 0.9, "x", "along-wall speed over the 1 s after a 30/60 degree hit, as a share"
+		+ " of the tangent speed it hit with (worst case)"],
+	"glide_wall_tangent_hi":   ["<=", 1.1, "x", "...and the best case: the wall neither brakes nor speeds the slide"],
+	"glide_wall_speed_min":    [">=", 1.0, "m/s", "slowest frame while the keys push along the wall: no dead stop"],
+	"glide_wall_flips":        ["<=", 0.0, "n", "along-wall speed sign flips over 1 s, every angled hit: no jitter"],
+	"glide_wall_bounce_mps":   ["<=", 0.3, "m/s", "fastest frame moving away from the wall after any hit: no rebound"],
 	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
 	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
 	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
-	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
+	"drop_dive_steer_t":       ["<=", 0.42, "s", "one air model, DECISIONS 11-08: 90% of 14 m/s in 0.39 s + a step"],
 	"drop_deploy_frames":      ["<=", 1.0, "frames", "press jump: glider opens the same step"],
 	"drop_deploy_settle_t":    ["<=", 0.30, "s", "[est] canopy catch to drop sink rate"],
 	"drop_glide_steer_t":      ["<=", 0.30, "s", "[est] responsive steering under the canopy"],
@@ -284,13 +294,17 @@ func run(main: Node) -> void:
 	_abyss_updraft()
 	_feather()
 	_ledge()
+	_glide_wall()
 	_drop()
 	_landing()
 	_camera()
 	_screen_scale()
 	_e2e()
-	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them
-	await _no_fall_carry(main)
+	_standing_dash()          # late: it swaps the kit and model the framing rows measure
+	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
+	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
+	await _no_fall_carry(main)      # it frees the match
+	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -1120,6 +1134,37 @@ func _dolm_hop() -> Array:
 	var feel: Dictionary = P.ak.dash_feel()
 	return [float(dd["dist"]) * float(feel["dist"]), float(dd["time"]) * float(feel["time"])]
 
+
+## A dash pressed standing still (no move keys) goes toward the cursor for every Hunter, never the way the
+## body faces: the cursor-aimed sources (Oath, Tetra, Kingpin, Brall, Felix, Void, Joule; Myth tested in
+## supervive_kits.md) do; the move-direction ones (Shiv, Elluna, Celeste, Ghost) were never filmed standing
+## (briefs/hero-ref, rows marked [?]), so they keep the shared rule (ArchKit.dash_dir). Shift is held
+## STAND_HOLD so the hold kits (Swap, Wirerun, Skate, Slide) release too.
+const STAND_HOLD := 18           # frames (0.3 s) Shift is held down
+const STAND_AIM := Vector2(0.6, -0.8)   # the cursor's direction from the hunter
+const STAND_DEG := 20.0          # widest allowed miss of the cursor, degrees
+func _standing_dash() -> void:
+	var cls_was := P.cls
+	var arch_was := P.arch
+	var wid_was := P.wid
+	for a in Arch.ids():
+		P.reclass(Arch.weight(a), a)
+		_reset(flat)
+		P.face = PI / 2.0         # the body faces -x, away from the cursor
+		P.inp["aim"] = flat + Vector3(STAND_AIM.x, 0, STAND_AIM.y) * 5.0
+		P.inp["dash"] = true
+		P.inp["dash_down"] = true
+		for i in 150:             # 2.5 s: Lantern Trade's 1.8 s lob lands after the hold
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["dash_down"] = i < STAND_HOLD
+		var moved := Vector2(P.pos.x - flat.x, P.pos.z - flat.z)
+		var miss := rad_to_deg(absf(moved.angle_to(STAND_AIM)))
+		var msg := "%s standing dash goes to the cursor (%.2f m, %.0f deg off)" % [a, moved.length(), miss]
+		ok(moved.length() > 0.5 and miss < STAND_DEG, msg)
+		P.inp["dash_down"] = false
+	P.reclass(cls_was, arch_was, wid_was)
+
 func _find_rim() -> Dictionary:
 	if not _rim.is_empty(): return _rim
 	var edge := {}
@@ -1385,6 +1430,113 @@ func _ledge() -> void:
 		w.level[int(cv[0])] = cv[1]
 
 # ---------------------------------------------------------------- the opening drop
+# ---------------------------------------------------------------- glider on a wall
+## The glider flown into a wall at 0, 30 and 60 degrees off its normal, keys held the same way: a 7-terrace
+## cliff and a one-tile ruin wall carved east of the flat spot, and a Tenzo rock placed turned 30 degrees
+## off the grid (long enough to slide along for the whole second). Reads the 60 frames after the hit.
+const GLIDE_WALL_DEG := [0.0, 30.0, 60.0]
+const GLIDE_WALL_H := 2.5          # m up the glider starts: under a ruin wall's top, airborne a second after the hit
+const GLIDE_WALL_ROCK_H := 1.85    # m: a rock blocks a body within 1.9 m of its base (Verbs.wall_blocks), so lower
+const GLIDE_WALL_ROCK_LEN := 12.0  # m: a test rock long enough to slide along (a real one is 1.3 m)
+const GLIDE_WALL_OUT := 1.0        # m in front of the face the glider starts
+func _glide_wall() -> void:
+	var x0 := int(floor(flat.x))
+	var z0 := int(floor(flat.z))
+	var lv := int(w.level[w.idx(x0, z0)])
+	var gy := lv * World.LEVEL
+	var tan := [9.0, 0.0]          # worst and best along-wall share over the angled hits
+	var speed_min := 99.0
+	var flips := 0
+	var bounce := 0.0
+	for what in ["cliff", "ruin wall", "tenzo rock"]:
+		var carved := []           # [index, old level, old kind] to put back afterwards
+		var rock := {}
+		var n := Vector2(-1, 0)    # out of the wall
+		var mid := Vector2(x0 + 3.0, z0 + 0.5)
+		if what == "tenzo rock":
+			n = n.rotated(deg_to_rad(30.0))      # off the grid, as an aimed rock lands
+			mid = Vector2(x0 + 4.0, z0 + 0.5)
+			# (someone else's rock, so it is a full wall; it faces the glider and outlasts the try)
+			var at := Vector3(mid.x, gy, mid.y)
+			rock = HeroZones.rock(m, m.hunters[1], at, -n, "gwall", GLIDE_WALL_ROCK_LEN, 30.0, 999.0, false)
+		else:
+			for dz in range(-5, 6):
+				for dx in range(3, 6 if what == "cliff" else 4):
+					var ci := w.idx(x0 + dx, z0 + dz)
+					carved.append([ci, w.level[ci], w.kind[ci]])
+					if what == "cliff":
+						w.level[ci] = lv + 7
+					else:
+						w.kind[ci] = World.T_BLOCK
+						w.walls[ci] = true
+		var t := (-n).rotated(PI / 2.0)      # along the wall, the way a positive angle slides
+		var h0 := GLIDE_WALL_ROCK_H if what == "tenzo rock" else GLIDE_WALL_H
+		for deg in GLIDE_WALL_DEG:
+			var r := _glide_wall_hit(mid, n, t, gy + h0, deg)
+			var tag := "glide_wall %s %d deg" % [what, int(deg)]
+			ok(r["hit"], "%s: the glider met the wall" % tag)
+			ok(r["open"], "%s: the glider stays open on the wall" % tag)
+			ok(r["into"] < 0.5, "%s: it stays pressed on the wall (%.2f m/s into it at most)" % [tag, r["into"]])
+			bounce = maxf(bounce, r["out"])
+			if deg > 0.0 and r["hit"]:
+				var row := [tag, r["tan"], r["tan0"], r["slow"]]
+				print("MFEEL %s: along-wall %.2fx of %.2f m/s, slowest %.2f m/s" % row)
+				tan[0] = minf(tan[0], r["tan"])
+				tan[1] = maxf(tan[1], r["tan"])
+				speed_min = minf(speed_min, r["slow"])
+				flips += int(r["flips"])
+		if not rock.is_empty():
+			HeroZones.remove_rock(m, rock, false)
+		for c in carved:
+			w.level[c[0]] = c[1]
+			w.kind[c[0]] = c[2]
+			w.walls.erase(c[0])
+	rec("glide_wall_tangent_lo", tan[0])
+	rec("glide_wall_tangent_hi", tan[1])
+	rec("glide_wall_speed_min", speed_min)
+	rec("glide_wall_flips", float(flips))
+	rec("glide_wall_bounce_mps", bounce)
+
+## One glide at the wall whose face passes `mid` with normal `n` (out of it) and tangent `t`, `deg` off the
+## normal, from `y` up: {hit, open, into (max m/s into the wall after it), out (max m/s away), tan (mean
+## along-wall share of tan0 over the second), tan0, slow (slowest frame), flips (along-wall sign flips)}.
+func _glide_wall_hit(mid: Vector2, n: Vector2, t: Vector2, y: float, deg: float) -> Dictionary:
+	var dir := (-n).rotated(deg_to_rad(deg))
+	var start := mid + n * GLIDE_WALL_OUT - t * GLIDE_WALL_OUT * sin(deg_to_rad(deg))
+	_reset(Vector3(start.x, y, start.y), false)
+	P.gliding = true
+	P.inp["glide"] = true
+	P.inp["move"] = dir
+	P.vel = Vector3(dir.x * Hunter.GLIDE_SPEED, 0.0, dir.y * Hunter.GLIDE_SPEED)
+	var into0 := Hunter.GLIDE_SPEED * cos(deg_to_rad(deg))
+	var r := {"hit": false, "open": true, "into": 0.0, "out": 0.0, "tan": 0.0, "slow": 99.0, "flips": 0,
+		"tan0": Hunter.GLIDE_SPEED * sin(deg_to_rad(deg))}
+	var since := 0           # frames since the hit
+	var last_sign := 0.0
+	for i in 120:
+		m.step(DT)
+		var hv := _hv(P)
+		if not r["hit"]:
+			r["hit"] = hv.dot(-n) < into0 * 0.5      # (the wall took the speed into it)
+			if not r["hit"]:
+				continue
+		since += 1
+		if since > 60:
+			break
+		r["open"] = r["open"] and P.gliding
+		r["out"] = maxf(r["out"], hv.dot(n))
+		r["into"] = maxf(r["into"], hv.dot(-n))
+		if deg <= 0.0:
+			continue
+		var tv := hv.dot(t)
+		r["tan"] += tv / 60.0 / r["tan0"]
+		r["slow"] = minf(r["slow"], hv.length())
+		if absf(tv) > 0.05:
+			if last_sign != 0.0 and signf(tv) != last_sign:
+				r["flips"] += 1
+			last_sign = signf(tv)
+	return r
+
 func _drop() -> void:
 	_reset(flat + Vector3(0, 40.0, 0), false)
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
