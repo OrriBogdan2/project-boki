@@ -456,7 +456,6 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	var slid := K.last_dash_kind
 	P.inp["move"] = Vector2.ZERO
 	P.slot_lv["dash"] = 1
-	K.knocked.clear()
 	P.dashes = 0.0
 	T.hp = 0.0
 	T.downed = true
@@ -466,6 +465,9 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	C.ac.step(m, 0.5)
 	T.downed = false
 	T.hp = T.max_hp
+	P.kbuffs.clear()                 # Hot Streak's faster, harder rounds would skew the rifle checks below
+	K.streak_t = 0.0
+	K.res = 0.0
 	var on_ground := _ground_looks(V, plays0)
 	var streaked := int(V.plays.get("slide", 0)) > int(plays0.get("slide", 0))
 	C.ok("Vex audit: no ground ring, scorch or flame wall on a slide, its rank-3 end or a knock",

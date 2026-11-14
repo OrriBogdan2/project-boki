@@ -284,14 +284,12 @@ func _lock_lines(move: String, what: String, lift: float, went: int, rec: Dictio
 
 ## The knock cue: a 0.6 s upper-body beat (no source frames: the footage shows no knock).
 func _knock(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
-	K.knocked.clear()
 	P.dashes = 0.0
-	T.hp = 0.0
-	T.downed = true
-	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	DashReset.takedown(P, T)         # the takedown credit plays her cue (Hot Streak)
 	var r := _time(m, P, K, "gunslinger_knock", 1.3, func() -> bool: return P.dashes >= 1.0)
-	T.downed = false
-	T.hp = T.max_hp
+	P.kbuffs.clear()
+	K.streak_t = 0.0
+	K.res = 0.0
 	C.ok("Vex timing knock: the cue plays its 0.6 s and hands back",
 			absf(float(r["len"]) - 0.6) < CLIP_TOL and float(r["out"]) > 0.6
 			and float(r["out"]) < 0.6 + _back(P, "gunslinger_knock"),

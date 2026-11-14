@@ -3,7 +3,7 @@ extends RefCounted
 ## a rival dummy) with the helpers of tools/archetype_check.gd. The rules and their sources are listed in
 ## docs/KNOCK_RESETS.md. Covered here: the game-wide dash back (DashReset: the knocker whole or one charge
 ## of several, a teammate who hit the foe in the last 5s too, no heal for them, nothing for a third team);
-## Vex's Burr Charge at rank 3; Cinder's Furnace Cloak and heal; Kael's heal, the Finishing Slam's Riposte
+## Vex's Hot Streak (her takedown or an assist) and her Coin Blast at rank 3; Cinder's Furnace Cloak and heal; Kael's heal, the Finishing Slam's Riposte
 ## reset and the Riposte's own takedown reset; Sable's heals (her own, an assist) and the Encore's Vault;
 ## Sparkle's Blowout; Grimble's Salvage stack on an assist; Meeko's carry refresh at rank 3. Hem's wall-stun
 ## charge and Mossy's dash refund need walls and run in --archer-combo-check / --bulwark-combo-check.
@@ -97,11 +97,14 @@ func _global() -> void:
 
 # ------------------------------------------------------------------ Vex (Ghost)
 func _vex() -> void:
-	var r = A.setup("gunslinger", 3.0)
+	var r = A.setup("gunslinger", 3.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var al := _dummy(m, "Ally", P.team, (r[4] as Vector3) + Vector3(0, 0, 2))
 	var K: GunslingerKit = P.ak
+	var sd: Dictionary = K.d["passive"]["streak"]
 	_rank3(P, "sec")
 	_spend(P, 1.0)
 	K.cd["rmb"] = 6.0
@@ -109,10 +112,32 @@ func _vex() -> void:
 	_knock(m, T, P)
 	A.ok("vex: his knock gives Combat Slide back whole (one charge)",
 			P.max_dashes() <= 1.0 and _full(P), "dashes %.2f / %.0f" % [P.dashes, P.max_dashes()])
-	A.ok("vex: rank 3 Burr Charge resets on the knock", float(K.cd["rmb"]) <= 0.0, "cd %.1f" % float(K.cd["rmb"]))
+	A.ok("vex: rank 3 Coin Blast comes back on her takedown", float(K.cd["rmb"]) <= 0.0, "cd %.1f" % float(K.cd["rmb"]))
 	A.ok("vex: one cue, not two (the kit no longer repeats DashReset)", _cues_for(P, c0) == ["takedown"],
 			str(_cues_for(P, c0)))
+	A.ok("vex: Hot Streak on her takedown: rounds faster, more damage, Fever lit for the streak", _streak_on(P, K, sd),
+			"streak %.2f rate %.2f dmg %.2f fever %.2f" % [K.streak_t, P.buff("fire_rate"), P.buff("damage"), K.fever_k()])
+	# an assist: she hit T2 inside the window, the ally knocks it: the streak again, the coin stays down
+	P.kbuffs.clear()
+	K.streak_t = 0.0
+	K.res = 0.0
+	K.ch_rmb = 0.0
+	K.cd["rmb"] = 6.0
+	_touch(P, T2)
+	_knock(m, T2, al)
+	print("KNOCKRESET vex assist: streak %.2f s, fire_rate %.2f, damage %.2f, fever %.2f, coin cd %.1f"
+			% [K.streak_t, P.buff("fire_rate"), P.buff("damage"), K.fever_k(), float(K.cd["rmb"])])
+	A.ok("vex: Hot Streak on an assist too; the rank 3 coin is for her own takedowns",
+			_streak_on(P, K, sd) and float(K.cd["rmb"]) > 0.0, "coin cd %.1f" % float(K.cd["rmb"]))
+	A.step(m, float(sd["t"]) + 0.2)
+	A.ok("vex: the streak ends after its seconds", K.streak_t <= 0.0 and P.buff("fire_rate") == 0.0
+			and P.buff("damage") == 0.0 and K.fever_k() == 0.0, "streak %.2f" % K.streak_t)
 	await A.done(m)
+
+## Hot Streak is burning on `P` with the data's numbers (and nearly all of its seconds left).
+func _streak_on(P: Hunter, K: GunslingerKit, sd: Dictionary) -> bool:
+	return (K.streak_t > float(sd["t"]) - 0.2 and is_equal_approx(P.buff("fire_rate"), float(sd["fire_rate"]))
+			and is_equal_approx(P.buff("damage"), float(sd["dmg"])) and K.fever_k() > 0.0)
 
 # ------------------------------------------------------------------ Cinder (Felix)
 func _cinder() -> void:

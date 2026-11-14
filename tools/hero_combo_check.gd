@@ -1187,7 +1187,8 @@ func _gunslinger() -> void:
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
+	# 7. Hot Streak: the kit's own hit path adds nothing to a knock (DashReset owns the credit); DashReset's
+	# takedown lights the streak and, at rank 3, brings the Coin Blast back
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -1196,9 +1197,14 @@ func _gunslinger() -> void:
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
-			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
-	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
+	ok("Knock: no Slipstep, heal or streak from the kit's hit (all DashReset's, so nothing double-fires)",
+			P.hp < 41.0 and P.dashes < 0.5 and K.streak_t <= 0.0, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
+	DashReset.takedown(P, T)
+	ok("Takedown at rank 3: Hot Streak lit and the Coin Blast is back",
+			K.streak_t > 0.0 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
+	P.kbuffs.clear()                 # the streak's faster, harder rounds would skew the rifle checks below
+	K.streak_t = 0.0
+	K.res = 0.0
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
