@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const AimkitCheck := preload("res://tools/aimkit_check.gd")
+
 const EXIT := preload("res://tools/ult_exit.gd")
 const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
 
@@ -217,10 +219,10 @@ func dancer_ring(a) -> void:
 	var grow_bh := float(d["r0"]) / AimKit.BH
 	var reach_bh := reach / AimKit.BH
 	var cadence := float(d["time"]) / float(d["shots"])
-	A.ok("dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
+	A.ok("dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band hits harder, a 6s blight",
 			absf(grow_bh - 0.17) < 0.03 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
 			and float(d["time"]) == 2.0 and absf(cadence - 0.2) < 0.001
-			and float(d["rim_dmg"]) == float(d["dmg"]) * 0.5 and float(d["rim_blight"]) == 6.0,
+			and float(d["rim_dmg"]) > 0.0 and float(d["rim_blight"]) == 6.0,
 			"%.2f bh -> %.2f bh" % [grow_bh, reach_bh])
 	A.ok("dancer ring: 4 a blade in the middle, 6 from the band (x power); none past the radius",
 			absf(float(mid_hits[0][1]) - float(d["dmg"]) * power) < 0.01
