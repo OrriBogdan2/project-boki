@@ -30,6 +30,9 @@ const SOURCE_ROWS := [
 	["juggernaut", "ground", "x", "cancel"], ["bulwark", "ground", "x", "cancel"], ["ashwick", "ground", "x", "cancel"],
 ]
 
+## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
+## and one the source can't settle ("Not determinable: <why>") runs the default.
+const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -320,9 +323,6 @@ const HOLD_KEYS := {"lmb": "fire", "rmb": "sec_hold", "x": "x_down"}
 const INTO_ACTS := ["fire", "cancel"]       # into rows whose move goes at once
 const COMBINES := {"jump": ["fire"], "into": INTO_ACTS, "hold": ["keep"]}      # every other mode is an exception
 const MODES_OF := {"jump": ["fire", "buffer"], "into": ["fire", "cancel", "buffer", "lock"], "hold": ["keep", "cancel"]}
-## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
-## and one the source can't settle ("Not determinable: <why>") runs the default.
-const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
 
 var exceptions := {}            # hero -> its exception rows, printed at the end (the hero agents' worklist)
 

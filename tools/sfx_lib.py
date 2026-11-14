@@ -9,7 +9,7 @@ tail, reflections, ring, grains, mix, at, sat) and adds:
   - CATS: one loudness target per category, so every Hunter, Boki and UI sound sits at the same level
     for what it is (docs/AUDIO.md). save_cat / takes_cat level a sound to its category and write it.
   - voice(): a wordless voice (grunt, gasp, cry) from a glottal pulse train through vowel formants.
-  - chime(), creak(), fm(), sweep(), rattle(), hiss(), sweep_noise() and wobble() (rushing air, gusts):
+  - chime(), creak(), fm(), sweep(), rattle(), hiss(), bubbles(), sweep_noise() and wobble() (rushing air, gusts):
     the textures several kits need; shape() and soft_in(): click-free envelopes.
 
 44.1 kHz mono 16-bit, written to audio/. Original synthesis, no samples.
@@ -23,7 +23,7 @@ from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick,
 __all__ = ['SR', 'N', 'T', 'noise', 'lpf', 'hpf', 'bpf', 'env', 'mix', 'at', 'sat', 'kick', 'click', 'crack',
            'sub', 'tail', 'reflections', 'ring', 'grains', 'level', 'CATS', 'reseed', 'rng', 'save_cat',
            'takes_cat', 'save_loop', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'sweep_noise', 'rattle',
-           'hiss', 'pad', 'wobble']
+           'hiss', 'bubbles', 'pad', 'wobble']
 
 # Category loudness (content/rules/sfx_levels.json, the same table --sfx-set-check measures against):
 # RMS in dBFS over the audible part, and the peak ceiling. The game's volume_db at the call site then
@@ -172,6 +172,19 @@ def wobble(d, rate, depth):
 def hiss(d, lo=2000, hi=9000, a=0.02, decay=0.3):
     """Steam, gas, a fuse: band noise with a soft start."""
     return bpf(noise(d), lo, hi) * env(N(d), a, decay)
+
+
+def bubbles(d, per_s, f_lo=250, f_hi=900, size=0.04):
+    """Rising air bubbles: short sines that chirp upward as they pop."""
+    n = N(d); out = np.zeros(n)
+    for _ in range(max(1, int(per_s * d))):
+        s0 = int(rng.uniform(0, max(1, n - N(size * 1.5))))
+        bd = size * rng.uniform(0.6, 1.4); bn = N(bd); tt = np.arange(bn) / SR
+        f = rng.uniform(f_lo, f_hi) * (1 + 2.5 * tt / bd)
+        b = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / (bd * 0.35)) * (1 - tt / bd)
+        b *= np.sin(np.pi * np.minimum(1, tt / 0.003) / 2)
+        out[s0:s0 + bn] += b * rng.uniform(0.4, 1.0)
+    return out
 
 
 # ------------------------------------------------------------------ voice (wordless)

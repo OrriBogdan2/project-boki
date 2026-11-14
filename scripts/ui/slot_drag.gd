@@ -120,7 +120,7 @@ func _pick_up() -> void:
 	_preview.position = get_viewport().get_mouse_position() - _preview.size * 0.5
 	if pad:
 		_preview.position = _rect(at).get_center() + PAD_LIFT
-	Sfx.play("pickup", null, -6.0)
+	InvSfx.grab()
 
 func _drop(to: Control) -> void:
 	var from: Control = _held["at"]
