@@ -32,6 +32,9 @@ const WEAPONS := [
 	"swordfish"
 ]
 const SIZE := 128  # px: the icon masters
+## Shaping items that reached main after the icon set was painted (docs/DEBT.md): they draw their family icon
+## until their art lands. Each must still be unpainted, so the list cannot go stale.
+const AWAITING_ART := ["glowmoss_sprig", "mistbloom", "chimegrass"]
 
 var bad := 0
 var used := {}  # icon id -> true, for the unused-file sweep
@@ -98,10 +101,19 @@ func _boki() -> void:
 			wrong.append(id)
 	ok(wrong.is_empty(), "every Fusion draws its painted icon %s" % [wrong])
 	wrong = []
+	var waiting: Array = []
 	for id in GardenItems.ids():
-		if ItemPages.icon_of(id) != "garden_" + id or not _has("garden_" + id):
+		if AWAITING_ART.has(id):
+			if Icons.art("garden_" + id) != null or ItemPages.icon_of(id) == "garden_" + id:
+				waiting.append(id)
+		elif ItemPages.icon_of(id) != "garden_" + id or not _has("garden_" + id):
 			wrong.append(id)
 	ok(wrong.is_empty(), "every shaping item draws its painted icon %s" % [wrong])
+	var known := AWAITING_ART.filter(func(id): return GardenItems.ids().has(id))
+	ok(
+		waiting.is_empty() and known.size() == AWAITING_ART.size(),
+		"items awaiting art %s draw their family icon (drop an id once its art lands) %s" % [AWAITING_ART, waiting]
+	)
 
 
 func _unused() -> void:
