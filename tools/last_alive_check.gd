@@ -101,5 +101,26 @@ func run(main: Node) -> void:
 	for o in solo.hunters:
 		if LastAlive.active(solo, o) or _aura(o): any = true
 	ok(not any, "solos: no aura for anyone")
+	solo.queue_free()
+	_trio(main)
 	print("LASTALIVE DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## A squad of three: the aura waits for BOTH teammates (KNOCKED or DEAD in the squad frames), and it
+## lives on the hunter only, as a mixed rim that still shows on snow.
+func _trio(main: Node) -> void:
+	var m := _start(main, 3)
+	var me: Hunter = m.player
+	var mates := m.hunters.filter(func(o: Hunter) -> bool: return o != me and o.team == me.team)
+	ok(mates.size() == 2, "a squad of three has two teammates")
+	mates[0].downed = true
+	_run_for(m, 0.3)
+	ok(not _aura(me), "one of two knocked: no aura yet")
+	mates[1].out = true
+	_run_for(m, 0.3)
+	ok(_aura(me), "one KNOCKED, one DEAD: the aura is on")
+	ok(m.find_children(LastAlive.NODE, "", true, false).size() == 1, "on that hunter only")
+	var rim := me.get_node(LastAlive.NODE).get_child(0) as MeshInstance3D
+	var code := (rim.material_override as ShaderMaterial).shader.code
+	ok("blend_mix" in code and not "blend_add" in code, "the rim is mixed, not added (reads on snow)")
+	m.queue_free()
