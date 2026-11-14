@@ -313,7 +313,7 @@ func _draw_all() -> void:
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
 		if p.downed:
 			_draw_downed(sz, p)
-		elif p.out and not p.gone and not m.result.get("ending", false):
+		elif p.out and not p.gone and not m.flow.ending():
 			_draw_dead(sz, p)
 	edge_world.draw(c, m.time)
 	if Input.is_action_pressed("scores"):
@@ -821,10 +821,10 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
-	var phase := ""; var pc := MUTED
-	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
+	var phase := m.flow.word()
+	var pc := BAD if m.flow.falling() else MUTED
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
-	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
+	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if m.flow.falling() else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
 	if m.player:
@@ -832,7 +832,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
-	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if m.flow.falling() else Color("b9a6ff"))
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y

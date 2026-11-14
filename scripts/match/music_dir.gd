@@ -112,7 +112,7 @@ func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
-	if m.result.get("ending", false):
+	if m.flow.ending():
 		if not ended:
 			ended = true
 			Sfx.sting("extract" if m.result.get("extracted", false) else "out")
