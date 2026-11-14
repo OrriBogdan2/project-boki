@@ -18,6 +18,10 @@ extends RefCounted
 ##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
 ##      again; a save that has dived never sees it
 ##   8. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
+##   9. framing at the match camera, per starter (Lace, Kael, Vex), at 1280x720: at every step the thing to
+##      act on (the camp's monster, the pad's sign, the glove, the outpost, the stop) is on screen for most
+##      of the step (a walk to a far stop: by the time you get there; the marker's edge arrow and the Boki
+##      lead the way meanwhile) and, where it is a thing, at least MIN_PX tall. One row per step is printed.
 
 var bad := 0
 var m: Match
@@ -25,6 +29,10 @@ var main: Node
 
 const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (the fresh-run log found 157)
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+const STARTERS := ["archer", "juggernaut", "gunslinger"]
+const FRAME_VIEW := Vector2(1280, 720)   # the smallest screen the tutorial is built for
+const MIN_PX := 24.0                     # px at 1280x720: the least a thing to act on may be drawn tall
+const ON_SHARE := 0.6                    # of a step's frames: its thing is on screen at least this often
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -38,6 +46,8 @@ func run(mn: Node) -> void:
 	_reach()
 	_dive_hint()
 	_zone_lines()
+	for id in STARTERS:
+		_framing(id)
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -424,3 +434,103 @@ func _zone_widths(zm: Match) -> void:
 				while px > 12 and zm.hud.big.get_string_size(String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
 					px -= 1
 				ok(px >= 12, "%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px])
+
+# ------------------------------------------------------------------ 9. framing at the match camera
+## Plays the course as one starter, the camera on the hunter (the default view, no cursor lean), and
+## judges each step's thing to act on at 1280x720: how often it is on screen and how tall it is drawn.
+func _framing(arch: String) -> void:
+	seed(11)       # (the run --tutorial-fight-check plays, the same each time)
+	var fm := Match.new()
+	main.add_child(fm)
+	fm.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
+			"demo_kin": "cindle", "arch": arch, "cls": Arch.weight(arch)})
+	fm.set_process(false)
+	var tu: Tutorial = fm.tut
+	var rows := {}      # step id -> [frames, frames on screen, px tall while on screen, on screen last frame]
+	var t := 0.0
+	while t < 600.0 and not fm.player.extracted:
+		TutorialDrive.drive(fm)
+		fm.step(Match.DT)
+		t += Match.DT
+		fm.cam.snap(fm.player.pos)
+		var sid := tu.id()
+		var at := _act_at(tu, sid)
+		if at == Vector3.INF:
+			continue
+		var row: Array = rows.get(sid, [0, 0, [], false])
+		rows[sid] = row
+		row[0] += 1
+		row[3] = _on_screen(fm.cam, at)
+		if row[3]:
+			row[1] += 1
+			var node := _act_node(tu, sid)
+			if node != null:
+				(row[2] as Array).append(_tall_px(fm.cam, node))
+	print("TUTHUD frame %s | step | on screen | px tall (min / median)" % arch)
+	for sid in rows:
+		var row: Array = rows[sid]
+		var share := float(row[1]) / maxf(1.0, float(row[0]))
+		var px: Array = row[2]
+		px.sort()
+		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[px.size() / 2]]
+		print("TUTHUD frame %s | %s | %.0f%% | %s" % [arch, sid, share * 100.0, tall])
+		if sid in Tutorial.WALK_LEAD:
+			ok(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
+		else:
+			ok(share >= ON_SHARE, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0])
+		if not px.is_empty():
+			ok(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
+	ok(fm.player.extracted, arch + ": the framing run finishes the course")
+	fm.queue_free()
+
+## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's pad
+## (you leave from it), else the step's goal.
+func _act_at(tu: Tutorial, sid: String) -> Vector3:
+	if sid in Tutorial.GAP_STEPS and tu.pad_sign(sid) != null:
+		return tu.stop(sid, "pad")
+	return tu.goal(sid)
+
+## The thing itself, when there is one to measure (the ground stops have none).
+func _act_node(tu: Tutorial, sid: String) -> Node3D:
+	if sid in Tutorial.GAP_STEPS:
+		return tu.pad_sign(sid)
+	if sid in Tutorial.FOE_STEPS:
+		var mb := tu.camps.nearest("sentinel" if sid == "hook" else "")
+		if mb == null:
+			mb = tu.camps.nearest()
+		return mb.model if mb else null
+	var item := tu.ground_item() if sid == "glove" else tu.outpost()
+	return item.get("node") if sid in ["glove", "wayout", "uplink", "defend", "extract"] else null
+
+func _on_screen(cam: Camera3D, at: Vector3) -> bool:
+	if cam.is_position_behind(at):
+		return false
+	return Rect2(Vector2.ZERO, FRAME_VIEW).has_point(_to_view(cam, at))
+
+## A world point on the 1280x720 screen.
+func _to_view(cam: Camera3D, at: Vector3) -> Vector2:
+	return cam.unproject_position(at) / cam.get_viewport().get_visible_rect().size * FRAME_VIEW
+
+## How tall a thing is drawn on screen: a sign faces the camera, so its line's height; anything else, the
+## height of its box's outline (seen from above, a flat monster's back counts, not just how high it stands).
+func _tall_px(cam: Camera3D, node: Node3D) -> float:
+	if node is Label3D:
+		var lab := node as Label3D
+		var half := cam.global_transform.basis.y * lab.font_size * lab.pixel_size * 0.5
+		return absf(_to_view(cam, lab.global_position + half).y - _to_view(cam, lab.global_position - half).y)
+	var box := _box(node)
+	var lo := INF
+	var hi := -INF
+	for i in 8:
+		var y := _to_view(cam, box.get_endpoint(i)).y
+		lo = minf(lo, y)
+		hi = maxf(hi, y)
+	return hi - lo
+
+## The world box a node draws in: all its visible meshes.
+func _box(node: Node3D) -> AABB:
+	var box := AABB(node.global_position, Vector3.ZERO)
+	for vi in node.find_children("*", "VisualInstance3D", true, false):
+		if (vi as VisualInstance3D).is_visible_in_tree():
+			box = box.merge((vi as VisualInstance3D).global_transform * (vi as VisualInstance3D).get_aabb())
+	return box
