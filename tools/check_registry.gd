@@ -215,6 +215,8 @@ const CHECKS := {
 	# the cursor on or under your own body
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],
 	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],  # key to picture
+	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake
+	"--boki-nap-shots": ["res://tools/boki_nap_check.gd", "boki_nap_check", "shots"],  # --shots-dir=<dir>
 	"--boki-moves-check": ["res://tools/boki_moves_check.gd", "boki_moves_check", null],  # move tiles
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],  # --shots-dir=<dir>
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],  # choose what to rank: + and pips
@@ -313,6 +315,7 @@ const CHECKS := {
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
 	# hit flinch over clips
@@ -345,7 +348,9 @@ const CHECKS := {
 	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
+	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],      # air casts before/after, frame by frame
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
+	"--aim-lead-check": ["res://tools/aim_lead_check.gd", "aim_lead_check", null],      # head and chest lead the cursor
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],      # before/after strip of turning on the spot
 	"--flue-flight-shots": ["res://tools/flue_flight_shots.gd", "flue_flight_shots", null],      # Cinder's Flue Flight
@@ -707,6 +712,8 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
+	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

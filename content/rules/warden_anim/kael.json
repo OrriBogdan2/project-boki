@@ -15,13 +15,21 @@
 			"f": "walk_f",
 			"b": "walk_b",
 			"l": "walk_l",
-			"r": "walk_r"
+			"r": "walk_r",
+			"fl": "walk_fl",
+			"fr": "walk_fr",
+			"bl": "walk_bl",
+			"br": "walk_br"
 		},
 		"run": {
 			"f": "run_f",
 			"b": "run_b",
 			"l": "run_l",
-			"r": "run_r"
+			"r": "run_r",
+			"fl": "run_fl",
+			"fr": "run_fr",
+			"bl": "run_bl",
+			"br": "run_br"
 		},
 		"walk_speed": 2.2,
 		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.6], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}, "start_phase": 0.75, "start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]}
@@ -59,21 +67,21 @@
 		"jug_slash_r": {
 			"clip": "slash_r",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_slash_l": {
 			"clip": "slash_l",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
 			"fade": 0.25,
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_wave": {
 			"clip": "wave",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
 			"fade": 0.3,
@@ -87,7 +95,8 @@
 		},
 		"jug_lunge": {
 			"clip": "lunge",
-			"fade_out": 0.4
+			"fade_out": 0.4,
+			"rate": 1.5
 		},
 		"jug_meteor": {
 			"clip": "meteor",
@@ -100,7 +109,8 @@
 		},
 		"jug_dash": {
 			"clip": "dash",
-			"fade_out": 0.4
+			"fade_out": 0.4,
+			"rate": 1.1
 		},
 		"jug_exdash": {
 			"clip": "exdash",
@@ -109,7 +119,7 @@
 		"jug_chain": {
 			"clip": "chain",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_reel": {
 			"clip": "reel",
 			"hold_from": 0.25,

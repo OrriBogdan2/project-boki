@@ -224,12 +224,6 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 
 ![ashwick walk and run, before and after](anim_audit/ashwick.jpg)
 
-<<<<<<< HEAD
-**Mossy (`bulwark`)**
-1. Cadence 5 steps/s on a 2 m giant (a shuffle); not changed.
-2. The left arm hung nearly still against the legs (counter +0.17, now +0.64). Slide only fell 25 % to 19 %: the nearest to the gate.
-3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.50, the travel now spread over 6 (throw) and 3 (slam) frames at 30 fps; the throw's release stays at 0.12 s and the slam's impact at 0.08 s).
-=======
 **Albert (`bulwark`)**
 1. Cadence was 5 steps/s on a 2 m giant (a shuffle), 4.4 after the slide tune; now 3.5 at a run and 2.6 at a walk
    (`foot_mps` [3.1, 7.4] plays the clips at rate 0.65), a heavy planted stride: the thighs stretch 1.35 / 1.55 so the
@@ -238,15 +232,12 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 2. The left arm hung nearly still against the legs (counter +0.17, now +0.68): the shield arm swings 0.5. The hammer arm
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
-3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
+3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.50, the travel now spread over 6 (throw) and 3 (slam) frames at 30 fps; the throw's release stays at 0.12 s and the slam's impact at 0.08 s).
 4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
    2.71 m/s (80 %); now 0.41 m/s (12 %, Nov 13) (see "The walk and run blend in step"; rows walk, jog, run, before then after, in
    the strip below). His loops share one `loco.cycle_s` (0.5 s); docs/art/FOOT_SLIDE.md has the whole blend sweep.
->>>>>>> origin/main
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
-
-![bulwark lmb_throw and lmb_slam at 30 fps (0 to 0.233 s), before and after the retime: `--anim-shots --close --frames=16`, llvmpipe on rpc1](anim_audit/bulwark_hand.jpg)
 
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
@@ -381,6 +372,35 @@ Sparkle's raw walk crosses her legs by frame 1; with the phase the stance opens 
 The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
 walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
 
+## Climb clips (mantle and ledge pull-up)
+
+Lace (`archer`), Tenzo (`dolm`), Grimble (`dredge`) and Neve (`rimewright`) have a keyed `mantle` (reach, hands plant, vault, land,
+run on; 0.73 s) and `ledge` (hang, pull up; 0.9 s) clip, played by the ledge rise's progress up the face (data `climb`). The
+rise had no animation state at all before: `mantle` was only set by a scripted mantle nothing starts any more, so every
+Hunter showed its fall pose up a ledge; the procedural mantle pose now shows too, for the Hunters without clips. The clips are
+keyed by `tools/art1/glb_climb_clips.py` (hips, head and limb aims solved to the rig; Lace's bow rides her hand, Grimble's
+right arm is the hook, Neve's skates trail). The rig still has no Blender-baked hand shapes: hands keep the idle's. Strip
+(top to bottom Tenzo, Lace, Grimble, Neve; --clip-shots, yaw 90):
+
+![mantle clips](anim_audit/climb_mantle.jpg)
+## Mantle and ledge clips
+
+A ledge rise (`Hunter.lfloat`) now feeds the anim state `mantle` = how far up the face the body is (`MantleCarry.rise_k`,
+0 at the foot, 1 at the lip), so a keyed mantle clip is read at that phase and cannot lag the body; `ledge` (the float
+back up from the abyss) plays on its own clock and holds its last pose. `mage` (Sparkle), `bulwark` (Albert), `thief`
+(Sable) and `ostra` (Motley) have both clips (0.8 s mantle, 1.0 s ledge), keyed with `tools/art1/climb_clips.py` and the
+poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Blender; rerun it after any rebuild of the
+`.glb`: `python3 tools/art1/climb_clips.py <ryzz|sable|breaker|ostra>`). Sparkle scrambles with one knee up; Sable
+kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
+legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
+`--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+Motley's root stays on his hover (data `rig_root`), so his lift and lean are keyed on the hips instead (his
+`offset_bones`): the spring stretches and he rises out of the box. `--close` backs the camera off for a tall Hunter.
+Rows below are mantle then ledge for Sparkle, Sable, Albert and Motley, 8 frames each (software GL; after changing a
+`.glb`, run `godot --headless --path . --import` first or the strip shows the old clip).
+
+![mantle and ledge strips: Sparkle, Sable, Albert, Motley](anim_audit/climb_mantle3.jpg)
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
@@ -388,15 +408,10 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-<<<<<<< HEAD
-- Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `dolm` jumps a hand 0.4 to 0.67 body heights in one frame.
-- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-=======
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
->>>>>>> origin/main
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65; at the jog the rate cap leaves 28 % slide, so the jog gate
   exempts it), and a stronger counter-swing (+0.39).

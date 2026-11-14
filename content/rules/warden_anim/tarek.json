@@ -46,15 +46,15 @@
 		"breah_throw": {
 			"clip": "lmb_throw",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
 			"hold_from": 0.24
-		},
+		, "air_legs": true},
 		"breah_punch": {
 			"clip": "lmb_punch",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_crouch": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
@@ -77,7 +77,8 @@
 			"clip": "rmb_lunge"
 		},
 		"breah_leap_land": {
-			"clip": "dash_land"
+			"clip": "dash_land",
+			"upper": "moving"
 		},
 		"breah_exdash": {
 			"clip": "dash_air",
@@ -86,7 +87,7 @@
 		},
 		"breah_raise": {
 			"clip": "e_row"
-		},
+		, "air_legs": true},
 		"breah_sense": {
 			"clip": "sense"
 		},
@@ -127,6 +128,11 @@
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.18, "tug_hz": 1.3, "twist": 0.06, "bow": 0.05},
+	"climb": {
+		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
+		"mantle": {"clip": "mantle", "rise": 0.28},
+		"ledge": {"clip": "ledge", "rise": 0.3}
+	},
 	"procedural": [
 		"ledge",
 		"mantle",
