@@ -771,18 +771,18 @@ func _tick_slam(dt: float) -> void:
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "soft": true,
-			"all": true}
+	var lane := {"len": float(sl["len"]), "width": float(sl["width"]), "fill": wk, "soft": true, "all": true}
 	if pin != Vector2.ZERO:
-		cone["dir"] = pin
-	AimKit.cone(h, "slam", cone)
+		lane["dir"] = pin
+	AimKit.lane(h, "slam", lane)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
 		_slam(pin)
 
-## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
-## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
+## The Finishing Slam: a heavy strike down a lane (Brall's Execution Slam, hero-ref 0157); the wounded
+## (under 35%) take +50%; a foe in the sweet spot (the far tip, dead ahead) is the payoff, and a knock on that
+## foe within 2s makes the Gilded Riposte ready again.
 func _slam(pin := Vector2.ZERO) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
@@ -790,11 +790,12 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb",
-			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+			{"delivery": {"type": "cone", "radius": float(sl["len"])}, "effects": effs})
 	var from := h.pos
 	var paid := {}
-	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
-	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
+	var strike := {"no_floor": true, "lane_w": float(sl["width"])}       # KinExec's cone hits this lane
+	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -813,9 +814,9 @@ func _slam(pin := Vector2.ZERO) -> void:
 			sweet_spots += 1
 			payoff_fx(f.pos, res_col(), "pay_rage", dd, f)
 			vfx("slam_sweet", f.pos, dd)
-		slam_hit[f.get_instance_id()] = m.time}))
+		slam_hit[f.get_instance_id()] = m.time})))
 	AimKit.hide(h, "slam")
-	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
+	vfx("slam_hit", h.pos, dd, {"len": float(sl["len"])})
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 ## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.

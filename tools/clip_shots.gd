@@ -1,9 +1,10 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--carry [--heart]] [--cc]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
-## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in
-## <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun, a root and Grounded standing in
-## <dir>/cc_<state>/.
+## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
+## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
+## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
+## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
+## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -113,12 +114,41 @@ func run(main: Node) -> void:
 		await tree.create_timer(1.5).timeout       # (the title's logo fades in real time, not in frames)
 		for key in ["stun", "rooted", "gnd"]:
 			await _cc(model, sync, fps, out, key)
+	var cast_speed := 4.0
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--cast-speed="):
+			cast_speed = float(a.substr(13))
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--cast="):
+			await _cast(model, sync, fps, out, a.substr(7), cast_speed)
 	if OS.get_cmdline_user_args().has("--moods"):
 		await _moods(model, sync, clips, out)
 	if OS.get_cmdline_user_args().has("--carry"):
 		await _carry(model, sync, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
+
+## --cast=<kmove>: moving at `speed` m/s (0: standing), the move is pressed 0.3 s in and let go at its clip's end;
+## <dir>/cast_<kmove>/f###.png every 1/fps s for 0.6 s past that (the hand-over in, and back to the legs).
+func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, speed: float) -> void:
+	var dir := out.path_join("cast_" + kmove)
+	DirAccess.make_dir_recursive_absolute(dir)
+	var clips: WardenClips = sync.get("clips")
+	clips.force = {}
+	var s := {"vel": Vector3(0, 0, -speed), "face": model.rotation.y, "grounded": true}
+	model.set_meta(WardenClips.STATE, s)
+	for k in 45:
+		sync.call("_process", 1.0 / 30.0)
+	var length := clips.lib.get_animation(String(clips.d["kmoves"][kmove]["clip"])).length
+	for i in int(fps * (0.3 + length + 0.6)):
+		var t := float(i) / fps - 0.3
+		if t >= 0.0 and t < length:
+			s["kmove"] = kmove
+			s["kmove_t"] = t
+		else:
+			s.erase("kmove")
+		sync.call("_process", 1.0 / fps)
+		await _grab(dir.path_join("f%03d.png" % i))
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw

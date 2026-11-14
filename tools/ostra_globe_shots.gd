@@ -2,9 +2,10 @@ extends "res://tools/vv_shots.gd"
 ## --ostra-globe-shots --shots-dir=<dir>: Motley's Brimseed at 0, 25, 50 and 100% growth at the match camera (xvfb with
 ## a renderer), one strip; the drawn radius is printed next to the hit radius.
 
-const GROWTH := [0.0, 0.25, 0.5, 1.0]      # share of the grow time
-const CROP := Vector2i(520, 360)           # px round the seed per strip frame
-const SEED_AT := 8.0                       # m east of Motley
+const GROWTH := [0.0, 0.25, 0.5, 1.0]  # share of the grow time
+const CROP := Vector2i(520, 360)  # px round the seed per strip frame
+const SEED_AT := 8.0  # m east of Motley
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -36,6 +37,7 @@ func run(main_node: Node) -> void:
 	f.close()
 	print("OSTRAGLOBESHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
 
 func _take(_kind: String, file: String, caption: String, _focus: Callable) -> void:
 	var img := main.get_viewport().get_texture().get_image()

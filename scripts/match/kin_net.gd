@@ -105,12 +105,9 @@ static func on_event(m: Match, x: Array) -> void:
 	var at := Vector3(float(x[3]), float(x[4]), float(x[5]))
 	match String(x[1]):
 		"throw":
-			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
 			m.sfx("throw", at, -4.0)
 		"recall", "merge_leap", "hop":
 			m.sfx("recall", at, -6.0)
-		"cmd":
-			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
 		"scan_start", "scan_stop", "scan_done":
 			if e is Hunter:
 				Capture.on_net(m, e, String(x[1]), String(x[6]))
@@ -120,7 +117,6 @@ static func on_event(m: Match, x: Array) -> void:
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 		"scoop", "round":
-			m.fx.ring(at, 1.2, Color.WHITE, 0.3)
 			m.sfx("recall", at, -4.0)
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)

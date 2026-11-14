@@ -5,7 +5,7 @@ extends "res://tools/hero_pair_check.gd"
 ## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
 ## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
 ## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
-## (tools/dash_flow_check.gd).
+## (tools/dash_flow_check.gd), and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
 
 var m: Match
 var P: Hunter
@@ -24,12 +24,14 @@ func run(main_node: Node) -> void:
 	_data()
 	_bag()
 	_fencer()
+	_tide()
 	_vials()
 	_hold_and_air()
 	_beach()
 	_swim()
 	_riptide()
 	_wave()
+	_telegraphs()
 	_numbers()
 	_cancels()
 	_recast()
@@ -51,6 +53,7 @@ func _combo_tag() -> void:
 func _reset(dist := 6.0) -> void:
 	K._drop_holds()
 	K.flying.clear()
+	for pd in K.puddles: (pd["node"] as Node3D).queue_free()
 	K.puddles.clear()
 	K.spouts.clear()
 	K.wave = {}
@@ -59,6 +62,8 @@ func _reset(dist := 6.0) -> void:
 	K.beach_at.clear()
 	K.spin_t = -1.0
 	K.swim_t = 0.0
+	K.tide = {}
+	K.combo_n = 0
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.roll_t = 0.0            # (a ride or dash left over from the last trial: DashFlow would hold the next press)
@@ -125,18 +130,51 @@ func _bag() -> void:
 func _fencer() -> void:
 	_reset(3.2)
 	var x0 := P.pos.x
-	var top := {"n": 0, "slow": 0.0}
-	P.inp["fire"] = true
+	var top := {"n": 0, "slow": 0.0, "t": 0.0, "pose": false}
+	var thrusts := int(HeroVfx.of(m).plays.get("thrust", 0))
 	step(m, 1.1, func():
-		P.inp["fire"] = true
+		top["t"] += DT
+		P.inp["fire"] = fmod(top["t"], 0.12) < 0.05      # clicking (holding is the Tide Lunge)
+		top["pose"] = top["pose"] or K.anim_id == "gil_thrust_1"
 		top["slow"] = maxf(top["slow"], T.slow_t)
 		top["n"] = K.combo_n)
 	P.inp["fire"] = false
+	ok("Fencer: a thrust plays its own thrust pose and look (no slash arc)",
+		top["pose"] and int(HeroVfx.of(m).plays.get("thrust", 0)) > thrusts)
 	ok("Fencer: a three-hit chain lands on the dummy", int(top["n"]) >= 3 and dmg(T) >= 20.0,
 		"swings %d dmg %.1f" % [top["n"], dmg(T)])
 	ok("Fencer: each swing steps him forward", P.pos.x - x0 > 0.8, "moved %.2f" % (P.pos.x - x0))
 	ok("Fencer: the third, longer thrust slows (30% for 0.5 s)", top["slow"] > 0.2 and top["slow"] <= 0.55,
 		"slow_t %.2f" % top["slow"])
+
+## Held LMB: the Tide Lunge. A short click is one thrust; held, he slows and draws back, and on release drives
+## down the line hitting everyone on it; a full charge soaks them (a splash mark toward Beached).
+func _tide() -> void:
+	_reset(3.0)
+	P.inp["fire"] = true
+	step(m, 0.1)
+	P.inp["fire"] = false
+	step(m, 0.4)
+	ok("Tide Lunge: a click is one thrust, no lunge", K.combo_n == 1 and K.lmb_t < 0.0 and K.tide.is_empty(),
+		"thrusts %d" % K.combo_n)
+	_reset(4.0)
+	var x0 := P.pos.x
+	P.inp["fire"] = true
+	step(m, 1.2, func(): P.inp["fire"] = true)
+	ok("Tide Lunge: held, he charges it (slowed, drawn back), full by 0.8 s",
+		K.lmb_t >= 0.0 and K.tide_k() >= 1.0 and K.move_k() < 1.0 and K.anim_id == "gil_tide_wind",
+		"k %.2f anim %s" % [K.tide_k(), K.anim_id])
+	var before := dmg(T)
+	P.inp["fire"] = false
+	step(m, 0.5)
+	var td: Dictionary = K.lmb_def()["tide"]
+	ok("Tide Lunge: let go, he drives about 5 m down the line", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5,
+		"%.2f m" % (P.pos.x - x0))
+	ok("Tide Lunge: full charge hits the foe on the line for 22", dmg(T) - before >= float(td["dmg"][1]) * 0.9,
+		"%.1f" % (dmg(T) - before))
+	ok("Tide Lunge: full charge soaks (one splash mark)", K.marks_on(T) == 1, "%d" % K.marks_on(T))
+	ok("Tide Lunge: the release plays its pose and look",
+		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
@@ -144,9 +182,13 @@ func _vials() -> void:
 		_reset(6.0)
 		K.bag.append(v)
 		var x0 := T.pos.x
+		var looks := int(HeroVfx.of(m).plays.get("shatter_" + v, 0))
 		tap(m, P)
+		var thrown := K.anim_id == "gil_throw"
 		var top := _land()
 		var hit := dmg(T) > 0.0
+		ok("%s: the toss pose, and the bottle breaks in its own look" % v,
+			thrown and int(HeroVfx.of(m).plays.get("shatter_" + v, 0)) == looks + 1)
 		match v:
 			"thunder": ok("Thunder: damage and a stun in the centre", hit and top["stun"] >= 0.4,
 				"dmg %.1f stun %.2f" % [dmg(T), top["stun"]])
@@ -160,15 +202,53 @@ func _vials() -> void:
 				"dmg %.1f burn %.2f" % [dmg(T), top["burn"]])
 			"zeep": ok("Super Zeep: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
 				"stun %.2f lift %.2f" % [top["stun"], top["lift"]])
-	# the slime puddle keeps slowing
+	_puddle()
+
+## The slime puddle keeps slowing, and it is drawn for exactly as long, on its radius: Gil's lit rim over a faint
+## slime inside, a white flare as it lands, an ease-out fade before it dries, and no strobing rings.
+func _puddle() -> void:
 	_reset(6.0)
 	K.bag.append("slime")
 	tap(m, P)
 	_land()
+	var vd := K.vial_def("slime")
+	var pd: Dictionary = K.puddles[0] if K.puddles.size() == 1 else {}
+	ok("Slime: one puddle, drawn", pd.has("node") and (pd["node"] as Node3D).is_inside_tree())
+	if not pd.has("node"):
+		return
+	var node: Node3D = pd["node"]
+	var rim: ShaderMaterial = pd["rim"]
+	var inside: ShaderMaterial = pd["inside"]
+	var sig := Arch.color("gil")
+	var quad := (node.get_child(1) as MeshInstance3D).mesh as PlaneMesh
+	var flare: Color = rim.get_shader_parameter("color")
+	ok("Slime: the rim sits on the puddle's radius and flares white as it lands",
+		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > GilKit.PUDDLE_RIM_A + 0.05
+			and flare.r > sig.r + 0.05,
+		"quad %.2f m, flare %s" % [quad.size.x, flare])
 	fresh(T)
 	step(m, 0.3)
 	ok("Slime: the puddle slows whoever stands in it", T.slow_t > 0.0 and absf(T.slow_k - 0.25) < 0.05,
 		"slow %.2f k %.2f" % [T.slow_t, T.slow_k])
+	var steady: Color = rim.get_shader_parameter("color")
+	var in_col: Color = inside.get_shader_parameter("color")
+	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
+		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
+			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
+		"rim %s inside %s" % [steady, in_col])
+	var at: Vector3 = pd["at"]
+	var r := float(pd["r"])
+	var on_it := func(rg: Dictionary) -> bool:
+		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
+	var strobe := false
+	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
+		step(m, DT)
+		strobe = strobe or m.fx.rings.any(on_it)
+	var mid: float = (rim.get_shader_parameter("color") as Color).a / GilKit.PUDDLE_RIM_A
+	ok("Slime: no rings strobe over it, and it fades on an ease-out curve as the slow ends (a quarter left halfway)",
+		not strobe and absf(mid - 0.25) < 0.05, "%.3f of its glow halfway through the fade" % mid)
+	step(m, 0.3)
+	ok("Slime: gone with its slow", K.puddles.is_empty() and node.is_queued_for_deletion())
 
 func _hold_and_air() -> void:
 	_reset(6.0)
@@ -213,19 +293,32 @@ func _beach() -> void:
 func _swim() -> void:
 	_reset(5.0)
 	var x0 := P.pos.x
+	var dives := int(HeroVfx.of(m).plays.get("dive", 0))
 	K.on_dash(false)
 	m.step(DT)
 	var under := K.swim_t > 0.0
 	var hit_on := float(K.incoming(T, 10.0, {})[0]) == 10.0
-	var top := {"stun": 0.0, "y": 0.0}
+	ok("Ground Swim: the dive and its wake play, no shared dash pill over the ground",
+		int(HeroVfx.of(m).plays.get("dive", 0)) == dives + 1 and K.own_dash_trail())
+	step(m, 0.15)
+	# owner 11-11: the swim didn't take him under. Mid-swim the dive pose has the whole body (hat and all,
+	# plate_offset up from the feet) below the surface.
+	var age := m.time - K.anim_at
+	var lift := float(HunterAnim.km_sample(K.anim_id, age).get("lift", 0.0))
+	ok("Ground Swim: mid-swim his whole body is under the ground",
+		K.anim_id == "gil_dive" and lift + float(K.d["plate_offset"]) < 0.0, "%s lift %.2f" % [K.anim_id, lift])
+	var top := {"stun": 0.0, "y": 0.0, "out": false}
 	var y0 := T.pos.y
 	step(m, 0.8, func():
+		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
 	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
 	var dd := K.dash_def()
 	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
 		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
+	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
+		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
 	ok("Ground Swim: he stays hittable underground", under and hit_on)
 	ok("Ground Swim: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])
@@ -234,7 +327,7 @@ func _swim() -> void:
 func _riptide() -> void:
 	_reset(1.6)
 	K.use_e()
-	ok("Riptide: E starts the spin", K.spin_t >= 0.0)
+	ok("Riptide: E starts the spin (the spin pose)", K.spin_t >= 0.0 and K.anim_id == "gil_spin")
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
 	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
@@ -242,6 +335,8 @@ func _riptide() -> void:
 	K.use_e()
 	step(m, 0.3)
 	K.e_recast()
+	ok("Riptide recast: the spin stops on the spout thrust, the spout's look plays",
+		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
@@ -265,8 +360,9 @@ func _wave() -> void:
 	P.lvl = 6
 	ok("Tidal Wave: casts", K.cast_ult())
 	m.step(DT)
-	ok("Tidal Wave: Gil is untargetable while he surfs",
-		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0)
+	ok("Tidal Wave: Gil is untargetable while he surfs (the surf pose, the wave's look)",
+		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0 and K.anim_id == "gil_surf"
+		and int(HeroVfx.of(m).plays.get("wave", 0)) > 0)
 	var top := {"stun": 0.0, "slow": 0.0, "k": 0.0}
 	step(m, 1.2, func():
 		top["stun"] = maxf(top["stun"], T.stun_t)
@@ -276,9 +372,32 @@ func _wave() -> void:
 		top["stun"] >= 0.9 and top["slow"] >= 2.5 and absf(top["k"] - 0.5) < 0.05,
 		"stun %.2f slow %.2f k %.2f" % [top["stun"], top["slow"], top["k"]])
 	ok("Tidal Wave: lands with a shield and is hittable again",
-		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
+		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0
+		and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+	_wave_way(Vector2(-1, 0))
+	_wave_way(Vector2(0, 1))
+
+## Owner 11-11: the ult pushed him the wrong way. Cast while running another way (back, or sideways), he surfs the
+## wave's own line toward the cursor, the whole 14 m, and stays on it.
+func _wave_way(run: Vector2) -> void:
+	_reset(6.0)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	P.inp["move"] = run
+	var p0 := P.pos
+	var aim := P.aim_dir()
+	K.cast_ult()
+	step(m, 1.1, func(): P.inp["move"] = run)
+	P.inp["move"] = Vector2.ZERO
+	var moved := P.pos - p0
+	var along := Vector2(moved.x, moved.z).dot(aim)
+	var off := absf(Vector2(moved.x, moved.z).cross(aim))
+	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
+		"along %.2f off-line %.2f" % [along, off])
+	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
+		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
 
 # ------------------------------------------------------------------ gil.md: numbers per slot
 ## One press of a one-step key (Hunter.inp: "sig" E, "sec" RMB, "dash" Shift, "jump"), held for a single step.
@@ -304,7 +423,7 @@ func _lmb_numbers() -> void:
 	var cds := {}
 	var t := 0.0
 	while t < 1.1:
-		P.inp["fire"] = true
+		P.inp["fire"] = t < 0.9 and fmod(t, 0.12) < 0.05      # clicking (holding is the Tide Lunge), one chain
 		var was := K.combo_n
 		m.step(DT)
 		t += DT
@@ -457,7 +576,10 @@ func _spin_cancels() -> void:
 	_reset(1.6)
 	_press("sig")
 	step(m, 0.3)
-	step(m, 0.4, func(): P.inp["fire"] = true)
+	var held := {"t": 0.0}
+	step(m, 0.4, func():
+		held["t"] += DT
+		P.inp["fire"] = fmod(held["t"], 0.12) < 0.05)      # clicking (held, it is a Tide Lunge on release)
 	P.inp["fire"] = false
 	ok("cancel E spin + LMB: both (the thrusts land, the spin goes on)", K.combo_n >= 1 and K.spin_t >= 0.0,
 		"thrusts %d" % K.combo_n)
@@ -466,7 +588,8 @@ func _spin_cancels() -> void:
 	var d0 := P.dashes
 	_press("dash")
 	ok("cancel E spin + Shift: locked (no dash, no charge spent, the spin goes on)",
-		P.dashes == d0 and K.swim_t <= 0.0 and P.roll_t <= 0.0 and K.spin_t >= 0.0)
+		P.dashes == d0 and K.swim_t <= 0.0 and P.roll_t <= 0.0 and K.spin_t >= 0.0,
+		"dashes %d->%d roll %.2f" % [d0, P.dashes, P.roll_t])
 	var y0 := P.pos.y
 	_press("jump")
 	step(m, 0.15)
@@ -565,3 +688,60 @@ func _clips() -> void:
 	K.bag.append("fire")
 	ok("colour: the RMB slot wears the next potion's colour, not Gil's blue (finding F3)",
 		K.slot_info("sec")["col"] == Color("#ff5a3a"))
+
+## Every telegraph Gil makes goes through AimKit (docs/AIMKIT.md), where everyone sees it, and none makes a
+## tweened Fx telegraph node (the old ArchKit.tele_circle/tele_lane path is gone). The R fuse ring is ArchKit's.
+func _telegraphs() -> void:
+	var nodes: int = m.fx.teles.size()
+	_reset(6.0)
+	K.bag.append("slime")
+	tap(m, P)
+	m.step(DT)
+	var pot := String(K.flying[0]["id"]) if not K.flying.is_empty() else ""
+	var c0 := AimKit.entry(P, pot)
+	var slime_r := float(K.vial_def("slime")["radius"])
+	ok("telegraph: a thrown potion's landing circle (its radius) is up for everyone",
+		c0.get("kind", "") == "circle" and bool(c0["all"]) and absf(float(c0["r"]) - slime_r) < 0.01,
+		str(c0.get("r", -1.0)))
+	var f0 := float(c0.get("fill", -1.0))
+	step(m, 0.15)
+	var f1 := float(AimKit.entry(P, pot).get("fill", -1.0))
+	ok("telegraph: it fills while the potion flies", f0 >= 0.0 and f1 > f0, "%.2f -> %.2f" % [f0, f1])
+	_land()
+	step(m, 0.15)
+	ok("telegraph: and is gone once it lands", not AimKit.shown(P, pot))
+	_reset(7.0)
+	K.use_e()
+	step(m, 0.3)
+	K.e_recast()
+	m.step(DT)
+	var sp: Dictionary = K.spouts[0] if not K.spouts.is_empty() else {}
+	var l0 := AimKit.entry(P, String(sp.get("id", "")))
+	ok("telegraph: the spout's lane, its length and width, for everyone",
+		l0.get("kind", "") == "lane" and bool(l0["all"]) and absf(float(l0["len"]) - float(sp["len"])) < 0.01
+		and absf(float(l0["width"]) - float(sp["w"])) < 0.01)
+	step(m, 0.1)
+	var l1 := AimKit.entry(P, String(sp.get("id", "")))
+	ok("telegraph: the spout's lane fills with its front",
+		float(l1.get("fill", -1.0)) > float(l0.get("fill", -1.0)) and float(l0.get("fill", -1.0)) >= 0.0)
+	_reset(6.0)
+	P.lvl = 6
+	K.cast_ult()
+	m.step(DT)
+	var w0 := AimKit.entry(P, "x")
+	ok("telegraph: Tidal Wave's lane (an outline, the full range) for everyone while he surfs",
+		w0.get("kind", "") == "lane" and bool(w0["all"]) and float(w0["fill"]) < 0.0
+		and absf(float(w0["len"]) - float(K.x_def()["range"])) < 0.01)
+	step(m, float(K.x_def()["time"]) + 0.3)
+	ok("telegraph: and is gone when he lands", not AimKit.shown(P, "x"))
+	_reset(6.0)
+	K.fuse = {"t": 1.0, "T": 1.0, "bond": false, "guard": "none", "fx": 1.0, "at": P.pos}
+	step(m, 0.25)
+	var r0 := AimKit.entry(P, "r_fuse")
+	ok("telegraph: an R fuse's 2.4 m ring fills on the ground for everyone",
+		r0.get("kind", "") == "circle" and bool(r0["all"]) and absf(float(r0["r"]) - 2.4) < 0.01
+		and float(r0["fill"]) > 0.15)
+	K.fuse = {}
+	step(m, 0.15)
+	ok("telegraph: none of it made an Fx telegraph node", m.fx.teles.size() == nodes,
+		"%d -> %d" % [nodes, m.fx.teles.size()])

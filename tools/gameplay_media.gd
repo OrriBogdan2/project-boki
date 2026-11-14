@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-10> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -19,7 +19,10 @@ extends RefCounted
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
 ##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
 ##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
-##  12 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
+##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
+##                   (11 and 12 follow with the game's own camera, as a player sees it)
+##   13 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
 ##                   (the see-through canopies: SeeThrough)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
@@ -91,7 +94,9 @@ func run(main_node: Node) -> void:
 		8: await _relay(secs)
 		9: await _duo(secs)
 		10: await _base_tp()
-		12: await _forest(secs)
+		11: await _shift_glide(secs)
+		12: await _dive_feather(secs)
+		13: await _forest(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -167,15 +172,18 @@ func _ground(p: Vector3) -> Vector3:
 	return m.world.free_spot_near(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), [], 1.2, 0.5, 6.0)
 
 ## Steps `secs` of the match, one rendered frame per 1/30 s. `each(t)` runs before every frame's steps,
-## `cam_to(t)` gives the camera's point.
-func _go(secs: float, each: Callable, cam_to: Callable) -> void:
+## `cam_to(t)` gives the camera's point (`follow`: the game camera's own follow, as in play, instead of a snap).
+func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void:
 	var t := 0.0
 	while t < secs:
 		_purge()
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
-		m.cam.snap(cam_to.call(t))
+		if follow:
+			m.cam.follow(cam_to.call(t), FRAME, false)
+		else:
+			m.cam.snap(cam_to.call(t))
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
@@ -499,6 +507,58 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
+
+# ------------------------------------------------------------------ 9, 10: movement feel (decision 0061)
+## The player's keys for the next rendered frame, as a player's (a press lasts one step: the hunter clears it).
+func _keys(pl: Hunter, move: Vector2, jump: bool, glide: bool, dash := false) -> void:
+	pl.inp["move"] = move
+	pl.inp["aim"] = pl.pos + Vector3(move.x, 0, move.y) * 8.0 + Vector3(0, 0.9, 0)
+	pl.inp["glide_press_only"] = true
+	pl.inp["jump"] = jump
+	pl.inp["glide"] = glide
+	pl.inp["dash"] = dash
+
+## Kingpin runs east, jumps, Shifts in the air and presses Space; the second time Space comes just after the dash.
+func _shift_glide(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	pl.teleport(_ground(pl.pos))
+	_zoom(0.55)
+	_mark("start")
+	var plan := [[0.4, 0.75, 0.85], [3.6, 3.95, 4.2]]      # [jump, Shift, Space] s: Space mid-dash, then 0.07s after it
+	await _go(secs, func(t: float):
+		var move := Vector2(1, 0) if fmod(t, 6.4) < 3.2 else Vector2(-1, 0)
+		var jump := false
+		var dash := false
+		var glide := false
+		for k in plan:
+			jump = jump or absf(t - float(k[0])) < FRAME * 0.5 or absf(t - float(k[2])) < FRAME * 0.5
+			dash = dash or absf(t - float(k[1])) < FRAME * 0.5
+			glide = glide or (t >= float(k[2]) and t < float(k[2]) + 1.4)
+		_keys(pl, move, jump, glide, dash),
+		func(_t: float): return pl.render_pos(1.0), true)
+
+## Glides out over the abyss at island level from the nearest edge east of the start, lets go for 1s, opens the glider
+## again (the feather up), and once more.
+func _dive_feather(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	var edge := pl.pos
+	while not m.world.is_void(edge.x + 0.5, edge.z) and edge.x < pl.pos.x + 200.0:
+		edge.x += 0.5
+	var lip := m.world.ground_at(edge.x, edge.z)
+	pl.teleport(Vector3(edge.x - 4.0, lip + 1.5, edge.z))
+	pl.grounded = false
+	pl.air_t = 1.0
+	pl.gliding = true
+	pl.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+	_zoom(0.55)
+	_mark("start")
+	await _go(secs, func(t: float):
+		var c := fmod(t, 3.6)          # glide 1s, drop 1s, feather 1.6s
+		_keys(pl, Vector2(1, 0), absf(c - 2.0) < FRAME * 0.5, c < 1.0 or c >= 2.0),
+		func(_t: float): return pl.render_pos(1.0), true)
+
 
 func _duo(secs: float) -> void:
 	Save.d["name"] = HeroTitle.base_name("gunslinger")

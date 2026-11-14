@@ -47,7 +47,7 @@ const HEROES := [
 	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
 	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
-	["gil", MEDIAN_BAR, "hold", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
+	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
 ]
 const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
