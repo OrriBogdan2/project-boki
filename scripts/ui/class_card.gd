@@ -63,6 +63,7 @@ static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
 	head.add_child(mt)
 	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
 	v.add_child(head)
+	Glossary.add_note(v, "Mastery")
 	for i in goals.size():
 		v.add_child(_mastery_row(id, i, width))
 	return v

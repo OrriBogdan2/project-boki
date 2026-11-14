@@ -1236,6 +1236,14 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | bite | {"look": "splash", "size": 0.55, "life": 0.3, "c": "bff4ff", "c2": "ffffff", "doc": "The bite, the moment to press: one sharp crown of water."} |
 | catch | {"look": "glint", "life": 0.65, "c": "bff4ff", "c2": "ffffff", "rare_c": "ffd24a", "rare_c2": "fff3c0", "size": {"snack": 0.2, "item": 0.3, "rare": 0.5}, "rise": 0.35, "doc": "A catch is landed: one four-point glint above the water, sized by what came up (snack, item, rare; a rare is gold) and floating up by rise m."} |
 
+## glossary (`content/rules/glossary.json`)
+
+First-time lines (Glossary, docs/UI_FIRST15.md 4): a word a new player meets on a screen before anything explains it, keyed by the word as shown, and its one line. The line shows under the word for the whole session it is first seen in, then never again. Keep each line short: the drop map's legend gives it about 34 characters.
+
+| Setting | Value |
+|---|---|
+| lines | {"Mastery": "Goals played as this Hunter: each one done gives a new look.", "Glider": "What you glide on after a jump: they all fly the same.", "Boss lair": "A boss: beat it for the best loot", "Vault": "A big chest of loot", "Rare Boki": "A rare wild Boki you can catch", "Item cache": "A chest with good gear beside it"} |
+
 ## heart (`content/rules/heart.json`)
 
 
