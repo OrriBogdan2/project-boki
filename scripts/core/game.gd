@@ -76,7 +76,7 @@ func _setup_input() -> void:
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
-	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("throw", [KEY_C])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
