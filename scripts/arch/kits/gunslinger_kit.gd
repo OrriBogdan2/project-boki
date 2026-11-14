@@ -3,14 +3,15 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
-## damages and Dazes it ("rat" Rattled in code) on the spot.
-## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
-## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +76% to a Dazed foe, in big
-## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
-## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
-## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a
+## foe damages and Dazes it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m, riding up
+## ramps and low ledges, and sticks where it meets a steep wall: a cone shows back toward you for its fuse,
+## then blasts, shoving everyone in it along the cone (toward you), hurting and Dazing them too. At the
+## lane's end on no foe and no wall, on the ground or in the air, it is a dud: a puff and nothing else (a
+## miss is a miss; the source's cone is wall-only). The rifle does +76% to a Dazed foe, in big gold numbers,
+## and the string doesn't decay on them. Slipstep goes where you move and you keep shooting. Longneedle:
+## stand still while the line narrows, the aim turning only so fast, then a long beam through walls. A knock
+## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 const EMBER := Color("ff9a5c")
 const HOT := Color("fff1c8")
@@ -47,12 +48,13 @@ const E_RECOVER := 0.6               # s she is held after the beam: the source'
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
-var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
+var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
+var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
 var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
@@ -60,7 +62,6 @@ var needle_hits := 0
 var needle_dir := Vector2.ZERO # tests: the line the last Longneedle fired along
 var wall_slams := 0
 var last_dash_kind := ""
-var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var puffs := 0                 # tests: launcher puffs
 var last_puff := Vector3.ZERO  # tests: where the last one went off
@@ -433,7 +434,7 @@ func fire_rmb(c: Dictionary) -> void:
 	n.scale = Vector3.ONE
 	var at := _launcher_at(d)
 	n.global_position = at
-	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"])}
+	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "fuse": -1.0, "fuse0": float(bd["fuse"])}
 	burr["range"] = float(bd["range"])
 	burr["y0"] = at.y
 	burrs.append(burr)
@@ -507,7 +508,7 @@ func _tick_burrs(dt: float) -> void:
 			n.rotation.y += dt * 14.0
 
 ## One frame of flight, read every BURR_SAMPLE m so no tile is skipped: a slight lob that rides up ramps,
-## stairs and low ledges, and stops only on a strict wall (`_burr_wall`), on a foe, or at the lane's end.
+## stairs and low ledges, and stops only on a strict wall (`_burr_wall`), on a foe, or at the lane's end (a dud).
 func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 	var p: Vector3 = b["pos"]
 	var dir: Vector2 = b["dir"]
@@ -523,7 +524,7 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 		var u := clampf(dist / float(b["range"]), 0.0, 1.0)
 		# q is still at the height it arrives with; the other team's placed barrier is a wall to it too
 		if _burr_wall(g_last, q, run) or Blockers.cut(m.verbs.walls, at, q, h.team, "solid") < INF:
-			_stick(b, at, true)
+			_stick(b, at)
 			return
 		var gy := ground(q).y
 		q.y = maxf(lerpf(float(b["y0"]), gy + BURR_RIDE, u * u) + 0.6 * sin(PI * u), gy + BURR_RIDE)
@@ -533,7 +534,7 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 			_direct_hit(b, victim, q)
 			return
 		if dist >= float(b["range"]):
-			_stick(b, ground(q) + Vector3(0, 0.2, 0), false)       # the ground at the lane's end
+			_dud(b, q)
 			return
 		at = q
 		g_last = m.world.ground_at(q.x, q.z)
@@ -618,17 +619,28 @@ func daze(foe: Ent, seconds: float) -> void:
 	daze_for[foe.get_instance_id()] = seconds
 	fx().swirl(foe, Color("ff4fb0"), HOT, seconds)
 
-## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came.
-func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
+## It meets a wall and sticks: the cone points back the way it came.
+func _stick(b: Dictionary, at: Vector3) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	b["pos"] = at
-	b["wall"] = wall
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
+	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), EMBER)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
-	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # the miss: a dull dust puff, no flash, nothing on a foe
+	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # a dull dust puff, no flash, nothing on a foe
+
+## The lane's end with no foe and no wall, wherever the charge is (ground or air): a miss is a miss. A small
+## puff and a dull low thunk, no damage, no Daze, no cone.
+func _dud(b: Dictionary, at: Vector3) -> void:
+	burrs.erase(b)
+	duds += 1
+	var n: Node3D = b["node"]
+	if is_instance_valid(n):
+		n.visible = false
+	m.fx.burst(at, SCRAPE, 5, 1.5, 0.35, 2.0, 0.6)
+	m.sfx("gunslinger_grenade_thunk", at, -9.0, 0.6)
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
@@ -640,12 +652,11 @@ func _detonate(b: Dictionary) -> void:
 	rattles += 1
 	m.fx.flash(at, HOT, 1.6, 0.1)
 	m.sfx("vn_blast", at, -1.0)
-	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
+	_cone(at, b["out"] as Vector2, bd)
 
 ## The blast: a cone back out of the stick point, shoving everything in it along the cone (toward the
 ## thrower) and Dazing it; a hunter shoved into more terrain is stunned.
-func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
-	last_cone = {"at": at, "dir": out, "wall": wall}
+func _cone(at: Vector3, out: Vector2, bd: Dictionary) -> void:
 	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), EMBER, HOT, 0.35)
 	var spray := Vector3(out.x, 0.2, out.y)
 	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
