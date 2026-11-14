@@ -130,7 +130,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	m.revive_hunter(P, mate)
 	_step(m, 0.1)
 	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
-	await main.get_tree().create_timer(0.2).timeout      # (Sfx spaces repeats in real ms)
+	await _wall_wait(Sfx.STACK_MS + 60)                  # (Sfx spaces and stacks repeats in real ms; a timer can run short)
 	Sfx.play("kill")
 	P.ak.cd["x"] = 0.05
 	_step(m, 0.1)
@@ -139,6 +139,13 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
+
+## Waits `ms` of wall-clock time (frames keep running). A SceneTreeTimer counts engine time, which can elapse
+## in well under that many real ms, and Sfx's repeat gap and stack window are real ms.
+func _wall_wait(ms: int) -> void:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < ms:
+		await main.get_tree().process_frame
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
