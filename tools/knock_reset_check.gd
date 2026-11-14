@@ -3,7 +3,8 @@ extends RefCounted
 ## a rival dummy) with the helpers of tools/archetype_check.gd. The rules and their sources are listed in
 ## docs/KNOCK_RESETS.md. Covered here: the game-wide dash back (DashReset: the knocker whole or one charge
 ## of several, a teammate who hit the foe in the last 5s too, no heal for them, nothing for a third team);
-## Vex's Hot Streak (her takedown or an assist) and her Coin Blast at rank 3; Cinder's Furnace Cloak and heal; Kael's heal, the Finishing Slam's Riposte
+## Vex's Hot Streak (her takedown or an assist) and her Coin Blast at rank 3;
+## Cinder's Furnace Cloak and heal; Kael's heal, the Finishing Slam's Riposte
 ## reset and the Riposte's own takedown reset; Sable's heals (her own, an assist) and the Encore's Vault;
 ## Sparkle's Blowout; Grimble's Salvage stack on an assist; Meeko's carry refresh at rank 3. Hem's wall-stun
 ## charge and Mossy's dash refund need walls and run in --archer-combo-check / --bulwark-combo-check.
@@ -112,11 +113,13 @@ func _vex() -> void:
 	_knock(m, T, P)
 	A.ok("vex: his knock gives Combat Slide back whole (one charge)",
 			P.max_dashes() <= 1.0 and _full(P), "dashes %.2f / %.0f" % [P.dashes, P.max_dashes()])
-	A.ok("vex: rank 3 Coin Blast comes back on her takedown", float(K.cd["rmb"]) <= 0.0, "cd %.1f" % float(K.cd["rmb"]))
+	A.ok("vex: rank 3 Coin Blast comes back on her takedown", float(K.cd["rmb"]) <= 0.0,
+			"cd %.1f" % float(K.cd["rmb"]))
 	A.ok("vex: one cue, not two (the kit no longer repeats DashReset)", _cues_for(P, c0) == ["takedown"],
 			str(_cues_for(P, c0)))
 	A.ok("vex: Hot Streak on her takedown: rounds faster, more damage, Fever lit for the streak", _streak_on(P, K, sd),
-			"streak %.2f rate %.2f dmg %.2f fever %.2f" % [K.streak_t, P.buff("fire_rate"), P.buff("damage"), K.fever_k()])
+			"streak %.2f rate %.2f dmg %.2f fever %.2f"
+			% [K.streak_t, P.buff("fire_rate"), P.buff("damage"), K.fever_k()])
 	# an assist: she hit T2 inside the window, the ally knocks it: the streak again, the coin stays down
 	P.kbuffs.clear()
 	K.streak_t = 0.0
