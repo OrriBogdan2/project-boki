@@ -429,6 +429,12 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .5, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) · **done** `ext/parity-phasewalk-rebased`, `ext/lace-phasewalk-verify`: passes raised terrain, set on top if it ends inside; follow-up in ext/combat-lace-spirit-ledges-rebased (not on the candidate) |
 | Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open · **done** `ext/parity-lace-focus` (main): Focus and Deadeye cut, Hawk Sense kept; climb asserted (`ext/lace-tall-climb-rebased`) |
+| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Guard .15 s, wall hit 4.94x the shot (full pin 178), stun 1.2, cd 16, 1 charge | match (verified Nov 9; gaps 6, 7 closed, docs/heroes/archer.md) |
+| Q | none | glove | ours |
+| E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
+| R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
+| Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | 3.5 m/.24 s raw → ~3 m/.28 s, walks rocks and barriers, **not ledges** | differ (gap 8: READY `ext/lace-phasewalk-verify` 728a6c834) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB `fire`; 8 of 17 rows unsourced | gap 9 closed here |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 · LMB **done** `ext/parity-dashlmb` (main, fires mid-dash); 8 rows unsourced **open** [?] |
@@ -950,6 +956,12 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
 | 9 | Dash→LMB still `buffer` on Zedran and Bjorn (Hem, Vex, Cinder, Ryzz, Tarek are `fire`); Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine. Lace and Cinder are `fire` now. Kael's and Albert's ground and air rows stay `buffer`: the source (juggernaut.md, bjorn.md, supervive_kits.md) never shows an LMB press inside the dash, so they say "Not determinable" (11-12) | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
+| 4 | Dashes stop dead: keep 15%/30% vs carry; global ×.85/×1.15 | Raise carry; drop scale where kit numbers already match | hunter.gd, content/rules/dash_feel.json | M |
+| 5 | ~~Hem's invented Focus/Deadeye~~ cut (owner 11-07) | done | archer_kit.gd, archer.json | closed |
+| 6 | ~~Hem's Heavy Shot wall payoff~~ now 4.94x | done | archer.json | closed |
+| 7 | ~~Hem's RMB .5 s dead zone~~ now a .15 s guard | done | archer.json | closed |
+| 8 | Hem's Phase Walk stops at raised walls | Merge `ext/lace-phasewalk-verify` 728a6c834 | pin_spirit.gd, hunter.gd, world.gd | S to merge |
+| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
 | 11 | Done: Cinder is off the dash feel (3.4 m/.33 s, poof 6.8 m/.28 s); Grimble's air barge is scaled once (measured 3.7 m/.2 s) | none | asserted in --move-feel-check | done |
 | 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
