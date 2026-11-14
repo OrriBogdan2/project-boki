@@ -248,18 +248,18 @@ func _build_wall() -> void:
 	_wall.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(_wall)
 
-func _secs_text() -> String:
+func _secs_text(hud) -> String:
 	if k < last() and m.time < t0[k + 1]:
-		return "ZONE CLOSES  %s" % m.hud._fmt(t0[k + 1] - m.time)
+		return "ZONE CLOSES  %s" % hud._fmt(t0[k + 1] - m.time)
 	if k > 0 and m.time < t1[k]:
-		return "ZONE CLOSING  %s" % m.hud._fmt(t1[k] - m.time)
+		return "ZONE CLOSING  %s" % hud._fmt(t1[k] - m.time)
 	return "FINAL ZONE"
 
 ## The row under the match clock: the next close, and a warning while you're outside. Its bottom.
 func hud_row(hud, r: Rect2) -> float:
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.7), 6)
 	hud.c.draw_circle(r.position + Vector2(11, 10), 4.0, COL)
-	hud._text(r.position + Vector2(21, 14), _secs_text(), 10, COL, hud.big)
+	hud._text(r.position + Vector2(21, 14), _secs_text(hud), 10, COL, hud.big)
 	if m.player and not m.player.out and k > 0 and outside(m.player.pos):
 		var t := "OUTSIDE  -%d%%/s" % int(round(dps[k] * 100.0))
 		var a := 0.6 + 0.4 * sin(m.time * 8.0)
@@ -295,4 +295,4 @@ func full_map(fm, kk: float) -> void:
 		var nv: Vector2 = fm.to_screen(Vector3(cs[k + 1].x, 0, cs[k + 1].y))
 		cv.draw_arc(nv, rs[k + 1] * kk, 0.0, TAU, MAP_SEGS, NEXT_COL, 2.0, true)
 	var top := Vector2(pv.x, maxf(pv.y - cur_r * kk - 10.0, fm.rect.position.y + 24.0))
-	fm.hud._ctext(top, _secs_text(), 13, COL, fm.hud.big)
+	fm.hud._ctext(top, _secs_text(fm.hud), 13, COL, fm.hud.big)
