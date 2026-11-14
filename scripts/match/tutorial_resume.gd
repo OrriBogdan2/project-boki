@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Beats whose state lives in the world's outpost resume at the start of that run.
 const OUTPOST_RUN := ["uplink", "defend", "extract"]
-const OUTPOST_START := "wayout"       # (the outpost run starts with the walk to the way out; was "goexit")
+const OUTPOST_START := "wayout"  # (the outpost run starts with the walk to the way out; was "goexit")
 
 
 static func opts() -> Dictionary:
