@@ -90,6 +90,7 @@ var squad_n := 1  # Hunters in the squad (1-4): the scale row
 var difficulty := "normal"  # rules "difficulty" key
 var gates: HeartRaidGates  # where and when each wave comes out, and its marks
 var audio: RaidSfx  # the raid's cues (waves, boss, gate ticks)
+var boss_nid := ""  # a client: the host's boss id, until its Mob arrives
 var boss: Mob = null  # the boss (a Boss on the host; a client mirrors a plain Mob)
 var lair := {}  # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []  # wave monsters alive
@@ -153,6 +154,8 @@ func tick(dt: float) -> void:
 		_sync_t -= THINK_S
 		if _sync_t <= 0.0:
 			_broadcast()
+	elif boss == null and boss_nid != "":
+		_find_boss()  # its snapshot lands after the "hr" that names it
 	audio.update()
 	_check_end()
 
@@ -309,6 +312,14 @@ func _spawn_boss() -> void:
 	_note("boss %s, %d hp" % [bd["kind"], int(b.max_hp)])
 	_broadcast()
 
+## A client: the boss the host named. BossNet builds it from its lair kind, so it takes the raid's name and
+## enrage time as the host's did (_spawn_boss); hp and max_hp come with the snapshots.
+func _find_boss() -> void:
+	boss = m.ents_by_id.get(boss_nid, null) as Mob
+	var bb := boss as Boss
+	if bb and bb.md.get("name", "") != String(rules()["boss"]["name"]):
+		bb.md["name"] = String(rules()["boss"]["name"])
+		bb.md["enrage"] = float(rules()["boss"]["enrage"])
 
 func _boss_down() -> void:
 	phase = P.HOLD
@@ -319,13 +330,13 @@ func _boss_down() -> void:
 		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.COL)
 	_broadcast()
 
-
-## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for).
-func boss_for(p: Hunter) -> Boss:
-	if not (boss is Boss) or boss.dead or p == null:
+## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client has no host
+## lair (its boss is BossNet's copy, hp and max_hp by the snapshot), so the square comes from the rules.
+func boss_for(p: Hunter) -> Mob:
+	if boss == null or not is_instance_valid(boss) or boss.dead or p == null:
 		return null
-	var c: Vector3 = lair["c"]
-	var hf := float(lair["half"]) + 4.0
+	var c: Vector3 = m.heart.site
+	var hf := float(rules()["boss"]["half"]) + 4.0
 	return boss if absf(p.pos.x - c.x) <= hf and absf(p.pos.z - c.z) <= hf else null
 
 
@@ -379,4 +390,5 @@ func net_in(x: Array) -> void:
 	wave = int(x[2])
 	next_wave_t = r("first_wave_s") + wave * r("wave_every_s")  # the host's wave clock (fixed timers)
 	boss_down = phase == P.HOLD or phase == P.WON
-	boss = m.ents_by_id.get(String(x[3]), null) as Mob
+	boss_nid = String(x[3])
+	_find_boss()
