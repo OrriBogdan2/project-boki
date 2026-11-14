@@ -81,7 +81,6 @@ channels), built in code from the file. A node's output feeds one input only. `-
 timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
 under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
-timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 
 ## The drop poses (WardenDropPose, `content/rules/drop_poses.json`)
 One pose set every Hero wears over its clips or rig, not a clip per Hero: `ride` (braced on the squad rocket's hull,
@@ -91,6 +90,19 @@ aimed along a direction in the body's own frame, read off the armature's rest, s
 WardenGlb's Sync after the clips, before the hands and blade are read. No per-Hero offsets: the lineup shots
 (`--clip-shots --drop`, docs/shots/anim-skydive) show no body clipping itself. `--clip-check` asserts both poses, the
 bank and the hand-over for all 12.
+
+## Opening a box
+No clip: one shared layer on the contract bones (`scripts/heroes/warden_open.gd`, WardenOpen), laid over the clips by
+Sync while the Hero holds a chest or a deathbox open (`Hunter.holding()` "chest" or "loot"; the player's open loot
+window holds "loot"). The state's `act_at` is the lid's top (`WardenOpen.lid_near`: the nearest closed chest or full
+box). It turns the root to the box, steps in (at most 0.45 m), sinks with the soles kept (leg IK), leans the hips and
+lays both wrists on the lid (arm IK, elbows out): in over 0.25 s, a small stir while held, back in 0.1 s when the hold
+ends. Step, drop and lean are searched once per reach against the Hero's own shoulders and arm length, so a tall Hero
+folds deeper and every Hero's hands reach the same lid. A move, a dash, a cast, a hit, a jump, or anything the clips
+play over the walk (`WardenClips.busy`: a kit move, a stun, an emote, a hand-back to the rig) takes it off the frame it
+comes; a hold that goes on reaches in again. The channel's timing is the game's own (ChestLoot `hold_s`, Life
+`loot_time`): the layer only shows it. `--loot-open-check` asserts all 12 Heroes and a chest opened in a real match;
+with `--shots-dir=<dir>` (GPU) it shoots `loot_open_strip.png`.
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.

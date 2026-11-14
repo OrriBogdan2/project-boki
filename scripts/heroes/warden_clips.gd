@@ -72,6 +72,7 @@ var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less 
 var air_w := 0.0
 var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
+var busy := false            # the state asks for more than standing or moving this step: a clip or the rig
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
 var still_t := 0.0
@@ -572,6 +573,7 @@ func step(dt: float) -> void:
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	upper_move = bool(want.get("lead", false))
+	busy = not want.is_empty()
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))
 	if flinching:
