@@ -8,8 +8,12 @@ extends RefCounted
 ##   4. a client mirroring the host's "ht take" hears it too
 ##   5. the countdown: an open seat you can reach ticks once a second over its last TICK_FROM_S, the last
 ##      TICK_LAST_S strong, all under the calls; nothing for a rival's seat, a seat you left or one already used
+##   6. the quest seats' own cues (scripts/match/quest_sfx.gd, content/sfx/quest.json): quest_take for your squad,
+##      quest_rival_rise once a rival passes 75 % while your squad is on a quest, quest_win / quest_lose when it
+##      resolves for your squad, the quest_site loop at an active seat; the host's own moves and a client's mirror
 ## Every Heart sound cue (heart_take, heart_reveal, heart_extract) still plays once beside them. Never touches the save.
 
+const QUEST := ["quest_take", "quest_rival_rise", "quest_win", "quest_lose"]
 const CALLS := ["ways_open", "ways_start", "ways_taken_own", "ways_taken_other", "ways_warn", "ways_last"]
 
 var bad := 0
@@ -29,6 +33,7 @@ func run(main: Node) -> void:
 	_heart(main)
 	_net(main)
 	_ticks(main)
+	_quest(main)
 	print("WAYSSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -275,4 +280,119 @@ func _ticks(main: Node) -> void:
 	ok(_count_down(m, "final", m.sess_len()) == all_s, "the Heart's final seat: ticks as the islands fall")
 	m.heart.audio.used["final"] = true
 	ok(_count_down(m, "final", m.sess_len()).is_empty(), "...not once it was taken")
+# ------------------------------------------------------------------ 6. the quest seats' own cues
+func _q(m: Match, cue: String) -> int:
+	return m.exits.seats.audio.cues.count(cue)
+
+## Moves a seat as a client's mirror would and lets QuestSfx hear it (no host moves in between).
+func _move(m: Match, s: QuestSeat, to: QuestSeat.S, team := -1, prog := 0.0) -> void:
+	s._force(to, "check", team)
+	s.ref["prog"] = prog
+	m.exits.seats.audio.update()
+
+func _quest(main: Node) -> void:
+	var lens := QUEST.map(func(c): return (load("res://audio/%s.wav" % c) as AudioStream).get_length())
+	ok(lens.all(func(l): return l > 0.3 and l < 2.5), "the four quest stings are short sounds %s" % [lens])
+	Sfx.reset_scene_audio()      # the Heart matches above leave their seats' loops held (the check never idles)
+	var m := _match(main, 8308)
+	var Q: QuestSeats = m.exits.seats
+	var A: QuestSfx = Q.audio
+	var me: int = m.player.team
+	var U: QuestSeat = Q.uplink
+	var L: QuestSeat = Q.lair
+	ok(U != null and L != null, "the match has both quest seats")
+	for h in m.hunters:
+		if h.team == me:
+			h.teleport(m.world.free_spot_near(U.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
+	A.update()
+	ok(not Sfx.loop_on("quest_site_uplink"), "a locked seat has no site loop")
+	_move(m, U, QuestSeat.S.OPEN)
+	ok(Sfx.loop_on("quest_site_uplink") and A.cues.is_empty(), "an open seat hums at its site, no sting")
+	for i in 5:
+		_move(m, U, QuestSeat.S.IN_USE, me)
+	ok(_q(m, "quest_take") == 1, "your squad takes on the Uplink: quest_take, once")
+	_move(m, U, QuestSeat.S.TAKEN, me)
+	ok(_q(m, "quest_win") == 1 and _q(m, "quest_lose") == 0, "...and takes it: quest_win, once")
+	_move(m, U, QuestSeat.S.TAKEN, me)
+	ok(_q(m, "quest_win") == 1, "...not again on the next tick")
+	OS.delay_msec(Sfx.HOLD_MS + 50)
+	Sfx._drop_stale_holds()
+	ok(not Sfx.loop_on("quest_site_uplink"), "the site loop ends once the seat is taken")
+	# your squad loses its hold; a rival on the other seat races yours
+	_move(m, L, QuestSeat.S.OPEN)
+	_move(m, L, QuestSeat.S.IN_USE, me)
+	ok(_q(m, "quest_take") == 2, "your squad sealed in with the lair's boss: quest_take")
+	_move(m, L, QuestSeat.S.OPEN)
+	ok(_q(m, "quest_lose") == 1, "the boss fight lost (the seat opens again): quest_lose, once")
+	m.queue_free()
+	_rival(main)
+	_quest_host(main)
+
+func _rival(main: Node) -> void:
+	var m := _match(main, 8309)
+	var Q: QuestSeats = m.exits.seats
+	var A: QuestSfx = Q.audio
+	var me: int = m.player.team
+	var rival := _other_team(m)
+	var U: QuestSeat = Q.uplink
+	var L: QuestSeat = Q.lair
+	for h in m.hunters:
+		h.teleport(m.world.free_spot_near(U.site() + Vector3(25, 0, 0), [], 1.0, 0.45, 10.0))
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.9)
+	ok(_q(m, "quest_rival_rise") == 0, "a rival past 75 % while your squad is on no quest: silence")
+	_move(m, L, QuestSeat.S.IN_USE, me)
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.9)
+	for i in 5:
+		_move(m, U, QuestSeat.S.IN_USE, rival, 0.95)
+	ok(_q(m, "quest_rival_rise") == 1,
+		"a rival past 75 % of its quest while yours holds the lair: the rising cue, once")
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.4)
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.8)
+	ok(_q(m, "quest_rival_rise") == 2, "...again only after it fell back under 50 %")
+	_move(m, U, QuestSeat.S.TAKEN, rival)
+	ok(_q(m, "quest_lose") == 0, "a rival taking the other seat is not your squad's loss")
+	m.queue_free()
+	# contesting a rival's uplink in its yard, then it is taken from you
+	m = _match(main, 8310)
+	Q = m.exits.seats
+	U = Q.uplink
+	me = m.player.team
+	rival = _other_team(m)
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.5)
+	m.player.teleport(U.site())
+	_move(m, U, QuestSeat.S.IN_USE, rival, 0.76)
+	ok(_q(m, "quest_rival_rise") == 1, "in a rival's uplink yard as it passes 75 %: the rising cue")
+	_move(m, U, QuestSeat.S.TAKEN, rival)
+	ok(_q(m, "quest_lose") == 1 and _q(m, "quest_win") == 0, "...and it is taken from you: quest_lose")
+	# a client mirrors the host's take
+	var cli := _match(main, 8311)
+	cli.net_on = true
+	cli.is_host = false
+	for i in 3:
+		var e := ["xc", "seat", "uplink", int(QuestSeat.S.IN_USE), cli.player.team, false]
+		cli.exits.seats.net_in(JSON.parse_string(JSON.stringify(e)))
+		cli.exits.seats.audio.update()
+	ok(_q(cli, "quest_take") == 1, "a client told its squad started the Uplink: quest_take, once")
+	cli.net_on = false
+	cli.queue_free()
+	m.queue_free()
+
+## The host's own moves sound: your squad starts the real uplink, charges it full, and the lift opens.
+func _quest_host(main: Node) -> void:
+	var m := _match(main, 8312)
+	var U: QuestSeat = m.exits.seats.uplink
+	var p: Hunter = m.player
+	_to(m, U.open_s + 1.0)
+	p.teleport(U.site())
+	m.exits._start(U.ref, p)
+	for i in 3:
+		m.step(Match.DT)
+	ok(U.state == QuestSeat.S.IN_USE and _q(m, "quest_take") == 1,
+		"the host starting the Uplink for your squad: quest_take")
+	U.ref["prog"] = 1.0
+	for i in 30:
+		p.teleport(U.site())
+		m.step(Match.DT)
+	ok(U.state == QuestSeat.S.TAKEN and _q(m, "quest_win") == 1,
+		"the charge full and the lift open: quest_win (%s)" % [U.trail])
 	m.queue_free()
