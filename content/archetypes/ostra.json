@@ -160,7 +160,7 @@
 	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies within 1.5m of you when you leave get a shield of a third of your health for 3s."},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
-		"full": "the lantern burns white and his ribbons lift",
+		"full": "the jack-in-the-box glows white and his spring coils tall",
 		"dash_spent": "a pale ripple where he stood"
 	},
 	"src": {

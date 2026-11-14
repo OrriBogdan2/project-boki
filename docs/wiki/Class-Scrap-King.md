@@ -48,8 +48,8 @@ grows with every knock.
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
-| Silhouette | the round brass helm and the rope drum on one shoulder |
+| Fantasy | The Scrap King. Hooks you in with his bone-hook arm, drops a hoard on you, and grows with every knock. |
+| Silhouette | the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back |
 | Resource | Salvage (max 10) |
 
 ### Kit card

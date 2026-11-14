@@ -20,7 +20,7 @@
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down; blocking builds Guard."],
-	"silhouette": "the frozen prow shield and the long ice-cased oar",
+	"silhouette": "the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist",
 	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Blocking builds Guard; at 50, Shield Charge becomes a Shield Slam.", "rmb": "Hold to block shots from the front; Shift becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "rmb": ["18 slam"], "e": ["18 burst"], "x": ["18 dmg"]}},
 	"signature": "tower_shield",
 	"resource": {
