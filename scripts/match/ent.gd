@@ -29,6 +29,7 @@ var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses 
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
+var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
@@ -120,6 +121,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		if m.net_send_hit(self, dmg, by, opts):
 			if opts.get("src", "") == "wisp":
 				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
+			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
 			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
@@ -170,6 +172,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st1 in ["stun", "root", "slow"]:
 			if float(opts.get(st1, 0.0)) > 0.0:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
+	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
@@ -183,6 +186,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
+	CcSfx.play(self, cc_cue)
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
 			CombatBus.status_applied.emit(self, st, by, float(opts[st]))
@@ -363,6 +367,7 @@ func net_follow(dt: float) -> void:
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
+const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
@@ -401,4 +406,4 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	show_flash(clampf(flash_t / 0.12, 0.0, 1.0))
+	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))
