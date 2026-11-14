@@ -6,7 +6,9 @@ Hetzner cron (gh lives there), flock'd, one PR at a time. Each run:
     merges it next run); RED -> "REGATE RED <flags>"; CONFLICT -> "REGATE CONFLICT <files>" (once per head); then wait
     until that PR merged / moved / 30 min, so the next re-gate sees the new main.
  2. Else scan open ext/* PRs: a GATE GREEN comment by our gh user whose sha is the head (or the head adds only merge
-    commits on top of it) and whose head does not contain origin/main (+ PRs listed WAITING in ~/cj/merge-ready-state.txt).
+    commits on top of it) and whose head does not contain origin/main, or whose head
+    holds main but adds only merge commits on the green (gated as it is). (This covers the WAITING PRs of
+    ~/cj/merge-ready-state.txt: every ext/* PR with a GATE GREEN is looked at.)
     Skip: activity (non-bot comment or head commit) < 20 min old; newest "<job> owns this PR until merged" from a job
     still running; a REGATE RED/CONFLICT already posted for this head; ~/release-hold present (merges are exempt
     from the build freeze, so only the release hold stops the bot).
@@ -51,18 +53,6 @@ def merge_first():
     return [int(x) for x in re.findall(r"#?\b(\d{1,5})\b", re.sub(r"(?m)#[^\d].*$", "", p.read_text()))]
 
 
-def waiting_listed():
-    p = CJ / "merge-ready-state.txt"
-    out = set()
-    if p.exists():
-        for ln in p.read_text().splitlines():
-            if "WAITING" in ln:
-                m = re.search(r"#(\d+)|\bpr[ =:]?(\d+)", ln, re.I)
-                if m:
-                    out.add(int(m.group(1) or m.group(2)))
-    return out
-
-
 def scan(gh, st):
     """-> (main sha, [row]) where row = dict(pr, branch, head, gated, verdict, why, created)."""
     prs = gh.open_prs()
@@ -70,7 +60,6 @@ def scan(gh, st):
     git("fetch", "-q", "origin", "main", *[f"+refs/pull/{p['number']}/head:refs/regate/pr/{p['number']}" for p in prs], timeout=600)
     main = git("rev-parse", "origin/main")
     me = gh.login()
-    waiting = waiting_listed()
     rows = []
     for p in prs:
         n, branch, head = p["number"], p["head"]["ref"], p["head"]["sha"]
