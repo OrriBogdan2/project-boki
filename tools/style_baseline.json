@@ -399,7 +399,6 @@
 },
 "scripts/match/bot.gd": {
 "long_line": 22,
-"nested_ternary": 1,
 "semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
@@ -439,7 +438,7 @@
 "scripts/match/flora.gd": {
 "long_line": 59,
 "nested_ternary": 2,
-"semicolon": 52
+"semicolon": 54
 },
 "scripts/match/fx.gd": {
 "long_line": 10,

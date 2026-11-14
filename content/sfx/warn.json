@@ -1,7 +1,0 @@
-{
- "group": "warn",
- "name": "Warnings",
- "script": "tools/gen_sfx_warn.py",
- "sounds": {"warn_heartbeat": "ui", "warn_tick": "ui", "blight_rumble": "cast"},
- "signature": []
-}
