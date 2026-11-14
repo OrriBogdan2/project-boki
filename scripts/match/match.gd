@@ -1234,10 +1234,9 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
-	if h == player and hud:
-		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
+	if not LootFeed.got_item(self, h, Loot.gear(String(wp["gear"]), int(wp["rar"]))):
+		sfx("pickup", h.pos, 0.0, 0.9)
 
 ## Walking over a tuning applies it (to bots too); one you've maxed stays on the ground.
 func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
@@ -1639,8 +1638,8 @@ func mate_col(h: Hunter) -> Color:
 	return MATE_COLS[i % MATE_COLS.size()]
 
 const SQUAD_PING_T := 45.0
-## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" (following `foe`) or "loot".
+## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and as a marker
+## in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" (following `foe`) or "loot".
 func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunter = null) -> void:
 	if h == null or (from_net and MuteList.has(h.pname)):
 		return
@@ -2604,17 +2603,15 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
+	var gems0 := h.gems
 	match p["kind"]:
 		"gem": h.gems += int(round(float(p["v"]) * PerkOrbs.gem_mult(h)))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
 		"tonic", "armor": UtilityBelt.pickup(h, UtilityBelt.item_of(p["kind"]), 1)
 		"ckey": KeyRun.on_pickup(self, h)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
-	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
-		if p["kind"] == "seed":
-			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
-	else:
+	LootFeed.ground(self, h, p, h.gems - gems0)
+	if h != player:
 		Juice.rival_pickup(self, h)
 
 # ------------------------------------------------------------------ shots
@@ -4389,9 +4386,9 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press %s again in the air and hold to glide", "jump"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your utility ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
+	["secondary", "Use your hunter ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
@@ -5640,7 +5637,8 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
+	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
