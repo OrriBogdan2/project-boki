@@ -41,6 +41,8 @@ func start(dv: Vector2, dist: float, kind: String) -> void:
 	var air := not h.grounded
 	if air:
 		dist *= float(ld().get("air_k", 0.55))
+		if kind != "spin":      # (the spin rides its dash's own cut, which item 183 holds to the ground's reach)
+			dist /= 1.0 + Loco.dash_glide_ease / t      # a swing's exit cut is eased out (DashGlide): count it in
 	else:
 		dist = maxf(0.0, dist - HunterMove.slide(minf(dist / t, h.base_speed * HunterMove.dash_exit_run)))
 	var run_v := clampf(Vector2(h.vel.x, h.vel.z).dot(dv), 0.0, h.base_speed)
