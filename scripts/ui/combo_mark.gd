@@ -13,6 +13,7 @@ const LOW_FRAC := 0.25          # the ring turns red under this much of the time
 const FLASH_BODY := 0.12 + 2.0 / 60.0   # s on Ent.flash_t: full white for 2 frames, then the usual fade
 const FLASH_TAG := 0.05         # s the tag stays white after a payoff
 const SND_GAP := 0.2            # s between two payoff sounds on one body (a rifle pays off every shot)
+const SND_DB := 3.0             # dB on the chime: its file is at -20 dB RMS, this lifts it to the fire level
 const PAY_KEY := "cm_pay"       # meta on the body: match time of the last payoff
 
 ## Called by a kit when its payoff lands on `t`: the body flashes white and the combo sound plays.
@@ -22,7 +23,7 @@ static func payoff(m: Node, h: Hunter, t: Ent) -> void:
 	t.flash_t = FLASH_BODY
 	m.fx.flash(t.pos + Vector3(0, 1.1, 0), h.ak.res_col().lerp(Color.WHITE, 0.6), 1.4, 0.1)
 	if gap > SND_GAP:
-		m.sfx("combo", t.pos, -1.0, 1.15)
+		m.sfx("combo", t.pos, SND_DB, 1.15)
 
 ## Draws the tag centred on `at` for `e`, if `viewer`'s kit has combo state on it.
 static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -> void:
