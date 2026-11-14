@@ -16,6 +16,9 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
+## Buses a slider sets as well as its own: UI (menu and HUD cues) sends straight to the master so it stays
+## dry (SfxMix), but it is still sound effects to the player, so the Sound effects slider levels it too.
+const SLIDER_ALSO := {"SFX": ["UI"]}
 ## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
 ## the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "elim_confirm"]
@@ -110,9 +113,6 @@ func _load_sets() -> void:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
 
-## Buses a slider sets as well as its own: UI (menu and HUD cues) sends straight to the master so it stays
-## dry (SfxMix), but it is still sound effects to the player, so the Sound effects slider levels it too.
-const SLIDER_ALSO := {"SFX": ["UI"]}
 
 ## Sets a bus ("Master", "Music", "SFX", "Ambience") from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
