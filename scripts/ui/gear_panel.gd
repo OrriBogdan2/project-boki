@@ -17,7 +17,19 @@ static func cell_rect(sz: Vector2, i: int) -> Rect2:
 	var x := sz.x - 18.0 - 270.0 + (270.0 - total)
 	return Rect2(Vector2(x + i * (CELL + GAP), sz.y - 18.0 - 62.0 - 66.0 - 22.0 - CELL), Vector2(CELL, CELL))
 
+## True once any of the four slots holds gear: until then the row of empty frames stays off the HUD.
+static func worn_any(p: Hunter) -> bool:
+	for g in p.gear:
+		if not (g as Dictionary).is_empty():
+			return true
+	return false
+
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
+	if worn_any(p):
+		_draw_slots(hud, sz, p)
+	_draw_upgrades(hud, sz, p)
+
+static func _draw_slots(hud, sz: Vector2, p: Hunter) -> void:
 	for i in Gear.SLOTS.size():
 		var r := cell_rect(sz, i)
 		var g: Dictionary = p.gear[i]
@@ -33,6 +45,8 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		if i < 2 and float(p.gear_cd[i]) > 0.0:
 			var f := Gloves.cd_frac(p, i)
 			hud.c.draw_rect(Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5))
+
+static func _draw_upgrades(hud, sz: Vector2, p: Hunter) -> void:
 	var perks_key: int = p.perks.hash()      # the upgrade line only changes when the perks do (no string building per frame)
 	if perks_key != _ups_key:
 		_ups_key = perks_key

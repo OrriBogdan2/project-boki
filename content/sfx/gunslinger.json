@@ -4,7 +4,6 @@
  "script": "tools/gen_sfx_vex.py",
  "sounds": {
   "vn_rifle": "fire",
-  "gunslinger_spinup": "signature",
   "gunslinger_grenade_thunk": "signature",
   "vn_cock": "cast",
   "vn_throw": "cast",
@@ -28,7 +27,6 @@
  },
  "reach": {"vn_nuke_fall": 40},
  "signature": [
-  "gunslinger_spinup",
   "gunslinger_grenade_thunk"
  ],
  "replaces": [

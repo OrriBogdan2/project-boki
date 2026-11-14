@@ -56,6 +56,15 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **After the pick**: a toast, a green "Done!" tick on the tutorial goal line, and on the Boki page **Done** is the one filled, ringed button. Feed is a plain button until the trough step is done, then the filled one again (`FarmTaskGuide.care_footer`).
 - Checks: `--farm-tutorial-check` (spotlight appears once, holds clicks only in the beat, fades, "Not set", footer) and `--farm-spot-shots=<dir>` (screenshots).
 
+## Round 4 (owner, Nov 12): Hob's home spot and clear ring
+- **A fixed spot** (`HobSpot`, `scripts/home/hob_spot.gd`), saved as `layout.hob.spot = [x, z]` (optional field, no save bump: a save without it picks one on first look). The first pick is the free tile nearest his old place by the market stall (`stall_stand`). After that it stays put every visit.
+- **Clear ring**: `farm_builder.json` `clear.m` = 3.5 m from his spot to the nearest edge of any placed footprint tile and to any place you interact with (`HomeBuild._targets`: doors, the stall, pot, portal, plots, feeders, bridge signs...). A free tile is also reachable on foot (`HomeBuild._reach`), open ground on the tile and all eight neighbours, not kept clear for a fixture, and on an opened isle. When his spot is chosen, places you interact with are kept further: `talk_reach` + `clear.reach_m` = 2.4 + 1.9 = 4.3 m (`HobSpot.apart_m`), so his talk ring and the stall's 1.9 m reach really never overlap (3.5 m alone did not guarantee it). The 3.5 m ring is what build mode enforces afterwards.
+- **Build mode refuses** a piece, door, path tile or feeder inside the ring: the ghost goes red with "Too close to Hob" (`HomeBuild.cell_reason`, `fits`, `feeder_fits`, the usual invalid-placement path).
+- **Already blocked** (an older save, a moved fixture): on the next layout sync he walks to the nearest free tile (ties: lowest tile index, so it is deterministic). That becomes his spot, and it is logged once (`HobSpot: ... he moves to ...`). With no free tile anywhere he keeps the old spot.
+- **Interact**: Hob wins only when he is nearer than the best target found so far (`FarmHob.find` returns his distance). Before, he overrode anything in his ring. Round 4b (11-13): the stall, pot, portal, house, lots, bridge signs and burrow no longer get their 0.3-0.6 m head start over Hob (`FarmHob.lead`), so where rings do overlap (Hob walking past, a crowded layout) the nearer one wins.
+- Only Hob is covered: he is the only fixed farm NPC. Pell is the Black Market panel, not a person on the farm.
+- Checks: `--hob-spot-check` (new, `--shots-dir=`). `--hob-check` and `--farm-tutorial-check` now allow up to 9 m from the stall (the ring keeps him at least ~4.5 m from its centre).
+
 ## Nov 11: Hob and Pell designed and modelled
 - Owner: "Hob and the future tutorial person need a design - and a Meshy design". Hob's shapes model is replaced by
   a rigged Meshy model and Pell (LORE_MASKS round 5's tutorial guide) is designed, modelled and placed: Pell waits

@@ -10,8 +10,8 @@ extends RefCounted
 const GAP := 0.15
 ## Close pairs left for the owner to rule on (docs/DEBT.md "Hunter colours under the gap").
 const OPEN := [["ostra", "tender"], ["ashwick", "juggernaut"], ["gunslinger", "tender"],
-		["ostra", "rimewright"], ["bulwark", "dredge"], ["archer", "thief"], ["dolm", "thief"],
-		["dredge", "gunslinger"], ["archer", "mage"]]
+		["ostra", "rimewright"], ["bulwark", "dredge"], ["dolm", "thief"],
+		["dredge", "gunslinger"], ["archer", "juggernaut"]]
 
 var bad := 0
 

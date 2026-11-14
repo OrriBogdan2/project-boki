@@ -84,12 +84,15 @@ func run(mn: Node, md := "all") -> void:
 	combos.sc = self
 	var ults = load("res://tools/care_ult_check.gd").new()
 	ults.sc = self
+	var carry = load("res://tools/care_carry_check.gd").new()
+	carry.sc = self
 	var anims = load("res://tools/rimewright_anim_check.gd").new()
 	anims.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await _ranks("tender")
 		await combos.tender()
+		await carry.tender()
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()

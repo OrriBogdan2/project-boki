@@ -59,11 +59,10 @@ static func top_under(list: Array, p: Vector3, r: float, g: float) -> float:
 	return g
 
 ## A grounded body follows the ground g under it. Walked from a lower top onto a higher one (one of his rocks onto
-## another, top_under), the drawn body eases up to it as a walked-up terrace does (Hunter.step_vis) instead of
+## another, top_under), the drawn body eases up to it as a walked-up terrace does (StepSmooth) instead of
 ## popping, and FootPlant keeps the feet on the top meanwhile.
 static func stand(h: Hunter, g: float) -> void:
 	if g - h.pos.y > POP:
-		h.step_vis -= g - h.pos.y
 		h.prev.y = g
 	h.pos.y = g
 

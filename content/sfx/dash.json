@@ -15,6 +15,7 @@
     "thief_dash_air": "dash",
     "mage_dash_air": "dash",
     "dolm_dash_air": "dash",
+    "gil_dash_air": "dash",
     "dash_empty": "ui"
   }
 }

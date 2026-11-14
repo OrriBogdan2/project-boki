@@ -37,6 +37,18 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+   A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
+   it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
+
+## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
+The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
+on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
+into the fit frame, scaled by the height ratio, under one `props_fit_to_master` empty; the master is untouched.
+Recipes: `ostra` (Motley: the Fan on his left palm, the 8 orbit cards on their two rings, one spin clip), `breaker` (Albert:
+the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fist shards, the ground rings). Outputs:
+`~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
+and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
+Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
 
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
@@ -56,7 +68,10 @@ best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Alread
 Grimble, Motley, Lace. Not swapped:
 - Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
   points need refitting to the new body first.
-- Sparkle, Albert i1 and Gil: still as in the 11-12 evening section above (memory/base colour, solid cyan glow, no spec).
+- Sparkle and Albert i1: still as in the 11-12 evening section above (memory/base colour, solid cyan glow).
+Gil (later the same day): swapped to current.json r2/v95a/cand_B (`gil_v95.json`, art/wardens/gil/IMPORT.md). Two
+new swap keys came with him: `drop_meshes` (the game glb's own meshes the master replaces: his scripted Tail and
+Dorsal) and, for a game glb with no clips, skin_relax is skipped (nothing to sample).
 bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
 separate Meshy part on their own texture).
 
@@ -79,6 +94,13 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Cinder 2026-11-13 (ext/cinder-ba-promote): B-A body live
+Owner pick B-A (`~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb`, CURRENT_OVERRIDES Cinder line): the curvy1113 B-A body (bust
+about two sizes up, waist and hips unchanged) under the live facekeep head, head_diff `[]`. The live hair is carried down
+past the neck cut at the back, and its dark locks are grown down from the cut at the front, so there is no hair ledge
+(no `--ramp`). Lava kept orange with glow (Meshy lavafix emission). Tail cut, swapped and checked as on 11-12; notes,
+sheets and the unpromoted B-A bust + S-B hips mix in `~/meshy/cinder-body-1113/`.
 
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:

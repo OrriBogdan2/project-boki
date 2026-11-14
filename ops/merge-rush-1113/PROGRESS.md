@@ -66,3 +66,52 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
    ui-void-masks-v3, vex-daze-rebased, vex-rmb-terrain-rebased (+10 big old-base -rebased branches).
 - Final batch C gate (main ca96e707c5): full suite both trees, branch-only reds rerun at low load: race and
   drop-launch are red on main too; 10 checks fixed vs main; import 0 parse errors; health --strict OK.
+
+## Batch D (job 20261113-225134-a3, rpc7; 11-13 23:00 to 11-14)
+- Gap at start: **1124** (live unmerged READY 1374, 250 archive-tagged at head). Open PRs held 43 tips (left out);
+  lane C2 (PR #58) 15 more.
+- Candidates: the 186 gap tips that already contain main ca96e707c5 (the bulk-rebase lane merged main into them).
+  First pass on main 96d778d036: 90 clean, 96 conflict. Main moved (PR #58, C2) during the gate; rebuilt on
+  df5464db04 from the 88 kept: 81 clean, 7 now conflict (`skip_batchD.tsv`, 103 rows with conflicting files).
+- Dropped by the gate (reverted in the branch, reason):
+  - ext/feel-hold-stand: --ledge-walk-check (juggernaut and dolm LMB root the Hunter 15 s on the ledge)
+  - ext/ui-match-phase: --panel-input-check (Esc pause menu no longer opens) and --demo-check
+  - ext/sfx-mask-puton: deletes main's mask_moment_check.gd, registry keeps it (same as batch C)
+  - ext/parity-downed-numbers: --bulwark-combo-check (Mending Ground revive 0.24 in 5 s, needs 0.3)
+  - ext/feel-cast-into-cast-rest: its own --cast-into-cast-check, Tender rows, and over the 300 s cap
+  - ext/fold-sfx-boki-1112: its own --boki-steps-check (TOUCH table vs the Boki clips, 20 rows)
+  - lane D1 (PR #53) owns them: ext/ui-buff-stack, ext/ui-key-caps, ext/ui-quest-race-pips, ext/ui-wisp-picker
+- Fixes in the batch: registry dedupe; hero_vfx.gdshader `band` redefinition (red on main too, 31 checks logged
+  a shader error); SkyshipModel template as a PackedScene (15 orphan nodes, --match-repeat-check);
+  hero_cat_fence_check Fx stub signature; stat_up_vfx_check FakeGame.find(); heart/side colour API drift.
+- Archived (tag only): ext/vfx-cel-ring-bursts (head reverts its only commit).
+- Batch D ships 73 branches (+ ui-ways-out-colourblind already in main via C2).
+
+## Batch E (job 20261114-025012-a3, rpc4; 11-14 03:00-)
+- Gap at start: **1054** (live unmerged READY 1297, 243 archive-tagged at head). Left out: 202 tips owned by other
+  lanes (open PRs #53 #60-#65 #45 #43, ext/integ-1113-C4, and the claimed batches 6/19/23 on their branches).
+- Candidates: the 850 other gap tips (139 contain main 55533bf67c or newer, 708 older) on main 195166f4d8.
+- **Tool bug found: the shared repo has `rerere.enabled` + `rerere.autoupdate` and ~10k recorded resolutions from
+  other sessions.** `git merge` then resolves a real conflict from the cache and merge_batch.sh committed it as a
+  clean merge (here: HubLayout.claim/vacant silently dropped, 29 parse errors). merge_batch.sh now merges with
+  `-c rerere.enabled=false`; 5 of the first 47 "clean" merges were really conflicts. Batches C and D used the old
+  script (suite-gated, so no known breakage, but their merges may hold reused resolutions). Other lanes' merge
+  scripts should do the same.
+- Clean on main: 42 (rerere off), then the gate dropped 5 (and 1 before the gate):
+  - ext/revive-source-numbers: its own bulk-rebase merge of main deletes 1008 .import files
+  - ext/ui-match-phase: --panel-input-check (Esc pause menu no longer opens), same as batch D
+  - ext/stuck-integ-b6204ee2: relay.gd `held`/`lost` vs lagcomp/remote-smooth checks' RelayServer subclasses
+  - ext/sfx-mask-puton: registry gains --relic-puton-check, its file is not in the tree
+  - ext/main-ratchet-1113: open PR #57 owns it (it was not in my exclusion list)
+  - ext/farm-friend-chase: --boki-rig-check (fliers hover 0.05 m, band 0.5-1.5); bisected to its merge
+- Fixes in the batch: registry dedupe; no new lint debt vs main (gdformat 14 files, gdlint names/order in 11
+  check tools, 3 shadowing locals); glider_heat_check stub HUD takes tip(text, near).
+- Skip list: `skip_batchE.tsv` (808 conflicts with files, 5 drops). Conflict size: ~100 one-file, ~100 two-file.
+- Main moved (PR #68, lane A, ba6b62f7a1) during the gate: merged in (home.gd hub condition + ClanBase.draw;
+  title.gd label + _continue; ABILITIES.md main's side, its generator fails on main too).
+- **Batch E gate (main ba6b62f7a1):** full suite both trees, 8 at a time (429 checks branch, 426 main): 2 red on
+  the branch only, both green on a low-load rerun (--duel-online-check: relay port busy; --garden-whistle-check:
+  flaky on main in batch C too) -> NEW-RED 0; 5 checks fixed vs main. Import 0 parse errors. health --strict OK.
+  No new lint debt vs main (gdformat/gdlint/ruff/gltf/vulture per file). Export dry run: every preset packs,
+  433.2 MB (baseline 428.2 MB, +1.2%, under the 5% budget).
+- Batch E ships 37 branches. Gap after merge about 1054 - 37 (recount with merge_gap.py).

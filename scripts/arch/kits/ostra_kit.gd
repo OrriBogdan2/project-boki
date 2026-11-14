@@ -9,21 +9,25 @@ extends ArchKit
 ## A thin aim line runs to the cursor the whole time he is out (his reticle); the Snap's wind-up turns
 ## it into two rails the width of the shard bundle, and holding Shift shows the Trade's two ends.
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
-## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
+## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: the moments are content/vfx/ostra.json (HeroVfx),
+## the shot skins, held motes and zones KitLooks (pooled).
 
 const TEAL := Color("7fe0d0")
-const VOID_COL := Color("b06bff")
-const PINK := Color("ff4fd8")
+const SEA := Color("2ee6c0")               # his signature sea teal (docs/VFX_QUALITY.md): what he throws
+const HOT := Color("b8fff0")               # the lighter teal of his hot cores (the Trade lantern's heart, Swollen)
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
-const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
-const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
-const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+const ORB_FULL_COL := Color("d8fff6")      # the orb's shot colour at full charge (what other games draw)
+const GLOW_COL := Color("2ee6c0")          # the charge glow at his hand, starting...
+const GLOW_FULL_COL := HOT                  # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
-const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
-const TRADE_EDGE := Color("ff3fd0")        # its magenta edge (the landing end; the UI's Void & Masks neon)
-const SMOKE := Color(0.118, 0.078, 0.188, 0.85)   # the void smoke round the Trade (the UI's #1e1430)
-const TRADE_LOOK_K := 1.3     # the Trade's lantern, motes and flashes, times their old size (visual only:
+const TRADE_COL := TEAL                    # the Trade's own end and aim (the dash slot's col, his pale teal)
+const TRADE_EDGE := SEA                    # its edge (the landing end) in his signature colour (VFX_QUALITY)
+const TRADE_LOOK_K := 1.65    # the Trade's lantern, times its old size (visual only:
                               # the circle's rings and sigils stay at dash.radius, the real catch)
+
+const BOT_SEED_AHEAD := 0.5     # s past the plant the foe's path is read for: the seed goes where they will be
+const BOT_POP_MIN := 0.7        # m: a bot pops a young seed (a small circle) once its foe is this near the middle
+const BOT_POP_K := 0.5          # ...or within this share of the radius of a grown one
 
 var swollen_t := 0.0
 var last_shot_t := -99.0
@@ -73,17 +77,20 @@ func ult_running() -> bool: return well.running()
 func cast_locked() -> bool: return well.locked
 func aim_lock() -> Vector2: return well.aim_lock
 func busy() -> bool: return super.busy() or well.locked
+func lock_left() -> float: return well.lock_left()
 func can_shoot() -> bool: return not well.locked and super.can_shoot()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
-## RecastCue: the seed is the marker; "WAIT" through the 0.3s minimum (a press there is buffered).
+## RecastCue: "WAIT" on the E slot through the 0.3s minimum (a press there is buffered).
+## No world marker (the owner wants less pop-up UI): the seed's own ring and the E slot carry it.
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
 		w["at"] = seed["pos"]
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
+		w["marker"] = false
 	return w
 
 func _hand(up := 1.15) -> Vector3:
@@ -101,14 +108,13 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
-		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
-		m.sfx("os_empower", h.pos, -2.0, 1.0)
+		vfx("swell")
 
-func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
+func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return
+	if String(o.get("src", "")) == "shot" and not o.has("ab"):
+		_orb_hit(t)
 	var rd := res_def()
 	add_swell(dmg * float(rd["per_dmg"]) * (float(rd["hunter_k"]) if t is Hunter else 1.0))
 
@@ -198,9 +204,8 @@ func _tick_weapon() -> void:
 		# camera drew it as a disc at his feet)
 		var hand := hand_pos(true)
 		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
-		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: magenta motes and smoke drawn into his hand
-			m.fx.burst(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
-			m.fx.burst(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
+		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: teal motes and smoke drawn into his hand
+			HeroVfx.of(m).hold(h, "orb_ready", charge)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
@@ -225,7 +230,7 @@ func _set_charge(k: float) -> void:
 		if charge < 1.0 and not h.downed:
 			full_chimes += 1
 			m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
-			m.fx.flash(hand_pos(true), GLOW_FULL_COL, 0.45, 0.08)
+			vfx("orb_full", hand_pos(true))
 	orb_wpn["shot_x"] = shot_x
 	orb_wpn["dmg"] = float(base_wpn["dmg"]) * (1.0 + float(ld["prime_dmg"]) * k)
 	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["prime_speed"]), k)
@@ -239,20 +244,24 @@ func orb_size_k(k: float) -> float:
 	return 1.0 + float(lmb_def()["size_k"]) * k
 
 ## The shot just left at the charge it was fired with: the quick shard, or from KitLooks.ORB_HELD_K the void
-## orb with its own flick and puff (its release sound is the weapon's, set by _set_charge).
+## orb with its own flick and shards (its release sound is the weapon's, set by _set_charge). Its trail is data.
 func _orb_fired() -> void:
 	last_shot_t = m.time
 	last_orb_c = charge
 	last_orb_r = float(h.wpn["size"])
 	KitLooks.of(m).release("os_charge")
-	KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge))
+	HeroVfx.of(m).trail(h, "orb_trail", KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge)))
 	var held_orb := charge >= KitLooks.ORB_HELD_K
 	play("ostra_orb_hot" if held_orb else "ostra_orb")
 	if charge >= 1.0:
 		settled_shots += 1
 	if held_orb:
-		m.fx.burst(_hand(), Color(TRADE_EDGE, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
-		m.fx.burst(_hand(), SMOKE, 6, 1.5, 0.4, -1.0, 1.6)
+		vfx("orb_cast", null, null, {"k": charge})
+
+## His orb lands (a weapon shot, not an ability's): a teal flash and shards, a ring and smoke from half charge.
+## The orb flies 0.41s (12.25m at 30m/s), under the 0.6s fire rate, so the one that hit is the last one fired.
+func _orb_hit(t: Ent) -> void:
+	vfx("orb_hit", t.pos, h.dir_to(t), {"k": last_orb_c, "r": last_orb_r, "hot": last_orb_c >= KitLooks.ORB_HELD_K})
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
@@ -316,10 +325,7 @@ func _swap_cast() -> void:
 	}
 	swap_peak = 0.0
 	play(swap_move())
-	m.fx.ring(h.pos, float(dd["radius"]), TRADE_COL, 0.35)
-	m.fx.ring(land, float(dd["radius"]), TRADE_EDGE, 0.35)
-	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
-	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
+	vfx("trade_cast", null, Vector2(land.x - h.pos.x, land.z - h.pos.z).normalized())
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)
 	_tx_trade(["zone", "trade", h.nid, m._r(land.x), m._r(land.y), m._r(land.z), float(dd["radius"]), swap_time()])
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
@@ -334,18 +340,15 @@ func swap_move() -> String:
 	return "ostra_swap" if h.grounded else "ostra_swap_air"
 
 ## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
-## direction. No ground, wall or abyss check limits it; over the abyss it keeps his current height.
+## direction, on the top surface there (OstraLand: a cursor on a cliff's face lands on its top, and the spot is
+## settled clear of walls, rocks and cliffs). Over the abyss it keeps his current height.
 func swap_spot() -> Vector3:
 	var reach := float(dash_def()["reach"])
 	var a := aim()
 	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
 	if dv.length() > reach:
 		dv = dv.normalized() * reach
-	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
-	var g: float = m.world.ground_at(p.x, p.z)
-	if g > World.VOID + 1.0:
-		p.y = g
-	return p
+	return OstraLand.spot(m, h.pos, Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y), h.r)
 
 func _tick_swap(dt: float) -> void:
 	var dd := dash_def()
@@ -359,11 +362,11 @@ func _tick_swap(dt: float) -> void:
 	var lift := sin(u * PI) * float(dd["lob"])
 	swap_peak = maxf(swap_peak, lift)
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
-	KitLooks.of(m).hold_on("os_star", "star", h, p, TRADE_LOOK_K)
-	# a violet trail and dark void wisps off the lantern, and wisps curling off his hem while he hovers
-	m.fx.burst(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
-	m.fx.burst(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
-	m.fx.burst(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
+	var lantern := KitLooks.of(m).hold_on("os_star", "star", h, p, TRADE_LOOK_K)
+	if not swap.has("trail"):      # a pale trail off the lantern, and void wisps off his hem while he hovers
+		swap["trail"] = true
+		HeroVfx.of(m).trail(h, "trade_trail", lantern)
+	HeroVfx.of(m).hold(h, "trade_hover")
 	var r := float(dd["radius"])
 	var ends := {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TRADE_COL, "col2": TRADE_EDGE}
 	AimKit.swap(h, "swap_fly", ends)
@@ -381,7 +384,7 @@ func charge_orb() -> bool:
 	return false
 
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.55, 0.3, 0.95, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
+	vfx("after", null, Vector2(h.vel.x, h.vel.z).normalized())
 	return true
 
 ## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
@@ -399,8 +402,9 @@ func _drop_holds() -> void:
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
-	var land: Vector3 = swap.get("land", h.pos)
 	var from: Vector3 = swap.get("from", h.pos)
+	# settled again on arrival: a wall raised on the spot during the flight never holds him
+	var land := OstraLand.settle(m, swap.get("land", h.pos), from, h.r)
 	var from_void := h.over_void()
 	swap = {}
 	AimKit.hide(h, "swap_fly")
@@ -410,7 +414,7 @@ func _swap_end(go: bool) -> void:
 		_tx_trade(["zone", "tradego", h.nid])
 		return
 	swaps += 1
-	_fold_in(from, TRADE_COL)
+	vfx("trade_fold", from)
 	if rank("dash") >= 3:
 		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
@@ -459,23 +463,15 @@ func trade_bodies(land: Vector3, r: float) -> Array:
 ## at, if that is higher; landing over the abyss also keeps it), with an implosion and his appear pose.
 func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	var dd := dash_def()
-	var gy: float = m.world.ground_at(land.x, land.z)
+	var gy: float = land.y if not m.world.is_void(land.x, land.z) else World.VOID
 	var dy := clampf(from.y - h.ground(), 0.0, float(dd["keep_h"])) if not from_void else 0.0
 	var arrive_y := maxf(gy + dy, from.y) if from_void or gy <= World.VOID + 1.0 else gy + dy
 	h.teleport(Vector3(land.x, arrive_y, land.z))
 	h.vel.y = 0.0
 	if arrive_y - gy > 0.05: h.grounded = false
 	play("ostra_arrive")
-	_fold_in(land, TRADE_EDGE)
-	m.fx.flash(land + Vector3(0, 1.0, 0), TRADE_EDGE, 0.9 * TRADE_LOOK_K, 0.08)
-	m.sfx("os_swap", land, -2.0, 1.0)
-	net_ring(land, 1.6 * TRADE_LOOK_K, TRADE_EDGE)
-
-## Both ends of a Trade fold in on themselves (motes and void smoke drawn inward, no ring or blast: the
-## dash rule).
-func _fold_in(at: Vector3, col: Color) -> void:
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 26, -6.0 * TRADE_LOOK_K, 0.3, 0.0, 1.3 * TRADE_LOOK_K)
-	m.fx.burst(at + Vector3(0, 1.0, 0), SMOKE, 12, -3.0 * TRADE_LOOK_K, 0.3, 0.0, 2.2 * TRADE_LOOK_K)
+	vfx("trade_fold", land)      # both ends fold in on themselves: no ring or blast (the dash rule)
+	vfx("trade_arrive", land)
 
 # ------------------------------------------------------------------ RMB: Shard Snap
 func fire_rmb(c: Dictionary) -> void:
@@ -512,21 +508,18 @@ func _snap_release() -> void:
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
 	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL,
+		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
 		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
 	)
-	KitLooks.of(m).skin(m.shots[-1], "spear")
-	m.sfx("os_snap", h.pos, -2.0, 1.0)
+	HeroVfx.of(m).trail(h, "snap_trail", KitLooks.of(m).skin(m.shots[-1], "spear"))
 	_boost(float(sn["boost"]["cast"]))
-	m.fx.flash(start, Color("b06bff"), 0.7, 0.07)
-	m.fx.burst(start, Color(0.45, 0.15, 0.7, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
+	vfx("snap_cast", start, dir)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	m.fx.burst(at, Color(0.45, 0.15, 0.7, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
-	m.fx.flash(at, PINK, 0.7, 0.08)
+	vfx("snap_hit", at, null, {"hit": e != null})
 	if e == null:
 		return
 	var sn: Dictionary = rmb_def()["snap"]
@@ -536,7 +529,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	KitLooks.of(m).crown(e, stun)
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
@@ -591,11 +583,11 @@ func _tick_seed(dt: float) -> void:
 	if float(seed["t"]) < drop:
 		var u := float(seed["t"]) / drop
 		var from: Vector3 = seed["from"]
-		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, VOID_COL)
+		KitLooks.of(m).hold_on("os_drop", "mote", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 1.0, SEA)
 	AimKit.circle(
 		h, "seed",
 		{
-			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": VOID_COL, "col2": TEAL,
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": TEAL, "col2": SEA,
 			"dashed": seed_k() < 1.0
 		}
 	)
@@ -610,6 +602,19 @@ func _tick_seed(dt: float) -> void:
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
+	elif h.ctrl == "bot":
+		_bot_pop()
+
+## A bot pops the seed once its foe stands near the middle (a fizzled seed does nothing, so it waits for one).
+func _bot_pop() -> void:
+	if float(seed["t"]) < float(e_def()["min_recast"]):
+		return
+	var tgt := _bot_target()
+	var near := tgt != null and Vector2(
+		tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
+	).length() < maxf(BOT_POP_MIN, seed_radius() * BOT_POP_K)
+	if near:
+		e_recast()
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
 ## waste the seed).
@@ -637,7 +642,7 @@ func _pop(hit: bool) -> void:
 	seed = {}
 	e_t = 0.0
 	AimKit.hide(h, "seed")
-	HeroZones.seed_pop(m, sid, TEAL)
+	HeroZones.seed_pop(m, sid)
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
@@ -646,21 +651,7 @@ func _pop(hit: bool) -> void:
 	play("ostra_pop")
 	var mult := 1.0 + (float(ed["dmg_max_k"]) - 1.0) * k
 	var dmg := float(ed["dmg"]) * mult * power("kin")
-	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
-	for i in 3:
-		var rr := rad * (1.0 - 0.3 * i)
-		m.later(0.04 * i, func(): m.fx.ring(p, rr, VOID_COL if i < 2 else Color("f2eaff"), 0.12))
-	m.fx.burst(p + Vector3(0, 0.8, 0), VOID_COL, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
-	m.later(
-		0.12,
-		func(): m.fx.spark(
-			p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
-		)
-	)
-	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
-	m.sfx("os_pop", p, -2.0, 1.0)
-	m.sfx("ostra_spring_boing", p, -3.0, 1.0)     # the jack springs out
-	net_ring(p, rad, TEAL)
+	vfx("seed_pop", p, null, {"r": rad, "k": k})      # an implosion to a bright point, then shards fly out
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
@@ -679,18 +670,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():
-		var inside := Vector2(
-			tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
-		).length() < seed_radius()
-		if inside or float(seed["t"]) > float(seed["grow"]) * 0.9:
-			h.inp["sig"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 8.0 and los and randf() < 0.3:
-		h.inp["aim"] = tgt.pos
+		var ed := e_def()
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["drop"]) + BOT_SEED_AHEAD, 0.0, float(ed["reach"]))
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 11.0 and randf() < 0.5:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sn: Dictionary = rmb_def()["snap"]
+		BotLead.aim(self, tgt, float(sn["wind"]), float(sn["speed"]), float(sn["range"]))
 		h.inp["sec"] = true
 		return
 	if int(

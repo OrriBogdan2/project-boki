@@ -5,6 +5,7 @@ import math
 import boki_clips
 import lodestick
 from boki_clips import add, c, s, seq, sweep
+from boki_gait import planted
 from lodestick import LEGS, SIDES, leg_pts, mir, v3
 
 LOOK_UP = 0.3      # the face tips up toward the high cameras
@@ -72,6 +73,23 @@ def tripod(p, t, swing, lift):
         a = sweep(t, 1, ph)
         up = max(0.0, c(t, 1, ph))
         leg(p, pre, sd, swing * a, lift * up, lift * 0.6 * up)
+
+
+def planted_leg(pre, sd):
+    """leg() for boki_gait: `a` swings it round the hip, `b` lifts the knee and folds the shin under it."""
+    sx = -1.0 if sd == "L" else 1.0
+
+    def put(p, a, b):
+        p[pre + "1." + sd] = (0.0, sx * a, sx * b)
+        p[pre + "2." + sd] = (0.0, 0.0, -sx * 0.6 * b)
+    return put
+
+
+def tripods(reach_out):
+    """The six legs for boki_gait.planted, in TRIPOD's two sets. The front legs already reach as far forward as they
+    go (and the hind ones back), so their steps sit `reach_out` m behind (ahead of) the rest place."""
+    shift = {"fleg": reach_out, "mleg": 0.0, "hleg": -reach_out}
+    return [(pre[0] + "paw." + sd, ph, planted_leg(pre, sd), shift[pre]) for (pre, sd), ph in TRIPOD.items()]
 
 
 def feelers(p, t, amp=0.08, back=0.0, rate=1):
@@ -279,8 +297,12 @@ def tend(t):
     return p
 
 
-CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (0.5, True, run), "hop": (1.0, True, hop),
-         "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
-         "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
-         "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
+CLIPS = {
+    "idle": (4.0, True, idle),
+    "walk": (1.0, True, planted(walk, BONES, tripods(0.12), duty=0.45, reach=0.22, lift=0.06, guess=(0.0, 0.0))),
+    "run": (1.0, True, planted(run, BONES, tripods(0.17), duty=0.2, reach=0.34, lift=0.08, drop=0.01,
+                               guess=(0.0, 0.0))),
+    "hop": (1.0, True, hop), "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
+    "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
+    "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
 HIDE_AT = {"prop_berry": (0, 0.16, 0.62), "prop_lode": (0, -0.34, 0.5)}

@@ -24,15 +24,21 @@ var skel: Skeleton3D
 var bob := 1.0               # x: the hips' vertical travel at this speed
 var hips := -1               # hips bone index
 var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
+var hips_keyed := false      # the clips do key it (data "offset_bones": Motley's spring): their height, not the rest
 var hips_y := NAN            # m: running mean of the hips' height (skeleton space)
 var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
+var run_len := 1.0           # s: of the forward run clip
 
-func _init(sk: Skeleton3D, swing: Dictionary) -> void:
+func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed := false) -> void:
 	skel = sk
+	walk_len = walk_s
+	run_len = run_s
+	hips_keyed = keyed
 	for b in LEG_BONES:
 		var bi := WardenSkeleton.find(sk, b)
 		if bi >= 0:
@@ -47,24 +53,26 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 		if ai >= 0 and hi >= 0 and ti >= 0:
 			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
 
-## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
-## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
-## rings at "walk_speed" and "run_speed". "side_foot_mps" (optional, same shape) is the strafe loops' own, mixed in
-## by how far `pos` (the blend position, x right, y forward) points sideways.
-func plan(spd: float, lc: Dictionary, pos: Vector2) -> float:
-	var walk := float(lc.get("walk_speed", 2.2))
-	var run := float(lc.get("run_speed", 4.6))
-	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
+## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
+## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
+## the clips with it at rate 1 (m/s, tools/anim_audit.gd), "bob": [walk, run]. "side_foot_mps" (optional, same shape)
+## is the strafe loops' own, mixed in by how far `pos` (the blend position, x right, y forward) points sideways. The
+## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
+## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
+## feel it. (Held at a speed, `w` is the speed's share from "walk_speed" to "run_speed".)
+func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	var stride: Array = lc.get("stride", [1.0, 1.0])
-	var foot: Array = lc.get("foot_mps", [walk, run])
+	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
 	var side: Array = lc.get("side_foot_mps", foot)
 	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
-	var ahead := lerpf(float(foot[0]), float(foot[1]), t)
-	var foot_speed := lerpf(ahead, lerpf(float(side[0]), float(side[1]), t), side_k)
-	gain = lerpf(float(stride[0]), float(stride[1]), t)
+	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k)
+	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k)
+	gain = lerpf(float(stride[0]), float(stride[1]), w)
 	var b: Array = lc.get("bob", [1.0, 1.0])
-	bob = lerpf(float(b[0]), float(b[1]), t)
-	return clampf(spd / maxf(foot_speed, 0.1), RATE_MIN, RATE_MAX)
+	bob = lerpf(float(b[0]), float(b[1]), w)
+	var cycle := lerpf(walk_len, run_len, w)
+	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
+	return clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, RATE_MAX) * run_len / cycle
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:
@@ -74,9 +82,11 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 	var k := 1.0 + (gain - 1.0) * legs_w
 	if hips >= 0:
 		var hp := skel.get_bone_pose_position(hips)
-		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - hips_rest_y)   # (the clip's, without our offset)
+		# (a clip that keys the hips set this frame's height; else it is the rest plus last frame's offset of ours)
+		var base := hp.y if hips_keyed else hips_rest_y
+		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - base)   # (the clip's, without our offset)
 		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
-		hp.y = hips_rest_y - (gy - hips_y) * (1.0 - bob) * legs_w
+		hp.y = base - (gy - hips_y) * (1.0 - bob) * legs_w
 		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])

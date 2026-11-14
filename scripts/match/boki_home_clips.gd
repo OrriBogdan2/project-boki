@@ -1,17 +1,17 @@
 class_name BokiHomeClips
 extends RefCounted
 ## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash,
-## and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), strut, pose, bow (Show Ring),
-## crouch, burst, sulk (the Dash), timed by their rules, and a flier's hover, glide and flare (BokiFly), its wings
-## and tail driving them.
+## swim, paddle, and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), strut, pose, bow
+## (Show Ring), crouch, burst, sulk (the Dash), timed by their rules, and a flier's hover, glide and flare (BokiFly),
+## its wings and tail driving them.
 ## Each is the species' baked idle (or sleep; the burst its run, the strut its walk) with BokiHomePoses' deltas laid
 ## over it, sampled into a new Animation, so every Boki keeps its own rest shape and idle motion. Built once per
 ## species and shared.
 
-const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle",
 	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "crouch", "burst", "sulk", "hover", "glide",
 	"flare"]
-const LOOPED := ["nap", "munch", "nudge", "climb", "splash", "strut", "hover", "glide"]
+const LOOPED := ["nap", "munch", "nudge", "climb", "splash", "swim", "paddle", "strut", "hover", "glide"]
 const SETTLE_SECS := 1.5
 const WAKE_SECS := 1.7
 const STEP := 0.05                  # s between keys
@@ -41,7 +41,7 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 	out["settle"] = _clip(skel, pose, "settle", idle, sleep, SETTLE_SECS)
 	out["wake"] = _clip(skel, pose, "wake", sleep, idle, WAKE_SECS)
 	out["nap"] = _clip(skel, pose, "nap", sleep, null, sleep.length)
-	for n in ["munch", "nudge", "climb", "splash"]:
+	for n in ["munch", "nudge", "climb", "splash", "swim", "paddle"]:
 		out[n] = _clip(skel, pose, n, idle, null, il, BokiHomePoses.cycles(n, il))
 	var impact := float(BaseTumble.rules()["impact_s"])
 	for n in ["rush", "brace", "dodge"]:

@@ -5,7 +5,8 @@ extends Node
 ## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown), "kburst"
 ## (a factor on the gait's cadence) and a flier's "aloft" and "lift" (BokiFly: hover or glide up there, a flare
 ## coming down), and plays the face on top of whatever the body does.
-## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
+## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
+## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
@@ -72,6 +73,18 @@ const FRAME := {
 		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
 		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
 			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
+	"goliathite": {"head": Vector3(0, 0.5, -0.33), "top": 0.668, "carry": Vector3(0, 0.795, 0.147),
+		"ear_tip": Vector3(0.085, 0.668, 0.129), "tail_tip": Vector3(0, 0.191, 0.515), "tip_bone": "hips", "hip": 0,
+		"marks": {"left flank": Vector3(-0.21, 0.207, 0.0736), "right flank": Vector3(0.21, 0.207, 0.0736),
+			"back": Vector3(0, 0.445, 0.258), "chest": Vector3(0, 0.159, -0.368)}},
+	"hoarheron": {"head": Vector3(0, 0.384, -0.44), "top": 0.62, "carry": Vector3(0, 0.739, 0.16),
+		"ear_tip": Vector3(0.0722, 0.62, 0.14), "tail_tip": Vector3(0, 0.177, 0.56), "tip_bone": "hips", "hip": 0,
+		"marks": {"left flank": Vector3(-0.178, 0.192, 0.08), "right flank": Vector3(0.178, 0.192, 0.08),
+			"back": Vector3(0, 0.414, 0.28), "chest": Vector3(0, 0.148, -0.4)}},
+	"floenatee": {"head": Vector3(0, 0.56, -0.42), "top": 0.7, "carry": Vector3(0, 0.72, -0.05),
+		"ear_tip": Vector3(0.06, 0.7, -0.36), "tail_tip": Vector3(0, 0.08, 0.5), "tip_bone": "hips", "hip": 0,
+		"marks": {"left flank": Vector3(-0.18, 0.25, 0.0), "right flank": Vector3(0.18, 0.25, 0.0),
+			"back": Vector3(0, 0.46, 0.08), "chest": Vector3(0, 0.3, -0.44)}},
 	"gibbelle": {"head": Vector3(0, 0.37, -0.15), "top": 0.52, "carry": Vector3(0, 0.6, 0.03),
 		"ear_tip": Vector3(0.155, 0.365, -0.05), "tail_tip": Vector3(0, 0.1, 0.17), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.16, 0.15, 0.02), "right flank": Vector3(0.16, 0.15, 0.02),
@@ -112,32 +125,32 @@ const FRAME := {
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
-	"cindle": [0.80, 1.60],
+	"cindle": [0.81, 1.48],
 	"puddlet": [0.58, 1.15],
-	"burrlet": [0.50, 1.02],
+	"burrlet": [0.52, 1.00],
 	"glintmole": [0.49, 1.04],
-	"rimeshrew": [0.56, 1.09],
+	"rimeshrew": [0.49, 1.15],
 	"zephyrak": [1.50, 2.90],
-	"pebbit": [0.48, 1.10],
-	"cairnback": [0.29, 0.90],
-	"wisplet": [0.45, 0.42],
+	"pebbit": [0.50, 1.09],
+	"cairnback": [0.30, 1.04],
+	"wisplet": [0.63, 1.32],
 	"gloamshell": [1.50, 2.90],
 	"selenfin": [1.50, 2.90],
-	"zapple": [0.75, 1.74],
-	"hivara": [0.63, 1.42],
-	"caecilith": [0.14, 0.35],
+	"zapple": [0.86, 1.70],
+	"hivara": [0.64, 1.44],
+	"caecilith": [0.15, 0.38],
 	"glomwort": [1.50, 2.90],
-	"kestrike": [0.30, 0.42],
-	"kindlewren": [0.39, 0.50],
-	"lodestick": [0.19, 0.60],
-	"marchleaf": [0.51, 2.02],
-	"mossgrade": [0.12, 0.74],
-	"nettlynx": [0.54, 1.07],
+	"kestrike": [0.33, 0.70],
+	"kindlewren": [0.89, 1.70],
+	"lodestick": [0.46, 1.62],
+	"marchleaf": [0.53, 2.05],
+	"mossgrade": [0.34, 0.93],
+	"nettlynx": [0.54, 1.03],
 	"thrumbird": [1.50, 2.90],
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
-const CONTACT := {"cindle": 0.333, "puddlet": 0.367, "burrlet": 0.367}
+const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
@@ -161,8 +174,11 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
+## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
+const SWIM_LINE := 0.5
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
+	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
@@ -190,7 +206,7 @@ const CLIP_FACE := {
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
-	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy", "swim": "cheer", "paddle": "focus",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 	"strut": "cheer", "pose": "cheer", "bow": "cheer",
 	"crouch": "focus", "burst": "cheer", "sulk": "sad",
@@ -237,11 +253,17 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
+var _swimmer := false          # a Water type: swims level rather than paddling
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
+static func swimmer(kin_id: String) -> bool:
+	return (BokiWade.rules()["swim"] as Array).has(BokiLines.element_of(kin_id))
 
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
@@ -307,6 +329,7 @@ func _ready() -> void:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
+	_swimmer = swimmer(species)
 	_copy_coat()
 	set_clip("idle")
 
@@ -348,6 +371,9 @@ func _process(dt: float) -> void:
 	if not root.is_visible_in_tree():
 		return
 	_flinch.update(root, dt)
+	_water = float(root.get_meta("kwater", 0.0))
+	if _water > 0.0:
+		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
@@ -370,12 +396,16 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip in OWN_HEIGHT else 0.0       # the clip does the hopping, not home
 	var lift := float(root.get_meta("lift", 0.0))
 	if lift > 0.0 and _shadow == null:
 		_shadow = _ground_shadow(flex)           # a flier's first time up: from now on its shadow marks the ground
+	var afloat := _float_lift()
+	model.position.y = 0.0
+	if clip in OWN_HEIGHT or afloat > 0.0:
+		# the clip hops or floats, not home
+		model.position.y = afloat / flex.global_basis.y.length() - body.position.y
 	if _shadow:
-		_shadow.global_position.y = root.global_position.y - lift + SHADOW_LIFT
+		_shadow.global_position.y = root.global_position.y - lift + _water + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
@@ -435,6 +465,9 @@ func _state_clip() -> String:
 		return "glide" if _speed >= WALK_SPEED else "hover"
 	if _shot == "flare" and _shot_left > 0.0:
 		return _shot          # it touches down before it does what it came down for
+	var swim := _swim_clip()
+	if swim != "":
+		return swim
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
@@ -452,6 +485,22 @@ func _state_clip() -> String:
 	if _speed >= RUN_SPEED:
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
+
+## "swim" or "paddle" while the water is deeper than SWIM_LINE of its height, else "".
+func _swim_clip() -> String:
+	if _water <= _afloat() or FRAME[species].get("hover", false):
+		return ""
+	return "swim" if _swimmer else "paddle"
+
+## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
+func _afloat() -> float:
+	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+
+## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
+func _float_lift() -> float:
+	if FRAME[species].get("hover", false):
+		return _water
+	return maxf(0.0, _water - _afloat())
 
 func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
