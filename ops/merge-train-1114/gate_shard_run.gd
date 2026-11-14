@@ -61,4 +61,6 @@ func _work() -> void:
 		var secs := (Time.get_ticks_msec() - t0) / 1000
 		var errs := FileAccess.get_file_as_string(log_path).count("SCRIPT ERROR")
 		OS.execute("rm", ["-rf", home, log_path])
+		_mutex.lock()  # one line at a time: two threads printing at once once made a "GS" line with no flag
 		print("GS %s %d %d %d" % [_flags[idx], rc, errs, secs])
+		_mutex.unlock()

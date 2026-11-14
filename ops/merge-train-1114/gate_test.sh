@@ -42,6 +42,7 @@ submit)
 			bothbad:c:--e-check) rc=1;;        # nobody can run c: listed, not a new red
 		esac
 		echo "GS \$f \$rc 0 1" >> \$R/\$id
+		[ \$SCEN = garble ] && [ \$side = c ] && echo "GS " >> \$R/\$id   # two threads printing at once
 	done
 	echo \$id;;
 result) echo "\$2 rc=0 fails=0 worker=x secs=1 needs=any label=l log=\$R/\$2";;
@@ -64,5 +65,6 @@ check flaky GREEN
 check unrun GREEN
 grep -q 'unrun=1' $T/out/summary.txt || { echo 'FAIL unrun count'; fails=$((fails+1)); }
 check twice GREEN
+check garble GREEN
 check bothbad GREEN
 exit $fails

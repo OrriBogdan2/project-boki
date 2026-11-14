@@ -111,8 +111,13 @@ gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE move
 	N=$((N + 1)); local out="$OUT/gate-$N"
 	log "gate $N: PRs ${prs[*]} on base ${BASE:0:10} (main ${MAIN:0:10})"
 	fresh_tree "$WORK/main" "$MAIN"
-	GS_TAG="mt$N" bash "${GATE:-$WORK/bin/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
-	local rc=$?; summary=$(head -1 "$out/summary.txt" 2>/dev/null)
+	local rc green=${GS_CACHE:-$HOME/.gate-shard-cache}/green-$(git -C "$cand" rev-parse "HEAD^{tree}").txt
+	if [ -z "${GATE:-}" ] && [ -f "$green" ]; then  # this exact tree already passed a full gate: no new gate
+		mkdir -p "$out"; cp "$green" "$out/summary.txt"; rc=0; log "gate $N: tree already GREEN (cached $(date -ur "$green" +%H:%M))"
+	else
+		GS_TAG="mt$N" bash "${GATE:-$WORK/bin/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1; rc=$?
+	fi
+	summary=$(head -1 "$out/summary.txt" 2>/dev/null)
 	[ $rc -eq 2 ] && { log "gate $N: usage or import failure, train stopped"; exit 2; }
 	log "gate $N rc=$rc: ${summary:-no summary (import failure?)}"
 	if [ $rc -eq 0 ]; then
@@ -127,7 +132,7 @@ gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE move
 		fi
 		return 0
 	fi
-	for pr in "${prs[@]}"; do LAST_RED[$pr]=$(grep -h '^NEW-RED' "$out/summary.txt" | head -1); done
+	for pr in "${prs[@]}"; do LAST_RED[$pr]=$(grep -h '^NEW-RED' "$out/summary.txt" | head -1); [ -n "${LAST_RED[$pr]}" ] || LAST_RED[$pr]=$(grep -o '^GATE RED ([^)]*)' "$out/summary.txt"); done
 	return 1
 }
 
