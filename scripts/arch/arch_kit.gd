@@ -898,6 +898,8 @@ func _tick_knocks() -> void:
 
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
+## DashReset just gave this hunter its dash back for a "takedown" or an "assist" (its 4s window, CC included).
+func on_takedown(_source: String) -> void: pass
 ## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
 func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
 ## The weapon fires from an open glider (it stays open); false: the attack key does nothing there.

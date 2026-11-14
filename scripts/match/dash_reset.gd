@@ -3,7 +3,8 @@ extends RefCounted
 ## The takedown refresh (decision 0022): when an ENEMY hunter is knocked or killed, the hunter who gets
 ## credit and every teammate whose damage or crowd control landed on the victim in the last ASSIST_WINDOW
 ## get their dash (Shift) back: a one-charge dash refills, a multi-charge dash gains one charge, and the
-## long-dash cooldown clears. Only the knocker heals a little. Mobs and bosses don't count, and a hero whose
+## long-dash cooldown clears. Only the knocker heals a little. The kit hears it too (ArchKit.on_takedown: Vex's
+## Hot Streak). Mobs and bosses don't count, and a hero whose
 ## dash data says "knock_refresh": false is left out. Match.knock, eliminate and _lose_life call takedown();
 ## Match.on_damage (and damage-free CC) calls note(). The hero-specific resets (a Sparkle blowout, a Vex
 ## vault, a knife in a foe) call cue() so every "dash is back" gives the same feedback to the one who got
@@ -39,6 +40,8 @@ static func _refresh(h: Hunter, source: String) -> bool:
 	h.dashes = most if most <= 1.0 else minf(most, h.dashes + 1.0)
 	h.ex_cd = 0.0
 	cue(h, source)
+	if h.ak:
+		h.ak.on_takedown(source)
 	return true
 
 ## The dash came back for `h`: play the cue (softer for an assist) and pop the Shift icon (local hunter only).

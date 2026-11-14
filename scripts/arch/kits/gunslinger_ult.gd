@@ -62,13 +62,13 @@ func cast() -> bool:
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 
-## The shell: a big Burr Charge with its spikes out, made once and reused.
+## The shell: a big spiked charge, made once and reused.
 func _take_node() -> Node3D:
 	for n in pool:
 		if is_instance_valid(n) and not (n as Node3D).visible:
 			(n as Node3D).visible = true
 			return n
-	var nn := kit._burr_mesh()
+	var nn := kit.shell_mesh()
 	nn.scale = Vector3.ONE * 2.6
 	pool.append(nn)
 	return nn

@@ -3,22 +3,29 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the green-fire rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a
+## Names: the RMB is Coin Blast (a coin charged with her green fire; "burr" in the data and code) and the E is
+## Cash Out ("needle" in the data and code).
+##
+## Loop: tap RMB and the coin flies from the arm-cannon's launcher along the aim. A direct hit on a
 ## foe damages and Dazes it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m, riding up
 ## ramps and low ledges, and sticks where it meets a steep wall: a cone shows back toward you for its fuse,
 ## then blasts, shoving everyone in it along the cone (toward you), hurting and Dazing them too. At the
 ## lane's end on no foe and no wall, on the ground or in the air, it is a dud: a puff and nothing else (a
 ## miss is a miss; the source's cone is wall-only). The rifle does +76% to a Dazed foe, in big gold numbers,
-## and the string doesn't decay on them. Slipstep goes where you move and you keep shooting. Longneedle:
-## stand still while the line narrows, the aim turning only so fast, then a long beam through walls. A knock
-## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## and the string doesn't decay on them. Slipstep goes where you move and you keep shooting. Cash Out:
+## stand still while the line narrows, the aim turning only so fast, then a long beam through walls. Hot Streak:
+## a takedown or an assist (DashReset's credit) gives faster, harder rifle rounds and lights Fever (lifesteal) for
+## a few seconds, the rifle arm burning green; abilities that land light Fever too.
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
 const LIME := Color("b8f03c")        # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")         # palette "hot"
 const DEEP := Color("4f8a12")        # palette "deep"
-const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
+const BRONZE := Color("b9732f")      # Cinderfall's shell (a material, not an effect)
+const GOLD := Color("ffcf3f")        # the coin (unshaded: the toon light turns gold red-brown)
+const GOLD_DARK := Color("c28a1c")   # its struck faces
+const STREAK_FX_EVERY := 0.15        # s between the rifle arm's green-fire puffs while Hot Streak burns
 const DUD_DUST := Color("6b4a2e")    # a dud Burr Charge's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
@@ -47,7 +54,9 @@ var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
-var knocked := {}
+var streak_t := 0.0             # s of Hot Streak left (the rifle arm burns green)
+var streak_fx := 0.0            # s to the next of its puffs
+var streaks := 0                # Hot Streaks lit (tests)
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
@@ -109,6 +118,7 @@ func _tick(dt: float) -> void:
 	_tick_mag(dt)
 	_tick_brackets()
 	_tick_walk_off()
+	_tick_streak(dt)
 	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt, PIP_LIFT, 0.65)
 
 func own_dash_trail() -> bool:
@@ -207,18 +217,34 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
 		add_fever(1)
-	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
-		_on_knock(t)
 
-## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
-func _on_knock(t: Ent) -> void:
-	knocked[t.get_instance_id()] = true
-	if rank("sec") >= 3:
+## Hot Streak, on a takedown or an assist (the dash itself comes back by the game-wide DashReset rule): rounds
+## leave faster and hit harder and Fever (lifesteal) burns for the streak's seconds; a second takedown renews it,
+## it never stacks. Rank 3 of the RMB also gets the coin back, on her own takedowns only.
+func on_takedown(source: String) -> void:
+	var sd := d["passive"]["streak"] as Dictionary
+	var secs := float(sd["t"])
+	h.add_buff("fire_rate", float(sd["fire_rate"]), secs)
+	h.add_buff("damage", float(sd["dmg"]), secs)
+	add_fever(1)
+	touch_res(secs)
+	streak_t = secs
+	streaks += 1
+	if source == "takedown" and rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	m.sfx("vn_stim", h.pos, -3.0)
-	vfx("knock")                   # the rifle hand's swoosh and a lift of green fire
+	vfx("knock")                   # the stim sting, the rifle hand's swoosh and a lift of green fire
 	play("gunslinger_knock")
+
+## While Hot Streak burns, green fire licks off the rifle arm (her own machine draws it; the knock cue is synced).
+func _tick_streak(dt: float) -> void:
+	if streak_t <= 0.0:
+		return
+	streak_t -= dt
+	streak_fx -= dt
+	if streak_fx <= 0.0 and tells_visible():
+		streak_fx = STREAK_FX_EVERY
+		vfx("streak")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
 ## Each round: a muzzle flash on the rifle's mouth, a lime tracer riding the round (its hit is on_deal's), the
@@ -382,7 +408,7 @@ func fire_rmb(c: Dictionary) -> void:
 			n = p
 			break
 	if n == null:
-		n = _burr_mesh()
+		n = _coin_mesh()
 		burr_pool.append(n)
 	n.visible = true
 	n.scale = Vector3.ONE
@@ -426,7 +452,23 @@ func _puff(at: Vector3, d: Vector2) -> void:
 
 ## The charge: a bronze ball about 0.3 m across, a dark band round it, a lime heart showing through
 ## and eight hot spikes. Solid colours, so it reads bronze and green fire on any ground.
-func _burr_mesh() -> Node3D:
+## The coin: a chunky gold disc 0.44 m across, a darker struck face each side and a green-fire rim. Solid
+## colours, so it reads gold and lime on any ground; in flight it spins on its edge (_tick_burrs).
+func _coin_mesh() -> Node3D:
+	var n := own_node()
+	var body := Models.part(n, Models.cyl(0.22, 0.22, 0.07, 20), solid_mat(GOLD))
+	body.rotation.x = PI * 0.5
+	for side in [-1.0, 1.0]:
+		var face := Models.part(n, Models.cyl(0.15, 0.15, 0.012, 16), solid_mat(GOLD_DARK), Vector3(0, 0, side * 0.035))
+		face.rotation.x = PI * 0.5
+	var rim := Models.part(n, Models.cyl(0.245, 0.245, 0.04, 20), solid_mat(LIME))
+	rim.rotation.x = PI * 0.5
+	for ch in n.get_children():
+		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return n
+
+## Cinderfall's shell (GunslingerUlt): a spiked bronze charge with a green heart.
+func shell_mesh() -> Node3D:
 	var n := own_node()
 	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
 	var band := Models.cyl(0.155, 0.155, 0.06, 14)
