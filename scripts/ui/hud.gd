@@ -9,6 +9,7 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
+var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
@@ -302,6 +303,7 @@ func _draw_all() -> void:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
+			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
 		if (p.dropping or p.rocket != null) and not map_open():
