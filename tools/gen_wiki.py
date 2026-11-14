@@ -427,7 +427,8 @@ def gen_boki():
     for sid, ln in ev.get("lines", {}).items():
         for o in ln.get("into", []):
             how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
-            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+            pth = o.get("path", "")      # one affinity, or a list of them (evolve.json "orbitle")
+            rows.append([nm(sid), nm(o["id"]), how, " or ".join(pth).title() if isinstance(pth, list) else pth.title()])
     b += table(["Boki", "Evolves into", "When", "Branch"], rows)
     b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []
@@ -762,6 +763,24 @@ def _air_audit_table():
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
+DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
+                   ("rise", "Shift in a jump's rise"), ("same", "Space and Shift on one step")]
+DASH_JUMP_MODE = {"cancel": "the jump goes at once and ends the dash", "both": "the jump goes and the dash runs on",
+                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends and the glider opens, no jump",
+                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise",
+                  "hop": "the air dash goes at once and arcs on as a hop, the rise kept"}
+
+def _dash_jump_rows(hero, f):
+    """Space in a dash, Shift in a jump's rise, both on one step (dash_jump rows, --dash-jump-check)."""
+    rows = []
+    for kind, label in DASH_JUMP_CASES:
+        row = f.get("dash_jump", {}).get(kind, {})
+        ours = DASH_JUMP_MODE.get(row.get("ours"), "no row")
+        if row.get("carry") is not None and row.get("ours") in ("cancel", "both"):
+            ours += ", keeping %d%% of its speed" % round(row["carry"] * 100)
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -794,6 +813,11 @@ def gen_dash_flow():
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += ("\n\n## Space and Shift together\n\nOne row per hero and case, from `dash_jump` in the same files. \"Ours\" is "
+             "measured headless by `--dash-jump-check`, which fails when the game stops doing it. Verdict: match (the source "
+             "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

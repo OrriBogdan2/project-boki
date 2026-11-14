@@ -210,7 +210,7 @@ static func regroup_goal(m, h: Hunter, a: Dictionary) -> Vector3:
 		return Vector3.INF
 	a["regroup"] = true
 	if d > BASE_M and h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and m.time - h.hurt_at > CALM_S:
-		h.start_base(mate)
+		BaseRecall.start(h, mate)
 	return mate.pos
 
 ## One bot decides, the squad's bots go along (leaving for the exit, crashing a rival's uplink).

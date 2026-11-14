@@ -80,6 +80,16 @@ enum DashInput { WASD_FALLBACK_TO_CURSOR, CURSOR, WASD }
 @export var mantle_duration := 0.25       ## minimum mantle time
 @export var mantle_max_upward_speed := 2.0 ## only mantle near apex or while falling
 
+@export_group("Steps")
+## Terrace steps snap the body; StepSmooth draws it (and the camera) easing in behind. All [est], by eye.
+@export var step_ease_rate := 8.0         ## 1/s: how fast the drawn body closes on the body's y after a step
+@export var step_max_speed := 4.4         ## m/s: the fastest it rises or sinks to catch up (4.4/60 = 0.073 m a frame)
+@export var step_lag_up := 0.9            ## m: the most it trails below a rise; a terrace step is 0.85
+@export var step_lag_down := 1.0          ## m: the most it hangs above a drop; a run down four stairs peaks at 0.6
+@export var step_free_from := 0.9         ## m above the ground where the ease starts to give way (a step is 0.85)
+@export var step_free_to := 1.5           ## m above the ground where the body is drawn as it is (jump, glide)
+@export var step_snap_max := 1.3          ## m: a gap this big (a teleport, a deep drop) is not a step: no ease
+
 @export_group("Jump pad")
 @export var jump_pad_dash_carry := 1.15   ## [wiki: dashing into a pad keeps momentum + small boost] [est]
 

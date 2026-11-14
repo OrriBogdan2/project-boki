@@ -56,7 +56,8 @@ func _source(src: String) -> void:
 		var placed_ok := wi.placed - decals0 == (1 if s in WALLS else 0)
 		if s in WALLS and placed_ok:
 			placed_ok = at.x > face - 0.3 and at.x < face + 1.0 and absf(at.z - spot.z) < 1.0
-			placed_ok = placed_ok and wi.last_normal.is_equal_approx(Vector3(-1, 0, 0))
+			# facing out of the wall: the normal is the knock's, and Lace's Heavy Shot leaves her bow, off her centre
+			placed_ok = placed_ok and wi.last_normal.dot(Vector3(-1, 0, 0)) > cos(deg_to_rad(5.0))
 		ok("decal %s > %s" % [src, s], placed_ok, "decals %d at %s" % [wi.placed - decals0, at])
 	await done(m)
 
@@ -109,7 +110,8 @@ func _knock(src: String, m: Match, P: Hunter, T: Hunter) -> Dictionary:
 			K.crushed_at = {}
 			T.hurt(5.0, P, {"src": "abil", "ab": "lmb", "kb": dir * 8.0, "lift": 2.0})
 		"gunslinger":
-			K._cone(T.pos - Vector3(1.0, 0, 0), dir, K.rmb_def()["burr"], false)
+			# a Burr cone is a wall cone now (vex-rmb-1111): no wall flag
+			K._cone(T.pos - Vector3(1.0, 0, 0), dir, K.rmb_def()["burr"])
 		"dolm":
 			K._punch(1.0)
 		"mage":

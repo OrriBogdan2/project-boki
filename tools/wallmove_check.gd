@@ -30,6 +30,22 @@ func ok(cond: bool, msg: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	_start(main)
+	var w4: Dictionary = _carve(4, 1)[0]
+	var w5 := _carve(5, 2)
+	_kick(w4, w5[0], w5[1])
+	_dance(w5[1])
+	_stand_mantle(_carve(1, 1)[0])
+	_bounce(w4)
+	_ledges(_carve(2, 2)[0])
+	_lift()
+	_guards(_carve(2, 1)[0], w5[0])
+	_hunters(main)
+	print("WCHECK DONE, failures: ", bad)
+	main.get_tree().quit()
+
+## A two-team match with one local hunter (h) alone on the map: no mobs, no Boki, everyone else far away.
+func _start(main: Node) -> void:
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
@@ -52,18 +68,6 @@ func run(main: Node) -> void:
 	h.kin = null
 	h.kin2 = null
 	w = m.world
-	var w4: Dictionary = _carve(4, 1)[0]
-	var w5 := _carve(5, 2)
-	_kick(w4, w5[0], w5[1])
-	_dance(w5[1])
-	_stand_mantle(_carve(1, 1)[0])
-	_bounce(w4)
-	_ledges(_carve(2, 2)[0])
-	_lift()
-	_guards(_carve(2, 1)[0], w5[0])
-	_hunters(main)
-	print("WCHECK DONE, failures: ", bad)
-	main.get_tree().quit()
 
 ## 5. Every Hunter: kick and bounce from a run, a jump, the dash and each ability's recovery (own file).
 func _hunters(main: Node) -> void:

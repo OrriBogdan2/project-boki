@@ -12,9 +12,10 @@ extends ArchKit
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
 ##   takes half the cooldown off.
-## - E, Anchor Drop: the fist raised through a short wind-up (he can walk slowly), then a giant ghost anchor
-##   slams the cone in front: a long stun. In the air you smash straight down, the anchor lands with you, a ring
-##   at the landing, and the height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
+## - E, Anchor Drop: a thin outline of the cone on the ground through a short wind-up (he can walk slowly) while
+##   a giant translucent fist falls into it (HeroVfx "anchor_fist"), then the slam hits the cone in front: a long
+##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the height
+##   adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
 ##   Just after it the barge turns badly.
 ## - Dash, Barge: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
 ##   touches nobody. A pounce in the air, further. Rank 3: it resets the gun's bloom.
@@ -428,9 +429,9 @@ func _grab(f: Ent, ally := false) -> void:
 		hook_hold = null
 		return
 	var rdf := rmb_def()
-	if f.mass() >= 6.0:
+	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
-		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
+		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul, or blocked (Blockers): a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -439,7 +440,8 @@ func _grab(f: Ent, ally := false) -> void:
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the
 	# way come along without the swing
-	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"])}
+	# the body stops adjacent, in front of him (footage 0130): `stop_gap` m of air left between the two bodies
+	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": h.r + f.r + float(rdf["stop_gap"])}
 	drag["dur"] = float(rdf["pull_max"])
 	var tow := drag.duplicate()
 	tow["swing"] = SWING
@@ -534,6 +536,8 @@ func cast_e() -> bool:
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
+	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
@@ -555,8 +559,6 @@ func _tick_wind(dt: float) -> void:
 	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
-	if tells_visible():
-		fx.orb(CareUtil.hand_at(h, false), BRASS, BRASS_HOT, 0.6 + 0.6 * k, 0.05)     # the raised fist, glowing hotter
 	if wind <= 0.0:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
@@ -574,11 +576,11 @@ func _hop(ed: Dictionary, t: float) -> void:
 	h.vel.x = v.x
 	h.vel.z = v.y
 
-## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
+## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "fill": clampf(k, 0.0, 1.0),
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
 		"all": true, "col": ANCHOR_COL, "alpha": 1.8, "hot": 0.5 * k
 	}
 

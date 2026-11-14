@@ -8,6 +8,7 @@ extends RefCounted
 ## back your partner and cheer at three marks with the Training post's timing bar (TimingBar). Pace comes
 ## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
 ## friends run side by side, rivals bump.
+## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
 ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
@@ -116,7 +117,7 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 		me["bonds"][uid] = clampf(float(me["bonds"].get(uid, 0.0)) + amt, -1.0, 1.0)
 
 static func winged(rec: Dictionary) -> bool:
-	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
+	return BokiFly.flier(String(rec.get("species", "")))
 
 ## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
 static func stretches(tw := {}) -> Array:
@@ -330,10 +331,12 @@ var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
+var practice := false          # the one first-time practice lap: ends at the first press, no gain, no cost
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
+var beats: RaceBeats = null    # the runners' crouch, burst and finish clips (kept on after the race until played)
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
 
 func _init(home) -> void:
@@ -440,10 +443,25 @@ func entrants() -> Array:
 
 func use() -> void:
 	var ks := entrants()
-	if ks.size() < 2:
+	if not ks.is_empty() and _offer():
+		_practice(ks[0])
+	elif ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
 		return
-	_begin(ks)
+	else:
+		_begin(ks)
+
+func _offer() -> bool:
+	return Settings.get_v("tips") and not Record.clean() and not Save.d["tutorial"].get("first_race", false)
+
+## The first time a race opens: one solo lap that stops at the first press, so the bar is learned in a few
+## seconds. Offered once per save (Save.d.tutorial.first_race; old saves are offered it once, no migration).
+func _practice(k: Dictionary) -> void:
+	Save.d["tutorial"]["first_race"] = true
+	practice = true
+	_begin([k])
+	var keys := [Settings.key_cap("interact"), Settings.key_cap("menu")]
+	bar.lbl.text = "Practice: press %s when the marker is in the gold  ·  %s skips" % keys
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -452,9 +470,9 @@ func solo(rec: Dictionary) -> void:
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
 		h._toast("%s is not out on the base" % rec["name"])
 	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
-		h._toast("%s is too tired or hungry to train. Nap or feed it first" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s is too tired or hungry to train. Nap or feed {him} first") % rec["name"])
 	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
-		h._toast("%s can't train Speed any further until it levels up" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s can't train Speed any further until {he} levels up") % rec["name"])
 	else:
 		h._care_start(k)
 		solo_rec = rec
@@ -467,6 +485,9 @@ func _begin(ks: Array) -> void:
 	for k in ks:
 		k["busy"] = true
 		recs.append(k["rec"])
+	if beats != null:
+		beats.stop()                 # last race's finish clips still playing
+	beats = RaceBeats.new(ks)
 	var back := maxi(0, recs.find(Save.active_kin()))
 	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
 	run.rng.randomize()
@@ -503,6 +524,9 @@ func input(event: InputEvent) -> bool:
 			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
+		if practice:
+			h._toast("That's a cheer: gold is great, orange is good. Now the real race")
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -511,9 +535,10 @@ func tick(d: float) -> void:
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
 	relay.tick(d)
+	if beats != null:
+		beats.step(run, d)
 	if run == null:
 		return
-	run.step(d)
 	bar.step(d)
 	_place_runners()
 	_hear_laps()
@@ -546,6 +571,9 @@ func _place_runners() -> void:
 		n.position = p
 		n.rotation.y = heading(s, clampf(into / float(st[s]["len"]), 0.0, 1.0))
 		runners[i]["pos"] = p
+		if winged(runners[i]["rec"]):
+			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
+			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:
@@ -568,12 +596,14 @@ func _lift(kind: String, f: float) -> float:
 	return 0.0
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice lap never pays out
 	var res := {}
 	if finished and solo_rec.is_empty():
 		res = settle(run)
-	for k in runners:
-		k["busy"] = false
-		k["t"] = 1.5
+	if finished:
+		beats.end()
+	else:
+		beats.stop()
 	bar.close()
 	if finished:
 		GardenFirstDay.mark("race", h)
@@ -588,6 +618,7 @@ func _end(finished: bool) -> void:
 	run = null
 	runners = []
 	solo_rec = {}
+	practice = false
 
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.

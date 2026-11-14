@@ -161,7 +161,7 @@ func _front() -> void:
 	Game.goto("title")
 	await wait(4.0)
 	await shot("title")
-	press("New game")
+	press("New Game")
 	await wait(4.5)
 	await shot("prologue_1")
 	for i in 2:

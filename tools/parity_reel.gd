@@ -1,11 +1,14 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## --parity-reel --shots-dir=<dir> --reel-hero=<arch> [--reel-only=<part>]: one Hunter's whole move set in the
 ## Training Grounds against a dummy, at the match camera, for the parity reel (docs/parity_reel/): LMB tap and
-## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a glide and a mantle. A
+## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a glide and a mantle
+## (`--reel-only=dash_lmb`: LMB held, then Shift into LMB at once and late, for Sable's quick bolts). A
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
-## REEL_MARK lines give the frame each part starts on. Never writes the save.
+## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
+## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
+## then one past it, from the ground or a jump's top). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -53,10 +56,9 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in SEQUENCE:
-		if only == "" or part == only:
-			print("REEL_MARK %d %s" % [frames, part])
-			await Callable(self, "_p_" + part).call()
+	for part: String in (SEQUENCE if only == "" else Array(only.split(","))):
+		print("REEL_MARK %d %s" % [frames, part])
+		await Callable(self, "_p_" + part).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
@@ -142,6 +144,39 @@ func _p_rmb() -> void:
 	await _seg("RMB, then again", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _in(t, 0.2) or _in(t, 2.0)
 		P.inp["sec_hold"] = _in(t, 0.2, 0.7) or _in(t, 2.0, 0.7))
+
+## Standing still, no keys: what the Hunter carries at rest.
+func _p_idle() -> void:
+	await _seg("Idle", 3.0, func(_t: float) -> void: pass)
+
+## RMB held walking into the dummy (4 m off) and leaning on it, then LMB with RMB still held (Albert: no push,
+## then the boop).
+func _p_rmb_walk_lmb() -> void:
+	await _seg("RMB held, walk into the dummy; then LMB", 6.0, func(t: float) -> void:
+		P.inp["sec"] = _in(t, 0.2)
+		P.inp["sec_hold"] = _in(t, 0.2, 5.6)
+		P.inp["move"] = Vector2(1, 0) if _in(t, 0.5, 3.5) else Vector2.ZERO
+		P.inp["fire"] = _in(t, 4.4), 4.0)
+
+func _p_rmb_ground() -> void:
+	await _seg("RMB at the dummy, then past it", 4.0, func(t: float) -> void:
+		P.inp["sec"] = _rmb_shot(t, 0.2, false) or _rmb_shot(t, 2.0, true))
+
+func _p_rmb_air() -> void:
+	await _seg("Jump, RMB at the dummy; jump, RMB past it", 4.0, func(t: float) -> void:
+		P.inp["jump"] = _in(t, 0.2) or _in(t, 2.0)
+		P.inp["sec"] = _rmb_shot(t, 0.5, false) or _rmb_shot(t, 2.3, true))
+
+## True for an RMB press at `when`, with the cooldown cleared; aimed 4 m to the dummy's side just before it
+## when `past`.
+func _rmb_shot(t: float, when: float, past: bool) -> bool:
+	if past and t >= when - 0.2:
+		_aim(T.pos + Vector3(0, 0, 4.0))
+	if not _in(t, when):
+		return false
+	P.ak.cd["rmb"] = 0.0
+	P.ak.ch_rmb = 1.0
+	return true
 
 func _p_e() -> void:
 	if who == "ostra":
@@ -292,3 +327,15 @@ func _p_mantle() -> void:
 		P.inp["move"] = dv
 		P.inp["aim"] = ahead
 	await _go(2.4, climb)
+
+## LMB held at its usual pace, Shift then LMB at once (Sable's quick bolts), and Shift then LMB 1.5s later.
+func _p_dash_lmb() -> void:
+	await _seg("LMB held", 2.6, func(t: float) -> void:
+		P.inp["fire"] = _in(t, 0.2, 2.2), 6.0)
+	for late in [0.0, 1.5]:
+		P.dashes = P.max_dashes()
+		var words := "Shift, then LMB held" if late == 0.0 else "Shift, then LMB 1.5s later"
+		await _seg(words, 2.8 + late, func(t: float) -> void:
+			P.inp["move"] = Vector2(0, 1) if t < 0.3 else Vector2.ZERO
+			P.inp["dash"] = _in(t, 0.2)
+			P.inp["fire"] = _in(t, 0.25 + late, 2.2), 6.0)

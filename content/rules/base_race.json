@@ -92,6 +92,9 @@
 	],
 	"twists_doc": "The weekly event: one format a week, picked by the real week number (unix days / 7) mod the list, no server, shown on the race post and pinned with the winner's photo to the showcase wall. 'game' is the minigame it tweaks (dash, seek, volley); other games play as usual that week. Tweaks: 'mult' multiplies everyone's Dash pace on that stretch kind; 'wobble' replaces the Dash wobble; 'swap' {at, kind, mult} changes one Dash stretch; 'night' forces the Seek's night rule; 'to_win' replaces the Volley's points to win.",
 	"week_s": 604800,
+	"beats": {"burst_s": 0.3, "hop_s": 0.8, "sulk_s": 1.2, "top": 2,
+		"celebrate": {"timid": ["hop"], "else": ["hop", "spin"]}, "sulk_face": {"grumpy": "angry", "else": "sad"}},
+	"beats_doc": "The runners' body beats (scripts/home/race_beats.gd), clips only: the race is held through the countdown, so they never change a time. A crouch on the line until 'go', a burst clip (a stretched run) for burst_s, then at the line the first `top` home celebrate (each clip in turn: hop for hop_s, spin for Echo Steps' spin) and the rest sulk for sulk_s; the last one home always sulks. Picked by temper (HomeCarry.temper_of: grumpy, brave, timid, calm; 'else' for the rest): a timid winner only hops, a grumpy loser huffs (its face).",
 	"card_s": 6.0,
 	"card_s_doc": "s the result card stays up."
 }
