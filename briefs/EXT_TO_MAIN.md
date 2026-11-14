@@ -9739,3 +9739,4 @@ READY ext/stuck-integ-f11b417c 4a0be5c291 (re-merged origin/main 49021aadf5, que
 READY ext/merge-lane-d2art-1114 a5b988ec224e638a92336247446c408be33ab7ae (merge lane d2art bundle A: 16 art/content/docs branches, suite NEW-RED 0, export OK 444.3 MB)
 READY ext/merge-lane-hunters5-1114 505c63d8ca7d9ad1dc55f1867821c56adc24965c (merge lane hunters5: 6 branches, gate NEW-RED 0, export OK 445 MB)
 READY ext/fix-canary-glide-spike-1114 be3f340bfb82 (canary SCRIPT ERROR glide_spike static-init order fixed; 10/10 -> 1/10 red, rest is evo-check pre-existing)
+READY ext/hero-portraits-a-1114 1b0cf72d306c435a3d7df658d5059821f3afc9c6 (13 hunters' A-pick portraits + art-refs hero sheets; merged origin/main, kept main's owner-pick ashwick (Cinder r3b) and dolm (Tenzo r6) portraits; --portrait-check 116/0, --check 0, health --strict OK)
