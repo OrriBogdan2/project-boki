@@ -13,6 +13,9 @@ extends Mob
 ##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
 ##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
 
+const PHASE_HP := [0.66, 0.33]   # health fractions where phases 1 and 2 start ([?] no source value)
+const LEASH_T := 12.0            # s with no foe inside the lair before it resets ([?] no source value)
+
 var lair: Dictionary = {}
 var dormant := true
 var phase := 0
@@ -22,6 +25,7 @@ var empty_t := 0.0
 var enraged := false
 var atk := ""
 var atk_t := 0.0
+var atk_began := 0.0         # match time the attack under way began (BossNet tells a new attack from the last by it)
 var atk_end := 0.0
 var steps: Array = []        # {t, f: Callable, done} for the attack under way
 var next_cd := 2.0
@@ -35,10 +39,12 @@ var dash_t := 0.0
 var dash_hit := {}
 var buried := false
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
-var anim_k := 0.0
 var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
+var add_k := 0               # egg-sac adds hatched so far: the next one's kind cycles BROOD_ADDS, no dice
+const BROOD_ADDS := ["skitter", "skitter", "bomber", "spitter"]   # phase 0 cycles the first two, then +1 a phase
 
+const THROWN := {"boulder": "boulders", "glob": "lob"}      # what _throw flies -> the attack that threw it
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
 func init_boss(match_node: Node, id: String, k: String, at: Vector3, tier_k: float, L: Dictionary) -> void:
@@ -66,7 +72,7 @@ func cd_k() -> float:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if dead or buried:
 		return 0.0
-	if dormant:
+	if dormant and not remote:
 		if String(lair.get("state", "")) in ["open", "awake"] and m.lairs:
 			m.lairs.wake(lair, by)
 		else:
@@ -190,6 +196,7 @@ func sim(dt: float) -> void:
 	if remote:
 		net_follow(dt)
 		return
+	BossNet.watch(self)
 	if dormant:
 		# asleep: breathing, healing back to full, waiting
 		hp = minf(max_hp, hp + max_hp * 0.08 * dt)
@@ -201,8 +208,7 @@ func sim(dt: float) -> void:
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
 		_tick_stagger(dt)
-	# phases at 66% and 33%
-	var want := 0 if hp > max_hp * 0.66 else (1 if hp > max_hp * 0.33 else 2)
+	var want := 0 if hp > max_hp * PHASE_HP[0] else (1 if hp > max_hp * PHASE_HP[1] else 2)
 	if want > phase:
 		_phase_up(want)
 	if not enraged and awake_t >= float(md.get("enrage", 75.0)):
@@ -212,7 +218,8 @@ func sim(dt: float) -> void:
 	var inside := foes_inside()
 	if inside.is_empty():
 		empty_t += dt
-		if empty_t > 12.0:
+		# (the Heart Raid's boss holds the Heart: it never sleeps)
+		if empty_t > LEASH_T and not lair.get("heart_raid", false):
 			m.lairs.reset_boss(self)
 			return
 	else:
@@ -246,7 +253,7 @@ func sim(dt: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= dt
 		vel.x = dash_v.x; vel.z = dash_v.y
-		_dash_hits()
+		_dash_hits(dt)
 	else:
 		var hv := Vector2(vel.x, vel.z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * dt))
@@ -292,9 +299,8 @@ func _attack_move(spd: float) -> Vector2:
 
 # ------------------------------------------------------------------ attacks
 func _begin(name: String, length: float, anim := "") -> void:
-	atk = name; atk_t = 0.0; atk_end = length; steps = []
-	anim_kind = anim; anim_k = 0.0
-	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
+	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; steps = []
+	anim_kind = anim
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
@@ -314,9 +320,26 @@ func _clear_attack() -> void:
 	dash_t = 0.0
 	if buried: _surface()
 
+func _stagger(by: Ent, opts: Dictionary) -> void:
+	super(by, opts)
+	BossSfx.stagger(m, self)
+
 func _choose_attack() -> void:
+	var opts := attacks()
+	# never the same attack twice in a row, so a fight reads as a rhythm, not a loop
+	var last := String(get_meta("last_atk", ""))
+	var pool: Array = opts.filter(func(o): return o != last)
+	if pool.is_empty(): pool = opts
+	var pick: String = pool[randi() % pool.size()]
+	set_meta("last_atk", pick)
+	if OS.get_cmdline_user_args().has("--boss-debug"): print("BOSSDBG %s t=%.1f %s from %s" % [mkind, awake_t, pick, str(opts)])
+	call("_atk_" + pick)
+
+## The attacks it may pick now (weighted by repeats), plus its lair's extra one (a Nightmare Heart Raid's
+## lair["extra"], one more attack of its kit, e.g. the Colossus's rockfall).
+func attacks() -> Array:
 	var opts: Array = []
-	var d := flat_dist(tgt)
+	var d := flat_dist(tgt) if tgt else INF
 	match mkind:
 		"colossus":
 			if d < 5.0: opts += ["slam", "slam"]
@@ -330,17 +353,12 @@ func _choose_attack() -> void:
 			opts += ["spit", "lob"]
 			if m.lairs.adds_alive(lair) < 3 + phase * 2: opts.append("brood")
 			if phase >= 1: opts.append("burrow")
-	# never the same attack twice in a row, so a fight reads as a rhythm, not a loop
-	var last := String(get_meta("last_atk", ""))
-	var pool: Array = opts.filter(func(o): return o != last)
-	if pool.is_empty(): pool = opts
-	var pick: String = pool[randi() % pool.size()]
-	set_meta("last_atk", pick)
-	if OS.get_cmdline_user_args().has("--boss-debug"): print("BOSSDBG %s t=%.1f %s from %s d=%.1f" % [mkind, awake_t, pick, str(opts), d])
-	call("_atk_" + pick)
+	if String(lair.get("extra", "")) != "":
+		opts.append(String(lair["extra"]))
+	return opts
 
 func _wind() -> float:
-	return float(md["windup"]) * (0.8 if enraged else 1.0) * (1.0 - 0.1 * phase)
+	return float(Data.MOBS[mkind]["windup"]) * (0.8 if enraged else 1.0) * (1.0 - 0.1 * phase)
 
 # ---- the Stone Colossus
 func _atk_slam() -> void:
@@ -350,6 +368,7 @@ func _atk_slam() -> void:
 	var at := clamp_in(pos + Vector3(d.x, 0, d.y) * 1.2, 0.5)
 	at.y = centre().y
 	_begin("slam", w + 0.6, "slam")
+	BossSfx.wind(m, self, "slam")
 	_tele_c(at, float(md["slam_r"]), Color("ff4a3a"), w)
 	# the purple stagger window opens on every slam
 	if stagger_t <= 0.0:
@@ -357,10 +376,29 @@ func _atk_slam() -> void:
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
 		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
-		m.sfx("k_gravity", at, 2.0, 0.6)
+		BossSfx.hit(m, self, "slam", at)
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
+
+## Rocks come down on marked circles round its square (the ceiling of the old forge, in a lair): on each
+## phase change, and as an attack of its own when its lair adds it (lair["extra"]).
+func _rockfall(n: int) -> void:
+	var c: Vector3 = centre()
+	var hf := float(lair.get("half", 7)) - 2.0
+	for i in n:
+		var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))
+		var dl := 0.9 + randf() * 0.9
+		_tele_c(at, 1.6, Color("ff6a3a"), dl)
+		_at(dl, func():
+			m.fx.burst(at + Vector3(0, 3.0, 0), Color("9c968a"), 14, 3.0, 0.6, 14.0, 1.4, Vector3.DOWN, 30.0)
+			blast(at, 1.6, 16.0, 4.0, 2.0))
+
+func _atk_rockfall() -> void:
+	_begin("rockfall", 2.2, "roar")
+	if m.heart_raid:
+		m.heart_raid.audio.rockfall(pos)
+	_rockfall(4 + phase * 2)
 
 func _wave(at: Vector3, max_r: float, speed: float) -> void:
 	var n := MeshInstance3D.new()
@@ -394,6 +432,7 @@ func _atk_boulders() -> void:
 	var w := 0.85
 	md["windup"] = w
 	_begin("boulders", w + 1.6, "throw")
+	BossSfx.wind(m, self, "boulders")
 	var n := 1 + phase
 	var picks: Array = foes_inside()
 	picks.shuffle()
@@ -416,7 +455,7 @@ func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: St
 	m.add_child(n)
 	var from := pos + Vector3(0, 3.6 if mkind == "colossus" else 2.0, 0)
 	n.global_position = from
-	m.sfx("throw", pos, 0.0, 0.6)
+	BossSfx.hit(m, self, THROWN[what], pos)
 	flying.append({"from": from, "to": to, "t": 0.0, "dur": dur, "n": n, "r": rad, "dmg": base, "what": what})
 
 func _tick_flying(dt: float) -> void:
@@ -433,16 +472,17 @@ func _tick_flying(dt: float) -> void:
 			flying.erase(f)
 			if f["what"] == "boulder":
 				blast(b, float(f["r"]), float(f["dmg"]), 6.0, 4.0, {"stun": 0.3})
-				m.sfx("boom", b, -2.0, 0.7)
+				BossSfx.land(m, self, "boulders", b)
 			else:
 				m.fx.burst(b + Vector3(0, 0.3, 0), col(), 20, 4.0, 0.5, 5.0)
-				m.sfx("k_spore", b, -2.0, 0.7)
+				BossSfx.land(m, self, "lob", b)
 				_puddle(b, float(f["r"]), 5.0)
 
 func _atk_fissure() -> void:
 	var w := _wind() * 0.9
 	md["windup"] = w
 	_begin("fissure", w + 0.5, "slam")
+	BossSfx.wind(m, self, "fissure")
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var a := Vector3(pos.x, centre().y, pos.z)
 	_tele_r(a, d, 12.0, 2.4, Color("ff4a3a"), w)
@@ -453,7 +493,7 @@ func _atk_fissure() -> void:
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
 		Shake.incoming_big(m, a, 0.5)
-		m.sfx("k_gravity", a, 0.0, 0.5))
+		BossSfx.hit(m, self, "fissure", a))
 
 # ---- Stormcoil
 func _atk_dash() -> void:
@@ -470,19 +510,20 @@ func _atk_dash() -> void:
 			var a := Vector3(pos.x, centre().y, pos.z)
 			_tele_r(a, d, length, 1.8, Color("7fe8ff"), w)
 			set_meta("dash_dir", d)
-			m.sfx("zap", pos, -2.0, 0.6))
+			BossSfx.wind(m, self, "dash"))
 		_at(t0 + w, func():
 			var d: Vector2 = get_meta("dash_dir", Vector2(0, 1))
 			dash_v = d * 24.0
 			dash_t = 13.0 / 24.0
 			dash_hit = {}
-			m.sfx("whoosh", pos, 2.0, 0.7))
+			BossSfx.hit(m, self, "dash", pos))
 
-func _dash_hits() -> void:
+func _dash_hits(dt: float) -> void:
 	m.fx.burst(pos + Vector3(0, 1.0, 0), Color("bff8ff"), 3, 2.0, 0.3, 0.0, 0.8)
+	var end := pos + Vector3(dash_v.x, 0, dash_v.y) * dt
 	for f in m.foes_of(team):
 		if f is Mob or dash_hit.has(f.nid): continue
-		if flat_dist(f) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
+		if Swept.dist(f.pos, pos, end) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
 			dash_hit[f.nid] = true
 			var d := dash_v.normalized()
 			var rel := Vector2(f.pos.x - pos.x, f.pos.z - pos.z)
@@ -495,6 +536,7 @@ func _atk_storm() -> void:
 	var w := 1.1 * (0.85 if enraged else 1.0)
 	md["windup"] = w
 	_begin("storm", w + 0.5, "roar")
+	BossSfx.wind(m, self, "storm")
 	var spots: Array = []
 	for f in foes_inside():
 		spots.append(clamp_in(f.pos + Vector3(f.vel.x, 0, f.vel.z) * 0.5, 0.5))
@@ -512,12 +554,13 @@ func _atk_storm() -> void:
 			m.fx.bolt(at + Vector3(randf_range(-1, 1), 10.0, randf_range(-1, 1)), at, Color("dffaff"))
 			m.fx.flash(at + Vector3(0, 0.6, 0), Color("dffaff"), 0.9, 0.08)
 			blast(at, 1.8, 18.0, 4.0, 2.0, {"stun": 0.45})
-			m.sfx("zap", at, 2.0, 0.8))
+			BossSfx.hit(m, self, "storm", at))
 
 func _atk_static() -> void:
 	var w := 1.5 * (0.85 if enraged else 1.0)
 	md["windup"] = w
 	_begin("static", w + 0.6, "roar")
+	BossSfx.wind(m, self, "static")
 	var at := Vector3(pos.x, centre().y, pos.z)
 	_tele_c(at, 4.8, Color("7fe8ff"), w)
 	_at(w, func():
@@ -528,13 +571,14 @@ func _atk_static() -> void:
 			if flat_dist(f) > 4.8:
 				m.fx.bolt(pos + Vector3(0, 1.4, 0), f.pos + Vector3(0, 0.8, 0), Color("bff8ff"))
 				f.hurt(dmg(8.0), self, {"stun": 0.2, "src": "mob"})
-		m.sfx("zap", pos, 4.0, 0.5))
+		BossSfx.hit(m, self, "static", pos))
 
 # ---- the Brood Mother
 func _atk_spit() -> void:
 	var w := _wind() * 0.85
 	md["windup"] = w
 	_begin("spit", w + 0.5, "spit")
+	BossSfx.wind(m, self, "spit")
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var n := 3 + phase
 	var a := Vector3(pos.x, centre().y, pos.z)
@@ -546,12 +590,13 @@ func _atk_spit() -> void:
 		for i in n:
 			var dd := d2.rotated(0.22 * (i - (n - 1) * 0.5))
 			m.spawn_shot(self, pos + Vector3(dd.x * 1.4, 0.9, dd.y * 1.4), dd * 10.0, dmg(14.0), 1.0, 0.36, Color("b6ff6a"), {"mob": true, "kb": 2.5, "slow": 1.0})
-		m.sfx("k_spore", pos, 0.0, 0.8))
+		BossSfx.hit(m, self, "spit", pos))
 
 func _atk_lob() -> void:
 	var w := 0.7
 	md["windup"] = w
 	_begin("lob", w + 1.4, "spit")
+	BossSfx.wind(m, self, "lob")
 	var picks: Array = foes_inside()
 	picks.shuffle()
 	var n := 2 + phase
@@ -599,10 +644,13 @@ func _atk_brood() -> void:
 	var w := 1.0
 	md["windup"] = w
 	_begin("brood", w + 2.4, "roar")
+	BossSfx.wind(m, self, "brood")
 	var n := 2 + phase
 	for i in n:
-		var a := TAU * i / n + randf() * 0.6
+		var a := TAU * i / n + 0.3 * float(add_k % 3)      # fixed spots round it (they turn a little each brood)
 		var at := clamp_in(pos + Vector3(cos(a), 0, sin(a)) * 3.0, 0.8)
+		var add_kind: String = BROOD_ADDS[add_k % (2 + mini(phase, 2))]
+		add_k += 1
 		at.y = centre().y
 		# egg sacs: glowing eggs that wobble, then burst into adds
 		var egg := Node3D.new()
@@ -615,15 +663,15 @@ func _atk_brood() -> void:
 		_at(w * 0.5, func(): if is_instance_valid(egg): egg.scale = Vector3.ONE)
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
-			m.sfx("die_small", at, -2.0, 1.3)
-			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
+			BossSfx.hit(m, self, "brood", at)
+			m.lairs.spawn_add(lair, add_kind, at))
 
 func _atk_burrow() -> void:
 	_begin("burrow", 3.6, "burrow")
+	BossSfx.wind(m, self, "burrow")
 	_at(0.4, func():
 		buried = true
-		m.fx.dust(pos, 20)
-		m.sfx("k_gravity", pos, 0.0, 0.7))
+		m.fx.dust(pos, 20))
 	var mark := {"at": pos}
 	_at(0.5, func():
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)
@@ -635,7 +683,7 @@ func _atk_burrow() -> void:
 		pos = Vector3(at.x, pos.y, at.z); prev = pos
 		_surface()
 		blast(at, 3.0, 24.0, 8.0, 8.0)
-		m.sfx("boom", at, 2.0, 0.6))
+		BossSfx.hit(m, self, "burrow", at))
 
 func _surface() -> void:
 	buried = false
@@ -646,30 +694,23 @@ func _phase_up(p: int) -> void:
 	_clear_attack()
 	phase = p
 	invul_t = 1.6
-	anim_kind = "roar"; anim_k = 0.0
+	anim_kind = "roar"
 	md["windup"] = 1.2
 	m.fx.ring(pos, 6.0, col(), 0.5)
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
 	Shake.incoming_big(m, pos, 0.7)
-	m.sfx("v_warden", pos, 4.0, 0.5)
-	m.sfx("boom", pos, 0.0, 0.5)
 	for f in foes_inside():
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})
 	m.lairs.on_boss_phase(self, p)
+	if m.heart_raid and lair.get("heart_raid", false):
+		m.heart_raid.audio.boss_phase(pos)
 	_begin("phase", 2.4, "roar")
 	var c: Vector3 = centre()
 	var hf := float(lair.get("half", 7)) - 2.0
 	match mkind:
 		"colossus":
-			# the ceiling of the old forge comes down in places
-			for i in 5 + p * 2:
-				var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))
-				var dl := 0.9 + randf() * 0.9
-				_tele_c(at, 1.6, Color("ff6a3a"), dl)
-				_at(dl, func():
-					m.fx.burst(at + Vector3(0, 3.0, 0), Color("9c968a"), 14, 3.0, 0.6, 14.0, 1.4, Vector3.DOWN, 30.0)
-					blast(at, 1.6, 16.0, 4.0, 2.0))
+			_rockfall(5 + p * 2)
 		"serpent":
 			for i in 6 + p * 2:
 				var at := Vector3(c.x + randf_range(-hf, hf), c.y, c.z + randf_range(-hf, hf))
@@ -691,7 +732,7 @@ func _trail_push() -> void:
 		trail.push_front(here)
 		if trail.size() > 140: trail.pop_back()
 
-func _trail_at(dist: float) -> Vector3:
+func trail_at(dist: float) -> Vector3:
 	var acc := 0.0
 	var last: Vector3 = trail[0] if not trail.is_empty() else pos
 	for i in range(1, trail.size()):
@@ -709,8 +750,7 @@ func render(delta: float, alpha: float) -> void:
 		position = prev.lerp(pos, alpha)
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	for mt in mats:
-		if mt is ShaderMaterial: mt.set_shader_parameter("flash", f)
+	show_flash(f)
 	if stag_ring:
 		stag_ring.visible = stag_open > 0.0 and stagger_t <= 0.0 and not dead
 		if stag_ring.visible:
@@ -721,104 +761,16 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		death_t += delta
-		var k := clampf(death_t / 1.4, 0.0, 1.0)
-		model.position.y = -k * 1.5
-		model.rotation.z = k * 0.5
-		visible = k < 1.0
-		for mt in mats:
-			if mt is ShaderMaterial: mt.set_shader_parameter("flash", 1.0 - k)
-		for s in model.get_meta("segs", []):
-			(s as Node3D).visible = k < 0.6
+		visible = MobDissolve.step(self, delta)
+		if visible:
+			BossAnim.pose(self, delta)      # the keyed death move plays out, then the dissolve (MobDissolve.begin)
 		return
 	model.visible = not buried
 	model.rotation.y = face
-	if anim_kind != "":
-		anim_k = minf(1.0, anim_k + delta / maxf(0.2, float(md.get("windup", 1.0))))
-	var body: Node3D = model.get_node("Body")
-	var spd := Vector2(vel.x, vel.z).length()
-	anim += delta * (1.5 + minf(spd, 6.0) * 1.2)
-	var sleep := 1.0 if dormant else 0.0
-	match mkind:
-		"colossus": _anim_colossus(delta, body, spd, sleep)
-		"serpent": _anim_serpent(delta, body, spd, sleep)
-		"brood": _anim_brood(delta, body, spd, sleep)
+	if remote:
+		BossNet.advance(self, delta)
+	anim += delta * (1.5 + minf(Vector2(vel.x, vel.z).length(), 6.0) * 1.2)
+	BossAnim.pose(self, delta)
 	if enraged:
 		for mt in mats:
 			if mt is ShaderMaterial: mt.set_shader_parameter("flash", maxf(f, 0.12 + 0.08 * sin(m.time * 9.0)))
-
-func _anim_colossus(delta: float, body: Node3D, spd: float, sleep: float) -> void:
-	body.position.y = -0.25 * sleep
-	body.rotation.x = 0.25 * sleep
-	var ap: AnimationPlayer = model.get_meta("anim") if model.has_meta("anim") else null
-	if ap == null:
-		return
-	var C: Dictionary = model.get_meta("clips")
-	var clip := String(C["idle"]); var rate := 0.6 if sleep > 0.0 else 1.0
-	var scrub := -1.0
-	match anim_kind:
-		"slam": clip = String(C["attack"]); scrub = anim_k * float(C["hit"]) if atk_t < float(md["windup"]) else -1.0
-		"throw": clip = String(C.get("throw", C["attack"])); scrub = anim_k * float(C.get("throw_hit", 0.5)) if atk_t < float(md["windup"]) else -1.0
-		"roar": clip = String(C.get("roar", C["idle"])); rate = 1.4
-		_:
-			if spd > 0.3: clip = String(C["walk"]); rate = clampf(spd / 1.6, 0.5, 1.4)
-	if stagger_t > 0.0: rate = 0.3
-	if ap.current_animation != clip:
-		ap.play(clip, 0.15)
-	if scrub >= 0.0:
-		ap.speed_scale = 0.0
-		ap.seek(ap.get_animation(clip).length * clampf(scrub, 0.0, 1.0), true)
-	else:
-		ap.speed_scale = rate
-
-func _anim_serpent(delta: float, body: Node3D, spd: float, sleep: float) -> void:
-	var hover := 1.0 - sleep * 0.85
-	var head: Node3D = body.get_node("Head")
-	var bob := sin(m.time * 2.2) * 0.18
-	head.position.y = 0.35 + hover * (1.0 + bob)
-	head.rotation.x = -0.25 * (anim_k if anim_kind == "dash" else 0.0) + 0.3 * sleep
-	var jaw: Node3D = head.get_node_or_null("Jaw")
-	if jaw: jaw.rotation.x = 0.1 + (0.55 * anim_k if anim_kind in ["roar", "dash"] else 0.0) + sin(m.time * 5.0) * 0.04
-	for wn in ["WingL", "WingR"]:
-		var wg: Node3D = head.get_node_or_null(wn)
-		if wg: wg.rotation.z = sin(m.time * (7.0 if dash_t > 0.0 else 3.5)) * 0.35 * (1.0 if wn == "WingL" else -1.0) * hover
-	var segs: Array = model.get_meta("segs", [])
-	var floor_y := position.y
-	for i in segs.size():
-		var s: Node3D = segs[i]
-		var p: Vector3
-		if trail.size() < 2 or sleep > 0.0:
-			# asleep: coiled in a loose spiral round itself
-			var a := face + i * 0.55
-			var rr := 0.9 + i * 0.09
-			p = position + Vector3(sin(a) * rr, 0.25 + 0.04 * i, cos(a) * rr)
-		else:
-			p = _trail_at(0.62 * (i + 1))
-			p.y = floor_y + 0.3 + hover * (0.95 + sin(m.time * 2.2 - i * 0.45) * 0.3 - i * 0.03)
-		var tw := 1.0 - exp(-14.0 * delta)
-		s.global_position = s.global_position.lerp(p, tw) if s.global_position.length() > 0.01 else p
-		var ahead: Vector3 = segs[i - 1].global_position if i > 0 else position + Vector3(0, head.position.y, 0)
-		if s.global_position.distance_to(ahead) > 0.05:
-			s.look_at(ahead, Vector3.UP)
-
-func _anim_brood(delta: float, body: Node3D, spd: float, sleep: float) -> void:
-	var legs: Node3D = body.get_node("Legs")
-	var mv := clampf(spd / 2.0, 0.0, 1.0)
-	body.position.y = -0.35 * sleep + (absf(sin(anim * 1.2)) * 0.06 * mv) - (0.2 * anim_k if anim_kind in ["spit", "roar"] else 0.0)
-	body.rotation.x = (0.25 * anim_k if anim_kind == "spit" else 0.0) - (0.2 * anim_k if anim_kind == "roar" else 0.0)
-	for i in 3:
-		for sx in [-1, 1]:
-			var lg := legs.get_node_or_null("Leg%d%d" % [i, sx]) as Node3D
-			if lg == null: continue
-			var ph := anim * 1.4 + (PI if (i % 2 == 0) == (sx > 0) else 0.0)
-			lg.rotation.y = sin(ph) * 0.35 * mv
-			lg.rotation.z = maxf(0.0, cos(ph)) * 0.25 * sx * mv - (0.35 * sx if anim_kind == "roar" else 0.0) * anim_k
-	var sac: Node3D = body.get_node("Sac")
-	var pulse := 1.0 + sin(m.time * (2.0 + phase * 1.5)) * 0.04 + (0.12 * anim_k if anim_kind == "brood" else 0.0)
-	sac.scale = Vector3(pulse, pulse * 0.98, pulse)
-	var hd: Node3D = body.get_node("Head")
-	for jn in ["JawL", "JawR"]:
-		var j := hd.get_node_or_null(jn) as Node3D
-		if j: j.rotation.y = (0.15 + 0.5 * anim_k * float(anim_kind in ["spit", "roar"]) + sin(m.time * 6.0) * 0.05) * (1.0 if jn == "JawL" else -1.0)
-	if buried:
-		body.position.y = -2.0

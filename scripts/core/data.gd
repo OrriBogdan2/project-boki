@@ -2,11 +2,23 @@ extends Node
 ## Every tunable definition in the game lives here: classes, weapons, kin, monsters, crops.
 ## Distances are in tiles (1 unit), speeds in tiles per second, times in seconds.
 
+## One per squad (MATCH_PLAYERS solos repeat none). The first eight are the old palette; the rest are
+## picked farthest-first in OKLab among mid-light, mid-chroma colours, so no two sit closer than
+## TEAM_COLOR_GAP (--team-colors checks it). Past ~40, colour alone runs out: add marks, not shades.
 const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2"), Color("f0d45a"),
-	Color("4ad8c8"), Color("ff8ad8"), Color("c8a07a"), Color("9ab4ff"), Color("ff6a4a"), Color("b8e05a"), Color("e6e6f0"),
-	Color("7a8cff"), Color("ffb8a0"), Color("5ae08a"), Color("d07aff"), Color("ffe08a"), Color("6ac0ff"), Color("ff9a5a")]
-## Every expedition has about this many hunters, however they're split into squads.
-const MATCH_PLAYERS := 20
+	Color("4ad8c8"), Color("ff8ad8"), Color("227722"), Color("4455cc"), Color("995522"), Color("993399"),
+	Color("779977"), Color("ccccff"), Color("227788"), Color("8877aa"), Color("cc7700"), Color("bb2255"),
+	Color("66aa00"), Color("0088dd"), Color("44ffaa"), Color("cc99aa"), Color("ffccbb"), Color("aaeedd"),
+	Color("00bb88"), Color("bb55bb"), Color("bbaa00"), Color("885577"), Color("ff7755"), Color("777733"),
+	Color("0099aa"), Color("009955"), Color("cc4422"), Color("8855cc"), Color("bbbb88"), Color("bbee55"),
+	Color("aa7766"), Color("7788ff"), Color("77ddff"), Color("00ffee")]
+## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
+## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
+const TEAM_COLOR_GAP := 0.08
+## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
+## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
+## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
+const MATCH_PLAYERS := 30
 
 const CLASSES := {
 	"light": {
@@ -133,15 +145,20 @@ const PERKS := {
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you
-## are; admins can force one in Settings > Gameplay or the admin panel (F1).
+## are; admins can force one in Settings > Gameplay or the admin panel (`).
 ##   skill: aim lead/accuracy and how often they think   react: seconds before they fire on a new target
 ##   dmg: their damage   fire: how much of the time they keep the trigger down
 ##   abil: how readily they use abilities and kin   aggro: how far they chase and how hard they press
+##   ring: metres inside the Blight's next ring they aim for (BotRing)
 const BOT_DIFF := {
-	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65, "fire": 0.5, "abil": 0.3, "aggro": 0.6},
-	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82, "fire": 0.7, "abil": 0.55, "aggro": 0.8},
-	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95, "fire": 0.85, "abil": 0.8, "aggro": 0.95},
-	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05, "fire": 1.0, "abil": 1.0, "aggro": 1.1},
+	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65,
+		"fire": 0.5, "abil": 0.3, "aggro": 0.6, "ring": 2.0},
+	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82,
+		"fire": 0.7, "abil": 0.55, "aggro": 0.8, "ring": 4.0},
+	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95,
+		"fire": 0.85, "abil": 0.8, "aggro": 0.95, "ring": 6.0},
+	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05,
+		"fire": 1.0, "abil": 1.0, "aggro": 1.1, "ring": 8.0},
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
 
@@ -199,6 +216,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
+			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -247,6 +266,7 @@ const MOBS := {
 	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
+	# and the Ink of that kin's type (InkDrops)
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
 		"r": 1.6, "gems": 40, "color": Color("7d7468"), "attack": "boss", "slam_r": 3.8, "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "cairnback", "enrage": 75.0},
@@ -263,6 +283,9 @@ const MOBS := {
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
 	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
+	# a Blight nest (BlightNests): a stone mound the Skitters climb out of; break it for gems and gear
+	"bl_nest": {"name": "Blight Nest", "hp": 120.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 0.9, "gems": 6, "color": Color("3a3230"), "attack": "none", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},
@@ -339,7 +362,7 @@ func pick_seed(r: RandomNumberGenerator = null) -> String:
 	return CROPS.keys()[0]
 
 const KIN_NAMES := Names.KIN      # ~2,200 names: see scripts/core/names.gd
-const BOT_NAMES := Names.BOT      # ~2,000 handles
+const BOT_NAMES := Names.BOT      # ~180 gamer tags
 
 ## A kin's name until you give it one: its species' name, as in a field guide.
 func default_kin_name(species: String) -> String:
@@ -352,20 +375,21 @@ func kin_title(kname: String, species_name: String) -> String:
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",
-		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
+		"depth": 1, "mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
 		"biome": {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")},
 		"sky": Color("10131f"), "ambient": Color("b9c4e6"), "sun": Color("fff1dc"), "clouds": [Color(0.06, 0.07, 0.13), Color(0.22, 0.24, 0.38)]},
 	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall.",
-		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
+		"depth": 2, "mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
 	{"name": "The Hollow", "desc": "Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key).",
-		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
+		"depth": 3, "mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},
 ]
 
 ## Home islands beyond the first one. Build a bridge to reach them. Rects are in home grid tiles.
+## Retired in the Boki base (base_mode hides the unbuilt bridges); delete after sign-off, GARDEN.md 10.7 step 11.
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
@@ -406,8 +430,6 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
-	"portal_open": 150.0,  # first exit portals open this many seconds in
 	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,

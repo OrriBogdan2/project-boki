@@ -53,6 +53,7 @@ static func parse(v: Variant, rep: GrammarReport) -> MergeSpec:
 		for slot in md:
 			if KinParts.EVO_SLOTS.has(slot):
 				m.merged[slot] = _patch(md[slot], "merged." + slot, rep)
+	KinFence.merge(m, rep)
 	return m
 
 static func _stages(d: Dictionary, key: String, rep: GrammarReport) -> Array[StageSpec]:

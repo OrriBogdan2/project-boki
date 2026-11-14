@@ -1,0 +1,51 @@
+{
+	"grammar": 1,
+	"id": "moon_mark",
+	"name": "Moon Mark",
+	"short": "Mark",
+	"flavor": "Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.",
+	"theme": "lunar",
+	"tier": 1,
+	"from": "kin",
+	"range": 9,
+	"cooldown": 10,
+	"charges": 1,
+	"trigger": {
+		"type": "on_cast"
+	},
+	"cue": {
+		"type": "foe_in_range",
+		"range": 8
+	},
+	"stages": [
+		{
+			"delivery": {
+				"type": "projectile",
+				"range": 9,
+				"speed": 30,
+				"size": 0.2
+			},
+			"effects": [
+				{
+					"type": "damage",
+					"amount": 4
+				},
+				{
+					"type": "stun",
+					"duration": 0.4
+				},
+				{
+					"type": "mark",
+					"mode": "reveal",
+					"duration": 4
+				},
+				{
+					"type": "mark",
+					"mode": "vulnerable",
+					"duration": 4,
+					"amount": 0.15
+				}
+			]
+		}
+	]
+}

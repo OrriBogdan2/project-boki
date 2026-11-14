@@ -9,6 +9,10 @@ extends RefCounted
 ##   5. sheer cliffs still don't catch you as you fall past them
 ##   6. a bot knocked off beside a ledge climbs back the same way
 ##   7. monsters knocked at an island from below are blocked, and fall out promptly
+##   8. at home: the same ledges, lift and fall-out
+##   9. the fall's sounds in order (AbyssFallSfx): wind under the lip, rising with depth, one warning
+##      before the point of no return, the lift as the glider (cool or overheated) carries you up;
+##      another hunter dropping off cries once
 ## Prints "ACHECK ok|FAIL ..." lines and "ACHECK DONE, failures: N".
 
 var bad := 0
@@ -94,7 +98,9 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 		if h.pos.distance_to(marker) < 0.01 and before.distance_to(marker) > 0.5:
 			r["fell"] = true; r["t"] = t
 			break
-		r["low"] = minf(float(r["low"]), h.pos.y)
+		if h.pos.y < float(r["low"]):
+			r["low"] = h.pos.y
+			r["low_at"] = h.pos
 		r["inside"] = maxf(float(r["inside"]), _inside(h))
 		if h.mantling():
 			r["mantled"] = true
@@ -169,7 +175,10 @@ func run(main: Node) -> void:
 		dn += 1
 		if r["mantled"]: grabbed += 1
 		if r["fell"]: dgood += 1
-		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
+		# the kill line (Hunter.abyss_kill_y) reads the lowest lip around where the hunter is, not the edge tile
+		var lip := _ref(Vector3(e["ex"], top, e["ez"]))
+		if r.has("low_at"): lip = minf(lip, _ref(Vector3(r["low_at"].x, top, r["low_at"].z)))
+		worst_drop = maxf(worst_drop, lip - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
 	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
@@ -184,7 +193,10 @@ func run(main: Node) -> void:
 	var r0 := _run(8.0, func(t):
 		h.inp["move"] = d0 if t < 0.3 else Vector2.ZERO
 		h.inp["dash"] = t < Match.DT * 1.5)
-	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
+	# the dash's speed carries on in the air (Loco.air_step), so measure under the lips where you fell, not the edge
+	var at0: Vector3 = r0.get("low_at", Vector3(e0["ex"], 0, e0["ez"]))
+	var ref0 := _ref(Vector3(at0.x, e0["top"], at0.z))
+	ok(r0["fell"] and ref0 - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), ref0 - float(r0["low"]), r0["t"]])
 	# walking (no dash, no jump) toward the edge takes a player over it: the edge doesn't hold you
 	var wgood := 0; var wn := 0; var bheld := 0
 	for e in edges.slice(0, 6):
@@ -264,6 +276,7 @@ func run(main: Node) -> void:
 				print("ACHECK   sheer rim %s caught onto %s (sheer=%s)" % [str(at), str(h.pos), w.sheer.has(w.idx(lx, lz))])
 				if w.sheer.has(w.idx(lx, lz)) or Vector2(lx + 0.5 - at.x, lz + 0.5 - at.z).length() < 1.2: caught += 1
 		ok(caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [caught, sh.size()])
+	_fall_cues(edges[0])
 	# ---------------------------------------------------------------- 6. a bot knocked off a ledge
 	m.opts["god"] = false
 	var b: Hunter = m.hunters[1]
@@ -302,10 +315,83 @@ func run(main: Node) -> void:
 		if mb.dead: mb_fell += 1
 	ok(mb_in < 0.05, "monsters knocked at an island from below stay out of it (deepest %.2fm)" % mb_in)
 	ok(mb_fell == mb_n and mb_low < 7.0, "monsters off the edge fall out promptly: %d of %d, deepest %.1fm below the lowest lip around" % [mb_fell, mb_n, mb_low])
+	_edge_knocks(edges[0])
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## 8. A hunter knocked off an island (docs/MOVEMENT_FEEL.md "Edge knocks against the source").
+func _edge_knocks(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	# a hard shove shuts the glider for the knock and a beat; the heat does not decide it
+	for fuel in [1.0, 0.0]:
+		_reset(Vector3(e["ex"] - dir.x * 0.5, top + 0.1, e["ez"] - dir.y * 0.5), Vector3.ZERO)
+		h.grounded = true
+		h.last_gy = top
+		h.glide_fuel = fuel
+		h.impulse(dir * 22.0 * h.mass(), 3.0 * h.mass())
+		var kt := h.knock_t
+		var t := 0.0
+		var t_open := -1.0
+		while t < 1.5 and t_open < 0.0:
+			h.inp["glide"] = true
+			m.step(Match.DT)
+			t += Match.DT
+			if h.gliding:
+				t_open = t
+		var good: bool = kt > 0.0 and t_open >= kt and t_open <= kt + 0.15
+		var what := "hard knock off an island, glide held, heat %.0f%%: opens %.2fs in, knock %.2fs"
+		ok(good, what % [(1.0 - fuel) * 100.0, t_open, kt])
+	h.inp["glide"] = false
+	# an overheated glider still lifts you out, at about half strength
+	var peaks := {}
+	for fuel in [1.0, 0.0]:
+		for dp in [7.0, 12.0]:
+			_reset(Vector3(e["ex"] + dir.x * 4.0, top - dp, e["ez"] + dir.y * 4.0), Vector3(0, -4.0, 0))
+			h.last_gy = top
+			h.air_t = 1.0
+			h.gliding = true
+			h.glide_fuel = fuel
+			var peak := -99.0
+			var t_up := -1.0
+			var t := 0.0
+			while t < 5.0:
+				h.inp["glide"] = true
+				m.step(Match.DT)
+				t += Match.DT
+				if t <= 0.5:
+					peak = maxf(peak, h.vel.y)
+				if t_up < 0.0 and h.pos.y >= top - 0.5:
+					t_up = t
+					break
+			peaks[[fuel, dp]] = [peak, t_up]
+	h.inp["glide"] = false
+	var halves := true
+	for dp in [7.0, 12.0]:
+		var r: float = float(peaks[[0.0, dp]][0]) / float(peaks[[1.0, dp]][0])
+		halves = halves and r > 0.4 and r < 0.65 and float(peaks[[0.0, dp]][1]) > 0.0
+	var shown := [peaks[[0.0, 7.0]][0], peaks[[1.0, 7.0]][0], peaks[[0.0, 12.0]][0], peaks[[1.0, 12.0]][0]]
+	var lift_what := "overheated glider lifts at half strength from 7m and 12m (peak %.1f vs %.1f, %.1f vs %.1f m/s)"
+	ok(halves, lift_what % shown)
+	# a shove off the edge is never blocked: a bot's edge guard only holds a walk
+	var went := 0
+	var n := 0
+	for who in ["local", "bot"]:
+		_reset(Vector3(e["ex"] - dir.x * 0.4, top, e["ez"] - dir.y * 0.4), Vector3.ZERO)
+		h.grounded = true
+		h.last_gy = top
+		h.ctrl = who
+		h.impulse(dir * 4.5 * h.mass())
+		for i in int(1.0 / Match.DT):
+			m.step(Match.DT)
+			if w.is_void(h.pos.x, h.pos.z) and not h.grounded:
+				went += 1
+				break
+		n += 1
+	h.ctrl = "local"
+	ok(went == n, "a 4.5 m/s shove at the rim carries player and bot over: %d of %d" % [went, n])
 
 ## Depths below the lip the lift is measured at (the point of no return is ~13m: Hunter.abyss_kill_y).
 const LIFT_DEPTHS := [1.0, 2.0, 4.0, 7.0, 10.0, 12.0]
@@ -381,10 +467,16 @@ func _home(main: Node) -> void:
 	var pk := Save.new_kin("zapple", "Pip"); Save.d["roster"].append(pk); Save.d["active"] = pk["uid"]
 	Save.d["tutorial"]["home"] = true; Save.d["tutorial"]["day1_done"] = true
 	Econ.ensure()
+	var trap = load("res://tools/script_error_trap.gd").new()
+	OS.add_logger(trap)
+	main.fade.covered = true      # as in real play, the farm builds in slices under the ink
 	var hm = load("res://scripts/home/home.gd").new()
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	while hm.building:
+		await main.get_tree().process_frame
+	main.fade.covered = false
 	hm.set_process(false)
 	var keep_w := w
 	w = hm.world
@@ -445,4 +537,117 @@ func _home(main: Node) -> void:
 		_press(Vector2.ZERO)
 	ok(hw == mini(4, edges.size()), "home: walking toward the edge goes over it and falls: %d of %d" % [hw, mini(4, edges.size())])
 	_home_lift(hm, edges[0])
+	hm.set_process(true)
+	await main.fade.cover(0.05)      # leaving the farm: the wipe closes over it, then it is freed
 	hm.queue_free()
+	for i in 3: await main.get_tree().process_frame
+	await main.fade.reveal(0.05)
+	OS.remove_logger(trap)
+	var seen := "%d %s" % [trap.count, trap.first]
+	ok(trap.count == 0, "home: building under the wipe, playing on and leaving it logs no script error (%s)" % seen)
+
+## A ground tile with `reach` m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
+const LANE := 26
+func _open_lane(reach := LANE) -> Vector3:
+	for z in range(4, w.h - 4):
+		for x in range(4, w.w - reach - 4):
+			var lv := w.level[w.idx(x, z)]
+			var clear := true
+			for i in reach:
+				var j := w.idx(x + i, z)
+				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
+				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
+				if not clear: break
+			if clear:
+				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
+	return Vector3.INF
+
+
+# ---------------------------------------------------------------- 9. the fall's sounds
+## Steps off a rim with no keys, then opens the glider (cool, or overheated at half lift) once the warning
+## plays. Logs the first step each cue comes on and the wind's level and pitch each step of the drop.
+func _fall_cues(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	var off: Vector3 = Vector3(dir.x, 0.0, dir.y) * (h.r + 2.0)
+	for hot in [false, true]:
+		_reset(Vector3(e["ex"], top - 0.2, e["ez"]) + off, Vector3.ZERO)
+		h.last_gy = top
+		h.air_t = 1.0
+		h.abyss_snd = AbyssFallSfx.new()
+		var cues: Array = []          # "wind", "warn", "lift" in the order they come on
+		var winds: Array = []         # the wind's (dB, pitch) each step of the drop, up to the warning
+		var at := {"warn_left": 0.0, "wind_on_lift": true, "loop": false}
+		var r := _run(5.0, func(_t): _log_cue(cues, winds, at, hot))
+		var rising := winds.size() > 4
+		for i in range(1, winds.size()):
+			if winds[i].x < winds[i - 1].x - 0.01 or winds[i].y < winds[i - 1].y - 0.001:
+				rising = false
+		var lo: Vector2 = winds[0] if winds.size() > 0 else Vector2.ZERO
+		var hi: Vector2 = winds[-1] if winds.size() > 0 else Vector2.ZERO
+		var tag := "overheated" if hot else "cool"
+		ok(cues == ["wind", "warn", "lift"], "%s glider: the fall's cues in order %s" % [tag, str(cues)])
+		ok(at["loop"] and rising and hi.x - lo.x > 6.0 and hi.y - lo.y > 0.3,
+			"%s: the wind plays and climbs as you sink (%.1f dB at %.2fx to %.1f dB at %.2fx over %d steps)"
+			% [tag, lo.x, lo.y, hi.x, hi.y, winds.size()])
+		ok(float(at["warn_left"]) > 0.5,
+			"%s: the warning comes %.1fm above the point of no return" % [tag, at["warn_left"]])
+		ok(not r["fell"] and not at["wind_on_lift"] and not h.abyss_snd.warned,
+			"%s: lifted out (fell %s), the wind off as it lifts, the warning re-armed" % [tag, str(r["fell"])])
+	h.inp["glide"] = false
+	_other_cry(e, off)
+
+## One step of _fall_cues' drop: logs what came on, and opens the glider once the warning has played.
+func _log_cue(cues: Array, winds: Array, at: Dictionary, hot: bool) -> void:
+	var s := h.abyss_snd
+	if s.falling and not "warn" in cues:
+		winds.append(AbyssFallSfx.wind_mix(h.lip_y - h.pos.y))
+		at["loop"] = at["loop"] or Sfx.loop_on(AbyssFallSfx.WIND_KEY)
+		if not "wind" in cues:
+			cues.append("wind")
+	if s.warned and not "warn" in cues:
+		cues.append("warn")
+		at["warn_left"] = h.pos.y - h.abyss_kill_y()
+	if s.lifted and not "lift" in cues:
+		cues.append("lift")
+		at["wind_on_lift"] = s.falling
+	if s.warned:
+		h.inp["glide"] = true
+		if hot:
+			h.glide_fuel = 0.0
+
+## Another hunter (not you) dropping off the same rim: one cry, re-armed once it's back in play.
+func _other_cry(e: Dictionary, off: Vector3) -> void:
+	var o: Hunter = m.hunters[1]
+	o.out = false
+	o.gone = false
+	o.downed = false
+	o.hp = o.max_hp
+	o.gliding = false
+	o.teleport(Vector3(e["ex"], float(e["top"]) - 0.2, e["ez"]) + off)
+	o.grounded = false
+	o.vel = Vector3.ZERO
+	o.last_gy = e["top"]
+	o.abyss_snd = AbyssFallSfx.new()
+	var cried_at := -1.0
+	var cries := 0
+	var was := false
+	var t := 0.0
+	while t < 4.0 and not o.out:
+		m.step(Match.DT)
+		t += Match.DT
+		if o.abyss_snd.cried and not was:
+			cries += 1
+			if cried_at < 0.0:
+				cried_at = t
+		was = o.abyss_snd.cried
+	ok(cries == 1 and cried_at < 0.6 and not o.abyss_snd.falling and o.out,
+		"another hunter off the edge cries %d time(s), %.2fs in, falls out (no wind for it)" % [cries, cried_at])
+	o.out = false
+	o.gone = false
+	o.hp = o.max_hp
+	o.teleport(e["at"])
+	o.vel = Vector3.ZERO
+	for i in 3:
+		m.step(Match.DT)
+	ok(not o.abyss_snd.cried, "...and the cry re-arms once it's back in play")
