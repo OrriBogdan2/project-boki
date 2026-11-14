@@ -3,7 +3,8 @@ extends RefCounted
 ## (ItemHold). The card only reads GardenItems.preview / EvoPath / StatBudget: its ghost numbers, budget and lean
 ## rings, path meter and Why? lines equal theirs, and building it changes nothing. At home: a feed menu row shows
 ## the card on hover, the try-on wears the change for tryon_s, a held item shows the card near a Boki, interact
-## gives it and walking away ends the hold with the item still in the bag.
+## gives it and walking away ends the hold with the item still in the bag. Sounds: the held card ticks softly while
+## it is up (GardenSfx.card_tick) and the give plays the item's cue at the Boki (GardenSfx.item).
 ## --item-card-shots --shots-dir=<dir> (needs a renderer): card_stat.png, card_path.png, card_sweet.png.
 ## Never touches the real save.
 
@@ -150,18 +151,28 @@ func _home() -> void:
 	ItemHold.want("thumpnut")
 	await _tick()
 	ok(home.hold.item == "thumpnut" and not home.hold.card.showing(), "held from the bag: no card away from a Boki")
+	var ticks := _heard("garden_item_tick")
 	_place(home, k, 1.0)
 	await _tick()
 	ok(is_same(home.hold.near, k) and home.hold.card.key.begins_with(String(rec["uid"])),
 			"near Pip: its card slides in")
+	ok(_heard("garden_item_tick") == ticks + 1, "...with one soft tick")
+	await main.get_tree().create_timer(GardenSfx.TICK_S * 3.0).timeout
+	var more := _heard("garden_item_tick") - ticks - 1
+	ok(more >= 2 and more <= 4, "...and about one every %.1f s while it is up (%d in %.1f s)"
+			% [GardenSfx.TICK_S, more, GardenSfx.TICK_S * 3.0])
 	_place(home, k, 8.0)
 	await _tick()
 	ok(home.hold.item == "" and not home.hold.card.showing() and int(Save.d["items"]["thumpnut"]) == 2,
 			"walking away ends the hold, both Thumpnuts still in the bag")
+	ticks = _heard("garden_item_tick")
+	await main.get_tree().create_timer(GardenSfx.TICK_S * 1.5).timeout
+	ok(_heard("garden_item_tick") == ticks, "no ticks once the card is gone")
 	var pv := GardenItems.preview(rec, "thumpnut")
 	ItemHold.want("thumpnut")
 	_place(home, k, 1.0)
 	await _tick()
+	var bites := _heard("garden_item_bite")
 	Input.action_press("interact")
 	await _tick()
 	Input.action_release("interact")
@@ -169,10 +180,14 @@ func _home() -> void:
 	var after: Array = pv["deltas"]["stats.power"]
 	ok(home.hold.item == "" and int(rec["stats"]["power"]) == int(after[1]),
 			"interact on Pip gives it: Power %d to %d" % after)
+	ok(_heard("garden_item_bite") == bites + 1, "...and Pip's give plays one stat bite")
 	ok(int(Save.d["items"]["thumpnut"]) == 1, "one Thumpnut left in the bag")
 	var last := String(rec["journal"][-1]["words"]) if not rec.get("journal", []).is_empty() else ""
 	ok(last.contains("Thumpnut"), "one journal line with the cause: '%s'" % last)
 	FarmUnlocks.rules()["base_mode"] = false
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
 
 ## Two frames: process_frame fires before Home's _process, so the second one has seen a full tick.
 func _tick() -> void:

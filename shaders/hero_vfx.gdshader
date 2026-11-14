@@ -16,8 +16,10 @@ const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across; its bright tip at UV.x -2..-1
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core (or, thin, only a spinning lit ring): UV across the quad
+const int M_SHEEN = 9;      // a band of light climbing a body-shaped capsule, facing the camera: UV.y top (0) to foot (1)
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
+const int M_FIST = 10;      // a translucent cel-shaded fist (a mesh) falling onto the ground over `fall` of its life
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -34,9 +36,12 @@ uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (shar
 uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
+uniform bool clean_streak = false;  // M_RIBBON "streak": a clean tracer (hot head, tail thins and cools, no burn-away)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 uniform float head_t = 0.28;  // M_SWEEP: the share of the life its head takes to run the arc
 uniform float band = 0.0;     // M_SWEEP: an even blade this deep (share of the arc's depth), not tapered at the ends
+uniform float fall = 0.5;   // M_FIST: the share of its life it falls over; it then rests, and fades at the end
+uniform float drop = 3.0;   // M_FIST: model units it falls from
 uniform float pool_band = 1.0;   // M_SCORCH pool: how much of the radius it covers from the edge in (1: all of it, a ring below)
 uniform bool soft = false;    // M_RIBBON: a soft glow strewn with twinkling glints instead of a hard-edged streak
 
@@ -44,6 +49,11 @@ void vertex() {
 	if (billboard) {
 		float s = length(MODEL_MATRIX[0].xyz);
 		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0] * s, INV_VIEW_MATRIX[1] * s, INV_VIEW_MATRIX[2] * s, MODEL_MATRIX[3]);
+	}
+	if (mode == M_FIST) {
+		float k = clamp(life / max(fall, 0.01), 0.0, 1.0);
+		vec3 up = normalize(inverse(mat3(MODEL_MATRIX)) * vec3(0.0, 1.0, 0.0));   // world up, however it is tipped
+		VERTEX += up * drop * (1.0 - k * k);      // drops faster as it falls: it lands on the last step
 	}
 }
 
@@ -181,6 +191,17 @@ vec4 skirt(vec2 uv) {
 	return vec4(ramp(heat) * a * 0.8, a * 0.8);
 }
 
+vec4 sheen(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float body = 1.0 - smoothstep(0.7, 1.0, length(vec2(p.x / 0.5, p.y)));   // the capsule the band is seen through
+	float d = (1.0 - uv.y) - (life * 1.25 - 0.1);                // the band climbs from below the feet to above the head
+	float lit = exp(-d * d / 0.012);
+	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;          // a faint wash left behind it
+	float fade = 1.0 - smoothstep(0.75, 1.0, life);
+	float a = clamp(lit + trail, 0.0, 1.0) * body * fade;
+	return vec4(mix(col.rgb, col2.rgb, lit) * a, a);
+}
+
 vec4 flare(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
@@ -195,6 +216,15 @@ vec4 flare(vec2 uv) {
 	float holes = smoothstep(life - 0.1, life + 0.25, fbm3(p * 3.5 + seed) + 0.25);
 	float a = clamp(body * holes * fade, 0.0, 1.0);
 	return vec4(ramp(0.3 + core * 0.75) * a, a * 0.9);
+}
+
+vec4 tracer(vec2 uv) {
+	// a round in flight: solid across, a white-hot core inside a coloured body, bright at the head, the tail cools
+	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
+	float a = smoothstep(0.0, 0.3, across) * (1.0 - uv.x * uv.x);
+	float core = smoothstep(0.45, 0.85, across) * (1.0 - uv.x * 0.6);
+	vec3 c = mix(mix(col.rgb, col3.rgb, uv.x), col2.rgb, core);
+	return vec4(c * a, a);
 }
 
 // A trail's bright tip (HeroVfx._draw_head), q -1..1: x along the flight (the front at 1), y across. Hard: a
@@ -217,6 +247,7 @@ vec4 ribbon_head(vec2 q) {
 
 vec4 ribbon(vec2 uv) {
 	if (uv.x < -0.5) { return ribbon_head(vec2((uv.x + 1.5) * 2.0, uv.y * 2.0 - 1.0)); }
+	if (clean_streak) { return tracer(uv); }
 	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
 	if (soft) {
@@ -296,16 +327,29 @@ vec4 ring(vec2 uv) {
 	return vec4(c * a, a);
 }
 
+// A translucent fist in flat cel steps: shade, body and a lit top, a bright hard rim so the shape reads over the
+// ground, the rest see-through. It fades in as it starts to fall and out as it rests.
+vec4 fist(vec3 n, vec3 view) {
+	float lit = cel(clamp(dot(normalize(n), normalize(vec3(-0.35, 0.8, 0.5))) * 0.5 + 0.5, 0.0, 1.0));
+	vec3 body = lit < 0.3 ? col3.rgb : (lit < 0.7 ? mix(col3.rgb, col.rgb, 0.6) : col.rgb);
+	float rim = hard(1.0 - abs(dot(normalize(n), normalize(view))) - 0.68);
+	float seen = smoothstep(0.0, 0.12, life) * (1.0 - smoothstep(0.82, 1.0, life));
+	float cover = mix(0.3, 0.9, rim) * seen;
+	return vec4(mix(body, col2.rgb, rim) * cover, cover);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
 	else if (mode == M_SCORCH) { v = scorch(UV); }
 	else if (mode == M_SKIRT) { v = skirt(UV); }
+	else if (mode == M_SHEEN) { v = sheen(UV); }
 	else if (mode == M_FLARE) { v = flare(UV); }
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
+	else if (mode == M_FIST) { v = fist(NORMAL, VIEW); }
 	else { v = thread(UV); }
 	// upright looks soften into the ground; flat ones (scorch, rings) lie on it
 	float g = gain * (billboard ? soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX) : 1.0);
