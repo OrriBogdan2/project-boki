@@ -35,7 +35,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0, "keys7_v": 0,
 }
 ## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
 const BUSES := {
@@ -553,7 +553,7 @@ const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_l
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
 ## training-only actions, the lobby's push to talk).
 const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
-		["goals", "throw"], ["fold_guide", "whistle"]]
+		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"]]
 
 ## Two actions may share a key only when they never run in the same place: one at home, the other in a match
 ## (or a pair listed in SHARED_OK).

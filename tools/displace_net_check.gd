@@ -2,7 +2,7 @@ extends RefCounted
 ## --displace-net-check: abilities that move someone else's body move a player on ANOTHER game instance,
 ## on that player's own game, to the same place they move a bot (scripts/combat/displace.gd). Two real
 ## games over the desktop relay: this process is the host (it runs the relay in-process too) and starts a
-## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
+## second headless game, the guest (--displace-net-check=guest), with CheckChild. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
 ## Sparkle's Skycall drag, Mossy's shield boop; Kael's Warchain pulls Kael to the player (not the player).
@@ -10,12 +10,11 @@ extends RefCounted
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
 ## of the air on their own game, with the landing stun a bot gets (GlideSpike).
-## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
+## Lines: DISPNET ok|FAIL <what>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
-const START_S := 240.0       # s for the guest to come up and build its match (the queue may hold it)
-const REPLY_S := 30.0        # s of real time for the guest to answer (a busy box starves it; sim time races ahead)
+const START_S := 240.0       # s for the guest to come up and build its match (a busy box boots it slowly)
+const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
@@ -42,7 +41,6 @@ var seen := {}
 var paced_us := 0            # the wall clock (µs) the match clock has been stepped up to
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
-var guest_bin := GODOT       # what starts the guest (--tele-net-shots: the running binary, a GPU worker has no wrapper)
 var early := {}              # the guest's reply one snapshot after a Boki move on it
 
 func ok(cond: bool, what: String, info := "") -> void:
@@ -54,6 +52,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == guest_flag: guest = true
@@ -67,24 +66,22 @@ func run(main_node: Node) -> void:
 # ------------------------------------------------------------------ the host
 ## Brings up the relay, the guest game and both matches; the guest's hunter as the host sees it, or null.
 func _host_up() -> Hunter:
-	port = 7930 + OS.get_process_id() % 60
+	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := RelayServer.new()
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), guest_bin, guest_flag, port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: other = String(id)
-		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return null
@@ -94,16 +91,17 @@ func _host_up() -> Hunter:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
+	var t1 := CheckClock.own_msec(guest_pid)
 	var said := t1
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-		if Time.get_ticks_msec() - said > 3000:      # a slow guest may not have heard the first start: say it again
-			said = Time.get_ticks_msec()
+		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may have missed it: say again
+			said = CheckClock.own_msec(guest_pid)
 			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
-	return G
+	return G if G != null and G.net_t >= 0.0 else null
 
 func _host() -> void:
 	var G := await _host_up()
@@ -135,21 +133,10 @@ func _host() -> void:
 func _finish() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("%s DONE, %d checks, failures: %d" % [tag, n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-func _read_pid() -> void:
-	if guest_pid > 0:
-		return
-	var p := dir.path_join("guest.log")
-	if not FileAccess.file_exists(p):
-		return
-	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("%s guest pid=" % tag):
-			guest_pid = int(line.get_slice("=", 1))
 
 ## One ability, on the bot and then on the guest from the same spot: the guest's own game puts it where
 ## the bot went, it really moved there, and the host's copy of it follows.
@@ -443,8 +430,9 @@ func _ask() -> Vector3:
 	return await _reply()
 
 func _reply() -> Vector3:
-	var t0 := Time.get_ticks_msec()
-	while replies.is_empty() and Time.get_ticks_msec() - t0 < REPLY_S * 1000.0:
+	var t0 := CheckClock.own_msec(guest_pid)
+	while (replies.is_empty() and CheckClock.own_msec(guest_pid) - t0 < REPLY_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.1)
 	if replies.is_empty():
 		return Vector3.INF
@@ -456,7 +444,6 @@ func _got(k: String) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("%s guest pid=%d" % [tag, OS.get_process_id()])
 	if not await _connect():
 		print("%s guest: no relay" % tag)
 		main.get_tree().quit(1)
@@ -469,7 +456,7 @@ func _guest() -> void:
 			"still building" if building else "no start heard", Net.peers.keys()])
 	else:
 		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
 		await _run(0.1)
 	main.get_tree().quit(0)
 
@@ -515,6 +502,8 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
+	if Net.enet:
+		CheckChild.hold(Net.enet.peer, START_S)
 	Net.set_presence({"name": "dn"})
 	return Net.mode == "server"
 

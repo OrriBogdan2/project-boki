@@ -26,8 +26,8 @@ fighting (damage, knocks) and slowly over time; each level gives a point.
 
 ## Your Boki and your class
 
-Your Boki doesn't replace any of your class abilities. It brings its own ability (C), fights on its
-own when you send it out (G), and adds a little of its type to your kit: each class ability has
+Your Boki doesn't replace any of your class abilities. It fights on its own when you send
+it out (C), and adds a little of its type to your kit: each class ability has
 **sockets** (hit, control, guard, utility, modifier) and your Boki's parts fill them at a fraction of
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.

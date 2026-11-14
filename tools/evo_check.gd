@@ -184,6 +184,15 @@ func _art_gate() -> void:
 	ok(rec["species"] == "cindle" and evs.size() == 1 and queued == 1,
 		"art gate: once the art exists it evolves on load, and home plays it")
 	Save.d["roster"] = []
+	var waits := _kin("hivara", 3)
+	_line("hivara", {"level": 8, "into": [{"id": no_art}]})
+	ok(Evo.level_form(waits) == [no_art, 8, false] and Evo.level_note(waits).ends_with("waits on its art"),
+		"art gate: the Growth card says its level-8 form waits on its art")
+	_line("hivara", {"level": 8, "into": [{"id": "cindle"}]})
+	var nm := String(Data.KIN["cindle"]["name"])
+	ok(Evo.level_note(waits) == "Evolves into %s at level 8" % nm, "art gate: with the art it names the form and level")
+	ok(Evo.level_form(_kin("pebbit", 3)).is_empty() == not Evo.rules()["lines"].has("pebbit"),
+		"art gate: a species with no level line has no level form")
 
 ## The cap: levels stop at 100, and generated kin too.
 func _cap() -> void:
