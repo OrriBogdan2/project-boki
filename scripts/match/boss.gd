@@ -44,7 +44,6 @@ var orbit := 1.0
 var add_k := 0               # egg-sac adds hatched so far: the next one's kind cycles BROOD_ADDS, no dice
 const BROOD_ADDS := ["skitter", "skitter", "bomber", "spitter"]   # phase 0 cycles the first two, then +1 a phase
 
-const DEATH_FADE_S := 1.4      # s the fallen body stays before it is gone
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
 func init_boss(match_node: Node, id: String, k: String, at: Vector3, tier_k: float, L: Dictionary) -> void:
@@ -729,14 +728,9 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		death_t += delta
-		BossAnim.pose(self, delta)
-		var k := clampf(death_t / DEATH_FADE_S, 0.0, 1.0)
-		visible = k < 1.0
-		for mt in mats:
-			if mt is ShaderMaterial: mt.set_shader_parameter("flash", 1.0 - k)
-		for s in model.get_meta("segs", []):
-			(s as Node3D).visible = k < 0.6
+		visible = MobDissolve.step(self, delta)
+		if visible:
+			BossAnim.pose(self, delta)      # the keyed death move plays out, then the dissolve (MobDissolve.begin)
 		return
 	model.visible = not buried
 	model.rotation.y = face
