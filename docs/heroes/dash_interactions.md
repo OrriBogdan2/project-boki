@@ -813,7 +813,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
 | rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
 | rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
-| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags like a hose (:15) |
+| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) trails behind the aim (:15) |
 | ashwick | RMB | free | free | briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown |
 | ashwick | E | free | free | briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown |
 | ashwick | ult (X) | slow (90 deg/s) | slow (90 deg/s) | briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 90 deg/s) |

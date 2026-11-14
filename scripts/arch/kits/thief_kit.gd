@@ -12,7 +12,8 @@ extends ArchKit
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
-##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
+##   keeps fast Shift presses (ThiefChain). A bolt soon after it starts a quick run of bolts (ThiefQuick). No ring
+##   or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
 ##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
@@ -31,7 +32,6 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -53,6 +53,7 @@ var bola := {}                 # the Bola in flight: {pos, dir, left, first, bou
 var encore: ThiefUlt           # X, the ultimate
 var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
+var quick: ThiefQuick          # the quick bolts after a Vault
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
 var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
@@ -79,6 +80,7 @@ func _setup() -> void:
 	encore = ThiefUlt.new(self)
 	spin = ThiefSpin.new(self)
 	chain = ThiefChain.new(self)
+	quick = ThiefQuick.new()
 
 func fx() -> DJFx:
 	return DJFx.of(m)
@@ -171,8 +173,9 @@ func refresh_marks() -> void:
 			_pip_pop(f, int(mk[h.nid][0]))
 
 # ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head, one per
-# Mark, spinning faster as they stack (everyone sees them, the victim included). A ring is made once and
-# goes back to pip_spare when its target's Marks run out.
+# Mark, spinning faster as they stack (everyone else sees them, the victim included; your own read off RecastCue's
+# MARKS badge, so they hide on your screen). A ring is made once and goes back to pip_spare when its target's
+# Marks run out.
 func _pip_node(t: Ent) -> Dictionary:
 	var key := t.get_instance_id()
 	if pips.has(key) and is_instance_valid(pips[key]["node"]):
@@ -217,6 +220,7 @@ func _tick_pips(dt: float) -> void:
 				pip_spare.append({"node": n, "d": p["d"]})
 			pips.erase(key)
 			continue
+		n.visible = not h.is_local()
 		var top := 2.7 if t is Hunter else 1.9
 		n.global_position = t.position + Vector3(0, top, 0)
 		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
@@ -272,6 +276,7 @@ func _tick(dt: float) -> void:
 	encore.tick(dt)
 	_tick_vault(dt)
 	chain.tick(dt)
+	quick.tick(dt)
 	_tick_landing()
 	_tick_trail(dt)
 	_tick_wrapped(dt)
@@ -378,6 +383,7 @@ func _bolt() -> void:
 	if sd["by"] != h:
 		return
 	bolts += 1
+	var came_quick := quick.bolt(h, dash_def())
 	hand = 1 - hand
 	var d := h.aim_dir()
 	var right := Vector2(-d.y, d.x)
@@ -417,6 +423,9 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
+	elif came_quick:            # the quick run after a Vault: the cartwheel's cyan in her hands and the tail
+		fx().ride(sd, "chakram", GHOST, BOLT_GOLD, 2.2, 0.42)
+		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 1.8, 0.42)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -530,6 +539,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
+	quick.vaulted(h, dd)
 	var was := primed_t > 0.0
 	primed_t = float(dd["primed_t"])
 	m.later(t, func():
@@ -862,7 +872,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
-## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.
+## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:
 	if knife.is_empty():
 		return
@@ -881,7 +891,6 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
-	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:
@@ -914,7 +923,6 @@ func _step_to_knife() -> void:
 	knife = {}
 	e_t = 0.0
 	fx().unplace("knife%d" % h.get_instance_id())
-	AimKit.hide(h, "knife")
 	if busy():
 		return
 	if in_dash():

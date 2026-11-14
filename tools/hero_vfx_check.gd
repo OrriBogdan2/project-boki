@@ -381,8 +381,10 @@ func _scarf(main: Node) -> void:
 	var was: Variant = Settings.v.get("quality", "auto")
 	Settings.v["quality"] = "high"
 	S.tick(1.0 / 60.0)
-	ok(S.wearers.size() == 1 and S.wearers[0].h == P and S.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
-	var w: HeroScarf.Wearer = S.wearers[0]
+	# (the training rival's hero comes from the seed: when it is a Claire too, it wears its own pair)
+	var mine := S.wearers.filter(func(x: HeroScarf.Wearer): return x.h == P)
+	ok(mine.size() == 1 and (mine[0] as HeroScarf.Wearer).tails.size() == 2, "Claire wears two scarf tails")
+	var w: HeroScarf.Wearer = mine[0] if not mine.is_empty() else S.wearers[0]
 	var a: Dictionary = HeroVfx.data("rimewright")["anchors"]["scarf"]
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var neck := V.anchor_pos(P, "scarf")
@@ -402,7 +404,7 @@ func _scarf(main: Node) -> void:
 		var drop := tail.pts[0].y - tail.pts[-1].y
 		ok(drop > ln * 0.7, "at rest a tail hangs (tip %.2f m under its root)" % drop)
 		ok((tail.pts[-1] - tail.pts[0]).dot(back) > 0.0, "and hangs behind her, not through her")
-	ok(S.made == 2, "one mesh per tail (%d)" % S.made)
+	ok(S.made == 2 * S.wearers.size(), "one mesh per tail (%d for %d wearers)" % [S.made, S.wearers.size()])
 	var step := Vector3(6.0, 0.0, 0.0) / 60.0
 	for i in 60:
 		P.model.global_position += step
@@ -422,12 +424,14 @@ func _scarf(main: Node) -> void:
 	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")
 	Settings.v["quality"] = "high"
 	S.tick(1.0 / 60.0)
-	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
+	var same: bool = S.made == 2 * S.wearers.size()
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and same, "back on, the same meshes")
 	Settings.v["quality"] = was
 	S.prewarm(P.pos)
 	S.prewarm_end()
 	S.prewarm(P.pos)
-	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
+	ok(S.made == 2 * S.wearers.size() + 1,
+			"the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
 
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
