@@ -87,6 +87,7 @@ var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var ult_cue := UltReadyCue.new()   # the chime when your R is back
+var barks := HunterBarks.new()     # your Hunter's voice callouts, and your squad's "Boki down"
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
@@ -1857,6 +1858,7 @@ func _reward_moment(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
 	Sfx.duck(0.25)
 	sfx("kill", null, -2.0)
+	barks.knock_landed(self)
 
 func _slow(t: float, k: float) -> void:
 	if net_on:
@@ -2195,6 +2197,7 @@ func on_kin_down(k: Kin) -> void:
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
+	barks.boki_down(self, k)
 	_check_team(k.team)
 
 ## Its owner scooped it up, or it came round on its own.
@@ -3896,6 +3899,7 @@ func step(dt: float) -> void:
 	if heart: heart.tick(dt)
 	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
+	barks.tick(self)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
