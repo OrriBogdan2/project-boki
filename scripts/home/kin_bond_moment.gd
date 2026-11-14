@@ -36,7 +36,6 @@ static func play(home: Node, k: Dictionary) -> void:
 	k["joy_t"] = 1.4
 	home._emote(k, "♥", true)
 	home.fx.burst(at + Vector3(0, 0.9, 0), Color("ff8fb0"), 24, 2.6)
-	home.fx.ring(at, 2.2, Color(1.0, 0.56, 0.69, 0.9), 0.5)
 	GardenSfx.cue("garden_friends", at)
 	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1, Unique.voice(rec))
 	home._say(k, BokiLines.say(rec, "bond_up"))

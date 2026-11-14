@@ -5,10 +5,11 @@ extends RefCounted
 ## `from` clip's pose at src_t (s) with the bone turned by the offsets (in the bone's own frame), so a recovery starts
 ## on the strike's last pose and eases to its own settle. The clip is as long as its last key.
 
+
 static func add(lib: AnimationLibrary, derive: Dictionary) -> void:
 	for nm in derive:
 		if lib.has_animation(StringName(nm)):
-			continue            # (the .glb's library is shared by every model of the Hero: built once)
+			continue  # (the .glb's library is shared by every model of the Hero: built once)
 		var def: Dictionary = derive[nm]
 		var src := lib.get_animation(String(def["from"]))
 		var keys: Array = def["keys"]
@@ -18,12 +19,12 @@ static func add(lib: AnimationLibrary, derive: Dictionary) -> void:
 			if src.track_get_type(i) != Animation.TYPE_ROTATION_3D:
 				continue
 			var bone := String(src.track_get_path(i).get_concatenated_subnames())
-			var tr := out.add_track(Animation.TYPE_ROTATION_3D)
-			out.track_set_path(tr, src.track_get_path(i))
+			var track_idx := out.add_track(Animation.TYPE_ROTATION_3D)
+			out.track_set_path(track_idx, src.track_get_path(i))
 			for key in keys:
 				var q: Quaternion = src.rotation_track_interpolate(i, float(key[1]))
 				var turn: Array = (key[2] as Dictionary).get(bone, [])
 				if not turn.is_empty():
 					q *= Quaternion.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2])))
-				out.rotation_track_insert_key(tr, float(key[0]), q)
+				out.rotation_track_insert_key(track_idx, float(key[0]), q)
 		lib.add_animation(StringName(nm), out)

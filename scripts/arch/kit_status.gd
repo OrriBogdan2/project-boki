@@ -1,12 +1,12 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
+##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; cords round the legs (StatusLooks)
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
-##        source's Daze is only a damage window); stars over the head
-##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a teal ring, then the slow's frost on the body (BodyTell)
+##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; the slow's body look (StatusLooks)
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -50,7 +50,9 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.set_meta("gnd_until", maxf(float(e.get_meta("gnd_until", 0.0)), float(m.time) + secs))
 			if e is Hunter:
 				(e as Hunter).gliding = false
-			if not was: _show(e, kind, secs, toast)
+			if not was:
+				_show(e, kind, secs, toast)
+				CcSfx.play(e, "ground")
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
@@ -58,13 +60,17 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
-			if not was_r: _show(e, kind, secs)
+			if not was_r:
+				_show(e, kind, secs)
+				CcSfx.play(e, "daze")
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
 			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
 			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
 			e.slow_t = maxf(e.slow_t, secs)
-			if not was_d: _show(e, kind, secs)
+			if not was_d:
+				_show(e, kind, secs)
+				if secs >= CcSfx.MIN_SLOW_S: CcSfx.play(e, "slow")
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
@@ -78,51 +84,25 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 	elif kind == "dsr":
 		e.slow_t = maxf(e.slow_t, secs)
 
-## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
+## What everyone sees: the body look (StatusLooks: cords round the legs, a ring over the head) for its
+## length, and a word as it lands (no ground ring: that means gameplay).
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
 	StatusSfx.kit(e, kind, secs)
 	match kind:
 		"gnd":
-			var old := e.get_node_or_null("Grounded")
-			if old: old.queue_free(); old.name = "GroundedGone"
-			var n := Node3D.new()
-			n.name = "Grounded"
-			var mat := DJFx.solid(GROUND_COL)          # solid: an additive glow washes out to white on grass
-			for i in 3:
-				var c := MeshInstance3D.new()
-				c.mesh = Models.cyl(0.42 - 0.05 * i, 0.42 - 0.05 * i, 0.06, 16)
-				c.material_override = mat
-				c.position = Vector3(0, 0.22 + 0.22 * i, 0)
-				c.rotation = Vector3(0.18 * (1 - i), 0.0, 0.2 * (i - 1))
-				c.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				n.add_child(c)
-			e.add_child(n)
-			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
+			_look(e, "gnd", secs)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
-			var old2 := e.get_node_or_null("Rattled")
-			if old2: old2.queue_free(); old2.name = "RattledGone"
-			var rn := Node3D.new()
-			rn.name = "Rattled"
-			var top := 2.35 * (float((e as Hunter).cdat.get("scale", 1.0)) if e is Hunter else 0.8)
-			var rmat := Models.glow_mat(Color(RATTLE_COL, 1.0))
-			for i in 4:
-				var st := MeshInstance3D.new()
-				st.mesh = Models.crystal(0.07, 0.1, 4)
-				st.material_override = rmat
-				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				var a := TAU * i / 4.0
-				st.position = Vector3(cos(a) * 0.38, top, sin(a) * 0.38)
-				rn.add_child(st)
-			e.add_child(rn)
-			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
-			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
+			_look(e, "daze", secs)
 		"dsr":
-			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
-		"vul":
-			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
+			_look(e, "slow", secs)
+
+## The body look for what this game can't read off the body's own timers: a body another game owns, or one
+## that isn't a Hunter (StatusLooks reads a local Hunter's timers itself, so a status cut short ends there).
+static func _look(e: Ent, st: String, secs: float) -> void:
+	if e.remote or not (e is Hunter):
+		StatusLooks.of(e.m).put(e, st, secs)
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:

@@ -43,10 +43,10 @@ static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now :
 	if _who.size() > 32:
 		_prune(now)
 	if first:
-		Sfx.play(sname, pos, vol_db, 0.0, 1.0, 0.0, take)
+		Sfx.play(sname, pos, vol_db, 0.0, 1.0, 0.0, false, take)
 	else:
 		var jitter := Sfx.rng.randf_range(-JITTER_DB, JITTER_DB)
-		Sfx.play(sname, pos, vol_db - Sfx.STACK_DB + jitter, JITTER_PITCH, 1.0, 0.0, take)
+		Sfx.play(sname, pos, vol_db - Sfx.STACK_DB + jitter, JITTER_PITCH, 1.0, 0.0, false, take)
 
 static func _prune(now: int) -> void:
 	for id in _who.keys():

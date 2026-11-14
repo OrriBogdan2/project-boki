@@ -144,7 +144,7 @@ func _pitch(h: Hunter) -> float:
 	return (Sfx.loops[WispHum.key(h)]["p"] as AudioStreamPlayer).pitch_scale
 
 func _falling_away() -> bool:
-	return Sfx.voices().any(func(p): return p.playing and p.stream == Sfx.streams.get(WispHum.HUM_END))
+	return Sfx.voice_all.any(func(p): return p.playing and p.stream == Sfx.streams.get(WispHum.HUM_END))
 
 func _frames(secs: float) -> void:
 	Sfx.listener = here

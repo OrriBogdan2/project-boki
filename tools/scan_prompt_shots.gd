@@ -3,15 +3,18 @@ extends RefCounted
 ## Run under xvfb with a renderer. Writes <dir>/scan_prompt.png (the whole screen).
 
 const DT := 1.0 / 60.0
-const RUN_S := 1.5         # s into the scan before the picture
+const RUN_S := 1.5  # s into the scan before the picture
 ## A 1v1 with no drop and no end, the same seed as --capture-check.
-const MATCH_OPTS := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true,
-		"demo_kin": "cindle"}
+const MATCH_OPTS := {
+	"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"
+}
+
 
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var m := Match.new()
@@ -19,7 +22,8 @@ func run(main: Node) -> void:
 	await m.start(MATCH_OPTS)
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
@@ -33,7 +37,8 @@ func run(main: Node) -> void:
 	while t < hold_s + RUN_S:
 		P.inp["interact"] = t < hold_s + 0.15
 		m.step(DT)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		m.cam.snap(P.pos + Vector3(1.0, 0, 0.0))
 		await main.get_tree().process_frame
 		t += DT

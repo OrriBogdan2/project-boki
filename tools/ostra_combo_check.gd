@@ -96,7 +96,7 @@ func _ostra() -> void:
 	for i in 40: K.on_deal(T, 10.0, {})
 	m.step(DT)
 	ok(
-		"passive: full Swell = Swollen for 9s, wrapped in the pink sphere",
+		"passive: full Swell = Swollen for 9s, wrapped in the light-teal sphere",
 		K.is_swollen() and K.swells == 1 and absf(
 			float(K.res_def()["swollen_t"]) - 9.0
 		) < 0.01 and KitLooks.of(m).holding("os_aura"),
@@ -115,9 +115,16 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
-	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok("lmb: the orb is his own teal shard (skin) with its data trail", KitLooks.of(m).skins_live("orb") >= 1
+			and int(HeroVfx.of(m).plays.get("orb_trail", 0)) >= 1)
+	var hits0 := int(HeroVfx.of(m).plays.get("orb_hit", 0))
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
+	ok("lmb: the hit draws its impact on the foe (orb_hit)", int(HeroVfx.of(m).plays.get("orb_hit", 0)) == hits0 + 1)
+	var layers: Array = HeroVfx.data("ostra")["moves"]["orb_hit"]["fx"]
+	ok("lmb: the impact is sized by the orb's hit radius (%.2f m) and has two shard layers" % K.last_orb_r,
+		K.last_orb_r >= 0.28 and layers.filter(func(l): return l["p"] == "shard").size() >= 2
+		and layers.any(func(l): return l["p"] == "flare" and l["size"] == "r"))
 	reset.call()
 	step(m, 1.6)
 	ok(
@@ -139,6 +146,7 @@ func _ostra() -> void:
 		"item 60: the charge restarts from zero after a shot (plain again)",
 		K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
 	)
+	_zone_looks(m)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
 	reset.call()
@@ -205,7 +213,8 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5, func(): s_near[0] = maxf(s_near[0], T.stun_t))
 	var d_near := dmg(T)
-	ok("rmb: the stun shows on the dummy (stars over its head)", s_near[0] > 0.0 and KitLooks.of(m).crowned(T))
+	var starred := StatusLooks.of(m).showing(T, "stun")
+	ok("rmb: the stun shows on the dummy (stars over its head)", s_near[0] > 0.0 and starred)
 	reset.call()
 	T.teleport(home + Vector3(11.5, 0, 0))
 	aim_at(P, T.pos)
@@ -761,6 +770,29 @@ func _bolt_through_terrain() -> void:
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
 ## (ostra_orb) that leaves along the aim; he turns to the cursor, so while he drifts sideways every orb
 ## leaves at it as it swings round him.
+## docs/VFX_QUALITY.md: his zones are a lit rim and a soft inside (0.25 alpha at most at the centre), in his teal.
+func _zone_looks(m: Match) -> void:
+	const CORE_A := 0.25
+	var seed := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
+	var sm := (seed.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the seed drum is clear inside, lit at its teal rim",
+		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
+	HeroZones.seed_pop(m, "zone_test")
+	var looks := KitLooks.of(m)
+	var held := (looks.hold_on("zone_dark", "dark", m, Vector3.ZERO, 1.0).get_child(0) as MeshInstance3D)
+	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 3.6)
+	var rim_orb := (well.get_node("Spin").get_children().back() as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the black orbs (Snap wind-up, Nightwell rim) have a broad lit sea-teal rim",
+		[held.material_override, rim_orb].all(func(mt: ShaderMaterial):
+			return mt.get_shader_parameter("rim") == OstraKit.SEA and float(mt.get_shader_parameter("power")) < 1.5))
+	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the open well has no floor fill, a lit rim",
+		float(fm.get_shader_parameter("fill")) == 0.0 and float(fm.get_shader_parameter("thickness")) > 0.0)
+	var dome := looks.hold_on("zone_dome", "well_dome", m, Vector3.ZERO, 3.6)
+	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the well's dome is clear at its centre",
+		float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1) <= CORE_A)
+
 func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	var seen := {}
 	for s0 in m.shots.filter(func(s): return s["by"] == P):

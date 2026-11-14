@@ -150,17 +150,16 @@ func _downed() -> void:
 
 func _cap() -> void:
 	_hush()
-	var cap := SfxVoices.cap("SFX")
-	for i in cap + 2:
+	for i in Sfx.POOL + 2:
 		Sfx.last_played.clear()
 		Sfx.recent.clear()
 		Sfx.play("rifle", P.pos + up * NEAR_M, 0.0, 0.0)
-	var full := Sfx.voices_on("SFX")
+	var full := Sfx.spots.filter(func(p): return p.playing).size()
 	foe.pos = P.pos + right * NEAR_M
 	m.on_damage(P, foe, 20.0, {})
-	var after := Sfx.voices_on("SFX")
-	ok(full == cap and IncomingHitSfx.voice() != null and after <= cap,
-		"a full near lane (%d of %d): the cue still plays and the lane stays at its cap (%d)" % [full, cap, after])
+	var after := Sfx.spots.filter(func(p): return p.playing).size()
+	ok(full == Sfx.POOL and IncomingHitSfx.voice() != null and after <= Sfx.POOL,
+		"a full placed pool (%d of %d): the cue still plays (it takes a voice) and the pool stays full (%d)" % [full, Sfx.POOL, after])
 
 ## The GPU recording (the child under the movie writer): one real shot from each of the 8 directions.
 func _reel() -> void:
@@ -214,12 +213,12 @@ func _bus_of(v) -> String:
 	return String(v.bus) if v != null else "none"
 
 func _hush() -> void:
-	for p in Sfx.voices():
+	for p in Sfx.voice_all:
 		p.stop()
 
 func _cues() -> int:
 	var takes: Array = Sfx.streams.get(IncomingHitSfx.SOUND, [])
-	return Sfx.voices().filter(func(p): return p.playing and p.stream in takes).size()
+	return Sfx.voice_all.filter(func(p): return p.playing and p.stream in takes).size()
 
 func _cue_at() -> Vector3:
 	var v = IncomingHitSfx.voice()

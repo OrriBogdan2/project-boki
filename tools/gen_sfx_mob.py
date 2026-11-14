@@ -1,11 +1,10 @@
-"""Mob and boss attack sounds (docs/AUDIO.md): a cue when each mob kind strikes and one when it lands, and a
-wind-up tell for each boss, so a lair fight can be dodged by ear.
+"""Mob attack sounds (docs/AUDIO.md): a cue when each mob kind strikes and one when it lands. (The lair bosses'
+own sounds are BossSfx's: content/sfx/boss.json, tools/gen_sfx_boss.py.)
 
     cd tools && python3 gen_sfx_mob.py      (then: godot --headless --import)
 
 mob_<kind>_atk is the strike (a lunge, a spit, a slam, a blast, a volley); mob_<kind>_hit plays on whoever it
-lands on. boss_<kind>_tell swells with the telegraph and peaks as the hit comes; boss_slam, boss_throw,
-boss_boulder, boss_spit and boss_glob are the release and the landing. Original synthesis, no samples.
+lands on. Original synthesis, no samples.
 """
 import os, sys
 import numpy as np
@@ -79,29 +78,6 @@ d = 0.5
 save('mob_warden_hit', mix(kick(130, 38, d, decay=0.2), 0.7 * crack(d, 150, 1000, 0.06), 0.4 * S.ring([110, 163], d, [0.25, 0.2], [1.0, 0.6])), 'impact')
 
 
-# ---- boss tells (cat cast): each swells to its peak as the strike lands
-d = 1.0
-g = S.creak(d, 45, 90, 0.7, 1200) * rise(d, 1.5)
-save('boss_colossus_tell', mix(g, 0.8 * sub(40, 70, d, d * 2) * rise(d, 2), 0.35 * S.rattle(d, rate=30, lo=300, hi=1500) * rise(d, 2.5)), 'cast')
-d = 1.0
-whine = lpf(S.sweep(260, 1900, d, 'saw', 1.4), 5000) * rise(d, 1.6)
-buzz = 0.4 * S.fm(1200, 1.01, 6.0, d, decay=2.0) * rise(d, 2.2)
-save('boss_serpent_tell', mix(whine * 0.7, buzz, 0.25 * hpf(noise(d), 4000) * (np.random.default_rng(3).random(N(d)) > 0.7) * rise(d, 3)), 'cast')
-d = 1.0
-gurgle = S.voice(d, 70, 130, 'uh', breath=0.5, rasp=0.9, vib=0.04, scale=0.8) * rise(d, 1.3)
-save('boss_brood_tell', mix(gurgle, 0.5 * S.grains(d, 140, 400, 2500, fall=d * 0.9) * rise(d, 1.2), 0.3 * bpf(noise(d), 300, 1400) * rise(d, 2)), 'cast')
-
-# ---- boss releases and landings
-d = 0.9
-save('boss_slam', stone(d, 70, 28, 250, 1800, 1.2), 'heavy_impact')
-d = 0.4
-save('boss_throw', whoosh(d, 250, 900, 1.6) * 1.0, 'fire')
-d = 0.8
-save('boss_boulder', mix(stone(d, 85, 34, 300, 2600, 1.0), 0.3 * S.grains(d, 100, 600, 2200, fall=0.35)), 'heavy_impact')
-d = 0.4
-save('boss_spit', mix(splat(d, 400, 2000, 150), 0.6 * S.hiss(d, 1500, 5000, decay=0.2)), 'fire')
-d = 0.5
-save('boss_glob', mix(splat(d, 250, 1500, 110), 0.5 * kick(130, 50, d, decay=0.12)), 'impact')
 # ---- the Blight: ash and embers, lower and drier than their island cousins
 d = 0.3
 save('mob_bl_skitter_atk', mix(whoosh(d, 400, 1500), 0.6 * S.grains(d, 120, 600, 2600, fall=0.15)), 'fire')

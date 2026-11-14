@@ -10,10 +10,10 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
-const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS), on the teal
+const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
-const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal that reads on bright grass
+const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
@@ -194,7 +194,9 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT, not h.is_local())     # yours: the badge
+		var badge := not h.is_local()      # yours: the badge
+		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, badge)
+		StatusLooks.of(m).keep(f, "static")
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
 			# sparks on the body, 2 a stack, livelier with each
 			var o := {"n": 2 * n, "v": 1.4 + 0.9 * n, "rad": 0.25 + 0.08 * n, "s": 0.065 * (0.8 + 0.3 * n)}
@@ -232,7 +234,7 @@ func _tick(dt: float) -> void:
 func own_dash_trail() -> bool:
 	return true
 
-## Her own after-images on the air dash and the Wirerun streak: her silhouette in teal (pink on the streak).
+## Her own after-images on the air dash and the Wirerun streak: her silhouette in pink-white (pink on the streak).
 func _tick_echo(dt: float) -> void:
 	if h.roll_t <= 0.0 and run_t <= 0.0:
 		echo_t = 0.0
@@ -241,7 +243,7 @@ func _tick_echo(dt: float) -> void:
 	if echo_t > 0.0:
 		return
 	echo_t = ECHO_GAP
-	fx().echo(h, PINK.lerp(TEAL, 0.35) if run_t > 0.0 else TEAL, 0.3)
+	fx().echo(h, PINK.lerp(PINK_WHITE, 0.35) if run_t > 0.0 else PINK_WHITE, 0.3)
 
 func teardown() -> void:
 	super.teardown()
@@ -341,7 +343,7 @@ func on_dash(use_ex: bool) -> bool:
 	if ult.airborne():
 		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
-		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a teal streak)
+		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a pink-white streak)
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
 			return true
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
@@ -452,7 +454,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	run_n += 1
 	m.later(time, _arrive.bind(run_n))
 
-## The streak itself: the body is hidden behind her own pink-teal after-images (_tick_echo); orbs crossed burst.
+## The streak itself: the body is hidden behind her own pink and white after-images (_tick_echo); orbs crossed burst.
 func _tick_run(dt: float) -> void:
 	run_t -= dt
 	if h.model:
@@ -534,7 +536,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	vfx("blowout", f.position)
-	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
@@ -571,17 +573,17 @@ func shows_charge_ball() -> bool:
 	return false                   # the summoned rod is her charge tell
 
 ## The Storm Rod: a 1.3 m copper shaft along -Z (the tip) with a dark grip at +0.25 where the hand
-## holds it, three teal windings and a teal crystal tip with a pink heart.
+## holds it, three pale pink windings and a pale pink crystal tip with a pink heart.
 func _build_rod() -> Node3D:
 	var n := own_node()
 	var along := Vector3(PI / 2, 0, 0)
-	var teal := solid_mat(TEAL)
+	var pale := solid_mat(PINK_WHITE)
 	Models.part(n, Models.cyl(0.045, 0.045, 1.3, 10), Models.shiny(COPPER, 0.8), Vector3.ZERO, Vector3.ONE, along)
 	var grip := Models.toon(Color("2a2233"))
 	Models.part(n, Models.cyl(0.058, 0.058, 0.24, 10), grip, Vector3(0, 0, 0.25), Vector3.ONE, along)
 	for i in 3:
-		Models.part(n, Models.cyl(0.066, 0.066, 0.04, 10), teal, Vector3(0, 0, -0.1 - 0.17 * i), Vector3.ONE, along)
-	Models.part(n, Models.crystal(0.09, 0.42, 4), teal, Vector3(0, 0, -0.68), Vector3.ONE, -along)
+		Models.part(n, Models.cyl(0.066, 0.066, 0.04, 10), pale, Vector3(0, 0, -0.1 - 0.17 * i), Vector3.ONE, along)
+	Models.part(n, Models.crystal(0.09, 0.42, 4), pale, Vector3(0, 0, -0.68), Vector3.ONE, -along)
 	Models.part(n, Models.sphere(0.06, 8), solid_mat(PINK), Vector3(0, 0, -0.72))
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -711,18 +713,18 @@ func _drop_mote(at: Vector3) -> void:
 	vfx("orb_drop", at, null, {"r": float(cd_["mote_r"]) + 0.3})
 	m.sfx("vv_orb", at, -5.0)
 
-## A charge orb: a pink core in a teal shell wound with two teal bands (it spins), its own light; short
-## arcs crackle off it in _tick_motes. Solid colours, so it reads pink and teal, not a white glow.
+## A charge orb: a pink core in a pale pink shell wound with two pale bands (it spins), its own light; short
+## arcs crackle off it in _tick_motes. Solid colours, so it reads pink and pale pink, not a white glow.
 func _build_mote() -> Node3D:
 	var n := own_node()
 	var core := Models.part(n, Models.sphere(0.24, 12), solid_mat(PINK))
 	core.sorting_offset = 1.0              # drawn after the shell: the pink heart shows through
-	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(TEAL, 0.22)))
+	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(PINK_WHITE, 0.22)))
 	for i in 2:
 		var band := TorusMesh.new()
 		band.inner_radius = 0.33
 		band.outer_radius = 0.39
-		Models.part(n, band, solid_mat(TEAL), Vector3.ZERO, Vector3.ONE, Vector3(0.9 * (i * 2 - 1), 0, 0.5))
+		Models.part(n, band, solid_mat(PINK_WHITE), Vector3.ZERO, Vector3.ONE, Vector3(0.9 * (i * 2 - 1), 0, 0.5))
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()

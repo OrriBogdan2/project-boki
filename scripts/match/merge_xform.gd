@@ -20,7 +20,6 @@ static func begin(h: Hunter, form: Dictionary) -> void:
 	var m := h.m
 	var col: Color = form["glow"]
 	spiral(h, col, true)
-	m.fx.ring(h.pos, 2.2, Color(col, 0.8), 0.45)
 	m.sfx("boki_fuse_" + String(form["cue"]), h.pos, SOUND_RANGE_DB - 4.0)
 	if h.is_local():
 		m.freeze_frame(HITSTOP)
@@ -44,12 +43,10 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 			m.hud.flash(col, 0.25)
 	h.squash = 0.35
 
-## The look of the moment, for everyone: white flash, shockwave rings, shards in the form's colours.
+## The look of the moment, for everyone: white flash, shards in the form's colours.
 static func pop_fx(m: Match, at: Vector3, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 2.6, 0.12)
-	m.fx.ring(at, 3.4 * float(form["size"]), Color(Color.WHITE, 0.9), 0.35)
-	m.fx.ring(at, 5.0 * float(form["size"]), Color(col, 0.8), 0.5)
 	m.fx.burst(at + Vector3(0, 1.0, 0), col, 26, 6.0, 0.55)
 	m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color(col).lerp(Color.WHITE, 0.5), 18, 8.0, 180.0, 0.4, 6.0, 1.2)
 	m.fx.dust(at, 10)
@@ -58,7 +55,6 @@ static func pop_fx(m: Match, at: Vector3, form: Dictionary) -> void:
 static func flash_only(m: Match, at: Vector3, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 1.8, 0.1)
-	m.fx.ring(at, 3.0, Color(col, 0.8), 0.4)
 	m.fx.burst(at + Vector3(0, 1.0, 0), col, 14, 4.0, 0.4)
 
 ## The merge is over: the shell peels (backwards pop), shards fly, the Boki springs out (KinMerge calls merge_pop).
@@ -78,7 +74,6 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 		if h.is_local() and m.hud:
 			m.hud.toast_small("SHELL BROKEN", col)
 	else:
-		m.fx.ring(h.pos, 3.0, Color(col, 0.8), 0.35)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
 		m.sfx(end_cue(why), h.pos, -2.0)
 	spiral(h, col, false)

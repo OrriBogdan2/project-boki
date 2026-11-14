@@ -7,7 +7,7 @@ extends RefCounted
 ## quiet for chip damage, loud for a heavy hit, and a shot from 40 m away is still heard. A flurry is one
 ## voice: a hit soon after the cue started folds into it and raises it to the flurry's damage so far (a shotgun
 ## volley sounds like its total); only a hit clearly louder on its own moves the cue to its source and restarts
-## it. It takes its voice from the Sfx pool, so the voice cap counts it (a keep cue, content/rules/sfx_voices.json)
+## it. It takes its voice from the Sfx pool as one of your own sounds (SfxVoices: never stolen),
 ## and the downed muffle dulls it. Only hits on you from someone else: never your own hits, damage over time or
 ## falls (Juice.hit), the Blight or a hazard.
 

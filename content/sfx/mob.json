@@ -19,21 +19,8 @@
   "mob_bl_skitter_hit": "impact",
   "mob_bl_warden_atk": "fire",
   "mob_bl_warden_hit": "impact",
-  "mob_bl_shriek": "cast",
-  "boss_colossus_tell": "cast",
-  "boss_serpent_tell": "cast",
-  "boss_brood_tell": "cast",
-  "boss_slam": "heavy_impact",
-  "boss_throw": "fire",
-  "boss_boulder": "heavy_impact",
-  "boss_spit": "fire",
-  "boss_glob": "impact"
+  "mob_bl_shriek": "cast"
  },
  "signature": [],
- "reach": {
-  "boss_colossus_tell": 32,
-  "boss_serpent_tell": 32,
-  "boss_brood_tell": 32,
-  "boss_slam": 32
- }
+ "reach": {}
 }

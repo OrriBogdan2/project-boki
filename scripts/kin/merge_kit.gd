@@ -153,7 +153,6 @@ func _strike_all(b: Dictionary) -> void:
 			continue
 		m.fx.bolt(f.pos + Vector3(0, 8.0, 0), f.pos + Vector3(0, 0.8, 0), col)
 		m.fx.flash(f.pos + Vector3(0, 0.9, 0), Color.WHITE, 1.3, 0.12)
-		m.fx.ring(f.pos, 1.5, col, 0.3)
 		f.hurt(float(b.get("dmg", 40.0)) * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "strike"], "stun": float(b.get("stun", 0.0)), "dr": true})
 	MergeSfx.play(h, "hit")
 	m.shake(0.6, h.pos)

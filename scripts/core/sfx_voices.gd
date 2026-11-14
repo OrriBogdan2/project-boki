@@ -1,62 +1,102 @@
 class_name SfxVoices
 extends RefCounted
-## The pool's voice budget (content/rules/sfx_voices.json, docs/AUDIO.md): which sound is worth keeping
-## when a bus is full. A bigger priority is worth more; KEEP is never stolen.
+## Who keeps a voice when the Sfx pool or the loops are full (docs/AUDIO.md, voice priority). Every sound gets a
+## rank: yours (no position, flagged mine, or within FRIEND_M of you) rank YOU, your squad's (within FRIEND_M of a
+## squadmate) SQUAD, and both always play over the rest; every other sound ranks by its distance from you, the
+## nearest first. A new sound with every pool voice busy takes the voice of the farthest sound ranked below it, or
+## is not played (yours, with only yours playing, takes the oldest of them); the loops past LOOP_CAP pause, the
+## farthest first, and sound again once there is room. Yours and your squad's loops never pause.
 
-const PATH := "res://content/rules/sfx_voices.json"
-const FAR_CHEAP := 0        # a far footstep or far Boki chatter: first to go
-const FAR_OTHER := 1        # a far sound, or a near footstep or chatter
-const NEAR_OTHER := 2       # a near sound of someone else
-const KEEP := 3             # your own, a warning or a recast cue, a UI sound: never stolen
+## A sound that lost its voice (why: &"stolen") or got none (&"full"): for --sfx-voice-check.
+signal cut(sname: String, rank: float, why: StringName)
 
-static var _rules := {}
+const YOU := -2.0  # the rank of your own sounds (any other sound's: metres from you, or SQUAD)
+const SQUAD := -1.0  # the rank of your squadmates' sounds
+## m: a sound this close to you or a squadmate is yours or theirs (inside two bodies, Ent.r 0.4, so a rival pressed
+## against them is not)
+const FRIEND_M := 0.7
+const LOOP_CAP := 8  # looping voices sounding at once, on top of the pool's (Sfx.POOL)
+const CULL_MS := 100  # ms between loop culls (cheap: a sort of the loops, ten times a second)
 
-static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-		_rules = parsed if parsed is Dictionary else {}
-	return _rules
+var friends := PackedVector3Array()  # you, then your living squadmates, kept by keep_squad each match frame
+var rank := PackedFloat32Array()  # per pool voice: the rank of what it plays
+var sound := PackedStringArray()  # per pool voice: the sound it plays
+var _cull_at := 0
 
-## Most voices sounding at once in a lane (see lane).
-static func cap(lane_name: String) -> int:
-	return int((rules()["cap"] as Dictionary)[lane_name])
 
-## The cap lane a bus is in: far ("SFXFar"), behind terrain ("SFXMuffled"), else near ("SFX": the clear SFX
-## bus, the SFXWorld bus the downed muffle dulls, and the kind buses of SfxMix: Voice, Boki, UI).
-static func lane(bus: String) -> String:
-	return bus if bus in ["SFXFar", "SFXMuffled"] else "SFX"
+func _init(pool: int) -> void:
+	rank.resize(pool)
+	sound.resize(pool)
 
-## dist: metres from the listener, or -1 for a sound with no place (a UI sound).
-static func priority(sname: String, dist: float, far_m: float) -> int:
-	var r := rules()
-	if dist < 0.0 or dist <= float(r["own_m"]) or sname in r["keep"]:
-		return KEEP
-	var cheap := false
-	for frag in r["cheap"]:
-		if sname.contains(frag):
-			cheap = true
-			break
-	if dist > far_m:
-		return FAR_CHEAP if cheap else FAR_OTHER
-	return FAR_OTHER if cheap else NEAR_OTHER
 
-## The voice to give up for a new sound of priority `prio` in a lane: the lowest priority that is not above
-## the new one, then the quietest, then the oldest. -1 when every voice there matters more (the new
-## sound is dropped). `prios`, `born` (start time, ms) and `voices` (Sfx.voice_all: plain and placed
-## players, which share these fields) are the pool's parallel arrays.
-static func victim(voices: Array, prios: PackedInt32Array, born: PackedInt64Array, lane_name: String, prio: int) -> int:
-	var best := -1
-	for i in voices.size():
-		var p = voices[i]
-		if not p.playing or lane(p.bus) != lane_name or prios[i] > prio or prios[i] >= KEEP:
-			continue
-		if best < 0 or _cheaper(prios[i], p.volume_db, born[i], prios[best], voices[best].volume_db, born[best]):
-			best = i
-	return best
+## The match's frame: you and your living squadmates are the friends.
+func keep_squad(hunters: Array, me: Hunter) -> void:
+	friends.resize(0)
+	if me == null:
+		return
+	friends.append(me.pos)
+	for h: Hunter in hunters:
+		if h != me and h.team == me.team and not h.dead:
+			friends.append(h.pos)
 
-static func _cheaper(pa: int, va: float, ta: int, pb: int, vb: float, tb: int) -> bool:
-	if pa != pb:
-		return pa < pb
-	if not is_equal_approx(va, vb):
-		return va < vb
-	return ta < tb
+
+func rank_of(pos, listener: Vector3, mine := false) -> float:
+	if mine or pos == null:
+		return YOU
+	for i in friends.size():
+		var f := friends[i]
+		if Vector2(pos.x - f.x, pos.z - f.z).length_squared() < FRIEND_M * FRIEND_M:
+			return YOU if i == 0 else SQUAD
+	return Vector2(pos.x - listener.x, pos.z - listener.z).length()
+
+
+## The voice of `pool` for a sound of rank `r` (-1: none, the sound is not played): a free one (from `next` round
+## the ring), else the farthest one ranked below it; yours with only yours playing takes `next`. `base`: where the
+## pool starts in rank and sound (Sfx keeps the plain voices, then the placed ones, in one table).
+func pick(pool: Array, base: int, next: int, r: float, sname: String) -> int:
+	var n := pool.size()
+	var worst := -1
+	for k in n:
+		var i := (next + k) % n
+		if not pool[i].playing:
+			return i
+		if worst < 0 or rank[base + i] > rank[base + worst]:
+			worst = i
+	if rank[base + worst] > r:
+		cut.emit(sound[base + worst], rank[base + worst], &"stolen")
+		return worst
+	if r == YOU:
+		cut.emit(sound[base + next], YOU, &"stolen")
+		return next
+	cut.emit(sname, r, &"full")
+	return -1
+
+
+## Pauses the loops past LOOP_CAP, the farthest first, and resumes the rest (loops: Sfx.loops); at most every
+## CULL_MS, or now (a loop just started, so a new one never sounds over the cap).
+func cull_loops(loops: Dictionary, listener: Vector3, now_too := false) -> void:
+	var now := Time.get_ticks_msec()
+	if now < _cull_at and not now_too:
+		return
+	_cull_at = now + CULL_MS
+	var order := []
+	for key in loops:
+		var p: AudioStreamPlayer = loops[key]["p"]
+		if is_instance_valid(p) and p.stream != null:
+			order.append([rank_of(loops[key]["pos"], listener), p])
+	order.sort_custom(func(a, b): return a[0] < b[0])
+	for i in order.size():
+		(order[i][1] as AudioStreamPlayer).stream_paused = i >= LOOP_CAP and order[i][0] > SQUAD
+
+
+## Pool voices and loops sounding now (a paused loop is not).
+static func sounding(players: Array, loops: Dictionary) -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	for key in loops:
+		var lp: AudioStreamPlayer = loops[key]["p"]
+		if is_instance_valid(lp) and lp.playing and not lp.stream_paused:
+			n += 1
+	return n
