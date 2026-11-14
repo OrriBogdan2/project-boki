@@ -1,11 +1,13 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the black
+## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs|sex to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles of three extreme bodies, standing and walking;
-## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default).
+## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default;
+## sex: both bodies from the front, three-quarter and side, and in every shroud).
 
+const HATCH := "res://scripts/ui/hatch.gd"  # the creator scene script every group builds
 const LOOKS := {
 	"creator_female": {"gender": 0},
 	"creator_male_short": {"height": 0}, "creator_male_tall": {"height": 2},
@@ -58,6 +60,8 @@ func run(main_node: Node) -> void:
 		await _farm(tree)
 	if only in ["", "eggs"]:
 		await _eggs(tree)
+	if only in ["", "sex"]:
+		await _sexes(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -67,7 +71,7 @@ func _fresh() -> void:
 
 func _creator(tree: SceneTree) -> void:
 	_fresh()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	hx.edit_only = true
 	main.add_child(hx)
 	await _shot(tree, "creator_default", 2.0)
@@ -83,7 +87,7 @@ func _creator(tree: SceneTree) -> void:
 func _eggs(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	main.add_child(hx)
 	await tree.process_frame
 	hx._looks_good()
@@ -118,7 +122,7 @@ func _mask(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
 	Save.d["look"].merge({"gender": 0, "glow": 0, "ghost": 1}, true)
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	main.add_child(hx)
 	await tree.process_frame
 	hx._looks_good()
@@ -143,7 +147,7 @@ func _mask(tree: SceneTree) -> void:
 
 func _shroud(tree: SceneTree) -> void:
 	_fresh()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	hx.edit_only = true
 	main.add_child(hx)
 	await _shot(tree, "creator_warmup", 2.5)
@@ -166,6 +170,30 @@ func _shroud(tree: SceneTree) -> void:
 		hx.locker.set_look(lk)
 		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_style_%s" % String(Unmasked.SHROUDS[style]).to_lower(), 0.8)
+	hx.queue_free()
+	await tree.process_frame
+
+## Each body in the creator from CREATE_CAM: the default look front, three-quarter and side, then every shroud.
+func _sexes(tree: SceneTree) -> void:
+	_fresh()
+	var hx = load(HATCH).new()
+	hx.edit_only = true
+	main.add_child(hx)
+	await _shot(tree, "creator_warmup", 2.5)
+	var views := {"front": PI, "three_quarter": PI * 0.78, "side": PI * 0.5}
+	for gender in Unmasked.SEXES.size():
+		for view in views:
+			var lk := Unmasked.default_look()
+			lk["gender"] = gender
+			hx.locker.set_look(lk)
+			hx.locker.set_yaw(views[view])
+			await _shot(tree, "sex_%s_%s" % [String(Unmasked.SEXES[gender]).to_lower(), view], 1.2)
+		for style in Unmasked.SHROUDS.size():
+			var lk := Unmasked.default_look()
+			lk.merge({"gender": gender, "shroud": style}, true)
+			hx.locker.set_look(lk)
+			hx.locker.set_yaw(views["three_quarter"])
+			await _shot(tree, "sex_%s_style_%d" % [String(Unmasked.SEXES[gender]).to_lower(), style], 0.8)
 	hx.queue_free()
 	await tree.process_frame
 

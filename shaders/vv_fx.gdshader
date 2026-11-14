@@ -1,20 +1,15 @@
 shader_type spatial;
-// Sparkle's and Vex's own effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
+// Vex's and Sparkle's leftover effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
 // `life` runs 0 -> 1 over the effect; `color` is the body, `color2` the hot core / accent, `color3` an
 // optional edge colour (its alpha says how much). Each mode writes a BODY, alpha-blended so it keeps its
 // colour and darkness on bright grass, and a GLOW added on top for the hot cores and sparks only.
-//   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
 //   3 DISC    a flat quad: a lit jagged crackling rim at 0.9, a soft dark falloff in from it down to `fill_a` at
 //             the centre (never a solid fill: the target reads through) and lightning veins (placed areas);
 //             hollow: no falloff or veins, a glowing centre
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
-//   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (smears, hand trails); with an edge
-//             colour, a hot core line down a lit body inside that edge (Vex's rifle rounds)
-//   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
-//   7 SWIRL   a flat quad: spinning comma arcs (the Dazed mark)
-//   8 BEAM    a ribbon: a hot core, a coloured body and a shimmering edge, thinning with life
+//   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the smear)
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_premul_alpha, cull_disabled, fog_disabled;
 uniform int mode = 0;
 uniform vec4 color : source_color = vec4(0.4, 0.9, 0.8, 1.0);
@@ -50,17 +45,7 @@ void fragment() {
 	vec3 body = color.rgb;
 	float body_a = 0.0;
 	vec3 glow = vec3(0.0);
-	if (mode == 0) {
-		// jagged: the core's offset across the ribbon jumps every 1/18 s, with two octaves of zigzag
-		float t = floor(TIME * 18.0);
-		float zig = (vnoise(uv.x * 7.0 + t * 3.1) - 0.5) * 0.55 + (vnoise(uv.x * 23.0 + t * 7.7) - 0.5) * 0.25;
-		float d = abs(uv.y - 0.5 - zig * (0.3 + 0.7 * smoothstep(0.0, 0.25, uv.x)));
-		float core = 1.0 - smoothstep(0.03, 0.09, d);
-		float halo = 1.0 - smoothstep(0.06, 0.4, d);
-		float tail = 1.0 - smoothstep(0.55, 1.0, uv.x);
-		body_a = halo * 0.8 * tail;
-		glow = color2.rgb * core * 1.4 * tail;
-	} else if (mode == 1) {
+	if (mode == 1) {
 		float rim = pow(1.0 - abs(uv.x * 2.0 - 1.0), 0.6);
 		float bands = 0.65 + 0.35 * sin(uv.y * 26.0 - TIME * 14.0);
 		float ends = smoothstep(0.0, 0.08, uv.y) * (1.0 - smoothstep(0.75, 1.0, uv.y));
@@ -107,51 +92,11 @@ void fragment() {
 		glow = color2.rgb * core * k;
 	} else if (mode == 5) {
 		float d = abs(uv.y - 0.5) * 2.0;
+		float w = mix(0.9, 0.08, uv.x);
+		float shaft = 1.0 - smoothstep(w * 0.5, w, d);
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
-		if (color3.a > 0.0) {
-			// edged: the body keeps most of its width, a hot core line runs down it, color3 rims it, and the
-			// back 60% fades out
-			float w = mix(1.0, 0.45, uv.x);
-			float shaft = 1.0 - smoothstep(w * 0.85, w, d);
-			float core = (1.0 - smoothstep(w * 0.15, w * 0.3, d)) * (1.0 - smoothstep(0.1, 0.9, uv.x));
-			body = mix(color.rgb, color3.rgb, smoothstep(w * 0.5, w * 0.7, d) * color3.a);
-			body_a = shaft * (1.0 - smoothstep(0.4, 1.0, uv.x)) * k;
-			glow = color2.rgb * (core * 1.2 + head) * k;
-		} else {
-			float w = mix(0.9, 0.08, uv.x);
-			float shaft = 1.0 - smoothstep(w * 0.5, w, d);
-			body_a = shaft * (1.0 - uv.x) * k;
-			glow = color2.rgb * head * k;
-		}
-	} else if (mode == 6) {
-		float front = 0.15 + 0.85 * sqrt(life);
-		float band = 1.0 - smoothstep(0.0, 0.12, abs(uv.y - front));
-		float fill = (1.0 - smoothstep(front - 0.02, front, uv.y)) * 0.45 * k;
-		float spikes = pow(abs(sin(uv.x * 31.4 + seed)), 12.0) * smoothstep(front * 0.5, front, uv.y);
-		spikes *= 1.0 - smoothstep(front, front + 0.1, uv.y);
-		float side = 1.0 - smoothstep(0.0, 0.04, min(uv.x, 1.0 - uv.x));
-		float edge = side * (1.0 - smoothstep(front, front + 0.02, uv.y));
-		body_a = clamp(band + fill + edge * 0.6, 0.0, 1.0) * k;
-		glow = color2.rgb * spikes * 1.5 * k;
-	} else if (mode == 8) {
-		// a hot core, a coloured body, and a shimmering edge band in color3
-		float d = abs(uv.y - 0.5) * 2.0;
-		float w = mix(1.0, 0.25, life);
-		float shaft = 1.0 - smoothstep(w * 0.45, w, d);
-		float core = 1.0 - smoothstep(0.0, 0.2 * w, d);
-		float shimmer = 0.6 + 0.4 * sin(uv.x * 90.0 - TIME * 50.0);
-		float edge = (1.0 - smoothstep(0.0, 0.12 * w, abs(d - w * 0.62))) * shimmer;
-		body = mix(color.rgb, color3.rgb, edge * color3.a);
-		body_a = clamp(shaft * 0.85 + edge * color3.a, 0.0, 1.0) * k;
-		glow = color2.rgb * core * 1.4 * k;
-	} else {
-		vec2 p = uv * 2.0 - 1.0;
-		float r = length(p);
-		float ang = atan(p.y, p.x) - TIME * 5.0;
-		float arms = smoothstep(0.55, 1.0, sin(ang * 3.0 + r * 6.0));
-		float band = smoothstep(0.35, 0.55, r) * (1.0 - smoothstep(0.8, 1.0, r));
-		body_a = arms * band;
-		glow = color2.rgb * arms * band * 0.4;
+		body_a = shaft * (1.0 - uv.x) * k;
+		glow = color2.rgb * head * k;
 	}
 	// cel steps with ragged hard edges (shaders/cel.gdshaderinc); premultiplied: the body covers what is under it,
 	// the glow adds on top

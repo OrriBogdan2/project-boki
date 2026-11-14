@@ -45,7 +45,6 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	var need := time_for(o)
 	if h.box_t <= 0.0:
 		h.vuln_fx_t = 0.0
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 	h.box_t += dt
 	# everyone sees (and hears: Match._update_box_hums) a box revive going up, and who's doing it
 	b["rev_prog"] = h.box_t / need
@@ -73,7 +72,6 @@ static func guard_inputs(h: Hunter) -> void:
 	var leaping: bool = h.inp.get("dash", false) or h.inp.get("jump", false) or h.roll_t > 0.0
 	if walking or leaping or h.gliding or h.stun_t > 0.0:
 		if h.box_t > 0.0:        # (not when interact was just let go)
-			h.m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 			cancel(h)
 		return
 	for key in NO_ATTACK:
