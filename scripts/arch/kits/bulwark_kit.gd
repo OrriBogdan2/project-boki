@@ -9,7 +9,8 @@ extends ArchKit
 ##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
 ##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
 ##   perfect swing, a leaping launch (BjornLaunch).
-## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
+## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it. Walking into it pushes
+##   nobody; LMB with it up is the boop, a short shield thrust that shoves foes in front (BjornBoop).
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
@@ -36,6 +37,7 @@ var crest: Node3D = null       # the gold crest light while a Shield Slam is arm
 var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
+var boop: BjornBoop            # LMB behind the raised aegis: the shield thrust
 var flared := false            # this hold's full-charge flare has gone off
 var spin := 0.0                # the whirled hammer's angle (rad), counted on match time (BjornFx draws it)
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
@@ -48,8 +50,6 @@ var ticks_healed := 0           # (checks) heals the zone's ticks gave
 var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
 var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
-var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
-var pushes := 0                # (checks) foes the raised aegis has pushed back
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
 var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
@@ -65,11 +65,13 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	launch = BjornLaunch.new(self)
+	boop = BjornBoop.new(self)
 
-## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
+## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
+## and with the max health levels give (LevelGrowth.hp), as the source's Brightshield scales with max health.
 func shield_max() -> float:
 	var sd: Dictionary = rmb_def()["shield"]
-	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1))
+	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1)) * LevelGrowth.hp(h)
 
 ## One of the aegis's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
 func _shield_stat(key: String) -> float:
@@ -88,9 +90,10 @@ func cd_k(slot: String) -> float:
 		return float(e_def()["cooldown_rank3"]) / float(e_def()["cooldown"]) if rank("kin") >= 3 else 1.0
 	return super.cd_k(slot)
 
-## Mending Ground heals 25% more at rank 2 and another 25% at rank 3.
+## Mending Ground heals 25% more at rank 2 and another 25% at rank 3, grown by the level's
+## ability power (LevelGrowth.ap).
 func heal_k() -> float:
-	return 1.0 + 0.25 * float(rank("kin") - 1)
+	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
 
 func full_ready() -> bool:
 	return res >= float(res_def().get("slam", 50.0))
@@ -126,7 +129,6 @@ func _tick(dt: float) -> void:
 		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)
 	front_t = maxf(0.0, front_t - dt)
-	var sd: Dictionary = rmb_def()["shield"]
 	if not wall.is_empty():
 		if not m.verbs.walls.has(wall):
 			# broken: locked out for 3s
@@ -145,7 +147,6 @@ func _tick(dt: float) -> void:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
 			# his aegis over the wall (armed: it burns hotter), cracking as it weakens
 			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
-			_shield_push()
 	else:
 		fx.aegis_hide()
 		down_t += dt
@@ -158,6 +159,7 @@ func _tick(dt: float) -> void:
 	if h.dash_buf > 0.0 and m.time < step_until:
 		h.roll_t = 0.0         # Shift in the swing's step or launch: the dash goes now (item 51), not at its end
 	launch.tick(dt)
+	boop.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
 		h.dash_buf = Hunter.DASH_BUFFER
@@ -168,37 +170,6 @@ func _tick(dt: float) -> void:
 	_tick_crest()
 	net_pulse(dt, full_ready())
 
-# ------------------------------------------------------------------ the raised aegis pushes back
-## The aegis's contact reach past its own thickness (m): a foe pressed against it is in range.
-const PUSH_REACH := 0.4
-
-## Foes that meet the raised aegis are shoved back along its facing ("push" m, once per "push_gap" s each), and
-## a hunter dashing into it is stopped. The double chevron in front of it shows the push (BjornFx.push_hint).
-func _shield_push() -> void:
-	var sd: Dictionary = rmb_def()["shield"]
-	var push := float(sd.get("push", 2.0))
-	var n := h.aim_dir()
-	var a: Vector2 = wall["a"]
-	var b: Vector2 = wall["b"]
-	var flash := false
-	for f in m.foes_of(h.team):
-		if not f.hittable():
-			continue
-		var p := Vector2(f.pos.x, f.pos.z)
-		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
-		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
-		var key: int = f.get_instance_id()
-		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
-		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
-		if in_front and p.distance_to(q) < reach and gap_ok:
-			pushed_at[key] = m.time
-			_shove(f, n, push, float(sd.get("push_speed", 14.0)))
-			pushes += 1
-			flash = true
-	fx.push_hint(wall, n, push, flash)
-	if flash:
-		m.sfx("bjorn_bash", h.pos, -5.0, 1.4)
-
 ## A Q glove going off is another ability starting: it ends a Crushing Blow being wound up.
 func _tick_glove() -> void:
 	var used := false
@@ -208,9 +179,9 @@ func _tick_glove() -> void:
 	if used and lmb_t >= 0.0:
 		cancel_hold()
 
-## Slides a pushed foe back along the aegis's facing (a wall behind it stops the slide; Displace: a player
+## Slides a booped foe back along the aegis's facing (a wall behind it stops the slide; Displace: a player
 ## online slides on their own game).
-func _shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
+func shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
 	var push := {"mode": "push", "dir": [dir.x, dir.y], "dist": dist, "spd": speed, "dur": dist / speed + 0.1}
 	push["unroll"] = true          # a hunter dashing into it is stopped
 	m.displace.tow(f, null, push)
@@ -264,10 +235,14 @@ func _start_ult() -> bool:
 func ult_running() -> bool:
 	return ult.phase != ""
 
+func lock_left() -> float:
+	return ult.lock_left()
+
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		# it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -291,6 +266,10 @@ func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
 	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
 
+## The raised aegis faces `by`: it stops their pulls too (Blockers).
+func blocks_from(by: Ent) -> bool:
+	return _aegis_takes(by, {})
+
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
 	return not mend.is_empty()
@@ -309,7 +288,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.hit(m, t, dir, float(res_def().get("crush_reach", 1.5)), h):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -350,6 +329,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
 		return true
 	if hold_blocked:
+		return true
+	if not wall.is_empty():
+		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
@@ -466,7 +448,6 @@ func _smash() -> void:
 	h.mel_hold = 0.0
 	fx.hold_end()
 	flared = false
-	var full := k >= 0.99
 	var dmg := lerpf(float(md["smash_dmg"][0]), float(md["smash_dmg"][1]), k) * _wk()
 	var kb := lerpf(float(md["smash_kb"][0]), float(md["smash_kb"][1]), k)
 	if perfect:
@@ -476,7 +457,7 @@ func _smash() -> void:
 	slam_k = k
 	knock_until = m.time + 0.25
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
-		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
+		{"heavy": true, "charged": true})
 	var dv := h.aim_dir()
 	if perfect:
 		launch.start(dv)
@@ -516,6 +497,8 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
 const THROW_WIND := 0.08
+## m round the flying hammer, out and back, that it hits (its sides stay inside it: --warden-clips-check)
+const MACE_HIT_R := 0.9
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:
@@ -572,6 +555,7 @@ func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
+	mace["t"] = 0.0
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
@@ -606,7 +590,7 @@ func _tick_mace(dt: float) -> void:
 			var g: float = m.world.ground_at(q.x, q.z)
 			var blocked: bool = m.world.is_block(q.x, q.z) or g > p.y - 0.2
 			if not blocked: p = q
-			for f in foes_in(p, 0.9, 1.8):
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["throw_dmg"]), dir)
@@ -614,7 +598,10 @@ func _tick_mace(dt: float) -> void:
 			if blocked or float(mace["d"]) >= float(mace.get("to", md["throw_range"])):
 				var gy: float = m.world.ground_at(p.x, p.z)
 				if gy <= World.VOID + 1.0:
-					mace["st"] = "back"; mace["hit"] = {}       # over the abyss: it comes straight back
+					# over the abyss: it comes straight back
+					mace["st"] = "back"
+					mace["hit"] = {}
+					mace["t"] = 0.0
 				else:
 					p = Vector3(p.x, gy + 0.15, p.z)
 					mace["st"] = "ground"; mace["t"] = 0.0
@@ -633,14 +620,17 @@ func _tick_mace(dt: float) -> void:
 			if float(md.get("lie_t", 0.0)) > 0.0 and float(mace["t"]) >= float(md["lie_t"]):
 				_recall()
 		"back":
-			var to := h.pos + Vector3(0, 1.0, 0) - p
-			var step := float(md["recall_speed"]) * dt
-			var dir2 := Vector2(to.x, to.z).normalized()
-			if to.length() <= step + 0.6:
+			# it homes on the hand and lands on the recall clip's catch key "recall_t" s after the call, from any range
+			# (sheet: recall flight 0.2-0.4 s)
+			mace["t"] = float(mace["t"]) + dt
+			var left := float(md["recall_t"]) - float(mace["t"])
+			if left <= 0.5 * dt:
 				_catch()
 				return
-			p += to.normalized() * step
-			for f in foes_in(p, 0.9, 1.8):
+			var to := h.pos + Vector3(0, 1.0, 0) - p
+			var dir2 := Vector2(to.x, to.z).normalized()
+			p += to * minf(1.0, dt / left)
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["recall_dmg"]), dir2)
@@ -672,10 +662,15 @@ func press_rmb() -> void:
 	rmb_t = 0.0
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
 	cancel_hold()
+	if _can_raise():
+		play("bul_guard")           # the arm comes up on the press, the aegis 0.1 s into the hold
 
 func rmb_hold_tick(t: float) -> void:
-	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
+	if t >= float(rmb_def()["hold"]) and _can_raise():
 		_raise()
+
+func _can_raise() -> bool:
+	return wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0
 
 func _raise() -> void:
 	var sd: Dictionary = rmb_def()["shield"]
@@ -683,7 +678,8 @@ func _raise() -> void:
 	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * 1.0, d, {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy", "color": rmb_def().get("col", "#9ad8ff")}, 1.0)
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
-	play("bul_guard")
+	if anim_id != "bul_guard":
+		play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
@@ -720,6 +716,8 @@ func _lower() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
+	if anim_id == "bul_guard":
+		anim_id = ""                # a tap: the arm goes back down with no aegis
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
 ## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
@@ -767,7 +765,7 @@ func on_dash(use_ex: bool) -> bool:
 		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
 		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
-		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
+		var dist := float(dd["charge"])
 		var t := dist / float(dd["charge_speed"])
 		var t_felt := t * float(dash_feel()["time"])
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
@@ -795,10 +793,10 @@ func on_dash(use_ex: bool) -> bool:
 			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
-	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
+	var dist2 := float(dd["whirl"])
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
@@ -809,8 +807,8 @@ func on_dash(use_ex: bool) -> bool:
 ## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
 const SPIN_GLIDE := 6.0
 
-## The 360 Smash's spin on arrival: one hit all round him, a red-gold swirl ring, still sliding on along
-## `wd`.
+## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
+## lies on the hit radius and runs round once with the turn.
 func _spin_hit(wd: Vector2) -> void:
 	if h.grounded:
 		h.vel.x += wd.x * SPIN_GLIDE
@@ -827,10 +825,9 @@ func _spin_hit(wd: Vector2) -> void:
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos, r)
+	vfx("spin", h.pos, null, {"r": r})
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
-	net_ring(h.pos, r, Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Mending Ground
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
@@ -849,7 +846,7 @@ func cast_e() -> bool:
 	e_t = float(ed["delay"]) + float(ed["time"])
 	fx.purify(at, r, 0.0)
 	m.sfx("bjorn_purify", at, -2.0)
-	net_ring(at, r, Feel.cat_color("sustain"))
+	net_ring(at, r, AimKit.hero_col(h))
 	return true
 
 ## The light column comes down ("delay"), then the zone heals everyone inside a little every "every" s for
@@ -862,17 +859,18 @@ func _tick_mend(dt: float) -> void:
 		mend["t"] = float(mend["t"]) - dt
 		var u := 1.0 - clampf(float(mend["t"]) / float(ed["delay"]), 0.0, 1.0)
 		fx.purify(mend["pos"], r, u)
-		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true, "col": BjornFx.GREEN})
+		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true,
+			"col": AimKit.hero_col(h)})
 		if float(mend["t"]) <= 0.0:
 			mend["zone"] = float(ed["time"])
 			mend["tick"] = float(ed["every"])
-			m.fx.ring(mend["pos"], r, BjornFx.GREEN, 0.4)
+			m.fx.ring(mend["pos"], r, AimKit.hero_col(h), 0.4)
 		return
 	mend["zone"] = float(mend["zone"]) - dt
 	mend["tick"] = float(mend["tick"]) - dt
 	fx.purify_hold(mend["pos"], r)
 	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
-		"col": BjornFx.GREEN})
+		"col": AimKit.hero_col(h)})
 	if float(mend["tick"]) <= 0.0:
 		mend["tick"] = float(mend["tick"]) + float(ed["every"])
 		_mend_tick()
@@ -893,7 +891,6 @@ func _mend_tick() -> void:
 			continue
 		ticks_healed += 1
 		o.heal(heal)
-		m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 4, 1.5, 0.35, -3.0)
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -909,7 +906,6 @@ func _mend_burst() -> void:
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
 			o.heal(heal)
-			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
@@ -918,10 +914,10 @@ func _mend_burst() -> void:
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
-	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
+	m.fx.ring(at, r, AimKit.hero_col(h), 0.45)
 	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
 	m.sfx("bjorn_purify_burst", at, 0.0)
-	net_ring(at, r, Feel.cat_color("sustain"))
+	net_ring(at, r, AimKit.hero_col(h))
 
 # ------------------------------------------------------------------ bots
 ## The hammer: called back from where it landed, else thrown at a foe out of arm's reach.

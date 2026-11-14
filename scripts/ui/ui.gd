@@ -182,6 +182,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var to := func(s: float, secs: float) -> void:
 		if not is_instance_valid(b) or not b.is_inside_tree(): return
 		var tw := b.create_tween()
+		s = minf(s, _room(b))
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
@@ -196,6 +197,15 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 			Sfx.play("hover", null, -14.0, 0.05))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
+
+## How far a button may scale (about its centre) before it pokes past its parent's sides: 1.0 for
+## one that fills its row.
+static func _room(b: Button) -> float:
+	var par := b.get_parent() as Control
+	if par == null or b.size.x < 1.0:
+		return 1.0
+	var gap := minf(b.position.x, par.size.x - b.position.x - b.size.x)
+	return 1.0 + maxf(0.0, gap) * 2.0 / b.size.x
 
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
@@ -877,7 +887,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
-				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))      # held: the same on every tab
+				sc.custom_minimum_size.y = minf(want, sc.get_viewport_rect().size.y - 110.0 - chrome)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
