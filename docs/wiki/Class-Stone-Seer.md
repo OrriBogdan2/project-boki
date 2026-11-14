@@ -38,13 +38,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy. |
-| Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
-| Dash: Rock Hop | Rock Hop: spring off a rock toward the cursor; press again as you land to hop on, up to 3 hops. The last landing crashes, and a rock rolls on and slows. |
-| LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
-| RMB: Quakefall | Quakefall: tap to slam just ahead; hold for a moment to hop forward and up, then slam harder. The centre stuns. Jump while holding to leap further. |
-| E: Stone Row | Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes. |
-| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss the rocks are ground you can stand on. |
-| Weapon: Rubble Fists | Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
+| Passive: Molten Guard | Punching your own rocks gives a shield; sneaking shows foes through walls. |
+| Dash: Rock Hop | Spring off a rock toward the cursor; up to 3 hops. |
+| RMB: Quakefall | Tap to slam ahead; hold to hop forward and slam harder. |
+| E: Stone Row | Raise three rocks ahead to climb, hide behind, or punch. |
+| Hunter ultimate: Basalt Spine | Raise a ridge of rocks at the cursor; drag to turn it. |
+| Weapon: Rubble Fists | Tap throws a boulder; hold and release to punch the lane. |
 
 ### Abilities in full
 

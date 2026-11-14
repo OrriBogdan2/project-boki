@@ -51,7 +51,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
-| Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
+| Silhouette | the long scarf streaming behind, the brass ammo strap across a narrow black top, the gold coin on her choker and the six-barrel brass minigun for a right forearm |
 | Resource | Fever (max 1) |
 
 ### Kit card
@@ -61,12 +61,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts. |
-| Passive: Hot Streak | Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds. |
-| Dash: Slipstep | Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim. |
-| RMB: Burr Charge | Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall it blasts a cone back at you, hurting and Dazing everyone in it. Anything else is a miss. |
-| E: Longneedle | Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
-| Hunter ultimate: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
-| Weapon: Quill Rifle | Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 76% more (big gold numbers). |
+| Passive: Hot Streak | Knocking a hunter down returns Slipstep; landed abilities give lifesteal. |
+| Dash: Slipstep | Tap to skid, hold to slide further; keep shooting throughout. |
+| RMB: Burr Charge | Shoot a charge that Dazes; hitting a wall blasts a cone back. |
+| E: Longneedle | Stand still 0.6s, then fire a beam through walls and everything. |
+| Hunter ultimate: Cinderfall | A shell lands at your cursor after 1.6s, then burns the patch. |
+| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 90% more. |
 
 ### Abilities in full
 

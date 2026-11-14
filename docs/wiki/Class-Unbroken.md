@@ -71,18 +71,18 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
-| Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
-| Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
-| RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the levelled blade flashes to fling further. In the air: drive straight down and knock down everyone you land on. |
-| E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; look aside to swing out that way. |
-| Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
-| Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. Neither knocks foes back. |
+| Passive: Rage | Damage fills Rage: more damage, faster dashes. Knocks heal you. |
+| Dash: Rampage | Short dash attack with two charges; the tip hits twice as hard. |
+| RMB: Smash | Tap: heavy slam. Hold: charge and fling yourself forward. |
+| E: Warchain | Chain a foe or wall, press E again to haul yourself. |
+| Hunter ultimate: Gilded Riposte | Guard 0.65s taking nothing, then lunge into a healing cleave. |
+| Weapon: Greatsword | Wide slashes, harder at the tip; hold to throw a Searing Wave. |
 
 ### Abilities in full
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4.5m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
