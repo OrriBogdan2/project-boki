@@ -8,9 +8,12 @@ extends RefCounted
 const HEAVY := Oomph.HEAVY_FLINCH
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HITREACT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	var ac: RefCounted = load("res://tools/archetype_check.gd").new()
@@ -40,9 +43,12 @@ func run(main: Node) -> void:
 	var w_solid := Oomph.flinch_weight(solid)
 	var want := lerpf(light, 1.0, inverse_lerp(chip_k, HEAVY, chip))
 	var rises := w_chip < w_solid and w_solid < 1.0 and is_equal_approx(Oomph.flinch_weight(HEAVY), 1.0)
-	ok(is_equal_approx(w_chip, want) and rises,
-			"layer weight rises with strength: chip %.2f < solid %.2f < stagger 1.0" % [w_chip, w_solid])
+	ok(
+		is_equal_approx(w_chip, want) and rises,
+		"layer weight rises with strength: chip %.2f < solid %.2f < stagger 1.0" % [w_chip, w_solid]
+	)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Lands a hit of `d` and returns the flinch strength it set.
 func _hit(m: Match, target: Hunter, by: Hunter, d: float, o: Dictionary) -> float:

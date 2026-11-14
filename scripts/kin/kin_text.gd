@@ -139,10 +139,12 @@ static func color(ab: AbilitySpec) -> Color:
 			return KinRules.effects_color(st.effects)
 	return KinRules.cat_color("sustain" if not ab.stages.is_empty() and ab.stages[0].delivery.type == "wall" else "utility")
 
-## A HUD icon from the shape of the ability (Icons ids).
+## A HUD icon for the ability (Icons ids): its painted icon (art/icons/boki_<id>.png), else a glyph from its shape.
 static func icon(ab: AbilitySpec) -> String:
 	if ab == null or ab.stages.is_empty():
 		return "bond"
+	if Icons.art("boki_" + ab.id):
+		return "boki_" + ab.id
 	var st: StageSpec = ab.stages[0]
 	var types := ab.effect_types()
 	match st.delivery.type:
@@ -255,6 +257,12 @@ static func owner_bonus(bonus: Dictionary) -> String:
 		var vs := pct(v) if key in ["owner_armor", "owner_move_speed"] else n(v)
 		out.append(String(OWNER_POINTS.get(key, key + " %s")) % vs)
 	return ", ".join(out)
+
+## The Fusion's icon (Icons ids): the merge's painted icon (art/icons/merge_<id>.png), else the bond glyph.
+static func merge_icon(ms: MergeSpec) -> String:
+	if ms and Icons.art("merge_" + ms.id):
+		return "merge_" + ms.id
+	return "bond"
 
 ## A merge in a few lines: [what it gives, what its shots do, what it does over time].
 static func merge(ms: MergeSpec, giant := false) -> Array:

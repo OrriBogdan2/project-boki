@@ -8,10 +8,12 @@ extends RefCounted
 const TIERS := ["common", "rare", "very_rare"]
 const LEGENDARY := "legendary"
 
-static var _where := {}        # species -> [mode id, tier], built on first use
+static var _where := {}  # species -> [mode id, tier], built on first use
+
 
 static func modes() -> Dictionary:
 	return Content.rules("mode_boki")["modes"]
+
 
 ## `pool` (the species a spawn site draws from) cut down to `mode_id`'s species whose tier is open at `level`
 ## (the difficulty gate_doc counts). With the "live" flag off, `pool` comes back as it was.
@@ -21,18 +23,22 @@ static func offer(pool: Array, mode_id: String, level: int) -> Array:
 	var tiers: Dictionary = modes()[mode_id]["tiers"]
 	return pool.filter(func(sp): return mode_of(sp) == mode_id and level >= int(tiers[tier(sp)]["gate"]))
 
+
 ## One species of that offer, drawn with `r`.
 static func draw(pool: Array, mode_id: String, level: int, r: RandomNumberGenerator) -> String:
 	var fits := offer(pool, mode_id, level)
 	return String(fits[r.randi_range(0, fits.size() - 1)])
 
+
 ## The mode a species is found in, or "" when no mode lists it.
 static func mode_of(species: String) -> String:
 	return String(_index().get(species, ["", ""])[0])
 
+
 ## Its tier there: "common", "rare", "very_rare", "legendary", or "" when no mode lists it.
 static func tier(species: String) -> String:
 	return String(_index().get(species, ["", ""])[1])
+
 
 static func _index() -> Dictionary:
 	if not _where.is_empty():

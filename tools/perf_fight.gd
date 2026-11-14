@@ -7,29 +7,42 @@ extends RefCounted
 
 const ARCHS := ["ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "rimewright", "thief"]
 const CAMP := ["brute", "skitter", "spitter", "skitter", "bomber", "brute", "skitter", "spitter"]
-const SECS := 24.0          # s of the camp fight
-const WAVE := 6.0           # s between casting waves (every Hunter: E, then R)
-const R_AFTER := 0.6        # s from a wave's E to its R
-const SAMPLE := 4           # frames between particle counts (it walks the whole tree)
-const KIT_SECS := 4.0       # s a kit's E and R are watched for
-const RING := 5.0           # m from the camp's middle to the Hunters
+const SECS := 24.0  # s of the camp fight
+const WAVE := 6.0  # s between casting waves (every Hunter: E, then R)
+const R_AFTER := 0.6  # s from a wave's E to its R
+const SAMPLE := 4  # frames between particle counts (it walks the whole tree)
+const KIT_SECS := 4.0  # s a kit's E and R are watched for
+const RING := 5.0  # m from the camp's middle to the Hunters
 
-var bench                    # the PerfBench: frames are logged and summed by it
+var bench  # the PerfBench: frames are logged and summed by it
 var m: Match
 var peak := {"n": 0, "by": {}, "t": 0.0, "nodes": 0}
-var made := {}               # "Class:name" -> nodes that entered the tree after the warm-up
-var kits := {}               # arch -> {n: particles over the quiet floor at its peak, made: nodes made}
+var made := {}  # "Class:name" -> nodes that entered the tree after the warm-up
+var kits := {}  # arch -> {n: particles over the quiet floor at its peak, made: nodes made}
 var counting := false
+
 
 func _init(perf_bench) -> void:
 	bench = perf_bench
+
 
 ## The whole run; returns the camp fight's frames.
 func run() -> Array:
 	var main: Node = bench.main
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 3, "total": 9, "no_drop": true, "god": true, "autoplay": true,
-		"demo_kin": "cindle", "seed": 4101}, true)
+	o.merge(
+		{
+			"teams": 3,
+			"squad": 3,
+			"total": 9,
+			"no_drop": true,
+			"god": true,
+			"autoplay": true,
+			"demo_kin": "cindle",
+			"seed": 4101
+		},
+		true
+	)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -37,14 +50,17 @@ func run() -> Array:
 		await main.get_tree().process_frame
 	m = main.current
 	m.set_process(false)
-	main.get_tree().node_added.connect(func(n: Node):
-		if counting:
-			var k := "%s:%s<%s" % [n.get_class(), String(n.name).rstrip("0123456789@"), _owner_name(n)]
-			made[k] = int(made.get(k, 0)) + 1)
+	main.get_tree().node_added.connect(
+		func(n: Node):
+			if counting:
+				var k := "%s:%s<%s" % [n.get_class(), String(n.name).rstrip("0123456789@"), _owner_name(n)]
+				made[k] = int(made.get(k, 0)) + 1
+	)
 	await _each_kit()
 	var fl: Array = await _camp()
 	_report()
 	return fl
+
 
 ## Who made a node: the nearest ancestor with a name of its own (pooled and made nodes are mostly unnamed).
 static func _owner_name(n: Node) -> String:
@@ -52,6 +68,7 @@ static func _owner_name(n: Node) -> String:
 	while up != null and String(up.name).begins_with("@"):
 		up = up.get_parent()
 	return String(up.name).rstrip("0123456789@") if up != null else ""
+
 
 func _step(n: int) -> void:
 	for i in n:
@@ -61,8 +78,10 @@ func _step(n: int) -> void:
 		m._process(Match.DT)
 		await bench.main.get_tree().process_frame
 
+
 func _particles() -> Dictionary:
 	return ParticleCount.by_owner(bench.main.get_tree().root)
+
 
 ## Every Hunter's E and R alone in front of an idle dummy (it stays, a punching bag in the camp), the rest idle.
 func _each_kit() -> void:
@@ -88,8 +107,10 @@ func _each_kit() -> void:
 		counting = true
 		var top := 0
 		for f in int(KIT_SECS * 60.0):
-			if f == 0: P.ak.use_e()
-			if f == 60: P.ak.use_r()
+			if f == 0:
+				P.ak.use_e()
+			if f == 60:
+				P.ak.use_r()
 			await _step(1)
 			if f % SAMPLE == 0:
 				top = maxi(top, ParticleCount.total(_particles()) - floor_n)
@@ -98,12 +119,14 @@ func _each_kit() -> void:
 	for h in ctrl:
 		h.ctrl = ctrl[h]
 
+
 func _ready_kit(h: Hunter) -> void:
 	h.unlock_all()
 	h.lvl = 6
 	h.slot_lv["ult"] = 1
 	h.ak.cd["e"] = 0.0
 	h.ak.cd["r"] = 0.0
+
 
 ## Three trios round the camp's middle with a monster camp, Boki out, E and R in waves; returns the frames.
 func _camp() -> Array:
@@ -132,9 +155,12 @@ func _camp() -> Array:
 	while f < int(SECS * 60.0):
 		var wave_f := f % int(WAVE * 60.0)
 		for h in m.hunters:
-			if wave_f == 0: _ready_kit(h)
-			if wave_f == 0: h.ak.use_e()
-			if wave_f == int(R_AFTER * 60.0): h.ak.use_r()
+			if wave_f == 0:
+				_ready_kit(h)
+			if wave_f == 0:
+				h.ak.use_e()
+			if wave_f == int(R_AFTER * 60.0):
+				h.ak.use_r()
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
@@ -146,11 +172,13 @@ func _camp() -> Array:
 	counting = false
 	return fl
 
+
 func _sample(t: float) -> void:
 	var by := _particles()
 	var n: int = ParticleCount.total(by)
 	if n > int(peak["n"]):
 		peak = {"n": n, "by": by, "t": t, "nodes": _vfx_nodes()}
+
 
 ## The effect nodes drawing now: emitting emitters plus the shown meshes and labels of Fx and HeroVfx.
 func _vfx_nodes() -> int:
@@ -163,18 +191,29 @@ func _vfx_nodes() -> int:
 			n += 1 if c.get("emitting") else 0
 	return n
 
+
 static func _top(by: Dictionary, n: int) -> String:
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	return ", ".join(ks.slice(0, n).map(func(k): return "%s %d" % [k, by[k]]))
 
+
 func _report() -> void:
 	var ks := kits.keys()
 	ks.sort_custom(func(a, b): return kits[a]["n"] > kits[b]["n"])
 	for k in ks:
-		print("FIGHT kit %-11s E+R particles +%d, nodes made %d (%s)" % [k, kits[k]["n"], kits[k]["made"],
-			kits[k]["top"]])
-	print("FIGHT peak t=%.1f s: particles %d, vfx nodes %d; by owner: %s" % [peak["t"], peak["n"], peak["nodes"],
-		_top(peak["by"], 10)])
-	print("FIGHT nodes made in the camp fight %d: %s" % [made.values().reduce(func(a, b): return a + b, 0),
-		_top(made, 12)])
+		print(
+			"FIGHT kit %-11s E+R particles +%d, nodes made %d (%s)" % [k, kits[k]["n"], kits[k]["made"], kits[k]["top"]]
+		)
+	print(
+		(
+			"FIGHT peak t=%.1f s: particles %d, vfx nodes %d; by owner: %s"
+			% [peak["t"], peak["n"], peak["nodes"], _top(peak["by"], 10)]
+		)
+	)
+	print(
+		(
+			"FIGHT nodes made in the camp fight %d: %s"
+			% [made.values().reduce(func(a, b): return a + b, 0), _top(made, 12)]
+		)
+	)

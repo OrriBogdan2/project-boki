@@ -76,9 +76,9 @@ const T := {
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
 	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
 	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
-	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m"],
+	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
-	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner: little float-out, out_k 0.1"],
+	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -142,6 +142,8 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
+	"dive_feather_speed":      [">=", 8.0, "m/s", "0061: 1s drop under the lip, then glide: speed 0.5s on"],
+	"dive_feather_m":          [">=", 7.0, "m", "...and the ground it covers in the 1s after the open"],
 	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
 	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
@@ -219,6 +221,10 @@ func _clear_inp() -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
+func _clear_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
 ## A clean, standing hunter at p.
 func _reset(p: Vector3, grounded := true) -> void:
 	P.out = false; P.gone = false; P.downed = false
@@ -266,8 +272,7 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
+	_clear_mobs()
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -400,6 +405,7 @@ func _aim_rel() -> void:
 			P.wpn["fire_slow"] = 0.8
 		for dir in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(-1, 1).normalized()]:
 			_reset(flat - Vector3(dir.x, 0, dir.y) * 3.0)
+			_clear_mobs()                   # (mobs spawned in the match time so far would knock these rows)
 			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
 			_steps(20)                      # face the aim first
 			P.inp["move"] = dir
@@ -1033,9 +1039,10 @@ const KIT_DASH := {
 	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
 	"gunslinger": {"ground": [4.8, 0.45], "air": [4.7, 0.33], "hold": [7.0, 0.73], "long": [4.6, 0.2],
 				"src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
-	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
-	"archer": {"ground": [3.0, 0.386], "long": [5.0, 0.286],
-				"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
+	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7;
+	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
+	"archer": {"ground": [3.375, 0.386], "long": [5.0, 0.286],
+			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "long": [4.2, 0.21], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
@@ -1046,7 +1053,7 @@ const KIT_DASH := {
 	"dredge": {"ground": [2.72, 0.184], "air": [3.672, 0.184],
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
-	# owner playtest 11-11 (8f7f151981): the lane 7.5% longer, 6.02-10.48 m, speed 43 m/s, so 6.02 / 43 x1.15
+	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
 	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
@@ -1344,6 +1351,23 @@ func _feather() -> void:
 		m.step(DT); fr += 1
 		if P.gliding: break
 	rec("feather_toggle_frames", fr if closed else 9.0)
+	# going down and feathering up: glide out at island level, let go for 1s, then press the glider again
+	_reset(start, false)
+	P.last_gy = lip
+	P.air_t = 1.0
+	P.gliding = true
+	P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+	P.inp["glide_press_only"] = true
+	var open_x := 0.0
+	for i in 60 + 60:
+		P.inp["move"] = Vector2(-1, 0)
+		P.inp["jump"] = i == 60
+		P.inp["glide"] = i >= 60
+		m.step(DT)
+		if i == 60: open_x = P.pos.x
+		if i == 90: rec("dive_feather_speed", Vector2(P.vel.x, P.vel.z).length())
+	rec("dive_feather_m", absf(P.pos.x - open_x))
+	P.inp["glide_press_only"] = false
 
 # ---------------------------------------------------------------- the ledge rise and fling
 ## A straight wall two terraces (1.6m) high with level open ground in front: jump at it pushing in.
