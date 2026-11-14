@@ -137,8 +137,8 @@ EXPORT_BAD=$(grep -vc ' rc=0 ' "$OUT/export.txt")
 [ -x ~/bin/release-dryrun ] && EXPORT_BAD=$(grep -ciE 'fail|error' "$OUT/export.txt")
 N_NEW=$(echo "$NEW_RED" | grep -c .)
 VERDICT=GREEN
-N_RAN=$(wc -l < "$OUT/cand.txt")
-[ "$N_NEW" -gt 0 ] || [ "$EXPORT_BAD" -gt 0 ] || [ "$PE_C" -gt "$PE_M" ] || [ "$N_RAN" -eq 0 ] && VERDICT=RED
+N_RAN=$(wc -l < "$OUT/cand.txt") N_WANT=$(pick "$CT" | grep -c .)
+[ "$N_NEW" -gt 0 ] || [ "$EXPORT_BAD" -gt 0 ] || [ "$PE_C" -gt "$PE_M" ] || [ "$N_RAN" -ne "$N_WANT" ] && VERDICT=RED
 {
 	echo "GATE $VERDICT checks=$N_RAN new_red=$N_NEW fixed=$FIXED flaky=$FLAKY" \
 		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
