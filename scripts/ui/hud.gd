@@ -204,6 +204,7 @@ func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBox
 	return sb
 
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
@@ -628,9 +629,10 @@ func _draw_feed(sz: Vector2) -> void:
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
-	var s := 340.0 if riding else 196.0
+	var s := minf(340.0, sz.y * 0.44) if riding else 196.0      # (the big drop map leaves room under it for the squad)
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
+	SafeArea.note(r)
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
 	if riding:
@@ -964,6 +966,7 @@ func toast_small(text: String, col: Color) -> void:
 	msgs.push(text, col, MsgLane.LOW)
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## The key label under a slot (HudStyle.key_pill).
@@ -1196,8 +1199,10 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var kc: Color = Data.KIN[k.species]["color"]
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
-	var pc := o + Vector2(6, 6)
 	var rr := 20.0
+	var ring := Vector2(rr + 4.0, rr + 4.0)
+	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()      # (the corner of the portrait, kept on screen)
+	SafeArea.note(Rect2(pc - ring, ring * 2.0))
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
 	c.draw_arc(pc, rr + 1.5, -PI / 2, -PI / 2 + TAU * clampf(k.hp / k.max_hp, 0.0, 1.0), 40, kc, 3.0, true)
@@ -1224,7 +1229,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"fused": st = "merged"
 	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
+		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
 
@@ -1658,10 +1663,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
-		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)      # (under the message lane, like the killcam line)
+		var sw := TextCache.width(big, String(st["text"]), 24)
+		SafeArea.note_as("exit_status", Rect2(Vector2(sz.x * 0.5 - sw * 0.5, sy - 22.0), Vector2(sw, 42.0)))
+		_ctext(Vector2(sz.x * 0.5, sy), String(st["text"]), 24, st["col"], big)
+		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sy + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 		if st.has("hint"):
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.2 + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
+			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
