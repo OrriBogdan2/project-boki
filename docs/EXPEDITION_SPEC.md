@@ -154,6 +154,16 @@ risk, theft/chase). Borrow:
 Recommendation: **adapt.** Use the basecamp idea for our extraction
 points; keep our kin-centric stakes.
 
+### Boss lairs: one exit, two prizes
+
+All three lairs of a map are live every match (`spawn_points.boss` pick 3 of 3 on Skyreach and the
+Hollow Crown). The match seed makes one of them the **Sealed Lair**: the only lair that leads out of the
+match (open 2:00 to 5:30, the winning squad leaves by its updraft). The other two are **prize lairs**: the
+boss kill pays kill XP (260) to the last hit's squad and its mates within 30 m, plus the boss's pile,
+Rare Egg and three perk orbs (the boss's buff), and nobody leaves the match by them. So the camps spec's
+mid-game XP is the two prize lairs; the Sealed Lair's XP is a by-product of leaving. `--lair-lock-check`
+asserts one exit and two prize lairs on both maps.
+
 ---
 
 ## 9. Map scale (roughest estimates)

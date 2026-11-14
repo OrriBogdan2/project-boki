@@ -185,8 +185,8 @@ func _tint_dormant(L: Dictionary, dormant: bool) -> void:
 	(L["nodes"]["dial"] as Node3D).get_node("Ring").visible = not dormant
 
 ## SpawnPlan decides which lairs are live this match: every lair is a "boss" candidate; the rolled ones
-## get their boss, guards and wards (see activate), the others stay dormant. Skyreach rolls 2 or 3 of its
-## 3 lairs (the layout's spawn_points.boss), generated maps 1 or 2 of theirs.
+## get their boss, guards and wards (see activate), the others stay dormant. Skyreach and the Hollow Crown
+## wake all 3 (the layout's spawn_points.boss: one Sealed Lair, two prize lairs), generated maps 1 or 2.
 func plug_into(plan: SpawnPlan) -> void:
 	if list.is_empty() or plan == null:
 		return
@@ -630,6 +630,8 @@ func reset_boss(b: Boss) -> void:
 	b.phase = 0
 	b.enraged = false
 	b.awake_t = 0.0
+	b.invul_t = 0.0      # (a reset during a phase roar must not carry its armour into the next fight)
+	b.empty_t = 0.0      # (nor the empty-lair clock: woken from outside again, it would sleep at once)
 	b.tgt = null
 	b.st = "idle"
 	b.stag_open = 0.0

@@ -102,8 +102,10 @@ func run(main: Node) -> void:
 	_spot(P, spot + Vector3(-5, 0, 0))
 	_spot(C, spot + Vector3(0, 0, 5))
 	_kill(spot, [[Q, 9.0], [P, 1.0]])
-	ok(is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want) and Q.xp == 0.0 and Q2.xp == 0.0,
-		"the squad that lands the last hit takes the XP, the squad that did 90% gets none")
+	ok(
+		is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want) and Q.xp == 0.0 and Q2.xp == 0.0,
+		"the squad that lands the last hit takes the XP, the squad that did 90% gets none"
+	)
 	# ---- 3. a lair boss: A deals 95%, B last-hits
 	for L in m.lairs.list:
 		m.lairs.activate(L)
@@ -131,16 +133,21 @@ func run(main: Node) -> void:
 	b.stagger_t = 0.0
 	b.hurt(b.hp * 0.95, Q, {"src": "shot"})
 	b.stagger_t = 0.0
-	ok(float(b.damage_by.get(Q.team, 0.0)) > b.max_hp * 0.9 and not b.dead,
-		"squad A has dealt over 90% of the boss and it still stands")
-	_zero_xp()      # (nothing steps between here and the kill)
+	ok(
+		float(b.damage_by.get(Q.team, 0.0)) > b.max_hp * 0.9 and not b.dead,
+		"squad A has dealt over 90% of the boss and it still stands"
+	)
+	_zero_xp()  # (nothing steps between here and the kill)
 	b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
 	ok(b.dead, "squad B's last hit kills it")
-	ok(is_equal_approx(P.xp, KillXp.BOSS_XP) and is_equal_approx(C.xp, KillXp.BOSS_XP),
-		"squad B gets the boss's %d XP (%.2f, %.2f)" % [int(KillXp.BOSS_XP), P.xp, C.xp])
-	ok(Q.xp == 0.0 and Q2.xp == 0.0,
-		"squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [Q.xp, Q2.xp])
-	ok(int(P.stats.get("bosses", 0)) == 1 and int(Q.stats.get("bosses", 0)) == 0,
-		"the boss kill itself is credited to B, not A")
+	ok(
+		is_equal_approx(P.xp, KillXp.BOSS_XP) and is_equal_approx(C.xp, KillXp.BOSS_XP),
+		"squad B gets the boss's %d XP (%.2f, %.2f)" % [int(KillXp.BOSS_XP), P.xp, C.xp]
+	)
+	ok(Q.xp == 0.0 and Q2.xp == 0.0, "squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [Q.xp, Q2.xp])
+	ok(
+		int(P.stats.get("bosses", 0)) == 1 and int(Q.stats.get("bosses", 0)) == 0,
+		"the boss kill itself is credited to B, not A"
+	)
 	print("XPSHARE done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
