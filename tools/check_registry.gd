@@ -397,6 +397,8 @@ const CHECKS := {
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
 	"--motley-reel": ["res://tools/motley_reel.gd", "motley_reel", null],      # owner review: E, Trade, ledge
 	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
+	"--cel-leftovers-shots": ["res://tools/cel_leftovers_shots.gd", "cel_leftovers_shots", null],
+	"--ring-shots": ["res://tools/ring_shots.gd", "ring_shots", null],      # Fx.ring bursts and team markers
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--menu-focus-check": ["res://tools/menu_focus_check.gd", "menu_focus_check", null],   # hover stays in panel
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
