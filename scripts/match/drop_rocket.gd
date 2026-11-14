@@ -39,6 +39,7 @@ var yaw := 0.0                 # the launch heading: the skydive camera sits beh
 var riders: Array = []         # Hunters aboard
 var safe := Vector3.INF        # where it flies with no keys held: a bot leader's spot, or an island off the abyss
 var node: Node3D
+var snd := RocketSfx.new()     # its ignition, thrust, jump-out and landing sounds
 var done := false
 
 static func launch(match_node: Match, l: Hunter) -> DropRocket:
@@ -60,6 +61,7 @@ static func launch(match_node: Match, l: Hunter) -> DropRocket:
 	r.node = _model(col)
 	match_node.add_child(r.node)
 	r._place_node()
+	r.snd.start(r)
 	r._trail(col)
 	return r
 
@@ -81,11 +83,14 @@ func tick(dt: float) -> void:
 			if not is_instance_valid(h):
 				continue
 			_unseat(h)
+			if h.dropping and not h.out:
+				snd.jump_out(self, h)
 			if h.remote and not h.out and h.dropping:
 				m.fx.puff(exit_at())
 			elif h.remote and not h.out:
 				landed = true
 	if riders.is_empty():
+		snd.ended(self)
 		if landed:
 			m.fx.settle(Vector3(pos.x, m.world.ground_at(pos.x, pos.z), pos.z))
 		_end()
@@ -106,6 +111,7 @@ func tick(dt: float) -> void:
 	for h in riders:
 		if not h.remote:
 			h.vel = vel
+	snd.tick(self, dt)
 	_place_node()
 
 func _fly(dt: float) -> void:
@@ -181,8 +187,7 @@ func detach(h: Hunter, dive := true) -> bool:
 	h.vel = vel
 	if not dive:
 		h.vel.y = Hunter.DEPLOY_POP
-	if h == m.player:
-		m.sfx("whoosh", null, -4.0, 1.2)
+	snd.jump_out(self, h)
 	return true
 
 ## Where a jump-out's puff shows: beside the body, right of the launch heading (the skydive view's right).
@@ -193,7 +198,7 @@ func exit_at() -> Vector3:
 ## on open ground.
 func _impact(at: Vector3) -> void:
 	m.fx.settle(at)
-	m.sfx("land", at, 0.0, 0.6)
+	snd.land(self, at)
 	var taken: Array = []
 	for h in riders:
 		_unseat(h)

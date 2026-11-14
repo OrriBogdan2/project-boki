@@ -99,7 +99,7 @@ static func _verb(id: String) -> String:
 	return String(it.get("verb", rules()["verbs"][it["use"]]))
 
 ## Takes one from the bag and applies it (a sweet with its pick): the result of apply() plus look
-## (the body colour changed) and id (GardenItemFx plays the give from it).
+## (the body colour changed) and id (the item: its cue, and GardenItemFx plays the give from it).
 static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
@@ -203,7 +203,7 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 ## deltas (apply()'s) for GardenItemFx.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
-	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
+	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "sweet", "aura"]
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "", "id": id,
 			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw, "deltas": pv["deltas"]}
 
