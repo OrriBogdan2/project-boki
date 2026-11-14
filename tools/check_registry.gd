@@ -106,6 +106,7 @@ const CHECKS := {
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
 	"--glide-bank-check": ["res://tools/glide_bank_check.gd", "glide_bank_check", null],
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
+	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor

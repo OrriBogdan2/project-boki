@@ -665,7 +665,7 @@ func _tick_dive(dt: float) -> void:
 	if h.gliding:
 		# the glider wins: opening it ends the smash (no landing hit) and he glides on, never dragged down
 		dive = {}
-		h.vel.y = maxf(h.vel.y, -Hunter.GLIDE_SINK)       # a normal glide from here, none of the smash's speed
+		h.vel.y = maxf(h.vel.y, -HunterMove.glide_sink)       # a normal glide from here, none of the smash's speed
 		AimKit.hide(h, "e_land")
 		play("")
 		return

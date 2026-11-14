@@ -104,7 +104,8 @@ const T := {
 	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
 	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
-	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
+	"glide_sink":              ["~", [1.38, 1.42], "m/s", "hunter_move.json glide_sink (ours: no footage to count)"],
+	"glide_overheat_s":        ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
 	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
@@ -265,7 +266,8 @@ func _flat_spot(r: float) -> Vector3:
 			return Vector3(floor(g.x) + 0.5, g.y, floor(g.z) + 0.5)
 	return w.random_ground()
 
-func run(main: Node) -> void:
+## A quiet match with one local hunter (P), everything unlocked, and the flat spot found.
+func _begin(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	m = Match.new()
@@ -284,6 +286,9 @@ func run(main: Node) -> void:
 	P.unlock_all()
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
+
+func run(main: Node) -> void:
+	_begin(main)
 	_ground()
 	_face_turn()
 	_jump()
@@ -310,6 +315,7 @@ func run(main: Node) -> void:
 	_standing_dash()          # late: it swaps the kit and model the framing rows measure
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
+	_overheat()         # after every timed row: its ~9 s of level glide would move them
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
@@ -618,7 +624,7 @@ func _glide() -> void:
 	_steps(60)
 	P.inp["jump"] = true
 	var tc := -1.0
-	var sink: float = Hunter.GLIDE_SINK
+	var sink: float = HunterMove.glide_sink
 	for i in 90:
 		P.inp["glide"] = true
 		m.step(DT)
@@ -696,7 +702,7 @@ func _glide_high() -> void:
 			if peak > _hv(P).length():
 				break
 	rec("glide_high_sink", sink)
-	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - Hunter.GLIDE_SINK))
+	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - HunterMove.glide_sink))
 
 # ---------------------------------------------------------------- glide dive
 ## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
@@ -803,6 +809,21 @@ func _swoop(h0: float, at: int, frames: int, hot: bool) -> Array:
 	return [(peak - base) / maxf(0.01, shed), gone, left]
 
 # ---------------------------------------------------------------- dash into glide
+## A level glide (its height pinned so it never lands) from a full glider to overheat, per unit of glide_cap.
+func _overheat() -> void:
+	_glide_at(25.0)
+	var y: float = P.pos.y
+	P.inp["jump"] = true
+	var t := 0.0
+	for i in 60 * 30:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2.ZERO
+		m.step(DT)
+		P.pos.y = y
+		if P.gliding: t += DT
+		if P.gliding and P.glide_fuel <= 0.001: break
+	rec("glide_overheat_s", t / float(P.cdat.get("glide_cap", 1.0)))
+
 func _dash_glide() -> void:
 	var kit_was := P.arch
 	P.set_arch("")      # the class dash: core physics (each kit's own air dash is its combo check's job)

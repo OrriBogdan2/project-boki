@@ -117,7 +117,7 @@ func _stun() -> void:
 	m.step(Match.DT)
 	ok(not h.gliding, "a stun shuts the glider at once")
 	_steps(0.2)
-	ok(h.vel.y < -2.0 * Hunter.GLIDE_SINK, "...and the body falls (%.1f m/s)" % h.vel.y)
+	ok(h.vel.y < -2.0 * HunterMove.glide_sink, "...and the body falls (%.1f m/s)" % h.vel.y)
 	ok(not _press_opens(0.1), "...a press during the stun doesn't open it")
 	_wait_stun()
 	ok(_press_opens(Match.DT), "...a press opens it the step the stun is over")

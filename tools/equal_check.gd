@@ -167,7 +167,7 @@ func _equal_base() -> void:
 	await _drop(m3)
 
 func GLIDE_BASE(P: Hunter) -> float:
-	return Hunter.GLIDE_TIME * float(P.cdat.get("glide_cap", 1.0))
+	return HunterMove.glide_heat_s * float(P.cdat.get("glide_cap", 1.0))
 
 func _belt_ids(P: Hunter) -> Array:
 	return P.belt.map(func(s): return String(s.get("id", "")))

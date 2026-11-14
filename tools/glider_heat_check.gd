@@ -1,8 +1,9 @@
 extends "res://tools/abyss_check.gd"
 ## --glider-heat-check (item 63): the glide input opens the glider at ANY heat (full, nearly spent, overheated, right
 ## after an overheated one closed), an overheated glider lifts at half strength out of the abyss, the climb
-## from deep down stays under the softened cap, and each hit kind spikes a gliding dummy or not (decision
-## 0022). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## from deep down stays under the softened cap, a level glide sinks at HunterMove.glide_sink and
+## overheats HunterMove.glide_heat_s after it opens, and each hit kind spikes a gliding dummy or not
+## (decision 0022). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 ## Fastest climb and time to the lip when the glider opens `dp` m under the lip with `fuel` heat left.
 func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
@@ -28,6 +29,25 @@ func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
 			break
 	h.inp["glide"] = false
 	return [peak, t_up]
+
+## A level glide 6 m over the rim (under glide_height, above the lip: no lift): [its sink in m/s after 2 s,
+## s from the open to overheat]. The height is pinned so it never lands before the heat runs out.
+func _level_glide(e: Dictionary) -> Array:
+	var y: float = float(e["top"]) + 6.0
+	_reset(Vector3(e["at"].x, y, e["at"].z), Vector3(0, -HunterMove.glide_sink, 0))
+	h.last_gy = e["top"]
+	h.air_t = 1.0
+	h.gliding = true
+	var sink := 0.0
+	var t := 0.0
+	while t < 30.0 and h.glide_fuel > 0.001:
+		h.inp["glide"] = true
+		m.step(Match.DT)
+		t += Match.DT
+		if absf(t - 2.0) < Match.DT * 0.5: sink = -h.vel.y
+		h.pos.y = y
+	h.inp["glide"] = false
+	return [sink, t]
 
 ## Presses glide (a fresh press) in the air at the given heat/cooldown; true if the glider opens within 0.4s.
 func _opens(e: Dictionary, fuel: float, cd: float, btn: bool) -> bool:
@@ -113,6 +133,12 @@ func run(main: Node) -> void:
 	var cap_txt := "the climb from deep down stays under the new cap (%.1f m/s <= %.1f)" % [deep_peak, 26.0 * 0.7]
 	ok(deep_peak <= 26.0 * 0.7 + 0.3, cap_txt)
 	ok(deep_peak >= 12.0, "...and is still a real lift (%.1f m/s)" % deep_peak)
+	var level: Array = _level_glide(e)
+	var heat_s: float = HunterMove.glide_heat_s * float(h.cdat.get("glide_cap", 1.0))
+	var sink_txt := "a level glide sinks at %.2f m/s (hunter_move.json glide_sink %.2f)"
+	ok(absf(float(level[0]) - HunterMove.glide_sink) < 0.02, sink_txt % [level[0], HunterMove.glide_sink])
+	var heat_txt := "a level glide overheats %.2f s after it opens (glide_heat_s x glide_cap %.2f)"
+	ok(absf(float(level[1]) - heat_s) <= Match.DT * 2.0, heat_txt % [level[1], heat_s])
 	_spike_kinds()
 	_burn_hint(e)
 	m.queue_free()

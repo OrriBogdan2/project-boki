@@ -329,7 +329,8 @@ func _glide_wins() -> void:
 		low = minf(low, P.pos.y)
 	ok(
 		"glide wins: a glide press in the air smash ends it and he glides at the normal sink",
-		diving and K.dive.is_empty() and P.gliding and K.quakes == q0 and low >= z0 - Hunter.GLIDE_SINK * 0.3 - 0.35,
+		diving and K.dive.is_empty() and P.gliding and K.quakes == q0
+			and low >= z0 - HunterMove.glide_sink * 0.3 - 0.35,
 		"fell %.2f m in 0.3 s" % (z0 - low)
 	)
 	P.inp["glide"] = false
