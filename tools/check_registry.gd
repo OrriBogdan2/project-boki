@@ -531,6 +531,7 @@ const CHECKS := {
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-climb-check": ["res://tools/farm_climb_check.gd", "farm_climb_check", null],      # farm ridges climb
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
+	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],      # item 27, 28, 31 of PLAYTEST-1108
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],  # the Dash, GARDEN.md 9.4
 	"--relay-cup-check": ["res://tools/relay_cup_check.gd", "relay_cup_check", null],  # GARDEN_MODERN 4.2
 	"--shove-check": ["res://tools/shove_check.gd", "shove_check", null],  # the Stump Shove, GARDEN.md 5.2
