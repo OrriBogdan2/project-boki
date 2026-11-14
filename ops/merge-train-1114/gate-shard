@@ -93,7 +93,7 @@ collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag
 		for f in ${flags[$id]//,/ }; do echo "${side[$id]} $f lost 0 0"; done; left=${left/ $id / }
 	done
 	while [ -n "${left// /}" ] && [ $(( $(date +%s) - t1 )) -lt "$MAX_WAIT" ]; do
-		sleep 30
+		sleep "${GS_POLL:-30}"
 		while read -r line; do  # `jobq result ID` for every id still open (`jobq wait` prints nothing until all are done, `status` only lists the latest)
 			id=${line%% *}; [ -n "${side[$id]:-}" ] && [[ $left == *" $id "* ]] || continue
 			log=$(grep -oP 'log=\K\S+' <<< "$line"); got=$(grep '^GS ' "$log" 2>/dev/null)
@@ -187,6 +187,29 @@ fi
 # lost on both sides after 3 tries: this check cannot run on the workers at all (main says nothing either); listed as UNRUN
 UNRUN=$(comm -12 <(lost "$OUT/cand.txt") <(lost "$OUT/main.txt") | grep .)
 NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")); lost "$OUT/cand.txt"; } | sort -u | comm -23 - <(echo "$UNRUN") | grep .)
+# 6. confirm: a candidate red that survived the re-run runs GS_CONFIRM (2) more times on both sides, same host, 1 at a time,
+#    2x cap. It stays NEW-RED only if the candidate fails every time and main passes at least once (122 of 485 checks were
+#    flaky on one gate, so "red twice" alone named 4 checks that pass locally).
+CONFIRM=$(comm -23 <(echo "$NEW_RED") <(lost "$OUT/cand.txt") | grep .)
+if [ -n "$CONFIRM" ] && [ "${GS_CONFIRM:-2}" -gt 0 ]; then
+	echo "$CONFIRM" | comm -12 - <(pick "$MT") > "$OUT/confirm.txt"
+	N4=$(wc -l < "$OUT/jobs.tsv"); slots > "$OUT/slots4.txt"; export SLOTS_FILE=$OUT/slots4.txt
+	for i in $(seq "${GS_CONFIRM:-2}"); do
+		SHARDS=999 PAR=1 CAP=$((CAP * 2)) submit c "$CT" < "$OUT/confirm.txt"
+		SHARDS=999 PAR=1 CAP=$((CAP * 2)) submit m "$MT" < "$OUT/confirm.txt"
+		tail -1 "$OUT/slots4.txt" > "$OUT/slots4.rot"; head -n -1 "$OUT/slots4.txt" >> "$OUT/slots4.rot"; mv "$OUT/slots4.rot" "$OUT/slots4.txt"
+	done
+	unset SLOTS_FILE
+	tail -n +"$((N4 + 1))" "$OUT/jobs.tsv" > "$OUT/jobs4.tsv"
+	collect "$OUT/jobs4.tsv" > "$OUT/round4.txt"
+	# not confirmed = a candidate run passed (flake), or main really ran it every time and never passed (broken on main too);
+	# main never running it (lost) keeps it NEW-RED
+	NOT_CONFIRMED=$(awk '{ ok = ($3 == "0" && $4 == 0) } $1 == "c" && ok { cg[$2] = 1 } $1 == "m" && $3 != "lost" { mran[$2] = 1 }
+		$1 == "m" && ok { mg[$2] = 1 } END { for (f in cg) print f; for (f in mran) if (!(f in mg)) print f }' "$OUT/round4.txt" \
+		| sort -u | comm -12 - "$OUT/confirm.txt")
+	NEW_RED=$(comm -23 <(echo "$NEW_RED") <(echo "$NOT_CONFIRMED" | grep .) | grep .)
+	[ -n "$NOT_CONFIRMED" ] && echo "$NOT_CONFIRMED" > "$OUT/not_confirmed.txt"
+fi
 FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | comm -23 - <(echo "$UNRUN") | grep -c .)
 FIXED=$(comm -13 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")) | comm -12 - <(pick "$CT") | grep -c .)
 
@@ -202,6 +225,7 @@ N_RAN=$(wc -l < "$OUT/cand.txt") N_WANT=$(pick "$CT" | grep -c .)
 		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
 		"(cand ${CSHA:0:10} vs main ${MSHA:0:10}; jobs $SUBMITTED, main cached $CACHED)"
 	[ "$N_NEW" -gt 0 ] && echo "NEW-RED: $(echo $NEW_RED)"
+	[ -s "$OUT/not_confirmed.txt" ] && echo "Red twice but not confirmed (passed in a confirm run, or main failed every confirm run): $(echo $(cat "$OUT/not_confirmed.txt"))"
 	[ -n "$UNRUN" ] && echo "UNRUN (lost on main and candidate): $(echo $UNRUN)"
 	echo "Export:"; sed 's/^/  /' "$OUT/export.txt"
 } > "$OUT/summary.txt"

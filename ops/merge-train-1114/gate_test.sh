@@ -36,7 +36,10 @@ submit)
 			candlost:c:--d-check) rc=127;;     # the candidate never gets d run
 			newred:c:--e-check) rc=1;;
 			flaky:c:--e-check) [ \$k = 1 ] && rc=1;;
-			unrun:*:--c-check) rc=127;;        # nobody can run c: listed, not a new red
+			unrun:*:--c-check) rc=127;;
+			twice:c:--e-check) [ \$k -le 2 ] && rc=1;;   # red in round 1 and the re-run, passes in a confirm run
+			bothbad:m:--e-check) [ \$k -ge 2 ] && rc=1;;  # green on main once, then main fails too: broken on main
+			bothbad:c:--e-check) rc=1;;        # nobody can run c: listed, not a new red
 		esac
 		echo "GS \$f \$rc 0 1" >> \$R/\$id
 	done
@@ -48,7 +51,7 @@ chmod +x $T/bin/*
 check() {  # check SCEN WANT(GREEN|RED) [NEWRED]
 	rm -f $T/cnt_* $T/submits; rm -rf $T/out $T/cache
 	(cd $T/main && git checkout -q -- . && git clean -fdq); (cd $T/cand && git checkout -q -- . && git clean -fdq)
-	SCEN=$1 PATH=$T/bin:$PATH GS_CACHE=$T/cache GS_SHARDS=2 GS_MAX_WAIT=5 timeout 300 bash "$HERE/gate-shard" $T/main $T/cand $T/out > /dev/null 2>&1
+	SCEN=$1 PATH=$T/bin:$PATH GS_CACHE=$T/cache GS_SHARDS=2 GS_MAX_WAIT=5 GS_POLL=1 timeout 300 bash "$HERE/gate-shard" $T/main $T/cand $T/out > /dev/null 2>&1
 	got=$(head -1 $T/out/summary.txt | awk '{print $2}'); nr=$(grep -o 'NEW-RED: .*' $T/out/summary.txt)
 	if [ "$got" = "$2" ] && [[ "$nr" == *"${3:-}"* ]]; then echo "PASS $1 -> $got $nr"; else echo "FAIL $1 -> $got (want $2 ${3:-}) $(head -1 $T/out/summary.txt)"; fails=$((fails+1)); fi
 }
@@ -60,4 +63,6 @@ check newred RED --e-check
 check flaky GREEN
 check unrun GREEN
 grep -q 'unrun=1' $T/out/summary.txt || { echo 'FAIL unrun count'; fails=$((fails+1)); }
+check twice GREEN
+check bothbad GREEN
 exit $fails
