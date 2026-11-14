@@ -339,6 +339,7 @@ func _draw_world_labels() -> void:
 	if m.fx: LabelClash.claim_numbers(m.fx, cam)      # (damage numbers stay on top: no tag draws over one)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
+	WaysOutPins.draw(self)             # the seats out and the Blight's edge, from afar
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -480,7 +481,7 @@ func _draw_bubbles() -> void:
 		if not is_instance_valid(b["ent"]):
 			continue
 		var k: Kin = b["ent"]
-		if k.dead:
+		if k.dead or not BokiChatter.heard(m, k):
 			continue
 		var at := k.bubble_at()
 		if cam.is_position_behind(at):
@@ -1350,75 +1351,7 @@ func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
 	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
 	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
 
-## Seconds a wisp has left at the normal bleed rate.
-func _bleed_left(h: Hunter) -> float:
-	return h.down_hp / (Data.MATCH["down_hp"] / Life.R["bleed_out"])
-
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
-
-## Your squad, stacked under the minimap: portrait, name, armor over segmented health, status icons.
-## A knocked teammate's row is outlined, with a KNOCKED tag and arrow (MateAlerts) and their bleed-out
-## timer, pulsing only while they're stomped; a dead one is greyed with an X, a DEAD tag and the time left
-## to bring them back from their deathbox; one who got out wears a check mark.
-func _draw_squad(sz: Vector2, p: Hunter) -> void:
-	var y := mm_bottom + 10.0
-	var w := 210.0
-	for h in m.hunters:
-		if h == p or h.team != p.team:
-			continue
-		var st := _mate_state(h)
-		var lbl := String(st[0])
-		var r := Rect2(Vector2(16, y), Vector2(w, 60))
-		var down := lbl == "WISP"
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.7 if down else 0.35), 2 if down else 1)
-		var pr := Rect2(r.position + Vector2(6, 6), Vector2(48, 48))
-		var pst := ""
-		match lbl:
-			"WISP": pst = "down"
-			"DEATHBOX", "DEAD": pst = "dead"
-			"EXTRACTED": pst = "out"
-		_draw_portrait(pr, h, pst, SideColor.of(m, h))
-		mates.draw_row(self, r, pr, h, lbl)
-		var tx := pr.end.x + 8.0
-		var tw := r.end.x - 8.0 - tx
-		_text(Vector2(tx, r.position.y + 19), h.pname.substr(0, 13), 14, INK if lbl == "ALIVE" else Color(INK, 0.7), big)
-		if m.skydrop and (h.riding or h.dropping):
-			# on the way in: who leads the drop, who follows, who's gone solo
-			if m.skydrop.is_lead(h):
-				_text(Vector2(tx + big.get_string_size(h.pname.substr(0, 13), HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 6, r.position.y + 18), "LEAD", 10, GOLD, big)
-		# how far, on the right of the name row
-		var at: Vector3 = st[2]
-		if at != Vector3.INF and lbl != "DEAD":
-			var dist_txt := "%dm" % int(round(Vector2(at.x - p.pos.x, at.z - p.pos.z).length()))
-			_text(Vector2(r.end.x - 8 - body.get_string_size(dist_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, r.position.y + 18), dist_txt, 11, MUTED, body)
-		match lbl:
-			"ALIVE":
-				var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
-				if h.max_armor > 0.5:
-					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
-				if _has_status(h):
-					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
-			"WISP":
-				var left := _bleed_left(h)
-				var stp: bool = h.get_meta("stomped", false)
-				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], Color("ff2a1a").lerp(Color.WHITE, 0.5 * pulse) if stp else Color("ff6a4a"))
-				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "%ds left") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
-				if h.revive > 0.0:
-					_arc(Vector2(r.end.x - 16, r.position.y + 46), 8, h.revive, GOOD, 3.0)
-			"DEATHBOX":
-				_text(Vector2(tx, r.position.y + 42), "Deathbox  %s" % String(st[3]), 12, Color("ffb0a0"))
-			"EXTRACTED":
-				_text(Vector2(tx, r.position.y + 42), "EXTRACTED", 13, Color("8fe3c8"), big)
-			_:
-				_text(Vector2(tx, r.position.y + 42), "ELIMINATED", 13, MUTED, big)
-		y += 66
-	_draw_squad_markers(sz, p)
-
-func _has_status(e: Ent) -> bool:
-	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
-		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -2541,7 +2474,7 @@ func _ground_ring(at: Vector3, r: float, col: Color, width: float, frac := 1.0, 
 
 func _draw_wisp_rings() -> void:
 	var p: Hunter = m.player
-	DownedMarks.draw(c, m)
+	DownedMarks.draw(c, m, self)
 	BokiMarks.draw(c, m)
 	# you, standing on an enemy wisp
 	if p and not p.out and p.has_meta("standing_on") and m.time - float(p.get_meta("standing_at", -9.0)) < 0.15:

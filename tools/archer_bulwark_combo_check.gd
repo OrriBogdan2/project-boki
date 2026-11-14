@@ -6,6 +6,9 @@ extends "res://tools/archetype_check.gd"
 const LACE_CANCEL_ROWS := preload("res://tools/lace_cancel_rows_check.gd")
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
 
+## degrees of hue a glow in Albert's swing crescent or Shield Slam fan may sit off his ivory (Arch.color): Kael's
+## orange is 24 off, his crimson 44
+const IVORY_HUE := 10.0
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -367,6 +370,7 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
+	_impact_looks(float(K.rmb_def()["pin"]["stun"]))
 	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(
@@ -429,7 +433,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
@@ -716,6 +720,9 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	# (her Shift, 12.5% longer since 11-11, can carry her past the rock by now: stand clear west of it first)
+	P.teleport(Vector3(bx - 1.0, home.y, home.z))
+	step(m, 0.05)
 	P.teleport(Vector3(bx + 0.5, home.y, home.z))
 	P.vel = Vector3.ZERO
 	P.inp["move"] = Vector2.ZERO
@@ -932,6 +939,38 @@ func _archer_combos() -> void:
 	)
 	await done(m)
 
+## The Heavy Shot's hit burst grows with its charge, the wall pin's is larger, both have a white core, and
+## neither leaves a ring on the ground (a flash only, not an explosion); the stunned foe wears a mark over its head
+## for the whole stun.
+func _impact_looks(stun_s: float) -> void:
+	var mv: Dictionary = HeroVfx.data("archer")["moves"]
+	var hit := _flare_reach(mv["heavy_hit"], 1.0)
+	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var pin := _flare_reach(mv["heavy_pin"], 1.0)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.2 * tap)
+	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > 1.3 * hit)
+	for move: String in ["heavy_hit", "heavy_pin"]:
+		var core := false
+		var ground := false
+		for layer: Dictionary in mv[move]["fx"]:
+			core = core or (layer["p"] == "flare" and layer["c"] == "white" and layer["c2"] == "white")
+			ground = ground or layer["p"] in ["ring", "vortex", "scorch", "skirt"]
+		ok("pin look: %s has a white-core flare and no ground ring" % move, core and not ground)
+	var stun_fx: Array = mv["heavy_stun"]["fx"]
+	var mark: Dictionary = stun_fx[1]
+	ok(
+		"pin look: the stun mark rides over the head for the whole stun",
+		mark["p"] == "star" and float(mark["y"]) >= 1.8 and float(mark["life"]) >= stun_s
+	)
+
+## The widest flare layer of a recipe at charge k (m across).
+func _flare_reach(rec: Dictionary, k: float) -> float:
+	var widest := 0.0
+	for layer: Dictionary in rec["fx"]:
+		if layer["p"] == "flare":
+			widest = maxf(widest, float(layer["size"]) * (1.0 + float(layer.get("size_k", 0.0)) * k))
+	return widest
+
 ## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 func _spin(lvl: int) -> float:
 	var r := setup("bulwark", 2.2)
@@ -959,6 +998,22 @@ func _growth() -> void:
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## The glows (sweep, ribbon, flare) of one of Albert's moves that leave his ivory: a sweep's body must be his
+## signature colour itself (Arch.color), and every tone a glow names within IVORY_HUE degrees of its hue.
+func _off_ivory(move: String) -> Array:
+	var d := HeroVfx.data("bulwark")
+	var sig := Arch.color("bulwark")
+	var off: Array = []
+	for l: Dictionary in d["moves"][move]["fx"]:
+		if l["p"] == "sweep" and not Color(String(d["palette"][l.get("c", "main")])).is_equal_approx(sig):
+			off.append("sweep body " + String(l.get("c", "main")))
+		for key in ["c", "c2", "c3"]:
+			if l["p"] in ["sweep", "ribbon", "flare"] and l.has(key):
+				var tone := Color(String(d["palette"][l[key]]))
+				if absf(wrapf(tone.h - sig.h, -0.5, 0.5)) * 360.0 > IVORY_HUE:
+					off.append("%s %s %s" % [l["p"], key, l[key]])
+	return off
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)
@@ -1050,6 +1105,9 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
+	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
+		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
 	step(m, 5.0)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
@@ -1138,6 +1196,11 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("swing", 0)) == 1
 		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
 		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
+	ok("bjorn vfx: the swing's crescent and trail are his ivory, not Kael's orange", _off_ivory("swing").is_empty(),
+		str(_off_ivory("swing")))
+	var whirl_col: Color = (K.fx.orbit_trail.material_override as ShaderMaterial).get_shader_parameter("color")
+	ok("bjorn vfx: the held swing's whirl trail is his ivory too", whirl_col.is_equal_approx(Arch.color("bulwark")),
+		whirl_col.to_html(false))
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -1382,6 +1445,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
 		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange", _off_ivory("slam").is_empty(),
+		str(_off_ivory("slam")))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

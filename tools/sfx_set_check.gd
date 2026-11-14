@@ -12,7 +12,7 @@ extends RefCounted
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
-##   8. dash_air per Hunter and the no-charge tick
+##   8. dash_air per Hunter (listed in dash.json and picked in the air) and the no-charge tick
 ##   9. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
@@ -23,6 +23,12 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
+##  13. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
+##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
+##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -31,6 +37,7 @@ const REACH_MIN := 5.0         # m: below this a sound would not carry past its 
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
 
 var bad := 0
 var levels := {}
@@ -58,6 +65,9 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_boss_moves()
+	_cc_cues()
+	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -241,6 +251,72 @@ func _nuke_fall() -> void:
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
+## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
+func _cc_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nvar player: Node\nvar time := 0.0\n"
+	stub.reload()
+	var m: Node = stub.new()
+	var me := _cc_body(m, 0, Vector3.ZERO)
+	var mate := _cc_body(m, 0, Vector3(6, 0, 0))
+	var far_mate := _cc_body(m, 0, Vector3(20, 0, 0))
+	var rival := _cc_body(m, 1, Vector3(3, 0, 0))
+	m.set("player", me)
+	Sfx.listener = me.pos
+	for kind: String in CcSfx.KINDS:
+		var own := "cc_" + kind
+		var quiet := own + "_mate"
+		var gap := _rms(own) - (_rms(quiet) + CcSfx.MATE_DB)
+		m.set("time", float(m.get("time")) + 1.0)
+		var heard := []
+		for h in [me, mate, rival, far_mate]:
+			heard.append(_cc_heard(h, kind))
+		var want := [[own], [quiet], [], []]
+		var who := "cc %s: you hear %s, a squadmate 6 m off %s (%.1f dB under), " % [kind, own, quiet, gap]
+		ok(heard == want and gap >= 6.0, who + "a rival and a squadmate 20 m off nothing (%s)" % [heard])
+	m.set("time", float(m.get("time")) + 1.0)
+	var first := _cc_heard(me, "stun")
+	m.set("time", float(m.get("time")) + 0.1)
+	var stacked := _cc_heard(me, "root")
+	m.set("time", float(m.get("time")) + CcSfx.CAP_S)
+	var later := _cc_heard(me, "slow")
+	ok(first.size() == 1 and stacked.is_empty() and later.size() == 1, "stacked CC plays once: a root 0.1 s after "
+			+ "a stun is silent, a slow %.1f s later plays (%s %s %s)" % [CcSfx.CAP_S, first, stacked, later])
+	var all := {"stun": 1.0, "root": 1.0, "slow": 1.0}
+	var pick := CcSfx.fresh_on_hit(me, all)
+	var nudge := CcSfx.fresh_on_hit(me, {"slow": 0.2})
+	me.stun_t = 1.0
+	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
+	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
+			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
+	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
+	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
+			"Ent.hurt and KitStatus.apply play the cues where the status lands")
+	for h in [me, mate, far_mate, rival]:
+		h.free()
+	m.free()
+
+func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
+	var h := Hunter.new()
+	h.m = m
+	h.team = team
+	h.pos = at
+	return h
+
+## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
+func _cc_heard(h: Hunter, kind: String) -> Array:
+	for k in Sfx.last_played.keys():
+		if String(k).begins_with("cc_"):
+			Sfx.last_played.erase(k)
+			Sfx.recent.erase(k)
+	CcSfx.play(h, kind)
+	return Sfx.last_played.keys().filter(func(k): return String(k).begins_with("cc_"))
+
+func _rms(sname: String) -> float:
+	var takes := _takes(sname)
+	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
+
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()
@@ -249,8 +325,12 @@ func _fallback() -> void:
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
 
-## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+## 7. Every Hunter's dash has an air variant listed in dash.json that HeroSfx picks with no floor under it, and the
+## no-charge tick exists.
 func _dash_air() -> void:
+	var listed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/dash.json"))["sounds"]
+	var unlisted := Arch.ids().filter(func(a): return not listed.has("%s_dash_air" % a))
+	ok(unlisted.is_empty(), "every roster Hunter has a <arch>_dash_air in dash.json (missing: %s)" % [unlisted])
 	var h := Hunter.new()
 	var picked := {}
 	for arch in Arch.ids():
@@ -260,8 +340,8 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
+	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash on the ground: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash"]
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
@@ -377,6 +457,31 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+
+## 12. The inventory cues.
+func _inv_cues() -> void:
+	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
+			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}
+	var silent := cues.keys().filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "inventory cues: %d sounds exist (silent: %s)" % [cues.size(), silent])
+	var mute := cues.keys().filter(func(n): return not _plays(n, cues[n]))
+	ok(mute.is_empty(), "inventory cues: each plays its own sound (not: %s)" % [mute])
+	var cats: Dictionary = levels["cats"]
+	var cue_db := float(cats["ui"]) + InvSfx.CUE_DB
+	var fight_db := minf(float(cats["fire"]), float(cats["impact"]))
+	ok(cue_db <= fight_db - INV_UNDER_DB, "inventory cues: %.0f dB, under a hit or shot (%.0f dB)" % [cue_db, fight_db])
+	var wiring := {"scripts/ui/loadout_panel.gd": ["drop()", "equip()"], "scripts/ui/slot_drag.gd": ["grab()"],
+			"scripts/match/loot_full.gd": ["swap()"], "scripts/match/life.gd": ["swap()", "take()"]}
+	var missing := []
+	for f in wiring:
+		var src := FileAccess.get_file_as_string("res://" + f)
+		for cue in wiring[f]:
+			if not src.contains("InvSfx." + cue):
+				missing.append("%s InvSfx.%s" % [f.get_file(), cue])
+	ok(missing.is_empty(), "inventory cues: the inventory and loot code plays them (missing %s)" % [missing])
+	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
+	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
+	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -523,3 +628,20 @@ func _heard(sname: String, act: Callable) -> float:
 	if not Sfx.last_played.has(sname):
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
+
+## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+func _boss_moves() -> void:
+	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
+	var missing := []
+	for kind in BossAnim.ATTACKS:
+		var cues := ["wake", "phase", "stagger", "fall", "defeat"]
+		for atk in BossAnim.ATTACKS[kind]:
+			cues += [atk + "_wind", atk + "_hit"]
+			if atk in ["boulders", "lob"]:
+				cues.append(atk + "_land")
+		for c in cues:
+			if not boss.has("boss_%s_%s" % [kind, c]):
+				missing.append("%s %s" % [kind, c])
+	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
+	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
+	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")

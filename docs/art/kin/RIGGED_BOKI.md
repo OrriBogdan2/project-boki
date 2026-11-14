@@ -31,6 +31,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, swim, paddle, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
@@ -53,6 +54,17 @@ BokiFly's metas: `aloft` picks hover (standing) or glide (moving, horizontal spe
 starts the flare, which comes before whatever it landed for; `lift` (m up) keeps a ground shadow, made the first
 time a flier lifts, on the ground under it. Strip: `--boki-fly-shots` (docs/shots/boki-fly/fly.png).
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
+asserts every rigged species has all fourteen, with the five game clips timed to those beats and no T-pose frame.
+Look at them with `--boki-home-shots`.
+
+Water: the root meta `kwater` is the water over its feet this frame (m; `BokiWade` sets it every step in a pond,
+the rig takes it, so a Boki lifted out or taken by a game is dry at once). Deeper than `SWIM_LINE` (half) of its
+height, the rig lifts the model off the bed to float with half its height under and plays `swim` (a Water type,
+`BokiRig.swimmer`: body level, legs tucked back, a wave down the tail, fins sculling) or `paddle` (the rest: nose and
+head up, front legs or wings stroking in turn, hind legs kicking); both bob with each stroke. One that hovers stays
+over the surface. A pond's deep middle is `swim_depth` (1 m, wade.json) deep under a rigged Boki. A glb clip of the
+same name wins over the built one. `--boki-rig-check` has the 1 m and puddle rows, `--wade-check` a Zapple paddling
+across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
@@ -104,11 +116,21 @@ attack clip: copy the measured time into `CONTACT`.
 `--boki-anim-audit` drives every rigged Boki through the live `BokiRig` hand-off (clip and rate from its speed) at
 1.5 (a stroll), 2.4 (a home wander), 4.4 m/s (a home fetch) and its own match speed (`kin_speed`), at scale 0.8, 1
 and 1.25. Per gait it measures the planted feet's slide as a share of the move speed and the steps per second,
-then the loop seams (the wrap's bone jump over the clip's median frame-to-frame jump: 1 is seamless, past 2 it
-hitches) and the idle-to-walk pop (the biggest bone jump while the rig hands idle over to walk, over the biggest in
-the steady walk after it: 1 is smooth). It fails a slide over 25%, except the gaits in its `OVER` ratchet (each
-gait's ceiling; they only come down, `docs/DEBT.md`). Flyers, serpents and blobs are exempt: the check asserts they
-are exactly the Boki whose feet do not sweep.
+then the loop seams (the sharpest change in any bone's step across the wrap, over the sharpest inside the clip: at
+most 1 the loop point is no rougher than the clip itself) and the idle-to-walk pop (the biggest bone jump while the
+rig hands idle over to walk, over the biggest in the steady walk after it: 1 is smooth). It fails a slide over 25%,
+except the gaits in its `OVER` ratchet (each gait's ceiling; they only come down, `docs/DEBT.md`), a seam over 1.0,
+except the clips in `SEAM_OVER`, and a pop over 3.0. Flyers, serpents and blobs are exempt from the slide: the check
+asserts they are exactly the Boki whose feet do not sweep.
+
+Clips start at 0 s. Until 11-13 every glb keyed them from Blender's frame 1, so Godot held each clip's first pose
+for 1/30 s and every loop stopped a frame at its wrap (and ran a frame long). `boki_rig.export` sets
+`export_anim_slide_to_zero`, and `tools/art1/glb_clip_start.py` slid the glbs already in `art/kin` without a
+rebake (only the key times change; `--check` lists any glb that still starts late). That took most seams from
+1.1-1.9 to under 1.0. What is left over 1.0 is a real break: a bone turns or changes speed at the loop point
+(on the 11-14 merge with main's planted-paw and scan glbs: gloamshell walk 2.0, cairnback walk 1.6, the
+three glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
+burrlet and kindlewren walk 1.0-1.15; `SEAM_OVER`, `docs/DEBT.md`).
 
 A seam counts the wrap's jump, so a quick beat that runs up to the loop's end reads as a hitch: wisplet's idle wing
 shuffle now settles by 0.94 of the clip, and kindlewren's walk loop starts at the bottom of a landing's crouch

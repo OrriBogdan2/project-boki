@@ -187,6 +187,7 @@ var wall_n := Vector2.ZERO
 var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed into (HunterMove.along_wall)
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
+var abyss_sfx := AbyssSfx.new()        # whoosh, catch, strain and fall-out cues (everyone's, from synced state)
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
@@ -959,7 +960,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	if not any:
 		return
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
-	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 const DASH_BUFFER := 0.18
@@ -1435,7 +1435,8 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
 		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
 		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
-	m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
+	if not o.get("own_look", false):      # a kit drawing its own swing (Gil's thrusts are no arc)
+		m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
 	Oomph.on_fire(self, true)
 	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
 
@@ -1624,7 +1625,7 @@ func slot_info(slot: String) -> Dictionary:
 			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
 			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
 			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
-			out.merge({"name": "Fusion", "short": "Fusion", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+			out.merge({"name": "Fusion", "short": "Fusion", "icon": KinText.merge_icon(u), "col": f["glow"], "desc": txt, "form": f, "bond": ult,
 				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": maxf(KinParts.MERGE_SPENT_TIME, MergeRelease.rest_s()) if kin != null and kin.resting() else KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
 				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out
@@ -1647,7 +1648,6 @@ func use_kin_ability(slot: String) -> void:
 			var kc := KinText.color(k.runner.def_of(slot))
 			if k.flat_dist(self) > 2.5 and k.state != "shoulder":
 				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(kc, 0.8))
-			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
 		_ab_feedback(slot, "deny")
 
@@ -1740,13 +1740,13 @@ func heal(n: float) -> void:
 		return
 	if remote:
 		m.net_event(["heal", nid, n])
+		m.fx.healed(self, minf(n, max_hp - hp))     # its own game heals it; the heal shows here now
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+	m.fx.healed(self, hp - before)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -1787,6 +1787,7 @@ func sim(dt: float) -> void:
 		return
 	Hex.tick(self, dt)
 	prev = pos
+	abyss_sfx.tick(self, dt)
 	if out or extracted:
 		if not merge_st.is_empty():
 			KinMerge.end(self, "broken")      # (eliminated or extracted mid-merge: the form goes with you)
@@ -2383,7 +2384,6 @@ func _interrupt_consume() -> void:
 	drink_t = 0.0
 	kit_t = 0.0
 	BoxRevive.cancel(self)
-	m.fx.word(pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
 
@@ -3107,7 +3107,7 @@ func render(delta: float, alpha: float) -> void:
 	if LOCAL_RENDER_LEAD and is_local() and freeze_t <= 0.0 and not remote:
 		position = render_pos(alpha)
 	StepSmooth.ease(self, delta)
-	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
+	visible = (not out or HunterWisp.out_visible(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
 			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
@@ -3216,6 +3216,7 @@ func render(delta: float, alpha: float) -> void:
 	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
+	BodyTell.tick(self, delta)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
@@ -3225,5 +3226,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.ring(pos + Vector3(0, 0.05, 0), 1.05, Color(1.0, 0.33, 0.22, 0.85), 0.24)
 			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
