@@ -259,6 +259,8 @@ func _tile(ak: String) -> PanelContainer:
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 8, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var stack := UI.vbox(6)
+	card.add_child(stack)
 	var row := UI.hbox(10)
 	card.add_child(row)
 	card.mouse_entered.connect(_show_howto.bind(ak))
