@@ -5,9 +5,9 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it and melts when it runs out.
-## Each ability's emitter on the swapped
-## models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
+## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it
+## and melts when it runs out. Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
+## And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
 ## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
 ## The drop rocket's looks (DropRocket): its trail, the puff where a Hunter jumps out and the dust where it lands.
