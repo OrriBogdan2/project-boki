@@ -17,7 +17,9 @@ cheeky rubbery pop. Her voice is a young woman's, bright and brash.
   mage_rod_hit               Storm Rod striking a foe
   vv_orb                     a charge orb appearing or bursting
   vv_sky_place/_count/_strike  Skycall: placed, counting down, the strike
-  vv_ult_rise/_hum/_slam     Kitefall: launch, hanging in the air, the strike down
+  vv_ult_charge/_rise/_hum/_crack/_slam
+                             Kitefall by beat: the crouch gathering, the lift-off, the hover (a loop, stops on the
+                             drop), the bolt leaving the sky as she drops, the landing boom
   mage_step_<surface>        light boots, bangles, a static tick (3 takes each)
   mage_hurt/down/death       wordless voice
 
@@ -250,13 +252,27 @@ def ult_rise():
     return mix(soft(kickoff, 1), air, lift, crackle(d, 150, fall=0.3) * 0.7)
 
 
+def ult_charge():
+    """The crouch: static gathering round her, a buzz climbing in pitch with sparks crowding in (0.3 s)."""
+    d = 0.3; n = N(d); u = np.arange(n) / n
+    rise = sat(bpf(S.sweep(90, 420, d, 'saw', 1.4), 90, 3000), 1.5) * env(n, 0.02, 0.12) * 0.5
+    return mix(soft(rise, 3), crackle(d, 160, cluster=0.8) * 0.8 * u, swoosh(d, 600, 2600, 2.5, 0.8, 1.0) * 0.3)
+
+
 def ult_hum():
-    """Hanging in the storm: an electric hum that swells and fades, sparks flickering round it."""
-    d = 2.2; n = N(d); t = T(d)
+    """Hanging in the storm: a steady electric hum with sparks flickering round it. A loop (save_loop)."""
+    d = 1.6; t = T(d)
     h1 = buzz(d, 110, 0.05, 2400) * 0.4 + buzz(d, 165.5, 0.05, 2400) * 0.2
-    shim = S.sweep(1200, 1500, d) * (0.5 + 0.5 * np.sin(2 * np.pi * 3.3 * t)) * 0.06
-    shape = np.minimum(1, t / 0.25) * np.exp(-np.maximum(0, t - 1.5) / 0.3)
-    return (h1 + shim + crackle(d, 50) * 0.5) * shape
+    shim = S.sweep(1200, 1500, d) * (0.5 + 0.5 * np.sin(2 * np.pi * 3.125 * t)) * 0.06      # 5 whole cycles
+    return h1 + shim + crackle(d, 50) * 0.5
+
+
+def ult_crack():
+    """The drop: a hard crack as the bolt leaves the sky, a tearing streak falling with her (0.25 s)."""
+    d = 0.25
+    crk = mix(click(0.004, 2500, 9500) * 2.0, crack(d, 1200, 7500, 0.01) * 2.2)
+    streak = sat(bpf(S.sweep(5200, 500, d, 'saw', 0.6), 300, 6500) * 1.4, 1.6) * env(N(d), 0.001, 0.1) * 0.7
+    return soft(mix(crk, streak, crackle(d, 200, fall=0.15) * 0.6), 1)
 
 
 def ult_slam():
@@ -342,8 +358,10 @@ def build():
     S.save_cat('vv_sky_place', sky_place(), 'cast')
     S.save_cat('vv_sky_count', sky_count(), 'cast')
     S.takes_cat('vv_sky_strike', sky_strike, 2, 'impact')
+    S.save_cat('vv_ult_charge', ult_charge(), 'cast')
     S.save_cat('vv_ult_rise', ult_rise(), 'cast')
-    S.save_cat('vv_ult_hum', ult_hum(), 'loop')
+    S.save_loop('vv_ult_hum', ult_hum(), 'loop')
+    S.save_cat('vv_ult_crack', ult_crack(), 'impact')
     S.save_cat('vv_ult_slam', ult_slam(), 'impact')
     for surf in ('grass', 'stone', 'wood', 'snow'):
         S.takes_cat('mage_step_' + surf, lambda i, s=surf: footstep(s, i), 3, 'step')

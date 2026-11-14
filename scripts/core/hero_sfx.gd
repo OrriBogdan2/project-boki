@@ -2,7 +2,8 @@ class_name HeroSfx
 extends RefCounted
 ## A Hunter's own version of a shared sound: "<arch>_<kind>" (gunslinger_dash, archer_hurt,
 ## bulwark_step_wood) when its sound branch made one, else the shared fallback. Kinds the game asks
-## for: dash, dash_air, hurt, down, death and step_<surface> (grass, stone, wood, snow). Answers are cached per
+## for: dash, dash_air, hurt, down, death and step_<surface> (grass, stone, wood, snow; water and
+## metal fall back to StepSurface's steps per weight class). Answers are cached per
 ## name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
 
 static var _has := {}          # sound name -> whether audio/ has it
@@ -15,6 +16,14 @@ static func of(h: Hunter, kind: String, fallback: String) -> String:
 	if not _has.has(own):
 		_has[own] = Sfx.ensure(own)
 	return own if _has[own] else fallback
+
+## The tick of `h`'s left-click weapon landing (its "hit" in content/weapons/<id>.json: hit_gun, hit_bow,
+## hit_blade, hit_blunt, hit_magic or hit_thrown), else the shared `hit`. An ability's hit keeps the shared one.
+static func hit_tick(h: Hunter, o: Dictionary) -> String:
+	if h == null:
+		return "hit"
+	var lmb: bool = o.get("src", "") == "shot" or o.get("ab", "") in ["primary", "lmb"]
+	return String(h.wpn.get("hit", "hit")) if lmb else "hit"
 
 ## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
 ## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.

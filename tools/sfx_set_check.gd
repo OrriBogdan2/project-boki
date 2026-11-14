@@ -38,6 +38,16 @@ extends RefCounted
 ##  18. held fire (docs/AUDIO.md): every weapon under FireSfx.HELD_RATE, and Neve's dart, fired every HELD_STEP_MS for
 ##      HELD_S seconds through FireSfx keeps at most FireSfx.VOICES voices sounding, opens on its base take and goes
 ##      round three or more others without repeating one
+##  19. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
+##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
+##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
+##  20. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
+##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
+##  21. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+##  22. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
+##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
+##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
 ## Reads the files (and, for 15 and 16, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -60,6 +70,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
 	levels = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
 	ok(levels is Dictionary and (levels.get("cats", {}) as Dictionary).size() >= 8, "the loudness table loads")
 	var sets := 0
@@ -84,6 +96,10 @@ func run(main: Node) -> void:
 	await _encore_loop(main)
 	_rarity_stings()
 	await _held_fire(main)
+	_hit_ticks()
+	_hostile()
+	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	await _steps(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -332,6 +348,49 @@ func _cc_heard(h: Hunter, kind: String) -> Array:
 func _rms(sname: String) -> float:
 	var takes := _takes(sname)
 	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
+## 20. A rival's cast is heard as a threat; yours and your allies' are not.
+func _hostile() -> void:
+	var reach: float = Sfx.sound_reach.get(HostileCue.NAME, 0.0)
+	var near_30 := reach >= 25.0 and reach <= 35.0
+	ok(Sfx.ensure(HostileCue.NAME) and near_30, "the rival-cast layer exists, reach %.0f m" % reach)
+	var h := Hunter.new()
+	var once := []
+	for arch in Arch.ids():
+		var k := ArchKit.new()
+		k.d = Arch.def(arch)
+		h.ak = k
+		var r_slots := ["ult_fuse", "ult"] if k.fuse_time() > 0.0 else ["ult"]
+		var r_n := r_slots.filter(func(s): return HostileCue.starts_threat(h, s)).size()
+		var others := ["secondary", "dodge", "primary", "ultimate"]
+		var quiet := others.all(func(s): return not HostileCue.starts_threat(h, s))
+		if HostileCue.starts_threat(h, "kin") and (k.r_def().is_empty() or r_n == 1) and quiet:
+			once.append(arch)
+	h.ak = null
+	ok(once.size() == Arch.ids().size(),
+			"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once])
+	var you := Hunter.new()
+	you.team = 1
+	Sfx.listener = Vector3.ZERO
+	var heard := func(team: int, at: Vector3) -> bool:
+		var before := int(Sfx.last_played.get(HostileCue.NAME, -1))
+		h.team = team
+		h.pos = at
+		HostileCue.play(you, h)
+		return int(Sfx.last_played.get(HostileCue.NAME, -1)) != before
+	var ally: bool = heard.call(1, Vector3(5, 0, 0))
+	var far: bool = heard.call(2, Vector3(40, 0, 0))
+	var rival: bool = heard.call(2, Vector3(5, 0, 0))
+	ok(rival and not ally, "a rival's cast at 5 m plays the layer, an ally's does not (%s, %s)" % [rival, ally])
+	ok(not far, "a rival's cast at 40 m does not")
+	h.free()
+	you.free()
+	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var cue_src := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var used := hunter_src.contains("HostileCue.on_used(self, slot)")
+	var x := cue_src.contains("HostileCue.play(m.player, h)")
+	var net := match_src.contains("\"hcast\": HostileCue.net_in")
+	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -823,3 +882,97 @@ func _hold(main: Node, sname: String, held: bool) -> Dictionary:
 		peak = maxi(peak, live)
 		await main.get_tree().process_frame
 	return {"peak": peak, "takes": takes, "shots": shots}
+## 19. One hit tick per weapon family; each Hunter's weapon names one; ability hits keep the shared tick.
+func _hit_ticks() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/hit.json"))
+	var family: Array = (set_d["sounds"] as Dictionary).keys()
+	ok(family.size() == 6, "hit ticks: six families (%s)" % [family])
+	var used := {}
+	var unmapped := []
+	var h := Hunter.new()
+	for arch in Arch.ids():
+		var w := Data.weapon_stats(Arch.signature(arch))
+		var tick := String(w.get("hit", ""))
+		used[tick] = true
+		if not family.has(tick):
+			unmapped.append("%s (%s)" % [arch, tick])
+	ok(unmapped.is_empty(), "hit ticks: every Hunter's weapon names one of them (%s)" % [unmapped])
+	var idle := family.filter(func(f): return not used.has(f))
+	ok(idle.is_empty(), "hit ticks: every family is some Hunter's weapon (unused %s)" % [idle])
+	h.wpn = Data.weapon_stats("longbow")
+	var shot := HeroSfx.hit_tick(h, {"src": "shot"})
+	var swing := HeroSfx.hit_tick(h, {"src": "abil", "ab": "primary"})
+	var cast := HeroSfx.hit_tick(h, {"src": "abil", "ab": "e"})
+	var picks := [shot, swing, cast]
+	ok(picks == ["hit_bow", "hit_bow", "hit"], "hit ticks: shot, primary, ability %s" % [picks])
+	h.wpn = Data.weapon_stats("rifle")
+	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
+	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
+	h.free()
+## 22. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
+const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
+
+func _steps(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	ok(m.world.layout_id == "hollowcrown", "step check runs on the Hollow Crown (%s)" % m.world.layout_id)
+	var spots := _surface_tiles(m)
+	ok(m.world.bridge.is_empty(), "the Hollow Crown has no plank bridges (its docks are gone)")
+	ok(m.skytrain != null, "the Hollow Crown has a sky train")
+	if m.skytrain != null:
+		var car: Transform3D = m.skytrain.cur[1]
+		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
+		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
+		spots["metal"] = deck
+	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
+	for surf in ["grass", "stone", "snow", "metal", "wood"]:
+		if surf == "wood":      # last: lays a plank tile on the grass one
+			m.world.bridge[m.world.idx(int(plank.x), int(plank.z))] = true
+			ok(StepSurface.at(m, plank) == "wood", "a plank bridge tile is wood")
+			spots["wood"] = plank
+		if spots.has(surf):
+			_step_on(m, m.player, surf, spots[surf])
+		else:
+			ok(false, "the Hollow Crown has %s to step on" % surf)
+	for cls in WEIGHT_ARCH:
+		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
+		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
+	m.queue_free()
+
+## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
+## shared steps get quieter to heavier, and the sound has its takes loaded.
+func _step_on(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
+	var arch0 := h.arch
+	var vols := []
+	for cls in WEIGHT_ARCH:
+		h.arch = WEIGHT_ARCH[cls]
+		h.teleport(p)
+		var want := "step_%s_%s" % [surf, cls] if surf in StepSurface.SHARED else "%s_step_%s" % [h.arch, surf]
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.listener = p
+		Juice.footstep(h)
+		var got: Array = Sfx.last_played.keys()
+		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
+		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
+	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
+	ok(spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
+			"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols])
+	h.arch = arch0
+
+## A walkable ground tile centre per ground surface (grass, stone, snow).
+func _surface_tiles(m: Match) -> Dictionary:
+	var w: World = m.world
+	var out := {}
+	for z in w.h:
+		for x in w.w:
+			if w.kind[w.idx(x, z)] != World.T_GROUND:
+				continue
+			var p := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
+			var surf := StepSurface.at(m, p)
+			if not out.has(surf):
+				out[surf] = p
+	return out

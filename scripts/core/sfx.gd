@@ -140,7 +140,13 @@ const VOICES := [
 	"step_grass",
 	"step_stone",
 	"step_snow",
-	"step_wood"
+	"step_wood",
+	"step_water_light",
+	"step_water_medium",
+	"step_water_heavy",
+	"step_metal_light",
+	"step_metal_medium",
+	"step_metal_heavy"
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
@@ -154,6 +160,7 @@ const MIN_GAP := {
 	"break_clay": 40,
 	"break_metal": 40,
 	"fuse_hiss": 80,
+	"hostile_cast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
