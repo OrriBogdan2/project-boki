@@ -7,9 +7,9 @@
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
-	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 76% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
+	"clip": {"lines": {"dash": "Tap to skid, hold to slide; you keep firing through both.", "lmb": "Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.", "rmb": "Launcher shot: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.", "e": "Stand still 0.6s, then a beam fires through walls; its recoil shoves you back.", "x": "Mark a zone at the cursor: a shell lands there 1.6s later and burns.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}, "holds": ["lmb"]},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
-	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"fantasy": "The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"howto": ["Play: mid-range rifle; slide with {dash} while shooting.", "Combo: {secondary} past a foe to shove them back, then shoot.", "Avoid: standing still, except to charge {signature}."],
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
 	"card": {
@@ -33,7 +33,7 @@
 		"vamp": 0.06,
 		"wait": 3.5,
 		"rattle_k": 0.76,
-		"col": "#ff9a5c"
+		"col": "#d8ff7a"
 	},
 	"passive": {
 		"name": "Hot Streak",
@@ -44,8 +44,8 @@
 		"rank3_speed": 0.25,
 		"rank3_speed_t": 2.0,
 		"name": "Slipstep",
-		"icon": "dash",
-		"col": "#ffc89a",
+		"icon": "gunslinger_dash",
+		"col": "#e6ffb0",
 		"cd": 8.5,
 		"tap_t": 0.18,
 		"roll": 4.8,
@@ -61,8 +61,8 @@
 		"delivery": "projectile",
 		"name": "Burr Charge",
 		"short": "Burr",
-		"icon": "skypierce",
-		"col": "#ffb36a",
+		"icon": "gunslinger_rmb",
+		"col": "#c8f560",
 		"cooldown": 6.5,
 		"charges": 1,
 		"burr": {
@@ -94,8 +94,8 @@
 		"delivery": "burst",
 		"name": "Longneedle",
 		"short": "Needle",
-		"icon": "haymaker",
-		"col": "#ffe0a0",
+		"icon": "gunslinger_e",
+		"col": "#eaffa8",
 		"cooldown": 11.5,
 		"charge": 0.6,
 		"turn_deg_s": 90.0,
@@ -108,22 +108,21 @@
 		"rattle_k": 0.2,
 		"shave": 0.2,
 		"shave_rank3": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
 			"ctrl_cap": "soft",
 			"guard": "add"
 		},
-		"linger": 0.75,
 		"recoil": 6.0
 	},
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Cinderfall",
 		"short": "Fall",
-		"icon": "earthshatter",
-		"col": "#ff7a3c",
+		"icon": "gunslinger_x",
+		"col": "#b8f03c",
 		"cooldown": 42.0,
 		"range": 14.0,
 		"radius": 3.4,
@@ -133,10 +132,10 @@
 		"dmg": 24.0,
 		"zone_t": 3.0,
 		"tick": 0.5,
-		"tick_dmg": 3.0,
+		"tick_dmg": 3.5,
 		"slow": 0.3,
 		"slow_t": 0.6,
-		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
+		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
 	},
 	"order": [
 		"sec",
@@ -157,6 +156,6 @@
 	"tells": {
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
-		"dash_spent": "an ember afterimage and faint skid streaks"
+		"dash_spent": "green-fire streaks and a kick of dust"
 	}
 }

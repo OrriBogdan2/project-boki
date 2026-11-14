@@ -25,6 +25,12 @@ const TYPES := {
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
 	"ghost": {"name": "Ghost", "col": Color("bcebdf"), "ink": Color("5a4aa8")},
 	"dark": {"name": "Dark", "col": Color("4a4a9a"), "ink": Color("ffb454")},
+	# the Boki 50 types (colours as their Work elements)
+	"stone": {"name": "Stone", "col": Color("a8b0c4")},
+	"ember": {"name": "Ember", "col": Color("ff7a3a")},
+	"frost": {"name": "Frost", "col": Color("a6eeff"), "ink": Color("2a5a7a")},
+	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
+	"storm": {"name": "Storm", "col": Color("5f7fb8")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -417,6 +423,27 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
 			ci.draw_colored_polygon(lid, ink)
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
+		"stone":       # a boulder
+			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.85, 0.6), P.call(-0.7, -0.1), P.call(-0.25, -0.6),
+				P.call(0.35, -0.55), P.call(0.8, -0.05), P.call(0.9, 0.6)]), ink)
+		"ember":       # a two-tongued flame
+			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, 0.85), P.call(-0.6, 0.35), P.call(-0.45, -0.3),
+				P.call(-0.15, 0.0), P.call(0.0, -0.9), P.call(0.3, -0.2), P.call(0.5, -0.45), P.call(0.6, 0.35)]), ink)
+		"frost":       # a snowflake
+			for k in 3:
+				var a := PI * k / 3.0
+				ci.draw_line(P.call(cos(a) * 0.9, sin(a) * 0.9), P.call(-cos(a) * 0.9, -sin(a) * 0.9), ink, w, true)
+		"bloom":       # a five-petal flower
+			for k in 5:
+				var a := TAU * k / 5.0 - PI / 2.0
+				ci.draw_circle(P.call(cos(a) * 0.5, sin(a) * 0.5), s * 0.32, ink)
+			ci.draw_circle(c, s * 0.24, Color(col.darkened(0.15), alpha))
+		"storm":       # a cloud with rain
+			for b in [[-0.4, 0.0, 0.36], [0.05, -0.25, 0.48], [0.45, 0.05, 0.34]]:
+				ci.draw_circle(P.call(b[0], b[1]), s * b[2], ink)
+			ci.draw_rect(Rect2(P.call(-0.4, -0.05), Vector2(0.85, 0.42) * s), ink)
+			for x in [-0.25, 0.25]:
+				ci.draw_line(P.call(x, 0.55), P.call(x - 0.12, 0.9), ink, w, true)
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 

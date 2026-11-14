@@ -150,9 +150,8 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
-	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
@@ -160,7 +159,6 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
 	if why == "broken":
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
@@ -202,7 +200,6 @@ static func tick_stomps(m: Match, dt: float) -> void:
 			# a foot comes down
 			h.stomp["hits"] = int(h.stomp["hits"]) + 1
 			m.fx.dust(h.pos, 10)
-			m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, Color(1, 0.8, 0.7, 0.6), 0.25)
 			m.sfx("thump", h.pos, -2.0, 0.85)
 			if near:
 				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
@@ -355,6 +352,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.
 static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> void:
+	var swapped := false      # something of yours went into the box in its place (the swap cue)
 	match String(it["key"]):
 		"gems":
 			h.gems += int(b["gems"]); b["gems"] = 0
@@ -402,6 +400,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				h.refresh_gear()
 				if not old.is_empty():
 					(b["gear"] as Array).append(old)
+					swapped = true
 		"pack":
 			# into your backpack; a full one swaps out its least valuable thing (that goes in the box)
 			var pi := int(it["i"])
@@ -416,9 +415,15 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					(b["pack"] as Array).append(h.pack[li])
 					h.pack.remove_at(li)
 					h.pack.append(pit)
+					swapped = true
 				elif h == m.player and m.hud:
 					m.hud.toast_small("Pack full", Color("ffb0a0"))
-	m.sfx("pickup", b["pos"], -4.0, 0.9)
+	if h != m.player:
+		m.sfx("pickup", b["pos"], -4.0, 0.9)
+	elif swapped:
+		InvSfx.swap()
+	else:
+		InvSfx.take()
 	_settle_box(b)
 
 ## Smart loot (press interact again with a box open): every gem, seed, kin and consumable, and the
@@ -537,7 +542,6 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	if o.ctrl == "bot":
 		o.ai = m.bot_brain.new_mind(m.rng, float(m.opts.get("bot_skill", m.bot_cfg.get("skill", 0.6))), m.bot_cfg)
 	m.sfx("revive", o.pos, 0.0)
-	m.fx.ring(o.pos, 2.2, Color("9ee2a0"), 0.5)
 	m.fx.burst(o.pos + Vector3(0, 1.0, 0), Color("cff6e0"), 26, 5.0, 0.6, -2.0)
 	if o == m.player:
 		m.killcam_text = ""

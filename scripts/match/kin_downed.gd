@@ -242,11 +242,9 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.rescue_on = false          # (its own recovery can fire mid-rescue: the rescuer is free again)
 	k.rescue_block = 0.0
 	k.down_void = false
-	var from := k.pos
 	k._hop_on()
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
-	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
 	k.m.sfx("recall", k.owner_h.pos, -4.0)
 	if rescued:
 		k.note("rescued", "you ran in and carried it out", 1.5)
@@ -255,7 +253,6 @@ static func come_round(k: Kin, rescued: bool) -> void:
 
 static func rescue(k: Kin) -> void:
 	k.m.fx.flash(k.pos + Vector3(0, 0.8, 0), Color.WHITE, 1.2, 0.1)           # the finish pop
-	k.m.fx.ring(k.pos, 2.0, Color(k.sp.get("glow", k.sp["color"]), 0.9), 0.4)
 	k.m.sfx("revive_done", k.pos, -2.0)
 	come_round(k, true)
 

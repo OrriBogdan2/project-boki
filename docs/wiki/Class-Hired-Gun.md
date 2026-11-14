@@ -50,7 +50,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
+| Fantasy | The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
 | Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
 | Resource | Fever (max 1) |
 
@@ -79,9 +79,9 @@ What the in-game kit card (K) says.
 - *Tap:* Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
 - *Resource full:* Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone.
 
-**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
+**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
-**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
+**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
 ### Ranks
 
@@ -101,6 +101,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|
 | Building up | a lit Fever pip over the bar while the lifesteal runs |
 | Armed / full | the same lit pip and a heat shimmer |
-| Dash spent | an ember afterimage and faint skid streaks |
+| Dash spent | green-fire streaks and a kick of dust |
 
 <!-- /gen:kit -->

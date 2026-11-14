@@ -9,8 +9,8 @@ tail, reflections, ring, grains, mix, at, sat) and adds:
   - CATS: one loudness target per category, so every Hunter, Boki and UI sound sits at the same level
     for what it is (docs/AUDIO.md). save_cat / takes_cat level a sound to its category and write it.
   - voice(): a wordless voice (grunt, gasp, cry) from a glottal pulse train through vowel formants.
-  - chime(), creak(), fm(), sweep(), rattle(), hiss(): the textures several kits need; shape() and
-    soft_in(): click-free envelopes.
+  - chime(), creak(), fm(), sweep(), rattle(), hiss(), bubbles(), sweep_noise() and wobble() (rushing air, gusts):
+    the textures several kits need; shape() and soft_in(): click-free envelopes.
 
 44.1 kHz mono 16-bit, written to audio/. Original synthesis, no samples.
 """
@@ -22,7 +22,8 @@ from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick,
 
 __all__ = ['SR', 'N', 'T', 'noise', 'lpf', 'hpf', 'bpf', 'env', 'mix', 'at', 'sat', 'kick', 'click', 'crack',
            'sub', 'tail', 'reflections', 'ring', 'grains', 'level', 'CATS', 'reseed', 'rng', 'save_cat',
-           'takes_cat', 'save_loop', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'rattle', 'hiss', 'pad']
+           'takes_cat', 'save_loop', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'sweep_noise', 'rattle',
+           'hiss', 'bubbles', 'pad', 'wobble']
 
 # Category loudness (content/rules/sfx_levels.json, the same table --sfx-set-check measures against):
 # RMS in dBFS over the audible part, and the peak ceiling. The game's volume_db at the call site then
@@ -107,6 +108,20 @@ def sweep(f0, f1, d, shape='sin', curve=1.0):
     return np.sin(ph)
 
 
+def sweep_noise(d, f0, f1, width=0.4):
+    """Noise whose band glides f0 -> f1 (a rush of air): a bank of bands from 150 Hz to 8 kHz, each one
+    sounding while the glide is within `width` (natural-log Hz) of it."""
+    n = N(d); u = np.arange(n) / max(1, n - 1)
+    lf = np.log(f0) + (np.log(f1) - np.log(f0)) * u
+    out = np.zeros(n); src = noise(d)
+    for fc in np.geomspace(150, 8000, 18):
+        g = np.exp(-((np.log(fc) - lf) / width) ** 2)
+        if g.max() < 0.02:
+            continue
+        out += bpf(src, fc * 0.8, fc * 1.25) * g
+    return out
+
+
 def fm(fc, ratio, index, d, decay=0.3, a=0.002):
     """Two-operator FM: bells and metal (ratio non-integer), electric buzz (high index)."""
     t = T(d)
@@ -147,9 +162,29 @@ def rattle(d, rate=40, lo=1800, hi=7000, jitter=0.4, decay=None):
     return out * e
 
 
+def wobble(d, rate, depth):
+    """A smooth random level around 1 (gusts), `rate` new values a second."""
+    pts = max(4, int(d * rate) + 3)
+    x = np.interp(np.arange(N(d)) / SR * rate, np.arange(pts), rng.standard_normal(pts))
+    return np.clip(1.0 + depth * lpf(x, 40) / (np.std(x) + 1e-9), 0.1, None)
+
+
 def hiss(d, lo=2000, hi=9000, a=0.02, decay=0.3):
     """Steam, gas, a fuse: band noise with a soft start."""
     return bpf(noise(d), lo, hi) * env(N(d), a, decay)
+
+
+def bubbles(d, per_s, f_lo=250, f_hi=900, size=0.04):
+    """Rising air bubbles: short sines that chirp upward as they pop."""
+    n = N(d); out = np.zeros(n)
+    for _ in range(max(1, int(per_s * d))):
+        s0 = int(rng.uniform(0, max(1, n - N(size * 1.5))))
+        bd = size * rng.uniform(0.6, 1.4); bn = N(bd); tt = np.arange(bn) / SR
+        f = rng.uniform(f_lo, f_hi) * (1 + 2.5 * tt / bd)
+        b = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / (bd * 0.35)) * (1 - tt / bd)
+        b *= np.sin(np.pi * np.minimum(1, tt / 0.003) / 2)
+        out[s0:s0 + bn] += b * rng.uniform(0.4, 1.0)
+    return out
 
 
 # ------------------------------------------------------------------ voice (wordless)

@@ -9,5 +9,9 @@ tools/unstable_mix_check.gd      # lost its main.gd hook in a merge and is red o
 tools/vfx_reel/ashwick.gd      # hero_vfx_reel.gd loads tools/vfx_reel/<hero>.gd by a built path
 tools/vfx_reel/bulwark.gd      # same
 tools/vfx_reel/rimewright.gd      # same
+tools/vfx_reel/gil.gd      # same
+tools/vfx_reel/ostra.gd      # same
 tools/vfx_reel/tender.gd      # same
+tools/vfx_reel/dolm.gd      # same
+tools/vfx_reel/thief.gd      # same
 tools/anim/uthana_bake.gd      # offline clip bake: godot -s tools/anim/uthana_bake.gd -- --recipes= --out= (docs/UTHANA_RANK.md)

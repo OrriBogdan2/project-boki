@@ -8,7 +8,8 @@ extends RefCounted
 ##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
-##   8. two world labels on one spot leave one drawn (LabelClash): the loot name waits, the nameplate stays
+##   8. two world labels on one spot leave one drawn: the loot name waits, the nameplate stays (LabelClash);
+##      a plate or lair board under a damage number fades, the number stays (LabelSpacing)
 ## Never touches the save.
 
 var bad := 0
@@ -198,6 +199,7 @@ func _yield() -> void:
 	for i in 30:
 		MsgLane.yield_label(lbl, cam, clear, 0.05)
 	ok(lbl.transparency < 0.05, "and comes back when the card goes")
+	_spacing(cam)
 	cam.queue_free()
 	lbl.queue_free()
 
@@ -216,3 +218,32 @@ func _clash() -> void:
 		LabelClash.claim(Vector2(i * 5, 0), LabelClash.NUM)
 	ok(LabelClash.boxes.size() == LabelClash.CAP, "claims stop at CAP, so a crowd never grows the array")
 	LabelClash.begin()
+
+# ------------------------------------------------------------------ 8b. label meets label
+func _spacing(cam: Camera3D) -> void:
+	var low := _label_at(Vector3(0, 0, 0), "Echo Loot")
+	var high := _label_at(Vector3(0.05, 0.02, 0), "-34")
+	var far := _label_at(Vector3(4, 0, 0), "Camp")
+	var group: Array[Label3D] = [low, far]
+	for i in 30:
+		var covers: Array[Rect2] = [MsgLane.label_rect(high, cam)]     # (rebuilt each frame, as the HUD does)
+		LabelSpacing.yield_group(group, cam, covers, 0.05)
+	ok(low.transparency > 0.8 and high.transparency == 0.0,
+		"a label under a damage number fades, the number stays (%.2f)" % low.transparency)
+	ok(far.transparency == 0.0, "a label that is clear of it is left alone")
+	var pair: Array[Label3D] = [low, _label_at(Vector3(0, 0.02, 0), "Chest")]
+	for i in 30:
+		var none: Array[Rect2] = []
+		LabelSpacing.yield_group(pair, cam, none, 0.05)
+	ok(low.transparency < 0.05 and pair[1].transparency > 0.8,
+		"of two in one group the first in the list stays, the second fades")
+	for l in [low, high, far, pair[1]]:
+		l.queue_free()
+
+func _label_at(pos: Vector3, text: String) -> Label3D:
+	var l := Label3D.new()
+	l.text = text
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	main.add_child(l)
+	l.global_position = pos
+	return l

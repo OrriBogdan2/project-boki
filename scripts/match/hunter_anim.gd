@@ -257,6 +257,9 @@ var trick_ax := Vector3.RIGHT
 var trick_done := false
 var land_k := 0.0
 var land_rate := 4.0
+const LAND_HOP_V := 4.0        # m/s down at touchdown: slower (a kerb, a step down of ~0.5 m) plays no landing at all
+const LAND_DROP_V := 8.5       # m/s: a terrace drop (2.5 m+) or a jump off a ledge gets the deep crouch; a plain jump
+                               # lands at JUMP_V 6.8, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
 var roll_t := -1.0             # landing roll / combat roll clock
 var roll_dur := 0.35
 var roll_ax := Vector3.RIGHT
@@ -314,7 +317,7 @@ var hip_y := 0.42              # the torso's rest height on the legs (longer leg
 var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
 var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
-func _init(m: Node3D) -> void:
+func _init(m: Node3D, fixed_seed := -1) -> void:
 	model = m
 	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
@@ -353,7 +356,7 @@ func _init(m: Node3D) -> void:
 		gait = EmptyGait.new(legs, st)
 		legs_sway = 0.0
 	ws = WardenStance.new(stance)
-	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
+	rng = int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
 	weight_to = weight
@@ -367,11 +370,12 @@ func _init(m: Node3D) -> void:
 		gun = aim.get_node_or_null("Gun")
 	_setup_weapon(String(m.get_meta("wid", "")))
 
-## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits).
+## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits); the same pose on
+## every build (a fixed seed, not the instance id's: a Hero's root bone can follow this Rig, Ostra's rig_root).
 static func rest_pose(m: Node3D) -> void:
 	if not m.has_node("Rig/Torso/ArmLPivot"):
 		return
-	var a := HunterAnim.new(m)
+	var a := HunterAnim.new(m, 1)
 	a.snap = true
 	a.update(1.0 / 60.0, {"fired": 99.0})
 
@@ -531,6 +535,14 @@ static func _spring(x: float, v: float, want: float, k: float, damp: float, dt: 
 		x += v * h
 	return Vector2(x, v)
 
+## What a touchdown plays, by the fall speed (m/s down): 0 nothing, 1 the hop's small dip, 2 the deep crouch of a
+## terrace drop. A glide's end is the deep one too, at any speed: the canopy's slow sink still reads as a long way down.
+## Shared with a Hero's clips (WardenClips), so both layers land the same way.
+static func land_tier(fall_v: float, from_glide: bool) -> int:
+	if from_glide or fall_v >= LAND_DROP_V:
+		return 2
+	return 1 if fall_v >= LAND_HOP_V else 0
+
 ## How long a jump still has before it lands, from the vertical speed and the height above the ground.
 static func _time_left(vy: float, h: float) -> float:
 	var up := maxf(vy, 0.0)
@@ -622,10 +634,12 @@ func update(dt: float, s: Dictionary) -> void:
 	var just_landed := grounded and not was_grounded
 	if just_landed:
 		var fall_v := -vy_prev
-		var hard := clampf(fall_v / 14.0 + air_t * 0.35, 0.0, 1.2)
-		land_k = clampf(maxf(land_k, hard), 0.0, 1.0) if fall_v > 2.5 or air_t > 0.45 else land_k
-		land_rate = lerpf(5.0, 2.2, clampf(hard, 0.0, 1.0)) * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
-		if trick == "ball" or (cls == "heavy" and (fall_v > 8.5 or air_t > 0.85)):
+		var tier := land_tier(fall_v, glide_k > 0.5)
+		# the hop: a small dip, gone in ~0.1 s; the drop or a glide's end: a deep crouch, up again in ~0.3 s
+		var hard := 0.35 if tier == 1 else clampf(fall_v / 14.0, 0.7, 1.0)
+		land_k = maxf(land_k, hard) if tier > 0 else land_k
+		land_rate = (3.5 if tier < 2 else 3.0) * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
+		if trick == "ball" or (cls == "heavy" and tier == 2):
 			slam_k = 1.0
 			slammed = true
 			land_k = 1.0
@@ -763,7 +777,7 @@ func update(dt: float, s: Dictionary) -> void:
 	hr += spot.lift(1)
 	kr -= spot.lift(1) * TurnStep.FOLD
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
-	if gait != null:
+	if gait != null and gait.legs.is_inside_tree():      # rest_pose's model has no world yet
 		gait.crouch = crouch_k
 		gait.squat = act_k * HunterVerbs.squat(act_kind, act_t, act_need) if HunterVerbs.ACTS.has(act_kind) else 0.0
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
@@ -1043,8 +1057,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
 	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
-		var sole_l := FootPlant.reach(hl, kl, wl)
-		var sole_r := FootPlant.reach(hr, kr, wr)
+		var sole_l := FootPlant.reach(hl, kl, wl, leg_l.scale.z)
+		var sole_r := FootPlant.reach(hr, kr, wr, leg_r.scale.z)
 		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
 		dr2 = dl2
 		leg_ref = FootPlant.HIP
@@ -1130,6 +1144,7 @@ func update(dt: float, s: Dictionary) -> void:
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
 ## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset), wg (a 3D model's wings
 ## flared, 0..1: WardenGlb.Springs).
+## A move with "land": true is a landing or arrival pose: it never keeps the glider shut (AirLimits).
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
 ## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
@@ -1213,7 +1228,7 @@ static func km_mix(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
 ## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
 static func km_def(id: String) -> Dictionary:
 	for t in [KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-			KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+			KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesGil.MOVES]:
 		if (t as Dictionary).has(id):
 			return t[id]
 	return {}

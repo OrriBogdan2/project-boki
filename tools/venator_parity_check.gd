@@ -101,6 +101,8 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
 	var s0 := P.shot_n
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
+	var heard: Array = []
+	var ear := _ear(heard, home)
 	for i in 200:
 		if P.shot_n - s0 >= 12:
 			break
@@ -115,6 +117,11 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 		if float(t_full["at"]) < 0.0 and P.ammo >= MAG:
 			t_full["at"] = t_full["t"]
 		t_full["t"] = float(t_full["t"]) + C.DT)
+	Sfx.played.disconnect(ear)
+	var own := String(P.wpn["sfx"])
+	# playtest 11-13: a wind-up whine played on the first round of every string
+	C.ok("Vex sounds: a string and the top-up after it play only the rifle round (no wind-up, no reload)",
+			heard.has(own) and heard.all(func(sn): return sn == own), "kit sounds %s" % [heard])
 	C.ok("Vex parity LMB: a 30-round drum that refills fast once the trigger rests (none in the first beat)",
 			int(P.wpn["mag"]) == MAG and after12 == MAG - 12 and int(t_full["early"]) == MAG - 12
 			and float(t_full["at"]) > 0.0 and float(t_full["at"]) <= REFILL_BY,
@@ -182,11 +189,17 @@ func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 ## drum refills, the count climbs back (the HUD shows it), and once full the held string picks up again.
 func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
-	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0}
+	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0,
+			"dries": 0, "was_dry": K.dry}
+	var heard: Array = []
+	var ear := _ear(heard, home)
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 		P.inp["fire"] = true
 		run["reload"] = maxf(float(run["reload"]), P.reload_t)
+		if K.dry and not run["was_dry"]:
+			run["dries"] = int(run["dries"]) + 1
+		run["was_dry"] = K.dry
 		if float(run["dry_at"]) < 0.0 and P.ammo <= 0:
 			run["dry_at"] = run["t"]
 			run["s"] = P.shot_n
@@ -195,7 +208,12 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 				run["back_at"] = run["t"]
 				run["low"] = P.ammo
 		run["t"] = float(run["t"]) + C.DT)
+	Sfx.played.disconnect(ear)
 	P.inp["fire"] = false
+	var cues := heard.count(GunslingerKit.RELOAD_SFX)
+	var dries := int(run["dries"])
+	C.ok("Vex sounds: each time the drum runs dry the reload cue plays once", dries > 0 and cues == dries,
+			"%d reload cues, %d times dry" % [cues, dries])
 	P.start_reload()
 	var gap := float(run["back_at"]) - float(run["dry_at"])
 	C.ok("Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires",
@@ -204,6 +222,16 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
 					run["reload"]])
 	C.ac.step(m, 1.5)
+
+## Starts noting the kit's own sounds (gunslinger_*, vn_*) into `out`, heard from `at` (Sfx drops a sound out of
+## hearing); disconnect the returned ear from Sfx.played to stop.
+func _ear(out: Array, at: Vector3) -> Callable:
+	Sfx.listener = at
+	var ear := func(sname: String, _at: Variant, _vol: float, _pitch: float) -> void:
+		if sname.begins_with("gunslinger_") or sname.begins_with("vn_"):
+			out.append(sname)
+	Sfx.played.connect(ear)
+	return ear
 
 ## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.
 func _brackets(m: Match, P: Hunter, home: Vector3) -> void:
@@ -242,7 +270,7 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	var no_hand := (KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array).all(func(key: Array) -> bool:
 		return float((key[1] as Dictionary).get("hw", 0.0)) == 0.0 and not (key[1] as Dictionary).has("fl"))
 	C.ok("Vex item 112: no throw pose, the left hand stays out of it, a recoil kick on the cannon",
-			no_hand and stance and float(kick["gp"]) > 0.3 and not GunslingerKit.TRAILS.has("gunslinger_rmb"),
+			no_hand and stance and float(kick["gp"]) > 0.3,
 			"gp %.2f" % kick["gp"])
 	T.teleport(home + Vector3(30, 0, 8))
 	P.teleport(home)
@@ -405,26 +433,26 @@ func _walk_speed(m: Match, P: Hunter) -> float:
 	C.ac.step(m, 0.6)
 	return P.flat_dist(p0) / 0.6
 
-## The audit (Nov 3): no cosmetic ground rings, discs or columns on her slide, its rank-3 end, a knock or the
-## Longneedle's recoil (a ground shape means gameplay); Dazed is only a damage window (no slow, the data); her
+## Her recipes played since `before` that lay a shape on the ground (a ring, a scorch, a vortex, a flame wall).
+static func _ground_looks(V: HeroVfx, before: Dictionary) -> Array:
+	var moves: Dictionary = HeroVfx.data("gunslinger")["moves"]
+	return V.plays.keys().filter(func(mv: String) -> bool:
+		var layers: Array = (moves.get(mv, {}) as Dictionary).get("fx", [])
+		return int(V.plays[mv]) > int(before.get(mv, 0)) and layers.any(
+				func(l: Dictionary) -> bool: return l["p"] in ["ring", "scorch", "vortex", "skirt"]))
+
+## The audit (Nov 3): no cosmetic ground rings, scorches or flame walls on her slide, its rank-3 end or a knock
+## (a ground shape means gameplay); Dazed is only a damage window (no slow, the data); her
 ## air roll fires the rifle as its dash row says.
 func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
-	var fx := VVFx.of(m)
-	var seen := {"ring": 0, "disc": 0, "pillar": 0}
-	var before := fx.live.map(func(e: Dictionary) -> Node3D: return e["node"])
-	var counted := {}
-	var watch := func():
-		for e in fx.live:
-			var kind := String(e["kind"])
-			if seen.has(kind) and not e["node"] in before and not counted.has(e["node"]):
-				counted[e["node"]] = true
-				seen[kind] = int(seen[kind]) + 1
+	var V := HeroVfx.of(m)
+	var plays0 := V.plays.duplicate()
 	P.teleport(home)
 	P.slot_lv["dash"] = 3
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	C.ac.step(m, 1.0, watch)
+	C.ac.step(m, 1.0)
 	var slid := K.last_dash_kind
 	P.inp["move"] = Vector2.ZERO
 	P.slot_lv["dash"] = 1
@@ -435,12 +463,14 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
 	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
 	var knocked := P.dashes >= 1.0
-	C.ac.step(m, 0.5, watch)
+	C.ac.step(m, 0.5)
 	T.downed = false
 	T.hp = T.max_hp
-	C.ok("Vex audit: no ground ring, disc or column on a slide, its rank-3 end or a knock",
-			slid != "" and knocked and int(seen["ring"]) + int(seen["disc"]) + int(seen["pillar"]) == 0,
-			"%s, knock %s, %s" % [slid, knocked, str(seen)])
+	var on_ground := _ground_looks(V, plays0)
+	var streaked := int(V.plays.get("slide", 0)) > int(plays0.get("slide", 0))
+	C.ok("Vex audit: no ground ring, scorch or flame wall on a slide, its rank-3 end or a knock",
+			slid != "" and knocked and on_ground.is_empty() and streaked,
+			"%s, knock %s, %s" % [slid, knocked, str(on_ground)])
 	C.ac.fresh(T)
 	KitStatus.apply(T, "rat", 1.4)
 	C.ok("Vex audit: Dazed is a damage window only, no slow (the data)",

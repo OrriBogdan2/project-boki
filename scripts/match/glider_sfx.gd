@@ -1,8 +1,11 @@
 class_name GliderSfx
 extends RefCounted
-## One hunter's glider sounds (tools/gen_sfx_glider.py, content/sfx/glider.json): a snap as the canopy
-## opens, a wind loop that pitches and swells with speed, a whoosh as the Ctrl dive starts, a hiss that
-## swells as the heat runs out, a crackle and a burn loop while it overheats, a fold as it closes.
+## One hunter's glider sounds (tools/gen_sfx_glider.py, content/sfx/glider.json), and the free fall before
+## it: after jumping out of the drop rocket the canopy is folded, so a buffeting wind (drop_fall_wind,
+## tools/gen_sfx_rocket.py) rises with your speed until the glider opens and its snap and wind take over.
+## The glider: a snap as the canopy opens, a wind loop that pitches and swells with speed, a whoosh as the
+## Ctrl dive starts, a hiss that swells as the heat runs out, a crackle and a burn loop while it overheats,
+## a fold as it closes.
 ## Ticked once a frame for every hunter, yours and everyone else's (theirs are positional and quieter,
 ## driven by the synced glide flag, velocity and the overheat bit), so each cue fires once on the change
 ## of state, never every frame.
@@ -19,8 +22,13 @@ const WIND_HIGH := 1.6          # ...and at the dive's full speed
 const HISS_FROM := 0.35         # heat left (1 cool, 0 overheated) below which the hiss starts
 const HISS_DB := -12.0          # dB, loop, at the point of overheating
 const OTHERS_DB := -6.0         # dB under yours for another player's glider
+const FALL_QUIET_DB := -20.0    # dB, the free-fall wind loop slow...
+const FALL_LOUD_DB := -6.0      # ...and at the rocket's own dive speed (DropRocket.FALL)
+const FALL_LOW := 0.75          # its pitch slow...
+const FALL_HIGH := 1.3          # ...and at that speed
 const DIVE_VY_MIN := 18.0       # m/s of fall that counts as the plunge for another player (no dive flag is sent)
 
+var fell := false               # in the drop's free fall last tick
 var open := false               # the glider was open last tick
 var hot := false                # ...and burning
 var diving := false             # ...and plunging
@@ -28,7 +36,8 @@ var net_hot := false            # another player's overheat bit (Match._net_appl
 
 ## Called every frame by the hunter; plays the cue for whatever changed since the last call.
 func tick(h: Hunter) -> void:
-	var gliding := h.gliding and not h.out
+	var falling := h.dropping and h.diving and not h.out      # the drop's free fall: the canopy is still folded
+	var gliding := h.gliding and not h.out and not falling
 	var v := h.net_vel if h.remote else h.vel
 	var trim := 0.0 if h.is_local() else OTHERS_DB
 	var burning := gliding and not h.dropping and (net_hot if h.remote else h.glide_fuel <= 0.001)
@@ -45,6 +54,13 @@ func tick(h: Hunter) -> void:
 	hot = burning
 	diving = plunging
 	var id := h.get_instance_id()
+	if fell and not falling:
+		Sfx.loop_stop("drop_fall%d" % id)      # cut at once: the glider's snap takes over
+	fell = falling
+	if falling:
+		var f := clampf(v.length() / DropRocket.FALL, 0.0, 1.0)
+		var fall_db := lerpf(FALL_QUIET_DB, FALL_LOUD_DB, f) + trim
+		Sfx.loop_hold("drop_fall%d" % id, "drop_fall_wind", h.pos, fall_db, lerpf(FALL_LOW, FALL_HIGH, f))
 	if gliding:
 		var k := clampf(v.length() / HunterMove.dive_vy, 0.0, 1.0)
 		var vol := lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k) + trim

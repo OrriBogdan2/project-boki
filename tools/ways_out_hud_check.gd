@@ -2,7 +2,8 @@ extends RefCounted
 ## --ways-out-hud-check: the Ways Out strip (scripts/ui/ways_out_hud.gd, briefs/specs/LIMITED_WAY_OUTS.md section 9).
 ##   1. four pips in order Lair / Heart / Uplink / Final, each locked with a countdown that matches the rules
 ##   2. the Heart's early pip follows its state: charging, ready (open), carried (in use, the carrier's squad), taken
-##   3. the quest pips follow the clock (open, shut = lost) and the lairs / outposts (in use, taken, by squad)
+##   3. the quest pips follow the clock (open, shut = lost) and the QuestSeats (in use, taken, by squad; a won Lair
+##      stays taken after its squad has landed, a ridden Uplink after its lift shut)
 ##   4. the final pip: locked until final_s, open, in use while a squad fills the ring, taken by the squad that left
 ##   6. the Gate prompt is only the carrier's leave prompt, says "Leave now: small reward", holds gate_hold_s,
 ##      and its second line names the final seat's time
@@ -72,19 +73,41 @@ func run(main: Node) -> void:
 	m.time = float(q["uplink_open_s"]) + 1.0 - m.sess_t0
 	ok(_st(m, 2) == St.OPEN, "past uplink_open_s the Uplink is open")
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var L := {"flown": [], "sealed_in": [foe], "state": "awake"}
-	var X := {"kind": "outpost", "state": "charging", "team": m.player.team}
-	m.lairs.list.append(L)
-	m.exits.list.append(X)
+	var qs: QuestSeats = m.exits.seats      # (their host moves, from the Sealed Lair and the Uplink's own outpost)
+	qs.build()
+	var L: Dictionary = qs.lair.ref
+	var X: Dictionary = qs.uplink.ref
+	m.time = float(q["lair_open_s"]) + 30.0 - m.sess_t0
+	qs.tick(0.0)
+	L["locked"] = true
+	L["sealed_in"] = [foe]
+	qs.tick(0.0)
 	ok(_st(m, 0) == St.USE and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
 		"a squad sealed in with a boss: the Lair is in use, in their colour")
+	L["state"] = "cleared"
+	L["won_by"] = foe.team
+	L["victory"] = true
+	qs.tick(0.0)
+	L["sealed_in"] = []
+	L["flown"] = []
+	ok(_st(m, 0) == St.TAKEN and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
+		"the boss down: the Lair is taken by that squad, and stays taken once they have flown and landed")
+	m.time = float(q["uplink_open_s"]) + 1.0 - m.sess_t0
+	qs.tick(0.0)
+	X["state"] = "charging"
+	X["team"] = m.player.team
+	qs.tick(0.0)
 	ok(_st(m, 2) == St.USE and int(WaysOutHud.seats(m)[2]["team"]) == m.player.team,
 		"an outpost charging: the Uplink is in use")
-	L["flown"] = [foe]
-	X["state"] = "spent"
-	ok(_st(m, 0) == St.TAKEN and _st(m, 2) == St.TAKEN, "ridden out and spent: both taken")
-	m.lairs.list.erase(L)
-	m.exits.list.erase(X)
+	X["state"] = "open"
+	qs.tick(0.0)
+	X["state"] = "closed"
+	X["taken"] = true
+	ok(_st(m, 2) == St.TAKEN, "the lift ridden and shut: the Uplink stays taken")
+	qs.uplink._force(QuestSeat.S.OPEN, "test")      # (unused again, for the shut row)
+	X["state"] = "idle"
+	X["team"] = -1
+	X.erase("taken")
 	m.time = float(q["uplink_shut_s"]) + 1.0 - m.sess_t0
 	ok(_st(m, 2) == St.LOST, "past uplink_shut_s unused, the Uplink is lost")
 	# ---------------------------------------------------------------- 4. the final pip
