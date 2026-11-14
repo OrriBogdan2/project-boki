@@ -154,7 +154,7 @@ func _tick(dt: float) -> void:
 		swollen_t = maxf(0.0, swollen_t - dt)
 		res = res_max() * swollen_t / float(res_def()["swollen_t"])
 		if swollen_t <= 0.0: res = 0.0
-		KitLooks.of(m).hold_on("os_aura", "aura", h, h.pos)
+		if not _is_wisp(): KitLooks.of(m).hold_on("os_aura", "aura", h, h.pos)
 	elif res_wait <= 0.0:
 		add_res(-float(res_def()["drain"]) * dt)
 	tell = "full" if is_swollen() else ("half" if res > 30.0 else "")
@@ -194,11 +194,14 @@ func _reticle() -> void:
 func _tick_weapon() -> void:
 	if h.wid != "tether_lantern":
 		return
+	if _is_wisp():
+		_go_dark()
+		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
 		_orb_fired()
 	_set_charge(wait_charge())
-	if charge > 0.0 and not h.downed and snap.is_empty():
+	if charge > 0.0 and snap.is_empty():
 		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
 		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
 		# camera drew it as a disc at his feet)
@@ -206,6 +209,17 @@ func _tick_weapon() -> void:
 		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
 		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: teal motes and smoke drawn into his hand
 			HeroVfx.of(m).hold(h, "orb_ready", charge)
+
+## A downed or eliminated Hunter is a Wisp: no charge, no motes, no aura. The wait starts over on revive.
+func _is_wisp() -> bool:
+	return h.downed or h.out or h.dead or h.gone
+
+func _go_dark() -> void:
+	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).release("os_aura")
+	last_shot_t = m.time
+	if charge > 0.0:
+		_set_charge(0.0)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
@@ -396,9 +410,7 @@ func _drop_holds() -> void:
 	snap_rec = 0.0
 	if not swap.is_empty():
 		_swap_end(false)
-	last_shot_t = m.time
-	if is_same(h.wpn, orb_wpn):
-		_set_charge(0.0)
+	_go_dark()
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
