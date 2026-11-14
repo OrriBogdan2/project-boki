@@ -395,7 +395,7 @@ func _chimes(home) -> void:
 	var hc: HomeChimes = home.chimes
 	var k: Dictionary = {}
 	for kk in home.kins:
-		if not HomeChimes._asleep(kk):
+		if not HomeChimes.asleep(kk):
 			k = kk
 	var rec: Dictionary = k["rec"]
 	hc.tick(0.0)

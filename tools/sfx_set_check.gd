@@ -33,6 +33,9 @@ extends RefCounted
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
 ##  11. every breakable material breaks with its own sound in 3 takes or more, a powder keg has its own fuse hiss
 ##      (as long as its fuse) and blast, and every chest tier opens with its own lid creak (content/sfx/breakables.json)
+##  11. the garden's moments (SFX_AUDIT row 22) each play their own cue, never the stock unlock: an egg laid or
+##      ready, two Boki becoming friends (once, as the bond reaches friend_at), a lean's new fleck or a part, a
+##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -76,6 +79,7 @@ func run(main: Node) -> void:
 	_chop_mine()
 	_breakables()
 	_gloves()
+	_garden_moments()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -551,6 +555,76 @@ func _glove_names(node, names: Dictionary) -> void:
 	elif node is Array:
 		for v in node:
 			_glove_names(v, names)
+## 11. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
+func _garden_moments() -> void:
+	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_evolve", "garden_visit_in",
+			"garden_visit_out", "garden_season"] + GardenSfx.CUPS
+	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
+	ok(filed, "moments: all %d cues have files" % cues.size())
+	var a := {"uid": "moment_a"}
+	var b := {"uid": "moment_b"}
+	BaseLife.befriended.clear()
+	var step := float(Content.rules("base_life")["friend_at"]) * 0.6
+	for i in 3:
+		BaseLife.add_bond(a, b, step)
+	ok(BaseLife.befriended == [["moment_a", "moment_b"]], "moments: friends once, as the bond reaches friend_at %s"
+			% [BaseLife.befriended])
+	BaseLife.befriended.clear()
+	var build: Dictionary = FarmUnlocks.rules()
+	var was_base: bool = build["base_mode"]
+	build["base_mode"] = true                   # leans only show on the Boki base
+	var rec := Save.new_kin("zapple", "Moment")
+	var tinted: Array = Lean.rules()["types"].keys().filter(func(t): return Lean.rules()["types"][t].has("tint"))
+	rec["lean"] = {tinted[0]: Evo.LEAN_FULL * 0.2}
+	var one := Lean.flecks(rec)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	ok((one == 1 and Lean.flecks(rec) == int(Lean.rules()["marks"])),
+			"moments: a lean shows one fleck from its first meal, all at full (%d)" % one)
+	var home := {"kins": [{"rec": rec, "pos": Vector3.ZERO}]}
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL * 0.2
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	var before := int(GardenSfx.heard.get("garden_chime_part", 0))
+	chimes.tick(1.0)
+	ok(int(GardenSfx.heard.get("garden_chime_part", 0)) == before + 1,
+			"moments: a lean that shows more flecks chimes garden_chime_part once")
+	build["base_mode"] = was_base
+	var res := {"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false,
+			"reset": false}
+	_cup_rounds(res)
+	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
+			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_friends\"",
+			"home.gd": "\"garden_evolve\"",
+			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
+	var off := []
+	for f in sites:
+		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
+		if not src.contains(sites[f]):
+			off.append(f)
+		elif f != "home.gd" and src.contains("Sfx.play(\"unlock\""):
+			off.append(f + " unlock")
+	for fn in ["func _make_egg(", "func _play_evolutions("]:
+		var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
+		var body := src.substr(src.find(fn), src.find("\nfunc ", src.find(fn) + 1) - src.find(fn))
+		if body.contains("\"unlock\""):
+			off.append(fn)
+	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
+
+## Each cup round's card plays its own fanfare once (Sprout, Bloom, Crown); a card with no round none.
+func _cup_rounds(res: Dictionary) -> void:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	ok(rounds.size() == GardenSfx.CUPS.size(), "moments: one cup fanfare per cup round (%d)" % rounds.size())
+	var before := GardenSfx.CUPS.map(func(c): return int(GardenSfx.heard.get(c, 0)))
+	GardenPrizes.rows(res)
+	for i in rounds.size():
+		var last: bool = i == rounds.size() - 1
+		GardenPrizes.rows(res.merged({"round": rounds[i]["name"], "ribbon": last, "keepsake": ""}, true))
+	var each := true
+	for i in GardenSfx.CUPS.size():
+		each = each and int(GardenSfx.heard.get(GardenSfx.CUPS[i], 0)) == before[i] + 1
+	ok(each, "moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none")
 
 func _takes(sname: String) -> Array:
 	var out := []

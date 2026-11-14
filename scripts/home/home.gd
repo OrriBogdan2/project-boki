@@ -139,6 +139,7 @@ func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
+	if not _visiting(): GardenSfx.zone_in(zone, GardenZones.here)
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -3675,6 +3676,7 @@ func _play_evolutions() -> void:
 		fx.body_glow(at, tint)
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		Sfx.play("garden_trait")
+		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
 		cam.zoom_to = HOME_ZOOM
@@ -4885,6 +4887,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
 	Sfx.play("garden_egg")
+	GardenSfx.cue("garden_egg", NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.
