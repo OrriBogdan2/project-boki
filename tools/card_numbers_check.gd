@@ -94,7 +94,8 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 	match a:
 		"archer":
 			var w := float(pin["wall_mult"])
-			return {"about_pairs": [[float(pin["dmg"][0]) * w, float(pin["dmg"][1]) * w]], "nums": [4.0]}  # PinSpirit.ORB_T, the spirit orb's time (a code constant)
+			# 4.0: PinSpirit.ORB_T, the spirit orb's time (a code constant)
+			return {"about_pairs": [[float(pin["dmg"][0]) * w, float(pin["dmg"][1]) * w]], "nums": [4.0]}
 		"ashwick":  # Char 31 needs 8 ticks of x.char
 			return {"nums": [ceilf(31.0 / float(x["char"])) * float(x["tick"])]}
 		"bulwark":  # the dash's time over its distance; the lane is cells x cell_len
@@ -109,7 +110,8 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 		"tender":  # the rank 3 burst is r3_k times the radius
 			return {"nums": [float(seed["burst_r"]) * float(seed["r3_k"])]}
 		"thief":  # a quick shot leaves quick_k of the Arc Shots rate after the last
-			return {"nums": [float(Data.weapon_stats("arc_bolts")["rate"]) * float(dash["quick_k"])]}
+			var rate := float(Data.weapon_stats("arc_bolts")["rate"])
+			return {"nums": [rate * float(dash["quick_k"])]}
 		"rimewright":  # SHATTER_R in rimewright_kit.gd (a code constant, not data)
 			return {"nums": [2.7]}
 	return {}
