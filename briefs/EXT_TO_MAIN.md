@@ -9646,3 +9646,4 @@ READY ext/glide-smooth-1111 d147ee06ef (PR #59 Sparkle DashGlide, GATE GREEN on 
 READY ext/fix-audio-settings 067b6cfcd0 (PR #51 audio sliders, GATE GREEN on main ba6b62f7a1)
 READY ext/creator-sex-distinct 2183d5ae04 (PR #29 empty creator, GATE GREEN on main ba6b62f7a1; home-gait new-red fixed)
 READY ext/main-ratchet-1113 f92ad473e2 (PR #57 lint re-baseline to main ba6b62f7a1 + #65 #61 #59 #51 #29; pr-checks lint ratchet should go green; merge after or with the batches)
+READY ext/merge-batch-23-1113 ff68c12ee8 (batch 23 re-merged onto main ba6b62f7a1 after the lane A PR #68: 12 conflicts resolved keeping main plus the branch intent; --check 0, health --strict OK, drop-rocket/tutorial-hud/ui-scale/settings-size/msg-queue/pause-menu checks 0 failed; --safe-area-check red on 2 drop-state rows (squad card 2px over vitals, in docs/DEBT.md); suite not re-run)
