@@ -45,7 +45,7 @@ table's after column rounded up to 0.05), or when a Hunter with stepping legs ha
 | Cinder (`ashwick`) | 2.40 (fwd 3.50 m/s) | 2.40 (fwd 3.50 m/s) | 2.40 |
 | Sparkle (`mage`) | 2.08 (back 3.50 m/s) | 2.08 (back 3.50 m/s) | 2.10 |
 | Kael (`juggernaut`) | 1.95 (back 3.00 m/s) | 1.95 (back 3.00 m/s) | 2.00 |
-| Meeko (`tender`) | 1.88 (left 3.50 m/s) | 1.88 (left 3.50 m/s) | 1.90 |
+| Meeko (`tender`) | 2.46 (back 3.50 m/s, main's v95 loops) | 1.80 (fwd 3.00 m/s, re-baked 11-13) | 1.85 |
 | Sable (`thief`) | 1.85 (fwd 3.00 m/s) | 1.85 (fwd 3.00 m/s) | 1.85 |
 | Lace (`archer`) | 1.73 (back 3.50 m/s) | 1.73 (back 3.50 m/s) | 1.75 |
 | Grimble (`dredge`) | 1.72 (back 3.50 m/s) | 1.72 (back 3.50 m/s) | 1.75 |
@@ -53,6 +53,35 @@ table's after column rounded up to 0.05), or when a Hunter with stepping legs ha
 
 `cycle_s` would likely help the others too: Cinder at `cycle_s` 0.7 measured 2.40 to 1.16 m/s in one trial. This
 branch doesn't change them.
+
+## Every walk on its run's timeline (Nov 13, ext/anim-albert-jog-blend)
+
+Without `loco.cycle_s` each walk loop now plays stretched to its own run loop's length (WardenClips._gait_loop), the
+space is synced for every Hunter, the walk ring sits at `walk_speed` / `run_speed`, and WardenGait.plan solves the
+rate for the blended cycle and stride. With `cycle_s` (Albert, Tenzo) it is the same as before. Albert's `foot_mps`
+was stale after his 0.9 size model (data 3.1 / 5.43, the clips step 2.1 / 3.65 at his 0.5 s cycle): re-measured.
+
+Worst slip per Hunter, origin/main ca96e707c5 (with the anim_audit `soles` compile fix) -> this branch, m/s:
+
+| Hunter | main | after | Bar |
+|---|---|---|---|
+| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 1.00 |
+| Vex (`gunslinger`) | 2.03 (left 3.0) | 1.20 (left 4.0) | 1.20 |
+| Albert (`bulwark`) | 1.97 (right 4.0) | 1.34 (right 4.0) | 1.35 |
+| Cinder (`ashwick`) | 2.33 (left 3.5) | 1.40 (left 3.5) | 1.40 |
+| Tenzo (`dolm`) | 2.65 (left run) | 2.70 (right run) | 2.70 |
+| Sparkle (`mage`) | 2.08 (back 3.5) | 1.53 (back run) | 1.55 |
+| Grimble (`dredge`) | 1.72 (back 3.5) | 0.92 (back 3.5) | 0.95 |
+| Meeko (`tender`) | 2.46 (back 3.5) | 1.04 (left 3.5) | 1.05 |
+| Sable (`thief`) | 1.85 (fwd 3.0) | 1.48 (right run) | 1.50 |
+| Lace (`archer`) | 4.38 (fwd 4.5) | 4.51 (fwd 4.0) | 1.75, fails |
+| Neve (`rimewright`) | 2.23 (left 4.45) | 2.31 (right 4.45) | none, fails |
+
+Open (both fail on main too): Lace's forward loops slide at every speed from 1.5 m/s (her forward walk and run were
+re-keyed to 0.667 and 0.583 s, the other directions are 1.033 and 0.667; `foot_mps` [1.18, 3.72] no longer matches
+them), and Neve steps since ext/anim-neve-stride but has no bar. Albert's right strafe between the rings
+(1.08 to 1.34 m/s at 3.0 to 4.0) is the walk_r and run_r loops out of phase; his other directions stay under 0.8.
+The table below is the Nov 11 sweep.
 
 ## The sweep, m/s of planted-foot slip
 
@@ -83,10 +112,10 @@ Tenzo 3.75 to 3.4.
 |  | back | 0.01 | 0.18 | 0.26 | 0.28 | 0.29 | 1.13 | 0.70 | 1.97 | 1.17 | 0.56 | 0.57 |
 |  | left | 0.00 | 0.34 | 0.52 | 0.61 | 0.25 | 1.31 | 1.93 | 0.73 | 2.13 | 1.10 | 1.12 |
 |  | right | 0.01 | 0.35 | 0.57 | 0.54 | 0.25 | 1.36 | 1.71 | 0.78 | 2.16 | 1.12 | 1.19 |
-| Meeko (`tender`, run 4.55) | fwd | 0.01 | 0.37 | 0.48 | 0.49 | 0.67 | 1.33 | 1.79 | 1.67 | 1.05 | 0.71 | 0.72 |
-|  | back | 0.01 | 0.44 | 0.43 | 0.36 | 0.51 | 1.34 | 1.80 | 1.77 | 0.86 | 0.48 | 0.49 |
-|  | left | 0.01 | 0.42 | 0.54 | 0.62 | 0.82 | 1.49 | 1.74 | 1.88 | 1.41 | 1.10 | 1.10 |
-|  | right | 0.01 | 0.39 | 0.52 | 0.59 | 0.81 | 1.42 | 1.75 | 1.79 | 1.39 | 1.12 | 1.09 |
+| Meeko (`tender`, run 4.55, re-baked 11-13) | fwd | 0.01 | 0.35 | 0.72 | 1.02 | 1.21 | 1.56 | 1.80 | 0.50 | 0.49 | 0.51 | 0.54 |
+|  | back | 0.01 | 0.40 | 0.58 | 0.80 | 1.11 | 1.25 | 1.41 | 1.44 | 1.24 | 0.95 | 0.95 |
+|  | left | 0.01 | 0.44 | 0.33 | 0.37 | 0.46 | 0.97 | 1.48 | 1.49 | 1.06 | 0.83 | 0.78 |
+|  | right | 0.01 | 0.40 | 0.21 | 0.30 | 0.50 | 0.92 | 1.41 | 1.56 | 1.02 | 0.83 | 0.81 |
 | Tenzo (`dolm`, run 4.65) | fwd | 0.01 | 0.39 → **0.27** | 0.67 → **0.40** | 0.49 → **0.40** | 0.49 → **0.51** | 0.92 → **0.45** | 2.30 → **0.50** | 2.34 → **0.70** | 1.96 → **0.85** | 1.02 → **0.89** | 1.00 → **0.89** |
 |  | back | 0.00 | 0.32 → **0.19** | 0.59 → **0.33** | 0.50 → **0.44** | 0.53 → **0.54** | 0.98 → **0.84** | 2.38 → **0.95** | 2.79 → **0.99** | 2.66 → **1.04** | 1.26 → **1.12** | 1.04 → **1.12** |
 |  | left | 0.00 | 0.42 → **0.35** | 0.79 → **0.50** | 0.97 → **0.63** | 1.01 → **0.76** | 1.50 → **0.75** | 2.28 → **0.73** | 2.57 → **0.76** | 2.90 → **0.87** | 3.14 → **2.43** | 3.27 → **2.65** |

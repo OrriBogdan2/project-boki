@@ -37,6 +37,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
+| `--step-smooth-check` | Vex, Albert and Sable on the Hollow Crown: up and down three terrace steps and a stair flight, the drawn body's y never jumps over 0.08 m a frame and the camera's never over 0.05 m (`--step-smooth-shots` takes the strips) |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
@@ -59,6 +60,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
+| `--duel-ring-hint-check` | The duel ring's first-visit hint and beam, once per save; the pad opens the ring's two choices |
+| `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
@@ -81,6 +84,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
+| `--input-latency-check` | Press to first motion or shot: LMB, RMB, E, dash and jump for every Hunter through the real input path; the first tick the velocity, the animation state or a projectile changes must be the press's own tick or the next, unless a sourced wind-up applies. Table in docs/MOVEMENT_FEEL.md (`=<id>,<id>` for some Hunters) |
 | `--home-build-check` | Build mode: placing, turning, moving, storing, refusing bad spots, save and reload, migration, expanding |
 | `--pack-ui-check` | The backpack windows take real mouse clicks |
 | `--title-check` | The title screen builds with the right menu, tagline, key art and frame budget |
