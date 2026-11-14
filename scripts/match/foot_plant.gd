@@ -55,7 +55,7 @@ static func near(h: Hunter) -> bool:
 
 ## After a.update: plants the feet of a.model on w's ground. want: false under animation LOD or far away (the pose
 ## stays the clip's and nothing is sampled). y: the body's height in the game (Hunter.pos.y; the drawn body sits off
-## it while it eases up a step, Hunter.step_vis: a terrace, or one of Tenzo's rocks onto a higher one, and the feet
+## it while it eases up a step, StepSmooth: a terrace, or one of Tenzo's rocks onto a higher one, and the feet
 ## stay on the top meanwhile). r: the body's radius, so a rock it stands on counts as Ent.ground counts it.
 func plant(a: HunterAnim, w: World, dt: float, want: bool, y := INF, r := 0.0) -> void:
 	world = w
