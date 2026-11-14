@@ -712,6 +712,7 @@ const CHECKS := {
 	"--belt-tips-check": ["res://tools/belt_tips_check.gd", "belt_tips_check", null],      # one-time belt item tips
 	"--tut-rebind-check": ["res://tools/tut_rebind_check.gd", "tut_rebind_check", null],      # text follows rebinds
 	"--fresh-run-log": ["res://tools/fresh_run_log.gd", "fresh_run_log", null],      # --shots-dir=<dir>
+	"--key-text-check": ["res://tools/key_text_check.gd", "key_text_check", null],  # keys via key_cap
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

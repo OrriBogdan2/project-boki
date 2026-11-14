@@ -515,7 +515,7 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var l := UI.label("Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back." % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
