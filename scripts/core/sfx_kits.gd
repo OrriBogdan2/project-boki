@@ -16,5 +16,8 @@ const NAMES := [
 	"os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap", "os_seed",
 	"os_pop", "os_empower", "br_rumble", "br_crumble", "os_well", "os_well_hum",
 ]
-## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs).
-const MIN_GAP := {}
+## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs):
+## the weapon-family hit ticks (content/sfx/hit.json) wait as long as the shared `hit` does.
+const MIN_GAP := {
+	"hit_gun": 45, "hit_bow": 45, "hit_blade": 45, "hit_blunt": 45, "hit_magic": 45, "hit_thrown": 45,
+}
