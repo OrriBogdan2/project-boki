@@ -3,6 +3,7 @@
  "name": "Sparkle",
  "script": "tools/gen_sfx_ryzz.py",
  "sounds": {
+  "hero_blowout": "impact",
   "mage_charge_tick": "cast",
   "mage_charge_full": "cast",
   "vv_bolt": "fire",

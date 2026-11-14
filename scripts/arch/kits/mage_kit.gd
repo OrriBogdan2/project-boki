@@ -573,7 +573,7 @@ func _blowout(f: Ent) -> void:
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
 	# no ground rings: the source shows a starburst
-	payoff_fx(f.pos, PINK, "mage_blowout", h.dir_to(f), f, false)
+	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f, false)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)
 	for i in 3:

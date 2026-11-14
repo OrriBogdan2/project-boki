@@ -76,7 +76,10 @@ func _chests(m: Match) -> void:
 	for ch in list.slice(0, 12):
 		P.teleport(ch["pos"] + Vector3(0.8, 0, 0))
 		P.vel = Vector3.ZERO
+		Sfx.listener = P.pos      # (a key opens it on the first step: hear it from here, not the last chest)
 		clear_stings()
+		for v in Sfx.voice_all: v.stop()      # (no real time passes between chests: the voice cap would fill)
+		Sfx.recent.clear()
 		var before := m.wpicks.map(func(w): return w["id"])
 		P.inp["interact"] = true
 		for i in 120:
