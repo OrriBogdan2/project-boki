@@ -24,7 +24,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **Passive: Marks.** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Bola 1. The fifth Mark pays out Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
 - **Shift: Vault** (6.5s a charge). A 3.4m flip (shots pass through it) and +30% speed until your next hit (2s at most). Your next weapon hit within 3s is Primed: +10 damage, 2 Marks and Shred (+15% damage taken for 3s). Landing it resets Vault.
 - **RMB: Bola** (12s):
-  - tap: Throw a spinning Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13.
+  - tap: Throw a spinning Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
   - in the air: Thrown from the air the same way.
 - **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
@@ -74,7 +74,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **Passive: Rage.** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 - **Shift: Rampage** (9s a charge). A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
 - **RMB: Smash** (3s):
-  - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is the payoff (a harder hit, no word); at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
+  - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
   - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
@@ -305,7 +305,7 @@ One rule for what stops what: `content/rules/blockers.json`, read by `scripts/co
 
 - Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).
 - Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.
-- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`) (no words float when a hook, spike, parry, tether snap or trap goes off: the hit, the ring and the sound say it).
+- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`), plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.
 
 ## Bots
 

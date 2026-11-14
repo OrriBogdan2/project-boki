@@ -2723,12 +2723,15 @@ static func revive_beacon() -> Node3D:
 	var root := Node3D.new()
 	var stone := toon(Color("8f9aa0"))
 	var glow := Color("8fffc0")
-	part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
-	part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
-	for i in 4:
-		var a := TAU * i / 4.0 + 0.4
-		part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
-		part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	if ItemArt.add(root, "revive_beacon") == null:    # the sculpted dais and posts; the crystal stays ours
+		part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
+		part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
+		for i in 4:
+			var a := TAU * i / 4.0 + 0.4
+			part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
+			part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	else:
+		ItemArt.beacon_strips(root, toon(glow, false, 0.9))
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var cr := Node3D.new(); cr.position = Vector3(0, 1.7, 0); g.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)
@@ -2750,26 +2753,28 @@ static func shrine() -> Node3D:
 	var stone_l := toon(Color("cfc8bb"))
 	var moss := toon(Color("7fa65a"), false)
 	var glow := Color("8fe3c8")
-	# a two-step hexagonal dais with a carved, glowing inlay
-	if Flora.v2():
-		# (cut stones laid in two rings, a glowing inlay, a carved round altar)
-		ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
-		ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
-		part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
-	else:
-		part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
-		part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
-		part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
-	# three leaning standing stones with moss on top
-	for i in 3:
-		var a := TAU * i / 3.0 + 0.5
-		var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
-		var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
-		part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
-		part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
-		part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
+	# a two-step hexagonal dais with a carved, glowing inlay and three leaning standing stones (sculpted when
+	# art/items/shrine.glb is there; the crystal stays ours: it turns, and hides once the shrine is used)
+	if ItemArt.add(root, "shrine") == null:
+		if Flora.v2():
+			# (cut stones laid in two rings, a glowing inlay, a carved round altar)
+			ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
+			ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
+			part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
+		else:
+			part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
+			part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
+			part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
+		# three leaning standing stones with moss on top
+		for i in 3:
+			var a := TAU * i / 3.0 + 0.5
+			var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
+			var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
+			part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
+			part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
+			part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
 	# the healing crystal floats and turns above the dais
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 1.45, 0); root.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.42, 0.62, 0.42)
@@ -2858,6 +2863,8 @@ static func gem() -> Node3D:
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
+	if ItemArt.add(root, "armor_shard", -0.05, Color.WHITE, 0.3):
+		return root
 	var pm := PrismMesh.new(); pm.size = Vector3(0.22, 0.34, 0.08)
 	var m := toon(Color("7ac8ff"), false, 0.8)
 	part(root, pm, m, Vector3(0, 0.2, 0))

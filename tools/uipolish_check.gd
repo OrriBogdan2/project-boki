@@ -11,23 +11,27 @@ extends RefCounted
 ##   6. building the theme logs no engine error (every startup logged one, so it was the last line
 ##      of each GPU bench crash and read as its cause)
 
+## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its item rows
+## (LootHold, split out of hud.gd) and reserved files.
+const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/loot_hold.gd", "scripts/ui/kin_reveal.gd"]
+const WORD_ALLOWED := ["scripts/arch/kits/gil_kit.gd", "scripts/match/fx.gd"]  # the count, and the function itself
+const STYLE_MODULE := [
+	"scripts/ui/ui.gd",
+	"scripts/ui/ui_theme.gd",
+	"scripts/ui/ui_frame.gd",
+	"scripts/ui/hud_style.gd",
+]
 var main: Node
 var fails := 0
 var n := 0
 
-## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its item rows
-## (LootHold, split out of hud.gd) and reserved files.
-const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/loot_hold.gd", "scripts/ui/kin_reveal.gd"]
-const WORD_ALLOWED := ["scripts/arch/kits/gil_kit.gd", "scripts/match/fx.gd"]    # the count, and the function itself
-const STYLE_MODULE := [
-	"scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/hud_style.gd",
-]
 
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1
 	printerr("UIPOLISH %-58s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -41,20 +45,34 @@ func run(main_node: Node) -> void:
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## Counts the engine errors logged while it is added (OS.add_logger).
-class ErrorCount extends Logger:
+class ErrorCount:
+	extends Logger
 	var errors: Array[String] = []
 
-	func _log_error(_function: String, _file: String, _line: int, code: String, rationale: String,
-			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+	func _log_error(
+		_function: String,
+		_file: String,
+		_line: int,
+		code: String,
+		rationale: String,
+		_editor_notify: bool,
+		_error_type: int,
+		_script_backtraces: Array[ScriptBacktrace]
+	) -> void:
 		errors.append(rationale if rationale != "" else code)
+
 
 func _theme_builds_clean() -> void:
 	var count := ErrorCount.new()
 	OS.add_logger(count)
-	UiTheme.build()
+	var t := UiTheme.build()
 	OS.remove_logger(count)
 	ok("theme builds without an engine error", count.errors.is_empty(), "; ".join(count.errors))
+	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
+	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
+
 
 # ------------------------------------------------------------------ 1, 2: the settings
 ## path -> source text of every script under dir.
@@ -67,10 +85,11 @@ func _sources(dir: String) -> Dictionary:
 		out.merge(_sources(dir + "/" + d))
 	return out
 
+
 ## Lines that use `key`, minus its DEFAULTS entry and the settings menu's own rows.
 func _uses(src: Dictionary, key: String) -> Array:
 	var out: Array = []
-	var quoted := "\"%s\"" % key
+	var quoted := '"%s"' % key
 	for path in src:
 		var in_defaults := false
 		for line in String(src[path]).split("\n"):
@@ -85,8 +104,10 @@ func _uses(src: Dictionary, key: String) -> Array:
 				out.append(path)
 	return out
 
+
 func _is_menu_row(line: String) -> bool:
 	return line.contains("_toggle(") or line.contains("_choice(") or line.contains("_slider(")
+
 
 func _settings_read(src: Dictionary) -> void:
 	var unread: Array = []
@@ -97,13 +118,14 @@ func _settings_read(src: Dictionary) -> void:
 	var tabs := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 	ok("the settings menu shows the new tabs", Overlay.SETTINGS_TABS == tabs)
 
+
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
-		var reads: Array = _uses(src, String(k)).filter(func(p):
-			return p != "scripts/core/settings.gd")
+		var reads: Array = _uses(src, String(k)).filter(func(p): return p != "scripts/core/settings.gd")
 		var gone := not Settings.DEFAULTS.has(k) and not Settings.v.has(k)
 		ok("removed '%s': not a setting, nothing reads it" % k, gone and reads.is_empty(), str(reads))
 		ok("removed '%s': get_v gives nothing (off)" % k, Settings.get_v(String(k)) == null)
+
 
 ## A settings file from before the audit loses the removed keys on the next start, and keeps the rest.
 func _migration() -> void:
@@ -132,6 +154,7 @@ func _migration() -> void:
 	else:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
 
+
 # ------------------------------------------------------------------ 3, 4: the look
 func _static_styles(src: Dictionary) -> void:
 	var stray: Array = []
@@ -158,6 +181,7 @@ func _static_styles(src: Dictionary) -> void:
 	ok("no callout words float over the world (fx.word only for Gil's count)", words.is_empty(), str(words))
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
 
+
 func _theme_boxes() -> Dictionary:
 	var out := {}
 	var t := UI.theme()
@@ -165,6 +189,7 @@ func _theme_boxes() -> Dictionary:
 		for nm in t.get_stylebox_list(type):
 			out[t.get_stylebox(nm, type)] = true
 	return out
+
 
 ## Panels and buttons under `root` whose box doesn't come from the menu look: [path, ...].
 func _off_look(root: Node, ours: Dictionary) -> Array:
@@ -184,6 +209,7 @@ func _off_look(root: Node, ours: Dictionary) -> Array:
 		out.append(String(root.get_path_to(ctl)) + (" (%s)" % owner_script.resource_path if owner_script else ""))
 	return out
 
+
 ## Opens `screen` and waits until it is the new, built, uncovered screen. Under the ink wipe
 ## (xvfb, real play) `main.current` is still the outgoing screen, or gone, for the first second.
 func _go(screen: String) -> Node:
@@ -195,6 +221,7 @@ func _go(screen: String) -> Node:
 		if i >= 9 and cur and cur.get_instance_id() != old_id and not main.fade.covered and not cur.get("building"):
 			break
 	return main.current
+
 
 func _screens() -> void:
 	var dt := ThemeDB.get_default_theme()
@@ -214,7 +241,7 @@ func _screens() -> void:
 		ok("settings > %s: every box is the menu look" % t, off.is_empty(), str(off))
 		var switches := Overlay.root.find_children("*", "CheckButton", true, false)
 		var models := switches.filter(func(c): return c.text == "3D model")
-		ok("settings > %s: no per-Warden \"3D model\" switch" % t, models.is_empty())
+		ok('settings > %s: no per-Warden "3D model" switch' % t, models.is_empty())
 	Overlay.close()
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
@@ -236,8 +263,14 @@ func _screens() -> void:
 	for t in ["Harvest ready", "Harvest ready", "Egg hatched", "A", "B", "C", "D", "E", "F", "G"]:
 		UI.toast(host, t)
 	var lane := MsgLane.of(host)
-	ok("toast: a few at a time, repeats merged, the queue capped", lane.texts().size() == MsgLane.MAX_SHOWN
-		and lane.texts()[0] == "Harvest ready  x2" and lane.waiting() == MsgLane.WAIT_CAP)
+	ok(
+		"toast: a few at a time, repeats merged, the queue capped",
+		(
+			lane.texts().size() == MsgLane.MAX_SHOWN
+			and lane.texts()[0] == "Harvest ready  x2"
+			and lane.waiting() == MsgLane.WAIT_CAP
+		)
+	)
 	host.queue_free()
 	var wide := Control.new()
 	Overlay.root.add_child(wide)
