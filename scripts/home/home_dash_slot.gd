@@ -1,7 +1,7 @@
 class_name HomeDashSlot
 extends Control
 ## The dash slot at home (farm, town, house): the match bar's DashSlot, drawn by the same code from the
-## same rules (Home.dash, a DashState like the Hunter's).
+## same numbers (the home's mirror of the Hunter's dash state: Home.dash_charges, ex_cd, _dodge()).
 ## It plays the part of Hud for HudSlot: the per-slot animation state the slot code expects lives here.
 ## In the garden nothing there needs a dash, so the slot stays away until the player's first dash.
 
@@ -34,7 +34,12 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	hover_spots.clear()
-	var s := DashSlot.of_state(home.dash_rules())
+	var dg: Dictionary = home._dodge()
+	var dd := Content.class_dodge(Data.class_of_save())
+	var icon: String = dd.icon if dd else "dash"
+	var col: Color = dd.color if dd else Color("bfe6ff")
+	var cap := int(dg["charges"])
+	var s := DashSlot.src(home.dash_charges, cap, float(dg["cd"]), home.ex_cd, float(dg["ex_cd"]), icon, col)
 	var r := Rect2(Vector2((size.x - SLOT) * 0.5, size.y - BOTTOM), Vector2(SLOT, SLOT))
 	DashSlot.draw(self, r, s)
 

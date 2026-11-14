@@ -173,6 +173,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if rank("dash") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
 
+## A third barge charge: he chains several short, fast shoves in a row.
+func extra_dashes() -> float: return 1.0
+
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
@@ -784,6 +787,10 @@ func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	h.roll_speed = air_dist / air_t
 	if not keep_pose: play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
+
+## The air pounce is its own slot (source: Brute Dash (Air), 12.5s, 2s less per rank), apart from the ground charges.
+func long_dash_cd() -> float:
+	return super.long_dash_cd() - float(dash_def()["air"]["rank_cut"]) * float(rank("dash") - 1)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
 func _tick_stop(dt: float) -> void:

@@ -83,10 +83,7 @@ var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
 var ammo := 12
 var reload_t := 0.0
 var fire_cd := 0.0
-var dash := DashState.new()     # charges + long-dash cooldown, the rules home shares (DashState)
-var dashes: float:
-	get: return dash.charges
-	set(v): dash.charges = v
+var dashes := 2.0
 var roll_dir := Vector2.ZERO
 var inv_t := 0.0
 var coyote := 0.0
@@ -372,12 +369,14 @@ func _chase_mod(mv: Vector2) -> float:
 func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
-func dash_rules() -> DashState: return dash.use(cdat, dodge_def, ak.d if ak else {})
-func max_dashes() -> float: return dash_rules().cap(float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0))
+func max_dashes() -> float:
+	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
+	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
-	return dash_rules().regen(ability_level("dash"), owner_stat("dodge_regen") + gear_stat("dodge"))
+	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
+	return base * (ak.dash_k() if ak else 1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:
@@ -918,9 +917,7 @@ func glider_sfx(which: String) -> void:
 ## effect list (the heavy class's charge shoves people).
 ## Shift, as in Supervive: a short dash, and a long one (its own, longer cooldown) when you're in
 ## the air or the short one is still recharging.
-var ex_cd: float:
-	get: return dash.air_cd
-	set(v): dash.air_cd = v
+var ex_cd := 0.0
 var used := {}                  # slot -> times you pressed it and it went off (the tutorial reads this)
 var hit_heat_t := 0.0           # a moment after being hit while gliding, the glider heats twice as fast
 var ex_next := false
@@ -1045,7 +1042,7 @@ func do_dash() -> void:
 		if ex_cd > 0.0:
 			_ab_feedback("dash", "deny")
 			return
-		ex_cd = dash_rules().air_max()
+		ex_cd = float(cdat.get("ex_cd", EX_DASH_CD))
 		ex_next = true
 		gliding = false
 	else:
@@ -1864,7 +1861,8 @@ func sim(dt: float) -> void:
 		reload_t -= dt
 		if reload_t <= 0.0:
 			ammo = wpn["mag"]
-	dash.tick(dt, max_dashes(), dash_regen())
+	if dashes < max_dashes():
+		dashes = minf(max_dashes(), dashes + dt / dash_regen())
 	_refresh_kin_stats()
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:

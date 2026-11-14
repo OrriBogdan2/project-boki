@@ -56,7 +56,6 @@
 	},
 	"dash": {
 		"id": "rinkrun",
-		"long": false,
 		"name": "Skate",
 		"icon": "dash",
 		"col": "#bff7ef",

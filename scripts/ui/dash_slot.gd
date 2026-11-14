@@ -4,7 +4,7 @@ extends RefCounted
 ## ordinary ability slot (HudSlot.ab_slot: icon, dark sweep, countdown, red frame, key pill) with a pip
 ## per charge that fills as the next one recharges, a countdown for that next charge, a flash and a soft
 ## tick when a charge returns, and a small diamond for the long air dash. Both callers hand it the same
-## numbers (src) from the same DashState: a match from the Hunter (of_hunter), home from its own (of_state).
+## numbers (src): a match from the Hunter (of_hunter), the farm from its mirror of the same state.
 
 const PIP_H := 4.0                      # px, a charge pip's height
 const PIP_Y := 16.0                     # px from the slot's bottom edge to the pips (clears the key pill)
@@ -34,18 +34,9 @@ static func of_hunter(h: Hunter) -> Dictionary:
 	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"],
 		not h.grounded)
 
-## Home's dash (rank 1, no match modifiers): the same rules the Hunter reads, and the kit's (else class's) look.
-static func of_state(st: DashState) -> Dictionary:
-	var dd := st.dash_def()
-	var icon := String(dd.get("icon", st.dodge.icon if st.dodge else "dash"))
-	var col: Color = st.dodge.color if st.dodge else AIR_COL
-	if dd.has("col"):
-		col = Color(String(dd["col"]))
-	return src(st.charges, int(st.cap()), st.regen(), st.air_cd, st.air_max() if st.has_long() else 0.0, icon, col)
-
 ## How long the air dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func air_cd_of(h: Hunter) -> float:
-	var cd: float = h.ak.long_dash_cd() if h.ak else h.dash_rules().air_max()
+	var cd: float = h.ak.long_dash_cd() if h.ak else float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD))
 	return maxf(0.01, cd)
 
 ## The whole charges and the seconds until the next one, from a src.

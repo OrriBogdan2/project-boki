@@ -1120,7 +1120,8 @@ var gliding := false
 var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
 var dash_t := 0.0
 var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
-var dash := DashState.new()    # your hero's dash charges and long dash, by the match Hunter's rules (DashState)
+var dash_charges := 2.0
+var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
@@ -1168,6 +1169,8 @@ var climb := {}                # (unused since the ledge float; kept for anythin
 var lfl := {}
 var _mv := Vector2.ZERO
 
+## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
+## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
 ## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
@@ -1185,8 +1188,19 @@ func _keep_off_hub(c) -> void:
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
-func dash_rules() -> DashState:
-	return dash.use_hero(Data.class_of_save(), String(Save.d.get("arch", "")))
+func _dodge() -> Dictionary:
+	var ck := Data.class_of_save()
+	var dd := Content.class_dodge(ck)
+	var cdat: Dictionary = Data.CLASSES.get(ck, {})
+	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
+		"ex_cd": float(cdat.get("ex_cd", Hunter.EX_DASH_CD)), "ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
+	if dd:
+		out["charges"] = dd.charges; out["cd"] = dd.cooldown
+		for e in dd.effects:
+			if typeof(e) == TYPE_DICTIONARY and String(e.get("type", "")) == "dash":
+				out["speed"] = float(e.get("speed", out["speed"])); out["time"] = float(e.get("time", out["time"]))
+				break
+	return out
 
 func dashing() -> bool:
 	return dash_t > 0.0
@@ -1194,14 +1208,15 @@ func dashing() -> bool:
 ## Shift, by the match's rules (Hunter.do_dash): the short dash while you have a charge and are on
 ## the ground; in the air or with the charges spent, the long dash if it's off cooldown.
 func try_dash(mv: Vector2, air: bool) -> bool:
-	var dg := dash_rules().shape()
+	var dg := _dodge()
 	var dir := mv if mv.length() > 0.1 else Vector2(-sin(pface), -cos(pface))
-	var long := air or dash.charges < 1.0
-	if (long and not dash.has_long()) or not dash.spend(long):
-		return false
-	if not long:
+	if not air and dash_charges >= 1.0:
+		dash_charges -= 1.0
 		start_dash(dir, float(dg["speed"]), float(dg["time"]))
 		return true
+	if ex_cd > 0.0:
+		return false
+	ex_cd = float(dg["ex_cd"])
 	var et := float(dg["ex_time"])
 	start_dash(dir, float(dg["ex_dist"]) / maxf(0.01, et), et)
 	pvy = maxf(pvy, 0.0)
@@ -1230,7 +1245,9 @@ func _move_player(d: float) -> void:
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
-	dash.tick(d, dash_rules().cap(), dash.regen())
+	var dg := _dodge()
+	dash_charges = minf(float(dg["charges"]), dash_charges + d / maxf(0.1, float(dg["cd"])))
+	ex_cd = maxf(0.0, ex_cd - d)
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
 	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match

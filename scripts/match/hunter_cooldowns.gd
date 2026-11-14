@@ -9,6 +9,7 @@ static func tick(h: Hunter, dt: float) -> void:
 	h.weak_t = maxf(0.0, h.weak_t - dt)
 	h.dash_buf = maxf(0.0, h.dash_buf - dt)
 	h.hit_heat_t = maxf(0.0, h.hit_heat_t - dt)
+	h.ex_cd = maxf(0.0, h.ex_cd - dt)
 	h.reveal_t = maxf(0.0, h.reveal_t - dt)
 	h.inv_t = maxf(0.0, h.inv_t - dt)
 	h.fire_cd = maxf(0.0, h.fire_cd - dt)
