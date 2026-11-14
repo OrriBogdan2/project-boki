@@ -27,6 +27,9 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var coyote_s: float = _phys["coyote_s"]
+static var jump_buffer_s: float = _phys["jump_buffer_s"]
+static var sneak_speed: float = _phys["sneak_speed"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -189,3 +192,10 @@ static func caught(dashing: bool, b1: float, b2: float) -> bool:
 	if dashing:
 		return b1 > 0.0 and b2 > 0.0
 	return b1 > 0.0 or b2 > 0.0
+
+## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
+## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
+## `height` is metres above the ground.
+static func near_landing(vy: float, height: float) -> bool:
+	var lead := jump_buffer_s + 0.02
+	return vy < 0.0 and height < maxf(0.9, (0.5 * Hunter.H_GRAV * lead - vy) * lead)
