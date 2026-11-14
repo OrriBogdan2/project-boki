@@ -281,7 +281,8 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
-		out.append("Fused %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+		var which := Settings.key_cap("signature") if slot == "active" else "auto ability"
+		out.append("Fused %s: %s" % [which, ", ".join(bits)])
 	return out
 
 ## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).
@@ -291,10 +292,10 @@ static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the Fusion ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
 	var a: Dictionary = fd["aug"]
 	out.append("You keep your own abilities and they get stronger:")
-	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])
-	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
-	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
-	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("fire"), a["lmb"]["name"], a["lmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("secondary"), a["rmb"]["name"], a["rmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("signature"), a["e"]["name"], a["e"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("dash"), a["dash"]["name"], a["dash"]["desc"]])
 	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
 	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
 	return out
