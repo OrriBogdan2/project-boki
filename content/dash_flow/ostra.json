@@ -75,40 +75,5 @@
 			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
 			"source": "Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
-	},
-	"into_cast": {
-		"lmb": {
-			"at": [0.05, 0.6],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a shot in the clip (briefs/hero-ref/ostra.md)."}
-		},
-		"lmb_hold": {
-			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside a held shot in the clip (briefs/hero-ref/ostra.md)."}
-		},
-		"rmb": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "Snap stun, then the bomb on the stunned dummy is shown in the source (briefs/hero-ref/ostra.md:112, 0419-0429): ours fires. Matches."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its RMB in the clip (briefs/hero-ref/ostra.md)."}
-		},
-		"e": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md)."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Void presses nothing else inside its E in the clip (briefs/hero-ref/ostra.md)."}
-		},
-		"x": {
-			"at": [0.05, 1.2],
-			"lmb": {"windup": "drop", "recovery": "fire", "source": "Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches."},
-			"lmb_hold": {"windup": "drop", "recovery": "fire", "source": "Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches."},
-			"rmb": {"windup": "drop", "recovery": "fire", "source": "Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches."},
-			"e": {"windup": "drop", "recovery": "fire", "source": "Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches."}
-		}
 	}
 }

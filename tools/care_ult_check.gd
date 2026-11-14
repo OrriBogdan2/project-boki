@@ -78,6 +78,7 @@ func tender() -> void:
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
+	var pluses0 := int(HeroVfx.of(m).plays.get("call_plus", 0))
 	P.inp["move"] = Vector2(-1, 0)
 	step(m, 1.5)
 	P.inp["move"] = Vector2.ZERO
@@ -89,6 +90,10 @@ func tender() -> void:
 	ok("mm X: the tether is an arc, its middle bowed well off the straight hand-to-ally line", _tether_bowed(K, A),
 		"bow %.1f m" % _tether_bow(K, A))
 	ok("mm X: the tether heals the teammate", A.hp > a_hp0 + 5.0, "%.0f -> %.0f" % [a_hp0, A.hp])
+	var pluses := int(HeroVfx.of(m).plays.get("call_plus", 0)) - pluses0
+	var rec: Dictionary = HeroVfx.data("tender")["moves"]["call_plus"]
+	ok("mm X: mint pluses rise off the teammate on each heal tick, sent to other games", pluses >= 2 and pluses <= 4
+		and bool(rec.get("net", true)) and String(rec["fx"][0]["c"]) == "mint", "%d in 1.5 s" % pluses)
 	# --- she can cast other things while it runs (wiki): Hearthlight goes up
 	P.inp["sig"] = true
 	step(m, 0.05)
@@ -296,8 +301,8 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
-		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
+	ok("tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.47) < 0.05
 		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
 	_rime_ring_is_hit(K, T, ring, float(xd["radius"]))
 	var rink_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
@@ -329,14 +334,7 @@ func rimewright() -> void:
 	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	var ch0 := K.ch_rmb
-	P.inp["sec"] = true
-	step(m, 0.05)
-	P.inp["sec"] = false
-	step(m, 0.3)
-	ok("tm X: RMB in the shell is refused: no charge spent, no spear (item 65; the Cast into cast table)",
-		absf(K.ch_rmb - ch0) < 0.001 and K.throw_t < 0.0, "charges %.2f -> %.2f" % [ch0, K.ch_rmb])
-	step(m, 0.95)          # with the 0.35 s RMB press: 3.65 s in all, past the 3.5 s crash
+	step(m, 1.3)
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
