@@ -316,7 +316,8 @@ func _on_rock() -> void:
 	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
 	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
 	ok(plopped, "a cast's plop showed on the water during the session")
-	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
+	ok(gf.run == null and is_instance_valid(gf.card) and gf.card.name == "GameResultCard",
+		"it ends with the shared result card (%.1f s, pressing every second)" % t)
 	Content.rules("farm_build")["base_mode"] = false
 
 ## The partner walks over, then a forced bite and catch: where it sits, where it looks, how it leans and hops.

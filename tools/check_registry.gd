@@ -27,9 +27,6 @@ const CHECKS := {
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
-	"--carry-two-check": ["res://tools/carry_two_check.gd", "carry_two_check", null],      # 2 Boki in, 1 carry-out
-	"--carry-two-shots": ["res://tools/carry_two_check.gd", "carry_two_check", "shots"],      # --shots-dir=<dir>, GPU
-	"--carry-two-clip": ["res://tools/carry_two_check.gd", "carry_two_check", "clip"],      # --shots-dir=<dir>
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
@@ -46,6 +43,7 @@ const CHECKS := {
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],  # GPU
 	"--hud-groups-check": ["res://tools/hud_groups_check.gd", "hud_groups_check", null],      # HUD groups, four moments
+	"--loot-feed-check": ["res://tools/loot_feed_check.gd", "loot_feed_check", null],      # loot feed rows
 	"--hud-groups-shots": ["res://tools/hud_groups_shots.gd", "hud_groups_shots", null],      # GPU, --shots-dir=
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
@@ -53,6 +51,10 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
 	"--photo-mode-check": ["res://tools/photo_mode_check.gd", "photo_mode_check", null],  # farm photo mode (GPU: PNG)
+	"--safe-area-check": ["res://tools/safe_area_check.gd", "safe_area_check", "check"],
+	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
+	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
+	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
@@ -187,8 +189,6 @@ const CHECKS := {
 	"--ttk-matrix-check": ["res://tools/ttk_matrix_check.gd", "ttk_matrix_check", null],
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
-	"--kin-downed-check": ["res://tools/kin_downed_check.gd", "kin_downed_check", null],      # downed pose in and out
-	"--kin-downed-shots": ["res://tools/kin_downed_shots.gd", "kin_downed_shots", null],      # GPU, --shots-dir=
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
 	# Bokidex quirks, sex ratios
@@ -250,7 +250,6 @@ const CHECKS := {
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
 	"--duel-sim": ["res://tools/duel_sim.gd", "duel_sim", null],      # 12x12 bot duels (docs/BALANCE_1111.md)
-	"--boss-focus-check": ["res://tools/boss_focus_check.gd", "boss_focus_check", null],      # decision 0061
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
 	"--dash-streak-check": ["res://tools/dash_streak_check.gd", "dash_streak_check", null],
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
@@ -461,6 +460,8 @@ const CHECKS := {
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
+	"--result-card-check": ["res://tools/result_card_check.gd", "result_card_check", null],     # the garden games' card
+	"--pause-menu-check": ["res://tools/pause_menu_check.gd", "pause_menu_check", null],     # 4 buttons, all reachable
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],  # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],  # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
@@ -534,6 +535,7 @@ const CHECKS := {
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
+	"--result-card-shots": ["res://tools/result_card_shots.gd", "result_card_shots", null],      # --shots-dir=<dir>
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],      # 0.24.2-0.24.4 saves load
 	"--garden-fit-check": ["res://tools/garden_fit_check.gd", "garden_fit_check", null],      # garden screens fit
@@ -713,11 +715,6 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
-	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
-	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
-	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
-	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
-	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

@@ -42,15 +42,6 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
-## armor (`content/rules/armor.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | Armor tiers, matched to the source (docs/ARMOUR_PARITY.md; read by ArmorRules into Hunter.ARMOR_TIERS). Every hunter starts on tier 0 and levels up by dealing damage (xp = damage dealt to reach the tier). While durability is above 0, a hit is cut by dr (the share blocked); what gets through hurts health and wears durability by the same amount. dur = durability in our health units: the source's durability x 0.14 (our Medium 145 HP / the source's medium ~1,040 HP), so the same for every class. xp = the source's 2,000 / 3,600 / 12,000 / 20,000 x 0.14. col = the bar colour. |
-| tiers | [{"name": "Common", "col": "dfe9f7", "xp": 0, "dr": 0.2, "dur": 350}, {"name": "Uncommon", "col": "7fe08a", "xp": 280, "dr": 0.25, "dur": 350}, {"name": "Rare", "col": "5fb6ff", "xp": 504, "dr": 0.3, "dur": 350}, {"name": "Epic", "col": "c27cff", "xp": 1680, "dr": 0.35, "dur": 420}, {"name": "Legendary", "col": "ffbf3a", "xp": 2800, "dr": 0.35, "dur": 490}] |
-
 ## audio_mix (`content/rules/audio_mix.json`)
 
 
@@ -640,7 +631,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | Setting | Value |
 |---|---|
 | _doc | Everything you can smash (scripts/match/breakables.gd). Any single hit breaks a breakable: a shot, a melee swing, an ability, a Boki strike, a blast or a dash through it; none has a health pool. 'weight' is the share of the random scatter on a map. 'material' picks the debris colours (see 'debris') and the break sound. 'loot' is rolled when it breaks: gems [min, max] worth gem_base each, odds for a tonic, armor shards (armor_amount) and a seed, and 'table' names a gear drop table. An 'explosive' kind is lit by its hit instead, burns 'fuse' seconds (or 'chain_fuse' when another blast lit it) with a ground ring showing 'radius', then blows: 'damage' at the middle falling to half at the edge, knockback and lift in m/s, 'shake' camera trauma. |
-| debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}, "stone": {"colors": ["8a8494", "5e5866", "b4aebc"], "sound": "br_crumble", "pitch": 0.8}} |
+| debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}} |
 | kinds | {"crate": {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}}, "pot": {"weight": 0.3, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}}, "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}}, "keg": {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {}, "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22, "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}} |
 
 ## build_sfx (`content/rules/build_sfx.json`)
@@ -694,12 +685,8 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | scan_s | 4 |
 | range | 3.5 |
 | cancel_range | 5 |
-| carry_out | 1 |
-| carry_out_doc | Carry-out slots (owner 11-11, carry 2 in, 1 extra out): Boki claimed in the match (scanned wild, or taken from a deathbox) a hunter can ride home in Hunter.caught. No passive, no summon. Full: a scan is blocked and the kin points to a teammate with room. |
-| stolen | 1 |
-| stolen_doc | Stolen-Boki slots: other hunters' own Boki (lost_from set) a hunter can hold in Hunter.caught. |
-| wisp_cap | 4 |
-| wisp_cap_doc | Most Boki one hunter holds at once: lead + second + carry-out + stolen. |
+| box_capacity | 3 |
+| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
 | noise_every_s | 0.5 |
 | hear_range | 26 |
 | rise_pitch | [0.8, 1.6] |

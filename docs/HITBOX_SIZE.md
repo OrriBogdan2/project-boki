@@ -6,16 +6,16 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 
 | Archetype | Warden | x standard | `hit_r` (m) | Why |
 |---|---|---|---|---|
-| bulwark | Breaker | 1.25 | 0.500 | tallest and widest: the heavy class's 0.50 m (DECISIONS, owner Nov 4; past the 1.15 cap; the hull itself is 0.95 m) |
+| bulwark | Mossy | 1.15 | 0.460 | tallest and widest (band cap; the hull itself is 0.95 m) |
 | dredge | Grimble | 1.13 | 0.452 | hulking |
-| juggernaut | Kael | 1.11 | 0.445 | broad |
-| gunslinger | Vex | 1.00 | 0.400 | the source's medium |
+| juggernaut | Kael | 1.07 | 0.428 | broad |
+| gunslinger | Vex | 1.04 | 0.416 | broad |
 | ostra | Motley | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
 | mage | Sparkle | 1.00 | 0.400 | average |
 | archer | Lace | 0.98 | 0.392 | average, slim |
-| dolm | Tenzo (Breah's base) | 1.03 | 0.412 | short and blocky in the source |
+| dolm | Tenzo (Breah's base) | 0.97 | 0.388 | lean |
 | thief | Sable | 0.96 | 0.384 | lean |
-| rimewright | Neve | 0.91 | 0.362 | tall but half a medium's breadth |
+| rimewright | Neve | 0.95 | 0.380 | slight |
 | ashwick | Cinder | 0.94 | 0.376 | low and hunched |
 | tender | Meeko | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
 

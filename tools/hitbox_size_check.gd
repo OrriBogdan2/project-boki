@@ -9,15 +9,8 @@ const BAND := Vector2(0.85, 1.15)
 # height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
 const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.40}
 const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.87}
-## Breaker's hit radius is the heavy class's 0.50 m (DECISIONS, owner Nov 4, after item 46): 1.25 x standard.
-const BAND_TOP := {"bulwark": 1.25}
-## Each hit_r (m) set from the source hero's height and breadth (docs/ARCHETYPES.md "Body and hitbox parity").
-const PARITY := {
-	"bulwark": 0.5, "dredge": 0.452, "juggernaut": 0.445, "gunslinger": 0.4, "ostra": 0.412, "mage": 0.4,
-	"archer": 0.392, "dolm": 0.412, "thief": 0.384, "rimewright": 0.362, "ashwick": 0.376, "tender": 0.34,
-	"gil": 0.38,      # ours, no source hero: main's value
-}
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -89,10 +82,8 @@ func run(main: Node) -> void:
 		var cls := Arch.weight(a)
 		h.reclass(cls, a)
 		var hr := Arch.hit_r(a, Data.CLASSES[cls])
-		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * float(BAND_TOP.get(a, BAND.y)) + 0.0005
+		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * BAND.y + 0.0005
 		ok(in_band, "%s: hit_r %.3f is %.3f x standard (band 0.85-1.15)" % [a, hr, hr / std])
-		var want := float(PARITY.get(a, -1.0))
-		ok(absf(hr - want) < 0.0005, "%s: hit_r %.3f is the source-parity value %.3f" % [a, hr, want])
 		ok(absf(h.r - hr) < 0.0001, "%s: the hunter's r is its hit_r" % a)
 		var ring := h.model.get_node("TeamRing") as MeshInstance3D
 		var drawn := (ring.mesh as PlaneMesh).size.x * 0.5 * ring.global_transform.basis.x.length()

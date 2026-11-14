@@ -64,9 +64,11 @@ const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
-## Armor, as in Supervive: it takes its tier's share off every hit (ARMOR_TIERS) for as long as it
-## has durability left; what gets through hurts your health and wears the durability down by the same
+## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
+## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
+const ARMOR_DR := 0.2
+const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -145,7 +147,7 @@ func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
-var kin2: Ent = null            # the second kin: in the satchel, its carry passive on (KinSlots), swapped in
+var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
 var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, giant, pulse, form, phase, kit, shell...} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends
@@ -286,7 +288,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	if control != "local":
 		bot_look = PlayerLook.random()
 	max_hp = cdat["hp"]; hp = max_hp
-	max_armor = float(ARMOR_TIERS[armor_tier][4]); armor = max_armor
+	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	# the belt issue and the equal pack size (Equal.pack_slots)
 	UtilityBelt.issue(self)
 	pack_cap = Equal.base_pack()
@@ -327,7 +329,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	if KinMerge.active(self): KinMerge.end(self, "broken")
 	max_hp = float(cdat["hp"]) + kin_hp_added; hp = max_hp
 	LevelGrowth.reset(self)      # your levels' health comes along to the new class
-	max_armor = float(ARMOR_TIERS[armor_tier][4]); armor = max_armor
+	max_armor = round(float(cdat["hp"]) * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
@@ -412,7 +414,12 @@ func owner_stat(stat: String) -> float:
 	return float(_kst.get(stat, 0.0))
 
 func _refresh_kin_stats() -> void:
-	var out := KinSlots.carry_stats(self)      # the lead's and the second's carry passives, no double stack
+	var out := {}
+	var k: Kin = kin
+	if k and k.ks:
+		if kin_carry_on():
+			for ps in k.ks.carry_passives:
+				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, k.carry_k)
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -547,7 +554,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat", "zone"]:
-		d *= 1.0 - float(ARMOR_TIERS[armor_tier][3])
+		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
 		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
 		if armor <= 0.0:
@@ -1681,7 +1688,7 @@ func _ab_feedback(slot: String, kind: String) -> void:
 	m.hud.ability_feedback(slot, kind)
 	m.sfx("skill", null, -9.0, 1.15)
 
-## The swap key: your lead and second Boki trade places (KinSlots). The second rides in your satchel.
+## X: swap which of your two kin is out. The benched one rests in your satchel.
 func swap_kin(force := false) -> void:
 	if kin2 == null or riding or out or (not force and (swap_cd > 0.0 or downed)):
 		return
@@ -2834,11 +2841,13 @@ func _gate(key: String, slot: String, fb: String) -> void:
 		else:
 			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
+var base_armor := 50.0
 ## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
-## count a third), and a knock adds a big chunk. Each tier blocks more and may hold more durability
-## (the new durability arrives full). Tier colour shows on everyone's armor bar, so you can read how
-## fed a rival is. Rows: [name, colour, xp to reach, damage reduction, durability] (ArmorRules).
-static var ARMOR_TIERS: Array = ArmorRules.tiers()
+## count a third), and a knock adds a big chunk. Each tier adds plates on top of the base, and the new
+## plates arrive full. Tier colour shows on everyone's armor bar, so you can read how fed a rival is.
+const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0], ["Uncommon", Color("7fe08a"), 220.0], ["Rare", Color("5fb6ff"), 560.0],
+	["Epic", Color("c27cff"), 1000.0], ["Legendary", Color("ffbf3a"), 1600.0]]
+const ARMOR_TIER_BONUS := 0.15     # of base armor per tier above Common
 const ARMOR_KNOCK_XP := 140.0
 var armor_xp := 0.0
 var armor_tier := 0
@@ -2871,7 +2880,7 @@ func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
-	max_armor = float(ARMOR_TIERS[armor_tier][4]) + gear_stat("armor")
+	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 
