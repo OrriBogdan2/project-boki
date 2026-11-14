@@ -68,6 +68,15 @@ across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`B
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
+Wild Boki in a match (`KinWildPose` sets the `pose` meta, `BokiRig.LAYER` answers it with a layer on Flex over the clip,
+bent per body plan by `BODY_FEEL`; no clip is baked, the same for every species): wandering is the walk clip; the first
+hit startles it (`alert`, 0.35 s: tall, rocks back, focused face); then a timid one bolts (`whine`: low, run clip, sad
+face) and a brave one charges (`growl`: lean in, run clip, angry face, the attack clip when it lunges); knocked out
+(`dazed`) it slumps, sways side to side on a slow idle (0.4x) with sleepy lids and never spins or freezes; under the
+scan beam (`scan`) it is lifted by `Capture.dissolve` and stretches with its legs kicking. A client sees dazed and scan
+(state is replicated) but not the startle, bolt or charge (the host alone knows who it is angry at).
+`--wild-boki-states-check` asserts it for all species; `--wild-boki-states-shots --shots-dir=<dir>` draws the row.
+
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
@@ -194,7 +203,45 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | nettlynx | 80% → 23% 4.0 steps/s | 80% → 37% 5.4 steps/s | 82% → 56% 6.0 steps/s | 87% → 71% 6.0 steps/s (6.6) | 1.3 / 1.0 / 1.3 | 0.9 |
 | caecilith | ?% → 55% 6.0 steps/s | ?% → 57% 6.0 steps/s | ?% → 77% 6.0 steps/s | ?% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
 | thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | 0.8 / 0.7 / 0.8 | 2.4 |
+Planted paws (`BokiPlant`, `scripts/match/boki_plant.gd`): the clips swing each leg from the hip on a sine, so a
+paw on the ground slows to a stop at both ends of its step and no single rate keeps it still. Once per species and
+clip, `BokiPlant` reads each paw's step from the clip (from furthest forward to furthest back, and whether a leg steps
+two or three times a loop); every frame, after the clip, `BokiRig` re-times each leg's bones on their own: the stance
+moves the paw back evenly at the Boki's ground speed (found against the body bones where they are now, at the clip's
+own time), the swing brings it forward in the rest of the step. The stance's share of the step follows the speed
+(0.25 to 0.75): at full cadence a paw stays down for less of the step instead of sliding. `STRIDE` and the clip rate
+are unchanged. A paw that does not sweep once back and once forward (zapple's walk hop, kindlewren, mossgrade's
+shuffling middle legs) keeps the clip's timing. It blends in over `FADE` as a walk or run starts and out as it ends.
+Cost: about 10 µs per visible rigged Boki per frame (headless, cindle and lodestick), no allocation.
+
+Slide at scale 1, before (origin/main 0.24.4: measured `STRIDE` rate only) → after (planted paws). What stays over
+25% is at match speeds, where the step is too short even at `MAX_CADENCE` 6 steps/s, plus the gaits `BokiPlant`
+leaves on their own timing (zapple walk, kindlewren, mossgrade) and caecilith, which has no paws. The audit counts a
+foot only when it is down for 2 or more of its 48 slices (`MIN_DOWN`): one slice is the touch-down or lift-off
+itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m/s, bottom row its match speed):
+`docs/art/kin/boki_gait/<id>_before.png` and `_after.png`.
+
+| Boki | 1.5 m/s | 2.4 | 4.4 | match (m/s) | seam idle/walk/run | idle-walk pop |
+|---|---|---|---|---|---|---|
+| cindle | 21% → 2% 2.6 steps/s | 38% → 19% 3.2 steps/s | 38% → 19% 5.9 steps/s | 46% → 26% 6.0 steps/s (6.8) | 1.1 / 1.0 / 1.3 | 0.9 |
+| puddlet | 16% → 23% 3.5 steps/s | 36% → 15% 4.5 steps/s | 42% → 13% 6.0 steps/s | 57% → 36% 6.0 steps/s (6.0) | 1.1 / 1.0 / 1.4 | 0.8 |
+| burrlet | 30% → 9% 4.1 steps/s | 33% → 16% 5.0 steps/s | 49% → 25% 6.0 steps/s | 64% → 47% 6.0 steps/s (6.2) | 1.5 / 1.1 / 1.3 | 0.9 |
+| glintmole | 33% → 4% 4.2 steps/s | 33% → 15% 4.9 steps/s | 46% → 24% 6.0 steps/s | 61% → 46% 6.0 steps/s (6.2) | 1.6 / 1.1 / 1.3 | 0.9 |
+| rimeshrew | 27% → 17% 4.2 steps/s | 40% → 25% 5.5 steps/s | 54% → 30% 6.0 steps/s | 72% → 58% 6.0 steps/s (7.4) | 1.6 / 1.0 / 1.3 | 0.9 |
+| pebbit | 33% → 6% 4.1 steps/s | 33% → 17% 4.7 steps/s | 44% → 25% 6.0 steps/s | 55% → 39% 6.0 steps/s (5.4) | 1.5 / 1.1 / 1.2 | 0.9 |
+| cairnback | 29% → 15% 5.5 steps/s | 40% → 28% 5.0 steps/s | 56% → 37% 6.0 steps/s | 65% → 51% 6.0 steps/s (5.6) | 1.5 / 1.1 / 1.1 | 0.8 |
+| wisplet | 34% → 11% 5.6 steps/s | 43% → 31% 6.0 steps/s | 62% → 62% 6.0 steps/s | 79% → 79% 6.0 steps/s (8.0) | 3.2 / 1.4 / 1.1 | 0.8 |
+| zapple | 59% → 59% 2.7 steps/s | 71% → 19% 3.0 steps/s | 71% → 19% 5.4 steps/s | 69% → 41% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.6 |
+| hivara | 27% → 13% 3.2 steps/s | 36% → 21% 3.6 steps/s | 33% → 21% 6.0 steps/s | 56% → 48% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
+| kestrike | 28% → 14% 6.0 steps/s | 49% → 50% 6.0 steps/s | 68% → 73% 6.0 steps/s | 81% → 84% 6.0 steps/s (7.4) | 0.6 / 1.5 / 1.2 | 0.9 |
+| kindlewren | 30% → 30% 6.0 steps/s | 43% → 43% 6.0 steps/s | 69% → 69% 6.0 steps/s | 81% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 / 1.4 | 0.9 |
+| lodestick | 62% → 30% 6.0 steps/s | 48% → 23% 6.0 steps/s | 70% → 55% 6.0 steps/s | 82% → 74% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
+| marchleaf | 48% → 16% 4.0 steps/s | 41% → 24% 3.0 steps/s | 41% → 24% 5.4 steps/s | 46% → 39% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
+| mossgrade | 51% → 51% 6.0 steps/s | 35% → 35% 4.4 steps/s | 41% → 41% 6.0 steps/s | 57% → 57% 6.0 steps/s (6.0) | 1.5 / 1.1 / 1.2 | 1.4 |
+| nettlynx | 26% → 11% 3.8 steps/s | 33% → 35% 4.8 steps/s | 51% → 30% 6.0 steps/s | 67% → 53% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |
+| thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 8.1 |
 | selenfin | EXEMPT: flyer (fins), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.0 |
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
+| caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |

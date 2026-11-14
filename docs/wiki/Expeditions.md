@@ -113,10 +113,12 @@ Each map and what it rolls is on [Maps and biomes](Maps.md).
 Walled arenas, each sealed by a ward and holding a boss and the **Rare Egg** it guards. Each match
 rolls which lairs are live (the rest lie dormant).
 
-- **Getting in.** Every lair has a **lock dial** at its gate: a needle sweeps round and you press F as
-  it crosses each lit arc, through three or four locks that get faster and tighter. A miss resets the
-  lock, rings a chime that pings you to everyone nearby, and calls guards. Some lairs have a second way
-  in: three **rune pylons** to light (Stormcrown Eyrie) or three **ward stones** to break (the Thornhive).
+- **Getting in.** Every lair's gate is barred by a **Gate Seal**, a wall of stone you break down with
+  sustained damage (2000 health at tier 0: about two minutes alone, about 20 s for a squad of three).
+  It cracks in four stages; each crack drops blocks out of it, shakes the ground, rings out to everyone
+  nearby and calls two guards. Walk away and nothing resets: after 15 s it knits back slowly, but never
+  past its last crack. Some lairs also have three **rune pylons** to light (Stormcrown Eyrie) or three
+  **ward stones** to break (the Thornhive): each one knocks a fifth off the seal.
 - **The fight.** Step past the threshold and the boss wakes and the gate seals behind you for up to 90
   seconds. Everyone within 150 m hears the roar and gets a ping, a shaft of light rises over the lair,
   and the seal's clock floats over the gate, so a squad outside can camp it. Bosses have phases at 66%

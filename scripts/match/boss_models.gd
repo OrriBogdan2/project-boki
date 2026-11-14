@@ -1,6 +1,6 @@
 class_name BossModels
 ## The bodies of the three lair bosses, their ward stones, and the lair's own pieces: the gate, the
-## sealing dome, the dial that opens it, rune pylons and the Rare Egg.
+## sealing dome, the dial that opens it, the seal braced across the gate, rune pylons and the Rare Egg.
 ##   Stone Colossus (colossus)  a KayKit warrior grown huge and turned to stone: moss, boulder pauldrons, gold rune eyes
 ##   Stormcoil      (serpent)   a sky serpent: a long chain of storm-blue coils behind a horned head, swept wings
 ##   Brood Mother   (brood)     a giant hive queen: a spider-legged thorax and a swollen, glowing egg sac
@@ -13,6 +13,7 @@ static func build(kind: String) -> Node3D:
 		"serpent": return serpent()
 		"brood": return brood()
 		"ward": return ward()
+		"gate": return gate_seal()
 	return null
 
 static func _mats_of(n: Node3D, extra: Array) -> Array:
@@ -299,6 +300,68 @@ static func dome(half: float, col: Color) -> Node3D:
 	rim.material_override = Models.ring_mat(Color(col, 0.7), 0.025); rim.position.y = 0.06; rim.name = "Rim"
 	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(rim)
+	return root
+
+## The seal braced across a lair's gate (LairBreach breaks it down): a wall of dressed stone blocks in
+## three columns and four rows ("B<row><col>", row 0 at the bottom), two iron bands, the lair's sigil
+## glowing on its face, and behind it a "Core" of light that shows where blocks have fallen. The
+## "Crack1".."Crack3" groups are the hairline cracks each stage opens. All of it sits under "Slab", off
+## the mob's "Body" (which the monster code leans on every hit: a wall shouldn't rock like a skitter).
+## Local -z faces the portcullis; the lair's colour comes from LairBreach (the seal is one kind for all).
+const SEAL_W := 3.0          # m across: the gate's three-tile gap
+const SEAL_H := 2.9          # m tall, up to the lintel
+const SEAL_Z := -0.55        # m from the monster's spot to the slab's middle, toward the bars
+static func gate_seal() -> Node3D:
+	var root := Node3D.new()
+	var body := Node3D.new()
+	body.name = "Body"
+	root.add_child(body)
+	var slab := Node3D.new()
+	slab.name = "Slab"
+	slab.position.z = SEAL_Z
+	root.add_child(slab)
+	var stones: Array = []
+	for k in 3:
+		stones.append(Models.toon(Color("8e8898").lightened(-0.08 + k * 0.07)))
+	var iron := Models.toon(Color("3a3640"))
+	var crack := Models.toon(Color("2a2630"), false)
+	var core := Models.glow_mat(Color(1.0, 0.85, 0.55, 0.9))
+	var sigil := Models.toon(Color("ffd36a"), false, 1.3)
+	var bw := SEAL_W / 3.0
+	var bh := SEAL_H / 4.0
+	var rr := RandomNumberGenerator.new()
+	rr.seed = 11
+	for row in 4:
+		for col in 3:
+			var at := Vector3(-SEAL_W * 0.5 + bw * (col + 0.5), bh * (row + 0.5), rr.randf_range(-0.03, 0.03))
+			Models.part(slab, Models.box(bw - 0.05, bh - 0.05, 0.42), stones[rr.randi() % 3], at, Vector3.ONE,
+				Vector3(0, 0, rr.randf_range(-0.03, 0.03)), "B%d%d" % [row, col])
+	var glow := Models.part(slab, Models.box(SEAL_W - 0.2, SEAL_H - 0.2, 0.05), core, Vector3(0, SEAL_H * 0.5, -0.16),
+		Vector3.ONE, Vector3.ZERO, "Core")
+	glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for y in [0.75, 2.2]:
+		Models.part(slab, Models.box(SEAL_W + 0.1, 0.16, 0.08), iron, Vector3(0, y, 0.24), Vector3.ONE, Vector3.ZERO,
+			"Band%d" % int(y))
+	var sg := Models.part(slab, Models.box(0.55, 0.55, 0.04), sigil, Vector3(0, 1.5, 0.25), Vector3.ONE,
+		Vector3(0, 0, PI / 4), "Sigil")
+	sg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# hairline cracks, each stage's set zig-zagging out from where its blocks will fall
+	var paths := [[Vector2(-1.1, 2.7), Vector2(-0.7, 2.2), Vector2(-0.85, 1.7), Vector2(-0.4, 1.3)],
+		[Vector2(1.2, 2.5), Vector2(0.6, 1.9), Vector2(0.75, 1.3), Vector2(0.2, 0.9), Vector2(0.35, 0.4)],
+		[Vector2(-1.3, 0.5), Vector2(-0.6, 0.9), Vector2(-0.2, 0.6), Vector2(0.4, 1.1), Vector2(1.3, 0.7)]]
+	for i in 3:
+		var g := Node3D.new()
+		g.name = "Crack%d" % (i + 1)
+		g.visible = false
+		slab.add_child(g)
+		var pts: Array = paths[i]
+		for j in pts.size() - 1:
+			var a: Vector2 = pts[j]
+			var b: Vector2 = pts[j + 1]
+			var mid := (a + b) * 0.5
+			Models.part(g, Models.box(a.distance_to(b) + 0.05, 0.06, 0.03), crack, Vector3(mid.x, mid.y, 0.23),
+				Vector3.ONE, Vector3(0, 0, (b - a).angle()))
+	root.set_meta("mats", stones + [iron, sigil])
 	return root
 
 ## The gate's lock: a stone lectern with a carved ring dial on its face, a needle and lit target arcs
