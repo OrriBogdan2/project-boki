@@ -96,7 +96,7 @@
 		"rmb": {
 			"name": "Prism Burst",
 			"icon": "brightshield",
-			"desc": "Your right click also throws a ring of crystals that slows foes and shields you. Recharges 20% faster.",
+			"desc": "Your ability also throws a ring of crystals that slows foes and shields you. Recharges 20% faster.",
 			"cd_k": 0.8,
 			"effects": [
 				{
