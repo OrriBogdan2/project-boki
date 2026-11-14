@@ -628,6 +628,13 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	if not lean.is_empty(): baby["lean"] = lean
 	return baby
 
+## The lean a baby of these two hatches with: the stronger parent's, scaled by LEAN_HEAD_START ({} if none).
+static func head_start(a: Dictionary, b: Dictionary) -> Dictionary:
+	var lean := stronger(a, b).get("lean", {}) as Dictionary
+	var out := {}
+	for el in lean: out[el] = float(lean[el]) * LEAN_HEAD_START
+	return out
+
 ## How much a kin leans toward an element in all (rec["lean"]; older records have none: 0).
 static func lean_total(rec: Dictionary) -> float:
 	var t := 0.0

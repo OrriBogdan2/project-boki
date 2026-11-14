@@ -32,9 +32,8 @@ const PALETTES := {
 		"heart": Color("d94fff"), "gate": Color("ff7ad9"), "call": Color("f0c8ff")},
 }
 const WATCH := Color("e8f4ff")       # nobody to be relative to (a spectator, a menu scene)
-const HOSTILE := Color("ff2d55")     # a rival's ability looks lean to this (docs/DASHES_AND_ABILITY_FEEL.md 5.2)
-const FX_FOE_K := 0.45               # share of HOSTILE in a rival's ground areas, telegraphs and shot halos
-const FX_ALLY_K := 0.3               # share of ALLY in a teammate's (yours stay as made)
+const FX_FOE_K := 0.45               # share of rim() (the palette's hostile tint) in a rival's ground areas, telegraphs and shot halos
+const FX_ALLY_K := 0.3               # share of ally() in a teammate's (yours stay as made)
 
 static func palette() -> Dictionary:
 	return PALETTES.get(String(Settings.get_v(KEY)), PALETTES["default"])
@@ -93,5 +92,5 @@ static func fx(m: Node, by: Node, col: Color) -> Color:
 	if lp == null or body == null or body == lp:
 		return col
 	if int(body.get("team")) == int(lp.get("team")):
-		return Color(col.lerp(ALLY, FX_ALLY_K), col.a)
-	return Color(col.lerp(HOSTILE, FX_FOE_K), col.a)
+		return Color(col.lerp(ally(), FX_ALLY_K), col.a)
+	return Color(col.lerp(rim(), FX_FOE_K), col.a)
