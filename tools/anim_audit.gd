@@ -25,9 +25,7 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const MAX_BOB_CM := 11.0
-## A Hunter whose new clips slide more than MAX_SLIDE and are not fitted yet: its own ceiling (a ratchet, DEBT.md).
-const SLIDE_KNOWN := {"archer": 0.9}
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -103,10 +101,9 @@ func _hero(main: Node, id: String) -> void:
 
 func _gate(id: String, top: Dictionary) -> void:
 	var share: float = top["slide"] / SPEEDS[2]
-	var limit: float = SLIDE_KNOWN.get(id, MAX_SLIDE)
-	if share > limit:
+	if share > MAX_SLIDE:
 		print("FAIL %s: feet slide %d%% of the run speed (limit %d%%)" % [id, round(100.0 * share),
-				round(100.0 * limit)])
+				round(100.0 * MAX_SLIDE)])
 		bad += 1
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
