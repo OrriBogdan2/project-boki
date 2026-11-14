@@ -79,6 +79,7 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	var all := rows(hud.m, p)
 	for i in all.size():
 		_row(hud, centre(hud, i), all[i], i)
+		SafeArea.note(Rect2(centre(hud, i) - Vector2(R, R), Vector2(R + LABEL_X + BAR_SKEW + BAR_W, R + BAR_Y + BAR_H)))
 	hud._draw_squad_markers(sz, p)
 
 

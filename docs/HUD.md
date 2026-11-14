@@ -23,7 +23,9 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
+| `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
+| `loot_feed.gd` (`LootFeed`, one on `hud.loot`) | what you just picked up (gems, seeds, belt items, gear worn or packed off the ground): bottom right over the slot row, icon + name + count per row, the same thing again within 2 s adds to its row, at most 4 rows, each fades out by 3 s; its own pickup tick pitched by rarity, silent while the lane keeps its fight budget except Rare and up. Counts as the `loot` HUD group only while it has rows. Check: `--loot-feed-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips (the count beside them past a full row: Sable's uncapped Marks) and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
@@ -105,7 +107,8 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Your squad knocked a rival | none (the knock burst and your flash) | 1.25 s | the KNOCK banner, same spot and timing |
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
-| Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Message lane (`toast`, `toast_small`, `level_up`: armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Loot feed (`LootFeed`: ground pickups) | bottom right over the slot row, 230x23 px rows, 14 px | 3 s, 4 rows, repeats within 2 s merge | out of the lane; silent in a fight unless Rare+ |
 | Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
 | Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
@@ -115,6 +118,26 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
+
+## Safe area
+
+- `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
+  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
+  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+- The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
+  the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
+  margin (4% of the height) for the countdown banner.
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
+  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  --shots-dir=<dir>` takes the same screens with a real renderer.
+- The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
+  nine states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
+  uplink far off (edge marker), your squad on a quest (the quest tracker under the strip), the last way out (alive,
+  and dead with the "Ways out left" line), the Gate prompt, and out past the Blight ring. The strip is expected only
+  once `HudGroups.ways_out_shown` lets it show. Edge markers are not in this check: `EdgeMarker` keeps them on its own
+  rim (`EdgeMarker.world_rim`), inside the margin, and `--edge-marker-check` holds that.
 
 ## The deathbox loot window (LootWindow)
 
@@ -135,6 +158,31 @@ nothing else on screen:
   out of the window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
 - Shots (GPU, `--inv-shots --shots-size=1920x1080`): [before](shots/loot-simple/before_1920x1080.jpg),
   [after](shots/loot-simple/after_1920x1080.jpg), [full backpack hold](shots/loot-simple/after_full_pack_1280x720.jpg).
+## Safe area
+
+- `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
+  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
+  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+- The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
+  the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
+  margin (4% of the height) for the countdown banner.
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
+  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  --shots-dir=<dir>` takes the same screens with a real renderer.
+- **Text size** (Settings > Accessibility: 100, 125, 150%, `Settings.TEXT_SIZES`) scales every font through
+  `UI.fs(px)`: the menu theme, `UI.label`/`keycap`/`section`, and `TextCache` (so the HUD's `_text` and every
+  width measured through it). The check also runs 720p and 1080p at 125% and 150%, adds settings, inventory
+  and the Field Book, and `SafeArea.clipped` fails any label or button cut off by its box. Long one-line text
+  elides (`text_overrun_behavior = TRIM_ELLIPSIS`) or wraps; it never shrinks below the chosen size.
+  A new text-drawing call takes its size through `UI.fs` (or `TextCache`), never a bare number.
+
+- `--overflow-check` (headless): every garden panel (Nesting Nook tabs, Burrow, a Boki card's tabs, feed,
+  zone cards, games board, item pages) at Text size 150% in 1280x720: no clipped, trimmed or overlapping label,
+  nothing past the margin. A new garden panel gets a line in `_panels()` and `_open()` of `tools/overflow_check.gd`.
+  `--overflow-shots --shots-dir=<dir>` takes them with a renderer. A one-line name that may not fit uses
+  `FitLabel.shrink` (smaller text down to a floor, then an ellipsis); a sentence wraps.
 
 ## Looting with a full inventory
 

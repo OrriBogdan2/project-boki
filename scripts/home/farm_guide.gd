@@ -138,6 +138,12 @@ func _near_boki() -> bool:
 	var at: Vector3 = ke["node"].position
 	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
 
+## Where the farm's toasts start: the usual 100 px, or under the goal line (which wraps at big text sizes).
+func toast_top() -> float:
+	if not hint_visible():
+		return 100.0
+	return maxf(152.0, hint_box.rect().end.y + 8.0)
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
 	if id == "":

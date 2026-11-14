@@ -242,7 +242,7 @@ func _vendor_card(g: Array) -> Control:
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
 	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	if is_open and String(g[6]) != "":
@@ -251,7 +251,7 @@ func _vendor_card(g: Array) -> Control:
 	var d := UI.label(Progress.req_text(key), 12, Color("ffb3a8"))
 	if is_open: d = UI.label(String(g[2]), 12, UI.MUTED)
 	d.autowrap_mode = TextServer.AUTOWRAP_OFF
-	d.clip_text = true
+	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(d)
 	hr.add_child(nv)

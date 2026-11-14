@@ -83,7 +83,7 @@
 		"rmb": {
 			"name": "Storm Burst",
 			"icon": "shock",
-			"desc": "Your right click also crackles: a lightning burst around you that arcs to 2 foes. Recharges 20% faster.",
+			"desc": "Your ability also crackles: a lightning burst around you that arcs to 2 foes. Recharges 20% faster.",
 			"cd_k": 0.8,
 			"effects": [
 				{
