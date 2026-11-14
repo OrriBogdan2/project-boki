@@ -13,7 +13,7 @@ const int M_SWEEP = 0;      // an arc of flame: UV.x along the swing, UV.y outer
 const int M_SCORCH = 1;     // the ground burning: UV across the quad
 const int M_SKIRT = 2;      // a wall of flame: UV.x round it, UV.y foot (0) to top (1)
 const int M_FLARE = 3;      // a ragged burst, facing the camera
-const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
+const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across; its bright tip at UV.x -2..-1
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core (or, thin, only a spinning lit ring): UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
@@ -26,16 +26,19 @@ uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);  // char, what i
 uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
-uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
+uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone, 3 pool (a still dark disc under a cast)
 uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
+uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 uniform float head_t = 0.28;  // M_SWEEP: the share of the life its head takes to run the arc
 uniform float band = 0.0;     // M_SWEEP: an even blade this deep (share of the arc's depth), not tapered at the ends
+uniform float pool_band = 1.0;   // M_SCORCH pool: how much of the radius it covers from the edge in (1: all of it, a ring below)
+uniform bool soft = false;    // M_RIBBON: a soft glow strewn with twinkling glints instead of a hard-edged streak
 
 void vertex() {
 	if (billboard) {
@@ -116,8 +119,22 @@ vec4 thread(vec2 uv) {
 	return vec4(mix(col.rgb, col2.rgb, line * 0.2) * a, a);
 }
 
+// A cast's ground mark: a flat dark disc (or a ring band) out to the exact edge, dark from the first frame,
+// gone in the last POOL_OUT of its life. Not fire: it does not burn or dissolve.
+const float POOL_A = 0.62;    // how much of the ground it darkens
+const float POOL_OUT = 0.15;  // the share of its life it takes to go
+vec4 pool(vec2 uv) {
+	float d = length(uv * 2.0 - 1.0);
+	float n = fbm3((uv * 2.0 - 1.0) * 3.0 + seed);
+	float inside = 1.0 - hard(d - 1.0);
+	float ring = pool_band >= 1.0 ? 1.0 : smoothstep(1.0 - pool_band, 1.0 - pool_band + 0.04, d);
+	float a = POOL_A * (0.85 + 0.15 * n) * inside * ring * (1.0 - smoothstep(1.0 - POOL_OUT, 1.0, life));
+	return vec4(col3.rgb * a, a);
+}
+
 vec4 scorch(vec2 uv) {
 	if (stitch) { return seam(uv); }
+	if (shape == 3) { return pool(uv); }
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float mask = 1.0;
@@ -180,9 +197,40 @@ vec4 flare(vec2 uv) {
 	return vec4(ramp(0.3 + core * 0.75) * a, a * 0.9);
 }
 
+// A trail's bright tip (HeroVfx._draw_head), q -1..1: x along the flight (the front at 1), y across. Hard: a
+// white-hot diamond, pointed front and back. Soft: a round glow under a turning, flickering four-point twinkle.
+vec4 ribbon_head(vec2 q) {
+	if (soft) {
+		float glow = pow(max(1.0 - length(q), 0.0), 1.6);
+		float turn = TIME * 3.0 + seed;
+		vec2 r = mat2(vec2(cos(turn), sin(turn)), vec2(-sin(turn), cos(turn))) * q;
+		float rays = max(1.0 - abs(r.x) * 9.0, 0.0) * max(1.0 - abs(r.y), 0.0);
+		rays += max(1.0 - abs(r.y) * 9.0, 0.0) * max(1.0 - abs(r.x), 0.0);
+		rays *= 0.75 + 0.25 * sin(TIME * 23.0 + seed * 5.0);
+		float a = clamp(glow * 1.3 + rays, 0.0, 1.0);
+		return vec4(ramp(0.3 + glow * 0.7 + rays * 0.5) * a, a * 0.85);
+	}
+	float d = abs(q.x) + abs(q.y);
+	float a = hard(0.98 - d);
+	return vec4(ramp(0.35 + (1.0 - d) * 0.65) * a, a);
+}
+
 vec4 ribbon(vec2 uv) {
+	if (uv.x < -0.5) { return ribbon_head(vec2((uv.x + 1.5) * 2.0, uv.y * 2.0 - 1.0)); }
 	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
+	if (soft) {
+		// no hard edge: a glow in the body colour thinning out round a thin hot core, and white glints streaming back
+		// off the head, each twinkling on its own beat
+		float glow = clamp(across * 1.5 + (n - 0.5) * 0.5 - uv.x * 0.8, 0.0, 1.0);
+		float core = pow(across, 6.0) * (1.0 - uv.x);
+		vec2 cell = vec2(uv.x * 14.0 - TIME * 9.0, uv.y * 3.0);
+		float pick = h21(floor(cell) + floor(seed * 13.0));
+		float spark = max(1.0 - length(fract(cell) - 0.5) * 3.2, 0.0) * step(0.62, pick);
+		float glint = spark * (0.6 + 0.4 * sin(TIME * 31.0 + pick * 40.0)) * (1.0 - uv.x);
+		float a = clamp(glow * glow + glint, 0.0, 1.0);
+		return vec4(ramp(0.32 + core * 0.55 + glint) * a, a * mix(0.8, 0.2, uv.x));
+	}
 	float body = across * 1.4 + (n - 0.5) * 0.9 - uv.x * 0.9;
 	float a = hard(body - 0.18);
 	float heat = across * across * (1.0 - uv.x) * 0.95 + (n - 0.5) * 0.3;
@@ -197,7 +245,7 @@ vec4 bolt(vec2 uv) {
 	wander += (h21(vec2(floor(uv.x * 14.0), tick + seed)) - 0.5) * 0.5 * jag;     // sharp kinks
 	wander *= sin(3.14159 * uv.x);                       // pinned at both ends
 	float off = abs(uv.y * 2.0 - 1.0 - wander);
-	float thin = jag > 0.0 ? 0.07 : 0.16;
+	float thin = core_w > 0.0 ? core_w : (jag > 0.0 ? 0.07 : 0.16);
 	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
 	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
 	float fade = 1.0 - smoothstep(0.45, 1.0, life);

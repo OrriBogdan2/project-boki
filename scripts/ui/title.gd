@@ -80,7 +80,7 @@ func _build_ui() -> void:
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
-	var b1 := _menu_main(("Continue" if has else "New game"), _continue if has else func(): Game.goto("prologue"))
+	var b1 := _menu_main(("Continue" if has else "New Game"), _continue if has else func(): Game.goto("prologue"))
 	col.add_child(b1)
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
@@ -90,14 +90,14 @@ func _build_ui() -> void:
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+		items.append(["Demo Match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if has:
-		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
+		items.append(["Play with Your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
-		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
+		items.append(["Play with Friends", func(): Game.goto("lobby", {}), "bond"])
 	if Net.mm.addr != "":
 		items.append(["Party", func(): Game.goto("party", {}), "bond"])
-	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
+	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	items.append(["Help", _open_help, "info"])
 	if not OS.has_feature("web"):
@@ -175,7 +175,7 @@ func _menu_main(text: String, cb: Callable) -> Button:
 	b.theme_type_variation = "MenuMain"
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
-	b.mouse_entered.connect(func(): if not b.has_focus(): b.grab_focus())
+	_lit_on_focus(b, "MenuMain")
 	return b
 
 func _menu_item(text: String, cb: Callable, icon := "") -> Button:
@@ -187,18 +187,22 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
 	b.pressed.connect(func(): Sfx.play("click"); cb.call())
-	# pointing at an item focuses it, so mouse and keyboard always agree on which one is lit
+	b.focus_entered.connect(func(): Sfx.play("hover", null, -12.0, 0.05))
+	_lit_on_focus(b, "MenuItem")
+	return b
+
+## Pointing at a menu button focuses it, and a focused one wears its hover look, so mouse and keyboard
+## always agree on which one is lit (no separate focus ring).
+func _lit_on_focus(b: Button, kind: String) -> void:
 	b.mouse_entered.connect(func(): if not b.has_focus(): b.grab_focus())
 	b.focus_entered.connect(func():
-		Sfx.play("hover", null, -12.0, 0.05)
-		b.add_theme_stylebox_override("normal", b.get_theme_stylebox("hover", "MenuItem"))
+		b.add_theme_stylebox_override("normal", b.get_theme_stylebox("hover", kind))
 		b.add_theme_color_override("font_color", Color.WHITE)
 		b.queue_redraw())
 	b.focus_exited.connect(func():
 		b.remove_theme_stylebox_override("normal")
 		b.remove_theme_color_override("font_color")
 		b.queue_redraw())
-	return b
 
 
 ## The help words, opened from the title (Overlay reads its ctx for which page).
