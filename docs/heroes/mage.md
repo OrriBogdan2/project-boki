@@ -84,7 +84,7 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
 | 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
 | 12 | E telegraph: dark disc, rim, descending pillar | closed on main, in flight (look) | `MageSky._commit()` plays `e_count` (content/vfx/mage.json): a dark `pool` disc on the exact radius, full until the strike, and a short pink-white pillar narrowing over the 0.8 s; ticked pink rim with chevron, committed arrow. `--mage-combo-check` asserts the disc, the pillar and the chevron |
-| 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with a LIVE word on the 4th stack |
+| 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with the bolt on the 4th stack |
 | 14 | LMB alternating hands | closed | `mage_lmb_l` / `mage_lmb_r` (parity f99f03c7); check "alternating hands, each a quick fling" |
 | 15 | Spear knockback size | closed | `rmb.coil.push` is [4.4, 6.6] (was [6, 9]); a standard-mass foe is knocked 1.77 m on open ground through the shared `Ent.impulse` path (no special case), the source is about 1 bh = 1.8 m (vireo.md item 15). Check "Storm Rod: a standard-mass foe is knocked about 1.8 m" asserts 1.5 to 2.1 m |
 | 16 | Sfx | nothing to copy | no audio in the footage |
