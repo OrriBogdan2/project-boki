@@ -156,6 +156,7 @@ AimKit.line(h, "aim")                                        # the thin aim line
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lace stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
+AimKit.span(h, "x", {"len": 12.0, "width": 3.2})              # Basalt Spine: the line over the band it slows
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
 The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
@@ -221,7 +222,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
-    to see one (see Open questions in the branch report).
+    to see one (see Open questions in the branch report). Ground cones have one: `ArchKit.net_cone` sends
+    `["fx", "cone", nid, at, dir, len, deg, dur, col]` and other games draw the same `all` cone for `dur` s
+    (static: no fill sweep). Vex's stuck Burr Charge uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.

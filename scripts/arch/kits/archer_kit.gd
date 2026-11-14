@@ -17,9 +17,9 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
+var sense: HawkSense         # the passive: hurt rivals revealed and outlined through cover
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
 var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
-var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
 var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
@@ -36,12 +36,20 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
+	# her arrows are loosed after this kit's tick, so each one's stock tracer would draw one frame as a white streak at
+	# the bow before _tag_shots skins it: skin it just before that frame is drawn
+	RenderingServer.frame_pre_draw.connect(_tag_shots)
+	sense = HawkSense.new(self)
 
 ## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
 ## Hunter.spirit_t would never tick down and the next hunter would ghost through terrain for good.
 func teardown() -> void:
 	if spirit:
 		spirit.end("merge")
+	if RenderingServer.frame_pre_draw.is_connected(_tag_shots):
+		RenderingServer.frame_pre_draw.disconnect(_tag_shots)
+	if sense:
+		sense.clear()
 	super()
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
@@ -49,10 +57,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		_arrow_hit(t)
 
 func _tick(dt: float) -> void:
-	sense_t -= dt
-	if sense_t <= 0.0:
-		sense_t = 0.3
-		_sense_injured()
+	sense.tick(dt)
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
@@ -143,6 +148,8 @@ func draw_bonus(t: float) -> float:
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
 ## loosed, the Heavy Shot's big orchid arrow.
 func _tag_shots() -> void:
+	if not is_instance_valid(h):
+		return
 	for s in m.shots:
 		if s["by"] != h or (s["x"] as Dictionary).has("pin"):
 			continue
@@ -160,14 +167,6 @@ func _tag_shots() -> void:
 		if arrow != null:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
-
-## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
-func _sense_injured() -> void:
-	var rd := res_def()
-	for f in m.foes_of(h.team):
-		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
-		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
-			f.reveal_t = maxf(f.reveal_t, 0.4)
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
@@ -231,6 +230,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
+	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check)
 
 func rmb_hold_tick(t: float) -> void:
 	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
@@ -367,8 +367,9 @@ func _pin(a: Vector3, k: float) -> void:
 func in_e() -> bool:
 	return not rain.is_empty()
 
-func _arc_deg() -> float:
-	return float(e_def().get("deg", 120.0)) * (1.3 if rank("kin") >= 3 else 1.0)
+## The Hail Wall's arc; rank 3 (the source's tier IV) widens it by "deg_r3_k".
+func arc_deg() -> float:
+	return float(e_def()["deg"]) * (float(e_def()["deg_r3_k"]) if rank("kin") >= 3 else 1.0)
 
 func cast_e() -> bool:
 	var ed := e_def()
@@ -378,9 +379,9 @@ func cast_e() -> bool:
 	var tell := float(ed["tell"])
 	var center := h.pos
 	# the arrows go up first (everyone sees the arc), then the rain starts
-	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": _arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed)})
+	AimKit.arc_wall(h, "e", {"center": center, "dir": d, "radius": radius, "deg": arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell, "col": col_of(ed)})
 	for i in 5:
-		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
+		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(arc_deg()) * 0.4
 		var dv := d.rotated(u)
 		# (cosmetic: small and orchid so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
@@ -396,7 +397,7 @@ func cast_e() -> bool:
 
 func _in_rain(f: Ent) -> bool:
 	var ed := e_def()
-	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
+	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
 
 func _tick_rain(dt: float) -> void:
 	var ed := e_def()
@@ -408,14 +409,14 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["start"]) > 0.0:
 		rain["start"] = float(rain["start"]) - dt
 		if float(rain["start"]) <= 0.0:
-			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(rain["t"]))
+			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(rain["t"]))
 			m.sfx("pin_rain", rain["c"], -3.0)
 		return
 	rain["patter"] = float(rain["patter"]) - dt
 	if float(rain["patter"]) <= 0.0:
 		rain["patter"] = randf_range(0.08, 0.14)
 		m.sfx("pin_patter", rain["c"], -12.0, randf_range(0.85, 1.25))
-	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": _arc_deg(),
+	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": arc_deg(),
 			"dir_x": (rain["d"] as Vector2).x, "dir_y": (rain["d"] as Vector2).y})
 	var inside: Array = []
 	for f in m.foes_of(h.team):

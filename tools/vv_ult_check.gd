@@ -5,7 +5,9 @@ extends RefCounted
 ## full-health light hunter). Runs inside tools/hero_combo_check.gd and reports through its ok().
 
 const BURST := preload("res://tools/ult_burst.gd")
+const EXIT := preload("res://tools/ult_exit.gd")
 const KIN := "pebbit"            # a Boki to bond with (the bond only fills while one is ready)
+const ZONE_TICK_S := 0.5         # s between Cinderfall burn ticks: the source's (briefs/hero-ref/venator.md, R)
 
 var hc: RefCounted                # tools/hero_combo_check.gd
 var ac: RefCounted                # tools/archetype_check.gd
@@ -51,11 +53,19 @@ func mage() -> void:
 	T.teleport(home + Vector3(6, 0, 0))
 	T2.teleport(home + Vector3(6.5, 0, 1.2))
 	ac.aim_at(P, T.pos)
+	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	ok("Kitefall: the press goes off", HunterKeys.ult_pressed(P))
 	ok("Kitefall: one press is one cast, its own cooldown starts",
 			U.casts == 1 and int(P.used.get("x", 0)) == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])),
 			"casts %d cd %.1f" % [U.casts, float(K.cd["x"])])
 	ok("Kitefall: the crouch first (mage_x)", U.phase() == MageUlt.CROUCH and K.anim_id == "mage_x")
+	m.step(ac.DT)
+	var burst := 0
+	for e: Dictionary in HeroVfx.of(m).live:
+		if (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
+			burst += 1
+	ok("Kitefall press (footage): the range ring shows at once, no range-wide burst (no screen flash)",
+			AimKit.shown(P, "x_ring") and burst == 0, "%d range-wide looks" % burst)
 	ac.step(m, 0.6, func(): ac.aim_at(P, T.pos))
 	# up there: high, invulnerable, the ring for everyone, the crown at the cursor, nothing else works
 	var hanging := U.phase() == MageUlt.AIR and P.pos.y > home.y + 3.5
@@ -70,6 +80,14 @@ func mage() -> void:
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
 	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
 			- float(U.data()["radius"])) < 0.05)
+	var from: Vector3 = U.leap["from"]
+	var range_r := float(xd["range"])
+	var hang: Array = hc._looks_at(m, from)
+	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
+	ok("Kitefall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -95,6 +113,18 @@ func mage() -> void:
 	ok("Kitefall: the landing marker shows for everyone",
 			AimKit.shown(P, "x_land") and bool(AimKit.entry(P, "x_land").get("all", false)))
 	ac.step(m, float(xd["drop"]) + 0.05)
+	var storm := 0
+	for l: Dictionary in hc._looks_at(m, U.last.get("at", P.pos)):
+		if l["mode"] == HeroVfx.MODES["scorch"] and absf(float(l["size"]) - 1.6 * float(xd["radius"])) < 0.01:
+			storm += 1
+	var fields := 0                    # burning scorch discs past the hit area (the dark ring band is a pool)
+	for e: Dictionary in HeroVfx.of(m).live:
+		var mt: ShaderMaterial = e["mat"]
+		var disc: bool = hc._param(mt, "mode", -1) == HeroVfx.MODES["scorch"] and hc._param(mt, "shape", 0) == 0
+		if disc and (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
+			fields += 1
+	ok("Kitefall: the storm stays on the hit area once she lands (no ring-wide field, no screen tint)",
+			storm == 1 and fields == 0, "storm %d wide %d" % [storm, fields])
 	var want := float(xd["dmg"]) * K.ult.power()
 	ok("Kitefall: she lands on the spot and the strike hits both foes",
 			hc._flat(P.pos, t_at) < 0.8 and U.last.get("hits", 0) == 2
@@ -120,6 +150,9 @@ func mage() -> void:
 	await _mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
+	var got: Dictionary = await EXIT.run(ac, "mage")
+	ok("Kitefall exit: Shift, LMB and jump pressed 0.1s before the strike go on its first free step",
+		EXIT.on_time(got), EXIT.said(got))
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
 	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
@@ -329,9 +362,11 @@ func _mage_shift(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 		t += hc.DT
 		crouched_again = crouched_again or (K.run_t <= 0.0 and K.anim_id == "mage_x")
 	var from: Vector3 = U.leap.get("from", home)
+	var ring_at: Vector2 = AimKit.entry(P, "x_ring").get("at", Vector2.ZERO)
 	ok("Kitefall + Shift (item 51): the Wirerun goes from the crouch, then she launches where it took her",
 			went and crouched_again and U.phase() == MageUlt.RISE and hc._flat(from, home) > 2.0
-			and hc._flat(P.pos, from) < 0.3 and AimKit.entry(P, "x_ring").get("at", from) == from,
+			and hc._flat(P.pos, from) < 0.3
+			and ring_at.distance_to(Vector2(from.x, from.z)) < 0.01,
 			"went %s crouch %s %s from %.1f m out" % [went, crouched_again, U.phase(), hc._flat(from, home)])
 	var xd := K.x_def()
 	ac.step(m, float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1)
@@ -518,13 +553,15 @@ func gunslinger() -> void:
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))
+	_gun_scorch(m, t_at, float(xd["radius"]))
 	var took: float = ac.dmg(T)
-	ac.step(m, 1.1)
+	var burn := _hurt_times(m, T, 1.1)
 	ok("Cinderfall: the patch burns and slows",
 			ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
 			"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks])
 	ok("Cinderfall: burn ticks pay no more bond", is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])))
-	ac.step(m, float(xd["zone_t"]))
+	burn.append_array(_hurt_times(m, T, float(xd["zone_t"]) - 0.9))    # on to 0.2 s past the zone's end
+	_zone_cadence(burn, ac.dmg(T) - took, float(xd["tick_dmg"]) * U.power(), float(xd["zone_t"]))
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	T2.teleport(home + Vector3(-30, 0, 0))
@@ -532,7 +569,44 @@ func gunslinger() -> void:
 	await ac.done(m)
 	await _gun_burst()
 
+## Steps frame by frame for secs and returns the match times (s) at which T lost health.
+func _hurt_times(m: Match, T: Hunter, secs: float) -> Array:
+	var out := []
+	var end := m.time + secs
+	var hp := T.hp
+	while m.time < end:
+		ac.step(m, hc.DT)
+		if T.hp < hp - 0.01:
+			out.append(m.time)
+		hp = T.hp
+	return out
+
+## The burn's cadence: ZONE_TICK_S between ticks to within half a step, a full zone of them, each the same.
+func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> void:
+	var lo := INF
+	var hi := 0.0
+	for i in range(1, times.size()):
+		lo = minf(lo, times[i] - times[i - 1])
+		hi = maxf(hi, times[i] - times[i - 1])
+	var half_step := float(hc.DT) * 0.5
+	var even := absf(lo - ZONE_TICK_S) < half_step and absf(hi - ZONE_TICK_S) < half_step
+	ok("Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same",
+			even and times.size() == roundi(zone_t / ZONE_TICK_S) and absf(burned - per * times.size()) < 0.5,
+			"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per])
+
 ## Stepping off the disc before it lands: no damage, no bond; a cursor past the range is clamped.
+## The scorch the patch keeps (VVFx.disc): its lit rim on the hit radius, see-through at the centre (VFX_QUALITY.md
+## "Opaque zone fills": never a solid fill over the Hunters in it).
+func _gun_scorch(m: Match, at: Vector3, r: float) -> void:
+	var scorch: MeshInstance3D = null
+	for n: Node3D in VVFx.of(m).pools.get("disc", []):
+		if n.visible and hc._flat(n.global_position, at) < 0.1:
+			scorch = n
+	var rim_r := scorch.scale.x * VVFx.DISC_EDGE if scorch else 0.0
+	var fill_a := float((scorch.material_override as ShaderMaterial).get_shader_parameter("fill_a")) if scorch else 1.0
+	ok("Cinderfall: the scorch's lit rim is on the hit radius, its centre see-through (alpha <= 0.25)",
+			absf(rim_r - r) < 0.05 and fill_a <= 0.25, "rim %.2f m (r %.2f) centre alpha %.2f" % [rim_r, r, fill_a])
+
 func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	var U := K.ult
 	var xd := K.x_def()

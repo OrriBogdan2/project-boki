@@ -314,4 +314,4 @@ func _run(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 func _stride_hz(c: WardenClips, _P: Hunter, speed: float) -> float:
 	var lc: Dictionary = c.d["loco"]
 	var clip_len := c.lib.get_animation(String(lc["run"]["f"])).length
-	return c.gait.plan(speed, lc, Vector2(0, 1)) / clip_len
+	return c.gait.plan(speed, lc, Vector2(0, 1), 1.0) / clip_len   # running straight ahead, all the way to the run

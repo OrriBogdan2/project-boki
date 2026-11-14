@@ -169,14 +169,12 @@ def _bone_scale(rest, sc):
 
 
 def export(path, tangents=False):
-    """`tangents`: a body with a normal map carries the frame it was baked in. Keys start at the clip's frame 1, so
-    the clips slide to 0: else Godot holds the first pose from 0 to 1/30 s and a looping clip stops for a frame each
-    time it wraps (tools/boki/glb_slide_to_zero.py fixed the glbs exported before this)."""
+    """`tangents`: a body with a normal map carries the frame it was baked in."""
     import os
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.export_scene.gltf(
         filepath=path, export_format="GLB", export_animations=True, export_animation_mode="ACTIONS",
-        export_force_sampling=True, export_frame_step=1, export_anim_slide_to_zero=True, export_morph=True,
-        export_skins=True,
+        export_force_sampling=True, export_frame_step=1, export_morph=True, export_skins=True,
+        export_anim_slide_to_zero=True,     # Blender keys from frame 1: without this each loop holds a frame at its start
         export_morph_normal=True, export_vertex_color="ACTIVE", export_all_vertex_colors=False, export_image_format="WEBP", export_image_quality=88, export_apply=False,
         export_yup=True, export_def_bones=False, export_extras=False, export_tangents=tangents)

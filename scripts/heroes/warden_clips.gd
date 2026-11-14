@@ -30,6 +30,7 @@ const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back int
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
+const LAND_DONE := 99.0       # s: land_t past any land clip (none plays)
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
@@ -78,7 +79,7 @@ var was_air := false
 var was_glide := false
 var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
 var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
-var land_t := 99.0
+var land_t := LAND_DONE
 var hit_seen := 99.0
 var last_emote := ""
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
@@ -118,6 +119,7 @@ var ring_starts: Array = []  # [seek path, s]: where each walk and run clip star
 var start_bones: Array = []  # [bone index, rotation]: loco "start_blend" bones, and their pose when he set off
 var start_s := 0.0           # s those bones take to ease from that pose into the clips
 var start_t := 0.0           # s since he set off
+var stride: WardenStride
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -152,6 +154,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -195,7 +198,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	var cycle := float(lc.get("cycle_s", 0.0))
 	gait = WardenGait.new(sk, lc.get("arm_swing", {}),
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["walk"]["f"])).length,
-			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length)
+			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length,
+			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()
@@ -464,6 +468,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			alt_on = not alt_on
 		alt_km = km
 		alt_t = tt
+		if mv.get("owns_land", false):
+			# this move is the landing (it may start in the air): the generic land clip must not follow it
+			land_t = LAND_DONE
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
 		if mv.has("fit"):
@@ -623,6 +630,7 @@ func step(dt: float) -> void:
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	stride.step(dt, s, self)
 	_air_tilt()
 	if turn:
 		turn.step(dt)

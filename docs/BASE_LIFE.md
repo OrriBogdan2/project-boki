@@ -90,6 +90,7 @@ check: `--base-life-check`.
   state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
   `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and
   the shake is a Body wobble): `wade` (a slow knee-high walk loop), `shake` (a shake-off, 0.6 s).
+- A garden day (`--garden-day-check`, under 60 s): 1200 s of game time (a 20-minute day) in Bramblebank with six Boki, the three toys and the snack patch, then the hub with the partner. Fails on a Boki that visits under 4 states, stays 90 s in one non-Nap state, stands still 20 s off a nav point (its goal, or a place it rests by design), leaves the island, or a part over GARDEN.md 10.6's nodes, emitters, script ms a frame or base-life ms a step (draws and the GPU frame stay with `--perf-bench`). A Chore that gets no nearer its goal for `BaseChore.STALL_S` gives up (a walker wobbling beside a napper and a toy never trips KinAvoid's pin test).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the

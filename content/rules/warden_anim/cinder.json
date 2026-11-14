@@ -22,7 +22,7 @@
 		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving", "fade": 0.12, "fade_out": 0.4}, "as_shot": {"clip": "shot", "upper": "moving", "fade_out": 0.4},
 		"as_leap": {"clip": "leap", "heading": true, "turn_max": 3.2, "fade_out": 0.4}, "lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2, "fade_out": 0.4},
 		"as_cloak": {"clip": "cloak", "fade_out": 0.4}, "lw_stoke": {"clip": "stoke", "upper": true, "fade_out": 0.4},
-		"lw_jet": {"clip": "jet", "hold_from": 0.22, "fade_out": 0.4}, "lw_land": {"clip": "jet_land", "upper": "moving", "fade_out": 0.4},
+		"lw_jet": {"clip": "jet", "hold_from": 0.22, "fade_out": 0.4}, "lw_land": {"clip": "jet_land", "upper": "moving", "owns_land": true, "fade_out": 0.4},
 		"lw_jump": {"clip": "jump", "fade_out": 0.4},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}
 	},
