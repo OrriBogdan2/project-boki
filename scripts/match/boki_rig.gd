@@ -5,6 +5,8 @@ extends Node
 ## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown), "kburst"
 ## (a factor on the gait's cadence) and a flier's "aloft" and "lift" (BokiFly: hover or glide up there, a flare
 ## coming down), and plays the face on top of whatever the body does.
+## Match body language (the "pose" meta, KinWildPose and KinCompanion) is a layer on Flex over whatever clip runs:
+## a startle, a charge, a cower, a knocked-out sway, a lift into the scan beam; BODY_FEEL bends it per body plan.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
 ## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
@@ -214,7 +216,24 @@ const CLIP_FACE := {
 	"glide": "cheer", "flare": "focus",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
+const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
+	"alert": "focus", "dazed": "sleepy", "scan": "sad"}
+## Pose layers: lean (rad, forward), squat (0..1 of its height, negative stands tall), sway (rad, side to side),
+## shiver (rad); `clip` and `rate` replace the idle, walk and run clips and their speed (a lifted Boki kicks).
+const LAYER := {
+	"alert": {"lean": -0.2, "squat": -0.1},
+	"growl": {"lean": 0.2, "squat": 0.1, "shiver": 0.03},
+	"whine": {"lean": 0.14, "squat": 0.16, "shiver": 0.03},
+	"dazed": {"lean": 0.3, "squat": 0.12, "sway": 0.2, "clip": "idle", "rate": 0.4},
+	"scan": {"lean": -0.15, "squat": -0.2, "shiver": 0.03, "clip": "run", "rate": 0.7},
+}
+## How far each body plan (KinPuppet.BODY) takes the lean and the sway: a flyer or serpent has no spine to tip.
+const BODY_FEEL := {"quad": Vector2(1.0, 1.0), "biped": Vector2(1.0, 1.0), "flyer": Vector2(0.6, 1.4),
+	"serpent": Vector2(0.5, 1.6), "blob": Vector2(0.5, 1.0)}
+const CHASE_POSES := ["growl", "whine"]   # moving at all in these is a run: a charge or a bolt
+const LAYER_RATE := 9.0       # 1/s the layer eases in and out at
+const SWAY_RATE := 4.0        # rad/s of the knocked-out sway
+const SHIVER_RATE := 45.0     # rad/s
 
 static var enabled := true
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
@@ -245,6 +264,9 @@ var _shot_rate := 1.0          # the speed the shot plays at
 var _attacking := false
 var _asleep := false
 var _aloft := false             # a flier in the air (BokiFly's "aloft" meta)
+var _layer := {"lean": 0.0, "squat": 0.0, "sway": 0.0, "shiver": 0.0}
+var _layer_t := 0.0
+var _feel := Vector2.ONE
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -310,6 +332,7 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	var rig := BokiRig.new()
 	rig.name = "BokiRig"
 	rig.species = kin_id
+	rig._feel = BODY_FEEL[KinPuppet.BODY.get(kin_id, "blob")]
 	rig.model = model_root
 	rig._dress(c, mats)
 	if FRAME[kin_id].get("hover", false):
@@ -396,8 +419,13 @@ func _process(dt: float) -> void:
 ## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	var squat: float = _layer["squat"]
+	var swing := _layer_t * SWAY_RATE
+	var sway := float(_layer["sway"])
+	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) + cos(swing) * sway * 0.4, 0.0,
+		sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
+	var wide := _flinch.wide * (1.0 + squat * 0.5)
+	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -448,9 +476,16 @@ func _pick_clip(dt: float) -> void:
 			_start_shot("flare")
 		elif _shot == "flare":
 			_shot_left = 0.0          # up again before the flare is done
+	var feel: Dictionary = LAYER.get(String(root.get_meta("pose", "")), {})
+	_step_layer(feel, dt)
 	var want := _state_clip()
+	if want in GAITS and feel.has("clip"):
+		want = feel["clip"]
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
+	if feel.has("rate"):
+		player.speed_scale = float(feel["rate"])
+		return
 	if want not in ["run", "walk", "carry", "strut"]:
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -482,6 +517,18 @@ func _plant_feet(dt: float) -> void:
 func plant(gait: String, at: float, rate: float, weight := 1.0) -> void:
 	(_plants[gait] as BokiPlant).pose(_skel, at, rate, _speed, model.global_basis.z.length(), weight)
 
+## Eases the pose layer toward what the pose asks (zero for none); lean and sway scale with the body plan.
+func _step_layer(feel: Dictionary, dt: float) -> void:
+	_layer_t += dt
+	for key in _layer:
+		var mult := 1.0
+		if key == "lean":
+			mult = _feel.x
+		elif key == "sway":
+			mult = _feel.y
+		var want := float(feel.get(key, 0.0)) * mult
+		_layer[key] = lerpf(float(_layer[key]), want, 1.0 - exp(-LAYER_RATE * dt))
+
 ## Plays a one-off clip, at `rate` times its speed.
 func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
@@ -510,7 +557,7 @@ func _state_clip() -> String:
 		return _shot
 	if root.get_meta("happy", false):
 		return "hop"
-	if _speed >= RUN_SPEED:
+	if _speed >= RUN_SPEED or (_speed >= WALK_SPEED and String(root.get_meta("pose", "")) in CHASE_POSES):
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
 
@@ -534,6 +581,9 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	var pf := String(POSE_FACE.get(String(root.get_meta("pose", "")), ""))
+	if pf != "":
+		return pf
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")
@@ -547,7 +597,7 @@ func _clip_face() -> String:
 		return best
 	if String(cf) != "":
 		return String(cf)
-	return String(POSE_FACE.get(String(root.get_meta("pose", "")), "neutral"))
+	return "neutral"
 
 func _face_step(dt: float) -> void:
 	set_face(_clip_face())

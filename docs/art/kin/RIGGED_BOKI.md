@@ -68,6 +68,15 @@ across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`B
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
+Wild Boki in a match (`KinWildPose` sets the `pose` meta, `BokiRig.LAYER` answers it with a layer on Flex over the clip,
+bent per body plan by `BODY_FEEL`; no clip is baked, the same for every species): wandering is the walk clip; the first
+hit startles it (`alert`, 0.35 s: tall, rocks back, focused face); then a timid one bolts (`whine`: low, run clip, sad
+face) and a brave one charges (`growl`: lean in, run clip, angry face, the attack clip when it lunges); knocked out
+(`dazed`) it slumps, sways side to side on a slow idle (0.4x) with sleepy lids and never spins or freezes; under the
+scan beam (`scan`) it is lifted by `Capture.dissolve` and stretches with its legs kicking. A client sees dazed and scan
+(state is replicated) but not the startle, bolt or charge (the host alone knows who it is angry at).
+`--wild-boki-states-check` asserts it for all species; `--wild-boki-states-shots --shots-dir=<dir>` draws the row.
+
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
