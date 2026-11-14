@@ -56,9 +56,7 @@ func run(m: Node) -> void:
 	lay["made"] = true
 	var bowl := {"u": HomeLayout._next_uid(lay), "id": "feed_bowl", "x": 47, "z": 34, "r": 0}
 	lay["deco"].append(bowl)
-	var H = load("res://scripts/home/home.gd").new()
-	main.add_child(H)
-	for _f in 4: await main.get_tree().process_frame
+	var H = await main._hb_home()      # the garden builds in slices: wait for all of it
 	H.day_t = 0.5
 	var spots := {bold: Vector3(45.0, 0, 34.5), greedy: Vector3(53.5, 0, 34.5),
 		shy: Vector3(47.5, 0, 31.0), full: Vector3(49.0, 0, 37.0)}
