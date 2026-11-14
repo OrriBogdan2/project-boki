@@ -4,7 +4,7 @@ extends RefCounted
 ## level and a bar toward the next level) along its top edge, then to its right your health as a big
 ## number over a thick segmented bar, armour as a strip under it with its number and
 ## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
-## archetype resource under that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 318.0       # px: health / armour width
@@ -76,8 +76,11 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 			HudStyle.strip(c, ar, H.armor_lerp, HudStyle.CHIP)
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
 	ArmorHud.bar(H, x0, ar.end.y + 2, w, p)    # progress to the next armour tier, under the strip
+	var cc_y := ar.end.y + 4
 	if p.ak and p.ak.has_meter():
-		H._draw_res_bar(x0, ar.end.y + 4, w, p)
+		H._draw_res_bar(x0, cc_y, w, p)
+		cc_y += 12.0
+	SelfCcLine.draw(c, Vector2(x0, cc_y), w, p)
 	xp_row(H, pr, x0, w, p)
 	_hidden_tag(H, sz, p)
 	H.lvl_cue.card(H, x0, y0 - 32.0)    # clear of the XP tracker on the block's top edge
