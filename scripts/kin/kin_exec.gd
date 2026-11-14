@@ -113,6 +113,8 @@ static func _telegraph(m: Node, at: Vector3, r: float, col: Color, t: float) -> 
 static func _origin(st: StageSpec, cx: Dictionary) -> Vector3:
 	if cx.has("at_fixed"):
 		return cx["at_fixed"]
+	if cx.has("muzzle"):
+		return cx["muzzle"]
 	var d := st.delivery
 	var caster: Ent = cx["caster"]
 	match String(d.params.get("origin", "caster")):
@@ -249,6 +251,8 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 		var dv := Vector2(cos(a), sin(a))
 		var lead := 0.6 if unit else 0.2
 		var start := Vector3(from.x + dv.x * lead, y, from.z + dv.y * lead)
+		if cx.has("muzzle"):
+			start = cx["muzzle"]          # (cx "muzzle": the exact point a weapon's mouth sits at, from the animation)
 		_shoot(st, cx, start, dv, spd, rng, size, col, {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}, hits)
 	if not cx.get("silent", false):
 		m.sfx("throw", from, -3.0, 1.15)
@@ -351,12 +355,19 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var r := float(p["radius"])
 	var cosv := cos(deg_to_rad(float(p["angle"])) * 0.5)
 	var col := _color(st, cx)
+	# a kit's strike lane (cx "lane_w", m): the wedge becomes a strip that wide over the same reach
+	var lane_w := float(cx.get("lane_w", 0.0))
 	m.fx.cone(from, dir, r, col)
 	m.sfx("whoosh", from, -4.0, 0.9)
 	var foes: Array = []
 	for f in m.foes_of(int(cx["team"])):
+		if not f.hittable() or absf(f.pos.y - from.y) >= 2.2:
+			continue
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
-		if f.hittable() and to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv) and absf(f.pos.y - from.y) < 2.2:
+		if lane_w > 0.0:
+			if AimMode.in_lane(from, dir, r, lane_w, f.pos, f.r):
+				foes.append(f)
+		elif to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv):
 			foes.append(f)
 	var hit := _hit(st.effects, st, foes, cx, from, r)
 	for f in hit:
@@ -835,8 +846,6 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 				m.displace.knock(f, kb, 1.0)
 		"mark":
 			KinRules.mark(f, String(pr["mode"]), float(pr["duration"]), float(pr["amount"]))
-			if String(pr["mode"]) == "reveal":
-				m.fx.ring(f.pos, 1.2, KinRules.cat_color("utility"), 0.6)
 
 ## The friendly effects of a delivery event: on the owner, the kin itself or allies near it.
 static func apply_friends(effs: Array, cx: Dictionary, center: Vector3, radius: float) -> void:
@@ -879,7 +888,6 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 			if "shield" in t:
 				ShieldSrc.give(t, float(pr["amount"]) * k * weak, ShieldSrc.BOKI)
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
-			m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", t.pos, -3.0)
 		"heal":
 			var amt := float(pr["amount"]) * k * weak
