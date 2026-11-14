@@ -5585,6 +5585,7 @@ func _process_net_revives() -> void:
 var _tip_t := 0.0
 var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
 var vision_hint := VisionHint.new()
+var belt_tips := BeltTips.new()  # the local player's one-time belt item tips
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5657,6 +5658,8 @@ func _tips() -> void:
 	_tip("move", "Hold left click to shoot  ·  %s dashes  ·  %s, then %s again to glide" % [Settings.key_cap("dash"), jk, jk])
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
+	var belt_tip := belt_tips.next(player)
+	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
