@@ -254,12 +254,14 @@ func _tick(k: Dictionary, dt: float) -> void:
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
-	if k.has("life_spot") and nap <= 0.0:
+	if k.has("life_spot") and not k["life_spot"].has("on") and nap <= 0.0:
 		var at: Vector3 = k["life_spot"]["pos"]
 		k["goal"] = at
 		var there := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() < SPOT_AT
 		if there or m.since >= float(R["spot_walk"]):
-			if not there:
+			if there:
+				k["life_spot"]["on"] = true      # lying on it: the spot stays its own until it wakes
+			else:
 				k.erase("life_spot")      # did not get there: naps where it is and leaves the spot free
 			_lie_down(k)
 		return

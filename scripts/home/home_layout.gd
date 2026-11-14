@@ -80,7 +80,7 @@ const CATALOG := {
 	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true, "comfort": "bright"},
 	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true, "comfort": "quiet"},
 	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true, "comfort": "quiet"},
-	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true},
+	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true, "comfort": "quiet"},
 	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
 	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
