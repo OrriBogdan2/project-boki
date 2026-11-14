@@ -396,11 +396,12 @@ func _whistle(home) -> void:
 	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 90.0, 80.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(home.kins[0]["rec"]["species"], "happy")) == 1
+	var species: String = home.kins[0]["rec"]["species"]
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(species, "happy")) == 1
 			and _total("bk_") == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 25.0, 40.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(home.kins[0]["rec"]["species"], "unsure")) == 1
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(species, "unsure")) == 1
 			and _total("bk_") == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
 	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
 	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _total("kin_") == 0,
