@@ -45,7 +45,7 @@ func run(m: Node) -> void:
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
-	_ribbon()
+	_loot()
 	_migration()
 	await _cues()
 	_evolve_chime()
@@ -60,7 +60,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 30 and fine, "30 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 29 and fine, "29 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -223,16 +223,43 @@ func _feeding() -> void:
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
 
-func _ribbon() -> void:
-	var rec := _boki("cindle", 3, "power")
-	var fresh := GardenItems.award_ribbon(rec, "dash", 5, "won the Dash Crown cup")
-	ok(fresh and not GardenItems.award_ribbon(rec, "dash", 6, "again"), "a Cup Ribbon: once a sport a Boki")
-	var other := GardenItems.award_ribbon(rec, "shove", 6, "won the Shove Crown cup")
-	ok(other and rec["ribbons"].size() == 2, "...and one for each sport")
-	var paged := int(rec["ribbons"]["dash"]["week"]) == 6 and GardenItems.owned("cup_ribbon")
-	ok(paged, "the cup's week moves on and the item has its page")
-	var kept: bool = not GardenItems.fed("cup_ribbon") and not GardenItems.preview(rec, "cup_ribbon")["ok"]
-	ok(kept and not GardenItems.take_off(rec, "cup_ribbon"), "worn for good: not eaten, not taken off")
+## An expedition's lair-pile bite: carried out, banked in the garden bag, eaten at home. The Boki card's
+## journal then says which item changed what.
+func _loot() -> void:
+	var drop: Dictionary = GardenItems.rules()["lair_drop"]
+	ok(GardenItems.lair_drop(0.0, 1) == String(drop["ids"][1]) and GardenItems.lair_drop(0.99, 1) == "",
+			"a lair pile holds a bite below the chance roll and none above it")
+	for id in drop["ids"]:
+		var v: Dictionary = Loot.VALUABLES.get(id, {})
+		ok(GardenItems.has(id) and v.get("bag", false) and String(v.get("name", "")) == GardenItems.item_name(id)
+				and String(GardenItems.item(id)["effect"]["kind"]) == "stat",
+				"lair drop %s is a stat bite carried as treasure under its own name" % id)
+		_loot_card(id)
+
+func _loot_card(id: String) -> void:
+	Save.d = Save.fresh()
+	var out := {}
+	Econ.after_raid({"extracted": true, "haul": [Loot.valuable(id)]}, out)
+	ok(int(Save.d["items"].get(id, 0)) == 1 and not Save.d["valuables"].has(id),
+			"%s brought out of a match lands in the garden bag, not the sell shelf" % id)
+	var stat := String(GardenItems.item(id)["effect"]["stat"])
+	var rec := _boki("cindle", 3, stat)
+	rec["stats"][stat] = 4
+	var before := (rec["journal"] as Array).size() if rec.has("journal") else 0
+	var pv := GardenItems.use(rec, id)
+	var lines: Array = rec["journal"]
+	var gain := int(rec["stats"][stat]) - 4
+	var card := VBoxContainer.new()
+	JournalCard.add(rec, card)
+	var shown := ""
+	for c in card.get_children():
+		shown += (c as Label).text + "\n" if c is Label else ""
+	card.free()
+	var name_ := GardenItems.item_name(id)
+	ok(pv["ok"] and gain > 0 and lines.size() == before + 1 and int(Save.d["items"][id]) == 0,
+			"%s eaten at home: +%d %s, one journal line, bag empty" % [id, gain, stat])
+	ok(shown.contains(name_) and shown.contains("%s +%d (4 to %d)" % [Care.STATS[stat]["name"], gain, 4 + gain]),
+			"%s: the Boki card's journal shows the item and the change" % id)
 
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))

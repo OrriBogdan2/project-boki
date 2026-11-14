@@ -16,6 +16,11 @@ static func ids() -> Array:
 		out.append(String(it["id"]))
 	return out
 
+## The stat bite a lair pile holds beside its gear, or "" when this pile has none (roll in 0..1).
+static func lair_drop(roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["lair_drop"]
+	return String(d["ids"][pick % d["ids"].size()]) if roll < float(d["chance"]) else ""
+
 static func has(id: String) -> bool:
 	return not item(id).is_empty()
 
@@ -52,7 +57,6 @@ static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		"aura": return _aura(rec, id)
 		"rinse": return _rinse(rec)
 		"nest": return _no("goes in the Nesting Nook with a pair")
-		"ribbon": return _no("won in a Crown cup, never fed: it stays on")
 		"down": return _down(rec, int(e["trust"]))
 		"stat_all": return _stat_all(rec, int(e["n"]))
 		"sweet": return _sweet(rec, e, pick)
@@ -86,9 +90,9 @@ static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
 
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
 	for key in deltas:
-		var after: Variant = deltas[key][1]
-		if key.begins_with("stats."): rec["stats"][key.substr(6)] = after
-		else: rec[key] = after.duplicate(true) if typeof(after) in [TYPE_ARRAY, TYPE_DICTIONARY] else after
+		var to: Variant = deltas[key][1]
+		if key.begins_with("stats."): rec["stats"][key.substr(6)] = to
+		else: rec[key] = to.duplicate(true) if typeof(to) in [TYPE_ARRAY, TYPE_DICTIONARY] else to
 
 static func _verb(id: String) -> String:
 	var it := item(id)
@@ -133,6 +137,7 @@ static func share(a: Dictionary, b: Dictionary, id: String) -> Dictionary:
 	CareJournal.note(b, "%s %s with %s" % [_verb(id), item_name(id), a["name"]])
 	pv["look"] = false
 	pv["id"] = id
+	pv["unstable"] = UnstableMix.unstable(a, b)
 	pv["text"] = "%s shared: %s" % [item_name(id), pv["text"]]
 	return pv
 
@@ -172,19 +177,8 @@ static func nudge(id: String) -> String:
 		"xp": return "+%d xp" % int(e["n"])
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"
-		"ribbon": return "1 step toward the final of its sport when a form is chosen"
 		"rinse": return "clears the lean; the grown parts stay"
 		_: return "%d points of the top stat become loose points" % int(e["n"])
-
-## A Crown cup's keepsake: the Cup Ribbon of `sport` (a GardenPrizes game id), one a sport for each Boki, worn
-## for good (rec.ribbons, sport -> {week} of its latest Crown). True the first time, when it is new.
-static func award_ribbon(rec: Dictionary, sport: String, week: int, why: String) -> bool:
-	var ribbons: Dictionary = rec.get_or_add("ribbons", {})
-	var fresh := not ribbons.has(sport)
-	ribbons[sport] = {"week": week}
-	if fresh:
-		_remember(rec, "cup_ribbon", why)
-	return fresh
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
@@ -317,9 +311,9 @@ static func _token_id(aff: String) -> String:
 			return String(it["id"])
 	return ""
 
-## False for items that are not fed (nest items are placed in the Nook, ribbons are won).
+## False for items that are not fed (nest items are placed in the Nook).
 static func fed(id: String) -> bool:
-	return not String(item(id)["effect"]["kind"]) in ["nest", "ribbon"]
+	return String(item(id)["effect"]["kind"]) != "nest"
 
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:

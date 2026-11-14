@@ -1824,6 +1824,8 @@ func _open_rack() -> void:
 			UI.footer_primary(v, "Equip", func(): _rack_equip(rack_pick), 140, "check")
 	elif g.has("unlock"):
 		var lk := UI.label(Gliders.how(rack_pick), UI.T_SMALL, UI.ACCENT_HI)
+		lk.custom_minimum_size.x = 440      # px: a long mastery goal wraps to two lines, not one word per line
+		lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		lk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		UI.footer(v).add_child(lk)
 	else:
@@ -1986,7 +1988,7 @@ func _house_alert(inside: Array) -> void:
 	wt.tween_callback(who.queue_free)
 	Sfx.play("kin_alert", at, -6.0, 0.1, 1.15)
 	# the house might be off screen: say it on the HUD as well
-	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", "heard you from the house and is on its way"))
+	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", KinSpeak.about(inside[0]["rec"], "heard you from the house and is on {his} way")))
 	# the house rattles: little feet scurrying for the door
 	if is_instance_valid(house_node):
 		var base := house_node.scale
@@ -2076,8 +2078,8 @@ func _find_interact() -> void:
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
 	if hob:
 		var near_hob := hob.find(p2)
-		if not near_hob.is_empty():
-			bd = 0.5
+		if not near_hob.is_empty() and (best.is_empty() or float(near_hob.get("d", 0.0)) < bd):
+			bd = float(near_hob.get("d", 0.5))
 			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and _visiting()): continue
@@ -2086,19 +2088,19 @@ func _find_interact() -> void:
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
 		if nm == "house": sp = _house_door() - HomeLayout.facing(house_r) * 0.1
 		var d := p2.distance_to(Vector2(sp.x, sp.z))
-		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
+		if d < reach and d < bd + FarmHob.lead(best, 0.6): bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
 		if not l["built"] and FarmSites.has_site(FarmLots.entry(b, _d())): continue      # FarmHob finds the site
 		var dp: Vector3 = l["door"] if l["built"] else l["at"]
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
-		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
+		if d < (1.8 if l["built"] else 2.4) and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "lot", "b": b}
 	for k in bridges:
 		if bridges[k]["built"] or FarmUnlocks.base_mode():
 			continue
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
-		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
+		if d < 2.4 and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "bridge", "isle": k}
 	var pet := {}      # a Boki only wins at the end, and never over work in reach
 	var pet_d := bd
 	for k in kins:
@@ -2108,7 +2110,7 @@ func _find_interact() -> void:
 	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
-		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
+		if bdd < 1.7 and bdd < bd + FarmHob.lead(best, 0.4): bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and not _visiting():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
 	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and not _visiting():
@@ -3476,27 +3478,34 @@ func _open_expedition() -> void:
 	UI.subtitle(v, "Pick your Hunter and where to drop.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
 	v.add_child(cols)
+	var first := ExpFold.first_visit()      # (then Boki, match and mode links sit in `more`, folded)
+	var more := UI.vbox(10)
 	# left: who you are (your Hunter, its weapon, your Boki); locked Hunters are greyed (HunterPickRow)
 	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(left)
-	HunterPickRow.add(self, left)
+	HunterPickRow.add(self, left, first)
+	if first:
+		ExpFold.add(v, [more], "More: Boki, match and modes")
+		v.add_child(more)
+	var lx: Control = more if first else left
 	var ak := Save.active_kin()
 	if not ak.is_empty():
-		left.add_child(UI.spacer(2))
-		left.add_child(UI.section("Boki you bring"))
-		CarryPick.add_cards(left, _open_expedition)
-		left.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
+		lx.add_child(UI.spacer(2))
+		lx.add_child(UI.section("Boki you bring"))
+		CarryPick.add_cards(lx, _open_expedition)
+		lx.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
 		if float(ak["trust"]) < 30.0:
-			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
+			lx.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
 	if Save.d.get("treat", "") != "":
-		left.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
-	hecon.loadout_rows(left, _open_expedition)
+		lx.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
+	hecon.loadout_rows(lx, _open_expedition)
 	# right: where you're going and how
 	var right := UI.vbox(10); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(right)
 	right.add_child(UI.section("Where"))
 	var ex := int(Save.d.get("extracts", 0))
 	if exp_tier >= Data.TIERS.size() or ex < int(Data.TIERS[exp_tier]["unlock"]): exp_tier = 0
+	var locked_tiles: Array = []
 	for i in Data.TIERS.size():
 		var td: Dictionary = Data.TIERS[i]
 		var locked := ex < int(td["unlock"])
@@ -3521,21 +3530,26 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
-	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	right.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+		if locked: locked_tiles.append(tc)
+	if first and not locked_tiles.is_empty():
+		ExpFold.add(right, locked_tiles, "Locked drops")
+	var rx: Control = more if first else right
+	rx.add_child(UI.spacer(2))
+	rx.add_child(UI.section("Match"))
+	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
-	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Conditions"))
-	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
-	right.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
+	rx.add_child(UI.spacer(2))
+	rx.add_child(UI.section("Conditions"))
+	rx.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
+	rx.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
 	if not ak.is_empty():
-		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
+		rx.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
-	var fl := UI.footer_left(v)
+	var fl: Container = UI.hbox(10) if first else UI.footer_left(v)
+	if first: more.add_child(fl)
 	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
@@ -4313,7 +4327,6 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	GardenVisitor.fed(self, rec, res)
 	if res["ok"]:
 		GardenFirstDay.mark("feed", self)
-		BokiLifeSfx.at_home(k, "eat")
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
 		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
@@ -4323,8 +4336,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(fx.burst.bind(fp, Care.food_col(f), 4, 1.2, 0.3))
-			tw.tween_callback(Sfx.play.bind("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4345,6 +4357,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
 		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
+		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
 		Save.save_game()
 		_refresh_top()
@@ -4361,7 +4374,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_swap_kin_model(k)      # its colour shifts toward the lean on the spot
 		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Lean.face(leaned)["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
-		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
+		_toast(KinSpeak.about(rec, "%s leans %s: {his} colour shifts (%d%%)") % [nm, Lean.face(leaned)["name"], pct])
 	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	_garden_xp(rec, "feed")
 	if res["love"]:
@@ -4453,14 +4466,17 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	var k := _kin_entry(rec)
 	if k.is_empty():
 		return
+	if yard == null:      # the drill runs at the Training post's dummy
+		_toast("Build a Training post on the farm first, then train %s there" % rec["name"])
+		return
 	if Care.need(rec, "energy") < 20.0 or Care.need(rec, "food") < 12.0:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"
 		_say(k, BokiLines.say(rec, "want_" + why))
-		_toast("%s is too %s to train. %s first" % [rec["name"], "tired" if why == "energy" else "hungry", "Let it nap" if why == "energy" else "Feed it"])
+		_toast(KinSpeak.about(rec, "%s is too %s to train. %s first") % [rec["name"], "tired" if why == "energy" else "hungry", "Let {him} nap" if why == "energy" else "Feed {him}"])
 		return
 	if int(rec["stats"][stat]) >= Care.stat_cap(rec):
-		_toast("%s can't train %s any further until it levels up" % [rec["name"], Care.STATS[stat]["name"]])
+		_toast(KinSpeak.about(rec, "%s can't train %s any further until {he} levels up") % [rec["name"], Care.STATS[stat]["name"]])
 		return
 	if not _care_start(k):
 		return

@@ -9,11 +9,13 @@
   abyss_cry    another Hunter dropping under the lip: a short wordless cry that falls away
 Original synthesis, no samples.
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, shape, soft_in, sweep, voice
+from sfx_lib import N, noise, lpf, bpf, env, mix, shape, soft_in, sweep, voice
 from gen_sfx_glider import sweep_noise, wobble
 
 S.reseed(7316)
@@ -30,7 +32,9 @@ def wind():
 def warn():
     d = 0.5
     t = np.arange(N(d)) / S.SR
-    tone = lpf(sweep(140, 95, d, 'saw'), 900) * (np.exp(-((t - 0.09) / 0.05) ** 2) + np.exp(-((t - 0.3) / 0.05) ** 2))
+    tone = lpf(sweep(140, 95, d, "saw"), 900) * (
+        np.exp(-(((t - 0.09) / 0.05) ** 2)) + np.exp(-(((t - 0.3) / 0.05) ** 2))
+    )
     whistle = bpf(noise(d), 2400, 3600) * shape(d, 0.05, 0.25, 0.2) * 0.35
     return soft_in(mix(tone * 1.4, whistle), 1.0)
 
@@ -43,16 +47,16 @@ def lift():
 
 
 def cry():
-    return voice(0.6, 430, 190, 'ah', breath=0.35, vib=0.02, scale=1.05, a=0.02, decay=0.35)
+    return voice(0.6, 430, 190, "ah", breath=0.35, vib=0.02, scale=1.05, a=0.02, decay=0.35)
 
 
 def build():
-    S.save_loop('abyss_wind', wind(), 'loop')
-    S.save_cat('abyss_warn', warn(), 'cast')
-    S.save_cat('abyss_lift', lift(), 'cast')
-    S.save_cat('abyss_cry', cry(), 'grunt')
+    S.save_loop("abyss_wind", wind(), "loop")
+    S.save_cat("abyss_warn", warn(), "cast")
+    S.save_cat("abyss_lift", lift(), "cast")
+    S.save_cat("abyss_cry", cry(), "grunt")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()
-    print('gen_sfx_abyss_fall: done')
+    print("gen_sfx_abyss_fall: done")

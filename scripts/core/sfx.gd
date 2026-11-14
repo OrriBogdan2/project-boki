@@ -77,6 +77,7 @@ const NAMES := [
 	"armor_break",
 	"knock_confirm",
 	"extract_ok",
+	"elim_confirm",
 	"ab_throw",
 	"ab_rail",
 	"ab_charge",
@@ -121,6 +122,9 @@ const NAMES := [
 	"fuse_hiss"
 ]
 const POOL := 24
+## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
+## the combat crowd never steal it, and no gap or stack cap thins it.
+const CUES := ["knock_confirm", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := [
 	"v_skitter",
@@ -205,6 +209,8 @@ var streams := {}
 var players: Array[AudioStreamPlayer] = []
 var next := 0
 var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+var cue_voice: AudioStreamPlayer
+var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
@@ -256,6 +262,9 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	cue_voice = AudioStreamPlayer.new()
+	cue_voice.bus = "SFX"
+	add_child(cue_voice)
 
 ## Each sound set's categories (they pick the bus, SfxMix.learn) and its heavy sounds that carry further than
 ## hear_range (a gatling you hear coming), under "reach" (metres). Past FAR they still go through the muffled
@@ -607,6 +616,13 @@ func play(
 ) -> void:
 	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
+		return
+	if sname in CUES:
+		cue_plays[sname] = int(cue_plays.get(sname, 0)) + 1
+		cue_voice.stream = streams[sname]
+		cue_voice.volume_db = vol_db
+		cue_voice.pitch_scale = pitch
+		cue_voice.play()
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))

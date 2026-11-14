@@ -80,19 +80,18 @@ func _cup() -> void:
 		var res := GardenPrizes.settle("shove", me, _boki(foe_power), true, t, rng)
 		names.append(res["round"])
 	ok(names == ["Sprout", "Bloom", "Crown"], "Sprout, Bloom, Crown in a row (got %s)" % str(names))
-	var crowned := GardenPrizes.has_ribbon(me, "shove") and GardenItems.owned("cup_ribbon")
-	ok(crowned, "the Crown grants the Shove ribbon and its page")
+	ok(GardenPrizes.ribbon_count(me, "shove") == 1, "the Crown grants exactly one Stump Shove ribbon")
 	ok(int(Save.d["items"].get("keepstone", 0)) == bag_before + 1, "the Crown grants a Keepstone, the cup prize")
 	var again: Array = []
 	for foe_power in [19, 21, 23]:
 		again.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + DAY, rng))
-	ok(not again[2]["ribbon"], "a second Crown the same week: no ribbon")
+	var ribbons := GardenPrizes.ribbon_count(me, "shove")
+	ok(ribbons == 1 and not again[2]["ribbon"], "a second Crown the same week: no ribbon")
 	ok(int(Save.d["items"].get("keepstone", 0)) == bag_before + 1, "...and no second cup prize")
 	var later: Array = []
 	for foe_power in [19, 21, 23]:
 		later.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + WEEK, rng))
-	var week_now := int(me["ribbons"]["shove"]["week"]) == GardenPrizes.week_of(t + WEEK)
-	ok(not later[2]["ribbon"] and week_now, "next week's Crown: no second ribbon, the week moves on")
+	ok(GardenPrizes.ribbon_count(me, "shove") == 2 and later[2]["ribbon"], "the next week's Crown grants again")
 	_echo_crown(rng, t + 5.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
 

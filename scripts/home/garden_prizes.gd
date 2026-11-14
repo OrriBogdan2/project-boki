@@ -3,8 +3,7 @@ extends RefCounted
 ## Prizes and cups for the garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
 ## A win by the Boki you backed rolls the game's prize table, adds the day's first-win item, and moves that
 ## Boki along the weekly cup: Sprout, Bloom, Crown, three wins in a row against rivals the data calls stronger.
-## The Crown gives the cup prize and, the first time, the game's Cup Ribbon (rec.ribbons): once a game
-## a week for each Boki.
+## The Crown gives the game's Cup Ribbon (rec.ribbons) and the cup prize, once a game a week for each Boki.
 ## State is lazy and needs no migration: Save.d cups (runs), Save.d prize_day (first win), rec.ribbons.
 
 static func rules() -> Dictionary:
@@ -55,12 +54,12 @@ static func entry_name(e: Dictionary) -> String:
 static func week_of(now: float) -> int:
 	return int(now / float(rules()["week_s"]))
 
-static func has_ribbon(rec: Dictionary, id: String) -> bool:
-	return rec.get("ribbons", {}).has(id)
+static func ribbon_count(rec: Dictionary, id: String) -> int:
+	return int(rec.get("ribbons", {}).get(id, {}).get("n", 0))
 
 ## True once this Boki has taken the game's Crown this week.
 static func crowned_this_week(rec: Dictionary, id: String, now: float) -> bool:
-	return has_ribbon(rec, id) and int(rec["ribbons"][id]["week"]) == week_of(now)
+	return ribbon_count(rec, id) > 0 and int(rec["ribbons"][id]["week"]) == week_of(now)
 
 ## The round this Boki fights next in a game's cup: an index into cup.rounds.
 static func stage(rec: Dictionary, id: String) -> int:
@@ -124,12 +123,16 @@ static func _cup(out: Dictionary, mine: Dictionary, foe: Dictionary, now: float)
 	runs.erase(uid)
 	_crown(out, mine, now)
 
-## The Crown: the game's Cup Ribbon (the first time) on the winner and the cup prize in the bag.
+## The Crown: the game's Cup Ribbon on the winner and the cup prize in the bag.
 static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	var id: String = out["game"]
 	var g := game(id)
+	var ribbons: Dictionary = mine.get_or_add("ribbons", {})
+	var have: Dictionary = ribbons.get_or_add(id, {"n": 0, "week": -1})
+	have["n"] = int(have["n"]) + 1
+	have["week"] = week_of(now)
 	out["crown"] = true
-	out["ribbon"] = GardenItems.award_ribbon(mine, id, week_of(now), "won the %s Crown cup" % g["name"])
+	out["ribbon"] = true
 	var prizes: Array = [{"kind": "item", "id": g["cup_prize"]}]
 	if out["ribbon"] and g.has("first_crown"):
 		prizes.append({"kind": "item", "id": g["first_crown"]})

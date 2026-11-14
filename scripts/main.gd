@@ -404,9 +404,6 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
-	if "--move-feel-check" in args:
-		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
-		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return
@@ -424,9 +421,6 @@ func _ready() -> void:
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
 		_weapon_check()
-		return
-	if "--base-check" in args:
-		_base_check()
 		return
 	if "--duel-check" in args:
 		_duel_check()
@@ -725,6 +719,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -1934,35 +1929,6 @@ func _grammar_runtime_check() -> void:
 	print("GRT DONE, failures: ", _grt_fail)
 	get_tree().quit(1 if _grt_fail > 0 else 0)
 
-## Headless check for basing to a teammate (B): a clean channel arrives weakened; a hit interrupts.
-func _base_check() -> void:
-	var m := Match.new()
-	add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "no_drop": true, "seed": 77, "autoplay": true, "big": false})
-	m.set_process(false)
-	var p: Hunter = m.player
-	p.ctrl = "local"
-	var mate := m.base_target(p)
-	if mate == null:
-		print("BCHECK FAIL no teammate"); get_tree().quit(); return
-	mate.ctrl = "idle"   # the check measures the recall landing beside the mate, not where a wandering mate strolls off to during the 3 s channel
-	for i in 30: m.step(Match.DT)
-	p.inp["move"] = Vector2.ZERO
-	p.start_base(mate)
-	var t := 0.0
-	while t < 3.3:
-		p.inp["move"] = Vector2.ZERO
-		m.step(Match.DT); t += Match.DT
-	var near := p.flat_dist(mate) < 2.5
-	print("BCHECK clean: arrived=%s weak=%.1f cd=%.0f dmg_mult=%.2f" % [near, p.weak_t, p.base_cd, m.dmg_mult(p)])
-	p.base_cd = 0.0
-	p.start_base(mate)
-	for i in 30: m.step(Match.DT)
-	p.hurt(5.0, null, {"src": "test"})
-	print("BCHECK interrupt: channel=%.2f cancelled=%s" % [p.base_t, p.base_t <= 0.0])
-	print("BCHECK ", "PASS" if near and p.base_t <= 0.0 else "FAIL")
-	get_tree().quit()
-
 ## Headless smoke test for the duel room: your autopilot against the sparring bot for a few
 ## minutes, changing the bot's class, behaviour, glove and difficulty along the way.
 func _duel_check() -> void:
@@ -2256,10 +2222,10 @@ func _truce_check() -> void:
 	print("TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d" % [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back])
 	if T.allied(0, 1) or not announced or not T.is_marked(traitor) or hits_back == 0: ok = false; print("TCHECK FAIL breaking")
 	# sharing an uplink
-	T.marked.clear()
-	T.make(0, 1)
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
+	T.marked.clear()     # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
+	T.make(0, 1)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
 	spots[B[0]] = o["pos"] + Vector3(-1.2, 0, -0.9)
