@@ -200,7 +200,7 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 		await tree.process_frame
 		frames += 1
 	ok(hx.stage == "name", "Name it hands over to naming")
-	hx._finish(sp, "Ember", "Orri", true)
+	hx._finish(sp, "Ember", true)
 	var rec: Dictionary = Save.d["roster"][0] if not Save.d["roster"].is_empty() else {}
 	var same: bool = rec.get("species", "") == sp and rec.get("name", "") == "Ember" and rec.get("starter", false)
 	var saved: bool = Save.d["active"] == rec.get("uid", "") and Save.d["tutorial"].get("hatched", false)
