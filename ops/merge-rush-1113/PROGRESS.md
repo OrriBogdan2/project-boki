@@ -107,3 +107,11 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
 - Fixes in the batch: registry dedupe; no new lint debt vs main (gdformat 14 files, gdlint names/order in 11
   check tools, 3 shadowing locals); glider_heat_check stub HUD takes tip(text, near).
 - Skip list: `skip_batchE.tsv` (808 conflicts with files, 5 drops). Conflict size: ~100 one-file, ~100 two-file.
+- Main moved (PR #68, lane A, ba6b62f7a1) during the gate: merged in (home.gd hub condition + ClanBase.draw;
+  title.gd label + _continue; ABILITIES.md main's side, its generator fails on main too).
+- **Batch E gate (main ba6b62f7a1):** full suite both trees, 8 at a time (429 checks branch, 426 main): 2 red on
+  the branch only, both green on a low-load rerun (--duel-online-check: relay port busy; --garden-whistle-check:
+  flaky on main in batch C too) -> NEW-RED 0; 5 checks fixed vs main. Import 0 parse errors. health --strict OK.
+  No new lint debt vs main (gdformat/gdlint/ruff/gltf/vulture per file). Export dry run: every preset packs,
+  433.2 MB (baseline 428.2 MB, +1.2%, under the 5% budget).
+- Batch E ships 37 branches. Gap after merge about 1054 - 37 (recount with merge_gap.py).
