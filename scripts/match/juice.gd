@@ -280,3 +280,23 @@ static func footstep(h: Hunter) -> void:
 	elif w.style_at(i) == "frost":
 		surf = "snow"
 	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+
+
+const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
+const ARMOR_UP_OWN_DB := -4.0   # dB: your own Hunter's tier-up (the fuller cue, no position)
+const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
+
+
+## The pitch of a tier's rise: higher tier, brighter.
+static func armor_up_pitch(tier: int) -> float:
+	return 0.8 + ARMOR_UP_PITCH * float(tier)
+
+
+## Armor went up a tier (Match._armor_up, never on a repair): a metallic rise pitched by tier. You hear the
+## fuller cue; everyone nearby hears the short positional one, so a rival knows this Hunter just got tougher.
+static func armor_up(m: Match, h: Hunter) -> void:
+	var pitch := armor_up_pitch(h.armor_tier)
+	if h == m.player:
+		Sfx.play("armor_up_own", null, ARMOR_UP_OWN_DB, 0.0, pitch)
+	else:
+		Sfx.play("armor_up", h.pos, ARMOR_UP_NEAR_DB, 0.0, pitch)

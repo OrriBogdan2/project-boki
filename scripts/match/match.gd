@@ -1844,9 +1844,9 @@ func freeze_frame(t: float) -> void:
 func _armor_up(h: Hunter) -> void:
 	var col := h.armor_col()
 	HeroVfx.of(self).tier_up(h, h.armor_tier)
-	if h == player:
-		sfx("revive", null, -6.0)
-		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
+	Juice.armor_up(self, h)
+	if h == player and hud:
+		hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
 
 ## A knock you landed: the short freeze, ring, burst and confirm sound. No slow-mo, no full-screen
 ## flash, so offline and online keep one rhythm (docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment).

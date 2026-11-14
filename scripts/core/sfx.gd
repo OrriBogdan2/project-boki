@@ -75,6 +75,8 @@ const NAMES := [
 	"slash_hit",
 	"armor_hit",
 	"armor_break",
+	"armor_up",
+	"armor_up_own",
 	"knock_confirm",
 	"extract_ok",
 	"elim_confirm",
