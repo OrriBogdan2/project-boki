@@ -22,7 +22,6 @@ const PILOT_COL := Color("ffd23a")     # the pilot flame: a hot gold spark in he
 const BOLT_CORE := Color("fff4c8")     # Cinder Shot's white-hot core (its body is the RMB slot's flame orange)
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
-<<<<<<< HEAD
 const PILOT_CORE := Color("fff4c8")
 const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
 const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
@@ -31,10 +30,6 @@ const RAM_FRONT_K := 1.4               # the burst speed against the average (fr
 const RAM_BACK_K := 0.85
 # s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
 const RAM_IMPACT_KEY := 0.36
-=======
-const PILOT_CORE := Color("c8f8ff")
-const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
->>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
@@ -546,14 +541,13 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	# on Felix's fitted ram curve (content/rules/dash_feel.json, docs/SUPERVIVE_FEEL.md "Dash speed curves")
-	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir, "curved": true})
+	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir})
 	st["last_dash"] = "soot_ram"
 	play("as_leap")
 	vfx("ram", null, dir)
 	h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
+	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
 ## The air dash, Cinder's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
@@ -575,6 +569,9 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
 	var dir: Vector2 = bash["dir"]
+	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
+		var into := float(bash["t0"]) - float(bash["t"])
+		h.roll_speed = float(bash["speed"]) * (RAM_FRONT_K if into < RAM_FRONT * float(bash["t0"]) else RAM_BACK_K)
 	bash["t"] = float(bash["t"]) - dt
 	if tells_visible():
 		_ram_looks(dir)

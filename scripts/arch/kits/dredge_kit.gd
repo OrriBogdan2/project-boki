@@ -748,7 +748,7 @@ func on_dash(use_ex: bool) -> bool:
 	else:
 		if not spend_dash(false):
 			return true
-		var shove := {"invuln": 0.06, "trail": "", "dir": dir, "curved": true}  # hits nobody; Kingpin's fitted curve
+		var shove := {"invuln": 0.06, "trail": "", "dir": dir}        # Brute Dash hits nobody (data, footage)
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
 		if not _move_runs(): _roll_ball()

@@ -70,7 +70,6 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
-<<<<<<< HEAD
 	"dash_curve_bulwark_peak_u":      ["~", [0.4, 0.6], "", "[footage] Oath Smash peaks 0.17s into 0.33s"],
 	"dash_curve_bulwark_peak_k":      ["~", [1.12, 1.3], "x", "[footage] Oath peak 530 px/s, mean 436"],
 	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
@@ -80,14 +79,6 @@ const T := {
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
-=======
-	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push is at full speed from the start"],
-	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s for 0.3s, mean 9.8 (fit 1.42)"],
-	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
-	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
-	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
-	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix peak 16.5 m/s, mean 11.2 (fit 1.88; steps miss the tip)"],
->>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -958,43 +949,34 @@ func _run_up() -> float:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-<<<<<<< HEAD
 	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
-=======
-	for id in ["gunslinger", "juggernaut", "archer", "dredge", "mage", "ashwick"]:
->>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var p0 := Vector3.ZERO
-		var want := 0.0
-		for i in 120:
-			var pos_was := P.pos
+		var x0 := 0.0
+		for i in 90:
+			var x_was := P.pos.x
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty():
-				p0 = pos_was
-				want = _curve_dist(id)
+			if speeds.is_empty(): x0 = x_was
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
+		var dd := P.ak.dash_def()
+		var feel := P.ak.dash_feel()
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-<<<<<<< HEAD
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
-=======
-		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
->>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
@@ -1005,7 +987,6 @@ func _dash_curves() -> void:
 	_tender_glide()
 	P.reclass(cls_was, kit_was)
 
-<<<<<<< HEAD
 ## Meeko's air dash is her kit's own measured curve (tender.json dash.air: ramp, burst, float-out): from a
 ## height, so it ends on time rather than on a touchdown; its distance, time and the speed it floats out at.
 func _tender_glide() -> void:
@@ -1027,15 +1008,6 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
-=======
-## The metres a fitted hero's dash is set to cover: the kit's distance under the dash feel, or for Sparkle's
-## Wirerun (a lane length from the charge, along the aim) the length its run took.
-func _curve_dist(id: String) -> float:
-	if id == "mage":
-		return float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
-	var dd := P.ak.dash_def()
-	return float(dd.get("roll", dd.get("dist"))) * float(P.ak.dash_feel()["dist"])
->>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
