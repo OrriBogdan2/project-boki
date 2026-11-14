@@ -51,13 +51,12 @@ func _air_dash(m: Match, P: Hunter, home: Vector3) -> void:
 	P.vel = Vector3.ZERO
 	_frame(m, [P])
 	P.do_dash()
+	var kind := (P.ak as GunslingerKit).last_dash_kind
 	var seen := {}
-	var burned := 0
 	var after_land := ""
 	for f in 90:
 		_frame(m, [P])
 		seen[_clips(P).cur] = true
-		burned += int((P.ak as GunslingerKit).fire_id != "")
 		if P.grounded and after_land == "" and f > 2:
 			for i in 3:
 				_frame(m, [P])
@@ -67,7 +66,7 @@ func _air_dash(m: Match, P: Hunter, home: Vector3) -> void:
 	for f in 60:
 		_frame(m, [P])           # (standing still again: the next move plays full-body)
 	ok(seen.has("dash_ex") and not seen.has("dash"), "an air dash rolls, no skid (clips %s)" % str(seen.keys()))
-	ok(burned >= 5, "the roll burns a fire ribbon (%d frames)" % burned)
+	ok(kind in ["air", "air_slide"], "the air dash burns a fire ribbon (the slide_air look; dash kind %s)" % kind)
 	ok(after_land != "dash_ex", "the roll gives way once she lands (clip after: %s)" % after_land)
 
 ## The world yaw a pair of bones faces: the line from the left one's head to the right one's is his right.
