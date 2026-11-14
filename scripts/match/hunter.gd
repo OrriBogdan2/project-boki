@@ -1829,6 +1829,8 @@ func sim(dt: float) -> void:
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
 	KinRegen.owner_shield_tick(self, dt)
+	if is_local():
+		WarnSfx.low_hp(self, dt)
 	if owner_stat("dodge_regen") >= 0.99:
 		dashes = max_dashes()
 	for bk in kbuffs.keys():
