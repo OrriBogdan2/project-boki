@@ -176,8 +176,8 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
-		var shown := ClanInfo.tagged(h.pname, h.clan_tag)
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), shown, HudStyle.PLATE_NAME_FS, name_col)
+		var title := ClanInfo.tagged(h.pname, h.clan_tag)
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), title, HudStyle.PLATE_NAME_FS, name_col)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
