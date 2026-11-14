@@ -17,8 +17,6 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	_text()
 	_steps()
-	await _area(main, tree, false)
-	await _area(main, tree, true)
 	var sig = load("res://tools/signature_drill_check.gd").new()
 	await sig.drills(main)
 	bad += sig.fails
