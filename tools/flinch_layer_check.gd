@@ -50,6 +50,9 @@ func _hero(id: String, move: String) -> void:
 	var hit: Dictionary = pair[0]
 	var ctl: Dictionary = pair[1]
 	var clips: WardenClips = hit["clips"]
+	var hold := minf(HOLD_T, clips.move_len(clips.d["kmoves"][move]) * 0.5)      # a cut clip (Vex's rifle) replays each shot
+	for p: Dictionary in pair:
+		(p["s"] as Dictionary)["kmove_t"] = hold
 	ok(clips.lib.has_animation(String(clips.d["kmoves"][move]["clip"])), "%s: %s is a keyed move" % [id, move])
 	_frames(pair, 12)
 	var owns := clips.act_w + clips.up_w
