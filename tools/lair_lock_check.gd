@@ -203,7 +203,7 @@ func run(main: Node) -> void:
 	# (Limited Ways Out, QuestSeats)
 	# a match in the mode: one lair by the seed, locked before 2:00, then the first squad to kill its
 	# boss takes it and leaves by its updraft (a rival there doesn't); unused, it shuts at 5:30
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	m = Match.new()

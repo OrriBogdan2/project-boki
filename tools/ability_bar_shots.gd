@@ -53,5 +53,5 @@ func run(main_node: Node) -> void:
 			P.ak.ch_rmb = float(P.ak.rmb_charges() - 1)
 			P.ak.cd["rmb"] = 0.25 * float(P.ak.rmb_def().get("cooldown", 6.0)) * P.ak.cd_k("sec")
 		await _grab(kit, bar)
-	m.over = true
+	m.flow.finish("check done")
 	main.get_tree().quit(0)

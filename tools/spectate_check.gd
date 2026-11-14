@@ -89,7 +89,7 @@ func run(main_node: Node, mode: String = "check") -> void:
 	click.pressed = true
 	click.position = Vector2(20, 20)
 	var used := m.spectate.input(click)
-	ok(used and m.result.get("ending", false) and not m.result.get("extracted", true), "Give up ends the match")
+	ok(used and m.flow.ending() and not m.result.get("extracted", true), "Give up ends the match")
 	ok(P.gone, "and your Boki is left behind (Life.make_gone)")
 	print("SPECTATE %s" % ("PASS" if bad == 0 else "FAILED %d" % bad))
 	main.get_tree().quit(0 if bad == 0 else 1)

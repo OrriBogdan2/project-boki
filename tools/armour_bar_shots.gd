@@ -53,7 +53,7 @@ func run(main_node: Node) -> void:
 	await _grab(m, "3_rare_tier", k)
 	P.armor_gain(5000.0)
 	await _grab(m, "4_top_tier", k)
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	main.get_tree().quit()
