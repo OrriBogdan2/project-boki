@@ -9,7 +9,9 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const LEAD_EDGE_MAX_M := 0.35     # m: the footage's noise floor, 1.5% of the ~23.5 m across the view
 const FLICK_MOVE_MAX_M := 0.05    # m the view may drift off you in the second after a cursor flick (footage: 0)
-const DASH_BACK_S := 1.2          # s after a dash starts by which the view is back on you (the trail model in camera.json: the pan stops by ~0.5 s, the last 0.4 m closes slowly)
+# s after a dash starts by which the view is back on you (the trail model in camera.json: the pan stops by ~0.5 s,
+# the last 0.4 m closes slowly)
+const DASH_BACK_S := 1.2
 const DASH_BACK_SLACK_M := 0.1    # m over the usual running lag allowed at that moment
 const DASH_JUMP_MAX_M := 0.5      # m the view may move in one frame during a dash (no jump cut)
 const EDGE := Vector2(0.99, 0.5)  # where the shot holds the cursor, as a share of the window

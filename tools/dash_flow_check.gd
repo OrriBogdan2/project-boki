@@ -42,11 +42,14 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func run(main: Node) -> void:
-	for r in SOURCE_ROWS:
-		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
-		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	for hero in _heroes():
+## `part` "k/n" (the registry's two halves, so neither runs past the suite's 300 s cap) runs every n-th hero from
+## the k-th; "" or a hero list on the flag runs them all.
+func run(main: Node, part := "") -> void:
+	if part == "" or part.begins_with("1/"):
+		for r in SOURCE_ROWS:
+			var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
+			ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
+	for hero in part_of(_heroes(), part, "--dash-flow-check="):
 		await check_hero(main, hero)
 		await _lock(main, hero)
 	_print_exceptions()
@@ -76,6 +79,22 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
+
+## Part "k/n" of `heroes`: every n-th from the k-th (interleaved, so both halves get a mix of slow and quick kits).
+## A hero list named on the command line (`named`=<id>,<id>) is run whole.
+static func part_of(heroes: Array, part: String, named: String) -> Array:
+	if part == "":
+		return heroes
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with(named) and arg.length() > named.length():
+			return heroes
+	var k := int(part.get_slice("/", 0)) - 1
+	var n := maxi(1, int(part.get_slice("/", 1)))
+	var out := []
+	for i in heroes.size():
+		if i % n == k:
+			out.append(heroes[i])
+	return out
 
 ## Every hero, or the ones named in --dash-flow-check=<id>,<id>.
 func _heroes() -> Array:

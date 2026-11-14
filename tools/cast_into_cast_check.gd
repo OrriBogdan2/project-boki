@@ -4,7 +4,8 @@ extends RefCounted
 ## what the row says: "fire" (goes within ACT_S), "queue" (held, goes after the row's wait, +-WAIT_TOL), "cancel"
 ## (goes at once and the first move never comes) or "drop" (never goes). The two press times per first move are its
 ## row's "at" (s after its press). An LMB hold is held HOLD_S, then let go. --cast-into-cast-check=<id>,<id> runs
-## only those heroes. Reuses --dash-flow-check's arena, ready-up and "went off" probes. Never touches the save.
+## only those heroes; with no list --cast-into-cast-check and --cast-into-cast-2-check run one half each. Reuses
+## --dash-flow-check's arena, ready-up and "went off" probes. Never touches the save.
 
 const PHASES := ["windup", "recovery"]
 const ACT_S := 0.1              # s: a press that goes this soon went at once
@@ -18,20 +19,22 @@ var flow_check = preload("res://tools/dash_flow_check.gd").new()
 var bad := 0
 var first_cut := false      # the last trial's first move never went off (pressed second, it ended it)
 var trials := 0
+var bases := {}             # "<hero> <second>": the second's time to go off pressed alone (any first)
 
 func ok(cond: bool, what: String) -> void:
 	print("CASTCAST %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
-func run(main: Node) -> void:
+## `part` "k/n": every n-th hero from the k-th (the registry runs two halves, each inside the suite's 300 s cap).
+func run(main: Node, part := "") -> void:
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow_check._on_used)
-	for hero in _heroes():
+	for hero in flow_check.part_of(_heroes(), part, "--cast-into-cast-check="):
 		var firsts: Dictionary = DashFlow.file_of(hero).get("into_cast", {})
 		for first in firsts:
 			for second in firsts[first]:
-				# Tender's Hearth Call needs a teammate within reach (nobody: nothing happens), and a lone trial has none
+				# Tender's Hearth Call needs a teammate within reach, and a lone trial has none
 				if hero == "tender" and (first == "x" or second == "x"):
 					continue
 				if second != "at":
@@ -53,7 +56,10 @@ func _heroes() -> Array:
 func _row(main: Node, hero: String, first: String, second: String, moves: Dictionary) -> void:
 	var row: Dictionary = moves[second]
 	ok(String(row.get("source", "")) != "", "%s %s during %s has a source" % [hero, second, first])
-	var base := maxf(0.0, await _wait(main, hero, "", second, 0.0))
+	var key := "%s %s" % [hero, second]
+	if not bases.has(key):
+		bases[key] = maxf(0.0, await _wait(main, hero, "", second, 0.0))
+	var base: float = bases[key]
 	for i in PHASES.size():
 		var phase: String = PHASES[i]
 		trials += 1

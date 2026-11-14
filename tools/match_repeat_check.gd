@@ -16,8 +16,9 @@ const SIM_S := 20.0             # s of match time per expedition
 const DT := 1.0 / 60.0          # s per match step (Match.DT)
 const FRAME_EVERY := 30         # match steps between frames, so deferred frees and timers run
 const HOME_FRAMES := 30         # frames on the farm before the counts are read
-const MESH_GROWTH := 90         # cached meshes one more match may add (~420 a match before MeshCache). Up from 60: a hero the
-					# rolled roster meets for the first time adds its ~55 look meshes once (Ashwick's, in the 4th match here)
+# cached meshes one more match may add (~420 a match before MeshCache). Up from 60: a hero the rolled roster meets
+# for the first time adds its ~55 look meshes once (Ashwick's, in the 4th match here)
+const MESH_GROWTH := 90
 const OBJ_GROWTH := 400         # objects one more match may add (~750 a match before MeshCache)
 
 var main: Node

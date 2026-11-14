@@ -245,8 +245,11 @@ const CHECKS := {
 	"--dash-streak-check": ["res://tools/dash_streak_check.gd", "dash_streak_check", null],
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
-	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
-	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
+	# two halves each (heroes interleaved), so neither passes the suite's 300 s cap; =<id>,<id> runs those heroes
+	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", "1/2"],
+	"--cast-into-cast-2-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", "2/2"],
+	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", "1/2"],  # dash -> ability rows
+	"--dash-flow-2-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", "2/2"],
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
