@@ -602,8 +602,10 @@ func match_voices() -> int:
 		if not nm in MATCH_BEDS:
 			own.append(amb_layers[nm]["p"])
 	for c in get_children():
+		if not c is AudioStreamPlayer:
+			continue  # (the placed voices are 3D: counted above)
 		var ours: bool = c in players or c in music or c in ambs or c in own
-		if c is AudioStreamPlayer and c.playing and not ours:
+		if c.playing and not ours:
 			n += 1  # also a stem or bed or loop still fading out
 	return n
 

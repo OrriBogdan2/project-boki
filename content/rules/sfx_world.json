@@ -8,13 +8,7 @@
     "scripts/match/boss.gd"
    ],
    "mob_voices": true,
-   "holes": [
-    "boss _atk_dash:zap",
-    "boss _atk_dash:whoosh",
-    "boss _atk_storm:zap",
-    "boss _atk_static:zap",
-    "boss _atk_brood:die_small"
-   ]
+   "holes": []
   },
   "pickups": {
    "sets": ["pickups"],

@@ -51,9 +51,9 @@ func _buses() -> void:
 		["archer_hurt", Vector3.ZERO, "Voice"],
 		["kin_alert", null, "Boki"],
 		["click", null, "UI"],
-		["thump", Vector3.ZERO, "SFX"],
+		["thump", Vector3.ZERO, "SFXWorld"],
 		["smg", far, "SFXFar"],
-		["smg", null, "SFX"]
+		["smg", null, "SFXWorld"]
 	]
 	for c in cases:
 		var got := String(Sfx._bus_for(c[1], c[0]))

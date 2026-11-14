@@ -85,9 +85,10 @@ func _heavy_from_the_bow(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vec
 		start.distance_to(bow) < 0.05 and v.normalized().distance_to(to_cursor) < 0.03,
 		"start %s bow %s" % [str(start), str(bow)])
 	var bow_node := WardenGlb.anchor(P.model, "anchor_bow_root")
+	var drawn: float = m.cam.hunter_scale if m.cam else 1.0      # (a Hunter is drawn that much bigger: the camera style's)
 	ok("RMB shot: the bow's mouth is the model's own bow anchor (it rides the bow in the pose), at bow height",
 		bow_node != null and bow_node.global_position.distance_to(bow) < 0.01
-			and bow.y > P.pos.y + 0.7 and bow.y < P.pos.y + 1.8,
+			and bow.y > P.pos.y + 0.7 * drawn and bow.y < P.pos.y + 1.8 * drawn,
 		"bow - body %s" % str(bow - P.pos))
 	var sent := Vector3(999, 0, 999)
 	for e in Net.out_events:
