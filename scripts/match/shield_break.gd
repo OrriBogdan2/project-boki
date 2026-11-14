@@ -7,37 +7,38 @@ extends Node3D
 ## setting doesn't thin it). Pooled: nodes are made once, with the match. The game that owns the body plays it and
 ## sends it to the others ("fx" "sbrk").
 
-const CRACK_S := 0.25       # s the crack shows: it runs across in RUN_S, holds, then fades out
-const RUN_S := 0.06         # s the crack takes to run from one side of the shell to the other
-const SHARD_S := 0.6        # s a shard falls before it is gone (fading over its last FADE_K of that)
+const CRACK_S := 0.25  # s the crack shows: it runs across in RUN_S, holds, then fades out
+const RUN_S := 0.06  # s the crack takes to run from one side of the shell to the other
+const SHARD_S := 0.6  # s a shard falls before it is gone (fading over its last FADE_K of that)
 const FADE_K := 0.35
-const CRACK_W := 0.08       # m: crack line width (about 3 px at 30 m)
-const SHARD_SIZE := Vector3(0.18, 0.22, 0.03)    # m: one shard, a thin triangle
-const SEGS := 5             # straight pieces in the crack across the shell
-const BRANCH := 2           # pieces in the short crack that forks off it
-const SHARDS := 5           # shards per break
-const JAG := 0.18           # the crack's side-to-side jag, times the shell's half width
-const GRAVITY := 9.8        # m/s^2 on the shards
-const BODY_LIFT := 0.9      # m above the feet (times the Hunter's scale): the body shell's centre
-const BODY_HALF := Vector2(0.45, 0.8)    # m: the body shell's half width and half height (times the Hunter's scale)
-const POOL_BREAKS := 6      # breaks that can show at once before the oldest pieces are reused
+const CRACK_W := 0.08  # m: crack line width (about 3 px at 30 m)
+const SHARD_SIZE := Vector3(0.18, 0.22, 0.03)  # m: one shard, a thin triangle
+const SEGS := 5  # straight pieces in the crack across the shell
+const BRANCH := 2  # pieces in the short crack that forks off it
+const SHARDS := 5  # shards per break
+const JAG := 0.18  # the crack's side-to-side jag, times the shell's half width
+const GRAVITY := 9.8  # m/s^2 on the shards
+const BODY_LIFT := 0.9  # m above the feet (times the Hunter's scale): the body shell's centre
+const BODY_HALF := Vector2(0.45, 0.8)  # m: the body shell's half width and half height (times the Hunter's scale)
+const POOL_BREAKS := 6  # breaks that can show at once before the oldest pieces are reused
 const SEG_POOL := POOL_BREAKS * (SEGS + BRANCH)
 const SHARD_POOL := POOL_BREAKS * SHARDS
 
 var m: Match
-var played := 0                       # breaks shown so far (checks)
-var live := 0                         # pieces showing (checks)
-var last_col := Color.BLACK           # the colour of the last break (checks)
+var played := 0  # breaks shown so far (checks)
+var live := 0  # pieces showing (checks)
+var last_col := Color.BLACK  # the colour of the last break (checks)
 var _segs: Array[MeshInstance3D] = []
 var _shards: Array[MeshInstance3D] = []
-var _seg_age := PackedFloat32Array()      # s since its break; -1 = free
-var _seg_delay := PackedFloat32Array()    # s after its break that it shows (the crack running across)
-var _shard_age := PackedFloat32Array()    # s since dropped; -1 = free
+var _seg_age := PackedFloat32Array()  # s since its break; -1 = free
+var _seg_delay := PackedFloat32Array()  # s after its break that it shows (the crack running across)
+var _shard_age := PackedFloat32Array()  # s since dropped; -1 = free
 var _shard_vel: Array[Vector3] = []
-var _shard_spin: Array[Vector3] = []      # rotation axis times rad/s
+var _shard_spin: Array[Vector3] = []  # rotation axis times rad/s
 var _next_seg := 0
 var _next_shard := 0
 var _rng := RandomNumberGenerator.new()
+
 
 ## The match's shield break, made with the match (Match._start).
 static func of(match_node: Match) -> ShieldBreak:
@@ -50,10 +51,12 @@ static func of(match_node: Match) -> ShieldBreak:
 	match_node.set_meta("shield_break", n)
 	return n
 
+
 ## `h`'s body shield broke: cracks its shell in their ability colour.
 static func body(h: Hunter) -> void:
 	var s := float(h.cdat["scale"])
 	of(h.m).play(h.position + Vector3(0, BODY_LIFT * s, 0), BODY_HALF * s, Arch.color(h.arch))
+
 
 ## A shell centred on `at` with half width / half height `half` breaks; `send`: tell the other games.
 func play(at: Vector3, half: Vector2, col: Color, send := true) -> void:
@@ -66,8 +69,8 @@ func play(at: Vector3, half: Vector2, col: Color, send := true) -> void:
 	var right := Vector3.UP.cross(n)
 	right = right.normalized() if right.length_squared() > 0.0001 else Vector3.RIGHT
 	var up := n.cross(right)
-	var face := at + n * half.x       # the shell's near face
-	var a0 := _rng.randf_range(0.6, 1.0) * PI    # the crack starts high on one side and ends low on the other
+	var face := at + n * half.x  # the shell's near face
+	var a0 := _rng.randf_range(0.6, 1.0) * PI  # the crack starts high on one side and ends low on the other
 	var pts: Array[Vector3] = []
 	for i in SEGS + 1:
 		var k := float(i) / SEGS
@@ -86,12 +89,21 @@ func play(at: Vector3, half: Vector2, col: Color, send := true) -> void:
 		dir = dir.rotated(n, _rng.randf_range(-0.5, 0.5))
 	for i in SHARDS:
 		var along := pts[1 + i % (SEGS - 1)]
-		_drop(along, n * _rng.randf_range(0.6, 1.4) + right * _rng.randf_range(-1.3, 1.3)
-			+ Vector3.UP * _rng.randf_range(0.5, 1.5), col)
+		_drop(
+			along,
+			(
+				n * _rng.randf_range(0.6, 1.4)
+				+ right * _rng.randf_range(-1.3, 1.3)
+				+ Vector3.UP * _rng.randf_range(0.5, 1.5)
+			),
+			col
+		)
+
 
 ## A break another game sent: ["sbrk", x, y, z, half_w, half_h, colour].
 func net_in(x: Array) -> void:
 	play(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), Color.html(String(x[7])), false)
+
 
 func _ready() -> void:
 	var quad := QuadMesh.new()
@@ -107,6 +119,7 @@ func _ready() -> void:
 		_shard_vel.append(Vector3.ZERO)
 		_shard_spin.append(Vector3.ZERO)
 
+
 func _piece(mesh: Mesh) -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -120,6 +133,7 @@ func _piece(mesh: Mesh) -> MeshInstance3D:
 	mi.visible = false
 	add_child(mi)
 	return mi
+
 
 ## One straight piece of crack from a to b on the plane facing `n`, shown after `delay` s.
 func _lay(a: Vector3, b: Vector3, n: Vector3, col: Color, delay: float) -> void:
@@ -135,6 +149,7 @@ func _lay(a: Vector3, b: Vector3, n: Vector3, col: Color, delay: float) -> void:
 	mi.visible = false
 	(mi.material_override as StandardMaterial3D).albedo_color = col.lerp(Color.WHITE, 0.35)
 
+
 func _drop(at: Vector3, vel: Vector3, col: Color) -> void:
 	var i := _next_shard
 	_next_shard = (_next_shard + 1) % SHARD_POOL
@@ -142,15 +157,19 @@ func _drop(at: Vector3, vel: Vector3, col: Color) -> void:
 		live += 1
 	_shard_age[i] = 0.0
 	_shard_vel[i] = vel
-	_shard_spin[i] = Vector3(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1), _rng.randf_range(-1, 1)).normalized() \
+	_shard_spin[i] = (
+		Vector3(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1), _rng.randf_range(-1, 1)).normalized()
 		* _rng.randf_range(8.0, 16.0)
+	)
 	var mi := _shards[i]
 	mi.transform = Transform3D(Basis.from_euler(Vector3(_rng.randf() * TAU, _rng.randf() * TAU, 0.0)), at)
 	mi.visible = true
 	(mi.material_override as StandardMaterial3D).albedo_color = col
 
+
 func _process(delta: float) -> void:
 	step(delta)
+
 
 func step(dt: float) -> void:
 	if live == 0:
