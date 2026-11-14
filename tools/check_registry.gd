@@ -101,6 +101,7 @@ const CHECKS := {
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
+	"--ring-stack-shots": ["res://tools/ring_stack_shots.gd", "ring_stack_shots", null],      # GPU, --shots-dir=
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
@@ -124,6 +125,8 @@ const CHECKS := {
 	"--move-drills-check": ["res://tools/move_drills_check.gd", "move_drills_check", null],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
+	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
+	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
@@ -135,6 +138,7 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
+	"--combo-payoff-check": ["res://tools/combo_payoff_check.gd", "combo_payoff_check", null],  # mark -> payoff
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)

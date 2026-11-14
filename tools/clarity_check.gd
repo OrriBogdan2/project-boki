@@ -23,7 +23,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -35,11 +35,11 @@ func run(main: Node) -> void:
 		h.ctrl = "idle"
 		if h != P and h.team == P.team: ally = h
 		elif h.team != P.team: foes.append(h)
-	ok(ally != null and foes.size() == 2, "a 2v2: one teammate, two rivals")
+	ok(ally != null and foes.size() == 3, "a 3v3: a teammate, three rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
 	ok(SideColor.of(m, P) == SideColor.YOU and SideColor.of(m, ally) == SideColor.ALLY, "you and your ally")
-	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "both rivals are the foe colour")
+	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "every rival is the foe colour")
 	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)
@@ -54,6 +54,7 @@ func run(main: Node) -> void:
 	_side_fx(m, P, ally, foes[0])
 	_body_tell(m, foes[0])
 	_boki_text(m, P, ally, foes[0])
+	_melee_stack(m, P, ally, foes)
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -137,6 +138,79 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var look := Oomph.shot_look(m, foe, c, 0.2)
 	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
 	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
+
+## A 3v3 melee, every Boki out, all of them piled on one spot: ownership rings are thin and sit under every cast, a
+## rival's telegraph on top of yours on top of a teammate's, one full-strength fill under a body, and the rings
+## fade while a telegraph covers them and come back after (docs/COMBAT_CLARITY.md, "Ground order").
+func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
+	var at := P.pos
+	for h: Hunter in m.hunters:
+		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(m.hunters.find(h) / 3)))
+		if h.kin:
+			(h.kin as Kin).state = "active"
+			(h.kin as Kin).teleport(h.pos + Vector3(0.3, 0, 0))
+	_run(m, 0.1)
+	m.fx.rings.clear()
+	for n: Node3D in m.fx.teles.duplicate():
+		m.fx.end_telegraph(n)
+	var ground := func() -> void:
+		for h: Hunter in m.hunters:
+			SideRings.tick(h)
+	ground.call()
+	var rings: Array = []
+	for h: Hunter in m.hunters:
+		rings.append(h.model.get_node_or_null("TeamRing"))
+		if h.kin:
+			rings.append((h.kin as Kin).ring)
+	var base := (rings[0] as MeshInstance3D).material_override as ShaderMaterial
+	var full_a := SideRings.YOU_A
+	ok(rings.size() == 12, "a 3v3 melee with every Boki out: 12 ownership rings (%d)" % rings.size())
+	var thin := is_equal_approx(float(base.get_shader_parameter("thickness")), SideRings.THIN)
+	ok(thin, "an ownership ring is the thinnest band")
+	ok(rings.all(func(r): return _prio(r) == SideColor.ORDER_RING), "ownership rings draw under every cast")
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "no telegraph: your ring is full strength")
+	var mine := _tele(m, P, at)
+	var theirs := _tele(m, foes[0], at)
+	var mates := _tele(m, ally, at)
+	m.fx.stack_telegraphs()
+	var ordered := _prio(theirs) > _prio(mine) and _prio(mine) > _prio(mates) and _prio(mates) > SideColor.ORDER_RING
+	ok(ordered, "draw order: rival over yours over a teammate's over the rings")
+	var full := m.fx.teles.filter(func(n): return _alpha(n) > 0.8)
+	ok(full == [theirs], "one full-strength fill under the pile: the rival's (%d)" % full.size())
+	AbilityFx.land(m, foes[1], at, 2.0, Color.ORANGE)
+	var landed: bool = not m.fx.rings.is_empty() and _prio(m.fx.rings[0]["node"]) == SideColor.ORDER_FOE
+	ok(landed, "a rival's landing ring is on the rival tier")
+	ground.call()
+	ok(rings.all(func(r): return SideRings.shown(r).a < 0.3), "every ownership ring is faded under the telegraphs")
+	_aim_order(m, P, foes[0])
+	for n: Node3D in [mine, theirs, mates]:
+		m.fx.end_telegraph(n)
+	m.fx.rings.clear()
+	ground.call()
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "the ring is back at full strength with the ground clear")
+
+func _tele(m: Match, by: Hunter, at: Vector3) -> Node3D:
+	var col := Color(SideColor.fx(m, by, Color.CYAN), 0.9)
+	return m.fx.telegraph_circle(at, 3.0, col, SideColor.order(m, by))
+
+func _prio(n: Node3D) -> int:
+	return (n.material_override as ShaderMaterial).render_priority
+
+func _alpha(n: Node3D) -> float:
+	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
+
+## AimKit draws a rival's telegraph in its own surface after yours.
+func _aim_order(m: Match, P: Hunter, foe: Hunter) -> void:
+	AimKit.circle(P, "own", {"all": true, "at": P.pos, "r": 3.0})
+	AimKit.circle(foe, "rival", {"all": true, "at": P.pos, "r": 3.0})
+	var d := AimKit.layer(m)
+	d.rebuild()
+	var n := d.mesh.get_surface_count()
+	ok(n == 2, "AimKit: yours and a rival's draw as two surfaces (%d)" % n)
+	ok(d.mat_foe.render_priority > d.mat.render_priority, "AimKit: the rival's surface draws after yours")
+	ok(d.covers(P.pos), "AimKit: the pile counts as covered")
+	AimKit.clear(P)
+	AimKit.clear(foe)
 
 ## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
 ## gone after;

@@ -9,7 +9,6 @@ extends RefCounted
 ## per moment instead of stems: the same reading picks calm, fight, last moments or boss, and the track
 ## crossfades when the moment changes. Reads the match, never changes it.
 
-const FIGHT_HOLD := 8.0       # s after the player's last fight hit (InCombat's clock) before the fight music fades
 const MIN_DWELL := 2.0        # seconds the drive goal stays put once it changed (a fade-out can't flicker)
 const RIVAL_NEAR := 13.0      # m: a rival this close and in sight lifts the drive layer
 const RIVAL_LEAVE := 16.0     # m: ...and it takes this much distance to let go of it again (hysteresis)
@@ -34,9 +33,9 @@ const STING_DUCK := 2.0       # seconds a single track ducks under the last-squa
 static func opening(tier: int) -> String:
 	return Soundtrack.track("boss", "hollow") if tier >= 2 else Soundtrack.track("calm", "match_calm")
 
-## Is a fight on for the player (a hit dealt or taken within FIGHT_HOLD, InCombat's clock)?
+## Is a fight on for the player (InCombat)?
 func fight_on(m: Match) -> bool:
-	return m.player != null and m.time - m.player.combat_at < FIGHT_HOLD
+	return m.player != null and InCombat.is_in(m.player)
 
 func start(m: Match) -> void:
 	if m.tier >= 2:
@@ -90,7 +89,7 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 			Sfx.play(CALLS[rng.randi() % CALLS.size()], at, 3.0, 0.05, rng.randf_range(0.45, 0.62))
 
 ## A trade lifts the goal to full at once; every other change (a fight fading, a rival coming or
-## going) waits MIN_DWELL after the last one, and a fight only fades after FIGHT_HOLD of calm.
+## going) waits MIN_DWELL after the last one, and a fight only fades once you are out of combat (InCombat).
 func _steer(now: float, fighting: bool) -> void:
 	var want := 1.0 if fighting else (0.65 if rival_close else 0.0)
 	if want == goal or (want < 1.0 and now - goal_at < MIN_DWELL):
