@@ -362,7 +362,7 @@ func _call() -> void:
 
 ## This kind's own sound for its attack: `atk` as it strikes, `hit` where it lands (docs/AUDIO.md, mob_<kind>_*).
 func _snd(part: String, at: Vector3, vol: float) -> void:
-	m.sfx("mob_%s_%s" % [mkind, part], at, vol, randf_range(0.95, 1.05))
+	m.sfx("mob_%s_%s" % [mkind, part], at, vol, Sfx.rng.randf_range(0.95, 1.05))
 
 func _strike() -> void:
 	_cancel_tele()
