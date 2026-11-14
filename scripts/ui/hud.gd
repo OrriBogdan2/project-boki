@@ -566,6 +566,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
+	if m.crouch_hint: m.crouch_hint.draw(self, sz)
 	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
@@ -986,6 +987,7 @@ var _h_down := false
 func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
+	TermHints.watch(self, m.player)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# the fold_guide key (H) folds the training guide (G is send / recall your kin) and the kit panel away (and back)
 	var hd := Input.is_action_pressed("fold_guide")
@@ -1213,7 +1215,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
+		"active": st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
 		"returning": st = "coming back"
 		"downed": st = "down"
 		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
@@ -1734,6 +1736,10 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
+	if Settings.get_v("tips") and not Record.clean():
+		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
+			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1897,8 +1903,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
-	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])

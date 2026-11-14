@@ -217,6 +217,7 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
+	m.player.stats.erase("glide_presses")
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
@@ -383,7 +384,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
 			return flag and near.call(4.5)
 		"glide":
-			flag = flag or p.gliding
+			flag = flag or (p.gliding and p.stats.get("glide_presses", 0) > 0)     # a double press only
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
@@ -600,6 +601,7 @@ func _words() -> void:
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	var was := detail
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 	key_cap = ""
 	if sid == "land":
