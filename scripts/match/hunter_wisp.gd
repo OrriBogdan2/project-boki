@@ -117,13 +117,12 @@ static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	WispHum.end(h)
 	_pop_fx(h, look["pop_out"], 0.5)
 
-## Ring, burst and sound of a pop; a Wisp nobody can see makes none.
+## Burst and sound of a pop; a Wisp nobody can see makes none.
 static func _pop_fx(h: Hunter, spec: Dictionary, height: float) -> void:
 	if not h.visible:
 		return
 	var at := h.position + Vector3(0, height, 0)
 	var col := _team_col(h)
-	h.m.fx.ring(h.position, float(spec["ring"]), col, float(spec["time"]))
 	h.m.fx.burst(at, col.lightened(0.5), int(spec["burst"]), 4.0, 0.45, -1.0, 0.9)
 	h.m.sfx(String(spec["sfx"]), h.position, -6.0 if h.is_local() else -12.0)
 

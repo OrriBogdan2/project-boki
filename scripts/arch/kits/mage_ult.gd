@@ -23,7 +23,7 @@ const RAY_BELOW := 12.0          # ... to this far below it
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
 
 var kit: MageKit
-var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free, disc}
+var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free}
 var casts := 0                 # (tests)
 var hits := 0                  # foes the strikes hit (tests)
 var last := {}                 # (tests) the last strike: {at, hits, bond}
@@ -256,7 +256,7 @@ func _aim_tick() -> void:
 	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
-## Gold crackle along the rim and round her body while she hangs.
+## Pink crackle along the rim and round her body while she hangs.
 func _air_fx(dt: float) -> void:
 	var rng := kit.fx().rng
 	var from: Vector3 = leap["from"]

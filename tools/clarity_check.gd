@@ -138,29 +138,29 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
 	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
 
-## Crowd control on a body, on the body: the props show while it lasts, the tint pulses its colour, all gone after;
+## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
+## gone after;
 ## a cast glints the caster in their signature colour and fades.
 func _body_tell(m: Match, f: Hunter) -> void:
+	var looks := StatusLooks.of(m)
+	Sfx.listener = f.pos      # (StatusLooks draws near the camera focus only)
 	f.stun_t = 1.0
 	_run(m, 0.1)
-	var props := f.get_node_or_null("BodyTell") as Node3D
-	ok(props != null and (props.get_node("Stun") as Node3D).visible, "a stunned body spins the stars")
+	ok(looks.showing(f, "stun"), "a stunned body spins the stars")
 	ok(_same(BodyTell.tint_of(f), BodyTell.STUN_COL), "... and pulses the stun colour")
 	f.stun_t = 0.0
 	f.root_t = 1.0
 	_run(m, 0.3)
-	var r := props.get_node("Root") as Node3D if props else null
-	ok(r != null and r.visible and r.scale.y > 0.99, "a rooted body grows its tendrils")
+	ok(looks.showing(f, "root"), "a rooted body shows the stakes at its feet")
 	ok(_same(BodyTell.tint_of(f), BodyTell.ROOT_COL), "... and pulses the root colour")
 	f.root_t = 0.0
 	f.slow_t = 1.0
 	f.stagger_t = 0.0
 	_run(m, 0.05)
-	ok(props != null and (props.get_node("Slow") as Node3D).visible, "a slowed body drips frost")
+	ok(looks.showing(f, "slow"), "a slowed body shows the rings down its legs")
 	f.slow_t = 0.0
 	_run(m, 0.05)
-	var none := props != null and not ((props.get_node("Stun") as Node3D).visible
-			or (props.get_node("Root") as Node3D).visible or (props.get_node("Slow") as Node3D).visible)
+	var none := not (looks.showing(f, "stun") or looks.showing(f, "root") or looks.showing(f, "slow"))
 	ok(none and BodyTell.tint_of(f).a == 0.0, "nothing holding it: nothing on the body")
 	var rings0: int = m.fx.radial
 	f.cast_at = m.time
