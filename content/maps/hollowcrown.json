@@ -11819,14 +11819,26 @@
    "a": "crown",
    "b": "cinder",
    "take": [
-    361.2,
-    211.0
+    358,
+    214
    ],
    "land": [
-    391.9,
-    202.8
+    402,
+    214
    ],
-   "rings": true,
+   "gap": 51.4
+  },
+  {
+   "a": "cinder",
+   "b": "crown",
+   "take": [
+    398,
+    252
+   ],
+   "land": [
+    354,
+    240
+   ],
    "gap": 51.4
   },
   {
@@ -11834,14 +11846,26 @@
    "a": "storm_e",
    "b": "cinder",
    "take": [
-    391.2,
-    367.8
+    386,
+    360
    ],
    "land": [
-    422.3,
-    355.3
+    404,
+    340
    ],
-   "rings": true,
+   "gap": 27.2
+  },
+  {
+   "a": "cinder",
+   "b": "storm_e",
+   "take": [
+    402,
+    344
+   ],
+   "land": [
+    384,
+    362
+   ],
    "gap": 27.2
   },
   {
@@ -11849,134 +11873,31 @@
    "a": "lark",
    "b": "storm_w",
    "take": [
-    196.2,
-    306.6
+    204,
+    300
    ],
    "land": [
-    239.3,
-    327.6
+    244,
+    330
    ],
-   "rings": true,
    "gap": 43.3
   },
   {
-   "name": "Lantern Line",
-   "a": "highwatch",
-   "b": "crown",
+   "a": "storm_w",
+   "b": "lark",
    "take": [
-    145.1,
-    147.7
+    240,
+    330
    ],
    "land": [
-    222.0,
-    169.3
+    200,
+    304
    ],
-   "rings": true,
-   "gap": 82.0
-  },
-  {
-   "name": "Eyrie Line",
-   "a": "gaol_ne",
-   "b": "crown",
-   "take": [
-    440.4,
-    115.5
-   ],
-   "land": [
-    329.7,
-    164.8
-   ],
-   "rings": true,
-   "gap": 115.5
-  },
-  {
-   "name": "Salt Line",
-   "a": "saltmere",
-   "b": "storm",
-   "take": [
-    299.0,
-    454.8
-   ],
-   "land": [
-    301.4,
-    392.0
-   ],
-   "rings": true,
-   "gap": 59.8
-  },
-  {
-   "name": "Moor Line",
-   "a": "duskmoor",
-   "b": "storm",
-   "take": [
-    362.8,
-    409.7
-   ],
-   "land": [
-    319.2,
-    383.5
-   ],
-   "rings": true,
-   "gap": 48.9
+   "gap": 43.3
   }
  ],
  "pads": [],
- "updrafts": [
-  {
-   "region": "crown",
-   "at": [
-    293.5,
-    189.5
-   ],
-   "top": 12,
-   "ring": true
-  },
-  {
-   "region": "frostgate",
-   "at": [
-    286.5,
-    86.5
-   ],
-   "top": 10,
-   "ring": true
-  },
-  {
-   "region": "highwatch",
-   "at": [
-    132.5,
-    119.5
-   ],
-   "top": 11,
-   "ring": true
-  },
-  {
-   "region": "cinder",
-   "at": [
-    480.5,
-    259.5
-   ],
-   "top": 14,
-   "ring": true
-  },
-  {
-   "region": "storm",
-   "at": [
-    304.5,
-    353.5
-   ],
-   "top": 6,
-   "ring": true
-  },
-  {
-   "region": "thorn",
-   "at": [
-    138.5,
-    391.5
-   ],
-   "top": 6,
-   "ring": true
-  }
- ],
+ "updrafts": [],
  "winds": [],
  "train": {
   "cars": 4,

@@ -57,11 +57,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
-  glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name, rings}: glide routes for bots;
-                      rings (+) true: an air lane both ways, glide rings laid along it (AirRings)
-  updrafts            {at:[x,z], top} rising air up to terrace `top`; (+) ring: true puts a lift ring
-                      over it, region (+): whose high ground it serves
-  pads, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
+  glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
+  pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
   ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / 216; tools/ways_out_sites.py)
   train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
                       from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
@@ -351,30 +348,13 @@ BRIDGES = [
 ]
 
 # Glide routes (bots take them; players can glide anywhere). Gaps are edge to edge, measured below.
-# rings=True makes a glide an AIR LANE (docs/AIR_RINGS.md): glide rings along take -> land throw you along
-# it at ring speed, so a lane may be far longer than one glider's heat; it runs both ways (one entry).
 glides = [
-    dict(name="Ember Leap", a="crown", b="cinder", take=[361.2, 211.0], land=[391.9, 202.8], rings=True),
-    dict(name="Slag Leap", a="storm_e", b="cinder", take=[391.2, 367.8], land=[422.3, 355.3], rings=True),
-    dict(name="Bramble Leap", a="lark", b="storm_w", take=[196.2, 306.6], land=[239.3, 327.6], rings=True),
-    # the long lanes over the void (re-placed on the v2 layout 11-13; every ring >= RING_TRAIN off the track):
-    # Highwatch's yard to the Crown's bailey, the Eyrie (Stormcrown Gaol) to the Crown, and Saltmere and
-    # Duskmoor to Stormbreak's Shrine Table shard (an air way in beside the shard bridges)
-    dict(name="Lantern Line", a="highwatch", b="crown", take=[145.1, 147.7], land=[222.0, 169.3], rings=True),
-    dict(name="Eyrie Line", a="gaol_ne", b="crown", take=[440.4, 115.5], land=[329.7, 164.8], rings=True),
-    dict(name="Salt Line", a="saltmere", b="storm", take=[299.0, 454.8], land=[301.4, 392.0], rings=True),
-    dict(name="Moor Line", a="duskmoor", b="storm", take=[362.8, 409.7], land=[319.2, 383.5], rings=True),
-]
-
-# Lift rings: an updraft at the foot of a region's high ground (2.5-3.6 m from the plateau's rim, clear of
-# stairs) with a ring over it; hop in and it carries you up to `top` (a terrace level) to glide onto it.
-updrafts = [
-    dict(region="crown", at=[293.5, 189.5], top=12, ring=True),       # the Throne, from the keep on its north side
-    dict(region="frostgate", at=[286.5, 86.5], top=10, ring=True),    # the ice shelf, from the Rimefield below it
-    dict(region="highwatch", at=[132.5, 119.5], top=11, ring=True),   # the lv 11 tower, east foot (the Lantern Line's side)
-    dict(region="cinder", at=[480.5, 259.5], top=14, ring=True),      # the Kilns' crest, from the lv 10 tier (west foot)
-    dict(region="storm", at=[304.5, 353.5], top=6, ring=True),        # the Shrine Table, north foot
-    dict(region="thorn", at=[138.5, 391.5], top=6, ring=True),        # Bramble Rise (the Thornhive), south foot
+    dict(name="Ember Leap", a="crown", b="cinder", take=[358, 214], land=[402, 214]),
+    dict(a="cinder", b="crown", take=[398, 252], land=[354, 240]),
+    dict(name="Slag Leap", a="storm_e", b="cinder", take=[386, 360], land=[404, 340]),
+    dict(a="cinder", b="storm_e", take=[402, 344], land=[384, 362]),
+    dict(name="Bramble Leap", a="lark", b="storm_w", take=[204, 300], land=[244, 330]),
+    dict(a="storm_w", b="lark", take=[240, 330], land=[200, 304]),
 ]
 
 lairs = [
@@ -404,11 +384,6 @@ def sc(v):
 
 def sc_pt(p):
     return [sc(p[0]), sc(p[1])] + list(p[2:])
-
-def sc_air(p):
-    """Glide take-offs/landings and lift rings keep a tenth of a metre: a lane's rings sit off the train
-    track and over the void, and a lift at the foot of its plateau, by less than a metre."""
-    return [round(p[0] * K, 1), round(p[1] * K, 1)]
 
 def sc_poly(P):
     return [[round(x * K, 1), round(z * K, 1)] for x, z in P]
@@ -473,8 +448,7 @@ def scale_layout():
         R["finals"] = [sc_pt(p) for p in R["finals"]]
         for H in R.get("hazard_areas", []): H["poly"] = sc_poly(H["poly"])
     for G in glides:
-        G["take"] = sc_air(G["take"]); G["land"] = sc_air(G["land"])
-    for U in updrafts: U["at"] = sc_air(U["at"])
+        G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
     for L in lairs: L["at"] = sc_pt(L["at"])
     outposts[:] = [sc_pt(e) for e in outposts]
     heart[:] = sc_pt(heart)
@@ -774,12 +748,7 @@ def preview(path, lv, owner, stairs):
     for o in outposts:
         dr.rectangle([o[0] * S - 6, o[1] * S - 6, o[0] * S + 6, o[1] * S + 6], outline=(120, 255, 200), width=2)
     for G in glides:
-        lane = G.get("rings")
-        dr.line([G["take"][0] * S, G["take"][1] * S, G["land"][0] * S, G["land"][1] * S],
-                fill=(90, 210, 240) if lane else (255, 255, 120), width=3 if lane else 1)
-    for U in updrafts:
-        x, z = U["at"]
-        dr.ellipse([x * S - 7, z * S - 7, x * S + 7, z * S + 7], outline=(255, 210, 122), width=3)
+        dr.line([G["take"][0] * S, G["take"][1] * S, G["land"][0] * S, G["land"][1] * S], fill=(255, 255, 120), width=1)
     for R in regions:
         for H in R.get("hazard_areas", []):
             dr.polygon([c * S for q in H["poly"] for c in q], outline=(255, 90, 40) if H["kind"] == "lava" else (60, 160, 255))
@@ -791,64 +760,6 @@ def preview(path, lv, owner, stairs):
     for q in train["stations"]:
         dr.ellipse([q[0] * S - 6, q[1] * S - 6, q[0] * S + 6, q[1] * S + 6], fill=(255, 150, 60))
     img.save(path)
-
-# ------------------------------------------------------------------ air rings
-AIR_MAX_S = 25.0        # s: the longest a lane may take at ring speed (no empty runs past this)
-RING_TRAIN = 5.0        # m: a ring keeps this far (across) from the sky train's track, so no car flies through it
-
-def _air_rules():
-    with open(os.path.join(os.path.dirname(__file__), "..", "content", "rules", "air_rings.json")) as f:
-        return json.load(f)
-
-def _cells(a, b):
-    n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) * 2))
-    return [(int(a[0] + (b[0] - a[0]) * i / n), int(a[1] + (b[1] - a[1]) * i / n)) for i in range(n + 1)]
-
-def ring_points(G, R):
-    """Where AirRings.lay puts a lane's rings (x, z): evenly from `first` past the take-off to `end` short of the landing."""
-    (x0, z0), (x1, z1) = G["take"][:2], G["land"][:2]
-    L = math.hypot(x1 - x0, z1 - z0); span = L - R["first"] - R["end"]
-    if span < 0: return []
-    n = int(span / R["gap"]) + 1
-    ss = [R["first"] + (span * k / (n - 1) if n > 1 else span * 0.5) for k in range(n)]
-    return [(x0 + (x1 - x0) * t / L, z0 + (z1 - z0) * t / L) for t in ss]
-
-def air_lane(G, lv, owner):
-    """The report line of an air lane: its length, rings and time at ring speed."""
-    if not G.get("rings"): return ""
-    R = _air_rules(); L = math.hypot(G["land"][0] - G["take"][0], G["land"][1] - G["take"][1])
-    return "  · air lane %.0f m, %d rings, %.1f s at ring speed" % (L, len(ring_points(G, R)), L / R["speed"])
-
-def check_air(lv, owner, stairs):
-    """Lanes run from their own island over open void (no other island in the way, every ring over the void)
-    and take under AIR_MAX_S; lift rings stand on their region's ground at a plateau's foot, clear of stairs."""
-    probs = []; R = _air_rules()
-    for G in glides:
-        if not G.get("rings"): continue
-        cells = _cells(G["take"], G["land"])
-        if owner.get(cells[0]) != G["a"] or owner.get(cells[-1]) != G["b"]:
-            probs.append("air lane %s->%s doesn't start on %s and end on %s" % (G["a"], G["b"], G["a"], G["b"]))
-        crossed = {owner[q] for q in cells if q in owner and lv[q] != -2} - {G["a"], G["b"]}
-        if crossed: probs.append("air lane %s->%s crosses %s" % (G["a"], G["b"], sorted(crossed)))
-        if math.hypot(G["land"][0] - G["take"][0], G["land"][1] - G["take"][1]) / R["speed"] > AIR_MAX_S:
-            probs.append("air lane %s->%s is longer than %d s" % (G["a"], G["b"], AIR_MAX_S))
-        for x, z in ring_points(G, R):
-            if (int(x), int(z)) in owner:
-                probs.append("air lane %s->%s has a ring over land at (%.0f, %.0f)" % (G["a"], G["b"], x, z))
-            if min(math.hypot(x - q[0], z - q[1]) for q in train["path"]) < RING_TRAIN:
-                probs.append("air lane %s->%s has a ring on the train track at (%.0f, %.0f)" % (G["a"], G["b"], x, z))
-    for U in updrafts:
-        q = (int(U["at"][0]), int(U["at"][1]))
-        reg = [r for r in regions if owner.get(q) in r["islands"]]
-        if not reg or reg[0]["id"] != U["region"]:
-            probs.append("lift ring %s not on %s" % (U["at"], U["region"])); continue
-        top = [math.hypot(x + 0.5 - U["at"][0], z + 0.5 - U["at"][1]) for (x, z), l in lv.items()
-               if l >= U["top"] and abs(x - q[0]) < 6 and abs(z - q[1]) < 6]
-        if lv[q] >= U["top"] or not top or min(top) > 4.0:
-            probs.append("lift ring %s isn't at the foot of level %d ground" % (U["at"], U["top"]))
-        if any((q[0] + dx, q[1] + dz) in stairs for dx in range(-2, 3) for dz in range(-2, 3)):
-            probs.append("lift ring %s on stairs" % (U["at"],))
-    return probs
 
 def gap(a, b, owner):
     A = [p for p, o in owner.items() if o == a]; B = [p for p, o in owner.items() if o == b]
@@ -1355,7 +1266,6 @@ def main():
     ip, worst = check_interest(lv, owner); probs += ip
     rp, far = check_reach(lv); probs += rp
     probs += check_finals(lv, stairs)
-    probs += check_air(lv, owner, stairs)
     for b, share, tg in cover_report(C, lv, owner):
         print('cover %-7s %5.1f %%  (target %.1f-%.1f %%)' % (b, share * 100, tg[0] * 100, tg[1] * 100))
     print('cover patches', len(C.patches), 'clumps', sum(len(p['clumps']) for p in C.patches))
@@ -1373,7 +1283,7 @@ def main():
         G["gap"] = round(gap(G["a"], G["b"], own), 1)
     if "--preview" in sys.argv:
         preview(sys.argv[sys.argv.index("--preview") + 1], lv, owner, stairs)
-    for G in glides: print("glide %-10s -> %-10s gap %.1f m%s" % (G["a"], G["b"], G["gap"], air_lane(G, lv, owner)))
+    for G in glides[::2]: print("glide %-10s -> %-10s gap %.1f m" % (G["a"], G["b"], G["gap"]))
     for B_ in bridges: print("bridge %-13s span %.1f m" % (B_["name"], B_["span"]))
     print("train loop %.0f m, %d stops, a lap %.0f s" % (loop, len(stops), sum(l[2] for l in legs)))
     for (nm, isl, d), (a, b, ride, run) in zip(stops, legs):
@@ -1384,7 +1294,7 @@ def main():
                      "ground in the east, Stormbreak's shards in the void between, the walled Crown on its north rim; "
                      "each region a different fight. Nothing is placed by dice except what the match rolls: which spawn "
                      "points, lairs and camps are live, loot, the Blight, weather.",
-               regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=updrafts,
+               regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
                winds=[], train=train, heart=heart, ways_scale=round(WAYS, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
