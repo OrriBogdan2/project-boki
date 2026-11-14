@@ -184,7 +184,8 @@ const MIN_GAP := {
 	"land": 80,
 	"step0": 60,
 	"step1": 60,
-	"step2": 60
+	"step2": 60,
+	"training_dummy_hit": 70
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
