@@ -74,7 +74,6 @@ func _shape(main: Node) -> void:
 	ok(finals.size() >= outposts, varies)
 
 
-
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.
 func _hurt(main: Node) -> void:
 	var m := _match(main, 5)
