@@ -96,6 +96,11 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
 everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
+## Armour on the body (every Hunter and bot, not a recipe)
+`Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
+`Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
+The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
