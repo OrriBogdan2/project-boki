@@ -18,10 +18,12 @@ const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast 
 const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
-## the press goes mid-dash; Kael and Albert dash AS the attack (no slash or swing inside it:
-## buffer), and their ult plants them, as Cinder's flight takes over (cancel).
+## the press goes mid-dash; Vex's rifle fires in the air slide too (the card's rule plus the wiki's air tap);
+## Kael and Albert dash AS the attack (no slash or swing inside it: buffer), and their ult plants them, as
+## Cinder's flight takes over (cancel).
 const SOURCE_ROWS := [
 	["archer", "ground", "lmb", "fire"], ["archer", "air", "lmb", "fire"],
+	["gunslinger", "air", "lmb", "fire"],
 	["mage", "ground", "lmb", "fire"], ["mage", "air", "lmb", "fire"],
 	["ashwick", "ground", "lmb", "fire"], ["ashwick", "air", "lmb", "fire"],
 	["dolm", "air", "lmb", "fire"],
