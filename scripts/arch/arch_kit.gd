@@ -406,7 +406,8 @@ func use_r() -> void:
 		return
 	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
 	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
-	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	var guard := String(r_def().get("fuse_guard", "none"))
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": guard, "fx": 0.0, "at": h.pos}
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
@@ -431,8 +432,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
-	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
 	if bond:
@@ -461,6 +460,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "r_fuse", {"at": fuse["at"], "r": 2.4, "col": col, "fill": k, "all": true})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -503,24 +503,19 @@ func _fire_r(will_bond: bool) -> void:
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
 			Sfx.duck(0.3)
 
-## The ult going off: a burst, a ring, a flash and a camera punch (the payoff of the fuse).
+## The ult going off: a burst, a flash and a camera punch (the payoff of the fuse).
 func _r_impact() -> void:
 	var col := col_of(r_def())
-	m.fx.ring(h.pos, 3.6, Color(col, 0.95), 0.4)
-	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.9), 0.25)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
 	Shake.incoming_big(m, h.pos, 0.6, h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
-	if m.net_on and not h.remote:
-		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 3.6, col.to_html(false)])
 
 ## The 0.35s transform tell of a Bonded R: a column in the kin's colour visible within 25m.
 func _bond_tell() -> void:
 	var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE) if h.kin else Color.WHITE
-	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
 	m.sfx("bond", h.pos, -2.0, 1.2)
@@ -718,23 +713,6 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees, in the viewer's side lean (SideColor.fx). Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
 	res_wait = maxf(res_wait, float(res_def().get("wait", 3.0)) if wait < 0.0 else wait)
@@ -758,8 +736,6 @@ func _tells(dt: float) -> void:
 		if tell != "":
 			var rc := res_col()
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
-			if tell == "full" and int(m.time * 5.0) % 3 == 0:
-				m.fx.ring(h.pos, 0.9, Color(rc, 0.7), 0.25)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
 			var kp: Vector3 = (h.kin as Kin).position
@@ -1049,13 +1025,9 @@ func armed_fx(slot := "sec") -> void:
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
-## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
+## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
-		rings := true) -> void:
-	if rings:
-		m.fx.ring(at, 2.4, col, 0.38)
-		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
@@ -1063,8 +1035,6 @@ func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
-	if rings:
-		net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
