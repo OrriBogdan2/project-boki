@@ -1548,11 +1548,11 @@ func local_player() -> Hunter:
 	return player
 
 ## Where the mouse points, at the right height: on a foe under the cursor at that foe's height,
-## otherwise on the ground under the cursor. Aiming on your own height made shots at someone a
-## terrace above (or below) drift sideways past them, because the camera looks down at an angle.
-func _mouse_aim() -> Vector3:
+## otherwise on the first ground the cursor's ray meets (AimMode.ray_ground; your own height over the
+## abyss). Aiming on your own height made shots at someone a terrace above (or below) drift sideways past
+## them, because the camera looks down at an angle.
+func _mouse_aim(mp: Vector2) -> Vector3:
 	var base_y := player.pos.y + 0.95
-	var mp := get_viewport().get_mouse_position()
 	var best: Ent = null
 	var bd := 52.0
 	for e in foes_of(player.team):
@@ -1566,18 +1566,14 @@ func _mouse_aim() -> Vector3:
 		if d < bd:
 			bd = d; best = e
 	if best:
-		var q := cam.mouse_on_plane(best.hit_y() + 0.95)
+		var q := cam.screen_on_plane(mp, best.hit_y() + 0.95)
 		aim_y = best.hit_y()
 		return Vector3(q.x, base_y, q.z)
-	aim_y = player.pos.y
-	var p := cam.mouse_on_plane(base_y)
-	for _i in 2:
-		var g := world.ground_at(p.x, p.z)
-		if g <= World.VOID + 1.0 or absf(g - player.pos.y) > World.LEVEL * 3.0:
-			break
-		p = cam.mouse_on_plane(g + 0.95)
-		aim_y = g
-	return Vector3(p.x, base_y, p.z)
+	var g := AimMode.ray_ground(world, [cam.project_ray_origin(mp), cam.project_ray_normal(mp)], player.pos.y)
+	aim_y = g.y if g != Vector3.INF else player.pos.y
+	if g == Vector3.INF:
+		g = cam.screen_on_plane(mp, base_y)
+	return Vector3(g.x, base_y, g.z)
 
 ## How much grip the ground has here (ice patches in a frost region make it slippery).
 func ground_grip(p: Vector3) -> float:
@@ -3288,7 +3284,7 @@ func _gather_input() -> void:
 		var best := DropRocket.island_near(world, player.pos)
 		if Vector2(best.x - player.pos.x, best.z - player.pos.z).length() > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
-	player.inp["aim"] = _mouse_aim()
+	player.inp["aim"] = _mouse_aim(get_viewport().get_mouse_position())
 	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
