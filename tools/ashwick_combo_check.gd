@@ -151,7 +151,7 @@ func _timing() -> void:
 	if clips and clips.lib and lc.has("run"):
 		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
 		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
-		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc, Vector2(0, 1), 1.0)     # (full stick ahead: on the run ring)
 	ok(
 		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
 		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot

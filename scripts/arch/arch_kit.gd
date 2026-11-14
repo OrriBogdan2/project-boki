@@ -29,6 +29,7 @@ var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
 var bot_hold := {"rmb": 0.0, "dash": 0.0}
+var bot_lead := {}             # a bot's delayed cast still being aimed (BotLead)
 var last_variant := ""         # the RMB variant that last fired (HUD, tests)
 var last_e := ""
 var st := {}                   # the subclass's own state
@@ -221,6 +222,7 @@ func tick(dt: float) -> void:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
+	if not bot_lead.is_empty(): BotLead.hold(self, dt)
 	if rmb_down:
 		if h.downed or h.stun_t > 0.0:
 			_drop_rmb()

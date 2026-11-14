@@ -246,9 +246,10 @@ Still differs:
 Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
 0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
 footage's is a thick wavy orange chain [F 0304]; Riposte's guard shows a gold strike rectangle like the footage's
-[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is an
-orange-gold arc up the strip into a gold impact cloud (0:19.1), where the footage's is a huge red vertical crescent
-and a white cloud [F 0430-0431, 0438-0439]; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
+[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is a tall
+gold-and-white crescent standing at the strip's end, then a white cloud (`ext/kael-riposte-crescent`; before it an
+orange-gold arc into a gold cloud), where the footage's is a huge red vertical crescent and a white cloud
+[F 0430-0431, 0438-0439], the red being his gold here; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
 +41 over him (116 to 158 hp, 0:19.2), with no green light-rain column (the footage's heal column is the knock heal
 [F 0455-0458], not the Retaliation's); the air dash puts a wide grey disc round him.
 
@@ -319,7 +320,8 @@ thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan d
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
 cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
-ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
+ours showed no plus sparkles there (since the reel: two small mint pluses rise off the ally on each 0.5 s heal tick,
+HeroVfx `call_plus`, also on other players' screens); at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
 ## Tenzo the Stone Seer (`dolm`, source Tetra)
