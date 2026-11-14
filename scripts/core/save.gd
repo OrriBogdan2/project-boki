@@ -465,6 +465,7 @@ func load_from(p: String) -> void:
 	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	RecastHint.migrate(parsed)      # and this one
+	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:

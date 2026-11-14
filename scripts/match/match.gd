@@ -41,6 +41,7 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var ktip: KnockTip = null           # the first-knock card, in the same two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
@@ -286,6 +287,7 @@ func _start(o: Dictionary) -> void:
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
 	ktip = KnockTip.for_match(self, guide)
+	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -3983,6 +3985,7 @@ func step(dt: float) -> void:
 		_update_training(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
