@@ -1,11 +1,12 @@
 class_name BokiLifeSfx
 extends RefCounted
-## A Boki's own sounds for the moments of its life (docs/AUDIO.md): a munch as it eats, a sleepy breath as it
+## A Boki's own sounds for the moments of its life (docs/AUDIO.md): a munch as it eats, a yawn as it
 ## dozes off, its cry as it leaps into a Fusion and as it goes down. Each plays through Sfx at the Boki, so the
 ## takes rotate (never the same take twice running), pitched by the Boki's voice roll. Home plays them softer
 ## than a match, and a Boki voices one cue at a time: a cue that comes while its last one still sounds is dropped.
 
-const CUES := {"eat": "boki_eat", "nap": "boki_sleep", "fuse": "boki_fuse", "down": "boki_downed"}
+## (nap: the yawn takes; boki_sleep is BokiNapSfx's breathing loop while it sleeps)
+const CUES := {"eat": "boki_eat", "nap": "boki_yawn", "fuse": "boki_fuse", "down": "boki_downed"}
 const MATCH_DB := -4.0       # dB: the level of a Boki's other calls in a fight (kin_happy, recall)
 const HOME_DB := -10.0       # dB: the garden is quiet and full of Boki, so meals and naps stay soft
 const PITCH_VAR := 0.07      # the usual random pitch spread (Match.sfx), on top of the Boki's own voice

@@ -525,7 +525,8 @@ func _boki(uid: String) -> Dictionary:
 
 ## Plays `event` for a home entry or a match Boki once Sfx would not merge it into the last sound.
 func _life_cue(who: Variant, event: String) -> void:
-	OS.delay_msec(Sfx.STACK_MS + 10)
+	# past the stack window and the cue's own repeat gap (the yawn's is 400 ms)
+	OS.delay_msec(maxi(Sfx.STACK_MS, int(Sfx.MIN_GAP.get(BokiLifeSfx.CUES[event], 0))) + 10)
 	if who is Kin:
 		BokiLifeSfx.in_match(who as Kin, event)
 	else:

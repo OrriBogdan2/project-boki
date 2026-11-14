@@ -4,8 +4,8 @@ extends RefCounted
 ## evolve level (a brighter chime) or a new form or part (docs/AUDIO.md). It watches each Boki's record rather
 ## than every place that raises them, so a new source needs no wiring. Events on one Boki that land within
 ## MERGE_S share one chime: the biggest one. A sleeping Boki makes no sound (the card and the evolution scene
-## still show it). Watched the same way, a Boki dozing off (its nap starting, wherever it lies down) voices a
-## sleepy breath (BokiLifeSfx "nap").
+## still show it). Watched the same way, a Boki dozing off (its nap starting, wherever it lies down) gives a
+## yawn (BokiLifeSfx "nap"; BokiNapSfx then breathes while it sleeps).
 
 const KINDS := ["stat", "level", "ready", "evolve"]     # smallest first: a merged chime plays the last one here
 const MERGE_S := 0.5     # s: an event this soon after a Boki's chime joins it instead of playing again

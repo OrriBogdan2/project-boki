@@ -40,7 +40,7 @@ func _buses() -> void:
 	var far := Sfx.listener + Vector3(30, 0, 0)
 	# routing is SfxMix's (a far sound goes through SFXFar first; the Boki's cries have their own Boki bus)
 	var cases := [["v_brute", null, "Voice"], ["v_brute", far, "SFXFar"], ["archer_hurt", Vector3.ZERO, "Voice"],
-		["kin_alert", null, "Boki"], ["click", null, "UI"], ["pickup", Vector3.ZERO, "SFX"], ["smg", far, "SFXFar"],
+		["kin_alert", null, "Boki"], ["click", null, "UI"], ["thump", Vector3.ZERO, "SFX"], ["smg", far, "SFXFar"],
 		["smg", null, "SFX"]]
 	for c in cases:
 		var got := String(Sfx._bus_for(c[1], c[0]))
