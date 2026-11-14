@@ -41,7 +41,6 @@ var seen := {}
 var paced_us := 0            # the wall clock (µs) the match clock has been stepped up to
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
-var guest_bin := GODOT       # what starts the guest (--tele-net-shots: the running binary, a GPU worker has no wrapper)
 var early := {}              # the guest's reply one snapshot after a Boki move on it
 
 func ok(cond: bool, what: String, info := "") -> void:
