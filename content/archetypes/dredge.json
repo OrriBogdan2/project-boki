@@ -12,7 +12,6 @@
 	"silhouette": "the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back",
 	"card": {"role_word": "Brawler", "loop": "Brawler who reels you in: hook a foe to your feet, smash them, finish them up close.", "dash": "A short low lunge where you move; a pounce in the air.", "passive": "Knocks and assists add health, up to 10 stacks.", "rmb": "An abyssal arm grabs the first body and reels it in, stunned.", "e": "Slam your fist into the ground ahead: damage and a long stun.", "x": "Charge a fan while walking slowly, then two waves of brass slugs.", "weapons": {"shotgun": "Seven slugs in a tight fan, 6m out; rear hits hurt more."}, "chips": {"e": ["25 dmg"], "x": ["4 per slug"]}},
 	"signature": "shotgun",
-	"lmb": {"sfx": "dr_shot"},
 	"resource": {"id": "salvage", "name": "Salvage", "max": 10, "kind": "stacks", "per_stack": 0.025, "back_k": 0.5, "heal_knock": 0.16, "col": "#e0b040"},
 	"passive": {"name": "Salvage", "desc": "Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health."},
 	"gun": {"armor_k": 0.66, "src": "supervive.wiki.gg/wiki/Kingpin: 66% increased damage to Armor when fired without spread"},

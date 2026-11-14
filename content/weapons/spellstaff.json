@@ -15,7 +15,7 @@
 		"range": 10.0,
 		"size": 0.26,
 		"color": "#9ad8ff",
-		"sfx": "mage_zap",
+		"sfx": "zap",
 		"nth": [
 			4,
 			0.5
