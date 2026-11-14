@@ -638,7 +638,7 @@ func _stick(b: Dictionary, at: Vector3) -> void:
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
-	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), EMBER)
+	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, LIME, HOT, 0.6, 0.12)
 	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # a dull dust puff, no flash, nothing on a foe
