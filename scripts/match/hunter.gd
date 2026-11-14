@@ -1802,6 +1802,7 @@ func sim(dt: float) -> void:
 				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
+			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
@@ -2071,9 +2072,8 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
-				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
-				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				var wish := HunterMove.along_wall(mv * spd, slide_n)
+				hv = Loco.accel_to(hv, wish, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():
@@ -2155,12 +2155,12 @@ func _physics(dt: float) -> void:
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
-	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
+	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x)
 	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
-	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
+	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z)
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
 		pos.y = step_up
@@ -2395,10 +2395,12 @@ func _update_glide(dt: float) -> void:
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
+		var pull: bool = DropFeel.pulls(inp, _glide_btn_held) and ctrl != "bot"
+		_glide_btn_held = inp.get("glide_btn", false)
 		if diving:
 			var void_below: bool = m.world.is_void(pos.x, pos.z)
 			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (inp.get("glide", false) and ctrl != "bot"):
+			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or pull:
 				_deploy()
 		if pos.y < -1.5:
 			dropping = false

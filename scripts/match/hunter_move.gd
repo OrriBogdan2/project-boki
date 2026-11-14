@@ -176,16 +176,6 @@ static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
 ## The keys' velocity against the wall the last step's walk pressed into (n: out of it, zero for
 ## none): its part into the wall is dropped, so the whole run-up goes along the face and you slide at
 ## the tangent part of your speed from the first step (a dash's hand-over into the run included).
-## The walk passes its velocity through it too: Loco.accel_to brakes any speed over the wish, which
-## would otherwise eat the tangent part before the run turned along the face.
 static func along_wall(wish: Vector2, n: Vector2) -> Vector2:
 	var into := wish.dot(n)
 	return wish - n * into if into < 0.0 else wish
-
-## Whether a step the walls stopped (b1, b2: World.occupy's answer for the x and z moves) is caught on a
-## corner and needs the sideways slip. A dash step along a face, its one axis free, is not: it slides at
-## the tangent part of its speed as the source's dashes do (decision 0047), and the slip would add to it.
-static func caught(dashing: bool, b1: float, b2: float) -> bool:
-	if dashing:
-		return b1 > 0.0 and b2 > 0.0
-	return b1 > 0.0 or b2 > 0.0
