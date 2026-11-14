@@ -2180,7 +2180,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KillXp.pay(self, mb, credit)
-	LastHitHint.kill(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
@@ -5454,7 +5453,6 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
 				who.dead = true
-				LastHitHint.kill(self, who, ents_by_id.get(String(x[2]), null))
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				MobSfx.death(self, who as Mob, false)
@@ -5566,7 +5564,6 @@ func _process_net_revives() -> void:
 var _tip_t := 0.0
 var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
 var vision_hint := VisionHint.new()
-var belt_tips := BeltTips.new()  # the local player's one-time belt item tips
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5638,8 +5635,6 @@ func _tips() -> void:
 	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
-	var belt_tip := belt_tips.next(player)
-	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", TipText.ability(true))
