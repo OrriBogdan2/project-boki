@@ -15,7 +15,9 @@ extends RefCounted
 ##   6. its sounds (scripts/match/raid_sfx.gd): a wave opens once per wave sent, the boss rises once, each wave's
 ##      gates tick in the last RaidSfx.TICK_S s, the Nightmare boss's rockfall warns and a phase change cues;
 ##      every cue has its sound file and Normal's boss has no rockfall warn.
-## --heart-raid-check=sim runs only part 3 (and --seed=N picks the raids' seed).
+##   7. first-time hints (HeartRaidHints): the raid-only Boki line, the first wave's marks, the boss rising and
+##      the Heart's final seat each show once and are saved as seen; the difficulty pick's is seen once too.
+## --heart-raid-check=hints runs only part 7, =sim only part 3 (and --seed=N picks the raids' seed).
 ## Each whole raid is 1.5-3 min of wall time, so the suite runs part 3's four raids as their own flags
 ## (--heart-raid-solo-check, -squad-, -hard-, -nightmare-; the registry passes the SIMS index) and
 ## --heart-raid-check runs the rest, with part 3's cross-raid rows (wave 1's size and gates) on short
@@ -57,6 +59,11 @@ func run(main: Node, part := -1) -> void:
 			await _sim(main, int(p[0]), p[1], seed_v, p[2], true)
 			main.get_tree().quit(0)
 			return
+	if args.has("--heart-raid-check=hints"):
+		await _hints(main)
+		print("HRAID DONE, failures: ", bad)
+		main.get_tree().quit(1 if bad > 0 else 0)
+		return
 	if not sim_only:
 		_tables()
 		await _expedition(main)
@@ -74,6 +81,7 @@ func run(main: Node, part := -1) -> void:
 	if not sim_only:
 		await _boss_extra(main)
 		await _win(main)
+		await _hints(main)
 	print("HRAID %s" % ("PASS" if bad == 0 else "FAIL %d" % bad))
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -406,6 +414,41 @@ func _win(main: Node) -> void:
 	ok(said.begins_with("Heart Raid (Normal) won"), "the results line: %s" % said)
 	await _drop(main, m)
 
+## 7. Each hint is unseen until its moment, shown once at it (the lane gets the line), then seen in the save.
+func _hints(main: Node) -> void:
+	Save.d = Save.fresh()
+	Settings.set_v("tips", true, false)
+	var o := HeartRaid.opts(1)
+	o.merge({"seed": 23, "tier": 0, "no_drop": true, "god": true, "sim_keep": true})
+	var m := _match(main, o)
+	var rd: HeartRaid = m.heart_raid
+	m.player.ctrl = "idle"
+	var seen: Dictionary = Save.d["tutorial"]
+	ok(HeartRaidHints.text("boss").contains(String(HeartRaid.rules()["boss"]["name"])), "the boss hint names the boss")
+	_run_to(m, HeartRaid.r("first_wave_s") - HeartRaid.r("warn_s") - 5.0)
+	ok(seen.get("raid_boki", false) and not seen.get("raid_wave", false), "in the calm: the Boki line, not the wave's")
+	_run_to(m, HeartRaid.r("first_wave_s") - HeartRaid.r("warn_s") + 2.0)
+	ok(seen.get("raid_wave", false) and not seen.get("raid_boss", false), "the first wave's marks: its line")
+	rd._spawn_boss()
+	_run_to(m, m.sess_time() + 1.0)
+	ok(seen.get("raid_boss", false) and not seen.get("raid_seat", false), "the boss rises: its line, not the seat's")
+	(rd.boss as Boss).hurt((rd.boss as Boss).max_hp * 10.0, m.player, {})
+	_run_to(m, m.sess_time() + 1.0)
+	ok(seen.get("raid_seat", false), "the Heart's final seat opens: its line shows")
+	var ui := Control.new()
+	main.add_child(ui)
+	HeartRaidHints.pick(ui)
+	var lane := MsgLane.of(ui)
+	var shown := func() -> int: return lane._waiting.size() + lane._shown.size()
+	ok(seen.get("raid_diff", false) and shown.call() == 1, "the difficulty pick shows its line")
+	HeartRaidHints.pick(ui)
+	ok(shown.call() == 1, "a second pick shows nothing")
+	ui.queue_free()
+	await _drop(main, m)
+
+func _run_to(m: Match, t: float) -> void:
+	while m.sess_time() < t:
+		m.step(Match.DT)
 
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]

@@ -152,6 +152,12 @@ Proposals (the owner's call):
   raid's own load (17 wave monsters + boss) is **not** measured: a `--perf-bench` raid scene is open.
 - **Balance:** the numbers are first guesses. The smoke runs print a line a minute to tune from.
 
+## First-time hints
+One line each, once per save, in the message lane (no panels, nothing blocks; DECISIONS 11-08): the difficulty pick
+(what Hard and Nightmare change), the raid-only Boki a few seconds into the first raid (DECISIONS 11-11 principle 2),
+the first wave's marks, the boss rising and the Heart's final seat opening. `scripts/match/heart_raid_hints.gd`, texts
+in heart_raid.json "hints", seen flags `Save.d["tutorial"]["raid_*"]`. `--heart-raid-check=hints` runs just these.
+
 ## Next steps
 1. Playtest solo and as 4. Tune the waves, scale and boss HP in heart_raid.json.
 2. A Boki-model boss (Cairnback first). Then Zephyrak and Hivara, rolled per raid.
