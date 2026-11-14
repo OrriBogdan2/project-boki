@@ -2136,6 +2136,7 @@ func _find_interact() -> void:
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
 		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
+		if life: pairs = life.hand.pairs(pairs)
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
 		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
@@ -2390,6 +2391,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_released("whistle") and life:
 		life.whistle.release()
+	if event.is_action_pressed("gear1") and life and panel_open == "" and not chat_open and not building_now \
+			and visit.is_empty() and not Overlay.is_open():
+		life.hand.cycle()      # the next snack in hand (BaseHandFeed)
+		return
 	if event.is_action_pressed("whistle") and panel_open == "" and not chat_open and visit.is_empty() and train.is_empty() and not Overlay.is_open():
 		_whistle()
 		get_viewport().set_input_as_handled()

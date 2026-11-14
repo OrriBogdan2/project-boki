@@ -96,7 +96,8 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 		if held >= HOLD_S:
 			var who: Dictionary = pending
 			pending = {}
-			press_hold(who)
+			if not (h.life and h.life.hand.offer(who)):      # a snack in hand: the hold feeds it (BaseHandFeed)
+				press_hold(who)
 		return true
 	h._use({"kind": "kin", "k": pending})
 	pending = {}
