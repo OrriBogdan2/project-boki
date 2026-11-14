@@ -11,6 +11,7 @@ var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
 var hud: Node = null
+var recap: DeathRecap = null    # the down/death card (scripts/ui/death_recap.gd)
 var spectate := Spectate.new(self)     # who you watch once you're out
 var env: WorldEnvironment
 var hunters: Array = []
@@ -42,6 +43,7 @@ var meteors: Array = []     # {at, t, tele}
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
+var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -86,7 +88,7 @@ var music_dir: MusicDir = null     # the layered score's levels (scripts/match/m
 var ult_cue := UltReadyCue.new()   # the chime when your R is back
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -348,6 +350,8 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	recap = DeathRecap.new(self)         # the down/death card
+	add_child(recap)
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -453,7 +457,8 @@ func _start(o: Dictionary) -> void:
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
-	if skydrop.planning and player:
+	intro = SquadIntro.start(self)      # the squad on the deck first (0.24.4); it opens the map after
+	if skydrop.planning and player and intro == null:
 		hud.open_map(true)
 	if player:
 		cam.snap(player.pos)
@@ -562,6 +567,7 @@ func _spawn_pads_and_exits() -> void:
 		add_child(arc)
 		pd["arc"] = arc
 	await _slice()
+	zone = ShrinkZone.make(self)
 	exits = Exits.new()
 	await exits.setup(self)
 	await _slice()
@@ -620,20 +626,6 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 	return h
 
 ## Who B would take you to: the teammate nearest the cursor on screen (alive, standing, not out).
-func base_target(h: Hunter) -> Hunter:
-	var mates: Array = hunters.filter(func(o): return o != h and o.team == h.team and not o.out and not o.downed and not o.extracted and not o.dropping and not o.riding)
-	if mates.is_empty():
-		return null
-	if h != player or mates.size() == 1:
-		return mates[0]
-	var mp := get_viewport().get_mouse_position()
-	var best: Hunter = mates[0]; var bd := 1e9
-	for o in mates:
-		var sp := cam.unproject_position(o.pos) if not cam.is_position_behind(o.pos) else Vector2(1e6, 1e6)
-		var d := sp.distance_to(mp)
-		if d < bd: bd = d; best = o
-	return best
-
 ## How high the player is over the ground under them (over the abyss: over the last ground they stood on).
 func player_altitude() -> float:
 	if player == null:
@@ -843,6 +835,7 @@ const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship 
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
+var intro: SquadIntro = null    # the squad intro on the deck, while it plays (SquadIntro)
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
 
 func _setup_ship() -> void:
@@ -910,8 +903,7 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 	var n: Node3D = s["node"]
 	# drawn along the line past the end too, so it sails off over the clouds
 	n.position = (s["a"] as Vector3).lerp(s["b"], (time - st) / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
-	for pn in ["PropL", "PropR"]:
-		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
+	SkyDeck.tick(self, s, dt)      # props, shadow, engine sound, the squad and their wisps on deck
 	var done := time >= st + float(s["ride"])
 	for h in hunters:
 		if h.riding and (h.rocket != null or not is_same(ship_of(h), s)):
@@ -1280,10 +1272,11 @@ func use_gear(h: Hunter, slot: int) -> void:
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
 		sfx("skill", h.pos, -4.0, 1.0)
 		return
+	var lau: Dictionary = gd.get("launch", {})      # launch gloves: m/s, m (content/gear)
 	match gid:
 		"gust_fan":
 			var d := h.aim_dir()
-			h.vel = Vector3(d.x * 9.0, 13.0, d.y * 9.0)
+			h.vel = Vector3(d.x * float(lau["fwd_mps"]), float(lau["up_mps"]), d.y * float(lau["fwd_mps"]))
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1319,7 +1312,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 		"rocket":
 			# straight up: a column of thrust that also cools your glider, so you can keep going
 			var d := h.aim_dir()
-			h.vel = Vector3(h.vel.x * 0.5 + d.x * 2.0, 17.0, h.vel.z * 0.5 + d.y * 2.0)
+			h.vel = Vector3(h.vel.x * 0.5 + d.x * lau.fwd_mps, lau.up_mps, h.vel.z * 0.5 + d.y * lau.fwd_mps)
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.shot_down = false
@@ -1332,10 +1325,10 @@ func use_gear(h: Hunter, slot: int) -> void:
 			# one there, otherwise straight up into the air
 			var d := h.aim_dir()
 			var aim: Vector3 = h.inp.get("aim", h.pos)
-			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, 9.0)
+			var reach := clampf(Vector2(aim.x - h.pos.x, aim.z - h.pos.z).length(), 2.0, float(lau["reach_m"]))
 			var tx := h.pos.x + d.x * reach; var tz := h.pos.z + d.y * reach
 			var gy := world.ground_at(tx, tz)
-			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + 8.0, h.pos.z + d.y * 3.0)
+			var to := Vector3(h.pos.x + d.x * 3.0, h.pos.y + float(lau["rise_m"]), h.pos.z + d.y * 3.0)
 			if gy > World.VOID + 1.0 and not world.is_block(tx, tz) and gy > h.pos.y - 1.0:
 				to = Vector3(tx, gy + 1.2, tz)
 			h.launch_to(to, 0.55)
@@ -1344,7 +1337,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("throw", h.pos, -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
-			h.vel.y = maxf(h.vel.y, 11.0)
+			h.vel.y = maxf(h.vel.y, float(lau["up_mps"]))
 			h.grounded = false
 			h.glide_cd = 0.0
 			h.roll_t = 0.0
@@ -1721,7 +1714,9 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var tags: Array = o.get("tags", [])
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
+		if o.has("ab"): tags.append(String(o["ab"]))      # the kit slot it came from (tools/duel_sim.gd)
 	if o.get("stun", 0.0) > 0.0: tags = tags + ["stun"]
+	if o.get("ab", "") != "": tags = tags + ["ab:" + String(o["ab"])]      # which cast hit
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	KinFollow.on_damage(target, by, d)
 	var crit: bool = o.get("crit", false)
@@ -1748,6 +1743,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
+			ArmourHint.hit(self, credit, target)
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
@@ -2180,7 +2176,9 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
+	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
+	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
@@ -2219,7 +2217,8 @@ func on_kin_down(k: Kin) -> void:
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
-			hud.toast("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), "run into it to pick it up" if not k.down_void else "it will come round on its own"], Color("ffb0a0"))
+			var how := "run into it to pick it up" if not k.down_void else "it will come round on its own"
+			hud.msgs.push("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), how], Color("ffb0a0"), MsgLane.URGENT)
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
@@ -2474,7 +2473,7 @@ const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc 
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or HawkSense.seen_by(target, team_i):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -3196,14 +3195,7 @@ func _process(delta: float) -> void:
 			_render_deco(s, alpha)
 		if String((s["x"] as Dictionary).get("src", "")) == "abil":
 			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		if s["node"]:
-			var mi: MeshInstance3D = s["node"]
-			mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-			var v: Vector2 = s["vel"]
-			if v.length() > 1.0:
-				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
-				var r: float = s.get("vr", s["r"])
-				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+		Oomph.place_shot(s, alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
@@ -3227,6 +3219,7 @@ func _process(delta: float) -> void:
 		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
 		var fp := ship_pos_of(ps) + sd * 3.0
 		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
+		if intro: intro.frame(delta)       # the squad intro takes the view, then hands it over
 	elif player and (player.rocket != null or player.dropping):
 		cam.skydive(player.render_pos(alpha), skydrop.drop_yaw(player), player_altitude(), delta)
 	elif player and not player.out and not player.downed:
@@ -3237,7 +3230,7 @@ func _process(delta: float) -> void:
 		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
 		cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		var peek := mate_look.focus(player.render_pos(alpha), alpha)
+		var peek := mate_look.focus(StepSmooth.view(player, alpha), alpha)
 		cam.follow(peek, delta, mate_look.looking == null)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
@@ -3340,8 +3333,7 @@ func _gather_input() -> void:
 	player.inp["crouch"] = crouch_on
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
-	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
-		pending_input["base"] = true
+	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
@@ -3386,6 +3378,8 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if intro and intro.skip(event):
+		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
@@ -3435,6 +3429,7 @@ func step(dt: float) -> void:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
 		for k in pending_input: pending_input[k] = false
+		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)
 		if String(opts.get("map_demo", "")) == "plan" and player and skydrop.clock > 1.2 and not has_meta("map_demo_done"):
 			# test: your ping on a vault, beside the bots' picks
@@ -3840,9 +3835,7 @@ func step(dt: float) -> void:
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
-		if pending_input["base"]:
-			pending_input["base"] = false
-			player.start_base(base_target(player))
+		BaseWheel.apply_pick(player)
 		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
@@ -4895,7 +4888,8 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
 	_check_last()
 
-func _update_rules(_dt: float) -> void:
+func _update_rules(dt: float) -> void:
+	if zone: zone.tick(dt)
 	var left := length - time
 	if left < 30.0 and not collapse_warned:
 		collapse_warned = true
@@ -5369,11 +5363,12 @@ func _net_ev(x, from: String) -> void:
 			match String(x[1]):
 				"ring": fx.ring(Vector3(x[2], x[3], x[4]), float(x[5]), Color.html(String(x[6])), 0.35)
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
-				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
+				"cone": ArchKit.net_cone_in(self, x)
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
+		"xp": KillXp.net_in(self, x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			var by: Ent = ents_by_id.get(String(x[2]), null)
@@ -5469,6 +5464,7 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Blight and not who.dead:
 				(who as Blight).burrow()
+		"nest": if blight: blight.nests.net(x)      # a Blight nest's stock and refill clock (BlightNests)
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
@@ -5582,6 +5578,8 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
+var vision_hint := VisionHint.new()
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5628,9 +5626,9 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
 
-func _tip(key: String, text: String) -> void:
+func _tip(key: String, text: String, near := "") -> void:
 	if hud != null and tip_once(key):
-		hud.tip(text)
+		hud.tip(text, near)
 
 ## The first-time hints' once-per-save gate (Save.d.tutorial): true the one time key is asked for.
 func tip_once(key: String) -> bool:
@@ -5641,6 +5639,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 func _tips() -> void:
+	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
@@ -5648,6 +5647,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	tips_live = true
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
@@ -5661,6 +5661,8 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
+		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var k: Kin = player.kin

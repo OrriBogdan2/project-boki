@@ -14,8 +14,8 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 ## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
-## walks off, the X aim) ride the upper body over the walk. Every other dolm move owns the body.
-const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
+## walks off, the X aim and spine roll) ride the upper body over the walk. Every other dolm move owns the body.
+const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim", "breah_spine"]
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
@@ -583,6 +583,36 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+	_landing(id, m, sync, clips, dd)
+
+## A move keyed "owns_land" is the landing (Cinder's `lw_land`): once it has played, the generic land clip must not
+## play after it, so the settle ends when the move does and control is back. As in the flight: a long time airborne,
+## the move starts in the air, she touches down just after it ends (AshwickJet lands 0.45 m up: 0.25 s down).
+func _landing(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var moves: Dictionary = dd.get("kmoves", {})
+	var land: Dictionary = dd.get("land", {})
+	for km in moves:
+		if not bool(moves[km].get("owns_land", false)) or land.is_empty():
+			continue
+		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
+		m.set_meta(WardenClips.STATE, s)
+		for i in 60:
+			sync.call("_process", DT)
+		var t := 0.0
+		var end_t := float(HunterAnim.km_def(String(km))["keys"][-1][0])
+		while t < end_t:
+			s["kmove"] = km
+			s["kmove_t"] = t
+			sync.call("_process", DT)
+			t += DT
+		s.erase("kmove")
+		for i in 3:
+			sync.call("_process", DT)
+		s["grounded"] = true
+		for i in 3:
+			sync.call("_process", DT)
+		ok(clips.land_t >= WardenClips.LAND_DONE,
+				"%s: touching down just after %s (the landing), no generic land clip follows" % [id, km])
 
 ## The bow's release: the string hand's snap is shown in full, not eaten by the blend-in. From the held draw, the
 ## move's blend is over (the pose is the clip's own) SNAP_BY s after the arrow's spawn (kmove_t 0), by the earliest
@@ -719,6 +749,7 @@ func _cc(id: String, dd: Dictionary) -> void:
 func _cc_run(id: String, key: String) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
+	HunterAnim.rest_pose(m)      # (the same seeded Rig pose in every run: Ostra stands on the Rig, as in _run_hit)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)

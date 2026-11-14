@@ -105,7 +105,7 @@
 		"icon": "barrage",
 		"col": "#d060ff",
 		"cooldown": 15.0,
-		"reach": 9.0,
+		"reach": 10.8,
 		"width": 1.8,
 		"tell": 0.35,
 		"time": 4.4,
@@ -113,7 +113,7 @@
 		"dmg": 5.0,
 		"slow": 0.35,
 		"blight": 1.0,
-		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.",
+		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -123,6 +123,7 @@
 		},
 		"rmin": 2.0,
 		"deg": 120.0,
+		"deg_r3_k": 1.3,
 		"cremate": 10.0
 	},
 	"x": {
@@ -140,7 +141,7 @@
 		"speed": 90.0,
 		"width": 0.5,
 		"dmg": 18.0,
-		"final_dmg": 25.0,
+		"final_dmg": 23.3,
 		"kb": 4.0,
 		"shred": 10.0,
 		"execute": 0.12,

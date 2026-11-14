@@ -28,14 +28,18 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "plus", "n": 8}]},
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
+## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
+## (fx_dot has its own ground fade: FxDot, ground_y.)
+const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
+const DT_FILL := 1.0 / 60.0   # s per step while timing the Faultline fill
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -59,17 +63,29 @@ func run(main: Node) -> void:
 	_budget(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
+	_lean()
 	_kit(m, V, P)
 	_dolm_rocks(m)
 	_net(m, V, P)
+	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
 	await _scarf(main)
 	_dots(m)
+	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
+	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Every camera-facing effect fades into the ground instead of cutting a line into it, on each renderer (one
+## include, picked by renderer); the Compatibility fallback's ground map comes with the match world.
+func _soft_edges(m: Match) -> void:
+	for sname: String in SOFT_SHADERS:
+		var code := (load("res://shaders/%s.gdshader" % sname) as Shader).code
+		ok(code.contains("soft_fade.gdshaderinc") and code.contains("soft_fade("), "%s softens into the ground" % sname)
+	ok(m.world.get_children().any(func(c: Node) -> bool: return c is FxGround), "the match world shares its ground map")
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
@@ -228,6 +244,23 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
+## A sweep stood up along the aim ("tilt" 90) turns up to its "lean" toward the match camera: no aim shows it
+## edge-on, and it never tips past the lean.
+func _lean() -> void:
+	var back := Vector3(0, sin(deg_to_rad(57.0)), cos(deg_to_rad(57.0)))
+	var layer := {"tilt": 90.0, "lean": 30.0}
+	var worst := 1.0
+	var within := true
+	for i in 8:
+		var b := Basis(Vector3.UP, TAU * i / 8.0)
+		var roll := HeroVfx.sweep_roll(layer, b, back)
+		var normal := b * Basis(Vector3(0, 0, 1), roll) * Vector3.UP
+		worst = minf(worst, absf(normal.dot(back)))
+		within = within and absf(roll - PI * 0.5) <= deg_to_rad(30.0) + 0.001
+	var stood := HeroVfx.sweep_roll({"tilt": 90.0}, Basis(), back)
+	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
+	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
+
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
@@ -247,8 +280,13 @@ func _dolm_rocks(m: Match) -> void:
 			var mat: Material = (mi as MeshInstance3D).material_override
 			if mat is ShaderMaterial:
 				var sm := mat as ShaderMaterial
-				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
-				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+				# the rock's own shader (glow, rim, heat) or a KitLooks.shade_mat haze (cel_tint's color)
+				var hot := false
+				for p: String in ["glow", "rim_col", "color"]:
+					var c: Variant = sm.get_shader_parameter(p)
+					hot = hot or (c is Color and (c as Color).r > (c as Color).b)
+				var heat: Variant = sm.get_shader_parameter("heat")
+				if hot or (heat != null and float(heat) > 0.0):
 					warm.append(kind)
 			elif mat is StandardMaterial3D:
 				var c := (mat as StandardMaterial3D).albedo_color
@@ -430,6 +468,42 @@ func _scarf(main: Node) -> void:
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
 
+## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
+## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
+## time is read from data.
+func _slam_fill(main: Node) -> void:
+	var m: Match = flow._match(main, "bulwark")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var K: BulwarkKit = P.ak
+	var xd: Dictionary = K.d["x"]
+	var windup0: float = xd["windup"]
+	P.lvl = 6
+	for rank in [1, 2, 3, 0]:
+		xd["windup"] = 0.6 if rank == 0 else windup0
+		for slot: String in P.slot_lv:
+			P.slot_lv[slot] = maxi(rank, 1)
+		K.cd["x"] = 0.0
+		K.ult.cast()
+		var t_full := -1.0
+		var t_slam := -1.0
+		var t := 0.0
+		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
+			m.step(DT_FILL)
+			t += DT_FILL
+			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 1.0:
+				t_full = t
+			if K.ult.slams > 0:
+				t_slam = t
+		var label := "rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [
+			maxi(rank, 1), xd["windup"], t_full, t_slam]
+		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and t_full == t_slam, label)
+		K.ult.slams = 0
+		K.ult.phase = ""
+		K.ult._hide_lane()
+	xd["windup"] = windup0
+	m.queue_free()
+
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
 ## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
 ## tells the dots the ground under it.
@@ -447,3 +521,35 @@ func _dots(m: Match) -> void:
 	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
 	var g: float = m.world.ground_at(at.x, at.z)
 	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
+
+## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
+## blade layer stay centred on her through a Vault, to within a hand's width.
+func _sable_ring(main: Node) -> void:
+	var m: Match = flow._match(main, "thief")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var U: ThiefUlt = (P.ak as ThiefKit).encore
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	P.ak.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	var reach := float(U.data()["reach"])
+	while float(U.st["t"]) < 0.2 - 0.5 * Match.DT:
+		m.step(Match.DT)
+	var half := float(AimKit.entry(P, "ult")["r"]) / reach
+	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	m.step(0.3)
+	P.inp["move"] = Vector2(0, -1)
+	P.inp["dash"] = true
+	var worst := 0.0
+	var from := P.pos
+	for i in 40:
+		m.step(Match.DT)
+		var ring: Vector2 = AimKit.entry(P, "ult")["at"]
+		var orbit := Vector3.ZERO
+		for j in ThiefUlt.ORBITERS:
+			orbit += ((U.k.fx().placed["enc_orb%d" % j] as Dictionary)["node"] as Node3D).global_position
+		orbit /= float(ThiefUlt.ORBITERS)
+		worst = maxf(worst, maxf(ring.distance_to(Vector2(P.pos.x, P.pos.z)),
+				Vector2(orbit.x, orbit.z).distance_to(Vector2(P.pos.x, P.pos.z))))
+	ok(P.pos.distance_to(from) > 3.0 and worst < 0.1,
+			"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst)
