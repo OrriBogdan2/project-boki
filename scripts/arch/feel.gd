@@ -226,7 +226,7 @@ static func impact_row(cat: String) -> Array:
 ## Layer 3, the impact, by effect category: [sound, pitch]. Control is a hard hit then a held tone.
 const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
 ## Layer 4, the kin theme's sweetener.
-const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravity", "prism": "k_prism", "lunar": "k_lunar", "echo": "k_echo"}
+const SWEETENER := {"venom": "k_poison", "spore": "k_spore", "gravity": "k_psychic", "prism": "k_crystal", "lunar": "k_fairy", "echo": "k_sound"}
 const MAX_VOICES := 4
 static var _voices := {}       # event key -> voices started this frame
 

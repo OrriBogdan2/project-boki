@@ -42,7 +42,8 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "vortex", "size": 2.0}, {"p": "ring", "size": 2.0}, {"p": "fist", "size": 2.0, "drop": 3.0},
 			{"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}, {"p": "plus", "n": 8}]},
+			{"p": "drop", "n": 24}, {"p": "plus", "n": 8},
+			{"p": "splinter", "n": 12}, {"p": "sherd", "n": 12}]},
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
