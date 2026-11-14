@@ -980,7 +980,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var row := UI.hbox(8); card.add_child(row)
 		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)
