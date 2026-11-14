@@ -32,7 +32,7 @@ const TAP_POSE_OPEN := {"archer": "arc_draw"}
 var reached := {}               # hold clip ids the trials brought up at all, key down or up
 var hold_ids := {}              # kmove id -> true, of the hero under test (its art file's "hold_from" moves)
 
-func run(main: Node) -> void:
+func run(main: Node, _part := "") -> void:
 	Save.no_write = true
 	for hero in _heroes():
 		hold_ids = _hold_ids(hero)

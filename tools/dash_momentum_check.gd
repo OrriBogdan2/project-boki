@@ -30,7 +30,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func run(main: Node) -> void:
+func run(main: Node, _part := "") -> void:
 	Save.no_write = true
 	for hero in _heroes():
 		var m := _match(main, hero)
