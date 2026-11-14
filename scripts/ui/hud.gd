@@ -370,6 +370,7 @@ func _draw_world_labels() -> void:
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
+		lvl_cue.body(self, cam, m.player)
 	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
@@ -834,9 +835,6 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
-	if m.player:
-		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
@@ -1014,18 +1012,15 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
+var lvl_cue := LevelUpCue.new()      # the level-up moment over your hero and over the vitals
 var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
 var xp_shown := -1.0     # the XP the bar has filled to
 var xp_pop := 0.0        # s left of the pop after XP landed
-## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
-## weapon's step on even levels, which also get a gold wash).
+## A level just went up (Hunter.gain_xp; `info` is the weapon's step on even levels): the level number
+## goes gold and LevelUpCue says what improved.
 func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
-	var line := "LEVEL %d  ·  +1 skill point" % lv
-	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+	lvl_pop = HudVitals.LVL_POP
+	lvl_cue.start(m.player, lv, info)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:

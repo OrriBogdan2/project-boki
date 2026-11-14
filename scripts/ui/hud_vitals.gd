@@ -10,7 +10,7 @@ extends RefCounted
 const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar
 const AR_H := 5.0          # px: the armour strip under it
-const LVL_POP := 0.35      # s: the level-up burst round the portrait
+const LVL_POP := 0.35      # s: the level number's gold fade after a level-up
 const XP_POP := 0.4        # s: the pop of the level number and bar when XP lands
 const XP_H := 6.0          # px: the XP bar's height
 const BAR_X := 44.0        # px: where the XP bar starts, right of the LV number
@@ -80,6 +80,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	xp_row(H, pr, x0, w, p)
 	_hidden_tag(H, sz, p)
+	H.lvl_cue.card(H, x0, y0 - 32.0)    # clear of the XP tracker on the block's top edge
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
@@ -107,7 +108,7 @@ static func corner(H, sz: Vector2) -> Vector2:
 ## The XP tracker on the block's top edge, just above the health number: LV and the run level, then a
 ## thin bar toward Hunter.XP_TO. XP landing (camp or kill) pops the number, brightens the bar and
 ## fills it smoothly (through a level-up too); unspent skill points pulse the whole bar gold, and a
-## level-up bursts a gold ring round the portrait.
+## level-up turns the number gold (the rest of the moment is LevelUpCue's, over the vitals).
 static func xp_row(H, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var gold := HudStyle.GOLD
@@ -117,9 +118,6 @@ static func xp_row(H, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 	H.lvl_seen = p.lvl
 	H.lvl_pop = maxf(0.0, H.lvl_pop - dt)
 	var lk: float = 1.0 - H.lvl_pop / LVL_POP
-	if H.lvl_pop > 0.0:
-		H._rounded(pr.grow(6.0 + lk * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - lk), 4)
-		H._rounded(pr.grow(2.0 + lk * 10.0), Color(gold, 0.18 * (1.0 - lk)), 14)
 	var fill := xp_step(H, p, dt)
 	var pop: float = H.xp_pop / XP_POP
 	var sc := 1.0 + 0.35 * sin((1.0 - pop) * PI) if pop > 0.0 else 1.0

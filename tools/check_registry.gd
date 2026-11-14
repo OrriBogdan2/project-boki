@@ -24,6 +24,8 @@ const CHECKS := {
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
+	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
+	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],      # movie writer: a level-up mid-fight
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
