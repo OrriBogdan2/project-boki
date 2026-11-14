@@ -12,6 +12,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(m: Node) -> void:
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # hunger is the old farm's: the garden (default) never starves
 	Save.d = Save.fresh()
 	Econ.ensure()
 	ok(not Care.natural_death(), "content/rules/care.json: natural_death is false")
@@ -41,9 +42,9 @@ func _offline() -> void:
 	ok(Care.starve_stage(r) == "sick" and capped, "...sick, the clock held at the cap (%.0f h)" % Care.starve_h(r))
 	Care.fed(r)
 	r["needs"]["food"] = 80.0
-	Care.starve_step(r, 3.0 * 3600.0)
+	Care.starve_step(r, 24.0 * 3600.0)      # the cap is the dead mark (Care.starve_cap): a day of care, not hours
 	var h := Care.starve_h(r)
-	ok(h < Care.STARVE["sick"], "...and a meal and a rest bring it back down (%.1f h)" % h)
+	ok(h < Care.STARVE["sick"], "...and a meal and a day of care bring it back down (%.1f h)" % h)
 
 func _tick() -> void:
 	var r := _starved_kin("Wren")
