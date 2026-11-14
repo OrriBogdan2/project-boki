@@ -1022,6 +1022,20 @@ static func net_vel(h: Hunter) -> Vector3:
 func move_vel() -> Vector3:
 	return h.vel
 
+## A ground cone everyone must dodge (Net 0.24.6): other players' games don't run this kit, so they get its
+## true length and width and draw the same AimKit cone for `dur` s (net_cone_in).
+func net_cone(at: Vector3, dir: Vector2, length: float, deg: float, dur: float, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["cone", h.nid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
+				m._r(length), m._r(deg), m._r(dur), col.to_html(false)])
+
+static func net_cone_in(match_node: Node, x: Array) -> void:
+	var who: Variant = match_node.ents_by_id.get(String(x[2]), null)
+	if who is Hunter and not (who as Hunter).is_local():
+		var p := {"from": Vector3(x[3], x[4], x[5]), "dir": Vector2(x[6], x[7]), "len": float(x[8]), "deg": float(x[9])}
+		p.merge({"dur": float(x[10]), "all": true, "col": Color.html(String(x[11]))})
+		AimKit.cone(who as Hunter, "net_cone", p)
+
 ## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
 ## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).
 func net_pulse(dt: float, on: bool, r := 1.1) -> void:
