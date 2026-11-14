@@ -459,7 +459,7 @@ func on_dash(use_ex: bool) -> bool:
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
-	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	var extra := {"invuln": 0.1, "feel": "long"} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
 	vault = {"t": 0.0, "dur": h.roll_t, "air": air}

@@ -1066,7 +1066,66 @@ func _kit_dashes() -> void:
 		var feel: Dictionary = P.ak.dash_feel()
 		var off := float(feel["dist"]) == 1.0 and float(feel["time"]) == 1.0
 		ok(not src or off, "felt dash %s: a sourced dash is off the dash feel" % id)
+	for row in MOVE_DASH:
+		P.reclass(Arch.weight(String(row[0])), String(row[0]))
+		var got := _felt_move(String(row[1]), row.size() > 4)
+		var want: Array = row[2]
+		var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0] and absf(got[1] - float(want[1])) <= DASH_TOL[1]
+		ok(hit and String(P.ak.st.get("last_dash", row[1])) == String(row[1]),
+				"felt move %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (no source: %s x0.85 / x1.15)"
+				% [row[0], row[1], got[0], got[1], want[0], want[1], row[3]])
 	P.reclass(was[0], was[1])
+
+## The Shift moves with no source figure on a kit whose plain dash is sourced (x1): each keeps the owner's
+## x0.85 / x1.15 through its dash_feel "moves" row. [kit, move, felt [m, s], raw, (in the air)]. A long dash (out of
+## charges) runs the class's ex_dist / ex_time (Hunter.dash_with), so its raw is the class's, not the kit's.
+const MOVE_DASH := [
+	["gunslinger", "long", [3.91, 0.23], "medium long dash 4.6 m / 0.2 s"],
+	["archer", "flick", [4.25, 0.329], "light long dash 5.0 m / 0.2 s, dash_speed x0.7"],
+	["bulwark", "lumber", [3.57, 0.242], "heavy long dash 4.2 m / 0.21 s"],
+	["bulwark", "charge", [3.57, 0.268], "4.2 m at 18 m/s"],
+	["bulwark", "short", [2.21, 0.146], "2.6 m at 20.5 m/s"],
+	["mage", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s"],
+	["thief", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s", true],
+	["gil", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s", true],
+	["juggernaut", "long", [3.57, 0.242], "heavy long dash 4.2 m / 0.21 s", true],
+	["dolm", "long", [3.91, 0.23], "medium long dash 4.6 m / 0.2 s"],
+]
+
+## One unsourced Shift move: set up its trigger (out of charges for a long dash, the shield up
+## for Albert's charge, the Crushing Blow winding for his short dash), Shift, then measured as _felt_dash.
+func _felt_move(move: String, air: bool) -> Array:
+	_steps(30)
+	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
+	var hold := {}
+	if move == "charge":
+		hold = {"sec_hold": true}
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+	elif move == "short":
+		hold = {"fire": true}
+	else:
+		P.dashes = 0.0
+	for i in (int(0.4 / DT) if not hold.is_empty() else 0):
+		for k in hold: P.inp[k] = hold[k]
+		m.step(DT)
+	P.inp["move"] = Vector2(1, 0)
+	var start := P.pos
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	var n := 0
+	for i in (150 if P.roll_t > 0.0 else 0):
+		var left := minf(P.roll_t, DT)
+		for k in hold: P.inp[k] = hold[k]
+		m.step(DT)
+		if P.roll_t > 0.0:
+			n += 1
+			continue
+		for k in hold: P.inp[k] = false
+		var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
+		return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
+	for k in hold: P.inp[k] = false
+	return [0.0, 0.0]
 
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over

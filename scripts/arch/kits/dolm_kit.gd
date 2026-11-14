@@ -568,7 +568,8 @@ func on_dash(use_ex: bool) -> bool:
 		if not spend_dash(true): return true
 		play("breah_exdash")
 		travel(
-			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}
+			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)),
+			{"invuln": 0.1, "trail": "dust", "feel": "long"}
 		)
 		m.sfx(HeroSfx.dash_name(h), h.pos, -4.0, 1.0)
 		return true

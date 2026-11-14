@@ -557,23 +557,28 @@ func dash_dir() -> Vector2:
 static var _dash_feel := {}
 var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
-## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
-func dash_feel() -> Dictionary:
+## The dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers. move: one of the
+## kit's Shift moves; its "moves" row (a move with no source figure) overrides the hunter's dist and time.
+func dash_feel(move := "") -> Dictionary:
 	if _dash_feel.is_empty():
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
-	return _dash_feel.get(id, _dash_feel["default"])
+	var f: Dictionary = _dash_feel.get(id, _dash_feel["default"])
+	var mv: Dictionary = (f.get("moves", {}) as Dictionary).get(move, {})
+	return f if mv.is_empty() else f.merged(mv, true)
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
 ## buffer all work as before). extra "curved": the hero's measured ground dash, which then runs on its
 ## dash_feel "curve" (docs/decisions/0025) instead of a constant speed. The hero's own: no Boki changes it
-## (DECISIONS 2026-11-05, --boki-dash-check).
+## (DECISIONS 2026-11-05, --boki-dash-check). extra "feel": the Shift move's name for its dash_feel row.
 func travel(dist: float, t: float, extra := {}) -> void:
-	var feel := dash_feel()
+	var feel := dash_feel(String(extra.get("feel", "")))
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]
+	if extra.has("feel"):
+		e["ex_feel"] = [float(feel["dist"]), float(feel["time"])]     # a long dash runs the class's numbers x this
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
 	var curve: Array = feel.get("curve", [])
 	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0

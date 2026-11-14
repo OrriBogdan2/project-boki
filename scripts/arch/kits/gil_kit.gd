@@ -202,7 +202,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class long dash in the air: no ground to swim through, so no dive and no surfacing
 		if spend_dash(true):
-			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
+			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust", "feel": "long"})
 		return true
 	if not spend_dash(false):
 		return true

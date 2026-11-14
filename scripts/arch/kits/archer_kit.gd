@@ -187,7 +187,7 @@ func on_dash(use_ex: bool) -> bool:
 	if ex:
 		# the long dash (out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll", "feel": "flick"})
 		play("pin_flick")
 		vfx("flick")
 		st["last_dash"] = "flick"
