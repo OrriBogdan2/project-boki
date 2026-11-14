@@ -10,22 +10,24 @@ extends RefCounted
 ## stays under the pool's stacking cap; the hum comes from the ring nearest you, none far from them.
 ## Never touches the save.
 
-const AIR_MAX_S := 25.0         # s: the longest a lane may take (no empty runs past this)
-const RING_GAP_S := 3.0         # s: the longest between two rings on a lane
-const FLY_LIMIT_S := 30.0       # s: a flight that hasn't landed by now failed
-const LIFT_LIMIT_S := 6.0       # s: a hop into a lift ring that isn't on top by now failed
-const BOT_LIFT_LIMIT_S := 7.0   # s: a bot 3 m off a lift ring not on top by now was too slow (the ring takes ~5)
+const AIR_MAX_S := 25.0  # s: the longest a lane may take (no empty runs past this)
+const RING_GAP_S := 3.0  # s: the longest between two rings on a lane
+const FLY_LIMIT_S := 30.0  # s: a flight that hasn't landed by now failed
+const LIFT_LIMIT_S := 6.0  # s: a hop into a lift ring that isn't on top by now failed
+const BOT_LIFT_LIMIT_S := 7.0  # s: a bot 3 m off a lift ring not on top by now was too slow (the ring takes ~5)
 
 var bad := 0
-var bot_lifts := 0              # lift rings a bot took on its own (_bot_lift)
+var bot_lifts := 0  # lift rings a bot took on its own (_bot_lift)
 var m: Match
 var w: World
 var P: Hunter
+
 
 func ok(cond: bool, what: String) -> void:
 	print("AIRRINGS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -64,9 +66,11 @@ func run(main: Node) -> void:
 	print("AIRRINGS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 func _park(h: Hunter) -> void:
 	h.teleport(Vector3(-500, 50, -500))
 	h.out = true
+
 
 func _reset(h: Hunter, at: Vector3) -> void:
 	h.out = false
@@ -83,6 +87,7 @@ func _reset(h: Hunter, at: Vector3) -> void:
 	h.inp["glide"] = false
 	for rg in m.air_rings.list:
 		rg["cd"].clear()
+
 
 ## The map data made it into the world: lanes with rings, a way back for bots, a lift ring per updraft.
 func _layout() -> void:
@@ -109,14 +114,17 @@ func _layout() -> void:
 		var has := (R["islands"] as Array).any(func(i): return served.has(i))
 		ok(has, "region %s has an air ring (a lane end or a lift)" % R["id"])
 
+
 func _joins(lk: Dictionary, from: String, to: String) -> bool:
 	return lk.get("glide", false) and w.islands[lk["from"]]["id"] == from and w.islands[lk["to"]]["id"] == to
+
 
 ## The lane's ring entries, ordered from `from` along the lane.
 func _rings_of(lane: int, from: Vector3) -> Array:
 	var out := m.air_rings.list.filter(func(rg): return int(rg["lane"]) == lane)
 	out.sort_custom(func(a, b): return from.distance_to(a["pos"]) < from.distance_to(b["pos"]))
 	return out
+
 
 ## Fly a lane on keys: run off the take-off, jump, glide toward the landing; count rings on the way.
 func _fly(lane: int, backward: bool) -> void:
@@ -174,6 +182,7 @@ func _fly(lane: int, backward: bool) -> void:
 	ok(worst <= RING_GAP_S, "%s: at most %.1f s between rings (%.1f)" % [label, RING_GAP_S, worst])
 	ok(_steps_up(pitches, 0), "%s: each ring sounds a step up, at full level (pitch %s)" % [label, pitches])
 
+
 ## A bot on its own crossing logic takes the longest lane and flies its rings.
 func _bot() -> void:
 	var longest := _longest_lane()
@@ -199,7 +208,7 @@ func _bot() -> void:
 	B.ai["tgt"] = null
 	var n0: int = m.air_rings.n
 	var t := 0.0
-	var heard: Array = []           # each pass heard from the take-off: [volume dB, pitch]
+	var heard: Array = []  # each pass heard from the take-off: [volume dB, pitch]
 	Sfx.listener = take
 	_hush()
 	while t < 20.0 and not (t > 1.0 and B.grounded and w.island_of(B.pos.x, B.pos.z) == int(link["to"])):
@@ -215,10 +224,13 @@ func _bot() -> void:
 	ok(flown >= rings, "a bot flies the %.0f m lane through its rings (%d of %d)" % [best, flown, rings])
 	ok(w.island_of(B.pos.x, B.pos.z) == int(link["to"]), "the bot lands across in %.1f s" % t)
 	var quiet := heard.all(func(e): return float(e[0]) <= AirRingSfx.OTHERS_DB + 0.01)
-	ok(heard.size() >= 2 and quiet and _steps_up(heard.map(func(e): return e[1]), 0),
-		"a bot's passes heard from the take-off are positional, under yours, a step up each (%s)" % [heard])
+	ok(
+		heard.size() >= 2 and quiet and _steps_up(heard.map(func(e): return e[1]), 0),
+		"a bot's passes heard from the take-off are positional, under yours, a step up each (%s)" % [heard]
+	)
 	B.ctrl = "idle"
 	_park(B)
+
 
 ## Hop into a lift ring: up the updraft, then steer onto the ground of the level it serves.
 func _lift(rg: Dictionary) -> void:
@@ -253,15 +265,19 @@ func _lift(rg: Dictionary) -> void:
 	var on_top := P.grounded and P.pos.y >= top_y - 0.05
 	ok(on_top, "%s: lands on the high ground in %.1f s (at %.1f m)" % [label, t, P.pos.y])
 
+
 ## Standing at a lane's take-off, the quickest way to the far island (by time) is the lane.
 func _routes() -> void:
 	for lk in w.links:
 		if not lk.get("rings", false):
 			continue
 		var hop := BotRoute.plan(w, lk["take"], int(lk["from"]), int(lk["to"]))
-		var what := "a bot at the lane %d>%d's take-off plans the lane (%.1f s)" % [int(lk["from"]), int(lk["to"]),
-			BotRoute.hop_s(lk)]
+		var what := (
+			"a bot at the lane %d>%d's take-off plans the lane (%.1f s)"
+			% [int(lk["from"]), int(lk["to"]), BotRoute.hop_s(lk)]
+		)
 		ok(hop.get("rings", false) and hop["take"] == lk["take"], what)
+
 
 ## A bot 3 m off a lift ring's foot (on the far side from the high ground), sent up to it, gets there in
 ## time: by the ring, or on foot when the stairs are the quicker way.
@@ -297,6 +313,7 @@ func _bot_lift(rg: Dictionary) -> void:
 	B.ctrl = "idle"
 	_park(B)
 
+
 func _longest_lane() -> int:
 	var longest := -1
 	var best := 0.0
@@ -308,6 +325,7 @@ func _longest_lane() -> int:
 			longest = i
 	return longest
 
+
 ## Stops every pool voice and forgets what played when, so the next pass isn't merged into the last one
 ## (Sfx keeps a same-name gap in real milliseconds, and this check runs far faster than real time).
 func _hush() -> void:
@@ -316,10 +334,12 @@ func _hush() -> void:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
 
+
 ## The pool voices playing `sname`.
 func _heard(sname: String) -> Array:
 	var path := "res://audio/%s.wav" % sname
 	return Sfx.players.filter(func(p): return p.playing and p.stream != null and p.stream.resource_path == path)
+
 
 ## The pitch `sname` just played at for you (one voice, no place, full level), or -1 when it didn't; then
 ## hushes the pool.
@@ -330,6 +350,7 @@ func _own_pitch(sname: String) -> float:
 	_hush()
 	return pitch
 
+
 ## The pitches climb AirRingSfx.STEPS one step per ring from step `from` (the top step repeats past the end).
 func _steps_up(pitches: Array, from: int) -> bool:
 	if pitches.is_empty():
@@ -339,6 +360,7 @@ func _steps_up(pitches: Array, from: int) -> bool:
 		if absf(float(pitches[i]) - want) > 0.001:
 			return false
 	return true
+
 
 ## A Hunter another game moves flies the longest lane (its synced position set here step by step), heard
 ## from 8 m beside the first ring: each pass in earshot plays at its ring, under yours and muffled past
@@ -358,7 +380,7 @@ func _remote_pass() -> void:
 		B.gliding = true
 		B.net_vel = dir * AirRings.r("speed")
 		Sfx.listener = first + dir.cross(Vector3.UP) * side
-		var heard: Array = []       # [volume dB, bus, pitch] per pass
+		var heard: Array = []  # [volume dB, bus, pitch] per pass
 		var n0: int = m.air_rings.n
 		_hush()
 		var s := 0.0
@@ -381,9 +403,14 @@ func _remote_pass() -> void:
 		var quiet := heard.all(func(e): return float(e[0]) <= AirRingSfx.OTHERS_DB + 0.01)
 		var muffled: bool = heard.size() >= 2 and heard[0][1] == "SFX" and heard[-1][1] == "SFXFar"
 		var steps := _steps_up(heard.map(func(e): return e[2]), 0)
-		ok(quiet and muffled and steps and not thrown,
-			"another game's Hunter on a lane %.0f m off: heard at the rings, under yours, muffled once far, "
-			% side + "a step up each, never thrown here (%s)" % [heard])
+		ok(
+			quiet and muffled and steps and not thrown,
+			(
+				"another game's Hunter on a lane %.0f m off: heard at the rings, under yours, muffled once far, " % side
+				+ "a step up each, never thrown here (%s)" % [heard]
+			)
+		)
+
 
 ## A crowd through one ring at once (eight passes in a step) starts no more pass voices than the pool's
 ## stacking cap: passes are pool one-shots, under its limits.
@@ -399,6 +426,7 @@ func _crowd() -> void:
 	ok(n >= 1 and n <= Sfx.STACK_MAX, what)
 	_hush()
 
+
 ## The hum: beside a lift ring it plays from that ring, quiet, a fourth lower, its file loaded; at a lane's
 ## take-off it plays from the lane's first ring at the glide pitch; one hum loop at most; none on ground
 ## far from every ring, nor once you are out.
@@ -408,8 +436,10 @@ func _hum() -> void:
 	var hum := _hum_at(Vector3(c.x, w.ground_at(c.x, c.z), c.z))
 	var lower: bool = hum.get("loaded", false) and is_equal_approx(hum["pitch"], AirRingSfx.HUM_LIFT_PITCH)
 	var lift_ok: bool = lower and hum["pos"] == c
-	ok(lift_ok and absf(float(hum["db"]) - AirRingSfx.HUM_DB) < 1.0,
-		"beside a lift ring: its hum, quiet and a fourth lower (%s)" % [hum])
+	ok(
+		lift_ok and absf(float(hum["db"]) - AirRingSfx.HUM_DB) < 1.0,
+		"beside a lift ring: its hum, quiet and a fourth lower (%s)" % [hum]
+	)
 	var lane := _longest_lane()
 	var take: Vector3 = m.air_rings.lanes[lane]["a"] - Vector3.UP * AirRings.r("up")
 	hum = _hum_at(take)
@@ -424,6 +454,7 @@ func _hum() -> void:
 	ok(_hum_at(take, false).is_empty(), "out of the match: no hum")
 	Sfx.loop_stop(AirRingSfx.HUM)
 
+
 ## One step with you at `at` (fresh: the hum stopped first): the hum's {pos, pitch, db, loaded (its file)},
 ## or {} when none plays.
 func _hum_at(at: Vector3, place := true) -> Dictionary:
@@ -437,6 +468,7 @@ func _hum_at(at: Vector3, place := true) -> Dictionary:
 	var L: Dictionary = Sfx.loops[AirRingSfx.HUM]
 	var p: AudioStreamPlayer = L["p"]
 	return {"pos": L["pos"], "pitch": p.pitch_scale, "db": p.volume_db, "loaded": p.stream != null}
+
 
 ## A spot on the ground more than `away` m from every ring.
 func _clear_of_rings(away: float) -> Vector3:

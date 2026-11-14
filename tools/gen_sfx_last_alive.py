@@ -6,13 +6,14 @@ Heard by the last one up only, never by anyone else (it is your state). Our own 
                            bus so the score's combat ducking (the SFX-keyed sidechain) pulls it under a fight
   last_alive_end    sting  a teammate is back up: a warm falling exhale that settles on a major third
 """
+
 import numpy as np
 import sfx_lib as S
 from sfx_lib import T, mix, at, lpf, bpf
 
 S.reseed(1111)
 
-BED_S = 2.0      # s, one loop: two beats (60 bpm, slower than the Heart carrier's heart_beat)
+BED_S = 2.0  # s, one loop: two beats (60 bpm, slower than the Heart carrier's heart_beat)
 
 
 def thump(f0, d=0.32, decay=0.09):
@@ -28,12 +29,12 @@ def start():
 
 
 def bed():
-    t = T(BED_S)                          # whole cycles of 55 Hz and 0.5 Hz in 2 s, so the drone loops cleanly
+    t = T(BED_S)  # whole cycles of 55 Hz and 0.5 Hz in 2 s, so the drone loops cleanly
     drone = (np.sin(2 * np.pi * 55.0 * t) + 0.4 * np.sin(2 * np.pi * 82.5 * t)) * (0.8 + 0.2 * np.cos(np.pi * t))
     beat = mix(thump(46.0), at(thump(56.0) * 0.6, 0.2))
     beats = mix(beat, at(beat, BED_S / 2))
     wash = lpf(S.noise(BED_S), 120) * 0.3
-    return S.pad(beats, BED_S)[:len(t)] + drone * 0.35 + wash
+    return S.pad(beats, BED_S)[: len(t)] + drone * 0.35 + wash
 
 
 def end():
@@ -45,10 +46,10 @@ def end():
 
 
 def main():
-    S.save_cat('last_alive_start', start(), 'cast')
-    S.save_loop('last_alive_bed', bed(), 'loop')
-    S.save_cat('last_alive_end', end(), 'cast')
+    S.save_cat("last_alive_start", start(), "cast")
+    S.save_loop("last_alive_bed", bed(), "loop")
+    S.save_cat("last_alive_end", end(), "cast")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

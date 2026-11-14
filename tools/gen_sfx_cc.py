@@ -10,19 +10,23 @@
 Each has a cc_<kind>_mate: the same cue low-passed and a category quieter, for a squadmate's CC nearby.
 Original synthesis, no samples. Its own seed: running it re-rolls nothing else.
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
 from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
 
 S.reseed(5121)
-MATE_LPF = 1600     # Hz: a squadmate's cue keeps its shape but loses its edge, so your own stays the clear one
+MATE_LPF = 1600  # Hz: a squadmate's cue keeps its shape but loses its edge, so your own stays the clear one
 
 
 def stun():
-    d = 0.5; t = T(d); f = 1180
-    a = np.sin(2 * np.pi * f * t) + np.sin(2 * np.pi * f * 1.035 * t)        # the close pair beats ~40 Hz
+    d = 0.5
+    t = T(d)
+    f = 1180
+    a = np.sin(2 * np.pi * f * t) + np.sin(2 * np.pi * f * 1.035 * t)  # the close pair beats ~40 Hz
     a += 0.35 * np.sin(2 * np.pi * f * 2.76 * t)
     return lpf(a * env(N(d), 0.002, 0.15), 6000)
 
@@ -49,18 +53,19 @@ def slow():
 
 
 def daze():
-    d = 0.55; t = T(d)
-    f = 540 * (1.0 + 0.09 * np.sin(2 * np.pi * 5.0 * t))                      # the pitch swings
+    d = 0.55
+    t = T(d)
+    f = 540 * (1.0 + 0.09 * np.sin(2 * np.pi * 5.0 * t))  # the pitch swings
     ph = 2 * np.pi * np.cumsum(f) / S.SR
     return lpf((np.sin(ph) + 0.3 * np.sin(2 * ph)) * S.shape(d, 0.03, 0.1, 0.4), 3000)
 
 
 def build():
-    for kind, fn in (('stun', stun), ('root', root), ('ground', ground), ('slow', slow), ('daze', daze)):
+    for kind, fn in (("stun", stun), ("root", root), ("ground", ground), ("slow", slow), ("daze", daze)):
         x = fn()
-        S.save_cat('cc_' + kind, x, 'cast')
-        S.save_cat('cc_%s_mate' % kind, lpf(x, MATE_LPF), 'ui')
+        S.save_cat("cc_" + kind, x, "cast")
+        S.save_cat("cc_%s_mate" % kind, lpf(x, MATE_LPF), "ui")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()

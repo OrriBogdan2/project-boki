@@ -10,9 +10,12 @@ const RAID_GATES := {"common": "normal", "rare": "hard", "very_rare": "nightmare
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BOKIMODES %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -22,6 +25,7 @@ func run(main: Node) -> void:
 	_raid_gates()
 	print("BOKIMODES DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _one_mode_each() -> void:
 	var r := BokiModes.rules()
@@ -33,11 +37,13 @@ func _one_mode_each() -> void:
 	for line in r["lines"]:
 		var entry: Dictionary = r["lines"][line]
 		var kin := String(entry.get("kin", ""))
-		if kin != "" and seen.has(kin): twice.append(kin)
+		if kin != "" and seen.has(kin):
+			twice.append(kin)
 		seen[kin] = true
 		var mode: Dictionary = r["modes"].get(String(entry["mode"]), {})
 		var valid: bool = not mode.is_empty() and r["tickets"].has(entry["rarity"])
-		if not valid or not (mode["difficulties"] as Array).has(entry["min_difficulty"]): invalid.append(line)
+		if not valid or not (mode["difficulties"] as Array).has(entry["min_difficulty"]):
+			invalid.append(line)
 	ok(twice.is_empty(), "no species sits on two lines %s" % str(twice))
 	ok(invalid.is_empty(), "every line has a known mode, rarity and difficulty %s" % str(invalid))
 	ok(r["lines"].size() >= 100, "the file lists the whole Bokidex (%d lines)" % r["lines"].size())
@@ -46,6 +52,7 @@ func _one_mode_each() -> void:
 	ok(off.is_empty(), "each lair boss's egg hatches an Expedition very rare %s" % str(off))
 	var gates_off: Array = r["lines"].keys().filter(func(line): return _raid_gate_off(r["lines"][line]))
 	ok(gates_off.is_empty(), "Heart Raid lines are gated by rarity (Normal, Hard, Nightmare) %s" % str(gates_off))
+
 
 func _expedition_pools() -> void:
 	for site in ["wild", "rare_spot"]:
@@ -60,10 +67,12 @@ func _expedition_pools() -> void:
 	for tier in ["rare", "very_rare"]:
 		var ids: Array = got.keys().filter(func(sp): return BokiModes.of(sp)["rarity"] == tier)
 		var n := 0
-		for sp in ids: n += int(got[sp])
+		for sp in ids:
+			n += int(got[sp])
 		per[tier] = float(n) / maxf(1.0, ids.size())
 	var odds := "%.0f vs %.0f draws each" % [per["very_rare"], per["rare"]]
 	ok(per["rare"] > 2.0 * per["very_rare"], "a very rare is drawn less often than a rare (%s)" % odds)
+
 
 ## A species moved to another mode in the rules drops out of every Expedition pool and draw.
 func _moved_species_leaves() -> void:
@@ -76,6 +85,7 @@ func _moved_species_leaves() -> void:
 	var what := "a Heart Raid Boki is never drawn in an Expedition (%d draws)" % DRAWS
 	ok(not drawn.has(sp) and not drawn.is_empty(), what)
 	entry["mode"] = "expedition"
+
 
 ## Heart Raid's pool by difficulty, on three species moved there for the test.
 func _raid_gates() -> void:
@@ -92,11 +102,14 @@ func _raid_gates() -> void:
 	for sp in saved:
 		BokiModes.of(sp).merge(saved[sp], true)
 
+
 func _very_rare(sp: String) -> bool:
 	return BokiModes.of(sp).get("mode") == "expedition" and BokiModes.of(sp).get("rarity") == "very_rare"
 
+
 func _raid_gate_off(entry: Dictionary) -> bool:
 	return entry["mode"] == "heart_raid" and RAID_GATES[entry["rarity"]] != entry["min_difficulty"]
+
 
 func _draw_counts(pool: Array, seed_val: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()

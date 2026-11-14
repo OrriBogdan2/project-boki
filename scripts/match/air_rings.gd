@@ -9,21 +9,23 @@ extends RefCounted
 ## Each peer runs the rings for the hunters it moves, like the rest of movement; for the ones another peer
 ## moves it only plays the pass's sound (AirRingSfx).
 
-const GLIDE_COL := Color("5ad0f0")     # cyan: speed
-const LIFT_COL := Color("ffd27a")      # warm gold, the updraft column's colour: height
-const BODY_Y := 0.8                    # m: a hunter's body over its feet (what goes through a ring)
-const TIP_R := 9.0                     # m: the first time you come this close to a ring, the tip shows
-const CLIMB_EASE := 2.5                # 1/s and m/s per m: the lane pulls you to its height (as a wind road does)
+const GLIDE_COL := Color("5ad0f0")  # cyan: speed
+const LIFT_COL := Color("ffd27a")  # warm gold, the updraft column's colour: height
+const BODY_Y := 0.8  # m: a hunter's body over its feet (what goes through a ring)
+const TIP_R := 9.0  # m: the first time you come this close to a ring, the tip shows
+const CLIMB_EASE := 2.5  # 1/s and m/s per m: the lane pulls you to its height (as a wind road does)
 
-var n := 0                     # rings flown through this match (SIMSTAT)
-var list: Array = []           # {pos, dir: Vector2, lift: bool, lane: int, node, cd: {nid: time}, top, onto (lifts)}
-var lanes: Array = []          # {a, b}: each ringed lane's ring line (ring centres), for the hold and the maps
+var n := 0  # rings flown through this match (SIMSTAT)
+var list: Array = []  # {pos, dir: Vector2, lift: bool, lane: int, node, cd: {nid: time}, top, onto (lifts)}
+var lanes: Array = []  # {a, b}: each ringed lane's ring line (ring centres), for the hold and the maps
 var sfx: AirRingSfx
 var _m: Match
-var _slip := {}                # Hunter -> {until: time, speed: m/s, lane: int}
+var _slip := {}  # Hunter -> {until: time, speed: m/s, lane: int}
+
 
 static func r(key: String) -> float:
 	return float(Content.rules("air_rings")[key])
+
 
 ## Lays the layout's rings into the world (World.generate_authored calls this once its glides and updrafts
 ## are placed): rings along every glide marked "rings", plus the way back as a bot route, and a lift ring
@@ -40,15 +42,23 @@ static func lay(w: World, layout: Dictionary, ids: Dictionary) -> void:
 		var land := _ground(w, G["land"])
 		for lk in w.links:
 			if lk.get("glide", false) and lk["take"].distance_to(take) < 0.1 and lk["land"].distance_to(land) < 0.1:
-				lk["rings"] = true       # (bots time a ringed lane at the ring speed: BotRoute)
+				lk["rings"] = true  # (bots time a ringed lane at the ring speed: BotRoute)
 		w.links.append({"from": to, "to": from, "take": land, "land": take, "glide": true, "rings": true})
 		_lay_lane(w, take, land)
 	for U in layout.get("updrafts", []):
 		if U.get("ring", false):
 			var at := _ground(w, U["at"])
 			var top := float(U.get("top", 2)) * World.LEVEL
-			w.rings.append({"pos": at + Vector3.UP * r("lift_y"), "dir": Vector2.ZERO, "lift": true,
-				"top": top, "onto": onto(w, at, top)})
+			w.rings.append(
+				{
+					"pos": at + Vector3.UP * r("lift_y"),
+					"dir": Vector2.ZERO,
+					"lift": true,
+					"top": top,
+					"onto": onto(w, at, top)
+				}
+			)
+
 
 ## Where a lift ring at `foot` sets you down: the nearest ground at least `top` high beside it (within 6 m),
 ## 1.5 m further in from the rim. INF if there is none.
@@ -67,10 +77,12 @@ static func onto(w: World, foot: Vector3, top: float) -> Vector3:
 		return best
 	return best + (best - foot).normalized() * Vector3(1, 0, 1) * 1.5
 
+
 static func _ground(w: World, xz: Array) -> Vector3:
 	var x := floorf(float(xz[0])) + 0.5
 	var z := floorf(float(xz[1])) + 0.5
 	return Vector3(x, w.ground_at(x, z), z)
+
 
 ## Rings evenly along take -> land, `up` m over the line between the two grounds.
 static func _lay_lane(w: World, take: Vector3, land: Vector3) -> void:
@@ -88,6 +100,7 @@ static func _lay_lane(w: World, take: Vector3, land: Vector3) -> void:
 		at.y = lane_y(a, b, at)
 		w.rings.append({"pos": at, "dir": dir, "lift": false, "a": a, "b": b})
 
+
 func _init(m: Match) -> void:
 	_m = m
 	sfx = AirRingSfx.new(m)
@@ -98,8 +111,19 @@ func _init(m: Match) -> void:
 		if not lift:
 			node.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
 		m.add_child(node)
-		list.append({"pos": rg["pos"], "dir": rg["dir"], "lift": lift, "lane": _lane_of(rg), "node": node, "cd": {},
-			"top": rg.get("top", 0.0), "onto": rg.get("onto", Vector3.INF)})
+		list.append(
+			{
+				"pos": rg["pos"],
+				"dir": rg["dir"],
+				"lift": lift,
+				"lane": _lane_of(rg),
+				"node": node,
+				"cd": {},
+				"top": rg.get("top", 0.0),
+				"onto": rg.get("onto", Vector3.INF)
+			}
+		)
+
 
 func _lane_of(rg: Dictionary) -> int:
 	if not rg.has("a"):
@@ -109,6 +133,7 @@ func _lane_of(rg: Dictionary) -> int:
 			return i
 	lanes.append({"a": rg["a"], "b": rg["b"]})
 	return lanes.size() - 1
+
 
 ## A ring: a glowing hoop that reads from across the map, standing up along its lane (cyan) or lying
 ## flat over its updraft (gold), with a faint film across it. Static: rings don't spin.
@@ -125,10 +150,18 @@ static func ring_node(lift: bool) -> Node3D:
 	var hoop := Models.part(root, tube, Models.toon(col, true, 0.9), Vector3.ZERO, Vector3.ONE, tilt, "Ring")
 	hoop.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var film_mat := Models.glow_mat(Color(col.lightened(0.4), 0.14))
-	var film := Models.part(root, Models.cyl(radius - 0.12, radius - 0.12, 0.02, 24), film_mat,
-		Vector3.ZERO, Vector3.ONE, Vector3.ZERO if lift else Vector3(PI / 2, 0, 0), "Film")
+	var film := Models.part(
+		root,
+		Models.cyl(radius - 0.12, radius - 0.12, 0.02, 24),
+		film_mat,
+		Vector3.ZERO,
+		Vector3.ONE,
+		Vector3.ZERO if lift else Vector3(PI / 2, 0, 0),
+		"Film"
+	)
 	film.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
+
 
 ## Every step, after the hunters move: rings flown through, and the hold of the last glide ring.
 func tick(dt: float) -> void:
@@ -141,7 +174,7 @@ func tick(dt: float) -> void:
 			if _through(rg, body) and float(rg["cd"].get(h.nid, -9.0)) <= _m.time:
 				rg["cd"][h.nid] = _m.time + r("cd")
 				if h.remote:
-					sfx.passed(h, rg)        # its own game throws it: here only the sound
+					sfx.passed(h, rg)  # its own game throws it: here only the sound
 				elif rg["lift"]:
 					_lift(h, rg)
 				else:
@@ -150,11 +183,13 @@ func tick(dt: float) -> void:
 		_hold(h, dt)
 	sfx.tick(list)
 
+
 func _through(rg: Dictionary, body: Vector3) -> bool:
 	var c: Vector3 = rg["pos"]
 	if not rg["lift"]:
 		return body.distance_to(c) <= r("hit_r")
 	return Vector2(body.x - c.x, body.z - c.z).length() <= r("lift_r") and absf(body.y - c.y) <= r("lift_dy")
+
 
 ## A glide ring: along the lane (whichever way you fly it) at the ring speed, the glider open and cooler.
 func _boost(h: Hunter, rg: Dictionary) -> void:
@@ -170,11 +205,13 @@ func _boost(h: Hunter, rg: Dictionary) -> void:
 	_slip[h] = {"until": _m.time + r("hold"), "speed": speed, "lane": rg["lane"]}
 	_cool(h, rg, GLIDE_COL)
 
+
 ## A lift ring: straight up with the glider open; the updraft under it does the rest.
 func _lift(h: Hunter, rg: Dictionary) -> void:
 	h.vel.y = maxf(h.vel.y, r("lift_vy"))
 	_slip.erase(h)
 	_cool(h, rg, LIFT_COL)
+
 
 func _cool(h: Hunter, rg: Dictionary, col: Color) -> void:
 	n += 1
@@ -188,6 +225,7 @@ func _cool(h: Hunter, rg: Dictionary, col: Color) -> void:
 	_m.fx.ring(c, r("look_r"), col, 0.3)
 	_m.fx.burst(c, col.lightened(0.5), 14, 4.0, 0.35, 0.0)
 	sfx.passed(h, rg)
+
 
 ## While the hold lasts and you keep gliding: never slower than the ring threw you, and on a lane, eased
 ## to its height (so a lane up to higher ground carries you up it). Your keys still steer.
@@ -208,6 +246,7 @@ func _hold(h: Hunter, dt: float) -> void:
 	var climb := clampf((want_y - h.pos.y) * CLIMB_EASE, -3.0, 6.0)
 	h.vel.y = lerpf(h.vel.y, climb, 1.0 - exp(-4.0 * dt))
 
+
 ## A lane's height over `p`: level at its high end's height, changing only over the last `rise` m before its
 ## low end. Over the void a glider can't sink below where it took off, so a lane can't slope down the whole
 ## way; near the low end's land it can, and the lane's hold climbs or eases you down that stretch.
@@ -217,6 +256,7 @@ static func lane_y(a: Vector3, b: Vector3, p: Vector3) -> float:
 	var from_low := Vector2(p.x - low.x, p.z - low.z).length()
 	return lerpf(low.y, high.y, clampf(from_low / r("rise"), 0.0, 1.0))
 
+
 func _tip() -> void:
 	var p: Hunter = _m.player
 	if p == null or p.out or int(_m.time * 4.0) % 4 != 0:
@@ -224,9 +264,15 @@ func _tip() -> void:
 	for rg in list:
 		if p.pos.distance_to(rg["pos"]) < TIP_R:
 			var jump := Settings.key_cap("jump")
-			_m._tip("rings", "Rings in the air: glide through a blue one to fly fast along its line, "
-				+ "hop into a gold one to soar up to high ground (%s, then %s again to glide)." % [jump, jump])
+			_m._tip(
+				"rings",
+				(
+					"Rings in the air: glide through a blue one to fly fast along its line, "
+					+ "hop into a gold one to soar up to high ground (%s, then %s again to glide)." % [jump, jump]
+				)
+			)
 			return
+
 
 ## Test (--ring-demo): start gliding at the first glide ring's lane, flying along it.
 func demo() -> void:

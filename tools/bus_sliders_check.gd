@@ -9,10 +9,12 @@ extends RefCounted
 var main: Node
 var fails := 0
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	print("BUSSLIDERS %-62s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -30,21 +32,33 @@ func run(main_node: Node) -> void:
 	print("BUSSLIDERS DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _bus_level(key: String) -> float:
 	return db_to_linear(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(Settings.BUSES[key])))
 
+
 func _buses() -> void:
 	for key in Settings.BUSES:
-		ok("bus %s exists, setting '%s' has a default" % [Settings.BUSES[key], key],
-			AudioServer.get_bus_index(Settings.BUSES[key]) >= 0 and Settings.DEFAULTS.has(key))
+		ok(
+			"bus %s exists, setting '%s' has a default" % [Settings.BUSES[key], key],
+			AudioServer.get_bus_index(Settings.BUSES[key]) >= 0 and Settings.DEFAULTS.has(key)
+		)
 	var far := Sfx.listener + Vector3(30, 0, 0)
 	# routing is SfxMix's (a far sound goes through SFXFar first; the Boki's cries have their own Boki bus)
-	var cases := [["v_brute", null, "Voice"], ["v_brute", far, "SFXFar"], ["archer_hurt", Vector3.ZERO, "Voice"],
-		["kin_alert", null, "Boki"], ["click", null, "UI"], ["thump", Vector3.ZERO, "SFX"], ["smg", far, "SFXFar"],
-		["smg", null, "SFX"]]
+	var cases := [
+		["v_brute", null, "Voice"],
+		["v_brute", far, "SFXFar"],
+		["archer_hurt", Vector3.ZERO, "Voice"],
+		["kin_alert", null, "Boki"],
+		["click", null, "UI"],
+		["thump", Vector3.ZERO, "SFX"],
+		["smg", far, "SFXFar"],
+		["smg", null, "SFX"]
+	]
 	for c in cases:
 		var got := String(Sfx._bus_for(c[1], c[0]))
 		ok("%s %s plays on %s" % [c[0], "at a spot" if c[1] != null else "(no spot)", c[2]], got == c[2], got)
+
 
 func _sliders() -> void:
 	Overlay.ctx = "title"
@@ -59,12 +73,16 @@ func _sliders() -> void:
 		var key: String = keys[i]
 		var want := 0.25 + 0.1 * i
 		sl.value = want
-		ok("'%s' slider sets bus %s" % [key, Settings.BUSES[key]], is_equal_approx(_bus_level(key), want) and
-			is_equal_approx(float(Settings.get_v(key)), want), "%.3f" % _bus_level(key))
+		ok(
+			"'%s' slider sets bus %s" % [key, Settings.BUSES[key]],
+			is_equal_approx(_bus_level(key), want) and is_equal_approx(float(Settings.get_v(key)), want),
+			"%.3f" % _bus_level(key)
+		)
 		sl.drag_ended.emit(true)
 		var heard := Sfx.players.any(func(p: AudioStreamPlayer): return p.playing and p.bus == Settings.BUSES[key])
 		ok("...and letting go plays the sample on %s" % Settings.BUSES[key], heard)
 	Overlay.close()
+
 
 func _find_sliders(n: Node) -> Array:
 	var out: Array = []
@@ -73,6 +91,7 @@ func _find_sliders(n: Node) -> Array:
 	for c in n.get_children():
 		out += _find_sliders(c)
 	return out
+
 
 func _save_load() -> void:
 	var keys: Array = Settings.BUSES.keys()
@@ -83,8 +102,12 @@ func _save_load() -> void:
 		var key: String = keys[i]
 		var want := 0.15 + 0.12 * i
 		Settings.apply(key)
-		ok("'%s' survives a save and a load" % key, is_equal_approx(float(Settings.get_v(key)), want) and
-			is_equal_approx(_bus_level(key), want), "%.3f" % float(Settings.get_v(key)))
+		ok(
+			"'%s' survives a save and a load" % key,
+			is_equal_approx(float(Settings.get_v(key)), want) and is_equal_approx(_bus_level(key), want),
+			"%.3f" % float(Settings.get_v(key))
+		)
+
 
 func _old_file() -> void:
 	var cf := ConfigFile.new()

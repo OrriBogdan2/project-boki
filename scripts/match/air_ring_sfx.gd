@@ -11,24 +11,28 @@ const PASS := "air_ring_pass"
 const LIFT := "air_ring_lift"
 const HUM := "air_ring_hum"
 const STEPS := [1.0, 1.125, 1.25, 1.5, 1.6667, 2.0]  # pitch of a run's 1st..6th ring: a major pentatonic to the octave
-const RUN_GAP_S := 3.0          # s: a lane's next ring within this, flown the same way, is the run's next step
-const OTHERS_DB := -6.0         # dB under yours for another Hunter's pass
-const HUM_DB := -14.0           # dB: the hum beside a ring (quieter with distance, silent past its reach)
-const HUM_LIFT_PITCH := 0.75    # a lift ring hums a fourth under a glide ring
+const RUN_GAP_S := 3.0  # s: a lane's next ring within this, flown the same way, is the run's next step
+const OTHERS_DB := -6.0  # dB under yours for another Hunter's pass
+const HUM_DB := -14.0  # dB: the hum beside a ring (quieter with distance, silent past its reach)
+const HUM_LIFT_PITCH := 0.75  # a lift ring hums a fourth under a glide ring
+
 
 ## One hunter's run along a lane: which way it flies, how many rings so far, when it took the last one.
 class Run:
 	var lane := -1
-	var way := 0.0              # the sign of its flight along the lane's direction
+	var way := 0.0  # the sign of its flight along the lane's direction
 	var step := 0
-	var last_t := 0.0           # match time (s)
+	var last_t := 0.0  # match time (s)
+
 
 var _m: Match
-var _runs := {}                 # Hunter nid -> Run
+var _runs := {}  # Hunter nid -> Run
+
 
 func _init(m: Match) -> void:
 	_m = m
-	Sfx.ensure(HUM)             # Sfx.loop_start doesn't load a file on first use as play does (docs/DEBT.md)
+	Sfx.ensure(HUM)  # Sfx.loop_start doesn't load a file on first use as play does (docs/DEBT.md)
+
 
 ## A hunter went through a ring. AirRings calls it for the hunters this game moves as the ring throws them,
 ## and for the ones another game moves as they pass (here only the sound plays).
@@ -41,6 +45,7 @@ func passed(h: Hunter, rg: Dictionary) -> void:
 		Sfx.play(LIFT, at, vol)
 	else:
 		Sfx.play(PASS, at, vol, 0.0, STEPS[_step(h, rg)])
+
 
 ## Which ring of its run this is: the next step after a ring of the same lane, flown the same way, at most
 ## RUN_GAP_S ago; otherwise the first.
@@ -57,6 +62,7 @@ func _step(h: Hunter, rg: Dictionary) -> int:
 	run.way = way
 	run.last_t = _m.time
 	return run.step
+
 
 ## Every step: the hum of the ring nearest you, while one is within the hum's reach.
 func tick(rings: Array) -> void:
