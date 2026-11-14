@@ -19,6 +19,7 @@ extends UiFrame
 @export var tilt := 0                       # varies the tear pattern so boxes side by side differ
 
 const STEP_PX := 16.0                       # spacing of the outline's points
+const CORNER_DEPTH := 0.6                   # x jag: deepest a corner point sits (= smallest chip, no fold)
 const BAND_PX := 22.0                       # depth of the border band that carries the speckle
 const GLOW_PASSES := [[10.0, 0.08], [5.0, 0.2], [2.0, 0.95]]    # [width px, alpha] outer to inner
 const CACHE_MAX := 48                       # outlines kept per box (rects in use on screen)
@@ -126,6 +127,8 @@ func _outline(r: Rect2) -> PackedVector2Array:
 			var depth := jag * h if k > 0 and k < steps else 0.0      # corner ends stay on the edge
 			if h > 0.94 and k > 0 and k < steps:
 				depth = jag * 2.4
+			elif k == 0 or k == steps:
+				depth = minf(depth, jag * CORNER_DEPTH)     # a corner point may not fold back over its chip
 			if notch and absf(d - length * 0.5) < minf(r.size.y * 0.2, 11.0):
 				var rn := minf(r.size.y * 0.2, 11.0)
 				depth = maxf(depth, sqrt(maxf(0.0, rn * rn - pow(d - length * 0.5, 2.0))) + 1.0)
