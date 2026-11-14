@@ -13,5 +13,8 @@
  "launch": {
   "up_mps": 17.0,
   "fwd_mps": 2.0
+ },
+ "sfx": {
+  "cast": "gl_rocket"
  }
 }

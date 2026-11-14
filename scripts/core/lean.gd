@@ -30,9 +30,17 @@ const MARK_RISE := 0.08        # how far out of the head their centres sit: half
 ## Flecks of the lean's colour on the head; more as the lean grows (strength 0..1). On a rig they sit on the upper
 ## brow, between where a grown crest and a third eye go (the part_crest and part_third_eye rest points), clear of
 ## crown tufts and caps that would hide them from the garden camera, and ride the head bone.
-static func mark(flex: Node3D, key: String, strength: float) -> void:
+## How many flecks of its lean show over a Boki's head: one from its first leaning meal up to "marks" at full
+## lean, none with no lean or base_mode off. HomeChimes chimes when this rises.
+static func flecks(rec: Dictionary) -> int:
+	var ln := Evo.lean(rec)
+	if not on() or String(ln[0]) == "":
+		return 0
+	return clampi(ceili(float(ln[1]) * int(rules()["marks"])), 1, int(rules()["marks"]))
+
+## `n` flecks of the lean's colour over the head (flecks()).
+static func mark(flex: Node3D, key: String, n: int) -> void:
 	var mat := Models.toon(face(key)["tint"], false, 0.9)
-	var n := clampi(ceili(strength * int(rules()["marks"])), 1, int(rules()["marks"]))
 	var rig := flex.get_node_or_null("BokiRig") as BokiRig
 	if rig == null:
 		for i in n:
