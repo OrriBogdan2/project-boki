@@ -576,7 +576,8 @@ func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
 	daze_for[foe.get_instance_id()] = seconds
 
-## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides that wall (BurrRide).
+## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides
+## that wall (BurrRide).
 func _stick(b: Dictionary, at: Vector3, on := {}) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	b["pos"] = at
