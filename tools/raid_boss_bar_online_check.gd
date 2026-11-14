@@ -8,6 +8,7 @@ extends "res://tools/displace_net_check.gd"
 ## outside the square, and nothing once it is dead. No Net field: Net.VERSION is unchanged.
 ## Lines: RBAR ok|FAIL <what>.
 
+## The bar is judged against the host's live hp: the raid squad hits the boss meanwhile.
 const HP_TOL := 0.02         # of max health: the guest's hp is up to one snapshot (0.1 s) old
 var home_at := Vector3.ZERO
 
@@ -100,8 +101,9 @@ func _host() -> void:
 		b.hp = b.max_hp * f
 		await _run(1.5)
 		r = await _bar()
-		ok(bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - f) < HP_TOL,
-			"guest: the bar's health is %d%% like the host's" % int(f * 100.0), "%s / %s" % [r.get("hp"), r.get("max")])
+		ok(bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - b.hp / b.max_hp) < HP_TOL,
+			"guest: the bar's health is %d%% like the host's" % int(f * 100.0),
+			"%s / %s (host %.1f)" % [r.get("hp"), r.get("max"), b.hp])
 		ok(int(r.get("phase", -1)) == b.phase, "guest: the bar's phase (%d) is the host boss's (%d) at %d%%" % [
 			int(r.get("phase", -1)) + 1, b.phase + 1, int(f * 100.0)])
 	ok(b.phase == 2, "the host boss reached its third phase")
