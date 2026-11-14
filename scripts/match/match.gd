@@ -23,6 +23,7 @@ var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
+var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -333,6 +334,7 @@ func _start(o: Dictionary) -> void:
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
 	GlideTrail.of(self)
+	StatusLooks.of(self)
 	ShieldBreak.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
@@ -386,6 +388,7 @@ func _start(o: Dictionary) -> void:
 		heart = Heart.new(self)
 		heart.setup(layout)
 		ways_vfx = WaysOutVfx.new(self)
+		if HeartRaid.on(opts): heart_raid = HeartRaid.new(self)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -1520,7 +1523,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)
+		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)      # a raid: its own Boki
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
@@ -1609,8 +1612,8 @@ func dmg_mult(h: Hunter) -> float:
 	var bot_k := float((h.ai.get("diff", {}) as Dictionary).get("dmg", 1.0)) if h.ctrl == "bot" and h != player else 1.0
 	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
 
-func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
-	Sfx.play(n, p, vol, 0.07, pitch)
+func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
+	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
 ## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
 func shake(a: float, at: Vector3) -> void:
@@ -1764,7 +1767,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
+		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
@@ -1837,11 +1840,10 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 func freeze_frame(t: float) -> void:
 	hitstop = maxf(hitstop, t)
 
-## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
+## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
 	var col := h.armor_col()
-	fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
-	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
+	HeroVfx.of(self).tier_up(h, h.armor_tier)
 	if h == player:
 		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
@@ -2097,9 +2099,8 @@ func on_fell(e: Ent) -> void:
 	if e is Hunter:
 		if e.out:
 			return
-		sfx("fall", e.pos, 0.0)
-		# swallowed by the cloud sea a few metres under the islands: a whoosh, a puff, a quick fade
-		sfx("whoosh", e.pos, -3.0, 0.7)
+		AbyssSfx.fall_out(e)
+		# swallowed by the cloud sea a few metres under the islands: a puff and a quick fade
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
@@ -2172,41 +2173,15 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
-	KeyCarry.on_mob_dead(self, mb)
 	KillXp.pay(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
-	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
-	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		# the gems come as one pile (DropMerge)
-		var gn := int(mb.md["gems"])
-		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
-		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
-		GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
-		if mb.mkind == "warden":
-			# the Warden guards the best things: treasure, maybe a Soul Ember
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
-			if rng.randf() < 0.5:
-				spawn_val(Loot.valuable("soul_ember"), mb.pos + Vector3(0.9, 0, -0.6))
-		elif mb.mkind == "brute" and rng.randf() < 0.25:
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
-		if mb.mkind == "glimmer":
-			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
-		if mb.mkind == "bl_warden":
-			# a Warden's lamp holds something worth the risk: armor, often a tonic
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
-			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
-	# the big ones are worth a perk to whoever brought them down
-	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
-		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
+	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
+	later(MobDissolve.begin(self, mb), func(): MobDrops.spill(self, mb, credit, loot))
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
@@ -2639,6 +2614,8 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
+	else:
+		Juice.rival_pickup(self, h)
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
@@ -2651,6 +2628,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi = null          # a melee strike is invisible; the swing has its own effect
 	if mi:
 		mi.visible = true
+		HeroVfx.of(self).reused(mi)      # a landed round's tracer lets go of the node before the new round shows
 		# readability: what can hurt you is the brightest, hottest thing on screen; your own and your
 		# team's shots are smaller and dimmer so they never hide an incoming one
 		var look: Array = Oomph.shot_look(self, by, col, size)
@@ -3138,6 +3116,7 @@ func _process(delta: float) -> void:
 		return
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
+	Sfx.voices.keep_squad(hunters, player)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
@@ -3914,6 +3893,7 @@ func step(dt: float) -> void:
 	Beacons.tick(self, dt)
 	ult_cue.tick(self)
 	if heart: heart.tick(dt)
+	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
 	if not net_on:
 		_watch_death()
@@ -5010,7 +4990,8 @@ func _finish() -> void:
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
-	if player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
+	if heart_raid: r["heart_raid"] = heart_raid.summary()
+	elif player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -5110,6 +5091,7 @@ func _flags(h: Hunter) -> int:
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
+	f |= StatusLooks.net_bits(h) << StatusLooks.FLAG_SHIFT      # stun/root/slow, for the body look everywhere
 	return f
 
 const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused"]
@@ -5125,7 +5107,7 @@ func _ser(e: Ent) -> Array:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
-			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k)
+			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k) + [StatusLooks.net_bits(k)]
 	var mb: Mob = e
 	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
@@ -5135,6 +5117,7 @@ func _ser(e: Ent) -> Array:
 		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
 	else:
 		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.15.3)
+	ms.append(StatusLooks.net_bits(mb))              # stun/root/slow, last (Net 0.24.6)
 	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
@@ -5268,6 +5251,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.below_lip = f & (1 << 24) != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			h.net_cc = (f >> StatusLooks.FLAG_SHIFT) & 7
 			if f & 2048 != 0:
 				var hk := ((f >> 15) & 15) - 1
 				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
@@ -5292,6 +5276,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
 			KinNet.apply_kin(k, it)
+			if it.size() > KinNet.KIN_AT + 5: k.net_cc = int(it[KinNet.KIN_AT + 5])
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
@@ -5310,6 +5295,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 				var bb: Blight = mb
 				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])
 				bb.tgt = player if int(it[20]) == 1 else null     # (only "alerted or not" matters to a proxy's looks)
+			if it.size() > 19: mb.net_cc = int(it[it.size() - 1])
 
 func _net_hit_in(x) -> void:
 	if typeof(x) != TYPE_ARRAY or x.size() < 12:
@@ -5341,6 +5327,8 @@ func _net_ev(x, from: String) -> void:
 			BossNet.net_in(self, x)
 		"zone":
 			HeroZones.net_in(self, x)
+		"tele":
+			AimNet.net_in(self, x)       # an AimKit "all" telegraph shown in another game
 		"disp":
 			displace.net_in(x)
 		"kcmd":
@@ -5415,6 +5403,8 @@ func _net_ev(x, from: String) -> void:
 			BoxRevive.net_in(self, x)
 		"ht":
 			if heart: heart.net_in(x)
+		"hr":
+			if heart_raid: heart_raid.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)

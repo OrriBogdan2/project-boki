@@ -11,7 +11,9 @@ KEY = re.compile(r'\s*("--[a-z0-9-]+"):')
 
 def main() -> None:
     lines = open(PATH).read().split("\n")
-    main_lines = set(subprocess.run(["git", "show", f"origin/main:{PATH}"], capture_output=True, text=True).stdout.split("\n"))
+    main_lines = set(
+        subprocess.run(["git", "show", f"origin/main:{PATH}"], capture_output=True, text=True).stdout.split("\n")
+    )
     seen = collections.defaultdict(list)
     for i, line in enumerate(lines):
         match = KEY.match(line)

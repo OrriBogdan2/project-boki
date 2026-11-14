@@ -636,7 +636,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Flow | Silent | Dash→LMB fires mid-dash (closed `4e788af65`); X row `[?]` | match; X unsourced |
 | E | Press, or hold + drag aim, 12 s, 1 Static [D] | Drag built, delay .8, stacks 1, cd 10.5 | match |
 | R | Launch, recast, crash, spreads Static, 60 s [D] | Hover 1.7, spread built, cd 42 | match; 0.7x cd |
-| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 5.6-9.75 m at 40 m/s (owner item 70, cut 11-10), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) |
+| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 6.02-10.48 m at 43 m/s (owner item 70, cut 11-10, +7.5% 11-11), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) |
 | R | Launch, recast, crash, spreads Static, 60 s [D] | Hover 1.7, spread built, cd 42 | match; 0.7x cd · cd **open** (gap 10) |
 | Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 7.5-13 m at 40 m/s (owner), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) · **owner** |
 | Passive | Static, 4 stacks [D] | Built, orb reset closed by owner | match |
@@ -711,6 +711,11 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 | Sable | Bola: first foe Grounded 1.5 s and slowed 30% (owner item 53); a pair stun 0.9 s; Shadow Knife slow 50% 2.5 s | Grounded, rings about 1.5 bh [F]; pair "Stunned", the label showed about 1.8 s [F]; knife "Slows" | match for Ground and slow; pair stun 0.9 kept: the footage has no two-foe tie (0115-0125 is one dummy and a tree, and a dummy never acts), so the 1.8 s is label time, not a stun; not measurable, frames and verdict in `docs/heroes/thief.md` "Pair stun length"; asserted in --dancer-combo-check |
 | Sable | Bola: first foe Grounded 1.5 s and slowed 30% (owner item 53); a pair stun 0.9 s; Shadow Knife slow 50% 2.5 s | Grounded, rings about 1.5 bh [F]; pair "Stunned", the label showed about 1.8 s [F]; knife "Slows", 50% in the wiki row, no time anywhere (`docs/heroes/thief.md`, "Shadow Knife audit") | match for Ground and slow, knife time 2.5 s `[?]`; pair stun 0.9 vs 1.8 is noted in `docs/heroes/thief.md` as an owner pacing call, kept |
 
+**Body read (11-12):** every row above shows one look per status on the body, whoever lands it (a kit, a Boki, a
+monster): stars for stun, thorns for root, cords for Grounded, rings down the legs for slow, a crystal ring for Daze
+(`docs/STATUS_LOOKS.md`), sized to the hitbox, up for the status's time, on every game, never a ring on the ground.
+`--status-look-check` lands each row from a caster of its kit and asserts it.
+
 **Fixed in this change (1):** Albert's Crush stun 0.5 to 1.0 s (`content/archetypes/bulwark.json` `resource.crush_stun`, text and docs), asserted by `combo bulwark: a Crush stuns 1.0 s` in `--bulwark-combo-check`.
 
 **Suggestions, not built (PARITY FIRST):**
@@ -784,7 +789,7 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Claire | Skate 10.5 m/s, up to 1.6 s | same | F speed | none (not a travel) | as raw | as raw |
 | Ostra | lob 12 m, 1.8 s | same | F time | none (not a travel) | as raw | as raw |
 | Bjorn | 3.5 m/.17 s whirl | 4.2 m/.3 s lumber | F whirl | ×1 | 3.5 m/.17 s | 4.2 m/.3 s |
-| Ryzz | lane 5.6-9.75 m at 40 m/s | same | no (owner item 70, lane cut 11-10) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
+| Ryzz | lane 6.02-10.48 m at 43 m/s | same | no (owner item 70, lane cut 11-10, +7.5% 11-11) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
 | Sable | 4.5 m/.48 s | the ground one with a charge (item 183) | F | ×1 | 4.5 m/.48 s | 4.5 m/.48 s, then the air's drag |
 
 On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
@@ -1065,7 +1070,7 @@ Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm
 | Tenzo | R, Dash | ridge fixed to 21 m, 15 rocks (source 12 bh = 21.6, ext/parity-tenzo-ridge), cd 45 range 11; open (owner): Rock Hop 3 x 2.8 m/0.26 s cd 12 (owner item 111) |
 | Tenzo | Dash-flow, CC | gap 9 **fixed since** (`dash.*.lmb` is `fire`); open: 6 `[?]` hold rows, ours-only rock and hop slows (CC suggestions) |
 | Sparkle | LMB, RMB, E, R | done: bolt 0.648 s range 13 (`coilcaster.json`, owner); RMB hold 1.0 cd 8; E delay 0.8, stacks 1, cd 10.5, r 1.5 reach 11 slide 3.4; R hover 1.7 cd 42 r 2.7 range 14.4 |
-| Sparkle | Dash | open (owner): lane **5.6-9.75 m** at 40 m/s, dmg 20, cd 8 (the section row's "7.5-13 m" is stale; the felt-dash table is right) |
+| Sparkle | Dash | open (owner): lane **6.02-10.48 m** at 43 m/s (+7.5% 11-11), dmg 20, cd 8 (the section row's "7.5-13 m" is stale; the felt-dash table is right) |
 | Sparkle | Flow, Passive | gap 9 **fixed since** (`dash.*.lmb` is `fire`, source "not determinable" `[?]`); passive done |
 | Grimble | RMB, E, R, Passive | done: reel 11.5 m cd 12; slam windup 0.38 r 3 stun 1.1 cd 7; R charge 1.1 fan 105 cd 21; Salvage max 10 at +2.5% |
 | Grimble | Dash | **fixed since** (gap 13): the air pounce has its own 12.5 s slot (`dash.air.cd`, 10.5/8.5 at ranks 2/3; asserted in `--dredge-combo-check`); the row's "air slot missing" is stale. Open (owner): ground dash off the 0.85/1.15 feel; cooldowns 0.58x of the data |
