@@ -320,7 +320,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						dmg *= 1.0 + float(e["spike"].get("dmg", 0.5))
 						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
 						o.erase("lift")
-						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
 						m.displace.spike(f, -16.0, caster)
 					f.hurt(dmg, caster, o)
 		"cone":
@@ -443,9 +442,8 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 		"shield":
 			for t in _targets(e, caster):
 				if "shield" in t:
-					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _heal_k(caster))
+					ShieldSrc.give(t, float(e.get("amount", 40.0)) * _heal_k(caster), ShieldSrc.ITEM)
 					if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 5.0)))
-				m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", caster.pos, -3.0)
 		"haste":
 			for t in _targets(e, caster):
@@ -477,7 +475,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 		"burst":
 			for t in _targets(e, caster):
 				m.fx.burst(t.pos + Vector3(0, 0.9, 0), col, 18, 4.0, 0.45)
-				m.fx.ring(t.pos, 1.2, col, 0.3)
 		"yank":
 			_yank(e, caster, ctx, m)
 		"zip":
@@ -603,7 +600,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			for o in m.hunters:
 				if o.team != caster.team and not o.out and o.flat_dist(c0) < rad:
 					o.reveal_t = maxf(o.reveal_t, float(e.get("time", 3.0)))
-					m.fx.ring(o.pos, 1.2, col, 0.6)
 			m.fx.ring(c0, rad, Color(col, 0.6), 0.7)
 			m.sfx("ping", c0, -2.0, 1.1)
 		"decoy":
@@ -623,7 +619,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				for t in who_l:
 					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster))
 					if float(e.get("shield", 0.0)) > 0.0 and "shield" in t:
-						t.shield = maxf(float(t.shield), float(e["shield"]) * _heal_k(caster))
+						ShieldSrc.give(t, float(e["shield"]) * _heal_k(caster), ShieldSrc.HEAL)
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))
 					if float(e.get("haste", 0.0)) > 0.0 and "haste_t" in t: t.haste_t = maxf(float(t.haste_t), float(e["haste"]))
 					if e.get("cleanse", false) and t is Ent:
@@ -662,7 +658,6 @@ static func _yank(e: Dictionary, caster: Node, ctx: Dictionary, m: Node) -> void
 			for kk in ["stun", "slow", "burn", "root"]:
 				if e.has(kk): o[kk] = float(e[kk])
 			v.hurt(maxf(0.1, float(e.get("dmg", 0.0)) * _power(caster, ctx)), caster, o)
-		m.fx.word(v.pos + Vector3(0, 2.0, 0), "HOOKED", col, false)
 	if not victims.is_empty():
 		m.sfx("grab", anchor.pos, -1.0, 1.1)
 

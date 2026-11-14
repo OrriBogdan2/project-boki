@@ -1,0 +1,7 @@
+{
+ "desc": "The mid-match spawns on a clock (scripts/match/timed_spawns.gd, docs/SPAWNS.md): each comes at a fixed share of the session at a fixed place, and is called out (map ping and a feed line with the seconds left) warn_s before it appears and again 10 s before.",
+ "glimmer": {"at": 0.5, "warn_s": 30.0},
+ "_glimmer": "the Glimmerkin, at one outer-island wild Boki spot picked from the match seed; at: share of the session, warn_s: seconds of warning",
+ "warden": {"at": 0.4, "warn_s": 30.0},
+ "_warden": "the Watcher, at the Heart on the center island"
+}

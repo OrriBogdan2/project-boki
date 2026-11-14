@@ -5,8 +5,10 @@ extends RefCounted
 ## A pose is a set of angle deltas (rx nose up, ry turn left, rz roll; rad) added on top of the baked idle or sleep,
 ## so every species keeps its own rest shape and mover. `TWEAK` is the per species part.
 
-## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself.
-const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5}
+## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself. A hover beats its wings every
+## 0.4 s, KinPuppet's flyer rate (16 rad/s); a glide rocks once every 1.2 s.
+const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5, "swim": 0.8, "paddle": 0.5,
+	"hover": 0.4, "glide": 1.2}
 ## species -> clip -> {"amp": factor on the whole motion, "bones": {bone: [rx, ry, rz] held through it}}.
 const TWEAK := {
 	"cairnback": {"nudge": {"amp": 0.6}, "climb": {"amp": 0.55}, "splash": {"amp": 0.6}},
@@ -22,10 +24,13 @@ const TWEAK := {
 	"mossgrade": {"climb": {"amp": 0.7}, "nudge": {"amp": 0.8}},
 	"nettlynx": {"nudge": {"amp": 1.2}, "climb": {"amp": 1.15}},
 }
-## The stiff and stocky bodies move less in the games' clips (rush, dodge, stonehop and spin).
+## The stiff and stocky bodies move less in the games' clips (rush, dodge, stonehop, spin and the Dash's).
 const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade": 0.7, "gloamshell": 0.75}
-## Tumble's and Echo Steps' clips (BaseTumble, EchoSteps): one shot each, timed by the games' beat data.
-const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin"]
+## Tumble's, Echo Steps' and the Dash's clips (BaseTumble, EchoSteps, RaceBeats): one shot each, timed by the games'
+## beat data.
+const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin", "crouch", "burst", "sulk"]
+## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
+const SHOW_CLIPS := ["strut", "pose", "bow"]
 const WING_JOINTS := ["wing1", "wing", "fwing"]
 const WING_TIPS := ["wing2", "hwing"]
 const TAIL := ["tail1", "tail2", "tail3", "tail4", "tail5", "tail6"]
@@ -58,7 +63,7 @@ func at(which: String, u: float, n := 1) -> void:
 	squash = Vector3.ONE
 	var tw: Dictionary = TWEAK.get(species, {}).get(which, {})
 	amp = float(tw.get("amp", 1.0))
-	if which in GAME_CLIPS:
+	if which in GAME_CLIPS or which in SHOW_CLIPS:
 		amp *= float(STIFF.get(species, 1.0))
 	call("_" + which, u)
 	for b in tw.get("bones", {}):
@@ -333,3 +338,233 @@ func _spin(u: float) -> void:
 		_:
 			add("spine", 0.3 * up * amp)
 	tail(0.7 * up * amp)
+
+## Strut, over the walk's own cycle (two bobs a cycle): chin up, chest out, knees lifted, tail high.
+func _strut(u: float) -> void:
+	var bob := absf(sin(TAU * u * float(_n) * 0.5))
+	move.y = 0.025 * bob * amp
+	add("head", 0.35 * amp)
+	add("neck", 0.18 * amp)
+	both("ear1", 0.0, 0.0, 0.15 * amp)
+	match plan:
+		"quad":
+			add("spine", 0.1 * amp)
+			both("fleg1", 0.3 * amp)
+			both("hleg1", 0.2 * amp)
+		"bird":
+			add("root", 0.15 * amp)
+			wings(0.25 * amp, -0.15 * amp)
+			both("hleg1", 0.25 * amp)
+		_:
+			add("spine", 0.3 * amp)
+	tail(0.0, 0.4 * amp)
+
+## Pose at the mark, over ShowRing.POSE_S: it eases in, holds a second's worth, eases out. A quad plants its feet
+## wide and lifts its head; a bird flares its wings and stands tall; a legless body rises up.
+func _pose(u: float) -> void:
+	var k := smoothstep(0.0, 0.25, u) * (1.0 - smoothstep(0.85, 1.0, u))
+	var breath := sin(TAU * u * 2.0) * 0.02 * k
+	add("head", 0.45 * k * amp + breath)
+	add("neck", 0.2 * k * amp)
+	both("ear1", 0.0, 0.0, 0.3 * k * amp)
+	match plan:
+		"quad":
+			move.y = -0.03 * k * amp
+			squash = Vector3(1.0 + 0.04 * k * amp, 1.0 - 0.05 * k * amp, 1.0)
+			both("fleg1", 0.15 * k * amp, 0.0, 0.35 * k * amp)
+			both("hleg1", -0.1 * k * amp, 0.0, 0.25 * k * amp)
+			add("spine", 0.15 * k * amp)
+		"bird":
+			add("root", 0.25 * k * amp)
+			move.y = 0.04 * k * amp
+			wings(0.9 * k * amp + breath * 4.0, 0.2 * k * amp)
+		_:
+			add("spine", 0.5 * k * amp + breath)
+			move.y = 0.06 * k * amp
+	tail(0.0, 0.5 * k * amp)
+
+## Bow, over ShowRing.BOW_S: dips forward, holds, comes up.
+func _bow(u: float) -> void:
+	var k := smoothstep(0.0, 0.35, u) * (1.0 - smoothstep(0.65, 1.0, u))
+	add("head", -0.55 * k * amp)
+	add("neck", -0.3 * k * amp)
+	both("ear1", 0.0, 0.0, -0.2 * k * amp)
+	match plan:
+		"quad":
+			add("root", -0.2 * k * amp)
+			both("fleg1", 0.5 * k * amp)
+			add("spine", -0.2 * k * amp)
+		"bird":
+			add("root", -0.55 * k * amp)
+			wings(-0.4 * k * amp, 0.3 * k * amp)
+		_:
+			add("spine", -0.5 * k * amp)
+	tail(0.0, -0.2 * k * amp)
+
+## Crouch, on the Dash's line through the countdown: drops low onto its haunches with the head up to the track by
+## 0.35, then holds it with a quiver.
+func _crouch(u: float) -> void:
+	var s := smoothstep(0.0, 0.35, u)
+	var quiver := sin(TAU * u * 6.0) * 0.02 * s
+	move.y = -0.05 * s * amp
+	move.z = 0.03 * s * amp
+	squash = Vector3(1.0 + 0.04 * s * amp, 1.0 - 0.08 * s * amp, 1.0 + 0.04 * s * amp)
+	add("head", 0.2 * s * amp + quiver)
+	add("neck", 0.1 * s * amp)
+	both("ear1", 0.0, 0.0, -0.25 * s * amp)
+	match plan:
+		"quad":
+			add("root", -0.12 * s * amp)
+			add("spine", -0.08 * s * amp)
+			both("fleg1", 0.3 * s * amp)
+			both("hleg1", -0.4 * s * amp)
+		"bird":
+			add("root", -0.2 * s * amp)
+			both("hleg1", 0.35 * s * amp)
+			wings(0.25 * s * amp, -0.2 * s * amp)
+		_:
+			add("root", -0.15 * s * amp)
+			add("spine", -0.25 * s * amp)
+	tail(quiver * 3.0, 0.3 * s * amp)
+
+## Burst, off the line over the species' own run: stretched long and low with the nose down at "go", easing back
+## to the plain run by the end.
+func _burst(u: float) -> void:
+	var k := (1.0 - smoothstep(0.0, 1.0, u)) * amp
+	squash = Vector3(1.0 - 0.06 * k, 1.0 - 0.06 * k, 1.0 + 0.16 * k)
+	add("head", 0.15 * k)
+	both("ear1", 0.0, 0.0, -0.35 * k)
+	match plan:
+		"quad":
+			add("root", -0.15 * k)
+			both("fleg1", 0.4 * k)
+			both("hleg1", -0.4 * k)
+		"bird":
+			add("root", -0.25 * k)
+			wings(-0.3 * k, -0.4 * k)
+		_:
+			add("root", -0.15 * k)
+			add("spine", 0.25 * k)
+	tail(0.0, 0.35 * k)
+
+## Sulk, home behind the first ones: a huff (squashed by 0.2), then the head hangs and turns away, ears flat, sat
+## back, the tail low; back to its idle over the last 0.15.
+func _sulk(u: float) -> void:
+	var huff := sin(PI * clampf(u / 0.2, 0.0, 1.0)) * amp
+	var s := smoothstep(0.1, 0.4, u) * (1.0 - smoothstep(0.85, 1.0, u)) * amp
+	squash = Vector3(1.0 + 0.05 * huff, 1.0 - 0.07 * huff, 1.0 + 0.05 * huff)
+	move.y = -0.03 * s
+	add("head", -0.45 * s, 0.25 * s)
+	add("neck", -0.2 * s)
+	both("ear1", 0.0, 0.0, -0.5 * s)
+	match plan:
+		"quad":
+			add("root", 0.15 * s)
+			both("fleg1", -0.1 * s)
+			both("hleg1", 0.45 * s)
+		"bird":
+			add("root", -0.1 * s)
+			wings(-0.3 * s)
+		_:
+			add("spine", -0.35 * s)
+	tail(0.0, -0.4 * s)
+
+## Hover, a loop of wingbeats: hung under its wings, tail down and legs hanging, the body rising on each downstroke.
+func _hover(u: float) -> void:
+	var beat := TAU * u * float(_n)
+	var flap := sin(beat)
+	move.y = -0.025 * flap * amp
+	add("root", 0.18 * amp)
+	add("head", -0.12 * amp)
+	both("ear1", 0.0, 0.0, 0.1 * flap * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.35 * amp)
+			both("hleg1", -0.2 * amp)
+		"bird":
+			both("hleg1", 0.25 * amp)
+		_:
+			add("spine", 0.1 * flap * amp)
+	wings((0.35 + 0.75 * flap) * amp, 0.15 * amp)
+	tail(0.1 * cos(beat) * amp, (-0.2 - 0.06 * flap) * amp)
+
+## Glide, a loop: wings held wide with a slow rock, nose down into the air, ears back, legs tucked, a slow bank.
+func _glide(u: float) -> void:
+	var s := sin(TAU * u * float(_n))
+	move.y = 0.015 * s * amp
+	add("root", -0.22 * amp, 0.0, 0.08 * s * amp)
+	add("head", 0.16 * amp)
+	both("ear1", 0.0, 0.0, -0.25 * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.6 * amp)
+			both("hleg1", -0.6 * amp)
+		"bird":
+			both("hleg1", -0.7 * amp)
+		_:
+			add("spine", 0.0, 0.15 * s * amp)
+	wings((0.8 + 0.12 * s) * amp, -0.1 * amp)
+	tail(0.12 * s * amp, 0.15 * amp)
+
+## Flare, once as a flier touches down (boki_fly.json flare_s): pitched up, wings wide and swept forward to brake,
+## feet reaching for the ground. The feet land halfway (a small squash), then it eases back into its idle.
+func _flare(u: float) -> void:
+	var brake := smoothstep(0.0, 0.3, u) * (1.0 - smoothstep(0.55, 1.0, u))
+	var touch := sin(PI * clampf((u - 0.45) / 0.35, 0.0, 1.0)) * amp
+	squash = Vector3(1.0 + 0.06 * touch, 1.0 - 0.1 * touch, 1.0 + 0.06 * touch)
+	move.y = -0.02 * touch
+	add("root", 0.45 * brake * amp)
+	add("head", -0.25 * brake * amp)
+	both("ear1", 0.0, 0.0, 0.2 * brake * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.9 * brake * amp)
+			both("hleg1", 0.25 * brake * amp)
+		"bird":
+			both("hleg1", 0.8 * brake * amp)
+		_:
+			add("spine", 0.35 * brake * amp)
+	wings(brake * amp, 0.5 * brake * amp)
+	tail(0.0, -0.4 * brake * amp)
+
+## Swim (a Water type in water over half its height, BokiRig): the body lies level, legs tucked back, a wave runs
+## down the tail and the fins (ears, or wings for a legless one) scull; it bobs twice a stroke.
+func _swim(u: float) -> void:
+	var c := TAU * u * float(_n)
+	move.y = 0.012 * sin(2.0 * c) * amp
+	add("root", 0.0, 0.0, 0.04 * sin(c) * amp)
+	add("spine", 0.0, 0.1 * sin(c + 1.2) * amp)
+	add("head", 0.08, -0.12 * sin(c + 1.2) * amp)
+	both("fleg1", -0.9 * amp + 0.08 * sin(c))
+	both("hleg1", -0.7 * amp)
+	both("ear1", 0.0, 0.0, 0.25 * sin(2.0 * c) * amp)
+	wings(0.3 * sin(c) * amp, 0.2)
+	for i in TAIL.size():
+		add(TAIL[i], 0.0, (0.2 + 0.08 * float(i)) * sin(c - 0.7 * float(i)) * amp)
+
+## Paddle (any other Boki in water over half its height): nose and head up out of the water, the front legs (or
+## wings) stroke in turn, the hind legs kick against them; each stroke lifts it a little.
+func _paddle(u: float) -> void:
+	var c := TAU * u * float(_n)
+	var s := sin(c)
+	move.y = 0.02 * sin(2.0 * c) * amp
+	add("root", 0.35 * amp, 0.0, 0.05 * s * amp)
+	add("neck", 0.1 * amp)
+	add("head", 0.25 * amp)
+	both("ear1", -0.15, 0.0, -0.1)
+	match plan:
+		"quad":
+			add("fleg1.L", (0.5 + 0.8 * s) * amp)
+			add("fleg1.R", (0.5 - 0.8 * s) * amp)
+			add("fleg2.L", -0.5 * maxf(0.0, cos(c)) * amp)
+			add("fleg2.R", -0.5 * maxf(0.0, -cos(c)) * amp)
+			add("hleg1.L", (-0.3 - 0.5 * s) * amp)
+			add("hleg1.R", (-0.3 + 0.5 * s) * amp)
+		"bird":
+			wings((0.45 + 0.4 * s) * amp, 0.3 * cos(c) * amp)
+			add("hleg1.L", 0.4 * s * amp)
+			add("hleg1.R", -0.4 * s * amp)
+		_:
+			add("spine", 0.15 * amp, 0.2 * s * amp)
+			wings((0.4 + 0.35 * s) * amp, 0.2)
+	tail(0.25 * sin(TAU * u) * amp)

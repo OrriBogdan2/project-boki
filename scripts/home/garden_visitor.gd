@@ -5,7 +5,8 @@ extends RefCounted
 ## at a time. It stays one garden day (care.json care_day_s), walks and plays your games as one more Boki
 ## (it is in the zone's kins, GardenZones.out_here) and eats only what you hand it: E on it opens the feed
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
-## zone has room, else leave an egg in the Incubator. The away card says who came and left.
+## zone has room, else leave an egg in the Incubator. It arrives with footprints and a shimmer and its egg
+## glints (VisitorArrive). The away card says who came and left.
 ## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
 ## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the baby's
 ## lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line.
@@ -46,7 +47,9 @@ static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 
 ## A species that could visit `zone` now and has a rigged model, or "".
 static func pick(zone: String, toy_ids: Array) -> String:
-	var fits: Array = Data.common_kin().filter(func(sp): return BokiRig.has(sp) and suits(zone, sp, toy_ids))
+	var open := GardenZones.ids().filter(func(id): return GardenZones.is_open(String(id))).size()
+	var pool := ModeBoki.offer(Data.common_kin(), "garden_visitors", open)
+	var fits: Array = pool.filter(func(sp): return BokiRig.has(sp) and suits(zone, sp, toy_ids))
 	return "" if fits.is_empty() else String(fits[_rng.randi() % fits.size()])
 
 ## A visitor of `species` arrives in `zone` at unix time `now`: its record, a Boki that shows what it loves.
@@ -93,6 +96,8 @@ static func step(h, dt: float, now := -1.0) -> void:
 		_look(h, dt, now)
 		return
 	var k: Dictionary = h._kin_entry(r)
+	if not k.is_empty():
+		VisitorArrive.shimmer(h, k, r, now - float(Save.d["visitor"]["t"]))
 	if not k.is_empty() and (k.get("busy", false) or k.has("indoors") or float(k.get("hold_t", 0.0)) > 0.0):
 		return      # mid-game, in a house or being fed: it goes after
 	if int(Save.d["visitor"]["fed"]) >= int(rules()["feeds"]):
@@ -112,7 +117,7 @@ static func _look(h, dt: float, now: float) -> void:
 	if sp == "":
 		return
 	var r := begin(zone, sp, now)
-	h.add_kin(r, 0)
+	VisitorArrive.trail(h, h.add_kin(r, 0)["pos"], sp)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 
