@@ -110,11 +110,16 @@ func _load_sets() -> void:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
 
+## Buses a slider sets as well as its own: UI (menu and HUD cues) sends straight to the master so it stays
+## dry (SfxMix), but it is still sound effects to the player, so the Sound effects slider levels it too.
+const SLIDER_ALSO := {"SFX": ["UI"]}
+
 ## Sets a bus ("Master", "Music", "SFX", "Ambience") from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
-	var i := AudioServer.get_bus_index(bus_name)
-	if i >= 0:
-		AudioServer.set_bus_volume_db(i, slider_db(v))
+	for b in [bus_name] + SLIDER_ALSO.get(bus_name, []):
+		var i := AudioServer.get_bus_index(b)
+		if i >= 0:
+			AudioServer.set_bus_volume_db(i, slider_db(v))
 
 ## A volume slider's bus level. The gain is the slider squared, so the slider follows loudness: 50% is
 ## about half as loud (-12 dB) and 0 is silent. (Gain = slider made 50% only -6 dB, and a slider seemed

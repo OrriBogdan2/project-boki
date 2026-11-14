@@ -11,7 +11,6 @@ extends RefCounted
 const BUSES := {"master": "Master", "music": "Music", "sfx": "SFX", "ambience": "Ambience"}
 const PROBE := "--audio-boot-probe"
 const SAVED := {"master": 0.3, "music": 0.4, "sfx": 0.5, "ambience": 0.6}
-const ROUTED := ["Music", "SFX", "Ambience", "SFXFar", "SFXMuffled"]
 const TOL := 0.05      # dB
 
 var main: Node
@@ -65,6 +64,8 @@ func _sliders(where: String) -> void:
 			var got := _db(BUSES[key])
 			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, BUSES[key]]
 			ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
+			for b in Sfx.SLIDER_ALSO.get(BUSES[key], []):
+				ok(absf(_db(b) - want) < TOL, "%s: %s slider %.2f -> %s bus too %.1f dB" % [where, key, lin, b, _db(b)])
 	# the same through the Settings > Audio page's own sliders (the order they are listed in)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
@@ -91,9 +92,23 @@ func _routes(where: String) -> void:
 		if not (p is AudioStreamPlayer or p is AudioStreamPlayer2D or p is AudioStreamPlayer3D):
 			continue
 		count += 1
-		if not String(p.get("bus")) in ROUTED:
+		if not _on_slider(String(p.get("bus"))):
 			off.append("%s on %s" % [p.get_path(), p.get("bus")])
 	ok(count > 0 and off.is_empty(), "%s: all %d players are on a slider's bus %s" % [where, count, off])
+
+## True if a bus is levelled by Music, Sound effects or Ambience: it is one of them, sends into one of them
+## (SFXFar, Voice, Boki -> SFX), or one of them sets it as well (Sfx.SLIDER_ALSO: UI). Master alone is not.
+func _on_slider(bus: String) -> bool:
+	for hop in 8:
+		if AudioServer.get_bus_index(bus) < 1:
+			return false
+		if bus in ["Music", "SFX", "Ambience"]:
+			return true
+		for s in Sfx.SLIDER_ALSO:
+			if bus in Sfx.SLIDER_ALSO[s]:
+				return true
+		bus = String(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)))
+	return false
 
 ## What reaches the speakers: a steady tone on each slider's bus, the Master bus's peak at full, half and 0.
 ## Half is about half as loud (-12 dB, give or take the peak meter's 2 dB); 0 is silence.
