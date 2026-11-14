@@ -20,7 +20,8 @@ const REACTIONS := [
 	["scripts/home/home.gd", "_care_step", "boki_sleep"],
 	["scripts/home/home.gd", "_care_nap", "boki_sleep"],
 ]
-const CUES := ["garden_feed", "garden_pet", "garden_friend", "garden_trait", "garden_egg", "garden_toy"]
+const CUES := ["garden_feed", "garden_pet", "garden_friend", "garden_trait", "garden_toy"]
+const EGG := "garden_egg"     # in the garden set (GardenSfx.cue), not the UI one
 
 var bad := 0
 
@@ -48,6 +49,7 @@ func run(main: Node) -> void:
 		ok(not seen.has(c) and c != "unlock", "%s is its own cue" % c)
 		seen[c] = true
 		ok((set_d["sounds"] as Dictionary).has(c) and Sfx.ensure(c), "%s is in the UI set and loads" % c)
+	ok(not (set_d["sounds"] as Dictionary).has(EGG) and Sfx.ensure(EGG), "%s loads from the garden set" % EGG)
 	for r in REACTIONS:
 		var body := _body(FileAccess.get_file_as_string("res://" + String(r[0])), String(r[1]))
 		var tag := "%s %s" % [String(r[0]).get_file(), String(r[1])]

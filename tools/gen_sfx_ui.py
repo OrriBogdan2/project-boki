@@ -215,13 +215,6 @@ def trait(i):
     return finish(room(mix(sw, *steps, chime), 0.8), 5400)
 
 
-def egg(i):
-    """A hollow wooden tock (a shell settling in straw) and a small warm bell."""
-    tock = (S.sweep(420, 210, 0.09) * env(N(0.09), 0.002, 0.03)
-            + 0.3 * S.pad(bpf(noise(0.04), 900, 1800) * env(N(0.04), 0.002, 0.012), 0.09))
-    return finish(room(mix(tock, at(pluck(NOTE['E5'], 0.55, 0.16, 0.5), 0.07), at(pluck(NOTE['A5'], 0.6, 0.18, 0.4), 0.17)), 0.7), 4200)
-
-
 def toy(i):
     """A rubber bounce: a pitch that hops up twice, each hop smaller, with a tine on the last."""
     def hop(f, d):
@@ -255,7 +248,6 @@ def main():
     S.takes_cat('garden_pet', pet, 3, 'ui')
     S.save_cat('garden_friend', friend(0), 'ui')
     S.save_cat('garden_trait', trait(0), 'ui')
-    S.save_cat('garden_egg', egg(0), 'ui')
     S.save_cat('garden_toy', toy(0), 'ui')
 
 
