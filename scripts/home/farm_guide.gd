@@ -6,8 +6,6 @@ extends RefCounted
 ## step face to face: HobTalk). The rules are FarmTutorial; none of it shows when visiting. Skipping puts
 ## the house down as a site if it isn't, so a skipper isn't stuck.
 
-const PLACE_RINGS := 24       # tiles out from the suggested spot that the search for free ground goes
-const PLACE_STEPS := 24.0     # tries round each ring
 const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fading
 
 var h
@@ -26,8 +24,6 @@ var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
-var _cells: Array = []   # place_cells()'s answer, and what it was for
-var _cells_sig := ""
 var done_t := 0.0     # s left of the "Done!" in front of the strip line
 var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
@@ -275,48 +271,6 @@ func _place(id: String, p: Vector3) -> bool:
 	if not was_active:
 		hb.close_ui()
 	return found
-
-## The tiles the piece in hand should go on: the free ground nearest the tutorial's spot (the house's suggested
-## spot, or beside the house for the trough); [] when there is none. Kept until the layout changes.
-func place_cells() -> Array:
-	var hb: HomeBuild = h.hb
-	if hb.held.is_empty():
-		return []
-	var sig := "%s|%d|%d|%d" % [hb.held["id"], hb.ver, hb.L()["deco"].size(), Econ.feeders().size()]
-	if sig == _cells_sig:
-		return _cells
-	_cells_sig = sig
-	_cells = []
-	var feeder: bool = hb.held["kind"] == "feeder"
-	var he := FarmHob.house_entry()
-	var p := HomeLayout.deco_center(he) if feeder and not he.is_empty() else house_spot()
-	var sz := Vector2i(1, 1) if feeder else HomeLayout.size_of(String(hb.held["id"]), 0)
-	for rad in PLACE_RINGS:
-		for k in PLACE_STEPS:
-			var a := float(k) / PLACE_STEPS * TAU
-			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5))
-			var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
-			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
-			if hb.feeder_fits(cs[0], "") if feeder else hb.fits(hb.held, cs):
-				_cells = cs
-				return _cells
-	return _cells
-
-## Opens the build bar's tab and page that hold the tile for entry `id`, so the spotlight can light it.
-func show_tile(id: String) -> void:
-	var hb: HomeBuild = h.hb
-	for tab in hb._tabs():
-		if hb.entries.tab(tab).any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == id):
-			if hb.cat != tab:
-				hb.cat = tab
-				hb._build_bar()
-			hb.bar.turn_to(id)
-			return
-
-## Where the ghost sits (the "mouse") to put the piece in hand on place_cells(): the middle of those tiles.
-func place_mouse() -> Vector2:
-	var cs := place_cells()
-	return Vector2.INF if cs.is_empty() else Vector2((cs[0].x + cs[-1].x + 1) * 0.5, (cs[0].y + cs[-1].y + 1) * 0.5)
 
 # ------------------------------------------------------------------ the world prompt
 ## Where a step's work is (its marker; Hob points there when he explains it).

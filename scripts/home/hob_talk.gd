@@ -5,7 +5,7 @@ extends RefCounted
 ## camera eases toward him. What he says:
 ##   - the first time on a new farm: who he is, the stall, the house spot and the axe (the farm tutorial's start)
 ##   - while the tutorial runs: the step you're on, pointing at where it happens
-##   - once the farm tutorial is done and the second Relic is on offer (ClassUnlock.second_pending): "By the way..." and
+##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
 ##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
 ## When a line is about something (a "show"), he points at it and the camera looks there and stays (CamLook)
@@ -36,9 +36,9 @@ func talking() -> bool:
 func busy() -> bool:
 	return talking() or intro_on
 
-## The second Relic is his to offer: it's on offer, and the farm tutorial is over (all its steps done, or none).
+## The second Mask is his to offer: it's on offer, and the house is down (or there is no tutorial).
 func offer_due() -> bool:
-	return ClassUnlock.second_pending() and not FarmTutorial.active()
+	return ClassUnlock.second_pending() and (not FarmTutorial.active() or FarmTutorial.did("house"))
 
 ## Starts a conversation: what he has to say now (see the file's doc).
 func start() -> void:
