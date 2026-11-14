@@ -28,7 +28,6 @@ static func afterglow(h: Hunter) -> void:
 	h.set_meta("afterglow_t", secs)
 	var col := Color("ffd84a")
 	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
-	if h.is_local():
 
 ## Every step: counts the afterglow down and sparkles while it lasts.
 static func tick(h: Hunter, dt: float) -> void:
