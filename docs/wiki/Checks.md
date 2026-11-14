@@ -37,7 +37,6 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
-| `--step-smooth-check` | Vex, Albert and Sable on the Hollow Crown: up and down three terrace steps and a stair flight, the drawn body's y never jumps over 0.08 m a frame and the camera's never over 0.05 m (`--step-smooth-shots` takes the strips) |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
@@ -53,20 +52,17 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
 | `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
-| `--boss-parity-check` | Lair boss against docs/CAMP_PARITY.md: the empty-lair reset after `Boss.LEASH_T`, phases at `Boss.PHASE_HP`, a reset mid-roar leaves no armour, and a stolen kill pays the last hit's squad (XP, kill stat, perk orbs), not the squad that did the damage |
+| `--lair-breach-check` | Breaking a lair's Gate Seal: stages, cracks, guards, the label, the mend that stops at the last crack, runes knocking shares off, the gate opening; one bot vs three timed |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
-| `--duel-ring-hint-check` | The duel ring's first-visit hint and beam, once per save; the pad opens the ring's two choices |
-| `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
-| `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
@@ -84,7 +80,6 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
-| `--input-latency-check` | Press to first motion or shot: LMB, RMB, E, dash and jump for every Hunter through the real input path; the first tick the velocity, the animation state or a projectile changes must be the press's own tick or the next, unless a sourced wind-up applies. Table in docs/MOVEMENT_FEEL.md (`=<id>,<id>` for some Hunters) |
 | `--home-build-check` | Build mode: placing, turning, moving, storing, refusing bad spots, save and reload, migration, expanding |
 | `--pack-ui-check` | The backpack windows take real mouse clicks |
 | `--title-check` | The title screen builds with the right menu, tagline, key art and frame budget |

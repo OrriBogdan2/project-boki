@@ -221,12 +221,12 @@ outposts = [[96, 60, 1], [156, 120, 1]]
 heart = [108, 108]
 # Boss lairs (see scripts/match/lairs.gd): walled arenas with one gate, a boss inside and its Rare Egg.
 #  at: the centre tile; half: tiles from the centre to the wall; gate: which wall has the gate;
-#  entry: ways to open it ("dial" the timing lock on the gate, "runes" light three rune pylons outside,
-#  "wards" break three ward stones round it)
+#  entry: ways to open it ("breach" break the Gate Seal down, "dial" the timing lock on the gate,
+#  "runes" light three rune pylons outside, "wards" break three ward stones round it)
 lairs = [
-    dict(id="forge", name="The Sunken Forge", boss="colossus", island="quarry", at=[54, 86], half=7, gate="s", entry=["dial"]),
-    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="shrine", at=[162, 84], half=7, gate="s", entry=["dial", "runes"]),
-    dict(id="hive", name="The Thornhive", boss="brood", island="nest", at=[128, 162], half=7, gate="w", entry=["dial", "wards"]),
+    dict(id="forge", name="The Sunken Forge", boss="colossus", island="quarry", at=[54, 86], half=7, gate="s", entry=["breach"]),
+    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="shrine", at=[162, 84], half=7, gate="s", entry=["breach", "runes"]),
+    dict(id="hive", name="The Thornhive", boss="brood", island="nest", at=[128, 162], half=7, gate="w", entry=["breach", "wards"]),
 ]
 # Randomised spawns (see scripts/match/spawn_plan.gd): the map never changes, but each match rolls which
 # of these candidate points are live. "pick" is [min, max] live per match; points are [x, z, place name].

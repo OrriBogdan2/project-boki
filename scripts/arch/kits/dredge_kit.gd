@@ -162,7 +162,7 @@ func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
 	var ht := t as Hunter
 	if ht.armor <= 0.0:
 		return
-	var wear := dmg * (1.0 - Hunter.ARMOR_DR) * float(gun_def()["armor_k"])
+	var wear := dmg * (1.0 - float(Hunter.ARMOR_TIERS[ht.armor_tier][3])) * float(gun_def()["armor_k"])
 	ht.armor = maxf(0.01, ht.armor - wear)
 	armor_shreds += 1
 
@@ -243,7 +243,7 @@ func _drop_holds() -> void:
 ## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
 ## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun" or KinMerge.transforming(h):
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -358,7 +358,7 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
@@ -425,7 +425,7 @@ func _tick_snap(dt: float) -> void:
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
-	if KinMerge.transforming(h) or KinMerge.active(h):
+	if KinMerge.transforming(h):
 		hook_hold = null
 		return
 	var rdf := rmb_def()

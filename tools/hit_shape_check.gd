@@ -221,7 +221,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	await _spawn(main)
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	for a in Arch.ids():
 		var hits := 0
 		P.reclass(Arch.weight(a), a)
@@ -244,7 +244,7 @@ func run(main: Node) -> void:
 			print("HSROW|%s|%s|%d|%s|%.1f|%.1f|%.0f|%.1f|%.1f|%.0f|%s" % [a, kind, meas["n"], src,
 					meas["reach"], meas["width"], meas["arc"], cont["reach"], cont["width"], cont["arc"], flags])
 		ok(hits >= 1, "%s: at least one input hurt a dummy (%d did)" % [a, hits])
-	ok(Time.get_ticks_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((Time.get_ticks_msec() - t0) / 1000.0))
+	ok(CheckClock.own_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((CheckClock.own_msec() - t0) / 1000.0))
 	HeroVfx.of(m).ribbons.clear()
 	print("HIT SHAPE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -58,6 +58,7 @@ var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
+var repress := false             # a hold dropped (a merge): the key is let go before the lance lights again
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -173,6 +174,7 @@ func _flashover_fx(f: Ent) -> void:
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
+	ComboMark.payoff(m, h, f)        # the body flash and the combo chime every other mark payoff has
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -235,14 +237,15 @@ func _shield_swirls() -> void:
 		)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
-## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
+## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
+## stage is the ComboMark tag over their plate instead (combo_read).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
 	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
 	# never spools (the lance is out), so the pilot is out with it
 	var spooling := was_held and spool < float(lmbd()["spool"])
-	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
+	if vis and spooling and not h.downed and not KinMerge.transforming(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
 	else:
@@ -259,7 +262,7 @@ func _tick_tells(dt: float) -> void:
 	for key in ignites:
 		var e: Dictionary = ignites[key]
 		var f := e["e"] as Ent
-		if not is_instance_valid(f):
+		if not is_instance_valid(f) or f is Hunter:
 			continue
 		var lvl := int(e["lvl"])
 		var top := f.pos + Vector3(0, 3.7, 0)
@@ -277,6 +280,15 @@ func _tick_tells(dt: float) -> void:
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
 
+## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
+func combo_read(f: Ent) -> Dictionary:
+	var lvl := burning(f)
+	if lvl == 0:
+		return {}
+	var e: Dictionary = ignites[f.get_instance_id()]
+	return {"icon": "fireball", "n": lvl, "max": 2, "left": float(e["until"]) - m.time,
+			"total": float(rd()["ignite_t"])}
+
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
 	var key := f.get_instance_id()
@@ -287,6 +299,7 @@ func pips_on(f: Ent) -> int:
 
 ## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
 func _drop_holds() -> void:
+	repress = true
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
 	spool = 0.0
@@ -325,8 +338,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if h.wid != "flamethrower":
 		return false
-	# a merge ends the roar: holding the key on must not relight it
-	var merging := KinMerge.transforming(h) or KinMerge.active(h)
+	# a merge ends the roar: holding the key on must not relight it (a new press does, in the live form)
+	repress = repress and held
+	var merging := KinMerge.transforming(h) or repress
 	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
@@ -497,6 +511,7 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
+		ComboMark.payoff(m, h, f)        # the Ignite payoff: bonus damage on a burning foe
 	# the impact: a white-hot flash, an ember shower and a rising ember puff (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
@@ -597,6 +612,7 @@ func _poof_cloud(dir: Vector2) -> void:
 ## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
 func _keep_poof(b: Dictionary) -> void:
 	var keep := (b["dir"] as Vector2) * float(b["speed"]) * float(dash_def()["air_keep"])
+	keep = h.turn_cost.hand_over(keep, keep.limit_length(h.base_speed))     # straight back: no more than a run
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 

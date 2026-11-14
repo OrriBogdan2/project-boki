@@ -40,8 +40,15 @@ func run(main_node: Node) -> void:
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "gil")
 	ok("dash flow: every row in content/dash_flow/gil.json holds, every slot casts mid-jump, holds through moves",
 		rows_bad == 0, "%d failures" % rows_bad)
+	await _combo_tag()
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd): the splash marks show, count down, Beach flashes.
+func _combo_tag() -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gil")
 
 func _reset(dist := 6.0) -> void:
 	K._drop_holds()
@@ -306,7 +313,10 @@ func _swim() -> void:
 		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
-	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
+	var dd := K.dash_def()
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
+		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
 	ok("Ground Swim: he stays hittable underground", under and hit_on)

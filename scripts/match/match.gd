@@ -3114,6 +3114,7 @@ func render_shots(alpha: float) -> void:
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
+	HoldTeach.match_tick(self)      # tap-vs-hold teaching (glide, Hold F prompts)
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
 	Sfx.voices.keep_squad(hunters, player)
@@ -3979,7 +3980,7 @@ func _separate() -> void:
 		near.sort()
 		for j in near:
 			var b: Ent = bodies[j]
-			if absf(a.pos.y - b.pos.y) > 1.0:
+			if absf(a.pos.y - b.pos.y) > 1.0 or FriendlyBodies.pass_through(self, a, b):
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
 			var mind := a.r + b.r
@@ -5641,7 +5642,7 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then hold Space in the air to glide")
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:

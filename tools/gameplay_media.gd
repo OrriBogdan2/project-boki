@@ -22,6 +22,8 @@ extends RefCounted
 ##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
 ##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
+##   13 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##                   (the see-through canopies: SeeThrough)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -94,6 +96,7 @@ func run(main_node: Node) -> void:
 		10: await _base_tp()
 		11: await _shift_glide(secs)
 		12: await _dive_feather(secs)
+		13: await _forest(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -316,6 +319,56 @@ func _hatch(secs: float) -> void:
 			still_at = -1.0
 		t += FRAME
 		frame += 1
+
+# ------------------------------------------------------------------ 12: forest walk
+const WOOD_R := 11.0             # m: how near trees count as one wood
+const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
+const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
+const WALK := 0.6                # share of full speed the Hunter strolls at
+
+## The thickest wood on the map, thickened with planted trees of its own style; the Hunter strolls from
+## tree to tree, there and back, passing just behind each one.
+func _forest(secs: float) -> void:
+	await _start("gunslinger", "")
+	var P := m.player
+	var w := m.world
+	var trees: Array = w.tree_spots.duplicate()
+	var heart: Vector3 = trees[0]
+	var most := 0
+	for t in trees:
+		var n := trees.filter(func(u: Vector3) -> bool: return u.distance_to(t) < WOOD_R).size()
+		if n > most:
+			most = n
+			heart = t
+	var path: Array = trees.filter(func(t: Vector3) -> bool: return t.distance_to(heart) < WOOD_R)
+	var style := Flora.style_ok(w.style_at(w.idx(int(heart.x), int(heart.z))))
+	for k in 8:
+		for row in [-1.0, 1.0]:
+			var at := heart + Vector3((k - 3.5) * GROVE_STEP, 0, row * 2.2 + (k % 2) * 0.6)
+			at.y = w.ground_at(at.x, at.z)
+			if w.is_void(at.x, at.z) or w.is_block(at.x, at.z) or absf(at.y - heart.y) > 0.3:
+				continue
+			if path.any(func(t: Vector3) -> bool: return t.distance_to(at) < 2.0):
+				continue
+			var tree := Flora.node("tree", style, k % 3, 1.1)
+			tree.position = at
+			w.add_child(tree)
+			path.append(at)
+	path.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	var back := path.duplicate()
+	back.reverse()
+	path.append_array(back)
+	P.teleport(_ground(path[0] + BEHIND))
+	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	var next := [0]
+	await _go(secs, func(_t: float) -> void:
+		var goal: Vector3 = path[next[0] % path.size()] + BEHIND
+		var d := Vector2(goal.x - P.pos.x, goal.z - P.pos.z)
+		if d.length() < 0.6:
+			next[0] += 1
+		P.inp["move"] = d.normalized() * WALK
+		SeeThrough.for_match(m),
+		func(_t: float) -> Vector3: return P.pos)
 
 # ------------------------------------------------------------------ the Boki base
 ## A fresh base with `n` rested level-6 Boki out (Ember, Ripple, Moss), `stats` per Boki when given, and the player
