@@ -15,6 +15,7 @@ const WALL_FACTOR := 12.0      # real s allowed per s of game time (a loaded box
 const EXPEDITION_SEED := 4242      # a fixed map and drop, so the driver's landing is the same every run
 const DROP_S := 90.0      # s of game time the opening drop may take
 const SIM_STALL_S := 45.0      # s of game time one tutorial step may take (as --tutorial-hud-check)
+const HINT_MAX := 120      # characters: the longest farm tutorial hint (the fresh-run log found three of 138-147)
 const COURSE_S := 900.0      # s of game time the whole tutorial course may take
 
 var bad := 0
@@ -90,11 +91,23 @@ func _button(root: Node, text: String) -> Button:
 
 ## A real button the player can see: says so, and presses it.
 func _press(root: Node, text: String) -> bool:
+	await _before_act("press " + text)
 	var b := _button(root, text)
 	ok(b != null, "there is a way forward: '%s'" % text)
 	if b != null:
 		b.pressed.emit()
 	return b != null
+
+## Hooks for --fresh-run-log (this check does nothing in them): what the player sees before each act, one
+## sim step of the tutorial match, and the farm step about to be done.
+func _before_act(_what: String) -> void:
+	pass
+
+func _sim_tick(_m: Match, _t: float) -> void:
+	pass
+
+func _farm_step(_home, _id: String) -> void:
+	pass
 
 func _child_of(parent: Node, type_name: String) -> Node:
 	for c in parent.get_children():
@@ -140,17 +153,18 @@ func _hatch() -> void:
 	_begin("hatch: card and look")
 	var hx = main.current
 	await _wait(func(): return hx.stage == "intro", "the hatch opens on its card")
-	_press(hx, String(hx.CARD_BUTTON))
+	await _press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
-	_press(hx, "Looks good")
+	await _press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
-	_press(hx, "This one")
+	await _press(hx, "This one")
 	var chosen: int = hx.chosen
 	ok(chosen >= 0 and _button(hx, "Hatch it") != null, "choosing an egg offers 'Hatch it'")
-	_press(hx, "Hatch it")
+	await _press(hx, "Hatch it")
 	await _wait(func(): return hx.stage == "warm", "the egg waits for knocks")
+	await _before_act("knock")
 	for i in hx.TAPS:
 		hx._unhandled_input(_key("jump"))
 		await tree.create_timer(0.25).timeout
@@ -162,7 +176,7 @@ func _hatch() -> void:
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
 	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
-	_press(hx, "Learn to fight")
+	await _press(hx, "Learn to fight")
 	await _relic(hx)
 
 ## The starter's card on the starter pick (HobOffer), or null before it shows.
@@ -177,10 +191,11 @@ func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
 	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	_press(hx, "Take " + HeroTitle.base_name(starter))
+	await _press(hx, "Take " + HeroTitle.base_name(starter))
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
+	await _before_act("put the Relic on")
 	moment._unhandled_input(_key("interact"))
 	await _wait(func(): return moment.phase == "intro", "putting it on opens its page")
 	await _wait(func(): return moment.go_button != null, "the page has a way on")
@@ -208,6 +223,7 @@ func _tutorial_match():
 		m.step(Match.DT)
 		_course_tick(m)
 		t += Match.DT
+		await _sim_tick(m, t)
 		step_t += Match.DT
 		if m.tut.step != last:
 			last = m.tut.step
@@ -226,7 +242,7 @@ func _tutorial_match():
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 1, "it counts as the first expedition")
 	ok(ClassUnlock.second_pending(), "and the second Relic is on offer")
-	_press(main.current, "Go home")
+	await _press(main.current, "Go home")
 	_begin("farm: first arrival")
 	await _wait(func(): return _is_screen("home.gd"), "'Go home' opens the farm")
 	var home = main.current
@@ -248,7 +264,10 @@ func _farm_tutorial(home) -> void:
 		if cur == "":
 			ok(false, "a step is always open while the tutorial runs (stalled after %d)" % FarmTutorial.done_count())
 			return
-		ok(FarmTutorial.hint_text(cur) != "", "'%s' tells you what to do" % cur)
+		var hint := FarmTutorial.hint_text(cur)
+		ok(hint != "", "'%s' tells you what to do" % cur)
+		ok(hint.length() <= HINT_MAX, "and in at most %d characters (%d)" % [HINT_MAX, hint.length()])
+		await _farm_step(home, cur)
 		_do_step(cur)
 	ok(bool(FarmTutorial.state()["done"]) and not FarmTutorial.state()["skipped"], "every step can be done in turn")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "the axe and the pickaxe were handed over")
@@ -403,7 +422,7 @@ func _ways_out(m: Match) -> void:
 	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
-	_press(main.current, "Back to the farm")
+	await _press(main.current, "Back to the farm")
 	await _wait(func(): return _is_screen("home.gd"), "back on the farm")
 	_end()
 
@@ -419,7 +438,7 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Tend the garden")
+	await _press(hx, "Tend the garden")
 	_begin("skip paths: farm")
 	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
 	var home = main.current
@@ -447,6 +466,6 @@ func _portal_relic(home) -> void:
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
 	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _press(home.panel_host, "Take Vex")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")
