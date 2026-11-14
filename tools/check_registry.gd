@@ -596,6 +596,7 @@ const CHECKS := {
 	"--blight-edge-shots": ["res://tools/blight_edge_shots.gd", "blight_edge_shots", null],  # --shots-dir=
 	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],  # --shots-dir=<dir>
+	"--item-art-clip": ["res://tools/item_art_clip.gd", "item_art_clip", null],  # --shots-dir=<dir>, review clip frames
 	"--train-halts-shots": ["res://tools/train_halts_shots.gd", "train_halts_shots", null],  # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],  # shields never hide a Hunter
 	# the shell follows amount and time
@@ -649,6 +650,12 @@ const CHECKS := {
 	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],      # Tenzo's feet on his rocks
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],  # feet on stairs
 	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
+	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],      # before/after strip of turning on the spot
+	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
+	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
+	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],      # slip sweep
+	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
+	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
