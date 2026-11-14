@@ -141,6 +141,22 @@ nothing else on screen:
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## Steal window (StealTell)
+
+DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
+rival can steal a boss. The counterplay needs a readable line, drawn by `scripts/ui/steal_tell.gd`:
+
+- **Line.** `content/rules/steal_window.json` `at` (0.25 of max health), the one number; the prize cry
+  (`StealSfx`, ext/sfx-steals) marks the same quarter.
+- **Bar.** At or under it a lair boss's health fill pulses gold (`StealTell.COL`, 2 Hz toward white) on the world bar
+  over its head and on the top boss bar the squad in its lair sees. Gold is apart from the bar's red, the stagger's
+  lilac and the chip's white; it wins over stagger and enrage colours while the window is open.
+- **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
+  end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
+  enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
+- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
+  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;
@@ -161,11 +177,17 @@ no kit draws its own recast HUD.
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
 - **Buffer.** A press up to `Loco.press_buffer` (tuning.json, 0.15 s) before the recast is allowed is kept in `recast_buf`
+- **Owner and others.** On the owner's screen the cue is the only readout: a kit's world copy of the same state
+  hides there and stays for everyone else (Sable's Mark pips, Sparkle's Static marker and its Live pips, Neve's
+  frost glow; Sable's knife has no ring of its own). Zones and objects stay for everyone (Motley's seed, Meeko's
+  hearth, Tenzo's landing ring, Albert's hammer and beacon, Kael's chain). `--recast-cue-check` asserts the split;
+  `--recast-cue-shots` shoots every recast kit as its owner and as the foe (docs/shots/recast-art-dedupe/).
+- **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Badges:
-Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift), Gil Riptide (E).
+Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).

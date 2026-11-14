@@ -67,10 +67,11 @@ func _setup() -> void:
 	launch = BjornLaunch.new(self)
 	boop = BjornBoop.new(self)
 
-## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
+## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
+## and with the max health levels give (LevelGrowth.hp), as the source's Brightshield scales with max health.
 func shield_max() -> float:
 	var sd: Dictionary = rmb_def()["shield"]
-	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1))
+	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1)) * LevelGrowth.hp(h)
 
 ## One of the aegis's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
 func _shield_stat(key: String) -> float:
@@ -89,9 +90,10 @@ func cd_k(slot: String) -> float:
 		return float(e_def()["cooldown_rank3"]) / float(e_def()["cooldown"]) if rank("kin") >= 3 else 1.0
 	return super.cd_k(slot)
 
-## Mending Ground heals 25% more at rank 2 and another 25% at rank 3.
+## Mending Ground heals 25% more at rank 2 and another 25% at rank 3, grown by the level's
+## ability power (LevelGrowth.ap).
 func heal_k() -> float:
-	return 1.0 + 0.25 * float(rank("kin") - 1)
+	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
 
 func full_ready() -> bool:
 	return res >= float(res_def().get("slam", 50.0))
