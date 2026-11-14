@@ -28,12 +28,10 @@ static func in_game(h) -> bool:
 	return h.games.any(_on) or (h.hrace != null and h.hrace.relay.run != null)
 
 
-## Is this one garden game on? Seek and Lantern Match keep a state, the Games board is never a game itself.
+## Is this one garden game on? Seek and Lantern Match keep a state, the others a run.
 static func _on(g) -> bool:
 	if g is BaseSeek:
 		return g.state != BaseSeek.S.IDLE
 	if g is LanternMatch:
 		return g.state != LanternMatch.S.IDLE
-	if g is BaseBoard:
-		return false
 	return g.run != null
