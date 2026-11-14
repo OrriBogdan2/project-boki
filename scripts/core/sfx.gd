@@ -121,7 +121,13 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss"
+	"fuse_hiss",
+	"axe_bite",
+	"trunk_creak",
+	"tree_down",
+	"pick_strike",
+	"rock_crack",
+	"rock_break",
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
