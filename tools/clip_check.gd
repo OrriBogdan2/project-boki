@@ -67,7 +67,6 @@ const JL_HEAVY_OPEN := {
 }
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
-	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
