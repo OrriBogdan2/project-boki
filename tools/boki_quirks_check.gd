@@ -33,7 +33,6 @@ func _female_share(species: String) -> float:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # the old farm: the garden is on by default
 	_data()
 	_sexes()
 	_rare_trait()

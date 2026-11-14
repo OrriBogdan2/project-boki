@@ -7,9 +7,8 @@ extends RefCounted
 const HIP := 0.44                  # m: the hip joint's height in Models.hunter's rest pose
 const KNEE := 0.2                  # m: knee below the hip joint
 ## The sole's heel, middle and toe in the knee's space (m): the boot mesh's lowest points along its length (the toe
-## tip curves up, so the toe is the ball it rests on, not the tip: -0.255 puts every body within 0.3 cm in
-## --unmasked-check; -0.245 sank them up to 1.3 cm, -0.264 left 0.9 cm).
-const SOLE := [Vector3(0.0, -0.263, 0.03), Vector3(0.0, -0.268, -0.06), Vector3(0.0, -0.255, -0.16)]
+## tip curves up 1.9 cm, so the toe is the ball it rests on, not the tip).
+const SOLE := [Vector3(0.0, -0.263, 0.03), Vector3(0.0, -0.268, -0.06), Vector3(0.0, -0.245, -0.16)]
 
 ## How far below the hip joint the boot's lowest point hangs, for the hip's turn (x forward, z out) and the
 ## knee's bend (x), all in radians.

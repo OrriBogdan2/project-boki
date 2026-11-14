@@ -1,5 +1,5 @@
 extends RefCounted
-## --feed-bowl-check: the feeding bowl. It is a base-mode item (off the build menu with farm_build.json base_mode off);
+## --feed-bowl-check: the feeding bowl. It is a base-mode item (off the build menu until Save.d["base_mode"]);
 ## a snack dropped in it calls the hungry Boki nearby; with a bowl and 3 hungry Boki (a bold one, a
 ## greedy middle one and a timid one, the first two rivals) all eat within 30 s, the timid one last,
 ## the rivals huff at each other at the bowl, each gets the food's lean (Evo) like hand feeding, and a
@@ -32,9 +32,8 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 1. base mode gates it
 	Save.d = Save.fresh()
 	var base_item: bool = HomeLayout.CATALOG["feed_bowl"].get("base", false)
-	FarmUnlocks.rules()["base_mode"] = false
 	ok(base_item and not FarmUnlocks.open("feed_bowl"), "the bowl is a base item: hidden outside base mode")
-	FarmUnlocks.rules()["base_mode"] = true
+	Save.d["base_mode"] = true
 	ok(FarmUnlocks.open("feed_bowl"), "in base mode it can be built")
 	# ---------------------------------------------------------------- 2. a bowl, three hungry Boki and a full one
 	Econ.ensure()
@@ -56,7 +55,9 @@ func run(m: Node) -> void:
 	lay["made"] = true
 	var bowl := {"u": HomeLayout._next_uid(lay), "id": "feed_bowl", "x": 47, "z": 34, "r": 0}
 	lay["deco"].append(bowl)
-	var H = await main._hb_home()      # the garden builds in slices: wait for all of it
+	var H = load("res://scripts/home/home.gd").new()
+	main.add_child(H)
+	for _f in 4: await main.get_tree().process_frame
 	H.day_t = 0.5
 	var spots := {bold: Vector3(45.0, 0, 34.5), greedy: Vector3(53.5, 0, 34.5),
 		shy: Vector3(47.5, 0, 31.0), full: Vector3(49.0, 0, 37.0)}

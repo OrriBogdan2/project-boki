@@ -16,7 +16,6 @@ func ok(cond: bool, what: String) -> void:
 
 func run(m: Node) -> void:
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # hunger is the old farm's: the garden (default) never starves
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var base := _neglected("Pip")

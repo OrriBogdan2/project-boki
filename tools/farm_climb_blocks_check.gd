@@ -29,7 +29,6 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # the old farm: the garden is on by default
 	var d := Save.fresh()
 	for nm in ["Pip", "Pop"]:
 		var k := Save.new_kin("zapple", nm)
