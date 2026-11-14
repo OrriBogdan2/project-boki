@@ -132,6 +132,8 @@ class Scan:
                 cone = Cone("limb_" + name, name, v3(*a) * (sx, 1, 1), v3(*b) * (sx, 1, 1), ra, rb)
                 self.BONES[name] = (cone.a, cone.b, self.BONES[name][2])
                 self._limbs.append(cone)
+        self.CLIPS = {name: clip[:-1] + (clip[-1].refit(self.BONES) if hasattr(clip[-1], "refit") else clip[-1],)
+                      for name, clip in anim.CLIPS.items()}     # planted paws aim from the fitted rig (boki_gait)
         self.LID = paint.hexc(s["lid"]) if "lid" in s else self._around_eyes(1.6, 0.0)
         self.LILAC = paint.hexc(s["brow"]) if "brow" in s else self._around_eyes(1.0, 2.4) * BROW_DARK
         deep = self._deepest()
