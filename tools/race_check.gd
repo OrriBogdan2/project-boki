@@ -16,9 +16,15 @@ extends RefCounted
 ##  10. courses: every garden zone has its own, closed, no sharper than max_turn, and every rigged body plan
 ##      runs it to the line in a lap time inside lap_band; the zone's own Home puts the loop on land,
 ##      clear of its toys, with no step in the ground a runner could not take
-##  10. the runners' beats (RaceBeats) never change a result: 20 seeded races finish in the same order at the same
+##  11. the runners' beats (RaceBeats) never change a result: 20 seeded races finish in the same order at the same
 ##      times with and without them; on the base they crouch through the countdown (the race holds), burst off the
 ##      line, the first two home celebrate by temper, the rest sulk, and each is let go once its clips are played
+##  12. ghost laps (RaceGhost): a taped lap replays within GHOST_S of the real runner all the way round, on
+##      uneven frames and with bumps; the best lap per course is kept (a slower one is not, a second water
+##      stretch is a course of its own); the save grows under GHOST_BYTES a course, even for the longest lap
+##      kept; the snapshot carries the laps and a hostile one is cut; a beaten ghost's gift pins the winner on
+##      the friend's wall; on a visit your partner races the friend's ghost to a card, the ghost on the line
+##      at its lap time, and your own save keeps no lap from it
 ## Never touches the real save.
 
 const RACES := 20
@@ -29,6 +35,8 @@ const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish
 const SAMPLE := 0.25             # m between the footing samples along a course
 const MAX_STEP := 0.3            # m of ground height between two samples: steeper than this is a wall, not a hill
 const CLOSE := 0.01              # m the lap may miss closing by
+const GHOST_S := 0.05            # s a ghost may run ahead of or behind the lap it taped
+const GHOST_BYTES := 4096        # bytes the save may grow by for one course's ghost
 
 var bad := 0
 var main: Node
@@ -51,7 +59,11 @@ func run(m: Node) -> void:
 	_courses()
 	await _zone_tracks()
 	_beats_keep_order()
+	_ghost_replay()
+	_ghost_best()
+	_ghost_snapshot()
 	await _on_base()
+	await _on_visit()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -284,6 +296,7 @@ func _on_base() -> void:
 		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
 				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
 				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
+		ok(Save.d.get("ghosts", {}).size() == 1, "on: the race's best lap is kept as a ghost")
 		await _practice(home)
 		await _solo(home)
 		var wall: Array = Save.d.get("showcase", [])
@@ -446,6 +459,166 @@ func _drill(home) -> void:
 		for f in 40:
 			home.drill.process(1.0 / 30.0)
 	ok(home.train.is_empty(), "drill: three presses end it (%s)" % rec["stats"]["speed"])
+
+## Seeded races of three, two of them rivals, on uneven frames: every lap taped and played back.
+func _ghost_replay() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261112
+	var species: Array = Data.KIN.keys()
+	var worst := 0.0
+	var laps := 0
+	for n in 8:
+		var recs: Array = []
+		for i in 3:
+			var sp: String = species[rng.randi() % species.size()]
+			recs.append(_kin(sp, "G%d" % i, rng.randi_range(0, 42), rng.randf_range(30.0, 100.0)))
+		BaseRace.nudge_bond(recs[0], recs[1], -1.0)
+		var r := BaseRace.Run.new(recs, 0, rng)
+		var seen: Array = []        # [t, dist, done_t] after each step
+		while not r.over() and r.t < MAX_S:
+			if r.can_cheer():
+				r.cheer("great")
+			r.step(rng.randf_range(1.0 / 120.0, 1.0 / 20.0))
+			seen.append([r.t, r.dist.duplicate(), r.done_t.duplicate()])
+		for i in recs.size():
+			var play := RaceGhost.replay(RaceGhost.lap(r, i), BaseRace.lap())
+			laps += 1
+			worst = maxf(worst, absf(play.end_t - float(r.done_t[i])))
+			for row in seen:
+				if float(row[2][i]) < 0.0:
+					worst = maxf(worst, _lag(play, float(row[0]), float(row[1][i])))
+	ok(laps == 24 and worst <= GHOST_S,
+		"ghost: %d laps replay within %.3f s of the runner all the way round (bar %.2f)" % [laps, worst, GHOST_S])
+
+## How far apart in time the ghost and the runner pass the point `d` m along the lap the runner held at `t`.
+func _lag(play: RaceGhost.Replay, t: float, d: float) -> float:
+	var lo := 0.0
+	var hi := play.end_t
+	for k in 40:
+		var mid := (lo + hi) * 0.5
+		if play.dist_at(mid) < d:
+			lo = mid
+		else:
+			hi = mid
+	return absf(lo - t)
+
+func _ghost_best() -> void:
+	Save.d = Save.fresh()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var size0 := JSON.stringify(Save.d).length()
+	var slow := _kin("zapple", "Slow", 0, 0.0)
+	var mud := {"mult": {"climb": 0.8}}
+	var r := _race([slow], 0, rng, false, mud)
+	var kept := RaceGhost.keep_best(r)
+	var key := RaceGhost.course(BaseRace.stretches())
+	var grew := JSON.stringify(Save.d).length() - size0
+	ok(not kept.is_empty() and Save.d["ghosts"].keys() == [key] and grew < GHOST_BYTES,
+		"ghost: a slow %.1f s lap is kept for its course, the save grows %d bytes (bar %d)" % [
+			r.done_t[0], grew, GHOST_BYTES])
+	RaceGhost.keep_best(_race([_kin("zapple", "Fast", 40, 100.0)], 0, rng))
+	ok(Save.d["ghosts"][key]["boki"] == "Fast", "ghost: a faster lap takes the course")
+	ok(RaceGhost.keep_best(_race([slow], 0, rng, false, mud)).is_empty() and Save.d["ghosts"][key]["boki"] == "Fast",
+		"ghost: a slower lap does not")
+	var two: Dictionary = BaseRace.rules()["twists"].filter(func(f): return f["id"] == "two_streams")[0]
+	RaceGhost.keep_best(_race([slow], 0, rng, false, two))
+	ok(Save.d["ghosts"].size() == 2, "ghost: a second water stretch is a course of its own")
+	var longest := PackedByteArray()
+	longest.resize(RaceGhost.MAX_TICKS - 1)
+	longest.fill(RaceGhost.MAX_STEP)
+	var big := {key: kept.merged({"boki": "Fourteen chars", "t": RaceGhost.MAX_TICKS * RaceGhost.TICK,
+		"track": Marshalls.raw_to_base64(longest)}, true)}
+	var worst := JSON.stringify(big).length()
+	ok(worst < GHOST_BYTES,
+		"ghost: the longest lap a course keeps is %d bytes in the save (bar %d)" % [worst, GHOST_BYTES])
+
+func _ghost_snapshot() -> void:
+	var snap := Social.clean_island(_sent(Social.profile_doc()))
+	ok(snap["ghosts"].size() == 2 and snap["ghosts"].values().all(func(l): return l["track"] != ""),
+		"ghost: the visit snapshot carries both courses' laps")
+	var junk := {}
+	for i in 20:
+		junk["c%d" % i] = {"species": "zapple", "boki": "<b>x</b>", "t": 9.0, "track": "AAAA"}
+	junk["c0"]["species"] = "nope"
+	junk["c1"]["t"] = 9999.0
+	junk["c2"]["track"] = "A".repeat(9000)
+	var cut := RaceGhost.clean(junk)
+	ok(cut.size() == RaceGhost.MAX_COURSES - 3 and cut.keys()[0] == "c3"
+			and not String(cut["c3"]["boki"]).contains("<"),
+		"ghost: a hostile snapshot is cut (%d of 20 courses kept)" % cut.size())
+	var key := RaceGhost.course(BaseRace.stretches())
+	var vee := _kin("cindle", "Vee", 10, 60.0)
+	var fast: Dictionary = Save.d["ghosts"][key]
+	var slow_g: Dictionary = _sent(RaceGhost.beat_gift("me", vee, fast["t"] + 1.0, fast, key, ""))
+	ok(RaceGhost.take_gift(slow_g, "Rowan") == "", "ghost: a lap slower than the ghost pins nothing")
+	var g: Dictionary = _sent(RaceGhost.beat_gift("me", vee, fast["t"] - 0.5, fast, key, ""))
+	var line := RaceGhost.take_gift(g, "Rowan")
+	var wall: Array = Save.d.get("showcase", [])
+	ok(line.contains("Vee") and wall.size() == 1 and wall[0]["name"] == "Vee" and wall[0]["twist"] == "Beat Fast's lap",
+		"ghost: a beaten ghost's gift pins the winner on the wall (\"%s\")" % line)
+	g["key"] = "nowhere"
+	ok(RaceGhost.take_gift(g, "Rowan") == "" and Save.d["showcase"].size() == 1,
+		"ghost: a gift for no lap of yours pins nothing")
+
+## A doc as the store hands it back: through JSON.
+func _sent(doc: Dictionary) -> Dictionary:
+	return JSON.parse_string(JSON.stringify(doc))
+
+## A visit: the friend's island from its snapshot (this save, published), your partner on their loop.
+func _on_visit() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = true
+	var snap := Social.clean_island(_sent(Social.profile_doc()))
+	snap["name"] = "Rowan"
+	var mine: Dictionary = Save.d["ghosts"].duplicate(true)
+	var H = load("res://scripts/home/home.gd")
+	var home = H.new()
+	home.visit = snap
+	home.visit_id = "t"
+	main.add_child(home)
+	main.current = home
+	for f in SETTLE_FRAMES:
+		if not home.building and is_instance_valid(home.root_ui):
+			break
+		await main.get_tree().process_frame
+	var race: BaseRace = home.hrace
+	ok(home._visiting() and race != null and is_instance_valid(race.post), "visit: the friend's race post stands")
+	if race != null and is_instance_valid(race.post):
+		ok(race.find(Vector2(race.post.position.x, race.post.position.z)) == {"kind": "race"}
+				and race.label().begins_with("Race the ghost of Rowan's"),
+			"visit: it offers their ghost (%s)" % race.label())
+		var kin_n: int = home.kins.size()
+		home._use_visiting({"kind": "race"})
+		var ghost_t := float(race.ghosts.ghost.get("t", -1.0))
+		ok(race.run != null and race.runners.size() == 1 and is_instance_valid(race.ghosts.node),
+			"visit: your partner lines up beside the faded ghost")
+		var at_line := false
+		var t := 0.0
+		var run_t := 0.0          # race time (main's countdown runs before it starts)
+		while race.run != null and t < MAX_S:
+			race.tick(0.05)
+			t += 0.05
+			if race.run != null:
+				run_t = race.run.t
+			if race.run != null and race.run.t >= ghost_t and not at_line:
+				var lane := RaceGhost.LANE * float(BaseRace.rules()["lane"])
+				var line_p := race.track_at(race.run.ends.size() - 1, 1.0, lane)
+				at_line = race.ghosts.node.position.distance_to(line_p) < 0.01
+		ok(race.run == null and is_instance_valid(race.card) and home.kins.size() == kin_n
+				and race.ghosts.ghost.is_empty(),
+			"visit: the race ends on a card and your partner goes home (%.1f s)" % t)
+		ok(at_line or run_t < ghost_t, "visit: the ghost is on the line at its lap time (%.2f s)" % ghost_t)
+		ok(Save.d["ghosts"] == mine, "visit: a lap on a friend's loop is not kept as yours")
+		for l in home.visit["ghosts"].values():
+			l["t"] = MAX_S          # a ghost anyone beats
+		home._use_visiting({"kind": "race"})
+		while race.run != null:
+			race.tick(0.25)
+		var title: Label = race.card.find_children("*", "Label", true, false)[0]
+		ok(title.text.ends_with("beat the ghost!"), "visit: beating the ghost says so")
+	rules["base_mode"] = false
+	home.queue_free()
+	await main.get_tree().process_frame
 
 ## The species that stand for each body plan: the rigged ones (KinPuppet.BODY) and one older round kin.
 func _plan_species() -> Dictionary:

@@ -186,7 +186,7 @@ static func profile_doc() -> Dictionary:
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
 		"tag": ClanInfo.my_tag(), "last": ClanInfo.last_deed(Save.d.get("log", [])),
 		"decor": Save.d.get("decor", {}).get("house", []),
-		"showcase": Save.d.get("showcase", []),
+		"showcase": Save.d.get("showcase", []), "ghosts": Save.d.get("ghosts", {}),
 	}
 	d.merge(VisitZones.doc())
 	return d
@@ -255,6 +255,10 @@ func collect_gifts(cb: Callable) -> void:
 					pets[pkey] = today
 					Save.remember(k, "visited", "got a scratch from %s, who came to visit" % who, 1.0)
 					lines.append("%s visited and petted %s." % [who, k["name"]])
+				"race":
+					var line := RaceGhost.take_gift(g, who)
+					if line != "":
+						lines.append(line)
 		# forget old pet days so the save doesn't grow forever
 		for pk in pets.keys():
 			if today - int(pets[pk]) > 2: pets.erase(pk)
@@ -875,7 +879,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
 		"showcase": BaseShowcase.clean(d.get("showcase")),
 		"tag": ClanInfo.clean_tag(d.get("tag")),
-		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system()))}.merged(VisitZones.clean(d))
+		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
+		"ghosts": RaceGhost.clean(d.get("ghosts"))}.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
 static func clean_snap_kin(rv) -> Dictionary:

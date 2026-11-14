@@ -58,6 +58,18 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
 
+## Ghost laps on the Dash (no live netcode)
+
+Every Dash lap at home is taped (`RaceGhost.Tape`: each runner's distance every 0.1 s). The fastest
+lap on each course is kept in `Save.d["ghosts"]` (`RaceGhost.keep_best`); a course is the lap's
+stretch layout, so the weekly "Two streams" loop has its own. A lap is about 0.5 KB of save (cm moved
+per tick as base64 bytes; the longest kept, 120 s, is 1.7 KB). The visit snapshot carries the laps
+(`Social.profile_doc`, cleaned by `RaceGhost.clean`). A visitor at the friend's race post runs their
+partner against the faded ghost, the owner's name over it, cheering at the marks as in any Dash; a win
+sends a `race` gift (`RaceGhost.beat_gift`) and the friend finds the winner pinned to their showcase
+wall when they come home (`RaceGhost.take_gift`). Old saves and older snapshots have no key: no laps.
+`--race-check` holds it: a replayed lap stays within 0.05 s of the real runner all the way round.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
