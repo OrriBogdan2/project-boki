@@ -37,7 +37,7 @@ class CatSpy extends Fx:
 	func healed(_h: Hunter, _n: float) -> void:
 		pass
 	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "", _key := "",
-			_kind := Fx.Num.HIT) -> void:
+			_kind := Fx.Num.HIT, _small := false) -> void:
 		seen.append(col)
 	func word(_at: Vector3, _txt: String, col: Color, _big := false) -> void:
 		seen.append(col)
