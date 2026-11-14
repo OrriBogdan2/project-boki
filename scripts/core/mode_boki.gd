@@ -2,7 +2,8 @@ class_name ModeBoki
 extends RefCounted
 ## Where each Boki is found, the owner's core principle 2 (docs/design/MODE_BOKI.md): content/rules/mode_boki.json
 ## lists the modes, each with a COMMON / RARE / VERY RARE spawn table and the difficulty each tier needs,
-## plus Expedition's legendaries, a separate roll per match. Data only for now: no spawn reads it yet.
+## plus Expedition's legendaries, a separate roll per match. The spawn pools read it only while the file's
+## "live" flag is on (default off: the pools keep drawing Data.common_kin).
 
 const TIERS := ["common", "rare", "very_rare"]
 const LEGENDARY := "legendary"
@@ -11,6 +12,19 @@ static var _where := {}        # species -> [mode id, tier], built on first use
 
 static func modes() -> Dictionary:
 	return Content.rules("mode_boki")["modes"]
+
+## `pool` (the species a spawn site draws from) cut down to `mode_id`'s species whose tier is open at `level`
+## (the difficulty gate_doc counts). With the "live" flag off, `pool` comes back as it was.
+static func offer(pool: Array, mode_id: String, level: int) -> Array:
+	if not bool(Content.rules("mode_boki").get("live", false)):
+		return pool
+	var tiers: Dictionary = modes()[mode_id]["tiers"]
+	return pool.filter(func(sp): return mode_of(sp) == mode_id and level >= int(tiers[tier(sp)]["gate"]))
+
+## One species of that offer, drawn with `r`.
+static func draw(pool: Array, mode_id: String, level: int, r: RandomNumberGenerator) -> String:
+	var fits := offer(pool, mode_id, level)
+	return String(fits[r.randi_range(0, fits.size() - 1)])
 
 ## The mode a species is found in, or "" when no mode lists it.
 static func mode_of(species: String) -> String:

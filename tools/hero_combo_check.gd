@@ -27,7 +27,13 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
+		var before: Array = [ac.n, ac.fails]
+		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
+		n += ac.n - before[0]
+		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
+		await load("res://tools/mage_glide_cancel_check.gd").new().run(self, ac)
+		await load("res://tools/mage_anim_time_check.gd").new(self).run(ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
 		await parity.vireo()
@@ -51,6 +57,33 @@ func _unwall(m: Match, p: Vector3) -> void:
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
+## Vex's Burr Charge cast from `up` m over the ground along an empty lane, a foe standing just past the lane's
+## end off to the side: a dud there (gone, no cone, no blast, the foe untouched), never a stick or a cone.
+func _burr_dud(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, up: float, how: String) -> void:
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(10.5, 0, 2.0))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, up, 0))
+	P.grounded = up <= 0.0
+	P.vel = Vector3.ZERO
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	var duds := K.duds
+	var blasts := K.rattles
+	var airborne := not P.grounded
+	ac.tap(m, P)
+	var stuck := false
+	for _i in int(1.6 / DT):
+		m.step(DT)
+		stuck = stuck or K.burrs.any(func(b: Dictionary) -> bool: return float(b["fuse"]) >= 0.0)
+	ok("RMB %s on nothing: a dud, no stick, no cone, no blast, the foe past the end untouched" % how,
+			airborne == (up > 0.0) and K.duds == duds + 1 and not stuck and K.rattles == blasts
+			and K.burrs.is_empty() and ac.dmg(T) < 0.5 and not KitStatus.rattled(T),
+			"duds +%d stuck %s blasts +%d took %.1f" % [K.duds - duds, stuck, K.rattles - blasts, ac.dmg(T)])
+	P.teleport(home)
+	ac.step(m, 0.3)
+
 func _fire(m: Match, P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -61,6 +94,15 @@ func _last_shot(m: Match, P: Hunter) -> Dictionary:
 	for i in range(m.shots.size() - 1, -1, -1):
 		if m.shots[i]["by"] == P: return m.shots[i]
 	return {}
+
+## How far a shot flies past its muzzle: its sweep starts at the body (ShotOrigin), so the muzzle lead is off.
+func _flight(sd: Dictionary) -> float:
+	var lead := 0.0
+	if sd.has("muzzle"):
+		var mz: Vector3 = sd["muzzle"]
+		var st: Vector3 = sd["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length() - lead
 
 func _dash(m: Match, P: Hunter, hold_s: float, each := Callable()) -> void:
 	P.inp["dash_down"] = true
@@ -119,8 +161,7 @@ func _mage() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
-			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
+			not sd.is_empty() and absf(_flight(sd) - 13.0) < 0.5, "%.1f m" % _flight(sd))
 	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
@@ -629,6 +670,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + aim_from)
@@ -653,6 +695,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + Vector3(at_m, 0, 0))
@@ -672,6 +715,40 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
 	P.vel = Vector3.ZERO     # (she ends the charges still moving and teleport keeps that: it carried into the Slipstep)
 
+## Her rounds read at match zoom (docs/VFX_QUALITY.md backlog 3): `sd`, a round just fired, rides a tracer in her
+## lime with a deep rim, as wide as her hit; a short star goes off on the rifle's mouth; a held string reuses the
+## pooled nodes. Ends rested, the drum full again.
+func _vex_rounds(m: Match, P: Hunter, sd: Dictionary) -> void:
+	var V := VVFx.of(m)
+	var ride: Array = V.riders.filter(func(rd: Dictionary) -> bool: return rd["sd"] == sd)
+	var mt: ShaderMaterial = null
+	if not ride.is_empty():
+		mt = (ride[0]["node"] as MeshInstance3D).material_override as ShaderMaterial
+	var width := float(ride[0]["width"]) if not ride.is_empty() else 0.0
+	ok("LMB: each round rides a pooled tracer in her lime, rimmed, as wide as her 0.3 m hit",
+			mt != null and String(ride[0]["kind"]) == "tracer" and width >= 0.3
+			and Color(mt.get_shader_parameter("color")).is_equal_approx(Arch.color("gunslinger"))
+			and Color(mt.get_shader_parameter("color3")).a > 0.0, "width %.2f m" % width)
+	var mouth := P.model.get_node_or_null(GunslingerKit.GUN_MUZZLE) as Node3D if P.model else null
+	var stars: Array = V.live.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "star")
+	var off := INF
+	if mouth and not stars.is_empty():
+		off = (stars[-1]["node"] as Node3D).global_position.distance_to(mouth.global_position)
+	ok("LMB: a short muzzle star on the rifle's mouth (0.1 s at most)",
+			off < 0.2 and float(stars[-1]["dur"]) <= 0.1, "%.2f m off the Muzzle" % off)
+	var frame := V._process.bind(DT)        # its looks end on frames, and a stepped check draws none: one a step
+	var held_string := func() -> void:
+		P.inp["fire"] = true
+		ac.step(m, 0.6, frame)
+		P.inp["fire"] = false
+		ac.step(m, 1.0, frame)
+	held_string.call()
+	var made := V.made
+	var shots := P.shot_n
+	held_string.call()
+	ok("LMB held: a second string makes no new effect nodes (pooled)", P.shot_n - shots >= 4 and V.made == made,
+			"%d rounds, %d new nodes" % [P.shot_n - shots, V.made - made])
+
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -683,7 +760,7 @@ func _gunslinger() -> void:
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
-	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
+	# 1. LMB: to full range past the cursor, a green-fire tracer; Dazed = +76% (source +39 on 51), a gold crit number
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
 	ac.step(m, 0.1)
@@ -693,15 +770,15 @@ func _gunslinger() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
-	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+			not sd.is_empty() and absf(_flight(sd) - 11.0) < 0.6, "%.1f m" % _flight(sd))
+	_vex_rounds(m, P, sd)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
-	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))
+	ok("Dazed: the rifle does +76%", is_equal_approx(K.outgoing(T, 10.0, o), 17.6))
 	ok("Dazed: big gold numbers (crit-style)", bool(o.get("crit", false)))
 	P.sus_n = 6
 	K.outgoing(T, 10.0, {"src": "shot"})
-	ok("Dazed: the string's decay pauses", P.sus_n <= 5)
+	ok("Dazed: the string's falloff keeps counting (no pause in the source)", P.sus_n == 6)
 	ok("Dazed: abilities are not boosted through outgoing",
 			is_equal_approx(K.outgoing(T, 10.0, {"src": "abil", "ab": "k1"}), 10.0))
 	KitStatus.clear_rattled(T)
@@ -731,37 +808,25 @@ func _gunslinger() -> void:
 			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
 	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12, "%.2f" % T.flash_t)
 	var rifle := {"src": "shot"}
-	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
-	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	T.teleport(home + Vector3(4, 0, 6))
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	P.teleport(home)
-	ac.step(m, 0.1)
-	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB: sticks on the ground at the lane's end",
-			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
-			"at %.1f" % (_flat(b0.get("pos", home), home)))
-	var cone_id := ("burr%d" % (b0["node"] as Node3D).get_instance_id()) if not b0.is_empty() else ""
-	var ce := AimKit.entry(P, cone_id)
-	ok("RMB: the cone shows back toward you, for everyone",
-			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
-	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
-			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
-			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
+	ok("RMB direct hit: the Dazed foe takes the rifle's +76%", is_equal_approx(K.outgoing(T, 10.0, rifle), 17.6))
+	# 3b. a miss is a miss: the lane's end on no foe and no wall is a dud, on the ground or from the air
+	_burr_dud(m, P, T, K, home, 0.0, "a ground cast")
+	_burr_dud(m, P, T, K, home, 4.0, "an air cast 4 m up")
 	ac.fresh(T)
 	T.teleport(home + Vector3(8, 0, 0))
-	ac.step(m, 0.05)
-	var tx := T.pos.x
-	ac.step(m, 1.0)
-	ok("RMB ground cone: damage + Dazed + shoved toward you",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and T.pos.x < tx - 1.5,
-			"took %.0f moved %.1f" % [ac.dmg(T), T.pos.x - tx])
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 2.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	ac.aim_at(P, T.pos)
+	ac.tap(m, P)
+	ac.step(m, 0.4)
+	ok("RMB air cast 2 m up: a foe 8 m down the lane is still struck and Dazed",
+			ac.dmg(T) >= 20.0 and KitStatus.rattled(T), "took %.1f" % ac.dmg(T))
+	KitStatus.clear_rattled(T)
+	P.teleport(home)
+	ac.step(m, 0.3)
 	ok("RMB: 0.9s fuse", is_equal_approx(float(bd["fuse"]), 0.9))
 	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned (no cooldown shave)
 	ac.fresh(T)
@@ -786,7 +851,15 @@ func _gunslinger() -> void:
 	ac.tap(m, P)
 	ac.step(m, 0.5)
 	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
+	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and absf(float(bw["pos"].x) - (home.x + 9.5)) < 0.8,
+			str(bw.get("pos", "")))
+	var cone_id := ("burr%d" % (bw["node"] as Node3D).get_instance_id()) if not bw.is_empty() else ""
+	var ce := AimKit.entry(P, cone_id)
+	ok("RMB: the cone shows back toward you, for everyone",
+			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
+	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
+			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
+			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
 	ac.step(m, 1.1)
 	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
 			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
@@ -822,30 +895,32 @@ func _gunslinger() -> void:
 	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)
-	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
+	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 20.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	P.teleport(home)
 	ac.step(m, 0.1)
 	ac.aim_at(P, T.pos)
 	var sk0 := K.skewers
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 36.0 * 1.15)
+	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
 	ac.step(m, 0.1)
 	for zz in [-1, 0, 1]: _wall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle passes through a wall", ac.dmg(T) >= 30.0)
+	ok("Longneedle passes through a wall", ac.dmg(T) >= 20.0)
 	for zz in [-1, 0, 1]: _unwall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.fresh(T)
@@ -937,6 +1012,14 @@ func _gunslinger() -> void:
 			"%.1f m kind %s" % [P.pos.z - z0, K.last_dash_kind])
 	P.inp["move"] = Vector2.ZERO
 	ac.step(m, 0.8)
+	ac.air_steers(m, P, home, "an air tap slide", func():
+		P.dashes = P.max_dashes()
+		P.inp["move"] = Vector2(0, 1)
+		P.do_dash())
+	ac.air_steers(m, P, home, "Longneedle's recoil", func():
+		K.cd["e"] = 0.0
+		P.ak.use_e()
+		ac.step(m, 0.7))
 	ok("small: the rifle loses half its punch over a 10-round string",
 			is_equal_approx(float(P.wpn["sustain_loss"]), 0.5) and int(P.wpn["sustain_rounds"]) == 10)
 	K.res = 3.0
@@ -965,7 +1048,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
+	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 20.0 and ac.dmg(T2) >= 20.0)
 	var cd_two := float(K.cd["e"])
 	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
 	P.slot_lv["kin"] = 3
@@ -1002,6 +1085,14 @@ func _gunslinger() -> void:
 	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
+	var speeds: Array = []
+	for rk in [1, 3]:
+		P.slot_lv["dash"] = rk
+		var before := P.buff("move_speed")
+		K._slide_end()
+		speeds.append(P.buff("move_speed") - before)
+	ok("upgrade parity: rank 3 (tier IV) a slide's end gives +25% speed, rank 1 none",
+			near.call(speeds[0], 0.0) and near.call(speeds[1], 0.25), str(speeds))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1

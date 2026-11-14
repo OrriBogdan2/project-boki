@@ -23,6 +23,7 @@ var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
+var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
 var shield_at := -99.0
@@ -160,7 +161,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
-	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
+	var slow := {}
+	if src == "dash":
+		slow = {"slow": float(dash_def()["slow_t"]), "slow_k": float(dash_def()["slow_k"])}
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
@@ -169,8 +172,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			s["dmg"] = spine.capped(e, float(s["dmg"]))
 			_ult_rock_landed(e, ult_cast)
-		x["slow"] = slow_t
-		x["slow_k"] = float(rd["slow_k"])
+		x.merge(slow)
 		if e is Hunter:
 			launch_pay += 1
 			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
@@ -180,13 +182,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			f_dmg = spine.capped(f, f_dmg)
 			_ult_rock_landed(f, ult_cast)
-		f.hurt(
-			f_dmg, h,
-			{
-				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
-				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
-			}
-		)
+		var splash := {"src": "abil", "ab": "rock", "kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0}
+		splash.merge(slow)
+		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
 
 ## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
@@ -274,11 +272,9 @@ func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
-			AimKit.cone(
-				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
-			)
+			_sight_p["len"] = sight_len()
+			_sight_p["deg"] = sight_deg()
+			AimKit.cone(h, "sight", _sight_p)
 			sight_t -= dt
 			if sight_t <= 0.0:
 				sight_t = 0.5
@@ -287,9 +283,17 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+func sight_grow() -> float:
+	return clampf(sneak_t / float(d["passive"]["grow"]), 0.0, 1.0)
+
 func sight_deg() -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), sight_grow())
+
+## The cone's reach: passive.len at the start of a sneak, passive.len_max after `grow` seconds of it.
+func sight_len() -> float:
+	var pd: Dictionary = d["passive"]
+	return lerpf(float(pd["len"]), float(pd["len_max"]), sight_grow())
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -308,11 +312,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
 		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)
@@ -357,7 +361,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		# a bot: punches up close, throws boulders from range
 		if held and h.fire_cd <= 0.0:
 			var tg := _bot_target()
-			if tg and h.flat_dist(tg) < 3.0: _punch(0.6)
+			if tg and (h.flat_dist(tg) < 3.0 or _row_between(tg)): _punch(0.6)
 			else: _boulder()
 		return true
 	if held:
@@ -418,14 +422,13 @@ func _boulder() -> void:
 	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), COBALT, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
 	Juice.shot(h, start, dir)
 
-## The boulder bursts where it ends: a small fireball with a red ring on the ground, splashing the
+## The boulder bursts where it ends: a blue flash and short debris over a ring at the splash radius, splashing the
 ## foes beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
 	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
-	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
-	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
+	vfx("boulder_hit", at, null, {"r": float(bd["splash"])})
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -447,11 +450,13 @@ func _punch(k: float) -> void:
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
 	var stepv := HunterMove.slide_speed(float(pd["step"]))
+	var hv := dir * stepv
 	if not h.grounded:
-		# no ground brake up there: a short push, but never slower than she flies (item 51, out of an air dash)
-		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
-	h.vel.x = dir.x * stepv
-	h.vel.z = dir.y * stepv
+		# no ground brake up there: a short push added to what she carries, never slower (item 51, out of an air
+		# dash) and never overwriting it, so the keys still steer (DECISIONS 11-08)
+		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
+	h.vel.x = hv.x
+	h.vel.z = hv.y
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
@@ -483,7 +488,7 @@ func _punch(k: float) -> void:
 		f.hurt(dmg, h, o)
 		landed += 1
 		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		if KnockWall.hit(m, f, dir, 1.6, h):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
@@ -491,15 +496,17 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
+## A bot punches when its own rocks stand in line with the foe: the punch sends the row at them.
+func _row_between(tg: Ent) -> bool:
+	var dir := h.aim_dir()
+	var pd: Dictionary = lmb_def()["punch"]
+	var lane := AimMode.in_lane(h.pos, dir, float(pd["sweep_max"]), float(pd["width"]), tg.pos, tg.r)
+	return lane and not sweep_rocks(dir).is_empty()
+
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
+## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
-	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
-	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
-	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
+	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -630,7 +637,7 @@ func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
 	shield_at = m.time
-	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
+	ShieldSrc.give(h, float(gd["shield"]) * shield_stacks, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
 	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 
@@ -706,13 +713,18 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.5 and dist < 9.0 and los and randf() < 0.6:
+		var ed := e_def()
+		var span := float(ed["dist"]) + float(ed["row_gap"])
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["tell"]), 0.0, span) + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sd := slam_def()
+		var hold := float(rmb_def()["hold"]) + float(sd["time"]) * randf_range(0.3, 1.0)
+		BotLead.aim(self, tgt, hold, 0.0, float(sd["hop"]) + float(sd["radius"][0]))
 		h.inp["sec"] = true
-		bot_hold["rmb"] = float(rmb_def()["hold"]) + float(slam_def()["time"]) * randf_range(0.3, 1.0)
+		bot_hold["rmb"] = hold
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and dist > 2.5 and dist < 6.0 and los and randf() < 0.2:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)

@@ -5,15 +5,17 @@ extends RefCounted
 ## Boki, a seed from their patch and, for a "trade_to" species, its next form. The friend's side is only their
 ## existing profile snapshot (Social.clean_island), so no Net message is involved.
 
-const DAY_SECS := 86400.0     # s a Boki stays away
-const MAX_AWAY := 2           # Boki away at once
-const TRAIT_PULL := 0.1       # share of the gap to the host Boki's trait closed on return
-const TRUST_GAIN := 2.0       # trust a visit adds
+const DAY_SECS := 86400.0  # s a Boki stays away
+const MAX_AWAY := 2  # Boki away at once
+const TRAIT_PULL := 0.1  # share of the gap to the host Boki's trait closed on return
+const TRUST_GAIN := 2.0  # trust a visit adds
+
 
 static func list() -> Array:
 	if typeof(Save.d.get("sleepovers")) != TYPE_ARRAY:
 		Save.d["sleepovers"] = []
 	return Save.d["sleepovers"]
+
 
 ## Why this Boki cannot go ("" if it can).
 static func why_not(rec: Dictionary) -> String:
@@ -25,6 +27,7 @@ static func why_not(rec: Dictionary) -> String:
 		return "You need another Boki at home."
 	return ""
 
+
 ## Sends rec to friend_id's garden. Returns false when it cannot go.
 static func send(rec: Dictionary, friend_id: String, friend_name: String, now: float) -> bool:
 	if why_not(rec) != "" or friend_id == "":
@@ -34,16 +37,18 @@ static func send(rec: Dictionary, friend_id: String, friend_name: String, now: f
 	Save.log_event("sleepover", rec, {"to": friend_name})
 	return true
 
+
 ## The sleepovers that have lasted a day.
 static func due(now: float) -> Array:
 	return list().filter(func(s): return now - float(s["t"]) >= DAY_SECS)
 
+
 ## Brings one home. host is the friend's cleaned island ({} if unreachable: only the memory line).
-## Returns {line, gift} (gift is a crop key or "").
-static func come_home(stay: Dictionary, host: Dictionary) -> Dictionary:
+## opening replaces the first sentence (a clan loan's line). Returns {line, gift} (gift is a crop key or "").
+static func come_home(stay: Dictionary, host: Dictionary, opening := "") -> Dictionary:
 	var rec: Dictionary = stay["rec"]
 	var who := String(stay["name"])
-	var line := "%s had a sleepover at %s's." % [rec["name"], who]
+	var line := opening if opening != "" else "%s had a sleepover at %s's." % [rec["name"], who]
 	var gift := ""
 	var lead: Array = host.get("roster", [])
 	if not lead.is_empty():
@@ -68,12 +73,14 @@ static func come_home(stay: Dictionary, host: Dictionary) -> Dictionary:
 	Care.dex_got(rec)
 	return {"line": line, "gift": gift}
 
+
 ## A crop growing on the host's plots, else the first crop they plant at all.
 static func _patch_seed(host: Dictionary) -> String:
 	for p in host.get("plots", []):
 		if String(p["crop"]) != "":
 			return String(p["crop"])
 	return ""
+
 
 ## Brings home every Boki that has stayed a day. cb gets the lines.
 static func collect(cb: Callable) -> void:
@@ -85,6 +92,7 @@ static func collect(cb: Callable) -> void:
 	var lines: Array = []
 	_next(stays, lines, cb)
 
+
 static func _next(stays: Array, lines: Array, cb: Callable) -> void:
 	if stays.is_empty():
 		if not lines.is_empty():
@@ -92,6 +100,13 @@ static func _next(stays: Array, lines: Array, cb: Callable) -> void:
 		cb.call(lines)
 		return
 	var stay: Dictionary = stays[0]
-	Social.get_doc("profiles/" + String(stay["to"]), func(p: Dictionary):
-		lines.append(come_home(stay, Social.clean_island(p))["line"])
-		_next(stays.slice(1), lines, cb))
+	var then := func(line: String):
+		lines.append(line)
+		_next(stays.slice(1), lines, cb)
+	if stay.has("clan"):
+		ClanLoan.come_home(stay, then)
+		return
+	Social.get_doc(
+		"profiles/" + String(stay["to"]),
+		func(p: Dictionary): then.call(come_home(stay, Social.clean_island(p))["line"])
+	)

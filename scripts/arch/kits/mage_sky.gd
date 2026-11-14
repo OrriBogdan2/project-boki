@@ -9,6 +9,7 @@ extends RefCounted
 
 const MIN_DRAG := 0.8        # m of cursor drag below which the tap default is used
 const TOWARD_COS := 0.64     # a drag within about 50 degrees of "to Sparkle" counts as pulling toward her
+const SKY_HOLD_AT := 0.9      # s into the sky clip: its arm-up pose (keys 0.5-1.15) a long drag waits in
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit
@@ -47,6 +48,8 @@ func _held() -> bool:
 func tick(dt: float) -> void:
 	var ed := kit.e_def()
 	var r := float(ed["radius"])
+	if kit.anim_id == "mage_e" and not kit.strikes.is_empty() and kit.m.time - kit.anim_at > SKY_HOLD_AT:
+		kit.anim_at = kit.m.time - SKY_HOLD_AT      # drag + count outlast the 1.4 s clip: the arm stays up
 	for i in kit.strikes.size():
 		var s: Dictionary = kit.strikes[i]
 		var at: Vector3 = s["at"]
@@ -81,8 +84,9 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.fx().disc(at, r, MageKit.VIOLET, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER)
-	kit.fx().pillar(at, Color(MageKit.PINK, 0.45), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	var dark := MageKit.VIOLET.darkened(0.4)
+	kit.fx().disc(at, r, dark, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER, false, true)
+	kit.fx().pillar(at, Color(MageKit.PINK, 0.7), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))

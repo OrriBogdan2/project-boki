@@ -11,9 +11,12 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TUTRES %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -25,12 +28,14 @@ func run(mn: Node) -> void:
 	print("TUTRES DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _tut_save(tut: Dictionary) -> void:
 	Save.d = Save.fresh()
 	var k := Save.new_kin("cindle", "Ash")
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
 	Save.d["tutorial"] = tut
+
 
 # ------------------------------------------------------------------ 1. the save
 func _save_rules() -> void:
@@ -47,10 +52,13 @@ func _save_rules() -> void:
 	var farmed := {"v": 11, "tutorial": {"hatched": true, "ft": {"did": {"hob": true}}}}
 	for d: Dictionary in [played, fresh, farmed]:
 		Save.migrate(d)
-	ok(bool(played["tutorial"].get("match", false)) and bool(farmed["tutorial"].get("match", false)),
-			"v12: a save that played or reached the farm counts as finished")
+	ok(
+		bool(played["tutorial"].get("match", false)) and bool(farmed["tutorial"].get("match", false)),
+		"v12: a save that played or reached the farm counts as finished"
+	)
 	var kept: bool = not fresh["tutorial"].has("match") and int(fresh["v"]) == Save.VERSION
 	ok(kept, "a save that only hatched keeps its tutorial")
+
 
 # ------------------------------------------------------------------ 2. a run saves its beats
 func _new_match() -> Match:
@@ -59,6 +67,7 @@ func _new_match() -> Match:
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	return m
+
 
 func _remember() -> void:
 	_tut_save({"hatched": true, "intro": true})
@@ -80,6 +89,7 @@ func _remember() -> void:
 	ok(wrong == "", "each finished beat is in the save the moment it ends (wrong:%s)" % wrong)
 	ok(String(Save.d["tutorial"]["tut_beat"]) == "defend", "extracting ends the course (Match sets tutorial.match)")
 	m.free()
+
 
 # ------------------------------------------------------------------ 3. quit after each beat, come back
 func _resume_each() -> void:
@@ -112,6 +122,7 @@ func _resume_each() -> void:
 		m.free()
 		tried += 1
 	ok(tried == steps.size() - 1, "every beat was tried (%d)" % tried)
+
 
 # ------------------------------------------------------------------ 4. the farm tutorial
 func _farm_resume() -> void:

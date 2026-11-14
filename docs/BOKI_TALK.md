@@ -14,6 +14,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 ## The file
 
 - `tuning`: the numbers above, plus `act_words` (an action is at most 4 words; a tone and an action that run over the cap together are never paired) and `min_lines` (the fewest general lines a trigger may have).
+- Actions and lines never say "it" or "its" of a Boki: they use `{he}` `{He}` `{his}` `{him}` `{himself}`, filled from the Boki's sex (`KinSpeak.pronouns`; "they" if the sex is unknown). `--boki-lines-check` fails on it/its/itself.
 - `tones`: how a young Boki says its name, by feeling. `{A}` is the first syllable, `{a}` the same in lower case, `{b}` the second syllable, `{F}` / `{f}` / `{U}` the full name as written, lower and upper case (`KinSpeak.fill`).
 - `sounds`: noises a tone may use besides the name (grrr, zzz...).
 - `alias`: old trigger names that share another trigger's lines (`yelp` and `low_hp` say `hurt` lines).
@@ -29,7 +30,7 @@ To add lines, add them to the trigger's list. `--boki-lines-check` fails a line 
 | Farm | `petted`, `fed`, `fed_fav`, `fed_no`, `full`, `brushed`, `bath_fav`, `bath_grump`, `nap`, `trained`, `train_miss` | the care actions in `home.gd` |
 | Farm | `want_food`, `want_energy`, `want_clean`, `want_joy` | a low need (greeting, `FarmChatter`, too tired to train, starving, overworked) |
 | Farm | `crop_ready`, `crop_watered`, `building`, `working`, `rain`, `night`, `chat` (+ the friend's `chat_reply`) | `FarmChatter` (`scripts/home/farm_chatter.gd`) |
-| Farm | `new_boki`, `look_rare`, `look_toy`, `look_loot`, `look_shy` (a timid Boki) | news at home: up to three Boki come to look (`ComeLook`, `scripts/home/come_look.gd`; the first to arrive saves one memory line) |
+| Farm | `new_boki`, `look_rare` (also a Rare Egg you carry home), `look_toy`, `look_loot` (also an Ink), `look_shy` (a timid Boki) | news at home: up to three Boki come to look and react by their traits, a sniff, a puff or a hide (`ComeLook`, `scripts/home/come_look.gd`, poses in `KinHabit`; the first to arrive saves one memory line) |
 | Farm | `hatched` | a Boki hatching |
 | Farm | `back_<kind>` (carried_out, boss_kill, revived, stood_over, comforted, knock_together, escaped) | the first time you walk up after an expedition, by how it went (`rec.recall`) |
 | Match | `kill`, `owner_down`, `caught`, `extract`, `comfort` (the results screen), `storm` (the islands start falling), `loot` (you open a chest) | `BokiChatter.say` from `match.gd` and `chest_loot.gd` |
