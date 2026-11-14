@@ -176,7 +176,8 @@ The Wyrm's corruption, a faction that hunts every squad by **noise and light**.
 - **The tide closes on the Heart.** From 15 s the Blight's ring shrinks toward the Heart's site over 4 minutes.
   Outside it the Blight is stronger and comes sooner, and the tide itself hurts you every second, past your
   armor: barely at first (a full-health medium Hunter lasts minutes), 26 s to die by the third of its 11 stages,
-  and about 3 s once it has closed.
+  and about 3 s once it has closed. Bots walk in ahead of the next ring (harder bots with more room),
+  fight at the edge, and drop the fight to run in, dashing or gliding, when the wall reaches them.
 
 ## Raid conditions
 
