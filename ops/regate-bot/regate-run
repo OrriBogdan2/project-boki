@@ -120,10 +120,10 @@ log "gate rc=$GRC: $(grep -m1 '^gate ' "$OUT/gate/summary.txt" 2> /dev/null)"
 [ "$GRC" = 3 ] && { kill "$EXP" 2> /dev/null; finish ERROR "gate ENV-BROKEN: $(grep -m1 ENV-BROKEN "$OUT/gate/summary.txt")"; }
 reds() { sed -n "s/^NEW-RED[^:]*: //p" "$1" | tr ' ' '\n' | sed '/^$/d' | sort -u; }
 RED=$(reds "$OUT/gate/summary.txt")
-if [ -n "$RED" ]; then  # flaky guard: the red flags once more, both sides, no cache
+if [ -n "$RED" ]; then  # flaky guard: the red flags once more, both sides, no cache, one at a time (net checks bind fixed ports)
 	echo "$RED" > "$OUT/rerun-flags.txt"
 	log "NEW-RED $(echo $RED), re-running once"
-	python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/rerun" --jobs "$JOBS" --flags "$OUT/rerun-flags.txt" \
+	python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/rerun" --jobs 1 --flags "$OUT/rerun-flags.txt" \
 		--no-cache --no-canary > "$OUT/rerun.stdout" 2>&1
 	RED=$(reds "$OUT/rerun/summary.txt")
 	log "after re-run: NEW-RED $(echo $RED)"

@@ -286,6 +286,20 @@ def verdict(rc, log):
     return ("green" if rc == 0 else "red"), mismatch
 
 
+def reap_env(marker):
+    """Kill what a check left running in its own session (tools/online_feel_proxy.py detaches, then holds its port
+    and makes later net checks red): every process whose environment has this check's private XDG_DATA_HOME."""
+    key = marker.encode()
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit() or int(d.name) == os.getpid():
+            continue
+        try:
+            if key in (d / "environ").read_bytes().split(b"\0"):
+                os.kill(int(d.name), signal.SIGKILL)
+        except OSError:
+            pass
+
+
 def run_flag(godot, tree, flag, timeout, extra):
     tmp = tempfile.mkdtemp(prefix="suite-")
     env = dict(os.environ, XDG_DATA_HOME=f"{tmp}/data", XDG_CONFIG_HOME=f"{tmp}/config", XDG_CACHE_HOME=f"{tmp}/cache")
@@ -301,6 +315,7 @@ def run_flag(godot, tree, flag, timeout, extra):
                 os.killpg(p.pid, signal.SIGKILL)
             except OSError:
                 pass
+            reap_env(f"XDG_DATA_HOME={tmp}/data")
             fh.seek(0)
             log = fh.read()
     except OSError as e:
