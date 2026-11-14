@@ -2078,8 +2078,8 @@ func _find_interact() -> void:
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
 	if hob:
 		var near_hob := hob.find(p2)
-		if not near_hob.is_empty():
-			bd = 0.5
+		if not near_hob.is_empty() and (best.is_empty() or float(near_hob.get("d", 0.0)) < bd):
+			bd = float(near_hob.get("d", 0.5))
 			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and _visiting()): continue
@@ -2088,19 +2088,19 @@ func _find_interact() -> void:
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
 		if nm == "house": sp = _house_door() - HomeLayout.facing(house_r) * 0.1
 		var d := p2.distance_to(Vector2(sp.x, sp.z))
-		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
+		if d < reach and d < bd + FarmHob.lead(best, 0.6): bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
 		if not l["built"] and FarmSites.has_site(FarmLots.entry(b, _d())): continue      # FarmHob finds the site
 		var dp: Vector3 = l["door"] if l["built"] else l["at"]
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
-		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
+		if d < (1.8 if l["built"] else 2.4) and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "lot", "b": b}
 	for k in bridges:
 		if bridges[k]["built"] or FarmUnlocks.base_mode():
 			continue
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
-		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
+		if d < 2.4 and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "bridge", "isle": k}
 	var pet := {}      # a Boki only wins at the end, and never over work in reach
 	var pet_d := bd
 	for k in kins:
@@ -2110,7 +2110,7 @@ func _find_interact() -> void:
 	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
-		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
+		if bdd < 1.7 and bdd < bd + FarmHob.lead(best, 0.4): bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and not _visiting():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
 	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and not _visiting():
