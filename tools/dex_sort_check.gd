@@ -55,6 +55,9 @@ func run(m: Node) -> void:
 		var want: Array = FieldBook.entries().filter(func(s): return DexView.type_of(FieldBook.face(s)) == t)
 		var got: Array = DexView.listed()
 		ok(got == want and _legend_last(got), "Field Book, %s only: %d entries, legendaries last" % [t, want.size()])
+	# playtest 11-13: an owned Barrelmander (storm) could not be found; 20 Boki 50 species had no type chip
+	var no_chip: Array = Data.KIN.keys().filter(func(s): return not DexView.TYPES.has(DexView.type_of(s)))
+	ok(no_chip.is_empty(), "every Boki's type has a chip, so each is found under its type %s" % [no_chip])
 	KinFilter.type = DexView.type_of(plain[0])
 	Save.d["dex"].erase(plain[0])
 	ok(not DexView.listed().has(plain[0]), "an entry you have not met hides under a type pick")
