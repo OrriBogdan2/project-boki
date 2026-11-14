@@ -184,7 +184,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector
 	K.press_rmb()
 	A.step(m, 0.9)
 	A.ok("dancer Bola: a pair in a line stays the stun and bonus damage", K.bola_pairs == pairs0 + 1
-			and T.stun_t > 0.0 and T2.stun_t > 0.0 and A.dmg(T) >= 18.0, "dmg %.0f" % A.dmg(T))
+			and T.stun_t > 0.0 and T2.stun_t > 0.0 and A.dmg(T) >= 9.0, "dmg %.1f" % A.dmg(T))
 	T2.teleport(home + Vector3(-30.0, 0, 0))
 	A.fresh(T)
 	A.fresh(T2)

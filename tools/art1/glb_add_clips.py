@@ -1,9 +1,11 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
-with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
+with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
+only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--hold-moved-rest]
 --hold-moved-rest: a node whose rest (translation/rotation) differs between the two builds (a spring bone the new model moved)
 gets its target rest held for the whole clip instead of the source's keys; the held names are printed. Use it only when the
-moved nodes are ones the clips hold still anyway (spring chains: the runtime sim moves them)."""
+moved nodes are ones the clips hold still anyway (spring chains: the runtime sim moves them).
+A key is a prefix ("crouch" takes crouch_idle, crouch_f ...); "=swap" is that clip only (not swap_aim, swap_air)."""
 import json
 import math
 import struct
@@ -58,21 +60,26 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
 
-    def accessor(i):
-        if i in copied:
-            return copied[i]
+    def accessor(i, shift=(0.0, 0.0, 0.0)):
+        if (i, shift) in copied:
+            return copied[(i, shift)]
         ac = dict(sj["accessors"][i])
         bv = dict(sj["bufferViews"][ac["bufferView"]])
         off0, ln = bv.get("byteOffset", 0), bv["byteLength"]
         tb.extend(b"\0" * (-len(tb) % 4))
         bv["byteOffset"] = len(tb)
         tb.extend(sb[off0:off0 + ln])
+        if any(shift):
+            v = list(struct.unpack_from("<%df" % (3 * ac["count"]), tb, bv["byteOffset"]))
+            struct.pack_into("<%df" % len(v), tb, bv["byteOffset"], *[x + shift[k % 3] for k, x in enumerate(v)])
+            ac.pop("min", None)
+            ac.pop("max", None)
         bv["buffer"] = 0
         tj["bufferViews"].append(bv)
         ac["bufferView"] = len(tj["bufferViews"]) - 1
         tj["accessors"].append(ac)
-        copied[i] = len(tj["accessors"]) - 1
-        return copied[i]
+        copied[(i, shift)] = len(tj["accessors"]) - 1
+        return copied[(i, shift)]
 
     done = []
     for a in sj["animations"]:
@@ -93,7 +100,9 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
                 if held is not None:
                     held.add(nm)
                 continue
-            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"]), "interpolation": sm.get("interpolation", "LINEAR")})
+            rest = [t - s for t, s in zip(tj["nodes"][names[nm]].get("translation", (0, 0, 0)), sj["nodes"][ch["target"]["node"]].get("translation", (0, 0, 0)))]
+            shift = tuple(rest) if ch["target"]["path"] == "translation" and max(map(abs, rest)) > 1e-6 else (0.0, 0.0, 0.0)
+            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"], shift), "interpolation": sm.get("interpolation", "LINEAR")})
             new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": ch["target"]["path"]}})
         tj["animations"].append(new)
         done.append(a["name"])
@@ -110,7 +119,7 @@ if __name__ == "__main__":
     tj, tb = read(target)
     sj, sb = read(source)
     held = set()
-    done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys), hold, held)
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held)
     write(out, tj, tb)
     print("added", len(done), done)
     if hold:
