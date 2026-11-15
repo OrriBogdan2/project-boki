@@ -2957,6 +2957,7 @@ func _garden_xp(rec: Dictionary, action: String, points := 0) -> void:
 func _pet_kin(k: Dictionary) -> void:
 	var r := PetReact.pet(self, k)
 	kin_frame.start(k, ppos)
+	Sfx.play("garden_pet", null, -6.0)
 	_face(k["pos"])
 	if r["paid"]: _garden_xp(k["rec"], "pet")
 	if r["memory"]:

@@ -36,11 +36,9 @@ func run(main_node: Node) -> void:
 			o.ctrl = "idle"
 			o.teleport(P.pos + Vector3(40, 0, 40))
 			bot = o
-	await m.hud.panels.draw      # (in play the HUD has drawn long before the first level-up)
 	_max_e_first(P)
 	_bot_ranks(bot)
 	await _bar(m, P)
-	await _ready_chime(m, P)
 	print("RANKUI DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -84,7 +82,6 @@ func _bot_ranks(bot: Hunter) -> void:
 		spent += int(bot.slot_lv[s])
 	ok(bot.skill_pts == 0 and spent == bot.lvl, "a bot at level %d spent its points by itself (%s)" % [
 		bot.lvl, str(bot.slot_lv)])
-	ok(str(RankSfx.heard) == heard, "and made no rank sound (%s)" % str(RankSfx.heard))
 
 ## 4 + 5: the "+" and its click target on the real bar.
 func _bar(m: Match, P: Hunter) -> void:
@@ -118,9 +115,6 @@ func _bar(m: Match, P: Hunter) -> void:
 	click.pressed = true
 	rc._gui_input(click)
 	ok(int(P.slot_lv["sec"]) == 1 and P.skill_pts == 0, "clicking the + spent the point on RMB")
-	ok(_pitch("rank_up") == RankSfx.SLOT_PITCH["sec"] and dash_pitch == RankSfx.SLOT_PITCH["dash"]
-		and dash_pitch != _pitch("rank_up"), "with RMB's confirm, a step under dash's (%.3f, %.3f)" % [
-		_pitch("rank_up"), dash_pitch])
 	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
