@@ -289,7 +289,8 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
-		out.append("Fused %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+		var which := Settings.key_cap("signature") if slot == "active" else "auto ability"
+		out.append("Fused %s: %s" % [which, ", ".join(bits)])
 	return out
 
 ## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).

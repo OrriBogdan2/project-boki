@@ -4,8 +4,8 @@ extends RefCounted
 ## level and a bar toward the next level) along its top edge, then to its right your health as a big
 ## number over a thick segmented bar, armour as a strip under it with its number and
 ## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
-## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits below the
-## bars (Hud._draw_abilities). Look: HudStyle.
+## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits
+## below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 318.0       # px: health / armour width
@@ -39,7 +39,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	H.armor_lerp = move_toward(H.armor_lerp, af, dt * (0.5 if H.armor_lerp > af else 4.0))
 	H.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := TextCache.width(HudStyle.BIG, hp_txt, 26)
@@ -99,7 +99,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := TextCache.width(HudStyle.BIG, txt, 13)
-	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
+	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, H._hud_origin(sz).y + 46.0), Vector2(tw + 24, 20))
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 

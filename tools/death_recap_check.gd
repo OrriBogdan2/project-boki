@@ -55,7 +55,7 @@ func run(main: Node) -> void:
 	var knife_name := String(Arch.def("thief")["e"]["name"])
 	ok(hits[0]["how"] == knife_name, "an ability hit reads as its ability (%s)" % hits[0]["how"])
 	ok(hits[1]["how"] == "a weapon shot" and hits[2]["how"] == "a fall", "plain hits read in plain words")
-	ok(hits[0]["hunter"] == foe and SideColor.of(m, foe) == SideColor.FOE,
+	ok(hits[0]["hunter"] == foe and SideColor.of(m, foe) == SideColor.foe(),
 		"the killer is the Hunter, drawn in the foe colour")
 	_run(DeathRecap.WINDOW_S + 1.0)
 	ok(m.recap.recent(P, m.time).is_empty(), "hits older than %d s fall off" % int(DeathRecap.WINDOW_S))

@@ -10,20 +10,19 @@ const ROWS := 4                # rows on show at most (a new one pushes the olde
 const HOLD_S := 5.0            # s a row is fully shown
 const FADE_S := 0.5            # s it then takes to fade out
 const LIFE_S := HOLD_S + FADE_S
-const LANE_W := 300.0          # px: the widest row (on a 1240 px screen the widest message card ends at 911)
-const RIGHT := 18.0            # px from the screen's right edge, lined up with the counters above
+const LANE_W := 266.0          # px: the widest row; wider, it would run under the message cards (inside the safe margin)
 const GAP := 4.0               # px between rows
 const KNOCK_H := 30.0          # px: a knock row's height
 const TEXT_H := 24.0           # px: a one-line text row's height
 const TEXT_BASE := 17.0        # px from a text row's top to its first baseline
 const BASELINE := 5.0          # px below a knock row's middle where its names sit
 const NAME_PX := 13            # font px for names and lines
-const NAME_W := 84.0           # px: a longer name is cut with an ellipsis (two of them fit LANE_W)
-const FACE := 24.0             # px: a face's side
-const ICON_W := 24.0           # px: the icon's cell between the faces
+const NAME_W := 82.0           # px: a longer name is cut with an ellipsis (two of them fit LANE_W)
+const FACE := 22.0             # px: a face's side
+const ICON_W := 22.0           # px: the icon's cell between the faces
 const ICON_S := 8.5            # Icons.draw size of that icon
-const SEP := 6.0               # px between a name, a face and the icon
-const EDGE := 14.0             # px from a plate's end to its content: the bar's inset, the bar, padding
+const SEP := 4.0               # px between a name, a face and the icon
+const EDGE := 10.0             # px from a plate's end to its content: the bar's inset, the bar, padding
 const BAR := 4.0               # px: a squad's colour bar
 const BAR_IN := 2.0            # px from the plate's end to its bar
 const TEXT_PAD := 12.0         # px after a text row's line
@@ -64,8 +63,9 @@ static func add(m: Match, knocker: Hunter, who: Hunter, icon: String) -> void:
 ## Draws the feed down from Hud.feed_top at the screen's right edge, oldest on top.
 static func draw(H, sz: Vector2) -> void:
 	shown.clear()
-	var y: float = H.feed_top
-	var right := sz.x - RIGHT
+	var pad := HudStyle.safe_pad(sz)
+	var y := maxf(H.feed_top, pad.y)
+	var right := sz.x - pad.x
 	for f: Dictionary in H.m.feed:
 		var a := snappedf(clampf((LIFE_S - float(f["t"])) / FADE_S, 0.0, 1.0), 0.125)
 		var is_knock := is_instance_valid(f.get("who"))
