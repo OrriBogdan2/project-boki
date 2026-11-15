@@ -140,4 +140,4 @@ func _bob_target(a: float, dt: float) -> float:
 			_pitch(skel.get_bone_global_pose(legs[1][0]).basis.y)))
 	spread_mean = lerpf(spread_mean, spread, a)
 	spread_peak = maxf(spread - spread_mean, spread_peak * exp(-dt / SPREAD_TAU))
-	return bob_sign * 0.5 * bob_m * (spread - spread_mean) / maxf(spread_peak, 0.05)
+	return bob_sign * 0.5 * bob_m * clampf((spread - spread_mean) / maxf(spread_peak, 0.05), -1.0, 1.0)
