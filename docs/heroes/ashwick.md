@@ -96,6 +96,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 |---|---|---|---|
 | E pull online (`remote`) | HIGH | (c) | owned by ext/online-displace (all kits); not touched here |
 | Knock reset ring | MED | (b) | the reset keeps its sound and HUD ready flash (no word); no ground ring, no net ring |
+| Knock reset ring | MED | (b) | the cloak reset keeps its sound and HUD ready flash; no ground ring, no net ring |
 | LMB fuel (8 s, 1.6 s refill) | MED | (b) | no fuel: the data's Flamethrower is a plain hold. "lance audit: 10 s of roaring with no fuel to run out ..." |
 | LMB self-slow while firing | MED | (b) | full walk while firing; only the wiki's 0.6 for 0.35 s after release. Same assert |
 | RMB cooldown, input | LOW / ok | (c) | fine per the audit (0.78x, the kit's scale) |
@@ -134,6 +135,10 @@ so nothing was built. In flight means extra polish on an unmerged branch; the ro
 | 10 | pilot flame | closed, owner override 11-11: gold, spool-up only | "lance: the gold pilot shows (her fire, not blue), no fire for the first 0.2s"; "lance: idle, no pilot flame in her palm" |
 | 11 | fuel | closed | no fuel, as in the source (f2478ab45); "lance audit: 10 s of roaring with no fuel ..." |
 | 12 | self-slow while flaming | closed | full walk while firing, 0.6 for 0.35 s after release (f2478ab45); "lance audit: ... at his full walk", "lance: letting go stops the fire at once" (`move_k` < 1 after) |
+
+## RMB range re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage linwick, 1 bh = top of the health bar to the feet = 1.8 m)
+
+Cinder Shot range 14: **Not determinable**. Hits at 6.9 bh = 12.4 m (273 px over a 39-40 px body, 0102-0107) and close in (0073-0076). The one miss (0128-0135) ends on the cursor at 184 px over 28.5 px = 6.45 bh = 11.6 m, with the lane drawn to the cursor. So the source cap is at least 12.4 m; 14 stays. The full-14 m flight on a miss is OWNER_REVIEW_1103 item 19.
 
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the

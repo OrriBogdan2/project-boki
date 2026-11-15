@@ -30,7 +30,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
 | `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
 | `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks and mastery: Vex as the one starter and the second Relic (Kael, Cinder or Meeko) after the first expedition (offered by Hob: `--hob-check`), no Relic pick before the egg, challenge-only Hunters never offered, each Hunter's challenge (tier, target, measurable stat) making it ready and hold to unlock opening it (a partial hold cancels, the reveal plays), mastery goals counted per Hunter with cosmetic-only rewards (no stat or ability anywhere in the progression data), glider skins changing no handling, the feats HunterFeats records, save migration keeping every Hunter a save had unlocked or played, the viewer showing every ability as a clip of it working (keys from the bindings, one short line each, no story or gender text), the glider pick, locked Hunters playable in the Arena (its Training dummy) and practice picker |
-| `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges |
+| `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges; each kit's payoff plays its own sound once at the fight-mix level |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
 | `--weapon-clip-check` | No held weapon dips into the ground in any pose, on any class |
 | `--pickup-check` | A picked-up weapon arrives with a full magazine and no reload running, from any source |
@@ -49,6 +49,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--perch-check` | Each perch can be reached from its updraft chain |
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
+| `--current-check` | Wind roads and updrafts: every entry in each authored map's data (and generated maps) gets a visual node placed where the data puts it, streaks capped and fewer on Low, a ring at each road end; `--shots-dir=` (*window*) |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
 | `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
@@ -73,6 +74,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
 | `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
 | `--breed-sim-check` | Breeding sim: 500 random pairs bred, sex split half and half (documented shares aside), traits from the parents' mean, IVs, habits and looks from one parent, no mutation outside the base-odds roll |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, the pairing sounds (two-note size chime, nuzzle, settle, wobble on an unstable mix) |
+| `--garden-react-check` | The garden's reactions (pet, feed, toy, egg, trait, friend) each play their own cue and leave `unlock` for real unlocks; the Boki eat and nap sounds |
 | `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |

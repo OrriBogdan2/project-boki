@@ -58,3 +58,5 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
   --anim-audit run 13 % (main 12 %). At Godot's default 30 fps import the
   run's 80 ms stance kept 2 or 3 keys and the soles wobbled. Run `pip_feet_weights.py`, `pip_gait.py`, then
   `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).
+
+- **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.
