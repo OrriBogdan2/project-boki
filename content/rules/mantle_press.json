@@ -1,0 +1,15 @@
+{
+  "doc": "What a press does while a hunter rises up a ledge (Hunter._ledge_rise, MantleCarry), the same for every hero. Read by DashFlow (scripts/arch/dash_flow.gd). mode: fire (goes mid-climb, the rise goes on) or buffer (waits for the top). seen: false marks a row the source doesn't show ([?] in docs/heroes/dash_interactions.md): those buffer, never cancel. Asserted by --mantle-press-check.",
+  "lmb": {"mode": "buffer", "seen": false,
+    "source": "Not shown inside a rise. Closest: sv_joule_1v4.mp4 9.20-9.27 s (briefs/supervive-data/MANTLE_185b.md): a hunter tops a low rim and stands firing ~0.07 s later, a shot at the top, not one in the rise."},
+  "rmb": {"mode": "buffer", "seen": false,
+    "source": "Not shown: no RMB inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref)."},
+  "e": {"mode": "buffer", "seen": false,
+    "source": "Not shown: no E inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref)."},
+  "x": {"mode": "buffer", "seen": false,
+    "source": "Not shown: no ultimate inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref)."},
+  "dash": {"mode": "fire", "seen": true,
+    "source": "Footage owner_mantle_clip.mp4 17.9-18.6 s (briefs/supervive-data/MANTLE_185b.md): a dash at an abyss rim goes over it and onto the grass at dash-trail speed, no stop. Data: the mantle is a suction force and a Z impulse during the fall (supervive_physics.md, Mantle), with no state that ends a dash."},
+  "jump": {"mode": "fire", "seen": true,
+    "source": "Owner's account of the source (docs/MOVEMENT_FEEL.md, Ledges): 'a well-timed input or jump gives a better fling. The game never takes control.' Ours: the fling (Hunter._ledge_fling)."}
+}

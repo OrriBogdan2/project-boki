@@ -5,9 +5,16 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
+## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
+## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
+const UI_SCALE_MIN := 0.75
+const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
-	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
+	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
+	"master": 0.9, "music": 0.85, "sfx": 1.0, "voices": 1.0, "ambience": 0.9, "ui_sounds": 1.0, "audio_v": 2,
+	"mute_unfocused": false,
 	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
@@ -22,18 +29,30 @@ const DEFAULTS := {
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false,
+	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
+## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
+const TEXT_SIZES := [1.0, 1.25, 1.5]
+
+## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
+const BUSES := {
+	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
+}
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
+## Camera ids renamed 11-13 (they were a third-party name): an old settings.cfg value maps to the new id.
+const CAM_IDS := {
+	"cam_style": {"supervive": "default", "supervive_wide": "default_wide"},
+	"cam_follow": {"supervive": "lean"},
+}
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
@@ -147,8 +166,8 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
@@ -157,7 +176,7 @@ const ACTIONS := [
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
-	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
@@ -179,8 +198,32 @@ var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
 
+## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
+static func migrate_cam(d: Dictionary) -> void:
+	for k in CAM_IDS:
+		var old := String(d.get(k, ""))
+		if CAM_IDS[k].has(old):
+			d[k] = CAM_IDS[k][old]
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := load_file()
+	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
+	_quality_basics = not cf.has_section_key("s", "quality")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--quality="):
+			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
+	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
+		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
+	get_tree().node_added.connect(_on_node_added)
+	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().root.size_changed.connect(_apply_render_scale)
+
+## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
+func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
@@ -193,12 +236,15 @@ func _ready() -> void:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
+		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
+	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
+	_migrate_volumes(cf)
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -213,18 +259,21 @@ func _ready() -> void:
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
-	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
-	_quality_basics = not cf.has_section_key("s", "quality")
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--quality="):
-			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
-	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
-		save.call_deferred()
-	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
-		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
-	get_tree().node_added.connect(_on_node_added)
-	get_tree().root.size_changed.connect(_apply_ui_scale)
-	get_tree().root.size_changed.connect(_apply_render_scale)
+	if not cf.has_section_key("s", "voices"):
+		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
+		v["voices"] = v["sfx"]
+		v["ui_sounds"] = v["sfx"]
+	return cf
+
+## The Text size choice nearest `x` (anything unreadable or out of range lands on 100%).
+static func snap_text_size(x: Variant) -> float:
+	if not (x is float or x is int):
+		return 1.0
+	var best: float = TEXT_SIZES[0]
+	for s: float in TEXT_SIZES:
+		if absf(s - float(x)) < absf(best - float(x)):
+			best = s
+	return best
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -233,6 +282,16 @@ func _migrate_belt_keys() -> void:
 		if ks.has(pair[0]):
 			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
 			ks.erase(pair[0])
+
+## The volume sliders became perceptual (audio_v 2, Sfx.slider_db: gain = slider squared). A level saved
+## before that moves its slider to where it sounds the same, so nobody's mix changes.
+func _migrate_volumes(cf: ConfigFile) -> void:
+	if cf.has_section_key("s", "audio_v"):
+		return
+	for k in BUSES:
+		if cf.has_section_key("s", k) or v[k] != DEFAULTS[k]:
+			v[k] = sqrt(clampf(float(v[k]), 0.0, 1.0))
+	v["audio_v"] = 2
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
@@ -296,11 +355,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:
@@ -324,6 +382,7 @@ func apply(k: String) -> void:
 		"quality", "quality_found":
 			_apply_quality()
 		"ui_scale": _apply_ui_scale()
+		"text_size": UI.set_text_size(float(v[k]))
 		"rec_level":
 			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
 			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):
@@ -343,11 +402,8 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
-	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
-	# never let the user's own size setting push the layout past the window either
-	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
+	var user := clampf(float(v.get("ui_scale", 1.0)), UI_SCALE_MIN, UI_SCALE_MAX)
+	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
 
@@ -591,6 +647,12 @@ func key_caps(action: String) -> String:
 		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
 		out.append(t.to_upper() if c.begins_with("key:") else t)
 	return " / ".join(out) if out.size() > 0 else "?"
+
+## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
+func fill_keys(text: String) -> String:
+	for a in ACTIONS:
+		text = text.replace("{%s}" % a[0], key_cap(a[0]))
+	return text
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:

@@ -216,6 +216,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
+			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -287,6 +289,10 @@ const MOBS := {
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},
+	# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
+	# damage. 2000 health at tier 0: one bot ~2 min (with the guards each crack calls), three ~20 s
+	"gate": {"name": "Gate Seal", "hp": 2000.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 1.4, "gems": 0, "color": Color("8a8494"), "attack": "none", "ward": true},
 }
 ## The lair bosses, in the order generated maps hand them out.
 const BOSSES := ["colossus", "serpent", "brood"]
@@ -421,7 +427,7 @@ const BUILDINGS := {
 		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
-	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
+	"armory": {"name": "Gear Shed", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
 		"desc": "Stores the weapons and gloves you bring home. Pick what you take on your next expedition, sell or salvage the rest, and get a bigger backpack."},
 	"shrine": {"name": "Soul Shrine", "isle": "main", "cost": 150, "rect": [49, 35, 50, 36], "needs_ember": true,
 		"desc": "Lit by a Soul Ember. Keeps the souls of Boki buried in the graveyard, and can bring one back (a little different)."},

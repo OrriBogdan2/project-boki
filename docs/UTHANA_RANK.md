@@ -38,6 +38,48 @@ The pipeline is committed under `tools/anim/`, so either case can start from it.
   - It fell another $0.40 between 00:20 and 00:25, when this job made no calls at all.
 - Once the cap was close, no more calls were made, so each move got only one take.
 
+## Round 2 (job 20261111-005144-a6, ext/anim-alt-1111): spend the rest of the credit
+
+**Result: 3 clips beat or fill the current set, all for Albert. Nothing else won.** None is swapped into a live animation set; they are for the owner to approve (READY post).
+
+**What was done**
+
+- 43 more takes on Tar, TTM 3.0, 4 s, rewrite off, in 3 batches (26, 12, 5), then retargeted to the breaker (Albert) and hem (Lace) rigs. Prompts: `tools/anim/uthana_prompts{,2,3}.tsv`. Raw takes and ledgers: `art/uthana_alt/motion{,2,3}/`.
+- Cleaned with the same pipeline. Recipes: `tools/anim/uthana_recipes_alt{,2,3}.json`. Judged at the game camera (panel and metrics as in the table above, in-game clip on the left).
+- Scores come from contact-sheet frames and the METRIC lines, not from watching every video in full.
+- Pipeline fix: `uthana_clean.gd` `load_motion` mis-read bone names on skinned rigs (`Skeleton3D:bone` track paths), which left Meshy/HY retargets static. Fixed. It does not change Uthana results.
+
+**Winners** (MP4s in `/home/boki/art-review/anim-alt-1111/`, in-game on the left)
+
+| Clip | Stands in for | R | W | S | F | St | Sum | Slide m (new / in-game) | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| albert_death3 | death (1.3 s) | 4 | 4 | 3 | 5 | 3 | 19 | 0.058 / 0.075 | Staggers, drops, lies flat. 2.88 s, body never below floor. Ties the current death at 19 and has more weight. |
+| albert_victory (v1) | emote | 4 | 3 | 4 | 5 | 2 | 18 | 0.111 / 0.124 | Hammer raised, clean feet. 3.97 s. Realistic rather than cartoon. |
+| albert_heavy3 | new heavy (Albert has none) | 4 | 3 | 4 | 3 | 2 | 16 | 0.460 / 0.276 (x_slam) | Overhead hammer arc that fills the missing heavy. Slides a bit more than x_slam. |
+
+**Rejected** (kept as evidence in the `evidence/` folder: `rejected_*.mp4`)
+
+| Clip | Why |
+|---|---|
+| albert_death (v1 trims) | Slides 0.22-0.63 m depending on trim; death3 is cleaner. |
+| albert_death2 | Body 0.205 m below the floor. |
+| albert_victory2 | Slides 1.14 m. |
+| albert_victory3 | Slides 0.31 m, worse than v1 (0.11). |
+| albert_heavy2 | Slides 0.72 m. |
+| albert_whirl2 | Slides 10.3 m. |
+| lace_death3 | Falls and lies down well, but sinks 0.17 m into the floor. |
+| lace_victory3 | Bow-raise reads, slide 0.40 m (in-game 0.55), but a generic pose; not clearly better. |
+| lace_hit2, lace_dodge2, lace_victory/2 | Slide too much or go underground, as in round 1. |
+| lace_shot | Acceptable, ties the in-game loose. Not worth a swap. |
+
+Lace clips do worse than Albert's: the same prompts retargeted to the hem rig stagger and slide more.
+
+**Spend (Uthana)**
+
+- 43 takes × about $0.4042 = about $17.4. The $18.35 balance at the start of this round (see the Spend table above) leaves about $0.55 of the $18 budget.
+- The live org balance read $38.38, $37.57, $32.72, then $30.70 during this round. That is higher than the $18.35 that round 1 ended on, so the account was topped up by someone else. The drops between readings match 17 takes × $0.4042 = $6.87 for batches 2 and 3. Batch 1 cost about $10.5 for 26 takes. Spending stopped at the budget, not at the live balance, because the extra funds were not this job's to use.
+- Ledgers: `art/uthana_alt/motion*/ledger.tsv` (includes the generation IDs).
+
 ## Rank: every pilot clip, raw, on the real rig, at the game camera
 
 **How the clips were rendered**

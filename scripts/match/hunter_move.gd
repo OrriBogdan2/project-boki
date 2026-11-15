@@ -4,7 +4,7 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
-static var _rules: Dictionary = _load()
+static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
@@ -27,14 +27,7 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
-
-static func _load() -> Dictionary:
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
-	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
-	return parsed
-
-static func rules() -> Dictionary:
-	return _rules
+static var sneak_speed: float = _phys["sneak_speed"]
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
@@ -149,3 +142,43 @@ static func rise_time(depth: float) -> float:
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.
 static func mantle_launch(run_speed: float) -> float:
 	return maxf(run_speed * mantle_launch_keep, mantle_launch_min)
+
+## Where a body wanting to be at p ends up once it's pushed straight out of every barrier that blocks
+## it (a Tenzo rock, a raised wall; Verbs.wall_blocks), as World.push_out_blocks does for rock tiles:
+## you slide along the face and round the end instead of stopping. x, y: the spot; z: the highest top
+## it was pushed off (0 for none), for the wall kick and the caster's climb (StoneStand).
+static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
+	var top := 0.0
+	for w in h.m.world.dyn_walls:
+		var wt := Verbs.wall_top(w, h.pos.y)
+		if wt <= 0.0:
+			continue
+		var reach := Verbs.wall_reach(w, h.r)
+		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
+		var d := p - c
+		if d.length_squared() >= reach * reach:
+			continue
+		if d.length_squared() < 1e-8:
+			d = Vector2(h.pos.x, h.pos.z) - c      # (dead on its line: back out the side you came from)
+		# out to a skin past the reach: a body sliding along the face then stays clear of it, where a float's
+		# rounding would otherwise push it a hair with a random normal and eat its speed
+		p = c + d.normalized() * (reach + World.BLOCK_SKIN)
+		top = maxf(top, wt)
+	return Vector3(p.x, p.y, top)
+
+## The keys' velocity against the wall the last step's walk pressed into (n: out of it, zero for
+## none): its part into the wall is dropped, so the whole run-up goes along the face and you slide at
+## the tangent part of your speed from the first step (a dash's hand-over into the run included).
+## The walk passes its velocity through it too: Loco.accel_to brakes any speed over the wish, which
+## would otherwise eat the tangent part before the run turned along the face.
+static func along_wall(wish: Vector2, n: Vector2) -> Vector2:
+	var into := wish.dot(n)
+	return wish - n * into if into < 0.0 else wish
+
+## Whether a step the walls stopped (b1, b2: World.occupy's answer for the x and z moves) is caught on a
+## corner and needs the sideways slip. A dash step along a face, its one axis free, is not: it slides at
+## the tangent part of its speed as the source's dashes do (decision 0047), and the slip would add to it.
+static func caught(dashing: bool, b1: float, b2: float) -> bool:
+	if dashing:
+		return b1 > 0.0 and b2 > 0.0
+	return b1 > 0.0 or b2 > 0.0

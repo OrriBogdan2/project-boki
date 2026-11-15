@@ -66,13 +66,13 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 [dredge.mp4](dredge.mp4)
 
 Still differs:
-- Cooldowns: Abyssal Hand 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
+- Cooldowns: Deep Reach 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
 - Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
   Nov 7).
-- Anchor Drop: our brass fist and a teal cone shown to everyone while it fills; the source shows a giant translucent
-  fist and only a hit-box outline [F]. Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
+- Anchor Drop: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
+  cone shows to everyone (matches the source [F]). Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
 - The Barge has no red burst at its start point [F]; the owner forbids bursts on dashes.
 - Brass Broadside turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
   the press [F]. He walks at 30% then 20% through it (owner).
@@ -242,9 +242,10 @@ Still differs:
 Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
 0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
 footage's is a thick wavy orange chain [F 0304]; Riposte's guard shows a gold strike rectangle like the footage's
-[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is an
-orange-gold arc up the strip into a gold impact cloud (0:19.1), where the footage's is a huge red vertical crescent
-and a white cloud [F 0430-0431, 0438-0439]; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
+[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is a tall
+gold-and-white crescent standing at the strip's end, then a white cloud (`ext/kael-riposte-crescent`; before it an
+orange-gold arc into a gold cloud), where the footage's is a huge red vertical crescent and a white cloud
+[F 0430-0431, 0438-0439], the red being his gold here; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
 +41 over him (116 to 158 hp, 0:19.2), with no green light-rain column (the footage's heal column is the knock heal
 [F 0455-0458], not the Retaliation's); the air dash puts a wide grey disc round him.
 
@@ -297,7 +298,8 @@ Still differs:
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
   (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
   stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
-- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
+- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches. Range, past-the-cursor flight,
+  speed and comet size now match (13.5 m, ext/meeko-crook-range); this reel predates it and its cursor sits on the dummy.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
@@ -315,7 +317,8 @@ thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan d
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
 cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
-ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
+ours showed no plus sparkles there (since the reel: two small mint pluses rise off the ally on each 0.5 s heal tick,
+HeroVfx `call_plus`, also on other players' screens); at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
 ## Tenzo the Stone Seer (`dolm`, source Tetra)
@@ -335,7 +338,7 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+- Shardskin: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
   a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
   damage and knockback only.
 

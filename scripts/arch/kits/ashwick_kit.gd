@@ -149,6 +149,7 @@ func stoke(f: Ent) -> int:
 func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var key := f.get_instance_id()
 	ignites[key] = {"e": f, "lvl": lvl, "until": m.time + float(rd()["ignite_t"])}
+	if f.remote: KitStatus.apply(f, "ign", float(rd()["ignite_t"]), float(lvl), true, "", h.nid)
 	var dps := float(rd()["dps%d" % lvl]) * f.max_hp * power("sec")
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
@@ -723,6 +724,8 @@ func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
 func gate_kin_tap() -> bool: return jet.swallow_kin_tap()
+## The hose roars from an open glider, which stays open (docs/heroes/ashwick.md Cancels: every interaction chains).
+func fires_in_glide() -> bool: return true
 
 # ------------------------------------------------------------------ bots
 ## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.

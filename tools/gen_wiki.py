@@ -542,7 +542,7 @@ def gen_maps():
             body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
             bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
-            en = {"dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
+            en = {"breach": "break the Gate Seal down", "dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
@@ -713,6 +713,19 @@ def _combo_rows(hero, f):
                              _combo_ours(held[move], HOLD_MODE, "keep")])
     return rows
 
+MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
+MANTLE_MODE = {"fire": "fires mid-climb, the rise goes on", "buffer": "buffered to the top"}
+
+def _mantle_rows():
+    """The press-in-a-mantle rows every hero shares (content/rules/mantle_press.json); [?] where the source is silent."""
+    rules = load_json(os.path.join(ROOT, "content", "rules", "mantle_press.json"))
+    rows = []
+    for key, label in MANTLE_INPUTS:
+        row = rules.get(key, {})
+        ours = MANTLE_MODE[row.get("mode", "buffer")] + ("" if row.get("seen") else " [?]")
+        rows.append(["mantle -> %s" % label, row.get("source", ""), ours])
+    return rows
+
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
     if row.get("carry"):
@@ -763,6 +776,24 @@ def _air_audit_table():
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
+DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
+                   ("rise", "Shift in a jump's rise"), ("same", "Space and Shift on one step")]
+DASH_JUMP_MODE = {"cancel": "the jump goes at once and ends the dash", "both": "the jump goes and the dash runs on",
+                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends and the glider opens, no jump",
+                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise",
+                  "hop": "the air dash goes at once and arcs on as a hop, the rise kept"}
+
+def _dash_jump_rows(hero, f):
+    """Space in a dash, Shift in a jump's rise, both on one step (dash_jump rows, --dash-jump-check)."""
+    rows = []
+    for kind, label in DASH_JUMP_CASES:
+        row = f.get("dash_jump", {}).get(kind, {})
+        ours = DASH_JUMP_MODE.get(row.get("ours"), "no row")
+        if row.get("carry") is not None and row.get("ours") in ("cancel", "both"):
+            ours += ", keeping %d%% of its speed" % round(row["carry"] * 100)
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -795,6 +826,15 @@ def gen_dash_flow():
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += ("\n\n## Space and Shift together\n\nOne row per hero and case, from `dash_jump` in the same files. \"Ours\" is "
+             "measured headless by `--dash-jump-check`, which fails when the game stops doing it. Verdict: match (the source "
+             "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
+             "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
+             "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
+    body += table(["Pair", "Source", "Ours"], _mantle_rows())
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

@@ -68,7 +68,8 @@ func inb(x: int, z: int) -> bool:
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return VOID
 	var i := idx(ix, iz)
@@ -98,11 +99,13 @@ func is_stand_block(x: float, z: float) -> bool:
 	return is_block(x, z) and block_top.has(idx(int(floor(x)), int(floor(z))))
 
 func is_block(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and kind[idx(ix, iz)] == T_BLOCK
 
 func island_of(x: float, z: float) -> int:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return -1
 	return island[idx(ix, iz)]
@@ -185,7 +188,7 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	if not ghost:
 		for o in BODY_SAMPLES:
 			var g := ground_at(x + o.x * r, z + o.y * r)
-			if g > y + STEP:
+			if g > y + STEP and g > y + STEP + stair_slope(x, z, x + o.x * r, z + o.y * r):      # (a stair's rise: no wall)
 				worst = maxf(worst, g)
 				hit = true
 	if hit:
@@ -195,6 +198,19 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 		if ground_at(x, z) <= VOID + 1.0:
 			return -1.0
 	return 0.0
+
+## Is (x, z) on a flight of stairs? Its ground is a slope (rising LEVEL per metre), not a wall or a ledge.
+func on_stairs(x: float, z: float) -> bool:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return inb(ix, iz) and stairs.has(idx(ix, iz))
+
+## How far the ground may rise or fall between (x0, z0) and (x, z) and still be one walkable slope: the stairs'
+## rise over that distance when either end is on a flight, or 0 off stairs, where any rise is a wall or ledge.
+func stair_slope(x0: float, z0: float, x: float, z: float) -> float:
+	if not (on_stairs(x, z) or on_stairs(x0, z0)):
+		return 0.0
+	return LEVEL * Vector2(x - x0, z - z0).length()
 
 const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
 const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
@@ -682,7 +698,8 @@ func vis_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 func in_bush(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
@@ -1189,7 +1206,9 @@ func build_meshes() -> void:
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	mat.set_shader_parameter("height_tex", tm.height_texture())
+	var heights: ImageTexture = tm.height_texture()
+	mat.set_shader_parameter("height_tex", heights)
+	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())
@@ -2675,7 +2694,7 @@ func _stamp_lair(D: Dictionary, ii: int) -> void:
 	islands[ii]["lair"] = true
 	lair_defs.append({"id": String(D.get("id", "lair%d" % lair_defs.size())), "name": String(D.get("name", "Boss Lair")),
 		"boss": String(D.get("boss", "colossus")), "c": c, "half": hf, "gate": gate, "gate_tiles": gate_tiles, "out": out,
-		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"])})
+		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["breach"])})
 	labels.append({"name": String(D.get("name", "Boss Lair")), "pos": Vector3(c.x, 0, c.y), "kind": "lair", "role": "lair", "height": lv * LEVEL})
 
 ## Nothing else is placed inside a lair: no spawns, chests, camps, wild kin or loot lying about.
@@ -2735,7 +2754,7 @@ func _place_lairs() -> void:
 		var gate := ("e" if to_mid.x > 0 else "w") if absf(to_mid.x) > absf(to_mid.y) else ("s" if to_mid.y > 0 else "n")
 		var boss: String = Data.BOSSES[(b0 + lair_defs.size()) % Data.BOSSES.size()]
 		var nm: String = {"colossus": "The Sunken Forge", "serpent": "Stormcrown Eyrie", "brood": "The Thornhive"}.get(boss, "Boss Lair")
-		var entry: Array = {"colossus": ["dial"], "serpent": ["dial", "runes"], "brood": ["dial", "wards"]}.get(boss, ["dial"])
+		var entry: Array = {"serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
 		_stamp_lair({"id": "lair%d" % lair_defs.size(), "name": nm, "boss": boss, "at": [best.x, best.y], "half": hf, "gate": gate, "entry": entry}, ii)
 		used.append(ii)
 	_clear_lair_spots()

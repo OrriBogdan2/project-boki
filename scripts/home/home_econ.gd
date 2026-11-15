@@ -674,14 +674,13 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
 		h._emote(ke, "!", true)
-	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. It knows you, but it isn't quite the same." % rec["name"],
-		"Level %d now, and a %s nature. It'll have new favourite foods to find out." % [int(rec["level"]), Care.nature(rec).to_lower()]])
+	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. %s knows you, but isn't quite the same." % [rec["name"], KinSpeak.about(rec, "{He}")],
+		KinSpeak.about(rec, "Level %d now, and a %s nature. {He}'ll have new favourite foods to find out.") % [int(rec["level"]), Care.nature(rec).to_lower()]])
 
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:
@@ -738,7 +737,7 @@ func open_shrine() -> void:
 const ARM_TABS := {"Gloves": [0, 1], "Boots": [3]}
 
 func open_armory() -> void:
-	var v: VBoxContainer = h._new_panel("Armory", 960, true)
+	var v: VBoxContainer = h._new_panel("Gear Shed", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
 	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
@@ -807,7 +806,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 		h._refresh_top()
 		open_armory(), 0, "plus")
 	b.disabled = int(Save.d["gems"]) < int(c[0]) or int(Save.d.get("scrap", 0)) < int(c[1])
-	b.tooltip_text = "More room in the armory: %d gems and %d scrap" % [int(c[0]), int(c[1])]
+	b.tooltip_text = "More room in the gear shed: %d gems and %d scrap" % [int(c[0]), int(c[1])]
 	return b
 
 func _loadout_line() -> String:
@@ -815,7 +814,7 @@ func _loadout_line() -> String:
 	for sl in Econ.LOADOUT_SLOTS:
 		var g := Econ.loadout(sl)
 		if not g.is_empty(): bits.append(Loot.name_of(g))
-	return ", ".join(bits) if not bits.is_empty() else "nothing from the armory"
+	return ", ".join(bits) if not bits.is_empty() else "nothing from the gear shed"
 
 func _in_loadout(it: Dictionary) -> String:
 	for s in Econ.LOADOUT_SLOTS:
@@ -958,13 +957,13 @@ func _treasure(v: VBoxContainer) -> void:
 			Sfx.play("unlock"); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
 
 # ------------------------------------------------------------------ the expedition panel
-## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
+## "From your gear shed" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	HomeBelt.rows(parent, reopen, h.exp_tier)
 	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
-	parent.add_child(UI.section("From your armory  (gloves and boots)"))
+	parent.add_child(UI.section("From your gear shed  (gloves and boots)"))
 	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
@@ -981,7 +980,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var row := UI.hbox(8); card.add_child(row)
 		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)

@@ -6,7 +6,10 @@ extends RefCounted
 ## The GLBs are pivoted at the bottom centre, front to +z (the camera side).
 
 const DIR := "res://art/items/%s.glb"
+const BEACON_POST_ANGLE := 0.87  # radians off the x axis of the sculpted beacon's posts (measured in Blender)
+const BEACON_STRIP_RADIUS := 0.85  # metres from the centre: half sunk into the posts' inner faces
 static var _scenes := {}
+
 
 ## The model `id` under `parent`, its base lifted by `y`. Returns the node, or null.
 static func add(parent: Node3D, id: String, y := 0.0, tint := Color.WHITE, glow := 0.0) -> Node3D:
@@ -34,12 +37,22 @@ static func add(parent: Node3D, id: String, y := 0.0, tint := Color.WHITE, glow 
 	n.set_meta("mats", mats)
 	return n
 
+
+## The glow strips down the inner faces of the sculpted revive beacon's four posts (the sculpt has none). Its
+## posts stand 0.85 m out (inner face) at +-50 and 180 +-50 degrees, 1.55 m tall.
+static func beacon_strips(root: Node3D, mat: Material) -> void:
+	for a: float in [BEACON_POST_ANGLE, PI - BEACON_POST_ANGLE, PI + BEACON_POST_ANGLE, -BEACON_POST_ANGLE]:
+		var at := Vector3(cos(a) * BEACON_STRIP_RADIUS, 0.9, sin(a) * BEACON_STRIP_RADIUS)
+		Models.part(root, Models.box(0.06, 0.9, 0.04), mat, at, Vector3.ONE, Vector3(0, PI / 2.0 - a, 0))
+
+
 ## A gear drop's spinning piece (slot 2 armor, 3 boots), centred on the spin; painted neutral grey, so it
 ## takes the drop's colour. False when there is no model for it.
 static func gear(spin: Node3D, slot: int, col: Color) -> bool:
 	if slot == 2:
 		return add(spin, "gear_armor", -0.3, col, 0.55) != null
 	return add(spin, "gear_boots", -0.27, col, 0.55) != null
+
 
 ## A loot gem, centred (it bobs about its middle); the primitive one is two mint prisms.
 static func gem() -> Node3D:
@@ -52,6 +65,7 @@ static func gem() -> Node3D:
 	Models.part(root, p, m, Vector3(0, 0.15, 0))
 	Models.part(root, p, m, Vector3(0, -0.15, 0), Vector3.ONE, Vector3(PI, 0, 0))
 	return root
+
 
 ## A healing tonic standing on its base; the primitive one is a mint ball with a neck and a cork.
 static func tonic() -> Node3D:

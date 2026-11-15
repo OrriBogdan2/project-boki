@@ -45,7 +45,6 @@ var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
-const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
 const SLAB_CAP := 24           # plates the strip holds; the 25th reuses the oldest (the trail's length while skating)
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
@@ -86,6 +85,7 @@ func add_chill(t: Ent) -> void:
 	var key := t.get_instance_id()
 	var fresh := not chilled(t)
 	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
 
@@ -119,6 +119,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 				delay,
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
 		chill.erase(t.get_instance_id())
+		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
@@ -163,6 +164,7 @@ func _tick(dt: float) -> void:
 		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
+		StatusLooks.of(m).keep(t, "chill")
 	for key in fan_hits.keys():
 		var e2: Dictionary = fan_hits[key]
 		e2["left"] = float(e2["left"]) - dt
@@ -556,8 +558,8 @@ func _tick_trails(dt: float) -> void:
 		HeroVfx.of(m).hold(h, "skate")
 		_lay_slabs(dt)
 
-## Plates of ice that form under her blades as she skates and fade behind her, each with a frost rim; all of them
-## one MultiMesh (IceStrip).
+## Plates of ice that form under her blades as she skates and fade behind her (a trail: no ring or disc on a dash);
+## all of them one MultiMesh (IceStrip).
 func _lay_slabs(dt: float) -> void:
 	rinkrun["slab"] = float(rinkrun.get("slab", 0.0)) - dt
 	if float(rinkrun["slab"]) > 0.0:
@@ -567,9 +569,6 @@ func _lay_slabs(dt: float) -> void:
 	var under := h.position + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * SLAB_LEAD
 	lk().ice_strip(SLAB_CAP).lay(
 			under, randf_range(0.9, 1.3), h.roll_dir.rotated(randf_range(-0.25, 0.25)), m.time, SLAB_LIFE)
-	rinkrun["frost"] = int(rinkrun.get("frost", 0)) + 1
-	if int(rinkrun["frost"]) % FROST_EVERY == 0:
-		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
 
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0

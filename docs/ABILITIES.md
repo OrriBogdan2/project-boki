@@ -36,6 +36,8 @@ _The warden of high ground. Climbs, reads the field, pins people to walls._
 - **Passive: Hawk Sense.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
 - **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
 - **RMB: Heavy Shot** (16s):
+  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
@@ -83,7 +85,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
 - **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
-- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
@@ -138,9 +140,9 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 | juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
 | ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
 | tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
-| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Molten Guard shield: flat (source: not in data) |
+| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Shardskin shield: flat (source: not in data) |
 | archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Hawk Sense: no number |
-| dredge, Grimble (Kingpin) | weapon: flat | Abyssal Hand dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| dredge, Grimble (Kingpin) | weapon: flat | Deep Reach dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
 | rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
 | mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
 | bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Aegis shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | 360 Smash dmg: AP = AP | Mending Ground heal: AP = AP (before flat: 0.87 / 0.74) | Faultline dmg: AP = AP | Guard: no number |
@@ -283,12 +285,12 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|
 | every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
-| Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Grimble's Deep Reach (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
 | Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |

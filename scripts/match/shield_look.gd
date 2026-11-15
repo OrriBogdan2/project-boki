@@ -4,7 +4,7 @@ extends RefCounted
 ## Boki moves, a Fuse release). The Hunter's own ink outline turns into a thicker line in their side colour
 ## (SideColor): a crisp shell that hugs the body, no bubble, nothing in front of it, no particles, no extra
 ## draw calls (the outline pass is swapped, not added). The amount is on the nameplate as a pale bar past
-## health (HudPlate). When a hit breaks the shield before it runs out it pops with one quick ring and flash.
+## health (HudPlate). When a hit breaks the shield before it runs out its shell cracks and sheds shards (ShieldBreak).
 ## The shell follows the shield's real state: it fades and thins with the amount left (against the most it held),
 ## and swells and brightens in one pulse over the last PULSE_S before it runs out, so both sides can play around it.
 ## Materials are swapped only when the shield goes up or down (a few spare ones are kept); per frame only the one
@@ -12,8 +12,6 @@ extends RefCounted
 
 const META := "shield_rim"       # on the Hunter: the colour shown, or absent while no shield is up
 const INK_WIDTH_K := 2.6        # the shield outline is this much wider than the model's own ink
-const POP_RING := 1.1            # m: radius of the break ring
-const POP_S := 0.22              # s: how long the break ring lasts
 const PULSE_S := 0.5             # s before the shield runs out that the shell pulses (once)
 const PULSE_PEAK := 2.0          # the "shell" value at the middle of the pulse (above 1: brighter and thicker)
 const SHELL_EPS := 0.004         # a smaller change of the shell value is not worth a parameter write
@@ -21,7 +19,8 @@ const SPARE_MAX := 16            # shield inks kept for reuse
 
 static var _spare: Array[ShaderMaterial] = []     # shield inks no Hunter wears now
 
-## Every frame, on every Hunter: puts the rim on while a shield is up, takes it off (and pops) when not.
+## Every frame, on every Hunter: puts the rim on while a shield is up, takes it off when not (and, in the game that
+## owns the body, cracks it when a hit took it before it ran out).
 static func tick(h: Hunter) -> void:
 	var up := h.shield > 0.0 and not h.downed and not h.out
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.25) if up else Color.BLACK
@@ -36,8 +35,9 @@ static func tick(h: Hunter) -> void:
 		_fade(h)
 	else:
 		_rim_off(h)
-		if h.shield_t > 0.0:
-			_pop(h)
+		if h.shield_t > 0.0 and h.shield <= 0.0 and not h.remote:
+			ShieldBreak.body(h)
+			h.m.sfx("ab_shield_hit", h.pos, -8.0, 1.3)
 
 ## The shell value for a shield of `amount` out of the most it held (`peak`) with `secs_left` to run: the share left,
 ## lifted to PULSE_PEAK and back over the last PULSE_S.
@@ -144,9 +144,3 @@ static func _ink(own: ShaderMaterial, col: Color) -> ShaderMaterial:
 
 static func _rim_mats(h: Hunter) -> Variant:
 	return h.get_meta("shield_rim_mats") if h.has_meta("shield_rim_mats") else null
-
-static func _pop(h: Hunter) -> void:
-	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.5)
-	h.m.fx.ring(h.pos + Vector3(0, 0.9, 0), POP_RING, col, POP_S)
-	h.m.fx.flash(h.pos + Vector3(0, 1.0, 0), col, 0.5, 0.08)
-	h.m.sfx("ab_shield_hit", h.pos, -8.0, 1.3)

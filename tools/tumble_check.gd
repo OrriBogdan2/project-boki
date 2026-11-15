@@ -317,7 +317,8 @@ func _on_base() -> void:
 			tb.tick(0.1)
 			t += 0.1
 		await main.get_tree().process_frame
-		ok(tb.run == null and is_instance_valid(tb.card), "on: the bout ends in a result card (%.1f s)" % t)
+		ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
+				"on: the bout ends in the shared result card (%.1f s)" % t)
 		Save.d["tutorial"].erase("first_tumble")
 		tb.use()
 		tb.input(_menu())

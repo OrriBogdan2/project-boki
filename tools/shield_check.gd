@@ -3,9 +3,10 @@ extends RefCounted
 ## shield, an ally area, a Boki's Refraction and Mass Guard, the Bulwark's raised aegis, a Fuse release,
 ## the owner shield a Boki gives) is applied to a Hunter standing in front of a rival; after it settles
 ## every body mesh that was visible is still visible, the Hunter is still targetable and still seen by
-## the rival, the shield rim (ShieldLook) is on, and your vitals' shield strip (ShieldStrip) leads with
-## that source's icon. With --shots-dir=<dir> (run under xvfb with a
-## renderer) it also writes one crop per source. Never touches the save.
+## the rival, and the shield rim (ShieldLook) is on. A shield a hit breaks (and the aegis) cracks (ShieldBreak) in
+## the owner's ability colour with no burst or ring, at Low too, and is gone after its time; one that runs out
+## doesn't crack. With --shots-dir=<dir> (run under xvfb with a renderer) it also writes one crop per source and
+## the break at match zoom. Never touches the save.
 
 const DT := 1.0 / 60.0
 const SETTLE_S := 0.6        # s each shield runs before it is measured
@@ -91,8 +92,52 @@ func run(main: Node) -> void:
 	await _settle(main, m, P, 0.2)
 	ok(not ShieldLook.shown(P), "no shield: the rim is off")
 	ok(ShieldStrip.pools(P).is_empty(), "no shield: no strip")
+	await _breaks(main, m, P, rival)
 	print("SHIELDCHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The break look: a hit through a shield cracks it, running out doesn't, Low keeps it, the aegis cracks the same.
+func _breaks(main: Node, m: Match, P: Hunter, rival: Hunter) -> void:
+	var sb := ShieldBreak.of(m)
+	var pieces := ShieldBreak.SEGS + ShieldBreak.BRANCH + ShieldBreak.SHARDS
+	var col := Arch.color(P.arch)
+	sb.set_process(false)        # stepped with the match below
+	for low in [false, true]:
+		m.fx.particles = 0.0 if low else Fx.PARTICLES
+		Effects.run([{"type": "shield", "amount": 40.0, "time": 5.0}], P, {})
+		await _settle(main, m, P, 0.2)
+		var n0 := sb.played
+		P.hurt(P.shield + 5.0, rival, {})
+		var radial0 := m.fx.radial      # (the hit's own sparks are made by now: only the break is counted)
+		ShieldLook.tick(P)
+		var tag := " (Low)" if low else ""
+		ok(m.fx.radial == radial0, "no burst or ring on the break%s" % tag)
+		await _settle(main, m, P, 0.1)
+		var what := "a hit breaks the shield: it cracks once, %d pieces%s" % [sb.live, tag]
+		ok(sb.played == n0 + 1 and sb.live == pieces, what)
+		ok(sb.last_col == col, "the crack is in the owner's ability colour%s" % tag)
+		if not low:
+			await _shot(main, m, P, "break", true)
+		await _settle(main, m, P, ShieldBreak.SHARD_S)
+		ok(sb.live == 0, "the crack and shards are gone after %.2f s%s" % [ShieldBreak.SHARD_S, tag])
+	m.fx.particles = Fx.PARTICLES
+	P.shield_t = 0.0
+	Effects.run([{"type": "shield", "amount": 40.0, "time": 0.3}], P, {})
+	var n1 := sb.played
+	await _settle(main, m, P, 0.6)
+	ok(not ShieldLook.shown(P) and sb.played == n1, "a shield that runs out doesn't crack")
+	_aegis(P)
+	await _settle(main, m, P, 0.6)
+	var wall: Dictionary = (P.ak as BulwarkKit).wall
+	ok(not wall.is_empty(), "the raised aegis is up")
+	var n2 := sb.played
+	m.verbs.walls.erase(wall)
+	await _settle(main, m, P, 0.1)
+	ok(sb.played == n2 + 1 and sb.last_col == Arch.color("bulwark"), "a broken aegis cracks the same way")
+	_clear(m, P)
+	var n3 := sb.played
+	sb.net_in(["fx", "sbrk", P.pos.x, 1.0, P.pos.z, 0.45, 0.8, col.to_html()])
+	ok(sb.played == n3 + 1 and sb.last_col.to_html() == col.to_html(), "a break from another game plays here")
 
 func _settle(main: Node, m: Match, P: Hunter, secs: float) -> void:
 	var t := 0.0
@@ -101,6 +146,7 @@ func _settle(main: Node, m: Match, P: Hunter, secs: float) -> void:
 		for h in m.hunters: h.render(DT, 1.0)
 		if m.verbs: m.verbs.render(1.0)
 		m.cam.snap(P.pos)
+		ShieldBreak.of(m).step(DT)
 		await main.get_tree().process_frame
 		t += DT
 
@@ -141,11 +187,13 @@ func _clear(m: Match, P: Hunter) -> void:
 	for mr in m.verbs.mirrors:
 		mr["t"] = 0.0
 
-func _shot(main: Node, m: Match, P: Hunter, label: String) -> void:
+func _shot(main: Node, m: Match, P: Hunter, label: String, whole := false) -> void:
 	if _dir == "":
 		return
 	await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
+	if whole:
+		img.save_png(_dir.path_join("shield_%s_match_zoom.png" % label))
 	var vp := main.get_viewport()
 	var c := vp.get_camera_3d().unproject_position(P.position + Vector3(0, 1.0, 0))
 	c *= Vector2(img.get_size()) / vp.get_visible_rect().size

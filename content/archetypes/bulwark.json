@@ -76,7 +76,6 @@
 		],
 		"smash_reach": 2.8,
 		"smash_arc": 180.0,
-		"smash_stun": 0.4,
 		"smash_rate": 0.61,
 		"carry": [
 			1.5,
@@ -94,7 +93,7 @@
 	"dash": {
 		"id": "smash360",
 		"name": "360 Smash",
-		"icon": "cleave",
+		"icon": "bulwark_dash",
 		"col": "#cfe8ff",
 		"cd": 8.0,
 		"whirl": 3.5,
@@ -104,16 +103,17 @@
 		"charge": 4.2,
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
-		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"charge_dmg": 12.0,
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
 	"rmb": {
 		"delivery": "cone",
 		"name": "Aegis",
+		"card_range": "slam.radius",
 		"short": "Aegis",
-		"icon": "wall",
+		"icon": "bulwark_rmb",
 		"col": "#9ad8ff",
 		"cooldown": 6.0,
 		"cd_per_rank": 1.5,
@@ -152,7 +152,7 @@
 		"surf_heat": 1.25,
 		"variants": {
 			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
-			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
+			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
 		},
@@ -167,8 +167,9 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Mending Ground",
+		"card_range": "radius",
 		"short": "Mend",
-		"icon": "dome",
+		"icon": "bulwark_e",
 		"col": "#8fe3c8",
 		"cooldown": 12.0,
 		"cooldown_rank3": 8.0,
@@ -193,7 +194,7 @@
 	"x": {
 		"name": "Faultline",
 		"short": "Fault",
-		"icon": "quake",
+		"icon": "bulwark_x",
 		"col": "#ff9a3a",
 		"unlock": 6,
 		"cooldown": 40.0,
