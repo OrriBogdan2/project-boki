@@ -452,6 +452,7 @@ func _hud_size(demo: Match) -> void:
 	Settings.v["hud_scale"] = 0.1
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
+	Save.d.erase("hud_reveal")      # (every group is drawn: the staged HUD would hide some)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
