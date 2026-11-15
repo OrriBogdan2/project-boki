@@ -1939,7 +1939,7 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 		var hm := _stand_in(id, PlayerLook.neutral())
 		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / vh * 100.0])
 		hm.free()
-	cam.use_style("supervive")
+	cam.use_style("default")
 	P.render(DT, 1.0)
 	cam.snap(P.pos)
 
