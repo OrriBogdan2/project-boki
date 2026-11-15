@@ -17,15 +17,17 @@ mkdir -p "\$3"; n=\$(( \$(cat $T/gn 2>/dev/null || echo 0) + 1 )); echo \$n > $T
 if [ \$n = 1 ]; then d=\$(mktemp -d); git clone -q $T/origin.git \$d; (cd \$d; echo z > z.txt; git add -A; git -c user.email=c@c -c user.name=c commit -qm sneak; git push -q origin HEAD:main); fi
 echo "GATE GREEN checks=5 new_red=0 fixed=0 flaky=0 parse_errors=0/0 export_bad=0 wall=1m" > "\$3/summary.txt"
 E
-export REGATE_RUN=${REGATE_RUN-} GATE=$T/stubgate TRAIN_STATE=$T/state TRAIN_WORK=$T/work
+export TRAIN_TRUST_IDS=1 REGATE_RUN=${REGATE_RUN-} GATE=$T/stubgate TRAIN_STATE=$T/state TRAIN_WORK=$T/work
 tb=$SRC/merge-train-1114/train-batch fail=0
 ok() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
 p4old=$(git rev-parse origin/ext/p4~0); git checkout -q ext/p4; echo more > g.txt; git add -A; git commit -qm p4b; git push -q origin HEAD:refs/pull/4/head -f; git checkout -q main
 ok "no train below the minimum" "[ -z \"\$($tb run --min 9 1 2 2>&1 | grep -c pushed | grep -v '^0')\" ]"
+$tb run --dry --min 1 2 > "$T/min.out" 2>&1
+ok "--min 1 is not read as PR #1" "grep -q ' + #2 (' $T/min.out"
 $tb run 1 2 3 4=${p4old:0:10} > "$T/run.out" 2>&1; echo "run rc=$?"
 br=$(git ls-remote origin 'refs/heads/ext/merge-train-*' | awk '{sub("refs/heads/","",$2); print $2}')
 ok "train branch pushed" "[ -n '$br' ]"
-ok "p3 skipped for conflict" "grep -q 'pr/3: SKIPPED.*f1.txt' $T/run.out"
+ok "p3 skipped for conflict" "grep -q 'pr/3: SKIPPED.*f1.txt.*only with the others' $T/run.out"
 ok "p4 skipped (head moved)" "grep -q 'PR #4: head .* is not the green' $T/run.out"
 ok "main's sneak commit merged in and re-gated" "grep -q 'gate 2:' $T/run.out && git ls-tree -r --name-only origin/$br | grep -q z.txt"
 git fetch -q origin; ok "branch holds p1 p2 and main" "git merge-base --is-ancestor origin/ext/p1 origin/$br && git merge-base --is-ancestor origin/ext/p2 origin/$br && git merge-base --is-ancestor origin/main origin/$br"

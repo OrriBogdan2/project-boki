@@ -3,7 +3,8 @@
 
   train-batch select               rows "PR sha branch behind" for open PRs whose newest GATE GREEN names their head and that are
                                    behind main (public API reads, or gh / GH_TOKEN when available)
-  train-batch run [PR[=sha] ...]   select (or take the given PRs), then build, gate, push, publish (below). --dry: only try the
+  train-batch run [PR[=sha] ...]   select (or take the given PRs; a bare PR must have its newest GATE GREEN at its head, or set
+                                   TRAIN_TRUST_IDS=1), then build, gate, push, publish (below). --dry: only try the
                                    merges and report skips, no push/gate/hold. --min N (default 2). --no-publish: stop after the push.
   train-batch publish BRANCH --summary 'GATE GREEN ...' [--minutes N] [--dry]
                                    open the PR + post GATE GREEN for a train gated on a box without gh (refuses if behind main)
@@ -85,6 +86,24 @@ def comments(pr):
         page += 1
 
 
+def cached_comments(pr, updated):
+    """comments(pr), reused from $TRAIN_STATE/comments-cache.json while the PR's updated_at (moves on every comment/push) is unchanged:
+    without a token the API allows 60 calls/h and ~35 PRs are behind main, so an uncached select runs out by its second run."""
+    path = os.path.join(STATE, "comments-cache.json")
+    try:
+        cache = json.load(open(path))
+    except Exception:
+        cache = {}
+    hit = cache.get(str(pr))
+    if updated and hit and hit.get("updated") == updated:
+        return hit["comments"]
+    got = [{"body": c["body"]} for c in comments(pr)]
+    cache[str(pr)] = {"updated": updated, "comments": got}
+    os.makedirs(STATE, exist_ok=True)
+    json.dump(cache, open(path + ".tmp", "w")); os.replace(path + ".tmp", path)
+    return got
+
+
 def select():
     """Rows (pr, sha, branch, behind) for open PRs whose newest GATE GREEN is their current head and that main has left behind."""
     git("fetch", "-q", "origin", "main")
@@ -100,7 +119,7 @@ def select():
         behind = git("rev-list", "--count", f"{sha}..origin/main")
         if not behind.isdigit() or int(behind) == 0:  # checked first: every comments call costs API quota (60/h without a token)
             continue
-        got = comments(n)
+        got = cached_comments(n, pr.get("updated_at"))
         greens = [m.group(1) for c in got for m in [GREEN_RE.search(c["body"])] if m]
         if greens and sha.startswith(greens[-1]):
             rows.append((n, sha, ref, int(behind)))
@@ -182,7 +201,8 @@ def run(args):
     dry = "--dry" in args
     publish = "--no-publish" not in args
     minimum = int(args[args.index("--min") + 1]) if "--min" in args else 2
-    ids = [a for a in args if re.match(r"^\d+(=[0-9a-f]+)?$", a)]
+    rest = [a for i, a in enumerate(args) if not (i and args[i - 1] == "--min")]  # "--min 1" is not PR #1
+    ids = [a for a in rest if re.match(r"^\d+(=[0-9a-f]+)?$", a)]
     t0 = time.time()
     git("fetch", "-q", "origin", "main", check=True)
     main = git("rev-parse", "origin/main")
@@ -192,6 +212,9 @@ def run(args):
             n, _, want = a.partition("=")
             git("fetch", "-q", "origin", f"+refs/pull/{n}/head:refs/remotes/pr/{n}", check=True)
             prs.append((int(n), git("rev-parse", f"pr/{n}"), "", 0))
+            if not want and os.environ.get("TRAIN_TRUST_IDS") != "1":  # a bare id must still be green at its head (regate-bot moves heads)
+                greens = [m.group(1) for c in comments(n) for m in [GREEN_RE.search(c["body"])] if m]
+                want = greens[-1] if greens else "no-green"
             if want and not prs[-1][1].startswith(want):
                 log(f"PR #{n}: head {prs[-1][1][:10]} is not the green {want[:10]}, skipped"); prs.pop()
     else:
@@ -206,8 +229,11 @@ def run(args):
     fresh_tree(cand, main)
     skipped = merge_in(cand, [(f"pr/{n}", sha) for n, sha, _, _ in prs], out, "1")
     folded = [p for p in prs if f"pr/{p[0]}" not in skipped]
-    for lab, files in skipped.items():
-        log(f"{lab}: SKIPPED, conflicts with main or the others in: {files}")
+    for lab, files in skipped.items():  # main alone or only the others? (main-conflicts need a fix job, not a later train)
+        sha = dict((f"pr/{n}", h) for n, h, _, _ in prs)[lab]
+        alone = subprocess.run(["git", "-C", REPO, "merge-tree", "--write-tree", "--name-only", main, sha], capture_output=True).returncode
+        skipped[lab] = f"{files} ({'conflicts with main itself: needs a conflict fix' if alone == 1 else 'only with the others: next train'})"
+        log(f"{lab}: SKIPPED, {skipped[lab]}")
     log(f"train {stamp}: main {main[:10]} + {' '.join('#%d' % p[0] for p in folded)} ({len(skipped)} skipped)")
     if len(folded) < minimum or dry:
         log("dry run, nothing pushed" if dry else "fewer than the minimum merged cleanly, no train")
