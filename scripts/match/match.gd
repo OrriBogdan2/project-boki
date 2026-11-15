@@ -24,6 +24,7 @@ var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
 var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
+var belt_tips := BeltTips.new()  # the local player's one-time belt item tips
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -2105,10 +2106,10 @@ func on_fell(e: Ent) -> void:
 		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
-			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
-			e.teleport(back)
 			if tut:
-				hud.toast("Back to your last stop. Try again", Color("f3eee2"))
+				tut.retry()      # (the beat starts again, back at the last stop)
+				return
+			e.teleport(e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground()))
 			e.vel = Vector3.ZERO
 			return
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
@@ -5644,6 +5645,8 @@ func _tips() -> void:
 	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
+	var belt_tip := belt_tips.next(player)
+	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
@@ -5658,6 +5661,10 @@ func _tips() -> void:
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+	var heart_tip := heart.tip_for(player) if heart else []
+	if heart_tip: _tip(heart_tip[0], heart_tip[1])
+	var ex := ExpeditionTips.next(self)
+	if ex: _tip(ex[0], ex[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
