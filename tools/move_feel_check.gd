@@ -1061,7 +1061,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
+	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash x0.85 / x1.15"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
