@@ -95,7 +95,7 @@
 			"clip": "slam",
 			"fade": 0.3,
 			"fade_out": 0.4,
-			"strike": ["tip", "rmb/slam/radius", "ground"]
+			"strike": ["tip", "rmb/slam/len", "ground"]
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",

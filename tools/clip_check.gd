@@ -338,8 +338,10 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		await holder.get_tree().process_frame
 		ys.append(hand.global_position.y - head.global_position.y)
 	clips.force = {}
-	ok(ys[0] > 0.0 and ys[1] < -0.1,
-			"%s: hands reach over the head, then plant on the lip (%.2f, %.2f m off the head)" % [id, ys[0], ys[1]])
+	# (a mantle-only clip from mantlekit.py grabs from under the head: its hands only have to rise to the lip)
+	var reach: float = 0.0 if cd.has("ledge") else float(ys[1]) + 0.15
+	ok(ys[0] > reach and ys[1] < -0.1,
+			"%s: hands reach up, then plant on the lip (%.2f, %.2f m off the head)" % [id, ys[0], ys[1]])
 	var clip_len := clips.lib.get_animation(String(cd["mantle"]["clip"])).length
 	var t_end := rise
 	var after := {"mantle": -1.0, "grounded": true}
@@ -354,8 +356,11 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	var hang := {}
 	for i in 30:
 		hang = clips._climb({"ledge": true}, DT)
-	ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001,
-			"%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	if cd.has("ledge"):
+		ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001,
+				"%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	else:
+		ok(hang.is_empty(), "%s: no ledge clip, a ledge float plays the procedural hang" % id)
 	clips._climb({"mantle": -1.0, "dead": true}, DT)
 
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.

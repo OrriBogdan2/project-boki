@@ -19,7 +19,7 @@ const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
 const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: mantlekit.py poses
-const CLIMBERS := ["archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve: glb_climb_clips.py keys
+const CLIMBERS := ["dredge", "rimewright"]    # Grimble, Neve: glb_climb_clips.py (Lace and Tenzo stretch: procedural)
 
 var bad := 0
 var holder: Node3D
@@ -233,13 +233,13 @@ func _mantle(id: String, keyed: bool) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
-	var md: Dictionary = clips.d.get("mantle", {})
+	var md: Dictionary = (clips.d.get("climb", {}) as Dictionary).get("mantle", {})
 	ok(clips.lib.has_animation(String(md.get("clip", ""))), "%s: a mantle clip is in the .glb" % id)
 	if md.is_empty():
 		m.free()
 		return
 	var length := clips.lib.get_animation(String(md["clip"])).length
-	var rise := float(md["rise"]) * length
+	var rise := float(md["rise"])      # (the clip second the hands meet the lip)
 	var at := clips._pick({"mantle": 0.5}, DT)
 	var half := float(at.get("t", -1.0))
 	var on_time: bool = at.get("clip", "") == md["clip"] and absf(half - rise * 0.5) < 0.01
@@ -280,7 +280,7 @@ func _mantle_proc(id: String) -> void:
 	var sync := m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	if sync != null and sync.clips != null:
 		var clips: WardenClips = sync.clips
-		ok(not clips.d.has("mantle") and bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
+		ok(not (clips.d.get("climb", {}) as Dictionary).has("mantle") and bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
 				"%s: no climb clip, a ledge rise plays the procedural pose" % id)
 	m.free()
 
