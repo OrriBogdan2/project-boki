@@ -78,6 +78,12 @@ extends RefCounted
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  28. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
+##  15. the Training Grounds (TrainingSfx): every cue is a sound of the training set with its own file (a shared
+##      fallback such as "revive" fails), the stations and the duel ring play them, the count-in plays 3-2-1 and
+##      one horn, the expanse has the full wind and a sky island less of it under its own bed, the beds sit on
+##      the Ambience bus, and the grounds never play the match's beds
+##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##  17. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -96,6 +102,16 @@ const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full s
 const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5        # s: the new-point chime's audible length at most
 const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {
+	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
+	"blight_rumble": ["match/blight_nests.gd"],
+	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_fuse_end": ["match/merge_xform.gd"], "boki_fuse_tired": ["match/merge_xform.gd"],
+	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+}
 
 var bad := 0
 var walked := {}               # kit file -> true once item 4 has read it
@@ -120,6 +136,7 @@ func run(main: Node) -> void:
 	await _menus(main)
 	_dash_air()
 	_cue_table()
+	_wired()
 	_fallback()
 	_ult_cues()
 	_nuke_fall()
@@ -151,6 +168,8 @@ func run(main: Node) -> void:
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
+	_training()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -634,6 +653,41 @@ func _rms(sname: String) -> float:
 	var takes := _takes(sname)
 	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
 
+## 7. Each sound in WIRED is in a set and its script(s) play it by name; the warning thresholds are sane.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
+		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	_warn_behaviour()
+
+## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
+func _warn_behaviour() -> void:
+	var h := Hunter.new()
+	h.max_hp = 100.0
+	var seen := []
+	for st in [[100.0, false], [20.0, false], [20.0, true], [0.0, false]]:
+		h.hp = st[0]
+		h.downed = st[1]
+		WarnSfx.beat_in = 0.0
+		WarnSfx.low_hp(h, 0.016)
+		seen.append(WarnSfx.beat_in > 0.0)
+	h.free()
+	WarnSfx.beat_in = 0.0
+	ok(seen == [false, true, false, false], "heartbeat only when hurt and up (full, 20 pct, downed, 0: %s)" % [seen])
+
 ## 5. A Hunter without its own set plays the shared sounds.
 ## 18. What you can see you can hear: the cue at the side edge of the wide match view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 6 dB quieter, past 30 m nothing plays.
@@ -1029,6 +1083,64 @@ func _inv_cues() -> void:
 	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
 	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
+
+## 15. The Training Grounds' cues and beds.
+func _training() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/training.json"))
+	var shared := FileAccess.get_file_as_string("res://scripts/core/sfx.gd")
+	var off := []
+	for c in TrainingSfx.CUES:
+		if not (d["sounds"] as Dictionary).has(c) or _takes(c).is_empty() or shared.contains("\"%s\"," % c):
+			off.append(c)
+	ok(off.is_empty(), "training: %d cues of its own set, each with its own file (off: %s)"
+			% [TrainingSfx.CUES.size(), off])
+	var arena := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
+	var duel := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
+	var wired := arena.contains("cue(TrainingSfx.RESET)") and arena.contains("cue(TrainingSfx.DUMMY_HIT")
+	wired = wired and arena.contains("cue(TrainingSfx.BOT_SPAWN") and duel.contains("cue(TrainingSfx.BOT_SPAWN")
+	wired = wired and duel.contains("TrainingSfx.count_start()") and duel.contains("TrainingSfx.count_in(")
+	var borrowed := arena.contains("m.sfx(\"revive\"") or duel.contains("m.sfx(\"revive\"")
+	ok(wired and not borrowed, "training: the stations and the duel ring play their own cues, not the shared revive")
+	TrainingSfx.heard.clear()
+	TrainingSfx.count_start()
+	var left := TrainingSfx.COUNT_S
+	while left > -1.0:
+		TrainingSfx.count_in(left, left - 0.25)
+		left -= 0.25
+	var heard := [int(TrainingSfx.heard.get(TrainingSfx.COUNT, 0)), int(TrainingSfx.heard.get(TrainingSfx.HORN, 0))]
+	ok(heard == [3, 1], "training: the duel ring counts 3-2-1 and sounds the horn once %s" % [heard])
+	var missing := [TrainingSfx.WIND, TrainingSfx.ISLAND].filter(
+			func(b): return not ResourceLoader.exists("res://audio/amb_%s.ogg" % b))
+	ok(missing.is_empty(), "training: both beds have their file %s" % [missing])
+	var w := World.new()
+	w.generate(4242, 64, 7)
+	var big := TrainingSfx.expanse_of(w)
+	var other := (big + 1) % w.islands.size()
+	var on_big: Vector2i = w.islands[big]["cells"][0]
+	var on_other: Vector2i = w.islands[other]["cells"][0]
+	var t := TrainingSfx.new()
+	var at_big := t.beds_at(w, on_big.x + 0.5, on_big.y + 0.5)
+	var at_isle := t.beds_at(w, on_other.x + 0.5, on_other.y + 0.5)
+	var big_wind := float(at_big[TrainingSfx.WIND])
+	var quieter := float(at_isle[TrainingSfx.WIND]) < big_wind and float(at_isle[TrainingSfx.ISLAND]) > 0.0
+	ok(big_wind == 1.0 and quieter, "training: full wind on the expanse, less on an island %s %s" % [at_big, at_isle])
+	var h := Hunter.new()
+	h.pos = Vector3(on_other.x + 0.5, 0, on_other.y + 0.5)
+	Sfx.play_ambience("")
+	t.ambience(w, h)
+	var on_bus := Sfx.amb_layers.size() == 2
+	for n in Sfx.amb_layers:
+		on_bus = on_bus and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience"
+	ok(on_bus, "training: both beds play on the Ambience bus %s" % [Sfx.amb_layers.keys()])
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var music := FileAccess.get_file_as_string("res://scripts/match/music_dir.gd")
+	var own := match_src.contains("Sfx.play_ambience(\"\" if o.get(\"training\", false) else \"match\")")
+	own = own and music.contains("training.ambience(w, p)\n\t\treturn\n\tvar voids")
+	var none_borrowed := not (Sfx.amb_layers.has("abyss") or Sfx.amb_layers.has("ruins") or Sfx.amb_name == "match")
+	ok(own and none_borrowed, "training: never the match's wind, abyss or ruins beds")
+	h.free()
+	w.free()
+	Sfx.clear_amb_layers(0.0)
 
 func _takes(sname: String) -> Array:
 	var out := []

@@ -222,6 +222,7 @@ const MIN_GAP := {
 	"xp_tick": 60,
 	"steal_won": 400,
 	"steal_lost": 400,
+	"training_dummy_hit": 70,
 	"hostile_cast": 100,
 	"armor_up": 120
 }
