@@ -74,27 +74,33 @@ def api(path, data=None, method=None):
 def comments(pr):
     out, page = [], 1
     while True:
-        c = api(f"issues/{pr}/comments?per_page=100&page={page}") or []
+        c = api(f"issues/{pr}/comments?per_page=100&page={page}")
+        if c is None:
+            sys.exit(f"GitHub API failed reading PR #{pr} comments (rate limit?): no train decision made")
         out += c
         if len(c) < 100:
             return out
         page += 1
 
 
-def select(minimum=0):
+def select():
     """Rows (pr, sha, branch, behind) for open PRs whose newest GATE GREEN is their current head and that main has left behind."""
     git("fetch", "-q", "origin", "main")
     rows = []
-    for pr in api("pulls?state=open&base=main&per_page=100") or []:
+    opened = api("pulls?state=open&base=main&per_page=100")
+    if opened is None:
+        sys.exit("GitHub API failed listing open PRs: no train decision made")
+    for pr in opened:
         n, sha, ref = pr["number"], pr["head"]["sha"], pr["head"]["ref"]
         if pr.get("draft") or BRANCH_RE.match(ref) or not pr["head"]["repo"] or pr["head"]["repo"]["full_name"] != SLUG:
             continue
-        greens = [m.group(1) for c in comments(n) for m in [GREEN_RE.search(c["body"])] if m]
-        if not greens or not sha.startswith(greens[-1]):
-            continue
         git("fetch", "-q", "origin", f"+refs/pull/{n}/head:refs/remotes/pr/{n}")
         behind = git("rev-list", "--count", f"{sha}..origin/main")
-        if behind.isdigit() and int(behind) > 0:
+        if not behind.isdigit() or int(behind) == 0:  # checked first: every comments call costs API quota (60/h without a token)
+            continue
+        got = comments(n)
+        greens = [m.group(1) for c in got for m in [GREEN_RE.search(c["body"])] if m]
+        if greens and sha.startswith(greens[-1]):
             rows.append((n, sha, ref, int(behind)))
     return rows
 
