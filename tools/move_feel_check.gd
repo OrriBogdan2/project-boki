@@ -76,9 +76,9 @@ const T := {
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
 	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
 	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
-	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 13.3m (footage 11-15)"],
+	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
-	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
+	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -113,6 +113,7 @@ const T := {
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
+	"sneak_speed":             ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run speed"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"swoop_x":                 ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
 	"swoop_fade_s":            ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
@@ -142,6 +143,8 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
+	"dive_feather_speed":      [">=", 8.0, "m/s", "0061: 1s drop under the lip, then glide: speed 0.5s on"],
+	"dive_feather_m":          [">=", 7.0, "m", "...and the ground it covers in the 1s after the open"],
 	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
 	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
@@ -219,6 +222,10 @@ func _clear_inp() -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
+func _clear_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
 ## A clean, standing hunter at p.
 func _reset(p: Vector3, grounded := true) -> void:
 	P.out = false; P.gone = false; P.downed = false
@@ -266,8 +273,7 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
+	_clear_mobs()
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -400,6 +406,7 @@ func _aim_rel() -> void:
 			P.wpn["fire_slow"] = 0.8
 		for dir in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(-1, 1).normalized()]:
 			_reset(flat - Vector3(dir.x, 0, dir.y) * 3.0)
+			_clear_mobs()                   # (mobs spawned in the match time so far would knock these rows)
 			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
 			_steps(20)                      # face the aim first
 			P.inp["move"] = dir
@@ -715,6 +722,7 @@ func _glide_dive() -> void:
 		if P.grounded:
 			break
 	rec("dive_vy", peak)
+	rec("sneak_speed", HunterMove.sneak_speed)
 	rec("dive_vy_t", t90)
 	rec("dive_cancel_h", cancel_h)
 	# the keys in the plunge against the keys under the glider, from a standstill
@@ -1031,20 +1039,25 @@ func _plain_dash() -> void:
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
-	"gunslinger": {"ground": [4.8, 0.45], "hold": [7.0, 0.73], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
-	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
-	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
+	"gunslinger": {"ground": [4.8, 0.45], "air": [4.7, 0.33], "hold": [7.0, 0.73], "long": [4.6, 0.2],
+				"src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
+	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7;
+	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
+	"archer": {"ground": [3.375, 0.386], "long": [5.0, 0.286],
+			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
-	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
+	"bulwark": {"ground": [3.5, 0.17], "long": [4.2, 0.21], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
 	"thief": {"ground": [4.5, 0.48], "air": [4.5, 0.48], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
-	"juggernaut": {"ground": [3.825, 0.266], "src": "owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15"},
+	"juggernaut": {"ground": [3.825, 0.266], "long": [4.2, 0.21],
+				"src": "owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15"},
 	"dredge": {"ground": [2.72, 0.184], "air": [3.672, 0.184],
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
-	# owner playtest 11-10 (754d177a0): the lane cut to 5.6-9.75 m, still at 40 m/s, so 5.6 / 40 x1.15
-	"mage": {"ground": [5.6, 0.161], "src": "owner 11-10: shortest lane 5.6 m at 40 m/s, time x1.15"},
+	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
+	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
+				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
 	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
@@ -1054,10 +1067,11 @@ func _kit_dashes() -> void:
 	for id in KIT_DASH:
 		var row: Dictionary = KIT_DASH[id]
 		P.reclass(Arch.weight(id), id)
-		for where in ["ground", "air", "hold"]:
+		for where in ["ground", "air", "hold", "long"]:
 			if not row.has(where): continue
 			var want: Array = row[where]
-			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air", where == "hold")
+			var got := _dolm_hop() if id == "dolm" else \
+					_felt_dash(where in ["air", "long"], where == "hold", where == "long")
 			var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0]
 			hit = hit and absf(got[1] - float(want[1])) <= DASH_TOL[1]
 			ok(hit, "felt dash %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (%s)"
@@ -1071,10 +1085,11 @@ func _kit_dashes() -> void:
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-## `hold` keeps the dash key down to the end.
-func _felt_dash(air: bool, hold := false) -> Array:
+## `hold` keeps the dash key down to the end; `long` runs out of charges first (the class's long dash).
+func _felt_dash(air: bool, hold := false, long := false) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
+	if long: P.dashes = 0.0      # out of charges: the long dash (Vex's, Hem's flick, Breaker's lumber)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = hold
@@ -1338,6 +1353,23 @@ func _feather() -> void:
 		m.step(DT); fr += 1
 		if P.gliding: break
 	rec("feather_toggle_frames", fr if closed else 9.0)
+	# going down and feathering up: glide out at island level, let go for 1s, then press the glider again
+	_reset(start, false)
+	P.last_gy = lip
+	P.air_t = 1.0
+	P.gliding = true
+	P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+	P.inp["glide_press_only"] = true
+	var open_x := 0.0
+	for i in 60 + 60:
+		P.inp["move"] = Vector2(-1, 0)
+		P.inp["jump"] = i == 60
+		P.inp["glide"] = i >= 60
+		m.step(DT)
+		if i == 60: open_x = P.pos.x
+		if i == 90: rec("dive_feather_speed", Vector2(P.vel.x, P.vel.z).length())
+	rec("dive_feather_m", absf(P.pos.x - open_x))
+	P.inp["glide_press_only"] = false
 
 # ---------------------------------------------------------------- the ledge rise and fling
 ## A straight wall two terraces (1.6m) high with level open ground in front: jump at it pushing in.
@@ -1720,7 +1752,7 @@ func _screen_scale() -> void:
 	var cam: CamRig = m.cam
 	if cam == null or P.model == null:
 		return
-	cam.use_style("supervive")
+	cam.use_style("default")
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
 	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
@@ -1740,7 +1772,7 @@ func _screen_scale() -> void:
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
+	print("MFEEL framing: style default pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)

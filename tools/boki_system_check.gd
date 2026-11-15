@@ -622,7 +622,7 @@ func _kcmd() -> void:
 	var rings: int = m.fx.radial
 	if cmd_ev.size() == 1:
 		KinNet.on_event(m, cmd_ev[0])
-	ok(m.fx.radial == rings + 1, "...and a client plays the order moment (ring %d -> %d)" % [rings, m.fx.radial])
+	ok(m.fx.radial == rings, "...and a client plays it with no ground ring (%d -> %d)" % [rings, m.fx.radial])
 
 # ------------------------------------------------------------------ 9. net
 func _net() -> void:

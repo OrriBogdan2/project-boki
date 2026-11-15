@@ -14,7 +14,7 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Ability", "e": "Utility",
 		"x": "Ultimate", "r": "Fusion with your Boki"}
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
@@ -185,6 +185,7 @@ func _rebuild_body() -> void:
 		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
 		row.set_meta("slot", slot)
 		row.mouse_entered.connect(select.bind(rows.size()))
+		AbilityCard.hover(row, id, slot)
 		rows.append(row)
 		(grid if slot in CLIP_SLOTS else lines).add_child(row)
 	# the one-line abilities fill the grid's last gap when there is one, else go under it

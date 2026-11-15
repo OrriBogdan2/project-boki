@@ -47,7 +47,7 @@ const HEROES := [
 	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
 	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
-	["gil", MEDIAN_BAR, "hold", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
+	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
 ]
 const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
@@ -57,8 +57,11 @@ const MEDIAN_BAR := "roster median"      # source name of a Hunter with no sourc
 const SHARE_ONLY := {"rimewright": {"rmb": 346.0, "x": 155.0}}
 const ULT_WAIT := 4.5
 
-## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
-const OVERRIDES := {}
+## Owner decisions that accept a slower Hunter: hero -> [damage share given up, "DECISIONS date: what"].
+## A row above RATIO_HI passes as "override" only up to RATIO_HI / (1 - share).
+const OVERRIDES := {
+	"ostra": [0.15, "DECISIONS 2026-11-06: item 117 accepted as is, Motley loses ~15% held-fire DPS, no compensation"],
+}
 
 var rows: Array = []
 var hits: Array = []      # [id, source name, slot, our share of the target, source share]
@@ -123,7 +126,7 @@ func _fight(arch: String, rank: int, armoured: bool) -> Array:
 	P.dashes = P.max_dashes()
 	T.max_hp = OUR_HP
 	T.hp = OUR_HP
-	T.max_armor = round(OUR_HP * Hunter.ARMOR_DUR) if armoured else 0.0
+	T.max_armor = float(Hunter.ARMOR_TIERS[0][4]) if armoured else 0.0
 	T.armor = T.max_armor
 	return [r[0], P, T, T.pos]
 
@@ -219,11 +222,15 @@ func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
 	row["ratio"] = ours / src if ours > 0.0 else 99.0
 	if row["ratio"] >= RATIO_LO and row["ratio"] <= RATIO_HI:
 		row["state"] = "ok"
-	elif OVERRIDES.has(hero[0]):
+	elif row["ratio"] > RATIO_HI and row["ratio"] <= RATIO_HI / (1.0 - _given_up(hero[0])):
 		row["state"] = "override"
 	else:
 		row["state"] = "FAIL"
 	return row
+
+## The damage share an owner decision lets this Hunter give up (OVERRIDES), else 0.
+func _given_up(id: String) -> float:
+	return float(OVERRIDES[id][0]) if OVERRIDES.has(id) else 0.0
 
 func run(main_node: Node) -> void:
 	main = main_node

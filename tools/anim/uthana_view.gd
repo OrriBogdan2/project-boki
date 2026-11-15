@@ -1,6 +1,6 @@
 extends Control
 ## Uthana review renders: N panels side by side (current in-game | raw Uthana | cleaned), each the same rig, seen
-## through the game's own camera (scripts/match/cam.gd "supervive": pitch 66, 23 m back, 32 deg lens, aimed 1 m above
+## through the game's own camera (scripts/match/cam.gd "default": pitch 66, 23 m back, 32 deg lens, aimed 1 m above
 ## the feet, the body tipped back CHAR_LEAN) on a 1440p screen, cropped to PANEL px round the hunter.
 ## Arg: --jobs=<json: [{out, model, face_deg, loops, libs: {lib: {name: path .glb|.res}}, panels: [{label, seq}]}]>
 ## A seg of seq is {clip: "lib/name" or one of the model's own clips, dur (s, default its length: past the end it
@@ -9,7 +9,7 @@ extends Control
 ## bone above the floor).
 const PANEL := 480                  ## px per panel
 const SCREEN_H := 1440.0            ## px: the screen height the crop is cut from
-const PITCH := deg_to_rad(66.0)     ## cam.gd STYLES.supervive
+const PITCH := deg_to_rad(66.0)     ## cam.gd STYLES.default
 const DIST := 23.0                  ## m
 const FOV := 32.0                   ## deg, vertical
 const RISE := 1.0                   ## m above the feet the view aims at

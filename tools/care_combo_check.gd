@@ -5,6 +5,7 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
+const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -944,17 +945,26 @@ func tender() -> void:
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))
-	# --- Moon Shot flies its full range past the cursor (cursor 3 m out, off the target line)
-	sc.aim_at(P, P.pos + Vector3(0, 0, 3.0))
-	P.inp["fire"] = true
-	step(m, 0.05)
-	P.inp["fire"] = false
-	var sh: Array = _mine(m, P)
-	var reach := 0.0
-	if not sh.is_empty(): reach = float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length()
+	# --- Moon Shot flies its full range past the cursor wherever it is (4, 8, 14 m out, off the target line)
+	var rng := float(P.wpn["range"])
+	var reaches: Array[float] = []
+	for d: float in [4.0, 8.0, 14.0]:
+		if not reaches.is_empty():
+			step(m, 0.45)
+		sc.aim_at(P, P.pos + Vector3(0, 0, d))
+		P.idle_fire = 0.0       # a plain ember: an idle crook's next one is Empowered (further)
+		P.shot_range_k = 1.0
+		P.inp["fire"] = true
+		step(m, 0.05)
+		P.inp["fire"] = false
+		var sh: Array = _mine(m, P)
+		reaches.append(float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length() if not sh.is_empty() else 0.0)
 	ok(
-			"mm LMB: the ember flies its full range past the cursor",
-			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+			"mm LMB: the ember flies its full range past the cursor at 4, 8 and 14 m",
+			AimMode.mode_of(P) == AimMode.MAX
+			and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
+			"range %.1f reach %s" % [rng, reaches])
+	ok("mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m)", rng >= 12.6 and rng <= 14.4, "%.1f m" % rng)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -1102,6 +1112,7 @@ func tender() -> void:
 	var bid := "burr%d" % int(K.burrs[0]["id"]) if K.burrs.size() > 0 else ""
 	step(m, 0.1)
 	var tele: Dictionary = AimKit.entry(P, bid)
+	var field_n: Node3D = K.lk().held.get(bid, {}).get("n", null)
 	ok(
 			"mm RMB: the burst area shows under the foe at once, for everyone, filling",
 			AimKit.shown(P, bid)
@@ -1110,6 +1121,11 @@ func tender() -> void:
 			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
+	ok(
+			"mm RMB: the field is a lit rim (a band, no flat fill) whose edge is the burst radius",
+			float(tele.get("band", 0.0)) > 0.0 and float(tele.get("fill", -1.0)) < 0.0 and field_n != null
+				and is_equal_approx(field_n.scale.x, K.burst_radius()),
+			"band %.2f disc r %.2f" % [float(tele.get("band", 0.0)), field_n.scale.x if field_n else 0.0])
 	await _burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
@@ -1500,12 +1516,16 @@ func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> v
 			T.root_t <= 0.0 and K.burrs.size() == 1 and K.ult_look.showing(bid) and a1 > a0 + 0.3,
 			"root %.2f vine %.2f -> %.2f" % [T.root_t, a0, a1])
 	var h1 := T.hp
+	var roots0 := int(HeroVfx.of(m).plays.get("seed_root", 0))
 	step(m, 0.25)
 	ok(
 			"mm RMB: it roots at about 2.0 s of contact (by 2.1 s), damages and Kindles, the vine gone",
 			T.root_t > 0.0 and h1 - T.hp > 25.0 and K.kindle_on(T) >= 1 and K.burrs.is_empty()
 			and not K.ult_look.showing(bid),
 			"root %.2f dmg %.0f" % [T.root_t, h1 - T.hp])
+	ok(
+			"mm RMB: the root moment plays on the foe it takes (one per rooted foe)",
+			int(HeroVfx.of(m).plays.get("seed_root", 0)) - roots0 == 1)
 	# breaking contact: 1 s built, then 0.3 s out of reach unwinds it 0.6 s; back in, it needs 1.6 s more
 	T.root_t = 0.0
 	var home := T.pos

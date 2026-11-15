@@ -155,7 +155,7 @@ const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 ## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It
 ## interrupts a scan here and a rescue (KinDowned); plain damage and the small shove most hits carry do not.
 static func controlled(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
+	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
 ## What stops a channel on the hunter (a scan): "jump" or "dash" (your choice), or "cc" (crowd control). "" = none.
 static func hunter_stop(h: Hunter) -> String:
@@ -295,7 +295,6 @@ static func _start_fx(m, h: Hunter, k: Kin, st: Dictionary) -> void:
 	st["beam"] = root
 	st["hum"] = "scanhum" + h.nid
 	Sfx.loop_start(st["hum"], "revive_hum", h.pos, 0.0, float(rules()["hear_range"]))
-	m.fx.ring(k.pos, 1.4, Color(beam_col(h), 0.8), 0.4)
 
 static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> void:
 	var root = st.get("beam")
@@ -339,7 +338,7 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
-	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)
+	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)      # the catch: --capture-read-check (main) keeps this ring
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()
 	sm.radius = 0.16; sm.height = 0.32

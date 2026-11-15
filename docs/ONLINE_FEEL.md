@@ -124,9 +124,12 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 | Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |
 |---|---|---|---|---|---|---|---|---|---|
+| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
+| Kael Warchain sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
+| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
 | Kael Warchain sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
-| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Motley swap dash | moved Hunter | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Motley swap dash | caster | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
@@ -252,7 +255,7 @@ scripts/match/net_smooth.gd). A steady line still draws 0.15 s behind. No sync s
 |---|---|---|---|---|---|
 | Kael Warchain self-pull | caster | 0.37 / 0.49 | 0.09 / 0.05 | -1 / 454 | x1.00 |
 | Kael Warchain sling | caster | 1.60 / 2.86 | 0.14 / 0.42 | 1 / 440 | x1.00 |
-| Grimble Abyssal Hand reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
+| Grimble Deep Reach reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
 | Motley swap dash | moved Hunter | 8.00 / 0.90 | 0.00 / 0.00 | 401 / 768 | x1.00, a teleport |
 | Motley swap dash | caster | 8.00 / 8.00 | 0.00 / 0.00 | 0 / 411 | x1.00, a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 / 8.05 | 0.00 / 0.00 | 532 / 895 | x1.00, a teleport |

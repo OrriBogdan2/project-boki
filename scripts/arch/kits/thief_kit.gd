@@ -130,12 +130,20 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
+	sync_marks(t)
+
+## A body on another game keeps a copy of our Marks on it (KitStatus tag "mrk").
+func sync_marks(t: Ent) -> void:
+	if t.remote:
+		var e: Array = t.get_meta("marks", {}).get(h.nid, [0, 0.0])
+		KitStatus.apply(t, "mrk", float(e[1]), float(e[0]) if float(e[1]) > 0.0 else 0.0, true, "", h.nid)
 
 func combo_read(t: Ent) -> Dictionary:
 	var n := marks_on(t)
 	if n <= 0:
 		return {}
-	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+	var left := float((t.get_meta("marks") as Dictionary)[h.nid][1])
+	return {"icon": "mark_thief", "n": n, "max": pip_count(), "left": left,
 			"total": float(res_def()["dur"])}
 
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
@@ -147,6 +155,7 @@ func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	mk.erase(h.nid)
 	t.set_meta("marks", mk)
+	sync_marks(t)
 
 ## How many diamonds the readout draws; the Marks themselves are uncapped.
 func pip_count() -> int:
@@ -163,6 +172,7 @@ func set_marks(t: Ent, n: int) -> void:
 	t.set_meta("marks", mk)
 	_pip_pop(t, n)
 	_on_marks(t, had, n)
+	sync_marks(t)
 
 ## Every Mark we have on anyone back to its full time (each Encore blade).
 func refresh_marks() -> void:

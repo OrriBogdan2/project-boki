@@ -144,6 +144,7 @@ func _rmb(m: Match, P: Hunter, K: TenderKit, home: Vector3) -> void:
 
 ## E, then E again: the lantern lifted, then thrown (the toss lands within a footage frame).
 func _hearth(m: Match, P: Hunter, K: TenderKit, home: Vector3) -> void:
+	K.burrs.clear()      # (the RMB row's seed, still building on the dummy, would flare its tug into this window)
 	C.sc.aim_at(P, home + Vector3(6.0, 0, 0))
 	K.cd["e"] = 0.0
 	K.cast_e()
