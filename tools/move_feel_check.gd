@@ -57,6 +57,9 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	"vault_exit_run":          ["~", [0.95, 1.05], "x", "[footage] Sable's Cartwheel runs down into her hasted run"],
+	"vault_slow_frames":       ["<=", 0.0, "frames", "[footage] past the peak, no step under the hasted run (no dip)"],
+	"vault_shot_gap_frames":   ["<=", 0.0, "frames", "[footage 0193] she throws as the flip ends (mid-flip too)"],
 	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
@@ -76,7 +79,7 @@ const T := {
 	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
 	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
-	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
+	"dash_curve_thief_exit_k":        ["~", [0.5, 0.7], "x", "[footage] Shiv ends 140 px/s, mean 235: hasted run"],
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
@@ -323,6 +326,7 @@ func run(main: Node) -> void:
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
+	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -1059,7 +1063,8 @@ func _dash_curves() -> void:
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
-		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
+		# against her run, a kit haste in it (Sable hands over at her hasted run)
+		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
@@ -1186,6 +1191,42 @@ func _felt_dash(air: bool, hold := false) -> Array:
 			P.inp["dash_down"] = false
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
+
+## Sable's Vault exit (briefs/hero-ref/dancer.md, docs/heroes/thief.md), keys held. Run on, the Cartwheel runs down
+## into her hasted run and hands over at it, with no step under it past the peak. LMB pressed for the step the flip
+## ends in throws a bolt in that step (a run of its own: the empowered bolt ends the speed by design).
+func _vault_exit() -> void:
+	var was := [P.cls, P.arch]
+	P.reclass(Arch.weight("thief"), "thief")
+	for shoot in [false, true]:
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		var slow := 0
+		var peak := 0.0
+		var gap := 99
+		for i in 60:
+			var was_rolling := P.roll_t > 0.0
+			P.inp["fire"] = shoot and was_rolling and P.roll_t <= DT
+			var shots: int = m.shots.size()
+			m.step(DT)
+			P.inp["dash"] = false
+			var v := _hv(P).length()
+			var run := P.base_speed * P.ak.move_k()
+			peak = maxf(peak, v)
+			if v < peak and v < run - 0.05:
+				slow += 1
+			if P.inp["fire"] and m.shots.size() > shots:
+				gap = 0
+			if not shoot and was_rolling and P.roll_t <= 0.0:
+				rec("vault_exit_run", v / run)
+		P.inp["fire"] = false
+		if shoot:
+			rec("vault_shot_gap_frames", gap)
+		else:
+			rec("vault_slow_frames", slow)
+	P.reclass(was[0], was[1])
 
 ## Cinder's Flue Flight (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
 ## ring, rising to her low hover, before the flight moves; then, the cursor swung a right angle, the heading turns

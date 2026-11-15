@@ -110,12 +110,12 @@ func use_style(id: String) -> void:
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame. A style that scales Hunters is the match's
-## alone: the home has no match Hunters to scale, so it keeps the Supervive view.
+## alone: the home has no match Hunters to scale, so it keeps the default view.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
 	if (STYLES.get(sty, {}) as Dictionary).has("hunter_scale"):
-		sty = "supervive"
+		sty = "default"
 	if sty != style_id:
 		use_style(sty)
 
