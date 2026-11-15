@@ -32,7 +32,6 @@ func run(main_node: Node) -> void:
 		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
-		await _spirit_look()
 		await tall.tall()
 		await bow.pin()
 	if both or "--bulwark-combo-check" in args:
@@ -42,6 +41,8 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+	if both or "--archer-combo-check" in args:
+		await _spirit_look()
 	n += ult.n + own.n + launch.n + tall.n + bow.n
 	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
