@@ -455,16 +455,6 @@ func _extract_pick(xt: float) -> Dictionary:
 	return {"clip": clip, "t": minf(xt - EXTRACT_DIP, lib.get_animation(clip).length - 0.001)}
 
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
-## The mantle clip at how far up the face the body is (so it never lags the rise), or the ledge clip on its own
-## clock while floating back up; {} when this Hero has no such clip (the data lists them under "states").
-func _climb(st: Dictionary, s: Dictionary) -> Dictionary:
-	var mk := float(s.get("mantle", -1.0))
-	if mk >= 0.0 and st.has("mantle"):
-		return {"clip": st["mantle"], "t": mk * lib.get_animation(String(st["mantle"])).length}
-	if bool(s.get("ledge", false)) and st.has("ledge"):
-		return {"clip": st["ledge"], "t": -1.0}
-	return {}
-
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
 	var climb := _climb(s, dt)
@@ -474,9 +464,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if fall >= 0.0 and st.has("dead"):      # knocked down (HunterFall): the death clip, as far in as the beat is
 		var clip := String(st["dead"])
 		return {"clip": clip, "t": fall * lib.get_animation(clip).length, "fade": FALL_FADE}
-	var climb := _climb(st, s)
-	if not climb.is_empty():
-		return climb
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
