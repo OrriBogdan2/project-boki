@@ -79,6 +79,7 @@ func _bot_ranks(bot: Hunter) -> void:
 		ok(false, "a bot in the match")
 		return
 	var h0 := LevelSfx.heard.duplicate()
+	var heard := str(RankSfx.heard)
 	bot.gain_xp(float(Hunter.XP_TO[4]) - bot.xp + 1.0)
 	ok(LevelSfx.heard == h0, "a rival's levels and ranks made no sound")
 	var spent := 0
@@ -139,6 +140,7 @@ func _ready_chime(m: Match, P: Hunter) -> void:
 	ok(_count("rank_ready") == 1, "then it chimes once")
 	await _wait(m, RankSfx.READY_DELAY * 2.0)
 	ok(_count("rank_ready") == 1 and P.skill_pts == 1, "and never again while the point waits")
+	P.level_slot("ult")
 	P.gain_xp(float(Hunter.XP_TO[P.lvl + 1]) - P.xp + 1.0)
 	await m.hud.panels.draw
 	await _wait(m, RankSfx.READY_DELAY + 0.2)
