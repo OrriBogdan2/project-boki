@@ -253,18 +253,18 @@ func _cup() -> void:
 		steps.append(res["prize"]["round"])
 		xps.append(res["xp"])
 		first = first or (i == 0 and res["prize"]["first"])
-	var win := int(XP["game_win"])
+	var win := int(XP["win"])
 	ok(steps == ["Sprout", "Bloom", "Crown"] and GardenPrizes.ribbon_count(rec, "kite") == 1,
 			"three won laps: %s and the Kite Tow Cup Ribbon" % str(steps))
-	ok(first and xps == [win * int(XP["first_win_mult"]), win, win],
-			"XP: first win of the day x%d, then %d a win: %s" % [XP["first_win_mult"], win, str(xps)])
+	ok(first and xps == [int(XP["first_win"]), win, win],
+			"XP: %d for the first win of the day, then %d a win: %s" % [XP["first_win"], win, str(xps)])
 	var bag: Dictionary = Save.d["items"]
 	ok(int(bag.get("zipseed", 0)) >= 1 and int(bag.get("galeribbon", 0)) == 1,
 			"prizes banked: first-win Zipseed and the Galeribbon cup prize %s" % str(bag))
 	var next_week := now + 8.0 * 86400.0
 	GardenPrizes.settle("kite", rec, BaseKite.rival(rec), true, next_week, rng)
 	var lost := BaseKite.settle(_lap(6, 30, false), rec, BaseKite.rival(rec), next_week + 1.0, rng)
-	ok(not lost["won"] and lost["xp"] == int(XP["game"]) and lost["prize"]["reset"],
+	ok(not lost["won"] and lost["xp"] == int(XP["play"]) and lost["prize"]["reset"],
 			"a lost lap: %d play XP and the cup starts over" % lost["xp"])
 	Save.d = Save.fresh()
 

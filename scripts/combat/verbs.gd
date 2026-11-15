@@ -462,6 +462,7 @@ func tick(dt: float) -> void:
 		var touch: Dictionary = w["touch"]
 		if not touch.is_empty():
 			for f in m.foes_of(int(w["team"])):
+				if not f.hittable(): continue
 				var c2 := Geometry2D.get_closest_point_to_segment(Vector2(f.pos.x, f.pos.z), w["a"], w["b"])
 				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and absf(f.pos.y - float(w["y"])) < 2.0:
 					var key: String = str(f.get_instance_id())

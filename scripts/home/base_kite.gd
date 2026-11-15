@@ -157,7 +157,7 @@ static func settle(run: Run, rec: Dictionary, foe: Dictionary, now := -1.0,
 	var foe_t := rival_time(foe, run.lap)
 	var won := run.time() <= foe_t
 	var prize := GardenPrizes.settle("kite", rec, foe, won, now, rng)
-	var xp := GardenXp.played(rec, won, prize["first"])
+	var xp := GardenXp.reward(won, prize["first"])      # (settle paid it)
 	return {"rec": rec, "time": run.time(), "hits": run.hits, "misses": run.misses, "gems": gems,
 			"won": won, "rival_time": foe_t, "prize": prize, "xp": xp}
 
