@@ -43,4 +43,14 @@ d=$(mktemp -d); git clone -q "$T/origin.git" "$d"; (cd "$d" && echo y > y.txt &&
 ok "publish refuses a train behind main" "$tb publish $br --summary 'GATE GREEN x' --dry 2>&1 | grep -q 'is behind origin/main'"
 git fetch -q origin; git checkout -q -B mt origin/main; git merge -q --no-edit origin/$br; git push -q origin HEAD:main; rm -f "$T/state/HOLD"
 ok "hold ends when the train is merged" "! $tb hold > /dev/null"
+# 11-15: p5 conflicts with main itself (a.txt), p6 only on an add/add .uid (merge_batch takes main's) and folds
+git fetch -q origin; git checkout -q -B m5 origin/main
+for n in 5 6; do
+	git checkout -qb ext/p$n m5; [ $n = 5 ] && echo p5 > a.txt; [ $n = 6 ] && echo uid://p6 > t.gd.uid; git add -A; git commit -qm p$n
+	git push -q origin ext/p$n:refs/pull/$n/head
+done
+git checkout -q m5; echo main > a.txt; echo uid://main > t.gd.uid; git add -A; git commit -qm mainmove; git push -q origin HEAD:main
+$tb run --dry --min 1 5 6 > "$T/alone.out" 2>&1
+ok "p5 conflicts with main itself" "grep -q 'pr/5: SKIPPED.*a.txt.*conflicts with main itself' $T/alone.out"
+ok "p6 .uid add/add folds" "grep -q ' + #6 (1 skipped)' $T/alone.out"
 [ -n "$KEEP" ] && echo "$T" || rm -rf "$T"; exit $fail

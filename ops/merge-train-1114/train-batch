@@ -229,11 +229,18 @@ def run(args):
     fresh_tree(cand, main)
     skipped = merge_in(cand, [(f"pr/{n}", sha) for n, sha, _, _ in prs], out, "1")
     folded = [p for p in prs if f"pr/{p[0]}" not in skipped]
-    for lab, files in skipped.items():  # main alone or only the others? (main-conflicts need a fix job, not a later train)
+    # main alone or only the others? (main-conflicts need a fix job, not a later train). A scratch merge of main + that PR in cand
+    # with the same merge_batch policy: `git merge-tree --write-tree` needs git >= 2.38 (rpc workers have 2.34, where it failed
+    # and every skip read "only with the others") and ignores the union/ours policy, so it over-reported conflicts as well.
+    built = git("rev-parse", "HEAD", cwd=cand)
+    for i, (lab, files) in enumerate(list(skipped.items())):
         sha = dict((f"pr/{n}", h) for n, h, _, _ in prs)[lab]
-        alone = subprocess.run(["git", "-C", REPO, "merge-tree", "--write-tree", "--name-only", main, sha], capture_output=True).returncode
-        skipped[lab] = f"{files} ({'conflicts with main itself: needs a conflict fix' if alone == 1 else 'only with the others: next train'})"
+        fresh_tree(cand, main)
+        alone = lab in merge_in(cand, [(lab, sha)], out, f"alone{i}")
+        skipped[lab] = f"{files} ({'conflicts with main itself: needs a conflict fix' if alone else 'only with the others: next train'})"
         log(f"{lab}: SKIPPED, {skipped[lab]}")
+    if skipped:
+        fresh_tree(cand, built)
     log(f"train {stamp}: main {main[:10]} + {' '.join('#%d' % p[0] for p in folded)} ({len(skipped)} skipped)")
     if len(folded) < minimum or dry:
         log("dry run, nothing pushed" if dry else "fewer than the minimum merged cleanly, no train")
