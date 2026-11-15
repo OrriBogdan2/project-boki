@@ -244,7 +244,6 @@ itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
-| caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
 
 Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile). The rigged
 body plays the `settle`, `nap` and `wake` clips (`BokiHomeClips`; wake has the stretch). On top of them, `KinNap`
@@ -253,3 +252,4 @@ builds up, and slows all three clips for a bigger Boki (scale times the root of 
 body (`KinPuppet`) gets the whole nap from `KinNap`: it lies down over 0.6 s, breathes once every 3.6 s, flicks an ear,
 and on waking gets up in 0.4 s and stretches long and low with the front down, done by 1.1 s. Checks:
 `--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).
+| caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
