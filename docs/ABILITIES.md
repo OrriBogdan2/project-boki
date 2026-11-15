@@ -39,6 +39,7 @@ _The warden of high ground. Climbs, reads the field, pins people to walls._
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2. A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
@@ -73,7 +74,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **Passive: Rage.** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 - **Shift: Rampage** (9s a charge). A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
 - **RMB: Smash** (3s):
-  - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
+  - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
   - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
@@ -140,9 +141,9 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 | juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
 | ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
 | tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
-| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Molten Guard shield: flat (source: not in data) |
+| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Shardskin shield: flat (source: not in data) |
 | archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Hawk Sense: no number |
-| dredge, Grimble (Kingpin) | weapon: flat | Abyssal Hand dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| dredge, Grimble (Kingpin) | weapon: flat | Deep Reach dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
 | rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
 | mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
 | bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Aegis shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | 360 Smash dmg: AP = AP | Mending Ground heal: AP = AP (before flat: 0.87 / 0.74) | Faultline dmg: AP = AP | Guard: no number |
@@ -285,12 +286,12 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|
 | every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
-| Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Grimble's Deep Reach (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
 | Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |
@@ -304,7 +305,7 @@ One rule for what stops what: `content/rules/blockers.json`, read by `scripts/co
 
 - Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).
 - Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.
-- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`), plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.
+- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`), plus a sound and flash when they go off (no floating words).
 
 ## Bots
 

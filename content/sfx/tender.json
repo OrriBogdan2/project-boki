@@ -19,7 +19,7 @@
   "tender_dash": "dash",
   "tend_pickup": "cast",
   "tend_call": "cast",
-  "tend_call_hum": "loop",
+  "tend_call_loop": "loop",
   "tend_arrive": "impact",
   "tender_cheer": "signature",
   "tender_step_grass": "step",
@@ -31,7 +31,8 @@
   "tender_death": "grunt"
  },
  "signature": ["tender_lantern_chime", "tender_cheer"],
+ "loops": ["tend_call_loop"],
  "kit_files": ["care_util.gd"],
  "replaces": ["tend_ember", "tend_ember_emp", "tend_kindled", "tend_seed_aim", "tend_seed", "tend_stick", "tend_root",
-  "tend_hearth", "tend_toss", "tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_call", "tend_call_hum", "tend_arrive"]
+  "tend_hearth", "tend_toss", "tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_call", "tend_call_loop", "tend_arrive"]
 }
