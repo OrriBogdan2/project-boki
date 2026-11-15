@@ -3,7 +3,8 @@ extends RefCounted
 ## match's own input handling runs too) with a full backpack: a pick-up opens the swap window, and a
 ## mouse click at each drawn row's Drop button swaps that slot for the new thing; the backpack (I)
 ## window's Drop and Wear buttons work by click; firing is held while the cursor is over a window;
-## Esc still closes them. Never touches the save.
+## Esc still closes them. A loot-row swap and a Wear play their inventory cue (InvSfx), not the generic
+## click. Never touches the save.
 
 var bad := 0
 var main: Node
@@ -30,6 +31,14 @@ func _buttons(root: Node, txt: String) -> Array:
 		for ch in n.get_children(): stack.append(ch)
 	out.sort_custom(func(a, b): return a.global_position.y < b.global_position.y)
 	return out
+
+## Forgets when these sounds last played, so _heard can tell what the next action played.
+func _hush(names: Array) -> void:
+	for n in names: Sfx.last_played.erase(n)
+
+## The ones of `names` that played since _hush.
+func _heard(names: Array) -> Array:
+	return names.filter(func(n): return Sfx.last_played.has(n))
 
 ## Where a control's middle is in window pixels (what the OS sends), through the interface scale.
 func _screen_mid(c: Control) -> Vector2:
@@ -92,6 +101,11 @@ func _key(k: Key) -> void:
 func _ids(h: Hunter) -> Array:
 	return h.pack.map(func(it): return String(it.get("uid", "")))
 
+## Is this item lying on the ground? Treasure keeps its uid; dropped gear is only {gear, rar} until someone picks it up.
+func _on_ground(it: Dictionary) -> bool:
+	return m.wpicks.any(func(w): return String((w.get("item", {}) as Dictionary).get("uid", "")) == String(it["uid"]) \
+		or (String(w.get("gear", "")) == String(it["id"]) and int(w.get("rar", -1)) == int(it.get("rar", 0))))
+
 func _fill(P: Hunter) -> void:
 	P.pack_cap = 4
 	P.pack = [Loot.valuable("old_coin"), Loot.gear("quilted_coat", 1), Loot.valuable("sky_pearl"), Loot.gear("windstep_boots", 2)]
@@ -118,6 +132,7 @@ func run(mn: Node) -> void:
 	for slot in 4:
 		_fill(P)
 		var before: Array = _ids(P)
+		var gone: Dictionary = P.pack[slot]
 		var at := m.world.free_spot_near(P.pos + Vector3(0.7, 0, 0.3), [P.pos], 0.5)
 		m.spawn_val(Loot.valuable("crown_shard"), Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 		var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
@@ -137,7 +152,7 @@ func run(mn: Node) -> void:
 		var after: Array = _ids(P)
 		ok(not after.has(before[slot]) and P.pack.any(func(it): return String(it.get("id", "")) == "crown_shard") and P.pack.size() == 4,
 			"slot %d: the click dropped exactly that slot and packed the shard" % slot)
-		ok(m.wpicks.any(func(w): return String((w.get("item", {}) as Dictionary).get("uid", "")) == before[slot]), "slot %d: the dropped thing is on the ground" % slot)
+		ok(_on_ground(gone), "slot %d: the dropped thing is on the ground" % slot)
 		# tidy the dropped thing away so the next round starts clean
 		for w in m.wpicks.duplicate():
 			if w.has("val") or (w.get("item", {}) as Dictionary).has("t"): Pack._off_ground(m, w)
@@ -183,14 +198,17 @@ func run(mn: Node) -> void:
 	m.boxes.append(bx)
 	hud.open_loot(bx)
 	await _frames(4)
-	var takes := _buttons(hud.loot_panel, "Swap")
+	var takes := _buttons(hud.loot_panel, "Take")
 	if takes.size() == 1:
 		var lrp: Control = (takes[0] as Button).get_parent().get_parent()
+		_hush(["inv_swap", "click"])
 		await _click(main.get_viewport().get_final_transform() * (lrp.get_global_transform_with_canvas() * Vector2(60.0, lrp.size.y * 0.5)))
 		await _frames(2)
 		ok(P.pack.any(func(it): return String(it.get("id", "")) == "crown_shard") and P.pack.size() == 4, "loot window: clicking the shard's row swaps it into the full pack")
+		var lheard := _heard(["inv_swap", "click"])
+		ok(lheard == ["inv_swap"], "loot window: the swap plays its cue, not the click (heard %s)" % [lheard])
 	else:
-		ok(false, "loot window: one Swap button for the shard (got %d)" % takes.size())
+		ok(false, "loot window: one Take button for the shard (got %d)" % takes.size())
 	hud.close_loot()
 	m.boxes.erase(bx)
 	# 4. the backpack window (I) on a full pack: Drop and Wear by click
@@ -213,10 +231,13 @@ func run(mn: Node) -> void:
 	if not eq.is_empty():
 		var w0 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
 		var at: Vector2 = _screen_mid(eq[0])
+		_hush(["inv_equip", "ui_confirm", "click"])
 		await _click(at)
 		await _frames(3)
 		var w1 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
 		ok(w1 != w0, "backpack: clicking Wear puts the gear on (%s -> %s, clicked %s)" % [str(w0), str(w1), at])
+		var wheard := _heard(["inv_equip", "ui_confirm", "click"])
+		ok(wheard == ["inv_equip"], "backpack: Wear plays the equip cue, not a button sound (heard %s)" % [wheard])
 	else:
 		ok(false, "backpack: a Wear button is drawn")
 	await _key(KEY_ESCAPE)

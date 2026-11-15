@@ -20,3 +20,6 @@ id_ed25519*
 credentials*.json
 secrets.*
 *.secret
+
+# The Sentry addon: fetched at export time by tools/sentry_addon.sh (docs/SENTRY.md)
+addons/sentry/

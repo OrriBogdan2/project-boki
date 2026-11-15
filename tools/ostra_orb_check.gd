@@ -140,7 +140,7 @@ func _full_slows() -> void:
 	_fire_after(m, P, K, 1.4)
 	step(m, 0.6)
 	ok(
-		"slow: a full orb slows (10% for 1.5s, the data's values)",
+		"slow: a full orb slows (6% for 1.5s, the in-game card)",
 		T.slow_t > 0.5 and absf(T.slow_k - float(K.lmb_def()["prime_slow"])) < 0.001, "slow %.2f" % T.slow_t
 	)
 	step(m, 2.0)

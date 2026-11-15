@@ -12,6 +12,8 @@ static func drop(slot: int, col: Color, rar: int) -> Node3D:
 	var spin: Node3D = root.get_node("Spin")
 	for ch in spin.get_children():
 		ch.queue_free()
+	if ItemArt.gear(spin, slot, col):
+		return root
 	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
 	var body := Models.toon(col, true, 0.55)
 	var trim := Models.toon(rc, true, 0.8)

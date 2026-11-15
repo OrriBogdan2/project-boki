@@ -109,11 +109,12 @@ func _stats() -> void:
 	var a := _kin(by_theme["ember"], "A", 10, 10, 50.0, 50.0)
 	var b := _kin(by_theme["frost"], "B", 10, 10, 50.0, 50.0)
 	var plain := _kin(by_theme["stone"], "P", 10, 10, 50.0, 50.0)
-	var ratio := BaseVolley.strength(a, b) / BaseVolley.strength(a, plain)
-	ok(absf(ratio - float(BaseVolley.rules()["edge"])) < 0.001, "the type edge is x%.3f of strength" % ratio)
+	var same := absf(BaseVolley.strength(a) - BaseVolley.strength(plain)) < 0.0001
+	ok(same and absf(BaseVolley.expected(a, b) - 0.5) < 0.0001,
+			"species themes change no strength: equal Boki are level (%.4f)" % BaseVolley.expected(a, b))
 	var happy := _kin("zapple", "H", 10, 10, 100.0, 100.0)
 	var glum := _kin("zapple", "G", 10, 10, 0.0, 0.0)
-	ok(BaseVolley.strength(happy, glum) > BaseVolley.strength(glum, happy) * 1.1, "mood and trust nudge strength up")
+	ok(BaseVolley.strength(happy) > BaseVolley.strength(glum) * 1.1, "mood and trust nudge strength up")
 
 ## Equal Boki, same dice with and without a great call at the start.
 func _spike() -> void:

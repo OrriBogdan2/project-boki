@@ -1,0 +1,377 @@
+{
+ "_doc": "One entry per game cue to re-source. cue = the audio/<cue>.wav name the game loads (takes <cue>_1.. are extra variants); level = category in content/rules/sfx_levels.json; pos = [regex, weight] matched on the library path (lowercase); neg = excluded paths; src_max = longest source file considered (s); trim_max = longest clip kept (s).",
+ "slots": [
+  {
+   "id": "ghost_shot",
+   "label": "Ghost (Vex) first shot",
+   "cue": "vn_rifle",
+   "level": "fire",
+   "trim_max": 0.55,
+   "src_max": 3.5,
+   "pos": [
+    [
+     "single.?shot|shot single|shot_single",
+     4
+    ],
+    [
+     "assault|rifle|blaster|laser|plasma|future weapons|sci-?fi weapon",
+     3
+    ],
+    [
+     "shot|fire|shoot",
+     1
+    ]
+   ],
+   "neg": "reload|cock|impact|hit|burst|auto|tail|distant|[0-9]+m_|shell|foley|handling|eject|insert|bullet.?by|ricochet|whiz"
+  },
+  {
+   "id": "ghost_reload",
+   "label": "Ghost (Vex) reload",
+   "cue": "reload",
+   "level": "cast",
+   "trim_max": 0.7,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "reload",
+     5
+    ],
+    [
+     "cock|chamber|bolt|slide|mag|clip|insert|click|load",
+     3
+    ],
+    [
+     "gun|rifle|weapon|blaster|future",
+     1
+    ]
+   ],
+   "neg": "ambien|voice|soldier|cover|shotgun.?shell|footstep|impact"
+  },
+  {
+   "id": "shot_rifle",
+   "label": "Rifle shot (rifle, burst rifle)",
+   "cue": "rifle",
+   "level": "fire",
+   "trim_max": 0.7,
+   "src_max": 3.5,
+   "pos": [
+    [
+     "assault|rifle",
+     3
+    ],
+    [
+     "single.?shot|shot single|shot_single",
+     3
+    ],
+    [
+     "future weapons|sci-?fi|blaster|laser",
+     2
+    ],
+    [
+     "shot|fire",
+     1
+    ]
+   ],
+   "neg": "reload|cock|hit|burst|auto|tail|distant|[0-9]+m_|shell|foley|handling|eject|bullet.?by|ricochet|whiz|vocal"
+  },
+  {
+   "id": "shot_smg",
+   "label": "SMG shot (smg, minigun)",
+   "cue": "smg",
+   "level": "fire",
+   "trim_max": 0.5,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "smg|submachine|mp7|p90|tmp|scorpion|uzi|machine",
+     4
+    ],
+    [
+     "pistol|blaster|laser|plasma|future weapons",
+     2
+    ],
+    [
+     "shot|fire|single",
+     1
+    ]
+   ],
+   "neg": "reload|cock|hit|impact|tail|distant|[0-9]+m_|shell|foley|handling|eject|bullet.?by|ricochet|whiz|vocal|burst|auto"
+  },
+  {
+   "id": "shot_shotgun",
+   "label": "Shotgun blast",
+   "cue": "dr_shot",
+   "level": "heavy_fire",
+   "trim_max": 0.9,
+   "src_max": 4.0,
+   "pos": [
+    [
+     "shotgun|12 ?g|spas|usas|slug|blunderbuss",
+     5
+    ],
+    [
+     "shot|fire|blast",
+     2
+    ],
+    [
+     "future weapons|sci-?fi",
+     1
+    ]
+   ],
+   "neg": "reload|cock|pump|impact|tail|distant|[0-9]+m_|shell|foley|handling|eject|bullet.?by|ricochet|vocal"
+  },
+  {
+   "id": "hit_confirm",
+   "label": "Hit confirm (you hit a foe)",
+   "cue": "hit",
+   "level": "impact",
+   "trim_max": 0.3,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "hit|impact|punch|thud|smack",
+     3
+    ],
+    [
+     "flesh|body|bullet.?impact|slap|combat",
+     3
+    ],
+    [
+     "small|short|light|tight",
+     1
+    ]
+   ],
+   "neg": "whoosh|swing|vocal|voice|ambien|cinematic|trailer|explosion|metal.?hit|glass|car|ball|golf|tennis|door|stick|hand ?guns|pistol|gun"
+  },
+  {
+   "id": "take_damage",
+   "label": "Take damage (you are hit)",
+   "cue": "hurt",
+   "level": "grunt",
+   "trim_max": 0.45,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "hurt|pain|grunt|oof|hit.?react|damage",
+     4
+    ],
+    [
+     "vocal|fighter|male|female|human",
+     2
+    ],
+    [
+     "punch|impact",
+     1
+    ]
+   ],
+   "neg": "monster|creature|growl|roar|dragon|troll|zombie|scream|death|die|dying|laugh|pony|footstep|dog|cat|ambien"
+  },
+  {
+   "id": "dash",
+   "label": "Dash",
+   "cue": "dash",
+   "level": "dash",
+   "trim_max": 0.35,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "whoosh|swoosh|swish|swipe|woosh",
+     3
+    ],
+    [
+     "dash|fast|quick|short|flyby|pass",
+     2
+    ],
+    [
+     "air|wind",
+     1
+    ]
+   ],
+   "neg": "footstep|ambien|vocal|voice|trailer|cinematic|long|riser|rise|fall|impact|hit|bullet|jet|car|bomb"
+  },
+  {
+   "id": "glide_start",
+   "label": "Glide start (glider opens)",
+   "cue": "glider_snap",
+   "level": "cast",
+   "trim_max": 0.5,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "flap|snap|unfold|open|cloth|wing|sail|flag|fabric|parachute",
+     4
+    ],
+    [
+     "whoosh|swoosh|air|wind",
+     2
+    ],
+    [
+     "short|quick",
+     1
+    ]
+   ],
+   "neg": "footstep|ambien|vocal|voice|trailer|riser|bullet|jet|car|engine|bird|flies|insect|fly |punch|combat|gore"
+  },
+  {
+   "id": "jump",
+   "label": "Jump",
+   "cue": "jump",
+   "level": "impact",
+   "trim_max": 0.3,
+   "src_max": 1.5,
+   "pos": [
+    [
+     "jump",
+     5
+    ],
+    [
+     "lift|push|hop|spring|boing|leap|effort|exert",
+     3
+    ],
+    [
+     "vocal|fighter|whoosh|up",
+     1
+    ]
+   ],
+   "neg": "fish|pony|bounce|trampoline|delay|retro|8-?bit|collect|footstep.*land"
+  },
+  {
+   "id": "land",
+   "label": "Land (touch down)",
+   "cue": "land",
+   "level": "impact",
+   "trim_max": 0.3,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "(^|[^a-z])land",
+     5
+    ],
+    [
+     "bodyfall|body fall|thud|stomp|drop|fall",
+     3
+    ],
+    [
+     "foot|shoe|boot|jump",
+     1
+    ]
+   ],
+   "neg": "whoosh|shell|pony|insect|fly|take.?off|flying|vocal|voice|ambien|fishing|water|splash"
+  },
+  {
+   "id": "ability_cast",
+   "label": "Ability cast (generic)",
+   "cue": "ab_blast",
+   "level": "cast",
+   "trim_max": 1.0,
+   "src_max": 4.0,
+   "pos": [
+    [
+     "cast",
+     5
+    ],
+    [
+     "spell|magic|buff|summon|zap|energy|elemental",
+     3
+    ],
+    [
+     "short|burst|blast|release",
+     1
+    ]
+   ],
+   "neg": "impact|hit|ambien|loop|sizzle|acid|vocal|voice|pad|drone|riser|explosion"
+  },
+  {
+   "id": "knockout",
+   "label": "Knockout (foe or hunter downed)",
+   "cue": "knock_confirm",
+   "level": "heavy_impact",
+   "trim_max": 0.9,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "impact|boom|slam|hit",
+     3
+    ],
+    [
+     "baxter|impactus|cinematic|heavy|big|deep|sub|final|knock|ko\\b|sting",
+     3
+    ],
+    [
+     "bodyfall|body fall",
+     1
+    ]
+   ],
+   "neg": "ambien|loop|vocal|voice|trailer|riser|whoosh|knocking|door|bottle|glass|car |scrape|gun|pistol|bullet|magic"
+  },
+  {
+   "id": "pickup",
+   "label": "Pickup (loot taken)",
+   "cue": "pickup",
+   "level": "ui",
+   "trim_max": 0.55,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "pick.?up|collect|item|grab",
+     5
+    ],
+    [
+     "coin|bonus|gem|chime|reward|powerup|power.?up",
+     3
+    ],
+    [
+     "short",
+     1
+    ]
+   ],
+   "neg": "assault|rifle|lighter|register|handle|drill|servo|bag|sports|foley|catch|voice|hurry"
+  },
+  {
+   "id": "ui_click",
+   "label": "UI click",
+   "cue": "click",
+   "level": "ui",
+   "trim_max": 0.25,
+   "src_max": 1.5,
+   "pos": [
+    [
+     "click|tap|press|button|select|confirm",
+     4
+    ],
+    [
+     "ui|interface|menu|hud",
+     2
+    ],
+    [
+     "short|soft|tight",
+     1
+    ]
+   ],
+   "neg": "camera|shutter|barista|grinder|coffee|stick|hockey|mechanical|keyboard|typewriter|triple|double|multi|knob|switch.?off|lighter"
+  },
+  {
+   "id": "ui_hover",
+   "label": "UI hover",
+   "cue": "hover",
+   "level": "ui",
+   "trim_max": 0.2,
+   "src_max": 1.5,
+   "pos": [
+    [
+     "hover|rollover|highlight|focus|tick",
+     5
+    ],
+    [
+     "ui|interface|menu|hud|blip|bleep|soft",
+     2
+    ],
+    [
+     "short|tiny|small",
+     1
+    ]
+   ],
+   "neg": "camera|shutter|barista|grinder|coffee|stick|hockey|keyboard|typewriter|clock|watch|tick.?tock|wood|double trouble|terminal"
+  }
+ ]
+}
