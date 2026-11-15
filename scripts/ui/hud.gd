@@ -132,10 +132,15 @@ func hurt_flash(d: float) -> void:
 ## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
+<<<<<<< HEAD
 	msgs.fight = in_fight()
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = 84.0
+=======
+	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
+	msgs.top = HudScale.from_edge(84.0)
+>>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
@@ -840,6 +845,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	if not HudReveal.on(m, "weather"):
+		return
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y
@@ -2663,10 +2670,10 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 		var ph := fmod(m.time * 1.8, 1.0)
 		if on_map.call(pv, 4.0):
 			c.draw_arc(pv, 6.0 + ph * 12.0, 0, TAU, 24, Color(GOLD, 1.0 - ph), 2.5, true)
-			c.draw_set_transform(pv, 0.0, Vector2(0.8, 1.05))
+			c.draw_set_transform_matrix(HudScale.xf * Transform2D(0.0, Vector2(0.8, 1.05), 0.0, pv))
 			c.draw_circle(Vector2.ZERO, 6.5, Color(0, 0, 0, 0.75))
 			c.draw_circle(Vector2.ZERO, 5.0, Color("ffd36a"))
-			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			c.draw_set_transform_matrix(HudScale.xf)
 		else:
 			edge_mini.add(pv - inner.get_center(), GOLD)
 

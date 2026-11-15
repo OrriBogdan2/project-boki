@@ -64,7 +64,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	if WaysHints.arrow_due(m):
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.COL)
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
-	var at := Vector2(sz.x * 0.5, sz.y * 0.8)
+	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
 	var vc := HudVitals.corner(hud, sz)
 	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)

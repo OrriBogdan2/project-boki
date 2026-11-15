@@ -138,6 +138,10 @@ static func shield_frac(h: Hunter) -> float:
 	return clampf(h.shield / maxf(1.0, h.max_hp), 0.0, 1.0)
 
 ## Another hunter's plate. `show_name`: Hud's rule (allies always; rivals near, hovered or down).
+## The name's tint: the squad colour once plate colours are revealed (HudReveal), plain before.
+static func _name_tint(H, role: Color) -> Color:
+	return role if HudReveal.on(H.m, "plate_colours") else Color.WHITE
+
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	TextCache.world = true      # plates hang on the world over each head: their text keeps its design size
 	_draw_plate(H, sp, h, show_name)

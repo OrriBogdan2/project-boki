@@ -10,6 +10,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
@@ -119,6 +120,23 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
+
+## HUD size
+
+- Settings > Accessibility > Interface size has "HUD size" beside it (`hud_scale`, 80-130%, default 100%, held to
+  that range when settings load, so saves from before it load at 100%). It scales the match HUD only
+  (`HudScale`); the menus follow Interface size.
+- Each panel group (`SafeArea.begin` in `HudPanels`) is drawn scaled about the corner or edge it hangs from
+  (`HudScale.ANCHOR`), so it stays on its margin and grows inward; groups with one anchor scale together and
+  keep their spacing. Hover spots and the registry's rects follow the scale. A widget that hangs from somewhere
+  else inside a group (the Ways Out strip, the hidden tag) starts its own with `HudScale.begin` and hands back.
+- Growing never takes a corner into the one on its side under or over it: the factor steps down to what the last
+  pass's extents leave room for, never below 100% (on 720p the left column, minimap + squad over the kin card
+  and bars, tops out near 125%, and the big drop map holds it at 100%).
+- What sits clear of the panels gives way by the growth (`HudScale.from_edge`): the message lane's top, the edge
+  markers' left limit and bottom reach, the Blight line.
+- `--hudref-check` section 9 and `--safe-area-check --hud-scale=<0.8..1.3>`: no group off screen or overlapping at 80%,
+  100% and 130% (the former at 1280x720 and 2560x1080, dropping and on the ground).
 
 ## Safe area
 

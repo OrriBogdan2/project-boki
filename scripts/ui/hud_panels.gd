@@ -46,34 +46,65 @@ func _draw_panels() -> void:
 		hud._draw_minimap(size)      # aboard the rocket: the map and nothing else (DropHud)
 	elif not (m.tut and m.tut.intro):
 		var sz := size
+<<<<<<< HEAD
 		SafeArea.begin("top")
+		if HudReveal.on(m, "counters"):
+			hud._draw_top(sz)
+=======
+		HudScale.pass_start()
+		HudScale.begin(hud, "top", sz)
 		hud._draw_top(sz)
+>>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 		if p and m.lairs:
-			SafeArea.begin("boss")
+			HudScale.begin(hud, "boss", sz)
 			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
+<<<<<<< HEAD
 		SafeArea.begin("feed")
-		hud._draw_feed(sz)
+		if HudReveal.on(m, "feed"):
+			hud._draw_feed(sz)
 		SafeArea.begin("minimap")
+=======
+		HudScale.begin(hud, "feed", sz)
+		hud._draw_feed(sz)
+		HudScale.begin(hud, "minimap", sz)
+>>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
-			SafeArea.begin("vitals")
+			HudScale.begin(hud, "vitals", sz)
 			HudVitals.draw(hud, sz, p)
-			SafeArea.begin("abilities")
+			HudScale.begin(hud, "abilities", sz)
 			hud._draw_abilities(sz, p)
-			SafeArea.begin("weapon")
+			HudScale.begin(hud, "weapon", sz)
 			hud._draw_weapon(sz, p)
-			SafeArea.begin("gear")
-			GearPanel.draw(hud, sz, p)
+<<<<<<< HEAD
+			if HudReveal.on(m, "gear"):
+				SafeArea.begin("gear")
+				GearPanel.draw(hud, sz, p)
 			SafeArea.begin("kin")
 			hud._draw_kin_card(sz, p)
-			SafeArea.begin("squad")
-			SquadFrames.draw(hud, sz, p)
-			TeamBoki.draw(hud, p)
-			SafeArea.begin("perks")
-			hud._draw_perks(sz, p)
+			if HudReveal.on(m, "squad"):
+				SafeArea.begin("squad")
+				SquadFrames.draw(hud, sz, p)
+				TeamBoki.draw(hud, p)
+			if HudReveal.on(m, "perks"):
+				SafeArea.begin("perks")
+				hud._draw_perks(sz, p)
 		else:
 			m.spectate.draw(hud, sz)
+=======
+			HudScale.begin(hud, "gear", sz)
+			GearPanel.draw(hud, sz, p)
+			HudScale.begin(hud, "kin", sz)
+			hud._draw_kin_card(sz, p)
+			HudScale.begin(hud, "squad", sz)
+			hud._draw_squad(sz, p)
+			TeamBoki.draw(hud, p)
+			HudScale.begin(hud, "perks", sz)
+			hud._draw_perks(sz, p)
+	HudScale.close(hud)
+>>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 	SafeArea.begin("")
+	HudScale.pass_end()
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0
