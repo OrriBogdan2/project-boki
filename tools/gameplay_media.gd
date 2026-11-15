@@ -24,7 +24,7 @@ extends RefCounted
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
 ##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
 ##  14 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
-##                   backpedal facing east, on the game camera; <dir>/loco_<id>.tsv logs the feet (tools/loco_slip.py)
+##                   backpedal facing east, on the game camera; <dir>/loco_<id>.tsv logs body and feet per frame
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
