@@ -2,7 +2,7 @@ class_name ArmorHud
 extends RefCounted
 ## Armor levelling on the HUD. Everyone starts on the same base armor; it levels up as you deal
 ## damage to rival hunters (Hunter.armor_gain: monsters count a third, a knock adds a big chunk), and
-## each level adds plates. HudVitals shows the tier word by the armour strip and calls bar() for a thin
+## each level blocks more of a hit. HudVitals shows the tier word by the armour strip and calls bar() for a thin
 ## progress bar under it; this adds a shield badge on the portrait, ringed by that progress, that pops on a level-up.
 ## Look: HudStyle.
 
@@ -47,7 +47,7 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	if left > 0.0:
 		grow = 1.0 + 0.35 * sin(k * PI)
 	var col: Color = p.armor_col()
-	var at := pr.position + Vector2(pr.size.x - 6, pr.size.y - 6)
+	var at := pr.end - Vector2(RADIUS, RADIUS)      # inside the portrait corner: the badge stays in the safe area
 	var r := RADIUS * grow
 	if left > 0.0:
 		c.draw_style_box(HudStyle.box(Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4), pr.grow(4.0 + k * 18.0))
@@ -92,6 +92,6 @@ static func tip(p: Hunter) -> Array:
 		out.append(["Top level: %d armor." % int(p.max_armor), HudStyle.MUTED, 13])
 	else:
 		var nx: Array = Hunter.ARMOR_TIERS[p.armor_tier + 1]
-		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[2]),
-				int(Hunter.ARMOR_TIER_BONUS * 100.0)], nx[1], 13])
+		out.append(["Next: %s  ·  %d of %d  ·  blocks %d%%" % [nx[0], int(p.armor_xp), int(nx[2]),
+				int(round(float(nx[3]) * 100.0))], nx[1], 13])
 	return out
