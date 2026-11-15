@@ -50,7 +50,7 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
-var take := 1
+var media_take := 1
 var diff := ""                # a bot difficulty for the match (Data.BOT_DIFF), "" keeps the setting
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
@@ -71,7 +71,7 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--media-clip="):
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-take="):
-			take = int(arg.substr(13))
+			media_take = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
 		if arg.begins_with("--media-fight="):
@@ -275,7 +275,7 @@ const TAKES := {
 
 func _skilled(secs: float) -> void:
 	diff = "expert"
-	var tk: Array = TAKES.get(take, TAKES[1])
+	var tk: Array = TAKES.get(media_take, TAKES[1])
 	var sa: Array = tk[0]
 	var sb: Array = tk[1]
 	await _start(String(sa[0][0]), String(sa[0][1]))
