@@ -35,6 +35,7 @@ var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
+var rng := RandomNumberGenerator.new()      # look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -254,7 +255,7 @@ func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float,
 	mt.set_shader_parameter("color2", col2)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("progress", 0.0)
-	mt.set_shader_parameter("seed", randf() * TAU)
+	mt.set_shader_parameter("seed", rng.randf() * TAU)
 	n.scale = s0
 	live.append({"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt})
 
@@ -427,7 +428,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
 		(sd["node"] as Node3D).visible = false
-	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
+	riders.append({"node": n, "sd": sd, "kind": kind, "spin": rng.randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
 
