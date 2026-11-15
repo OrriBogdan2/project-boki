@@ -114,8 +114,9 @@ static func on_event(m: Match, x: Array) -> void:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
+			m.sfx("boki_downed", at, -4.0)
 		"scoop", "round":
-			m.sfx("recall", at, -4.0)
+			m.sfx("boki_revive", at, -4.0)
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":

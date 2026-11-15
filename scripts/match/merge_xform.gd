@@ -81,7 +81,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 
 ## The sound of a Fusion ending: afterglow after a release, a tired sigh after a timeout, else a soft recall.
 static func end_cue(why: String) -> String:
-	return {"ult": "boki_fuse_end", "time": "boki_fuse_tired"}.get(why, "recall")
+	return {"ult": "boki_fuse_end", "time": "boki_fuse_tired"}.get(why, "boki_unfuse")
 
 ## The ultimate's cracking tell (Shatter): the shell splits along bright seams for `secs` before the burst.
 static func crack(h: Hunter, form: Dictionary, secs: float) -> void:

@@ -7,3 +7,4 @@ Format and rules: docs/AUDIO.md.
 `egg.json` is an egg nearing its hatch (scripts/home/egg_sfx.gd).
 `glint.json` is Glint Fishing (scripts/home/glint_sfx.gd).
 `quest.json` is the quest seats' own cues (scripts/match/quest_sfx.gd); `heart.json` the Heartspark and the Ways Out calls.
+`training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
