@@ -56,7 +56,6 @@ var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
-var rng := RandomNumberGenerator.new()   # the noise seeds' own stream: what is on screen must not shift the sim's dice
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
