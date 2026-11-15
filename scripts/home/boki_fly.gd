@@ -8,28 +8,34 @@ extends RefCounted
 ## k["fly"] = {h: m up now, to: m this flight holds}, only while it is off the ground. home.gd calls step() after
 ## each move, leap() on a leap and land() when another system takes the Boki.
 
-var h                      # the home (home.gd): world
+var h  # the home (home.gd): world
 var R: Dictionary
+
 
 func _init(home) -> void:
 	h = home
 	R = rules()
 
+
 static func rules() -> Dictionary:
 	return Content.rules("boki_fly")
+
 
 ## The roster's flier mark: the species' look has wings (its species JSON colors.wing).
 static func flier(species: String) -> bool:
 	return Data.KIN.get(species, {}).has("wing")
 
+
 ## Still in the air with `left` s to touchdown: the flare takes the last half of flare_s before it.
 static func glides(left: float) -> bool:
 	return left > float(rules()["flare_s"]) * 0.5
+
 
 ## m over the ground where a landing flier starts its flare: halfway through it, its feet touch down.
 static func flare_from() -> float:
 	var r := rules()
 	return float(r["sink"]) * float(r["flare_s"]) * 0.5
+
 
 ## One Boki after its move this frame: it rises, holds or comes down. True while it is off the ground.
 func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> bool:
@@ -54,6 +60,7 @@ func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> bool:
 		k.erase("fly")
 	return lift > 0.0
 
+
 ## A flier glides the leap to another isle (home.gd _leap_step) and flares as it comes down.
 func leap(k: Dictionary) -> void:
 	if not flier(String(k["rec"]["species"])):
@@ -66,6 +73,7 @@ func leap(k: Dictionary) -> void:
 	n.set_meta("aloft", glides(left))
 	n.set_meta("lift", 0.0)
 
+
 ## Something else has the Boki now (a game, a carry, a job): it is on the ground at once.
 func land(k: Dictionary) -> void:
 	if not k.has("fly"):
@@ -75,11 +83,13 @@ func land(k: Dictionary) -> void:
 	n.set_meta("aloft", false)
 	n.set_meta("lift", 0.0)
 
+
 func _wants_air(k: Dictionary, pos: Vector3) -> bool:
 	var ahead: Vector3 = pos + (k["vel"] as Vector3) * float(R["gap_lead"])
 	if _bridge(pos) or _bridge(ahead):
 		return true
 	return (R["zones"] as Array).has(GardenZones.here) and BaseLife.roams(k)
+
 
 ## A plank tile over the void between isles (World.bridge).
 func _bridge(p: Vector3) -> bool:

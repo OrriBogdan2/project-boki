@@ -7,9 +7,9 @@ extends RefCounted
 ## perks are shown, better gear from a box backpack goes on when taken, and Esc closes it.
 ## Never touches the save.
 
-const OPEN_MS := 100.0      # ms, the most building the window may take (it is ~40 controls)
-const HEADLESS_SIZE := Vector2i(1280, 720)     # px, the tightest screen we ship for
-const POP_S := 0.3          # s, past UI.pop_in's grow-in, so the window is measured at its real size
+const OPEN_MS := 100.0  # ms, the most building the window may take (it is ~40 controls)
+const HEADLESS_SIZE := Vector2i(1280, 720)  # px, the tightest screen we ship for
+const POP_S := 0.3  # s, past UI.pop_in's grow-in, so the window is measured at its real size
 const INV_SHOTS := preload("res://tools/inv_shots.gd")
 const LOOT_FULL := preload("res://tools/loot_full_check.gd")
 
@@ -17,10 +17,12 @@ var bad := 0
 var main: Node
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOOTWIN %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -46,6 +48,7 @@ func run(main_node: Node) -> void:
 	print("LOOT WINDOW CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A deathbox with a bit of everything, and `extra` more treasure for a long list.
 func _box(q: Hunter, p: Hunter, extra: int) -> Dictionary:
 	var things: Array = [Loot.valuable("old_coin"), Loot.valuable("kin_idol"), Loot.gear("blink", 3)]
@@ -60,6 +63,7 @@ func _box(q: Hunter, p: Hunter, extra: int) -> Dictionary:
 	m.boxes.append(bx)
 	return bx
 
+
 func _layout(bx: Dictionary, tag: String) -> void:
 	var p: Hunter = m.player
 	var t0 := Time.get_ticks_usec()
@@ -73,8 +77,11 @@ func _layout(bx: Dictionary, tag: String) -> void:
 	print("LOOTWIN %s window %s in %s" % [tag, r, view])
 	ok(view.encloses(r), "%s: the window is fully on screen" % tag)
 	var out: Array = []
-	var parts: Array = w.find_children("*", "Label", true, false) + w.find_children("*", "Button", true, false) \
+	var parts: Array = (
+		w.find_children("*", "Label", true, false)
+		+ w.find_children("*", "Button", true, false)
 		+ w.find_children("*", "PanelContainer", true, false)
+	)
 	for c in parts:
 		var cr := (c as Control).get_global_rect()
 		var inside_scroll := _in_scroll(c, w)
@@ -95,6 +102,7 @@ func _layout(bx: Dictionary, tag: String) -> void:
 	m.hud.close_loot()
 	m.boxes.erase(bx)
 
+
 func _in_scroll(c: Node, w: Node) -> bool:
 	var at := c.get_parent()
 	while at != null and at != w:
@@ -102,6 +110,7 @@ func _in_scroll(c: Node, w: Node) -> bool:
 			return true
 		at = at.get_parent()
 	return false
+
 
 ## Nothing worn, lots of room: pressing the first button again and again empties the box, one press a thing.
 func _all_takeable(p: Hunter, q: Hunter) -> void:
@@ -122,10 +131,13 @@ func _all_takeable(p: Hunter, q: Hunter) -> void:
 		(takes[0] as Button).pressed.emit()
 		presses += 1
 		await _frames(1)
-	ok(bx.get("empty", false) and presses == n,
-		"every thing is takeable: %d presses emptied a box of %d" % [presses, n])
+	ok(
+		bx.get("empty", false) and presses == n,
+		"every thing is takeable: %d presses emptied a box of %d" % [presses, n]
+	)
 	ok(m.hud.loot_open == null, "an emptied box closes its window")
 	m.boxes.erase(bx)
+
 
 ## A better glove in the box's backpack: it says UPGRADE and Wear, and taking it puts it on.
 func _wears_upgrade(p: Hunter, q: Hunter) -> void:
@@ -134,8 +146,10 @@ func _wears_upgrade(p: Hunter, q: Hunter) -> void:
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
 	var takes := _take_buttons(m.hud.loot_panel)
-	ok(takes.size() == 1 and (takes[0] as Button).text == "Wear" and _texts(m.hud.loot_panel).has("UPGRADE"),
-		"a better glove reads UPGRADE with Wear")
+	ok(
+		takes.size() == 1 and (takes[0] as Button).text == "Wear" and _texts(m.hud.loot_panel).has("UPGRADE"),
+		"a better glove reads UPGRADE with Wear"
+	)
 	(takes[0] as Button).pressed.emit()
 	ok(p.gear.any(func(g): return String((g as Dictionary).get("id", "")) == "blink"), "taking it puts it on")
 	var esc := InputEventKey.new()
@@ -147,16 +161,20 @@ func _wears_upgrade(p: Hunter, q: Hunter) -> void:
 	ok(m.hud.loot_open == null, "Esc closes the window")
 	m.boxes.erase(bx)
 
+
 ## The take buttons of the box column (the first column's buttons; your column has none unless holding).
 func _take_buttons(w: Control) -> Array:
 	return w.find_children("*", "Button", true, false).filter(
-		func(b): return (b as Button).text in ["Take", "Wear", "Full"])
+		func(b): return (b as Button).text in ["Take", "Wear", "Full"]
+	)
+
 
 func _texts(root: Node) -> Array:
 	var out: Array = []
 	for l in root.find_children("*", "Label", true, false):
 		out.append((l as Label).text)
 	return out
+
 
 func _frames(k: int) -> void:
 	for i in k:

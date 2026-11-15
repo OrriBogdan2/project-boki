@@ -60,6 +60,13 @@ def gd_one(path):
 
 
 def run_gd(files):
+    # Build gdtoolkit's grammar cache once before the workers start: on a cold ~/.cache/gdtoolkit (every CI run)
+    # they race in its exists-then-makedirs, and the loser's file was counted as "cannot parse" (FileExistsError).
+    from gdtoolkit.formatter import format_code
+    from gdtoolkit.linter import lint_code
+
+    lint_code("extends Node\n", gd_lint_config())
+    format_code("extends Node\n", LINE_LENGTH)
     with Pool() as pool:
         results = pool.map(gd_one, files, chunksize=8)
     lint = {p: r[0] for p, r in zip(files, results) if r[0]}
