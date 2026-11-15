@@ -84,7 +84,7 @@ func hit_y() -> float:
 
 func over_void() -> bool:
 	if not m.world.is_void(pos.x, pos.z):
-		return IslandDepth.below(m.world, pos)      # under an island's rock there's only the abyss below
+		return false
 	var st = m.get("skytrain")
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
@@ -151,7 +151,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	freeze_t = 0.05 if d >= 10.0 else 0.03
+	freeze_t = maxf(freeze_t, 0.05 if d >= 10.0 else 0.03)      # (a small hit never cuts a heavy one's hold short)
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:

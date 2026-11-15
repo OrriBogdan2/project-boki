@@ -283,6 +283,7 @@ const CHECKS := {
 	"--squad-intro-check": ["res://tools/squad_intro_check.gd", "squad_intro_check", null],      # 0.24.4
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
+	"--hit-feedback-check": ["res://tools/hit_feedback_check.gd", "hit_feedback_check", null],      # item 96.4
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	# hit arcs round your Hunter
@@ -506,8 +507,6 @@ const CHECKS := {
 	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],      # walls and corners
 	"--dash-wall-check": ["res://tools/dash_wall_check.gd", "dash_wall_check", null],      # dashes slide along walls
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],      # owner bug 11-11
-	"--island-clip": ["res://tools/island_clip.gd", "island_clip", null],      # GPU: deep-island clips
-	"--island-depth-check": ["res://tools/island_depth_check.gd", "island_depth_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	# which surfaces a wall stun counts
 	"--wall-stun-check": ["res://tools/wall_stun_check.gd", "wall_stun_check", null],

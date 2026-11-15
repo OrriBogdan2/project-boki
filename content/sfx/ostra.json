@@ -3,6 +3,7 @@
 	"name": "Motley",
 	"script": "tools/gen_sfx_motley.py",
 	"sounds": {
+		"ostra_hit": "impact",
 		"os_orb": "fire",
 		"os_orb_hot": "fire",
 		"os_prime": "cast",

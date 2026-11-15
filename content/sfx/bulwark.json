@@ -3,6 +3,7 @@
 	"name": "Albert",
 	"script": "tools/gen_sfx_breaker.py",
 	"sounds": {
+		"bulwark_hit": "heavy_impact",
 		"bjorn_throw": "fire",
 		"bulwark_hammer_clang": "signature",
 		"bulwark_hull_creak": "signature",

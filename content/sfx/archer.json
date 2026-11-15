@@ -3,6 +3,7 @@
  "name": "Lace",
  "script": "tools/gen_sfx_lisette.py",
  "sounds": {
+  "archer_hit": "impact",
   "archer_thread_twang": "signature",
   "pin_loose": "fire",
   "pin_loose_super": "fire",

@@ -161,22 +161,12 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 		ref = minf(ref, last)
 	return ref - ABYSS_DEPTH
 
-## The island rock a body of radius r at height y stands against (0: none): a tile higher than a step,
-## from its top down to its underside only (IslandDepth), so under an island is open air.
-func terrain_wall(x: float, z: float, r: float, y: float) -> float:
-	var worst := 0.0
-	var ud := under_heights()
-	for o in BODY_SAMPLES:
-		var g := ground_at(x + o.x * r, z + o.y * r)
-		if g > y + STEP and ud[idx(int(floor(x + o.x * r)), int(floor(z + o.y * r)))] < y + IslandDepth.HEAD:
-			worst = maxf(worst, maxf(g, WALL_MIN))
-	return worst
-
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
 ## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers (Blockers "phase") and terrain don't block,
 ## only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
+	var worst := 0.0
 	if not dyn_walls.is_empty():
 		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
 		if wb > 0.0:
@@ -188,12 +178,18 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	var bt := 0.0 if ghost else _block_hit(x, z, r * BLOCK_BODY - BLOCK_SKIN, y)
 	if bt > 0.0:
 		return bt
-	# an island is solid from its top down to its rocky underside (IslandDepth): beside it that column
-	# is a wall, under it is open air. (A wall is never reported as 0, which means "free": a
-	# ground-level island, top 0, blocks from below too.)
-	var wall := 0.0 if ghost else terrain_wall(x, z, r, y)
-	if wall > 0.0:
-		return wall
+	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
+	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
+	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
+	var hit := false
+	if not ghost:
+		for o in BODY_SAMPLES:
+			var g := ground_at(x + o.x * r, z + o.y * r)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
+	if hit:
+		return maxf(worst, WALL_MIN)
 	if guard:
 		# don't let a walking hunter step off into the abyss; dashes and knockback ignore this
 		if ground_at(x, z) <= VOID + 1.0:
@@ -1144,13 +1140,7 @@ const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
 var _deco: Node3D = null
 var _rims: Array = []               # grassy rim spots from the terrain mesher, for the grass fringe
-var under := PackedFloat32Array()   # per tile: the height of the island's rocky underside (IslandDepth)
-
-## Per tile: how far down each island's rock reaches (worked out once, from the tiles).
-func under_heights() -> PackedFloat32Array:
-	if under.size() != w * h:
-		under = IslandDepth.fill(self)
-	return under
+var under := PackedFloat32Array()   # per tile: the height of the island's rocky underside (visual only)
 
 ## While a match builds under the loading screen: called after each step, then a frame draws.
 var stage_cb := Callable()
@@ -1177,19 +1167,19 @@ func build_meshes() -> void:
 	# big maps: the ground in 32-tile chunks, so only what's on screen (and in each shadow cascade)
 	# draws. A map's ground looks the same every match, so a later match reuses it (_mesh_cache).
 	var tkey := _terrain_key()
-	under = IslandDepth.fill(self)      # the tiles may have changed since it was last worked out
 	var parts: Array
 	var tm = null
 	if _mesh_cache.has(tkey):
 		var hit: Array = _mesh_cache[tkey]
-		parts = hit[0]; _rims = (hit[1] as Array).duplicate()
+		parts = hit[0]; under = (hit[1] as PackedFloat32Array).duplicate(); _rims = (hit[2] as Array).duplicate()
 	else:
 		var keep := _visual_seed_begin()
 		tm = TerrainMesh.new(self)
 		parts = (await tm.build_chunked(32)) if w > 96 else [[Vector2i.ZERO, await tm.build()]]
 		_visual_seed_end(keep)
+		under = tm.under
 		_rims = tm.rims
-		_cache_put(tkey, [parts, _rims.duplicate()])
+		_cache_put(tkey, [parts, under.duplicate(), _rims.duplicate()])
 	await _stage("world.terrain")
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
