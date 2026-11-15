@@ -2,15 +2,25 @@ class_name HunterStats
 extends RefCounted
 ## The Stats tab beside the Relics screen: one row per open Hunter (matches, knocks, revives, damage per
 ## match, times you got out) and a totals row, most played first, unplayed Hunters greyed. The numbers are
-## Save.d["classes"]["hunters"][id] (ClassUnlock.after_match counts them; "matches" and "damage" are
-## optional keys, read as 0 on a save that never counted them: no save version bump). No graphs: one
-## table.
+## Save.d["classes"]["hunters"][id] (ClassUnlock.after_match counts them; "matches" and "damage" were added in
+## save v14). No graphs: one table.
 
 const TITLE := "Hunter stats"
 const TABS := ["Relics", "Stats"]
 const COLUMNS := ["Hunter", "Matches", "Knocks", "Revives", "Damage / match", "Got out"]
 const NAME_W := 190.0      # px, the Hunter column
 const COL_W := 120.0       # px, each number column
+
+## v13 -> v14 (Save._migrate_13_to_14): a Hunter with counted matches has played at least as many matches as it
+## got out of (and one at least). Its damage stays 0 (not recorded before), so its damage per match shows "-".
+static func migrate(data: Dictionary) -> void:
+	var c = data.get("classes")
+	if typeof(c) != TYPE_DICTIONARY or typeof(c.get("hunters")) != TYPE_DICTIONARY:
+		return
+	for id in c["hunters"]:
+		var s = c["hunters"][id]
+		if typeof(s) == TYPE_DICTIONARY and not s.is_empty() and not s.has("matches"):
+			s["matches"] = maxi(1, int(s.get("extracts", 0)))
 
 ## One row of numbers for a Hunter's stats dict: {id, matches, knocks, revives, damage, got_out}.
 static func row(id: String, s: Dictionary) -> Dictionary:
