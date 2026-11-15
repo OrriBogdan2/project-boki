@@ -4,28 +4,37 @@ extends RefCounted
 ## hunter is drawn at exactly that radius, and shots are tested against it (a bullet just inside
 ## the circle hits, just outside misses) for the smallest and the biggest. Never touches the save.
 
-var bad := 0
 const BAND := Vector2(0.85, 1.15)
+# Kael and Albert: body size stays under SIZE_MAX (a smaller cast member), and the nameplate keeps its
+# height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
+const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.40}
+const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.87}
+var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _flatten(m: Match, h: Hunter) -> void:
-	var W: World = m.world
+	var wld: World = m.world
 	var hx := int(floor(h.pos.x))
 	var hz := int(floor(h.pos.z))
-	var hi: int = W.idx(hx, hz)
-	var lv: int = int(W.level[hi])
+	var hi: int = wld.idx(hx, hz)
+	var lv: int = int(wld.level[hi])
 	for dz in range(-6, 7):
 		for dx in range(-8, 9):
-			if not W.inb(hx + dx, hz + dz): continue
-			var i: int = W.idx(hx + dx, hz + dz)
-			W.kind[i] = World.T_GROUND
-			W.level[i] = lv
-			W.island[i] = W.island[hi]
-			for d in [W.stairs, W.walls, W.props, W.bush]:
+			if not wld.inb(hx + dx, hz + dz):
+				continue
+			var i: int = wld.idx(hx + dx, hz + dz)
+			wld.kind[i] = World.T_GROUND
+			wld.level[i] = lv
+			wld.island[i] = wld.island[hi]
+			for d in [wld.stairs, wld.walls, wld.props, wld.bush]:
 				d.erase(i)
+
 
 ## Fires one level bullet (radius 0.1) along +x, `side` metres off h's centre; true if it hit h.
 func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
@@ -36,9 +45,11 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 		h.teleport(h.pos)
 		h.vel = Vector3.ZERO
 		m.step(Match.DT)
-		if m.shots.is_empty(): break
+		if m.shots.is_empty():
+			break
 	m.shots.clear()
 	return h.hp < h.max_hp
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -47,16 +58,20 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
-	for b in m.breaks: b["dead"] = true
+	for b in m.breaks:
+		b["dead"] = true
 	var h: Hunter = m.hunters[0]
 	var shooter: Hunter = null
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o.team != h.team and shooter == null: shooter = o
+		if o.team != h.team and shooter == null:
+			shooter = o
 	for o in m.hunters:
-		if o != h and o != shooter: o.teleport(m.world.random_ground())
+		if o != h and o != shooter:
+			o.teleport(m.world.random_ground())
 	_flatten(m, h)
 	var std := float(Data.CLASSES["medium"]["hit_r"])
 	var lo := 9.0
@@ -75,6 +90,12 @@ func run(main: Node) -> void:
 		var drawn_z := (ring.mesh as PlaneMesh).size.y * 0.5 * ring.global_transform.basis.z.length()
 		var same := absf(drawn - hr) < 0.002 and absf(drawn_z - hr) < 0.002
 		ok(same, "%s: ground circle radius %.3f = hit_r %.3f" % [a, drawn, hr])
+		if SIZE_MAX.has(a):
+			var sz := float(Arch.body(a)["size"])
+			ok(sz <= SIZE_MAX[a], "%s: body size %.3f is trimmed (max %.2f)" % [a, sz, SIZE_MAX[a]])
+			var per := HudPlate.plate_offset(h) / sz
+			var want: float = PLATE_PER_SIZE[a]
+			ok(absf(per - want) < 0.02, "%s: nameplate %.2f per size (want %.2f)" % [a, per, want])
 		if hr < lo:
 			lo = hr
 			lo_a = a
@@ -87,7 +108,7 @@ func run(main: Node) -> void:
 		h.teleport(h.pos)
 		h.vel = Vector3.ZERO
 		shooter.teleport(h.pos + Vector3(0, 0, 5.0))
-		var edge := h.hit_radius() + 0.1            # the circle plus the bullet's own radius
+		var edge := h.hit_radius() + 0.1  # the circle plus the bullet's own radius
 		ok(not _fire(m, shooter, h, edge + 0.04), "%s: %.2f m off, just outside, misses" % [a, edge + 0.04])
 		ok(_fire(m, shooter, h, edge - 0.04), "%s: %.2f m off, just inside, hits" % [a, edge - 0.04])
 		ok(_fire(m, shooter, h, 0.0), "%s: a bullet through the centre hits" % a)

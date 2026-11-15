@@ -25,6 +25,7 @@ var loaded := {}                # online: peer id -> true, everyone in the roste
 var load_wait := 0.0
 var locked := false
 var pick := ""                  # your Hunter (an Arch id), "" until you pick or your turn runs out
+var first := false              # this save's first lobby: the note teaches the countdown (once per save)
 var _hold := 0.0
 var _launched := false
 
@@ -32,6 +33,28 @@ func _init(o: Dictionary) -> void:
 	opts = o
 	squad = pick_order(o)
 	loaded[Net.me] = true
+	first = bool(o.get("first_lobby", first_lobby()))
+
+## Whether this save has not seen a lobby yet (Save.d.tutorial.first_lobby; an optional flag like
+## tutorial.home, absent on older saves, so they see it once: no migration).
+static func first_lobby() -> bool:
+	return not bool(Save.d.get("tutorial", {}).get("first_lobby", false))
+
+## Marks the first lobby seen, so its teach only shows once per save.
+static func mark_first_seen() -> void:
+	if not Save.d.has("tutorial"):
+		Save.d["tutorial"] = {}
+	Save.d["tutorial"]["first_lobby"] = true
+	Save.save_game()
+
+## The first lobby's note on your turn: what 0:00 does, then that the squad sees your pick.
+## "" when this is not the save's first lobby or it is not your turn (the view's usual note shows).
+func teach_line() -> String:
+	if not first or locked or not my_turn():
+		return ""
+	if pick == "":
+		return "Pick a Hunter before 0:00, or we pick one for you."
+	return "Your squad sees your pick. It locks in at 0:00."
 
 ## A real expedition (offline or online), not training, the tutorial, the arena or a demo.
 static func expedition(o: Dictionary) -> bool:

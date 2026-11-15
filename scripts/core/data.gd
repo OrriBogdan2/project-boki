@@ -22,19 +22,19 @@ const MATCH_PLAYERS := 30
 
 const CLASSES := {
 	"light": {
-		"name": "Light", "color": Color("c9bcff"), "hp": 124, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
+		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
 		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
 		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
-		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
+		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
 		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
-		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
+		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
 		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
 		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
@@ -145,15 +145,20 @@ const PERKS := {
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you
-## are; admins can force one in Settings > Gameplay or the admin panel (F1).
+## are; admins can force one in Settings > Gameplay or the admin panel (`).
 ##   skill: aim lead/accuracy and how often they think   react: seconds before they fire on a new target
 ##   dmg: their damage   fire: how much of the time they keep the trigger down
 ##   abil: how readily they use abilities and kin   aggro: how far they chase and how hard they press
+##   ring: metres inside the Blight's next ring they aim for (BotRing)
 const BOT_DIFF := {
-	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65, "fire": 0.5, "abil": 0.3, "aggro": 0.6},
-	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82, "fire": 0.7, "abil": 0.55, "aggro": 0.8},
-	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95, "fire": 0.85, "abil": 0.8, "aggro": 0.95},
-	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05, "fire": 1.0, "abil": 1.0, "aggro": 1.1},
+	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65,
+		"fire": 0.5, "abil": 0.3, "aggro": 0.6, "ring": 2.0},
+	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82,
+		"fire": 0.7, "abil": 0.55, "aggro": 0.8, "ring": 4.0},
+	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95,
+		"fire": 0.85, "abil": 0.8, "aggro": 0.95, "ring": 6.0},
+	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05,
+		"fire": 1.0, "abil": 1.0, "aggro": 1.1, "ring": 8.0},
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
 
@@ -211,6 +216,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
+			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -258,14 +265,14 @@ const MOBS := {
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
-	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin,
-	# and one whose kin is of an Ink's type ("ink") gives that Ink to its killer (Goods.on_result)
+	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
+	# and the Ink of that kin's type (InkDrops)
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
 		"r": 1.6, "gems": 40, "color": Color("7d7468"), "attack": "boss", "slam_r": 3.8, "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "cairnback", "enrage": 75.0},
 	"serpent": {"name": "Stormcoil, the Sky Serpent", "hp": 1250.0, "speed": 5.2, "dmg": 22.0, "range": 10.0, "windup": 0.95, "cd": 1.5,
 		"r": 1.15, "gems": 40, "color": Color("3f86b8"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "zephyrak", "enrage": 75.0, "ink": "wyrm"},
+		"egg": "zephyrak", "enrage": 75.0},
 	"brood": {"name": "The Brood Mother", "hp": 1350.0, "speed": 2.3, "dmg": 18.0, "range": 9.0, "windup": 1.0, "cd": 1.7,
 		"r": 1.55, "gems": 40, "color": Color("8a9a3a"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "hivara", "enrage": 75.0},
@@ -276,9 +283,16 @@ const MOBS := {
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
 	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
+	# a Blight nest (BlightNests): a stone mound the Skitters climb out of; break it for gems and gear
+	"bl_nest": {"name": "Blight Nest", "hp": 120.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 0.9, "gems": 6, "color": Color("3a3230"), "attack": "none", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},
+	# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
+	# damage. 2000 health at tier 0: one bot ~2 min (with the guards each crack calls), three ~20 s
+	"gate": {"name": "Gate Seal", "hp": 2000.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 1.4, "gems": 0, "color": Color("8a8494"), "attack": "none", "ward": true},
 }
 ## The lair bosses, in the order generated maps hand them out.
 const BOSSES := ["colossus", "serpent", "brood"]
@@ -413,7 +427,7 @@ const BUILDINGS := {
 		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
-	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
+	"armory": {"name": "Gear Shed", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
 		"desc": "Stores the weapons and gloves you bring home. Pick what you take on your next expedition, sell or salvage the rest, and get a bigger backpack."},
 	"shrine": {"name": "Soul Shrine", "isle": "main", "cost": 150, "rect": [49, 35, 50, 36], "needs_ember": true,
 		"desc": "Lit by a Soul Ember. Keeps the souls of Boki buried in the graveyard, and can bring one back (a little different)."},

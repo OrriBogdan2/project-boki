@@ -2,6 +2,7 @@ extends Node3D
 ## Inside a building: walk around, hang out with the kin who live there, and decorate. Furniture
 ## sits on a tile grid; press B (or the Decorate button) to place, turn, move and put things away.
 
+const SPEED := 4.2
 const TILE := 1.0
 
 var room := "house"
@@ -273,8 +274,8 @@ func _move_player(d: float) -> void:
 	if panel_open == "" and not Overlay.is_open():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
-	var arch := String(Save.d.get("arch", ""))      # indoors walks as the farm and a match do
-	var hv := HunterMove.walk(Vector2(pvel.x, pvel.z), mv * HunterMove.speed(arch), HunterMove.accel(arch), 1.0, d)
+	var hv := Vector2(pvel.x, pvel.z)
+	hv += (mv * SPEED - hv) * (1.0 - exp(-14.0 * d))
 	var nx := ppos.x + hv.x * d
 	if not _blocked(nx, ppos.z): ppos.x = nx
 	var nz := ppos.z + hv.y * d
@@ -315,10 +316,12 @@ func _use(it: Dictionary) -> void:
 ## Petting indoors counts just like outside: joy, likes, the memory and the first-day list.
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
-	Sfx.play("kin_happy", null, -4.0)
+	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
+	HomeVerbs.come_in(k, ppos)
 	k["t"] = 1.2; k["goal"] = k["pos"]
-	verbs.play("pat")
+	pface = atan2(-(k["pos"].x - ppos.x), -(k["pos"].z - ppos.z))      # turn to it
+	verbs.play("pat", k["node"])
 	if not visit.is_empty():
 		return
 	var loves_pet: bool = rec.get("likes", {}).get("play", "") == "pet"
