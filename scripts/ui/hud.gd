@@ -136,7 +136,7 @@ func _place_msgs() -> void:
 	msgs.fight = in_fight()
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
-	msgs.top = HudStyle.safe_pad(c.size).y + 66.0      # under the timer / Ways Out strip
+	msgs.top = HudStyle.safe_pad(c.size).y + 72.0      # under the timer / Ways Out strip
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
@@ -633,7 +633,7 @@ func _draw_feed(sz: Vector2) -> void:
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
-	var s := minf(340.0, sz.y * 0.40) if riding else 196.0      # (the big drop map leaves room under it, its rows and the squad)
+	var s := minf(340.0, HudStyle.safe_rect(sz).size.y * 0.36) if riding else 196.0      # (the big drop map leaves room under it, its rows and the squad)
 	var r := Rect2(HudStyle.safe_pad(sz), Vector2(s, s))
 	mm_bottom = r.end.y
 	SafeArea.note(r)

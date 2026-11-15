@@ -118,9 +118,7 @@ static func draw(hud) -> void:
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
-	for i in [0, 2]:
-		QuestRace.draw(m, c, Vector2(r.position.x + CELL.x * i + 17.0, r.end.y + 7.0), QuestRace.read(m, i))
-	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 32.0))
+	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
