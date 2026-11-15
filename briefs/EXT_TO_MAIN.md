@@ -9834,3 +9834,4 @@ READY ext/merge-lane-vfxsfx1-1115 bf6d2d8f39 (bulk-rebase: origin/main merged in
 READY ext/merge-lane-misc3-1115 babbc113b0 (bulk-rebase: origin/main merged in mechanically, was ec867f0e5b; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc3-1115-b 54b682a54f (bulk-rebase: origin/main merged in mechanically, was c1b20696d7; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-boki3d-1114 9ea5da02549f3ca02237c4bc3bcf57c1f31168da (origin/main merged; Rules.md=main's, size_budget regenerated; size --check OK; health --strict only fails 3 style lines in files identical to main)
+READY ext/merge-lane-boki3d-1114 48b5eef45824aaa2ecb38ad01c7ce0dd7a15aca0 (origin/main ace561dba7 already merged; style baseline fixed (main's counts for files identical to main) + dj_fx.gd long line; health --strict OK, --check 0 failures, size_budget 463.4 MB +0.0% 0 failures)
