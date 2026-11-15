@@ -176,6 +176,8 @@ func _shown(P: Hunter) -> String:
 			return "clip " + String(r["clip"])
 		if r.get("proc", false):
 			return ("keyed " + km) if keyed else "FALLBACK " + km
+		if r.is_empty() and float(s.get("hit_t", 99.0)) < 0.3:
+			return "flinch"     # a chip hit: WardenFlinch's additive lean over the loco, no hit clip
 	elif keyed:
 		return "keyed " + km
 	elif float(s.get("hit_t", 99.0)) < 0.3:
