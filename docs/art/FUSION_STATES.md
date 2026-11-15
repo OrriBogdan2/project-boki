@@ -25,7 +25,7 @@ reads what the model shows from the hero's own clip picker (`WardenClips`) or, f
 | idle, walk, run, LMB, RMB, E, dash, hit | exactly what the hero shows unmerged (its own clips; the check asserts equality) |
 | xform | the hero's `fusion`/`fuse` clip (`mf_xform` keys for a rig with no clip) |
 | ultimate | the form's own keyed move, a key on every beat of its `r.beats` (asserted): `mf_ult_stormwing` (dip, climb with arms gathered to 0.62, cocked, both arms thrown down on the 0.7 strike, hover), `mf_ult_tidal_shell` (curled behind crossed arms through the 0.55 crack, thrown open on the burst), `mf_ult_titan` (load, launch, tuck, both fists down on the 0.65 landing, up again, the big slam at 1.05) |
-| release | `mf_release` (0.5 s: jolted back with arms flung open as the Boki springs out, a step back in), here and in other games (`merge_end` event); a move the hero starts after the release wins |
+| release | `mf_release` (0.5 s: jolted back with arms flung open as the Boki springs out, a step back in), here and in other games (the owner sends it as the merge pose, `KinNet.hunter_extra`, only while the hero starts no move: the snapshot carrying the kit's next move id never carries the release); a move the hero starts after the merge ended wins |
 
 The form ultimates and the release have no hand-keyed clip in any hero's `.glb`: they play on the retargeted rig
 (the clip picker's "procedural" path), as `mf_ult` always did. Clips need Blender (docs/DEBT.md).

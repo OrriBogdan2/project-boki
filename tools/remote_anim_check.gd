@@ -13,6 +13,9 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
+## R fuses (a full meter; the harness Hunters have no Boki, so a Surge) and the Fusion ends inside the cast: once
+## on its own (the release, mf_release, is compared), once with a dash on the step it ends (the dash shows on both
+## games, not the release).
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -52,6 +55,8 @@ var tele_kinds := {}         # shape kind -> host telegraphs of that kind over e
 var tele_miss := {}          # shape kind -> the ones the guest never showed
 var retimes: Array = []      # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
 var last_at := [ "", 0.0 ]   # the watched kit's move id and anim_at at the last frame
+var released := 0            # heroes whose R played the release on the host
+var dash_released := 0       # heroes whose dash on the Fusion's last step played the release on the host
 
 func _init() -> void:
 	tag = "RANIM"
@@ -71,7 +76,7 @@ func _host() -> void:
 		await _boss(kind, String(BOSSES[kind]))
 	for arch in ARCHS:
 		for key in KEYS:
-			for held in ([false] if key in ["e", "r"] else [false, true]):
+			for held in ([false] if key == "e" else [false, true]):
 				await _cast(G, arch, key, held)
 	_wash_rows_ok()
 	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
@@ -80,6 +85,9 @@ func _host() -> void:
 		ok(not tele_miss.has(kind), "telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
 			"missing: %s" % str(tele_miss.get(kind, [])))
 	await _ram_retime()
+	ok(released == ARCHS.size(), "every hero's R fuses and the release plays when it ends (%d of %d)" % [
+		released, ARCHS.size()])
+	ok(dash_released == 0, "a dash on the step the Fusion ends shows over the release (%d heroes not)" % dash_released)
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
@@ -146,13 +154,17 @@ func _first_k(rows: Array, move_name: String) -> float:
 
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var P := m.player
-	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	var tail := " dash" if key == "r" else " held"      # (R "held": its Fusion ends on a dash)
+	var what := "%s %s%s" % [arch, key, tail if held else ""]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
 	_kit(arch)
 	P.fire_cd = 0.0
 	P.ammo = int(P.wpn.get("mag", 12))
+	if key == "r":
+		P.ult = 1.0
+		P.merge_cd = 0.0
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "kit", "arch": arch})
 	await _reply()
@@ -169,11 +181,18 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	if rocks:
 		_rocks(World.T_BLOCK)
 	await _press(key, held)
+	await _press(key, held and key != "r")
 	var lace_walk: bool = what == "archer dash"
 	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	if rocks:
 		_rocks(World.T_GROUND)
+	if key == "r":
+		await _end_fusion(held)
 	var mine := log_rows.duplicate()
+	if key == "r":
+		var shown := int(mine.any(func(r): return String(r[2]) == MergeMoves.RELEASE))
+		released += 0 if held else shown
+		dash_released += shown if held else 0
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "log"})
 	await _reply()
@@ -204,6 +223,16 @@ func _rocks(kind: int) -> void:
 	var W := m.world
 	for dz in [-1, 0, 1]:
 		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
+
+## R's Fusion ends inside the cast, so the copy's release is compared; `dash`: a dash on the same step (the
+## copy used to play the release over it: it took its start from the merge_end event, KinNet.hunter_extra).
+func _end_fusion(dash: bool) -> void:
+	if not KinMerge.active(m.player):
+		return
+	KinMerge.end(m.player, "test")
+	if dash:
+		m.player.do_dash()
+	await _run(SETTLE)
 
 ## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
 func _press(key: String, held: bool) -> void:
