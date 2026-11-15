@@ -1,5 +1,13 @@
 # Sable (thief): import note
 
+## LIVE tilt1112 master in game (2026-11-14, ext/ingame-sync-sable)
+`~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb` (current.json 11-12 22:27Z: the low4 body with the braid long down the back,
+the prop1111/cand_B head with its solid grey-black moth eyes, the mouth repainted level and calm) swapped onto the current
+sable.glb (its 53 clips incl. the first-pose ones, anchors and wing films on the hips region kept). The new pistols hang
+along her thighs and coat, so the spec `detach`es each hand from the hips and its thigh: fused, hand.L stretched 21.9x
+(11 clips over the 18.5 ceiling); cut, the worst clip is bola at 15.3 (main 18.4). 13.1k tris, one 2048 atlas.
+Proof: `~/meshy/ingame-model-sync-1114/compare.jpg` (game close-up and match camera beside the master render).
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Sable/r2/prop1111/cand_B.glb` (CURRENT_OVERRIDES 11-12: solid grey-black eyes, up-pitched moth wings) swapped onto the 11-12 owner-fix sable.glb below, so its narrower idle and stance clips stay. The fix's wing reweight is not re-run: it picks fur below the waist for the old hanging wings and would hang these wings on the thighs and shins; instead the spec's last region gives the wing films (x ±0.36, behind y -0.215, z 0.3-0.84) to the hips whole. 13.0k tris, one 2048 atlas, 47 clips.
 Spec `art/wardens/src/sable_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.

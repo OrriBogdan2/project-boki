@@ -29,6 +29,7 @@ func run(main_node: Node) -> void:
 	await _lance_combos()
 	await _growth()
 	_timing()
+	await load("res://tools/ashwick_anim_check.gd").new(ak, ok).run()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
