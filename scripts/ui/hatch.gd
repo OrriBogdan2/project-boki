@@ -639,7 +639,7 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var step := NameStep.new(sp_id, "")      # ("Head out together" below keeps the name)
+	var step := NameStep.new(sp_id, "")      # (either path card below keeps the name)
 	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(step)
 	v.add_child(name_row)
@@ -658,7 +658,7 @@ func _show_name() -> void:
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Tend the garden"
-	step.chosen()_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	step.box.grab_focus()
 	step.box.select_all()
