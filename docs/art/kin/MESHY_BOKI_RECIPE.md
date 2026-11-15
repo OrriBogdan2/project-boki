@@ -15,6 +15,16 @@ sheet, not the manatee-and-icebox line in content/kin_v2. Its face sits on the s
 row's `face` keys (`mouth_y`, `mouth_z` in scan space now override the fitted mouth), and its FRAME marks were set by
 hand off the scan's profile: a sitting seal is no blob, so the fitted ones floated off its back.
 
+11-15: the four starters and Echolop on their own rigs (legs swing): Vespyx (`cindle`), Prismander (`puddlet`),
+Mycroll (`burrlet`), Gravadillo (`pebbit`), Echolop (`zapple`). Each is the best of 4 Meshy runs from the live dex art
+(two from the hero alone, one from the turnaround views, one from the hero plus the turnaround views); the sheets and
+`gen_log.tsv` are in `~/meshy/boki3d/<id>/ingame1115/`, the picks in `~/meshy/boki/<id>/run1`. Pick the
+turnaround-made run: a hero is a three-quarter view, and a model made from it alone keeps the turned head (the
+mirrored Boki face cannot sit on it) or the hero's pose (Gravadillo rolled into a ball, Vespyx's raised paw). Two
+row keys came with them: `mid` (Vespyx's tail rings beside it and pulled the bounds' middle 5 cm off its head) and
+`iris` (Echolop's art has lilac eyes, the proxy amber). A tail that curls another way than the proxy's rides
+`limbs` capsules, and the FRAME row's `tail_tip` is read off the scan.
+
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 
@@ -77,6 +87,8 @@ off landmark pairs (proxy coordinate, scan coordinate) where the two disagree: g
 | `limbs` | A part the fit cannot follow: a capsule along it, in scan space, that takes the bone and its weights |
 | `at` | A grown part lands wrong: its attach point in scan space |
 | `sat`, `gain` | The texture's grade, baked into the atlas. Start at `sat` 0.7: see below |
+| `mid` | The scan's head is off the bounds' middle (a tail curled to one side): how far right its midline is |
+| `iris` | Hex eye colour, when the art's is not the proxy's |
 | `lid`, `brow` | Hex colours for the eyelids and brows, only when the build's own pick is wrong: it takes the scan's graded colour in a ring round each eye (lids) and just above it, darkened (brows) |
 
 The game's warm light and tonemap push a painted texture's mid colours to pure hues (Kestrike's rust came out
