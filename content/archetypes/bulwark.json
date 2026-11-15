@@ -127,9 +127,8 @@
 			"wait_rank3": 1.4,
 			"lock": 3.0,
 			"lock_rank3": 2.0,
-			"len": 6.0,
-			"dist": 1.6,
-			"bow": 0.55,
+			"len": 4.2,
+			"arc": 140.0,
 			"slow": 0.6,
 			"boop": {
 				"cd": 0.55,
