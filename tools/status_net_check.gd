@@ -6,7 +6,7 @@ extends "res://tools/displace_net_check.gd"
 ## LEFT_TOL) and the look on the body. Cinder's Ignite levels and burn, Neve's Chill and Shatter, Sparkle's
 ## Static, Sable's Marks (and two Sables' Marks on one body, each kept per caster), Vex's Daze, Disoriented,
 ## Shred and Blight (stacks, seconds and strength), hit slows, Grounded.
-## Lines: STATNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid> (the base class reads it).
+## Lines: STATNET ok|FAIL <what>. The relay, the guest process and both matches come from the base class's _host_up.
 
 const LEFT_TOL := 0.1            # s: the seconds a status has left may differ by this between the two games
 const CLEAR_S := 0.3            # s: a clear rides the next Net flush, and the question may overtake it
@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	guest_flag = GUEST_ARG
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == GUEST_ARG: guest = true
@@ -38,37 +39,7 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	port = 7930 + OS.get_process_id() % 60
-	dir = ProjectSettings.globalize_path("user://status_net")
-	DirAccess.make_dir_recursive_absolute(dir)
-	var relay := RelayServer.new()
-	main.add_child(relay)
-	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
-	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, GUEST_ARG, port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
-	var other := ""
-	var t0 := Time.get_ticks_msec()
-	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
-		await main.get_tree().create_timer(0.5).timeout
-		for id in Net.peers:
-			if String(id) != Net.me: other = String(id)
-		_read_pid()
-	ok(other != "", "the guest joins the relay", other)
-	if other == "":
-		return _end()
-	var d := {"mid": "sn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
-		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
-		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
-	Net.lobby_emit("dn", {"c": "start", "d": d})
-	await _build(d)
-	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
-		await _run(0.2)
-		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
+	var G := await _host_up()
 	if G == null:
 		return _end()
 	await _cinder(G)
@@ -81,7 +52,6 @@ func _host() -> void:
 func _end() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("STATNET DONE, %d checks, failures: %d" % [n, bad])

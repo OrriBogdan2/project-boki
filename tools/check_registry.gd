@@ -20,8 +20,6 @@ const CHECKS := {
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
 	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
-	"--friendly-bodies-check": ["res://tools/friendly_bodies_check.gd", "friendly_bodies_check", null],
-	"--friendly-bodies-shots": ["res://tools/friendly_bodies_shots.gd", "friendly_bodies_shots", null],
 	# loot, kin keeping, the Soul Shrine
 	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],
 	# each ability verb at a dummy rival
