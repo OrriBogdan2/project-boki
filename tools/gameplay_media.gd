@@ -621,7 +621,7 @@ func _locomotion(secs: float) -> void:
 	_zoom(fight_zoom)
 	var sk := WardenGlb.skeleton(pl.model.get_node_or_null("Warden"))
 	var log := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
-	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz")
+	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy")
 	_mark("start")
 	await _go(secs, func(t: float):
 		var move := Vector2.ZERO
@@ -635,8 +635,11 @@ func _locomotion(secs: float) -> void:
 		var pts := AUDIT.points(sk)
 		var fl: Vector3 = pts["foot.L"]
 		var fr: Vector3 = pts["foot.R"]
-		log.store_line("%.4f\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f" % [t, label, pl.pos.x,
-				pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z]),
+		var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
+		var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
+		log.store_line("%.4f\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f" % [
+				t, label, pl.pos.x, pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z, pl.pos.y,
+				(pts["hips"] as Vector3).y, knee_l.y, knee_r.y]),
 		func(_t: float): return pl.render_pos(1.0), true)
 	log.close()
 
