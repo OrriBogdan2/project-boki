@@ -116,6 +116,8 @@ func _steal() -> void:
 	var popped := absf(fk.flat_dist(at) - KinSteal.POP_M) < 0.1
 	ok(KinSteal.loose(fk) and KinSteal.loose(f2k) and fk.owner_h == f and f2k.owner_h == f2 and popped,
 		"scatter: the thief goes down, both wisps are loose again where they fell")
+	if f.downed:      # (a bot may have knocked the owner down again meanwhile: the take-back is the revived owner's)
+		m.revive_hunter(f, null)
 	f.teleport(Vector3(fk.pos.x + 0.5, f.pos.y, fk.pos.z))
 	f.inp["interact"] = true
 	_frames(0.7)
