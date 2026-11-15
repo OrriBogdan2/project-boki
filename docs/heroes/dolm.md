@@ -61,7 +61,7 @@ Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: ma
 
 | Row | Verdict | Where / why |
 |---|---|---|
-| Passive Molten Guard: a punch into your own rocks gives a shield | match | dolm_kit.gd:452-454, :611 (one stack per punch, 18 x4, 6s); `audit tarek: ... gives no Molten Guard` for an ally's rocks |
+| Passive Shardskin: a punch into your own rocks gives a shield | match | dolm_kit.gd:452-454, :611 (one stack per punch, 18 x4, 6s); `audit tarek: ... gives no Shardskin` for an ally's rocks |
 | Passive Tremor Sense: sneak shows foes in front through walls, cone grows | match (angle grows, not length) | dolm_kit.gd:264-297, dolm.json:26 (16m, 25 to 40 deg over 2s). In flight: ext/tenzo-cone-grow (length 18 to 25m) |
 | LMB tap: boulder, 0.6s | match | dolm.json:29 `rate` 0.6, dolm_kit.gd:391-395; `parity breah: tapped, a boulder every 0.6s` |
 | LMB hold: punch, 0.6s, launches foes and rocks, wall stun | regressed, fixed | dolm.json:30 `rate` was 0.7 (KIT_PARITY called it a match), now 0.6; dolm_kit.gd:432 sets `fire_cd` at the cast; asserted `verify Nov 9: LMB tap and punch both 0.6s`. Rocks and wall stun: dolm_kit.gd:428-480, `combo: ...` lines |

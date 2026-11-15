@@ -864,7 +864,7 @@ Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DEC
 | LMB | 7 slugs, 0.5 s, stop 6.3 m | as source | match |
 | LMB | fan [F] 20 rested, 30 firing | 30 rested + bloom to 45 | differ (READY lmb-range-parity d1aa84b8d, scrapking-lmb d5891bd37) |
 | LMB | bloom resets on dash (tier 3) | rank 3 barge resets it | match |
-| RMB | Abyssal Hand through terrain (DECISIONS: walls and cliffs, placed walls stop it) | `pierce_terrain` on the hook (match.gd:3186): rocks, props, cliffs pass; `--dredge-combo-check` cliff and rock rows PASS (grab 6.3 m behind a cliff, drag over rocks); reel also climbs cliffs, stops at a placed wall | match |
+| RMB | Deep Reach through terrain (DECISIONS: walls and cliffs, placed walls stop it) | `pierce_terrain` on the hook (match.gd:3186): rocks, props, cliffs pass; `--dredge-combo-check` cliff and rock rows PASS (grab 6.3 m behind a cliff, drag over rocks); reel also climbs cliffs, stops at a placed wall | match |
 | RMB | what stops it | placed walls (Verbs.shot_check), domes, and breakable props (`_shot_break`) end the flight without a grab; no main assert for the placed wall (READY decisions-hero-asserts a6d970278) | match; breakables `[?]` (source says terrain only) |
 | RMB | first target, ally, wisps, caster Grounded, rank 3 half cd | all built and asserted | match |
 | RMB | cooldown 18 s (data L1), card 11.7 s at footage level 9 | 12 | differ 0.67x (READY grimble-parity-verify d94bc7769 sets 18; see ranked 2) |
@@ -915,7 +915,7 @@ Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DEC
 4. Albert shield: drop the 2 m push, 3 s lock and Surf unless the owner keeps them; assert hook, stun, slow and root from the front (bulwark_kit.gd:176, 267; M, owner).
 5. Crush: test the real knock into a wall, not terrain within 1.5 m (bulwark_kit.gd:307; M).
 6. Grimble LMB fan 20 + 10 (READY), knock heal 16% remove or keep (dredge.json; S, owner).
-7. Breakable props ending the Abyssal Hand: source says terrain only (match.gd:3298; S, `[?]`).
+7. Breakable props ending the Deep Reach: source says terrain only (match.gd:3298; S, `[?]`).
 
 Suggestion, not built: show Albert's Bash cooldown on the dash slot icon so the Shift choice reads at a glance.
 
