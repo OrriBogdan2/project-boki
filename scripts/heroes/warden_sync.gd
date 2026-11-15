@@ -14,6 +14,7 @@ var head_look: WardenLookAt   # the head turns to the aim ahead of the body (War
 var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (WardenGlb.BONES)
+var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 var blade_tip: Node3D
 var blade_bone := -1
@@ -24,7 +25,6 @@ var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the ha
 var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 var idle_break: WardenBreak   # the one beat this Hunter breaks a long idle with (WardenBreak), or null
-var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 var hide_out: Array = []      # bone indices that shrink away while WardenGlb.CHAIN_OUT
 var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
