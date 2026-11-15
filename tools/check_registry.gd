@@ -6,8 +6,7 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
-	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
-	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
+	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],      # 30/60/144 fps
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
@@ -43,14 +42,20 @@ const CHECKS := {
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--alive-counter-check": ["res://tools/alive_counter_check.gd", "alive_counter_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
-	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
-	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
-	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
-	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
-	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
-	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
-	"--cam-lead-check": ["res://tools/cam_lead_check.gd", "cam_lead_check", "check"],      # footage: no cursor lean
-	"--cam-lead-shots": ["res://tools/cam_lead_check.gd", "cam_lead_check", "shots"],      # --shots-dir=<dir>
+	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],  # GPU
+	"--hud-groups-check": ["res://tools/hud_groups_check.gd", "hud_groups_check", null],      # HUD groups, four moments
+	"--loot-feed-check": ["res://tools/loot_feed_check.gd", "loot_feed_check", null],      # loot feed rows
+	"--hud-groups-shots": ["res://tools/hud_groups_shots.gd", "hud_groups_shots", null],      # GPU, --shots-dir=
+	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
+	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
+	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
+	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
+	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
+	"--photo-mode-check": ["res://tools/photo_mode_check.gd", "photo_mode_check", null],  # farm photo mode (GPU: PNG)
+	"--safe-area-check": ["res://tools/safe_area_check.gd", "safe_area_check", "check"],
+	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
+	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
+	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
@@ -287,9 +292,11 @@ const CHECKS := {
 	# --shots-dir=<dir> [--size=WxH] (GPU)
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
+	"--mob-death-check": ["res://tools/mob_death_check.gd", "mob_death_check", null],  # dissolve, stagger, drops
+	"--mob-death-shots": ["res://tools/mob_death_shots.gd", "mob_death_shots", null],      # death strips (GPU)
+	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
-	"--camera-frame-check": ["res://tools/camera_frame_check.gd", "camera_frame_check", "check"],
-	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],
+	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
