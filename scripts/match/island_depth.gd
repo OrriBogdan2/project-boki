@@ -165,4 +165,4 @@ static func slide_out(W: World, pos: Vector3, n: Vector2, r: float) -> Vector3:
 	return pos
 
 static func _free(W: World, p: Vector3, r: float) -> bool:
-	return W.occupy(p.x, p.z, r, p.y, false, true) == 0.0
+	return W.terrain_wall(p.x, p.z, r, p.y) == 0.0

@@ -51,8 +51,8 @@ func _depths(ww: World, where: String) -> void:
 		var x := i % ww.w + 0.5
 		var z := i / ww.w + 0.5
 		tried += 1
-		var air := ww.occupy(x, z, 0.3, ud[i] - IslandDepth.HEAD - 0.3, false, true) == 0.0
-		if air and ww.occupy(x, z, 0.3, ud[i] + 0.5, false, true) > 0.0:
+		var air := ww.terrain_wall(x, z, 0.3, ud[i] - IslandDepth.HEAD - 0.3) == 0.0
+		if air and ww.terrain_wall(x, z, 0.3, ud[i] + 0.5) > 0.0:
 			right += 1
 	ok(tried > 0 and right == tried, "%s: under each tile's rock is open air, beside it a wall (%d of %d)"
 			% [where, right, tried])
