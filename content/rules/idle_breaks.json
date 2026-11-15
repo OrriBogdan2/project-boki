@@ -68,5 +68,6 @@
 		{"bone": "head", "rot": [-0.15, -0.25, 0.2], "in": 0.25, "out": 0.25},
 		{"bone": "hips", "rot": [-0.05, 0, 0]},
 		{"bone": "head", "rot": [-0.2, 0, 0], "from": 0.55, "to": 0.85, "beats": 2}
-	]}
+	]},
+	"gil": {"line": "Gil: a fish out of water, twitchy and proud. He flicks his swordfish up, peers along the point, and looks pleased.", "dur": 2.6, "tracks": [{"bone": "upper_arm.R", "rot": [0.6, 0, -0.15], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.0, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.1, -0.2, 0.15], "in": 0.25, "out": 0.25}, {"bone": "upper_arm.R", "rot": [0.2, 0, 0], "from": 0.5, "to": 0.8, "beats": 2}]}
 }
