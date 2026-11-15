@@ -48,12 +48,12 @@ const BESIDE := 0.8        # m: the least gap between a spot and the place besid
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
 var night := false
+var arrival := false       # you just arrived in this zone: the first tick greets you (BaseGreet)
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
-var arrival := false       # you just arrived in this zone: the first tick greets you (BaseGreet)
 
 func _init(home) -> void:
 	h = home

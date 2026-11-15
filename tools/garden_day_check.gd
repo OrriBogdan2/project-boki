@@ -117,7 +117,7 @@ func _day(zone: String) -> void:
 
 ## The zone's toys and the snack patch. A zone with a build brings its own (garden_zones.json deco); a zone
 ## without one gets the base demo's three toys and the patch round the landing.
-func _stage(label: String, zone: String) -> void:
+func _stage(label: String, _zone: String) -> void:
 	if home.toys.toys().is_empty():
 		var land := HomeLayout.LANDING
 		for id in BaseDemo.TOYS:
@@ -247,7 +247,7 @@ func _states(label: String, zone: String) -> String:
 
 ## The budget as far as a headless run reads it (GARDEN.md 10.6, garden_zones.json budget / budget_hub).
 func _budget(label: String, zone: String) -> void:
-	var B: Dictionary = GardenZones.rules()["budget_hub" if zone == "hub" else "budget"]
+	var cap: Dictionary = GardenZones.rules()["budget_hub" if zone == "hub" else "budget"]
 	var nodes: int = home.find_children("*", "", true, false).size()
 	var emit := 0
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
@@ -264,15 +264,15 @@ func _budget(label: String, zone: String) -> void:
 		for i in FRAMES:
 			home.life.step(0.1)
 		life_ms = (Time.get_ticks_usec() - t0) / 1000.0 / FRAMES
-	ok(nodes <= int(B["nodes"]), "%s: %d nodes (budget %d)" % [label, nodes, B["nodes"]])
-	ok(emit <= int(B["emitters"]), "%s: %d emitting particle systems (budget %d)" % [label, emit, B["emitters"]])
+	ok(nodes <= int(cap["nodes"]), "%s: %d nodes (budget %d)" % [label, nodes, cap["nodes"]])
+	ok(emit <= int(cap["emitters"]), "%s: %d emitting particle systems (budget %d)" % [label, emit, cap["emitters"]])
 	ok(
-		frame_ms <= float(B["frame_ms"]),
-		"%s: %.2f ms of script a frame (the whole frame's budget is %.1f ms)" % [label, frame_ms, B["frame_ms"]]
+		frame_ms <= float(cap["frame_ms"]),
+		"%s: %.2f ms of script a frame (the whole frame's budget is %.1f ms)" % [label, frame_ms, cap["frame_ms"]]
 	)
 	ok(
-		life_ms <= float(B["base_life_ms"]),
-		"%s: %.3f ms a base-life step (budget %.1f ms)" % [label, life_ms, B["base_life_ms"]]
+		life_ms <= float(cap["base_life_ms"]),
+		"%s: %.3f ms a base-life step (budget %.1f ms)" % [label, life_ms, cap["base_life_ms"]]
 	)
 
 

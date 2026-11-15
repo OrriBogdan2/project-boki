@@ -19,6 +19,12 @@ const TRACK_CHARS := MAX_TICKS * 4 / 3 + 4    # base64 characters of the longest
 const FADE := 0.55           # transparency of the ghost's model: 0 solid, 1 gone
 const LANE := 1.0            # the ghost's lane, in lane widths right of your Boki
 
+# racing a friend's ghost on a visit
+var race: BaseRace
+var ghost := {}              # the friend's lap on this course ({} when not racing)
+var play: Replay = null
+var node: Node3D = null      # the ghost's model
+
 ## How far each runner of a Run is along the lap at every TICK since the start.
 class Tape:
 	var marks: Array = []        # per runner: m along the lap at TICK, 2 TICK, ...
@@ -159,10 +165,6 @@ static func take_gift(g: Dictionary, who: String) -> String:
 		who, boki, ghost_boki, lap_t, ghost_t]
 
 # ------------------------------------------------------------------ racing a friend's ghost on a visit
-var race: BaseRace
-var ghost := {}              # the friend's lap on this course ({} when not racing)
-var play: Replay = null
-var node: Node3D = null      # the ghost's model
 
 func _init(r: BaseRace) -> void:
 	race = r

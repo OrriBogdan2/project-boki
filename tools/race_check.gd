@@ -28,6 +28,7 @@ extends RefCounted
 ## Never touches the real save.
 
 const RACES := 20
+const HOME_GD := "res://scripts/home/home.gd"
 const WIN_SHARE := 0.6           # the favourite must win at least this share
 const DT := 1.0 / 30.0           # s per step
 const MAX_S := 120.0             # s: a race that runs longer is stuck
@@ -571,7 +572,7 @@ func _on_visit() -> void:
 	var snap := Social.clean_island(_sent(Social.profile_doc()))
 	snap["name"] = "Rowan"
 	var mine: Dictionary = Save.d["ghosts"].duplicate(true)
-	var H = load("res://scripts/home/home.gd")
+	var H = load(HOME_GD)
 	var home = H.new()
 	home.visit = snap
 	home.visit_id = "t"
@@ -670,7 +671,7 @@ func _zone_tracks() -> void:
 		d["tutorial"] = {"hatched": true, "intro": true}
 		d["zones"][z] = {"open": true}
 		Save.d = d
-		var home: Node = load("res://scripts/home/home.gd").new()
+		var home: Node = load(HOME_GD).new()
 		home.zone = z
 		main.add_child(home)
 		main.current = home

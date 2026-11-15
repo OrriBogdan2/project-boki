@@ -84,7 +84,8 @@ func _keys_part() -> void:
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
 	var seed := "Find its Wayseed in a run's lair or at Old Pell's (%d gems)" % int(BlackMarket.seed_terms()[1])
-	var near := " (closest: %s, Ice %d of %d)" % [rec["name"], int(rec["lean"]["ice"]), int(GardenZones.rules()["lean_key"])]
+	var key := int(GardenZones.rules()["lean_key"])
+	var near := " (closest: %s, Ice %d of %d)" % [rec["name"], int(rec["lean"]["ice"]), key]
 	var both := seed + ", and feed a Boki Water, Ice or Crystal meals" + near + "."
 	ok(ZoneCards.lock_line("glasswater") == both,
 		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
