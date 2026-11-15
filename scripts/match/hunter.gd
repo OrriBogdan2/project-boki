@@ -1961,8 +1961,12 @@ func _pad_fly(dt: float) -> void:
 	pad["t"] += dt
 	var k := clampf(pad["t"] / pad["dur"], 0.0, 1.0)
 	var a: Vector3 = pad["from"]; var b: Vector3 = pad["to"]
-	var y := lerpf(a.y, b.y, k) + 4.0 * float(pad["h"]) * k * (1.0 - k)
-	var np := Vector3(lerpf(a.x, b.x, k), y, lerpf(a.z, b.z, k))
+	var np: Vector3
+	if pad.has("face"):
+		np = _mantle_point(k)
+	else:
+		var y := lerpf(a.y, b.y, k) + 4.0 * float(pad["h"]) * k * (1.0 - k)
+		np = Vector3(lerpf(a.x, b.x, k), y, lerpf(a.z, b.z, k))
 	vel = (np - pos) / maxf(dt, 0.0001)
 	pos = np
 	if k >= 1.0:
@@ -1979,9 +1983,34 @@ func _pad_fly(dt: float) -> void:
 		m.fx.dust(pos, 3 if ledge else 8)
 		m.sfx("land", pos, -12.0 if ledge else -8.0)
 
-## True while you're rising up a ledge.
+## Where a mantle has you at progress k (0..1): up the face with an ease-out (a quick pull that
+## slows near the top), then over the lip with a small hop and an ease-in-out onto the top. The
+## height never drops below the lip while you're over the cliff, so you can't sink into it.
+func _mantle_point(k: float) -> Vector3:
+	var a: Vector3 = pad["from"]; var f: Vector3 = pad["face"]; var b: Vector3 = pad["to"]
+	var lip: float = pad["lip"]
+	var sp: float = pad["split"]
+	if k < sp:
+		var u := k / maxf(0.001, sp)
+		var e := 1.0 - (1.0 - u) * (1.0 - u)
+		var hz := clampf(u * 3.0, 0.0, 1.0)          # snap against the wall in the first third
+		return Vector3(lerpf(a.x, f.x, hz), lerpf(a.y, lip, e), lerpf(a.z, f.z, hz))
+	var u2 := (k - sp) / maxf(0.001, 1.0 - sp)
+	var e2 := u2 * u2 * (3.0 - 2.0 * u2)
+	return Vector3(lerpf(f.x, b.x, e2), lerpf(lip, b.y, e2) + 0.22 * sin(u2 * PI), lerpf(f.z, b.z, e2))
+
+## True while you're rising up a ledge (or in a scripted pad mantle).
 func mantling() -> bool:
-	return not lfloat.is_empty()
+	return not lfloat.is_empty() or (not pad.is_empty() and pad.has("face"))
+
+## How far through the climbing part of a mantle you are (0 when not mantling), for the animation.
+func mantle_k() -> float:
+	if not lfloat.is_empty():
+		return 1.0
+	if pad.is_empty() or not pad.has("face"):
+		return 0.0
+	var k := clampf(float(pad["t"]) / float(pad["dur"]), 0.0, 1.0)
+	return 1.0 if k < float(pad["split"]) + 0.15 else 0.0
 
 func _physics(dt: float) -> void:
 	if pad.size() > 0:
@@ -2976,6 +3005,7 @@ func _rise_k() -> float:
 	var y0 := float(lfloat["y0"])
 	return clampf((pos.y - y0) / maxf(0.05, float(lfloat["lip"]) + 0.12 - y0), 0.0, 1.0)
 
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -2993,7 +3023,10 @@ func _anim_state(stretch: float) -> void:
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["fall"] = HunterFall.clip_k(self)
 	s["ledge"] = grap.size() > 0
-	s["mantle"] = _rise_k()
+	var mk := _rise_k()
+	if pad.has("face"):
+		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
+	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
