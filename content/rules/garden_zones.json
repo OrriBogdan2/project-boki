@@ -53,9 +53,9 @@
 		"list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone, nest, or egg: the Incubator once an egg is placed in it), needs (a hint seen first), locked (only while a zone sleeps), text."
 	},
 	"zones": {
-		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash", "play": "race"},
+		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash", "play": "race",
+			"nap": [["sunny rock", 36, 33], ["under a tree", 43, 37], ["by the water", 39, 40]]},
 		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "loves": {"types": ["water", "ice"], "nature": "Gentle"}, "trait": "temper", "trait_low": true, "game": "Spark Volley", "play": "volley", "lair_biomes": ["frost"],
-			"nap": [["sunny rock", 36, 33], ["under a tree", 43, 37], ["by the water", 39, 40]],
 			"nap": [["by the water", 38, 34], ["sunny rock", 28, 38], ["under a tree", 47, 42]],
 			"build": {"theme": "glasswater", "seed": 3307, "sk": 0.9,
 				"deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]],
