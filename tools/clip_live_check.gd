@@ -3,8 +3,8 @@ extends RefCounted
 ## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play
 ## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
 ## then he is gone; a stun, a root and Grounded each show on his clips. Every Hunter, each key pressed on the way up
-## a jump and in a fall: a move seen in the air plays over airborne legs ("air_legs", or clips on the upper body only) unless its legs are the move (LEGS_MOVES), and one
-## that lands before its end keeps the legs it had.
+## a jump and in a fall: a move seen in the air plays over airborne legs ("air_legs", or clips on the upper body
+## only) unless its legs are the move (LEGS_MOVES), and one that lands before its end keeps the legs it had.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
