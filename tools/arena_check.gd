@@ -3,7 +3,7 @@ extends RefCounted
 ## show it, reset works, the Esc menu's Practice page sets your ranks (--practice-shot=<dir> saves
 ## it), archetype / weapon / Boki / glove swaps apply, the toggles work, the kit card builds for all
 ## six archetypes, the expedition loadout shows the card, and the Training Grounds gets the same
-## tools. Prints ARENACHECK PASS/FAIL.
+## tools and its own sounds (TrainingSfx). Prints ARENACHECK PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -452,6 +452,20 @@ func _training() -> void:
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
 	_dodge_drill(m)
+	# the grounds' own sounds (docs/AUDIO.md): a dummy hit, a reset and the bot each play their cue, and the beds
+	# are the grounds' own, not the match's
+	TrainingSfx.heard.clear()
+	CombatBus.hit_landed.emit(P, m.arena.dummies[0]["h"], 10.0, [])
+	m.arena.reset()
+	m.arena.bot_mode = "idle"
+	m.arena._spawn_bot()
+	var cues := [TrainingSfx.DUMMY_HIT, TrainingSfx.RESET, TrainingSfx.BOT_SPAWN]
+	ok("training: dummy hit, reset and bot play their cues", cues.all(func(c): return TrainingSfx.heard.has(c)),
+		str(TrainingSfx.heard))
+	m.music_dir.tick(m, 0.3)
+	var beds := Sfx.amb_layers.keys()
+	ok("training: its own beds, not the match's", beds.has(TrainingSfx.WIND) and not beds.has("abyss")
+		and Sfx.amb_name != "match", "%s %s" % [beds, Sfx.amb_name])
 	m.queue_free()
 	await main.get_tree().process_frame
 
