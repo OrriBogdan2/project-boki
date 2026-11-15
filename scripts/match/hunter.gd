@@ -110,6 +110,7 @@ var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
 var shield_src := ""          # an Icons id: who gave the shield (ShieldSrc), for your vitals' strip
+var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
@@ -542,6 +543,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if shield > 0.0 and not shelled:
 		var a := minf(shield, d)
 		shield -= a; d -= a
+		ShieldSfx.hit(self, a)
+		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
@@ -1512,7 +1515,7 @@ func _emit_shot() -> void:
 		m.spawn_shot(self, start, Vector2(cos(a), sin(a)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
-	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
+	FireSfx.shot(get_instance_id(), wpn["sfx"], pos, -2.0 if is_local() else -6.0, float(wpn["rate"]))
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
@@ -1816,7 +1819,9 @@ func sim(dt: float) -> void:
 	HunterCooldowns.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0: shield = 0.0
+		if shield_t <= 0.0:
+			shield = 0.0
+			shield_kind = ""
 	if reload_t > 0.0:
 		reload_t -= dt
 		if reload_t <= 0.0:
@@ -2796,7 +2801,7 @@ func level_slot(slot: String) -> bool:
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
-		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
+		RankSfx.spent(slot, int(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
@@ -2968,6 +2973,7 @@ var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self:
 		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
+		if m: HostileCue.on_used(self, slot)      # a rival's E or R sounds like a threat
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot

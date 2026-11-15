@@ -203,22 +203,27 @@ def shing(f, g=1.0):
                ring((f * 1.5, f * 2.3), d, (0.07, 0.04), (0.08 * g, 0.04 * g)))
 
 
+def encore_rise(i):
+    """The ring growing (0.4 s, the grow time of her X): air drawn in, rising to where the blades start."""
+    d = 0.4; n = N(d)
+    return swish(d, 350, 3200, 2.0) * np.linspace(0.3, 1.0, n) * 1.3
+
+
 def encore(i):
-    swell_d = 0.7; n = N(swell_d)
-    swirl = swish(swell_d, 300, 1900, 2.0) * np.linspace(0.3, 1.0, n) * 1.1
     drum = mix(kick(150, 50, 0.6, 0.02, 0.08, 2.8) * 0.7, crack(0.5, 200, 2000, 0.04) * 1.6, sub(60, 38, 0.6, 0.12) * 0.4)
     chord = mix(*[bell(f, 0.6, 0.3) * 0.12 for f in (1175, 1480, 1760)])
     blades = mix(*[at(shing(2500 + 230 * k, 1.0 - 0.12 * k), 0.06 * k) for k in range(4)])
-    return mix(blades, at(swirl, 0.08), at(drum, 0.45), at(chord, 0.46))
+    return mix(blades, at(drum, 0.45), at(chord, 0.46))
 
 
 def encore_whirr(i):
+    """The blades spinning round her, a loop for as long as the ring lasts: two whirls at whole turns per loop, so
+    the pulses meet at the seam."""
     d = 2.0; n = N(d)
-    a, _ = am_whirl(d, 13, 15, 900, 4200, 3.0)
-    b, _ = am_whirl(d, 17.3, 19, 500, 2600, 3.0)
+    a, _ = am_whirl(d, 14, 14, 900, 4200, 3.0)
+    b, _ = am_whirl(d, 18, 18, 500, 2600, 3.0)
     glint = mix(*[at(bell(S.rng.uniform(2400, 3600), 0.2, 0.05) * 0.06, S.rng.uniform(0, 1.7)) for _ in range(14)])
-    e = np.minimum(1.0, np.arange(n) / N(0.12)) * np.minimum(1.0, (n - np.arange(n)) / N(0.35))
-    return mix(a * 0.8 + b * 0.7, pad(glint, d)[:n]) * e
+    return lpf(mix(a * 0.8 + b * 0.7, pad(glint, d)[:n]), 10000)
 
 
 def blade(i):
@@ -306,7 +311,8 @@ def build():
     save('dj_blink', blink(0), 'cast')
     save('dj_heal', heal(0), 'cast')
     save('dj_encore', encore(0), 'cast')
-    save('dj_encore_whirr', encore_whirr(0), 'loop')
+    save('dj_encore_rise', encore_rise(0), 'cast')
+    S.save_loop('dj_encore_whirr', encore_whirr(0), 'loop')
     takes('dj_blade', blade, 3, 'fire')
     takes('dj_encore_hit', encore_hit, 3, 'impact')
     takes('thief_hurt', hurt, 3, 'grunt')
