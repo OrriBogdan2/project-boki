@@ -7,7 +7,7 @@
 		"Swift"
 	],
 	"theme": "tempest",
-	"flavor": "A little sky serpent: a moray eel's long body with a swift's swept wings, crackling with static. Hatched from Stormcoil's egg.",
+	"flavor": "A little sky serpent: a moray eel's long body with a swift's swept wings, crackling with static. Hatched from the egg Sarcobra guards.",
 	"colors": {
 		"body": "#2f6f9a",
 		"belly": "#d6f4ff",
@@ -112,7 +112,7 @@
 	"egg": {
 		"name": "Storm Egg",
 		"temper": "Wild",
-		"desc": "Light as a cloud and buzzing with static. Little sparks jump to your fingers. The Sky Serpent guarded it.",
+		"desc": "Light as a cloud and buzzing with static. Little sparks jump to your fingers. Sarcobra guarded it.",
 		"play": "Fast and electric. Spears through foes and arcs lightning."
 	}
 }
