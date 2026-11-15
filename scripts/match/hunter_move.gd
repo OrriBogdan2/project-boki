@@ -34,6 +34,7 @@ static var dive_timeout: float = _phys["dive_timeout"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
+static var step_height: float = _phys["step_height"]     # m: the tallest lip walked straight over (World.STEP)
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
