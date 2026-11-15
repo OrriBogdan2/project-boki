@@ -45,12 +45,6 @@ const E_RECOVER := 0.6               # s she is held after the beam: the source'
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
-# Her looks, from her table (content/archetypes/gunslinger.json "palette"): green fire
-static var main_col := Arch.fx_col("gunslinger", "main")
-static var hot_col := Arch.fx_col("gunslinger", "hot")
-static var deep_col := Arch.fx_col("gunslinger", "deep")
-static var metal_col := Arch.fx_col("gunslinger", "metal")   # her shells and rivets
-
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
@@ -130,7 +124,7 @@ func fires_in_glide() -> bool:
 	return true
 
 func shows_charge_ball() -> bool:
-	return false                   # the Longneedle charges an green-fire orb at the muzzle instead
+	return false                   # the Longneedle charges an ember orb at the muzzle instead
 
 const SLIDE_LOOP_FROM := 0.367       # s: the dash clip's slide loop (three keys): a held slide replays it from here,
 const SLIDE_LOOP_T := 0.133          # s: one period at a time, so she stands up as the skid ends
@@ -436,7 +430,7 @@ func _puff(at: Vector3, d: Vector2) -> void:
 ## and eight hot spikes. Solid colours, so it reads bronze and green fire on any ground.
 func _burr_mesh() -> Node3D:
 	var n := own_node()
-	Models.part(n, Models.sphere(0.15, 12), Models.shiny(metal_col, 0.6))
+	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
 	var band := Models.cyl(0.155, 0.155, 0.06, 14)
 	Models.part(n, band, Models.toon(Color("2b2a33"), false, 0.0))
 	var heart := Models.part(n, Models.sphere(0.07, 8), solid_mat(LIME), Vector3(0, 0.1, 0.1))
@@ -444,7 +438,7 @@ func _burr_mesh() -> Node3D:
 	for i in 8:
 		var a := TAU * i / 8.0
 		var out := Vector3(cos(a), sin(i * 2.1) * 0.5, sin(a)).normalized()
-		var spike := Models.part(n, Models.crystal(0.04, 0.17, 4), solid_mat(hot_col), out * 0.17)
+		var spike := Models.part(n, Models.crystal(0.04, 0.17, 4), solid_mat(HOT), out * 0.17)
 		var up := Vector3.UP if absf(out.y) < 0.95 else Vector3.RIGHT
 		spike.look_at_from_position(spike.position, spike.position * 2.0, up)
 	for ch in n.get_children():

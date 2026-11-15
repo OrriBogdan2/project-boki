@@ -10,6 +10,8 @@ extends RefCounted
 ## rocks crumble whoever stands on them falls. Bond: a hunter slowed by the rise, or hit by one of its
 ## rocks while the bond window is open, counts as a land (HeroUlt.landed).
 
+const CRACK_COL := Color("3a7cff")
+const PREVIEW_COL := Color("d8ecff")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
 const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
 const HUSH_PAD := 0.1                  # s past the last rock the rocks make no rumble of their own
@@ -96,7 +98,7 @@ func _tick_aim(dt: float) -> void:
 		axis = drag.normalized()
 	k.play_hold("breah_spine_aim", phase_t)
 	if h.is_local():
-		AimKit.span(h, "x", _span_p({"chevrons": 6, "col": DolmKit.pale_col}))
+		AimKit.span(h, "x", _span_p({"chevrons": 6, "col": PREVIEW_COL}))
 		AimReach.ring(k, "x")
 	if not _held() or phase_t >= float(xd()["aim_max"]):
 		_erupt()

@@ -100,7 +100,7 @@ func _aim_hop() -> bool:
 	var at: Vector3 = spot["at"]
 	AimKit.circle(
 		h, "leap",
-		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": DolmKit.main_col, "dur": st["T"] + 0.4}
+		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": Color("3a7cff"), "dur": st["T"] + 0.4}
 	)
 	return true
 
@@ -262,7 +262,7 @@ func _tick_air(dt: float) -> void:
 		h, "leap",
 		{
 			"at": st["spot"]["at"], "r": float(dd()["land_r"]), "fill": clampf(t / T, 0.0, 1.0), "all": true,
-			"col": DolmKit.main_col
+			"col": Color("3a7cff")
 		}
 	)
 	if not h.grounded and h.pad.is_empty():

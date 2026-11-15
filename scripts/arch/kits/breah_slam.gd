@@ -120,7 +120,7 @@ func hold_tick(t: float) -> void:
 	var dd := h.aim_dir()
 	for side in [-1.0, 1.0]:
 		var at := h.pos + Vector3(dd.x * 0.3 - dd.y * 0.32 * side, 0.75, dd.y * 0.3 + dd.x * 0.32 * side)
-		var hot := DolmKit.main_col.lerp(DolmKit.hot_col, c)
+		var hot := DolmKit.COBALT.lerp(Color("9ad0ff"), c)
 		looks.hold_on("br_slamfist%d" % int(side), "mote", h, at, 0.8 + 1.0 * c, hot)
 	HeroVfx.of(k.m).hold(h, "slam_charge", c)
 	# jump while charging: leap forward, the circle rides along

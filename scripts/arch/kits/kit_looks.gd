@@ -7,7 +7,7 @@ extends Node3D
 ## back to it, so a burst of rocks or a stream of orbs never creates nodes per frame.
 ##
 ## Skins (shape, colour, trail, impact):
-##   boulder    Tarek's tap throw: a lumpy glowing rock tumbling end over end, cobalt trail
+##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
@@ -61,8 +61,6 @@ static func rock_mat(heat: float, seed_v: float) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
 	mt.shader = ROCK_SH
 	mt.set_shader_parameter("heat", heat)
-	mt.set_shader_parameter("glow", DolmKit.main_col)       # Tenzo's stone glows in his cobalt
-	mt.set_shader_parameter("rim_col", DolmKit.hot_col)
 	mt.set_shader_parameter("seed", seed_v)
 	return mt
 
@@ -147,8 +145,8 @@ static func basalt_mat(seed_v: float) -> ShaderMaterial:
 	var mt := rock_mat(0.0, seed_v)
 	mt.set_shader_parameter("stone", BASALT)
 	mt.set_shader_parameter("stone_hi", BASALT_HI)
-	mt.set_shader_parameter("glow", DolmKit.main_col)
-	mt.set_shader_parameter("rim_col", DolmKit.hot_col)
+	mt.set_shader_parameter("glow", DolmKit.COBALT)
+	mt.set_shader_parameter("rim_col", COBALT_HOT)
 	mt.set_shader_parameter("rim", 0.5)
 	return mt
 
@@ -163,7 +161,7 @@ func _build_rock(n: Node3D, kind: String) -> void:
 	body.name = "Spin"
 	Models.part(body, lump(r * 0.55), basalt_mat(vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
 	Models.part(body, lump(r * 0.45), basalt_mat(vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.main_col, 0.28)), Vector3.ZERO)
+	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.COBALT, 0.28)), Vector3.ZERO)
 
 ## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
@@ -171,7 +169,7 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
 	var top := Models.toon(RockLook.STONE_HI.lerp(RockLook.CAP, 0.4), true, 0.6)
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
-	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(DolmKit.main_col), Vector3(0, -0.17, 0))
+	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
 ## Ostra's shots: dark glass with bright teal rims, each with its own length and tail (the tail points
 ## back along the flight, -Z being forward after look_at).

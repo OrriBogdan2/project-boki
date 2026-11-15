@@ -279,7 +279,7 @@ func _slam() -> void:
 	AimKit.hide(kit.h, "x_aim")
 	# the landing marker flashes on the spot a beat before she arrives (everyone sees it)
 	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
-	mark.merge({"col": MageKit.hot_col, "col2": MageKit.hot_col, "hot": 0.6})
+	mark.merge({"col": MageKit.PINK, "col2": MageKit.PINK, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
 	kit.vfx("x_dive", land, null, {"r": float(data()["radius"])})
 
@@ -362,7 +362,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
-## Pink lightning stays at her feet for a moment after the strike (she is free to act).
+## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
 	var rng := kit.fx().rng
 	if rng.randf() > 14.0 * dt:

@@ -265,11 +265,9 @@ func color(h: Hunter, key: String) -> Color:
 	return _pal(h, key, key)
 
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
-	return col(h.arch, String(name_or_hex) if name_or_hex != null else fallback)
-
-## A colour of a Hero's palette by name (a hex passes through): kits that draw in code read their table here.
-static func col(arch: String, name_or_hex: String) -> Color:
-	return Color(String(data(arch).get("palette", {}).get(name_or_hex, name_or_hex)))
+	var pal: Dictionary = data(h.arch).get("palette", {})
+	var key := String(name_or_hex) if name_or_hex != null else fallback
+	return Color(String(pal.get(key, key)))
 
 func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
 	var from := String(layer.get("at", "here"))

@@ -32,7 +32,7 @@ const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gil": ["gil_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
-	"tender": ["tender_", "care_look"], "thief": ["thief_"]}
+	"tender": ["tender_"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.
 const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
 	"anchors": {"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]},
@@ -77,7 +77,6 @@ func run(main: Node) -> void:
 			gold.append(f)
 	ok(gold.is_empty(), "no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour %s" % [gold])
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
-	_colours()
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -131,45 +130,6 @@ func _called(arch: String) -> Dictionary:
 				called[hit.get_string(1)] = true
 	return called
 
-## Every Hunter's abilities wear its ability colour (docs/HERO_VFX.md "Ability colours"): the LMB (its weapon), each
-## slot's colour and its kit table's main colour sit on that hue, except the colours that mean something (MEANING).
-func _colours() -> void:
-	var off: Array = []
-	for arch: String in Arch.ORDER:
-		var want := Arch.color(arch)
-		var cols := {"lmb": Content.weapon(Arch.signature(arch)).primary.get("color", Color.WHITE) as Color}
-		for slot: String in ["dash", "rmb", "e", "x"]:
-			cols[slot] = Color(String((Arch.def(arch)[slot] as Dictionary).get("col", "#ffffff")))
-		if Arch.def(arch).has("palette"):
-			cols["palette"] = Arch.fx_col(arch, "main")
-		elif HeroVfx.data(arch).has("palette"):
-			cols["palette"] = HeroVfx.col(arch, "main")
-		for slot: String in cols:
-			var c: Color = cols[slot]
-			if _off_hue(c, want) and not slot in MEANING.get(arch, []):
-				off.append("%s %s" % [arch, slot])
-	ok(off.is_empty(), "every Hunter's LMB/RMB/E/R/dash colour is on its ability colour %s" % [off])
-	for arch: String in MOVES_ON_HUE:
-		var moves: Dictionary = HeroVfx.data(arch)["moves"]
-		var off_moves: Array = []
-		for mv: String in moves:
-			for layer: Dictionary in moves[mv].get("fx", []):
-				for key in ["c", "c2", "c3"]:
-					var c := HeroVfx.col(arch, String(layer.get(key, "main")))
-					if _off_hue(c, Arch.color(arch)) and not mv in MOVES_ON_HUE[arch] and not mv in off_moves:
-						off_moves.append(mv)
-		ok(off_moves.is_empty(), "%s: every recipe move but its heals is on its ability colour %s" % [arch, off_moves])
-	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col, TenderKit.main_col]
-	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm"), Arch.color("tender")],
-			"Vex's, Sparkle's, Tenzo's and Meeko's kits draw from their colour tables")
-	var hex := NO_HEX.filter(func(k): return FileAccess.get_file_as_string(
-			"res://scripts/arch/kits/%s.gd" % k).contains("Color(\""))
-	ok(hex.is_empty(), "no hex colour in the kits that draw from a table %s" % [hex])
-
-## A saturated colour more than HUE_OFF round the wheel from the Hunter's (pale tints are free).
-func _off_hue(c: Color, want: Color) -> bool:
-	return c.s >= PALE_S and rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU))) > HUE_OFF
-
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
 	var d := HeroVfx.data(arch)
@@ -196,7 +156,7 @@ func _recipes(arch: String) -> void:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
-			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
+			var flare_big: bool = layer["p"] in ["flare", "portal"] and big > MAX_FLARE
 			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):

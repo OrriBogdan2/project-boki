@@ -58,7 +58,7 @@ func tick(dt: float) -> void:
 		else:
 			s["dir"] = drag_dir(at)
 			var drag := {"from": at, "dir": s["dir"], "len": 4.0, "width": 0.55, "tip": true}
-			drag.merge({"col": MageKit.hot_col, "col2": MageKit.hot_col})
+			drag.merge({"col": MageKit.PINK, "col2": MageKit.PINK})
 			AimKit.lane(kit.h, "e_drag", drag)
 		# a pink ticked rim with the chevron on it pointing the drag; once counting only the rim, so the dark disc
 		# (content/vfx/mage.json) shows through instead of a pink fill
@@ -94,7 +94,7 @@ func _arrow(i: int, s: Dictionary, r: float) -> void:
 	var at: Vector3 = s["at"]
 	var from := at - Vector3(dir.x, 0, dir.y) * r * ARROW_LEN * 0.5
 	var arrow := {"from": from, "dir": dir, "len": r * ARROW_LEN, "width": 0.5, "tip": true}
-	arrow.merge({"col": MageKit.hot_col, "col2": Color.WHITE})
+	arrow.merge({"col": MageKit.PINK, "col2": Color.WHITE})
 	AimKit.lane(kit.h, "e_arrow%d" % i, arrow)
 
 ## The pink rim chevron pointing the drag: two short pink strokes, redrawn every step.

@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
+		await _spirit_look()
 		await tall.tall()
 		await bow.pin()
 	if both or "--bulwark-combo-check" in args:
@@ -178,6 +179,14 @@ func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
+
+## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
+func _spirit_look() -> void:
+	var look = load("res://tools/lace_spirit_look_check.gd").new()
+	look.main = main
+	await look.walk()
+	n += look.n
+	fails += look.fails
 
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)

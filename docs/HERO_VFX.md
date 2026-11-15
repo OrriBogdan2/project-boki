@@ -118,38 +118,6 @@ everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). No
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
 
-## Ability colours
-DECISIONS 2026-11-08: every Hunter's abilities wear its ability colour (`content/archetypes/<arch>.json` "color";
-docs/VFX_QUALITY.md has the list). Where a Hunter's colours live, one table each:
-- a Hero with recipes: the `palette` of `content/vfx/<arch>.json` (Lace, Kael, Albert, Cinder, Meeko, Neve);
-- a kit that draws in code: the `palette` of its archetype JSON, read with `Arch.fx_col(arch, key)` into the kit's
-  `main_col` / `hot_col` / ... static vars (Vex, Sparkle, Tenzo). No hex in those kits.
-- every Hunter: each slot's `col` (HUD tile, cast words, rings through `col_of`) and the signature weapon's
-  `primary.color` (the LMB tile and charge flash).
-
-`--hero-vfx-check` asserts every Hunter's LMB/RMB/E/R/dash colour and kit table (archetype or recipe palette `main`)
-sit within 40 degrees of hue of the ability colour (pale tints free). For the Hunters in `MOVES_ON_HUE` (Meeko) every
-recipe move's colours do too, bar the named meaning moves; the kits in `NO_HEX` (Tenzo, Meeko) hold no hex colour. Colours that mean something stay and are named in the check (`MEANING`): a shield's
-blue, heals' green-gold. Status and timing cues (Daze pink, stun crown gold, Lace's perfect-release gold) are free too.
-
-Audit 2026-11-11 (main 272368589). "Fixed" = on this branch; "left" = still off-colour, with why.
-
-| Hunter | colour | off-colour found (LMB / RMB / E / R / dash) | fixed | left |
-|---|---|---|---|---|
-| Vex | lime `#b8f03c` | everything ember orange `#ff9a5c` / deep red / bronze: tracer, Burr Charge, Longneedle beam, Cinderfall discs and pillar, Slipstep after-image; slots and Quill Rifle orange; gun glow strip | all of it: green fire from her table (main, hot, deep, metal); slots, weapon, gun strip | the ult disc's dark char (dark is free) |
-| Sparkle | pink `#ff5ab4` | lightning body teal `#1fc6dc` on every LMB / Storm Rod / Skycall / Kitefall / Wirerun arc; copper and gold rims; slots and Coilcaster teal, Kitefall gold | lightning pink with a pale core, rose rims, from her table; slots, weapon, finger glow | her body glow (`model_glow`) is art, not VFX |
-| Tenzo | cobalt `#3a7cff` | rock glow molten orange (`molten_rock` default) on fists, thrown rocks, shards; orange trails on LMB/RMB rocks and the Rock Hop rock; orange foot slab; orange slam burst and dark red crater; fist seam orange; Rubble Fists tan | cobalt from his table in `KitLooks.rock_mat`, trails, slab, slam; kit hex replaced by table names | rock bodies stay earth (a material, not an effect) |
-| Motley | teal `#2ee6c0` | the whole kit is void violet / magenta (Shard Snap orb, spear, Nightwell, Lantern Trade, sigils); Nightwell and Lantern Trade slots and the Tether Lantern violet | slots and weapon teal | kit code (`ostra_kit`, `ostra_well`, `kit_looks` orb/spear/well): ported on ext/vfx-hunter-colours 1adb5d28b (stacked on ext/vfx-pass), not redone here |
-| Sable | violet `#9a5cff` | gold knives and bolts (`ffcf5a`, `ffc04a`), orange bolt tail, blue empowered chakram, red knock star; Bola slot gold, Encore pink, Arc Bolts gold | Bola / Encore slots and weapon violet | `thief_kit` / `thief_ult` constants: the knock star is on ext/vfx-hunter-colours 17f7c64de, the rest needs a pass |
-| Grimble | gold `#ffc832` | Abyssal Hand violet arm and sludge, pink slugs, violet Broadside wave 2, teal ring; pink-white shotgun | shotgun gold | `dredge_kit` / `dredge_blast` constants (ext/vfx-hunter-colours f0a0f4d5d, 1240f613f) |
-| Meeko | leaf `#5fdc6a` | recipe palette main is lantern gold `#ffd27a` (Ember Cast, Burrseed); violet burrs; Burrseed / Relay Step slots yellow-gold; crook gold; Ember Cast bolt gold and pink, its hit a violet star; Kindle ring violet to orange, Kindle resource orange | Burrseed / Relay Step slots and crook green; ext/vfx-meeko-palette: recipe palette `main` leaf, Ember Cast / Kindle / Burrseed / Relay Step recipes on `main`/`hot`/`fern`/`moss`/`char`/`mist`; burrs, seed aim, Kindle ring, Ember Cast bolt and hit (`care_look`) from `TenderKit`'s table; Kindle resource leaf; no hex left in `tender_kit`; ext/vfx-meeko-hit-hearth: the Ember Cast hit adds a leaf chunk-and-spark burst (`ember_hit`, played from `care_look`'s impact) and the Hearth Call cast draws a gold ring at the tether range (`call`, r = 12.6 m) | Hearthlight and Hearth Call are heals: gold kept under the palette's `gold`/`cream`/`amber`/`pink` (`MOVES_ON_HUE` names the moves); coral fizzles (dropped, snapped, out of reach) are a status cue |
-| Kael | crimson `#ff3a2a` | magenta Smash strike lane `#ff3df0`; violet/pink Meteor Drop circles (airborne Smash); gold Gilded Riposte | none | the drop circles are damage / stun areas (meaning); magenta lane and gold guard are named looks, owner call |
-| Albert | ivory `#fff0b0` | Aegis blue, Mending Ground mint column, Faultline orange | none | Aegis is a shield, Mending Ground a heal (meaning); Faultline orange sits within 40 degrees of his gold |
-| Lace | orchid `#e04aff` | gold perfect-release cue, gold EXECUTED word | none | timing and payoff cues (meaning) |
-| Cinder | orange `#ff7a1a` | Cinder Shot red-pink, cyan pilot flame | none | within the hue (35 degrees); the pilot flame is a small accent |
-| Neve | frost `#8ae6ff` | none | none | |
-
-Resource colours are not in the check yet: Lace's Hawk Sense and Sable's Marks (`#ffd23f`) sit off their hue.
 ## Shot floor (LMB projectiles)
 Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
 beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p (9 px at 1080p) with the default camera, sized
