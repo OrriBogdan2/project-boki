@@ -525,9 +525,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 205,
+"long_line": 191,
 "nested_ternary": 16,
-"semicolon": 138
+"semicolon": 126
 },
 "scripts/match/merge_look.gd": {
 "long_line": 6
@@ -621,6 +621,10 @@
 "scripts/match/train_route.gd": {
 "long_line": 2,
 "semicolon": 5
+},
+"scripts/match/training.gd": {
+"long_line": 14,
+"semicolon": 12
 },
 "scripts/match/truce.gd": {
 "long_line": 6,

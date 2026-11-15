@@ -156,7 +156,7 @@ func _tutorial() -> void:
 	ok("the move step's strip cap is the bound move keys ('%s')" % tu.key_cap,
 			tu.key_cap == tu._wasd() and tu.key_cap.begins_with("F"))
 	ok("the strip's key cap is the bound key on %d steps" % capped, capped > 0 and off.is_empty(), str(off))
-	for row in m.train_rows(): texts.append(String(row[1]))
+	for row in m.training.rows(): texts.append(String(row[1]))
 	none("tutorial lines, details, hints, training rows name no default key (%d)" % texts.size(), _stale_in(texts))
 	m.free()
 
