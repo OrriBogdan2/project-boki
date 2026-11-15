@@ -85,6 +85,7 @@ var last_emote := ""
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
+var twist_max := TWIST_MAX   # rad: 90 deg plus "loco.twist_hyst" (default TWIST_HYST), the leg turn-round margin
 var twist_goal := 0.0        # rad the legs turn off the aim this frame (0 when he is not running)
 var twist_back := false      # past the twist limit the legs turn round and run backwards
 var twist_face := 0.0        # rad: the facing last frame, so the legs can hold their way while the aim swings
@@ -195,6 +196,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.active = true
 	var lc: Dictionary = d["loco"]
 	twist_on = bool(lc.get("aim_twist", false))
+	twist_max = PI / 2.0 + float(lc.get("twist_hyst", TWIST_HYST))
 	var cycle := float(lc.get("cycle_s", 0.0))
 	gait = WardenGait.new(sk, lc.get("arm_swing", {}),
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["walk"]["f"])).length,
@@ -714,7 +716,7 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		if twist_goal != 0.0 and air_w <= 0.0:      # (in the air the body turns with the rig: glide bank)
 			# running: the legs hold their way while the aim swings, but never twist him past the limit
 			var held := head_turn - wrapf(face - twist_face, -PI, PI)
-			head_turn = clampf(held, minf(head_turn, -TWIST_MAX), maxf(head_turn, TWIST_MAX))
+			head_turn = clampf(held, minf(head_turn, -twist_max), maxf(head_turn, twist_max))
 	twist_face = face
 	var follow := 1.0 - exp(-dt * HEADING_RATE)     # how far the turn eases toward its goal this frame
 	# (the twist swings the legs across his front, never round his back)
@@ -738,7 +740,7 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 		twist_goal = 0.0
 		return Vector2.ZERO
 	var rel := wrapf(atan2(-flat.x, -flat.y) - face, -PI, PI)
-	twist_back = absf(rel) > (PI - TWIST_MAX if twist_back else TWIST_MAX)
+	twist_back = absf(rel) > (PI - twist_max if twist_back else twist_max)
 	twist_goal = rel - signf(rel) * PI if twist_back else rel
 	return Vector2(0.0, -k if twist_back else k)
 
