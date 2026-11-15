@@ -29,8 +29,8 @@ const LEAN := -0.22  # the label's lean (x shear per unit up)
 const CONDENSE := 0.82  # the label's width squeeze
 const MARK_DX := 106.0  # units from the portrait centre to the knocked marker's centre
 const MARK_R := 13.0  # units: the marker's round body (its tail reaches 2x further)
-const KILL_R := 11.5  # units: the killer disc (ref: a red disc at the marker's spot, 23 px across)
-const KILL_RIM := 2.5  # units: the red ring around the killer's face
+const KILL_R := 11.5           # units: the killer disc (ref: a red disc at the marker's spot, 23 px across)
+const KILL_RIM := 2.5          # units: the red ring around the killer's face
 const KILL_COL := Color("e8304a")
 const FRAME := Color(0.01, 0.0, 0.02, 0.92)
 const NAME_COL := Color("eef4f2")
@@ -250,12 +250,14 @@ static func face(hud, h: Hunter, grey: bool) -> Texture2D:
 		return Portraits.cut(ak, Portraits.art_path(ak), Vector2i(PORTRAIT_PX, PORTRAIT_PX), grey)
 	return hud.portrait_grey(h) if grey else hud.portrait(h)
 
+
 ## Beside a dead teammate's row: the Hunter who finished them, their face in a red disc.
 static func _killer(hud, at: Vector2, by: Hunter) -> void:
 	var c: CanvasItem = hud.c
 	c.draw_circle(at, KILL_R + 1.0, Color(0, 0, 0, 0.6))
 	c.draw_circle(at, KILL_R, KILL_COL)
 	disc(c, at, KILL_R - KILL_RIM, face(hud, by, false), SideColor.of(hud.m, by).darkened(0.4))
+
 
 ## Beside a knocked teammate's row: a pale burst with a red X, its long point toward where they lie.
 static func _marker(hud, at: Vector2, h: Hunter) -> void:
