@@ -4,7 +4,7 @@ Main moves every 20-30 min, so a green that must have `behind_by 0` is stale bef
 `train-batch run` folds every green-but-behind PR into one `ext/merge-train-<MMDD>-<HHMM>` branch (main + each PR head, merge_batch.sh
 conflict policy; conflicting or head-moved PRs are skipped and logged), gates it once with `gate-shard`, opens one PR listing the folded
 PRs and posts `GATE GREEN <full sha>` on it. `train-batch finish` closes the folded PRs ("merged via #N") after the train merged.
-Details: `train-batch` docstring. Test: `bash ops/merge-train-1114/train_batch_test.sh` (11 checks, local, no cluster).
+Details: `train-batch` docstring. Test: `bash ops/merge-train-1114/train_batch_test.sh` (15 checks, local, no cluster).
 
 ## Install (coordinator, hetzner)
     cp ops/merge-train-1114/{train-batch,gate-shard,gate_shard_run.gd} /home/boki/coord/boki-tools/merge-train/ && boki-install boki-tools/merge-train

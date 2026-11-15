@@ -5,6 +5,8 @@
                                    behind main (public API reads, or gh / GH_TOKEN when available)
   train-batch run [PR[=sha] ...]   select (or take the given PRs), then build, gate, push, publish (below). --dry: only try the
                                    merges and report skips, no push/gate/hold. --min N (default 2). --no-publish: stop after the push.
+  train-batch publish BRANCH --summary 'GATE GREEN ...' [--minutes N] [--dry]
+                                   open the PR + post GATE GREEN for a train gated on a box without gh (refuses if behind main)
   train-batch finish               for published trains: once the train PR merged, comment "merged via #N" on each folded PR and
                                    close it; release the hold file
   train-batch hold [--except REF]  exit 0 and print why while a train is gating (merge-ready-watch must then merge nothing but
@@ -231,24 +233,66 @@ def run(args):
         return 1
     if subprocess.run(["git", "-C", REPO, "merge-base", "--is-ancestor", "origin/main", sha]).returncode != 0:
         log(f"train {stamp}: main moved again after 3 gates, not publishing"); return 1
-    title = f"Merge train {stamp}: " + " ".join(f"#{p[0]}" for p in folded)
-    lines = [f"- #{n} `{(ref or git('log', '-1', '--format=%s', sha_)[:60])}` {sha_[:10]}" for n, sha_, ref, _ in folded]
+    publish_train(stamp, branch, [(n, sha_, ref) for n, sha_, ref, _ in folded], sha, main, summary, out, skipped,
+                  round((time.time() - t0) / 60), publish)
+    return 0
+
+
+def publish_train(stamp, branch, folded, sha, main, summary, out, skipped=None, minutes=None, publish=True):
+    """Write pr-body.md / gate-comment.md / meta.json for a gated train; open the PR and post GATE GREEN when gh/GH_TOKEN works."""
+    title = f"Merge train {stamp}: " + " ".join(f"#{n}" for n, _, _ in folded)
+    lines = [f"- #{n} `{(ref or git('log', '-1', '--format=%s', sha_)[:60])}` {sha_[:10]}" for n, sha_, ref in folded]
     body = (f"One gated merge of {len(folded)} PRs that were GATE GREEN but behind main, so their greens stopped going stale.\n\n"
             + "\n".join(lines) + ("\n\nSkipped (conflict): " + "; ".join(f"{k} {v}" for k, v in skipped.items()) if skipped else "")
-            + f"\n\nBuilt on origin/main {main[:10]} with `train-batch run`. The folded PRs get a \"merged via\" comment and are closed once this merges.")
-    comment = f"GATE GREEN {sha}: {summary[len('GATE GREEN '):]} (train of {len(folded)} PRs, gated on main {main[:10]}, {(time.time() - t0) / 60:.0f} min)"
+            + f"\n\nBuilt on origin/main {main[:10]} with `train-batch`. The folded PRs get a \"merged via\" comment and are closed once this merges.")
+    took = f", {minutes} min" if minutes is not None else ""
+    comment = f"GATE GREEN {sha}: {summary[len('GATE GREEN '):]} (train of {len(folded)} PRs, gated on main {main[:10]}{took})"
+    os.makedirs(out, exist_ok=True)
     for name, text in (("pr-body.md", body), ("gate-comment.md", comment)):
         open(os.path.join(out, name), "w").write(text + "\n")
-    meta = {"stamp": stamp, "branch": branch, "folded": [p[0] for p in folded], "sha": sha, "main": main, "pr": None, "title": title, "minutes": round((time.time() - t0) / 60)}
+    meta = {"stamp": stamp, "branch": branch, "folded": [n for n, _, _ in folded], "sha": sha, "main": main, "pr": None, "title": title, "minutes": minutes}
     if publish and can_write():
         made = api("pulls", {"title": title, "head": branch, "base": "main", "body": body})
         if made:
             meta["pr"] = made["number"]
             api(f"issues/{made['number']}/comments", {"body": comment})
             log(f"train PR #{made['number']} opened, GATE GREEN {sha[:10]} posted")
+        else:
+            log(f"opening the PR for {branch} failed; texts in {out}")
     else:
-        log(f"no gh/GH_TOKEN here: texts in {out} (pr-body.md, gate-comment.md), open the PR from {branch} and post the comment")
+        log(f"no gh/GH_TOKEN here (or --no-publish): texts in {out} (pr-body.md, gate-comment.md); publish later with `train-batch publish {branch} --summary ...`")
     json.dump(meta, open(os.path.join(out, "meta.json"), "w"))
+    return 0
+
+
+def publish_cmd(args):
+    """publish BRANCH --summary 'GATE GREEN ...' [--minutes N] [--dry]: open the PR for a train gated on a box without gh (rpc4/w2).
+    Refuses unless the branch is pushed, is a train name, contains origin/main (behind 0) and the summary is a GATE GREEN."""
+    if not args or "--summary" not in args:
+        sys.exit("usage: train-batch publish ext/merge-train-MMDD-HHMM --summary 'GATE GREEN ...' [--minutes N] [--dry]")
+    branch, summary = args[0], args[args.index("--summary") + 1]
+    minutes = int(args[args.index("--minutes") + 1]) if "--minutes" in args else None
+    if not BRANCH_RE.match(branch) or not summary.startswith("GATE GREEN "):
+        sys.exit("publish: needs an ext/merge-train-MMDD-HHMM branch and a summary starting 'GATE GREEN '")
+    git("fetch", "-q", "origin", "main", f"+refs/heads/{branch}:refs/remotes/origin/{branch}", check=True)
+    sha, main = git("rev-parse", f"origin/{branch}"), git("rev-parse", "origin/main")
+    if subprocess.run(["git", "-C", REPO, "merge-base", "--is-ancestor", main, sha]).returncode != 0:
+        sys.exit(f"publish: {branch} is behind origin/main {main[:10]}: merge main in and delta-gate it first (regate-run), not publishing")
+    folded = []  # the train's own "Merge pr/N <sha>" commits on its first-parent line
+    for subj in reversed(git("log", "--first-parent", "--format=%s", f"{main}..{sha}").splitlines()):
+        m = re.match(r"^Merge pr/(\d+) ([0-9a-f]{7,40})", subj)
+        if m:
+            folded.append((int(m.group(1)), git("rev-parse", m.group(2)) or m.group(2), ""))
+    if len(folded) < 1:
+        sys.exit(f"publish: no 'Merge pr/N' commits on {branch}")
+    stamp = branch[len("ext/merge-train-"):]
+    out = os.path.join(STATE, stamp)
+    if not os.path.exists(HOLD_FILE) and "--dry" not in args:
+        os.makedirs(STATE, exist_ok=True)  # a fresh hold: the train is ready, merge-ready-watch needs <= 10 min to take it
+        json.dump({"branch": branch, "start": time.time()}, open(HOLD_FILE, "w"))
+    publish_train(stamp, branch, folded, sha, main, summary, out, minutes=minutes, publish="--dry" not in args)
+    if "--dry" in args:
+        print(open(os.path.join(out, "pr-body.md")).read() + "\n" + open(os.path.join(out, "gate-comment.md")).read(), end="")
     return 0
 
 
@@ -285,6 +329,8 @@ def main_():
             print(*r)
     elif cmd == "run":
         return run(args)
+    elif cmd == "publish":
+        return publish_cmd(args)
     elif cmd == "finish":
         finish()
     elif cmd == "hold":

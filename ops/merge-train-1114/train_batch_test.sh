@@ -33,6 +33,12 @@ ok "GATE GREEN text names the full sha" "grep -q \"^GATE GREEN \$(git rev-parse 
 ok "hold is on" "$tb hold > /dev/null"
 ok "hold lets the train PR through" "! $tb hold --except $br > /dev/null"
 ok "hold releases itself after the cap" "HOLD_MIN=0 $tb hold > /dev/null; [ \$? = 1 ] && grep -q released $T/state/train.log"
-git push -q origin "origin/$br:refs/heads/main"; rm -f "$T/state/HOLD"
+$tb publish $br --summary 'GATE GREEN checks=5 new_red=0' --dry > "$T/pub.out" 2>&1
+ok "publish --dry lists the folded PRs" "grep -q '^- #2 ' $T/pub.out"
+ok "publish writes the GATE GREEN text" "grep -q \"^GATE GREEN \$(git rev-parse origin/$br):\" $T/state/${br#ext/merge-train-}/gate-comment.md"
+ok "publish refuses a non-green summary" "! $tb publish $br --summary 'GATE RED x' --dry > /dev/null 2>&1"
+d=$(mktemp -d); git clone -q "$T/origin.git" "$d"; (cd "$d" && echo y > y.txt && git add -A && git -c user.email=c@c -c user.name=c commit -qm move && git push -q origin HEAD:main)
+ok "publish refuses a train behind main" "$tb publish $br --summary 'GATE GREEN x' --dry 2>&1 | grep -q 'is behind origin/main'"
+git fetch -q origin; git checkout -q -B mt origin/main; git merge -q --no-edit origin/$br; git push -q origin HEAD:main; rm -f "$T/state/HOLD"
 ok "hold ends when the train is merged" "! $tb hold > /dev/null"
-rm -rf "$T"; exit $fail
+[ -n "$KEEP" ] && echo "$T" || rm -rf "$T"; exit $fail
