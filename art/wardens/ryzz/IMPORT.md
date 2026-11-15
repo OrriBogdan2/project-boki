@@ -25,8 +25,22 @@ Run it all with INSTALL=1 ~/meshy/ryzz_f/build.sh [source]. No weapon: fingertip
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
 
+## Pigtail graft (2026-11-15, ext/sparkle-hair-1115): Meshy pigtails on the live model
+Owner 11-15: the in-game hair "goes out too far and isn't wavy enough". Only the pigtails change: the live ones are cut from `Body`
+(hair-atlas faces outside |x| > 0.085 or below z 1.56) and Meshy-made wavy ones (a multi-image-to-3d bust from four head crops of
+the v2 turnaround) are grafted on by `tools/meshy/pigtail_graft.py` (`art/wardens/src/ryzz_pigtails.json`): aligned to the head, sheared in
+toward the neck, graded to the live palette, remeshed to 1.5k tris a side, baked into free atlas rectangles, skinned to `head`. Face, body,
+chest, backpack, rig and clips are untouched (the same file through Blender's glTF export); the pigtails stay rigid on the head bone.
+13.9k tris (live 13.2k). `ryzz_atlas.jpg` is Godot's extract of the new embedded atlas.
+Re-run 11-15 on main's glb (main moved at bfae359ad9: Sparkle's idle/clips): `pigtail_graft.py` on main's current ryzz.glb, then
+`python3 tools/art1/glb_add_clips.py <graft.glb> <main ryzz.glb> =<every clip> <out.glb>` (Blender's export resamples the clips; this puts
+main's 45 clips back byte for byte: same names, key counts and values) and `python3 tools/art1/glb_compact.py <out.glb> ryzz.glb` (drops the
+resampled clips' leftover data). Nothing but the pigtails differs from main's glb.
+
 Idle/run pilot (2026-11-11, ext/anim-pilot-four), licence for both: Meshy generated asset, our account. Sparkle's Meshy rig is 01a1c8ac-ed6a-7214-a6e0-3250ea3170f7, auto-rigged from her static mesh at height 1.9. `idle` is now animation-library action 89 (task 01a1c8ad-9df6-7391-bae2-a82e739cf522), retargeted with feet planted, 1.71 s played twice (3.42 s), seam 0.14 deg; blind judge 4.8 vs the old idle 2.8. `run_f` is now the rig's own running clip, retargeted at 1.11x with feet planted at 4.55 m/s and her arms carried from the old run_f, 0.62 s, seam 0.04 deg; judge 4.5 vs 4.0. The rig's walking candidate lost (3.0-3.2 vs 4.0), so walk_f is unchanged. Recipe: `python3 tools/art1/glb_pick_clip.py <candidate.glb> <clip> <name> <tile> /tmp/x.glb`, then `python3 tools/art1/glb_add_clips.py <this glb> /tmp/x.glb <name>`. Candidate GLBs and renders: ~/anim/four (glb/, renders/blind/).
 
 
 Carried onto the v95 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ext/anim-pilot-four 37d910944 glb> idle --hold-moved-rest` (2026-11-13, merge of origin/main 18402df5b): the core bones' rest is identical between the two builds and main's old idle matched the judged ones, so the clips are the judged ones; the spring bones the new model moved (spring_pig*, gum) hold this model's rest in them, as every other clip does.
 `run_f`: Not carried (2026-11-13): the pilot run_f above; `--anim-audit` on the game rig reads run slide 97% (sole sweep 1.03 m/s at a 4.83 m/s run) (main's own clip 9%, limit 25%), so main's clip stays. The candidate is `run_f` in ext/anim-pilot-four 37d910944's ryzz.glb, to copy with `glb_add_clips.py --hold-moved-rest` once the in-game foot slide is fixed.
+
+Merge 11-15 (ext/merge-lane-anim-hard2-1115): main's glb (45 clips, idle, pigtails) with only the key-pose-read `lmb_l` put back from the branch (`glb_add_clips.py <main ryzz.glb> <branch ryzz.glb> =lmb_l`, then `glb_compact.py`); the other 44 clips are main's byte for byte.
