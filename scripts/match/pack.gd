@@ -27,6 +27,15 @@ static func lowest_value(h) -> int:
 static func wants(h, it: Dictionary) -> bool:
 	return room(h) or Loot.value(it) > lowest_value(h)
 
+## Is this piece of gear better than what you wear in its slot (or is that slot empty)?
+static func beats_worn(h, it: Dictionary) -> bool:
+	var cur: Dictionary = h.gear[Gear.slot_on(h, String(it["id"]))]
+	return cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
+
+## A thing you could wear that beats what you have on: taking it from a box puts it on.
+static func wears(h, it: Dictionary) -> bool:
+	return String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it.get("id", ""))) and beats_worn(h, it)
+
 # ------------------------------------------------------------------ things on the ground
 ## The item a ground pick-up stands for (made once and kept on it).
 static func ground_item(wp: Dictionary) -> Dictionary:
@@ -59,7 +68,10 @@ static func take_ground(m, h, wp: Dictionary) -> void:
 		var cur: Dictionary = h.gear[Gear.slot_on(h, String(it["id"]))]
 		if cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not wants(h, it):
 			_off_ground(m, wp)
-			var old_g := _wear(m, h, it)
+			var fed := LootFeed.got_item(m, h, it)
+			var old_g := _wear(m, h, it, -1, fed)
+			if not fed:
+				m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 			if not old_g.is_empty():
 				_stash_new(m, h, old_g)
 			return
@@ -71,8 +83,8 @@ static func stash(m, h, wp: Dictionary) -> bool:
 	if room(h):
 		_off_ground(m, wp)
 		h.pack.append(it)
-		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
-		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
+		if not LootFeed.got_item(m, h, it):
+			m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
 		return true
 	if h == m.player and m.hud:
 		m.hud.open_swap(wp)
@@ -105,34 +117,33 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
 ## `slot` -1 picks the slot (a glove: the same glove's slot, an empty one, or the weaker one: Gloves).
-static func _wear(m, h, it: Dictionary, slot := -1) -> Dictionary:
+## `fed`: the loot feed already shows it (a ground pickup, LootFeed), so no toast.
+static func _wear(m, h, it: Dictionary, slot := -1, fed := false) -> Dictionary:
 	if slot < 0:
 		slot = Gear.slot_on(h, String(it["id"]))
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": it["id"], "rar": int(it["rar"])}
 	h.gear_cd[slot] = 0.0
 	h.refresh_gear()
-	if h == m.player and m.hud:
+	if not fed and h == m.player and m.hud:
 		m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
-	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 	if old.is_empty():
 		return {}
 	return Loot.gear(String(old["id"]), int(old["rar"]))
 
 ## From the backpack window: wear this piece of gear (in `slot`, or where it goes when -1); what you
 ## had takes its place in the pack. A piece can only go in a slot of its own kind (gloves: either glove).
-static func use_from_pack(m, h, i: int, slot := -1) -> void:
-	if i < 0 or i >= h.pack.size():
-		return
+## True when something was put on (the window plays its cue, InvSfx).
+static func use_from_pack(m, h, i: int, slot := -1) -> bool:
+	if i < 0 or i >= h.pack.size() or String(h.pack[i].get("t", "")) != "gear":
+		return false
 	var it: Dictionary = h.pack[i]
 	h.pack.remove_at(i)
-	if String(it.get("t", "")) == "gear":
-		if slot >= 0 and not fits_slot(String(it["id"]), slot):
-			slot = -1
-		var old_g := _wear(m, h, it, slot)
-		if not old_g.is_empty(): h.pack.insert(mini(i, h.pack.size()), old_g)
-	else:
-		h.pack.insert(i, it)
+	if slot >= 0 and not fits_slot(String(it["id"]), slot):
+		slot = -1
+	var old_g := _wear(m, h, it, slot)
+	if not old_g.is_empty(): h.pack.insert(mini(i, h.pack.size()), old_g)
+	return true
 
 ## Can this piece be worn in worn slot `slot` (gloves 0 and 1, armor 2, boots 3)?
 static func fits_slot(id: String, slot: int) -> bool:
@@ -210,9 +221,8 @@ static func smart_loot(m, h, b: Dictionary) -> int:
 		var bg := _best_gear(b, slot)
 		if bg.is_empty():
 			continue
-		var cur: Dictionary = h.gear[Gear.slot_on(h, String(bg["it"]["id"]))]
-		if cur.is_empty() or Loot.value(bg["it"]) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))):
-			_box_to_hand(m, h, b, bg)
+		if beats_worn(h, bg["it"]):
+			wear_from_box(m, h, b, bg)
 			n += 1
 	# the pack: best first
 	var guard := 0
@@ -266,8 +276,10 @@ static func _box_put(b: Dictionary, it: Dictionary) -> void:
 	b["empty"] = false
 
 ## Takes a piece of gear out of a box onto you; what you wore goes into the box.
-static func _box_to_hand(m, h, b: Dictionary, c: Dictionary) -> void:
+## c is one of _box_things: {it, where, i}.
+static func wear_from_box(m, h, b: Dictionary, c: Dictionary) -> void:
 	var it: Dictionary = c["it"]
 	_box_remove(b, c)
 	var old_g := _wear(m, h, it)
+	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 	if not old_g.is_empty(): _box_put(b, old_g)

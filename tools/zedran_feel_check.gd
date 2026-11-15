@@ -19,6 +19,7 @@ func run(a) -> void:
 	await parity_lmb()
 	await parity_rmb()
 	await load("res://tools/kael_accuracy_check.gd").new().run(A)
+	await load("res://tools/kael_cancel_rows_check.gd").new().run(A)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(A.main, "juggernaut")
 	A.ok("jug item 51: every slot casts mid-jump, holds through a jump and a dash and lets go in the air, and a "
 			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -334,6 +335,22 @@ func chain_pull() -> void:
 	A.ok("jug RMB row: airborne after a chain launch = Meteor Drop", K.meteor.running() and K.last_variant == "air",
 			"variant %s" % K.last_variant)
 	A.step(m, 1.4)
+	# a pull started in the air (hooked, then a jump, then E) holds his height to the anchor
+	_settle(m, P, K, home)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	_hook(m, P, K, T.pos, 0.4)
+	P.do_jump()
+	A.step(m, 0.15)
+	var y0 := P.pos.y
+	K.use_e()
+	var low_y := y0
+	t = 0.0
+	while W.state == "pulling" and t < 1.5:
+		m.step(A.DT)
+		t += A.DT
+		low_y = minf(low_y, P.pos.y)
+	A.ok("jug pull: a pull started in the air holds its height to the anchor (no source frame shows an airborne chain)",
+			W.exits == "arrived" and low_y >= y0 - 0.3, "exit %s y0 %.2f low %.2f" % [W.exits, y0, low_y])
 	# a stun in the pull stops it dead
 	_settle(m, P, K, home)
 	_hook(m, P, K, T.pos, 0.4)
@@ -343,6 +360,25 @@ func chain_pull() -> void:
 	A.step(m, 0.03)
 	A.ok("jug pull: a stun stops it dead", W.exits == "stopped" and Vector2(P.vel.x, P.vel.z).length() < 1.5,
 			"exit %s" % W.exits)
+	A.step(m, 0.4)
+	_settle(m, P, K, home)
+	_hook(m, P, K, T.pos, 0.4)
+	K.use_e()
+	A.step(m, 0.08)
+	P.root_t = 0.3
+	A.step(m, 0.03)
+	A.ok("jug pull: a root stops it dead", W.exits == "stopped" and Vector2(P.vel.x, P.vel.z).length() < 1.5,
+			"exit %s" % W.exits)
+	A.step(m, 0.4)
+	# a knock in the pull: the shove takes over (it is not eaten by the pull stopping)
+	_settle(m, P, K, home)
+	_hook(m, P, K, T.pos, 0.4)
+	K.use_e()
+	A.step(m, 0.08)
+	P.impulse(Vector2(0, 12.0) * P.mass())
+	A.step(m, 0.03)
+	A.ok("jug pull: a knock ends it and its shove carries him", W.exits == "knocked" and W.state == "ready"
+			and P.vel.z > 6.0, "exit %s vel %s" % [W.exits, P.vel])
 	A.step(m, 0.4)
 	# across a gap: the pull holds its height over the void and lands on the far side
 	_settle(m, P, K, home)
@@ -686,6 +722,38 @@ func parity_lmb() -> void:
 	A.ok("jug parity lmb: taps chain one slash per 0.34s (3 in 1s) and he walks on while swinging",
 			slashes == 3 and walk >= P.base_speed * 0.85,
 			"%d slashes, %.1f m/s of %.1f" % [slashes, walk, P.base_speed])
+	# standing taps at the footage's gaps (0026, 0029, 0033 at 5 fps): no step into any swing, the sides keep
+	# alternating across a gap under CHAIN_RESET, and a tap after it starts the chain over on the right
+	A.step(m, 0.6)
+	P.teleport(home)
+	A.step(m, JuggernautKit.CHAIN_RESET + 0.2)
+	var stand := P.pos
+	var sides: Array = []
+	for gap in [0.0, 0.6, 0.8, 0.95]:
+		A.step(m, gap)
+		_lmb_tap(m, P)
+		sides.append(K.anim_id)
+	var stepped := P.flat_dist(stand)
+	A.ok("jug parity lmb chain: standing taps 0.6-0.95 s apart alternate right-left-right-left and none steps "
+			+ "him forward",
+			sides == ["jug_slash_r", "jug_slash_l", "jug_slash_r", "jug_slash_l"] and stepped < 0.1,
+			"%s, moved %.2f m" % [str(sides), stepped])
+	A.step(m, JuggernautKit.CHAIN_RESET + 0.1)
+	_lmb_tap(m, P)
+	A.ok("jug parity lmb chain: idle past CHAIN_RESET (1.0 s) the next tap is the first swing (right) again",
+			K.anim_id == "jug_slash_r", K.anim_id)
+	# taps inside the 0.34 s between slashes: kept, one slash when the cooldown ends (two taps still give one)
+	var n_slash := K.slash_n
+	var at_slash := K.slash_at
+	A.step(m, 0.12)
+	_lmb_tap(m, P)
+	A.step(m, 0.05)
+	_lmb_tap(m, P)
+	var early := K.slash_n - n_slash
+	A.step(m, 0.4)
+	A.ok("jug parity lmb chain: taps inside the 0.34 s cooldown queue one slash for its end, not two and not at once",
+			early == 0 and K.slash_n == n_slash + 1 and absf(K.slash_at - at_slash - float(ld["rate"])) < 0.04,
+			"early %d, +%d slashes, %.2f s after" % [early, K.slash_n - n_slash, K.slash_at - at_slash])
 	A.step(m, 0.6)
 	P.teleport(home)
 	# the hold: the lane grows with the charge, and the wave matches it
@@ -709,6 +777,13 @@ func parity_lmb() -> void:
 	A.ok("jug parity lmb hold: the wave flies at the footage's ~20 bh/s (36 m/s)", absf(float(lens[1][2]) - 36.0) < 1.0,
 			"%.1f m/s" % float(lens[1][2]))
 	await A.done(m)
+
+## An attack-key tap: pressed one step and let go the next (a slash swings on the release).
+func _lmb_tap(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	m.step(A.DT)
+	P.inp["fire"] = false
+	m.step(A.DT)
 
 ## RMB: the Lunge holds as long as you like with the blade over his head, and a release on the blade's flash (a
 ## perfect window at full, then once a second) flings him further (docs/heroes/juggernaut.md "Parity pass").
@@ -869,7 +944,8 @@ func chain_steer() -> void:
 			Wd.level[Wd.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 3
 	T.teleport(home + Vector3(-6.0, 0, 8.0))
 	var runs := {}
-	for how in ["straight", "strafe", "face", "sling"]:
+	var held := {"strafe": Vector2(0, 1), "in": Vector2(1, 0), "back": Vector2(-1, 0)}     # keys held in the pull
+	for how in ["straight", "strafe", "face", "sling", "walk_in", "in", "back", "away"]:
 		_settle(m, P, K, home)
 		if how == "sling":
 			P.teleport(home + Vector3(3.0, 0, 0))
@@ -877,8 +953,12 @@ func chain_steer() -> void:
 		var hooked := W.hooked() and W.target == null
 		if how == "sling":
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
+		if how == "walk_in":
+			A.step(m, 0.35, func(): P.inp["move"] = Vector2(1, 0))       # walking at the anchor when he presses
 		if how == "face":
 			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
+		if how == "away":
+			A.aim_at(P, P.pos + Vector3(-9.0, 0, 0))     # facing straight away from the anchor
 		var from := P.pos
 		K.use_e()
 		var t := 0.0
@@ -886,7 +966,7 @@ func chain_steer() -> void:
 		var start_z := W.pull_dir.y
 		var look: Vector3 = P.inp["aim"] - P.pos       # the cursor stays put on screen as the camera follows him
 		while W.state == "pulling" and t < 1.5:
-			P.inp["move"] = Vector2(0, 1) if how == "strafe" else Vector2.ZERO
+			P.inp["move"] = held.get(how, Vector2.ZERO)
 			P.inp["aim"] = P.pos + look
 			m.step(A.DT)
 			t += A.DT
@@ -909,6 +989,21 @@ func chain_steer() -> void:
 			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5
 					and float(sl["avg"]) > float(st["avg"]) + 1.5, "sling %.1f, avg %.1f against %.1f m/s" % [
 					float(sl["sling"]), float(sl["avg"]), float(st["avg"])])
+	var wi: Dictionary = runs["walk_in"]
+	A.ok("jug chain pull: pulled while walking at the anchor his speed adds to it (the impulse adds to his motion)",
+			float(wi["sling"]) > 3.0 and float(wi["speed"]) > float(ed["reel_speed"]) + 3.0
+					and float(wi["wide"]) < 0.3, str(wi))
+	for how in ["in", "back"]:
+		var kd: Dictionary = runs[how]
+		A.ok("jug chain pull: holding %s in the pull changes neither its line nor its speed (the data's air control "
+				% ("W toward the anchor" if how == "in" else "S away") + "0.015)",
+				kd["exit"] == "arrived" and float(kd["wide"]) < 0.3 and absf(float(kd["t"]) - float(st["t"])) < 0.05
+						and absf(float(kd["speed"]) - float(st["speed"])) < 0.01, str(kd))
+	var aw: Dictionary = runs["away"]
+	A.ok("jug chain pull: facing straight away from the anchor, it hauls him straight in at the reel speed (no swing, "
+			+ "no sling; the source shows no such pull, 0333-0336)",
+			aw["exit"] == "arrived" and float(aw["wide"]) < 0.3
+					and absf(float(aw["speed"]) - float(ed["reel_speed"])) < 0.01, str(aw))
 	# strafing at the press: the pull starts swung wide that way (the sideways speed carries in)
 	_settle(m, P, K, home)
 	_hook(m, P, K, home + Vector3(9.0, 0, 0), 0.35)

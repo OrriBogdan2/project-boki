@@ -1,11 +1,14 @@
 class_name BaseRace
 extends RefCounted
 ## The Dash (briefs/design/GARDEN.md 5.1 and 9.4), the Boki base's first minigame; only with
-## farm_build.json base_mode on. A race post stands by the Training post with a 6 x 3 m loop beside
-## it: a straight, a water stretch, a climb and a jump. Press interact at the post and 2 to 4 rested
-## Boki out on the base run one lap; you back your partner and cheer at three marks with the
-## Training post's timing bar (TimingBar). Pace comes from trained Speed, joy, and a lean on its own
-## stretch (the Tide knack swims, wings glide the gap); friends run side by side, rivals bump.
+## farm_build.json base_mode on. A race post stands by the Training post (or on its zone's own spot) with a
+## loop beside it: the course of the zone you are in (base_race.json courses), four stretches of straight,
+## water, climb and jump laid along that zone's ground (a winding hedge lane, a pond loop with stepping
+## stones, a hill climb). Press interact at the post and 2 to 4 rested Boki out on the base run one lap; you
+## back your partner and cheer at three marks with the Training post's timing bar (TimingBar). Pace comes
+## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
+## friends run side by side, rivals bump.
+## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
 ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
@@ -18,11 +21,11 @@ extends RefCounted
 
 const POST_OFF := Vector3(2.2, 0, 0.4)      # m from the Training post to the race post
 const LOOP_OFF := Vector3(0.9, 0, -0.6)     # m from the race post to the loop's start line
-const LOOP_W := 6.0                          # m, the loop's long side (the straight and the climb)
 const CLIMB_H := 0.7                         # m, the top of the climb
 const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
+const PLANS := ["biped", "quad", "flyer", "serpent", "blob"]   # KinPuppet.BODY's plans, what --race-check walks
 const REACH := 1.6                           # m from the post to start a race
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
@@ -46,9 +49,58 @@ static func tweak(game: String) -> Dictionary:
 	var f := twist()
 	return f if String(f["game"]) == game else {}
 
+## A zone's course: its four stretches {kind, mult, pts, len}, `pts` the points after the previous stretch's end
+## (the first starts at the line, [0, 0]) and `len` their length in m, worked out here. A zone with none
+## (the hub) runs the start zone's.
+static func course(id: String) -> Array:
+	var all: Dictionary = rules()["courses"]
+	var out: Array = all.get(id, all[GardenZones.start()])["stretches"]
+	for i in out.size():
+		if not out[i].has("len"):
+			var pts := path(out, i)
+			var run := 0.0
+			for j in range(1, pts.size()):
+				run += pts[j - 1].distance_to(pts[j])
+			out[i]["len"] = run
+	return out
+
+## Stretch s of course c as points from the line: the end of the one before, then its own.
+static func path(c: Array, s: int) -> PackedVector2Array:
+	var out := PackedVector2Array([Vector2.ZERO if s == 0 else Vector2(c[s - 1]["pts"][-1][0], c[s - 1]["pts"][-1][1])])
+	for q in c[s]["pts"]:
+		out.append(Vector2(q[0], q[1]))
+	return out
+
+## The point a fraction f along stretch s of course c, and the way it faces there.
+static func along(c: Array, s: int, f: float) -> Array:
+	var pts := path(c, s)
+	var left: float = clampf(f, 0.0, 1.0) * float(c[s]["len"])
+	for i in range(1, pts.size()):
+		var seg := pts[i - 1].distance_to(pts[i])
+		if left <= seg or i == pts.size() - 1:
+			return [pts[i - 1].lerp(pts[i], clampf(left / seg, 0.0, 1.0)), (pts[i] - pts[i - 1]).normalized()]
+		left -= seg
+	return [pts[-1], Vector2.RIGHT]
+
+## Where the zone you are in has its own race post (tiles x, z), or [].
+static func post_spot() -> Array:
+	return rules()["posts"].get(GardenZones.here, [])
+
+## The loop's points in the world when the zone has a post spot: what its scatter keeps clear.
+static func loop_points() -> Array:
+	var S := post_spot()
+	var out: Array = []
+	if S.is_empty():
+		return out
+	var line := Vector3(S[0], 0.0, S[1]) + LOOP_OFF
+	for s in course(GardenZones.here):
+		for q in s["pts"]:
+			out.append(line + Vector3(q[0], 0.0, q[1]))
+	return out
+
 static func lap() -> float:
 	var out := 0.0
-	for s in rules()["stretches"]:
+	for s in course(GardenZones.here):
 		out += float(s["len"])
 	return out
 
@@ -65,11 +117,11 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 		me["bonds"][uid] = clampf(float(me["bonds"].get(uid, 0.0)) + amt, -1.0, 1.0)
 
 static func winged(rec: Dictionary) -> bool:
-	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
+	return BokiFly.flier(String(rec.get("species", "")))
 
 ## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
 static func stretches(tw := {}) -> Array:
-	var out: Array = rules()["stretches"]
+	var out: Array = course(GardenZones.here)
 	if tw.has("swap"):
 		out = out.duplicate(true)
 		out[int(tw["swap"]["at"])].merge(tw["swap"], true)
@@ -128,7 +180,7 @@ class Run:
 		backed = back
 		rng = r
 		var at := 0.0
-		for s in R["stretches"]:
+		for s in BaseRace.course(GardenZones.here):
 			at += float(s["len"])
 			ends.append(at)
 		for i in recs.size():
@@ -279,10 +331,12 @@ var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
+var practice := false          # the one first-time practice lap: ends at the first press, no gain, no cost
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
+var beats: RaceBeats = null    # the runners' crouch, burst and finish clips (kept on after the race until played)
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
 
 func _init(home) -> void:
@@ -296,10 +350,11 @@ func place() -> void:
 			n.queue_free()
 	post = null
 	wall = null
-	if h.YARD_AT.x < -100.0:
+	var spot := post_spot()
+	if spot.is_empty() and h.YARD_AT.x < -100.0:
 		relay.place()
 		return
-	var at: Vector3 = h.YARD_AT + POST_OFF
+	var at: Vector3 = h.YARD_AT + POST_OFF if spot.is_empty() else Vector3(spot[0], 0.0, spot[1])
 	if h.zone == "":       # with the hub on, the wall hangs by its games board (HubWaystone)
 		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
 		h.add_child(wall)
@@ -311,20 +366,18 @@ func place() -> void:
 	_post_model()
 	var st: Array = stretches(tweak("dash"))
 	for i in st.size():
-		var a := _corner(i)
-		var b := _corner(i + 1)
-		var strip := MeshInstance3D.new()
-		var bm := BoxMesh.new()
-		var span := Vector3(absf(b.x - a.x), 0.04, absf(b.z - a.z))
-		if span.x > span.z:
-			span.z = TRACK_W
-		else:
-			span.x = TRACK_W
-		bm.size = span
-		strip.mesh = bm
-		strip.material_override = mat(STRETCH_COL[String(st[i]["kind"])])
-		strip.position = (a + b) * 0.5 - post.position + Vector3(0, ground(a) + 0.02, 0)
-		post.add_child(strip)
+		var pts := path(course(GardenZones.here), i)
+		for j in range(1, pts.size()):
+			var a := start + Vector3(pts[j - 1].x, 0, pts[j - 1].y)
+			var b := start + Vector3(pts[j].x, 0, pts[j].y)
+			var strip := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = Vector3(TRACK_W, 0.04, a.distance_to(b))
+			strip.mesh = bm
+			strip.material_override = mat(STRETCH_COL[String(st[i]["kind"])])
+			strip.position = (a + b) * 0.5 - post.position + Vector3(0, ground(a) + 0.02, 0)
+			strip.rotation.y = atan2(b.x - a.x, b.z - a.z)
+			post.add_child(strip)
 	relay.place()
 
 func _post_model() -> void:
@@ -361,11 +414,6 @@ func ground(p: Vector3) -> float:
 	var g: float = h._ground_h(p.x, p.z)
 	return g if g > -50.0 else 0.0
 
-## Corner i of the loop: 0 the start, then round the 6 x 3 rectangle back to it.
-func _corner(i: int) -> Vector3:
-	var deep := float(rules()["stretches"][1]["len"])
-	return start + [Vector3.ZERO, Vector3(LOOP_W, 0, 0), Vector3(LOOP_W, 0, -deep), Vector3(0, 0, -deep)][i % 4]
-
 func find(p2: Vector2) -> Dictionary:
 	if run != null or relay.run != null or not is_instance_valid(post):
 		return {}
@@ -395,10 +443,25 @@ func entrants() -> Array:
 
 func use() -> void:
 	var ks := entrants()
-	if ks.size() < 2:
+	if not ks.is_empty() and _offer():
+		_practice(ks[0])
+	elif ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
 		return
-	_begin(ks)
+	else:
+		_begin(ks)
+
+func _offer() -> bool:
+	return Settings.get_v("tips") and not Record.clean() and not Save.d["tutorial"].get("first_race", false)
+
+## The first time a race opens: one solo lap that stops at the first press, so the bar is learned in a few
+## seconds. Offered once per save (Save.d.tutorial.first_race; old saves are offered it once, no migration).
+func _practice(k: Dictionary) -> void:
+	Save.d["tutorial"]["first_race"] = true
+	practice = true
+	_begin([k])
+	var keys := [Settings.key_cap("interact"), Settings.key_cap("menu")]
+	bar.lbl.text = "Practice: press %s when the marker is in the gold  ·  %s skips" % keys
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -407,9 +470,9 @@ func solo(rec: Dictionary) -> void:
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
 		h._toast("%s is not out on the base" % rec["name"])
 	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
-		h._toast("%s is too tired or hungry to train. Nap or feed it first" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s is too tired or hungry to train. Nap or feed {him} first") % rec["name"])
 	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
-		h._toast("%s can't train Speed any further until it levels up" % rec["name"])
+		h._toast(KinSpeak.about(rec, "%s can't train Speed any further until {he} levels up") % rec["name"])
 	else:
 		h._care_start(k)
 		solo_rec = rec
@@ -422,6 +485,9 @@ func _begin(ks: Array) -> void:
 	for k in ks:
 		k["busy"] = true
 		recs.append(k["rec"])
+	if beats != null:
+		beats.stop()                 # last race's finish clips still playing
+	beats = RaceBeats.new(ks)
 	var back := maxi(0, recs.find(Save.active_kin()))
 	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
 	run.rng.randomize()
@@ -458,6 +524,9 @@ func input(event: InputEvent) -> bool:
 			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
+		if practice:
+			h._toast("That's a cheer: gold is great, orange is good. Now the real race")
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -466,9 +535,10 @@ func tick(d: float) -> void:
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
 	relay.tick(d)
+	if beats != null:
+		beats.step(run, d)
 	if run == null:
 		return
-	run.step(d)
 	bar.step(d)
 	_place_runners()
 	_hear_laps()
@@ -499,21 +569,24 @@ func _place_runners() -> void:
 		var p := track_at(s, clampf(into / float(st[s]["len"]), 0.0, 1.0), lane * (i - (runners.size() - 1) * 0.5))
 		var n: Node3D = runners[i]["node"]
 		n.position = p
-		n.rotation.y = heading(s)
+		n.rotation.y = heading(s, clampf(into / float(st[s]["len"]), 0.0, 1.0))
 		runners[i]["pos"] = p
+		if winged(runners[i]["rec"]):
+			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
+			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:
-	var a := _corner(s)
-	var fwd := (_corner(s + 1) - a).normalized()
-	var p := a.lerp(_corner(s + 1), f) + Vector3(-fwd.z, 0, fwd.x) * side
-	p.y = ground(p) + _lift(String(rules()["stretches"][s]["kind"]), f)
+	var at := along(course(GardenZones.here), s, f)
+	var mid: Vector2 = at[0] + Vector2(-at[1].y, at[1].x) * side
+	var p := start + Vector3(mid.x, 0, mid.y)
+	p.y = ground(p) + _lift(String(course(GardenZones.here)[s]["kind"]), f)
 	return p
 
-## The facing (rotation.y) of a runner on stretch s.
-func heading(s: int) -> float:
-	var fwd := (_corner(s + 1) - _corner(s)).normalized()
-	return atan2(-fwd.x, -fwd.z)
+## The facing (rotation.y) of a runner a fraction f along stretch s.
+func heading(s: int, f: float) -> float:
+	var fwd: Vector2 = along(course(GardenZones.here), s, f)[1]
+	return atan2(-fwd.x, -fwd.y)
 
 func _lift(kind: String, f: float) -> float:
 	match kind:
@@ -523,12 +596,14 @@ func _lift(kind: String, f: float) -> float:
 	return 0.0
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice lap never pays out
 	var res := {}
 	if finished and solo_rec.is_empty():
 		res = settle(run)
-	for k in runners:
-		k["busy"] = false
-		k["t"] = 1.5
+	if finished:
+		beats.end()
+	else:
+		beats.stop()
 	bar.close()
 	if finished:
 		GardenFirstDay.mark("race", h)
@@ -543,6 +618,7 @@ func _end(finished: bool) -> void:
 	run = null
 	runners = []
 	solo_rec = {}
+	practice = false
 
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.

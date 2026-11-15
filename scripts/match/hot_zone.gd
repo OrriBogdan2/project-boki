@@ -66,6 +66,22 @@ func rarity_bonus(p: Vector3) -> int:
 func landing() -> Vector3:
 	return w.free_spot_near(zone[0]["c"], [], 1.0, 0.5, 12.0) if not zone.is_empty() else Vector3.INF
 
+## The first-time hint (Match.tip_once key) for the line under the drop map.
+const TIP_KEY := "hot_zone"
+
+func region_name() -> String:
+	return String(w.regions[hot].get("name", "")) if hot >= 0 else ""
+
+func plan_line() -> String:
+	return "This match's hot zone is %s: better loot, more fights" % region_name()
+
+## The line under the drop map the first time a player plans a drop with a hot zone (once per
+## save, through Match's first-time hints and their tips setting); "" every other time.
+func take_plan_line(m: Match) -> String:
+	if hot < 0 or not Settings.get_v("tips") or Record.clean() or m.opts.get("autoplay", false):
+		return ""
+	return plan_line() if m.tip_once(TIP_KEY) else ""
+
 ## The hot zone on the drop map / full map (FullMap.draw).
 func full_map(fm, kk: float) -> void:
 	for k in zone.size():

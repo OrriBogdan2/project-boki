@@ -1,0 +1,7 @@
+#!/bin/bash
+# prior-work (11-12): has this concept already been built, posted or started? Searches ext/* branches, READY posts, the last
+# 14 days of jobs (label + task + status), the backlog, DECISIONS.md and main's log, with the concept-aliases.tsv map.
+#   prior-work [--label L] [--task T | --task-file F | TEXT...]     top matches with score and why (HIGH = would refuse a start)
+#   prior-work gate --label L --task-file F --by WHO [--redo R]    claude-job's gate: exit 75 + reason, else the prompt block
+#   prior-work dryrun [--hours 48] [--sample 30] [--job ID ...] [-v] replay past starts
+exec python3 "$(dirname "$(readlink -f "$0")")/prior_work.py" "$@"
