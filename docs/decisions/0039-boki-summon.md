@@ -20,8 +20,12 @@ whole, on its normal AI and orders, leash 10 m (+-2 m by aggression), re-bloomin
 Damage never ends it; a knock-down turns it back into a wisp with x1.25 cooldown. The window ends in a 0.35 s
 shrink; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
 a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiHud.summon_ring).
-Left out on purpose: guardian summon, stealing, the reveal on a killed summon, bots summoning, mounts.
+Carry passives: the wisp rides on the shoulder with the Return order, so its passives are on at 100 % whether
+it is a wisp or out; one Boki per hunter, so nothing stacks yet (stolen wisps at a share: decision 0041, later).
+Left out on purpose: guardian summon, stealing (0041), the reveal on a killed summon (0044), one rule set for
+PvE and PvP (0045), kill credit (the kill-feed task), bots summoning, mounts.
 
 ## Consequences
-- Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
-- kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
+- Net.VERSION 0.24.14: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
+- kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--summon-check` covers the key, the table, the knock-down, the snapshot round trip and the leash
+  (chase, dash, glide, knock). The Summon prompts read `Settings.key_cap("summon")`.
