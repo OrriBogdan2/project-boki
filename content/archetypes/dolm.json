@@ -1,5 +1,6 @@
 {
 	"id": "dolm",
+	"recast_hint": {"dash": "hop on to the next rock"},
 	"title": "Stone Seer",
 	"base_name": "Tenzo",
 	"gender": "male",

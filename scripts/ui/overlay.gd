@@ -251,6 +251,11 @@ func open_pause(where: String) -> void:
 			RateCard.gate(root, func(): Game.goto("title")))
 	res.grab_focus.call_deferred()
 
+## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met.
+func open_words() -> void:
+	WordsView.fill(_page("words", "Help: words", 560, true))
+
+
 ## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
 func open_controls() -> void:
 	var v := _page("controls", "Controls", 720)
@@ -282,6 +287,7 @@ func open_more() -> void:
 			close()
 			scr._start_training())
 	_menu_item(v, "Controls", "dash", open_controls)
+	_menu_item(v, "Help", "info", open_words)
 	if ctx != "match":
 		_menu_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 		_menu_item(v, "Save Files", "satchel", open_saves)

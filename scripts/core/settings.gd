@@ -161,7 +161,7 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (press again in the air to glide)"], ["glide", "Open glider (in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
@@ -634,11 +634,9 @@ func key_caps(action: String) -> String:
 		out.append(t.to_upper() if c.begins_with("key:") else t)
 	return " / ".join(out) if out.size() > 0 else "?"
 
-## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
-func fill_keys(text: String) -> String:
-	for a in ACTIONS:
-		text = text.replace("{%s}" % a[0], key_cap(a[0]))
-	return text
+## The four walking keys' caps in a row ("WASD"), joined by `sep`.
+func move_caps(sep := "") -> String:
+	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:

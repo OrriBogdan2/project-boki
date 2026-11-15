@@ -14,6 +14,7 @@ static var difficulty := "normal"  # the last one picked (this session; the lobb
 
 static func open(h) -> void:
 	var v: VBoxContainer = h._new_panel("Heart Raid (prototype)", 560)
+	HeartRaidHints.pick(h.root_ui)
 	UI.subtitle(v, "No rival squads. Waves of monsters and the Blight come for the Heart, then its boss rises.")
 	var rl := HeartRaid.rules()
 	var goal := (

@@ -48,9 +48,10 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var at := "%d" % int(ceil(p.armor))
 		var aw := TextCache.width(HudStyle.BIG, at, 15)
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
-		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-		var tw := TextCache.width(HudStyle.BIG, tn, 10)
-		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
+		if p.armor_tier > 0:          # the tier's name waits until the first tier-up (TermHints says what it is)
+			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
+			var tw := TextCache.width(HudStyle.BIG, tn, 10)
+			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
 	ArmorHud.note(H, Vector2(x0, y0 - 26))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
