@@ -807,7 +807,7 @@ static func lever(col: Color) -> Node3D:
 
 
 ## The vent at the back of a lair the escape updraft rises from: a ring of carved stones round an iron
-## grate. "Air" holds the column of rising air (World.updraft_visual), shown while it blows.
+## grate. "Air" holds the column of rising air (CurrentFx.updraft_visual), shown while it blows.
 static func vent(col: Color, r: float, top: float) -> Node3D:
 	var root := Node3D.new()
 	if Flora.v2():
@@ -829,7 +829,7 @@ static func vent(col: Color, r: float, top: float) -> Node3D:
 	rn.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	rn.visible = false
 	root.add_child(rn)
-	var air := World.updraft_visual(r, 0.0, top, Color(col.lightened(0.55), 1.0))
+	var air := CurrentFx.updraft_visual(r, 0.0, top, Color(col.lightened(0.55), 1.0))
 	air.name = "Air"
 	# a soft body of light inside the streaks, so the column reads from the usual camera angle
 	var body := Models.part(
