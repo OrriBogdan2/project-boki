@@ -299,7 +299,8 @@ Still differs:
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
   (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
   stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
-- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
+- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches. Range, past-the-cursor flight,
+  speed and comet size now match (13.5 m, ext/meeko-crook-range); this reel predates it and its cursor sits on the dummy.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
