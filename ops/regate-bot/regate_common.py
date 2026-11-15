@@ -125,7 +125,11 @@ def workers():
     for line in p.read_text().splitlines():
         line = line.split("#", 1)[0]
         ip = re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", line)
+        f = line.split()
         if not ip:
+            # 11-14: rpc pods are listed as "rpc6 rpc6 ..." (ssh host alias, no IPv4); they were invisible -> only w2/w3 used
+            if len(f) >= 2 and re.fullmatch(r"[A-Za-z][\w.-]*", f[1]):
+                out[f[0]] = f[1]
             continue
         name = next((w for w in re.split(r"[\s,:=]+", line) if w and w != ip.group(0)), ip.group(0))
         out[name] = ip.group(0)
@@ -140,10 +144,12 @@ def ssh_cmd(ip, remote, timeout=60):
 _STATUS = None
 
 
+CJB = shutil.which("claude-job") or ("/home/boki/bin/claude-job" if os.access("/home/boki/bin/claude-job", os.X_OK) else None)  # 11-14: cron PATH lacks ~/bin
+
 def claude_job_status():
     global _STATUS
     if _STATUS is None:
-        rc, out, _ = run(["claude-job", "status"], timeout=60) if shutil.which("claude-job") else (1, "", "")
+        rc, out, _ = run([CJB, "status"], timeout=60) if CJB else (1, "", "")
         _STATUS = out if rc == 0 else ""
     return _STATUS
 
@@ -152,10 +158,14 @@ def job_running(label):
     """Is the job named by an 'owns this PR' label still running? label = a job id or a task label
     (e.g. merge-driver-1114, matched against ~/cj/<id>/prompt). Unknown -> True for 6 h (conservative)."""
     st = claude_job_status()
+    # 11-14: exact match on the job's label file; prompt-text grep made any job that MENTIONED the label an owner
+    # (fix-main-reds-1114 named merge-driver-1114 -> #29/#57/#59 skipped forever after the real owner finished)
+    dirs = sorted(CJ.glob("2026*-*"))[-400:]
     ids = [label] if JOB_ID_RE.match(label) else [
-        d.name for d in sorted(CJ.glob("2026*-*"))[-400:]
-        # the owner is the job whose task is titled "<label>: ..." (a line start), not any prompt that mentions it
-        if (d / "prompt").exists() and re.search(rf"(?m)^\s*{re.escape(label)}:", (d / "prompt").read_text(errors="replace"))]
+        d.name for d in dirs if (d / "label").exists() and (d / "label").read_text(errors="replace").split()[-1:] == [label]]
+    if not ids and not JOB_ID_RE.match(label):
+        ids = [d.name for d in dirs if (d / "prompt").exists() and not (d / "label").exists()
+               and label in (d / "prompt").read_text(errors="replace")[-12000:]]
     if not ids:
         return None
     for i in ids:
@@ -180,3 +190,22 @@ def save_json(p, data):
     tmp = p.with_suffix(".tmp")
     tmp.write_text(json.dumps(data, indent=1, sort_keys=True))
     tmp.replace(p)
+
+
+def inflight_list(st):
+    """state.json 'inflight' as a list of per-PR dicts (11-14b: up to REGATE_MAX_INFLIGHT gates at once). Migrates the
+    old single-dict form (one gate at a time) and drops malformed or duplicate entries (first entry per PR wins)."""
+    raw = st.get("inflight")
+    if isinstance(raw, dict):
+        raw = [raw]
+    out, seen = [], set()
+    for f in raw if isinstance(raw, list) else []:
+        if isinstance(f, dict) and "pr" in f and f["pr"] not in seen:
+            seen.add(f["pr"])
+            out.append(f)
+    st["inflight"] = out
+    # cooldown keys are PR numbers; json turns int keys into strings, so normalise to str (an int key never matched
+    # after a reload before 11-14b)
+    st["cooldown"] = {str(k): v for k, v in (st.get("cooldown") or {}).items() if v > now()}
+    return out
+
