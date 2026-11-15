@@ -155,6 +155,7 @@ func _shove(home) -> void:
 
 func _dash(home) -> void:
 	var race: BaseRace = home.hrace
+	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var runners: int = race.runners.size()
 	var offs := [0.0, (TimingBar.GOOD + TimingBar.GREAT) * 0.5, 0.9]      # a perfect, a good and a missed press

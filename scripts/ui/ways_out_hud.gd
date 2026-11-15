@@ -2,14 +2,15 @@ class_name WaysOutHud
 extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
-## the Blight (squads and players left are the top-right AliveCounter). Plus the carrier's Heart Gate prompt.
-## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
-## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
+## the Blight (squads and players left are the top-right AliveCounter). Under it, the quest tracker (QuestTracker).
+## Plus the carrier's Heart Gate prompt.
+## Reads the match only: the Heart's state for the two Heart seats, the QuestSeat machines for who is on or took a
+## quest seat, their schedule (content/rules/heart.json "quest") for the rest. Drawn with HudStyle on the Hud's canvas.
 
 enum St {LOCKED, OPEN, USE, TAKEN, LOST}
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
-const TOP_Y := 8.0
+const TOP_Y := SafeArea.MARGIN
 const PIP_R := 7.0
 const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
@@ -20,10 +21,10 @@ static var _seats: Array = [{}, {}, {}, {}]    # reused every frame: name, st, t
 static func seats(m: Match) -> Array:
 	var now := m.sess_time()
 	var q: Dictionary = Heart.rules()["quest"]
-	_quest(0, now, q["lair_open_s"], q["lair_shut_s"], _lair_team(m, "flown"), _lair_team(m, "sealed_in"))
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	_quest(0, now, q["lair_open_s"], q["lair_shut_s"], qs.lair if qs else null)
 	_heart_early(m)
-	var live := _uplink_team(m, "charging", "open")
-	_quest(2, now, q["uplink_open_s"], q["uplink_shut_s"], _uplink_team(m, "spent"), live)
+	_quest(2, now, q["uplink_open_s"], q["uplink_shut_s"], qs.uplink if qs else null)
 	_heart_final(m, now)
 	return _seats
 
@@ -34,11 +35,12 @@ static func _seat(i: int, st: int, t: float, team: int) -> void:
 	d["t"] = t
 	d["team"] = team
 
-static func _quest(i: int, now: float, open_s: float, shut_s: float, taken: int, using: int) -> void:
-	if taken >= 0:
-		_seat(i, St.TAKEN, -1.0, taken)
-	elif using >= 0:
-		_seat(i, St.USE, -1.0, using)
+## A quest seat: taken or in use as its QuestSeat says (with the squad), else locked, open or lost by its window.
+static func _quest(i: int, now: float, open_s: float, shut_s: float, s: QuestSeat) -> void:
+	if s and s.state == QuestSeat.S.TAKEN:
+		_seat(i, St.TAKEN, -1.0, s.team)
+	elif s and s.state == QuestSeat.S.IN_USE:
+		_seat(i, St.USE, -1.0, s.team)
 	elif now < open_s:
 		_seat(i, St.LOCKED, open_s - now, -1)
 	elif now < shut_s:
@@ -71,24 +73,6 @@ static func _heart_final(m: Match, now: float) -> void:
 		_:
 			_seat(3, St.LOCKED, Heart.r("final_s") - now, -1)
 
-## The squad of the first hunter listed under `key` on any lair ("flown": left by the updraft, "sealed_in": fighting).
-static func _lair_team(m: Match, key: String) -> int:
-	if m.lairs == null:
-		return -1
-	for L in m.lairs.list:
-		var who: Array = L.get(key, [])
-		if not who.is_empty():
-			return (who[0] as Hunter).team
-	return -1
-
-## The squad of the first outpost in one of these states.
-static func _uplink_team(m: Match, a: String, b := "") -> int:
-	if m.exits == null:
-		return -1
-	for x in m.exits.list:
-		if x["kind"] == "outpost" and (x["state"] == a or x["state"] == b):
-			return int(x.get("team", -1))
-	return -1
 
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
@@ -107,14 +91,19 @@ static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF or not HudGroups.ways_out_shown(m):
 		return
+	if m.heart_raid:
+		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
+		return
 	var c: Control = hud.c
 	var sd := seats(m)
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
+	SafeArea.note_as("ways_strip", r)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+	QuestTracker.draw(hud, r)
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
@@ -156,10 +145,13 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
 # ------------------------------------------------------------------ the Heart Gate prompt
+static func is_gate_prompt(it: Dictionary) -> bool:
+	return it.get("kind", "") == "heart" and it.get("act", "") == "leave"
+
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
 ## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
 static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
-	if it.get("kind", "") != "heart" or it.get("act", "") != "leave":
+	if not is_gate_prompt(it):
 		return false
 	var c: Control = hud.c
 	var key := Settings.key_cap("interact")
@@ -169,6 +161,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
 	var edge := Color(Heart.GATE_COL, 0.7)
+	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))      # (the box and its hold bar)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
 	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.GATE_COL)
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
@@ -177,6 +170,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var stay := stay_line(hud.m)
 	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
 	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
+	SafeArea.note_as("gate_stay", back)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
 	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true

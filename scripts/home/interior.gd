@@ -318,8 +318,10 @@ func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
+	HomeVerbs.come_in(k, ppos)
 	k["t"] = 1.2; k["goal"] = k["pos"]
-	verbs.play("pat")
+	pface = atan2(-(k["pos"].x - ppos.x), -(k["pos"].z - ppos.z))      # turn to it
+	verbs.play("pat", k["node"])
 	if not visit.is_empty():
 		return
 	var loves_pet: bool = rec.get("likes", {}).get("play", "") == "pet"

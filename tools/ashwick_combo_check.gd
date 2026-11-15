@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _growth()
 	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
@@ -150,7 +151,7 @@ func _timing() -> void:
 	if clips and clips.lib and lc.has("run"):
 		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
 		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
-		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc, Vector2(0, 1), 1.0)     # (full stick ahead: on the run ring)
 	ok(
 		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
 		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
@@ -275,13 +276,19 @@ func _all() -> void:
 			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
+	var pilot := "pilot%d" % P.get_instance_id()
+	ak.step(m, 0.3)
+	ok("lance: idle, no pilot flame in her palm", not K.fx.shown(pilot))
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
+	var pilot_col: Color = (K.fx.placed[pilot]["node"] as Node3D).material_override.get_shader_parameter("color") \
+		if K.fx.shown(pilot) else Color.BLACK
 	ok(
-		"lance: the cyan pilot shows, no fire for the first 0.2s",
-		K.fx.shown("pilot%d" % P.get_instance_id()) and K.hose.puffs.is_empty() and ak.dmg(T) == 0.0,
-		"puffs %d dmg %.1f" % [K.hose.puffs.size(), ak.dmg(T)]
+		"lance: the gold pilot shows (her fire, not blue), no fire for the first 0.2s",
+		K.fx.shown(pilot) and pilot_col.r > pilot_col.b + 0.5 and K.hose.puffs.is_empty() and ak.dmg(T) == 0.0,
+		"puffs %d dmg %.1f col %s" % [K.hose.puffs.size(), ak.dmg(T), pilot_col.to_html(false)]
 	)
 	ak.step(m, 0.6, func(): P.inp["fire"] = true; ak.aim_at(P, home + Vector3(1.5, 0, 0)))
+	ok("lance: roaring, the pilot is out", not K.fx.shown(pilot))
 	var reach: float = K.hose.reach_from(P.pos)
 	ok(
 		"lance: the stream runs its full ~6.1m past a close cursor", reach >= 5.6 and reach <= 7.6,
@@ -365,21 +372,24 @@ func _all() -> void:
 	t0 = K.flame_ticks
 	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
 	var hot: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	var chip := T.max_hp * 0.015 * float(K.lmbd()["tick"])
+	var bonus: Dictionary = K.d["ignite_bonus"]
+	var k1 := float(bonus["dmg_k"][0])
+	var chip := T.max_hp * float(bonus["tick_pct"][0]) * float(K.lmbd()["tick"])
 	ok(
-		"lance: +25% and 1.5% of health a second on an Ablaze foe (per tick)",
-		cold > 1.5 and absf(hot - (cold * 1.25 + chip)) < cold * 0.12,
-		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * 1.25 + chip]
+		"lance: ignite_bonus on an Ablaze foe, more damage and a health chip (per tick)",
+		cold > 1.5 and absf(hot - (cold * k1 + chip)) < cold * 0.12,
+		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * k1 + chip]
 	)
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 2, "until": m.time + 99.0}
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
 	ak.step(m, 1.0, func(): _hold_bare(P, T, K))
 	var flash: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	var chip2 := T.max_hp * 0.025 * float(K.lmbd()["tick"])
+	var k2 := float(bonus["dmg_k"][1])
+	var chip2 := T.max_hp * float(bonus["tick_pct"][1]) * float(K.lmbd()["tick"])
 	ok(
-		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
-		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
+		"lance: ignite_bonus on a Flashed-over foe, more again (per tick)",
+		absf(flash - (cold * k2 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * k2 + chip2]
 	)
 	# a burning foe builds Char as fast as a cold one (the old halving is gone). 0.8 s: the fire leaves from
 	# her body (ShotOrigin), so it reaches the foe ~0.08 s later than from the old 1.3 m nozzle
@@ -483,7 +493,7 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.8)
 	ok(
-		"cinder: 25% more on an Ablaze foe", ak.dmg(T) >= cinder_cold * 1.2,
+		"cinder: more on an Ablaze foe (ignite_bonus)", ak.dmg(T) >= cinder_cold * (k1 - 0.04),
 		"hot %.1f cold %.1f" % [ak.dmg(T), cinder_cold]
 	)
 	reset.call()
@@ -617,7 +627,7 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
 	ok(
-		"ram rank 3: +4.3 damage (before the rank's own +30%)", ak.dmg(T) > ram1 * 1.2,
+		"ram rank 3: more damage (rank3_dmg, before the rank's own +30%)", ak.dmg(T) > ram1 * 1.2,
 		"rank 1 %.1f rank 3 %.1f" % [ram1, ak.dmg(T)]
 	)
 	ok(
@@ -700,15 +710,21 @@ func _all() -> void:
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
+	var n1: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()     # a wandering third foe may stand in range
 	K._cloak_blast()
 	var shield1: float = P.shield
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	P.slot_lv["kin"] = 3
+	var n3: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()
 	K._cloak_blast()
+	var ed: Dictionary = K.e_def()
+	var per1 := float(ed["shield_base"]) + float(ed["shield_each"]) * n1     # the shield a hit count gives, per max hp
+	var per3 := float(ed["shield_base"]) + float(ed["shield_each"]) * n3
 	ok(
-		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
-		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
+		"cloak rank 3: shield +80% in all (same foes in range)",
+		shield1 > 5.0 and absf((P.shield / per3) / (shield1 / per1) - 1.8) < 0.02,
+		"rank 1 %.1f (%d foes) rank 3 %.1f (%d foes)" % [shield1, n1, P.shield, n3]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
 	ok("cinder: one charge at rank 1", K.rmb_charges() == 1)

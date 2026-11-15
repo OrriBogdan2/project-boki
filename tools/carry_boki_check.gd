@@ -6,6 +6,7 @@ extends RefCounted
 ## Never touches the real save.
 
 const STEP := 0.1
+const PLAYER_R := 0.3     # m: how wide you are to a prop (a Boki is 0.3 in the same walk)
 var bad := 0
 var main: Node
 var home
@@ -72,7 +73,12 @@ func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
 	for i in int(secs / STEP):
 		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		var step: Vector3 = Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		# props stop you as they stop a Boki
+		if home.world.occupy(home.ppos.x + step.x, home.ppos.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.x += step.x
+		if home.world.occupy(home.ppos.x, home.ppos.z + step.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.z += step.z
 		home.player.position = home.ppos
 		home.carry.tick(STEP, {}, true)
 		home._move_kin(STEP)
@@ -126,6 +132,7 @@ func _lift_walk_drop(k: Dictionary) -> void:
 	var scale0: Vector3 = (k["node"] as Node3D).scale
 	ok(c.speed_mul() == 1.0, "no change to your speed before you lift")
 	await _hold_lifts(k)
+	_lifted(c)
 	ok(c.k == k and c.mode == "carry" and k["busy"], "holding interact lifts a small Boki into your arms")
 	ok(is_equal_approx(c.speed_mul(), 0.9) and c.anim_state()["act"] == "carry", "you walk at 90% with the carry pose")
 	var far := _walk(k, 3.0)
@@ -183,6 +190,7 @@ func _traits(timid: Dictionary, grumpy: Dictionary, brave: Dictionary) -> void:
 	c.drop()
 	var b := _put(brave)
 	c.press_hold(b)
+	_lifted(c)
 	var swing := 0.0
 	for i in 30:
 		c.tick(STEP, {}, true)
@@ -210,6 +218,10 @@ func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
 	home.ppos = _open_ground()
 	var k := _put(rec)
+	for o in home.kins:     # the earlier rows left the small ones parked round you; leading is about the one you lead
+		if o != k:
+			o["pos"] = home.ppos + Vector3(14.0, 0.0, 14.0)
+			(o["node"] as Node3D).position = o["pos"]
 	k["pers"]["speed"] = 0.6      # the plodding end of a kind's own pace (home.gd _personality): a lead ignores it
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
@@ -227,3 +239,8 @@ func _pose() -> void:
 		for i in 40:
 			a.update(1.0 / 60.0, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "act": mode})
 		ok(a.act_kind == mode and a.act_k > 0.9, "the hunter holds the %s pose while running" % mode)
+
+## Plays out the pick-up (HunterVerbs "lift"): you stand still for it, then walk and carry.
+func _lifted(c: HomeCarry) -> void:
+	if c.lifting():
+		c.h.verbs.act = ""

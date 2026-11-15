@@ -35,8 +35,11 @@ static var glide_drag_steer := 0.0
 static var glide_coast := 0.0
 static var glide_catch := 0.0
 static var glide_max := 0.0
+static var glide_swoop := 0.0
+static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
+static var dash_glide_ease := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -64,8 +67,11 @@ static func load_tuning() -> bool:
 	glide_coast = g["coast"]
 	glide_catch = g["catch"]
 	glide_max = g["max"]
+	glide_swoop = g["swoop"]
+	glide_swoop_fade = g["swoop_fade"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
+	dash_glide_ease = T["dash_glide"]["ease_t"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
@@ -81,6 +87,11 @@ static func machine() -> Fsm:
 static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
+
+## Seconds after an air dash ends that a fresh glide press still counts as a press in the dash (DashGlide).
+static func dash_glide_grace(arch: String) -> float:
+	var g: Dictionary = T["dash_glide"]["grace"]
+	return float(g.get(arch, g["default"]))
 
 ## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
 ## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).

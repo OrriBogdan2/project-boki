@@ -84,7 +84,7 @@ const MOVES := {
 					"y": 0.7, "p": -0.25, "sq": -0.15, "lift": 0.18, "fr": Vector3(-0.02, 0.08, -0.6), "rw": 1.0,
 					"fl": Vector3(-0.36, 0.25, 0.36), "hw": 1.0, "lw": 0.8, "legs": [0.15, -0.2, -0.45, -0.1]}],
 		[0.55, {}]]},
-	# Burrseed wind-up (items 118 and 23, a fixed 0.35 s: tender.json rmb windup): turned side-on (~70 deg),
+	# Burrseed wind-up (item 118, a fixed 0.6 s: tender.json rmb windup): turned side-on (~70 deg),
 	# the casting fist pointed down the lane, the other hand drawn up beside the ear, sinking on the
 	# back leg until the throw
 	"mm_seed_aim": {"keys": [
@@ -95,7 +95,7 @@ const MOVES := {
 					"y": 1.0, "p": 0.06, "r": 0.06, "sq": 0.06, "fr": Vector3(-0.42, 0.05, -0.4), "rw": 1.0,
 					"fl": Vector3(0.02, 0.32, 0.12), "hw": 1.0, "lw": 0.7, "legs": [-0.25, -0.4, 0.35, -0.55]}],
 		[
-				0.35,
+				0.6,
 				{
 					"y": 1.2, "p": 0.1, "r": 0.08, "sq": 0.12, "fr": Vector3(-0.42, 0.05, -0.4), "rw": 1.0,
 					"fl": Vector3(0.02, 0.4, 0.12), "hw": 1.0, "lw": 0.8, "legs": [-0.3, -0.5, 0.45, -0.7]}]]},
@@ -477,14 +477,15 @@ const MOVES := {
 		[0.24, {"p": -0.15, "sq": 0.12, "fl": Vector3(0.1, -0.03, -0.12), "hw": 1.0, "wf": 1.0}],
 		[0.45, {}]]},
 	# ================================================================ ultimates on X (10 fps beats)
-	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally,
+	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally (ring
+	# by f28, 0.3 s; 0.33 s = the call clip, so the channel takes the body on the clip's last frame),
 	# an overshoot, then into the channel pose
 	"mm_call": {"keys": [
 		[0.0, {"y": 0.2, "p": -0.08, "fl": Vector3(0.1, 0.32, -0.5), "hw": 1.0}],
 		[0.05, {"y": -0.2, "p": 0.15, "sq": 0.18, "fl": Vector3(0.05, -0.15, 0.25), "hw": 1.0}],
 		[0.1, {"y": 0.3, "p": -0.25, "sq": -0.22, "lift": 0.06, "fl": Vector3(0.1, 0.78, -0.3), "hw": 1.0}],
 		[0.2, {"y": 0.22, "p": -0.18, "sq": -0.08, "fl": Vector3(0.08, 0.7, -0.22), "hw": 1.0}],
-		[0.35, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "fr": Vector3(0.25, 0.0, -0.2), "rw": 0.7}]]},
+		[0.33, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "fr": Vector3(0.25, 0.0, -0.2), "rw": 0.7}]]},
 	# the channel (f26-f73): one hand held high over the tether, the other out for balance; the legs
 	# keep walking (no leg channel)
 	"mm_call_hold": {"hold": true, "keys": [
