@@ -10,21 +10,6 @@ Sources (gameplay facts only, written in our own words):
 - The footage reference sheet (frames kept on the local machine): timing, aiming, telegraphs, animation beats.
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
-## Ranks: tier table (source: Kingpin)
-On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
-and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
-Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
-applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
-ranks in the source or ours. R is left to decision 0022.
-
-| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
-|---|---|---|---|---|---|---|
-| LMB Scattergun | none | none | none | - | - | - |
-| RMB Abyssal Hand (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
-| Shift Barge (10s; [D] 7s) and air pounce (12.5s; [D] 12.5s) | -1.25s (air -2s) | -1.25s (air -2s) | dashing resets the bloom, shot hits cut the dash cooldown | 8.2s, air 10.5s | 6.4s, air 8.5s; a dash resets the spread, each pellet hit trims 0.25s | `dash.cut`, `dash.air.rank_cut`, the bloom reset at dash rank 3 |
-| E Anchor Drop (7s; [D] 12s) | +20% damage, -2.5s, +0.1s stun | +20% damage, -2.5s, +0.1s stun | +100% damage on a foe over the Abyss, +0.2s stun | 5.5s, damage +20%, stun +0.1s | 4.1s, damage +40%, stun +0.4s in all, double over the Abyss | `e.rank3_stun`, the abyss double at kin rank 3 |
-| Passive Salvage | none | none | none | - | - | - |
-
 ## Scaling
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
