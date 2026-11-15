@@ -113,6 +113,7 @@ const T := {
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
+	"sneak_speed":             ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run speed"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"swoop_x":                 ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
 	"swoop_fade_s":            ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
@@ -195,9 +196,10 @@ func ok(cond: bool, what: String) -> void:
 	print("MFEEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func rec(key: String, v: float) -> void:
+## `table`: a section module's own targets (move_feel_knock.gd), shaped as T.
+func rec(key: String, v: float, table: Dictionary = T) -> void:
 	results[key] = v
-	var t: Array = T[key]
+	var t: Array = table[key]
 	var pass_ := false
 	var tgt := ""
 	match String(t[0]):
@@ -298,6 +300,7 @@ func run(main: Node) -> void:
 	_flue_flight()
 	_abyss_updraft()
 	_feather()
+	load("res://tools/move_feel_knock.gd").run(self)     # the knock arc (docs/MOVEMENT_FEEL.md "Knock arc")
 	_ledge()
 	_glide_wall()
 	_drop()
@@ -721,6 +724,7 @@ func _glide_dive() -> void:
 		if P.grounded:
 			break
 	rec("dive_vy", peak)
+	rec("sneak_speed", HunterMove.sneak_speed)
 	rec("dive_vy_t", t90)
 	rec("dive_cancel_h", cancel_h)
 	# the keys in the plunge against the keys under the glider, from a standstill
@@ -1045,11 +1049,10 @@ const KIT_DASH := {
 			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
-	"bulwark": {"ground": [3.5, 0.17], "long": [4.2, 0.21], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
+	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
 	"thief": {"ground": [4.5, 0.48], "air": [4.5, 0.48], "src": "[footage] Shiv Cartwheel 4.5 m in 0.48 s"},
-	"juggernaut": {"ground": [3.825, 0.266], "long": [4.2, 0.21],
-				"src": "owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15"},
+	"juggernaut": {"ground": [3.825, 0.266], "src": "owner 113.8: a 0.07 s dip, then 4.5 m / 0.17 s x0.85 / x1.15"},
 	"dredge": {"ground": [2.72, 0.184], "air": [3.672, 0.184],
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
@@ -1065,11 +1068,10 @@ func _kit_dashes() -> void:
 	for id in KIT_DASH:
 		var row: Dictionary = KIT_DASH[id]
 		P.reclass(Arch.weight(id), id)
-		for where in ["ground", "air", "hold", "long"]:
+		for where in ["ground", "air", "hold"]:
 			if not row.has(where): continue
 			var want: Array = row[where]
-			var got := _dolm_hop() if id == "dolm" else \
-					_felt_dash(where in ["air", "long"], where == "hold", where == "long")
+			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air", where == "hold")
 			var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0]
 			hit = hit and absf(got[1] - float(want[1])) <= DASH_TOL[1]
 			ok(hit, "felt dash %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (%s)"
@@ -1083,11 +1085,10 @@ func _kit_dashes() -> void:
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-## `hold` keeps the dash key down to the end; `long` runs out of charges first (the class's long dash).
-func _felt_dash(air: bool, hold := false, long := false) -> Array:
+## `hold` keeps the dash key down to the end.
+func _felt_dash(air: bool, hold := false) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
-	if long: P.dashes = 0.0      # out of charges: the long dash (Vex's, Hem's flick, Breaker's lumber)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = hold
@@ -1750,7 +1751,7 @@ func _screen_scale() -> void:
 	var cam: CamRig = m.cam
 	if cam == null or P.model == null:
 		return
-	cam.use_style("supervive")
+	cam.use_style("default")
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
 	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
@@ -1770,7 +1771,7 @@ func _screen_scale() -> void:
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
+	print("MFEEL framing: style default pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)

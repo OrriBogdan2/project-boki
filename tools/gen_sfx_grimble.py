@@ -1,5 +1,5 @@
 """Grimble's sounds (id dredge, the Scrap King): a skinny, wiry, greedy junk-hoarder monster with a towering
-hoard on his back, a gaff hook on a chain (the Abyssal Hand), a scrap fist and a junk blunderbuss.
+hoard on his back, a gaff hook on a chain (the Deep Reach), a scrap fist and a junk blunderbuss.
 
     cd tools && python3 gen_sfx_grimble.py      (then: godot --headless --import)
 
@@ -123,7 +123,7 @@ def shot(i):
     return mix(boom, tube, at(scrap, 0.01), tail)
 
 
-# ------------------------------------------------------------------ RMB: Abyssal Hand
+# ------------------------------------------------------------------ RMB: Deep Reach
 def throw():
     """The gaff hook flung out: a heave, the chain paying out, the abyss moaning behind it."""
     d = 0.6

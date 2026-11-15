@@ -11,6 +11,7 @@ extends RefCounted
 ## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
 ## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And Motley's hover hum (no footsteps): held while he moves, swelling and rising with speed, gone when still.
 ## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
 ## and they recover; then the autoplay match runs LOUD_S and each bus's peak meter is reported (MATCHAUDIO BUS).
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
@@ -70,11 +71,14 @@ func run(main_node: Node) -> void:
 	_buses()
 	await _big_event_duck(P)
 	_steps(m, P)
+	_shields(m, P)
 	await _glider(P, "yours")
+	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
+	await _hover(other, "another player's")
 	other.remote = false
 	await _loudness(m)
 	# extract mid-channel and go home
@@ -140,6 +144,37 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
+
+## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
+## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
+func _shields(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
+	P.inv_t = 0.0
+	P.hp = P.max_hp        # the ult-ready part revived you low; three breaks must not down you
+	for kind in ["ward", "cloak", "molten"]:
+		P.shield = 30.0
+		P.shield_kind = "" if kind == "ward" else kind
+		for part in ["hit", "break"]:
+			var cue := "shield_%s_%s" % [kind, part]
+			ok(Sfx.ensure(cue), "%s is a sound on file" % cue)
+			Sfx.last_played.clear()
+			P.hurt(10.0 if part == "hit" else 40.0, R, {})
+			var shield_cues := Sfx.last_played.keys().filter(func(k): return k.begins_with("shield_"))
+			ok(shield_cues == [cue], "your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues])
+		ok(P.shield_kind == "" and P.shield <= 0.0, "...and the break clears the material")
+	Sfx.listener = P.pos
+	R.shield = 30.0
+	R.shield_kind = "molten"
+	R.pos = P.pos + Vector3(70, 0, 0)
+	Sfx.last_played.clear()
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.is_empty(), "a rival's shield 70 m away is out of earshot")
+	R.pos = P.pos + Vector3(5, 0, 0)
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.has("shield_molten_hit"), "...and 5 m away its thunk is heard")
+	R.shield_t = 0.01
+	R.sim(0.1)
+	ok(R.shield <= 0.0 and R.shield_kind == "", "a shield that runs out clears the material")
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
@@ -317,6 +352,38 @@ func _glider(h: Hunter, who: String) -> void:
 	await main.get_tree().create_timer(0.5).timeout
 	var running := Sfx.loop_on(wind) or Sfx.loop_on(burn) or Sfx.loop_on(hiss)
 	ok(not running, "%s glider: all loops stop once the glider is folded" % who)
+
+## Motley floats with no feet (HoverHum): his hum holds while he drifts, swells and rises with his speed and
+## stops once he is still; a Hunter with feet has no hum. `h` wears his sounds for the test.
+func _hover(h: Hunter, who: String) -> void:
+	var was := h.arch
+	var key := HoverHum.key(h)
+	h.arch = "ostra"
+	h.unseen = false
+	h.crouch = false
+	_set_speed(h, h.base_speed * 0.3, 0.0)
+	HoverHum.tick(h)
+	var on := Sfx.loop_on(key)
+	ok(on, "%s hover: Motley drifting hums" % who)
+	var slow_db := float(Sfx.loops[key]["vol"]) if on else 0.0
+	var slow_pitch := _pitch(key) if on else 0.0
+	_set_speed(h, h.base_speed, 0.0)
+	HoverHum.tick(h)
+	var fast_db := float(Sfx.loops[key]["vol"]) if on else 0.0
+	ok(on and fast_db > slow_db and _pitch(key) > slow_pitch,
+		"%s hover: the hum swells and rises with speed (%.1f -> %.1f dB)" % [who, slow_db, fast_db])
+	if h.remote:
+		ok(on and Sfx.loops[key]["pos"] != null, "another player's hover: the hum is positional")
+	_set_speed(h, 0.0, 0.0)
+	HoverHum.tick(h)
+	await main.get_tree().create_timer(0.5).timeout
+	ok(not Sfx.loop_on(key), "%s hover: still, the hum stops" % who)
+	h.arch = "gunslinger"
+	_set_speed(h, h.base_speed, 0.0)
+	HoverHum.tick(h)
+	ok(not Sfx.loop_on(key), "%s hover: a Hunter with feet has no hum" % who)
+	h.arch = was
+	_set_speed(h, 0.0, 0.0)
 
 func _set_speed(h: Hunter, flat: float, vy: float) -> void:
 	h.vel = Vector3(flat, vy, 0)

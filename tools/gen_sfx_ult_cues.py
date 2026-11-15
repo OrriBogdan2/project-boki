@@ -5,13 +5,14 @@
 One body sound per Hunter, voiced to its element (<arch>_ult_cue: a rising swell that breaks into a hit), and two
 short team tags played on top of it by UltCue: ult_tag_ally (a bright rising pair) and ult_tag_foe (a low falling
 pair). Both tags sit at the same level, so a rival's ultimate is told apart by colour, never by being louder.
+hostile_cast: the short low edge HostileCue lays under every rival E, R and X cast (one for all Hunters).
 Original synthesis, no samples. Its own seed: running it re-rolls nothing else.
 """
 import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, sub, tail
+from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick, sub, tail
 
 S.reseed(7301)
 DUR = 0.9       # s: swell 0.6 s, then the hit and its tail
@@ -87,11 +88,20 @@ def tag(freqs, step):
     return mix(*[at(S.chime(f, 0.5, 0.3, ((1.0, 1.0), (2.0, 0.3))), step * i) for i, f in enumerate(freqs)])
 
 
+def hostile():
+    """Two detuned saws beating against each other, falling a little under a gritty tick: uneasy, low, short."""
+    d = 0.26; n = N(d)
+    buzz = lpf(S.sweep(150, 110, d, 'saw') + S.sweep(159, 116, d, 'saw'), 900) * env(n, 0.003, 0.08)
+    edge = bpf(noise(d), 1100, 3200) * env(n, 0.0005, 0.012)
+    return hpf(mix(sat(buzz * 0.6, 2.0), edge * 0.8, at(S.click(0.004, 1400, 4500), 0.07) * 0.5), 60)
+
+
 def build():
     for arch, fn in sorted((k[4:], v) for k, v in globals().items() if k.startswith('cue_')):
         S.save_cat(arch + '_ult_cue', hpf(fn(), 30), 'signature')
     S.save_cat('ult_tag_ally', tag([784, 1175], 0.12), 'cast')     # G5 up to D6: open, bright
     S.save_cat('ult_tag_foe', tag([392, 277], 0.12), 'cast')       # G4 down to C#4: low, tense
+    S.save_cat('hostile_cast', hostile(), 'cast')                   # last: its noise draws shift nothing above
 
 
 if __name__ == '__main__':
