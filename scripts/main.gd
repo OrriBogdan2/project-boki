@@ -1479,3 +1479,13 @@ func _social_cmd(c: String, current) -> void:
 				current.ppos = Vector3(float(p[2]), 0, float(p[3]))
 			_soc_reply(true)
 
+func _hb_home():      # the farm for the checks that build one (tools/*_check.gd call main._hb_home())
+	var H = load("res://scripts/home/home.gd")
+	var hm = H.new()
+	add_child(hm)
+	current = hm
+	await get_tree().process_frame
+	await get_tree().process_frame
+	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
+		await get_tree().process_frame
+	return hm
