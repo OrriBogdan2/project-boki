@@ -23,6 +23,7 @@
   "size": 0.18,
   "color": "#bfe6ff",
   "sfx": "swipe",
+  "hit": "hit_blade",
   "desc": "Two quick thrusts and a longer lunge. Every thrust steps you in; the third slows.",
   "kick": 0.04
  },
