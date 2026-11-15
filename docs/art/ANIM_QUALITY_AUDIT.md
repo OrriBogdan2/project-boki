@@ -134,7 +134,9 @@ body (not in the air, a crouch, or a move that owns the body):
   Tender 2.1 -> 7.7, Bulwark 23 -> 36); strafes keep their clip's own bob again. Foot height: clip 14 logs the ankles
   in the body's own frame (aL aR vs rest a0L a0R), since CamRig.char_lean tips every Hunter back 20 degrees about the
   feet and a world-height reading shows a strafe's feet 10-30 cm "under" the floor that is only that lean. In the body
-  frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Vex sits 12-14 cm up (walk, run, strafe).
+  frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
+  strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
+  Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
