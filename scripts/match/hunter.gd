@@ -1845,6 +1845,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
+	HoverHum.tick(self)
 	abyss_snd.tick(self)
 	if remote:
 		net_follow(dt)
@@ -2595,8 +2596,8 @@ func _try_ledge_grab(dt: float) -> void:
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
 ## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
-## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
-## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+## Over the top you pop up a little toward your keys. Moving off the face, a fresh glide press, a stun or a
+## knock end it. A press in the rise goes by its mantle row (DashFlow); a jump flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
 const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
