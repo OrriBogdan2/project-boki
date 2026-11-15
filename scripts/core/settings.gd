@@ -23,6 +23,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
+	"boki_wisps": false,
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
