@@ -139,6 +139,7 @@ func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
+	if not _visiting(): GardenSfx.zone_in(zone, GardenZones.here)
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -3661,7 +3662,7 @@ func _play_evolutions() -> void:
 	for e in evs:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
-	Sfx.play("skill")
+	Sfx.play("boki_evolve")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
 	var tw := create_tween()
@@ -3678,6 +3679,7 @@ func _play_evolutions() -> void:
 		fx.body_glow(at, tint)
 		Sfx.play("garden_trait")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
+		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
 		cam.zoom_to = HOME_ZOOM

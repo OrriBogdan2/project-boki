@@ -8,6 +8,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--tracy=<dir>]  a Tracy capture of the match part into <dir>, then the run ends (docs/PERF.md)
 ##   [--bench-hunters=30]  hunters in the expedition (squads of 2; the default 6 is the fixed load)
 ##   [--bench-trios=10]  the expedition as that many bot trios (3 per squad), and every POSE_SAMPLE frames one extra
 ##   timed pose of each Hunter and rigged Boki, printed as "BENCH pose" lines by distance from the camera focus
@@ -33,6 +34,7 @@ const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 vis
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
 const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
 const NavCheck := preload("res://tools/garden_nav_check.gd")
+const PerfTracy := preload("res://tools/perf_tracy.gd")
 
 var main: Node
 var secs := 60.0
@@ -40,6 +42,7 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var tracy_dir := ""
 var hunters := 6
 var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
 var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
@@ -54,6 +57,9 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
+	if tracy_dir != "":
+		await _tracy_match()
+		return
 	if "--bench-fight" in OS.get_cmdline_user_args():
 		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
 		_finish()
@@ -80,6 +86,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--tracy="): tracy_dir = a.substr(8)
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
@@ -173,6 +180,15 @@ func _match() -> Array:
 	_meshes()
 	Match.prof_on = false
 	return fl
+
+## The match part alone under tracy-capture; the exit code says whether the zones were exported.
+func _tracy_match() -> void:
+	var cap := PerfTracy.new()
+	failed = not cap.start(tracy_dir)
+	if not failed:
+		await _match()
+		failed = not await cap.finish(main.get_tree())
+	_finish()
 
 ## One extra pose of every Hunter and rigged Boki, timed and filed by distance band and on or off screen: HunterAnim,
 ## the Hero clips and springs (WardenGlb.Sync) or the Boki clip, and the skeleton they write.

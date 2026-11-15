@@ -64,10 +64,13 @@ func _rules_and_save() -> void:
 	ok(SnackPatch.harvest(Save.d, now).is_empty() and Save.d["crops"] == before, "before its timer it yields nothing")
 	var late: float = now + float(SnackPatch.rules()["grow_secs"]) + 1.0
 	var got := SnackPatch.harvest(Save.d, late)
-	var each: bool = got.size() == 5 and got[4] == SnackPatch.extra(Save.d, {"rot": 0})      # + one rotating extra
+	var season := GardenSeasons.snack(late)
+	var first := got.slice(0, 5)
+	var each: bool = first[4] == SnackPatch.extra(Save.d, {"rot": 0}) and got.count(season) == 1      # + rotating extra
+	each = each and got.size() == (5 if first.has(season) else 6)      # + the season's snack when not already there
 	for s in SnackPatch.rules()["snacks"]:
 		each = each and got.has(s) and int(Save.d["crops"].get(s, 0)) == int(before.get(s, 0)) + 1
-	ok(each, "after its timer it yields the four snacks, one each, and a rotating extra: %s" % str(got))
+	ok(each, "after its timer it yields the four snacks, one each, a rotating extra and the season's: %s" % str(got))
 	ok(SnackPatch.harvest(Save.d, late).is_empty(), "picked, it starts over")
 
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.
@@ -84,8 +87,9 @@ func _ridge() -> void:
 	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
 			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(L["deco"] as Array).append(e)
-	var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
-	var each := got.size() == 4
+	var now := Time.get_unix_time_from_system()
+	var got := SnackPatch.harvest(Save.d, now)
+	var each := got.size() == (4 if SnackPatch.snacks(Save.d).has(GardenSeasons.snack(now)) else 5)      # + season's
 	for s in got:
 		each = each and Econ.pantry(String(s)) == 1
 	ok(each, "ridge: a ripe patch puts one of each in the pantry: %s" % str(got))

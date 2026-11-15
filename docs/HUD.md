@@ -25,6 +25,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
+| `exit_mark.gd` (`ExitMark`) | the way to extract on both maps: one icon (disc and rising arrow) in three states, closed (grey), opening (ring fills, cyan), open (solid green, pulsing); the full map adds a pill with the timer ("OPENS 1:20", "OPENING 40%", "OPEN 0:12"); an opening or open one off the minimap pings on its edge. The same words feed the tooltip and the key |
+| `map_hover.gd` (`MapHover`) | full-map tooltips: rest the cursor 0.6 s on any marker (exits, ways-out seats, hunters, your Boki, spawns, shrines, lairs, beacons, boxes, halts, the train, ships, pings, places, the hot zone) and a card gives its name and one line. `--map-hover-check`; `--map-clear-shots` takes before/after shots |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
@@ -198,6 +200,14 @@ nothing else on screen:
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Taking, swapping, dragging, dropping into a slot and wearing each play a short, quiet inventory cue (`InvSfx`, docs/AUDIO.md) from the inventory and loot code, in place of the generic click.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+
+## The recast marker (world)
+While a recast is open, a ring and a key cap sit in the world on what the key will trigger, in the ability's
+colour, shrinking and fading as the window closes. `RecastMarker.show_at` (scripts/ui/recast_marker.gd) is
+called every step by the kit; only the caster's game draws it and nothing goes over Net. In: Tenzo's Rock Hop
+(the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall, E freezes it), Sparkle's Kitefall
+(the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
+`--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
 
 ## Steal window (StealTell)
 

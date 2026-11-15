@@ -268,21 +268,8 @@ def work(i):
     return soft(room(mix(h(620, 0.0), h(700, 0.13), scuff), 0.3), 4000)
 
 
-def fuse(i):
-    """Fusion: the Boki leaps in. A rising sparkle spiral, a warm swell and a bright pop with a bell."""
-    d = 0.9; n = N(d); u = np.arange(n) / n
-    spiral = S.sweep(300, 1800, d, curve=1.6) * np.sin(np.pi * u ** 0.6) * 0.5
-    swell_t = S.sweep(180, 360, d) * np.sin(np.pi * u ** 1.2) * 0.45
-    grain = S.grains(d, 90, 3000, 8500, 0.002, 0.005, fall=0.4) * 0.3 * u
-    bell = at(mix(S.chime(1047, 1.2, 0.5, ((1.0, 1.0), (2.76, 0.3))), S.chime(1568, 1.2, 0.5, ((1.0, 0.7),))) * 0.4, 0.78)
-    pop = at(mix(bubble(400, 0.1, 2.5), S.kick(150, 60, 0.3, 0.02, 0.1, 2.0) * 0.5), 0.76)
-    return soft(room(mix(spiral, swell_t, grain, bell, pop), 0.9), 5400)
 
 
-def unfuse(i):
-    d = 0.5; n = N(d); u = np.arange(n) / n
-    fall = S.sweep(1400, 380, d) * np.sin(np.pi * u ** 0.4) * (1 - u) * 0.6
-    return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
 
 
 # ---------------------------------------------------------------- per-species voices
@@ -437,8 +424,6 @@ def main():
     S.save_loop('boki_sleep', sleep_loop(), 'loop')
     S.takes_cat('boki_yawn', yawn, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
-    S.takes_cat('boki_fuse', fuse, 0, 'boki')
-    S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
     voice_sets()
 
 
