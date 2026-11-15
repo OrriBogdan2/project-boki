@@ -45,7 +45,9 @@ const DEEP := Color("7a0c14")       # her laces in shade: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
-const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
+const TINT_WALK := 0.45         # the Spirit Walk wash while she walks clear of everything (1 = inside something)
+const TINT_SHADE := 0.6         # how much darker than DEEP the wash is: a dark spirit-world look, not a colour flash
+const WASH_COL := Color("310508")   # her red darkened: the body colour while she phases (pin.md frame 0360)
 const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
@@ -509,7 +511,7 @@ func tint_to(k: float) -> void:
 		tint = ColorRect.new()
 		tint.set_anchors_preset(Control.PRESET_FULL_RECT)
 		tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tint.material = KitShaders.mat("tint", Color(0.04, 0.08, 0.3))
+		tint.material = KitShaders.mat("tint", DEEP.darkened(TINT_SHADE))
 		cl.add_child(tint)
 
 func _process(_delta: float) -> void:
