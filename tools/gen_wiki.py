@@ -736,6 +736,28 @@ def _dash_ours(row, modes):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
+TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
+              ("x_recast", "ult (X) recast")]
+
+def _turn(rule):
+    return rule if isinstance(rule, str) else "slow (%g deg/s)" % rule
+
+def gen_turn_table():
+    """The body-turn rows from each kit JSON's "turn" block (ArchKit.turn_rule, --yaw-lock-check)."""
+    rows = []
+    for aid in ARCH_ORDER:
+        hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in TURN_SLOTS:
+            row = ARCH.get(aid, {}).get("turn", {}).get(slot)
+            if row:
+                rows.append([hero, label, _turn(row["early"]), _turn(row["late"]), row["source"]])
+    return ("\n## Body turning during casts\n\n_Generated from the \"turn\" block in `content/archetypes/<hero>.json`._"
+            "\n\nDoes the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor "
+            "east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it "
+            "follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first "
+            "cast's.\n\n" + table(["Hero", "Slot", "0.1-0.33 s (wind-up, channel)", "0.53-0.77 s (release, after)",
+                                    "Source"], rows))
+
 # Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
 AIR_AUDIT = {
     "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
@@ -835,6 +857,7 @@ def gen_dash_flow():
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
     body += table(["Pair", "Source", "Ours"], _mantle_rows())
+    body += gen_turn_table()
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

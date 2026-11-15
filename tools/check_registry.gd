@@ -221,6 +221,7 @@ const CHECKS := {
 	"--label-clash-shots": ["res://tools/label_clash_shots.gd", "label_clash_shots", null],
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
+	"--yaw-lock-check": ["res://tools/yaw_lock_check.gd", "yaw_lock_check", null],      # body turn per slot
 	# the cursor on or under your own body
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],
 	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],  # key to picture

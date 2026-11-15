@@ -229,6 +229,12 @@
 	],
 	"rank_cd": {"dash": [1, 0.8125, 0.625]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown"}
+	},
 	"rank3": {
 		"sec": "shield HP +50% in all and it repairs and regenerates faster",
 		"dash": "the 360 Smash refunds the Shield Charge when it hits",

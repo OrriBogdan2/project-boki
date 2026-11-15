@@ -153,6 +153,14 @@
 		"kin",
 		"gear"
 	],
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown"},
+		"x": {"early": "locked", "late": "locked", "source": "briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65)"},
+		"x_recast": {"early": "locked", "late": "free", "source": "briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out"}
+	},
 	"rank_cd": {"sec": [1, 0.8542, 0.7083], "dash": [1, 0.8846, 0.7692], "kin": [1, 0.875, 0.75]},
 	"rank_dmg": {"sec": [1, 1.15, 1.3], "dash": [1, 1, 1], "kin": [1, 1, 1]},
 	"rank3": {"sec": "the spear's detonation hits 45% harder", "dash": "a Skate over the Abyss lays ice underfoot that holds for 5s", "kin": "the wall is 40 points tougher"},

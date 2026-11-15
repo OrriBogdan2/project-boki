@@ -161,6 +161,13 @@
 		"dash",
 		"gear"
 	],
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:45 'the hunter turns to the cursor'; :313 the torso keeps facing the cursor while she strafes"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:26 a tap with an aim telegraph while held; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:28 a zone on herself; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:28 recast throws it to the cursor; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/mooshmoosh.md:224-225 'Elluna can walk during the channel', the tether follows"}
+	},
 	"rank_cd": {"sec": [1, 1, 0.7391], "dash": [1, 0.8929, 0.7857], "kin": [1, 1, 0.75], "air": [1, 0.8929, 0.7857]},
 	"rank_dmg": {"sec": [1, 1.4, 1.4], "dash": [1, 1, 1], "kin": [1, 1.225, 1.5]},
 	"rank3": {"sec": "the roots last 0.3s longer, the burst is twice as wide and takes half again as much from ability power", "dash": "picking up a teammate refreshes your long air dash", "kin": "the thrown light's healing boost is 100% instead of 50%"},

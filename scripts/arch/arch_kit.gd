@@ -284,6 +284,25 @@ func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
 ## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
+## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
+## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
+## A recast row it doesn't have is its first cast's (a second press of a slot with no recast changes nothing).
+func turn_rule(slot: String) -> Dictionary:
+	var rows: Dictionary = d.get("turn", {})
+	var row: Dictionary = rows.get(slot, rows.get(slot.trim_suffix("_recast"), {}))
+	return {"early": row.get("early", "free"), "late": row.get("late", "free")}
+## A capped row's turn rate (deg/s) for a window, read where the cast steers.
+func turn_deg_s(slot: String, window: String) -> float:
+	return float(d["turn"][slot][window])
+## A capped-turn aim lock: `cur` turned toward the raw cursor (not aim_dir(), which returns the lock) by at
+## most `deg_s` degrees per second. A committed charge keeps its line near-planted this way.
+func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
+	var a: Vector3 = h.inp["aim"]
+	var want := Vector2(a.x - h.pos.x, a.z - h.pos.z)
+	if want.length() < 0.05:
+		return cur
+	var step := deg_to_rad(deg_s) * dt
+	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
