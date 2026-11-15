@@ -18,9 +18,8 @@
   "boki_form_stormwing_cast": "cast", "boki_form_stormwing_travel": "dash", "boki_form_stormwing_hit": "impact",
   "boki_form_tidal_shell_cast": "cast", "boki_form_tidal_shell_travel": "dash", "boki_form_tidal_shell_hit": "impact"
  },
- "reach": {"boki_sleep": 7, "boki_yawn": 9},
+ "reach": {"boki_sleep": 7, "boki_yawn": 9, "boki_form_titan_cast": 30, "boki_form_stormwing_cast": 30, "boki_form_tidal_shell_cast": 30},
  "loops": ["boki_sleep"],
- "reach": {"boki_form_titan_cast": 30, "boki_form_stormwing_cast": 30, "boki_form_tidal_shell_cast": 30},
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
   "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]
