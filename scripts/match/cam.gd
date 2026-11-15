@@ -1,6 +1,7 @@
 class_name CamRig
 extends Camera3D
-## Supervive-style camera: high, far and narrow, leaning toward the cursor so you see where you aim.
+## Supervive-style camera: high, far and narrow, centred on you (the footage shows no cursor lean: docs/MOVEMENT_FEEL.md
+## "Camera lead"). Only the Standard and Dynamic follow presets lean toward the cursor.
 
 const HEIGHT := 27.0
 const BACK := 17.5
@@ -13,6 +14,9 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+## Width / height of the screen the styles' lenses are measured at. Every screen shows that frame's width of
+## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
+static var FRAME_ASPECT: float = RULES["frame_aspect"]
 
 var focus := Vector3.ZERO
 var target: Node3D = null
@@ -28,6 +32,7 @@ var top := 0.0                # 0 = the usual angle, 1 = looking straight down (
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
 var dist := 32.2              # how far back it sits
+var lens := 28.0              # degrees: the vertical lens on a FRAME_ASPECT screen (the style's "fov")
 var rise := 0.0               # (camcal) the view aims this far above the focus (the style's "rise")
 var yaw := 0.0                # turned around the focus (0 = looking north); only the skyship ride turns it
 var yaw_to := 0.0
@@ -101,7 +106,7 @@ func use_style(id: String) -> void:
 	style_id = id if STYLES.has(id) else "supervive"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
-	fov = float(st["fov"])
+	lens = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
@@ -112,14 +117,18 @@ func apply_settings() -> void:
 	if sty != style_id:
 		use_style(sty)
 
-## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
+## Metres of ground across any screen at the focus, for a style at zoom 1.
 static func style_across(id: String) -> float:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
-	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
+	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * FRAME_ASPECT)
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
+## The vertical lens for this screen: `lens` widened or narrowed so the view shows a FRAME_ASPECT screen's width.
+func frame_fov() -> float:
+	var view := get_viewport().get_visible_rect().size
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(lens) * 0.5) * FRAME_ASPECT * view.y / maxf(1.0, view.x)))
+
 func _ready() -> void:
-	fov = 28.0
 	near = 1.0
 	far = 120.0
 	current = true
@@ -184,6 +193,25 @@ func lean_to(rel: Vector3) -> Vector3:
 	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
 	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
 
+## The view's lean for a cursor at `at` (viewport px) with you at `p`, in world metres: the Supervive follow reads the
+## cursor's ground distance from you (lean_to, none at the shipped numbers: the footage shows no lean), the others its
+## distance from the screen's centre.
+func cursor_pan(at: Vector2, p: Vector3) -> Vector3:
+	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	if follow_mode == "supervive":
+		var cur := _plane_at(at, p.y)      # where the cursor points on the ground at your height
+		return lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
+	if float(fm[2]) <= 0.0:
+		return Vector3.ZERO
+	var half := get_viewport().get_visible_rect().size * 0.5
+	var rel := (at - half) / half       # -1..1 on each axis
+	var l := rel.length()
+	if l <= float(fm[0]) or float(fm[1]) <= float(fm[0]):
+		return Vector3.ZERO
+	var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
+	if fm[4]:
+		f *= f
+	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 ## The drop's skydive view: close behind you along the drop's heading and looking down at the
 ## map, a little further back the higher you are; over the last few metres it turns back to the usual view.
 const SKYDIVE_CHASE := 0.35        # of the low chase view: tips the pitch from the style's ~57 down to ~50 degrees
@@ -202,23 +230,10 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
-	var want_pan := Vector3.ZERO
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	var want_pan := cursor_pan(get_viewport().get_mouse_position(), p) if mouse_lead else Vector3.ZERO
 	if follow_mode == "supervive" and mouse_lead:
-		# where the cursor points on the ground at your height, relative to you
-		var cur := mouse_on_plane(p.y)
-		want_pan = lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	elif mouse_lead and float(fm[2]) > 0.0:
-		var vp := get_viewport()
-		var sz := vp.get_visible_rect().size
-		var half := sz * 0.5
-		var rel := (vp.get_mouse_position() - half) / half       # -1..1 on each axis
-		var l := rel.length()
-		if l > float(fm[0]) and float(fm[1]) > float(fm[0]):
-			var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
-			if fm[4]: f *= f
-			want_pan = Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 	if follow_mode == "supervive" and mouse_lead:
 		pass        # (eased above)
 	elif not mouse_lead or float(fm[3]) <= 0.0:
@@ -271,6 +286,7 @@ func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
 	var z := zoom * (1.0 + pull) * cast_wide()
+	fov = frame_fov()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
@@ -312,7 +328,9 @@ func mouse_ray() -> Array:
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
-	var mp := get_viewport().get_mouse_position()
+	return _plane_at(get_viewport().get_mouse_position(), y)
+
+func _plane_at(mp: Vector2, y: float) -> Vector3:
 	var o := project_ray_origin(mp)
 	var d := project_ray_normal(mp)
 	if absf(d.y) < 0.0001:

@@ -49,11 +49,11 @@ func _style(cam: CamRig) -> void:
 	var st: Dictionary = CamRig.RULES["styles"]["supervive"]
 	cam.use_style("supervive")
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
-			and is_equal_approx(cam.fov, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
+			and is_equal_approx(cam.lens, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
 			"the Supervive style is camera.json's: %s" % str(st))
 	var pitch := rad_to_deg(cam.pitch)
 	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
-	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg inside the source's %s" % [cam.fov, str(src["fov_deg"])])
+	ok(_inside(cam.lens, src["fov_deg"]), "lens %.1f deg inside the source's %s" % [cam.lens, str(src["fov_deg"])])
 	cam.snap(Vector3.ZERO)
 	var feet := (cam.unproject_position(Vector3.ZERO).y - VIEW.y * 0.5) / VIEW.y * 100.0
 	ok(_inside(feet, src["feet_below_pct"]), "feet %.2f%% of the height below the centre, inside the source's %s"
