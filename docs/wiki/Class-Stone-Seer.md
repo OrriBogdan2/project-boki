@@ -25,7 +25,7 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Rubble Fists (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you. |
 | Silhouette | the huge stone left arm, the stone gauntlet and the three floating eye stones |

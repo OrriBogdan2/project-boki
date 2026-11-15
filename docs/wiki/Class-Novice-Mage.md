@@ -49,7 +49,7 @@ throws whatever potion comes out of his bag next, and chains crowd control until
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.34 m/s, 1 dash charge |
 | Signature weapon | Swordfish (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached. |
 | Silhouette | the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip |

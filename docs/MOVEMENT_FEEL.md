@@ -67,7 +67,7 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
-| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
+| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm (`--move-speed-check`) |
 | aim_side / aim_back / aim_back_fire speed_k (run with the keys across or away from the aim, over toward it) | 1.0 | 1.0 | 0.99–1.01 | [game data] no backpedal or strafe slow: one MoveSpeed per hunter, no directional row in the movement data (the only forward/back split decoded is rail grinding, 1300/1050); hero-ref footage has no clean walk-away run to frame (see ext/feel-backpedal-speed) |
 | aim_back_3m_frames (frames to cover 3 m away from the aim, minus toward it) | 0 | 0 | <= 0 | [game data] same; 42 frames both ways at 4.55 m/s |
 | jump_input_frames | 1 | 1 | <= 1 | |
