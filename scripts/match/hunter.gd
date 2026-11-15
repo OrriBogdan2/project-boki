@@ -1844,12 +1844,8 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
-<<<<<<< HEAD
 	abyss_snd.tick(self)
-||||||| parent of 5a5015831d (Neve skate sound for the 11-11 skate: speed-led glide loop, throttled carve scrape, slide-out hiss)
-=======
 	if ak: ak.sound_tick(dt)
->>>>>>> 5a5015831d (Neve skate sound for the 11-11 skate: speed-led glide loop, throttled carve scrape, slide-out hiss)
 	if remote:
 		net_follow(dt)
 		return
