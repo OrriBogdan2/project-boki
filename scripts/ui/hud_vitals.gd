@@ -4,7 +4,8 @@ extends RefCounted
 ## level and a bar toward the next level) along its top edge, then to its right your health as a big
 ## number over a thick segmented bar, armour as a strip under it with its number and
 ## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
-## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits
+## below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 318.0       # px: health / armour width
