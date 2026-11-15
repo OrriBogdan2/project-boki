@@ -225,7 +225,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
-	ok(rig.clip == "cast", "a cast pulse plays the cast")
+	ok(rig.clip == "ability", "a cast pulse plays the ability clip")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
