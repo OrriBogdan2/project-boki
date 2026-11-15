@@ -161,8 +161,7 @@ const MOVES := {
 			"fr": Vector3(0.3, -0.7, -0.4), "rw": 0.9, "lw": 1.0, "legs": [1.2, -1.8, 1.0, -1.7]
 		}],
 		[0.3, {"p": -0.15, "sq": 0.1, "lift": -0.03}],
-		[0.38, {}],
-		[0.44, {}]]},
+		[0.38, {}]]},
 	# The air barge (the same quick 0.18 s lunge, 35% further): a beast's pounce, arms cocked up, then raked
 	# forward with the claws out and dragged down through the air, legs tucked, a heavy drop onto his feet
 	"dr_pounce": {"keys": [
