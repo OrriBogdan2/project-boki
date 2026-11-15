@@ -659,11 +659,6 @@ const CHECKS := {
 	"--map-hover-check": ["res://tools/map_hover_check.gd", "map_hover_check", null],      # MapHover
 	"--map-clear-shots": ["res://tools/map_clear_shots.gd", "map_clear_shots", null],      # --shots-dir=<dir>
 	"--blight-edge-shots": ["res://tools/blight_edge_shots.gd", "blight_edge_shots", null],      # --shots-dir=
-	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],  # MapDetail: default vs hold
-	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],  # TrainMap
-	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
-	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],  # --shots-dir=<dir>
-	"--blight-edge-shots": ["res://tools/blight_edge_shots.gd", "blight_edge_shots", null],  # --shots-dir=
 	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],  # --shots-dir=<dir>
 	"--item-art-clip": ["res://tools/item_art_clip.gd", "item_art_clip", null],  # --shots-dir=<dir>, review clip frames
@@ -682,15 +677,8 @@ const CHECKS := {
 	"--recast-marker-shots": ["res://tools/recast_marker_shots.gd", "recast_marker_shots", null],
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
-	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
-	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
-	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
-	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],  # the 50 lined up
-	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],  # also --shots-dir=
-	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],  # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
-	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
 	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
