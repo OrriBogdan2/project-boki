@@ -26,6 +26,7 @@ const BASKET_R := 0.28                        # m, the basket's radius
 const BASKET_H := 0.3                         # m, its height
 const SCENT_R := 0.14                         # m, the hidden scent's glow
 const REACH := 1.6                            # m from the basket to pick the scent up
+const FIRST := "first_seek"                   # Save.d.tutorial: the practice hunt ran (FirstRound)
 const TURN := 6.0                             # rad/s a hunter turns to its heading
 
 static func rules() -> Dictionary:
@@ -156,6 +157,7 @@ var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
 var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
+var practice := false          # the first practice hunt: short (practice_s), no gain, no cost
 
 func _init(home) -> void:
 	h = home
@@ -167,6 +169,7 @@ func go(to: S) -> bool:
 		return false
 	state = to
 	state_t = 0.0
+	practice = practice and to != S.IDLE and to != S.RESULT
 	return true
 
 ## The scent basket beside the Training post (none without one); called when fixtures move.
@@ -221,7 +224,11 @@ func use() -> void:
 			h._toast("Seek needs two rested Boki out on the base")
 			return
 		go(S.CARRY)
-		h._toast("You hold the scent: walk anywhere on the base and hide it")
+		practice = FirstRound.due(FIRST, "seek")
+		if practice:
+			FirstRound.take(FIRST)
+		h._toast(FirstRound.line("anywhere to hide the scent") if practice
+				else "You hold the scent: walk anywhere on the base and hide it")
 	elif state == S.CARRY:
 		_hide(Vector2(h.ppos.x, h.ppos.z))
 
@@ -278,7 +285,7 @@ func tick(d: float) -> void:
 			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
 			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
 			_lay_trails(d)
-			if hunt.over():
+			if hunt.over() or (practice and hunt.t >= float(rules()["practice_s"])):
 				_end(true)
 		S.RESULT:
 			if state_t >= float(rules()["card_s"]):
@@ -301,6 +308,9 @@ func _lay_trails(d: float) -> void:
 		cue.update(i, hunt.item, hunt.pos[i], right_p(hunt.recs[i], hunt.night), _ground, d)
 
 func _end(finished: bool) -> void:
+	if practice and finished:
+		h._toast("That's a hunt: the brighter trail is the better nose. " + FirstRound.DONE)
+	finished = finished and not practice      # a practice hunt never pays out
 	var res := settle(hunt) if finished else {}
 	for k in pair:
 		k["busy"] = false
