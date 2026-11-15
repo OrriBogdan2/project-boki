@@ -224,6 +224,7 @@ func _volley(home) -> void:
 func _tumble(home) -> void:
 	var tb: BaseTumble = home.htumble
 	var moves: Array = BaseTumble.rules()["moves"].keys()
+	TumbleTeach.mark()        # the real bout, not the one-time practice exchange (tumble_check)
 	tb.use()
 	var want := {}                # move -> exchanges it should decide
 	var pushes := 0

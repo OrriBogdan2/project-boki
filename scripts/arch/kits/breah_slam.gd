@@ -120,6 +120,7 @@ func _tick_wind(dt: float) -> void:
 	wind_t += dt
 	h.vel.x = 0.0
 	h.vel.z = 0.0
+	_wind_circle()
 	if wind_t >= float(feel()["windup"]):
 		wind_t = -1.0
 		_take_off()
@@ -263,8 +264,15 @@ func fire(c: Dictionary) -> void:
 	h.vel.x = 0.0
 	h.vel.z = 0.0
 	k.play("breah_windup")
+	_wind_circle()
 	k.m.fx.dust(h.pos, 5)
 	k.m.sfx("br_crack", h.pos, -8.0, 0.8)
+
+
+## The circle held through the wind-up where the hop will land (_take_off's flight), so the tell never drops out.
+func _wind_circle() -> void:
+	var land := wind_dir.normalized() * float(sd()["hop"]) + wind_run * flight()
+	_circle(k.h.pos + Vector3(land.x, 0, land.y), wind_k)
 
 
 ## The hop into the circle's centre, both fists coming down as he lands there.
