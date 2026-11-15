@@ -225,11 +225,26 @@ def call():
     return mix(choir, at(lantern_ring(0) * 0.6, 0.05), puff(0.6, 300, 1200, 0.2) * 0.25)
 
 
-def call_hum(i):
-    """The tether's warm hum (one every 0.22 s while it holds, each blending into the next)."""
-    d = 0.7
-    hum = warm((392 * (1 + 0.004 * i), 587, 784), d, 0.18, 0.4, 0.004) * 0.9
-    return mix(hum, sparkle(d, 2, gain=0.12))
+LOOP_D = 2.0     # s: the channel loop's length; every note in it is a whole number of cycles of this
+
+
+def call_loop():
+    """The channel's warm loop (Hearth Call, 5 s): a G-major lantern chord breathing slowly, with soft
+    lantern chimes on a fixed beat whose tails wrap round the seam. Each note is a whole number of cycles
+    in LOOP_D, so it repeats without a click. The game loops it on her and, quieter, on the ally."""
+    n = N(LOOP_D); t = np.arange(n) / S.SR
+    out = np.zeros(n)
+    for f, g in ((392.0, 1.0), (587.0, 0.7), (784.0, 0.55), (988.0, 0.25)):
+        for s in (-1.0, 1.0):
+            ff = round((f + s * 1.5) * LOOP_D) / LOOP_D
+            out += g * (np.sin(2 * np.pi * ff * t) + 0.18 * np.sin(4 * np.pi * ff * t))
+    out *= 1.0 + 0.18 * np.sin(2 * np.pi * t / LOOP_D * 2.0)
+    chimes = np.zeros(n)
+    tr = np.arange(N(0.9)) / S.SR
+    for k, beat in enumerate((0.0, 0.67, 1.33)):
+        ring = np.sin(2 * np.pi * STAR[(k * 2) % 4] * tr) * np.exp(-tr / 0.25) * shape(0.9, 0.004, 0.2, 0.7)
+        chimes += np.roll(np.concatenate([ring, np.zeros(n - len(ring))]), N(beat))
+    return out / 8.0 + chimes * 0.35
 
 
 def arrive():
@@ -307,7 +322,7 @@ def build():
     S.takes_cat('tender_dash', dash, 3, 'dash')
     S.save_cat('tend_pickup', pickup(), 'cast')
     S.save_cat('tend_call', call(), 'cast')
-    S.takes_cat('tend_call_hum', call_hum, 3, 'loop')
+    S.save_loop('tend_call_loop', call_loop(), 'loop')
     S.save_cat('tend_arrive', arrive(), 'impact')
     S.save_cat('tender_cheer', cheer(), 'signature')
     for s in ('grass', 'stone', 'wood', 'snow'):

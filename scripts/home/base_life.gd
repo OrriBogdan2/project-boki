@@ -4,15 +4,15 @@ extends RefCounted
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
 ## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki (friends chase, BaseChase), stares at a rival or comes to look at a newcomer. A retired mentor
-## (Mentor) only strolls slowly near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are
-## HomeToys' (k["play"]: it picks,
+## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
+## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
-## nap in a pile; rivals stare and huff. A Boki that would thrive in another open zone sometimes goes
-## and waits at the return pad with a bubble: it looks at the pad (HubWaystone.pad) the way it comes
-## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off.
+## nap in a pile; rivals stare and huff, and turn and huff when they pass (BaseRival).
+## A Boki that would thrive in another open zone sometimes goes and waits at the return pad
+## with a bubble: it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer,
+## and E on it sends it (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
@@ -102,7 +102,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
-		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: BaseChase.clear(k))
+		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(
 			S.NAP,
 			func(_to: int) -> void:
@@ -110,6 +110,7 @@ func machine(k: Dictionary) -> Fsm:
 				BaseDuo.woke(k)
 		)
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
+		m.on_exit(S.REACT, func(_to: int) -> void: k.erase("life_rival"))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
 	return k["life"]
@@ -216,9 +217,6 @@ func choose(k: Dictionary) -> void:
 		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
-	var friend: Dictionary = BaseChase.pick(self, k, near) if randf() < float(pers.get("social", 0.22)) else {}
-	if not friend.is_empty() and BaseChase.begin(self, k, friend):
-		return
 	var mate := _mate(k, near)
 	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
 		_tag(k, mate)
@@ -242,6 +240,7 @@ func _tick(k: Dictionary, dt: float) -> void:
 	if _taken(k):
 		return
 	m.tick(dt)
+	BaseRival.cool(k, dt)
 	if not _awake(k) and not m.is_in(S.NAP):
 		_nap(k, "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
@@ -254,6 +253,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
+			elif m.is_in(S.ROAM):
+				BaseRival.pass_by(self, k)
 		S.EAT:
 			if k.has("life_eat"):
 				if not BaseFeed.tick(h, k, m.since) or m.since >= float(R["max"]["eat"]):
@@ -266,10 +267,7 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.PLAY:
 			_play_tick(k, m, dt)
 		S.PLAY_WITH:
-			if k.has("life_chase"):
-				BaseChase.tick(self, k, m, dt)
-			else:
-				_tag_tick(k, m)
+			_tag_tick(k, m)
 		S.WATCH, S.REACT:
 			_look_tick(k, m)
 		S.CHORE:
@@ -346,7 +344,8 @@ func _tag_tick(k: Dictionary, m: Fsm) -> void:
 func _look_tick(k: Dictionary, m: Fsm) -> void:
 	var at: Dictionary = k["life_at"]
 	var to := Vector2(at["pos"].x - k["pos"].x, at["pos"].z - k["pos"].z)
-	if m.is_in(S.REACT) and to.length() > 2.0:
+	var rival: bool = k.get("life_rival", false)
+	if m.is_in(S.REACT) and to.length() > 2.0 and not rival:
 		k["goal"] = at["pos"] - Vector3(to.x, 0, to.y).normalized() * 1.8  # comes over for a look
 	else:
 		k["goal"] = k["pos"]
@@ -356,6 +355,8 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 		cap = float(k["life_for"])  # an ask at the pad waits its whole time
 	if m.since >= minf(float(k["life_for"]), cap):
 		m.go(S.ROAM, "looked")
+		if rival:
+			BaseRival.walk_on(self, k, at)
 
 
 # ------------------------------------------------------------------ entering states
@@ -418,8 +419,8 @@ func _chore(k: Dictionary) -> bool:
 func _tag(k: Dictionary, o: Dictionary) -> void:
 	var m := machine(k)
 	var om := machine(o)
-	if not m.can(S.PLAY_WITH) or not om.can(S.PLAY_WITH):
-		return
+	if not m.can(S.PLAY_WITH) or not om.can(S.PLAY_WITH) or bond(k["rec"], o["rec"]) <= float(R["rival_at"]):
+		return      # rivals never play together
 	m.go(S.PLAY_WITH, "tag")
 	om.go(S.PLAY_WITH, "tagged")
 	var secs := randf_range(R["play_with"][0], R["play_with"][1])

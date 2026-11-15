@@ -127,7 +127,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Albert (bulwark) | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
 | Albert (bulwark) | hold LMB through a jump | [?] Not determinable. Footage (briefs/hero-ref/bjorn.md:67-74): every charged-swing hold (frames 0101-0110, 0116-0128, 0132-0149, 0160-0172) is made standing; he never moves while charging (open question bjorn.md:271) and no jump is shown (bjorn.md:363-366). Data (briefs/supervive-data/supervive_kits.md:88: HOLD to charge a swing) silent on jumping. Kept: the charge carries through, as on the dash rows (owner item 51). | the hold carries through and lets go there |
 | Albert (bulwark) | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
-| Neve (rimewright) | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
+| Neve (rimewright) | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become thick beams. Ours: thick beams at normal damage (data pass) that leave on the aim and home in late like her darts (owner, Nov 7); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
 | Neve (rimewright) | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
 | Neve (rimewright) | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
 | Neve (rimewright) | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner items 64/65: the skate's velocity and direction go on into the ult as a frozen statue that slides on its ice (x.carry_t 0.8 s, easing to a stop, no steering or turning), then she is rooted. Symmetric with item 27 (Shift out of the ult keeps momentum). | fires mid-dash; dash momentum carries |
@@ -450,3 +450,16 @@ One row per hero and case, from `dash_jump` in the same files. "Ours" is measure
 | gil | Space in an air dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the dash ends and the glider opens, no jump | [?] |
 | gil | Shift in a jump's rise | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the air dash goes at once and ends the rise | [?] |
 | gil | Space and Shift on one step | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the jump goes at once and ends the dash, keeping 4% of its speed | [?] |
+
+## A press during a mantle (every hero)
+
+One row per input for all heroes, read from `content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.
+
+| Pair | Source | Ours |
+|---|---|---|
+| mantle -> LMB | Not shown inside a rise. Closest: sv_joule_1v4.mp4 9.20-9.27 s (briefs/supervive-data/MANTLE_185b.md): a hunter tops a low rim and stands firing ~0.07 s later, a shot at the top, not one in the rise. | buffered to the top [?] |
+| mantle -> RMB | Not shown: no RMB inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> E | Not shown: no E inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> R (ult) | Not shown: no ultimate inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> dash (Shift) | Footage owner_mantle_clip.mp4 17.9-18.6 s (briefs/supervive-data/MANTLE_185b.md): a dash at an abyss rim goes over it and onto the grass at dash-trail speed, no stop. Data: the mantle is a suction force and a Z impulse during the fall (supervive_physics.md, Mantle), with no state that ends a dash. | fires mid-climb, the rise goes on |
+| mantle -> jump | Owner's account of the source (docs/MOVEMENT_FEEL.md, Ledges): 'a well-timed input or jump gives a better fling. The game never takes control.' Ours: the fling (Hunter._ledge_fling). | fires mid-climb, the rise goes on |
