@@ -1,0 +1,24 @@
+{
+ "group": "cc",
+ "name": "Crowd control on you",
+ "script": "tools/gen_sfx_cc.py",
+ "sounds": {
+  "cc_stun": "cast",
+  "cc_stun_mate": "ui",
+  "cc_root": "cast",
+  "cc_root_mate": "ui",
+  "cc_ground": "cast",
+  "cc_ground_mate": "ui",
+  "cc_slow": "cast",
+  "cc_slow_mate": "ui",
+  "cc_daze": "cast",
+  "cc_daze_mate": "ui"
+ },
+ "reach": {
+  "cc_stun_mate": 14,
+  "cc_root_mate": 14,
+  "cc_ground_mate": 14,
+  "cc_slow_mate": 14,
+  "cc_daze_mate": 14
+ }
+}

@@ -5,18 +5,21 @@ extends RefCounted
 ## then it cheers up and the shy mark is gone. A Boki with no shy mark (an old save) is settled. Never touches the
 ## real save.
 
-const DT := 0.25             # s per farm step
-const LOOK_S := 20.0         # s the residents get to come over and look
-const SHY_RUN_S := 150.0     # s of the shy day that are watched
-const PAD_R := 3.0           # m: how close to the pad it arrives
+const DT := 0.25  # s per farm step
+const LOOK_S := 20.0  # s the residents get to come over and look
+const SHY_RUN_S := 150.0  # s of the shy day that are watched
+const ISLAND_SEED := 4242  # the farm's island
+const PAD_R := 3.0  # m: how close to the pad it arrives
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BASESTRAY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _new_save() -> void:
 	var d := Save.fresh()
@@ -35,7 +38,11 @@ func _new_save() -> void:
 	Save.d = d
 	Econ.ensure()
 	HomeLayout.ensure(d)
-	HomeLayout.of(d)["fb"] = 0      # no building pass: the stall is open at every level, so is the Shelter
+	# a farm start picks a random island: pinned, so the run is the same every time
+	HomeLayout.of(d)["seed"] = ISLAND_SEED
+	HomeLayout.of(d)["sk"] = HomeLayout.fs_scale(ISLAND_SEED)
+	HomeLayout.of(d)["fb"] = 0  # no building pass: the stall is open at every level, so is the Shelter
+
 
 func _entry(home, rec: Dictionary) -> Dictionary:
 	for k in home.kins:
@@ -43,12 +50,15 @@ func _entry(home, rec: Dictionary) -> Dictionary:
 			return k
 	return {}
 
+
 func _near_pad(home, k: Dictionary) -> float:
 	return Vector2(k["pos"].x, k["pos"].z).distance_to(Vector2(home.hway.pad["pos"].x, home.hway.pad["pos"].z))
+
 
 func _from_middle(home, k: Dictionary) -> float:
 	var isle := maxi(home.world.island_of(k["pos"].x, k["pos"].z), 0)
 	return Vector2(k["pos"].x, k["pos"].z).distance_to(home.world.islands[isle]["c"])
+
 
 func _memory_of_day(home, nm: String) -> bool:
 	for k in home.kins:
@@ -56,6 +66,7 @@ func _memory_of_day(home, nm: String) -> bool:
 			if String(m["text"]).contains("the day %s arrived" % nm):
 				return true
 	return false
+
 
 func run(m: Node) -> void:
 	main = m
@@ -67,11 +78,14 @@ func run(m: Node) -> void:
 	_new_save()
 	var home = await main._hb_home()
 	home.panel_open = ""
+	home.set_process(false)  # nothing moves on frame time from here: the run below is only the DT steps
+	seed(5)  # the frames of the build above (more of them on a busy machine) used up a varying share of the draws
+	home.world.rng.seed = 5  # (the walks' open spots come from the world's own generator)
 	home.ppos = Vector3(-500, 0, -500)
 	FarmChatter._known.clear()
 	FarmChatter._look_t = 0.0
-	FarmChatter.tick(home, 0.01)      # the first look only learns who lives here
-	home._move_kin(DT)      # the base has met its residents: the next new uid is an arrival
+	FarmChatter.tick(home, 0.01)  # the first look only learns who lives here
+	home._move_kin(DT)  # the base has met its residents: the next new uid is an arrival
 	var cards: Array = Shelter.cards()
 	var stray: Dictionary = cards.filter(func(c): return String(c.get("from", "")) == "")[0]
 	var r := Shelter.adopt(String(stray["id"]))
@@ -90,8 +104,10 @@ func run(m: Node) -> void:
 	ok(not kid.is_empty() and _near_pad(home, kid) < PAD_R, "it arrives at the pad (%.1f m)" % _near_pad(home, kid))
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(home, 0.01)
-	ok(not ComeLook._looks.is_empty() and ComeLook._looks[0]["kind"] == "boki",
-		"the residents come to look (%d)" % ComeLook._looks.size())
+	ok(
+		not ComeLook._looks.is_empty() and ComeLook._looks[0]["kind"] == "boki",
+		"the residents come to look (%d)" % ComeLook._looks.size()
+	)
 	var reacted := false
 	var t := 0.0
 	while t < LOOK_S:
@@ -124,8 +140,18 @@ func run(m: Node) -> void:
 	ok(not played, "the shy Boki joins no tag and no toy")
 	var kid_mean := kid_d / maxf(kid_n, 1.0)
 	var res_mean := res_d / maxf(res_n, 1.0)
-	ok(kid_n > 0 and kid_mean > res_mean + 1.0,
-		"it keeps to the edge (%.1f m out, the others %.1f m)" % [kid_mean, res_mean])
+	# against the island's own typical spot, not the few residents' mean: where those few happen to wander in 150 s
+	# swings by many metres (they were sometimes as far out as the shy one, a flaky red under load)
+	var isle := maxi(home.world.island_of(kid["pos"].x, kid["pos"].z), 0)
+	var mid: Vector2 = home.world.islands[isle]["c"]
+	var typical := 0.0
+	for i in 300:
+		var p: Vector3 = home.world.random_ground(isle)
+		typical += Vector2(p.x, p.z).distance_to(mid) / 300.0
+	ok(
+		kid_n > 0 and kid_mean > typical + 1.0,
+		"it keeps to the edge (%.1f m out, a typical spot %.1f m, the others %.1f m)" % [kid_mean, typical, res_mean]
+	)
 	var left := float(rec.get("shy_s", 0.0))
 	ok(left > 0.0 and left < float(BaseShy.rules()["secs"]), "the shy day is counting down (%.0f s left)" % left)
 	rec["shy_s"] = 1.0

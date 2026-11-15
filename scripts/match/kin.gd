@@ -79,6 +79,7 @@ var catch_prog := 0.0             # (net) 5.0 once a client has asked the host t
 var scan_by: Hunter = null        # who is scanning it right now: its daze timer waits (Capture)
 var scan_at := -9.0               # when that was last confirmed (a scan whose hunter vanished lets go after a few seconds)
 var angry_at: Ent = null
+var angry_since := 0.0            # m.time it first got angry (KinWildPose's startle)
 var power := 1.0                  # treat bonus
 var events := []                  # things that happened this match, written to memory afterwards
 var lines := {}                   # personalised barks, if the AI wrote any
@@ -168,7 +169,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
-	ring.material_override = Models.ring_mat(Color(tc, 0.85), 0.16)
+	ring.material_override = SideRings.mat(Color(tc, 0.85), 0.16)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)
@@ -754,6 +755,7 @@ func _sim_fly(dt: float) -> void:
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
+			KinFollow.land_cue(self)
 			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
 			m.fx.dust(pos, 14)
@@ -796,6 +798,7 @@ func _sim_fly_home(dt: float) -> void:
 			return
 		var merge_now: bool = fly.get("merge", false)
 		_hop_on()
+		KinFollow.land_cue(self, true)
 		if merge_now and not KinMerge.cast(owner_h):
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
@@ -834,7 +837,7 @@ func _sim_active(dt: float) -> void:
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) \
-				or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+				or flat_dist(target) > brain.chase_range() + 3.0 or brain.spares(target) or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -1009,6 +1012,7 @@ func _sim_dazed(dt: float) -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if state in ["dazed", "bench", "fused", "downed"]:
 		return 0.0
+	var calm := angry_at == null
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])
 	opts = bh[1]
@@ -1016,6 +1020,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
 		angry_at = by.owner_h
+	if calm and angry_at:
+		angry_since = m.time
 	if shield > 0.0 and d > 0.0:
 		var soak := minf(shield, d)
 		shield -= soak
@@ -1075,7 +1081,8 @@ func render(delta: float, alpha: float) -> void:
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
 	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
-	var pose_now: String = comp.pose if comp else ""
+	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
+			scan_by != null and Capture.active(scan_by), m.time - angry_since)
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
 	if on_you and owner_h and owner_h.model and not giant.is_empty() and not owner_h.gliding:
@@ -1120,9 +1127,10 @@ func render(delta: float, alpha: float) -> void:
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("starry", state in ["downed", "dazed"])      # a stun's stars are the shared look (StatusLooks)
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
-		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
+		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)

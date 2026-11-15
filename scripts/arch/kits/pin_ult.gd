@@ -12,7 +12,7 @@ extends Node3D
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
 ## and her glowing bow, and hears the cast anywhere on the map (content/vfx/archer.json "ult_cast").
 ## Look: the empower burst, a flare at the bow per shot, the travelling arrow (PinFx kind "ult", sized to
-## the hit width, orchid thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
+## the hit width, red thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
 ## Bond: an arrow that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
 ## kill it caused); a miss pays nothing.
 

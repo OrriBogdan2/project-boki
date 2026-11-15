@@ -163,11 +163,12 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers (Blockers "phase") and terrain don't block,
+## only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty() and not ghost:
-		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
+	if not dyn_walls.is_empty():
+		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
@@ -254,9 +255,8 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		if is_block(px, pz) and ground_at(px, pz) + BLOCK_H > y:
-			return false
-		if ground_at(px, pz) > y + 0.2:
+		var gy := ground_at(px, pz)      # (once a sample: bots' sight tests march this every think)
+		if gy > y + 0.2 or (gy + BLOCK_H > y and is_block(px, pz)):
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue
@@ -1189,7 +1189,9 @@ func build_meshes() -> void:
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	mat.set_shader_parameter("height_tex", tm.height_texture())
+	var heights: ImageTexture = tm.height_texture()
+	mat.set_shader_parameter("height_tex", heights)
+	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())
@@ -2675,7 +2677,7 @@ func _stamp_lair(D: Dictionary, ii: int) -> void:
 	islands[ii]["lair"] = true
 	lair_defs.append({"id": String(D.get("id", "lair%d" % lair_defs.size())), "name": String(D.get("name", "Boss Lair")),
 		"boss": String(D.get("boss", "colossus")), "c": c, "half": hf, "gate": gate, "gate_tiles": gate_tiles, "out": out,
-		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"])})
+		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["breach"])})
 	labels.append({"name": String(D.get("name", "Boss Lair")), "pos": Vector3(c.x, 0, c.y), "kind": "lair", "role": "lair", "height": lv * LEVEL})
 
 ## Nothing else is placed inside a lair: no spawns, chests, camps, wild kin or loot lying about.
@@ -2735,7 +2737,7 @@ func _place_lairs() -> void:
 		var gate := ("e" if to_mid.x > 0 else "w") if absf(to_mid.x) > absf(to_mid.y) else ("s" if to_mid.y > 0 else "n")
 		var boss: String = Data.BOSSES[(b0 + lair_defs.size()) % Data.BOSSES.size()]
 		var nm: String = {"colossus": "The Sunken Forge", "serpent": "Stormcrown Eyrie", "brood": "The Thornhive"}.get(boss, "Boss Lair")
-		var entry: Array = {"colossus": ["dial"], "serpent": ["dial", "runes"], "brood": ["dial", "wards"]}.get(boss, ["dial"])
+		var entry: Array = {"serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
 		_stamp_lair({"id": "lair%d" % lair_defs.size(), "name": nm, "boss": boss, "at": [best.x, best.y], "half": hf, "gate": gate, "entry": entry}, ii)
 		used.append(ii)
 	_clear_lair_spots()

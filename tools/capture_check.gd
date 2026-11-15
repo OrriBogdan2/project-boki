@@ -509,7 +509,7 @@ func _sound() -> void:
 	var rise := "pitch %.2f then %.2f" % [common["lo"], common["hi"]]
 	ok(float(common["lo"]) > 0.0 and common["hi"] > common["lo"] + 0.2, "the scan hum rises with the fill (%s)" % rise)
 	ok(common["caught"] == 1 and common["cues"] == _expect("scan_pop"), "a common catch: chime and call once")
-	ok(Sfx._duck_tw != null and Sfx._duck_tw.is_valid(), "...and the music ducks under it")
+	ok(Sfx.mix._duck_tw != null and Sfx.mix._duck_tw.is_valid(), "...and the music ducks under it")
 	var fine := _scan_through(func(r): r["mutations"] = ["giant"])
 	ok(fine["cues"] == _expect("scan_pop_fine"), "a mutated Boki: the fine chime once %s" % fine["cues"])
 	var rare := _scan_through(func(r): r["shimmer"] = true)

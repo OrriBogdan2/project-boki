@@ -9,25 +9,25 @@ const SYL := {"cindle": ["Cin", "dle"], "puddlet": ["Pud", "let"], "burrlet": ["
 
 ## Little things it does that say what it means without saying it.
 const ACTS := {
-	"food": ["(eyes the cooking pot)", "(its tummy rumbles)", "(sniffs at your pockets)", "(nudges an empty bowl toward you)"],
-	"energy": ["(yawns so wide it wobbles)", "(looks over at its bed)", "(blinks very, very slowly)"],
+	"food": ["(eyes the cooking pot)", "({his} tummy rumbles)", "(sniffs at your pockets)", "(nudges an empty bowl toward you)"],
+	"energy": ["(yawns so wide {he} wobbles)", "(looks over at {his} bed)", "(blinks very, very slowly)"],
 	"clean": ["(shakes off a puff of dust)", "(scratches at a muddy patch)", "(looks at the pond, then at you)"],
 	"joy": ["(drops a ball at your feet)", "(tugs at your sleeve)", "(bounces in a little circle)"],
 	"hello": ["(hops over to you)", "(spins around once)", "(wiggles all over)"],
-	"cold": ["(keeps its distance)", "(watches you sideways)", "(doesn't come any closer)"],
-	"love": ["(rubs against your leg)", "(flops onto its back)", "(nuzzles your hand)"],
-	"mean": ["(turns its back on you)", "(flattens its ears)", "(stomps off a few steps)"],
+	"cold": ["(keeps {his} distance)", "(watches you sideways)", "(doesn't come any closer)"],
+	"love": ["(rubs against your leg)", "(flops onto {his} back)", "(nuzzles your hand)"],
+	"mean": ["(turns {his} back on you)", "(flattens {his} ears)", "(stomps off a few steps)"],
 	"sorry": ["(peeks back at you)", "(inches a little closer)"],
-	"full": ["(pats its round belly)", "(sits down with a happy sigh)"],
-	"brave": ["(swipes at the air)", "(puffs itself up)", "(paws the ground, ready)"],
+	"full": ["(pats {his} round belly)", "(sits down with a happy sigh)"],
+	"brave": ["(swipes at the air)", "(puffs {himself} up)", "(paws the ground, ready)"],
 	"timid": ["(hides behind your leg)", "(looks up at you, unsure)"],
-	"curious": ["(tilts its head)", "(stares at you, thinking hard)"],
-	"proud": ["(puffs up proudly)", "(stands as tall as it can)"],
+	"curious": ["(tilts {his} head)", "(stares at you, thinking hard)"],
+	"proud": ["(puffs up proudly)", "(stands as tall as {he} can)"],
 	"play": ["(darts off and looks back at you)", "(crouches low, tail going)"],
 	"bye": ["(watches you go)", "(waves a paw)", "(follows you a few steps)"],
 	"home": ["(rolls around in the grass)", "(sniffs a flower)"],
 	"friends": ["(looks over at the other Boki)", "(calls out to someone across the farm)"],
-	"listen": ["(listens with its ears up)", "(nods along)", "(sits right in front of you)"],
+	"listen": ["(listens with {his} ears up)", "(nods along)", "(sits right in front of you)"],
 }
 
 ## A few words it picks up first.
@@ -73,6 +73,17 @@ static func fill(species: String, pattern: String, rec := {}) -> String:
 	out = out.replace("{N}", String(rec.get("name", p["F"])))
 	return out.substr(0, 1).to_upper() + out.substr(1)
 
+## A line's {he} {his} {him} {himself} for a Boki's sex ("m", "f"; "" reads as they/their).
+static func pronouns(text: String, sex: String) -> String:
+	var p := {"m": ["he", "his", "him", "himself"], "f": ["she", "her", "her", "herself"]}.get(
+			sex, ["they", "their", "them", "themself"]) as Array
+	var out := text.replace("{he}", p[0]).replace("{He}", String(p[0]).capitalize())
+	return out.replace("{his}", p[1]).replace("{him}", p[2]).replace("{himself}", p[3])
+
+## The same for a save record, whose sex is read from its rolls.
+static func about(rec: Dictionary, text: String) -> String:
+	return pronouns(text, Unique.sex(rec))
+
 static func _pick(arr: Array, salt: int) -> String:
 	return String(arr[absi(salt) % arr.size()])
 
@@ -86,7 +97,7 @@ static func say(rec: Dictionary, feel: String, act_key := "", salt := -1) -> Str
 	if salt < 0: salt = randi()
 	var s := babble(rec["species"], feel, salt)
 	if act_key != "" and ACTS.has(act_key):
-		s += " " + _pick(ACTS[act_key], salt / 3)
+		s += " " + about(rec, _pick(ACTS[act_key], salt / 3))
 	return s
 
 ## Answers something you said, at the kin's level of speech. Fluent kin use KinBrain.
@@ -143,7 +154,7 @@ static func reply(rec: Dictionary, text: String) -> String:
 		var mem: Array = rec.get("memory", [])
 		var m := String(mem[-1]["text"]).trim_prefix("you ") if mem.size() > 0 else "farm"
 		var line := fill(rec["species"], _pick(SIMPLE.get(key, SIMPLE["chat"]), salt), rec).replace("{M}", " ".join(m.split(" ").slice(0, 4)))
-		return line + (" " + _pick(ACTS[act], salt / 7) if salt % 3 == 0 else "")
+		return line + (" " + about(rec, _pick(ACTS[act], salt / 7)) if salt % 3 == 0 else "")
 	var s := babble(rec["species"], feel, salt)
 	if stage == 1:
 		var w: String = WORDS.get(key, WORDS.get(intent, ""))
@@ -151,4 +162,4 @@ static func reply(rec: Dictionary, text: String) -> String:
 			var p := _parts(rec["species"])
 			var punct := "?" if feel == "question" else ("..." if feel in ["sad", "sleepy"] else "!")
 			s = "%s ...%s%s %s!" % [s, w, punct, p["A"]]
-	return s + " " + _pick(ACTS.get(act, ACTS["listen"]), salt / 5)
+	return s + " " + about(rec, _pick(ACTS.get(act, ACTS["listen"]), salt / 5))

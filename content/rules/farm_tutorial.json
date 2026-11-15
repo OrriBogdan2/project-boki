@@ -300,12 +300,18 @@
 		"title": "Goals",
 		"max": 5,
 		"per_source": {
+			"shelter": 1,
 			"first_day": 5,
 			"unlock": 2,
 			"mastery": 1,
 			"milestone": 1,
 			"level": 1
 		},
+		"shelter": {
+			"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)",
+			"locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"
+		},
+		"shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.",
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {

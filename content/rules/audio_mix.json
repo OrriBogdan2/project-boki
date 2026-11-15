@@ -1,0 +1,12 @@
+{
+ "_doc": "The audio buses and the big-event duck (scripts/core/sfx_mix.gd, docs/AUDIO.md). bus_of_category: a sound's category in its set (content/sfx/<group>.json) picks its bus; anything else plays on SFX. voice_prefixes: sounds outside the sets that are voices (monster cries). big_event: these sounds, when heard, dip Music and Ambience by dip_db (dB), reached in in_s, held hold_s, back in recover_s (seconds).",
+ "bus_of_category": {"boki": "Boki", "ui": "UI", "grunt": "Voice"},
+ "voice_prefixes": ["v_"],
+ "big_event": {
+  "sounds": ["ult_tag_foe", "heart_reveal", "heart_gate_open", "steal_won", "steal_lost"],
+  "dip_db": -6.0,
+  "in_s": 0.12,
+  "hold_s": 0.3,
+  "recover_s": 1.0
+ }
+}
