@@ -3,18 +3,19 @@ extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
 ##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate), 1 when it rides as a wisp (KinWisp; Net 0.24.14),
-##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.24.14)]
+##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.24.14),
+##     loose seconds / carrier id / stolen summon used (KinSteal; Net 0.24.15)]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
-##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
+##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). wgrab / wsum (grab a loose Boki wisp, or a stolen one's summon: KinSteal; nid = the hunter, extra = the Boki's nid), wkill (a rival killed a summon: nid = its owner, extra = the killer's team, KinSummon; Net 0.24.15). The owner's game runs the rescue and the recovery timer; other
 ##     games get the state and play the moment.
 
 const KIN_AT := 19
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k)
+	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k) + KinSteal.net_extra(k)
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 4:
@@ -30,6 +31,8 @@ static func apply_kin(k: Kin, it: Array) -> void:
 		k.summon.left = float(it[KIN_AT + 6])
 		k.summon.shrink = float(it[KIN_AT + 7])
 		k.summon.cd = float(it[KIN_AT + 8])
+	if it.size() > KIN_AT + 11:
+		KinSteal.apply_net(k, float(it[KIN_AT + 9]), String(it[KIN_AT + 10]), int(it[KIN_AT + 11]) == 1)
 
 static func _summon_extra(k: Kin) -> Array:
 	var s := k.summon
@@ -122,6 +125,11 @@ static func on_event(m: Match, x: Array) -> void:
 		"unbond":
 			if e is Hunter:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
+		"wkill":
+			KinSummon.show_reveal(m, at, int(String(x[6])))
+		"wgrab", "wsum":
+			if e is Hunter:
+				KinSteal.on_net(m, e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 		"scoop", "round":

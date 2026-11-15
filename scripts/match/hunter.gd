@@ -398,7 +398,7 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried():
+	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
 		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
@@ -418,6 +418,7 @@ func _refresh_kin_stats() -> void:
 		if kin_carry_on():
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, k.carry_k)
+	KinSteal.add_passives(self, out)        # stolen wisps at a share, clamped with the rest below
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
