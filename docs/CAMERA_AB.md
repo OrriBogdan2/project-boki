@@ -2,7 +2,7 @@
 
 For the owner's call on DEBT "Camera framing vs the source". Nothing here changes a default: the flag is the Settings camera style
 `source_scale` ("Far view, big Hunters (test)", `content/rules/camera.json`, built in ext/feel-camera-source-flag, see
-docs/MOVEMENT_FEEL.md "Source scale flag"). Off is the Supervive style.
+docs/MOVEMENT_FEEL.md "Source scale flag"). Off is the default style.
 
 ## The shots
 
