@@ -53,8 +53,6 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
   level; the portrait framing gets redone once the cap's height is known.
 
 ## Scaling used (ratios from the source)
-- Orb 14.5 dmg / 0.6s (the data's 263 share of a level-15 target, 17.1 on our 154, less the ~15% held-fire DPS the owner gave up: DECISIONS 2026-11-06, item 117), 30 m/s, full 12.25m range (owner 11-10: -12.5% from 14m), through walls (owner, item 60); a full charge is +34% (owner's data 353 vs 263; was +30%), x1.4 speed, +90% size, 10% slow 1.5s (wiki).
-- Snap 18 (the data's 277 share of a level-15 target; 0.76x the seed, 277 vs 365), stun 0.8-1.8s by distance (card), one charge, 10s.
 - Orb 9 dmg / 0.6s, 30 m/s, full 12.25m range (owner 11-10: -12.5% from 14m), through walls (owner, item 60); a full charge is +34% (owner's data 353 vs 263; was +30%), x1.4 speed, +90% size, 6% slow 1.5s (the in-game card; the wiki says 10%, see "Orb slow" below).
 - Snap 9.5, about 1.05x an orb (data pass: owner's data 277 vs the orb's 263), stun 0.8-1.8s by distance (card), one charge, 10s.
 - Orb 14.5 dmg / 0.6s (the data's 263 share of a level-15 target, 17.1 on our 154, less the ~15% held-fire DPS the owner gave up: DECISIONS 2026-11-06, item 117), 30 m/s, full 12.25m range (owner 11-10: -12.5% from 14m), through walls (owner, item 60); a full charge is +34% (owner's data 353 vs 263; was +30%), x1.4 speed, +90% size, 10% slow 1.5s (wiki).
@@ -197,12 +195,6 @@ draws the same sigil filling over the flight (`KitLooks.timed_sigil`); a Trade c
 Net.VERSION 0.24.5.
 
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
-Conversions (2026-11-11, `--ttk-check`): damage as a share of a level-15 target (2364 health, 154 on ours): Snap 277 -> 18,
-the seed 365 -> 23.7, its damage over time 250 a second -> 16.2; the orb 263 -> 17.1 less the owner's ~15% (item 117) -> 14.5.
-Full orb 353 -> +34%, Swollen Snap 399 -> +44%. Time to knock is 1.09 (LMB) and 1.13 / 1.00 (combo) of the source (docs/TTK.md);
-the ratios are pinned in content/rules/kit_parity.json. Durations and cooldowns match directly: Snap 10s, Trade
-9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield by health: 375 of a
-2074-hp hunter (level 15) -> 26 of 145.
 Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, full orb 353 -> +34%, Swollen Snap 399 ->
 +44%, the seed 365 -> 12.5, its damage over time 250 a second -> 8.2. Durations and cooldowns match directly: Snap 10s, Trade
 9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield like Cinder's ram shield
@@ -244,9 +236,6 @@ A full orb slows **6% for 1.5s** (`lmb.prime_slow` 0.06, `prime_slow_t` 1.5; was
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
 | Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
-| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 30% speed (item 75; was 20%; 25-35% band, no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
-| Hands of Fate: "Void floats": no footstep noise, avoids ground hazards (data card); no footstep noises, unaffected by water or sand effects (wiki) | data card, wiki | no (only the 0.3 m visual hover; no landing seen) | built: no footsteps (gait 0.1); lava, spore, toxic, molten and hazard-tagged damage and their burn/slow never touch him (tags in `ostra.json` passive.float_tags; a sky strike still does); no water or sand slows exist on any map. NOT in the source, so not built: hovering over small gaps (only the Trade hovers over the abyss, owner and wiki), a slower fall, ignoring other ground zones, a softer landing. Asserted in --ostra-combo-check (1 m gap under him: he falls; a 3 m fall: free-fall speed and the shared landing squash) |
-| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing; wisps wait on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 7) |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies in his 1.5m ring as he leaves (47, 3s), checked as he goes; none at the landing |
 | Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 67.5% speed (owner 11-10 playtest; item 75 had 30%, 11-08 35%, was 20%; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
@@ -379,29 +368,6 @@ Suggestions, not built: a "firing faster lowers speed and damage" penalty (card 
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
 
-## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
-What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
-root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
-5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
-she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
-most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
-resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
-Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
-stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
-(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
-
-| Slot | CC kind | Source | Ours | Verdict |
-|---|---|---|---|---|
-| RMB Shard Snap wind-up (0.2 s, [F] `0115`) | stun | [?] | cancelled, charge spent | [?] |
-| RMB wind-up | knocked | ends | cancelled | match (cooldown [?]) |
-| RMB wind-up | knockback, root | [?] | no check: the shards go | [?] |
-| Shift Lantern Trade aim (hold) | stun, knocked | [?] / ends | the aim ends with no cast, the dash not spent | [?] / match |
-| Shift Trade lob in flight | stun, knocked | [?] / ends | called off, nobody swaps, the dash stays spent | [?] / match (cooldown [?]) |
-| Shift aim and lob | knockback, root | [?] | no check | [?] |
-| E Brimseed (planted, recast to pop) | stun | [?] | it keeps growing; the recast is denied while stunned | [?] |
-| E Brimseed | knocked | [?] (a planted bomb, not in the hand) | fizzles with no damage | [?] |
-| X Nightwell cast lock | stun, knockback, knocked | [?] | frees him; the well goes on (placed) | [?] |
-| X Nightwell | root | [?] | no check | [?] |
 ## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
 
 Every slot measured three ways: the source from briefs/hero-ref/ostra.md (one frame = 0.2 s, the ult strip 0.1 s), the

@@ -157,7 +157,7 @@ func _kmoves(a: String) -> void:
 	var count := 0
 	var dead: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesGil.MOVES]:
+			KMovesCare.MOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
 		for mv in t:
 			count += 1
 			var moved := {}

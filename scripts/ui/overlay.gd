@@ -142,8 +142,8 @@ func shot_demo(which: PackedStringArray) -> void:
 				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
-			var lw := LeaveMatch.warning(LeaveMatch.Kind.get(arg.to_upper(), LeaveMatch.Kind.DEEP), true)
-			UI.confirm(root, lw["head"], lw["body"], "Leave", close, arg != "practice")
+			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
+				"Leave", close)
 		"tooltip":
 			tab = "Controls"
 			open_settings()
@@ -238,11 +238,11 @@ func open_pause(where: String) -> void:
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
-		var ask := func(): LeaveMatch.ask(root, m, leave)
 		if tut:
-			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
-			var lb: Button = _menu_item(v, "Leave match", "back", ask, "", "Danger")
+			var lb: Button = _menu_item(v, "Leave match", "back", func():
+				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		_menu_item(v, "Save and leave", "home", func():
@@ -258,13 +258,7 @@ func open_controls() -> void:
 	var hero: String = (psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save())
 	ControlsCard.fill(v, hero)
 	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
-	UI.footer_left(v).add_child(UI.ghost("Help: words", open_words))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
-
-## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met. Linked from the
-## Controls page footer (Esc > More > Controls), so the Esc menu stays at four buttons.
-func open_words() -> void:
-	WordsView.fill(_page("words", "Help: words", 560, true))
 
 func _menu_item(v: VBoxContainer, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
 	var b := UI.button(txt, cb, 388.0, icon)
@@ -402,7 +396,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")
 	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
-	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	var follow := [["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
 	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 

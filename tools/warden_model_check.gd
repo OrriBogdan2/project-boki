@@ -15,8 +15,7 @@ const EPS := 0.0005
 ## The heights follow the owner's final height chart (Nov 8, ext/hero-heights) where it moved a Warden off its sheet.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	# (Albert appeal3, owner 11-10: the big helmet and masts stand 1.3x the old top, as wide; body size 1.8, 0.9 of
-	# his sheet, owner 11-08; hit_r kept)
+	# (Albert appeal3, owner 11-10: the big helmet and masts stand 1.3x the old top, as wide)
 	"bulwark": {"hit_r": 0.46, "height": 1.03, "height_3d": 1.55, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
@@ -44,7 +43,7 @@ const WARDENS := {
 	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
 	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
 	# yet, so "moves" is "" and the rig's generic poses play; the v95 swap's hat stands lower: 0.896)
-	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.9, "width": [0.5, 1.5], "moves": "gil_"},
+	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.9, "width": [0.5, 1.5], "moves": ""},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -123,7 +122,7 @@ func _anim(id: String) -> void:
 	var still: Array = []
 	var moves: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
-			KMovesCare.MOVES, KMovesPair.MOVES, KMovesGil.MOVES]:
+			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:

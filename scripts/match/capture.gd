@@ -155,7 +155,7 @@ const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 ## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It
 ## interrupts a scan here and a rescue (KinDowned); plain damage and the small shove most hits carry do not.
 static func controlled(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
+	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
 ## What stops a channel on the hunter (a scan): "jump" or "dash" (your choice), or "cc" (crowd control). "" = none.
 static func hunter_stop(h: Hunter) -> String:
@@ -223,8 +223,6 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
 	m._catch(h, k)
-	if h.is_local():
-		UiSfx.captured()
 
 ## Release a capsule from your box. The Boki goes free (it is not put back in the world).
 static func release(m, h: Hunter, idx: int) -> bool:

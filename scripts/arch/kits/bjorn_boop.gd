@@ -8,7 +8,6 @@ extends RefCounted
 ## itself (Verbs reads a following wall's "dist" each step), so the block and the look move together.
 
 const PULL := 0.15             # m the aegis draws back in the wind-up: the anticipation before the snap
-const GUARD_HOLD := 0.12       # s into bul_guard its hold starts (breaker.json hold_from): the guard resumes held
 const BODY_Y := 2.2            # m: a foe further above or below the wall's base than this is out of reach
 const POP_COL := Color("ffe6a8")
 const RING_COL := Color("ffd27a")
@@ -40,7 +39,6 @@ func press() -> void:
 	home = float(k.wall["dist"])
 	ready_at = m.time + float(bd()["cd"])
 	boops += 1
-	k.play("bul_boop")
 	m.sfx("bjorn_shield_up", h.pos, -9.0, 1.5)
 
 func tick(dt: float) -> void:
@@ -69,8 +67,6 @@ func tick(dt: float) -> void:
 	if t >= w3:
 		k.wall["dist"] = home
 		t = -1.0
-		k.play("bul_guard")
-		k.anim_at = m.time - GUARD_HOLD
 
 ## The snap lands: every foe in front of him, out to "reach" m past the thrust aegis and across its width, is
 ## shoved back along the aim.

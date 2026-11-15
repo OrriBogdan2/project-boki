@@ -6,20 +6,6 @@ extends "res://tools/hero_pair_check.gd"
 ## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
 ## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
 ## (tools/dash_flow_check.gd), and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
-## Last, his sound set: every move and phase that ran plays a sound of its own (content/vfx/gil.json, made by
-## tools/gen_sfx_gil.py), none shared with another move or the stock set, and each cast plays its own move (every
-## move but the dive has his clip); the potion leaves his hand on the toss clip's pull-out key.
-
-## Each move or phase of the kit -> the sound it plays (the thrusts and the dash pick theirs by "k" and HeroSfx).
-const OWN_SOUNDS := {
-	"thrust": ["gil_thrust", "gil_thrust_low"], "lunge": ["gil_lunge"], "thrust_hit": ["gil_thrust_hit"],
-	"lunge_hit": ["gil_lunge_hit"], "tide_wind": ["gil_tide_wind"], "tide_full": ["gil_tide_full"],
-	"tide_lunge": ["gil_tide_lunge"], "tide_hit": ["gil_tide_hit"], "throw": ["gil_toss"],
-	"shatter_thunder": ["gil_pop_thunder"], "shatter_slime": ["gil_pop_slime"], "shatter_air": ["gil_pop_air"],
-	"shatter_fire": ["gil_pop_fire"], "shatter_zeep": ["gil_pop_zeep"], "mark": ["gil_mark"],
-	"beached": ["gil_beached"], "surface": ["gil_surface"], "spin": ["gil_spin"], "spout": ["gil_spout"],
-	"wave": ["gil_wave"], "wave_land": ["gil_wave_land"],
-}
 
 var m: Match
 var P: Hunter
@@ -41,7 +27,6 @@ func run(main_node: Node) -> void:
 	_tide()
 	_vials()
 	_hold_and_air()
-	_pull_out()
 	_beach()
 	_swim()
 	_riptide()
@@ -51,8 +36,6 @@ func run(main_node: Node) -> void:
 	_cancels()
 	_recast()
 	_clips()
-	_sounds()
-	_moves()
 	await done(m)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "gil")
 	ok("dash flow: every row in content/dash_flow/gil.json holds, every slot casts mid-jump, holds through moves",
@@ -145,7 +128,7 @@ func _fencer() -> void:
 	step(m, 1.1, func():
 		top["t"] += DT
 		P.inp["fire"] = fmod(top["t"], 0.12) < 0.05      # clicking (holding is the Tide Lunge)
-		top["pose"] = top["pose"] or K.anim_id == "gil_thrust_a"
+		top["pose"] = top["pose"] or K.anim_id == "gil_thrust_1"
 		top["slow"] = maxf(top["slow"], T.slow_t)
 		top["n"] = K.combo_n)
 	P.inp["fire"] = false
@@ -194,7 +177,7 @@ func _vials() -> void:
 		var x0 := T.pos.x
 		var looks := int(HeroVfx.of(m).plays.get("shatter_" + v, 0))
 		tap(m, P)
-		var thrown := K.anim_id == "gil_toss"
+		var thrown := K.anim_id == "gil_throw"
 		var top := _land()
 		var hit := dmg(T) > 0.0
 		ok("%s: the toss pose, and the bottle breaks in its own look" % v,
@@ -244,13 +227,12 @@ func _puddle() -> void:
 	var in_col: Color = inside.get_shader_parameter("color")
 	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
 		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
-			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * GilKit.PUDDLE_FILL <= 0.25,
+			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
 		"rim %s inside %s" % [steady, in_col])
 	var at: Vector3 = pd["at"]
 	var r := float(pd["r"])
 	var on_it := func(rg: Dictionary) -> bool:
-		var n := rg["node"] as Node3D       # (Fx.ring sizes its quad: scale x RING_REACH is the radius)
-		return absf(n.scale.x * Fx.RING_REACH - r) < 0.05 and n.global_position.distance_to(at) < 0.5
+		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
 	var strobe := false
 	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
 		step(m, DT)
@@ -753,71 +735,3 @@ func _telegraphs() -> void:
 	step(m, 0.15)
 	ok("telegraph: none of it made an Fx telegraph node", m.fx.teles.size() == nodes,
 		"%d -> %d" % [nodes, m.fx.teles.size()])
-
-## The potion stays in the bag until the toss clip's pull-out key (rmb draw), then leaves his hand.
-func _pull_out() -> void:
-	_reset(6.0)
-	tap(m, P)
-	var held: bool = not K.flying.is_empty() and not K.flying[0].has("from")
-	while not K.flying.is_empty() and not K.flying[0].has("from") and m.time - K.anim_at < 1.0:
-		step(m, DT)
-	var out_t := m.time - K.anim_at
-	var draw := float(K.rmb_def()["draw"])
-	ok("Grab Bag: the potion comes out of the bag on the toss key", held and absf(out_t - draw) <= 1.0 / 30.0,
-		"out %.3f s, key %.3f s" % [out_t, draw])
-	_land()
-
-
-
-func _sounds() -> void:
-	var moves: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/gil.json"))["moves"]
-	var set_names: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/gil.json"))["sounds"]
-	var wrong := []
-	var silent := []
-	for mv in OWN_SOUNDS:
-		var names := (moves[mv].get("sfx", []) as Array).map(func(e): return String(e["n"]))
-		if names != OWN_SOUNDS[mv] or not names.all(func(n): return set_names.has(n) and Sfx.ensure(n)):
-			wrong.append("%s %s" % [mv, names])
-		if int(HeroVfx.of(m).plays.get(mv, 0)) == 0:
-			silent.append(mv)
-	ok("sounds: every move and phase plays its own levelled gil_* sound (wrong: %s)" % [wrong], wrong.is_empty())
-	ok("sounds: every one of those moves ran in this check (never ran: %s)" % [silent], silent.is_empty())
-	ok("sounds: the dive is the dash sound alone (no second layer)", not moves["dive"].has("sfx"))
-	P.grounded = true
-	var ground := HeroSfx.dash_name(P)
-	P.grounded = false
-	var air := HeroSfx.dash_name(P)
-	P.grounded = true
-	ok("sounds: Ground Swim dives in gil_dash, the air dash plays gil_dash_air",
-		ground == "gil_dash" and air == "gil_dash_air", "%s / %s" % [ground, air])
-
-## The moves each cast plays (KMovesGil ids, content/rules/warden_anim/gil.json), in the order they play. The dive
-## is the rig's keyed pose, not a clip: it takes the whole body under the ground, the swim clip only
-## sinks him to the fin.
-func _moves() -> void:
-	var seen: Array = []
-	var watch := func():
-		if K.anim_id != "" and (seen.is_empty() or seen[-1] != K.anim_id):
-			seen.append(K.anim_id)
-	_reset(6.0)
-	tap(m, P)
-	watch.call()
-	K.on_dash(false)
-	step(m, 0.8, watch)
-	K.use_e()
-	step(m, 0.3, watch)
-	K.e_recast()
-	step(m, 0.1, watch)
-	P.lvl = 6
-	K.cd["x"] = 0.0
-	K.cast_ult()
-	step(m, 1.3, watch)
-	var want := ["gil_toss", "gil_dive", "gil_surface", "gil_spin", "gil_spout", "gil_surf", "gil_wave_land"]
-	ok("moves: the Grab Bag, Ground Swim, Riptide and Tidal Wave each play theirs", seen == want, str(seen))
-	var clips: Dictionary = WardenClips.data("gil").get("kmoves", {})
-	var bare := want.filter(func(mv: String) -> bool: return mv != "gil_dive" and not clips.has(mv))
-	ok("moves: each has a clip in his map", bare.is_empty(), str(bare))
-	_reset(6.0)
-	K.use_e()
-	K._drop_holds()
-	ok("moves: a spin cut short (a stun) lets go of the twirl", K.anim_id == "", K.anim_id)

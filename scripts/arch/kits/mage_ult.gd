@@ -107,9 +107,7 @@ func tick(dt: float) -> void:
 	var xd := data()
 	match phase():
 		CROUCH:
-			if kit.h.downed:
-				drop()                      # knocked in the crouch: she never takes off (mage.md "Interrupts")
-			elif _moving():
+			if _moving():
 				leap["t"] = 0.0             # a Shift in the crouch: the crouch waits for it, then starts over
 				leap["moved"] = true
 			elif bool(leap.get("moved", false)):

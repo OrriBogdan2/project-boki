@@ -66,7 +66,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 [dredge.mp4](dredge.mp4)
 
 Still differs:
-- Cooldowns: Abyssal Hand 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
+- Cooldowns: Deep Reach 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
 - Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
@@ -209,18 +209,17 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
 [gunslinger.mp4](gunslinger.mp4)
 
 Still differs:
-- RMB Coin Blast (was Burr Charge): a coin flicked from her cyborg hand on the press along a fixed 10.5 m lane, no
-  hold lane (owner item 112, 11-08); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
+- RMB Burr Charge: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
+  112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
   still sticks and blows the cone (the "always procs in the air" bug); `ext/vex-rmb-1111` makes it a dud.
-- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Palm Lance 11.5 vs 12 / 10,
+- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Longneedle 11.5 vs 12 / 10,
   Cinderfall 42 vs 55 (gap 10, owner call).
 - Cinderfall's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
-- The Coin Blast and Palm Lance names, the coin and the palm origin (DECISIONS 11-08) are built on
-  `ext/vex-coin-palm-1108`; the beam and the coin's trail are still ember (the green-fire recolour is `ext/vex-greenfire-1108`).
+- The Coin Blast rename and coin look (DECISIONS 11-08) are not built.
 - Her light is ember orange (our palette); the source's is green and cyan with a purple slide trail [F 0118].
 
 Seen in the reel: the rifle hits the dummy from 7 m; RMB is a red tracer to the dummy, which reads DAZED with a gold
-pip; Palm Lance is a long orange line through the rock and past the frame, like the footage's beam through terrain
+pip; Longneedle is a long orange line through the rock and past the frame, like the footage's beam through terrain
 [F 0182] but thin, with none of its green-white thickness or smoke ring [F 0170]; Cinderfall shoots a light column
 up, then a ticked orange disc and a burning patch with SLOWED, the footage's beats [F 0197, 0203]; the slide shows
 a pale ring at her feet for a few frames at the start, which the owner's "no rings on dashes" rule (gunslinger.md row 10)
@@ -299,7 +298,8 @@ Still differs:
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
   (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
   stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
-- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
+- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches. Range, past-the-cursor flight,
+  speed and comet size now match (13.5 m, ext/meeko-crook-range); this reel predates it and its cursor sits on the dummy.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
@@ -338,7 +338,7 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+- Shardskin: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
   a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
   damage and knockback only.
 

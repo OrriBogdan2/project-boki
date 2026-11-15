@@ -9,7 +9,7 @@ extends ArchKit
 
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
-var flying: Array = []              # thrown potions: {at, t, left, v, id, out_at (it leaves his hand), from}
+var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
 var puddles: Array = []             # slime puddles: {at, r, t, left, k, tick, node, rim, inside}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
@@ -78,7 +78,7 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 # ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
-const THRUSTS := ["gil_thrust_a", "gil_thrust_b", "gil_lunge"]   # one per chain step (his clips, KMovesGil keys)
+const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
 const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
 
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
@@ -107,7 +107,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 	elif held and not bot and m.time - press_at >= float(lmb_def()["tide"]["after"]):
 		lmb_t = 0.0
 		play("gil_tide_wind")
-		vfx("tide_wind", h.pos)
 	return true
 
 func _thrust() -> void:
@@ -123,7 +122,7 @@ func _thrust() -> void:
 	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	play(THRUSTS[i])
-	var o := {"len": float(ld["reach"][i]), "k": float(i)}      # k 1: the second thrust's own sound
+	var o := {"len": float(ld["reach"][i])}
 	if i == 2: vfx("lunge", h.pos, h.aim_dir(), o)
 	else: vfx("thrust", h.pos, h.aim_dir(), o)
 
@@ -215,13 +214,9 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	# (the potion leaves the bag on the toss clip's pull-out key, rmb draw s after the press, and flies from there)
-	flying.append({"at": at, "t": ft, "left": ft, "v": v, "id": _tele_id(), "out_at": m.time + float(rd["draw"])})
-	play("gil_toss")
-
-## The potion leaves his hand: it flies from where the hand is now.
-func _let_go(it: Dictionary) -> void:
-	it["from"] = HeroVfx.of(m).anchor_pos(h, "hand_l")
+	var hand := HeroVfx.of(m).anchor_pos(h, "hand_l")
+	flying.append({"at": at, "from": hand, "t": ft, "left": ft, "v": v, "id": _tele_id()})
+	play("gil_throw")
 	vfx("throw", h.pos)
 
 func rmb_hold_tick(t: float) -> void:
@@ -285,18 +280,18 @@ const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slo
 const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
 const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
 const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
-const PUDDLE_IN_A := 0.8        # the inside's alpha: filled at PUDDLE_FILL of it (0.24, the zone rule's 0.25 cap)
-const PUDDLE_FILL := 0.3        # the ring shader's flat fill share under the rim
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
 
 ## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
-## Gil's lit rim over a faint flat inside in the slime's colour.
+## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
 func _add_puddle(at: Vector3, vd: Dictionary) -> void:
 	var r := float(vd["puddle_r"])
 	var n := Node3D.new()
 	var quad := Models.flat_quad(r * 2.0)
 	var inside := Models.ring_mat(Color(col_of(vd), PUDDLE_IN_A), 0.0)
-	inside.set_shader_parameter("fill", PUDDLE_FILL)
+	inside.set_shader_parameter("wash", 1.0)
 	var rim := Models.ring_mat(Arch.color(h.arch), PUDDLE_RIM)
+	rim.set_shader_parameter("halo", 1.0)
 	Models.part(n, quad, inside, Vector3(0, 0.06, 0))
 	Models.part(n, quad, rim, Vector3(0, 0.08, 0))
 	ShadowPolicy.off(n)
@@ -334,26 +329,12 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 	if n >= int(pd.get("need", 3)) and m.time >= float(beach_at.get(key, -99.0)):
 		marks.erase(key)
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
-		CombatBus.tech.emit(h, "gil")
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
-
-## The drill rig (SignatureDrill): one splash mark on `f`, of an effect that is not in the next two potions.
-func add_mark(f: Ent) -> void:
-	var next := next_vial()                   # refills an empty bag first
-	var after := String(bag[-2]) if bag.size() > 1 else ""
-	var soon := [vial_def(next).get("mark", ""), vial_def(after).get("mark", "")]
-	for v in rmb_def().get("vials", {}):
-		var mk := String(vial_def(String(v)).get("mark", v))
-		if mk not in soon:
-			var have: Dictionary = marks.get(f.get_instance_id(), {})
-			have[mk] = m.time
-			marks[f.get_instance_id()] = have
-			return
 
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:
@@ -408,12 +389,6 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return spin_t >= 0.0
 
-## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
-func recast_window() -> Dictionary:
-	if spin_t < 0.0:
-		return {}
-	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
-
 func e_recast() -> bool:
 	if spin_t < 0.0:
 		return false
@@ -458,9 +433,9 @@ func _release_spout() -> void:
 	var w := lerpf(float(ed["width"][0]), float(ed["width"][1]), k)
 	var spd := lerpf(float(ed["speed"][0]), float(ed["speed"][1]), k)
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
-		"id": _tele_id(), "from": h.pos, "len": length, "col": col_of(ed),
+		"id": _tele_id(), "from": h.pos, "len": length,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
-		"ab": "k1", "fx_t": 0.0})
+		"col": col_of(ed), "ab": "k1", "fx_t": 0.0})
 	play("gil_spout")
 	vfx("spout", h.pos, dir, {"len": length, "w": w, "k": k})
 
@@ -523,10 +498,10 @@ func _start_wave() -> bool:
 	var length := float(xd["range"])
 	untarget_t = t
 	wave = {"p": Vector2(h.pos.x, h.pos.z) - dir * 0.5, "y": h.pos.y, "dir": dir, "left": length + 0.5,
-		"id": "x", "from": h.pos, "len": length, "col": col_of(xd),
+		"id": "x", "from": h.pos, "len": length,
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
-		"dmg": float(xd["dmg"]) * power("ult"), "ab": "ult", "fx_t": 0.0}
+		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult", "fx_t": 0.0}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	# along the wave's own line: a bare dash steers by the move keys, so a moving cast surfed off the wave
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t, "dir": dir}], h, ctx)
@@ -536,9 +511,9 @@ func _start_wave() -> bool:
 
 func _land_wave() -> void:
 	var xd := x_def()
-	ReceiverCue.shield(h, float(xd["shield"]), col_of(xd), ShieldSrc.TIDE)
+	ShieldSrc.give(h, float(xd["shield"]), ShieldSrc.TIDE)
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
-	play("gil_wave_land")
+	play("gil_land")
 	vfx("wave_land", h.pos)
 
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -546,26 +521,17 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
-## The landing circle everyone sees, filling from the toss until the potion lands.
-func _landing_tele(it: Dictionary, vd: Dictionary, k: float) -> void:
-	AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
-		"all": true, "alpha": TELE_A, "lw": TELE_LW})
-
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	for it in flying.duplicate():
-		var vd := vial_def(String(it["v"]))
-		if not it.has("from"):
-			# (a ms early: the step clock adds up in floats)
-			if m.time < float(it["out_at"]) - 0.001:
-				_landing_tele(it, vd, 0.0)
-				continue
-			_let_go(it)
 		it["left"] = float(it["left"]) - dt
 		var k := 1.0 - clampf(float(it["left"]) / maxf(0.01, float(it["t"])), 0.0, 1.0)
 		var p: Vector3 = (it["from"] as Vector3).lerp(it["at"], k) + Vector3(0, sin(k * PI) * 2.0, 0)
+		var vd := vial_def(String(it["v"]))
 		m.fx.burst(p, col_of(vd), 1, 0.3, 0.25, 0.0)
-		_landing_tele(it, vd, k)
+		# the landing circle everyone sees, filling until the potion lands
+		AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
+			"all": true, "alpha": TELE_A, "lw": TELE_LW})
 		if float(it["left"]) <= 0.0:
 			flying.erase(it)
 			_shatter(it)
@@ -624,7 +590,6 @@ func _end_stale_hold() -> void:
 
 # ------------------------------------------------------------------ bots
 const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
-const BOT_SWIM_MIN := 3.5  # m: closer than this a bot fences instead of swimming in
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
@@ -636,15 +601,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if spin_t >= 0.0:
 		if spin_t > 1.2 or dist > 3.5: use_e()
 		return
-	var swim := float(dash_def()["dist"])
-	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > BOT_SWIM_MIN and dist < swim + 1.0 \
-			and randf() < 0.3:
-		# Ground Swim in: he surfaces on top of them and knocks them up
-		h.inp["aim"] = tgt.pos
-		h.ai["dash_dir"] = h.dir_to(tgt)
-		h.inp["move"] = h.dir_to(tgt)
-		h.inp["dash"] = true
-	elif float(cd["e"]) <= 0.0 and dist < 2.8:
+	if float(cd["e"]) <= 0.0 and dist < 2.8:
 		use_e()
 	elif rmb_ready() and los and dist < float(rmb_def()["range"]) + 1.0:
 		bot_hold["rmb"] = BOT_TAP

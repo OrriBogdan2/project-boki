@@ -5,6 +5,7 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
+const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -944,17 +945,26 @@ func tender() -> void:
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))
-	# --- Moon Shot flies its full range past the cursor (cursor 3 m out, off the target line)
-	sc.aim_at(P, P.pos + Vector3(0, 0, 3.0))
-	P.inp["fire"] = true
-	step(m, 0.05)
-	P.inp["fire"] = false
-	var sh: Array = _mine(m, P)
-	var reach := 0.0
-	if not sh.is_empty(): reach = float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length()
+	# --- Moon Shot flies its full range past the cursor wherever it is (4, 8, 14 m out, off the target line)
+	var rng := float(P.wpn["range"])
+	var reaches: Array[float] = []
+	for d: float in [4.0, 8.0, 14.0]:
+		if not reaches.is_empty():
+			step(m, 0.45)
+		sc.aim_at(P, P.pos + Vector3(0, 0, d))
+		P.idle_fire = 0.0       # a plain ember: an idle crook's next one is Empowered (further)
+		P.shot_range_k = 1.0
+		P.inp["fire"] = true
+		step(m, 0.05)
+		P.inp["fire"] = false
+		var sh: Array = _mine(m, P)
+		reaches.append(float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length() if not sh.is_empty() else 0.0)
 	ok(
-			"mm LMB: the ember flies its full range past the cursor",
-			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+			"mm LMB: the ember flies its full range past the cursor at 4, 8 and 14 m",
+			AimMode.mode_of(P) == AimMode.MAX
+			and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
+			"range %.1f reach %s" % [rng, reaches])
+	ok("mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m)", rng >= 12.6 and rng <= 14.4, "%.1f m" % rng)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -1199,8 +1209,8 @@ func tender() -> void:
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
 			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y / P.vis_k < 0.9,
-			"r %.2f scale %.2f" % [P.r, P.model.scale.y / P.vis_k])
+			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
+			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
@@ -1932,24 +1942,6 @@ func rimewright() -> void:
 			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
 			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
-	await _free(m)
-	# --- Interrupts (rimewright.md): knocked in the Rink Wall's tell, no wall rises
-	r = sc.setup("rimewright", 30.0)
-	m = r[0]
-	P = r[1]
-	K = P.ak
-	sc.aim_at(P, P.pos + Vector3(7.0, 0, 0))
-	step(m, 0.05)
-	P.inp["sig"] = true
-	step(m, 0.05)
-	P.inp["sig"] = false
-	var telling := not K.wall_cast.is_empty()
-	P.downed = true            # set directly: a real knock of the lone player ends the training team
-	P.down_hp = 60.0           # a wisp with no down health is finished at once
-	step(m, 0.4)
-	ok("tm E: knocked in the tell, no wall rises", telling and K.wall_cast.is_empty() and K.wall.is_empty(),
-			"tell %s cast %s wall %s" % [telling, K.wall_cast.is_empty(), K.wall.is_empty()])
-	P.downed = false
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)

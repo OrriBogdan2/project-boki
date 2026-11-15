@@ -4,7 +4,7 @@ extends ArchKit
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
-## Molten Guard: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
+## Shardskin: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
@@ -24,11 +24,10 @@ var dive := false              # a Quakefall in the air (the hop, a leap, an air
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
-var dive_t := 0.0              # ...how long the plunge has run (it hangs, then speeds up: tenzo.rmb in tuning.json)
 var sight_t := 0.0
 var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
-var shield_stacks := 0         # Molten Guard stacks
+var shield_stacks := 0         # Shardskin stacks
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
@@ -42,7 +41,7 @@ var launches := 0
 var slams := 0
 var dunks := 0
 var wall_stuns := 0
-var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
+var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
@@ -210,9 +209,9 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if shield_stacks > 0 and h.shield > 0.0:
-		HeroVfx.of(m).hold(h, "guard")      # Molten Guard: embers rising round her while it holds
+		HeroVfx.of(m).hold(h, "guard")      # Shardskin: embers rising round her while it holds
 	if dive:
-		_tick_dive(dt)
+		_tick_dive()
 	hop.tick(dt)
 	slam.tick(dt)
 	spine.tick(dt)
@@ -236,7 +235,7 @@ func _tick_stones(dt: float) -> void:
 			best = f
 	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
 
-func _tick_dive(dt: float) -> void:
+func _tick_dive() -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)
 	if h.downed:
@@ -249,13 +248,7 @@ func _tick_dive(dt: float) -> void:
 	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
 		_end_plunge()
 	elif dive_fall:
-		# a readable plunge: a beat hanging at the top, then it gathers speed up to its cap
-		dive_t += dt
-		var fd := slam.feel()
-		if dive_t < float(fd["dive_hang"]):
-			h.vel.y = 0.0
-		else:
-			h.vel.y = maxf(-dive_speed(), minf(h.vel.y, 0.0) - float(fd["dive_acc"]) * dt)
+		h.vel.y = minf(h.vel.y, -dive_speed())
 
 ## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never
 ## dunked): no ground to slam, so the slam is dropped and he falls on at the abyss's own pace, glider free.
@@ -337,8 +330,6 @@ func stonesight() -> int:
 func punch_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
-
-func lmb_holding() -> bool: return lmb_t >= 0.0
 
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "rubble_fists":
@@ -475,7 +466,6 @@ func _punch(k: float) -> void:
 	if swept.size() >= 2: sweeps += 1
 	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
 		guard_punches += 1
-		CombatBus.tech.emit(h, "dolm")
 		guard_stack()
 	for i in swept.size():
 		var w: Dictionary = swept[i]
@@ -636,12 +626,12 @@ func fire_rmb(c: Dictionary) -> void:
 func _slam(k: float, at_feet: bool) -> void:
 	slam.slam(k, at_feet)
 
-## Molten Guard: one more stack (each is a shield, up to the cap, all expiring together).
+## Shardskin: one more stack (each is a shield, up to the cap, all expiring together).
 func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
 	shield_at = m.time
-	ReceiverCue.shield(h, float(gd["shield"]) * shield_stacks, Color.TRANSPARENT, ShieldSrc.MOLTEN)
+	ShieldSrc.give(h, float(gd["shield"]) * shield_stacks, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
 	vfx("guard_up")
 

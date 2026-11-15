@@ -12,10 +12,7 @@ const SHOT := 10.0          # damage of the test shot
 const KNOCK := 12.0         # m/s of the test shove (a hard knock is over 4)
 const STUN := 0.5           # s of the test stun
 
-## Hunters with air-knock rows red the day the sweep widened from four starters to Arch.ORDER (2026-11-12): kept out
-## of the count as "open" (Claire's skate ignores a hit, Mage's blink and Shiv's cartwheel read a stun's lock
-## differently). docs/DEBT.md "Widened sweeps".
-const AIR_OPEN := ["rimewright", "mage", "thief"]
+const AIR_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]
 const AIR_HIT_AT := 0.05    # s into the state the hit lands; in an air dash, the first step its i-frames are over
 const AIR_RUN := 1.3        # s each air-knock run lasts; the carry is the x gap to the same run with no hit
 const AIR_HIGH := 40.0      # m over the ground: nobody lands inside a run
@@ -200,14 +197,13 @@ func _air_run(state: String, hit: Dictionary, at: Vector3) -> Dictionary:
 	r["x"] = h.pos.x - x0
 	return r
 
-## Every Hunter (Arch.ORDER), each hit while gliding, in an air dash and falling (docs/MOVEMENT_FEEL.md
+## Lace, Kael, Vex and Albert, each hit while gliding, in an air dash and falling (docs/MOVEMENT_FEEL.md
 ## "Knocked in the air"). A knock carries an open glider; a stun shuts it until a press after the stun; a knock
 ## or a stun past an air dash's i-frames ends the dash; a shut glider waits out a hard knock before it opens.
 func _air_knocks() -> void:
 	var at := marker + Vector3(0, AIR_HIGH, 0)
 	var hits := _air_hits()
-	for arch in Arch.ORDER:
-		var bad_before := bad
+	for arch in AIR_HEROES:
 		h.reclass(Arch.weight(arch), arch)
 		var fall_carry := {}
 		for state in ["fall", "glide", "dash"]:
@@ -221,9 +217,6 @@ func _air_knocks() -> void:
 				var reopen := "%.2f s" % open_at if open_at >= 0.0 else "-"
 				var tag := "%s %s, %s: carried %.2f m, reopen %s" % [arch, state, what, carry, reopen]
 				_air_row(state, hit, got, tag, carry, float(fall_carry[what]))
-		if arch in AIR_OPEN and bad > bad_before:
-			print("ACHECK open %s: %d rows red above are left open (AIR_OPEN)" % [arch, bad - bad_before])
-			bad = bad_before
 	h.reclass("medium", "")
 
 ## Asserts one air-knock case (`tag` names it and carries what was measured).

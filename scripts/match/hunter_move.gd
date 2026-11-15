@@ -4,7 +4,7 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
-static var _rules: Dictionary = _load()
+static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
@@ -27,17 +27,7 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
-static var step_height: float = _phys["step_height"]
-static var abyss_cam_zoom: float = _phys["abyss_cam_zoom"]
-static var abyss_cam_ease: float = _phys["abyss_cam_ease"]
-
-static func _load() -> Dictionary:
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
-	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
-	return parsed
-
-static func rules() -> Dictionary:
-	return _rules
+static var sneak_speed: float = _phys["sneak_speed"]
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
@@ -125,12 +115,8 @@ static func fall_cap(h: Hunter) -> float:
 		return h.ak.dive_speed()
 	if not h.below_lip:
 		return fall_max
-	return lerpf(fall_max, abyss_fall_max, abyss_band(h.lip_y - h.pos.y))
-
-## How far into the abyss slow-fall band `depth` metres under the lip is: 0 at abyss_slow_from, 1 at
-## abyss_slow_to (the fall cap and the camera abyss zoom both follow it).
-static func abyss_band(depth: float) -> float:
-	return clampf((depth - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
+	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
+	return lerpf(fall_max, abyss_fall_max, k)
 
 ## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within Hunter.MANTLE_REACH it's the
 ## source's suction: gravity as in any jump, plus mantle_pull while you rise slower than mantle_vy_cap, so a

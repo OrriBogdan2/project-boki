@@ -41,7 +41,6 @@ on main's tree (d255acbee) and `vfxq-after-<arch>` on this branch; the sheets li
 | Albert | bulwark | `#fff0b0` | radiant ivory | |
 | Sable | thief | `#9a5cff` | violet | |
 | Motley | ostra | `#2ee6c0` | sea teal | |
-| Gil | gil | `#4aa8ff` | sea blue | water looks: foam white core, deep blue shade; each potion keeps its own status colour |
 
 Rule: a kit draws its body in its signature colour (or a slot `col` in its archetype JSON derived from it). White,
 pale tints of the signature, and black/smoke are free. Status colours (purple for control, green for heal) stay readable on
@@ -79,7 +78,6 @@ Still open (shared, not done here):
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
-- Only eight kits are data-driven (`content/vfx/`: archer, ashwick, bulwark, dolm, gil, juggernaut, rimewright, tender). The rest draw with
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
@@ -162,8 +160,6 @@ marks a rock's footprint, not a hit or zone, so by the same rule it could go or 
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
-11. Gil: Air and Super Zeep breaks as see-through smoke, not opaque puffs over the target; the held RMB's landing
-    ring as one circle that follows the cursor (it re-fires every 0.1 s).
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
 sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored by code read (the strips are silent).
@@ -213,16 +209,12 @@ Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_r.png`) is there too.
 
-Gil (owner playtest 11-11, branch ext/gil-rework-1111): moved from `Fx` dots and rings to `content/vfx/gil.json`
-and keyed poses (`scripts/match/kmoves_gil.gd`) on every move: thrust streaks and hit splashes, the Tide Lunge
-(held LMB), the dive under the ground with a wake and the surfacing burst, one break look per potion, the Riptide
-sweep and spout, the wave's wake and crest. Scored 11-11 in the re-score table below; the rework's game-camera clips
-are in `docs/parity_reel/gil_rework/`. Left: his own sound set (the recipes reuse shared sounds).
-
 ## Meeko and Albert ground rings (ext/vfx-gold-ground-rings)
+
 Rule (DECISIONS, Movement and combat feel): a ground ring means gameplay (a hit area, a zone, a tether range). Kept rings
 are in the Hunter's own colour (`content/archetypes` "color": Meeko `#5fdc6a`, Albert `#fff0b0`), never the shared gold,
 so they do not read as each other's or as loot. Asserted in `--tender-combo-check` and `--bulwark-combo-check`.
+
 | Hunter | Ring | Class | Now |
 |---|---|---|---|
 | Meeko | Burrseed wind-up glow, 1.4 m round her (violet, gold rim) | decoration (the dotted lane is the aim) | cut |
@@ -239,8 +231,10 @@ so they do not read as each other's or as loot. Asserted in `--tender-combo-chec
 | Albert | Aegis push chevrons in front of the wall (gold) | gameplay, push reach | kept, his pale gold |
 | Albert | Faultline remote rings at the near cell (ember, gold; 2.0 / 2.4 m circles on a 4 x 4.5 m lane) | decoration (the lane is the area and everyone sees it) | cut |
 | Albert | LMB charge ring | not a ground ring: the cursor reticle | unchanged |
+
 Not rings, left as they are: Albert's swing and slam crescents (`bulwark.json` `sweep`, ember to red; real hit
 arcs; ext/vfx-albert-ivory-arcs already recolours them) and Meeko's violet Burrseed discs.
+
 GPU strips (jobq rp1/pc, `--hero-vfx-reel`): docs/shots/vfx-gold-ground-rings/ (Hearthlight, the 360 Smash, Mending Ground).
 Albert (bulwark), ext/vfx-albert-ivory-arcs: the LMB swing crescent, the Shield Slam fan and the held-swing whirl trail are
 his ivory (`#fff0b0`, pale gold `#e8c96a`), no longer Kael's orange. The before/after strip is

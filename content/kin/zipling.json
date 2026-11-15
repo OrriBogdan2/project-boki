@@ -1,0 +1,29 @@
+{
+	"id": "zipling",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gloamshell.json.",
+	"size": {
+		"cm": 24,
+		"kg": 0.7,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#98a382",
+		"belly": "#e6cade",
+		"glow": "#b4cf81"
+	},
+	"work": {
+		"forage": 3,
+		"craft": 2,
+		"haul": 1
+	},
+	"line": {
+		"dex": "zipling",
+		"stage": 1,
+		"stages": 3,
+		"prev": [],
+		"next": [
+			"zippelith"
+		],
+		"_doc": "its evolution line in the dex; the game evolves by affinity form within a species, so the line is data only"
+	}
+}

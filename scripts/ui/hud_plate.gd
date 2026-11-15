@@ -29,11 +29,9 @@ var _prune_at := 0.0
 var shown := {}
 
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
-## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET; times the
-## camera's hunter_scale, so the plate clears a Hunter drawn bigger.
+## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	var drawn: float = h.m.cam.hunter_scale if h.m and h.m.cam else 1.0
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET)) * drawn
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
 ## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.

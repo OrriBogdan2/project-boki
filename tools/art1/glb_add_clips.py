@@ -1,8 +1,7 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
 only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py [--skip-missing] <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]
---skip-missing drops the tracks of bones the target lacks (a build without the source's added foot bones) instead of stopping.
+Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]
 A key is a prefix ("crouch" takes crouch_idle, crouch_f ...); "=swap" is that clip only (not swap_aim, swap_air)."""
 import json
 import struct
@@ -32,7 +31,7 @@ def write(path, j, bin_):
         f.write(bin_)
 
 
-def add(tj, tb, sj, sb, wanted, skip_missing=False):
+def add(tj, tb, sj, sb, wanted):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
@@ -65,8 +64,6 @@ def add(tj, tb, sj, sb, wanted, skip_missing=False):
         new = {"name": a["name"], "channels": [], "samplers": []}
         for ch in a["channels"]:
             nm = sj["nodes"][ch["target"]["node"]].get("name")
-            if nm not in names and skip_missing:
-                continue
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
             sm = a["samplers"][ch["sampler"]]
@@ -81,13 +78,11 @@ def add(tj, tb, sj, sb, wanted, skip_missing=False):
 
 
 if __name__ == "__main__":
-    skip = "--skip-missing" in sys.argv
-    args = [a for a in sys.argv[1:] if a != "--skip-missing"]
-    target, source, keys = args[0:3]
-    out = args[3] if len(args) > 3 else target
+    target, source, keys = sys.argv[1:4]
+    out = sys.argv[4] if len(sys.argv) > 4 else target
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
-    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), skip)
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys))
     write(out, tj, tb)
     print("added", len(done), done)

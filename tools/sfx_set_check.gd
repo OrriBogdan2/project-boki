@@ -3,7 +3,8 @@ extends RefCounted
 ## (_menus: Settings, the inventory and the Field Book).
 ##   1. every listed sound has a file (audio/<name>.wav or its takes <name>_1..4.wav)
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
-##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
+##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface (a
+##      Hunter with no feet, KMovesStone.gait < 0.5: no step files, a <arch>_hover loop for HoverHum instead),
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##      and its signature weapon's JSON names one of them (no stock sound)
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
@@ -23,12 +24,11 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
-##  12. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
-##  13. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
 ##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
-##  14. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
+##  13. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
-##  15. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ## Reads the files only; never touches the save.
 
@@ -65,7 +65,6 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
-	_ui_cues()
 	_strip_chime()
 	_boss_moves()
 	_cc_cues()
@@ -126,11 +125,15 @@ func _boki_voices(sounds: Dictionary) -> void:
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
-	var need := ["dash"] + VOICE
-	for s in SURFACES:
-		need.append("step_" + s)
+	var floats := KMovesStone.gait(arch) < 0.5
+	var moves: Array = ["hover"] if floats else SURFACES.map(func(s): return "step_" + s)
+	var need: Array = ["dash"] + VOICE + moves
 	var missing := need.filter(func(k): return not sounds.has("%s_%s" % [arch, k]))
-	ok(missing.is_empty(), "%s: voice, dash and footsteps on every surface (missing %s)" % [arch, missing])
+	ok(missing.is_empty(), "%s: voice, dash and %s (missing %s)" % [arch, moves, missing])
+	if floats:
+		var steps := SURFACES.filter(func(s): return not _takes("%s_step_%s" % [arch, s]).is_empty())
+		ok(steps.is_empty() and d.get("loops", []).has(arch + "_hover"),
+			"%s: no feet, so no step files (%s) and %s_hover is a loop" % [arch, steps, arch])
 	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
@@ -142,10 +145,11 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
-	for kind in ["dash", "step_wood", "hurt"]:
+	var kinds := ["dash", moves[0], "hurt"]
+	for kind in kinds:
 		picked.append(HeroSfx.of(h, kind, kind))
 	h.free()
-	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
+	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
 
@@ -460,22 +464,7 @@ func _strip_chime() -> void:
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
-## 12. Every sound UiSfx plays by name has a file, so a typo never plays silence.
-func _ui_cues() -> void:
-	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
-	var re := RegEx.create_from_string('"([a-z_]+)"')
-	var names := {}
-	for hit in re.search_all(src):
-		var line_at := src.rfind("\n", hit.get_start()) + 1
-		if not src.substr(line_at, src.find("\n", line_at) - line_at).to_lower().contains("meta"):
-			names[hit.get_string(1)] = true
-	var missing := []
-	for n in names:
-		if _takes(String(n)).is_empty():
-			missing.append(n)
-	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
-
-## 15. The inventory cues.
+## 12. The inventory cues.
 func _inv_cues() -> void:
 	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
 			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}
@@ -646,7 +635,7 @@ func _heard(sname: String, act: Callable) -> float:
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
 
-## 13. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
 func _boss_moves() -> void:
 	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
 	var missing := []

@@ -477,7 +477,7 @@ func _glasswater_part(m: Node) -> void:
 	ok(batches.size() >= 3 and batches.size() <= 6 and mats.size() == 3 and n > want / 2,
 		"the scatter is %d props in %d MultiMesh batches over 3 shared materials" % [n, batches.size()])
 	gw.hsp.tick(1.0)
-	ok(Save.d["zones"]["glasswater"]["patch"].has(SnackPatch.RIPE_KEY), "the patch's timer is kept on the save")
+	ok(Save.d["zones"]["glasswater"]["patch"].has("t"), "the patch's timer is kept on the save")
 	gw.hway.hop(GardenZones.HUB)
 	var hub = await _arrived(m, gw)
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")

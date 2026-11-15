@@ -13,7 +13,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
 | **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Coin Blast | Palm Lance (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
 | **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
@@ -58,12 +58,12 @@ _The storm-kite runner. Charges you up shot by shot, then runs straight through 
 
 _The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
 
-- **Passive: Fever.** Each ability that lands (Coin Blast, its blast, Palm Lance) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Coin Blast counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
 - **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
-- **RMB: Coin Blast** (9s):
+- **RMB: Burr Charge** (9s):
   - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
-  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Coin Blast's cooldown drops 40%.
-- **E: Palm Lance** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
+- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)
@@ -140,9 +140,9 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 | juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
 | ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
 | tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
-| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Molten Guard shield: flat (source: not in data) |
+| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Shardskin shield: flat (source: not in data) |
 | archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Hawk Sense: no number |
-| dredge, Grimble (Kingpin) | weapon: flat | Abyssal Hand dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| dredge, Grimble (Kingpin) | weapon: flat | Deep Reach dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
 | rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
 | mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
 | bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Aegis shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | 360 Smash dmg: AP = AP | Mending Ground heal: AP = AP (before flat: 0.87 / 0.74) | Faultline dmg: AP = AP | Guard: no number |
@@ -285,12 +285,12 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|
 | every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
-| Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Grimble's Deep Reach (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
 | Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
 | Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |

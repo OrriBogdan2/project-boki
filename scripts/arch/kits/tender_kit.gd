@@ -167,7 +167,6 @@ func _dress_ember(s: Dictionary) -> void:
 	stats["swirls"] += 1
 	if emp:
 		stats["emp"] += 1
-		CombatBus.tech.emit(h, "tender")
 		play("mm_shot_emp")
 		m.sfx("tend_ember_emp", h.pos, -3.0, 1.0)
 	elif not seed_aim:
@@ -217,7 +216,7 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		# the source's triggers: a stun, or damage (on_take); a root or hex holds
+		# the source's triggers: a stun, or damage (on_take); a root holds
 		if h.stun_t > 0.0:
 			drop_all(true)
 			return
@@ -335,7 +334,7 @@ func _tick_glide(dt: float) -> void:
 ## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
 ## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
-## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
+## charge; letting go does nothing. A stun or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
 func rmb_winding() -> bool: return seed_aim
 
@@ -636,7 +635,7 @@ func _pulse(c: Vector3, per: float) -> void:
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
 ## "heal_stars").
 func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
-	CareUtil.heal(m, o, amt, wisp_k, h.accent())
+	CareUtil.heal(m, o, amt, wisp_k)
 	vfx("heal_stars", o.pos)
 
 func _hearth_end(flare: bool) -> void:

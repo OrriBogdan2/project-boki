@@ -158,6 +158,7 @@ func add_spark(f: Ent, n := 1) -> void:
 	s["n"] = mini(int(rd["max"]), was + n)
 	s["t"] = float(rd["dur"])
 	sparks[key] = s
+	if f.remote: KitStatus.apply(f, "sta", float(s["t"]), float(s["n"]), true, "", h.nid)
 	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
 		# the 4th stack: a bolt drops out of the sky onto them
 		var swing: bool = anim_id == "" or m.time - anim_at > 0.3
@@ -179,6 +180,7 @@ func clear_sparks(f: Ent) -> void:
 	if sparks.has(key):
 		sparks.erase(key)
 		fx().unmark("vs%d" % key)
+		if f.remote: KitStatus.apply(f, "sta", 0.0, 0.0, true, "", h.nid)
 
 func _tick_sparks(dt: float) -> void:
 	var mx := int(res_def()["max"])
@@ -531,7 +533,6 @@ func _blowout(f: Ent) -> void:
 	clear_sparks(f)
 	blowouts += 1
 	ComboMark.payoff(m, h, f)
-	CombatBus.tech.emit(h, "mage")
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
@@ -621,7 +622,7 @@ func fire_rmb(c: Dictionary) -> void:
 	if rod != null and is_instance_valid(rod):
 		rod.visible = false
 	var sd := rmb_def()
-	if h.downed or not spend_rmb():          # knocked mid-hold: nothing thrown (mage.md "Interrupts")
+	if not spend_rmb():
 		return
 	var held_t := float(c["t"])
 	var min_t := float(sd["min_t"])

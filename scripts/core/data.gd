@@ -46,7 +46,7 @@ const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds 
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
 	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
-		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "gun_rifle", "color": Color("d9ff66"), "size": 0.12},
+		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
 ## Rarity tiers, Common to Legendary: the names and colours gear is sold, shown and sorted by
@@ -132,7 +132,7 @@ const PERKS := {
 	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
 	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
-	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
@@ -228,6 +228,19 @@ const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zappl
 func common_kin() -> Array:
 	var all: Array = KIN.keys().filter(func(k): return not KIN[k].get("rare", false))
 	return LAUNCH_KIN.filter(func(k): return all.has(k)) + all.filter(func(k): return not LAUNCH_KIN.has(k))
+
+const ZONE_POOLS := "res://content/zone_pools.json"
+var _zone_pools: Dictionary
+
+## Who spawns wild in an expedition tier: the tier's own list in content/zone_pools.json when it has one (the
+## early zones show only kin with a 3D model), else every common kin that no early zone claims.
+func wild_pool(tier: int) -> Array:
+	if _zone_pools.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ZONE_POOLS))
+		_zone_pools = (parsed as Dictionary).get("zones", {}) if parsed is Dictionary else {"": []}
+	if _zone_pools.has(str(tier)):
+		return _zone_pools[str(tier)]
+	return common_kin().filter(func(k): return not _zone_pools.values().any(func(z): return (z as Array).has(k)))
 
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
@@ -427,7 +440,7 @@ const BUILDINGS := {
 		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
-	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
+	"armory": {"name": "Gear Shed", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
 		"desc": "Stores the weapons and gloves you bring home. Pick what you take on your next expedition, sell or salvage the rest, and get a bigger backpack."},
 	"shrine": {"name": "Soul Shrine", "isle": "main", "cost": 150, "rect": [49, 35, 50, 36], "needs_ember": true,
 		"desc": "Lit by a Soul Ember. Keeps the souls of Boki buried in the graveyard, and can bring one back (a little different)."},
@@ -438,5 +451,5 @@ const MATCH := {
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,
 	"bleed": 2.5,          # downed health lost per second
-	"down_hp": 100.0,      # a wisp's pool; it drains over Life.R.bleed_out (15 s)
+	"down_hp": 100.0,      # so about 40 seconds downed before you bleed out
 }
