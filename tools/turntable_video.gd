@@ -153,7 +153,7 @@ func _turn(id: String) -> void:
 ## The Boki as the game builds them, 4 to a row, all turning one full 360 in `secs`, the camera drifting in a little.
 func _kin_grid() -> void:
 	disc.visible = false
-	var cols := 4
+	var cols := maxi(4, ceili(sqrt(kin_ids.size() * 1.8)))   # wider than tall, to fill a 16:9 frame
 	var rows := ceili(float(kin_ids.size()) / cols)
 	var gap := 1.75
 	var ks: Array = []
@@ -165,10 +165,10 @@ func _kin_grid() -> void:
 	for _k in 20:
 		await tree.process_frame
 	cam.fov = 32.0
-	var dist := float(cols) * gap * 0.5 / (tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H) * 1.12
+	var dist := float(cols) * gap * 0.5 / (tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H) * 0.95
 	var c := Vector3(0, 0.45, 0)
 	_fog(dist)
-	var pitch := deg_to_rad(24.0)
+	var pitch := deg_to_rad(32.0)
 	var dir := out.path_join("kin_grid")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var n := int(round(secs * FPS))
