@@ -19,7 +19,7 @@ var h                                   # the Home screen
 var jobs: Array = []                    # what needs doing right now (see _scan)
 var taken := {}                         # job key -> kin uid
 var scan_t := 0.0
-var spots := {}                         # deco uid -> [sig, Vector3]: where a kin stands to work a station
+var spots := {}                         # "uid:slot" -> [sig, Vector3]: where a kin stands to work (per crew slot)
 var pile_nodes := {}                    # pile id -> Node3D
 var feed_box: VBoxContainer = null
 var feed_lines: Array = []
@@ -88,6 +88,7 @@ func scan() -> void:
 	for st in HomeLayout.stations(h._d()): live_u[int(st["e"]["u"])] = true
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
+	FarmSites.clean_crew(Save.d)
 	_plot_jobs()
 	if not FarmUnlocks.base_mode():
 		_wild_jobs()
@@ -195,24 +196,26 @@ func stand(e: Dictionary, slot := 0) -> Vector3:
 		return c + side
 	var sig := "%d,%d,%d,%d" % [int(e["x"]), int(e["z"]), int(e.get("r", 0)), h.hb.ver if h.hb else 0]
 	var u := int(e["u"])
-	if spots.has(u) and spots[u][0] == sig:
-		return spots[u][1]
+	var key := "%d:%d" % [u, slot]
+	if spots.has(key) and spots[key][0] == sig:
+		return spots[key][1]
 	var cells := HomeLayout.deco_cells(e)
 	var x0 := 9999; var z0 := 9999; var x1 := -9999; var z1 := -9999
 	for t in cells:
 		x0 = mini(x0, t.x); z0 = mini(z0, t.y); x1 = maxi(x1, t.x); z1 = maxi(z1, t.y)
 	var face := HomeLayout.facing(int(e.get("r", 0)))
-	var best := Vector3.INF; var bs := -1e9
+	var open: Array = []
 	for z in range(z0 - 1, z1 + 2):
 		for x in range(x0 - 1, x1 + 2):
 			if x >= x0 and x <= x1 and z >= z0 and z <= z1: continue
 			if not _ground(x, z): continue
 			var p := Vector3(x + 0.5, 0, z + 0.5)
 			var dv := p - c
-			var sc := dv.normalized().dot(face) * 2.0 - dv.length()
-			if sc > bs: bs = sc; best = p
-	if best == Vector3.INF: best = c + face * 1.0
-	spots[u] = [sig, best]
+			open.append([dv.normalized().dot(face) * 2.0 - dv.length(), open.size(), p])
+	# the best open tile, then the next best for the next crew slot (two builders can't share one paw spot)
+	open.sort_custom(func(a, b): return a[0] > b[0] or (a[0] == b[0] and a[1] < b[1]))
+	var best: Vector3 = open[mini(slot, open.size() - 1)][2] if not open.is_empty() else c + face * 1.0
+	spots[key] = [sig, best]
 	return best
 
 func _st_ok(s: Dictionary) -> bool:
@@ -463,17 +466,21 @@ func best_job(k: Dictionary) -> Dictionary:
 		var el := String(j["el"])
 		if not takes_job(rec, j): continue
 		var at: Vector3 = j["at"]
-		if _isle(at) != here and mine < 0: continue      # (an assigned kin goes over to its station)
-		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
+		var posted := mine >= 0 or FarmSites.site_of(rec) >= 0
+		if _isle(at) != here and not posted: continue      # (an assigned kin goes over to its station or site)
+		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if posted else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
 		if sc > bs: bs = sc; best = j
 	return best
 
-## Would this kin take this job? One assigned to a station only works that station (whatever the
-## Job Board says); the rest take any job they're suited to, but not the ones only assigned kin do.
+## Would this kin take this job? One assigned to a station only works that station, one assigned to a
+## site only builds it (whatever the Job Board says); the rest take any job they're suited to, but not
+## the ones only assigned kin do.
 func takes_job(rec: Dictionary, j: Dictionary) -> bool:
 	var mine := Work.assigned(rec)
 	if String(j.get("kind", "")) == "build":
 		return mine == int(j.get("u", -1)) or (mine < 0 and FarmSites.takes(rec, j))
+	if FarmSites.site_of(rec) >= 0:
+		return false
 	if mine >= 0:
 		return int(j.get("u", -1)) == mine and Work.can_work(rec) and Work.level(rec, String(j["el"])) > 0
 	if j.get("need", false):
@@ -882,11 +889,8 @@ func _out(at: Vector3, m: String, n: int, who: String, el: String) -> void:
 	produced(at, "+%d %s · %s" % [n, m, who], el, m)
 
 # ------------------------------------------------------------------ telling you
-## A station made something: a word floating up from it and a line in the work feed.
+## A station made something: the pickup sound and a line in the work feed.
 func produced(at: Vector3, text: String, el: String, _what: String) -> void:
-	if h.fx:
-		var w := text.split(" · ")[0]
-		h.fx.word(at + Vector3(0, 1.3, 0), w, Work.col_of(el).lightened(0.25))
 	Sfx.play("pickup", at, -14.0, 0.1, 1.3)
 	feed(text, Work.col_of(el), el)
 
@@ -984,7 +988,7 @@ func open_station(e: Dictionary) -> void:
 		var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), "" if Work.can_work(r) else "  (%s)" % Work.why_not(r)], UI.T_BODY, Data.KIN.get(String(r["species"]), {}).get("color", UI.INK))
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
-		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); _reassign(rr); open_station(e), 120))
+		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); reassign(rr); open_station(e), 120))
 		v.add_child(row)
 	var cands: Array = []
 	for r in Save.d["roster"]:
@@ -1007,11 +1011,11 @@ func open_station(e: Dictionary) -> void:
 			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
-			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
+			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); reassign(rr); Save.save_game(); open_station(e), 120))
 			v.add_child(row)
 
 ## A kin's assignment changed: it drops whatever it was doing and picks again.
-func _reassign(rec: Dictionary) -> void:
+func reassign(rec: Dictionary) -> void:
 	var k: Dictionary = h._kin_entry(rec)
 	if not k.is_empty():
 		drop(k)

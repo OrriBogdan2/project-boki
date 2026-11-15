@@ -60,4 +60,3 @@ static func land(h: Hunter) -> void:
 	h.stun_t = maxf(h.stun_t, land_stun)
 	h.hurt(land_dmg, h.last_hit_by, {"src": "fall"})
 	h.m.fx.dust(h.pos, 12)
-	h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)
