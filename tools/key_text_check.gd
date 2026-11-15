@@ -154,7 +154,15 @@ func _source_tips() -> void:
 		if hit != null:
 			_line("match.gd _tip", hit.get_string(1))
 			n += 1
-	ok(n > 10, "match.gd _tip lines read (%d)" % n)
+	# most tips are TipText's now (scripts/match/tip_text.gd): every string literal there is tip text
+	var str_lit := RegEx.create_from_string("\"([^\"]{12,})\"")
+	for ln in FileAccess.get_file_as_string("res://scripts/match/tip_text.gd").split("\n"):
+		if ln.strip_edges().begins_with("#"):
+			continue
+		for hit in str_lit.search_all(ln):
+			_line("TipText", hit.get_string(1))
+			n += 1
+	ok(n > 10, "match.gd _tip and TipText lines read (%d)" % n)
 
 func _farm() -> void:
 	var n := _walk("farm tutorial", FarmTutorial.rules(), FarmTutorial.fill)

@@ -68,7 +68,8 @@
 			"hold_from": 0.16
 		},
 		"breah_slam": {
-			"clip": "rmb_slam"
+			"clip": "rmb_slam",
+			"fit": 1.51
 		},
 		"breah_dive": {
 			"clip": "rmb_dive",
