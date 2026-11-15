@@ -876,8 +876,8 @@ static func ue_band(v0: float) -> Vector2:
 ## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
 static func run_speeds() -> Dictionary:
 	var out := {}
-	for id in HunterMove.rules():
-		var row = HunterMove.rules()[id]
+	for id in MoveRules.data():
+		var row = MoveRules.data()[id]
 		if row is Dictionary and row.has("speed"):
 			var v := float(row["speed"])
 			out[v] = out.get(v, []) + [id]
