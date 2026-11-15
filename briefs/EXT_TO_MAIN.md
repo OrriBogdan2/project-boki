@@ -9867,3 +9867,4 @@ READY ext/merge-lane-hunt3-1115r2 cc08721a05acfadd7b06d6b6fd2255a9807eff0c (hunt
 READY ext/mantle-port-a 856f912527 (0.24.6 anim wave on current main: ~40 anim branches ported, see docs/MERGE_0246_ANIM.md; NEW-RED explained in docs/DEBT.md; export OK 453 MB)
 READY ext/merge-lane-hunters3-1114 d5f21417240 (main f71704b3d83 merged, remote-smooth green locally)
 READY ext/merge-batch-24-1113 afec04b163b (main f71704b3d83 merged, friendly-bodies dropped, status-net ported)
+READY ext/merge-train-1115 90787d92c6 (PR #110 train tooling: GATE GREEN vs main d65f00de26, NEW-RED 0, export 453 MB; not posted, no gh on rpc7: text at rpc7:/home/boki/cj/20261115-155513-a1/gate110/gate-comment-110.md; stale since #112)
