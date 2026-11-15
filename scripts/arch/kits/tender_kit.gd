@@ -33,6 +33,15 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
+## Her colours, one table (content/vfx/tender.json "palette"): leaf for her own moves, gold for her heals.
+static var main_col := HeroVfx.col("tender", "main")     # leaf, her ability colour
+static var hot_col := HeroVfx.col("tender", "hot")       # pale leaf core, aim lane
+static var moss_col := HeroVfx.col("tender", "moss")     # burrs
+static var fern_col := HeroVfx.col("tender", "fern")     # burr rims
+static var gold_col := HeroVfx.col("tender", "gold")     # heals: Hearthlight, Hearth Call
+static var amber_col := HeroVfx.col("tender", "amber")   # heal rims and the call line
+static var teal_col := HeroVfx.col("tender", "teal")     # a thrown Hearthlight's rim
+static var coral_col := HeroVfx.col("tender", "coral")   # a fizzle: dropped, snapped, out of reach
 const BOT_CALL_SAFE := 3.0      # m: a bot starts Hearth Call on a teammate only with no rival Hunter this close
 const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Hearth Call on herself below this HP share
 var look: CareLook             # pooled visuals (made on first use)
@@ -355,7 +364,7 @@ func _seed_lane() -> void:
 	var sd := rmb_def()
 	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
 	var width := float(sd["seed"]["hit_r"])
-	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
+	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": hot_col})
 
 ## Her share of run speed during the wind-up.
 func move_k() -> float:
@@ -370,7 +379,7 @@ func _tick_seed(dt: float) -> void:
 	seed_wind -= dt
 	if seed_wind > 0.0:
 		_seed_lane()
-		HeroVfx.of(m).hold(h, "seed_aim")      # lilac stars gather at the lantern while she winds up
+		HeroVfx.of(m).hold(h, "seed_aim")      # leaf stars gather at the lantern while she winds up
 		return
 	_seed_cancel()
 	_throw_seed()
@@ -446,7 +455,7 @@ func _tick_burrs(dt: float) -> void:
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else coral_col,
 				"a": lerpf(0.3, 0.9, k) if held else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
@@ -759,9 +768,9 @@ func _start_call() -> bool:
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	vfx("call")
+	vfx("call", null, null, {"r": float(x_def()["range"])})        # the ring is the tether's reach
 	vfx("call_land", who.pos)
-	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), gold_col)
 	return true
 
 
@@ -842,7 +851,7 @@ func _call_end(done: bool) -> void:
 
 ## The tether snaps where everyone can see it: coral sparks at her hand and at the far end.
 func _call_snap(who: Hunter) -> void:
-	var snap := Color("ff8a6a")
+	var snap := coral_col
 	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
 	if who != null:
 		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)

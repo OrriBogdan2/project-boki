@@ -23,6 +23,13 @@ const ECHO_GAP := 0.045              # s between her after-images on the Wirerun
 const STATIC_GAP := 0.35             # s between the Static sparks' puffs on a marked foe (each lives as long)
 const LIVE_CRAWL_HZ := 7.0           # arcs a second crawling down a Live foe
 
+# Her looks, from her table (content/archetypes/mage.json "palette"): the lightning is a pink body with a hot pale core
+static var main_col := Arch.fx_col("mage", "main")
+static var hot_col := Arch.fx_col("mage", "hot")
+static var deep_col := Arch.fx_col("mage", "deep")       # the dark floor of her discs
+static var rim_col := Arch.fx_col("mage", "rim")         # disc edges and the rod
+static var rim_hot_col := Arch.fx_col("mage", "rim_hot")
+
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
@@ -422,11 +429,11 @@ func _tick_wire(dt: float) -> void:
 	var full_len := float(dd["dist"][1]) * wire_reach()
 	var lane := {"len": full_len, "width": 0.35, "rails": true, "chevrons": 5, "fill": L / full_len, "col": col_of(dd)}
 	AimKit.lane(h, "dash", lane)
-	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": PINK}
+	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": hot_col}
 	ring["all"] = true
 	ring["hot"] = k * 0.6
 	AimKit.circle(h, "dash_end", ring)
-	AimKit.charge(h, k, {"col": col_of(dd), "col2": PINK})
+	AimKit.charge(h, k, {"col": col_of(dd), "col2": hot_col})
 	if fx().rng.randf() < 0.35:
 		vfx("wire_tick", h.position + _jitter(0.4, 0.2, 1.4), null, {"to": h.position + _jitter(0.5, 0.2, 1.6)})
 	var auto_t := float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"])
@@ -613,9 +620,9 @@ func _tick_rod() -> void:
 			vfx("rod_tick", tip, null, {"to": tip + _jitter(0.35, -0.6, 0.2)})
 	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
 	lane["col"] = col_of(rmb_def())
-	lane["col_full"] = PINK
+	lane["col_full"] = hot_col
 	AimKit.lane(h, "rmb", lane)
-	AimKit.charge(h, k, {"col": col_of(rmb_def()), "col2": PINK, "flare": false})
+	AimKit.charge(h, k, {"col": col_of(rmb_def()), "col2": hot_col, "flare": false})
 
 func fire_rmb(c: Dictionary) -> void:
 	AimKit.hide(h, "rmb")
@@ -719,7 +726,7 @@ func _drop_mote(at: Vector3) -> void:
 ## arcs crackle off it in _tick_motes. Solid colours, so it reads pink and pale pink, not a white glow.
 func _build_mote() -> Node3D:
 	var n := own_node()
-	var core := Models.part(n, Models.sphere(0.24, 12), solid_mat(PINK))
+	var core := Models.part(n, Models.sphere(0.24, 12), solid_mat(hot_col))
 	core.sorting_offset = 1.0              # drawn after the shell: the pink heart shows through
 	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(PINK_WHITE, 0.22)))
 	for i in 2:
@@ -730,7 +737,7 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = hot_col
 	lt.omni_range = 2.4
 	lt.light_energy = 1.2
 	n.add_child(lt)
