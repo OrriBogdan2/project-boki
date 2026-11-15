@@ -9799,3 +9799,4 @@ READY ext/merge-lane-anim-hard-1115 70f59097c4 (anim HARD set: idle-breaks, boki
 READY ext/merge-lane-feelcombat-1115 7cc0539189 (bulk-rebase: origin/main merged in mechanically, was bca4546823; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc2-1115 19d7a5f57e3 (misc2 bundle: 6 branches, health OK, export OK, targeted checks green)
 READY ext/merge-lane-misc3-1115 07a12d160adf2d42cd1a2a92f0af2d6dab8192b1 (lane misc3: 8 branches resolved on main 8c17ddb41c; health OK, export-pack 446 MB, targeted checks green; suite 9-branch variant NEW-RED 0 excluding dropped merge-anim-1111-clips)
+READY ext/merge-batch-24-1113 03566430ff (merged main 8c17ddb41c; TurnCost reads MoveRules: 0 import errors)
