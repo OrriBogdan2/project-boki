@@ -127,3 +127,10 @@ at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.
 `s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
 the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
 exactly that size and measures its own look, the core and the rim in pixels across the flight line.
+
+## Missed shots
+A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
+puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
+range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
+oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
+asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
