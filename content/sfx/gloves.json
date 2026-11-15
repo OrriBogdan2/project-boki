@@ -1,0 +1,30 @@
+{
+ "group": "gloves",
+ "name": "Gloves",
+ "script": "tools/gen_sfx_gloves.py",
+ "sounds": {
+  "gl_blink": "cast",
+  "gl_blink_hit": "impact",
+  "gl_barrier": "cast",
+  "gl_barrier_hit": "impact",
+  "gl_hook": "cast",
+  "gl_hook_catch": "impact",
+  "gl_hook_bite": "impact",
+  "gl_rocket": "cast",
+  "gl_mirror": "cast",
+  "gl_mirror_hit": "impact",
+  "gl_ice": "cast",
+  "gl_gust": "cast",
+  "gl_hover": "cast",
+  "gl_ledge": "cast",
+  "gl_quake": "cast",
+  "gl_quake_hit": "impact",
+  "gl_vortex": "cast",
+  "gl_vortex_pull": "cast",
+  "gl_vortex_blast": "heavy_impact",
+  "gl_skyhook": "cast",
+  "gl_decoy": "cast"
+ },
+ "signature": [],
+ "replaces": []
+}

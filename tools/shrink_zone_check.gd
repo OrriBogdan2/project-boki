@@ -25,6 +25,78 @@ func _match(main: Node, seed_v: int) -> Match:
 	return m
 
 
+## ZoneSfx. Standing well inside through every close: one warning each, at warn_s before it, and no other cue (no
+## countdown: the Ways Out ticks stay the only one). The hum sits on the wall's nearest point, louder 12 m from it
+## than 50 m, as loud just outside as just inside. Crossing out and back in sound once each; standing on the edge
+## doesn't. The zone's damage plays its tick and no hurt voice; a hit taken plays the hurt voice and no tick.
+## The zone's words in the feed name no squad (solos).
+func _audio(main: Node) -> void:
+	var m := _match(main, 12)
+	var z := m.zone
+	var a := z.audio
+	var p := m.player
+	var fc := z.cs[z.last()]
+	p.pos = m.world.free_spot_near(Vector3(fc.x, 0, fc.y), [], 1.0, 0.45, 12.0)
+	var warned: Array = []
+	while m.time < z.t1[z.last()] + 2.0:
+		m.time += 0.25
+		Sfx.listener = p.pos
+		var n := a.cues.size()
+		z.tick(0.25)
+		if a.cues.size() > n:
+			warned.append(m.time)
+	var on_time := warned.size() == z.last()
+	for j in range(1, mini(warned.size(), z.last()) + 1):
+		on_time = on_time and absf(float(warned[j - 1]) - (z.t0[j] - float(ShrinkZone.rules()["warn_s"]))) <= 0.26
+	ok(on_time and a.cues.count("warn") == z.last(), "one warning before each of %d closes, warn_s ahead" % z.last())
+	ok(a.cues.size() == z.last(), "inside the whole match: no other zone cue (%s)" % [a.cues])
+	var said := m.feed_all.filter(func(t): return "zone" in t.to_lower())
+	var squad_words := said.filter(func(t): return "squad" in t.to_lower() or "team" in t.to_lower())
+	ok(not said.is_empty() and squad_words.is_empty(), "the zone's feed lines name no squad (%d lines)" % said.size())
+	m.time = z.t1[2] + 1.0
+	z.tick(DT)
+	var dir := (Vector2(p.pos.x, p.pos.z) - z.cur_c).normalized()
+	var put := func(past: float) -> void:
+		var q := z.cur_c + dir * (z.cur_r + past)
+		p.pos = Vector3(q.x, p.pos.y, q.y)
+		Sfx.listener = p.pos
+		z.tick(DT)
+	var hum := func() -> float: return float((Sfx.loops[ZoneSfx.HUM_KEY]["p"] as AudioStreamPlayer).volume_db)
+	put.call(-12.0)
+	var at: Vector3 = Sfx.loops[ZoneSfx.HUM_KEY]["pos"] if Sfx.loop_on(ZoneSfx.HUM_KEY) else Vector3.INF
+	var on_wall := absf(Vector2(at.x, at.z).distance_to(z.cur_c) - z.cur_r) < 0.5
+	ok(on_wall and absf(p.pos.distance_to(at) - 12.0) < 0.5, "the hum sits on the wall's nearest point")
+	var near: float = hum.call()
+	put.call(-50.0)
+	var far: float = hum.call()
+	put.call(12.0)
+	var out_db: float = hum.call()
+	ok(near > far + 3.0, "the hum grows near the wall: %.1f dB at 12 m, %.1f dB at 50 m" % [near, far])
+	ok(absf(out_db - near) < 1.0, "the hum as loud 12 m outside (%.1f dB) as 12 m inside" % out_db)
+	put.call(-12.0)
+	a.cues.clear()
+	for past in [-0.3, 0.3, 2.0, 0.3, -0.3, 0.3, -2.0, -0.3]:
+		put.call(past)
+	ok(a.cues == ["out", "in"], "crossing out then in: one cue each, none on the edge (%s)" % [a.cues])
+	var hurt := HeroSfx.of(p, "hurt", "hurt")
+	put.call(10.0)
+	a.cues.clear()
+	Sfx.last_played.erase(hurt)
+	var hp0 := p.hp + p.shield + p.kin_shield
+	for i in 180:
+		m.time += DT
+		z.tick(DT)
+	var ticks := a.cues.count("tick")
+	var hurt_out := p.hp + p.shield + p.kin_shield < hp0
+	ok(ticks >= 2 and ticks <= 3 and hurt_out, "outside 3 s: %d zone ticks as the damage lands" % ticks)
+	ok(not Sfx.last_played.has(hurt), "the zone's damage plays no hurt voice (%s)" % hurt)
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
+	a.cues.clear()
+	p.hurt(20.0, rival, {})
+	ok(Sfx.last_played.has(hurt) and a.cues.is_empty(), "a hit taken plays the hurt voice and no zone tick")
+	m.free()
+
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -32,6 +104,7 @@ func run(main: Node) -> void:
 	_shape(main)
 	_hurt(main)
 	_bots(main)
+	_audio(main)
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 

@@ -29,6 +29,15 @@ extends RefCounted
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
+##  15. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
+##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
+##  11. every breakable material breaks with its own sound in 3 takes or more, a powder keg has its own fuse hiss
+##      (as long as its fuse) and blast, and every chest tier opens with its own lid creak (content/sfx/breakables.json)
+##  11. the garden's moments (SFX_AUDIT row 22) each play their own cue, never the stock unlock: an egg laid or
+##      ready, two Boki becoming friends (once, as the bond reaches friend_at), a lean's new fleck or a part, a
+##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
+##  11. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist;
+##      every form file names its own cast, travel and hit sounds (MergeSfx), all on file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -68,8 +77,19 @@ func run(main: Node) -> void:
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
+	_ambience()
+	_chop_mine()
+	_breakables()
+	_gloves()
+	_garden_moments()
+	_fusion_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
+func _ambience() -> void:
+	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
+		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -193,11 +213,11 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 ## The garden minigames play literal names (garden_ ones, and any name handed to GardenSfx.cue): a typo would
 ## play silence.
 func _garden_names() -> void:
-	var re := RegEx.create_from_string("\"(garden_[a-z0-9_]+)\"|cue\\(\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string("\"((?:garden|glint)_[a-z0-9_]+)\"|cue\\(\"([a-z0-9_]+)\"")
 	var seen := []
 	var silent := []
 	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "base_tumble.gd", "echo_steps.gd",
-			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd", "egg_sfx.gd"]:
+			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd", "egg_sfx.gd", "glint_sfx.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
 			var sname := hit.get_string(1) + hit.get_string(2)
 			if sname.ends_with("_"):          # a prefix, completed below
@@ -208,7 +228,7 @@ func _garden_names() -> void:
 	var sizes: Array = GardenSfx.SIZE.values()
 	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes,
 			"tumble_clash_": BaseTumble.rules()["moves"].keys(),
-			"garden_chime_": HomeChimes.KINDS}
+			"garden_chime_": HomeChimes.KINDS, "glint_catch_": ["small", "medium", "large"]}
 	for prefix in prefixed:
 		for tail in prefixed[prefix]:
 			seen.append(prefix + tail)
@@ -238,6 +258,10 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
+	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
+	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
+	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to the aim telegraph")
 
 ## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
 ## it carries past hearing range, and the kit plays it where the shell will land.
@@ -316,6 +340,35 @@ func _cc_heard(h: Hunter, kind: String) -> Array:
 func _rms(sname: String) -> float:
 	var takes := _takes(sname)
 	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
+
+## 11. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+func _fusion_cues() -> void:
+	var cues := {}
+	var files := DirAccess.get_files_at("res://content/merge_forms")
+	for t in (MergeForm.data()["types"] as Dictionary).values():
+		cues[String(t["cue"])] = true
+	for f in files:
+		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
+	var missing := []
+	for c in cues:
+		if not Sfx.ensure("boki_fuse_" + c):
+			missing.append(c)
+	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
+		if not Sfx.ensure(c):
+			missing.append(c)
+	ok(missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+	# every form names its own cast, travel and hit (MergeSfx), each on file and none shared with another form
+	var named := {}
+	var silent := []
+	for f in files:
+		for kind in ["cast", "travel", "hit"]:
+			var sname := MergeSfx.name_of(f.get_basename(), kind)
+			named[sname] = true
+			if sname == "" or not Sfx.ensure(sname):
+				silent.append("%s %s" % [f.get_basename(), kind])
+	ok(silent.is_empty() and named.size() == files.size() * 3,
+		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -482,6 +535,128 @@ func _inv_cues() -> void:
 	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
 	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
+## 11. The props you smash and the chests you open play their own sounds, never a shared stand-in.
+func _breakables() -> void:
+	var set_src := FileAccess.get_file_as_string("res://content/sfx/breakables.json")
+	var own: Dictionary = JSON.parse_string(set_src)["sounds"]
+	var rules := Breakables.rules()
+	var used := {}
+	var wrong := []
+	for mat in rules["debris"]:
+		var sname := String(rules["debris"][mat]["sound"])
+		if not own.has(sname) or _takes(sname).size() < 3 or used.has(sname):
+			wrong.append("%s: %s" % [mat, sname])
+		used[sname] = true
+	ok(wrong.is_empty(), "%d materials break with their own sound in 3 takes (wrong: %s)" % [used.size(), wrong])
+	for kind_s in rules["kinds"]:
+		var ex: Dictionary = rules["kinds"][kind_s].get("explosive", {})
+		if ex.is_empty():
+			continue
+		var secs := _length(String(ex["fuse_sound"]))
+		var mine := own.has(String(ex["fuse_sound"])) and own.has(String(ex["blast_sound"]))
+		ok(mine and absf(secs - float(ex["fuse"])) < 0.01,
+				"%s: its own fuse hiss (%.2f s for a %.2f s fuse) and blast" % [kind_s, secs, ex["fuse"]])
+	var lids: Array = ChestLoot.R()["creak"]
+	var odd := lids.filter(func(s): return not own.has(s) or lids.count(s) > 1)
+	var ends: bool = ChestLoot.creak(0) == lids[0] and ChestLoot.creak(lids.size() + 2) == lids[-1]
+	ok(lids.size() >= 2 and odd.is_empty() and ends,
+			"%d chest tiers open with their own lid creak, the last for richer (wrong: %s)" % [lids.size(), odd])
+## 7. Every sound a glove names in its content (cast, an effect's "sfx" / "hit_sfx") exists, and at least the
+## first four gloves (Blink, Barrier, Hook, Rocket) have their own.
+func _gloves() -> void:
+	var names := {}
+	var own := []
+	for id in Gear.ALL:
+		var g: Dictionary = Gear.ALL[id]
+		if g.has("sfx"):
+			own.append(id)
+		_glove_names(g, names)
+	var silent := names.keys().filter(func(n): return not Sfx.ensure(String(n)))
+	ok(silent.is_empty(), "gloves: every named sound exists (silent: %s)" % [silent])
+	var first := ["blink", "barrier", "grapple", "rocket"]
+	var have_first: bool = first.all(func(id): return own.has(id))
+	ok(have_first, "gloves: Blink, Barrier, Hook and Rocket have their own sounds (%d do)" % own.size())
+
+func _glove_names(node, names: Dictionary) -> void:
+	if node is Dictionary:
+		for k in node:
+			if k in ["sfx", "hit_sfx", "cast"] and node[k] is String and node[k] != "":
+				names[node[k]] = true
+			else:
+				_glove_names(node[k], names)
+	elif node is Array:
+		for v in node:
+			_glove_names(v, names)
+## 11. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
+func _garden_moments() -> void:
+	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_evolve", "garden_visit_in",
+			"garden_visit_out", "garden_season"] + GardenSfx.CUPS
+	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
+	ok(filed, "moments: all %d cues have files" % cues.size())
+	var a := {"uid": "moment_a"}
+	var b := {"uid": "moment_b"}
+	BaseLife.befriended.clear()
+	var step := float(Content.rules("base_life")["friend_at"]) * 0.6
+	for i in 3:
+		BaseLife.add_bond(a, b, step)
+	ok(BaseLife.befriended == [["moment_a", "moment_b"]], "moments: friends once, as the bond reaches friend_at %s"
+			% [BaseLife.befriended])
+	BaseLife.befriended.clear()
+	var build: Dictionary = FarmUnlocks.rules()
+	var was_base: bool = build["base_mode"]
+	build["base_mode"] = true                   # leans only show on the Boki base
+	var rec := Save.new_kin("zapple", "Moment")
+	var tinted: Array = Lean.rules()["types"].keys().filter(func(t): return Lean.rules()["types"][t].has("tint"))
+	rec["lean"] = {tinted[0]: Evo.LEAN_FULL * 0.2}
+	var one := Lean.flecks(rec)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	ok((one == 1 and Lean.flecks(rec) == int(Lean.rules()["marks"])),
+			"moments: a lean shows one fleck from its first meal, all at full (%d)" % one)
+	var home := {"kins": [{"rec": rec, "pos": Vector3.ZERO}]}
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL * 0.2
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	var before := int(GardenSfx.heard.get("garden_chime_part", 0))
+	chimes.tick(1.0)
+	ok(int(GardenSfx.heard.get("garden_chime_part", 0)) == before + 1,
+			"moments: a lean that shows more flecks chimes garden_chime_part once")
+	build["base_mode"] = was_base
+	var res := {"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false,
+			"reset": false}
+	_cup_rounds(res)
+	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
+			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_friends\"",
+			"home.gd": "\"garden_evolve\"",
+			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
+	var off := []
+	for f in sites:
+		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
+		if not src.contains(sites[f]):
+			off.append(f)
+		elif f != "home.gd" and src.contains("Sfx.play(\"unlock\""):
+			off.append(f + " unlock")
+	for fn in ["func _make_egg(", "func _play_evolutions("]:
+		var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
+		var body := src.substr(src.find(fn), src.find("\nfunc ", src.find(fn) + 1) - src.find(fn))
+		if body.contains("\"unlock\""):
+			off.append(fn)
+	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
+
+## Each cup round's card plays its own fanfare once (Sprout, Bloom, Crown); a card with no round none.
+func _cup_rounds(res: Dictionary) -> void:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	ok(rounds.size() == GardenSfx.CUPS.size(), "moments: one cup fanfare per cup round (%d)" % rounds.size())
+	var before := GardenSfx.CUPS.map(func(c): return int(GardenSfx.heard.get(c, 0)))
+	GardenPrizes.rows(res)
+	for i in rounds.size():
+		var last: bool = i == rounds.size() - 1
+		GardenPrizes.rows(res.merged({"round": rounds[i]["name"], "ribbon": last, "keepsake": ""}, true))
+	var each := true
+	for i in GardenSfx.CUPS.size():
+		each = each and int(GardenSfx.heard.get(GardenSfx.CUPS[i], 0)) == before[i] + 1
+	ok(each, "moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none")
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -509,6 +684,12 @@ func _measure(path: String) -> Dictionary:
 			cnt += 1
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
+
+## A 16-bit mono wav's length in seconds (the sample rate from its header).
+func _length(sname: String) -> float:
+	var path := "res://audio/%s.wav" % sname
+	var rate := FileAccess.get_file_as_bytes(path).decode_u32(24)
+	return _data(path).size() / 2.0 / maxf(1.0, rate)
 
 ## The 16-bit PCM samples of a wav file (its "data" chunk).
 func _data(path: String) -> PackedByteArray:
@@ -645,3 +826,19 @@ func _boss_moves() -> void:
 	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
 	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
 	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
+## 11. The farm's chop and mine: the set has the axe and pick in several takes, and every sound HomeGather
+## plays by literal name exists (the old stand-ins, break_wood / armor_hit / thump, are not used there).
+func _chop_mine() -> void:
+	ok(_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
+			"chop: the axe bite and pick strike come in 3 takes")
+	var re := RegEx.create_from_string("Sfx\\.play\\(\"([a-z0-9_]+)\"")
+	var src := FileAccess.get_file_as_string("res://scripts/home/home_gather.gd")
+	var played := []
+	for hit in re.search_all(src):
+		played.append(hit.get_string(1))
+	var silent := played.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "chop: every sound HomeGather plays exists (silent: %s)" % [silent])
+	var own := ["axe_bite", "trunk_creak", "tree_down", "pick_strike", "rock_crack", "rock_break"]
+	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
+	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
+			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")

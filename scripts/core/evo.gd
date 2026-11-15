@@ -325,7 +325,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	if String(ln[0]) != "":
 		base = base.lerp(Lean.face(ln[0])["tint"], LEAN_TINT * float(ln[1]))
 		if Lean.on():
-			Lean.mark(body, ln[0], float(ln[1]))
+			Lean.mark(body, ln[0], Lean.flecks(rec))
 	# recolour the body to the form's and the meals' tint
 	var mats: Array = root.get_meta("mats", [])
 	if mats.size() > 0 and (forms.size() > 0 or String(ln[0]) != ""):

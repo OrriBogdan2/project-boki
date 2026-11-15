@@ -79,4 +79,6 @@ func _patch() -> void:
 	e["rot"] = 0
 	var ridge: Array = SnackPatch.harvest(Save.d, 3.0e9)
 	var own: Array = SnackPatch.rules()["zone_snacks"]["ridge"]
-	ok(ridge == own, "a ridge patch grows exactly its zone's list (%s)" % str(ridge))
+	var season := GardenSeasons.snack(3.0e9)
+	ok(ridge == (own if own.has(season) else own + [season]),
+			"a ridge patch grows exactly its zone's list and the season's snack (%s)" % str(ridge))

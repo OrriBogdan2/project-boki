@@ -5,6 +5,7 @@
 One body sound per Hunter, voiced to its element (<arch>_ult_cue: a rising swell that breaks into a hit), and two
 short team tags played on top of it by UltCue: ult_tag_ally (a bright rising pair) and ult_tag_foe (a low falling
 pair). Both tags sit at the same level, so a rival's ultimate is told apart by colour, never by being louder.
+Plus tell_foe, the wind-up TellCue plays where a rival's ground telegraph will land (docs/AUDIO.md).
 Original synthesis, no samples. Its own seed: running it re-rolls nothing else.
 """
 import os, sys
@@ -87,11 +88,22 @@ def tag(freqs, step):
     return mix(*[at(S.chime(f, 0.5, 0.3, ((1.0, 1.0), (2.0, 0.3))), step * i) for i, f in enumerate(freqs)])
 
 
+def tell_foe():
+    """A rival's area starting: a dry low tick, then a short buzzing swell rising into the landing (0.4 s). Dry and
+    buzzy where cast sounds and the team tags ring, so it never reads as an ally's cast."""
+    d = 0.4
+    u = np.arange(N(d)) / N(d)
+    swell = S.sweep(140, 300, d, curve=1.5) * u ** 1.2 * (1.0 - u ** 8)
+    buzz = bpf(S.rattle(d, rate=36, lo=600, hi=2400), 500, 2600) * u ** 2 * 0.4
+    return mix(kick(200, 90, 0.12, drop=0.02, decay=0.04) * 0.7, swell * 0.8, buzz)
+
+
 def build():
     for arch, fn in sorted((k[4:], v) for k, v in globals().items() if k.startswith('cue_')):
         S.save_cat(arch + '_ult_cue', hpf(fn(), 30), 'signature')
     S.save_cat('ult_tag_ally', tag([784, 1175], 0.12), 'cast')     # G5 up to D6: open, bright
     S.save_cat('ult_tag_foe', tag([392, 277], 0.12), 'cast')       # G4 down to C#4: low, tense
+    S.save_cat('tell_foe', hpf(tell_foe(), 30), 'cast')
 
 
 if __name__ == '__main__':

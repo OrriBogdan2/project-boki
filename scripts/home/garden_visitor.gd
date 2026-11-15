@@ -118,6 +118,7 @@ static func _look(h, dt: float, now: float) -> void:
 		return
 	var r := begin(zone, sp, now)
 	VisitorArrive.trail(h, h.add_kin(r, 0)["pos"], sp)
+	GardenSfx.cue("garden_visit_in", h._kin_entry(r)["node"].position)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 
@@ -152,8 +153,12 @@ static func _thank(h, r: Dictionary, now: float) -> void:
 		leave(h, "A wild %s left %s" % [_name(r), "a " + Incubator.egg_name(egg)], now)
 		h._toast("%s left an egg" % _name(r))
 
-## The visitor goes (its model with it when `h` has one): its line waits for the away card, the next one after gap_s.
+## The visitor goes (its model with it and its goodbye when `h` has one): its line waits for the away card, the
+## next one after gap_s.
 static func leave(h, line: String, now: float) -> void:
+	var k: Dictionary = h._kin_entry(rec()) if h != null else {}
+	if not k.is_empty():
+		GardenSfx.cue("garden_visit_out", k["node"].position)
 	_dismiss(h, rec())
 	var notes: Array = Save.d["visitor"].get("notes", [])
 	notes.append(line)

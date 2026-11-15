@@ -57,6 +57,7 @@ var cur_r := 0.0
 var fallen := false
 var told := 0  # the last close the feed and the kin warned of (the first-match guide reads it)
 var _owed := {}  # Hunter -> outside damage not landed yet
+var audio: ZoneSfx  # the warning, the wall's hum, the crossing and the damage tick
 var _wall: MeshInstance3D = null
 var _mat: ShaderMaterial = null
 
@@ -123,6 +124,7 @@ func _init(match_node: Match) -> void:
 		dps[j] = float(ph[j - 1]["dps"])
 	cur_c = cs[0]
 	cur_r = rs[0]
+	audio = ZoneSfx.new(self)
 	_build_wall()
 
 
@@ -175,6 +177,7 @@ func tick(dt: float) -> void:
 	while k < last() and m.time >= t0[k + 1]:
 		k += 1
 	_warn()
+	audio.update()
 	if k > 0:
 		_hurt_outside(dt)
 	if not fallen and m.time >= t1[last()]:
@@ -197,10 +200,11 @@ func _warn() -> void:
 		BokiChatter.say(m, m.player.kin, "zone")
 	if m.hud:
 		m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	m.sfx("warn", null, 0.0)
+	audio.warn()
 
 
-## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain).
+## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no
+## flinch or hitstop either, and the player hears ZoneSfx's tick instead of a hurt voice).
 func _hurt_outside(dt: float) -> void:
 	var R := rules()
 	for h in m.hunters:
@@ -209,7 +213,8 @@ func _hurt_outside(dt: float) -> void:
 			continue
 		var owed: float = float(_owed.get(h, 0.0)) + dps[k] * h.max_hp * dt
 		if owed >= dps[k] * h.max_hp * float(R["tick_s"]):
-			h.hurt(owed, null, {"src": "zone"})
+			if h.hurt(owed, null, {"src": "zone", "tick": true}) > 0.0 and h == m.player:
+				audio.tick()
 			owed = 0.0
 		_owed[h] = owed
 

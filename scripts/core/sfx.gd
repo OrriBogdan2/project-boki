@@ -75,6 +75,8 @@ const NAMES := [
 	"slash_hit",
 	"armor_hit",
 	"armor_break",
+	"armor_up",
+	"armor_up_own",
 	"knock_confirm",
 	"extract_ok",
 	"elim_confirm",
@@ -119,7 +121,14 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss"
+	"axe_bite",
+	"trunk_creak",
+	"tree_down",
+	"pick_strike",
+	"rock_crack",
+	"rock_break",
+	"keg_fuse",
+	"keg_blast",
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -153,7 +162,9 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
-	"fuse_hiss": 80,
+	"tell_foe": 120,
+	"keg_fuse": 80,
+	"keg_blast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
@@ -439,9 +450,9 @@ func set_layers(want: Dictionary) -> void:
 
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
-## is already the current ambience, an early return, so it would never clear them), every keyed loop
-## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
+## stops. The layered score and the place beds (abyss, ruins, AmbBeds) fade out (a screen asking for the
+## "match" wind while it is already the current ambience returns early, so it would never clear them),
+## every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()

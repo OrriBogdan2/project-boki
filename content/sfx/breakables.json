@@ -1,0 +1,12 @@
+{
+ "group": "breakables",
+ "name": "Breakables and chests",
+ "script": "tools/gen_sfx_breakables.py",
+ "sounds": {
+  "break_wood": "impact", "break_clay": "impact", "break_metal": "impact",
+  "keg_fuse": "cast", "keg_blast": "heavy_impact",
+  "chest_creak_plain": "cast", "chest_creak_rich": "cast", "chest_creak_grand": "cast"
+ },
+ "signature": [],
+ "replaces": ["break_wood", "break_clay", "break_metal"]
+}

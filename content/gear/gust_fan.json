@@ -13,5 +13,8 @@
  "launch": {
   "up_mps": 13.0,
   "fwd_mps": 7.5
+ },
+ "sfx": {
+  "cast": "gl_gust"
  }
 }

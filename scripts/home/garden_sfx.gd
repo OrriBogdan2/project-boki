@@ -4,6 +4,9 @@ extends RefCounted
 ## Ring and the Relay Cup) and of the shaping items (docs/AUDIO.md). Every cue goes through cue(), which plays it
 ## through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the checks can assert each
 ## cue fires once per event.
+## Ring and the Relay Cup), its cup rounds, wild visitors and seasons (docs/AUDIO.md). Every cue goes through
+## cue(), which plays it through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the
+## checks can assert each cue fires once per event.
 
 const DB := -6.0                      # dB: the garden sounds sit under the Boki voices
 const BEAT_S := 0.45                  # s between the three countdown beats
@@ -21,6 +24,7 @@ const ITEM := {"stat": "garden_item_bite", "stat_all": "garden_item_bite", "xp":
 		"token": "garden_item_token", "stay": "garden_item_lock", "sweet": "garden_item_snack",
 		"rinse": "garden_item_wash", "aura": "garden_item_aura", "loose": "garden_item_unwind",
 		"trait": "garden_item_nudge", "twin": "garden_item_nudge", "down": "garden_item_nudge"}
+const CUPS := ["garden_cup_sprout", "garden_cup_bloom", "garden_cup_crown"]      # by cup round, garden_prizes.json
 
 static var heard := {}                # cue name -> times played, for the checks
 
@@ -59,6 +63,22 @@ static func clash(home, move: String, pos, pushed: bool) -> void:
 static func reveal(home, pos) -> void:
 	cue("show_reveal", pos)
 	home.get_tree().create_timer(REVEAL_S).timeout.connect(func(): cue("show_crowd", pos))
+
+## A cup round won (garden_prizes.json cup rounds, by name): its fanfare, bigger each step up to the Crown.
+static func cup(round_name: String) -> void:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	cue(CUPS[rounds.map(func(r): return r["name"]).find(round_name)], null)
+
+## A Home opening in `zone` ("" the start zone, GardenZones.here before it opens is `from`): when that is a
+## new zone and the one in season (GardenSeasons), its short sting.
+static func zone_in(zone: String, from: String) -> void:
+	if not FarmUnlocks.base_mode() or zone == GardenZones.HUB or _zone(zone) == _zone(from):
+		return
+	if String(GardenSeasons.season()["zone"]) == _zone(zone):
+		cue("garden_season", null)
+
+static func _zone(id: String) -> String:
+	return id if id != "" else GardenZones.start()
 
 static func _size(rec: Dictionary) -> String:
 	return SIZE[Unique.size_tag(rec)]
