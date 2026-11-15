@@ -110,7 +110,7 @@ func run(m: Node) -> void:
 	var from := {"sp": "cindle", "zone": "hushwood", "day": 12}
 	var vegg := Incubator.add("cindle", "", from)
 	ok(Incubator.find(String(vegg["id"])).get("visitor") == from, "a cradled egg keeps who left it")
-	Incubator.find(String(vegg["id"]))["heat"] = Incubator.HEAT_NEED
+	Incubator.find(String(vegg["id"]))["heat"] = Incubator.need()
 	var vbaby := Incubator.hatch(rng)
 	var vp: Array = FamilyView.parents(vbaby)
 	var states: Array = vp.map(func(s): return s["state"])
@@ -120,7 +120,7 @@ func run(m: Node) -> void:
 	var line := "hatched from the egg a wild Vespyx left in Hushwood on day 12"
 	ok(Incubator.born_line(vbaby, "") == line, "one memory line tells the day")
 	var oegg := Incubator.add("cindle", "")
-	Incubator.find(String(oegg["id"]))["heat"] = Incubator.HEAT_NEED
+	Incubator.find(String(oegg["id"]))["heat"] = Incubator.need()
 	var obaby := Incubator.hatch(rng)
 	var old_wild: bool = FamilyView.parents(obaby).all(func(s): return s["state"] == FamilyView.WILD)
 	ok(old_wild, "an egg without the data shows wild only")
