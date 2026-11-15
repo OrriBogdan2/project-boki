@@ -27,3 +27,15 @@ Build 2 min; full gate 51 min (rpc4 under load: 253 flags red on both sides and 
 main as well, a lost shard job on the candidate); main moved (#82 merged by merge-ready-watch, which has no hold yet) -> `regate-run` delta
 gate 4 min -> GREEN, branch `ext/merge-train-1115-0201` behind main 0. rpc4 has no gh, so the PR and the GATE GREEN comment are the
 coordinator's (texts: `pr-body.md`, `gate-comment.md`). A full gate is 10-50 min and main moves every 20-30, so the delta gate and the hold are what make a train land.
+
+## Second look (11-15 04:15Z, w2, job 20261115-040516-a1)
+- Train #108 (`ext/merge-train-1115-0201`) never merged: no hold in merge-ready-watch, no PR/GATE GREEN until 03:37Z, and main moved 27
+  commits; it is now dirty (conflicts) and its hold auto-released at 134 min. Close #108 and delete its branch (coordinator, gh).
+- The greens left behind are mostly not train material: of #86 #62 #51, #62 conflicts with main itself (net.gd, settings.gd, cam.gd ...)
+  and #98 #85 went REGATE RED. `run` now tells the two kinds of skip apart: "conflicts with main itself: needs a conflict fix" (send to a
+  fix job) vs "only with the others: next train".
+- regate-bot moves heads (merges main in) without a new green yet; a bare `run 86` used to fold that ungated head. Bare ids now need
+  their newest GATE GREEN at their head (`TRAIN_TRUST_IDS=1` to skip, tests only).
+- Without a token, `select` reads comments of ~35 behind PRs (60 API calls/h): cached in `$TRAIN_STATE/comments-cache.json` by updated_at.
+- The train only pays off once merge-ready-watch has the hold line above and the box that runs `run` can open the PR within minutes
+  (hetzner, gh): a train published 90 min after its gate is as stale as the greens it folded.
