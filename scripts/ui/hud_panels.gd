@@ -63,6 +63,7 @@ func _draw_panels() -> void:
 			HudScale.begin(hud, "vitals", sz)
 			HudVitals.draw(hud, sz, p)
 			HudScale.begin(hud, "abilities", sz)
+			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
 			HudScale.begin(hud, "weapon", sz)
 			hud._draw_weapon(sz, p)

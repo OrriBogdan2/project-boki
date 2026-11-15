@@ -10,6 +10,9 @@ equip = a muted buckle clink over a leather thump, swap = a falling tick, a slid
 take = a rustle and a short rising pair (quieter and duller than pickup).
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
+for you), steal_won (a quick bright rise, you took a monster another squad fought hardest) and
+steal_lost (a dull falling pair over a low bump: you were robbed of it).
 """
 import numpy as np
 import sfx_lib as S
@@ -125,6 +128,19 @@ def level_up(i):
     return finish(room(mix(*arp, top, glow), 0.9), 5600)
 
 
+def rank_up(i):
+    """Choosing which ability to rank: a short rising pair; the caller pitches it per slot."""
+    return finish(room(mix(pluck(NOTE['C5'], 0.3, 0.06), at(pluck(NOTE['G5'], 0.4, 0.1), 0.06)), 0.5), 4800)
+
+
+def rank_max(i):
+    """A slot hits its top rank and its bonus opens: a fuller rising chord with a bright tail."""
+    run = [at(pluck(NOTE[n], 0.5, 0.1), 0.05 * k) for k, n in enumerate(['C5', 'G5', 'C6'])]
+    top = at(mix(pluck(NOTE['E6'], 0.9, 0.25), pluck(NOTE['G5'], 0.9, 0.25) * 0.6), 0.15)
+    glow = at(S.chime(NOTE['C6'] * 2, 0.7, 0.25, ((1.0, 0.6), (2.76, 0.15))) * 0.2, 0.17)
+    return finish(room(mix(*run, top, glow), 0.8), 5600)
+
+
 def ping(i):
     return finish(room(mix(pluck(NOTE['A5'] * jit(i, 0.01), 0.6, 0.18, 0.8),
                            0.4 * pluck(NOTE['A5'] * 1.5, 0.4, 0.1, 0.3)), 0.7), 4800)
@@ -143,6 +159,102 @@ def charge(i):
     low = S.sweep(330, 520, d) * np.sin(np.pi * u * 0.5 + 0.1) * u ** 0.6
     high = S.sweep(660, 1040, d) * u ** 1.5
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
+
+
+# ---------------------------------------------------------------- garden reactions
+# The farm's own cues (what you hear most at home): short, warm, one per kind, so `unlock` stays for real unlocks.
+def feed(i):
+    """Two soft munches (a low tine and a crumb of noise) and a pleased rising tine."""
+    j = jit(i, 0.03)
+
+    def munch(f):
+        return mix(pluck(f, 0.1, 0.03, 0.2), 0.5 * lpf(noise(0.05), 1400) * env(N(0.05), 0.003, 0.02))
+    return finish(room(mix(munch(NOTE['C4'] * j), at(munch(NOTE['D4'] * j), 0.1),
+                           at(pluck(NOTE['G5'] * j, 0.35, 0.1), 0.22)), 0.5), 3800)
+
+
+def pet(i):
+    """A purr: a low tone with a quick tremolo, rounded off, and one warm tine on top."""
+    d = 0.5; n = N(d); t = T(d)
+    f = 150 * jit(i, 0.04)
+    purr = np.sin(2 * np.pi * f * t) * (0.6 + 0.4 * np.sin(2 * np.pi * 24 * t)) * np.sin(np.pi * np.arange(n) / n) ** 1.5
+    return finish(room(mix(purr * 0.6, at(pluck(NOTE['E5'] * jit(i, 0.02), 0.4, 0.12, 0.4), 0.05)), 0.5), 2600)
+
+
+def friend(i):
+    """Two tines a fifth apart ring together (a handshake), then a bright third above."""
+    return finish(room(mix(pluck(NOTE['G4'], 0.5, 0.14), pluck(NOTE['D5'], 0.5, 0.14),
+                           at(pluck(NOTE['G5'], 0.7, 0.2), 0.12), at(pluck(NOTE['D6'], 0.8, 0.26), 0.2)), 0.8), 5200)
+
+
+def trait(i):
+    """A shimmer rising through a pentatonic climb, ending in a chime: something about it changed."""
+    sw = S.sweep(420, 1250, 0.4) * env(N(0.4), 0.05, 0.2) * 0.25
+    steps = [at(pluck(NOTE[nm], 0.4, 0.09), 0.06 * k) for k, nm in enumerate(['D5', 'E5', 'G5', 'A5'])]
+    chime = at(S.chime(NOTE['D6'], 0.9, 0.3, ((1.0, 0.6), (2.76, 0.2))) * 0.3, 0.26)
+    return finish(room(mix(sw, *steps, chime), 0.8), 5400)
+
+
+def egg(i):
+    """A hollow wooden tock (a shell settling in straw) and a small warm bell."""
+    tock = (S.sweep(420, 210, 0.09) * env(N(0.09), 0.002, 0.03)
+            + 0.3 * S.pad(bpf(noise(0.04), 900, 1800) * env(N(0.04), 0.002, 0.012), 0.09))
+    return finish(room(mix(tock, at(pluck(NOTE['E5'], 0.55, 0.16, 0.5), 0.07), at(pluck(NOTE['A5'], 0.6, 0.18, 0.4), 0.17)), 0.7), 4200)
+
+
+def toy(i):
+    """A rubber bounce: a pitch that hops up twice, each hop smaller, with a tine on the last."""
+    def hop(f, d):
+        return S.sweep(f, f * 1.7, d) * env(N(d), 0.003, d * 0.5)
+    return finish(room(mix(hop(330, 0.1), at(hop(400, 0.08), 0.12) * 0.7, at(pluck(NOTE['C6'], 0.3, 0.08), 0.22)), 0.4), 4600)
+
+
+# ---------------------------------------------------------------- the Nesting Nook (scripts/home/nook_sfx.gd)
+def nook_note(i):
+    """One warm tine on C5 with its octave below; the Nook plays it twice, pitched by each parent's size."""
+    return finish(room(mix(pluck(NOTE['C5'], 0.8, 0.22, 0.5), 0.35 * pluck(NOTE['C4'], 0.8, 0.2, 0.0)), 0.8), 3800)
+
+
+def nuzzle(i):
+    """A soft brush of fur (swelling filtered noise) over a quiet low purr."""
+    d = 0.45; n = N(d); t = T(d)
+    swell = np.sin(np.pi * np.arange(n) / n) ** 2
+    purr = np.sin(2 * np.pi * 170 * jit(i, 0.03) * t) * (0.6 + 0.4 * np.sin(2 * np.pi * 20 * t))
+    return finish(room(mix(0.5 * lpf(noise(d), 1500) * swell, 0.35 * purr * swell), 0.4), 2400)
+
+
+def settle(i):
+    """A small body sinking into straw: a low soft thump and a short sigh of air."""
+    thump = S.sweep(170, 85, 0.2) * env(N(0.2), 0.004, 0.07)
+    sigh = 0.4 * lpf(noise(0.35), 900) * env(N(0.35), 0.06, 0.12)
+    return finish(room(mix(thump * 0.8, at(sigh, 0.04)), 0.4), 2200)
+
+
+def wobble(i):
+    """An unsure mix: two tines a little flat and sour with a slow wobble, then a soft one that stays open.
+    Gentle on purpose: it says 'needs care', not 'failed'."""
+    def tine(f, d, dec):
+        t = T(d)
+        ph = 2 * np.pi * np.cumsum(f * (1 + 0.025 * np.sin(2 * np.pi * 6 * t))) / S.SR
+        return np.sin(ph) * env(N(d), 0.004, dec)
+    return finish(room(mix(tine(NOTE['E5'], 0.4, 0.12), 0.7 * tine(NOTE['E5'] * 1.04, 0.4, 0.12),
+                           at(tine(NOTE['D5'] * 0.97, 0.5, 0.14), 0.17), at(tine(NOTE['A4'], 0.7, 0.2), 0.36)), 0.6), 3200)
+
+
+def xp_tick(i):
+    return finish(room(pluck(NOTE['G6'], 0.16, 0.035, 0.5), 0.25), 5200)
+
+
+def steal_won(i):
+    rise = [at(pluck(NOTE[n], 0.3, 0.07), 0.055 * k) for k, n in enumerate(['D5', 'G5', 'D6'])]
+    flick = at(S.chime(NOTE['G6'], 0.4, 0.12, ((1.0, 0.5), (2.76, 0.2))) * 0.3, 0.17)
+    return finish(room(mix(*rise, flick), 0.5), 5400)
+
+
+def steal_lost(i):
+    fall = [at(pluck(NOTE[n], 0.35, 0.09, 0.4), 0.09 * k) for k, n in enumerate(['E5', 'C5'])]
+    bump = at(pluck(NOTE['C4'] / 2, 0.3, 0.1, 0.1) * 1.2, 0.09)
+    return finish(room(mix(*fall, bump), 0.4), 2600)
 
 
 # ---------------------------------------------------------------- inventory (InvSfx)
@@ -197,9 +309,24 @@ def main():
     S.takes_cat('pickup', pickup, 3, 'ui')
     S.save_cat('unlock', unlock(0), 'ui')
     S.save_cat('level_up', level_up(0), 'ui')
+    S.save_cat('rank_up', rank_up(0), 'ui')
+    S.save_cat('rank_max', rank_max(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
+    S.takes_cat('garden_feed', feed, 2, 'ui')
+    S.takes_cat('garden_pet', pet, 3, 'ui')
+    S.save_cat('garden_friend', friend(0), 'ui')
+    S.save_cat('garden_trait', trait(0), 'ui')
+    S.save_cat('garden_egg', egg(0), 'ui')
+    S.save_cat('garden_toy', toy(0), 'ui')
+    S.save_cat('nook_note', nook_note(0), 'ui')
+    S.takes_cat('nook_nuzzle', nuzzle, 2, 'ui')
+    S.save_cat('nook_settle', settle(0), 'ui')
+    S.save_cat('nook_wobble', wobble(0), 'ui')
+    S.save_cat('xp_tick', xp_tick(0), 'ui')
+    S.save_cat('steal_won', steal_won(0), 'ui')
+    S.save_cat('steal_lost', steal_lost(0), 'ui')
     S.takes_cat('inv_grab', inv_grab, 3, 'ui')
     S.takes_cat('inv_drop', inv_drop, 3, 'ui')
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')

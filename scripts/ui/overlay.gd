@@ -450,6 +450,9 @@ func _tab_access(v: VBoxContainer) -> void:
 	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
 	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
+	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),
+		"Swaps the colours that tell you, your squad and rivals apart. Ability colours stay")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")

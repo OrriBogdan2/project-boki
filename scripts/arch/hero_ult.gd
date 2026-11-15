@@ -64,11 +64,13 @@ static func slot_info(k: ArchKit) -> Dictionary:
 	var xd := k.x_def()
 	var cd_left := float(k.cd["x"])
 	var unlock := int(Hunter.ULT_AT[0])
+	# off cooldown and unlocked but press() would refuse it: busy (downed, stunned, riding, hexed) or merged
+	var blocked := cd_left <= 0.0 and k.h.lvl >= unlock and not k.ult_running() and (k.busy() or KinMerge.active(k.h))
 	return {
 		"name": String(xd.get("name", "")), "short": String(xd.get("short", "")), "icon": String(xd.get("icon", "")),
 		"col": k.col_of(xd), "desc": String(xd.get("desc", "")), "cd": cd_left, "cd_max": cooldown(k),
 		"charges": 1 if cd_left <= 0.0 else 0, "max_charges": 1, "verb": "x", "level": 1,
-		"ready": cd_left <= 0.0 and k.h.lvl >= unlock and not KinMerge.active(k.h),
-		"locked": k.h.lvl < unlock, "unlock": unlock,
+		"ready": cd_left <= 0.0 and k.h.lvl >= unlock and not blocked,
+		"locked": k.h.lvl < unlock, "unlock": unlock, "blocked": blocked,
 		"up": k.ult_running(),
 	}
