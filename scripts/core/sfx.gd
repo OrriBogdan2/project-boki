@@ -89,6 +89,8 @@ const NAMES := [
 	"slash_hit",
 	"armor_hit",
 	"armor_break",
+	"armor_up",
+	"armor_up_own",
 	"knock_confirm",
 	"extract_ok",
 	"elim_confirm",
@@ -134,7 +136,14 @@ const NAMES := [
 	"break_clay",
 	"break_metal",
 	"keg_fuse",
-	"keg_blast"
+	"keg_blast",
+	"fuse_hiss",
+	"axe_bite",
+	"trunk_creak",
+	"tree_down",
+	"pick_strike",
+	"rock_crack",
+	"rock_break"
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -210,7 +219,12 @@ const MIN_GAP := {
 	"step0": 60,
 	"step1": 60,
 	"step2": 60,
-	"training_dummy_hit": 70
+	"training_dummy_hit": 70,
+	"xp_tick": 60,
+	"steal_won": 400,
+	"steal_lost": 400,
+	"hostile_cast": 100,
+	"armor_up": 120
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 ## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
@@ -261,6 +275,8 @@ var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
 var hear_range := 30.0  # m: silent beyond this (a sound's own "reach" overrides it)
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
+var sound_gain := {}
 var last_played := {}
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
@@ -305,6 +321,11 @@ func _ready() -> void:
 			streams[n] = takes
 	_load_sets()
 	_load_mix()
+	# main's point fixes (sfx_levels.json gain_db) for the sounds the mix pass (sfx_cues.json) does not level
+	sound_gain = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))["gain_db"]
+	for s in sound_gain:
+		if not cue_db.has(s):
+			cue_db[s] = sound_gain[s]
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"

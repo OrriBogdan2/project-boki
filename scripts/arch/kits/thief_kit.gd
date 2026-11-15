@@ -703,6 +703,7 @@ func _tick_bola(dt: float) -> void:
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
 				m.sfx("thief_bola_ricochet", p, -5.0)
 				continue
+			MissFx.puff(m, MissFx.colour_of(h), p, true)
 			_end_bola(p)
 			return
 		p = q
@@ -730,6 +731,8 @@ func _tick_bola(dt: float) -> void:
 					_end_bola(p)
 					return
 		if float(bola["left"]) <= 0.0:
+			if bola["first"] == null:
+				MissFx.puff(m, MissFx.colour_of(h), p, false)
 			_end_bola(p)
 			return
 	bola["pos"] = p

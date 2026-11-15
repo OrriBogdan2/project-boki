@@ -633,6 +633,7 @@ func guard_stack() -> void:
 	shield_at = m.time
 	ShieldSrc.give(h, float(gd["shield"]) * shield_stacks, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
+	h.shield_kind = "molten"
 	vfx("guard_up")
 
 # ------------------------------------------------------------------ E: Stone Row
