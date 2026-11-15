@@ -119,6 +119,7 @@ const CHECKS := {
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
 	"--glide-bank-check": ["res://tools/glide_bank_check.gd", "glide_bank_check", null],
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
+	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],  # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],  # --shots-dir, --res
@@ -148,6 +149,7 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
+	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)
@@ -330,10 +332,11 @@ const CHECKS := {
 	"--telegraph-lead-check": ["res://tools/telegraph_lead_check.gd", "hero_pair_check", null],
 	"--bot-dodge-check": ["res://tools/bot_dodge_check.gd", "bot_dodge_check", null],
 	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
-	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],  # the Warden models
-	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],  # rig for the Blender build
-	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],  # .glb loader
-	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],  # baked rig rests
+	"--lace-playtest-check": ["res://tools/lace_playtest_check.gd", "lace_playtest_check", null],      # Lace 11-08
+	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
+	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
+	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
+	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],      # baked rig rests
 	"--warden-rest-bake": ["res://tools/warden_rest_check.gd", "warden_rest_check", "bake"],
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],  # warm-up kept on disk
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
