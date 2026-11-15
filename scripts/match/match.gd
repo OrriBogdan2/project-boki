@@ -2108,10 +2108,10 @@ func on_fell(e: Ent) -> void:
 		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
-			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
-			e.teleport(back)
 			if tut:
-				hud.toast("Back to your last stop. Try again", Color("f3eee2"))
+				tut.retry()      # (the beat starts again, back at the last stop)
+				return
+			e.teleport(e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground()))
 			e.vel = Vector3.ZERO
 			return
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
