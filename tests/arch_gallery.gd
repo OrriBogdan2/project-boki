@@ -127,7 +127,7 @@ func _heads() -> void:
 
 ## The hero showcase (Thief and Juggernaut), for the hero-art screenshots:
 ##   --showcase        three of each across races and genders, close up from a three-quarter view
-##   --showcase-top    the same hunters from the match camera (Supervive preset: 65°, 25 m, fov 35);
+##   --showcase-top    the same hunters from the match camera (default preset: 65°, 25 m, fov 35);
 ##                     --showcase-zoom halves the field of view to inspect what reads at that angle
 ##   --showcase-poses  each archetype frozen in idle, run, attack, RMB cast and ultimate
 ## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-one (one look each), --showcase-outfit=<index>.
@@ -199,7 +199,7 @@ func _showcase() -> void:
 			h.rotation.y = PI * 0.86
 			i += 1
 	if "--showcase-top" in args:
-		# the Supervive camera preset (Cam.STYLES "supervive"), looking at the middle of the row
+		# the default camera preset (Cam.STYLES "default"), looking at the middle of the row
 		var p := deg_to_rad(65.0)
 		cam.position = Vector3(0, sin(p) * 25.0, cos(p) * 25.0); cam.rotation = Vector3(-p, 0, 0)
 		cam.fov = 17.5 if "--showcase-zoom" in args else 35.0

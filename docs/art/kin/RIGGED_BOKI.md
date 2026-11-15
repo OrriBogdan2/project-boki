@@ -294,4 +294,12 @@ None of these is a gap (each resolves to a real clip); each is a stand-in an ani
 4. **summon throw** (flying): the run clip; a tucked tumble or glide (`ext/anim-boki-hop-air` plays hop in the air).
 5. **Relay win** and **sulk**: a hop and a stand; a cheer jump and a slump.
 6. The shared idle, walk, run, hop, pet, carry and tend of the species listed above under "Shared base".
+
+Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile). The rigged
+body plays the `settle`, `nap` and `wake` clips (`BokiHomeClips`; wake has the stretch). On top of them, `KinNap`
+(`scripts/match/kin_nap.gd`) adds an ear flick every 3-8 s on the root ear bones the nap clip keys, so the flick never
+builds up, and slows all three clips for a bigger Boki (scale times the root of its mass, x0.85 to x1.4). The primitive
+body (`KinPuppet`) gets the whole nap from `KinNap`: it lies down over 0.6 s, breathes once every 3.6 s, flicks an ear,
+and on waking gets up in 0.4 s and stretches long and low with the front down, done by 1.1 s. Checks:
+`--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).
 | caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
