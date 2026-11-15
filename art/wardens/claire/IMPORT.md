@@ -49,4 +49,9 @@ Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15),
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
 edge stays rather than a hole; it is not reworked here.
 
+Clip re-key (2026-11-11, docs/heroes/rimewright.md "Animation timing"): `dart_r`, `dart_l`, `dart_heavy`, `beam`, `wall`,
+`freeze` and `clench` re-baked from `~/meshy/claire_v2/stage/c/claire.blend` (hetzner) by `tools/art1/claire_clips.py` with
+those names as its third argument, then put into this file by `python3 tools/art1/glb_add_clips.py claire.glb claire_rk.glb
+dart_r,dart_l,dart_heavy,beam,wall,freeze,clench` (no re-swap: same skeleton; a control clip, `shatter`, came out bit-equal).
+
 walk and run, on foot (2026-11-11): the Meshy-rig retarget of ext/anim-pilot-albert-neve (`walk_f`, `run_f`, copied with `glb_add_clips.py` onto this v95 body, same rig) re-pinned with `tools/art1/hunter_dir_gait.py` (Blender 4.5, CPU): `-- SRC.glb F.glb 2.54 5.31 f 0.5625 0`, `glb_add_clips.py SRC F walk_f,run_f S1`, then `-- S1 D.glb 2.54 5.31 b,l,r,fl,fr,bl,br` and `glb_add_clips.py` again. The speeds are her 2.2 / 4.6 m/s over her in-game model scale 0.867 (the gait tool works in model metres; pinned at 2.2 / 4.6 the soles covered only 3.8 / 4.0 m/s of ground, which was the skate). Walk 0.5625 s (27 keys, duty 0.40), run 0.604 s (duty 0.18); every planted sole 100 % within 5 %, seams 0, diagonals in step; the swing meets the floor at 0.95 of the ground speed (`MEET`, was 0.6: the foot scuffed forward at the strike). Her skate stays `skate*`/`tm_skate`. claire.json `loco`: `stride` [1.0, 1.0] (no thigh stretch on a pinned clip), `foot_mps` [2.0, 4.4] (the game's blend reads it a touch slower than baked). `--anim-audit`: run slide 24 % at the ankle (gate 25 %), 21 % at the sole; walk 19 % at the sole.

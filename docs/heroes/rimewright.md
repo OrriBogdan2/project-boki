@@ -211,7 +211,7 @@ card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `le
 | After the crash, 0.4 s of recovery (footage f57 -> f61): locked, a press in its last 0.15 s goes as it ends, Shift skates out | "anim rime: she is locked from the burst ...", "anim rime: no walking, darts or E ...", "anim rime: an E pressed in its last 0.15 s ...", "anim rime: Shift in the recovery ..." |
 
 ## Animation moves
-In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`. The model plays hand-keyed clips on these timings (`content/rules/warden_anim/claire.json`, `tools/art1/claire_clips.py`): she carries the spear, so darts flick off its tip or her left palm, and the RMB push is both hands driving the shaft. Tone: gentle figure-skating, modest, never seductive.
+In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`. The model plays hand-keyed clips as long as these moves (`content/rules/warden_anim/claire.json`, `tools/art1/claire_clips.py`), their hit poses on the kit's hits (Animation timing below): she carries the spear, so darts flick off its tip or her left palm, and the RMB push is both hands driving the shaft. Tone: gentle figure-skating, modest, never seductive.
 
 | Ability | Move | Beats (s) | Shape |
 |---|---|---|---|
@@ -238,7 +238,7 @@ The skate leaves a ribbon of ice chips, ice plates under her blades (`IceStrip`,
 Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
 
 ## Animation timing (parity against the footage)
-Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), measured in game by `tools/rimewright_anim_check.gd` (rows `anim ...` in `--rimewright-combo-check`). "Pose lag" is how late the clip's hit pose (flick, sling, thrust, palms out, stamp) lands after the kit's hit. Before the fix the kit hit at the move's start while the clip was still cocking, so the pose trailed it by the whole cock. Now `claire.json` gives each such move a `lead` (s of the clip skipped), so the pose lands on the hit; the GLB is untouched.
+Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), measured in game by `tools/rimewright_anim_check.gd` (rows `anim ...` in `--rimewright-combo-check`). "Pose lag" is how late the clip's hit pose (flick, sling, thrust, palms out, stamp) lands after the kit's hit. Before the fix the kit hit at the move's start while the clip was still cocking, so the pose trailed it by the whole cock. `claire.json` then skipped the cock with a `lead`; now the clips are re-keyed (`tools/art1/claire_clips.py`, put into `claire.glb` by `tools/art1/glb_add_clips.py`): each hit pose sits at the kit's hit (the flick, sling, thrust, stamp and clench at 0, the wall's shove at 0.2), with no `lead`. `--clip-check` finds each pose in the GLB at its time (the frame its hand is farthest from where the clip ends), the `anim` rows hold those times to the kit's hits. The held spear grows to full size by 0.12 s (`SPEAR_FORM_T`), as her palms gather it. Strips before/after: `docs/shots/neve-spear-keys/`.
 
 | Move | Source (s) | Ours before | Ours after |
 |---|---|---|---|
@@ -248,7 +248,7 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 | Spear (RMB) | palms out, then flight | release 0.10 s = pose key | unchanged |
 | Spear detonation | 1.8-2.0 after landing | 1.82 s | unchanged |
 | Clench (the burst) | on the detonation | pose 0.10 s late | pose on the burst |
-| Wall tell | 0.2 sparkle, then it erupts | 0.22 s; shove 0.05 s late | 0.22 s; shove on the eruption |
+| Wall tell | 0.2 sparkle, then it erupts | 0.22 s; shove 0.05 s late | 0.22 s; shove 0.02 s early (key 0.2) |
 | Freeze (Wall recast) | on the press | pose 0.13 s late | pose on the stamp |
 | Skate push-off / stop | full speed within 0.2; stop 0.1-0.2 | 0.18 s / 0.03 s | unchanged |
 | Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
@@ -260,7 +260,7 @@ The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.j
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
 
-Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption).
+Model re-key wishes (GLB / `tools/art1`): none open here: the flick, sling and thrust keys sit at 0 (no `lead`), `spear_aim` gathers the spear by `SPEAR_FORM_T` (0.12 s) and `rime_crash` is main's 0.4 s recovery.
 
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars and the ice slab between them (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes. Her frozen body is `IceBody` (`ice_body.gd`) with `shaders/hero_ice.gdshader`: her own colour and atlas under translucent ice (screen refraction, a fresnel rim, an inner glow, a Voronoi crack web, a sparkle), a bright frost front climbing feet to head on the cast and back down on the thaw; it works on the procedural model (its material_override a part) and on `claire.glb` (an override a surface).
@@ -275,4 +275,4 @@ Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and th
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> R is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
-- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. `WardenClips._pick` adds a kmove's `lead` to the kit's `kmove_t`.
+- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. Her clips carry no `lead` (`WardenClips._pick` would add it to the kit's `kmove_t`).

@@ -53,7 +53,7 @@ const PUSH_T := 0.1           # s from letting go of RMB to the release: both pa
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
-const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+const SPEAR_FORM_T := 0.12     # s of holding RMB for the spear to grow to full size: her palms' gather (spear_aim clip)
 ## The presses the crash's recovery holds back, and the HUD slot each one's refusal pulses.
 const RECOVER_KEYS := {
 	"fire": "", "sec": "sec", "sig": "k1", "jump": "", "gear1": "gear0", "gear2": "gear1", "kin_ab": ""}
