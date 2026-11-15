@@ -397,8 +397,8 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
-		return false      # (its wisp may be stolen: KinSteal)
+	if kin == null or not (kin as Kin).carried():
+		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
 ## Riding the giant Fusion form right now (a Boki on the Return order guards at your side, never under you).
@@ -463,13 +463,11 @@ func buff(stat: String) -> float:
 func mass() -> float:
 	return float(cdat.get("mass", 1.0))
 
-## A downed Hunter is a Wisp (decision 0019): shots and areas pass through it. Stomps, executes and revives
-## reach it by their own rules (Life), not through here.
 func hittable() -> bool:
-	return not dead and not out and not extracted and not riding and not downed
+	return not dead and not out and not extracted and not riding
 
 func targetable() -> bool:
-	return hittable() and cloak_t <= 0.0 and not dropping
+	return hittable() and not downed and cloak_t <= 0.0 and not dropping
 
 func is_local() -> bool:
 	return ctrl == "local"
