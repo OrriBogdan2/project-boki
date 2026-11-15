@@ -91,10 +91,10 @@ func _model(id: String, look: Dictionary, glb := false) -> Node3D:
 	var cls := Arch.weight(id) if id != "" else "medium"
 	var proc := not glb and WardenGlb.uses_model(id)
 	if proc:
-		WardenGlb.set_model(id, false)
+		WardenGlb._measuring = true
 	var m := Models.hunter(cls, Data.TEAM_COLORS[0], Arch.signature(id if id != "" else REF_WEAPON), "", look, id)
 	if proc:
-		WardenGlb.set_model(id, true)
+		WardenGlb._measuring = false
 	# the rest pose's stance (which leg takes the weight) is seeded per node: fix the seed so every model
 	# is measured in the same pose and the size comparisons don't drift from build to build
 	m.set_meta("anim_seed", ANIM_SEED)

@@ -17,7 +17,7 @@ const FLASH_FILL := 0.35  # how far a tap's flash fills the ring (0..1)
 const POP_S := 0.8  # s the "Hold" pop rises and fades
 const CLICK_DB := -10.0  # the tap click sits under the game's sounds
 const GLIDE_DONE_S := 0.6  # s with the glider open and Space still down: a finished glide hold
-const HOLD_DONE_S := 1.0  # s of F held on a chop, a mine or a "Hold F" prompt: a finished hold
+const HOLD_DONE_S := 1.0  # s of F held on a chop, a mine or a hold prompt: a finished hold
 const HINTS := {
 	"chop": "Hold %s to chop",
 	"mine": "Hold %s to mine",

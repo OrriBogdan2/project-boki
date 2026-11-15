@@ -2151,7 +2151,7 @@ func _find_interact() -> void:
 		prompt_lbl.visible = false
 		var old_row := prompt_box.get_node_or_null("Keys")
 		if old_row: old_row.free()
-		var row := HoldPrompt.key_hints(pairs, 14, UI.INK, hg.ring_fill, hg.ring_action)      # "Hold F": the ring
+		var row := HoldPrompt.key_hints(pairs, 14, UI.INK, hg.ring_fill, hg.ring_action)      # the hold key: the ring
 		row.name = "Keys"
 		row.add_theme_constant_override("separation", 22)
 		for one in row.get_children():

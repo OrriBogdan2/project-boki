@@ -123,7 +123,7 @@ func _match() -> void:
 	P.ak.cue.erase("w")
 	var texts: Array = TextCache.seen.duplicate()
 	for id in ["sec", "k1", "r", "dash"]:
-		for line in m.hud._tip_lines(id, P): texts.append(String(line[0]))
+		for line in m.hud.hover.tip_lines(id, P): texts.append(String(line[0]))
 	none("no hunter slot text or tooltip names a default key (%d texts)" % texts.size(), _stale_in(texts))
 	m.free()
 
