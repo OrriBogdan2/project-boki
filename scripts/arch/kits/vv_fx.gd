@@ -61,20 +61,16 @@ static func of(match_node: Node) -> VVFx:
 ## `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all. The Hunter's
 ## after-images are copied now too (ECHO_CAP of them, a dash leaves 7): his first dash built 391 meshes.
 ## mark_pips: the Static marker's pip count (it is built for one count), 0 for a kit with no marker.
-## deep: arcs and smears the kit strings up in one frame (a Coil hit, a flying burr), one pooled node each.
+## deep: smears the kit strings up in one frame (a flying burr), one pooled node each.
 func prewarm(at: Vector3, who: Hunter, mark_pips := 0, deep := 1) -> void:
 	var b := at + Vector3.RIGHT
 	var w := Color.WHITE
 	for i in deep:
-		arc(at, b, w, w, 0.5, WARM_T)
 		smear(at, b, w, w, 0.3, WARM_T)
-	beam(at, b, w, w, 0.9, WARM_T)
 	pillar(at, w, w, 6.0, 0.9, WARM_T)
 	ring(at, 1.0, w, w, WARM_T)
 	disc(at, 1.0, w, w, WARM_T)
 	star(at, w, w, 0.4, WARM_T)
-	swirl(who, w, w, WARM_T)
-	shackle(who, w, w, WARM_T)
 	_play(_take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER))), "tracer", WARM_T)
 	if mark_pips > 0:
 		marker("warm", who, 1, mark_pips, w, w, 2.0)
