@@ -1,0 +1,29 @@
+{
+	"id": "rippmink",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/nacrolin.json.",
+	"size": {
+		"cm": 38,
+		"kg": 1.1,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#db94a4",
+		"belly": "#bdcef1",
+		"glow": "#b65c6c"
+	},
+	"work": {
+		"tide": 3,
+		"craft": 2,
+		"mend": 1
+	},
+	"line": {
+		"dex": "rippmink",
+		"stage": 2,
+		"stages": 2,
+		"prev": [
+			"ermink"
+		],
+		"next": [],
+		"_doc": "its evolution line in the dex; the game evolves by affinity form within a species, so the line is data only"
+	}
+}

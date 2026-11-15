@@ -668,7 +668,8 @@ func where_at(p: Vector3) -> Dictionary:
 	return w
 
 func bot_kin_record() -> Dictionary:
-	var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
+	var pool: Array = Data.wild_pool(tier)
+	var sp: String = pool[rng.randi_range(0, pool.size() - 1)]
 	var rec := Save.new_kin(sp, "", kin_seed("bot"))
 	rec["trust"] = rng.randf_range(40, 80)
 	rec["level"] = rng.randi_range(1, 4 + tier * 3)
@@ -741,7 +742,7 @@ func _spawn_hunters() -> void:
 				var rec: Dictionary = Save.active_kin()
 				var rec2: Dictionary = Save.second_kin()
 				if opts.has("demo_kin"):
-					var ids: Array = Data.common_kin()
+					var ids: Array = Data.wild_pool(tier)
 					var sp0 := String(opts["demo_kin"])
 					rec = Save.new_kin(sp0 if Data.KIN.has(sp0) else "cindle", "", kin_seed("demo"))
 					rec["name"] = Data.KIN[rec["species"]]["name"]
@@ -1522,7 +1523,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)      # a raid: its own Boki
+		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.wild_pool(tier), "expedition", tier, rng)      # a raid: its own Boki
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
