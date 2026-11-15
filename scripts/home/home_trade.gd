@@ -85,6 +85,10 @@ func _price_row(cur: int, on_change: Callable) -> HBoxContainer:
 
 # ------------------------------------------------------------------ the Shelter
 func shelter(v: VBoxContainer) -> void:
+	_handed(v)
+	if Stalls.level() < 2:
+		m.show_note(v)
+		return       # only here for a Boki handed to you
 	UI.subtitle(v, "Boki are never sold. Adopt one (the gems go to nobody), give one a new home (it pays nothing), "
 		+ "or hand one to a friend.")
 	var cards := Shelter.cards()
@@ -179,15 +183,39 @@ func _transfer(v: VBoxContainer) -> void:
 		ol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		orow.add_child(ol)
 		orow.add_child(UI.button("Call back", func():
-			var r := Transfer.recall(oid)
-			if r["ok"]: m.spawn_kin.call()
-			_done(r, "It came back to the farm"), 110))
+			TransferPost.recall(oid, func(r: Dictionary):
+				if r["ok"]: m.spawn_kin.call()
+				_done(r, "It came back to the farm")), 110))
 		v.add_child(orow)
+
+## Boki other players handed you (TransferPost.inbox): accept or refuse each.
+func _handed(v: VBoxContainer) -> void:
+	if TransferPost.inbox.is_empty():
+		return
+	v.add_child(UI.section("Handed to you"))
+	for e in TransferPost.inbox:
+		var doc := String(e["doc"])
+		var p: Dictionary = e["p"]
+		var nm := String(p["kin"]["name"])
+		var row := UI.hbox(8)
+		var lbl := UI.label("%s wants to hand you %s, a level %d %s" % [p["from_name"], nm, int(p["kin"]["level"]),
+			Data.KIN[p["kin"]["species"]]["name"]], 13, UI.INK)
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(lbl)
+		row.add_child(UI.button("Accept", func():
+			TransferPost.answer(doc, true, func(r: Dictionary):
+				if r["ok"]: m.spawn_kin.call()
+				_done(r, "%s is yours now" % nm)), 100, "bond"))
+		row.add_child(UI.button("Refuse", func():
+			TransferPost.answer(doc, false, func(r: Dictionary): _done(r, "%s is going home" % nm)), 100))
+		v.add_child(row)
 
 func _send(rec: Dictionary) -> void:
 	var to := send_to
 	var nm := String(rec["name"])
-	var send := func(): _done(Transfer.send(String(rec["uid"]), to), "%s is waiting for %s to accept" % [nm, to])
+	var send := func():
+		_done(Transfer.send(String(rec["uid"]), to), "%s is waiting for %s to accept" % [nm, to])
+		TransferPost.sync(func(_lines: Array): pass)      # post it now, not on the next visit home
 	var terms := "It costs %d gems. %s has to accept it." % [Transfer.fee(), to]
 	_confirm("Hand %s to %s?" % [nm, to], terms, "Send", send, false)
 
