@@ -9743,3 +9743,4 @@ READY ext/hero-portraits-a-1114 1b0cf72d306c435a3d7df658d5059821f3afc9c6 (13 hun
 READY ext/merge-lane-garden1-1114 1321867ac3 (PR #96 follow-up: +5 garden branches merged (waystone-keys, race-ghost, respec, greet-home, soak-zones) +farm-new-toy ported to ComeLook, 4 archived, glide_spike boot error fixed; local checks 0 fail, export OK 446 MB; needs regate)
 READY ext/merge-batch-15-1113 4d5a6657b4 (PR #62: tutorial-dead-air NEW-RED fixed, audio no longer shifts gameplay RNG; branch since moved to f2367140bd by another job, re-gate that head)
 READY ext/merge-lane-d2art-1114-b a74f2f6b4808db839edc6dc681b8c03a56addff7 (d2art bundle B: sfx-weapon-fire + stuck-integ-cff77e31; targeted flags green, full gate left to regate)
+READY ext/merge-lane-d2art-1114 f594568a3b75f1c1e4989e7e9d104dc66dee6a86 (d2art bundle A refreshed on main 46458b969c+; 16 branches, suite NEW-RED 0, export OK)
