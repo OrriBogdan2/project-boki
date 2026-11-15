@@ -32,7 +32,8 @@
 		"rimewright": "Skate. Don't look down at the ice.",
 		"dolm": "Stone remembers what eyes forget.",
 		"ostra": "Go on, laugh. I'll keep it.",
-		"thief": "I only meant to take a look."
+		"thief": "I only meant to take a look.",
+		"gil": "Ooh, what does this one do?"
 	},
 	"sting_semitones": {
 		"gunslinger": 0,
@@ -46,7 +47,8 @@
 		"rimewright": 4,
 		"dolm": -3,
 		"ostra": 1,
-		"thief": 6
+		"thief": 6,
+		"gil": 8
 	},
 	"sting_doc": "Each Hunter's sting is the same rising motif in their own key (semitones from A3)."
 }

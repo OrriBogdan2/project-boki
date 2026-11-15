@@ -144,7 +144,7 @@ func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
 func _dex() -> void:
-	var order := DexView.order()
+	var order := FieldBook.entries()
 	var roster: Array = Legendary.rules()["roster"]
 	var tail := order.slice(order.size() - roster.size())
-	ok("Bokidex lists the legendaries last", roster.all(func(sp): return tail.has(sp)), str(tail))
+	ok("the Field Book lists the legendaries last", roster.all(func(sp): return tail.has(sp)), str(tail))

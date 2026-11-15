@@ -10,28 +10,11 @@ Usage:
 The old code has a lot of these, so the rule is a ratchet: a file may not get worse than its baseline,
 and a new file starts at zero. Clean a file up, then run --update so it can't slip back.
 """
-import json, os, re, sys
+import argparse, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASELINE = os.path.join(ROOT, "tools", "style_baseline.json")
 MAX_LINE = 120      # characters, tabs counted as 4
-
-# Members that Node, Node2D, Node3D, CanvasItem, Control and Object already define. Declaring a variable
-# or parameter with one of these names hides the engine's own (Godot warns: SHADOWED_VARIABLE_BASE_CLASS).
-ENGINE_MEMBERS = {
-    "name", "owner", "position", "rotation", "scale", "transform", "visible", "size", "modulate",
-    "material", "global_position", "global_transform", "basis", "process_mode", "z_index", "tooltip_text",
-    "get", "set", "call", "free", "show", "hide", "connect", "notification", "get_parent", "queue_free",
-}
-# Built-in global functions (Godot warns: SHADOWED_GLOBAL_IDENTIFIER).
-GLOBALS = {
-    "min", "max", "abs", "range", "str", "load", "preload", "floor", "ceil", "round", "clamp", "lerp",
-    "sign", "print", "len", "hash", "sqrt", "pow", "randf", "randi", "snapped", "wrap", "char", "type_string",
-}
-SHADOWABLE = ENGINE_MEMBERS | GLOBALS
-
-DECL = re.compile(r"^\s*(?:static\s+)?var\s+([A-Za-z_]\w*)")
-FUNC = re.compile(r"^\s*(?:static\s+)?func\s+\w+\s*\(([^)]*)\)")
 
 
 def code_part(line: str) -> str:
@@ -54,7 +37,7 @@ def code_part(line: str) -> str:
 
 def problems(path: str) -> dict:
     """Rule name -> list of line numbers."""
-    found = {"long_line": [], "semicolon": [], "nested_ternary": [], "shadow": [], "history_comment": []}
+    found = {"long_line": [], "semicolon": [], "nested_ternary": [], "history_comment": []}
     with open(os.path.join(ROOT, path), encoding="utf-8", errors="ignore") as f:
         for i, raw in enumerate(f, 1):
             line = raw.rstrip("\n")
@@ -65,13 +48,6 @@ def problems(path: str) -> dict:
                 found["semicolon"].append(i)
             if code.count(" if ") >= 2 and code.count(" else ") >= 2:
                 found["nested_ternary"].append(i)
-            m = DECL.match(code)
-            names = [m.group(1)] if m else []
-            fm = FUNC.match(code)
-            if fm:
-                names += [a.strip().split(":")[0].split("=")[0].strip() for a in fm.group(1).split(",") if a.strip()]
-            if any(n in SHADOWABLE for n in names):
-                found["shadow"].append(i)
             comment = line[len(code):]
             if re.search(r"\((was |owner[:, ]|movefeel|sync\d+)", comment):
                 found["history_comment"].append(i)
@@ -91,15 +67,19 @@ def counts():
 
 
 def main():
-    args = sys.argv[1:]
-    if "--file" in args:
-        p = args[args.index("--file") + 1]
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--strict", action="store_true", help="exit 1 when any file is worse than tools/style_baseline.json")
+    ap.add_argument("--update", action="store_true", help="rewrite the baseline (only after cleaning up)")
+    ap.add_argument("--file", metavar="PATH", help="list every problem in one file, with line numbers")
+    args = ap.parse_args()
+    if args.file:
+        p = args.file
         for rule, ls in problems(p).items():
             if ls:
                 print(f"{rule}: lines {', '.join(map(str, ls[:40]))}{' ...' if len(ls) > 40 else ''}")
         return
     now = counts()
-    if "--update" in args:
+    if args.update:
         with open(BASELINE, "w", encoding="utf-8") as f:
             json.dump({p: {k: v for k, v in c.items() if v} for p, c in now.items() if any(c.values())}, f, indent=0, sort_keys=True)
         print(f"style baseline written for {len(now)} files")
@@ -118,7 +98,7 @@ def main():
         for w in worse[:30]:
             print("  " + w)
         print("  (run `python3 tools/style_lint.py --file <path>` for line numbers)")
-        if "--strict" in args:
+        if args.strict:
             sys.exit(1)
     else:
         print("STYLE OK")

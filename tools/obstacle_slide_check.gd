@@ -186,9 +186,9 @@ func _open_ground(p: Vector2, lv: int) -> bool:
 	return true
 
 ## The walk-past line stays on open level ground, away from every other blocker and jump pad.
-func _line_clear(s: Vector2, d: Vector2, len: float, lv: int, c: Dictionary) -> bool:
+func _line_clear(s: Vector2, d: Vector2, span: float, lv: int, c: Dictionary) -> bool:
 	var t := 0.0
-	while t <= len:
+	while t <= span:
 		var p := s + d * t
 		for pd in w.pads:
 			if Vector2((pd["pos"] as Vector3).x, (pd["pos"] as Vector3).z).distance_to(p) < 1.5: return false
@@ -271,7 +271,7 @@ func _lap(c: Dictionary) -> Dictionary:
 	_reset(Vector3(st.x, float(c["lv"]) * World.LEVEL, st.y))
 	var swept := 0.0
 	var last_a := a0
-	var run := 0; var worst := 0; var worst_at := Vector2.ZERO
+	var streak := 0; var worst := 0; var worst_at := Vector2.ZERO
 	for i in 900:
 		# along the surface where it's nearest (as a player hugging it steers), 20 degrees into it
 		var nrm := _away(c, Vector2(P.pos.x, P.pos.z))
@@ -283,12 +283,12 @@ func _lap(c: Dictionary) -> Dictionary:
 		_step()
 		var a := Vector2(P.pos.x, P.pos.z)
 		if a.distance_to(b) < P.base_speed * DT * 0.25:
-			if debug and run >= STUCK_RUN and run < STUCK_RUN + 6:
+			if debug and streak >= STUCK_RUN and streak < STUCK_RUN + 6:
 				print("OBST     lap stuck step at %s mv %s nrm %s vel %s gr %s" % [str(b), str(mv), str(nrm), str(P.vel.snapped(Vector3(0.01, 0.01, 0.01))), P.grounded])
-			run += 1
-			if run > worst: worst = run; worst_at = b
+			streak += 1
+			if streak > worst: worst = streak; worst_at = b
 		else:
-			run = 0
+			streak = 0
 		var ang := (a - cen).angle()
 		swept += wrapf(ang - last_a, -PI, PI)
 		last_a = ang
@@ -296,4 +296,4 @@ func _lap(c: Dictionary) -> Dictionary:
 			return {"done": true, "run": worst, "at": worst_at.snapped(Vector2(0.01, 0.01)), "swept": rad_to_deg(swept)}
 		if (a - cen).length() > rad + P.r + 3.0:
 			break      # drifted off (shouldn't: the steering hugs it)
-	return {"done": false, "run": maxi(worst, run), "at": Vector2(P.pos.x, P.pos.z).snapped(Vector2(0.01, 0.01)), "swept": rad_to_deg(swept)}
+	return {"done": false, "run": maxi(worst, streak), "at": Vector2(P.pos.x, P.pos.z).snapped(Vector2(0.01, 0.01)), "swept": rad_to_deg(swept)}
