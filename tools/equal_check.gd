@@ -363,11 +363,12 @@ func _armor_levels() -> void:
 	await _drop(m)
 
 ## The tier-up cue (Juice.armor_up), part 1: a break and a heal play no cue, then your own tier-up plays the
-## fuller one at the tier's pitch (P has 88 xp here, B none).
+## fuller one at the tier's pitch (P is set 50 xp short of tier 1, so B's 150 hp is enough whatever the tier's xp is).
 func _armor_up_own(P: Hunter, B: Hunter) -> void:
 	Sfx.listener = P.pos
 	var own0 := int(Sfx.last_played.get("armor_up_own", -1000))
 	var near0 := int(Sfx.last_played.get("armor_up", -1000))
+	P.armor_xp = float(Hunter.ARMOR_TIERS[1][2]) - 50.0
 	P.armor = 5.0
 	P.hurt(40.0, B, {"src": "shot"})
 	P.heal(30.0)
