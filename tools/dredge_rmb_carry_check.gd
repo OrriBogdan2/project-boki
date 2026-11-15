@@ -1,5 +1,5 @@
 extends RefCounted
-## Abyssal Hand thrown on the move (docs/heroes/dredge.md "Moving while casting"), for
+## Deep Reach thrown on the move (docs/heroes/dredge.md "Moving while casting"), for
 ## --dredge-combo-check: thrown at the top of a jump back he keeps that jump's backward speed while his height
 ## is held, then falls and brakes on the ground as after any jump; a dash's extra speed is not kept longer
 ## than without the hand; thrown on the ground he stays braced at a fifth of his walk.
