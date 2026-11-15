@@ -1,18 +1,20 @@
 extends RefCounted
 ## --summon-check: the Boki summon out of the wisp (KinSummon, decision 0039). The Summon key
 ## (C) bursts the wisp into the full Boki, again sends it back early, the role x size table and the leash
-## come from content/rules/boki_summon.json, a knock-down turns it back into a wisp with the longer
-## cooldown, the leash holds on a chase, a dash, a glide and a knock, and the kin snapshot carries the
-## summon seconds to another game. Prints PASS/FAIL.
+## come from content/rules/boki_summon.json, a kill turns it back into a wisp (decisions 0044/0045: a rival's
+## kill costs the longer cooldown, flies home and reveals the owner; a monster's alone does not; a monster that
+## finishes a rival's work counts as the rival's), the leash holds on a chase, a dash, a glide and a knock, and
+## the kin snapshot carries the summon seconds to another game. A rival's kill with the owner down leaves it loose
+## (KinSteal). Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
-const RUSH_S := 1.5      # s: its rush ability has landed and it is walking home again
+const RUSH_S := 1.5  # s: its rush ability has landed and it is walking home again
 
 var bad := 0
 var m: Match
 var p: Hunter
 var k: Kin
-var east := Vector3.RIGHT      # the way the scenes walk: solid ground out to 20 m (the map has abyss on some sides)
+var east := Vector3.RIGHT  # the way the scenes walk: solid ground out to 20 m (the map has abyss on some sides)
 
 
 func run(main: Node) -> void:
@@ -42,7 +44,7 @@ func run(main: Node) -> void:
 	east = _solid_dir()
 	_table()
 	_press()
-	_knocked()
+	_killed()
 	_net()
 	_leash_rules()
 	_chase()
@@ -85,7 +87,7 @@ func _out() -> void:
 		k.summon.shrink = 0.0
 		KinWisp.set_wisp(k, true)
 	KinSummon.press(p)
-	k.summon.left = 60.0      # (long enough to outlast the scene)
+	k.summon.left = 60.0  # (long enough to outlast the scene)
 	_frames(0.2)
 
 
@@ -110,12 +112,43 @@ func _press() -> void:
 	ok(cap != "", "press: the Summon key has a cap for the prompts (%s)" % cap)
 
 
-func _knocked() -> void:
+func _mob() -> Ent:
+	var mb := Ent.new()  # (a stand-in monster: no owner, no team)
+	return mb
+
+
+func _killed() -> void:
+	var foe := _foe()
+	var base := k.summon.cd_base
+	var mult := float(KinSummon.rules()["killed_cd_mult"])
 	_out()
-	k.go_down()
-	ok(k.wisp and not k.summon.out(), "knocked: a knock-down turns it straight back into a wisp")
-	var want: float = k.summon.cd_base * float(KinSummon.rules()["knocked_cd_mult"])
-	ok(absf(k.summon.cd - want) < 0.5, "...with the longer cooldown (%.0f s)" % k.summon.cd)
+	var rv := p.reveal_t
+	k.go_down(false, foe)
+	ok(k.wisp and not k.summon.out(), "killed: a rival's kill turns it straight back into a wisp")
+	ok(absf(k.summon.cd - base * mult) < 0.5, "...with the longer cooldown (%.0f s)" % k.summon.cd)
+	ok(
+		k.summon.fly > 0.0 and p.reveal_t >= float(KinSummon.rules()["reveal_s"]) - 0.01 and p.reveal_t > rv,
+		"...it streaks home and its owner is revealed"
+	)
+	var mob := _mob()
+	_out()
+	k.go_down(false, mob)
+	ok(k.wisp and absf(k.summon.cd - base) < 0.5, "killed: a monster's kill alone is the plain cooldown (PvE rule)")
+	_out()
+	k.hurt(1.0, foe)
+	k.go_down(false, mob)
+	ok(absf(k.summon.cd - base * mult) < 0.5, "killed: a monster finishing a rival's hit counts as the rival's")
+	_out()
+	k.go_down(false, foe.kin)
+	ok(absf(k.summon.cd - base * mult) < 0.5, "killed: a rival's Boki counts as the rival")
+	_out()
+	p.downed = true
+	k.go_down(false, foe)
+	ok(KinSteal.loose(k) and k.wisp, "killed: a rival's kill with its owner down leaves a loose wisp there")
+	KinSteal.go_home(k)
+	p.downed = false
+	k.back_home = false
+	mob.free()
 
 
 ## The kin snapshot carries the wisp flag and the summon seconds, and another game applies them.
@@ -167,7 +200,7 @@ func _chase() -> void:
 	var lsh := k.brain.leash()
 	ok(lsh == k.summon.leash(k.brain.aggression), "chase: out, its leash is the summon one (%.1f m)" % lsh)
 	var foe := _foe()
-	var stay := east * (lsh + 2.0)      # a foe just past the leash, the Boki already near it
+	var stay := east * (lsh + 2.0)  # a foe just past the leash, the Boki already near it
 	k.teleport(p.pos + east * (lsh - 2.0))
 	var far := 0.0
 	var turned := false
@@ -175,7 +208,7 @@ func _chase() -> void:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
-		if i == int(RUSH_S * 60) + 20:      # (the rush flew it home: back to the edge, the walk is measured)
+		if i == int(RUSH_S * 60) + 20:  # (the rush flew it home: back to the edge, the walk is measured)
 			k.teleport(p.pos + east * (lsh - 2.0))
 		if i > RUSH_S * 60 + 20:
 			far = maxf(far, k.flat_dist(p))
