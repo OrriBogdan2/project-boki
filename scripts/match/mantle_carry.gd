@@ -97,3 +97,12 @@ static func fling(h: Hunter, hv: Vector2, d: Vector2, spd: float) -> Vector2:
 	if along < spd:
 		hv += d * (spd - along)
 	return hv.limit_length(maxf(spd, exit_cap(h)))
+
+## How far up the face a ledge rise has got, 0 (at the foot) to 1 (at the lip); -1 when you are not rising. The
+## Warden's mantle clip plays at this phase, so its pose is the body's own progress and never lags it.
+static func rise_k(h: Hunter) -> float:
+	var lf := h.lfloat
+	if lf.is_empty():
+		return -1.0
+	var y0 := float(lf.get("y0", h.pos.y))
+	return clampf((h.pos.y - y0) / maxf(float(lf["lip"]) + 0.12 - y0, 0.05), 0.0, 1.0)
