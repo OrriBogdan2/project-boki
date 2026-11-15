@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgbrfvxivqd6a"
-path="res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.ctex"
+path.bptc="res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.bptc.ctex"
+path.astc="res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "687a9553ea1c58d4aae4d07b737b9a92"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lodestick/lodestick_lodestick_eye.webp"
-dest_files=["res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.ctex"]
+dest_files=["res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.bptc.ctex", "res://.godot/imported/lodestick_lodestick_eye.webp-458ccc6a09fbb4f9bf2a4e399fd07cfc.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

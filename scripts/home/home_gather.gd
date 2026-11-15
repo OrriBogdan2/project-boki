@@ -52,6 +52,8 @@ static func tool_for(what: String) -> String:
 ## The market's Farm tab: the tools you don't have yet. [key, name, description, price, colour, on_buy, owned_text]
 static func shop_goods() -> Array:
 	var out: Array = []
+	if FarmUnlocks.base_mode():
+		return out
 	for t in TOOLS:
 		var td: Dictionary = TOOLS[t]
 		var tk: String = t
@@ -63,7 +65,7 @@ func busy() -> bool:
 
 ## The nearest wild tree or boulder within reach of p2, as an interact entry (or {}).
 func find(p2: Vector2) -> Dictionary:
-	if h.hb == null or not h.visit.is_empty():
+	if h.hb == null or not h.visit.is_empty() or FarmUnlocks.base_mode():
 		return {}
 	var w: World = h.world
 	var cx := int(floor(p2.x)); var cz := int(floor(p2.y))
@@ -189,7 +191,6 @@ func finish() -> int:
 	_fall(at, what)
 	if h.fx:
 		h.fx.dust(at, 14)
-		h.fx.word(at + Vector3(0, 1.4, 0), "+%d %s" % [n, td["mat"]], Color(td["col"]).lightened(0.3))
 	Sfx.play("pickup", at, -8.0, 0.1, 1.1)
 	h._refresh_top()
 	Save.save_game()

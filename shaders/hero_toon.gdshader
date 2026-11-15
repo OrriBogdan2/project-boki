@@ -20,6 +20,11 @@ uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_disable
 uniform float normal_k = 1.0;     // its strength (NORMAL_MAP_DEPTH); a look can set it per slot
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
+// toon.gdshader's colour weights (a glider canopy), kept when Models.hero_look moves a material here.
+uniform bool vertex_weights = false;
+uniform vec4 weight_r = vec4(1.0);
+uniform vec4 weight_g = vec4(1.0);
+uniform vec4 weight_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
@@ -101,6 +106,13 @@ uniform float far_aa = 0.0;
 uniform float far_clamp = 0.0;
 uniform float far_rim_soft = 0.0;
 uniform float far_glow = 0.0;
+// Who and what, on the body (docs/COMBAT_CLARITY.md): side_rim is a band round the silhouette in the viewer's
+// side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), outside the
+// signature band. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz times a second while it
+// lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
+uniform vec4 side_rim : source_color = vec4(0.0);
+uniform vec4 tell : source_color = vec4(0.0);
+uniform float tell_hz = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.
 uniform float soften = 0.0;
@@ -123,6 +135,7 @@ uniform float emit_flicker = 0.0;
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/canopy_heat.gdshaderinc"
 // The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
 // (abs: the projection's y is flipped when drawing into a texture; an orthographic camera: its view height / 0.57)
 float match_d(vec3 v, mat4 proj) {
@@ -180,7 +193,8 @@ void fragment() {
 		vec3 hot = mix(glow_edge.a > 0.0 ? glow_edge.rgb : glow_core.rgb, glow_core.rgb, smoothstep(0.35, 0.9, heat));
 		c = mix(c, hot, glow_key ? heat : 1.0);
 	}
-	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
+	if (use_vertex_color && vertex_weights) { c *= mat3(weight_r.rgb, weight_g.rgb, weight_b.rgb) * COLOR.rgb; }
+	else if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	if (desat > 0.0) { c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))), desat); }
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
@@ -228,6 +242,8 @@ void fragment() {
 		float lum = dot(c, vec3(0.3, 0.59, 0.11));
 		c = max(mix(vec3(lum), c, 1.0 + far_k * 0.6), vec3(0.0)) * (1.0 + far_k);
 	}
+	float ember = canopy_ember(lpos.xz);
+	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
@@ -250,7 +266,7 @@ void fragment() {
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
+	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;
@@ -281,6 +297,19 @@ void fragment() {
 			+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) * (far_spec - 1.0) * far_p
 			- rim_far_color.rgb * fr * rim_far * far_k * far_rim_soft + rim_far_color.rgb * frs * 0.6
 			+ (gf - gc) * step(0.0001, glow);
+	}
+	if (side_rim.a > 0.0) {
+		// (a band, not a hairline: a Hunter is ~40 px tall at the match camera)
+		float sw = fwidth(nv) * 1.5;
+		float se = smoothstep(0.45 - sw, 0.72 + sw, 1.0 - nv) * side_rim.a * (1.0 - fog) * (1.0 - flash);
+		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.9);
+		EMISSION += side_rim.rgb * se;
+	}
+	if (tell.a > 0.0) {
+		float tk = tell.a * (tell_hz > 0.0 ? 0.6 + 0.4 * sin(TIME * tell_hz * 6.2832) : 1.0);
+		float tb = tk * (0.35 + 0.65 * smoothstep(0.2, 0.75, 1.0 - nv)) * (1.0 - flash);
+		ALBEDO = mix(ALBEDO, tell.rgb, tb * 0.4);
+		EMISSION += tell.rgb * tb * 0.55;
 	}
 }
 
