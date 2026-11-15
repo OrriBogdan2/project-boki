@@ -2,26 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cfvtu47g4jnyn"
-path.bptc="res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.bptc.ctex"
-path.astc="res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.astc.ctex"
+uid="uid://cbhmi1eitvvns"
+path.s3tc="res://.godot/imported/sable_v95.jpg-413d894b7cc672ed5b4dcc95a7b6a310.s3tc.ctex"
+path.etc2="res://.godot/imported/sable_v95.jpg-413d894b7cc672ed5b4dcc95a7b6a310.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "81c2bdc0dc725a1f6cbf40cef1ab7bc6"
+"md5": "2bb33d78250dfbe2abe4a04d63a25ce2"
 }
 
 [deps]
 
-source_file="res://art/wardens/pip/pip_atlas.jpg"
-dest_files=["res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.bptc.ctex", "res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.astc.ctex"]
+source_file="res://art/wardens/sable/sable_v95.jpg"
+dest_files=["res://.godot/imported/sable_v95.jpg-413d894b7cc672ed5b4dcc95a7b6a310.s3tc.ctex", "res://.godot/imported/sable_v95.jpg-413d894b7cc672ed5b4dcc95a7b6a310.etc2.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1

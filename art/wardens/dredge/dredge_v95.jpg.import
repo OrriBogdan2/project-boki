@@ -2,26 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dc502k0h3gnk3"
-path.bptc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.bptc.ctex"
-path.astc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.astc.ctex"
+uid="uid://c2hbfc5wo224m"
+path.s3tc="res://.godot/imported/dredge_v95.jpg-3304d557556f3676b201a19dfb525f92.s3tc.ctex"
+path.etc2="res://.godot/imported/dredge_v95.jpg-3304d557556f3676b201a19dfb525f92.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "763f0757c1dd81c19028bb0a84c2ba99"
+"md5": "8e86b437c86281a9fcd67fb9939bcfd0"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.bptc.ctex", "res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.astc.ctex"]
+source_file="res://art/wardens/dredge/dredge_v95.jpg"
+dest_files=["res://.godot/imported/dredge_v95.jpg-3304d557556f3676b201a19dfb525f92.s3tc.ctex", "res://.godot/imported/dredge_v95.jpg-3304d557556f3676b201a19dfb525f92.etc2.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

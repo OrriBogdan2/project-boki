@@ -8,6 +8,7 @@ A later Meshy pass promoted into v95 (v95-promote) reaches the game with the sam
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,7 +32,8 @@ ART = {
     "tarek": "tarek",
 }
 TRIS = 60000  # the body's triangles in game (RIG_CONTRACT "Budget": the v95 masters' own-paint models)
-TEX = 4096  # the largest side of each of the master's images in game (px)
+TEX = 4096  # the largest side of each of the master's images in the .glb (px)
+SECOND_TEX = 2048  # px: the game's size limit for a master's other images (VRAM: 4096 is 11 MB compressed, 2048 2.7 MB)
 
 
 def local(path, name):
@@ -63,6 +65,30 @@ def spec_for(art):
             if spec.get("game") == game:
                 return spec
     sys.exit("v95_to_game: no swap spec for " + game)
+
+
+def texture_imports(art):
+    """The master's images as the game draws them: VRAM-compressed and mipmapped (Godot imports an extracted image
+    lossless, 4x the video memory of the old atlases), the main one ("v95": the face's) at full size, the others
+    (a grafted body, emission) at SECOND_TEX. True when an .import changed (import again)."""
+    changed = False
+    d = os.path.join(REPO, "art/wardens", art)
+    for f in sorted(os.listdir(d)):
+        if not (f.startswith(art + "_v95") and f.endswith(".jpg.import")):
+            continue
+        path = os.path.join(d, f)
+        text = open(path).read()
+        new = text
+        for key, val in (
+            ("compress/mode", 2),
+            ("mipmaps/generate", "true"),
+            ("process/size_limit", 0 if f == art + "_v95.jpg.import" else SECOND_TEX),
+        ):
+            new = re.sub(r"(?m)^%s=.*$" % re.escape(key), "%s=%s" % (key, val), new)
+        if new != text:
+            open(path, "w").write(new)
+            changed = True
+    return changed
 
 
 def main():
@@ -110,6 +136,8 @@ def main():
     shutil.copy(out, os.path.join(REPO, spec["game"]))
     if not a.no_import:
         subprocess.run(["godot", "--headless", "--path", REPO, "--import"], check=True)
+        if texture_imports(art):
+            subprocess.run(["godot", "--headless", "--path", REPO, "--import"], check=True)
 
 
 main()

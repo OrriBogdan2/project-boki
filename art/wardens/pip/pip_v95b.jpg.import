@@ -2,23 +2,25 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://diw4f85ekysjq"
-path="res://.godot/imported/tarek_atlas.jpg-0fbe9c171d9fd20370da256638411d9f.ctex"
+uid="uid://bjuquqqg5so3v"
+path.s3tc="res://.godot/imported/pip_v95b.jpg-84f85e57c1acf3a2631b12a86f5ffc5f.s3tc.ctex"
+path.etc2="res://.godot/imported/pip_v95b.jpg-84f85e57c1acf3a2631b12a86f5ffc5f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "751b7dfd491361d6f2873e7177bac269"
+"md5": "ec6a4c7c53002014905421ac2ce3257a"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_atlas.jpg"
-dest_files=["res://.godot/imported/tarek_atlas.jpg-0fbe9c171d9fd20370da256638411d9f.ctex"]
+source_file="res://art/wardens/pip/pip_v95b.jpg"
+dest_files=["res://.godot/imported/pip_v95b.jpg-84f85e57c1acf3a2631b12a86f5ffc5f.s3tc.ctex", "res://.godot/imported/pip_v95b.jpg-84f85e57c1acf3a2631b12a86f5ffc5f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1

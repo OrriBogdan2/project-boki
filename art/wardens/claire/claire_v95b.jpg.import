@@ -2,26 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2vnsvx6dyo80"
-path.bptc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex"
-path.astc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"
+uid="uid://ceoag6wubrgfe"
+path.s3tc="res://.godot/imported/claire_v95b.jpg-cab1ee79ebda1a4b74b2f9125e8c5673.s3tc.ctex"
+path.etc2="res://.godot/imported/claire_v95b.jpg-cab1ee79ebda1a4b74b2f9125e8c5673.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "461c879ddf8c200c9558255bfbeff6a8"
+"md5": "addb6d235ddcba638321c315d81950a6"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_normal.jpg"
-dest_files=["res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex", "res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"]
+source_file="res://art/wardens/claire/claire_v95b.jpg"
+dest_files=["res://.godot/imported/claire_v95b.jpg-cab1ee79ebda1a4b74b2f9125e8c5673.s3tc.ctex", "res://.godot/imported/claire_v95b.jpg-cab1ee79ebda1a4b74b2f9125e8c5673.etc2.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1

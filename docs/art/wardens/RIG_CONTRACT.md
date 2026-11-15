@@ -179,15 +179,13 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
-  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
-  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
-  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
-- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
-  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
-  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
-  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
+- **At most 80k triangles per Warden, weapon included** (`--warden-glb-check`, `--clip-check`). Since 11-15 (owner:
+  the v95 masters go in as they are) a Hunter is its current v95 master decimated to ~60k with its own UVs and
+  Meshy paint, no rebake: `python3 tools/art1/v95_to_game.py <Name>` (V95_SWAP.md "Own paint"). Measured cost of
+  triangles: DETAIL_PILOT.md (40k: +0.06 ms GPU a frame for six Hunters) and the 11-15 bench in V95_SWAP.md.
+- Textures: the master's own images, each at most 4096² (`v95_to_game.py --tex`), VRAM-compressed
+  (`compress/mode=2`: BPTC on desktop), mipmapped; a kept old prop keeps its 2048² atlas. At most 8 toon slots
+  (slots, not materials, count: a slot spans the master's images, "<slot>-v95", "<slot>-v95b").
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
