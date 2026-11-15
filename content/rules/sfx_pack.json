@@ -1,0 +1,125 @@
+{
+ "_doc": "A picks as pointers into the private library: sfx_pack.py cuts them into the private pack. No audio.",
+ "picks": [
+  {
+   "slot": "ghost_shot",
+   "cue": "vn_rifle",
+   "mode": "oneshot",
+   "src": "2016/Audiobeast - The London Warehouse Firearms Library/Audiobeast_Small_Room_H&K_416_5.56_Assault_Rifle_05m_LS5_001_Single_Shot_x1.wav",
+   "start": 33848,
+   "end": 37840,
+   "trim_max": 0.45,
+   "rms_db": -17.0
+  },
+  {
+   "slot": "ghost_reload",
+   "cue": "reload",
+   "mode": "oneshot",
+   "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 5of9/MatiasMacSD - THE WEAPONS - SCI-FI WEAPONS/Weapon Reload-16.wav",
+   "start": 845,
+   "end": 80960,
+   "trim_max": 0.8,
+   "rms_db": -24.2
+  },
+  {
+   "slot": "dash",
+   "cue": "dash",
+   "mode": "oneshot",
+   "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 5of8/Soundrangers - Whooshes And Transitions/texture_whoosh_02_fast_02.wav",
+   "start": 6702,
+   "end": 33220,
+   "trim_max": 0.4,
+   "rms_db": -21.7
+  },
+  {
+   "slot": "glide_start",
+   "cue": "glider_snap",
+   "mode": "oneshot",
+   "src": "2020/Systematic-Sound - Sound Themes - Modern Cloth Foley 01/SFX CLOTH Foley Jacket Synthetic Soft Shell Whoosh Flutter.wav",
+   "start": 136674,
+   "end": 150040,
+   "trim_max": 0.55,
+   "rms_db": -18.4
+  },
+  {
+   "slot": "glide_loop",
+   "cue": "glider_wind",
+   "mode": "loop",
+   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 2of8/MatiasMacSD - The Transition/Transition_Sci-fi-12.wav",
+   "start": 291060,
+   "end": 370440,
+   "trim_max": 1.8,
+   "rms_db": -21.0
+  },
+  {
+   "slot": "take_damage",
+   "cue": "hurt",
+   "mode": "oneshot",
+   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/AudioDesire - Voice Pack One - Emma/VO_001_Female_Pain_20.wav",
+   "start": 1245,
+   "end": 24420,
+   "trim_max": 0.5,
+   "rms_db": -16.0
+  },
+  {
+   "slot": "hit_confirm",
+   "cue": "hit",
+   "mode": "oneshot",
+   "src": "2015/NoizBoy - Hong Kong Action Kit - Hit Kit #1/Seq 2.1 Hit #1 96 HK1.wav",
+   "start": 4289,
+   "end": 12100,
+   "trim_max": 0.3,
+   "rms_db": -18.0
+  },
+  {
+   "slot": "knockout",
+   "cue": "knock_confirm",
+   "mode": "oneshot",
+   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/3maze - FINAL IMPACT/toon_hit_022.wav",
+   "start": 1589,
+   "end": 29700,
+   "trim_max": 1.0,
+   "rms_db": -17.0
+  },
+  {
+   "slot": "scan_capture",
+   "cue": "scan_pop",
+   "mode": "oneshot",
+   "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 1of8/Airborne Sound - Interface Accents/Accent,Interface,UI,Data,Chatter,Clean,Crystal,Low.wav",
+   "start": 28,
+   "end": 25740,
+   "trim_max": 1.1,
+   "rms_db": -18.6
+  },
+  {
+   "slot": "extract",
+   "cue": "extract_ok",
+   "mode": "oneshot",
+   "src": "2020/The Mooseman - Digital Sci Fi UI Kit 1/positive_1.wav",
+   "start": 0,
+   "end": 21780,
+   "trim_max": 3.0,
+   "rms_db": -17.0
+  },
+  {
+   "slot": "ui_click",
+   "cue": "click",
+   "mode": "oneshot",
+   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/The Chris Alan - Analog Synthesized UI & SFX/Analog Synthesized UI - Button Click Tone 1.wav",
+   "start": 518,
+   "end": 3960,
+   "trim_max": 0.2,
+   "rms_db": -22.0
+  },
+  {
+   "slot": "level_up",
+   "cue": "level_up",
+   "mode": "oneshot",
+   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 5of8/Sound Spark LLC \u2013 Magic Spells, Buffs and Attacks/Ice_Spell_Ice_Spell_Buff_Positive_02.wav",
+   "start": 107,
+   "end": 42020,
+   "trim_max": 2.2,
+   "rms_db": -22.0
+  }
+ ]
+}
