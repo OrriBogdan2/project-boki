@@ -49,6 +49,7 @@ const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 # ---------------------------------------------------------------- spacing
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
+const PANEL_RESERVE := 120.0      # px a menu panel leaves free: chrome + safe margin
 const PAD := 26          # inside a panel
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
@@ -901,14 +902,14 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
 				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))      # held: the same on every tab
-				sc.custom_minimum_size.y = minf(want, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				sc.custom_minimum_size.y = minf(want, sc.get_viewport_rect().size.y - PANEL_RESERVE - chrome)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
 		sc.tree_entered.connect(func(): fit.call_deferred())
 		body.set_meta("scroll", sc)
 	else:
-		outer.add_child(paged(body, 110.0, title_txt, top, width - PAD * 2.0, foot))
+		outer.add_child(paged(body, PANEL_RESERVE, title_txt, top, width - PAD * 2.0, foot))
 	outer.add_child(foot)
 	body.set_meta("shell", p)
 	p.set_meta("key", title_txt)
