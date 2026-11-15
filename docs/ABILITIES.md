@@ -85,7 +85,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
 - **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
-- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
