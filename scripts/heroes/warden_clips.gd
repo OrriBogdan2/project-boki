@@ -94,6 +94,7 @@ var gait: WardenGait         # the stride and arm swing laid over the walk and r
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
+var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -202,6 +203,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
+	reach = WardenReach.make(sk, d)
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
 		turn = WardenTurn.make(model, sk)
@@ -636,6 +638,8 @@ func step(dt: float) -> void:
 		turn.step(dt)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	if reach:
+		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 
