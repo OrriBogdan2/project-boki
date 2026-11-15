@@ -315,7 +315,7 @@ const MOVES := {
 					"fr": Vector3(-0.14, 0.12, -0.2), "rw": 1.0, "wf": 1.0, "lw": 0.9,
 					"legs": [-0.35, -0.4, 0.5, -0.75]}]]},
 	# ... let go: a push, not a throw. A quick load deeper into the back foot (0.05), then both palms drive
-	# straight out at the cursor and the spear leaves them at full extension (0.1, RimewrightKit.PUSH_T), the
+	# straight out at the cursor and the spear leaves them at full extension (0.1, RimeSpear.PUSH_T), the
 	# body lunging after it; the arms hold out through the recoil, then settle
 	"tm_spear": {"keys": [
 		[
