@@ -101,8 +101,8 @@ func _flare_glow(glb: Node3D) -> void:
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	m.albedo_color = Color(0.55, 1.0, 0.9, 0.9)
-	m.albedo_texture = WardenGlb._puff()
-	puff = WardenGlb._bloom_quad(m, FLARE_M, Vector3.ZERO)
+	m.albedo_texture = WardenFx._puff()
+	puff = WardenFx._bloom_quad(m, FLARE_M, Vector3.ZERO)
 	puff.visible = false
 	# (on the root, following the anchor: nothing that walks the .glb's meshes sees it)
 	root.add_child(puff)
