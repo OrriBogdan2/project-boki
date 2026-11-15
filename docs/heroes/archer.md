@@ -63,6 +63,7 @@ with the commit or code and the assert in `--archer-combo-check`; owner override
 | 5 | Stage timing 0.6-0.8 / 1.2-1.4 s | closed | 584afbfb8: 0.6 / 1.15 s, the low end (the "owner call" taken for ranged TTK). Assert `pin bow: stage timings` |
 | 6 | Shift is Spirit Walk | closed, rest in flight | rocks, trees, pillars and barriers on main (584afbfb8, `pin_spirit.gd`, `combo pin: Spirit Walk passes`); raised walls and ledge faces: READY ext/lace-phasewalk-verify 728a6c834 (supersedes ext/parity-phasewalk-rebased, merges ext/lace-tall-climb-rebased) |
 | 7 | Hail Wall is a curved arc | closed | 584afbfb8: `ArcherKit.cast_e`, 120 degrees (`_arc_deg`) at the cursor distance clamped to 2-10.8 m (footage 0498: a wall at 6 bh), needle posts laced with red thread (owner 11-11; the panels are gone), blue burn. Asserts `pin E: the arc shows at the cursor distance`, `pin E: a foe on the arc 45 degrees off the aim burns` |
+| 7 | Hail Wall is a curved arc | closed | 584afbfb8: `ArcherKit.cast_e`, 120 degrees (`_arc_deg`) at the cursor distance clamped to 2-10.8 m, panels with fletch posts, blue burn. Asserts `pin E: the arc shows at the cursor distance`, `pin E: a foe on the arc 45 degrees off the aim burns` |
 | 8 | Hail Wall cooldown 8.3 s | owner override | the data's 15 s (`e.cooldown`; audit row "E cooldown 9 vs 15"; DECISIONS: data over footage). The per-slot row above said 9 s and is corrected now |
 | 9 | Heavy Shot hold telegraph: gold V and a growing bar | closed, in her red | 584afbfb8 (a bar from the bow growing with `heavy_k`, `AimKit.charge`); red with her kit colour and no V, 1fcc318fd (item 114). Asserts `pin RMB held: the bar grows with the charge, to 2 body heights`, `pin heavy: the telegraph while held is a thick gold lane` |
 | 10 | Supercharged target ring and X-star hit | closed | 584afbfb8: the first foe under the full-draw line is ringed at the feet (`pin reticle: Supercharged = ... the foe under it ringed`); the hit is a teal X-star (`ArcherKit._arrow_hit` > `super_hit`, `PinFx.star`). The X-star itself has no assert |
@@ -72,6 +73,12 @@ with the commit or code and the assert in `--archer-combo-check`; owner override
 
 No open row is left, so nothing was built here. In flight on her files (not re-checked here): ext/lace-playtest-1108, ext/lace-dash-charges,
 ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
+
+## Ranges re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage pin, 1 bh = top of the health bar to the feet = 1.8 m)
+
+- E Hail Wall reach 9 -> **10.8 m**: the wall sits on the cursor at 252 px over a 42 px body = 6.0 bh (0493-0498; also 4.5 bh at 0457). The cap is never reached, so 10.8 is the floor; locked in kit_parity.json.
+- RMB Heavy Shot range 14: **Not determinable**. Every Impaling Shot ends on a dummy 1-4 bh out (0264-0273, 0281-0285, 0327-0331, 0494-0501); the 2 bh gold bar (0494) is the hold telegraph.
+- X Starpiercer width 0.5: matches the beam, 10-13 px over a 42 px body = 0.43-0.56 m (0559, 0566, 0573); locked. Range 18: **Not determinable**, every beam runs off the top edge past 6.8 bh = 12.2 m (0559-0560, 0566, 0573, 0587-0593).
 
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
@@ -194,6 +201,7 @@ asserts it.
 Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 25 per beam (60 s cooldown, 4x the E cooldown of 15 s as in the source). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
 Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 23.3 per beam (36 s cooldown, 4x the E cooldown as in the source). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
 Shares of the standard target against the source (docs/TTK.md, no LMB source number so no check row; not tuned): Heavy Shot 3.8 to 7.1x (Heartpiercer 35 = 2.7%), its wall hit the same, Hail Wall 1.37x (Rain of Arrows 61 a second = 4.7%), Starpiercer 0.46x (326 / 422 = 25.4 / 32.8%).
+Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 25 per beam (60 s cooldown, the data's). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
 
 ## Cross-ability interactions (combos)
 | Combination | Result | Check |
@@ -203,6 +211,7 @@ Shares of the standard target against the source (docs/TTK.md, no LMB source num
 | Empowered / tap with no target | Lands at the cursor; the spent arrow stays stuck there for 4 s | same |
 | Supercharged with a foe under the line | The foe ringed at its feet; a silver burst on the hit | same |
 | Heavy Shot into a wall | Wall hit, 1.2 s stun | same; crimson burst on the wall face, crimson-white stars over the foe for the stun (`heavy_pin`, `heavy_stun` in content/vfx/archer.json) |
+| Heavy Shot into a wall | Wall hit, 1.2 s stun | same |
 | Wall pin, then a shot | a plain arrow (no Deadeye) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back (no cost) | same |
@@ -212,6 +221,7 @@ Shares of the standard target against the source (docs/TTK.md, no LMB source num
 | Starpiercer, then a wall pin, then three beams | The pinned foe eats every beam; lined-up foes behind it are pierced too | `--archer-combo-check` |
 | Starpiercer during Spirit Walk | Shots kept; she can roll between beams | same |
 | Starpiercer's last beam on a hurt hunter | a knock under 12% (the the cast's best bond event) | same |
+| Starpiercer's last beam on a hurt hunter | finishes under 12% (a knock: the cast's best bond event) | same |
 | A Boki merge mid nock | No beam; the empowered window ends | same |
 | Starpiercer then a merge on a full-health light hunter | Standing (burst cap) | same |
 | Draw, then Shift (the roll or the air flick) or a jump (item 51) | The draw carries through and charges on; let go mid-roll and it looses as the roll ends, let go in the air and she keeps her speed. The source shows nothing ending a draw on the roll, so it combines (content/dash_flow/archer.json) | `--archer-combo-check` (`pin early release: a dash keeps the draw...`, `pin item 51: ...`), `--dash-flow-check` |
@@ -319,6 +329,50 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).
 
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
+
+## Verification on main d255acbee (Nov 9, job 20261109-204749-a2: Lace vs Myth, PARITY FIRST)
+Read: this doc, KIT_PARITY, pin.md, supervive_kits.md (Myth, [D]), DECISIONS (owner notes win). `--archer-combo-check` 159/0, `--archetype-check` 379/0. These assert our spec, not the source, so rows below are checked by reading `archer.json`, `longbow.json`, `archer_kit.gd`, `pin_spirit.gd`. [F] = footage. Verdicts: match, differ, owner, [?].
+
+| Slot | Source | Main | Verdict |
+|---|---|---|---|
+| LMB cadence, tap, stages | 0.5 s [F]; Empowered 0.6-0.8, Supercharged 1.2-1.4 s [F]; lands at cursor, Supercharged past it | rate 0.5; 0.6 / 1.15 s; 12 m / 16 m; tap 15 | match; Supercharged 0.05 s under the footage range (5 fps, +-0.1 s): [?], kept |
+| LMB overdraw, perfect | half damage 0.4-0.6 s past full [F]; perfect = faster next Empowered [F] | x0.5 at +0.5 s; quick_k 1.6, window 0.15 s | match; 1.6 and 0.15 are ours [?]; the 0.35 s window is owner item 20 (ext/lace-playtest-1108, not on main) |
+| LMB reticle | V lines [F] | owner's filling line (item 55b) | owner |
+| RMB Heavy Shot | hold, release, 16 s, 1 charge, 35 dmg, wall stun +173 (4.94x) [D] | cd 16, 1 charge, dmg 16-30, wall hit 4.94x the shot (full pin 178), stun 1.2, ranks 13 / 10 s, rank 3 dash charge | match (payoff gap closed: it was 0.4x); KIT_PARITY gaps 6 and 7 are stale |
+| RMB details | tap fires uncharged [F, newer]; knock 2-3 body heights [F] | tap does nothing (the data says hold only); push 8-12; hold slows to 38%; stun 1.2 s, charge 1.1 s | tap: data wins, [?]; stun time, charge time, 38% [?]; wall test is a 3 m proximity check, not a real collision |
+| E Rain of Arrows | arc ~120 deg at cursor distance, 4.4 s [F]; 15 s, 61 dmg/s, Slow, Anti-Heal [D] | arc 120 deg, 2-9 m, 4.4 s, cd 15, 5 per 0.5 s (10/s), slow 35%, blight | match shape and cd; DPS differs (~0.16x of the source's 61/s, kept for light HP: ext/damage-ratio-audit); slow 35% [?]; Cremate +10 is ours (ext/parity-antiheal removes it) |
+| R / X Starpiercer | 3 empowered shots, no charge, 60 s; first two 326, third 422 (1.29x) [D] | 3 shots, 6 s, cd 60, 18 / 18 / 25 (1.39x), pierce, execute under 12% | match; the final reads 1.39x against 1.29x: would be 23 (S, needs the burst-cap check re-run; the older doc quotes 1.41x from a source I could not find) |
+| Shift Spirit Walk | roll then 2.8 s through terrain incl. the raised wall, 9.5 s, 10 mana; roll toward the cursor [D]; roll 3 m / 0.27 s [F]; +5-10% [F]; rank 3 +0.5 s, +150 in terrain [D] | cd 9.5, 1 charge, roll 3.5 x 0.85 = 3.0 m in 0.24 x 1.15 = 0.28 s, walk 2.8 s x1.1, rank 3 +0.5 s and +33%; passes rocks, trees, pillars, barriers, **not ledge faces** | match on numbers and timing; **differ: ledges** (below); roll follows WASD, cursor when still: owner (movement default); mana and 30-mana snap-back cost: none, [?] |
+| Passive | injured hunters seen through fog; climbs tall ledges [D] | Hawk Sense: foes under 50% HP within 22 m; no Focus or Deadeye (cut); no ledge climb | owner (keep Hawk Sense); 50% and 22 m are ours [?]; the ledge climb differs |
+| Animations | [F] timing table above | every row in "Animation timing" still reads match | match on coverage; not re-measured frame by frame; `pin_deadeye` row removed (move is gone) |
+| Dash interactions | silent on casts in the roll [F] | LMB through Shift keeps the draw (owner item 51); RMB / E / X fire mid-roll; 8 rows have no source | owner; `[?]` rows listed in KIT_PARITY item 20 |
+
+**Heavy Shot wall payoff:** closed on main. Full pin = 30 + 148 = 178 (asserted: `parity lace`), a light hunter has 124 HP; the minimum charge pins for 16 + 79 = 95. The source's "up to 173" may scale less steeply with charge [?].
+
+**Spirit Walk over ledges:** differs on main. `blocked_here()` tests `is_block` and barriers only; the data rolls "through a pillar and the raised-platform wall". Fix is on READY `ext/lace-phasewalk-verify` 728a6c834 (supersedes `ext/parity-phasewalk` and `-rebased` 2178ea313, includes `ext/lace-tall-climb-rebased`): passes ledge faces, climbs and drops along the path, ending on a ledge sets her on top. It adds about 16 lines to `hunter.gd` and `world.gd` and a `tall_climb_check`; merge that one, not the older two.
+
+**Timing table:** the "Ours after" column matches the code and `dash_feel.json` (roll 3.0 m / 0.28 s, nock 0.5, recover 1.0). Open: Supercharged at 1.15 s against 1.2-1.4 s [F]; everything else sits inside one footage frame (0.2 s).
+
+**READY, touching Lace, not on main** (latest line per branch; older lines are superseded):
+- `ext/lace-phasewalk-verify` 728a6c834: ledge passage and tall climb (above).
+- `ext/lace-playtest-1108` b79ec35c5: owner items 18-20 (needle on the nock anchor, Starpiercer fires on the press with the nock deleted, perfect window 0.35 s in `tuning.json`); moves the window and nock away from the source numbers above, owner calls.
+- `ext/lace-hawk-sense` f67042371: Hawk Sense sight shared by the team, `sense_linger`; numbers stay ours.
+- `ext/lace-hail-wisps` d93205aaa: Hail Wall hits Wisps.
+- `ext/parity-antiheal` 55a5d0dfc: Anti-Heal on the source's four, removes our Cremate rider.
+- `ext/vfx-lace-impact` 2199382e1: Heavy Shot impact size, Spirit Walk shell.
+- `ext/lace-dash-charges` 7b83eae8 (Nov 8): 2 charges and a 4.0 m roll; against the data (one charge, 9.5 s, 3 m). It predates the 9.5 s fix, check before merging.
+- Also in the queue but not Lace-specific: `ext/parity-ability-pierce` 76de01e1, `ext/parity-passives-a` 2d4ecc486, `ext/rank-parity-slice` 003a3cfeb, `ext/aim-preview-parity` 52056e6f1, `ext/telegraph-audit-b-rebased` d42fe2ce6.
+
+**Ranked gaps** (files; effort)
+1. Spirit Walk through ledge faces: merge `ext/lace-phasewalk-verify` (`pin_spirit.gd`, `hunter.gd`, `world.gd`; S to merge, was L).
+2. Heavy Shot minimum-charge wall hit and the 3 m wall test: confirm in footage whether "up to 173" scales with charge (`archer.json` `wall_mult`, `archer_kit.gd` `_pin`; S, needs footage).
+3. Starpiercer final 25 -> 23 if the data's 326 / 422 is the target (`archer.json` `x.final_dmg`, docs, wiki; S).
+4. Hail Wall damage 10/s against the source's ratio (`archer.json` `e.dmg`; S, owner: light-HP balance).
+5. Supercharged 1.15 -> 1.2 s (`longbow.json` `draw`, `arc_draw` clip, perfect-window asserts; S, owner: ranged TTK).
+6. Spirit Walk has no mana cost or 30-mana snap-back cost; roll follows WASD, not the cursor (owner default).
+7. Hawk Sense 50% / 22 m, Hail slow 35%, quick draw 1.6x, hold slow 38%: ours, not in the source [?].
+
+Suggestions (ours, not built): none beyond the 0.05 s fade noted under Animation timing.
 
 ## Payoff
 

@@ -7,7 +7,7 @@ extends RefCounted
 ## procedural crouch retargeted on this model, what main's Heroes do. Needs a renderer.
 
 const DT := 1.0 / 30.0
-const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 ## s: down, up. Standing, 1.3 s held, 1.6 s sneaking, 0.5 s still, then up.
 const T_DOWN := 0.4

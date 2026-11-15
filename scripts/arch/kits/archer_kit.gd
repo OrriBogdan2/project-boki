@@ -356,6 +356,7 @@ func _pin(a: Vector3, k: float) -> void:
 		if KnockWall.hit(m, f, dir, float(pd["wall"]), h):
 			var face := KnockWall.contact(m, f, dir, float(pd["wall"]))
 			pins += 1
+			m.sfx("pay_called", f.pos, 0.0, 1.0)      # the wall stun is a payoff: its own sting
 			vfx("heavy_pin", face + Vector3(0, 1.0, 0), dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge

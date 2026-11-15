@@ -23,7 +23,7 @@ func run() -> void:
 	await _barge_run()
 	_clips()
 
-## Abyssal Hand (0121-0129): the arm is out at full reach 0.4 s after the cast (~5 bh), then the pull takes ~1.0 s.
+## Deep Reach (0121-0129): the arm is out at full reach 0.4 s after the cast (~5 bh), then the pull takes ~1.0 s.
 func _throw_and_reel() -> void:
 	var r: Array = ak.setup("dredge", 5.0 * BH, "", false)
 	var m: Match = r[0]
