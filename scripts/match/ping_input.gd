@@ -9,7 +9,6 @@ extends RefCounted
 ## pings (see docs/decisions/0094-world-ping-follow.md).
 
 const PICK_PX := 40.0                # px on screen: how near the cursor an enemy or loot counts as pointed at
-const ENEMY_COL := Color("ff4a3d")   # an enemy ping, whoever placed it
 const LOOT_COL := Color("ffc94a")    # loot or a box
 const SPOT_COL := Color("f4f1ea")    # the ground: "go here"
 const ENEMY_T := 4.0                 # s an enemy ping follows its hunter, then it is gone
@@ -54,9 +53,9 @@ static func place_world(m: Match, sp: Vector2) -> String:
 	m.squad_ping(h, _ground_at(m, sp))
 	return "spot"
 
-## A ping's colour by kind: red on an enemy, gold on loot, white on the ground.
+## A ping's colour by kind: the foe colour (colour vision) on an enemy, gold on loot, white on the ground.
 static func color(kind: String) -> Color:
-	return {"enemy": ENEMY_COL, "loot": LOOT_COL}.get(kind, SPOT_COL)
+	return SideColor.foe() if kind == "enemy" else {"loot": LOOT_COL}.get(kind, SPOT_COL)
 
 ## How long a ping of `kind` lasts.
 static func life(kind: String) -> float:

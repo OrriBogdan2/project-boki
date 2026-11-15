@@ -28,6 +28,7 @@
   "size": 0.25,
   "color": "#ffb070",
   "sfx": "juggernaut_blade_hiss",
+  "hit": "hit_blade",
   "desc": "A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far.",
   "kick": 0.1
  },

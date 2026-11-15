@@ -14,6 +14,7 @@
 		"size": 0.18,
 		"color": "#e8f7c0",
 		"sfx": "archer_thread_twang",
+		"hit": "hit_bow",
 		"draw": [
 			[
 				0.6,

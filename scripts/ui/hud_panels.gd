@@ -60,6 +60,7 @@ func _draw_panels() -> void:
 			SafeArea.begin("vitals")
 			HudVitals.draw(hud, sz, p)
 			SafeArea.begin("abilities")
+			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
 			SafeArea.begin("weapon")
 			hud._draw_weapon(sz, p)
