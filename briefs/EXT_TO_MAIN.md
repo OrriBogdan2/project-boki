@@ -9855,3 +9855,4 @@ READY ext/merge-lane-misc3-1115 8838483f11 (bulk-rebase: origin/main merged in m
 READY ext/merge-lane-misc3-1115-b fb0a60eef4 (bulk-rebase: origin/main merged in mechanically, was 54b682a54f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc2-1115-b 66b86c06e2 (bulk-rebase: origin/main merged in mechanically, was c79f1db727; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc-1115r2 09e725c796 (bulk-rebase: origin/main merged in mechanically, was df71c54ef0; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/hunter-3d-vex-sparkle-1115 937fae59f7ebca00628340f2f413183afb96cecf (Vex + Sparkle in-game 3D rebuilt from Meshy on the current live 2D looks; own rigs, clips, anchors kept; fresh-worktree import OK, vex/mage glb+model+stretch checks no worse than main, export dry run 447 MB)
