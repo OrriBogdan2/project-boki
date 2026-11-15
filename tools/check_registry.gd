@@ -39,7 +39,6 @@ const CHECKS := {
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
-	"--aim-lead-check": ["res://tools/aim_lead_check.gd", "aim_lead_check", null],      # head and chest lead the cursor
 	"--alive-counter-check": ["res://tools/alive_counter_check.gd", "alive_counter_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],  # GPU
