@@ -98,7 +98,7 @@ func _guards(m: Match) -> void:
 	m.lairs.activate(lair)
 	var call_guards := func() -> Array:
 		var n0 := (lair["guards"] as Array).size()
-		m.lairs._call_guards(lair, lair["dial"], 2)
+		m.lairs.call_guards(lair, lair["dial"], 2)
 		var made: Array = (lair["guards"] as Array).slice(n0)
 		var at := made.map(func(g): return g.pos)
 		for g in made:
