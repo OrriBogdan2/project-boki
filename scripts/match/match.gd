@@ -668,8 +668,7 @@ func where_at(p: Vector3) -> Dictionary:
 	return w
 
 func bot_kin_record() -> Dictionary:
-	var pool: Array = Data.wild_pool(tier)
-	var sp: String = pool[rng.randi_range(0, pool.size() - 1)]
+	var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
 	var rec := Save.new_kin(sp, "", kin_seed("bot"))
 	rec["trust"] = rng.randf_range(40, 80)
 	rec["level"] = rng.randi_range(1, 4 + tier * 3)
@@ -742,7 +741,7 @@ func _spawn_hunters() -> void:
 				var rec: Dictionary = Save.active_kin()
 				var rec2: Dictionary = Save.second_kin()
 				if opts.has("demo_kin"):
-					var ids: Array = Data.wild_pool(tier)
+					var ids: Array = Data.common_kin()
 					var sp0 := String(opts["demo_kin"])
 					rec = Save.new_kin(sp0 if Data.KIN.has(sp0) else "cindle", "", kin_seed("demo"))
 					rec["name"] = Data.KIN[rec["species"]]["name"]
@@ -1523,7 +1522,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.wild_pool(tier), "expedition", tier, rng)      # a raid: its own Boki
+		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)      # a raid: its own Boki
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
@@ -4206,6 +4205,8 @@ func _update_interact(dt: float) -> void:
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
 					var open_now: bool = h == player and hud != null and hud.loot_is(b)
+					if open_now:
+						h.set_hold("loot")     # (your open loot window is the channel: WardenOpen's pose)
 					var lt := ("Press %s again to smart loot  ·  click items to take them" % Settings.key_cap("interact")) if open_now else ("Press %s to open %s  ·  twice to smart loot" % [Settings.key_cap("interact"), whose])
 					best = {"kind": "loot", "box": b, "label": lt if h == player else "Hold %s to loot %s" % [Settings.key_cap("interact"), whose], "col": Life.box_color(b)}
 					break
@@ -4470,7 +4471,7 @@ func _update_training(dt: float) -> void:
 		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
+		"ledge": player.grap.size() > 0 or player.mantling(),
 		"smash": train.get("_smash", false),
 		"stagger": train.get("_stagger", false),
 		"weapon": train.get("_weapon", false),

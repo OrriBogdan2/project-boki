@@ -726,6 +726,12 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
+	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake
+	"--boki-nap-shots": ["res://tools/boki_nap_check.gd", "boki_nap_check", "shots"],  # --shots-dir=<dir>
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
+	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],      # air casts, frame by frame
+	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
+	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
@@ -734,16 +740,6 @@ const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
 	# mashing LMB never beats holding
-	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
-	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
-	"--zone-pool-check": ["res://tools/zone_pool_check.gd", "zone_pool_check", null],      # early zones need 3D models
-	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
-	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
-	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
-	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
-	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
-	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
-	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

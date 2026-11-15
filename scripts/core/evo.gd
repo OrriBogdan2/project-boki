@@ -330,7 +330,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	if mats.size() > 0 and (forms.size() > 0 or String(ln[0]) != ""):
 		(mats[0] as ShaderMaterial).set_shader_parameter("albedo", base)
-	if body.has_node("BokiRig") or body.has_node("M3d"):
+	if body.has_node("BokiRig"):
 		return         # its grown parts are on the rig (BokiDna)
 	var mats2: Array = root.get_meta("mats", [])
 	for m in muts:

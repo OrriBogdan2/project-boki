@@ -1,5 +1,5 @@
 extends RefCounted
-## --roster-shots --shots-dir=<dir> [--px=2400]: <dir>/lineup.png, every Boki as the game builds them, in a grid:
+## --roster-shots --shots-dir=<dir> [--px=2400]: <dir>/lineup.png, the 50 Boki as the game builds them, in a grid:
 ## the modelled ones first (rigged), then the placeholders. Prints the counts. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -18,8 +18,8 @@ func run(main: Node) -> void:
 		main.fade.reveal(0.01)
 	var ids: Array = Data.KIN.keys()
 	ids.sort()
-	var modelled: Array = ids.filter(func(i): return BokiRig.has(i) or MeshyKin.has(i))
-	var placeholder: Array = ids.filter(func(i): return not modelled.has(i))
+	var modelled: Array = ids.filter(func(i): return BokiRig.has(i))
+	var placeholder: Array = ids.filter(func(i): return not BokiRig.has(i))
 	var order := modelled + placeholder
 	var rows := ceili(order.size() / float(COLS))
 	var shots := Shots.new()
