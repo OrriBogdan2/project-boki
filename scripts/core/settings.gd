@@ -29,11 +29,12 @@ const DEFAULTS := {
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
+	"colour_vision": "default",      # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
@@ -48,6 +49,11 @@ const BUSES := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
+## Camera ids renamed 11-13 (they were a third-party name): an old settings.cfg value maps to the new id.
+const CAM_IDS := {
+	"cam_style": {"supervive": "default", "supervive_wide": "default_wide"},
+	"cam_follow": {"supervive": "lean"},
+}
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
@@ -194,6 +200,14 @@ var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
 
+## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
+static func migrate_cam(d: Dictionary) -> void:
+	for k in CAM_IDS:
+		var old := String(d.get(k, ""))
+		if CAM_IDS[k].has(old):
+			d[k] = CAM_IDS[k][old]
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var cf := load_file()
@@ -224,7 +238,8 @@ func load_file() -> ConfigFile:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
+		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
@@ -245,6 +260,8 @@ func load_file() -> ConfigFile:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
+		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	if not cf.has_section_key("s", "voices"):
 		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
@@ -625,14 +642,22 @@ func binding_text(action: String) -> String:
 		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
 
+## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
+## so a row of caps (UI.key_hints) never splits one into two.
+const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
+
+## One saved binding ("key:70", "mouse:8") as a cap: "F", "SPACE", "M4", "WHEEL-UP".
+func cap_text(code: String) -> String:
+	var parts := code.split(":")
+	if parts.size() != 2: return "?"
+	if parts[0] == "key": return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
+	return MOUSE_CAPS.get(int(parts[1]), "M%s" % parts[1])
+
 ## Both bindings, short ("R / X"), where a prompt has room for them.
 func key_caps(action: String) -> String:
 	var out: Array = []
 	for c in slots(action):
-		if c == "": continue
-		var t := code_text(c)
-		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
-		out.append(t.to_upper() if c.begins_with("key:") else t)
+		if c != "": out.append(cap_text(c))
 	return " / ".join(out) if out.size() > 0 else "?"
 
 ## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
@@ -641,14 +666,7 @@ func fill_keys(text: String) -> String:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB").
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
-	if evs.is_empty():
-		return "?"
-	var e: InputEvent = evs[0]
-	if e is InputEventKey:
-		return OS.get_keycode_string((e as InputEventKey).physical_keycode).to_upper()
-	if e is InputEventMouseButton:
-		return {1: "LMB", 2: "RMB", 3: "MMB", 8: "M4", 9: "M5"}.get((e as InputEventMouseButton).button_index, "M%d" % (e as InputEventMouseButton).button_index)
-	return "?"
+	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"

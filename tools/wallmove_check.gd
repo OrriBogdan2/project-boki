@@ -6,8 +6,6 @@ extends RefCounted
 ##      you hop, and the glider never opens from it.
 ##      Facing a wall with no keys, ten hops in a row, each with its scuff, and never a glider; a standing
 ##      jump at a one-terrace ledge mantles onto it.
-##   1b. Tall climb: Lace's plain jump facing the four-terrace wall climbs it, Vex's doesn't; both still
-##      walk off its top.
 ##   2. Wall bounce: an angled hit with speed reflects and keeps most of the speed; head-on it doesn't.
 ##   3. Ledges: a glide release against a two-terrace ledge, and falling past one, put you on top;
 ##      keys along or away from the wall never do.

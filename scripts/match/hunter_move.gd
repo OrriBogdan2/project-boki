@@ -4,7 +4,7 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
-static var _rules: Dictionary = _load()
+static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]

@@ -541,7 +541,7 @@ def gen_maps():
             dz = {0: "quiet", 1: "contested", 2: "dangerous"}
             body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
-            bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
+            bn = {"colossus": "Siegephant", "serpent": "Sarcobra", "brood": "Calderoise"}
             en = {"breach": "break the Gate Seal down", "dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
@@ -718,6 +718,19 @@ def _combo_rows(hero, f):
         rows.append([hero, "hold LMB through %s" % label, row.get("source", ""), row.get("ours", "")])
     return rows
 
+MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
+MANTLE_MODE = {"fire": "fires mid-climb, the rise goes on", "buffer": "buffered to the top"}
+
+def _mantle_rows():
+    """The press-in-a-mantle rows every hero shares (content/rules/mantle_press.json); [?] where the source is silent."""
+    rules = load_json(os.path.join(ROOT, "content", "rules", "mantle_press.json"))
+    rows = []
+    for key, label in MANTLE_INPUTS:
+        row = rules.get(key, {})
+        ours = MANTLE_MODE[row.get("mode", "buffer")] + ("" if row.get("seen") else " [?]")
+        rows.append(["mantle -> %s" % label, row.get("source", ""), ours])
+    return rows
+
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
     if row.get("carry"):
@@ -856,6 +869,10 @@ def gen_dash_flow():
              "it; ours is kept until it does).\n\n")
     body += table(["Hero", "Slot", "Source", "Ours", "Verdict"],
                   [r for aid in ARCH_ORDER for r in _air_cast_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
+             "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
+             "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
+    body += table(["Pair", "Source", "Ours"], _mantle_rows())
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
