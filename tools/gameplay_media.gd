@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-14> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -23,7 +23,7 @@ extends RefCounted
 ##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
 ##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
-##   14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
 ##                   (the see-through canopies: SeeThrough)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
@@ -322,7 +322,7 @@ func _hatch(secs: float) -> void:
 		t += FRAME
 		frame += 1
 
-# ------------------------------------------------------------------ 14: forest walk
+# ------------------------------------------------------------------ 9: forest walk
 const WOOD_R := 11.0             # m: how near trees count as one wood
 const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
 const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
