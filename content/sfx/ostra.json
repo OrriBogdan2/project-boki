@@ -19,16 +19,15 @@
 		"os_well": "cast",
 		"os_well_hum": "impact",
 		"ostra_dash": "dash",
-		"ostra_step_grass": "step",
-		"ostra_step_stone": "step",
-		"ostra_step_wood": "step",
-		"ostra_step_snow": "step",
+		"ostra_hover": "loop",
 		"ostra_hurt": "grunt",
 		"ostra_down": "grunt",
 		"ostra_death": "grunt"
 	},
 	"signature": ["ostra_music_box", "ostra_spring_boing"],
 	"kit_files": ["ostra_well.gd"],
+	"loops": ["ostra_hover"],
+	"reach": {"ostra_hover": 14},
 	"replaces": ["os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap",
 		"os_seed", "os_pop", "os_empower", "os_well", "os_well_hum"]
 }
