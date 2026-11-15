@@ -22,6 +22,7 @@ var disc: MeshInstance3D
 var out := "user://turntable"
 var secs := 6.0
 var env_res: Environment
+var kin_ids: Array = []   # --tt-kin=a,b,c: a grid of these Boki, each turning (instead of the Hunters)
 var zoom := {"bulwark": 1.15}   # --tt-zoom=id:f,...: camera distance factor where skinned bounds miss a raised weapon
 
 func run(main: Node) -> void:
@@ -41,6 +42,8 @@ func run(main: Node) -> void:
 				zoom[kv.get_slice(":", 0)] = float(kv.get_slice(":", 1))
 		if s == "--tt-no-lineup":
 			lineup = false
+		if s.begins_with("--tt-kin="):
+			kin_ids = Array(s.substr(9).split(","))
 	if out.is_relative_path():
 		out = ProjectSettings.globalize_path("res://").path_join(out)
 	DirAccess.make_dir_recursive_absolute(out)
@@ -50,6 +53,11 @@ func run(main: Node) -> void:
 	main.get_viewport().size = Vector2i(W, H)
 	main.get_viewport().msaa_3d = Viewport.MSAA_4X
 	_stage(main)
+	if not kin_ids.is_empty():
+		await _kin_grid()
+		print("TURNTABLE_DONE")
+		tree.quit()
+		return
 	for id in ids:
 		await _turn(String(id))
 	if lineup:
@@ -142,6 +150,37 @@ func _turn(id: String) -> void:
 	h.queue_free()
 	await tree.process_frame
 
+## The Boki as the game builds them, 4 to a row, all turning one full 360 in `secs`, the camera drifting in a little.
+func _kin_grid() -> void:
+	disc.visible = false
+	var cols := 4
+	var rows := ceili(float(kin_ids.size()) / cols)
+	var gap := 1.75
+	var ks: Array = []
+	for i in kin_ids.size():
+		var k := Models.kin(String(kin_ids[i]), {})
+		k.position = Vector3((i % cols - (cols - 1) * 0.5) * gap, 0, (float(i / cols) - (rows - 1) * 0.5) * gap)
+		holder.add_child(k)
+		ks.append(k)
+	for _k in 20:
+		await tree.process_frame
+	cam.fov = 32.0
+	var dist := float(cols) * gap * 0.5 / (tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H) * 1.12
+	var c := Vector3(0, 0.45, 0)
+	_fog(dist)
+	var pitch := deg_to_rad(24.0)
+	var dir := out.path_join("kin_grid")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var n := int(round(secs * FPS))
+	for f in n:
+		for i in ks.size():
+			(ks[i] as Node3D).rotation.y = TAU * f / n + i * 0.7
+		var d := dist * lerpf(1.05, 0.95, float(f) / n)
+		cam.position = c + Vector3(0, sin(pitch), cos(pitch)) * d
+		cam.look_at(c)
+		await _grab(dir.path_join("%04d.jpg" % f))
+	print("TT_KIN_GRID %d %s" % [n, ",".join(PackedStringArray(kin_ids))])
+
 func _lineup() -> void:
 	disc.visible = false
 	var gap := 1.5
@@ -159,7 +198,7 @@ func _lineup() -> void:
 		await tree.process_frame
 	cam.fov = 30.0
 	var span := (LINE.size() - 1) * gap + 2.4
-	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H)
+	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H) * 1.12
 	var dist := span * 0.5 / tan(half_h)
 	var c := Vector3(0, 1.1, 0)
 	_fog(dist)
