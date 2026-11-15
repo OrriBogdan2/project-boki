@@ -15,11 +15,11 @@ var m: Match
 var defaults := {}      # action -> its default caps (both slots), read before the rebind
 var pats := {}          # action -> RegEx for those caps in a line
 
-## Keys no default binding uses, one per action.
+## Keys no default binding uses, one per action (not KP Enter: confirm's second default).
 const ODD_KEYS := [KEY_F13, KEY_F14, KEY_F15, KEY_F16, KEY_F17, KEY_F18, KEY_F19, KEY_F20, KEY_F21, KEY_F22,
 	KEY_F23, KEY_F24, KEY_F25, KEY_F26, KEY_F27, KEY_F28, KEY_F29, KEY_F30, KEY_F31, KEY_F32, KEY_F33, KEY_F34,
 	KEY_F35, KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9,
-	KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD, KEY_KP_ENTER, KEY_INSERT,
+	KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD, KEY_INSERT,
 	KEY_HOME, KEY_END, KEY_PAGEUP, KEY_PAGEDOWN, KEY_SCROLLLOCK, KEY_PAUSE, KEY_NUMLOCK, KEY_BACKSLASH,
 	KEY_SEMICOLON, KEY_BRACKETLEFT, KEY_BRACKETRIGHT, KEY_APOSTROPHE]
 ## Caps that are also everyday words or numbers: only a hit after "press", "hold", "tap", "key" or in "(A)".
@@ -119,7 +119,7 @@ func _tutorial() -> void:
 		for s: String in BokiChatter.TUT_HINT[id]: _line("boki hint " + id, TutorialText.fill(s, m.player))
 	_line("scout hint", "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch"))
 	ok(n > 30, "tutorial lines checked (%d)" % n)
-	ok(fill.call("%J %S") == "%s %s" % [Settings.key_cap("jump"), Settings.key_cap("secondary")],
+	ok(fill.call("%J %E") == "%s %s" % [Settings.key_cap("jump"), Settings.key_cap("signature")],
 			"the tutorial's key tokens follow the rebind")
 
 func _training() -> void:
@@ -160,5 +160,5 @@ func _farm() -> void:
 	var n := _walk("farm tutorial", FarmTutorial.rules(), FarmTutorial.fill)
 	ok(n > 20, "farm tutorial lines checked (%d)" % n)
 	var house: Dictionary = FarmTutorial.step_def("house")
-	var wait := FarmTutorial.fill(String(house.get("hints", {}).get("wait", "")))
+	var wait: String = FarmTutorial.fill(String(house.get("hints", {}).get("wait", "")))
 	ok(wait.contains(Settings.key_cap("interact")), "the farm house hint names the rebound use key: " + wait)
