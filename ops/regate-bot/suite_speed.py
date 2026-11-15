@@ -20,6 +20,7 @@ import signal
 import statistics
 import subprocess
 import sys
+import faulthandler
 import tempfile
 import threading
 import time
@@ -103,6 +104,20 @@ def order_flags(flags, hist):
     p90 = {f: pct(v, 0.9) for f, v in hist.items() if v}
     unknown = pct(list(p90.values()), 0.9) if p90 else DEFAULT_SECS
     return sorted(flags, key=lambda f: (-p90.get(f, unknown), f))
+
+
+MIN_MEM_GB = float(os.environ.get("SUITE_MIN_MEM_GB", "3"))
+
+
+def mem_avail_gb():
+    """MemAvailable in GB (Linux); a large number where /proc/meminfo is missing so the gate never blocks."""
+    try:
+        for ln in open("/proc/meminfo"):
+            if ln.startswith("MemAvailable:"):
+                return int(ln.split()[1]) / 1048576
+    except OSError:
+        pass
+    return 1e9
 
 
 def simulate(flags, secs, jobs):
@@ -286,42 +301,93 @@ def verdict(rc, log):
     return ("green" if rc == 0 else "red"), mismatch
 
 
-def reap_env(marker):
-    """Kill what a check left running in its own session (tools/online_feel_proxy.py detaches, then holds its port
-    and makes later net checks red): every process whose environment has this check's private XDG_DATA_HOME."""
-    key = marker.encode()
-    for d in Path("/proc").iterdir():
-        if not d.name.isdigit() or int(d.name) == os.getpid():
-            continue
+REAP_S = 20.0  # a stuck /proc read must never stall a gate (11-14: regate #57/#59 hung 155 min inside the cleanup)
+
+
+def _proc_state(d):
+    """One letter from /proc/PID/stat ('' when unreadable); stat takes no mm lock, so it is safe to read first."""
+    try:
+        return (d / "stat").read_text().rsplit(")", 1)[1].split()[0]
+    except (OSError, IndexError):
+        return ""
+
+
+def reap_marked(mark, deadline=REAP_S):
+    """SIGKILL our own processes whose environment holds mark (a per-run env line); -> how many, or -1 when the scan
+    ran out of time. Reading /proc/PID/environ takes that process's mmap lock, which blocks for as long as the process
+    sits in a stalled page fault (a thrashing box with 3 gates on it): so each read runs in its own daemon thread, we
+    wait `deadline` s for them all, give up on the stuck ones, and never read a D (uninterruptible) or Z process."""
+    mine, me = os.getuid(), os.getpid()
+    killed, threads = [0], []
+
+    def one(d):
         try:
-            if key in (d / "environ").read_bytes().split(b"\0"):
+            if mark in (d / "environ").read_bytes().split(b"\0"):
                 os.kill(int(d.name), signal.SIGKILL)
-        except OSError:
+                killed[0] += 1
+        except (OSError, ValueError):
             pass
 
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit() or int(d.name) == me:
+            continue
+        try:
+            if d.stat().st_uid != mine or _proc_state(d) in ("D", "Z", "X", ""):
+                continue
+        except OSError:
+            continue
+        t = threading.Thread(target=one, args=(d,), daemon=True)
+        t.start()
+        threads.append(t)
+    end = time.time() + deadline
+    for t in threads:
+        t.join(max(0.0, end - time.time()))
+    return -1 if any(t.is_alive() for t in threads) else killed[0]
 
-def run_flag(godot, tree, flag, timeout, extra):
+
+def _bounded(fn, deadline):
+    """Run fn() in a daemon thread and wait at most deadline s; True when it finished."""
+    t = threading.Thread(target=fn, daemon=True)
+    t.start()
+    t.join(deadline)
+    return not t.is_alive()
+
+
+def run_flag(godot, tree, flag, timeout, extra, on_start=None):
+    """One check run. Every step that waits on the OS is bounded, so this returns within about timeout + 60 s: the
+    engine runs in its own session under `timeout`; if it is still there at timeout + 30 s (a D-state engine) its
+    whole session is SIGKILLed and the run is red with rc 124 and a note, instead of waiting forever."""
     tmp = tempfile.mkdtemp(prefix="suite-")
+    mark = f"XDG_DATA_HOME={tmp}/data".encode()
     env = dict(os.environ, XDG_DATA_HOME=f"{tmp}/data", XDG_CONFIG_HOME=f"{tmp}/config", XDG_CACHE_HOME=f"{tmp}/cache")
     cmd = ["timeout", "-k", "10", str(timeout), godot, "--headless", *extra, "--path", str(tree), "--", flag]
     t0 = time.time()
+    note = ""
+    # 11-14: output to a file, not a pipe: an orphan a check leaves behind (online_feel_proxy.py, setsid'd, parent 1)
+    # kept the pipe open and hung a whole gate for 60 min (#29 on rpc7). Afterwards, end every process that still
+    # carries this run's own XDG_DATA_HOME (inherited env = exactly this check's leftovers, nothing else).
     try:
-        # regate-bot 11-14: log to a file, own process group, kill the group after: a helper a check starts
-        # (tools/online_feel_proxy.py) outlived godot, held the stdout pipe and hung a whole gate for 3 h.
-        with open(f"{tmp}/log", "w+", errors="replace") as fh:
-            p = subprocess.Popen(cmd, cwd=tree, env=env, stdout=fh, stderr=subprocess.STDOUT, start_new_session=True)
-            rc = p.wait()
+        with open(f"{tmp}/out.log", "w+", errors="replace") as fh:
+            p = subprocess.Popen(cmd, cwd=tree, env=env, stdin=subprocess.DEVNULL, stdout=fh, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
+            if on_start:
+                on_start(p.pid, mark)
             try:
-                os.killpg(p.pid, signal.SIGKILL)
+                rc = p.wait(timeout + 30)
+            except subprocess.TimeoutExpired:
+                rc, note = 124, f"\nSUITE-SPEED: engine still running {timeout + 30}s after start, killed (hard timeout)\n"
+            try:
+                os.killpg(p.pid, signal.SIGKILL)  # whatever is left in the run's own session goes too
             except OSError:
                 pass
-            reap_env(f"XDG_DATA_HOME={tmp}/data")
+            if reap_marked(mark) < 0:
+                note += f"\nSUITE-SPEED: /proc scan for leftovers timed out after {REAP_S:.0f}s (a stuck process); gate goes on\n"
             fh.seek(0)
-            log = fh.read()
+            log = fh.read() + note
     except OSError as e:
         rc, log = 127, f"launch failed: {e}"
-    finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+    if not _bounded(lambda: shutil.rmtree(tmp, ignore_errors=True), 30):
+        log += "\nSUITE-SPEED: removing the run's temp dir timed out (30s); left behind\n"
     secs = round(time.time() - t0, 1)
     v, mm = verdict(rc, log)
     return {"flag": flag, "rc": rc, "secs": secs, "verdict": v, "mismatch": mm, "log": log}
@@ -374,6 +440,10 @@ class Cache:
 
 
 # ---------------------------------------------------------------- the gate
+class GateStalled(Exception):
+    """No run finished for --stall-min minutes: the gate stops with a reason instead of waiting for a hung run."""
+
+
 class Gate:
     def __init__(self, a):
         a.main, a.merge = os.path.abspath(a.main), os.path.abspath(a.merge)
@@ -384,6 +454,8 @@ class Gate:
         self.res = {"main": {}, "merge": {}}
         self.abort = threading.Event()
         self.t0 = time.time()
+        self.last_progress = time.time()  # bumped by every finished run (record): the stall watchdog reads it
+        self.active = {}  # run id -> (side, flag, pid, env mark, started): what is running right now
         self.extra = a.godot_args.split() if a.godot_args else []
 
     def log(self, msg):
@@ -396,6 +468,8 @@ class Gate:
         r["cached"] = cached
         with self.lock:
             self.res[side][r["flag"]] = r
+            if not cached:
+                self.last_progress = time.time()
         d = self.out / side
         d.mkdir(exist_ok=True)
         name = r["flag"].lstrip("-")
@@ -413,7 +487,8 @@ class Gate:
         q = [(0, i, j) for i, j in enumerate(jobs)]
         heapq.heapify(q)
         cv = threading.Condition()
-        state = {"busy": 0, "seq": len(jobs), "err": None}
+        mem_lock = threading.Lock()
+        state = {"busy": 0, "running": 0, "seq": len(jobs), "err": None}
 
         def worker():
             while True:
@@ -426,6 +501,13 @@ class Gate:
                     side, tree, flag = heapq.heappop(q)[2]
                     state["busy"] += 1
                 follow = None
+                with mem_lock:  # 11-14: w2 lost its whole user session (tmux + 2 jobs) at --jobs 12 on 30 GB; wait for RAM
+                    t0 = time.time()
+                    while state["running"] > 0 and mem_avail_gb() < MIN_MEM_GB and time.time() - t0 < 600 and not self.abort.is_set():
+                        time.sleep(2)
+                    time.sleep(0.5)
+                    with cv:
+                        state["running"] += 1
                 try:
                     r = self._one(side, tree, flag)
                     if label == "body" and r:
@@ -434,6 +516,7 @@ class Gate:
                 except Exception as e:  # noqa: BLE001 - re-raised after the pool drains
                     state["err"] = e
                 with cv:
+                    state["running"] -= 1
                     if follow:
                         heapq.heappush(q, (-1, state["seq"], follow))
                         state["seq"] += 1
@@ -441,12 +524,58 @@ class Gate:
                     cv.notify_all()
 
         threads = [threading.Thread(target=worker, daemon=True) for _ in range(max(1, self.a.jobs))]
+        self.last_progress = time.time()
         for t in threads:
             t.start()
-        for t in threads:
-            t.join()
+        limit = self.a.stall_min * 60
+        while any(t.is_alive() for t in threads):
+            for t in threads:
+                t.join(2.0 / len(threads))
+            if limit > 0 and time.time() - self.last_progress > limit and any(t.is_alive() for t in threads):
+                self.stalled(label, limit, len(q), state)
         if state["err"]:
             raise state["err"]
+
+    def stalled(self, label, limit, queued, state):
+        """The watchdog: no run finished for `limit` s. Say why (which runs are open, where each thread is blocked,
+        which processes sit in D state) into stall.txt and the log, end the open runs' leftovers, and stop the gate."""
+        self.abort.set()
+        now = time.time()
+        open_runs = sorted(self.active.values(), key=lambda v: v[4])
+        who = ", ".join(f"{sd}:{fl} {now - st:.0f}s" for sd, fl, _pid, _m, st in open_runs[:6]) or "none (workers idle?)"
+        why = (f"STALLED: no run finished for {limit / 60:.0f} min in the {label} phase ({len(self.res['merge'])} merge +"
+               f" {len(self.res['main'])} main done, {queued} queued, {state['busy']} busy); open runs: {who}")
+        try:
+            with open(self.out / "stall.txt", "w") as fh:
+                fh.write(why + "\n\n== python threads ==\n")
+                fh.flush()
+                faulthandler.dump_traceback(file=fh, all_threads=True)
+                fh.write("\n== processes in D state / open runs' sessions ==\n")
+                fh.flush()
+                ps = subprocess.run(["ps", "-eo", "pid,ppid,pgid,sid,stat,wchan:24,etimes,cmd", "--sort=-etimes"],
+                                    capture_output=True, text=True, timeout=20).stdout.splitlines()
+                sids = {str(v[2]) for v in open_runs}
+                fh.write("\n".join(ln[:230] for ln in ps[:1] + [x for x in ps[1:] if (x.split() + ["", "", "", "", ""])[4].startswith("D")
+                                                                or (x.split() + [""] * 4)[3] in sids])[:20000] + "\n")
+        except (OSError, subprocess.SubprocessError, ValueError):
+            pass
+        for sd, fl, pid, mark, _st in open_runs:  # the hung runs' own sessions and leftovers go; nobody else's processes
+            try:
+                os.killpg(pid, signal.SIGKILL)
+            except OSError:
+                pass
+            reap_marked(mark, 10.0)
+        self.log(why + f" (details: {self.out}/stall.txt)")
+        with open(self.out / "summary.txt", "a") as fh:
+            fh.write(why + "\n")
+        if self.a.alert_file:
+            pth = Path(self.a.alert_file)
+            try:
+                pth.parent.mkdir(parents=True, exist_ok=True)
+                pth.write_text(why + f" (gate {self.out}, {time.strftime('%Y-%m-%d %H:%M:%S')})\n")
+            except OSError:
+                pass
+        raise GateStalled(why)
 
     def follow_up(self, side, r):
         """--main-lazy: the main side only matters when the merge side is red (green merge = no NEW-RED)."""
@@ -461,7 +590,15 @@ class Gate:
     def _one(self, side, tree, flag):
         if self.abort.is_set():
             return None
-        r = run_flag(self.a.godot, tree, flag, self.a.timeout, self.extra)
+        rid = (side, flag)
+
+        def started(pid, mark):
+            self.active[rid] = (side, flag, pid, mark, time.time())
+
+        try:
+            r = run_flag(self.a.godot, tree, flag, self.a.timeout, self.extra, started)
+        finally:
+            self.active.pop(rid, None)
         if self.abort.is_set():
             r["aborted"] = True
         self.record(side, r)
@@ -557,6 +694,15 @@ class Gate:
         self.run_many(work, "body")
         return self.summary(flags, scope)
 
+    def run_guarded(self):
+        """run(), with a stall mapped to exit code 4 (the reason is in summary.txt / stall.txt)."""
+        try:
+            return self.run()
+        except GateStalled as e:
+            print(f"gate STALLED: {e}")
+            (self.out / "rc").write_text("4\n")
+            return 4
+
     def summary(self, flags, scope):
         wall = time.time() - self.t0
         m, g = self.res["main"], self.res["merge"]
@@ -634,6 +780,8 @@ def main(argv=None):
     p.add_argument("--out", required=True)
     p.add_argument("--jobs", type=int, default=8, help="parallel godot runs in total")
     p.add_argument("--timeout", type=int, default=300)
+    p.add_argument("--stall-min", type=float, default=20,
+                   help="stop with exit 4 and a reason when no run finishes for this many minutes (0: off)")
     p.add_argument("--godot", default="godot")
     p.add_argument("--godot-args", default="", help="extra engine args, part of the cache key")
     p.add_argument("--history", default=os.path.expanduser("~/.cache/boki-suite/history.tsv"))
@@ -695,7 +843,7 @@ def main(argv=None):
         print(f"# {why}")
         print("ALL" if picked is None else "\n".join(picked))
     elif a.cmd == "gate":
-        return Gate(a).run()
+        return Gate(a).run_guarded()
     return 0
 
 
