@@ -2,7 +2,7 @@ extends RefCounted
 ## The match camera's framing against the source (docs/MOVEMENT_FEEL.md, "Camera framing vs the source" and
 ## "Camera frame per aspect").
 ## --camera-frame-check:
-##   1. the Supervive style takes its numbers from content/rules/camera.json and, on a 1920x1080 view, sits inside
+##   1. the default style takes its numbers from content/rules/camera.json and, on a 1920x1080 view, sits inside
 ##      the source's bands there: pitch, lens, your feet a little below the centre, and the shape of the ground
 ##      shown (metres ahead over behind, to the side over ahead)
 ##   2. per aspect, windowed and full screen (VIEWS): every screen shows the 16:9 frame's metres to the side, a
@@ -51,7 +51,7 @@ func run(main: Node, what: String) -> void:
 	main.add_child(vp)
 	var cam := CamRig.new()
 	vp.add_child(cam)
-	cam.use_style("supervive")
+	cam.use_style("default")
 	vp.size = VIEWS[0][1]
 	cam.snap(Vector3.ZERO)
 	_style(cam)
@@ -62,10 +62,10 @@ func run(main: Node, what: String) -> void:
 
 func _style(cam: CamRig) -> void:
 	var src: Dictionary = CamRig.RULES["source"]
-	var st: Dictionary = CamRig.STYLES["supervive"]
+	var st: Dictionary = CamRig.STYLES["default"]
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
 			and is_equal_approx(cam.lens, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
-			"the Supervive style is camera.json's: %s" % str(st))
+			"the default style is camera.json's: %s" % str(st))
 	var pitch := rad_to_deg(cam.pitch)
 	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
 	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg at 16:9 inside the source's %s"

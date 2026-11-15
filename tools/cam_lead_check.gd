@@ -1,6 +1,6 @@
 extends RefCounted
 ## The camera's cursor lead against the source footage (docs/MOVEMENT_FEEL.md "Camera lead"):
-##   --cam-lead-check (headless): with the Supervive follow the view stays on you with the cursor at the
+##   --cam-lead-check (headless): with the centred follow the view stays on you with the cursor at the
 ##     screen's edge, a cursor flick moves it by nothing within a frame, and a dash eases the view after
 ##     you with no jump cut. The same in an expedition and in the Training Grounds.
 ##   --cam-lead-shots: a frame with the cursor held at the right edge, into --shots-dir=<dir> (xvfb, GPU).
@@ -47,7 +47,7 @@ func _area(label: String, opts: Dictionary) -> void:
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-	cam.follow_mode = "supervive"
+	cam.follow_mode = "centred"
 	cam.lead = 1.0
 	cam.snap(P.pos)
 	for i in 30:
