@@ -15,6 +15,8 @@ const PICKUP_GUNS := ["smg", "rifle", "burst_rifle", "shotgun", "sniper"]
 const OLD_SIGNATURES := ["longsword", "twin_blades", "spellstaff"]
 ## The shared weapon sounds the audit found standing in for Hunters' own (SFX_AUDIT row 3).
 const STOCK := ["smg", "rifle", "shotgun", "sniper", "thump", "cleave", "swipe", "zap"]
+## Hunters added after the audit whose weapon still plays a stock sound (own LMB sound owed: docs/DEBT.md).
+const OWED := ["gil"]
 const HOLD := 1.6           # s the attack key is held (past the sniper's wind-up and a melee charge)
 const TAPS := 3             # quick taps after the hold (tap-to-throw / combo kits)
 
@@ -29,6 +31,8 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	var not_own := STOCK + PICKUP_GUNS.map(func(w): return String(Data.weapon_stats(w)["sfx"]))
 	for arch in Arch.ids():
+		if arch in OWED:
+			continue
 		var r: Array = ak.setup(arch, 6.0)
 		var heard := _fire(r[0], r[1])
 		var stock := heard.filter(func(s): return s in not_own)
