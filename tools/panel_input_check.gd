@@ -34,6 +34,7 @@ func run(host: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 4242, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
+	m.flow.tick(0.0)      # one step out of LOADING (MatchFlow.can_pause: the Esc menu waits for a built match)
 	main.current = m      # (the pause menu asks Main for the screen)
 	await tree.process_frame
 	for panel in PANELS:
