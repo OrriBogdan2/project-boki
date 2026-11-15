@@ -29,6 +29,7 @@ const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (
 var lit := {}                           # key cap -> s left lit
 var caps := {}                          # key cap -> its Label
 var title: Label
+var clean_zoom := 0.0                   # --reel-clean[=zoom]: the match camera's zoom, the overlays all off
 var steps := 0
 var r_down := false                     # R was pressed this step (it goes through HunterKeys, not inp)
 
@@ -47,10 +48,19 @@ func run(main_node: Node) -> void:
 			who = arg.substr(12)
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
+		if arg.begins_with("--reel-clean"):     # capture-only (recap footage): no caps, title or HUD, full-size frames
+			clean_zoom = float(arg.get_slice("=", 1)) if "=" in arg else 0.6
 	hero_name = who
 	Save.d["tutorial"][KitDrill.SAVE_KEY] = true     # no kit drill card under the title (Save.no_write is on)
 	await _setup()
-	_build_keys()
+	if clean_zoom > 0.0:
+		main.get_window().size = Vector2i(1920, 1080)
+		main.get_viewport().size = Vector2i(1920, 1080)
+		title = Label.new()
+		if m.hud: m.hud.visible = false
+		_clean_overlays()
+	else:
+		_build_keys()
 	frame_dir = dir.path_join("frames")
 	DirAccess.make_dir_recursive_absolute(frame_dir)
 	P.lvl = 6
@@ -114,9 +124,31 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 			_keys_update()
 	await super._go(secs, keyed, marks, lead)
 
+## (--reel-clean) the Training Grounds' own overlays off too: hint line, DPS meter, menu, the sign by the start
+func _clean_overlays() -> void:
+	if m.arena:
+		for l in [m.arena.layer, m.arena.card_layer, m.arena.menu_layer]:
+			if l: l.visible = false
+	var pr := Practice.of(m)
+	if pr and pr.bar:
+		pr.bar.visible = false
+	for lb in m.find_children("*", "Label3D", true, false):
+		if not (lb as Label3D).text.is_valid_int():     # (damage numbers stay)
+			(lb as Label3D).visible = false
+
 func _save_frame() -> void:
 	steps += 1
-	if steps % (60 / FRAME_FPS) == 0:
+	if clean_zoom > 0.0:
+		if steps % 30 == 1:
+			_clean_overlays()
+		m.cam.zoom = clean_zoom
+		m.cam.zoom_to = clean_zoom
+	if steps % (60 / FRAME_FPS) != 0:
+		return
+	if clean_zoom > 0.0:
+		main.get_viewport().get_texture().get_image().save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.9)
+		frames += 1
+	else:
 		super._save_frame()
 
 # ------------------------------------------------------------------ the parts
