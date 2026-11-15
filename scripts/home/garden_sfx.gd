@@ -51,7 +51,7 @@ static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
 
 ## A rival's huff as it passes another (BaseRival): the loser's sulk in the Boki's size.
 static func huff(rec: Dictionary, pos) -> void:
-	cue("garden_sulk_" + _size(rec), pos)
+	cue("garden_sulk_" + size_word(rec), pos)
 
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
 static func clash(home, move: String, pos, pushed: bool) -> void:
