@@ -1,0 +1,4 @@
+minimap_far_open.png: The minimap with an open lift far off: a pulsing arrow on its edge
+full_hover_open.png: Full map, cursor resting on the open extraction point
+full_hover_closed.png: Full map, cursor resting on the closed extraction point
+full_map.png: Full map, cursor off the markers
