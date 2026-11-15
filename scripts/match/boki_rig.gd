@@ -346,6 +346,7 @@ func _ready() -> void:
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
 func advance(dt: float) -> void:
 	player.advance(dt)
+	_twitch_ears()         # (over the clip's pose, before the skeleton takes it)
 	_skel.advance(dt)
 
 ## The model's skeleton.
@@ -387,7 +388,6 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-	_twitch_ears()
 	var t := pace.step(dt)
 	if t > 0.0:
 		_face_step(t)
