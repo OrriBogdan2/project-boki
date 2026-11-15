@@ -12,6 +12,7 @@ OURS='^(MERGE_REPORT\.md|docs/wiki/.*|tools/(style|lint)_baseline\.json|.*\.impo
 while read -r b s; do
 	[ -n "$b" ] || continue
 	git merge-base --is-ancestor "$s" HEAD 2>/dev/null && continue
+	git reset -q --hard HEAD; git clean -fdq  # a failed commit or union step must not leave the next merge a dirty tree
 	git -c rerere.enabled=false merge -q --no-ff -m "Merge $b ${s:0:9} (merge rush)" "$s" >/dev/null 2>&1 && continue
 	bad=()
 	mapfile -t unmerged < <(git diff --name-only --diff-filter=U)  # read first: git diff can hold index.lock
