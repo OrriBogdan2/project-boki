@@ -21,6 +21,7 @@ var fails := 0
 var n := 0
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
 const LOUD_S := 12.0           # s of autoplay match the bus meters are read over
+const REPEAT_GAP_MS := 200     # ms of real time between two chimes: past Sfx.STACK_MS, so not stacked
 const WALK_S := 8.0            # s: the longest an abyss walk is run
 const ABYSS_NAMES := ["abyss_whoosh", "abyss_catch", "abyss_fallout"]
 
@@ -130,7 +131,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	m.revive_hunter(P, mate)
 	_step(m, 0.1)
 	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
-	await _wall_wait(Sfx.STACK_MS + 60)   # Sfx stacks repeats in real ms; an engine timer can run short
+	await _wait_real_ms(REPEAT_GAP_MS)
 	Sfx.play("kill")
 	P.ak.cd["x"] = 0.05
 	_step(m, 0.1)
@@ -139,13 +140,6 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
-
-## Waits `ms` of wall-clock time (frames keep running). A SceneTreeTimer counts engine time, which can elapse
-## in well under that many real ms, and Sfx's repeat gap and stack window are real ms.
-func _wall_wait(ms: int) -> void:
-	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < ms:
-		await main.get_tree().process_frame
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
@@ -339,6 +333,16 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
+
+## Waits ms of wall-clock time. Sfx spaces and stacks repeats in real ms, and a SceneTreeTimer is no
+## measure of that: its first frame's delta also counts the match steps run before it was made, so
+## create_timer(0.2) could end ~80 ms after the last chime, inside Sfx.STACK_MS (the chime came out a
+## stacked 3.5 dB quieter and the gate went red at random).
+func _wait_real_ms(ms: int) -> void:
+	var until := Time.get_ticks_msec() + ms
+	while Time.get_ticks_msec() < until:
+		await main.get_tree().process_frame
+
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
