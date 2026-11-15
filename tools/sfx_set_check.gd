@@ -136,6 +136,7 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var wid := Arch.signature(arch)
 	var wdef: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/%s.json" % wid))
 	var wsfx := String((wdef["primary"] as Dictionary).get("sfx", ""))
+	wsfx = String(Arch.def(arch).get("lmb", {}).get("sfx", wsfx))      # the archetype's own sound over a shared gun's
 	ok(sounds.has(wsfx), "%s: signature weapon %s plays its own %s, not a stock sound" % [arch, wid, wsfx])
 	var h := Hunter.new()
 	h.arch = arch
