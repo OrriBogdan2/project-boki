@@ -18,6 +18,7 @@ import crouchkit
 import gardenkit
 
 A_Z = K.ANKLE_Z
+GAIT_T = 11 / FPS                # s: one walk or run cycle (two steps)
 
 
 READY = {

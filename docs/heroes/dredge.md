@@ -10,6 +10,21 @@ Sources (gameplay facts only, written in our own words):
 - The footage reference sheet (frames kept on the local machine): timing, aiming, telegraphs, animation beats.
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
+## Ranks: tier table (source: Kingpin)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB Scattergun | none | none | none | - | - | - |
+| RMB Abyssal Hand (12s; [D] 18s) | -2.5s | -2.5s | -50% cooldown on an enemy hit | 10.3s | 8.7s; a foe hit takes half off | `rmb.refund` at sec rank 3 |
+| Shift Barge (10s; [D] 7s) and air pounce (12.5s; [D] 12.5s) | -1.25s (air -2s) | -1.25s (air -2s) | dashing resets the bloom, shot hits cut the dash cooldown | 8.2s, air 10.5s | 6.4s, air 8.5s; a dash resets the spread, each pellet hit trims 0.25s | `dash.cut`, `dash.air.rank_cut`, the bloom reset at dash rank 3 |
+| E Anchor Drop (7s; [D] 12s) | +20% damage, -2.5s, +0.1s stun | +20% damage, -2.5s, +0.1s stun | +100% damage on a foe over the Abyss, +0.2s stun | 5.5s, damage +20%, stun +0.1s | 4.1s, damage +40%, stun +0.4s in all, double over the Abyss | `e.rank3_stun`, the abyss double at kin rank 3 |
+| Passive Salvage | none | none | none | - | - | - |
+
 ## Scaling
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
@@ -403,6 +418,32 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 | Scattergun, kick and back on the aim | ~1 frame (0.2) | kick 0.05, back 0.24 (clip 0.36) | same | none (a frame's tolerance) |
 | Brass Broadside | 1.1 charge, waves 0.6 apart | 1.1 / 0.6 | same (asserted in `dredge_ult_check.gd`, run by `--dredge-combo-check`) | none |
 | Pounce, dive, quake, jump, flex, reel end | no footage timing | clip = kit | same | none |
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured in a live match through `WardenClips` (dredge.glb clips seeked to the kit's move clock, `kmove_t`; blend in
+0.1 s, back to the legs 0.16 s) by `tools/dredge_anim_time_check.gd`, which runs inside `--dredge-combo-check` and
+asserts every row below. A clip's "hit" is read off the GLB: the frame its pose stops moving after its fastest swing.
+Source times from briefs/hero-ref/dredge.md (one frame = 0.2 s; the ult 0.1 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `dr_shot` (seven slugs) | kick on the shot frame, back on the aim ~1 frame later; a shot every 2-3 frames [0041-0047] | slugs and clip on the press, owns 0.12 / kick 0.07 / aim 0.17, stance 0.36; held every 0.52 (0.5 s cd on 60 Hz frames) | same | matches |
+| bloom | not readable in the footage | +4° a volley, capped 15°, gone 0.95 s after release | same | no source |
+| `dr_throw` | arm out over 0.4 s to 5 bh [f121-123] | arm leaves 0.02 / punch 0.17 / grab of a body 5 bh off at 0.30 | same | arm ~25% fast: ext/feel-grimble-reel (64a565f7f) owns the speed |
+| `dr_reel` `dr_pullend` | grab f124, pull ~1.0 s [f124-129] | reel clip on the grab's frame, pull 0.85 s, pull-end on arrival | same | hand-offs match; reel speed is ext/feel-grimble-reel's |
+| `dr_anchor` (E) | wind-up f1, hop f2, slam ~0.4, total ~0.8 [0221-0234] | windup 0.38 / slam 0.37 / clip 1.0, legs back 1.17 | clip 0.8, legs back 0.97 | fixed (re-key); asserted. No hop: owner item 33 |
+| `dr_blast` (X) | charge 1.1 [f22-33], wave 1 f34, wave 2 f40, done ~2.1 [f43] | waves 1.10 / 1.72 on shoves 1.10 / 1.70, clip 2.1, legs back 2.25 | same | matches |
+| `dr_lunge` x3 (Shift) | one dash ≤0.2 s, lands crouched, on the aim in 1 frame [0186-0189]; no chain in the footage | dash 0.18, presses 0.42 apart, clip 0.367: the body fell to 0.69 legs between barges | clip 0.433 (squat held 0.38-0.44): owned 1.0 through the chain | fixed (re-key); asserted |
+| `dr_pounce` (air Shift) | no air dash in the footage | owns 0.10 / drop 0.24 / legs back 0.53 | same | no source |
+| run cadence | no clean run in the footage; the sheet's "cadence ×0.9, stride 0.7" is a build note | 4.65 m/s, run_f at ×1.06: 3.3 steps/s, 1.40 m a step (Hem/Kael: 3.0, 1.53) | same | no source |
+
+Clip re-keys (tools/art1/grimble_clips.py, rebuilt from the 11-07 grimble_art1.blend; every other clip identical):
+- `anchor`: 1.0 → 0.8 s; the bounce 0.48 → 0.46, the drag back 0.75 → 0.62.
+- `lunge`: 0.38 → 0.44 s; the squat (END) held from 0.38, so the next press re-seeks from a held pose, not from the legs.
+
+Suggestions (ours, not built): the source's E hops ~1 bh forward on f2 (we stay planted, owner item 33); our run takes
+more, shorter steps than a medium, the opposite of the sheet's heavy note (run_f at 0.7 s would give ~2.9 steps/s);
+the barge covers 3.2 m (1.8 bh) against the source's 2.5-3 bh.
 
 ## Look and sound
 - Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,

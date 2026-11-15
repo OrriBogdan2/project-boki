@@ -248,7 +248,9 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		# done by the next barge: dash + gap, plus the held squat that bridges the chained press's late frames
+		# (docs/heroes/dredge.md, "Animation timing")
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap + 0.06
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
@@ -973,6 +975,34 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun, air pounce cd]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), cd_e, K.power("kin") / pk, K._stun_t(),
+				K.long_dash_cd()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
+	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
+	ok("upgrade parity: air pounce 12.5 -> 10.5 -> 8.5 (-2s twice, the source's own numbers)",
+			near.call(up[1][5], 10.5) and near.call(up[2][5], 8.5), str(up))
+	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	await ak.done(m)
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop

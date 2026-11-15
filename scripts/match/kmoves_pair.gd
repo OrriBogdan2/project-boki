@@ -108,12 +108,12 @@ const MOVES := {
 			"y": 0.35, "p": -0.9, "fl": Vector3(0.1, -0.65, -0.8), "hw": 1.0, "fr": Vector3(0.25, -0.3, -0.3),
 			"rw": 0.7, "sq": 0.65, "lift": -0.25, "lw": 1.0, "legs": [1.2, -1.7, -0.45, -1.0]
 		}],
-		[0.48, {
+		[0.46, {
 			"y": 0.3, "p": -0.7, "fl": Vector3(0.1, -0.45, -0.7), "hw": 1.0, "fr": Vector3(0.25, -0.2, -0.25),
 			"rw": 0.7, "sq": 0.35, "lift": -0.14, "lw": 1.0, "legs": [1.1, -1.6, -0.4, -0.95]
 		}],
-		[0.75, {"p": -0.2, "fl": Vector3(0.05, 0.1, -0.3), "hw": 0.5, "sq": 0.1, "lift": -0.03}],
-		[1.0, {}]]},
+		[0.62, {"p": -0.2, "fl": Vector3(0.05, 0.1, -0.3), "hw": 0.5, "sq": 0.1, "lift": -0.03}],
+		[0.8, {}]]},
 	# Anchor Drop in the air: both fists locked overhead, knees up, dropping like a stone (held to the ground)
 	"dr_dive": {"hold": true, "keys": [
 		[0.0, {
@@ -161,7 +161,8 @@ const MOVES := {
 			"fr": Vector3(0.3, -0.7, -0.4), "rw": 0.9, "lw": 1.0, "legs": [1.2, -1.8, 1.0, -1.7]
 		}],
 		[0.3, {"p": -0.15, "sq": 0.1, "lift": -0.03}],
-		[0.38, {}]]},
+		[0.38, {}],
+		[0.44, {}]]},
 	# The air barge (the same quick 0.18 s lunge, 35% further): a beast's pounce, arms cocked up, then raked
 	# forward with the claws out and dragged down through the air, legs tucked, a heavy drop onto his feet
 	"dr_pounce": {"keys": [
@@ -307,11 +308,11 @@ const MOVES := {
 			"p": 0.4, "sq": -0.35, "lift": 0.18, "fr": Vector3(0.85, 0.5, 0.1), "rw": 1.0,
 			"fl": Vector3(-0.85, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": 1.45
 		}],
-		[0.13, {
+		[0.26, {
 			"p": 0.28, "sq": -0.12, "lift": 0.07, "fr": Vector3(0.75, 0.45, 0.05), "rw": 1.0,
 			"fl": Vector3(-0.75, 0.45, 0.05), "hw": 1.0, "gp": 1.35
 		}],
-		[0.24, {}]]},
+		[0.36, {}]]},
 	# Cinder's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
 	# spread-eagled on the launch, arms and legs wide and the nozzle held out, until the speed bleeds off
 	"lw_hop": {"keys": [

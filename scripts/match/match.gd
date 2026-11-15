@@ -1488,7 +1488,7 @@ func _collide_breaks() -> void:
 			if absf(e.pos.y - bp.y) > 0.6:
 				continue
 			var d := Vector2(e.pos.x - bp.x, e.pos.z - bp.z)
-			var mind: float = e.r + 0.36
+			var mind: float = e.hull_r() + 0.36
 			var l := d.length()
 			if l >= mind:
 				continue
@@ -1497,7 +1497,7 @@ func _collide_breaks() -> void:
 				continue
 			var nrm := d / l if l > 0.0001 else Vector2(1, 0)
 			var push := nrm * (mind - l)
-			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.r, e.pos.y, e.grounded) == 0.0:
+			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.hull_r(), e.pos.y, e.grounded) == 0.0:
 				e.pos.x += push.x; e.pos.z += push.y
 
 ## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
@@ -2823,7 +2823,7 @@ func shot_stance_y(e: Ent) -> float:
 
 ## Shots flying between these heights (x..y) hit this body.
 func shot_band(e: Ent) -> Vector2:
-	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
+	var top: float = Arch.hit_h(e.arch) if e is Hunter else maxf(0.9, e.r * 2.2)
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
@@ -3350,6 +3350,8 @@ func _gather_input() -> void:
 	if aim_hold == "hunter_ult" and not Input.is_action_pressed("hunter_ult"):
 		aim_hold = ""
 		HunterKeys.ult_pressed(player)
+	if Input.is_action_just_pressed("summon") and not paused:
+		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
 	if intro and intro.skip(event):
@@ -3817,6 +3819,9 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
+		if pending_input.get("summon", false):
+			pending_input["summon"] = false
+			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
@@ -3978,7 +3983,7 @@ func _separate() -> void:
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
-			var mind := a.r + b.r
+			var mind := a.hull_r() + b.hull_r()
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
@@ -3988,9 +3993,9 @@ func _separate() -> void:
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
 				# bodies push each other around, but never off an edge
-				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.r, a.pos.y, a.grounded) == 0.0:
+				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.hull_r(), a.pos.y, a.grounded) == 0.0:
 					a.pos.x += pa.x; a.pos.z += pa.y
-				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
+				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.hull_r(), b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
 
 ## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something
@@ -4205,6 +4210,8 @@ func _update_interact(dt: float) -> void:
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
 					var open_now: bool = h == player and hud != null and hud.loot_is(b)
+					if open_now:
+						h.set_hold("loot")     # (your open loot window is the channel: WardenOpen's pose)
 					var lt := ("Press %s again to smart loot  ·  click items to take them" % Settings.key_cap("interact")) if open_now else ("Press %s to open %s  ·  twice to smart loot" % [Settings.key_cap("interact"), whose])
 					best = {"kind": "loot", "box": b, "label": lt if h == player else "Hold %s to loot %s" % [Settings.key_cap("interact"), whose], "col": Life.box_color(b)}
 					break
@@ -4223,6 +4230,8 @@ func _update_interact(dt: float) -> void:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
+		if best.is_empty():
+			best = KinSteal.interact_for(self, h, want, dt)      # 2b. grab a loose Boki wisp
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var wp := PickupReach.under_cursor(self, h)
@@ -4469,7 +4478,7 @@ func _update_training(dt: float) -> void:
 		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
+		"ledge": player.grap.size() > 0 or player.mantling(),
 		"smash": train.get("_smash", false),
 		"stagger": train.get("_stagger", false),
 		"weapon": train.get("_weapon", false),
@@ -4927,6 +4936,7 @@ func _finish() -> void:
 	if over:
 		return
 	over = true
+	KinSteal.match_end(self)
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
