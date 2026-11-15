@@ -49,8 +49,7 @@
 		},
 		"breah_wind": {
 			"clip": "lmb_wind",
-			"hold_from": 0.24,
-			"upper": "moving"
+			"hold_from": 0.24
 		},
 		"breah_punch": {
 			"clip": "lmb_punch",
@@ -116,7 +115,7 @@
 		"downed": "downed",
 		"reviving": "revive",
 		"dead": "death",
-		"dead_t": 2.6,
+		"dead_t": 1.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {

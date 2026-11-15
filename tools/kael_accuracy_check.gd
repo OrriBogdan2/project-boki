@@ -317,7 +317,7 @@ func slam_combo() -> void:
 	A.step(m, 0.1)
 	var t2_up := T2.pos.y - P.pos.y
 	A.ok("jug combo: the landing knocks down and spikes the airborne foe beside him to the ground",
-			D.spiked == 1 and fall <= -10.0 and T2.stun_t > 0.0 and t2_up < 0.3 and A.dmg(T2) >= 14.0,
+			D.spiked == 1 and fall <= -10.0 and T2.stun_t > 0.0 and t2_up < 0.3 and A.dmg(T2) >= 18.0,
 			"spiked %d vy %.1f stun %.2f %.2f m up took %.0f" % [D.spiked, fall, T2.stun_t, t2_up, A.dmg(T2)])
 	A.ok("jug combo: the chain still holds the foe after the slam", W.hooked() and W.target == T, W.state)
 	_air(m, P, 0.12)
@@ -335,10 +335,9 @@ func slam_combo() -> void:
 	var hp0 := T.hp
 	_until(m, func(): return W.state != "pulling", 1.5)
 	P.inp["sec_hold"] = false
-	A.ok("jug combo: the pull reaches the foe (no jump-out from the earlier jump) and the Haul Slam lands (no stun)",
-			W.exits == "arrived" and K.haul_slams == 1 and T.hp < hp0 and T.stun_t <= 0.0 and P.flat_dist(T) < 2.5,
-			"exit %s hauls %d foe %.0f > %.0f at %.1f m stun %.2f" % [W.exits, K.haul_slams, hp0, T.hp,
-					P.flat_dist(T), T.stun_t])
+	A.ok("jug combo: the pull reaches the foe (no jump-out from the earlier jump) and the Haul Slam lands",
+			W.exits == "arrived" and K.haul_slams == 1 and T.hp < hp0 and T.stun_t > 0.0 and P.flat_dist(T) < 2.5,
+			"exit %s hauls %d foe %.0f > %.0f at %.1f m" % [W.exits, K.haul_slams, hp0, T.hp, P.flat_dist(T)])
 	await A.done(m)
 
 ## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Slam's wind-up) is

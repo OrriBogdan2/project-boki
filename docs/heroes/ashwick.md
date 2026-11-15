@@ -228,7 +228,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
   ember ring and the carpet, as in the footage.
 - Only enemy hunters count for the bond (the carpet still burns monsters and Boki).
 - Body and movement (hero-ref "Body, scale and movement feel"): 0.76 of a heavy's size and a little broad, the tall hat kept;
-  quick short steps (1.8x the step rate, stride 0.45; her glb walk and run share one 0.367s cycle, a step every 0.18s); the hitbox stays the heavy 0.5 (the ring under him shows it).
+  quick short steps (1.8x the step rate, stride 0.45); the hitbox stays the heavy 0.5 (the ring under him shows it).
 - Owner (23:40): the air dash is a long, fast "poof" (6.8m in 0.28s, scaled once) from a cloud of smoke and
   flame blown out behind him (no blast: owner review item 35), balled up for one roll, then sailing spread-eagled; he
   keeps half its speed after it.
@@ -340,7 +340,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Cinder Shot (RMB) | `as_aim` (hold), `as_shot` | casting hand cocked at the shoulder sighting down the lane; release: the arm thrusts out (overshoot), the body kicked back by the shot |
 | Soot Ram (Shift) | `as_leap` (0.55s over a 0.32s ram) | a coil, then head first like a battering ram, balled up compact in the flame skull (arms swept back, knees folded up behind), held through the ram; squashes on impact, springs upright with the gun on the aim (footage 0159-0161) |
 | Air poof (the air dash) | `lw_hop` (0.7s over a 0.28s poof, then the kept speed) | balled up as the bellows blow a cloud of smoke and flame out behind him (no blast), one fast roll forward, then sailing out spread-eagled while the speed bleeds off |
-| Furnace Cloak (E) | `as_cloak` | 0.36s on the press: a quick tuck, then chest out and the arms flung wide with the blast (up on her toes), held about 0.2s, settle; her legs keep walking under it |
+| Furnace Cloak (E) | `as_cloak` | 0.24s on the press: a quick tuck, then chest out and the arms flung wide with the blast (up on his toes, the flamer swung up on its strap), held a beat, settle |
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
 | Flue Flight (R) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
@@ -392,35 +392,6 @@ every warden) would give the source's instant stop.
 Done (ext/anim-remote-retime, decision 0098): the ram hit re-times `as_leap` through `ArchKit.retime`, so remote
 views move the squash onto the hit frame too (it is 0.19-0.23 s earlier, under the 0.3 s resync a plain resend
 needs); `--remote-anim-check` "ashwick ram hit".
-
-## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
-Measured through `WardenClips` (cinder.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, blend
-out to locomotion 0.16 s, under one footage frame) and in `--ashwick-combo-check` (`tools/ashwick_anim_check.gd`).
-"Hit" is the release or contact key, "end" when she settles. Source times are from briefs/hero-ref/linwick.md
-(one frame = 0.2 s; the ult footage is 0.1 s a frame).
-
-| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
-|---|---|---|---|---|
-| `as_lance` stream start | a one-frame cyan pilot, then the fire [0021-0022] | palm set 0.1 / kick and fire at 0.2 (spool 0.2) / braced from 0.34, looped | same | matches |
-| `as_lance_end` stream stop | the fire stops at once on release, the pilot stays, body barely moves [0047] | snuffed on release / recoil 0.08 / 0.3 | same | matches |
-| `as_aim` `as_shot` Cinder Shot | the lane ~0.4 s before the shot, a quick forward thrust [0073-0074] | aim pose 0.12, held / thrust 0.06, bolt on release / 0.48 | same | matches (the thrust sits in the 0.1 s blend) |
-| `as_cloak` arm fling | ring + arms flung wide for about 0.2 s, still wide at the blast [0181-0182] | tuck 0 / wide 0.06-0.13 / settled 0.24 | wide 0.06-0.26 / settled 0.36 (re-keyed); legs walk under it | fixed; asserted (the blast stays on the press: owner item 11) |
-| `lw_jet` take-off | ember burst f25 (0.1 s), flying from f26 | crouch 0.08 / fly 0.22, while already moving at full speed | the clip starts 0.12 s in: fly pose at 0.1 s | fixed; asserted |
-| `lw_jet` flight inputs | unclear; the shield fires the moment he lands (f137) | only E works (owner decision) | same | owner rule (asserted in the ult check) |
-| `lw_land` landing | no impact, continues on foot [f39-f41] | a light squash 0.08 / 0.36, full body: her feet slid if she walked | same keys, upper body only while she walks | fixed; asserted |
-| `as_leap` free ram | 3.4 m in 0.33 s, front-loaded, upright at once [0159-0161] | coil 0.06 / ram held to 0.3 / upright 0.55 | same | matches (upright 0.22 s after the ram, one frame) |
-| `as_leap` ram into a foe | contact ~0.12 s, stops dead, knock ~0.1 s later [0141-0145] | struck pose at 0.36 on the clip, ~0.24 s after contact | the clip jumps to 0.3 on contact: struck pose 0.06 s later | fixed; asserted |
-| `lw_hop` air poof | not in the footage (owner: 6.8 m in 0.28 s) | ball 0.05 / roll 0.17 / spread 0.25-0.5 / 0.7 | same | no source |
-| run cadence | a footfall every 0.15-0.2 s, short strides | run_f 0.7 s cycle at 4.6 m/s: a step every 0.35 s at her 4.65 m/s | walk and run re-keyed to one 0.367 s cycle (stride shortened to match): a step every 0.18 s | fixed; asserted |
-
-Clip re-keys (tools/art1/cinder_clips.py, baked from stage_p2/cinder.blend through `jobq --app blender` and merged with
-glb_add_clips.py; the other clips are unchanged byte for byte):
-- `cloak`: the wide key moved 0.13 to 0.26 and the end 0.24 to 0.36 (the procedural `as_cloak` keys and CLOAK_POSE_T follow).
-- `walk_*` `run_*`: one 11-frame cycle (GAIT_T) and the stride from it, so the walk-to-run blend keeps her feet in phase.
-
-Suggestions (ours, not built): the free ram shows its struck pose (0.36) with nothing struck; a separate free-ram tail
-(upright straight from the ram pose) would read cleaner. glb_add_clips leaves the replaced clips' old samples in the
-buffer (+0.37 MB); a full re-export would drop them.
 
 ## Look and sound
 - Effects: `scripts/arch/kits/ld_fx.gd` (pooled; `shaders/ld_fx.gdshader` draws each look's body alpha-blended so colour and

@@ -1208,8 +1208,8 @@ func tender() -> void:
 			absf(glide_d - glide_want) < 1.0 and sink < 1.0 and K.anim_id == "mm_float",
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
-			"mm body: small (a 0.65 model) with the 0.352 m hurtbox (the chart size, --hurtbox-check)",
-			absf(P.r - 0.352) < 0.001 and P.model.scale.y < 0.9,
+			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
+			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
@@ -1965,10 +1965,6 @@ func rimewright() -> void:
 			and K.anim_id == "tm_wall"
 			and AimKit.shown(P, "e")
 			and bool(AimKit.entry(P, "e").get("all", false)))
-	var shove_t := float(KMovesCare.MOVES["tm_wall"]["keys"][2][0])
-	var tell_t := float(K.e_def()["tell"])
-	ok("tm E: the palm shove lands as the wall erupts (the move's 'out' key = the tell)",
-			absf(shove_t - tell_t) < 0.01, "shove %.2f s, tell %.2f s" % [shove_t, tell_t])
 	step(m, 0.25)
 	var w0: Dictionary = K.wall.get("w", {})
 	var mid0 := ((w0.get("a", Vector2.ZERO) as Vector2) + (w0.get("b", Vector2.ZERO) as Vector2)) * 0.5

@@ -2,7 +2,7 @@ extends RefCounted
 ## --warden-model-check (concept phase 2: the in-engine Warden models, scripts/heroes/warden_*.gd). For
 ## each Warden built from its concept sheet: the rig keeps every node the animation and the kits look
 ## up (and the hero's own weapon anchors); HunterAnim binds every part and each of the hero's keyed
-## moves still moves the body; the ring that shows the hit radius is drawn at it (--hurtbox-check holds the radius);
+## moves still moves the body; the hit radius and the ring that shows it are the class's, frozen here;
 ## the true height (sole to the top of the head) and the width sit on the hero sheet's scale against a
 ## medium hunter; at both ends of every MantleLook slider the height moves no more than the clamps
 ## allow, the anchors stay and the hit ring doesn't change; the portrait frames the head.
@@ -10,7 +10,7 @@ extends RefCounted
 const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const EPS := 0.0005
-## Per Warden: its height against a medium hunter (hero sheets, "Body,
+## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 ## The heights follow the owner's final height chart (Nov 8, ext/hero-heights) where it moved a Warden off its sheet.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
@@ -19,13 +19,13 @@ const WARDENS := {
 	"bulwark": {"hit_r": 0.46, "height": 1.03, "height_3d": 1.55, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
-	"gunslinger": {"height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
+	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
 	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
-	"mage": {"height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
+	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
-	"thief": {"height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
+	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
-	"dolm": {"height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
+	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
 	# (height_3d: the appeal3 model's cap points flop out to the sides, not up over his crown; was 1.26)
@@ -151,6 +151,10 @@ func _pose(an: HunterAnim, m: Node3D, mv: String, tt: float) -> Array:
 func _hitbox(id: String) -> void:
 	var cdat: Dictionary = Data.CLASSES[Arch.weight(id)]
 	var hr := Arch.hit_r(id, cdat)
+	ok(
+		absf(hr - float(WARDENS[id]["hit_r"])) < EPS,
+		"%s: hit radius %.2f m, the class's (%.2f)" % [id, hr, WARDENS[id]["hit_r"]]
+	)
 	var m := _model(id, PlayerLook.neutral())
 	var ring := m.get_node("TeamRing") as MeshInstance3D
 	var drawn := (ring.mesh as PlaneMesh).size.x * 0.5 * ring.global_transform.basis.x.length()

@@ -175,7 +175,6 @@ var hold := "rifle"
 var hd: Dictionary = {}        # HOLDS entry
 var st: Dictionary = {}        # STANCE entry, with the Warden's gait over it
 var ws: WardenStance           # the Warden's signature stance and idle cycle
-var moth: WardenWings          # moth wings that come up now and then (warden_anim "wings": Sable), or null
 var snap := false              # rest_pose: jump straight to the targets
 
 var ph := 0.0                  # walk phase, advances with distance travelled
@@ -707,11 +706,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# a 3D model's wings fold back while she skates and flare on a kit move's "wg" (WardenGlb.Springs,
 	# the root's WING_FOLD meta)
 	var flare := float(km.get("wg", 0.0))
-	if moth:      # (moth wings that come up now and then: WardenWings)
-		var ground_v := spd if grounded else 0.0
-		var open := moth.fold(dt, flare, not grounded or rolling, emote_k > 0.5, ground_v, s.get("downed", false))
-		model.set_meta(WardenGlb.WING_FOLD, open)
-	elif dash_kind == "skate" or flare > 0.0 or model.has_meta(WardenGlb.WING_FOLD):
+	if dash_kind == "skate" or flare > 0.0 or model.has_meta(WardenGlb.WING_FOLD):
 		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else -flare)
 	var roll_k := 0.0
 	var roll_ang := 0.0
@@ -1542,8 +1537,6 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
-	else:
-		ap += aim_pitch * (1.0 - AimPitch.SPINE)    # a melee hold: the arms take their share on the aim node
 	# the Warden's signature carry while standing (it comes up to the aim the moment they fire)
 	var carried := ws.carry(Transform3D(gbas, gpos))
 	gbas = carried.basis

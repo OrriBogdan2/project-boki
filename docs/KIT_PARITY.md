@@ -702,7 +702,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 |---|---|---|---|
 | Vex | Burr Charge Daze 1.4 s (only +90% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
 | Zedran | Meteor Drop: core stun 0.8 s, ring slow 40% 1.5 s | "Slow + 88 dmg; center hits Stun" [D], no numbers | match in shape |
-| Zedran | Fireblast, Chain Lunge, Haul Slam: no CC (the full blast's 30% 1 s slow, the Chain Lunge's 0.35 s stun and the Haul Slam's 0.25 to 0.6 s stun are **removed**) | none: the tooltips list no slow on the blast and no stun on the chain | **fixed**: match (ours-only riders: keep none, DECISIONS 2026-11-07) |
+| Zedran | Fireblast (full) slow 30% 1 s; Chain Lunge stun 0.35 s; Haul Slam stun 0.25 to 0.6 s | none: the tooltips list no slow on the blast and no stun on the chain | ours-only riders, see suggestions |
 | Hem | Heartpiercer wall stun 1.2 s (rank 3: dash charge); Rain of Arrows slow 35% 0.8 s refreshed | "enemies that collide with terrain are Stunned", "Slow + Anti-Heal", no numbers; wall stun not shown cleanly [F] | match; numbers unsourced |
 | Cinder | Cinder Shot slow 30% 1.5 s; Flue Flight carpet slow 30% 0.5 s refreshed | "Slow" on both [D]; dummy read SLOWED once, maybe the jump pad [F] | match; numbers unsourced |
 | Pip | Burrseed root 1.1 s, +0.3 s at rank 3 | Root, +0.3 s upgrade [D]; root seen about 1 s or more [F] | match |
@@ -721,9 +721,10 @@ monster): stars for stun, thorns for root, cords for Grounded, rings down the le
 (`docs/STATUS_LOOKS.md`), sized to the hitbox, up for the status's time, on every game, never a ring on the ground.
 `--status-look-check` lands each row from a caster of its kit and asserts it.
 
-**Fixed (2):** Zedran's three ours-only riders removed (`lmb.wave_slow`, the Chain Lunge stun, `rmb.haul.stun`; data, kit, text, docs), asserted by `juggernaut LMB hold: Searing Wave (... the full wave does not slow)`, `combo jug: E > hold RMB = Chain Lunge (no stun)` and `combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)` in `--juggernaut-combo-check`. Albert's Crush stun 0.5 to 1.0 s (`content/archetypes/bulwark.json` `resource.crush_stun`, text and docs), asserted by `combo bulwark: a Crush stuns 1.0 s` in `--bulwark-combo-check`.
+**Fixed in this change (1):** Albert's Crush stun 0.5 to 1.0 s (`content/archetypes/bulwark.json` `resource.crush_stun`, text and docs), asserted by `combo bulwark: a Crush stuns 1.0 s` in `--bulwark-combo-check`.
 
 **Suggestions, not built (PARITY FIRST):**
+- Zedran: drop the fireblast slow (`lmb.wave_slow`), the Chain Lunge stun and the Haul Slam stun (`rmb.haul.stun`): the source has no CC on them. Removing the Haul stun changes a documented move, so it needs the owner.
 - Tarek: drop `rock.slow_*` and `dash.slow_t` (the source rocks shred armour, they do not slow).
 - Albert: the Shield Slam stun 0.6 s has no source row (goes with ext/parity-bulwark-guardcut). The Crushing Blow stun 0.4 s is removed (ext/parity-albert-crush-stun).
 - Albert: the Shield Slam stun 0.6 s has no source row.

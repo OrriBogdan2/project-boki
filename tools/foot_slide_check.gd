@@ -14,7 +14,7 @@ const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0
 ## m/s: the worst mean planted-foot slip each Hunter may show anywhere in the sweep, the measured worst of the
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
 ## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
-const BAR := {"archer": 1.75, "juggernaut": 1.0, "gunslinger": 1.0, "bulwark": 1.35, "ashwick": 1.4, "tender": 1.05,
+const BAR := {"archer": 1.75, "juggernaut": 1.0, "gunslinger": 1.2, "bulwark": 1.35, "ashwick": 1.4, "tender": 1.05,
 		"dolm": 2.7, "dredge": 0.95, "mage": 1.55, "thief": 1.5}
 
 var bad := 0

@@ -121,8 +121,7 @@ func blocked_here(terrain := true) -> bool:
 	var w: World = k.m.world
 	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
-	var reach := h.hull_r() * 0.6
-	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, reach, h.pos.y) > 0.0
+	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 
 func tick(dt: float) -> void:
 	if t <= 0.0:

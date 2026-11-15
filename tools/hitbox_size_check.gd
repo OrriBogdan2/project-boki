@@ -39,9 +39,8 @@ func _flatten(m: Match, h: Hunter) -> void:
 ## Fires one level bullet (radius 0.1) along +x, `side` metres off h's centre; true if it hit h.
 func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 	h.hp = h.max_hp
-	h.armor = h.max_armor
-	var y := h.pos.y + up
-	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, SHOT_LIFE, rad, Color.WHITE)
+	var y := h.pos.y + 0.95
+	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, 0.4, 0.1, Color.WHITE)
 	for i in 30:
 		h.teleport(h.pos)
 		h.vel = Vector3.ZERO
@@ -49,7 +48,7 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 		if m.shots.is_empty():
 			break
 	m.shots.clear()
-	return h.hp < h.max_hp or h.armor < h.max_armor      # (armor takes a hit first)
+	return h.hp < h.max_hp
 
 
 func run(main: Node) -> void:

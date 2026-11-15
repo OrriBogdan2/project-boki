@@ -221,7 +221,7 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 | RMB release | `tm_spear` | 0.05 load deeper, 0.1 both palms fully out (the spear leaves them), 0.28 held through the recoil, 0.55 | a two-palm push into a lunge after it (owner 19:50: no arm-back wind-up, no throwing release) |
 | RMB detonation | `tm_clench` | 0.05 / 0.1 / 0.34 | a sharp clench of the free hand |
 | LMB large dart | `tm_dart_heavy` | 0.04 wound away, both hands back to the hip; 0.08 both arms sling forward, the fan snapping open; 0.18 | the barrage's 3 large darts |
-| E | `tm_wall` | 0.1 the tell (a deep crouch, both palms drawn back to the hips), 0.2 both palms shoved out low and wide as the ice erupts (= `e.tell`), 0.35 held into the slide, 0.7 | footage: "both hands pushed forward" |
+| E | `tm_wall` | 0.1-0.2 the tell (a deep crouch, both palms drawn back to the hips), 0.27 both palms shoved out low and wide as the ice erupts, 0.42 held into the slide, 0.7 | footage: "both hands pushed forward" |
 | E again | `tm_freeze` | 0.07 knee up, 0.13 stamp, 0.42 | a stamp of the blade, a fist pulled down |
 | Shift start | `tm_skate_go` | 0.08 push, 0.16 into the stride | a crouch and a hard push off the back blade |
 | Shift held | `tm_skate` (looped by the kit every 0.56s) | 0 / 0.28 / 0.56 | low and leaning hard, knees deep, long pushes one leg then the other, the arms and fan swinging against them, the body rocking |

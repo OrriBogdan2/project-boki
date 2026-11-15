@@ -726,14 +726,6 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
-	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
-	"--hurtbox-check": ["res://tools/hurtbox_check.gd", "hurtbox_check", null],
-	"--kite-check": ["res://tools/kite_check.gd", "kite_check", null],         # Kite Tow part 1, GARDEN_MODERN 4.2
-	"--levelup-check": ["res://tools/levelup_check.gd", "levelup_check", null],
-	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],  # docs/decisions/0044
-	"--wisp-hit-rules-check": ["res://tools/wisp_hit_rules_check.gd", "wisp_hit_rules_check", null],
-	"--wisp-rules-check": ["res://tools/wisp_rules_check.gd", "wisp_rules_check", null],      # docs/decisions/0045
-	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

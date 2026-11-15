@@ -13,8 +13,8 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   (`""` → `in` → `on` → `out`) kept in the hunter's meta `wisp`, driven from `Hunter.render`. It reads
   `downed` and `out` only, so nothing new is replicated: remote players and bots get the Wisp from the
   state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
-- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive and the
-  revive UI are all as before. The hitbox is not: shots and areas pass through a Wisp. Only the picture changes. `Hunter._anim_state` now feeds
+- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive, the
+  hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Knocked-down beat (`HunterFall`, 0.4-0.5 s by weight) before the Wisp takes over: the hero staggers
