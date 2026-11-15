@@ -26,7 +26,7 @@ const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
 const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
 	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS,
-	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS}
+	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS, "cindle": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in

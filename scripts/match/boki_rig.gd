@@ -16,10 +16,11 @@ const PATH := "res://art/kin/%s/%s.glb"
 ## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
 ## light, no sheen).
 const FRAME := {
-	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
-		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
-		"marks": {"left flank": Vector3(-0.115, 0.25, 0.09), "right flank": Vector3(0.115, 0.25, 0.09),
-			"back": Vector3(0, 0.335, 0.10), "chest": Vector3(0, 0.235, -0.165)}},
+	"cindle": {"head": Vector3(0, 0.496, -0.368), "top": 0.754, "carry": Vector3(0, 0.312, -0.368),
+		"ear_tip": Vector3(0.23, 0.839, -0.128), "tail_tip": Vector3(-0.285, 0.61, 0.085), "tip_bone": "tail7",
+		"hip": 0.22,
+		"marks": {"left flank": Vector3(-0.173, 0.253, -0.0168), "right flank": Vector3(0.173, 0.253, -0.0168),
+			"back": Vector3(0, 0.355, -0.0104), "chest": Vector3(0, 0.235, -0.206)}},
 	"puddlet": {"head": Vector3(0, 0.3, -0.36), "top": 0.45, "carry": Vector3(0, 0.42, 0.1),
 		"ear_tip": Vector3(0.36, 0.56, -0.13), "tail_tip": Vector3(0, 0.34, 0.86), "tip_bone": "tail5", "hip": 0.14,
 		"marks": {"left flank": Vector3(-0.12, 0.2, 0.1), "right flank": Vector3(0.12, 0.2, 0.1),
