@@ -26,9 +26,8 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - Main wiring left: none beyond the few lines already in home.gd.
 
 ## Round 3: Hob in person and the second Mask (items 87, 89; owner, Nov 4)
-- **Hob is a person** (`HobModel`: a stocky builder in the toon style, built from shapes: rolled sleeves, apron,
-  tool belt with a hammer, flat cap, pencil behind his ear, simple face marks like the rest of the Empty; poses
-  idle, wave, talk, point, hammer). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
+- **Hob is a person** (`HobModel`; since Nov 11 a rigged Meshy model, "Old Road Hob": patched ochre coat, goggled
+  hat, braided beard, mallet on his back, docs/art/npcs/PIPELINE.md; poses idle, wave, talk, point, hammer, walk). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
   the house while it is a site. His name shows over him until you have met him; a "!" while he has something.
 - **Face to face** (`HobTalk`, `TalkBox`, lines in `farm_builder.json` "talk"): interact opens a talk box with his
   portrait (rendered from the model) and name, one line at a time (click or the interact key), you stand still
@@ -50,3 +49,25 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **River brush** (`river`, Paths tab, open from the start): the water brush at 2 gems a tile instead of 6, so a channel is cheap. It counts as water everywhere.
 - **Tutorial, 12 steps** (in Hob's voice, one action each): axe (given free), chop, house (mandatory first), hammer, task, mine a rock (pickaxe given free; says what stone is for), feed, crop (marker on the water; grow time never blocks: the next open step is shown meanwhile), buy a seed (Seeds tab; gems topped up to one seed so nobody is stuck), sell a crop (Sell tab; says gems come from selling, expeditions and Goals), meet Hob, head out. The market steps point at the stall when one stands, else at the Market on the bar.
 - **Save v10** (main's numbering: market is v8, mantle-look v9). Step 8->9 is an empty placeholder for mantle-look; 9->10 is `FarmBuilder.migrate`, which is keyed by its own `farm_builder` field.
+
+## Round 3 (owner playtest, Nov 8): the spotlight, "Not set", what to do after a job
+- **`FarmSpotlight`** (`scripts/home/farm_spotlight.gd`), driven from `FarmGuide._poll` and asked for per hint stage by `"spot"` in `farm_tutorial.json` (`hub`: a bottom-bar button, `world`: the step's Boki marker). The first time a target comes up it gets a 0.9 s beat: mouse clicks held, the screen dark with a rounded cut-out, a gold ring flashing 3 times, the hint card beside it. Then the dark eases to a light vignette and the ring keeps a soft pulse until the thing is done. After the beat nothing in it takes a click. Each target gets its beat once per run of the game; coming back to the step shows only the ring. It is not shown when a menu, a talk or build mode is up, nor for a step that is done. Used on: the job step (the Boki in the world), the build-menu steps (house, trough, crop patch: the Build button) and the Market bar steps (buy, sell: the Market button).
+- **The job step**: the Boki button is not ringed, because it opens the Burrow list and not the page; clicking the Boki (or the Details key) does. The job dropdown's first line is now **Not set** (orange); an unset Boki still takes the best job it can find, nothing about that changed.
+- **After the pick**: a toast, a green "Done!" tick on the tutorial goal line, and on the Boki page **Done** is the one filled, ringed button. Feed is a plain button until the trough step is done, then the filled one again (`FarmTaskGuide.care_footer`).
+- Checks: `--farm-tutorial-check` (spotlight appears once, holds clicks only in the beat, fades, "Not set", footer) and `--farm-spot-shots=<dir>` (screenshots).
+
+## Round 4 (owner, Nov 12): Hob's home spot and clear ring
+- **A fixed spot** (`HobSpot`, `scripts/home/hob_spot.gd`), saved as `layout.hob.spot = [x, z]` (optional field, no save bump: a save without it picks one on first look). The first pick is the free tile nearest his old place by the market stall (`stall_stand`). After that it stays put every visit.
+- **Clear ring**: `farm_builder.json` `clear.m` = 3.5 m from his spot to the nearest edge of any placed footprint tile and to any place you interact with (`HomeBuild._targets`: doors, the stall, pot, portal, plots, feeders, bridge signs...). A free tile is also reachable on foot (`HomeBuild._reach`), open ground on the tile and all eight neighbours, not kept clear for a fixture, and on an opened isle. When his spot is chosen, places you interact with are kept further: `talk_reach` + `clear.reach_m` = 2.4 + 1.9 = 4.3 m (`HobSpot.apart_m`), so his talk ring and the stall's 1.9 m reach really never overlap (3.5 m alone did not guarantee it). The 3.5 m ring is what build mode enforces afterwards.
+- **Build mode refuses** a piece, door, path tile or feeder inside the ring: the ghost goes red with "Too close to Hob" (`HomeBuild.cell_reason`, `fits`, `feeder_fits`, the usual invalid-placement path).
+- **Already blocked** (an older save, a moved fixture): on the next layout sync he walks to the nearest free tile (ties: lowest tile index, so it is deterministic). That becomes his spot, and it is logged once (`HobSpot: ... he moves to ...`). With no free tile anywhere he keeps the old spot.
+- **Interact**: Hob wins only when he is nearer than the best target found so far (`FarmHob.find` returns his distance). Before, he overrode anything in his ring. Round 4b (11-13): the stall, pot, portal, house, lots, bridge signs and burrow no longer get their 0.3-0.6 m head start over Hob (`FarmHob.lead`), so where rings do overlap (Hob walking past, a crowded layout) the nearer one wins.
+- Only Hob is covered: he is the only fixed farm NPC. Pell is the Black Market panel, not a person on the farm.
+- Checks: `--hob-spot-check` (new, `--shots-dir=`). `--hob-check` and `--farm-tutorial-check` now allow up to 9 m from the stall (the ring keeps him at least ~4.5 m from its centre).
+
+## Nov 11: Hob and Pell designed and modelled
+- Owner: "Hob and the future tutorial person need a design - and a Meshy design". Hob's shapes model is replaced by
+  a rigged Meshy model and Pell (LORE_MASKS round 5's tutorial guide) is designed, modelled and placed: Pell waits
+  beside each first-match tutorial stop as its step begins, talks, and waves when you come near (`TutorialPell`).
+  Both are `NpcModel`s (content/rules/npcs.json). Designs, picks and the pipeline: docs/art/npcs/PIPELINE.md.
+  Check: `--npc-check`.

@@ -1,5 +1,6 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"extra_bones": {"x_breath": "hips"},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],
@@ -9,7 +10,7 @@
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
-		"stance_after": 6.0,
+		"stance_after": 4.0,
 		"walk": {
 			"f": "walk_f",
 			"b": "walk_b",
@@ -23,7 +24,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6
+		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.6], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}, "start_phase": 0.75, "start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -43,86 +44,126 @@
 		"glide": "glide",
 		"dive": "exdash"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.4,
-		"min_fall": 0.25
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
+	"derive": {
+		"ult_recover": {
+			"from": "riposte",
+			"keys": [
+				[0.0, 0.1, {}],
+				[0.1, 0.4, {"hips": [10, 0, 0], "root": [6, 0, 0], "head": [14, 0, 0]}],
+				[0.35, 0.4667, {"hips": [6, 0, 0], "root": [4, 0, 0], "head": [10, 0, 0]}]
+			]
+		}
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r"
+			"clip": "slash_r",
+			"fade_out": 0.4
 		},
 		"jug_slash_l": {
-			"clip": "slash_l"
+			"clip": "slash_l",
+			"fade_out": 0.4
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
-			"fade": 0.2
+			"fade": 0.25,
+			"fade_out": 0.4
 		},
 		"jug_wave": {
-			"clip": "wave"
+			"clip": "wave",
+			"fade_out": 0.4
 		},
 		"jug_slam": {
-			"clip": "slam"
+			"clip": "slam",
+			"fade": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
 			"hold_from": 0.45,
-			"fade": 0.18
+			"fade": 0.18,
+			"fade_out": 0.4
 		},
 		"jug_lunge": {
-			"clip": "lunge"
+			"clip": "lunge",
+			"fade_out": 0.4
 		},
 		"jug_meteor": {
 			"clip": "meteor",
-			"hold_from": 0.3
+			"hold_from": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land"
+			"clip": "meteor_land",
+			"fade_out": 0.4
 		},
 		"jug_dash": {
-			"clip": "dash"
+			"clip": "dash",
+			"fade_out": 0.4
 		},
 		"jug_exdash": {
-			"clip": "exdash"
+			"clip": "exdash",
+			"fade_out": 0.4
 		},
 		"jug_chain": {
-			"clip": "chain"
+			"clip": "chain",
+			"fade_out": 0.4
 		},
 		"jug_reel": {
 			"clip": "reel",
 			"hold_from": 0.25,
-			"heading": true
+			"heading": true,
+			"fade_out": 0.4
 		},
 		"jug_spin": {
-			"clip": "spin"
+			"clip": "spin",
+			"fade": 0.3,
+			"fade_out": 0.4
 		},
 		"jug_chainlunge": {
-			"clip": "chainlunge"
+			"clip": "chainlunge",
+			"fade_out": 0.4
 		},
 		"jug_haul_wind": {
 			"clip": "haul_wind",
-			"hold_from": 0.15
+			"hold_from": 0.15,
+			"fade": 0.15,
+			"fade_out": 0.4
 		},
 		"jug_haulslam": {
-			"clip": "haulslam"
+			"clip": "haulslam",
+			"fade_out": 0.4
 		},
 		"jug_guard": {
 			"clip": "guard",
-			"hold_from": 0.2
+			"hold_from": 0.2,
+			"fade_out": 0.4
 		},
 		"jug_riposte": {
-			"clip": "riposte"
+			"clip": "riposte",
+			"fade_out": 0.4
+		},
+		"jug_ult_recover": {
+			"clip": "ult_recover",
+			"upper": "moving",
+			"fade": 0.14,
+			"fade_out": 0.4
 		},
 		"jug_roar": {
 			"clip": "roar",
-			"upper": true
+			"upper": true,
+			"fade": 0.12,
+			"fade_out": 0.4
 		},
 		"mf_xform": {
-			"clip": "fusion"
+			"clip": "fusion",
+			"fade": 0.18,
+			"fade_out": 0.4
 		}
 	},
+	"lockin": {"clip": "stance", "dur": 1.3, "rate": 1.0, "fade": 0.35, "settle": 0.45},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -191,6 +232,14 @@
 		],
 		[
 			"jug_riposte",
+			0.1
+		],
+		[
+			"jug_ult_recover",
+			0.35
+		],
+		[
+			"jug_riposte",
 			0.3
 		],
 		[
@@ -198,6 +247,9 @@
 			0.8
 		]
 	],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
+	"turn": {"dur": 0.34, "lift": 0.36},
+	"cc": {"pull": 0.27, "tug_hz": 0.7, "twist": 0.06, "bow": 0.15},
 	"procedural": [
 		"ledge",
 		"mantle",
@@ -216,6 +268,7 @@
 		"hand.R"
 	],
 	"skinned_weapon": true,
+	"carry_drop": ["hand.R"],
 	"blade": {
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"

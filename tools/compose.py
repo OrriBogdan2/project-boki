@@ -406,6 +406,63 @@ def write_layers(group):
         os.unlink(tmp)
         print('%-14s %5.1fs %4d KB' % (name, len(x) / SR, os.path.getsize(out) // 1024))
 
+# ------------------------------------------------------------------ run-end stingers
+# Short one-shots in the expedition score's key (A minor, 132 bpm), played over the fading stems
+# (Sfx.sting / MusicDir): getting out, being taken out, the last squad standing, and the garden's
+# welcome home. None runs past 2.5 s, so the results screen's own music never sits under one.
+def _sting(name, seed):
+    return Song(name, 132, 1, beats=4, root=69, mode='minor', seed=seed)
+
+def sting_extract():
+    # relief: a harp run up into a bright C major chord (the key's third degree), glock on top
+    s = _sting('sting_extract', 61)
+    s.inst(0, 'harp', 92); s.inst(1, 'horn', 84); s.inst(2, 'strings', 66); s.inst(3, 'glock', 80); s.inst(4, 'cello', 84)
+    for i, d in enumerate([0, 2, 4, 7, 9]):
+        s.note(0, i * 0.25, s.deg(d, -1), 1.5, 82 + i * 3)
+    for k in s.chord(2, -1): s.note(1, 1.25, k, 2.0, 92)
+    for k in s.chord(0, -1): s.note(2, 0, k, 3.0, 62)
+    for i, d in enumerate([7, 9, 11]): s.note(3, 1.25 + i * 0.5, s.deg(d, 0), 1.2, 78)
+    s.note(4, 0, s.deg(0, -2), 3.0, 80)
+    return s
+
+def sting_out():
+    # taken out: a falling cello line settling on a low A minor under a soft choir and one timpani
+    s = _sting('sting_out', 63)
+    s.inst(0, 'cello', 90); s.inst(1, 'slow_strings', 60); s.inst(2, 'timpani', 96); s.inst(3, 'oohs', 44)
+    for t, d, dur in [(0, 4, 0.75), (0.75, 2, 0.75), (1.5, 0, 2.0)]:
+        s.note(0, t, s.deg(d, -1), dur, 84)
+    for k in s.chord(0, -1): s.note(1, 0, k, 3.4, 58)
+    s.note(2, 1.5, s.deg(0, -3), 1.0, 94)
+    for k in s.chord(0, 0): s.note(3, 1.5, k, 2.0, 40)
+    return s
+
+def sting_last():
+    # last squad standing: a horn call up the fifth and octave, a brass fifth, taiko, a crash
+    s = _sting('sting_last', 67)
+    s.inst(0, 'horn', 100); s.inst(1, 'brass', 96); s.inst(2, 'taiko', 110); s.inst(3, 'tremolo', 70)
+    for t, d, dur in [(0, 0, 0.5), (0.5, 4, 0.5), (1.0, 7, 1.8)]:
+        s.note(0, t, s.deg(d, -1), dur, 100)
+    for d in (0, 4): s.note(1, 1.0, s.deg(d, -1), 1.6, 100)
+    for t in (0, 1.0): s.note(2, t, 48, 1, 106)
+    s.note(2, 0.5, 48, 0.5, 80)
+    s.note(9, 1.0, D['crash'], 2.0, 90)
+    for k in s.chord(0, -1): s.note(3, 0, k, 3.0, 66)
+    return s
+
+def sting_home():
+    # welcome home: celesta and music box over a harp roll, resolving onto a warm C major
+    s = _sting('sting_home', 71)
+    s.inst(0, 'celesta', 84); s.inst(1, 'harp', 76); s.inst(2, 'nylon', 70); s.inst(3, 'music_box', 72)
+    for i, d in enumerate([0, 2, 4, 7]):
+        s.note(1, i * 0.25, s.deg(d, 0), 1.5, 74)
+    for t, d, dur in [(0, 4, 0.5), (0.5, 5, 0.5), (1.0, 7, 0.5), (1.5, 9, 1.8)]:
+        s.note(0, t, s.deg(d, 0), dur, 82)
+    for k in s.chord(2, -1): s.note(2, 1.0, k, 2.4, 66)
+    s.note(3, 1.5, s.deg(11, 0), 1.5, 70)
+    return s
+
+STINGS = {f.__name__: f for f in [sting_extract, sting_out, sting_last, sting_home]}
+
 TRACKS = {f.__name__: f for f in [home_day, home_night, orchard, meadow, summit, match, hollow, title, hub, guild, lullaby]}
 
 
@@ -427,7 +484,7 @@ def reverb_ir(seconds=2.2, damp=4.0):
     ir[0] = 0
     return ir / np.sqrt(np.sum(ir ** 2, axis=0))
 
-def render(s, tail=3.0, verb=0.22):
+def render(s, tail=3.0, verb=0.22, loop=True):
     import tinysoundfont
     syn = tinysoundfont.Synth(samplerate=SR, gain=-6)
     sfid = syn.sfload(SF2)
@@ -456,6 +513,10 @@ def render(s, tail=3.0, verb=0.22):
     x = np.concatenate(out)
     wet = fftconvolve(x, reverb_ir(), mode='full', axes=0)[:len(x)]
     x = x * (1 - verb) + wet * verb * 1.6
+    if not loop:
+        n = int(0.4 * SR)
+        x[-n:] *= np.linspace(1, 0, n)[:, None]      # a one-shot ends in a short fade
+        return x
     # wrap the ringing tail onto the start so the loop is seamless
     L = int(s.length_beats * spb * SR)
     loop = x[:L].copy()
@@ -463,20 +524,21 @@ def render(s, tail=3.0, verb=0.22):
     loop[:len(tl)] += tl[:L]
     return loop
 
-def write(name, x):
+def write(name, x, prefix='music_'):
     x = x / (np.max(np.abs(x)) or 1) * 0.89
     tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False).name
     with wave.open(tmp, 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes((x * 32767).astype(np.int16).tobytes())
-    out = os.path.join(OUT, 'music_%s.ogg' % name)
+    out = os.path.join(OUT, '%s%s.ogg' % (prefix, name))
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', tmp, '-c:a', 'libvorbis', '-q:a', '2', out], check=True)
     os.unlink(tmp)
     print('%-11s %5.1fs %4d KB' % (name, len(x) / SR, os.path.getsize(out) // 1024))
 
 if __name__ == '__main__':
     ensure_bank()
-    names = sys.argv[1:] or list(TRACKS) + list(LAYERS)
+    names = sys.argv[1:] or list(TRACKS) + list(LAYERS) + list(STINGS)
     for n in names:
         if n in LAYERS: write_layers(n)
+        elif n in STINGS: write(n, render(STINGS[n](), tail=0.6, loop=False), prefix='')
         else: write(n, render(TRACKS[n]()))

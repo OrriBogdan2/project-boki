@@ -25,6 +25,7 @@ const COLS := [
 ]
 
 static var _rumble_at := -9.0
+static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 
 static func make() -> Node3D:
@@ -112,7 +113,7 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
+			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(0.35, 0.6, 1.0, 0.95)),
 			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
@@ -125,16 +126,17 @@ static func cool(n: Node3D) -> void:
 		return
 	var tw := n.create_tween().set_parallel()
 	for mi in cracks.get_children():
-		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		tw.tween_property(mat, "shader_parameter/color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
-## A rock coming up: a burst of dust and earth at its foot and one short rumble.
-static func rise_fx(m: Node, at: Vector3) -> void:
-	m.fx.dust(at, 14)
-	m.fx.burst(at + Vector3(0, 0.3, 0), STONE_HI, 12, 3.5, 0.45, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
-	if absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
+## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).
+static func hush(m: Node, secs: float) -> void:
+	_hush_until = float(m.time) + secs
+
+## A rock coming up: one short rumble (the debris and dust are its kit's HeroVfx move, content/vfx/dolm.json).
+static func rumble(m: Node, at: Vector3) -> void:
+	if float(m.time) >= _hush_until and absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
 
@@ -147,8 +149,9 @@ static func crumble(m: Node, w: Dictionary) -> void:
 	w["node"] = null
 	var at := n.global_position
 	m.sfx("br_crumble", at, -4.0, 1.0)
-	m.fx.dust(at, 12)
-	KitLooks.of(m).chips(at + Vector3(0, TOP * 0.5, 0), 6, 0.2)
+	var by := w.get("by") as Hunter
+	if by != null and is_instance_valid(by):
+		HeroVfx.of(m).play(by, "rock_crumble", at + Vector3(0, TOP * 0.5, 0), Vector2.ZERO)
 	var shadow := n.get_node_or_null("Shadow") as Node3D
 	if shadow != null:
 		shadow.visible = false
