@@ -14,6 +14,7 @@ var head_look: WardenLookAt   # the head turns to the aim ahead of the body (War
 var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (WardenGlb.BONES)
+var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 var blade_tip: Node3D
 var blade_bone := -1
@@ -72,6 +73,7 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 	for b in dd.get("hide_while_chain", []):
 		hide_out.append(WardenSkeleton.find(skel, String(b)))
 	clips = WardenClips.make(root, glb, skel, art_name)
+	opener = WardenOpen.make(clips) if clips else null
 	sway = WardenSway.make(root, skel, dd.get("sway", {}))
 	flinch = WardenFlinch.make(root, skel) if clips else null
 	aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
@@ -211,6 +213,8 @@ func _play(dt: float) -> void:
 					_rig_pose(l), w))
 	for l in rig_root:
 		skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+	if opener:
+		opener.step(dt, 1.0 - w)
 	if flinch:
 		flinch.step(dt)
 	if drop_pose:
