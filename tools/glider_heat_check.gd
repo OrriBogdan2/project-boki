@@ -134,10 +134,11 @@ func run(main: Node) -> void:
 	ok(deep_peak <= 26.0 * 0.7 + 0.3, cap_txt)
 	ok(deep_peak >= 12.0, "...and is still a real lift (%.1f m/s)" % deep_peak)
 	var level: Array = _level_glide(e)
-	var heat_s: float = HunterMove.glide_heat_s * float(h.cdat.get("glide_cap", 1.0))
+	var gear_k: float = 1.0 + h.gear_stat("heat")      # worn gear's heat stat (the save's armory boots) stretches it
+	var heat_s: float = HunterMove.glide_heat_s * float(h.cdat.get("glide_cap", 1.0)) * gear_k
 	var sink_txt := "a level glide sinks at %.2f m/s (hunter_move.json glide_sink %.2f)"
 	ok(absf(float(level[0]) - HunterMove.glide_sink) < 0.02, sink_txt % [level[0], HunterMove.glide_sink])
-	var heat_txt := "a level glide overheats %.2f s after it opens (glide_heat_s x glide_cap %.2f)"
+	var heat_txt := "a level glide overheats %.2f s after it opens (glide_heat_s x glide_cap x gear heat %.2f)"
 	ok(absf(float(level[1]) - heat_s) <= Match.DT * 2.0, heat_txt % [level[1], heat_s])
 	_spike_kinds()
 	_burn_hint(e)
