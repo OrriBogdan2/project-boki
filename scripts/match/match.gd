@@ -3112,6 +3112,7 @@ func render_shots(alpha: float) -> void:
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
+	HoldTeach.match_tick(self)      # tap-vs-hold teaching (glide, Hold F prompts)
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
 	Sfx.voices.keep_squad(hunters, player)
@@ -5639,7 +5640,7 @@ func _tips() -> void:
 		return
 	tips_live = true
 	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
-	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
+	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then hold %s in the air to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
