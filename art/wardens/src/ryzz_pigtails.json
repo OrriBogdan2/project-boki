@@ -1,0 +1,29 @@
+{
+ "doc": "Pigtail graft spec (tools/meshy/pigtail_graft.py): Sparkle's Meshy-made pigtails on ryzz.glb, owner 11-15 'hair goes out too far and isn't wavy enough'. Option A of ~/meshy/sparkle-hair-1115/RESULTS.md.",
+ "live": "art/wardens/ryzz/ryzz.glb re-run 11-15 on main's glb after bfae359ad9 (git show origin/main:art/wardens/ryzz/ryzz.glb at ace561dba72); the clips are put back with tools/art1/glb_add_clips.py + glb_compact.py (see art/wardens/ryzz/IMPORT.md)",
+ "meshy_bust": "~/meshy/sparkle-hair-1115/gen/raw4_s8/glb.glb (Meshy multi-image-to-3d, meshy-7.1, seed 8, four head crops of the v2 turnaround_A)",
+ "s": 0.3,
+ "auto": true,
+ "rects": {
+  "L": [
+   0.48398046875,
+   0.677828125,
+   0.66738671875,
+   0.7547890625
+  ],
+  "R": [
+   0.048921875000000004,
+   0.39120703125,
+   0.2040078125,
+   0.46328515625
+  ]
+ },
+ "voxel": 0.0045,
+ "tris": 1500,
+ "thick": 0.01,
+ "shear": 0.32,
+ "squeeze": 0.7,
+ "yfree": 0.1,
+ "cage": 0.015,
+ "ray": 0.05
+}
