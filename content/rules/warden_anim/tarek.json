@@ -46,16 +46,16 @@
 		"breah_throw": {
 			"clip": "lmb_throw",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
 			"upper": "moving",
 			"hold_from": 0.24
-		},
+		, "air_legs": true},
 		"breah_punch": {
 			"clip": "lmb_punch",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_crouch": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
@@ -78,7 +78,8 @@
 			"clip": "rmb_lunge"
 		},
 		"breah_leap_land": {
-			"clip": "dash_land"
+			"clip": "dash_land",
+			"upper": "moving"
 		},
 		"breah_exdash": {
 			"clip": "dash_air",
@@ -87,7 +88,7 @@
 		},
 		"breah_raise": {
 			"clip": "e_row"
-		},
+		, "air_legs": true},
 		"breah_sense": {
 			"clip": "sense"
 		},

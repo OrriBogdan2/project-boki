@@ -8,6 +8,9 @@ TAU = 2 * math.pi
 
 ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.45, 0.85), "eR": (1.0, -0.7, -0.6), "cR": 0.3, "sR": 1.0}
 FAN_UP = {"hL": (-0.30, 0.18, 1.10), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-1.0, -0.6, -0.5), "cL": 0.55, "sL": 0.6}
+# his arms in to the body while the other one casts: the deck held up at his chest, the right hand loose at his belt
+FAN_IN = {"hL": (-0.19, 0.17, 1.04), "fL": (-0.1, 0.35, 0.93), "pL": (0.3, -0.9, 0.2), "eL": (-0.5, -0.3, -0.8), "cL": 0.55, "sL": 0.6}
+HAND_IN_R = {"hR": (0.19, 0.14, 1.0), "fR": (0.0, 0.4, -0.9), "pR": (-0.9, 0.2, 0.0), "eR": (0.5, -0.3, -0.8), "cR": 0.4, "sR": 0.3}
 # the sheet's showman: arms flung wide, the open right hand and the fanned deck out past the ruff
 STILL = {**ORB_UP, **FAN_UP, "hR": (0.44, 0.12, 1.18), "hL": (-0.42, 0.14, 1.22), "spine": (8.0, -5.0, 2.0), "head": (-14.0, 6.0, 12.0),
          "brow": -0.5, "cheek": 0.3, "lid": 0.3}
@@ -66,6 +69,20 @@ def wobble(period, pitch, roll, bob):
         hd = P["head"]
         P["head"] = (hd[0] - pitch * 0.5 * math.sin(ph - 1.5), hd[1], hd[2])
         P["wR"], P["wL"] = 0.12, 0.08
+    return fn
+
+
+def tread(period, way, kick, sway, then):
+    """under the glide the box treads on its spring, as the source's hem trails: a kick along the way he goes twice a loop and a
+    sway across it once, on top of the trail the clip's swing holds (way: f, b, l, r)"""
+    u = {"f": (1.0, 0.0), "b": (-1.0, 0.0), "l": (0.0, 1.0), "r": (0.0, -1.0)}[way]
+
+    def fn(P, t):
+        then(P, t)
+        ph = t / period * TAU
+        k, s = kick * math.sin(2 * ph), sway * math.sin(ph)
+        w = P["swing"]
+        P["swing"] = (w[0] + u[0] * k + abs(u[1]) * s, w[1] + u[1] * k + abs(u[0]) * s)
     return fn
 
 
@@ -140,7 +157,7 @@ def creep(box, shift):
 
 
 CLIPS = {
-    # ---------------------------------------------------------------- loco: the box goes first, tilting toward the way he moves; the body rides late
+    # ---------------------------------------------------------------- loco: he glides upright and leads; the box hung on the spring trails and treads
     "idle": {"len": 3.2, "base": STILL, "add": idle_add, "loop": True, "keys": [
         (0.0, {}),
         (1.3, {}),
@@ -151,14 +168,14 @@ CLIPS = {
         (3.2, {}),
     ]},
     "stance": {"len": 2.0, "base": READY, "add": stance_add, "loop": True, "keys": [(0.0, {}), (2.0, {})]},
-    "walk_f": {"len": 1.4, "loop": True, "base": loco((9.0, 0.0), (4.0, -4.0, 2.0), (0.0, -0.03, -0.03), head=(-18.0, 4.0, 8.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_b": {"len": 1.4, "loop": True, "base": loco((-9.0, 0.0), (10.0, -4.0, 0.0), (0.0, 0.03, -0.03), head=(-12.0, 2.0, 10.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -9.0), (6.0, 8.0, 6.0), (0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_r": {"len": 1.4, "loop": True, "base": loco((3.0, 9.0), (6.0, -12.0, -6.0), (-0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((17.0, 0.0), (2.0, 0.0, 0.0), (0.0, -0.09, -0.07), head=(-22.0, 0.0, 6.0), brow=-1.0, cheek=0.7), **TRAIL), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-16.0, 0.0), (14.0, 0.0, 0.0), (0.0, 0.08, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7)), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -17.0), (6.0, 8.0, 12.0), (0.08, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 17.0), (6.0, -8.0, -12.0), (-0.08, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
+    "walk_f": {"len": 1.4, "loop": True, "base": loco((4.0, 0.0), (6.0, -4.0, 2.0), (0.0, 0.02, -0.03), head=(-18.0, 4.0, 8.0), swing=(12.0, 0.0)), "add": tread(1.4, "f", 5.0, 6.0, wobble(1.4, 2.5, 2.0, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_b": {"len": 1.4, "loop": True, "base": loco((-4.0, 0.0), (10.0, -4.0, 0.0), (0.0, -0.02, -0.03), head=(-12.0, 2.0, 10.0), swing=(-10.0, 0.0)), "add": tread(1.4, "b", 4.0, 5.0, wobble(1.4, 2.5, 2.0, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_l": {"len": 1.4, "loop": True, "base": loco((2.0, -4.0), (6.0, 8.0, 6.0), (-0.02, 0.0, -0.03), swing=(0.0, 11.0)), "add": tread(1.4, "l", 5.0, 5.0, wobble(1.4, 2.0, 2.5, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_r": {"len": 1.4, "loop": True, "base": loco((2.0, 4.0), (6.0, -12.0, -6.0), (0.02, 0.0, -0.03), swing=(0.0, -11.0)), "add": tread(1.4, "r", 5.0, 5.0, wobble(1.4, 2.0, 2.5, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
+    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((8.0, 0.0), (5.0, 0.0, 0.0), (0.0, 0.04, -0.07), head=(-22.0, 0.0, 6.0), brow=-1.0, cheek=0.7, swing=(22.0, 0.0)), **TRAIL), "add": tread(0.9, "f", 7.0, 5.0, wobble(0.9, 3.5, 3.0, 0.02)), "keys": [(0.0, {}), (0.9, {})]},
+    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-8.0, 0.0), (14.0, 0.0, 0.0), (0.0, -0.04, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7, swing=(-18.0, 0.0))), "add": tread(0.9, "b", 6.0, 5.0, wobble(0.9, 3.5, 3.0, 0.02)), "keys": [(0.0, {}), (0.9, {})]},
+    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((2.0, -8.0), (6.0, 8.0, 12.0), (-0.04, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7, swing=(0.0, 20.0)), **TRAIL), "add": tread(0.9, "l", 6.0, 5.0, wobble(0.9, 3.0, 3.5, 0.02)), "keys": [(0.0, {}), (0.9, {})]},
+    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((2.0, 8.0), (6.0, -8.0, -12.0), (0.04, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7, swing=(0.0, -20.0)), **TRAIL), "add": tread(0.9, "r", 6.0, 5.0, wobble(0.9, 3.0, 3.5, 0.02)), "keys": [(0.0, {}), (0.9, {})]},
 
     # ---------------------------------------------------------------- the crouch: down with a squeeze past the hold, up with a small overshoot
     "crouch_idle": {"len": 3.6, "base": HUNCH, "add": hunch_add, "loop": True, "keys": [(0.0, {}), (3.6, {})]},
@@ -169,23 +186,27 @@ CLIPS = {
     "crouch_in": {"len": 0.34, "base": STILL, "keys": [(0.0, {}), (0.15, SQUEEZE), (0.34, HUNCH)]},
     "crouch_out": {"len": 0.36, "base": HUNCH, "keys": [(0.0, {}), (0.08, SQUEEZE), (0.24, SPRUNG), (0.36, STILL)]},
 
-    # ---------------------------------------------------------------- LMB: Tether Lantern (leans out on the spring)
-    "orb": {"len": 0.30, "base": STILL, "keys": [
+    # ---------------------------------------------------------------- LMB: Tether Lantern, thrown from the body on the kit's beats
+    # (kmoves_stone ostra_orb: drawn in 0.04, flicked 0.09, back by 0.30): the orb cupped at the ruff, the hand flicked out along the
+    # aim and back in to him; the deck held in at his chest the while (no arm out sideways)
+    "orb": {"len": 0.30, "base": dict(STILL, **FAN_IN), "keys": [
         (0.00, {}),
-        (0.033, {"hR": (0.31, 0.02, 1.24), "fR": (0.2, 0.4, 0.9), "pR": (-0.1, 0.8, -0.3), "spine": (2.0, 10.0, 3.0), "lift": (0.0, -0.04, -0.03)}, "out"),
-        (0.10, {"hR": (0.14, 0.42, 1.22), "fR": (-0.1, 0.95, 0.1), "pR": (0.0, 0.2, -1.0), "eR": (1.0, -0.5, -0.5), "cR": 0.12, "sR": 1.0, "spine": (16.0, -20.0, 3.0), "head": (-22.0, 14.0, 10.0),
-                "lift": (0.0, 0.1, 0.02), "cheek": 0.7, "brow": -1.0}, "snap"),
-        (0.17, {"cR": 0.3, "lift": (0.0, 0.05, 0.0)}),
-        (0.30, dict(STILL, lift=(0.0, 0.0, 0.0))),
+        (0.04, {"hR": (0.19, 0.12, 1.16), "fR": (0.1, 0.7, 0.7), "pR": (-0.2, 0.9, 0.3), "eR": (0.5, -0.5, -0.7), "cR": 0.55, "sR": 0.5,
+                "spine": (6.0, -8.0, 2.0), "head": (-16.0, 10.0, 8.0), "lift": (0.0, -0.03, -0.03)}, "out"),
+        (0.09, {"hR": (0.18, 0.43, 1.30), "fR": (0.0, 1.0, 0.1), "pR": (0.0, 0.3, -1.0), "eR": (0.5, -0.3, -0.8), "cR": 0.08, "sR": 1.0,
+                "spine": (12.0, 8.0, 2.0), "head": (-22.0, -6.0, 8.0), "lift": (0.0, 0.06, 0.02), "cheek": 0.7, "brow": -1.0}, "snap"),
+        (0.17, {"hR": (0.11, 0.38, 1.18), "fR": (-0.1, 0.9, -0.3), "cR": 0.3, "spine": (12.0, 4.0, 2.0), "lift": (0.0, 0.03, 0.0)}, "out"),
+        (0.30, dict(HAND_IN_R, spine=STILL["spine"], head=STILL["head"], lift=(0.0, 0.0, 0.0), cheek=0.3, brow=-0.5)),
     ]},
-    # the alternate cast, off his left hand: the fan drops as the hand flicks (WardenClips "alt": every other orb)
-    "orb_l": {"len": 0.30, "base": STILL, "keys": [
+    # the alternate cast, off his left hand: the fan drops as the hand flicks, the right hangs in (WardenClips "alt": every other orb)
+    "orb_l": {"len": 0.30, "base": dict(STILL, **HAND_IN_R), "keys": [
         (0.00, {}),
-        (0.033, {"hL": (-0.31, 0.02, 1.24), "fL": (-0.2, 0.4, 0.9), "pL": (0.1, 0.8, -0.3), "spine": (2.0, -10.0, -3.0), "lift": (0.0, -0.04, -0.03), "fan": 0.6}, "out"),
-        (0.10, {"hL": (-0.14, 0.42, 1.22), "fL": (0.1, 0.95, 0.1), "pL": (0.0, 0.2, -1.0), "eL": (-1.0, -0.5, -0.5), "cL": 0.12, "sL": 1.0, "spine": (16.0, 20.0, -3.0), "head": (-22.0, -14.0, 10.0),
-                "lift": (0.0, 0.1, 0.02), "cheek": 0.7, "brow": -1.0, "fan": 0.3}, "snap"),
-        (0.17, {"cL": 0.3, "lift": (0.0, 0.05, 0.0), "fan": 0.6}),
-        (0.30, dict(STILL, lift=(0.0, 0.0, 0.0), fan=1.0)),
+        (0.04, {"hL": (-0.19, 0.12, 1.16), "fL": (-0.1, 0.7, 0.7), "pL": (0.2, 0.9, 0.3), "eL": (-0.5, -0.5, -0.7), "cL": 0.55, "sL": 0.5,
+                "spine": (6.0, 8.0, -2.0), "head": (-16.0, -10.0, 8.0), "lift": (0.0, -0.03, -0.03), "fan": 0.6}, "out"),
+        (0.09, {"hL": (-0.18, 0.43, 1.30), "fL": (0.0, 1.0, 0.1), "pL": (0.0, 0.3, -1.0), "eL": (-0.5, -0.3, -0.8), "cL": 0.08, "sL": 1.0,
+                "spine": (12.0, -8.0, -2.0), "head": (-22.0, 6.0, 8.0), "lift": (0.0, 0.06, 0.02), "cheek": 0.7, "brow": -1.0, "fan": 0.3}, "snap"),
+        (0.17, {"hL": (-0.11, 0.38, 1.18), "fL": (0.1, 0.9, -0.3), "cL": 0.3, "spine": (12.0, -4.0, -2.0), "lift": (0.0, 0.03, 0.0), "fan": 0.6}, "out"),
+        (0.30, dict(FAN_IN, spine=STILL["spine"], head=STILL["head"], lift=(0.0, 0.0, 0.0), cheek=0.3, brow=-0.5, fan=1.0)),
     ]},
     # item 136's RMB: eight cards, one each 0.08 s, dealt off the fan by the right hand; the left holds the deck up; he keeps moving
     "flurry": {"len": 0.90, "base": dict(READY, hR=(0.2, 0.3, 1.16), fR=(0.0, 0.9, 0.35), pR=(0.0, 0.2, -1.0), cR=0.2, hL=(-0.2, 0.26, 1.16), fL=(0.1, 0.5, 0.85), pL=(0.2, -0.9, 0.2), spine=(14.0, -6.0, 0.0), head=(-24.0, 6.0, 4.0), cheek=1.0), "add": flurry_add, "keys": [
@@ -194,14 +215,18 @@ CLIPS = {
         (0.66, {}),
         (0.90, STILL),
     ]},
-    # the full orb only (the kit plays this at full charge): compressed, then the whole spring flung out behind the throw
-    "orb_hot": {"len": 0.50, "base": STILL, "keys": [
+    # the full orb only (the kit plays this at full charge; ostra_orb_hot: drawn back 0.06, flung 0.11, kicked back 0.22): the orb drawn
+    # back to his hip with the spring compressed, then the arm and the whole spring flung out straight along the aim, the deck hand back
+    "orb_hot": {"len": 0.50, "base": dict(STILL, **FAN_IN), "keys": [
         (0.00, {}),
-        (0.067, {"hR": (0.36, -0.14, 1.22), "fR": (0.25, -0.5, 0.8), "pR": (-0.1, 0.8, 0.5), "eR": (1.0, -0.2, -0.8), "spine": (-6.0, 26.0, 3.0), "head": (-8.0, -18.0, 8.0), "lift": (0.0, -0.08, -0.16), "lid": 1.0, "cheek": 0.9, "brow": -1.0, "smoke": 0.5}, "out"),
-        (0.133, {"hR": (0.08, 0.45, 1.26), "fR": (0.0, 1.0, 0.1), "pR": (0.0, 0.1, -1.0), "cR": 0.02, "sR": 1.0, "eR": (1.0, -0.4, -0.6), "spine": (28.0, -30.0, 0.0), "head": (-28.0, 24.0, 4.0),
-                  "hL": (-0.3, -0.1, 0.98), "lift": (0.0, 0.2, 0.1), "box": (6.0, 0.0), "jaw": 8.0, "smoke": 0.0}, "snap"),
-        (0.233, {"spine": (-4.0, -24.0, 0.0), "lift": (0.0, -0.05, 0.06), "hR": (0.14, 0.40, 1.34), "fR": (0.1, 0.5, 0.85), "cR": 0.2, "head": (-10.0, 20.0, 6.0), "jaw": 10.0, "box": (-4.0, 0.0)}),
-        (0.50, dict(STILL, jaw=0.0)),
+        (0.06, {"hR": (0.22, -0.02, 1.08), "fR": (0.2, 0.6, 0.75), "pR": (-0.3, 0.9, 0.3), "eR": (0.4, -0.6, -0.7), "cR": 0.6, "sR": 0.5,
+                "spine": (-6.0, -16.0, 3.0), "head": (-8.0, 14.0, 8.0), "lift": (0.0, -0.06, -0.14), "lid": 1.0, "cheek": 0.9, "brow": -1.0, "smoke": 0.5}, "out"),
+        (0.11, {"hR": (0.12, 0.45, 1.27), "fR": (0.0, 1.0, 0.1), "pR": (0.0, 0.1, -1.0), "eR": (0.5, -0.4, -0.7), "cR": 0.02, "sR": 1.0,
+                "spine": (26.0, 16.0, 0.0), "head": (-28.0, -14.0, 4.0), "hL": (-0.24, -0.12, 0.98), "fL": (-0.1, -0.3, -0.95), "eL": (-0.5, -0.3, -0.8),
+                "lift": (0.0, 0.18, 0.08), "box": (6.0, 0.0), "jaw": 8.0, "smoke": 0.0}, "snap"),
+        (0.22, {"spine": (-4.0, 10.0, 0.0), "lift": (0.0, -0.05, 0.06), "hR": (0.16, 0.38, 1.30), "fR": (0.1, 0.6, 0.8), "cR": 0.2, "head": (-10.0, -10.0, 6.0),
+                "jaw": 10.0, "box": (-4.0, 0.0), **FAN_IN}),
+        (0.50, dict(HAND_IN_R, spine=STILL["spine"], head=STILL["head"], lift=(0.0, 0.0, 0.0), box=(0.0, 0.0), jaw=0.0, lid=0.3, cheek=0.3, brow=-0.5)),
     ]},
     # ---------------------------------------------------------------- RMB: Shard Snap (the spring wound right down, then the release)
     "snap_wind": {"len": 0.70, "base": STILL, "add": lambda P, t: t > 0.3 and twitch(0.5, 44.0)(P, t), "keys": [

@@ -16,13 +16,13 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
 	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
-		"gunslinger_lmb": {"clip": "lmb", "upper": "moving", "fade_out": 0.4},
-		"gunslinger_rmb": {"clip": "rmb", "upper": "moving", "fade_out": 0.4},
-		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade_out": 0.4},
+		"gunslinger_lmb": {"clip": "lmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
+		"gunslinger_rmb": {"clip": "rmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
+		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade_out": 0.4, "rate": 1.25},
 		"gunslinger_dash_ex": {"clip": "dash_ex", "fade_out": 0.4},
-		"gunslinger_e": {"clip": "e", "fade": 0.15},
+		"gunslinger_e": {"clip": "e", "fade": 0.15, "air_legs": true},
 		"gunslinger_x": {"clip": "x"},
-		"gunslinger_knock": {"clip": "knock", "upper": "moving", "fade_out": 0.4},
+		"gunslinger_knock": {"clip": "knock", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}
 	},
 	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.0},

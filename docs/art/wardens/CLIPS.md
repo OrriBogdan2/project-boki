@@ -14,7 +14,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
   launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has
+  them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
+  holds each loop's pelvis to the forward loop's height at the same phase).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
@@ -40,14 +42,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
   a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
   glider stays in the hands. A Boki riding on you sits on the torso you see (`WardenGlb.shown_torso`, the hips bone back
   through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
   swing of its own side's leg; `side_foot_mps` [walk, run] is the strafe loops' own foot speed, mixed in by how far the
   move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
   so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
   `--foot-slide-check`). No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `fade` / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
   `Oomph.HEAVY_FLINCH`); any other hit is `WardenFlinch`: a torso spring (front, back, left, right from `hit_dir`) added after
@@ -70,6 +72,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   (0.25 s), a cast (0.6 s), a kit move or an emote cancels it (`TurnStep.busy`). Heavy Heroes take a slower, lower
   step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
 - `cc` (scripts/heroes/warden_cc.gd): how the Hero fights crowd control, laid over the clips and in and out in 0.1 s. A stun plays the `stun` state (its sway loop); a root keeps the legs planted on the idle while the torso pulls (`pull` rad of lean, `tug_hz` tugs a second, `twist` rad of wring); Grounded drops into the `crouch` layer (no dip) and bows the head `bow` rad at the cords. `--clip-check` asserts all three for every Hero.
+- `climb` (mantle, ledge): {clip, `rise`}. A ledge rise (Hunter `_rise_k`, 0 at the start of the face, 1 at the lip) seeks the mantle clip to progress x `rise` s, so the hands meet the lip when the body does; a ledge float (dash off an edge) hangs `rise` s; either then runs on to the clip's end unless a move, the glider or death takes over. Keyed with `tools/art1/glb_climb_clips.py` (no Blender). A model without the clips (or the key) plays the procedural pose.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
