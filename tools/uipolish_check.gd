@@ -372,14 +372,15 @@ func _closing(home: Node) -> void:
 	await _frames(2)
 	await _esc()
 	ok("Esc closes a farm panel and doesn't open the Esc menu", home.panel_open == "" and not Overlay.is_open())
-	var recs: Array = Save.d["roster"]
-	var res := {"order": [recs[0], recs[0]], "gems": 3, "memory": "A test race."}
-	home.race._show_card(res)
+	# the Dash's result card (BaseRace.result_card, shared by every minigame) closes like any other panel
+	var rows := [["A test race.", 18, UI.ACCENT_HI]]
+	var card: Control = BaseRace.result_card(home, rows)
 	await _frames(2)
 	await _esc()
-	var card_gone: bool = home.race.card == null and not Overlay.is_open()
-	ok("Esc closes the Dash's result card and doesn't open the Esc menu", card_gone)
-	home.race._show_card(res)
+	await _frames(1)
+	ok("Esc closes the Dash's result card and doesn't open the Esc menu", not is_instance_valid(card) and not Overlay.is_open())
+	card = BaseRace.result_card(home, rows)
 	await _frames(2)
 	await _right_click()
-	ok("a right click outside the Dash's result card closes it", home.race.card == null)
+	await _frames(1)
+	ok("a right click outside the Dash's result card closes it", not is_instance_valid(card))
