@@ -11,7 +11,7 @@ const BLINK_HZ := 12.0           # how fast a lit keg flashes
 const SQUASH_T := 0.07           # seconds a broken prop takes to pop flat
 const SAFE_MARGIN := 1.2         # metres outside a lit keg's blast a bot still keeps clear
 const CHAIN_SLACK := 0.4         # metres past the blast radius that still light a neighbour
-const BLAST_DEBRIS := 1.6        # a blast throws its debris this much harder, and more of it
+const BLAST_SPEED := 1.6         # debris power per metre of blast radius
 const SCORCH_SCALE := 0.9        # scorch radius as a share of the blast radius
 const HIT_R := 0.36              # metres from a prop's centre a shot or swing has to pass to hit it
 
@@ -78,9 +78,8 @@ static func near(breaks: Array, p: Vector3, reach: float) -> Array:
 			out.append(b)
 	return out
 
-## Runs the fuses of lit kegs and ages the debris in the air.
+## Runs the fuses of lit kegs.
 func tick(dt: float) -> void:
-	_fx.tick(dt)
 	for b in lit.duplicate():
 		b["fuse_t"] = float(b["fuse_t"]) + dt
 		var p := clampf(float(b["fuse_t"]) / float(b["fuse"]), 0.0, 1.0)
@@ -110,7 +109,7 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	var kind_s: String = b["kind"]
 	var sp := spec(kind_s)
 	_pop(b["node"], true)
-	_show_break(at, String(sp["material"]), int(sp["chunks"]), BLAST_DEBRIS if sp.has("explosive") else 1.0)
+	_show_break(at, String(sp["material"]), int(sp["chunks"]))
 	if not from_net:
 		KeyBonus.on_break(_m, at, kind_s)
 	_drop_loot(at, sp["loot"], by, from_net)
@@ -133,6 +132,7 @@ func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	_m.fx.ring(c, radius * 0.6, Color("fff0c0"), 0.2)
 	_m.fx.burst(c, Color("ffb070"), int(radius * 13.0), 7.0, 0.6, 6.0, 1.5)
 	_m.fx.flash(c, Color("ffd9a0"), radius * 0.6, 0.12)
+	_fx.shatter(c, "metal", int(spec("keg")["chunks"]), radius * BLAST_SPEED / 2.6)
 	_fx.scorch(at, radius * SCORCH_SCALE)
 	_m.sfx("boom", c, 2.0, 0.85)
 	_hitstop(by, HITSTOP * 1.5)
@@ -163,10 +163,10 @@ func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 		var info := {"src": "boom", "kb": dir * float(ex["knockback"]) * f, "lift": float(ex["lift"]) * f}
 		e.hurt(float(ex["damage"]) * f, credit, info)
 
-func _show_break(at: Vector3, mat_name: String, chunks: int, power: float) -> void:
+func _show_break(at: Vector3, mat_name: String, chunks: int) -> void:
 	var drules: Dictionary = rules()["debris"][mat_name]
 	var mid := at + Vector3(0, 0.35, 0)
-	_fx.shatter(mid, mat_name, chunks, power)
+	_fx.shatter(mid, mat_name, chunks)
 	_m.fx.dust(at, 8)
 	_m.fx.flash(mid, Color("fff0d0"), 0.45, 0.07)
 	_m.sfx(String(drules["sound"]), at, -2.0, float(drules["pitch"]))
