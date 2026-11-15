@@ -279,7 +279,7 @@ const CHECKS := {
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
-	"--kit-sweep-check": ["res://tools/kit_sweep_check.gd", "kit_sweep_check", null],      # every slot, every Hunter: no log errors
+	"--kit-sweep-check": ["res://tools/kit_sweep_check.gd", "kit_sweep_check", null],  # no log errors
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],
@@ -331,7 +331,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
-	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],      # firing while running keeps the legs
+	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],  # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
