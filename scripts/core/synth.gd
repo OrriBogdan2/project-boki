@@ -141,9 +141,12 @@ static func glider(set: String, close: bool) -> AudioStreamWAV:
 		buf[i] = lo
 	return to_wav(buf, -25.0 if close else -21.0)
 
-## The home whistle that calls your kin: a soft, breathy two-note "fwee-fweeoo".
-static func whistle() -> AudioStreamWAV:
+## The home whistle that calls your kin, a soft and breathy one. A tap is a short two-note "fwee-fweeoo"; a hold
+## (rising) is a longer climb of three notes, so you hear which call you made.
+static func whistle(rising := false) -> AudioStreamWAV:
 	var notes := [[880.0, 1040.0, 0.15], [0.0, 0.0, 0.05], [990.0, 1320.0, 0.28]]
+	if rising:
+		notes = [[700.0, 960.0, 0.25], [960.0, 1400.0, 0.25], [1400.0, 2000.0, 0.45]]
 	var total := 0.0
 	for nt in notes: total += float(nt[2])
 	var buf := PackedFloat32Array(); buf.resize(int(RATE * total))
