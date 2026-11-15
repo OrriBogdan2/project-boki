@@ -17,23 +17,18 @@ const CHECKS := {
 	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
-	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],  # no lair "you fell"
-	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],  # real-paced bot expedition clock
-	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],  # the emote wheel, Hunters side by side
-	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],  # clearance
-	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],  # spec 8 sites
-	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],  # hungry -> kibble -> feed -> can go
-	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],  # demo-reel footage, 1080p60 (GPU)
-	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],  # the reel's drivers play through
-	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],  # the recording presets
-	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],  # docs/SENTRY.md, stays off
-	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],  # F1-F3 look at a teammate
-	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],  # GPU, --shots-dir=
-	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
-	# the Ways Out strip and Gate prompt
-	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],  # EdgeMarker
-	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
-	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
+	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
+	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
+	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
+	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
+	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
+	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
+	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
+	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
+	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
+	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
+	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
+	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
 	"--heart-raid-solo-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 0],      # a whole solo raid
 	"--heart-raid-squad-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 1],      # 4, Normal
@@ -41,6 +36,7 @@ const CHECKS := {
 	"--heart-raid-nightmare-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 3],      # 4, Nightmare
 	"--ways-out-sim": ["res://tools/ways_out_sim.gd", "ways_out_sim", null],      # LIMITED_WAY_OUTS task 7, bots
 	"--bot-ways-check": ["res://tools/bot_ways_check.gd", "bot_ways_check", null],      # bot plans, cap, delay, ring
+	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--alive-counter-check": ["res://tools/alive_counter_check.gd", "alive_counter_check", null],
@@ -59,23 +55,22 @@ const CHECKS := {
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
 	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
-	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],  # Heartspark carry layer
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
-	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],  # splash, spray, wake
-	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],  # audio/cries
+	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
+	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],  # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],  # GARDEN_MODERN.md 5
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],  # GARDEN_MODERN.md 1
-	"--ink-preview-check": ["res://tools/ink_preview_check.gd", "ink_preview_check", null],  # Ink card
-	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],  # GARDEN_MODERN.md 3
-	"--first-evolve-check": ["res://tools/first_evolve_check.gd", "first_evolve_check", null],  # first-evolve beat
+	"--ink-preview-check": ["res://tools/ink_preview_check.gd", "ink_preview_check", null],      # Ink card
+	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],      # GARDEN_MODERN.md 3
+	"--first-evolve-check": ["res://tools/first_evolve_check.gd", "first_evolve_check", null],      # first-evolve beat
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],  # GARDEN_MODERN 1.2
 	"--icon-art-check": ["res://tools/icon_art_check.gd", "icon_art_check", null],      # painted icons, art/icons
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
-	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
+	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],  # Mixing Bowl
+	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],  # GARDEN.md 9.2
 	"--base-check": ["res://tools/base_check.gd", "base_check", null],      # B: hold wheel, channel, cancels
-	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--base-stray-check": ["res://tools/base_stray_check.gd", "base_stray_check", null],
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],  # decision 0022
 	"--homecoming-react-check": ["res://tools/homecoming_react_check.gd", "homecoming_react_check", null],  # GARDEN 4
@@ -84,7 +79,7 @@ const CHECKS := {
 	"--garden-soak": ["res://tools/garden_soak.gd", "garden_soak", null],  # the garden pieces together, 30 days
 	"--base-demo-check": ["res://tools/base_demo_check.gd", "base_demo_check", null],  # GARDEN.md 9.8
 	"--garden-nav-check": ["res://tools/garden_nav_check.gd", "garden_nav_check", null],  # GARDEN nav sweep
-	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],  # each zone's ambient layer
+	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--wade-check": ["res://tools/wade_check.gd", "wade_check", null],  # GARDEN.md 4 Boki wading
 	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
@@ -97,16 +92,17 @@ const CHECKS := {
 	"--mentor-check": ["res://tools/mentor_check.gd", "mentor_check", null],  # GARDEN.md section 3
 	"--trait-drift-check": ["res://tools/trait_drift_check.gd", "trait_drift_check", null],  # GARDEN.md 3, lever 3
 	"--baby-parents-check": ["res://tools/baby_parents_check.gd", "baby_parents_check", null],  # GARDEN.md 6
-	"--unstable-mix-check": ["res://tools/unstable_mix_check.gd", "unstable_mix_check", null],  # GARDEN.md 6
+	"--unstable-mix-check": ["res://tools/unstable_mix_check.gd", "unstable_mix_check", null],      # GARDEN.md 6
 	"--family-tree-check": ["res://tools/family_tree_check.gd", "family_tree_check", null],  # GARDEN_MODERN 5.8
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],  # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],  # --shots-dir=<dir>
-	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],      # GPU
-	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
-	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
+	# last-hit XP and the 30 m squad share
+	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],      # Heartspark carry layer
 	"--save-chain-check": ["res://tools/save_chain_check.gd", "save_chain_check", null],      # SAVE_CHAIN_0245
 	"--sleepover-check": ["res://tools/sleepover_check.gd", "sleepover_check", null],      # docs/decisions/0022
 	"--base-breed-check": ["res://tools/base_breed_check.gd", "base_breed_check", null],      # GARDEN.md 6
+	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
+	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
@@ -115,11 +111,10 @@ const CHECKS := {
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
 	"--glide-bank-check": ["res://tools/glide_bank_check.gd", "glide_bank_check", null],
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
-	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
-	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],  # LMB projectile floor
-	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],  # --shots-dir, --res
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],
+	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
+	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
@@ -145,9 +140,8 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
-	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
-	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # Gil, the Novice Mage
+	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
@@ -159,34 +153,34 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--soundtrack-check": ["res://tools/soundtrack_check.gd", "soundtrack_check", null],      # Settings > Audio > Music
-	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
 	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],  # map regions, hot drop zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],  # --shots-dir=<dir>, GPU
+	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
 	# merged props hold their draws; --shots-dir=<dir> saves a lineup
 	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
-	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],  # 6 Hunters, 4 Boki
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
+	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
-	"--kin-target-check": ["res://tools/kin_target_check.gd", "kin_target_check", null],  # pick_target's rule
+	"--kin-target-check": ["res://tools/kin_target_check.gd", "kin_target_check", null],      # pick_target's rule
 	# boss wake, phase and defeat cues
 	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],  # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	# Settings > Audio sliders reach the buses
 	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
+	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
+	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
 	"--sfx-voice-check": ["res://tools/sfx_voice_check.gd", "sfx_voice_check", null],  # 30-Hunter voice cap
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],  # item 103
 	"--settings-size-check": ["res://tools/settings_size_check.gd", "settings_size_check", null],      # steady panel
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],      # Interface size slider
-	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
-	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
 	# sounds behind terrain
 	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],
 	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],
@@ -218,8 +212,8 @@ const CHECKS := {
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
-	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],  # --shots-dir=<dir>
 	"--kit-panel-fight-shots": ["res://tools/kit_panel_fight_shots.gd", "kit_panel_fight_shots", null],
+	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
 	"--label-clash-shots": ["res://tools/label_clash_shots.gd", "label_clash_shots", null],
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
@@ -231,8 +225,8 @@ const CHECKS := {
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],  # choose what to rank: + and pips
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],  # --shots-dir=<dir>
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],  # sound sets, loudness
-	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],  # monster death and stagger sounds
 	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
+	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
@@ -242,7 +236,7 @@ const CHECKS := {
 	# charges + slot timers on the bar
 	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
-	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],  # docs/SPAWNS.md
+	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],      # docs/SPAWNS.md
 	"--blight-nest-check": ["res://tools/blight_nest_check.gd", "blight_nest_check", null],      # docs/decisions/0061
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
@@ -278,14 +272,14 @@ const CHECKS := {
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],  # item 184b
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
-	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],  # items 162, 162b
-	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],  # item 151
-	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],  # (GPU)
 	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
 	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
+	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
+	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
+	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--squad-intro-check": ["res://tools/squad_intro_check.gd", "squad_intro_check", null],      # 0.24.4
@@ -293,7 +287,6 @@ const CHECKS := {
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
-	"--number-looks-check": ["res://tools/number_looks_check.gd", "number_looks_check", null],      # by source
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],
 	# --shots-dir=<dir> [--size=WxH] (GPU)
@@ -304,32 +297,25 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
-	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
-	"--tips-check": ["res://tools/tips_check.gd", "tips_check", null],      # context tips
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--lace-1111-check": ["res://tools/lace_1111_check.gd", "lace_1111_check", null],      # Lace 11-11 notes
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
-	"--range-clamp-check": ["res://tools/range_clamp_check.gd", "range_clamp_check", null],  # cursor past max range
 	"--telegraph-lead-check": ["res://tools/telegraph_lead_check.gd", "hero_pair_check", null],
+	"--range-clamp-check": ["res://tools/range_clamp_check.gd", "range_clamp_check", null],      # cursor past max range
 	"--bot-dodge-check": ["res://tools/bot_dodge_check.gd", "bot_dodge_check", null],
 	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
-	"--lace-playtest-check": ["res://tools/lace_playtest_check.gd", "lace_playtest_check", null],      # Lace 11-08
-	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
-	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
-	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
-	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],      # baked rig rests
+	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],  # the Warden models
+	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],  # rig for the Blender build
+	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],  # .glb loader
+	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],  # baked rig rests
 	"--warden-rest-bake": ["res://tools/warden_rest_check.gd", "warden_rest_check", "bake"],
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],  # warm-up kept on disk
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
-	"--warden-blink-check": ["res://tools/warden_blink_check.gd", "warden_blink_check", "check"],  # eyelid blink
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
-	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],  # models beside sheets
-	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],  # aim pitch: the pose
-	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],  # the strip (GPU)
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
@@ -338,17 +324,19 @@ const CHECKS := {
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
 	# hit flinch over clips
 	"--flinch-layer-check": ["res://tools/flinch_layer_check.gd", "flinch_layer_check", null],
-	"--flinch-layer-shots": ["res://tools/flinch_layer_shots.gd", "flinch_layer_shots", null],  # the strip (GPU)
-	"--contact-check": ["res://tools/contact_check.gd", "contact_check", null],  # v95 swaps: hit vs contact pose
-	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],  # Tenzo's feet on his rocks
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],  # feet on stairs
-	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],  # --shots-dir=<dir>
-	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],  # the Empty's planted feet
-	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],  # clips in a real match
-	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],  # the leave beat
+	"--warden-blink-check": ["res://tools/warden_blink_check.gd", "warden_blink_check", "check"],      # eyelid blink
+	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
+	"--flinch-layer-shots": ["res://tools/flinch_layer_shots.gd", "flinch_layer_shots", null],      # the strip (GPU)
+	"--contact-check": ["res://tools/contact_check.gd", "contact_check", null],      # v95 swaps: hit vs contact pose
+	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],      # Tenzo's feet on his rocks
+	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
 	"--cast-pop-check": ["res://tools/cast_pop_check.gd", "cast_pop_check", null],      # move blends cross their gaps
 	"--stride-check": ["res://tools/stride_check.gd", "stride_check", null],      # run start and stop
 	"--stride-shots": ["res://tools/stride_shots.gd", "stride_shots", null],      # the stop from a run, before/after
+	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
+	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
+	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],  # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
@@ -366,54 +354,53 @@ const CHECKS := {
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
-	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],  # every Hunter gliding: turns, dive
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],      # before/after strip of turning on the spot
 	"--flue-flight-shots": ["res://tools/flue_flight_shots.gd", "flue_flight_shots", null],      # Cinder's Flue Flight
+	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],      # every Hunter gliding: turns, dive
 	# Meeko's sun and cloud orbit her, bob, clear the wings
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],  # frames of that orbit
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],  # every Hunter standing still (IDLE_AUDIT)
-	"--rooted-shots": ["res://tools/rooted_shots.gd", "rooted_shots", null],  # rooted Hunters casting, legs planted
-	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],  # the lobby lock-in poses (GPU)
-	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],  # the shot kick, before and after
-	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],  # every Hunter in a row, true scale
-	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],  # colour vs .glb
-	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],  # gait gate
-	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],  # slip sweep
-	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],  # walk, run, idle, attacks
+	"--rooted-shots": ["res://tools/rooted_shots.gd", "rooted_shots", null],      # rooted Hunters casting, legs planted
+	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
+	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
 	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],      # ways down, match camera
+	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],      # slip sweep
+	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # every Hunter in a row, true scale
+	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb
+	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
+	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],  # the sight wedge and hiding plates
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],  # sight wedge shots (GPU)
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
-	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],  # draw cost of sets of rigged Bokis
-	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],  # rigged Boki review sheets
-	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],  # fliers hover, glide, flare
 	# a Boki taking a hit, strips
 	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
-	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],  # a sheet per home state
-	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
-	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],  # rigged Boki
-	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],  # rigged Boki gait gate
-	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],  # rigged Boki gait strips
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
-	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],  # Sable (same check)
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
-	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],  # Sparkle / Vex screenshots
-	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],  # Tarek review screenshots
-	"--drop-merge-check": ["res://tools/drop_merge_check.gd", "drop_merge_check", null],  # merged ground drops
-	"--glide-cam-shots": ["res://tools/glide_cam_shots.gd", "glide_cam_shots", null],  # camera through a glide dive
-	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],  # full-inventory looting
 	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],
 	"--inventory-check": ["res://tools/inventory_check.gd", "inventory_check", null],  # in-match inventory
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],  # --shots-dir=<dir>, --resolution
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],  # --shots-dir=<dir>
-	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],  # --shots-dir=<dir>
-	"--ability-bar-shots": ["res://tools/ability_bar_shots.gd", "ability_bar_shots", null],  # --shots-dir=<dir>
+	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
+	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
+	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
+	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],    
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],      # Boki afloat in 1 m of water
+	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
+	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],      # rigged Boki gait gate
+	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],      # rigged Boki gait strips
+	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
+	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
+	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
+	"--drop-merge-check": ["res://tools/drop_merge_check.gd", "drop_merge_check", null],      # merged ground drops
+	"--glide-cam-shots": ["res://tools/glide_cam_shots.gd", "glide_cam_shots", null],      # camera through a glide dive
+	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
 	"--loot-window-check": ["res://tools/loot_window_check.gd", "loot_window_check", null],      # the deathbox window
 	"--lpage-drag-check": ["res://tools/lpage_drag_check.gd", "lpage_drag_check", null],      # L panel glove drag
 	"--loot-nudge-shots": ["res://tools/loot_nudge_shots.gd", "loot_nudge_shots", null],      # --shots-dir=<dir>
+	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
+	"--ability-bar-shots": ["res://tools/ability_bar_shots.gd", "ability_bar_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	# --shots-dir=<dir> --res=WxH
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],
@@ -422,40 +409,36 @@ const CHECKS := {
 	"--combo-mark-shots": ["res://tools/combo_mark_shots.gd", "combo_mark_shots", null],  # overhead combo tag strips
 	"--combo51-shots": ["res://tools/combo51_shots.gd", "combo51_shots", null],  # item 51 combo strips
 	"--dash-frames-check": ["res://tools/dash_frames.gd", "dash_frames", null],  # item 181
-	"--loot-glow-check": ["res://tools/loot_glow_check.gd", "loot_glow_check", null],  # loot rarity looks
-	"--loot-glow-shots": ["res://tools/loot_glow_shots.gd", "loot_glow_shots", null],  # --shots-dir=<dir>
 	"--hero-vfx-check": ["res://tools/hero_vfx_check.gd", "hero_vfx_check", null],
-	"--hunter-colour-gap-check": ["res://tools/hunter_colour_gap_check.gd", "hunter_colour_gap_check", null],
 	"--gameplay-media": ["res://tools/gameplay_media.gd", "gameplay_media", null],  # website clips and stills
-	"--knock-banner-clip": ["res://tools/knock_banner_clip.gd", "knock_banner_clip", null],  # GPU, --shots-dir=
-	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],  # the rocket drop (GPU)
+	"--hunter-colour-gap-check": ["res://tools/hunter_colour_gap_check.gd", "hunter_colour_gap_check", null],
+	"--knock-banner-clip": ["res://tools/knock_banner_clip.gd", "knock_banner_clip", null],      # GPU, --shots-dir=
 	"--hero-vfx-reel": ["res://tools/hero_vfx_reel.gd", "hero_vfx_reel", null],
 	# the per-Hunter parity reels (docs/parity_reel)
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
-	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],  # every look, side by side
-	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],  # item 60 screenshots
-	"--menu-focus-check": ["res://tools/menu_focus_check.gd", "menu_focus_check", null],  # hover stays in panel
-	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],  # Brimseed growth
-	"--title-check": ["res://tools/title_check.gd", "title_check", null],  # the title: menu, key art, frame budget
-	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],  # the hatch: a quiet, personal moment
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
-	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],  # the eggs' 3D shells
-	"--motley-reel": ["res://tools/motley_reel.gd", "motley_reel", null],      # owner review: E, Trade, ledge
 	"--boki-modes-check": ["res://tools/boki_modes_check.gd", "boki_modes_check", null],      # one mode per Boki
+	"--loot-glow-check": ["res://tools/loot_glow_check.gd", "loot_glow_check", null],      # loot rarity looks
+	"--loot-glow-shots": ["res://tools/loot_glow_shots.gd", "loot_glow_shots", null],      # --shots-dir=<dir>
+	"--motley-reel": ["res://tools/motley_reel.gd", "motley_reel", null],      # owner review: E, Trade, ledge
+	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
 	"--cel-leftovers-shots": ["res://tools/cel_leftovers_shots.gd", "cel_leftovers_shots", null],
 	"--ring-shots": ["res://tools/ring_shots.gd", "ring_shots", null],      # Fx.ring bursts and team markers
-	"--words-check": ["res://tools/words_check.gd", "words_check", null],      # Help: the Words page, its text budget
+	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
+	"--menu-focus-check": ["res://tools/menu_focus_check.gd", "menu_focus_check", null],   # hover stays in panel
+	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
+	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
+	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
+	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],      # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
 	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
-	"--item-art-check": ["res://tools/item_art_check.gd", "item_art_check", null],  # sculpted item models
 	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],      # art/props models
-	"--miss-fx-check": ["res://tools/miss_fx_check.gd", "miss_fx_check", null],      # missed shots end in a puff
-	"--miss-shots": ["res://tools/miss_shots.gd", "miss_shots", null],      # --shots-dir=<dir>
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],
+	"--item-art-check": ["res://tools/item_art_check.gd", "item_art_check", null],      # sculpted item models
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
 	"--hud-timeline-shots": ["res://tools/hud_timeline_shots.gd", "hud_timeline_shots", null],      # GPU, --before
 	"--tutorial-strip-shots": ["res://tools/tutorial_strip_shots.gd", "tutorial_strip_shots", null],
@@ -463,10 +446,10 @@ const CHECKS := {
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
 	"--stairs-check": ["res://tools/stairs_check.gd", "stairs_check", null],      # up and down stairs: no hops or pops
 	"--label-spacing-shots": ["res://tools/label_spacing_shots.gd", "label_spacing_shots", null],    # --shots-dir=<dir>
-	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
-	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],     # 2 games, relay
+	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
+	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
@@ -492,17 +475,17 @@ const CHECKS := {
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],
 	# no span without a prompt or a marker
 	"--tutorial-dead-air-check": ["res://tools/tutorial_dead_air_check.gd", "tutorial_dead_air_check", null],
-	"--duo-tutorial-check": ["res://tools/duo_tutorial_check.gd", "duo_tutorial_check", null],  # 2v2 tutorial
-	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],  # arrival modals, top bar
-	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],  # journal, away card
-	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],  # --shots-dir=<dir>
-	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],  # settings, menu look
-	"--ui-sfx-check": ["res://tools/ui_sfx_check.gd", "ui_sfx_check", null],  # slider, toggle, tab sounds
-	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],  # one message lane
-	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],  # the Unmasked
+	"--duo-tutorial-check": ["res://tools/duo_tutorial_check.gd", "duo_tutorial_check", null],      # 2v2 tutorial
+	"--ui-sfx-check": ["res://tools/ui_sfx_check.gd", "ui_sfx_check", null],     # slider, toggle, tab sounds
+	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar
+	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
+	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
 	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the XP first-time lines
+	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--bus-sliders-check": ["res://tools/bus_sliders_check.gd", "bus_sliders_check", null],      # a volume per bus
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
+	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
+	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
 	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null], # ability cards = data
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
@@ -518,8 +501,8 @@ const CHECKS := {
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
 	"--relics-tab-check": ["res://tools/relics_tab_check.gd", "relics_tab_check", null],  # the Market's Relics tab
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
-	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],  # Relics tile grid
-	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
+	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],      # Relics tile grid
+	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],      # no "Arena" in practice text
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],  # bots wear gamer tags
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
@@ -534,7 +517,6 @@ const CHECKS := {
 	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
-	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],  # hit strength
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
 	# the same with one dummy moved around: reach, lane and arc to 0.1 m / 3 degrees
 	"--hit-shape-fine": ["res://tools/hit_shape_fine.gd", "hit_shape_fine", null],
@@ -559,8 +541,8 @@ const CHECKS := {
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
 	"--result-card-shots": ["res://tools/result_card_shots.gd", "result_card_shots", null],      # --shots-dir=<dir>
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
-	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],  # 0.24.2-0.24.4 saves load
-	"--garden-fit-check": ["res://tools/garden_fit_check.gd", "garden_fit_check", null],  # garden screens fit
+	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],      # 0.24.2-0.24.4 saves load
+	"--garden-fit-check": ["res://tools/garden_fit_check.gd", "garden_fit_check", null],      # garden screens fit
 	"--garden-zones-check": ["res://tools/garden_zones_check.gd", "garden_zones_check", null],  # GARDEN.md 10 zones
 	"--garden-day-played-check": ["res://tools/garden_day_played_check.gd", "garden_day_played_check", null],
 	"--zone-affinity-check": ["res://tools/zone_affinity_check.gd", "zone_affinity_check", null],  # zone loves
@@ -590,14 +572,14 @@ const CHECKS := {
 	"--tumble-check": ["res://tools/tumble_check.gd", "tumble_check", null],  # Tumble, GARDEN_MODERN.md 4.2
 	"--seek-check": ["res://tools/seek_check.gd", "seek_check", null],  # Seek, GARDEN.md 5.3
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
-	"--lantern-check": ["res://tools/lantern_check.gd", "lantern_check", null],  # Lantern Match, GARDEN_MODERN 4.2
+	"--lantern-check": ["res://tools/lantern_check.gd", "lantern_check", null],      # Lantern Match, GARDEN_MODERN 4.2
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],  # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],  # the Dash's showcase wall
 	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],  # 4.2 game 4
 	"--glint-fx-shots": ["res://tools/glint_fx_shots.gd", "glint_fx_shots", null],  # the looks sheet (GPU)
-	"--bowl-sfx-check": ["res://tools/bowl_sfx_check.gd", "bowl_sfx_check", null],      # Mixing Bowl sounds
 	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds
+	"--bowl-sfx-check": ["res://tools/bowl_sfx_check.gd", "bowl_sfx_check", null],      # Mixing Bowl sounds
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],  # GARDEN_MODERN 4.2 game 3
@@ -614,20 +596,17 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
-	# 2 games, relay: a raid client's boss top bar
-	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
-	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
-	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
-	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],      # GPU
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
-	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],  # 0061 dropped players
-	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],  # 0061 cut-off saves
-	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],  # 2 games, relay
-	"--sfx-remote-check": ["res://tools/sfx_remote_check.gd", "sfx_remote_check", null],  # 2 games, relay
+	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
+	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
+	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],      # 0061 dropped players
+	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
+	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--tele-net-shots": ["res://tools/tele_net_shots.gd", "tele_net_shots", null],     # 2 games, GPU, --shots-dir=
 	"--glide-net-check": ["res://tools/glide_net_check.gd", "glide_net_check", null],     # 2 games, relay
+	"--sfx-remote-check": ["res://tools/sfx_remote_check.gd", "sfx_remote_check", null],     # 2 games, relay
 	# + a server, delay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],
 	"--online-rocket-check": ["res://tools/online_rocket_check.gd", "online_rocket_check", null],      # drop, 2 games
@@ -653,20 +632,20 @@ const CHECKS := {
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],  # Mantle look, creator
 	# Fx.number rolls, tiers, reticle
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],
-	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],  # --shots-dir=<dir>
 	"--wisp-hum-check": ["res://tools/wisp_hum_check.gd", "wisp_hum_check", null],      # the Hunter Wisp hum
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],  # docs/decisions/0019
-	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],  # --shots-dir=<dir> [--dot-hard]
+	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],  # --shots-dir=<dir>
-	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],  # the Boki box tags, bond %
+	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
 	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],  # --shots-dir=<dir>
 	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],  # down/death card
+	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],      # the Boki box tags, bond %
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],  # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],  # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
-	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],  # only hard CC breaks a stomp
+	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],  # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],  # --shots-dir=<dir> [--seed=N]
@@ -677,54 +656,49 @@ const CHECKS := {
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
 	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],  # --shots-dir=<dir>
 	"--blight-edge-shots": ["res://tools/blight_edge_shots.gd", "blight_edge_shots", null],  # --shots-dir=
-	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],  # skinned monster models
+	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],  # --shots-dir=<dir>
 	"--item-art-clip": ["res://tools/item_art_clip.gd", "item_art_clip", null],  # --shots-dir=<dir>, review clip frames
 	"--train-halts-shots": ["res://tools/train_halts_shots.gd", "train_halts_shots", null],  # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],  # shields never hide a Hunter
 	# the shell follows amount and time
 	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],
-	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],  # DoT body look
-	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],  # 2v2, one down, --shots-dir=
-	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],  # --shots-dir=<dir>
+	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
+	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
-	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
-	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],  # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],  # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],  # Hob in person, the second Mask; --shots-dir=
-	"--npc-check": ["res://tools/npc_check.gd", "npc_check", null],  # the rigged NPCs (Hob, Pell)
-	"--npc-shots": ["res://tools/npc_shots.gd", "npc_shots", null],  # --shots-dir=<dir> (a renderer, GPU)
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
-	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
-	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # palettes
-	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=
+	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
+	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],      # Hob's clear ring
 	"--hob-spot-shots": ["res://tools/hob_spot_shots.gd", "hob_spot_shots", null],      # =<dir>, before/after
-	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],  # steps never jolt
 	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],      # --shots-dir=<dir>
+	"--npc-check": ["res://tools/npc_check.gd", "npc_check", null],      # the rigged NPCs (Hob, Pell)
+	"--npc-shots": ["res://tools/npc_shots.gd", "npc_shots", null],      # --shots-dir=<dir> (a renderer, GPU)
 	# every monster kind has every state; wind-up = telegraph
 	"--mob-anim-check": ["res://tools/mob_anim_check.gd", "mob_anim_check", null],
 	# same input script at 30/60/144 fps
 	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],
 	# docs/specs/PARTY.md, fake matchmaker
 	"--party-client-check": ["res://tools/party_client_check.gd", "party_client_check", null],
-	"--party-view-check": ["res://tools/party_view_check.gd", "party_view_check", null],  # the party screen
-	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],  # type filter + sort
-	"--size-budget-check": ["res://tools/size_budget_check.gd", "size_budget_check", null],  # SIZE_BUDGET.md
-	"--save-compat-check": ["res://tools/save_compat_check.gd", "save_compat_check", "check"],  # SAVES.md
-	"--save-golden-capture": ["res://tools/save_compat_check.gd", "save_compat_check", "capture"],  # --out=<dir>
-	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],  # shots at point blank
-	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
-	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],  # drop and landing frames
-	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],  # the loading screen; =home|training
+	"--party-view-check": ["res://tools/party_view_check.gd", "party_view_check", null],      # the party screen
+	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
+	"--size-budget-check": ["res://tools/size_budget_check.gd", "size_budget_check", null],      # SIZE_BUDGET.md
+	"--save-compat-check": ["res://tools/save_compat_check.gd", "save_compat_check", "check"],      # SAVES.md
+	"--save-golden-capture": ["res://tools/save_compat_check.gd", "save_compat_check", "capture"],      # --out=<dir>
 	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],  # press to motion
+	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
+	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
+	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
+	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
 	"--swept-hit-check": ["res://tools/swept_hit_check.gd", "swept_hit_check", null],
 	"--bot-ring-check": ["res://tools/bot_ring_check.gd", "bot_ring_check", null],      # BotRing
 	"--level-growth-check": ["res://tools/level_growth_check.gd", "level_growth_check", null],
@@ -732,6 +706,12 @@ const CHECKS := {
 	"--boss-parity-check": ["res://tools/boss_parity_check.gd", "boss_parity_check", null],  # boss phase, leash, kill
 	"--steal-tell-check": ["res://tools/steal_tell_check.gd", "steal_tell_check", null],      # boss low-HP tell
 	"--steal-tell-shots": ["res://tools/steal_tell_shots.gd", "steal_tell_shots", null],      # GPU, --shots-dir=
+	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker
+	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],      # aim pitch: the pose
+	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
+	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
+	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
+	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
 	"--camera-follow-check": ["res://tools/camera_follow_check.gd", "camera_follow_check", "check"],      # dash trail
@@ -741,8 +721,6 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
-	"--tut-rebind-check": ["res://tools/tut_rebind_check.gd", "tut_rebind_check", null],      # text follows rebinds
-	"--fresh-run-log": ["res://tools/fresh_run_log.gd", "fresh_run_log", null],      # --shots-dir=<dir>
 	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
 	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)

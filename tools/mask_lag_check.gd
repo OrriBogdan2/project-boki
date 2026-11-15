@@ -123,7 +123,6 @@ func _live_views(n: Node) -> int:
 	var live := 0
 	for vp in n.find_children("*", "SubViewport", true, false):
 		var mode := (vp as SubViewport).render_target_update_mode
-		var shown := vp.get_parent() is CanvasItem and (vp.get_parent() as CanvasItem).is_visible_in_tree()
-		if mode == SubViewport.UPDATE_ALWAYS or (mode == SubViewport.UPDATE_WHEN_VISIBLE and shown):
+		if mode == SubViewport.UPDATE_ALWAYS or mode == SubViewport.UPDATE_WHEN_VISIBLE:
 			live += 1
 	return live

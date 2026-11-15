@@ -346,7 +346,6 @@ func _draw_world_labels() -> void:
 	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	WaysOutPins.draw(self)             # the seats out and the Blight's edge, from afar
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
-	TerrainHud.draw(self)    # the hazard you're standing in, and whether your Boki keeps you safe
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
 		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))
@@ -401,8 +400,6 @@ func _draw_world_labels() -> void:
 				_bar(lr, clampf(mb.hp / mb.max_hp, 0.0, 1.0), StealTell.fill(mb, Color("ff6a5a"), m.time))
 				StealTell.mark(self, Vector2(lr.end.x + 14, lr.get_center().y), mb)
 			continue
-		if m.lairs.boss_for(m.player) == mb:
-			continue      # the raid boss (a Boss or plain Mob copy on a client): the top bar has it
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
 			var br := Rect2(sp + Vector2(-bw * 0.5, 0), Vector2(bw, 6))
@@ -574,7 +571,6 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
-	if m.crouch_hint: m.crouch_hint.draw(self, sz)
 	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
@@ -675,8 +671,6 @@ func _draw_minimap(sz: Vector2) -> void:
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
-	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
-		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
@@ -999,7 +993,6 @@ var _h_down := false
 func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
-	TermHints.watch(self, m.player)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# the fold_guide key (H) folds the training guide (G is send / recall your kin) and the kit panel away (and back)
 	var hd := Input.is_action_pressed("fold_guide")
@@ -1229,7 +1222,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
+		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
 		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
@@ -1739,10 +1732,6 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
-	if Settings.get_v("tips") and not Record.clean():
-		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
-			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1908,7 +1897,8 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
-	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}
+	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -2777,44 +2767,36 @@ func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
 	feed_top = maxf(feed_top, r.end.y + 8.0)
 
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with
-## marks at the phase lines, and the enrage clock. A client's boss is a Boss too (BossNet syncs phase, enraged
-## and the wake clock); a plain Mob copy gets name from the raid rules, phase from its health, no enrage clock.
+## marks at the phase lines, and the enrage clock.
 func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
-	var b: Mob = m.lairs.boss_for(p)
+	var b: Boss = m.lairs.boss_for(p)
 	if b == null:
 		return
-	var bb := b as Boss
-	var bname := String(bb.md["name"]) if bb else String(HeartRaid.rules()["boss"]["name"])
-	var col: Color = Lairs.color_of(bb.lair if bb else {"boss": b.mkind})
+	var col: Color = Lairs.color_of(b.lair)
 	var w := minf(560.0, sz.x * 0.46)
 	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 30), Vector2(w, 16))
 	_rounded(Rect2(r.position - Vector2(14, 22), r.size + Vector2(28, 50)), Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
-	_text(r.position + Vector2(0, -6), bname.to_upper(), 15, col, big)
-	var phase_n := bb.phase if bb else Boss.phase_at(b.hp, b.max_hp)
-	var ph := "PHASE %d" % (phase_n + 1)
+	_text(r.position + Vector2(0, -6), String(b.md["name"]).to_upper(), 15, col, big)
+	var ph := "PHASE %d" % (b.phase + 1)
 	_text(Vector2(r.end.x - TextCache.width(big, ph, 13), r.position.y - 6), ph, 13, INK, big)
 	var frac := clampf(b.hp / b.max_hp, 0.0, 1.0)
 	c.draw_rect(r, Color(0, 0, 0, 0.6))
 	var ct := _chip_of(b, frac)
 	if ct > frac:
 		c.draw_rect(Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8))
-	var enraged: bool = bb != null and bb.enraged
-	var hc := Color("ff5a4a") if enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
+	var hc := Color("ff5a4a") if b.enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
 	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), StealTell.fill(b, hc, m.time))
 	StealTell.mark(self, Vector2(r.position.x + 9, r.end.y + 16), b)
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)
-	if bb == null:
-		feed_top = maxf(feed_top, r.end.y + 30.0)
-		return
-	var left := float(bb.md.get("enrage", 75.0)) - bb.awake_t
-	var et := "ENRAGED" if bb.enraged else "ENRAGE IN %s" % _fmt(maxf(0.0, left))
-	_ctext(Vector2(sz.x * 0.5, r.end.y + 20), et, 12, BAD if bb.enraged or left < 20.0 else MUTED, big)
+	var left := float(b.md.get("enrage", 75.0)) - b.awake_t
+	var et := "ENRAGED" if b.enraged else "ENRAGE IN %s" % _fmt(maxf(0.0, left))
+	_ctext(Vector2(sz.x * 0.5, r.end.y + 20), et, 12, BAD if b.enraged or left < 20.0 else MUTED, big)
 	var lk: Dictionary = m.lairs.sealed_lair(p)
 	if not lk.is_empty():
 		# sealed in with it: what it takes to get out, and when the seal gives up on its own
-		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [bname.to_upper(), Lairs.clock(m.lairs.lock_left(lk))], 15, col, big)
-	if bb.invul_t > 0.0:
-		_ctext(Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (bb.phase + 1), 22, col, big)
+		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [String(b.md["name"]).to_upper(), Lairs.clock(m.lairs.lock_left(lk))], 15, col, big)
+	if b.invul_t > 0.0:
+		_ctext(Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (b.phase + 1), 22, col, big)
 	feed_top = maxf(feed_top, r.end.y + (54.0 if not lk.is_empty() else 34.0))

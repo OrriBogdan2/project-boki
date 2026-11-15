@@ -521,19 +521,6 @@ def gen_gear():
     page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/hunter_abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
-def _terrain_hazards(hz_at):
-    """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
-    which Boki walks it safely."""
-    R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
-    kin = content("kin_v2")
-    rows = []
-    for kind, D in R.items():
-        where = sorted({nm for k, nm in hz_at if k == kind})
-        C = D["counter"]
-        safe = [t.title() + " type" for t in C.get("themes", [])] + [kin.get(k, {}).get("name", k) for k in C.get("kin", [])]
-        rows.append([D["name"], ", ".join(where), D["hurts"].capitalize(), ", ".join(safe)])
-    return "### Terrain hazards\n\nGround that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.\n\n" + table(["Hazard", "Where", "Does", "Safe with"], rows) + "\n\n"
-
 def gen_maps():
     try:
         src = open(os.path.join(ROOT, "scripts", "match", "world.gd"), encoding="utf-8").read()
@@ -554,7 +541,7 @@ def gen_maps():
             dz = {0: "quiet", 1: "contested", 2: "dangerous"}
             body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
-            bn = {"colossus": "Siegephant", "serpent": "Sarcobra", "brood": "Calderoise"}
+            bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
             en = {"breach": "break the Gate Seal down", "dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
@@ -566,9 +553,6 @@ def gen_maps():
             if m.get(key): trav.append("%d %s" % (len(m[key]), label))
         if m.get("train"): trav.append("a sky train with %d stops (%s)" % (len(m["train"].get("stations", [])), ", ".join(m["train"].get("names", []))))
         if trav: body += "**Getting around:** " + ", ".join(trav) + ".\n\n"
-        hz_at = [(A["kind"], i.get("name", i["id"])) for i in isl for A in i.get("hazard_areas", [])]
-        if hz_at:
-            body += _terrain_hazards(hz_at)
         if m.get("chokepoints"):
             body += "**Chokepoints:** " + ", ".join(c if isinstance(c, str) else c.get("name", "") for c in m["chokepoints"]) + ".\n\n"
         sp = m.get("spawn_points", {})

@@ -33,8 +33,8 @@ its engines droning and its shadow sweeping over the islands below.
 
 ## Moving around
 
-- **Jump and glide.** Press Space again in the air and hold it (or hold Mouse 5, which opens the glider
-  at once without a jump); holding Space from the jump never glides. Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
+- **Jump and glide.** Hold Space in the air (or press Mouse 5, which opens the glider at once without
+  a jump). Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
   brake. The glider heats up (about 14 seconds of level gliding); it cools fastest on the ground.
 - **Feathering.** Opening and closing the glider is instant with no penalty. With it closed in the air
   it cools a little, and for a moment after closing you keep the glide's speed and steering, so
@@ -125,15 +125,15 @@ rolls which lairs are live (the rest lie dormant).
   seconds. Everyone within 150 m hears the roar and gets a ping, a shaft of light rises over the lair,
   and the seal's clock floats over the gate, so a squad outside can camp it. Bosses have phases at 66%
   and 33% and enrage after 75 seconds. They fight everyone inside, rivals included.
-  - **Siegephant** (a castle-tower elephant): slams with shockwave rings you jump, thrown boulders, fissures.
-  - **Sarcobra** (a winged tomb cobra): telegraphed lunges, lightning circles, a coiled discharge.
-  - **Calderoise** (a volcano-shelled tortoise): acid spit and puddles, egg sacs that hatch adds, burrowing.
+  - **The Stone Colossus:** slams with shockwave rings you jump, thrown boulders, fissures.
+  - **Stormcoil, the Sky Serpent:** telegraphed lunges, lightning circles, a coiled discharge.
+  - **The Brood Mother:** acid spit and puddles, egg sacs that hatch adds, burrowing.
 - **After.** The gate stays shut for 15 seconds unless someone inside pulls the lever by it, and an
   updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
   roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
-  your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Siegephant), Zephyrak
-  (Sarcobra) or Hivara (Calderoise).
+  your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Colossus), Zephyrak
+  (Stormcoil) or Hivara (Brood Mother).
 
 ## Getting out
 
@@ -219,5 +219,5 @@ boss lairs and a sky train. Full details on [Maps and biomes](Maps.md).
 quiet outer isles (Highwatch and Saltmere have uplinks), a mid ring of four regions each with one raised plateau reached by stairs (Frostgate,
 Cinder Steps, Stormbreak, Thornwood), and a raised core, **the Crown**, with the vault on the Throne,
 two boss Gaols and the most loot and Blight. Every route into the Crown is a bridge or a glide over
-open air. Lairs: Stormcrown Eyrie (Sarcobra), the Sunken Forge (Siegephant) and the Thornhive
-(Calderoise), two of them live each match.
+open air. Lairs: Stormcrown Eyrie (Stormcoil), the Sunken Forge (Stone Colossus) and the Thornhive
+(Brood Mother), two of them live each match.

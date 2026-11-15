@@ -163,13 +163,12 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
-## Floating damage number colour: by who was hit and how (Fx picks and draws). `plain` is a plain hit's
-## colour (a Boki's hits wear its type colour); crits, armour and hurt keep theirs.
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, plain := HIT) -> Color:
+## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
+static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
 	if on_you: return HURT
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
-	return HIT_ARMOR if armor_hit else plain
+	return HIT_ARMOR if armor_hit else HIT
 
 static var _italic: FontVariation
 ## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).

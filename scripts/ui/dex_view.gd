@@ -230,7 +230,6 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	_fact(info, "pin", "Lives", _habitat(spk))
 	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
 	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
-	HazardCounter.add_row(info, spk, 18.0, UI.T_SMALL)
 	if BokiQuirks.quirk(spk) != "":
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":

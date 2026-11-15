@@ -40,10 +40,6 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
-## Sable 2026-11-14 (ext/ingame-sync-sable): tilt1112 master in game
-The 11-13 blocker below (left hand 6.0 -> 21.1x) was the new pistols fused to the thighs and coat, not the joint points:
-`detach` hand.L/hand.R from hips and their thigh brings the worst clip to 15.3 (bola; main 18.4), 0 clips over 18.5.
-
 ## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
 The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
 on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
@@ -53,12 +49,6 @@ the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fi
 `~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
 and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
 Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
-
-## Status (2026-11-14, ext/albert-i1-ingame): Albert i1 in game
-Albert is on his live i1 master (art/wardens/breaker/IMPORT.md). Two swap keys came with him: `emit_paint` (a master that paints its
-glow: the emissive texture is the baked atlas's texels in a hue/sat/value range) and `screen` again (`screen_uvs`, lost in a merge
-before 11-11: Albert's porthole showed blank glass from the clean1 swap on). The fish has `move_bones` with `to` and the game glb is
-main's (absolute points only), which closes the 16x stretch: worst 5.24, 0 clips over 9.5.
 
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged

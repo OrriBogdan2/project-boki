@@ -17,6 +17,7 @@ const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", 
 		"swap"]
 # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
+const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -108,7 +109,6 @@ var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
 var shield_src := ""          # an Icons id: who gave the shield (ShieldSrc), for your vitals' strip
-var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
@@ -540,8 +540,6 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if shield > 0.0 and not shelled:
 		var a := minf(shield, d)
 		shield -= a; d -= a
-		ShieldSfx.hit(self, a)
-		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
@@ -831,13 +829,15 @@ func do_jump() -> void:
 	if wall_moves.try_kick(self):
 		return
 	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
-	var near_ground := HunterMove.near_landing(vel.y, pos.y - ground()) and not over_void()
+	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
+	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
+	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
 		if gliding:
 			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
-	jump_buf = HunterMove.jump_buffer_s
+	jump_buf = JUMP_BUFFER
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
 const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
@@ -901,7 +901,6 @@ func _dash_into_glide() -> bool:
 func _open_glider() -> void:
 	if not moves.open_glider():
 		return
-	add_stat("glide_presses")     # the tutorial's glide step counts only a press
 	_glide_armed = false
 	grounded = false
 	glider_sfx("open")
@@ -1512,7 +1511,7 @@ func _emit_shot() -> void:
 		m.spawn_shot(self, start, Vector2(cos(a), sin(a)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
-	FireSfx.shot(get_instance_id(), wpn["sfx"], pos, -2.0 if is_local() else -6.0, float(wpn["rate"]))
+	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
@@ -1815,9 +1814,7 @@ func sim(dt: float) -> void:
 	HunterCooldowns.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0:
-			shield = 0.0
-			shield_kind = ""
+		if shield_t <= 0.0: shield = 0.0
 	if reload_t > 0.0:
 		reload_t -= dt
 		if reload_t <= 0.0:
@@ -2076,7 +2073,7 @@ func _physics(dt: float) -> void:
 	else:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
-			var grip: float = m.ground_grip(pos, self)     # ice in a frost region: you skid instead of stopping
+			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
 				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
 				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
@@ -2257,7 +2254,7 @@ func _physics(dt: float) -> void:
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
-		coyote = HunterMove.coyote_s
+		coyote = 0.12
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt
@@ -2799,7 +2796,7 @@ func level_slot(slot: String) -> bool:
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
-		RankSfx.spent(slot, int(slot_lv[slot]))
+		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
@@ -2969,7 +2966,6 @@ var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self:
 		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
-		if m: HostileCue.on_used(self, slot)      # a rival's E or R sounds like a threat
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot
@@ -3084,27 +3080,17 @@ func _anim_state(stretch: float) -> void:
 		s.erase("air_h")
 
 ## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
-## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
+## heroes "feel more important"). Visual only: the hitbox (r), the TeamRing hit circle under your
+## feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
-var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
 	if n == null:
 		return
-	vis_k = 1.0
-	fit_scale()
-
-## Puts VIS_SCALE x the camera's hunter_scale on the model (again when the Settings camera changes).
-func fit_scale() -> void:
-	var k: float = VIS_SCALE * (m.cam.hunter_scale if m and m.cam else 1.0)
-	if is_equal_approx(k, vis_k):
-		return
-	model.scale *= k / vis_k
-	var ring := model.get_node_or_null("TeamRing") as Node3D
+	n.scale *= VIS_SCALE
+	var ring := n.get_node_or_null("TeamRing") as Node3D
 	if ring:
-		ring.scale /= k / vis_k
-	vis_k = k
+		ring.scale /= VIS_SCALE
 
 ## (movefeel) Where to draw this hunter between simulation steps. Everyone else is interpolated
 ## (drawn up to one step in the past, which is smooth); the local player is drawn at the present
@@ -3128,7 +3114,6 @@ func render(delta: float, alpha: float) -> void:
 			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
-	fit_scale()
 	HunterWisp.tick(self, delta)
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
 	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)

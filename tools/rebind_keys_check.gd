@@ -163,7 +163,7 @@ func _tutorial() -> void:
 # ------------------------------------------------------------------ 4. loading tips, tokens, kit card
 func _loading() -> void:
 	var texts: Array = []
-	for tip in TipPick.rules()["tips"]: texts.append(TipPick.render(String(tip["text"])))
+	for tip in load("res://scripts/ui/loading.gd").TIPS: texts.append(Settings.fill_keys(String(tip)))
 	none("loading tips name no default key (%d tips)" % texts.size(), _stale_in(texts))
 	var sample := ["Press E again", "Hold Shift to aim", "Dash (Shift)", "on RMB", "your right click"]
 	var fine := ["Press F5 again", "hold F13", "F2 AGAIN", "Press it again"]
@@ -172,7 +172,7 @@ func _loading() -> void:
 	ok("the kit card's tile caps follow the bindings",
 			TILES.keys().all(func(k): return KitCard._cap(k) == Settings.key_cap(TILES[k])))
 	ok("no loading tip leaves a {token} unfilled", not texts.any(func(t): return String(t).contains("{")))
-	var moved := TipPick.render("{jump} {crouch} {interact} {util1}")
+	var moved := Settings.fill_keys("{jump} {crouch} {interact} {util1}")
 	var caps: Array = ["jump", "crouch", "interact", "util1"].map(func(a): return Settings.key_cap(a))
 	ok("tokens fill from the bindings ('%s')" % moved, moved == " ".join(caps))
 

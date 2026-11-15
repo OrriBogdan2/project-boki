@@ -10,7 +10,6 @@ extends RefCounted
 ## And the abyss (tools/gen_sfx_abyss.py, AbyssSfx): a scripted walk off a Hollow Crown rim plays the whoosh
 ## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
 ## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
-## Hunter callouts (HunterBarks): who hears which bark, the 6 s cooldown and the setting.
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 ## And Motley's hover hum (no footsteps): held while he moves, swelling and rising with speed, gone when still.
 ## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
@@ -67,8 +66,6 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
-	_shields(m, P)
-	_barks(m, P)
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
 	_buses()
@@ -146,35 +143,6 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
-## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
-## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
-func _shields(m: Match, P: Hunter) -> void:
-	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
-	P.inv_t = 0.0
-	for kind in ["ward", "cloak", "molten"]:
-		P.shield = 30.0
-		P.shield_kind = "" if kind == "ward" else kind
-		for part in ["hit", "break"]:
-			var cue := "shield_%s_%s" % [kind, part]
-			ok(Sfx.ensure(cue), "%s is a sound on file" % cue)
-			Sfx.last_played.clear()
-			P.hurt(10.0 if part == "hit" else 40.0, R, {})
-			var shield_cues := Sfx.last_played.keys().filter(func(k): return k.begins_with("shield_"))
-			ok(shield_cues == [cue], "your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues])
-		ok(P.shield_kind == "" and P.shield <= 0.0, "...and the break clears the material")
-	Sfx.listener = P.pos
-	R.shield = 30.0
-	R.shield_kind = "molten"
-	R.pos = P.pos + Vector3(70, 0, 0)
-	Sfx.last_played.clear()
-	R.hurt(10.0, P, {})
-	ok(Sfx.last_played.is_empty(), "a rival's shield 70 m away is out of earshot")
-	R.pos = P.pos + Vector3(5, 0, 0)
-	R.hurt(10.0, P, {})
-	ok(Sfx.last_played.has("shield_molten_hit"), "...and 5 m away its thunk is heard")
-	R.shield_t = 0.01
-	R.sim(0.1)
-	ok(R.shield <= 0.0 and R.shield_kind == "", "a shield that runs out clears the material")
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
@@ -297,65 +265,6 @@ func _step_db(h: Hunter, P: Hunter, d: float, contact: bool) -> float:
 	if not Sfx.last_played.keys().any(func(k): return String(k).contains("step")):
 		return NAN
 	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
-## Hunter callouts: yours (ult back, low health, a knock, your Boki down) only for you, a 6 s cooldown per Hunter,
-## a teammate's "Boki down" heard 40 m away at the teammate, a rival's never, nothing with the setting off.
-func _barks(m: Match, P: Hunter) -> void:
-	m.barks = HunterBarks.new()
-	var B := m.barks
-	var bark_of := func(h: Hunter, kind: String): return "%s_call_%s" % [h.arch, kind]
-	Sfx.listener = P.pos
-	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
-	P.ak.cd["x"] = 5.0
-	B.tick(m)
-	ok(B.plays.is_empty(), "no bark while your ultimate is cooling down (%s)" % [B.plays])
-	P.ak.cd["x"] = 0.0
-	Sfx.last_played.clear()
-	B.tick(m)
-	var heard := Sfx.last_played.has(bark_of.call(P, "ult"))
-	ok(B.plays == [["ult", P.nid]] and heard, "your ultimate back: one bark (%s)" % [B.plays])
-	B.knock_landed(m)
-	ok(B.plays.size() == 1, "a knock 0 s later stays quiet (the 6 s cooldown)")
-	m.time += HunterBarks.COOLDOWN_S + 0.1
-	B.knock_landed(m)
-	ok(B.plays.back() == ["knock", P.nid], "...and barks once the cooldown is over")
-	m.time += HunterBarks.COOLDOWN_S + 0.1
-	var hp := P.hp
-	P.hp = P.max_hp * 0.2
-	B.tick(m)
-	m.time += HunterBarks.COOLDOWN_S + 0.1
-	B.tick(m)
-	var low_pct := int(HunterBarks.LOW_SHARE * 100)
-	ok(B.plays.count(["low", P.nid]) == 1, "low health: one bark per drop under %d%%" % low_pct)
-	P.hp = hp
-	m.time += HunterBarks.COOLDOWN_S + 0.1
-	Sfx.last_played.clear()
-	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
-	heard = Sfx.last_played.has(bark_of.call(P, "boki"))
-	ok(B.plays.back() == ["boki", P.nid] and heard, "your Boki down: you call it")
-	var voiced := func(x): return x.team != P.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
-	var other: Hunter = m.hunters.filter(voiced)[0]
-	var team := other.team
-	var theirs := Kin.new()
-	theirs.owner_h = other
-	other.pos = P.pos + Vector3(40, 0, 0)
-	var before := B.plays.size()
-	B.boki_down(m, theirs)
-	ok(B.plays.size() == before, "a rival's Boki down: no call (%s)" % [B.plays])
-	other.team = P.team
-	Sfx.last_played.clear()
-	B.boki_down(m, theirs)
-	ok(B.plays.back() == ["boki", other.nid] and Sfx.last_played.has(bark_of.call(other, "boki")),
-			"a teammate's Boki down 40 m away: the squad hears the teammate call it")
-	ok(B.plays.all(func(p): return p[0] == "boki" or p[1] == P.nid), "only \"Boki down\" is heard from another Hunter")
-	Settings.v["hunter_barks"] = false
-	m.time += HunterBarks.COOLDOWN_S + 0.1
-	before = B.plays.size()
-	B.knock_landed(m)
-	B.boki_down(m, theirs)
-	Settings.v.erase("hunter_barks")
-	ok(B.plays.size() == before, "Hunter callouts off: no bark (%s)" % [B.plays])
-	other.team = team
-	theirs.free()
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
