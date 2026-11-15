@@ -3658,6 +3658,7 @@ func _play_evolutions() -> void:
 	var big := false
 	for e in evs:
 		if e["kind"] == "form": big = true
+	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)

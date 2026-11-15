@@ -32,7 +32,6 @@ var stage: HunterViewer          # your pick, standing: it strikes its lock-in p
 var stage_slot: Control          # where the stage stands, beside the Hunter grid
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
-var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
 
 const COLUMNS := 5          # Hunter cards per row: 13-15 Hunters = 3 rows, which fit at 1280x720 with the chat log full
 const PORTRAIT_PX := 48.0   # px, a card's portrait (the lobby's smaller one)

@@ -60,6 +60,7 @@ func run(m: Node) -> void:
 	ok(took == 20, "20 of 20 babies take the stronger parent's lean as a head start (%d)" % took)
 	ok(habits == 20, "20 of 20 babies take the food from one parent and the play from the other (%d)" % habits)
 	ok(kind, "a baby never hates its own favourite food")
+	_preview(a, b, rng)
 	a.erase("lean")
 	b.erase("lean")
 	ok(not Care.breed(a, b, rng).has("lean"), "parents with no lean (older saves) breed a baby with none")
