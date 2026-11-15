@@ -10,6 +10,7 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
+const Cover := preload("res://tools/boki_state_cover.gd")
 ## m/s: a stroll, a home wander, a home fetch (home.gd), a led Boki at its catch-up top (home_lead.json), and the
 ## match speed per species.
 const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
