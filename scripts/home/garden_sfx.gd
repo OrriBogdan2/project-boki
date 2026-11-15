@@ -1,9 +1,6 @@
 class_name GardenSfx
 extends RefCounted
 ## The sounds of the garden minigames (the Dash, Stump Shove, Seek, Spark Volley, Tumble, Echo Steps, the Show
-## Ring and the Relay Cup) and of the shaping items (docs/AUDIO.md). Every cue goes through cue(), which plays it
-## through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the checks can assert each
-## cue fires once per event.
 ## Ring and the Relay Cup), its cup rounds, wild visitors and seasons (docs/AUDIO.md). Every cue goes through
 ## cue(), which plays it through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the
 ## checks can assert each cue fires once per event.
