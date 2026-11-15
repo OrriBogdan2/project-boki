@@ -55,6 +55,15 @@ func drop() -> void:
 	AimKit.hide(h, "leap")
 	KitLooks.of(m).release(FOOT_KEY)
 
+## A glide press in a hop's flight: the flight (launch_to's fly_t) ends there at its own speed, no landing, no
+## rock, no crash. A hop up onto a ledge is the shared sure arc (pad) and keeps it, like every Hunter's.
+func let_go() -> bool:
+	if st.is_empty() or String(st["phase"]) != "air" or not h.pad.is_empty():
+		return false
+	h.fly_t = 0.0
+	drop()
+	return true
+
 ## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
 ## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
 ## last flight's final BUFFER_S is held for the landing (_crash).
