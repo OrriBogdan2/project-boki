@@ -15,7 +15,7 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
-##  10 skilled fight (capture-only, ext/footage-hl-1113) expert bots playing their own kits (no scripted rota),
+##  13 skilled fight (capture-only, ext/footage-hl-1113) expert bots playing their own kits (no scripted rota),
 ##                   no Merge, --media-take=<1-5> picks the matchup; MEDIA_MARK down/out lines name each fall
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
@@ -97,14 +97,10 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
-<<<<<<< ours
 		10: await _base_tp()
 		11: await _shift_glide(secs)
 		12: await _dive_feather(secs)
-||||||| base
-=======
-		10: await _skilled(secs)
->>>>>>> theirs
+		13: await _skilled(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -265,7 +261,7 @@ func _fight(secs: float) -> void:
 		_assist(t, squad_b, squad_a),
 		func(_t: float): return _centre(squad_a + squad_b))
 
-# ------------------------------------------------------------------ 10: skilled fight
+# ------------------------------------------------------------------ 13: skilled fight
 ## Each take: [squad A as [arch, boki]..., squad B ..., camera zoom, gap]. The player's Hunter is A's first.
 const TAKES := {
 	1: [[["gunslinger", "zapple"], ["juggernaut", "pebbit"], ["tender", "cindle"]],
@@ -300,11 +296,26 @@ func _skilled(secs: float) -> void:
 	for h in squad_a + squad_b:
 		(h as Hunter).ai = m.bot_brain.new_mind(m.rng, 0.95, cfg)
 		(h as Hunter).teleport((h as Hunter).pos)
-	_zoom(float(tk[2]))
+	var z0 := float(tk[2])
+	_zoom(z0)
+	m.guide = null                # no first-match lines, toasts or hints over the fight (kill feed and bars stay)
+	if m.hud:
+		m.hud.msgs.clear()
+		m.hud.msgs.hold = true
 	still_at = 6.0
 	_mark("start")
 	var seen := {}
 	await _go(secs, func(_t: float):
+		if m.hud:
+			m.hud.msgs.clear()
+		# the camera widens as the fight spreads (a dash out, a retreat) so both sides stay in the shot
+		var live := _alive(squad_a + squad_b)
+		var c := _centre(live)
+		var spread := 0.0
+		for h in live:
+			spread = maxf(spread, (h as Hunter).pos.distance_to(c))
+		var zt := clampf(z0 + maxf(0.0, spread - 4.0) / 11.0, z0, 1.15)
+		_zoom(lerpf(m.cam.zoom, zt, 0.05))      # (eased here: _go snaps the camera, so its own follow never runs)
 		for h in squad_a + squad_b:
 			var hh := h as Hunter
 			hh.merge_cd = 999.0       # no Merge in these takes (owner 11-13: the soul-link look is not for the pitch)
