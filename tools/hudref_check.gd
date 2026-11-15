@@ -631,7 +631,8 @@ func _hud_size(demo: Match) -> void:
 				"%s: the minimap shrinks at 80%% and never at 130%% (%s)" % [tag, str(widths)])
 			ok(is_equal_approx(widths[0.8] / widths[1.0], 0.8), "%s: 80%% draws it at 0.8 of its size" % tag)
 			if state == "on the ground":      # (the left column holds back to what fits above the bottom block)
-				ok(widths[1.3] > widths[1.0] * 1.15, "%s: 130%% draws the minimap clearly bigger" % tag)
+				ok(widths[1.3] > widths[1.0] * 1.05,
+						"%s: 130%% draws the minimap bigger (held to the room above the bottom block)" % tag)
 	Settings.v["hud_scale"] = keep
 	Settings.set_v("hud_full", false, false)
 	main.get_tree().root.size = Vector2i(1280, 720)
