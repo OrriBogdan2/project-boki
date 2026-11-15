@@ -38,9 +38,9 @@ var yaw := 0.0                # turned around the focus (0 = looking north); onl
 var yaw_to := 0.0
 var chase := 0.0              # 0 = the usual angle, 1 = low behind-the-ship view
 var chase_to := 0.0
-## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Centred (the default) stays on you; lean
-## leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased, and capped so you
-## never leave the screen (lean_to). Locked stays centred on you.
+## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Centred (the default)
+## stays on you; lean leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased,
+## and capped so you never leave the screen (lean_to). Locked stays centred on you.
 static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "centred"
 var pan := Vector3.ZERO
@@ -193,9 +193,9 @@ func lean_to(rel: Vector3) -> Vector3:
 	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
 	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
 
-## The view's lean for a cursor at `at` (viewport px) with you at `p`, in world metres: the centred and lean follows read the
-## cursor's ground distance from you (lean_to: none for centred, the footage shows no lean), the others its
-## distance from the screen's centre.
+## The view's lean for a cursor at `at` (viewport px) with you at `p`, in world metres: the centred and lean follows
+## read the cursor's ground distance from you (lean_to: none for centred, the footage shows no lean), the others
+## its distance from the screen's centre.
 func cursor_pan(at: Vector2, p: Vector3) -> Vector3:
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["centred"])
 	if follow_mode == "centred" or follow_mode == "lean":
