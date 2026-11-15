@@ -5,7 +5,7 @@ extends RefCounted
 ##     stomper and a knock on the wisp included.
 ##  2. The stomper takes damage as usual while locked, and it doesn't break the stomp.
 ##  3. A stun on the stomper cancels it at once; the wisp lives and can drift again. So does every hard
-##     crowd control (a root, a knock or launch, which still throws the stomper, Grounded, a hex, a push),
+##     crowd control (a root, a knock or launch, which still throws the stomper, Grounded, a push),
 ##     and the wisp is still alive past Stomp.TIME; a slow, Daze or Disoriented doesn't break it, and the
 ##     hold can't commit while the stomper is under hard crowd control.
 ##  4. Left alone, the stomp kills the wisp at Stomp.TIME, not before.
@@ -148,7 +148,6 @@ func _check_cc(at: Vector3) -> void:
 		"a knock": func() -> void: foe.hurt(5.0, m.player, {"kb": Vector2(2.0 * Capture.HARD_KNOCK * foe.mass(), 0)}),
 		"a launch": func() -> void: foe.hurt(5.0, m.player, {"lift": 4.0 * foe.mass()}),
 		"Grounded": func() -> void: KitStatus.apply(foe, "gnd", 0.4),
-		"a hex": func() -> void: Hex.apply(foe, 0.4),
 		"a push": func() -> void: m.displace.tow(foe, null, push),
 	}
 	for kind in hard:

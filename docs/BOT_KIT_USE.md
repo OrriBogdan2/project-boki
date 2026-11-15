@@ -91,7 +91,7 @@ The Snap did not change: the bots' general aim already leads the target by the w
 
 ## Stomps (BotStomp, scripts/match/bot_stomp.gd)
 
-A stomp is a 3 s finisher that can't be cancelled; the stomper can be hit, and any hard CC on it (stun, root, real knock or launch, Grounded, hex: `Stomp.breaks`) breaks the stomp and the wisp lives (DECISIONS 2026-11-11 "stomping", decision 0061). Bots play by that. The rules live in `BotStomp`, wired into `Bot.think` and `Bot._choose`. Nothing is listed per Hunter: the ranges and cooldowns come from the kit data (`content/archetypes/<id>.json`); only `rescue_r` is in `content/rules/bot_stomp.json`:
+A stomp is a 3 s finisher that can't be cancelled; the stomper can be hit, and any hard CC on it (stun, root, real knock or launch, Grounded: `Stomp.breaks`) breaks the stomp and the wisp lives (DECISIONS 2026-11-11 "stomping", decision 0061). Bots play by that. The rules live in `BotStomp`, wired into `Bot.think` and `Bot._choose`. Nothing is listed per Hunter: the ranges and cooldowns come from the kit data (`content/archetypes/<id>.json`); only `rescue_r` is in `content/rules/bot_stomp.json`:
 
 - **Stomp only when safe.** A bot goes for a downed rival, and holds interact on it, only when no enemy Hunter on its feet is within `BotStomp.punish_r()` of the wisp: the longest reach of any hard CC in any kit's RMB or E, held or tapped (14 m today: Lace's Heavy Shot pin, Meeko's Burrseed).
 - **Break a stomp on a teammate first.** When a teammate is being stomped and the bot's breaker is unlocked and off its kit cooldown, the bot does nothing else. It walks into reach, presses the breaker on the stomper and keeps aiming at the stomper for 1 s while the move winds up and flies. It goes up to `rescue_r` (25 m).

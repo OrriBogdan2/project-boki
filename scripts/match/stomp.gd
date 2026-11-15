@@ -20,7 +20,7 @@ const LOCKED_INPUTS := ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "u
 		"gear1", "gear2", "fire", "throw", "kin_ab"]
 
 ## Hard crowd control on the stomper breaks a stomp: everything Capture.controlled counts (a stun, a root,
-## a real knock or launch, Grounded, a hex) and a pull or push by Displace, which the pin would swallow.
+## a real knock or launch, Grounded) and a pull or push by Displace, which the pin would swallow.
 ## Slows, Daze, plain damage and the small shove most hits carry don't (the stomper stays put through them).
 static func breaks(m: Match, h: Hunter) -> bool:
 	return Capture.controlled(h) or not m.displace.towing(h).is_empty()
