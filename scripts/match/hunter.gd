@@ -109,7 +109,6 @@ var shield := 0.0
 var shield_t := 0.0
 var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var shield_src := ""          # an Icons id: who gave the shield (ShieldSrc), for your vitals' strip
-var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model

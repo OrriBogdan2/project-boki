@@ -203,7 +203,6 @@ const MIN_GAP := {
 	"xp_tick": 60,
 	"steal_won": 400,
 	"steal_lost": 400,
-	"hostile_cast": 100,
 	"armor_up": 120
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
