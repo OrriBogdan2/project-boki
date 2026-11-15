@@ -38,7 +38,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy. |
-| Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
+| Passive: Shardskin | Shardskin: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
 | Dash: Rock Hop | Rock Hop: spring off a rock toward the cursor; press again as you land to hop on, up to 3 hops. The last landing crashes, and a rock rolls on and slows. |
 | LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 | RMB: Quakefall | Quakefall: tap to slam just ahead; hold for a moment to hop forward and up, then slam harder. The centre stuns. Jump while holding to leap further. |
@@ -48,14 +48,14 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 and lengthening from 18m to 25m over 2s of sneaking) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
+**Shardskin (passive).** Shardskin: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 and lengthening from 18m to 25m over 2s of sneaking) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
 
 **Rock Hop (dash, Shift, 12s cooldown).** A rock bursts up under you and you spring off it toward the cursor, about 2.5m. A fresh rock rises under your feet at each landing and you skid along it, skateboard style. Press again within 0.6s of a take-off to hop on toward the cursor, up to 3 hops; press nothing and you land. Each landing nudges whoever is beside you. The last one crashes (8 damage and a shove), and a rock rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. Rocks crumble in a moment, allies can hop them, and a hop crosses the abyss only if ground lies within your hops left. The cooldown starts when the chain ends. In the air: your long dash.
 
 **Quakefall (RMB, 11s cooldown).**
 
 - *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
-- *Hold:* Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
+- *Hold:* Hold up to 0.45s (it goes by itself at the end): hop about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
 - *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
