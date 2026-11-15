@@ -200,7 +200,9 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 		await tree.process_frame
 		frames += 1
 	ok(hx.stage == "name", "Name it hands over to naming")
-	hx._finish(sp, "Ember", "Orri", true)
+	var boxes: Array = hx.bottom.find_children("*", "LineEdit", true, false)
+	ok(boxes.size() == 1, "the naming card has one text box, the Boki's (yours is in the locker): %d" % boxes.size())
+	hx._finish(sp, "Ember", true)
 	var rec: Dictionary = Save.d["roster"][0] if not Save.d["roster"].is_empty() else {}
 	var same: bool = rec.get("species", "") == sp and rec.get("name", "") == "Ember" and rec.get("starter", false)
 	var saved: bool = Save.d["active"] == rec.get("uid", "") and Save.d["tutorial"].get("hatched", false)
@@ -224,7 +226,7 @@ func _first_mask(tree: SceneTree) -> void:
 	hx.add_child(kin)
 	hx.kin_node = kin
 	hx.chosen = 0
-	hx._finish("cindle", "Ember", "Orri", true)
+	hx._finish("cindle", "Ember", true)
 	await tree.process_frame
 	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
