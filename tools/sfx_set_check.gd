@@ -334,7 +334,7 @@ func _level_cues() -> void:
 	ok(pitched, "every ranked slot has its own confirm pitch")
 	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
 	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
-	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl)\n\t\t\tLevelSfx"),
 			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
