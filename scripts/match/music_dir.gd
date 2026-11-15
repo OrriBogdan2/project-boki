@@ -108,10 +108,17 @@ func last_squad() -> void:
 		if single:
 			Sfx.duck(STING_DUCK)
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> SfxMix.Muffle:
+	if p.downed or p.out:
+		return SfxMix.Muffle.DOWN
+	return SfxMix.Muffle.LOW_HP if LowHpCue.under_line(p) else SfxMix.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.mix.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true

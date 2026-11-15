@@ -69,6 +69,7 @@ func run(main_node: Node) -> void:
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
 	_buses()
+	await _muffle(m, P)
 	await _big_event_duck(P)
 	_steps(m, P)
 	await _glider(P, "yours")
@@ -92,6 +93,7 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
+	ok(not Sfx.mix.muffle_state().on, "the world is clear again once the match is left")
 	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
@@ -200,6 +202,32 @@ func _big_event_duck(P: Hunter) -> void:
 
 ## The match runs on its own for LOUD_S; each bus's peak meter (max and mean, dBFS) is reported. Only the
 ## master limiter is asserted (nothing past its ceiling); the levels are for reading.
+## Down or out dulls the SFX bus hard, under the low-health line a little; the UI bus (pings, the heartbeat) stays
+## clear; a revive or a heal lifts it.
+func _muffle(m: Match, P: Hunter) -> void:
+	var room := SfxMix.Muffle
+	var hp := P.hp
+	var armor := P.armor
+	P.downed = true
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.DOWN], SfxMix.MUFFLE_DB[room.DOWN], "downed")
+	ok(Sfx.mix.bus_for("ping", false, false) == &"UI" and Sfx.mix.bus_for("ping", false, false) != &"SFX",
+		"pings go through the UI bus, so the muffle skips them")
+	P.downed = false
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "revived")
+	P.hp = 1.0
+	P.armor = 0.0
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line")
+	P.hp = hp
+	P.armor = armor
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "healed")
+
+func _muffle_step(m: Match, hz: float, db: float, what: String) -> void:
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(SfxMix.MUFFLE_S + 0.2).timeout
+	var st := Sfx.mix.muffle_state()
+	ok(is_equal_approx(st.hz, hz) and is_equal_approx(st.db, db) and st.on == (hz < 20000.0),
+		"%s: the SFX bus low-pass %.0f Hz, duck %.0f dB (%s)" % [what, hz, db, st])
+
 func _loudness(m: Match) -> void:
 	var names: Array = ["Master"] + SfxMix.BUSES.keys()
 	var top := {}

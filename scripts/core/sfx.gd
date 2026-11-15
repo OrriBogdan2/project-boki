@@ -463,6 +463,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 	for p in players:
 		p.stop()
 	voices.friends.resize(0)
+	mix.set_muffle(SfxMix.Muffle.OFF)
 
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,

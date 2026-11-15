@@ -76,6 +76,7 @@ A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s sea
 
 ## Low-health heartbeat
 `heartbeat` (`tools/gen_sfx_health.py`, set `content/sfx/health.json`) plays through `LowHpCue` (`scripts/ui/low_hp_cue.gd`) for the local player only, via `Sfx.play`, one beat at a time so the rate can follow health. Line, rate, level and duck depth are in `content/rules/low_hp.json`; it ducks by `duck_db` while `Sfx.busy_voices()` is at least `duck_voices` (a fight). Toggle: Settings > Audio > Low-health heartbeat (`low_hp_pulse`). `--sfx-set-check` asserts it starts under the line, speeds up, and stops on heal, down or out.
+The world goes dull while you are down or out (`SfxMix.set_muffle`, driven by `MusicDir`): the SFX bus gets a 1200 Hz low-pass and a -6 dB duck, eased over 0.3 s, and under the low-health line a milder 3500 Hz and -2 dB. The UI bus (pings, the heartbeat) is not touched; leaving the match clears it. `--match-audio-check`.
 
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.

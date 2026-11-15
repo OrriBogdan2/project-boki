@@ -27,6 +27,10 @@ func bpm(s: float) -> float:
 	var line := float(_rules["start_share"])
 	return lerpf(float(_rules["bpm_empty"]), float(_rules["bpm_start"]), clampf(s / line, 0.0, 1.0))
 
+## True while this hunter is under the low-health line and the heartbeat is on in Settings.
+static func under_line(h: Hunter) -> bool:
+	return Settings.get_v("low_hp_pulse") and share(h) < float(Content.rules(RULES)["start_share"])
+
 ## One frame for your hunter.
 func tick(h: Hunter, dt: float) -> void:
 	var alive := h != null and not h.downed and not h.out
