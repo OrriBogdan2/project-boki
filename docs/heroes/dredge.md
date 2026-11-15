@@ -157,6 +157,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | R | ok | (c) | matches |
 | R stop refund | LOW | (c) | ours, noted |
 | Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and R combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
+| X | ok | (c) | matches |
+| X stop refund | LOW | (c) | ours, noted |
+| Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and X combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Ultimate on R: Brass Broadside
 Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
@@ -215,6 +218,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - "Through terrain" means rocks, trees, props and cliff faces: the hook flies through them and the body is hauled up and over
   (lifted onto a cliff face, carried to the first clear spot past a rock). A placed ability wall still stops the hook and the reel
   (dust where it snags a wall). The abyss is not special: a body dragged over it falls (the knock rules).
+  (the hook sound and the stop). The abyss is not special: a body dragged over it falls (the knock rules).
 - The reel can't be cancelled by the caster; he can shuffle (20%) and barge during it (the shuffle is what swings the body).
 - Hook hold (owner item 31): the source data has no number for walking while the arm is out, so the out-flight walk is the owner's default band (20%). During the reel he stands braced (the footage: side-on through the pull) and shuffles at the same 20%, between the owner's fallback of rooting him and the wiki's physics pull (the shuffle still swings the body). His height is held only while he is off the ground (on the ground there is nothing to hold); only his vertical speed is held, so a mid-air drift is the same 20% walk and knocks still shove him.
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.
@@ -435,3 +439,14 @@ Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift barges at once out of everything (item 51): out of the slam's wind-up the raised fist rides the barge and slams where it arrives, out of the air smash the pounce goes and the smash drops from where it ends, out of the Broadside the charge and waves follow him. Only a jump is refused from the hook's throw to the end of the reel (owner item 31, the source's Grounded while reeling: `into_jump.rmb`).
 The slugs are ordinary shots (`Match.spawn_shot` with a `kx` callback for the hit). No new sync shape.
+
+## v2 re-audit (Nov 9: models-v2 merged)
+Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep against the pre-v2 tree `54df2f18a^`, `--anim-shots --close`; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 walk and run strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/dredge.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![dredge v2 strips](../art/anim_audit/v2_dredge.jpg)
+
+- Gait: run slide 12 %, arms against the legs +0.91, hip bob 17.0 cm, idle to walk first-pose gap 0.45 body heights: all as on Nov 8.
+- Free arm: `throw` flings it 1.43 body heights and holds an arm out for 67 % of the clip, `shot` 58 %: as on Nov 8 (open there, a v1 clip trait, not a v2 regression; parity says leave it until the source shows otherwise).
+- Hook = right arm: `anchor_hook_tip` rides `hand.R` at a fixed 0.79 m in `shot` (before 0.76 m, the v2 model is 1.04x), and leaves the hand only in `throw` (0.42 to 0.83 m), where the hook flies on the chain. No drift.
+- Blunderbuss: it hangs on the `gun` bone at the root, not in a hand, in both versions (nearest the left hand in `shot` 0.17 m, idle 0.44 m; before 0.15 and 0.38 m, the gun is 0.45 m long now, 0.40 before). Unchanged ratio; for the owner to judge against the sheet.
+- Timing tables above: re-run through `--dredge-combo-check` on the v2 clips: 95 checks, 0 failures; no row moved.

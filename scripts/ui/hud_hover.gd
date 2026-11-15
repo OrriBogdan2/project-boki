@@ -765,9 +765,10 @@ func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h2 += wrapped_h(String(lines[i][0]), w - 24, 13) + 3.0
 	var pos := mp + Vector2(22, 18)
-	if pos.x + w > sz.x - 8:
+	var safe := HudStyle.safe_rect(sz)
+	if pos.x + w > safe.end.x:
 		pos.x = mp.x - w - 22
-	if pos.y + h2 > sz.y - 160:
+	if pos.y + h2 > safe.end.y - 160.0:
 		pos.y = mp.y - h2 - 18
 	var box := Rect2(pos, Vector2(w, h2))
 	H._rounded(box, Color(0.05, 0.06, 0.09, 0.9), 10, Color(lines[0][1], 0.5), 2)
