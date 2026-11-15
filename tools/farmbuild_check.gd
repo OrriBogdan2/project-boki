@@ -190,7 +190,7 @@ func run(m: Node) -> void:
 			"farm level follows play (24 harvests make level 2 and open the Lumber Camp, not the Oven)")
 	_stats(1, 0, 0, 0)
 	ok(FarmUnlocks.open("armory") and not FarmUnlocks.open("shrine") and not FarmUnlocks.open("kin_statue"),
-			"the first extraction opens the Armory")
+			"the first extraction opens the Gear Shed")
 	_stats(1, 1, 0, 0)
 	ok(FarmUnlocks.open("shrine") and FarmUnlocks.open("fountain"),
 			"the first boss opens the Soul Shrine and the fountain")

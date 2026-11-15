@@ -64,6 +64,8 @@
 	"dash": {
 		"id": "relay_step",
 		"name": "Relay Step",
+		"card_range": "dist",
+		"icon": "dash",
 		"icon": "tender_dash",
 		"col": "#ffe2a8",
 		"cd": 7.0,
@@ -85,6 +87,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Burrseed",
+		"card_range": "seed.range",
 		"short": "Burr",
 		"icon": "tender_rmb",
 		"col": "#c8e07a",
@@ -121,6 +124,8 @@
 		"ground": {"range": "reach", "r": "thrown_radius", "recast": true},
 		"delivery": "zone",
 		"name": "Hearthlight",
+		"card_range": "reach",
+		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
 		"col": "#ffd27a",
@@ -169,6 +174,7 @@
 	"lmb_note": "Ember Cast",
 	"x": {
 		"name": "Hearth Call",
+		"card_range": "range",
 		"short": "Call",
 		"icon": "tender_x",
 		"col": "#9cf07a",

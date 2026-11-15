@@ -15222,7 +15222,7 @@
    "half": 7,
    "gate": "w",
    "entry": [
-    "dial",
+    "breach",
     "runes"
    ]
   },
@@ -15238,7 +15238,7 @@
    "half": 7,
    "gate": "n",
    "entry": [
-    "dial"
+    "breach"
    ]
   },
   {
@@ -15253,7 +15253,7 @@
    "half": 7,
    "gate": "s",
    "entry": [
-    "dial",
+    "breach",
     "wards"
    ]
   }
