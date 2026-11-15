@@ -5658,6 +5658,8 @@ func _tips() -> void:
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
+	var ex := ExpeditionTips.next(self)
+	if ex: _tip(ex[0], ex[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
