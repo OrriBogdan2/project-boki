@@ -7,6 +7,7 @@ var skel: Skeleton3D
 var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 var springs := WardenSprings.new()  # the spring_ bone chains (braids) swinging on top
 var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
+var lead := WardenAimLead.new()   # head, chest and legs turning to the cursor in turn, over the clips
 var orbits := WardenOrbits.new()    # the orbit_ props (seeing-stones) circling their bone
 var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
@@ -202,6 +203,8 @@ func _play(dt: float) -> void:
 			var pose: Transform3D = poses[i]
 			skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
 					_rig_pose(l), w))
+	var body_w := 0.0 if clips.upper_move else clips.act_w
+	lead.apply(skel, root.get_meta(WardenClips.STATE, {}), body_w, clips.proc_w, dt)
 	for l in rig_root:
 		skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 	if flinch:
