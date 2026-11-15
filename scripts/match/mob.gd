@@ -75,7 +75,7 @@ func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0)
 
 
 func mass() -> float:
-	if mkind == "sentinel":
+	if mkind in ["sentinel", "gate"]:
 		return 50.0
 	return 6.0 if mkind == "warden" else (3.0 if mkind == "brute" else 1.0)
 
