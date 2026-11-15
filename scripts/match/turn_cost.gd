@@ -8,7 +8,7 @@ extends RefCounted
 ## last dash's for `window` seconds after it ended (the ground hands a dash over at the run, so without this a
 ## dash straight back right after one would be free). Tunables: content/rules/hunter_move.json physics.
 
-static var _phys: Dictionary = HunterMove.rules()["physics"]
+static var _phys: Dictionary = HunterMove._load()["physics"]   # _load, not rules(): this can initialise before HunterMove does
 static var full: float = _phys["turn_full"]           # m/s over the run speed at which a turn costs in full
 static var window: float = _phys["turn_window"]       # s after a dash ends that its speed still counts
 static var recover: float = _phys["turn_recover"]     # s a turned move takes to build back to its speed
