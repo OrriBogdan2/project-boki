@@ -1,0 +1,828 @@
+# Merge-gap archive pass 11-13 (job 20261113-173508-a3, rpc4, deep; escalated from 20261113-161526-a4)
+
+Scope: the batches in section 4 of the triage (`ops/merge-triage-1113/MERGE_TRIAGE_1113.md` on `ext/merge-triage-1113`, job 20261113-160524-a3) that are **not** in {5,6,7,8,9,10,11,13,20,21}:
+B00-B04, B12, B14-B19, B22-B26. That is 604 tips plus 153 stacked branches that ride only with those tips: **757 branches**. The 311 stacked branches that ride with any top-10 tip, and the 377 top-10 tips, were not touched.
+Main at the time: origin/main ce8bb5edd0. No in-scope branch had landed on main since the triage.
+
+Method (reversible, nothing deleted): tag `archive/<branch>` at the READY sha (= the head for 38 of 40; for the other 2 the head is a descendant of the READY sha and is what was tagged), then list the branch in merge-exclude.
+If `archive/<branch>` already sat at another sha, the tag is `archive/<branch>@<sha9>` (the triage convention). All 40 tags were checked on origin after the push.
+rpc4 has no `~/bin/merge-exclude.txt`, `merge-gap` or `claude-job`. **Hetzner action:** `cat ops/merge-archive-1113/merge-exclude-add-archive-1113.txt >> ~/bin/merge-exclude.txt` (40 lines, from `ext/merge-archive-1113`).
+
+## How each branch was tested
+
+- Unmerged lines: every line the branch adds since its merge-base with main (8+ chars, generated/registry/shots/briefs files left out) that main does not contain, plus every line it removes that main still has.
+- (a) covered: the same test against each top-10 branch (tips + their stacked branches) touching its files. **Residual 0** = a top-10 branch already holds all of it (most are literal merges, e.g. "Merge ext/combat-fusion-band" in ext/feel-landing-recovery). Residual of 1-3 lines was accepted only when those lines are a net VERSION bump, a comment, a doc row or a test-setup line (each one read by hand). An explicit READY "supersedes ext/X" from a top-10 branch also counts.
+- (b) on main / reworked: unmerged lines 0-10 and main holds a later version of the same feature (checked by hand).
+- (c) older than 5 days (last real commit before 11-08 17:35), impact <=4, docs/tuning/checks only and covered: only ext/heal-knock-source-rebased qualified, and it is already in (a). The 11-12 bulk rebase means almost every branch has work dated 11-09 or later, so (c) is nearly empty.
+
+## Counts per reason
+
+| reason | archived |
+|---|---|
+| (a) all unmerged lines in a top-10 branch (residual 0) | 18 |
+| (a) same, residual only a VERSION bump, comment, doc row or test line | 12 |
+| (a) explicit READY successor in the top-10 | 3 |
+| (b) on main, reworked there since | 7 |
+| (c) old docs/tuning/checks only | 0 (1 qualified, counted in (a)) |
+| **total archived** | **40** (35 new tags, 5 already at the head) |
+| kept: merge later | 717 (574 tips + 143 stacked) |
+
+## Gap before / after
+
+Same basis as the triage (READY, live, not on main; hetzner `merge-gap` may differ, see its section on the 230 pre-tagged branches):
+
+- before this pass: **1448** (1446 class c?/d branches + the 2 held (b): sparkle-dash-feel, vfx-cel-ring-bursts).
+- after this pass: **1408** (-40). Five of the 40 already had an archive tag at their head; if hetzner already excluded those, the hetzner drop is 35.
+- after the top-10 job lands all 10 batches (377 tips + 311 stacked): about **720**. Under 100 by Tue 11-17 is **not reachable** with these rules: 717 of the 757 in-scope branches carry lines that are on neither main nor any top-10 branch.
+- What would close the rest is merging, not archiving: B26 integ tips (one stuck-integ line, owner call; triage risk 2) and rebase-and-gate runs for B01-B04, B14-B19, B22-B25.
+
+## Flags for the top-10 job and the owner
+
+- `ext/scrapking-lmb-1111` (B03 I5): owner 11-11 top-priority successor of ext/scrapking-lmb, which rides with a top-10 tip: the top-10 job should take -1111, not the old PR #19 head
+- `ext/vfx-vex-tracer-data` (B12 I6): data-driven take on the same Vex tracer item as ext/vfx-vex-tracer-0246 (B11); newer, 350 own lines
+- `ext/vfx-vex-tracer` (B12 I5): same VFX_QUALITY item 3 as ext/vfx-vex-tracer-0246 (B11); not a newer copy (106 own lines), owner look call, likely drop after -0246 lands
+- `ext/vfx-vex-tracer-strips` (B12 I5): same item as ext/vfx-vex-tracer-0246 (B11); 106 own lines; likely drop after -0246 lands
+- `ext/infra-usage-plan` (B16 I3): standalone history (usage pacer), not a main merge
+- `ext/infra-usage-remote-source` (B16 I3): standalone history (usage-track helper), not a main merge
+- `ext/rename-guin-1112` (B24 I6): briefs-only rename rows on the agent-briefs line, not a main merge
+- `ext/first-hints-check-rebased`: newer than ext/first-hints-check, which rides with a top-10 tip; merge after it
+
+## Archived (40), with why and restore
+
+The branches still exist. To restore one: delete its line from `~/bin/merge-exclude.txt`. If the branch was deleted later: `git push origin '<tag>^{commit}:refs/heads/<branch>'`. For (a), restore it if the named top-10 branch does not land.
+
+- `ext/combat-fusion-band` c58fd24595 (a) tag `archive/ext/combat-fusion-band`: all its unmerged lines are in ext/feel-landing-recovery (B06), which merged it. Restore: `git push origin 'archive/ext/combat-fusion-band^{commit}:refs/heads/ext/combat-fusion-band'`
+- `ext/combat-glove-band` 232075e9cc (a) tag `archive/ext/combat-glove-band`: all its unmerged lines are in ext/wisp-guardian-rebased-rebased (rides with B08). Restore: `git push origin 'archive/ext/combat-glove-band^{commit}:refs/heads/ext/combat-glove-band'`
+- `ext/combat-perk-orbs-rebased` 5da42591cd (a) tag `archive/ext/combat-perk-orbs-rebased@5da42591c`: all its unmerged lines are in ext/feel-landing-recovery (B06). Restore: `git push origin 'archive/ext/combat-perk-orbs-rebased@5da42591c^{commit}:refs/heads/ext/combat-perk-orbs-rebased'`
+- `ext/flow-rows-source` ab9b2bfac5 (a) tag `archive/ext/flow-rows-source`: all its unmerged lines are in ext/w0246-misc (rides with B06/B11). Restore: `git push origin 'archive/ext/flow-rows-source^{commit}:refs/heads/ext/flow-rows-source'`
+- `ext/heal-knock-source-rebased` 55e9abdf1c (a) tag `archive/ext/heal-knock-source-rebased`: all its unmerged lines are in ext/w0246-misc (rides with B06/B11); also docs/checks only, last work 11-08 (c). Restore: `git push origin 'archive/ext/heal-knock-source-rebased^{commit}:refs/heads/ext/heal-knock-source-rebased'`
+- `ext/input-latency-check` 1ab360ba3b (a) tag `archive/ext/input-latency-check`: all its unmerged lines are in ext/w0246-feel (rides with B06/B11). Restore: `git push origin 'archive/ext/input-latency-check^{commit}:refs/heads/ext/input-latency-check'`
+- `ext/kit-parity-refresh-1` 6f66de265e (a) tag `archive/ext/kit-parity-refresh-1`: all its unmerged lines are in ext/feel-landing-recovery (B06). Restore: `git push origin 'archive/ext/kit-parity-refresh-1^{commit}:refs/heads/ext/kit-parity-refresh-1'`
+- `ext/perf-visibility-ranges-rebased` 592376aa1b (a) tag `archive/ext/perf-visibility-ranges-rebased`: all its unmerged lines are in ext/wisp-guardian-rebased-rebased (rides with B08). Restore: `git push origin 'archive/ext/perf-visibility-ranges-rebased^{commit}:refs/heads/ext/perf-visibility-ranges-rebased'`
+- `ext/sfx-garden-games-rebased` f6e990951c (a) tag `archive/ext/sfx-garden-games-rebased`: all its unmerged lines are in ext/garden-snacks-all-types-rebased (B21). Restore: `git push origin 'archive/ext/sfx-garden-games-rebased^{commit}:refs/heads/ext/sfx-garden-games-rebased'`
+- `ext/sfx-knock-confirm` 927807dd8a (a) tag `archive/ext/sfx-knock-confirm`: all its unmerged lines are in ext/vfx-meeko-weight-rebased-rebased (B11). Restore: `git push origin 'archive/ext/sfx-knock-confirm^{commit}:refs/heads/ext/sfx-knock-confirm'`
+- `ext/sfx-loot-open` 6cb7905df7 (a) tag `archive/ext/sfx-loot-open`: all its unmerged lines are in ext/w0246-garden (rides with B08/B21). Restore: `git push origin 'archive/ext/sfx-loot-open^{commit}:refs/heads/ext/sfx-loot-open'`
+- `ext/sfx-status-cues` c26f368232 (a) tag `archive/ext/sfx-status-cues@c26f36823`: all its unmerged lines are in ext/w0246-audio-vfx (rides with B11/B13), which merged it. Restore: `git push origin 'archive/ext/sfx-status-cues@c26f36823^{commit}:refs/heads/ext/sfx-status-cues'`
+- `ext/step-smooth-rebased` c42d1084e2 (a) tag `archive/ext/step-smooth-rebased`: all its unmerged lines are in ext/w0246-misc (rides with B06/B11). Restore: `git push origin 'archive/ext/step-smooth-rebased^{commit}:refs/heads/ext/step-smooth-rebased'`
+- `ext/tut-first-race-garden` 3cd5a43486 (a) tag `archive/ext/tut-first-race-garden`: all its unmerged lines are in ext/tut-first-race-rebased (B20). Restore: `git push origin 'archive/ext/tut-first-race-garden^{commit}:refs/heads/ext/tut-first-race-garden'`
+- `ext/ui-buff-stack` 167a0ca649 (a) tag `archive/ext/ui-buff-stack`: all its unmerged lines are in ext/ui-interact-port (rides with B21), which merged it. Restore: `git push origin 'archive/ext/ui-buff-stack^{commit}:refs/heads/ext/ui-buff-stack'`
+- `ext/ui-fusion-hud` 40ae6829fa (a) tag `archive/ext/ui-fusion-hud`: all its unmerged lines are in ext/ui-interact-port (rides with B21). Restore: `git push origin 'archive/ext/ui-fusion-hud^{commit}:refs/heads/ext/ui-fusion-hud'`
+- `ext/vfx-capture-read` 8c16f148a9 (a) tag `archive/ext/vfx-capture-read`: all its unmerged lines are in ext/wisp-guardian-rebased-rebased (rides with B08). Restore: `git push origin 'archive/ext/vfx-capture-read^{commit}:refs/heads/ext/vfx-capture-read'`
+- `ext/zone1-batch1` ad361d5625 (a) tag `archive/ext/zone1-batch1`: integ tip; all its unmerged lines are in ext/w0246-misc (rides with B06/B11), which merged it. Restore: `git push origin 'archive/ext/zone1-batch1^{commit}:refs/heads/ext/zone1-batch1'`
+- `ext/combat-boss-parity` 8348b09527 (a) tag `archive/ext/combat-boss-parity@8348b0952`: in ext/vfx-motley-port (B11) except its net VERSION bump (0.24.5; main and B11 carry newer). Restore: `git push origin 'archive/ext/combat-boss-parity@8348b0952^{commit}:refs/heads/ext/combat-boss-parity'`
+- `ext/combat-lair-prize` a07f4a97b8 (a) tag `archive/ext/combat-lair-prize@a07f4a97b`: in ext/vfx-motley-port (B11) except its net VERSION bump. Restore: `git push origin 'archive/ext/combat-lair-prize@a07f4a97b^{commit}:refs/heads/ext/combat-lair-prize'`
+- `ext/net-rejoin` 744f568bd6 (a) tag `archive/ext/net-rejoin`: in ext/w0246-misc (rides with B06/B11) except its net VERSION bump. Restore: `git push origin 'archive/ext/net-rejoin^{commit}:refs/heads/ext/net-rejoin'`
+- `ext/rocket-drop-1111` aeac4f0c09 (a) tag `archive/ext/rocket-drop-1111`: in ext/anim-stomp-per-hunter (B09) except its net VERSION bump. Restore: `git push origin 'archive/ext/rocket-drop-1111^{commit}:refs/heads/ext/rocket-drop-1111'`
+- `ext/perf-mob-cap` 7bdfe1d4aa (a) tag `archive/ext/perf-mob-cap`: in ext/vfx-motley-port (B11) except one perf_bench config line. Restore: `git push origin 'archive/ext/perf-mob-cap^{commit}:refs/heads/ext/perf-mob-cap'`
+- `ext/stomp-lock-1111` da99e28e2f (a) tag `archive/ext/stomp-lock-1111`: in ext/anim-stomp-starters (B10) except one DEATH_AND_REVIVE.md doc line. Restore: `git push origin 'archive/ext/stomp-lock-1111^{commit}:refs/heads/ext/stomp-lock-1111'`
+- `ext/stuck-integ-fb4b4275` 365038735a (a) tag `archive/ext/stuck-integ-fb4b4275`: integ tip; in ext/anim-react-settle-neve-tenzo (B10) except one docstring line in tools/art1/glb_react.py. Restore: `git push origin 'archive/ext/stuck-integ-fb4b4275^{commit}:refs/heads/ext/stuck-integ-fb4b4275'`
+- `ext/tut-first-echo` e2a742ea92 (a) tag `archive/ext/tut-first-echo`: in ext/w0246-tutorial (rides with B06) except one test-setup line in garden_sfx_check.gd. Restore: `git push origin 'archive/ext/tut-first-echo^{commit}:refs/heads/ext/tut-first-echo'`
+- `ext/ui-steal-callout` 769f40cef5 (a) tag `archive/ext/ui-steal-callout@769f40cef`: in ext/early-steal-window (B21) except one HUD.md doc row. Restore: `git push origin 'archive/ext/ui-steal-callout@769f40cef^{commit}:refs/heads/ext/ui-steal-callout'`
+- `ext/vfx-dot-body` 158c3fc102 (a) tag `archive/ext/vfx-dot-body`: in ext/vfx-telegraph-timing-rebased (B11) except one comment line in ent.gd. Restore: `git push origin 'archive/ext/vfx-dot-body^{commit}:refs/heads/ext/vfx-dot-body'`
+- `ext/revive-source-numbers` d4bd06697e (a) tag `archive/ext/revive-source-numbers`: in ext/anim-swim-reds (B08) except dropping one unused local in box_revive.gd. Restore: `git push origin 'archive/ext/revive-source-numbers^{commit}:refs/heads/ext/revive-source-numbers'`
+- `ext/combat-meeko-carry-drop` e6901fa66f (a) tag `archive/ext/combat-meeko-carry-drop@e6901fa66`: in ext/feel-landing-recovery (B06) except 3 doc-table rows it rewrote. Restore: `git push origin 'archive/ext/combat-meeko-carry-drop@e6901fa66^{commit}:refs/heads/ext/combat-meeko-carry-drop'`
+- `ext/meeko-rmb-motion-rebased-rebased` e5587292a8 (a) tag `archive/ext/meeko-rmb-motion-rebased-rebased`: READY successor ext/meeko-rmb-motion-rebased-rebased-rebased says "supersedes" it; that one rides with a top-10 tip. Restore: `git push origin 'archive/ext/meeko-rmb-motion-rebased-rebased^{commit}:refs/heads/ext/meeko-rmb-motion-rebased-rebased'`
+- `ext/tut-first-heartspark` f682458657 (a) tag `archive/ext/tut-first-heartspark`: READY successor ext/tut-first-heartspark-rebased (B20) says "supersedes" it. Restore: `git push origin 'archive/ext/tut-first-heartspark^{commit}:refs/heads/ext/tut-first-heartspark'`
+- `ext/vfx-albert-gap8` 14288ab628 (a) tag `archive/ext/vfx-albert-gap8`: READY successor ext/vfx-albert-slab (B11) says "Supersedes ext/vfx-albert-gap8" (owner-sheet arc, not its dome). Restore: `git push origin 'archive/ext/vfx-albert-gap8^{commit}:refs/heads/ext/vfx-albert-gap8'`
+- `ext/garden-trait-drift` 04173974ad (b) tag `archive/ext/garden-trait-drift`: on main (base_drift.gd and its check), main reworded it since; 7 lines differ, all rework. Restore: `git push origin 'archive/ext/garden-trait-drift^{commit}:refs/heads/ext/garden-trait-drift'`
+- `ext/garden-lantern-match` 1e73ac2909 (b) tag `archive/ext/garden-lantern-match@1e73ac290`: on main and grown since (main has 29 items, 8 prize games incl. lantern; branch says 27/7). Restore: `git push origin 'archive/ext/garden-lantern-match@1e73ac290^{commit}:refs/heads/ext/garden-lantern-match'`
+- `ext/tutorial-idle-check` 19a355ea6e (b) tag `archive/ext/tutorial-idle-check`: main has its own stall nag (NAG_T) and KEY_WAIT_T anti-strand; branch is the older take on the same steps. Restore: `git push origin 'archive/ext/tutorial-idle-check^{commit}:refs/heads/ext/tutorial-idle-check'`
+- `ext/neve-skirt-chiffon` 4465dc6f2a (b) tag `archive/ext/neve-skirt-chiffon`: main has newer Claire v95 art at both art paths; one src json line differs. Restore: `git push origin 'archive/ext/neve-skirt-chiffon^{commit}:refs/heads/ext/neve-skirt-chiffon'`
+- `ext/vfx-albert-smash` c2f36d4d9f (b) tag `archive/ext/vfx-albert-smash`: the feature (HeroVfx spin ring) is on main; only a before/after screenshot is not. Restore: `git push origin 'archive/ext/vfx-albert-smash^{commit}:refs/heads/ext/vfx-albert-smash'`
+- `ext/farm-arrival-rank-0245` 09bb31367b (b) tag `archive/ext/farm-arrival-rank-0245`: on main except one line in tools/raising_check.gd. Restore: `git push origin 'archive/ext/farm-arrival-rank-0245^{commit}:refs/heads/ext/farm-arrival-rank-0245'`
+- `ext/agent-briefs-rebased` b2ebf08c0f (b) tag `archive/ext/agent-briefs-rebased`: briefs-only (TOWN_HUB.md doc); that doc is now on ext/agent-briefs. Restore: `git push origin 'archive/ext/agent-briefs-rebased^{commit}:refs/heads/ext/agent-briefs-rebased'`
+
+## Keep: merge later, ranked by impact (574 tips)
+
+I/H = the triage heuristic impact/hard; own = unmerged lines (not on main); kind = what those lines are; near-dupe = a top-10 branch holds all but N of them.
+
+- I9 H3 B02 `ext/combat-wisp-hit-rules` own 1314: player-facing code/data (23 files), owner; near-dupe of ext/vfx-motley-port (4 own lines)
+- I9 H8 B02 `ext/meeko-rmb-verify-rebased` own 3079: player-facing code/data (401 files), fix, owner
+- I9 H8 B02 `ext/wisp-summon-key-c` own 1054: player-facing code/data (23 files), owner
+- I9 H9 B19 `ext/tut-revive-hint` own 5576: art not in game (24 files), player-facing code/data (441 files), owner
+- I9 H10 B26 `ext/anim-w0246-blender-rows` own 16752: art not in game (208 files), player-facing code/data (272 files), owner
+- I9 H10 B02 `ext/kael-lunge-length-rebased-rebased` own 4363: art not in game (25 files), player-facing code/data (121 files), fix, owner
+- I9 H10 B02 `ext/kael-rmb-unlock-rebased` own 15908: art not in game (45 files), player-facing code/data (627 files), fix, owner
+- I9 H10 B02 `ext/meeko-rmb-verify-rebased-rebased` own 9353: art not in game (25 files), player-facing code/data (488 files), fix, owner
+- I9 H10 B02 `ext/parity-stranded-0246` own 14187: art not in game (328 files), player-facing code/data (239 files), owner
+- I9 H10 B26 `ext/soul-link-integ-rebased` own 7078: art not in game (66 files), player-facing code/data (133 files), owner
+- I9 H10 B26 `ext/stuck-integ-11014837` own 32598: art not in game (202 files), player-facing code/data (734 files), fix, owner
+- I9 H10 B26 `ext/stuck-integ-a6af81f7` own 17183: art not in game (147 files), player-facing code/data (433 files), fix, owner
+- I9 H10 B19 `ext/tutorial-beats-5-6-rebased-rebased` own 9331: art not in game (25 files), player-facing code/data (486 files), owner
+- I9 H10 B26 `ext/ui-w0246-boki-reds` own 11690: art not in game (53 files), player-facing code/data (242 files), owner
+- I8 H1 B16 `ext/hud-g-armor-1111` own 61: player-facing code/data (3 files), owner
+- I8 H2 B24 `ext/fusion-states-fix` own 421: player-facing code/data (9 files), fix, owner
+- I8 H2 B02 `ext/kael-owner-1111` own 252: player-facing code/data (10 files), owner; near-dupe of ext/vfx-kael-hold-arc (3 own lines)
+- I8 H2 B24 `ext/levelup-clear-1111` own 244: player-facing code/data (5 files), owner
+- I8 H2 B24 `ext/momentum-1111` own 253: player-facing code/data (6 files), owner
+- I8 H2 B02 `ext/vex-rmb-1111` own 129: player-facing code/data (5 files), fix, owner
+- I8 H3 B16 `ext/ui-bonus-column` own 730: player-facing code/data (15 files), owner
+- I8 H5 B26 `ext/feel-input-batch` own 471: player-facing code/data (11 files), fix, owner
+- I8 H7 B01 `ext/perf-owner-hw-rebased` own 2331: player-facing code/data (35 files), fix
+- I8 H8 B25 `ext/cancel-blend-port` own 17116: art not in game (208 files), player-facing code/data (272 files)
+- I8 H8 B02 `ext/kael-tap-ult-port` own 254: player-facing code/data (4 files), owner
+- I8 H8 B02 `ext/mantle-port-b` own 17142: art not in game (208 files), player-facing code/data (271 files)
+- I8 H8 B14 `ext/sfx-beat-resync` own 17675: art not in game (206 files), player-facing code/data (484 files)
+- I8 H8 B24 `ext/summon-clips-port` own 16894: art not in game (208 files), player-facing code/data (271 files)
+- I8 H8 B02 `ext/wisp-passive-stack-rebased` own 928: player-facing code/data (21 files)
+- I8 H10 B26 `ext/anim-release-sync-meeko-motley` own 16973: art not in game (208 files), player-facing code/data (273 files), fix
+- I8 H10 B01 `ext/bot-hazard-route` own 13872: art not in game (53 files), player-facing code/data (248 files)
+- I8 H10 B02 `ext/combat-bots-downed` own 7104: art not in game (66 files), player-facing code/data (136 files), fix
+- I8 H10 B02 `ext/combat-hazard-ward-stack` own 13213: art not in game (53 files), player-facing code/data (248 files)
+- I8 H10 B02 `ext/combat-motley-swept` own 6788: art not in game (8 files), player-facing code/data (151 files), fix; near-dupe of ext/feel-landing-recovery (25 own lines)
+- I8 H10 B26 `ext/combat-w0246-bot-reds` own 6845: art not in game (8 files), player-facing code/data (151 files), fix
+- I8 H10 B26 `ext/farm-w0246-flakes` own 8880: art not in game (62 files), player-facing code/data (189 files), fix
+- I8 H10 B02 `ext/grimble-v95-rebased` own 15989: art not in game (45 files), player-facing code/data (629 files), fix
+- I8 H10 B02 `ext/meeko-root-rebased` own 19814: art not in game (45 files), player-facing code/data (732 files), fix; near-dupe of ext/stuck-integ-b7a5717c (9 own lines)
+- I8 H10 B14 `ext/sfx-swim-ice-moves` own 14391: art not in game (61 files), player-facing code/data (260 files)
+- I8 H10 B14 `ext/summon-share-port` own 15514: art not in game (161 files), player-facing code/data (445 files)
+- I8 H10 B19 `ext/tut-event-hints-rebased` own 16059: art not in game (45 files), player-facing code/data (628 files), fix
+- I8 H10 B16 `ext/ui-loading-bar-steady` own 15146: art not in game (161 files), player-facing code/data (444 files), fix; near-dupe of ext/w0246-misc (16 own lines)
+- I8 H10 B26 `ext/ui-w0246-layout-reds` own 11695: art not in game (53 files), player-facing code/data (242 files)
+- I8 H10 B26 `ext/wisp-merge-from-wisp-rebased` own 4406: art not in game (25 files), player-facing code/data (121 files), fix
+- I8 H10 B02 `ext/wisp-summon-leash-rebased` own 4446: art not in game (25 files), player-facing code/data (120 files), fix
+- I8 H10 B02 `ext/wisp-summon-net-rebased` own 4591: art not in game (25 files), player-facing code/data (120 files), fix
+- I7 H1 B16 `ext/creator-preview` own 257: player-facing code/data (3 files), owner
+- I7 H1 B02 `ext/motley-1111` own 329: player-facing code/data (4 files), owner
+- I7 H1 B25 `ext/select-loading-1111` own 323: player-facing code/data (4 files), owner
+- I7 H1 B16 `ext/ui-self-shield-strip` own 144: player-facing code/data (12 files), owner
+- I7 H2 B02 `ext/blight-nests` own 1057: player-facing code/data (16 files)
+- I7 H2 B02 `ext/recast-art-dedupe` own 108: player-facing code/data (4 files), owner
+- I7 H2 B19 `ext/tut-seat-grace-hint` own 324: player-facing code/data (11 files), fix
+- I7 H2 B16 `ext/ui-text-chat-rebased` own 868: player-facing code/data (22 files)
+- I7 H3 B16 `ext/hud-ref-copy-2` own 617: player-facing code/data (14 files), owner
+- I7 H3 B16 `ext/ui-banner-queue-calm` own 108: player-facing code/data (2 files)
+- I7 H4 B02 `ext/combat-steal-boss-bonus` own 1462: player-facing code/data (31 files), fix
+- I7 H4 B02 `ext/physics-unify-1111` own 535: player-facing code/data (6 files), owner
+- I7 H4 B14 `ext/sfx-steals` own 1491: art not in game (10 files), player-facing code/data (31 files), fix
+- I7 H4 B14 `ext/sfx-summon-end` own 3382: art not in game (41 files), player-facing code/data (34 files)
+- I7 H4 B19 `ext/tut-farm-old-steps-cut` own 127: player-facing code/data (15 files)
+- I7 H6 B19 `ext/tut-first-proc` own 3738: art not in game (41 files), player-facing code/data (35 files)
+- I7 H7 B01 `ext/perf-train-0245-rebased` own 2052: player-facing code/data (33 files)
+- I7 H8 B25 `ext/gil-train-1112` own 3287: art not in game (68 files), player-facing code/data (58 files)
+- I7 H8 B02 `ext/meeko-loops-rebake` own 16640: art not in game (208 files), player-facing code/data (271 files)
+- I7 H8 B25 `ext/react-2-port` own 17806: art not in game (206 files), player-facing code/data (483 files)
+- I7 H8 B14 `ext/sfx-wisp-proc` own 3813: art not in game (41 files), player-facing code/data (42 files)
+- I7 H8 B02 `ext/summon-kill-credit-rebased` own 1377: player-facing code/data (29 files)
+- I7 H9 B14 `ext/hushwood-port` own 8738: art not in game (62 files), player-facing code/data (180 files), fix
+- I7 H9 B24 `ext/pick-relic-1111` own 3405: player-facing code/data (85 files)
+- I7 H9 B14 `ext/sfx-boki-voices-3` own 8779: art not in game (62 files), player-facing code/data (181 files); near-dupe of ext/w0246-garden (13 own lines)
+- I7 H9 B01 `ext/split-models-rebased` own 3388: player-facing code/data (12 files)
+- I7 H9 B19 `ext/tut-beat-retry-port` own 3465: player-facing code/data (84 files)
+- I7 H9 B19 `ext/tut-dive-hint` own 5555: art not in game (24 files), player-facing code/data (440 files)
+- I7 H9 B19 `ext/tut-duel-hint-port` own 4082: player-facing code/data (303 files)
+- I7 H9 B19 `ext/tut-first-utility` own 7314: art not in game (24 files), player-facing code/data (480 files)
+- I7 H9 B19 `ext/tut-no-ripe-timer-1111` own 3282: player-facing code/data (84 files); near-dupe of ext/w0246-tutorial (15 own lines)
+- I7 H9 B19 `ext/tut-retry-port` own 3481: player-facing code/data (85 files)
+- I7 H9 B19 `ext/tut-wall-kick-hint` own 5576: art not in game (24 files), player-facing code/data (440 files)
+- I7 H9 B19 `ext/tutorial-banner-1111` own 3422: art not in game (1 files), player-facing code/data (86 files)
+- I7 H9 B16 `ext/ui-summon-card` own 1112: player-facing code/data (26 files)
+- I7 H9 B01 `ext/verify-tut-starters-0246` own 3385: player-facing code/data (85 files)
+- I7 H10 B24 `ext/belt-move-port` own 11918: art not in game (53 files), player-facing code/data (242 files)
+- I7 H10 B02 `ext/combat-mage-rod-dmg` own 6796: art not in game (8 files), player-facing code/data (151 files)
+- I7 H10 B02 `ext/combat-mob-camp-root` own 6788: art not in game (8 files), player-facing code/data (151 files); near-dupe of ext/feel-landing-recovery (25 own lines)
+- I7 H10 B02 `ext/combat-summon-share` own 11732: art not in game (66 files), player-facing code/data (498 files)
+- I7 H10 B26 `ext/combat-w0246-support-reds` own 10392: art not in game (30 files), player-facing code/data (126 files); near-dupe of ext/w0246-feel (17 own lines)
+- I7 H10 B26 `ext/feel-w0246-camera` own 10430: art not in game (30 files), player-facing code/data (126 files)
+- I7 H10 B26 `ext/feel-w0246-combo-reds` own 10420: art not in game (30 files), player-facing code/data (127 files)
+- I7 H10 B26 `ext/feel-w0246-frame-reds` own 10536: art not in game (30 files), player-facing code/data (127 files)
+- I7 H10 B26 `ext/feel-w0246-glide-reds` own 10432: art not in game (30 files), player-facing code/data (127 files)
+- I7 H10 B26 `ext/feel-w0246-knock-reds` own 10419: art not in game (30 files), player-facing code/data (126 files)
+- I7 H10 B26 `ext/feel-w0246-move-reds` own 10486: art not in game (30 files), player-facing code/data (127 files)
+- I7 H10 B26 `ext/garden-integrated-rebased` own 4281: art not in game (25 files), player-facing code/data (120 files)
+- I7 H10 B02 `ext/herovfx-mode-clash` own 7977: art not in game (363 files), player-facing code/data (189 files)
+- I7 H10 B24 `ext/hires-splash-rotation` own 12137: art not in game (89 files), player-facing code/data (282 files)
+- I7 H10 B24 `ext/impact-castlock-port` own 10619: art not in game (30 files), player-facing code/data (128 files)
+- I7 H10 B24 `ext/impact-strike-port` own 10777: art not in game (30 files), player-facing code/data (129 files)
+- I7 H10 B26 `ext/mc-demo-1112` own 7774: art not in game (115 files), player-facing code/data (262 files)
+- I7 H10 B26 `ext/mc-fix-1109` own 1048: player-facing code/data (191 files), fix
+- I7 H10 B26 `ext/mc-integ-1112d` own 13372: art not in game (53 files), player-facing code/data (533 files)
+- I7 H10 B02 `ext/parity-rider-sweep-0246` own 14218: art not in game (328 files), player-facing code/data (239 files)
+- I7 H10 B02 `ext/parity-sable-cartwheel-curve` own 10409: art not in game (30 files), player-facing code/data (126 files)
+- I7 H10 B01 `ext/perf-occluder-pool-rows` own 15150: art not in game (161 files), player-facing code/data (444 files)
+- I7 H10 B14 `ext/sfx-ability-ready` own 8112: art not in game (364 files), player-facing code/data (189 files)
+- I7 H10 B14 `ext/sfx-boki-state-cues` own 16781: art not in game (425 files), player-facing code/data (333 files)
+- I7 H10 B14 `ext/sfx-boki-state-cues-wisp` own 15174: art not in game (161 files), player-facing code/data (444 files)
+- I7 H10 B14 `ext/sfx-dash-per-hunter-rebased` own 9049: art not in game (25 files), player-facing code/data (485 files); near-dupe of ext/feel-first-cast-warm-rebased (7 own lines)
+- I7 H10 B14 `ext/sfx-match-shop` own 12367: art not in game (74 files), player-facing code/data (246 files)
+- I7 H10 B14 `ext/sfx-strike-resync` own 24414: art not in game (571 files), player-facing code/data (438 files)
+- I7 H10 B14 `ext/sfx-terrain-hazards` own 14035: art not in game (84 files), player-facing code/data (251 files)
+- I7 H10 B24 `ext/spike-slam-rebased` own 20077: art not in game (45 files), player-facing code/data (733 files), fix
+- I7 H10 B26 `ext/stuck-integ-42241ff1` own 27293: art not in game (139 files), player-facing code/data (454 files)
+- I7 H10 B26 `ext/stuck-integ-606e9a98` own 13939: art not in game (139 files), player-facing code/data (345 files)
+- I7 H10 B26 `ext/stuck-integ-86b7d6eb` own 22188: art not in game (137 files), player-facing code/data (388 files)
+- I7 H10 B26 `ext/stuck-integ-d2f36c16` own 7866: art not in game (25 files), player-facing code/data (151 files)
+- I7 H10 B26 `ext/stuck-integ-f6bd2b7c` own 10599: art not in game (140 files), player-facing code/data (305 files), fix
+- I7 H10 B14 `ext/summon-kill-credit-port` own 14116: art not in game (328 files), player-facing code/data (241 files)
+- I7 H10 B19 `ext/tut-duel-ring-rebased` own 17177: art not in game (45 files), player-facing code/data (634 files)
+- I7 H10 B19 `ext/tut-first-fuse` own 4448: art not in game (25 files), player-facing code/data (122 files)
+- I7 H10 B19 `ext/tut-first-shop` own 12227: art not in game (53 files), player-facing code/data (243 files)
+- I7 H10 B19 `ext/tut-garden-first-day-rebased` own 8962: art not in game (36 files), player-facing code/data (517 files); near-dupe of ext/garden-nav-sweep-rebased (21 own lines)
+- I7 H10 B19 `ext/tut-summon-pad` own 18677: art not in game (161 files), player-facing code/data (507 files)
+- I7 H10 B16 `ext/ui-aspect-sweep` own 11743: art not in game (53 files), player-facing code/data (243 files)
+- I7 H10 B16 `ext/ui-boki-box-carry` own 12010: art not in game (53 files), player-facing code/data (246 files)
+- I7 H10 B16 `ext/ui-loot-compare` own 11756: art not in game (53 files), player-facing code/data (243 files)
+- I7 H10 B14 `ext/utility-parity-0246` own 18582: art not in game (264 files), player-facing code/data (494 files)
+- I7 H10 B01 `ext/verify-ttk-0246` own 16979: art not in game (38 files), player-facing code/data (223 files)
+- I7 H10 B02 `ext/vex-dash-charge-port` own 11170: art not in game (30 files), player-facing code/data (347 files)
+- I7 H10 B02 `ext/wisp-gpu-ab-rebased` own 7307: art not in game (66 files), player-facing code/data (134 files)
+- I6 H1 B02 `ext/albert-hold-cinder-orb` own 198: player-facing code/data (6 files)
+- I6 H1 B02 `ext/combat-armour-xp` own 323: player-facing code/data (7 files); near-dupe of ext/feel-landing-recovery (11 own lines)
+- I6 H1 B02 `ext/combat-blockers` own 284: player-facing code/data (12 files); near-dupe of ext/feel-landing-recovery (16 own lines)
+- I6 H1 B00 `ext/farm-garden-soak` own 171: player-facing code/data (1 files), fix; near-dupe of ext/garden-soak-zones (26 own lines)
+- I6 H1 B01 `ext/fix-0245-reds` own 105: art not in game (1 files), player-facing code/data (4 files)
+- I6 H1 B24 `ext/friendly-bodies` own 364: player-facing code/data (5 files)
+- I6 H1 B24 `ext/online-displace-reds` own 190: player-facing code/data (1 files)
+- I6 H1 B03 `ext/parity-neve-crash-recovery` own 82: player-facing code/data (2 files), fix
+- I6 H1 B14 `ext/sfx-boki-landings` own 298: player-facing code/data (8 files), fix
+- I6 H1 B14 `ext/sfx-boss-windups` own 963: art not in game (28 files), player-facing code/data (6 files)
+- I6 H1 B14 `ext/sfx-last-alive` own 119: art not in game (3 files), player-facing code/data (3 files)
+- I6 H1 B14 `ext/sfx-ui-controls` own 186: player-facing code/data (3 files), fix
+- I6 H1 B14 `ext/sfx-voice-priority` own 474: player-facing code/data (4 files)
+- I6 H1 B19 `ext/tut-air-rings` own 918: player-facing code/data (13 files)
+- I6 H1 B16 `ext/ui-card-numbers` own 178: player-facing code/data (3 files)
+- I6 H1 B16 `ext/ui-key-caps` own 130: player-facing code/data (10 files), fix
+- I6 H1 B12 `ext/vfx-mob-death-anim-rebased` own 418: player-facing code/data (9 files); near-dupe of ext/vfx-motley-port (5 own lines)
+- I6 H1 B03 `ext/wisp-look-1112` own 503: player-facing code/data (22 files)
+- I6 H2 B25 `ext/balance-sim-1111` own 402: player-facing code/data (4 files)
+- I6 H2 B24 `ext/boss-gate-1111` own 592: player-facing code/data (12 files), fix
+- I6 H2 B24 `ext/char-creator-v2-1111` own 1756: player-facing code/data (15 files)
+- I6 H2 B03 `ext/combat-ttk-five` own 90: player-facing code/data (7 files), owner
+- I6 H2 B03 `ext/combat-zone-stage-dmg` own 1613: player-facing code/data (18 files)
+- I6 H2 B03 `ext/dredge-auto-rebased` own 170: player-facing code/data (4 files)
+- I6 H2 B03 `ext/grimble-stretch-v2-rebased` own 157: player-facing code/data (2 files), fix
+- I6 H2 B19 `ext/hob-clear-spot` own 380: player-facing code/data (5 files), fix
+- I6 H2 B03 `ext/lace-playtest-1108` own 795: player-facing code/data (17 files)
+- I6 H2 B24 `ext/main-checks-registry-b` own 1773: player-facing code/data (1 files)
+- I6 H2 B03 `ext/predictable-camps-1111` own 742: player-facing code/data (14 files)
+- I6 H2 B01 `ext/save-chain-0245` own 1781: player-facing code/data (20 files); near-dupe of ext/garden-balance-apply (5 own lines)
+- I6 H2 B14 `ext/sfx-air-rings` own 1178: art not in game (3 files), player-facing code/data (15 files)
+- I6 H2 B14 `ext/sfx-creator-clans` own 1198: art not in game (19 files), player-facing code/data (15 files)
+- I6 H2 B14 `ext/sfx-rocket-drop` own 817: art not in game (5 files), player-facing code/data (15 files)
+- I6 H2 B19 `ext/tut-first-hour-order` own 638: player-facing code/data (4 files)
+- I6 H2 B19 `ext/tut-first15-reshoot` own 199: art not in game (12 files), player-facing code/data (2 files), fix
+- I6 H2 B19 `ext/tut-rocket-hint` own 649: player-facing code/data (13 files)
+- I6 H2 B16 `ext/ui-hud-reveal-1110` own 762: player-facing code/data (26 files)
+- I6 H2 B16 `ext/ui-label-spacing` own 125: player-facing code/data (2 files)
+- I6 H2 B16 `ext/ui-next-form-port` own 186: player-facing code/data (3 files)
+- I6 H2 B17 `ext/ui-quest-race-pips` own 801: player-facing code/data (33 files)
+- I6 H2 B17 `ext/ui-rocket-hud` own 615: player-facing code/data (14 files)
+- I6 H2 B17 `ext/ui-safe-area-one` own 192: player-facing code/data (11 files)
+- I6 H2 B17 `ext/ui-simplify` own 674: player-facing code/data (19 files); near-dupe of ext/ui-interact-port (15 own lines)
+- I6 H2 B17 `ext/ui-squad-killer` own 435: player-facing code/data (7 files)
+- I6 H2 B12 `ext/vfx-motley-kit` own 112: player-facing code/data (6 files), fix
+- I6 H2 B12 `ext/vfx-motley-orb-hit` own 352: player-facing code/data (7 files), fix
+- I6 H3 B01 `ext/bot-stomp-1111` own 855: player-facing code/data (14 files)
+- I6 H3 B03 `ext/combat-utility-verify` own 1746: player-facing code/data (40 files)
+- I6 H3 B26 `ext/merge-anim-1111-clips` own 663: player-facing code/data (9 files), fix
+- I6 H3 B14 `ext/sfx-garden-items` own 797: art not in game (16 files), player-facing code/data (24 files)
+- I6 H3 B03 `ext/squad-intro-skyship` own 730: player-facing code/data (8 files); near-dupe of ext/w0246-misc (5 own lines)
+- I6 H3 B03 `ext/summon-pve-rules-rebased` own 1200: player-facing code/data (22 files); near-dupe of ext/anim-swim-reds (10 own lines)
+- I6 H3 B24 `ext/teach-hold` own 1255: player-facing code/data (11 files)
+- I6 H3 B19 `ext/tut-hazard-hint` own 1144: player-facing code/data (14 files)
+- I6 H3 B19 `ext/tut-hud-pointers` own 679: player-facing code/data (15 files)
+- I6 H3 B17 `ext/ui-hazard-map` own 1217: player-facing code/data (16 files)
+- I6 H3 B17 `ext/ui-hudref-verify` own 897: player-facing code/data (14 files)
+- I6 H3 B17 `ext/ui-pro-1111` own 610: player-facing code/data (26 files)
+- I6 H3 B17 `ext/ui-ride-pick` own 700: player-facing code/data (19 files)
+- I6 H3 B17 `ext/ui-shop-panel` own 1814: player-facing code/data (40 files); near-dupe of ext/ui-interact-port (29 own lines)
+- I6 H3 B01 `ext/verify-solos-pacing` own 2730: player-facing code/data (9 files)
+- I6 H3 B12 `ext/vfx-air-rings-read` own 1653: player-facing code/data (21 files)
+- I6 H3 B12 `ext/vfx-cc-body-reads` own 989: art not in game (3 files), player-facing code/data (20 files)
+- I6 H3 B12 `ext/vfx-rocket-drop` own 795: player-facing code/data (15 files)
+- I6 H3 B12 `ext/vfx-utilities-2` own 2980: player-facing code/data (56 files)
+- I6 H4 B03 `ext/combat-raid-balance` own 1562: player-facing code/data (21 files)
+- I6 H4 B03 `ext/combat-sable-lmb-hits` own 1093: player-facing code/data (53 files)
+- I6 H4 B22 `ext/fold-anim-boki-1112` own 1998: art not in game (3 files), player-facing code/data (21 files)
+- I6 H4 B22 `ext/fold-meeko-rmb-1112` own 67: player-facing code/data (9 files), owner
+- I6 H4 B03 `ext/grimble-fist-vfx-rebased` own 462: art not in game (3 files), player-facing code/data (10 files), fix
+- I6 H4 B14 `ext/sfx-boon-cue` own 1529: art not in game (3 files), player-facing code/data (29 files)
+- I6 H4 B14 `ext/sfx-camp-idle` own 1385: art not in game (4 files), player-facing code/data (27 files)
+- I6 H4 B14 `ext/sfx-raid-cues` own 1984: art not in game (5 files), player-facing code/data (28 files)
+- I6 H4 B14 `ext/sfx-stomp-break` own 875: art not in game (8 files), player-facing code/data (13 files)
+- I6 H4 B19 `ext/tut-drop-old-farm-steps` own 106: player-facing code/data (13 files)
+- I6 H4 B19 `ext/tut-garden-no-gather` own 130: player-facing code/data (14 files)
+- I6 H4 B19 `ext/tut-heart-raid-hints` own 1592: player-facing code/data (22 files)
+- I6 H4 B17 `ext/ui-banner-queue` own 416: player-facing code/data (9 files)
+- I6 H4 B17 `ext/ui-level-gap` own 1271: player-facing code/data (27 files)
+- I6 H4 B17 `ext/ui-overhead-ref` own 773: player-facing code/data (15 files)
+- I6 H4 B17 `ext/ui-raid-boss-bar-online` own 1636: player-facing code/data (22 files)
+- I6 H4 B17 `ext/ui-stomp-picker` own 868: player-facing code/data (15 files)
+- I6 H4 B17 `ext/ui-trios-only-text` own 43: player-facing code/data (14 files); near-dupe of ext/vfx-telegraph-timing-rebased (11 own lines)
+- I6 H4 B12 `ext/vfx-vex-kit` own 708: player-facing code/data (18 files)
+- I6 H4 B12 `ext/vfx-vex-tracer-data` own 353: player-facing code/data (10 files) | data-driven take on the same Vex tracer item as ext/vfx-vex-tracer-0246 (B11); newer, 350 own lines
+- I6 H5 B22 `ext/early-camps-bots-a3` own 1798: player-facing code/data (27 files)
+- I6 H5 B22 `ext/fold-anim-time-1112` own 1353: player-facing code/data (16 files)
+- I6 H5 B22 `ext/fold-tut-first-1112` own 1684: player-facing code/data (30 files)
+- I6 H5 B22 `ext/garden-cinderstep-zone-rebased` own 493: art not in game (11 files), player-facing code/data (92 files), fix
+- I6 H5 B14 `ext/sfx-utilities-2` own 3089: art not in game (124 files), player-facing code/data (58 files)
+- I6 H5 B19 `ext/tut-first-camp` own 1252: player-facing code/data (26 files)
+- I6 H5 B19 `ext/tut-wisp-beats` own 1402: player-facing code/data (27 files)
+- I6 H5 B17 `ext/ui-belt-six-rebased` own 3662: art not in game (103 files), player-facing code/data (62 files)
+- I6 H5 B17 `ext/ui-simplify-1111` own 732: player-facing code/data (30 files)
+- I6 H5 B17 `ext/ui-stomp-ring` own 797: player-facing code/data (12 files)
+- I6 H5 B12 `ext/vfx-stomp` own 917: player-facing code/data (16 files)
+- I6 H6 B22 `ext/early-camps-map-ui` own 2103: art not in game (1 files), player-facing code/data (36 files)
+- I6 H6 B22 `ext/farm-boki-xp-curve` own 2020: player-facing code/data (140 files)
+- I6 H6 B22 `ext/garden-fresh-hour` own 463: player-facing code/data (2 files)
+- I6 H6 B14 `ext/sfx-garden-games-3` own 1232: art not in game (34 files), player-facing code/data (25 files)
+- I6 H6 B17 `ext/ui-boki-box-hazard` own 1550: player-facing code/data (27 files)
+- I6 H6 B17 `ext/ui-solos-hud` own 1915: player-facing code/data (17 files)
+- I6 H7 B03 `ext/combat-ttk-parity-1112` own 470: player-facing code/data (15 files), fix
+- I6 H7 B03 `ext/parity-verify-0245-slice` own 2364: art not in game (1 files), player-facing code/data (36 files)
+- I6 H7 B24 `ext/rename-guin-1112` own 0: checks/docs only | briefs-only rename rows on the agent-briefs line, not a main merge
+- I6 H7 B24 `ext/rename-tessaram-1111` own 10: checks/docs only
+- I6 H7 B24 `ext/review-design-1110` own 70: checks/docs only
+- I6 H7 B24 `ext/review-design-1110-fun` own 53: checks/docs only
+- I6 H7 B25 `ext/spike-on-glidespike` own 141: player-facing code/data (5 files)
+- I6 H7 B19 `ext/tut-first-games-port` own 243: player-facing code/data (6 files)
+- I6 H7 B12 `ext/vfx-utility-read` own 2418: player-facing code/data (55 files)
+- I6 H8 B26 `ext/anim-stomp-batch-a` own 1649: art not in game (2 files), player-facing code/data (34 files)
+- I6 H8 B26 `ext/anim-stomp-batch-b` own 2347: art not in game (1 files), player-facing code/data (37 files)
+- I6 H8 B22 `ext/garden-ridge-rebased` own 225: player-facing code/data (9 files), fix; near-dupe of ext/w0246-garden (8 own lines)
+- I6 H8 B17 `ext/hunters3d-0246` own 846: art not in game (2 files), player-facing code/data (36 files)
+- I6 H8 B01 `ext/no-dash-bursts-audit-rebased-rebased` own 215: player-facing code/data (10 files); near-dupe of ext/dash-no-rings-reel (5 own lines)
+- I6 H8 B24 `ext/reset-cue-rebased` own 2344: art not in game (3 files), player-facing code/data (294 files)
+- I6 H8 B19 `ext/tut-dodge-dummy-rebased` own 1414: art not in game (24 files), player-facing code/data (30 files)
+- I6 H8 B19 `ext/tut-solo-words` own 1596: player-facing code/data (42 files)
+- I6 H8 B19 `ext/tut-stomp-hints` own 2246: player-facing code/data (47 files)
+- I6 H8 B19 `ext/tut-summon-station` own 1772: player-facing code/data (34 files)
+- I6 H8 B12 `ext/vfx-neve-rimelock-area` own 9: player-facing code/data (1 files), fix
+- I6 H9 B22 `ext/farm-mood-icons-rebased` own 241: player-facing code/data (3 files); near-dupe of ext/w0246-garden (2 own lines)
+- I6 H9 B22 `ext/garden-voice-ambience-rebased` own 105: player-facing code/data (11 files); near-dupe of ext/garden-deflake (6 own lines)
+- I6 H9 B26 `ext/integ-ways-out-0245` own 2349: art not in game (1 files), player-facing code/data (36 files)
+- I6 H9 B24 `ext/land-squash-lean-rebased` own 311: art not in game (3 files), player-facing code/data (6 files); near-dupe of ext/vfx-motley-port (7 own lines)
+- I6 H9 B01 `ext/split-ui` own 1776: player-facing code/data (63 files)
+- I6 H9 B14 `ext/step-sounds-unified-rebased` own 530: art not in game (66 files), player-facing code/data (11 files); near-dupe of ext/vfx-motley-port (16 own lines)
+- I6 H9 B03 `ext/ult-ranks-rebased-rebased` own 206: player-facing code/data (21 files)
+- I6 H9 B12 `ext/vfx-kael-smash-lane-on-slam-lane` own 112: art not in game (2 files), player-facing code/data (5 files)
+- I6 H10 B17 `ext/hunter-first-hints` own 2628: player-facing code/data (52 files)
+- I6 H10 B19 `ext/tut-hints-blight-camp-box` own 93: player-facing code/data (2 files)
+- I5 H1 B22 `ext/boki-gait` own 241: art not in game (10 files), player-facing code/data (2 files)
+- I5 H1 B01 `ext/bot-kit-lands` own 137: player-facing code/data (8 files)
+- I5 H1 B03 `ext/cinder-flue-clips` own 153: player-facing code/data (5 files)
+- I5 H1 B22 `ext/clans-roles` own 759: player-facing code/data (6 files)
+- I5 H1 B22 `ext/clans-weekly-board` own 734: player-facing code/data (10 files)
+- I5 H1 B03 `ext/combat-albert-aegis-input` own 215: player-facing code/data (1 files); near-dupe of ext/w0246-feel (10 own lines)
+- I5 H1 B03 `ext/combat-bots-ring` own 195: player-facing code/data (4 files)
+- I5 H1 B03 `ext/combat-hurtbox-parity` own 271: art not in game (1 files), player-facing code/data (25 files); near-dupe of ext/feel-landing-recovery (14 own lines)
+- I5 H1 B00 `ext/combat-lace-spirit-ledges-rebased` own 12: player-facing code/data (1 files), fix
+- I5 H1 B03 `ext/combat-level-growth` own 134: player-facing code/data (4 files); near-dupe of ext/feel-landing-recovery (10 own lines)
+- I5 H1 B03 `ext/combat-ranks-a` own 147: player-facing code/data (7 files); near-dupe of ext/feel-landing-recovery (18 own lines)
+- I5 H1 B03 `ext/combat-ranks-c` own 211: player-facing code/data (10 files); near-dupe of ext/feel-landing-recovery (10 own lines)
+- I5 H1 B03 `ext/combat-steal-window-tell` own 369: player-facing code/data (7 files)
+- I5 H1 B03 `ext/combat-swept-hits` own 196: player-facing code/data (4 files); near-dupe of ext/feel-landing-recovery (4 own lines)
+- I5 H1 B03 `ext/combat-vex-cone-net` own 215: player-facing code/data (3 files), fix
+- I5 H1 B24 `ext/combo-payoff-audit` own 252: player-facing code/data (8 files)
+- I5 H1 B17 `ext/creator-empty-marks` own 421: player-facing code/data (7 files)
+- I5 H1 B00 `ext/creator-sex-distinct` own 102: player-facing code/data (5 files); near-dupe of ext/w0246-misc (11 own lines)
+- I5 H1 B22 `ext/egg-hover-1111` own 121: player-facing code/data (3 files)
+- I5 H1 B22 `ext/extra-grounds-expanse` own 657: player-facing code/data (8 files); near-dupe of ext/w0246-garden (9 own lines)
+- I5 H1 B22 `ext/farm-clip-1111` own 198: player-facing code/data (3 files)
+- I5 H1 B22 `ext/farm-games-picker-base` own 63: player-facing code/data (3 files)
+- I5 H1 B22 `ext/farm-hand-feed` own 222: player-facing code/data (5 files)
+- I5 H1 B22 `ext/farm-hatch-name` own 197: player-facing code/data (7 files)
+- I5 H1 B22 `ext/farm-loot-nudge-card` own 131: player-facing code/data (5 files)
+- I5 H1 B22 `ext/farm-respec` own 81: player-facing code/data (5 files)
+- I5 H1 B22 `ext/farm-rival-beats` own 122: player-facing code/data (5 files)
+- I5 H1 B22 `ext/farm-soak-full-loop` own 161: player-facing code/data (3 files)
+- I5 H1 B22 `ext/farm-transfer-transport` own 271: player-facing code/data (5 files)
+- I5 H1 B22 `ext/fold-vfx-vex-1112` own 130: art not in game (1 files), player-facing code/data (5 files)
+- I5 H1 B22 `ext/garden-nap-spots` own 134: player-facing code/data (3 files)
+- I5 H1 B22 `ext/garden-seasons` own 271: player-facing code/data (7 files)
+- I5 H1 B22 `ext/garden-sleepovers` own 194: player-facing code/data (6 files); near-dupe of ext/garden-balance-apply (4 own lines)
+- I5 H1 B25 `ext/gil-rework-1111` own 521: player-facing code/data (6 files)
+- I5 H1 B03 `ext/grimble-nose-1109` own 23: player-facing code/data (3 files), owner; near-dupe of ext/stuck-integ-950a5444 (25 own lines)
+- I5 H1 B22 `ext/hatch-mask-polish-1111` own 350: player-facing code/data (15 files)
+- I5 H1 B17 `ext/intro-hold-skip-1111` own 150: player-facing code/data (2 files)
+- I5 H1 B03 `ext/kael-black-red` own 78: player-facing code/data (8 files)
+- I5 H1 B22 `ext/map-clear-1111` own 479: player-facing code/data (8 files)
+- I5 H1 B03 `ext/meeko-call-noself` own 45: player-facing code/data (2 files), fix
+- I5 H1 B01 `ext/perf-anim-distance-rate` own 190: player-facing code/data (4 files)
+- I5 H1 B00 `ext/pitch-reel-exit-1112` own 568: player-facing code/data (1 files)
+- I5 H1 B24 `ext/polish-panel-close` own 147: player-facing code/data (7 files)
+- I5 H1 B01 `ext/remote-smooth-reds` own 193: player-facing code/data (1 files)
+- I5 H1 B03 `ext/sable-dash-lmb-1111` own 120: player-facing code/data (3 files)
+- I5 H1 B03 `ext/scrapking-arm-1111` own 198: player-facing code/data (8 files)
+- I5 H1 B03 `ext/scrapking-lmb-1111` own 152: player-facing code/data (8 files) | owner 11-11 top-priority successor of ext/scrapking-lmb, which rides with a top-10 tip: the top-10 job should take -1111, not the old PR #19 head
+- I5 H1 B04 `ext/scrapking-lmb-1111-clips` own 152: player-facing code/data (8 files)
+- I5 H1 B14 `ext/sfx-abyss` own 232: art not in game (6 files), player-facing code/data (4 files)
+- I5 H1 B14 `ext/sfx-abyss-fall` own 186: art not in game (4 files), player-facing code/data (4 files)
+- I5 H1 B14 `ext/sfx-boki-life-wire` own 177: player-facing code/data (8 files)
+- I5 H1 B14 `ext/sfx-bus-ducking` own 205: player-facing code/data (3 files)
+- I5 H1 B14 `ext/sfx-bus-sliders` own 146: player-facing code/data (3 files)
+- I5 H1 B14 `ext/sfx-cc-on-you` own 179: art not in game (10 files), player-facing code/data (4 files)
+- I5 H1 B15 `ext/sfx-closing-zone` own 698: art not in game (7 files), player-facing code/data (10 files)
+- I5 H1 B15 `ext/sfx-combo-payoffs` own 134: player-facing code/data (4 files)
+- I5 H1 B15 `ext/sfx-enemy-tells` own 120: art not in game (1 files), player-facing code/data (5 files)
+- I5 H1 B15 `ext/sfx-glint-fishing` own 198: art not in game (14 files), player-facing code/data (5 files)
+- I5 H1 B15 `ext/sfx-held-fire-cadence` own 136: player-facing code/data (4 files)
+- I5 H1 B15 `ext/sfx-mixing-bowl` own 264: art not in game (22 files), player-facing code/data (7 files)
+- I5 H1 B15 `ext/sfx-quest-exits` own 248: art not in game (5 files), player-facing code/data (5 files)
+- I5 H1 B15 `ext/sfx-rank-pick` own 151: art not in game (3 files), player-facing code/data (5 files)
+- I5 H1 B15 `ext/sfx-ready-cues` own 190: art not in game (3 files), player-facing code/data (5 files); near-dupe of ext/w0246-audio-vfx (1 own lines)
+- I5 H1 B15 `ext/sfx-silence-audit` own 267: player-facing code/data (6 files)
+- I5 H1 B15 `ext/sfx-voice-cap` own 239: player-facing code/data (3 files)
+- I5 H1 B15 `ext/sfx-ways-out-ticks` own 104: art not in game (1 files), player-facing code/data (2 files)
+- I5 H1 B15 `ext/sfx-whistle-answer` own 75: player-facing code/data (6 files)
+- I5 H1 B01 `ext/split-rimewright-spear` own 202: player-facing code/data (3 files)
+- I5 H1 B01 `ext/status-net-per-caster` own 391: player-facing code/data (6 files)
+- I5 H1 B04 `ext/tenzo-ridge-bursts` own 150: player-facing code/data (6 files)
+- I5 H1 B19 `ext/training-time-trial` own 872: player-facing code/data (5 files)
+- I5 H1 B24 `ext/tree-fade-1111` own 213: player-facing code/data (5 files)
+- I5 H1 B04 `ext/ttk-kael` own 33: player-facing code/data (1 files)
+- I5 H1 B19 `ext/tut-beat-retry` own 130: player-facing code/data (3 files)
+- I5 H1 B00 `ext/tut-first-ult` own 94: player-facing code/data (2 files)
+- I5 H1 B00 `ext/tut-first-zone` own 21: player-facing code/data (4 files)
+- I5 H1 B17 `ext/ui-dex-filters` own 373: player-facing code/data (3 files)
+- I5 H1 B17 `ext/ui-drop-plan-first` own 100: player-facing code/data (5 files)
+- I5 H1 B17 `ext/ui-hunter-stats` own 170: player-facing code/data (4 files)
+- I5 H1 B17 `ext/ui-keybind-conflicts` own 126: player-facing code/data (2 files)
+- I5 H1 B17 `ext/ui-meeko-channel-ally` own 121: player-facing code/data (4 files)
+- I5 H1 B17 `ext/ui-minigame-picker-0245` own 66: player-facing code/data (4 files)
+- I5 H1 B17 `ext/ui-pause-more` own 157: player-facing code/data (1 files)
+- I5 H1 B17 `ext/ui-results-first` own 457: player-facing code/data (2 files)
+- I5 H1 B17 `ext/ui-ult-ready` own 219: player-facing code/data (3 files); near-dupe of ext/vfx-motley-port (3 own lines)
+- I5 H1 B17 `ext/ui-ways-out-colourblind` own 610: player-facing code/data (32 files)
+- I5 H1 B17 `ext/ui-wisp-picker` own 129: player-facing code/data (4 files)
+- I5 H1 B17 `ext/ui-zone-cards` own 117: player-facing code/data (4 files)
+- I5 H1 B04 `ext/uplink-tour-stall` own 32: player-facing code/data (2 files), fix
+- I5 H1 B01 `ext/verify-camera-ab` own 312: player-facing code/data (3 files)
+- I5 H1 B01 `ext/verify-felt-dash-0245` own 19: checks/docs only, fix; near-dupe of ext/anim-boki-cast-rebased (19 own lines)
+- I5 H1 B01 `ext/verify-hitbox-rest` own 97: checks/docs only
+- I5 H1 B01 `ext/verify-kael-guard-ult` own 66: checks/docs only, fix
+- I5 H1 B04 `ext/vex-greenfire-1108` own 68: player-facing code/data (3 files)
+- I5 H1 B12 `ext/vfx-armour-tier-up` own 80: art not in game (1 files), player-facing code/data (3 files); near-dupe of ext/w0246-audio-vfx (7 own lines)
+- I5 H1 B12 `ext/vfx-fusion-topdown` own 279: player-facing code/data (5 files)
+- I5 H1 B12 `ext/vfx-garden-item-apply` own 338: player-facing code/data (3 files)
+- I5 H1 B12 `ext/vfx-gil-aimkit` own 157: player-facing code/data (2 files)
+- I5 H1 B12 `ext/vfx-gil-bar` own 693: art not in game (2 files), player-facing code/data (6 files)
+- I5 H1 B12 `ext/vfx-gil-colour` own 277: player-facing code/data (4 files)
+- I5 H1 B12 `ext/vfx-heal-read-1111` own 350: player-facing code/data (6 files)
+- I5 H1 B12 `ext/vfx-kael-kit` own 20: art not in game (6 files), player-facing code/data (5 files); near-dupe of ext/anim-boki-cast-rebased (25 own lines)
+- I5 H1 B12 `ext/vfx-lace-heavy-impact` own 449: player-facing code/data (10 files)
+- I5 H1 B12 `ext/vfx-motley-data` own 268: player-facing code/data (7 files)
+- I5 H1 B12 `ext/vfx-particle-budget-fight` own 340: player-facing code/data (4 files)
+- I5 H1 B12 `ext/vfx-ring-audit` own 37: player-facing code/data (30 files)
+- I5 H1 B12 `ext/vfx-sparkle-ult-local` own 74: player-facing code/data (5 files)
+- I5 H1 B12 `ext/vfx-telegraph-lead-rebased` own 188: player-facing code/data (1 files)
+- I5 H1 B12 `ext/vfx-telegraph-net` own 404: player-facing code/data (4 files)
+- I5 H1 B12 `ext/vfx-vex-scorch-rim` own 30: player-facing code/data (2 files), fix
+- I5 H1 B12 `ext/vfx-vex-tracer` own 108: player-facing code/data (3 files) | same VFX_QUALITY item 3 as ext/vfx-vex-tracer-0246 (B11); not a newer copy (106 own lines), owner look call, likely drop after -0246 lands
+- I5 H1 B12 `ext/vfx-vex-tracer-strips` own 108: player-facing code/data (3 files) | same item as ext/vfx-vex-tracer-0246 (B11); 106 own lines; likely drop after -0246 lands
+- I5 H1 B12 `ext/vfx-ways-out-read` own 458: player-facing code/data (6 files)
+- I5 H1 B22 `ext/ways-out-sim` own 498: player-facing code/data (3 files)
+- I5 H1 B04 `ext/wisp-look-net` own 52: player-facing code/data (6 files), fix
+- I5 H2 B25 `ext/barrier-block-parity` own 134: player-facing code/data (4 files)
+- I5 H2 B04 `ext/base-tp-hold-wheel` own 504: player-facing code/data (12 files)
+- I5 H2 B22 `ext/boki-gait-plant` own 252: player-facing code/data (2 files)
+- I5 H2 B04 `ext/boss-bot-focus-1111` own 160: player-facing code/data (5 files)
+- I5 H2 B01 `ext/bots-human-1111-feel` own 1033: player-facing code/data (5 files)
+- I5 H2 B01 `ext/checks-out-of-main-c` own 356: player-facing code/data (1 files)
+- I5 H2 B04 `ext/combat-blight-endgame` own 783: player-facing code/data (7 files)
+- I5 H2 B04 `ext/combat-grimble-ult-clarity` own 480: player-facing code/data (22 files)
+- I5 H2 B04 `ext/combat-levelup-refill-rebased` own 131: player-facing code/data (7 files); near-dupe of ext/feel-landing-recovery (7 own lines)
+- I5 H2 B04 `ext/combat-melee-ring-stack` own 674: player-facing code/data (24 files)
+- I5 H2 B04 `ext/combat-motley-dead-kit` own 204: player-facing code/data (4 files)
+- I5 H2 B04 `ext/duel-ring-port` own 543: player-facing code/data (5 files)
+- I5 H2 B22 `ext/farm-base-only-breed` own 192: player-facing code/data (3 files)
+- I5 H2 B22 `ext/farm-boki-pronouns` own 211: player-facing code/data (59 files)
+- I5 H2 B22 `ext/farm-friend-chase` own 187: player-facing code/data (4 files)
+- I5 H2 B22 `ext/farm-new-toy` own 461: player-facing code/data (6 files)
+- I5 H2 B22 `ext/farm-pet-personality` own 274: player-facing code/data (5 files)
+- I5 H2 B22 `ext/fold-feel-glide-1112` own 496: player-facing code/data (5 files)
+- I5 H2 B23 `ext/fold-sfx-boki-1112` own 731: art not in game (48 files), player-facing code/data (19 files)
+- I5 H2 B24 `ext/gate-speed-1111` own 1062: checks/docs only
+- I5 H2 B24 `ext/home-dash-one` own 161: player-facing code/data (11 files)
+- I5 H2 B04 `ext/kael-drop-down` own 322: player-facing code/data (10 files)
+- I5 H2 B04 `ext/kael-rmb-line-1111` own 181: player-facing code/data (7 files)
+- I5 H2 B04 `ext/kit-card-1111` own 73: player-facing code/data (14 files)
+- I5 H2 B04 `ext/lace-cancels-1111` own 627: player-facing code/data (11 files); near-dupe of ext/vfx-lace-spirit-walk-on-lace (2 own lines)
+- I5 H2 B04 `ext/neve-1111` own 353: player-facing code/data (3 files)
+- I5 H2 B04 `ext/neve-cancels-1111` own 556: player-facing code/data (3 files)
+- I5 H2 B04 `ext/parity-albert-blow-stun` own 94: player-facing code/data (9 files)
+- I5 H2 B04 `ext/parity-kael-clips` own 112: player-facing code/data (6 files)
+- I5 H2 B04 `ext/parity-tenzo-ridge` own 24: player-facing code/data (2 files)
+- I5 H2 B04 `ext/parity-ttk-kael` own 68: player-facing code/data (2 files)
+- I5 H2 B01 `ext/perf-1111` own 356: player-facing code/data (5 files)
+- I5 H2 B01 `ext/perf-skip-proc-body` own 344: player-facing code/data (6 files)
+- I5 H2 B01 `ext/perf-tracy-1112` own 343: player-facing code/data (3 files)
+- I5 H2 B01 `ext/remote-move-clear` own 63: player-facing code/data (5 files); near-dupe of ext/anim-bul-guard-remote (3 own lines)
+- I5 H2 B04 `ext/sable-wings` own 752: art not in game (1 files), player-facing code/data (8 files)
+- I5 H2 B24 `ext/series-boki-1112` own 508: player-facing code/data (6 files)
+- I5 H2 B15 `ext/sfx-biome-beds` own 284: art not in game (4 files), player-facing code/data (3 files)
+- I5 H2 B15 `ext/sfx-boki-ability-impacts` own 522: art not in game (96 files), player-facing code/data (14 files)
+- I5 H2 B15 `ext/sfx-boki-steps` own 309: art not in game (48 files), player-facing code/data (4 files)
+- I5 H2 B15 `ext/sfx-breakables` own 236: art not in game (17 files), player-facing code/data (6 files)
+- I5 H2 B15 `ext/sfx-coverage-world` own 592: art not in game (43 files), player-facing code/data (33 files)
+- I5 H2 B15 `ext/sfx-falloff-wide-cam` own 731: player-facing code/data (18 files)
+- I5 H2 B15 `ext/sfx-fusion-forms` own 434: art not in game (32 files), player-facing code/data (15 files)
+- I5 H2 B15 `ext/sfx-hunter-wisp-hum` own 214: art not in game (1 files), player-facing code/data (5 files)
+- I5 H2 B15 `ext/sfx-incoming-hit-dir` own 760: art not in game (4 files), player-facing code/data (11 files)
+- I5 H2 B15 `ext/sfx-interrupt-cut` own 181: art not in game (1 files), player-facing code/data (17 files)
+- I5 H2 B15 `ext/sfx-kit-placeholders-2` own 506: art not in game (57 files), player-facing code/data (32 files)
+- I5 H2 B15 `ext/sfx-listener-hunter` own 123: player-facing code/data (4 files); near-dupe of ext/feel-landing-recovery (5 own lines)
+- I5 H2 B15 `ext/sfx-mix-pass` own 533: art not in game (3 files), player-facing code/data (5 files)
+- I5 H2 B15 `ext/sfx-mob-attacks` own 169: art not in game (25 files), player-facing code/data (6 files)
+- I5 H2 B15 `ext/sfx-neve-skate` own 549: art not in game (6 files), player-facing code/data (7 files)
+- I5 H2 B15 `ext/sfx-pick-taken` own 147: player-facing code/data (6 files)
+- I5 H2 B15 `ext/sfx-ready-cues-summon` own 674: art not in game (3 files), player-facing code/data (21 files)
+- I5 H2 B15 `ext/sfx-step-surfaces-2x` own 181: art not in game (24 files), player-facing code/data (6 files)
+- I5 H2 B15 `ext/sfx-training-grounds` own 242: art not in game (10 files), player-facing code/data (8 files)
+- I5 H2 B01 `ext/split-home-system` own 156: player-facing code/data (2 files)
+- I5 H2 B01 `ext/split-hud` own 333: player-facing code/data (2 files)
+- I5 H2 B01 `ext/split-match-system` own 239: player-facing code/data (3 files)
+- I5 H2 B25 `ext/stairs-smooth-1111` own 213: player-facing code/data (2 files)
+- I5 H2 B18 `ext/ui-counter-overlap` own 150: player-facing code/data (2 files)
+- I5 H2 B18 `ext/ui-edge-markers-one` own 235: player-facing code/data (5 files)
+- I5 H2 B18 `ext/ui-expedition-first` own 84: player-facing code/data (3 files)
+- I5 H2 B18 `ext/ui-garden-result-card` own 219: player-facing code/data (6 files)
+- I5 H2 B18 `ext/ui-glossary-pass` own 158: player-facing code/data (8 files)
+- I5 H2 B18 `ext/ui-loot-feed` own 189: player-facing code/data (8 files)
+- I5 H2 B18 `ext/ui-mask-preview-warm` own 170: player-facing code/data (7 files); near-dupe of ext/relic-preview-hitch (6 own lines)
+- I5 H2 B18 `ext/ui-match-phase` own 224: player-facing code/data (6 files)
+- I5 H2 B18 `ext/ui-relics-grid` own 221: player-facing code/data (4 files)
+- I5 H2 B18 `ext/ui-tab-board-stats` own 282: player-facing code/data (6 files)
+- I5 H2 B18 `ext/ui-world-ping` own 122: player-facing code/data (5 files)
+- I5 H2 B12 `ext/vfx-colour-audit` own 357: player-facing code/data (27 files); near-dupe of ext/vfx-meeko-palette (8 own lines)
+- I5 H2 B12 `ext/vfx-grimble-anchor` own 99: player-facing code/data (8 files)
+- I5 H2 B12 `ext/vfx-hit-flash-kind` own 153: player-facing code/data (3 files)
+- I5 H2 B12 `ext/vfx-meeko-ult-field` own 157: player-facing code/data (5 files); near-dupe of ext/vfx-meeko-hit-hearth (4 own lines)
+- I5 H2 B12 `ext/vfx-motley-trade-teal` own 334: player-facing code/data (7 files)
+- I5 H2 B12 `ext/vfx-vex-data` own 259: player-facing code/data (8 files); near-dupe of ext/vfx-vex-lance-beam (3 own lines)
+- I5 H3 B24 `ext/armour-parity` own 173: player-facing code/data (4 files)
+- I5 H3 B01 `ext/bot-kael-1111` own 341: player-facing code/data (10 files)
+- I5 H3 B04 `ext/clarity-1112` own 589: player-facing code/data (23 files)
+- I5 H3 B04 `ext/combat-in-combat-rule` own 181: player-facing code/data (10 files); near-dupe of ext/feel-landing-recovery (7 own lines)
+- I5 H3 B04 `ext/combat-mob-boss-fsm` own 547: player-facing code/data (9 files)
+- I5 H3 B23 `ext/farm-feed-bowl` own 384: player-facing code/data (9 files)
+- I5 H3 B23 `ext/farm-garden-default` own 614: player-facing code/data (4 files)
+- I5 H3 B23 `ext/farm-greet-home` own 192: player-facing code/data (5 files)
+- I5 H3 B23 `ext/farm-incubator-verify` own 443: player-facing code/data (14 files)
+- I5 H3 B23 `ext/garden-horizon` own 215: player-facing code/data (12 files)
+- I5 H3 B23 `ext/garden-hub-theme` own 200: player-facing code/data (12 files)
+- I5 H3 B23 `ext/garden-lantern-zone-hub-rebased` own 76: player-facing code/data (5 files)
+- I5 H3 B04 `ext/kael-cancels-1111` own 722: player-facing code/data (11 files)
+- I5 H3 B04 `ext/kael-chainlunge-cleanup` own 335: player-facing code/data (12 files)
+- I5 H3 B26 `ext/merge-anim-1111` own 663: player-facing code/data (9 files)
+- I5 H3 B17 `ext/modes-solos-1111` own 279: player-facing code/data (9 files)
+- I5 H3 B04 `ext/parity-bulwark-crush-rebased` own 103: player-facing code/data (11 files)
+- I5 H3 B04 `ext/sable-appeal4` own 782: art not in game (2 files), player-facing code/data (12 files)
+- I5 H3 B15 `ext/sfx-garden-events` own 148: art not in game (10 files), player-facing code/data (9 files)
+- I5 H3 B15 `ext/sfx-garden-zone-music` own 182: art not in game (3 files), player-facing code/data (13 files)
+- I5 H3 B15 `ext/sfx-hunter-barks` own 273: art not in game (192 files), player-facing code/data (6 files)
+- I5 H3 B15 `ext/sfx-hunter-foley` own 773: art not in game (157 files), player-facing code/data (13 files); near-dupe of ext/vfx-motley-port (26 own lines)
+- I5 H3 B16 `ext/sfx-inventory-actions` own 131: art not in game (18 files), player-facing code/data (8 files)
+- I5 H3 B16 `ext/sfx-low-hp-filter-rebased` own 223: art not in game (4 files), player-facing code/data (8 files); near-dupe of ext/w0246-audio-vfx (8 own lines)
+- I5 H3 B16 `ext/sfx-nook` own 216: art not in game (17 files), player-facing code/data (7 files)
+- I5 H3 B16 `ext/sfx-xp-steal` own 199: art not in game (3 files), player-facing code/data (7 files); near-dupe of ext/w0246-audio-vfx (4 own lines)
+- I5 H3 B01 `ext/split-hunter` own 416: player-facing code/data (18 files)
+- I5 H3 B04 `ext/stomp-1111-rules` own 649: player-facing code/data (10 files)
+- I5 H3 B18 `ext/ui-font-wght-tag` own 421: player-facing code/data (9 files); near-dupe of ext/squad-frames (26 own lines)
+- I5 H3 B18 `ext/ui-hud-groups-verify` own 179: art not in game (13 files), player-facing code/data (2 files)
+- I5 H3 B18 `ext/ui-hud-scale` own 548: player-facing code/data (12 files)
+- I5 H3 B18 `ext/ui-inventory-pass` own 99: player-facing code/data (2 files)
+- I5 H3 B18 `ext/ui-knock-feed` own 851: player-facing code/data (10 files)
+- I5 H3 B18 `ext/ui-mode-cards` own 379: player-facing code/data (10 files)
+- I5 H3 B18 `ext/ui-portal-boki-card` own 754: player-facing code/data (19 files)
+- I5 H3 B18 `ext/ui-quest-tracker` own 595: player-facing code/data (10 files)
+- I5 H3 B18 `ext/ui-waysout-safe-area` own 384: player-facing code/data (8 files)
+- I5 H3 B01 `ext/verify-stomp-break-sweep` own 788: player-facing code/data (10 files)
+- I5 H4 B23 `ext/farm-carry-arrival` own 448: player-facing code/data (17 files)
+- I5 H4 B23 `ext/farm-sick-recover` own 330: player-facing code/data (8 files)
+- I5 H4 B23 `ext/garden-cinderstep` own 239: player-facing code/data (13 files)
+- I5 H4 B23 `ext/garden-hub-move` own 354: player-facing code/data (9 files)
+- I5 H4 B23 `ext/garden-kite-2` own 740: player-facing code/data (7 files)
+- I5 H4 B23 `ext/garden-zone-cinderstep` own 468: player-facing code/data (21 files), fix
+- I5 H4 B23 `ext/kin-type-trail` own 763: player-facing code/data (84 files)
+- I5 H4 B04 `ext/landing-recovery` own 610: player-facing code/data (14 files); near-dupe of ext/feel-landing-recovery (13 own lines)
+- I5 H4 B16 `ext/sfx-garden-visitors-cups` own 519: art not in game (18 files), player-facing code/data (17 files)
+- I5 H4 B16 `ext/sfx-solos-quiet` own 405: player-facing code/data (14 files)
+- I5 H4 B16 `ext/sfx-stomp-1111` own 767: art not in game (7 files), player-facing code/data (13 files)
+- I5 H4 B16 `ext/sfx-water` own 880: art not in game (90 files), player-facing code/data (15 files)
+- I5 H4 B18 `ext/ui-garden-text-size` own 619: player-facing code/data (32 files)
+- I5 H4 B18 `ext/ui-stomp-state` own 657: player-facing code/data (12 files)
+- I5 H4 B18 `ext/ui-zone-next` own 397: player-facing code/data (11 files)
+- I5 H5 B16 `ext/sfx-carry-cues` own 528: art not in game (5 files), player-facing code/data (20 files)
+- I5 H5 B16 `ext/sfx-steps-dirloops` own 1763: art not in game (42 files), player-facing code/data (32 files)
+- I5 H5 B18 `ext/ui-declutter-1111` own 174: player-facing code/data (36 files)
+- I5 H5 B18 `ext/ui-plate-status-row` own 446: player-facing code/data (11 files)
+- I5 H5 B18 `ext/ui-rebind-everywhere` own 301: player-facing code/data (32 files)
+- I5 H5 B18 `ext/ui-text-size` own 410: player-facing code/data (31 files)
+- I5 H5 B18 `ext/ui-tooltip-from-data` own 502: player-facing code/data (27 files)
+- I5 H6 B25 `ext/docs-kit-parity-names` own 884: player-facing code/data (13 files)
+- I5 H6 B25 `ext/sv-private-1112` own 870: player-facing code/data (14 files)
+- I5 H7 B25 `ext/online-dash-sweep` own 89: checks/docs only
+- I5 H8 B04 `ext/combat-neve-lmb-torn` own 3: player-facing code/data (1 files), fix
+- I5 H8 B04 `ext/combat-ostra-seed-burn` own 6: checks/docs only, fix
+- I5 H8 B04 `ext/lace-climb-tall` own 50: checks/docs only
+- I5 H8 B26 `ext/training-merge-1111` own 215: player-facing code/data (11 files)
+- I4 H1 B00 `ext/anim-timing-dolm` own 55: checks/docs only; near-dupe of ext/run-stop-one (13 own lines)
+- I4 H1 B23 `ext/boki-key-c-main` own 24: player-facing code/data (3 files)
+- I4 H1 B01 `ext/bot-kit-lead-casts` own 79: player-facing code/data (5 files)
+- I4 H1 B04 `ext/combat-lace-wallclimb` own 59: checks/docs only
+- I4 H1 B23 `ext/farm-breed-pace-table` own 103: player-facing code/data (1 files)
+- I4 H1 B23 `ext/farm-toys-joy-tune` own 59: player-facing code/data (3 files)
+- I4 H1 B23 `ext/farm-unmasked-feet` own 53: player-facing code/data (3 files)
+- I4 H1 B25 `ext/load-map-stall` own 57: player-facing code/data (3 files)
+- I4 H1 B01 `ext/no-squad-hint-1111` own 21: player-facing code/data (3 files)
+- I4 H1 B01 `ext/perf-assets-1111` own 19: player-facing code/data (2 files); near-dupe of ext/anim-boki-cast-rebased (22 own lines)
+- I4 H1 B02 `ext/perf-heart-final` own 58: player-facing code/data (1 files)
+- I4 H1 B25 `ext/prematch-safe-720` own 62: player-facing code/data (1 files)
+- I4 H1 B02 `ext/remote-anim-timeout` own 60: checks/docs only; near-dupe of ext/anim-stomp-per-hunter (6 own lines)
+- I4 H1 B02 `ext/remote-smooth-reds-b` own 98: player-facing code/data (1 files)
+- I4 H1 B25 `ext/riders-round3` own 26: player-facing code/data (5 files)
+- I4 H1 B16 `ext/sfx-armour-tier-up` own 93: art not in game (2 files), player-facing code/data (3 files); near-dupe of ext/w0246-audio-vfx (5 own lines)
+- I4 H1 B16 `ext/sfx-chop-mine` own 88: art not in game (10 files), player-facing code/data (3 files)
+- I4 H1 B16 `ext/sfx-hostile-casts` own 97: art not in game (1 files), player-facing code/data (6 files)
+- I4 H1 B16 `ext/sfx-level-rank` own 67: art not in game (2 files), player-facing code/data (3 files)
+- I4 H1 B16 `ext/sfx-loudness-0245` own 234: player-facing code/data (2 files)
+- I4 H1 B16 `ext/sfx-meeko-channel-loop` own 88: art not in game (5 files), player-facing code/data (3 files)
+- I4 H1 B16 `ext/sfx-rarity-stings` own 79: art not in game (2 files), player-facing code/data (5 files)
+- I4 H1 B16 `ext/sfx-shield-break` own 110: art not in game (24 files), player-facing code/data (5 files)
+- I4 H1 B16 `ext/sfx-sparkle-ult-beats` own 95: art not in game (3 files), player-facing code/data (3 files)
+- I4 H1 B24 `ext/skin-relax-four` own 143: art not in game (1 files), player-facing code/data (2 files)
+- I4 H1 B00 `ext/tut-first-egg-line` own 40: player-facing code/data (3 files)
+- I4 H1 B18 `ext/ui-first15-0245` own 47: art not in game (6 files), player-facing code/data (4 files)
+- I4 H1 B18 `ext/ui-first15-leftovers` own 61: art not in game (4 files), player-facing code/data (4 files)
+- I4 H1 B18 `ext/ui-prematch-margin` own 57: player-facing code/data (1 files)
+- I4 H1 B18 `ext/ui-results-plain` own 25: player-facing code/data (1 files); near-dupe of ext/anim-boki-cast-rebased (27 own lines)
+- I4 H1 B18 `ext/ui-self-cc-timer` own 74: player-facing code/data (3 files)
+- I4 H1 B18 `ext/ui-stale-text-pass` own 91: player-facing code/data (17 files)
+- I4 H1 B18 `ext/ui-start-here-port` own 53: player-facing code/data (5 files)
+- I4 H2 B23 `ext/boki-gait-rekey` own 299: art not in game (22 files), player-facing code/data (28 files)
+- I4 H2 B25 `ext/docs-decision-numbers` own 650: player-facing code/data (32 files)
+- I4 H2 B23 `ext/farm-carry-boki-trail` own 15: player-facing code/data (2 files)
+- I4 H2 B23 `ext/farm-carry-trail-0245` own 59: player-facing code/data (2 files)
+- I4 H2 B18 `ext/hunter-regen-meshy` own 62: art not in game (2 files), player-facing code/data (6 files)
+- I4 H2 B24 `ext/ostra-gait-rebased` own 65: art not in game (1 files), player-facing code/data (3 files)
+- I4 H2 B16 `ext/sfx-hit-tick-family` own 111: art not in game (24 files), player-facing code/data (17 files)
+- I4 H2 B15 `ext/sfx-type-cues-19` own 153: art not in game (96 files), player-facing code/data (8 files)
+- I4 H2 B18 `ext/ui-kit-panel-fight` own 73: player-facing code/data (1 files)
+- I4 H2 B18 `ext/ui-words-cut-match` own 60: player-facing code/data (21 files)
+- I4 H3 B18 `ext/hunter-revamp-go` own 138: art not in game (11 files), player-facing code/data (11 files)
+- I4 H3 B16 `ext/sfx-garden-react` own 110: art not in game (11 files), player-facing code/data (5 files)
+- I4 H4 B25 `ext/women-body-1111` own 69: player-facing code/data (14 files)
+- I3 H1 B00 `ext/art-keepers` own 3: player-facing code/data (1 files)
+- I3 H1 B16 `ext/infra-usage-plan` own 0: checks/docs only | standalone history (usage pacer), not a main merge
+- I3 H1 B16 `ext/infra-usage-remote-source` own 0: checks/docs only | standalone history (usage-track helper), not a main merge
+- I3 H1 B25 `ext/ranges-sable-motley-albert` own 10: player-facing code/data (1 files)
+- I3 H1 B24 `ext/rimewright-skate-rebased` own 87: art not in game (1 files), player-facing code/data (2 files)
+- I3 H1 B00 `ext/tenzo-arm-slate` own 12: art not in game (2 files), player-facing code/data (3 files)
+- I3 H5 B18 `ext/hunter-revamp-af` own 230: art not in game (23 files), player-facing code/data (17 files)
+
+## Keep: stacked branches that ride with a kept tip (143)
+
+They land when their tip merges; no separate merge needed.
+
+- `ext/airdash-anims-1108` own 188, rides with `ext/stuck-integ-d2f36c16`
+- `ext/albert-size-boop` own 688, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/albert-size-boop-rebased` own 2164, rides with `ext/reset-cue-rebased`
+- `ext/anim-arm-motley` own 95, rides with `ext/stuck-integ-606e9a98`, `ext/stuck-integ-d2f36c16`
+- `ext/anim-boki-idle` own 596, rides with `ext/stuck-integ-d2f36c16`
+- `ext/anim-boki-slide-batch2` own 303, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/anim-boki-slide-starters` own 107, rides with `ext/fold-anim-boki-1112`, `ext/mc-integ-1112d`
+- `ext/anim-boki-stance-linear` own 10, rides with `ext/fold-anim-boki-1112`, `ext/mc-integ-1112d`
+- `ext/anim-boki-state-cover` own 203, rides with `ext/fold-anim-boki-1112`, `ext/mc-integ-1112d`
+- `ext/anim-elim-beat-wisp` own 163, rides with `ext/combat-motley-dead-kit`
+- `ext/anim-gil-clips` own 686, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +3
+- `ext/anim-gil-grabbag` own 749, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/anim-jump-land` own 268, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/anim-lace-release-snap` own 40, rides with `ext/stuck-integ-a6af81f7`
+- `ext/anim-loot-open` own 480, rides with `ext/mc-integ-1112d`
+- `ext/anim-meeko-crouch-stride` own 24, rides with `ext/mc-integ-1112d`
+- `ext/anim-nook-moment` own 745, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/anim-time-vex-0245` own 155, rides with `ext/fold-anim-time-1112`
+- `ext/anim-unmasked-feet` own 99, rides with `ext/fix-0245-reds`
+- `ext/anim-uthana-rank` own 820, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/anim-w0246-reds` own 17410, rides with `ext/anim-w0246-blender-rows`
+- `ext/art1-clip-port` own 589, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/boki-downed-pose-rebased` own 474, rides with `ext/stuck-integ-a6af81f7`
+- `ext/cast-move-eight` own 47, rides with `ext/mc-integ-1112d`
+- `ext/checks-out-of-main-b2` own 356, rides with `ext/checks-out-of-main-c`
+- `ext/combat-bots-zone` own 1558, rides with `ext/combat-zone-stage-dmg`
+- `ext/combat-daze-status` own 11, rides with `ext/mc-integ-1112d`
+- `ext/combat-far-bot-ground` own 87, rides with `ext/stuck-integ-a6af81f7`
+- `ext/combat-gil-ttk` own 491, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/combat-merge-form-text` own 2, rides with `ext/mc-integ-1112d`
+- `ext/combat-revive-diminish` own 62, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/combat-steal-bonus` own 1441, rides with `ext/combat-steal-boss-bonus`
+- `ext/cooldown-parity-verify` own 120, rides with `ext/parity-stranded-0246`, `ext/parity-rider-sweep-0246`
+- `ext/dash-nd-rows-a` own 72, rides with `ext/stuck-integ-606e9a98`, `ext/stuck-integ-f6bd2b7c`
+- `ext/early-boss-boon` own 1439, rides with `ext/sfx-boon-cue`
+- `ext/early-camps-core` own 543, rides with `ext/sfx-steals`, `ext/early-camps-map-ui`
+- `ext/early-camps-layout` own 1147, rides with `ext/sfx-steals`, `ext/early-camps-map-ui`
+- `ext/farm-glasswater-garden-only` own 50, rides with `ext/mc-integ-1112d`
+- `ext/farm-item-preview-card` own 595, rides with `ext/sfx-garden-items`
+- `ext/farm-site-assign` own 203, rides with `ext/mc-integ-1112d`
+- `ext/farm-site-paused` own 45, rides with `ext/mc-integ-1112d`
+- `ext/feel-gil-sweeps` own 418, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/feel-glide-btn-online` own 134, rides with `ext/fold-feel-glide-1112`
+- `ext/feel-glide-start-flat` own 54, rides with `ext/fold-feel-glide-1112`, `ext/mc-integ-1112d`
+- `ext/feel-glide-swoop` own 130, rides with `ext/fold-feel-glide-1112`
+- `ext/feel-glide-unknowns` own 20, rides with `ext/fold-feel-glide-1112`
+- `ext/feel-held-fire-resume` own 315, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/feel-neve-statue-time` own 23, rides with `ext/mc-integ-1112d`
+- `ext/feel-online-150` own 122, rides with `ext/online-displace-reds`, `ext/stuck-integ-a6af81f7` +1
+- `ext/feel-online-hearth-call` own 13, rides with `ext/online-displace-reds`, `ext/stuck-integ-a6af81f7` +1
+- `ext/feel-utility-move` own 3404, rides with `ext/utility-parity-0246`
+- `ext/fight-hitch` own 308, rides with `ext/perf-owner-hw-rebased`, `ext/perf-train-0245-rebased`
+- `ext/first-hints-check-rebased` own 4306, rides with `ext/tut-first-fuse`
+- `ext/fix-ui-theme-optionbutton` own 17, rides with `ext/mc-integ-1112d`
+- `ext/garden-cup-ribbon` own 66, rides with `ext/sfx-garden-items`
+- `ext/garden-unlock` own 154, rides with `ext/garden-horizon`
+- `ext/garden-zones-decision` own 24, rides with `ext/garden-fresh-hour`, `ext/mc-integ-1112d`
+- `ext/incubator-slow-1111` own 412, rides with `ext/farm-incubator-verify`
+- `ext/integ-garden-0245` own 2765, rides with `ext/garden-fresh-hour`
+- `ext/kael-shift-1111` own 453, rides with `ext/kael-cancels-1111`
+- `ext/match-shops-1111` own 12124, rides with `ext/sfx-match-shop`, `ext/tut-first-shop`
+- `ext/meeko-rmb-1111` own 67, rides with `ext/fold-meeko-rmb-1112`
+- `ext/menus-more` own 164, rides with `ext/stuck-integ-11014837`
+- `ext/npc-hob-guide-1111-r2` own 62, rides with `ext/mc-demo-1112`, `ext/mc-integ-1112d` +2
+- `ext/parity-bulwark-guardcut` own 87, rides with `ext/parity-bulwark-crush-rebased`, `ext/mc-integ-1112d`
+- `ext/parity-downed-numbers` own 83, rides with `ext/stuck-integ-606e9a98`, `ext/stuck-integ-f6bd2b7c`
+- `ext/parity-pin-kael-drop` own 2, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/parity-tenzo-rock-slows` own 23, rides with `ext/parity-stranded-0246`, `ext/parity-rider-sweep-0246`
+- `ext/parity-ttk-albert` own 38, rides with `ext/combat-ttk-parity-1112`, `ext/gil-train-1112` +3
+- `ext/parity-ttk-sparkle-sable-lace` own 59, rides with `ext/combat-ttk-five`, `ext/combat-ttk-parity-1112` +4
+- `ext/parity-ttk-vex` own 114, rides with `ext/combat-ttk-parity-1112`, `ext/gil-train-1112` +3
+- `ext/parity-vex-coin-stick` own 155, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/perch-reds` own 94, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/pitch-reel-1112` own 500, rides with `ext/pitch-reel-exit-1112`, `ext/mc-integ-1112d`
+- `ext/pitch-reel-watchdog` own 550, rides with `ext/pitch-reel-exit-1112`, `ext/mc-integ-1112d`
+- `ext/pve-raid-1111` own 1509, rides with `ext/combat-raid-balance`, `ext/sfx-raid-cues` +1
+- `ext/ranges-source-rest` own 9, rides with `ext/ranges-sable-motley-albert`
+- `ext/recast-buffer-expired` own 187, rides with `ext/stuck-integ-11014837`
+- `ext/recast-marker-b` own 277, rides with `ext/stuck-integ-11014837`
+- `ext/region-hazards-1111` own 13646, rides with `ext/sfx-terrain-hazards`
+- `ext/sfx-boki-remote` own 245, rides with `ext/fold-sfx-boki-1112`, `ext/mc-integ-1112d`
+- `ext/sfx-extract-cues` own 209, rides with `ext/stuck-integ-11014837`
+- `ext/sfx-gil-dash-air` own 52, rides with `ext/mc-integ-1112d`
+- `ext/sfx-gil-kit` own 301, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/sfx-gil-set` own 909, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/sfx-heartspark` own 43, rides with `ext/stuck-integ-11014837`
+- `ext/sfx-kael-slash-edge` own 47, rides with `ext/mc-integ-1112d`
+- `ext/sfx-kit-coverage` own 259, rides with `ext/sfx-kit-placeholders-2`
+- `ext/sfx-lobby-pick` own 269, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/sfx-pickups-gloves` own 186, rides with `ext/stuck-integ-11014837`
+- `ext/sfx-remote-casts` own 157, rides with `ext/fold-sfx-boki-1112`, `ext/mc-integ-1112d`
+- `ext/sfx-sable-ring-loop` own 70, rides with `ext/mc-integ-1112d`
+- `ext/sfx-silence-audit-coverage` own 310, rides with `ext/sfx-raid-cues`
+- `ext/sfx-utility-items-rebased` own 2771, rides with `ext/sfx-utilities-2`
+- `ext/sfx-wisp-hum-port` own 232, rides with `ext/mc-integ-1112d`
+- `ext/split-exits` own 648, rides with `ext/stuck-integ-11014837`, `ext/stuck-integ-42241ff1`
+- `ext/split-warden-glb` own 507, rides with `ext/stuck-integ-11014837`, `ext/stuck-integ-42241ff1`
+- `ext/stuck-integ-cb5c1c27` own 1189, rides with `ext/reset-cue-rebased`, `ext/mc-fix-1109`
+- `ext/stuck-integ-e2561d23` own 2772, rides with `ext/meeko-rmb-verify-rebased`
+- `ext/stuck-integ-e28956f8` own 1482, rides with `ext/reset-cue-rebased`
+- `ext/summon-killed-wisp-rebased` own 1045, rides with `ext/wisp-summon-key-c`, `ext/summon-kill-credit-rebased` +1
+- `ext/tenzo-playtest-1108` own 570, rides with `ext/stuck-integ-606e9a98`, `ext/stuck-integ-d2f36c16`
+- `ext/tut-creator-first` own 94, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/tut-drop-plan-first` own 77, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/tut-first-cc` own 49, rides with `ext/fold-tut-first-1112`
+- `ext/tut-gil-howto` own 365, rides with `ext/gil-train-1112`, `ext/mc-demo-1112` +2
+- `ext/tut-hud-term-hints` own 43, rides with `ext/mc-integ-1112d`
+- `ext/tut-station-goals-rebased` own 1197, rides with `ext/tut-dodge-dummy-rebased`
+- `ext/tut-summon-killed` own 1099, rides with `ext/tut-wisp-beats`
+- `ext/tut-ways-out` own 2770, rides with `ext/tut-seat-grace-hint`
+- `ext/ui-ability-cards-rebased` own 368, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/ui-audio-buses` own 40, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/ui-boki-next-form` own 1822, rides with `ext/farm-boki-xp-curve`
+- `ext/ui-combo-tag-rest` own 138, rides with `ext/combo-payoff-audit`
+- `ext/ui-death-recap` own 305, rides with `ext/stuck-integ-606e9a98`, `ext/stuck-integ-f6bd2b7c`
+- `ext/ui-lobby-720-fit` own 48, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/ui-pick-one-click` own 117, rides with `ext/sfx-pick-taken`
+- `ext/ui-results-plain-0245` own 28, rides with `ext/ui-results-first`, `ext/mc-integ-1112d`
+- `ext/ui-settings-trim` own 530, rides with `ext/stuck-integ-11014837`
+- `ext/ui-tip-card-one-prompt` own 47, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/ui-void-masks-v3` own 517, rides with `ext/ui-simplify`
+- `ext/ui-waystone-keys` own 37, rides with `ext/mc-integ-1112d`
+- `ext/util-tonic-lamp-rebased` own 3221, rides with `ext/utility-parity-0246`
+- `ext/verify-w0246-audio` own 7992, rides with `ext/sfx-strike-resync`
+- `ext/vex-coin-palm-1108` own 328, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/vex-dash-parity-rebased` own 228, rides with `ext/stuck-integ-f6bd2b7c`
+- `ext/vfx-boki-cc-body` own 733, rides with `ext/vfx-cc-body-reads`
+- `ext/vfx-breakables` own 185, rides with `ext/mc-integ-1112d`
+- `ext/vfx-burr-cone-net` own 34, rides with `ext/vex-rmb-1111`
+- `ext/vfx-cel-leftovers` own 117, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/vfx-heal-shield-read` own 408, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/vfx-kael-slam-smoke` own 9, rides with `ext/stuck-integ-a6af81f7`, `ext/mc-integ-1112d`
+- `ext/vfx-kael-smash-lane` own 8013, rides with `ext/vfx-kael-smash-lane-on-slam-lane`
+- `ext/vfx-neve-statue-break` own 57, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/vfx-number-sources` own 293, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/vfx-sable-palette` own 472, rides with `ext/combat-sable-lmb-hits`
+- `ext/vfx-soft-dots` own 78, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/vfx-sparkle-bolt-origin` own 727, rides with `ext/mc-demo-1112`, `ext/stuck-integ-606e9a98` +1
+- `ext/vfx-tenzo-impacts` own 99, rides with `ext/tenzo-ridge-bursts`
+- `ext/vfx-vex-ult-core` own 40, rides with `ext/fold-vfx-vex-1112`
+- `ext/vfx-wisp-proc` own 3630, rides with `ext/tut-first-proc`
+- `ext/ways-out-one-seat` own 299, rides with `ext/tut-seat-grace-hint`
+- `ext/wisp-steal-rebased` own 828, rides with `ext/wisp-summon-key-c`, `ext/wisp-passive-stack-rebased` +2
+
+## Problems
+
+1. Gap stays near 720 even after the top-10 job: the in-scope work is unique, so only merges close it. HARD 8, BLOCKS 9.
+2. The (a) archives assume the top-10 batches land. If a named covering branch is dropped, restore the archived ones that point to it (the log names each one). HARD 2, BLOCKS 3.
+3. Hetzner exclude not applied from rpc4: append the 40 lines on hetzner. HARD 1, BLOCKS 4.
+4. The 3 not-main-bound branches (infra-usage-plan, infra-usage-remote-source, rename-guin-1112) inflate the main gap; the rules here do not cover them. Owner/coord call. HARD 1, BLOCKS 2.
+5. Line-set tests ignore line order: a branch could add the same lines in a different place. Residual-0 cases were spot-checked against merge commit subjects (4 of 5 named the branch). HARD 2, BLOCKS 2.

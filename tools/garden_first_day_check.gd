@@ -105,6 +105,7 @@ func _list() -> void:
 func _bot() -> void:
 	Save.d = _fresh_save()
 	Save.d["tutorial"]["day1_done"] = true      # the guided tutorial stays out of it
+	Save.d["tutorial"]["first_race"] = true     # past the first-race practice lap (BaseRace._practice)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var lay := HomeLayout.ensure(Save.d)
