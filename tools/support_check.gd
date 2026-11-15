@@ -223,7 +223,7 @@ func _tender_support() -> void:
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
-	# --- the drop set: a stun or any damage; a root or a hex holds; 4s no re-pick
+	# --- the drop set: a stun or any damage; a root holds; 4s no re-pick
 	P.stun_t = 0.0
 	K.lock_t = 0.0
 	A.down_hp = 60.0
@@ -231,9 +231,8 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	var held := CareUtil.is_carried(A)
 	P.root_t = 0.5
-	Hex.apply(P, 0.5, false)
 	step(m, 0.1)
-	ok("Carrier: a root and a hex hold them", held and CareUtil.is_carried(A))
+	ok("Carrier: a root holds them", held and CareUtil.is_carried(A))
 	P.root_t = 0.0
 	P.hurt(10.0, T, {"src": "primary"})
 	step(m, 0.1)

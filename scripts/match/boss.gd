@@ -6,12 +6,12 @@ extends Mob
 ## its enrage timer (75 s, a quarter-minute before the 90 s seal fails) it hits harder and faster. It
 ## never leaves its lair; if the lair empties it goes back to sleep and heals.
 ##
-##   Stone Colossus  slams that send out shockwave rings (jump them), thrown boulders, ground fissures;
-##                   rockfall on each phase change
-##   Stormcoil       circles you and lunges along a telegraphed line, calls lightning on marked
-##                   circles, coils up and discharges; a lightning storm on each phase change
-##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
-##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
+##   Siegephant  (colossus)  slams that send out shockwave rings (jump them), thrown boulders, ground
+##                           fissures; rockfall on each phase change
+##   Sarcobra    (serpent)   circles you and lunges along a telegraphed line, calls lightning on marked
+##                           circles, coils up and discharges; a lightning storm on each phase change
+##   Calderoise  (brood)     spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
+##                           hatch into adds, burrows and bursts up under you; a brood of adds on each phase
 
 const PHASE_HP := [0.66, 0.33]   # health fractions where phases 1 and 2 start ([?] no source value)
 const LEASH_T := 12.0            # s with no foe inside the lair before it resets ([?] no source value)
@@ -360,7 +360,7 @@ func attacks() -> Array:
 func _wind() -> float:
 	return float(Data.MOBS[mkind]["windup"]) * (0.8 if enraged else 1.0) * (1.0 - 0.1 * phase)
 
-# ---- the Stone Colossus
+# ---- Siegephant (colossus)
 func _atk_slam() -> void:
 	var w := _wind()
 	md["windup"] = w
@@ -495,7 +495,7 @@ func _atk_fissure() -> void:
 		Shake.incoming_big(m, a, 0.5)
 		BossSfx.hit(m, self, "fissure", a))
 
-# ---- Stormcoil
+# ---- Sarcobra (serpent)
 func _atk_dash() -> void:
 	var w := _wind()
 	md["windup"] = w
@@ -573,7 +573,7 @@ func _atk_static() -> void:
 				f.hurt(dmg(8.0), self, {"stun": 0.2, "src": "mob"})
 		BossSfx.hit(m, self, "static", pos))
 
-# ---- the Brood Mother
+# ---- Calderoise (brood)
 func _atk_spit() -> void:
 	var w := _wind() * 0.85
 	md["windup"] = w
