@@ -99,9 +99,11 @@ static func below(W: World, p: Vector3) -> bool:
 	var iz := int(floor(p.z))
 	return W.inb(ix, iz) and W.kind[W.idx(ix, iz)] != World.T_VOID and p.y + HEAD <= W.under_heights()[W.idx(ix, iz)]
 
-## Can a body at p catch tile i's rock: it reaches down to p's height, or hangs just over the head?
-static func touches(W: World, i: int, p: Vector3) -> bool:
-	return W.under_heights()[i] < p.y + HEAD + float(T["under_reach_m"])
+## Can a body at p catch tile i's rock: it reaches down to p's height, or (gliding in under it) hangs just
+## over the head? A plain fall only catches rock beside it: main's air steering (Loco) carries a falling body
+## in under the rim fast enough that the overhead reach made every island a net down to catch_depth_m.
+static func touches(W: World, i: int, p: Vector3, gliding := false) -> bool:
+	return W.under_heights()[i] < p.y + HEAD + (float(T["under_reach_m"]) if gliding else 0.0)
 
 ## Hunter._unclip's rock rules: true when it's handled (see clear).
 static func unclip(h: Hunter) -> bool:

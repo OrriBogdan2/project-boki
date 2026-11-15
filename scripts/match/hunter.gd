@@ -2540,7 +2540,7 @@ func _try_ledge_grab(dt: float) -> void:
 			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND:
 				continue
 			# a smooth sheer cliff (authored maps) has nothing to hold: you can't catch it from the air
-			if not grounded and (w.sheer.has(w.idx(x, z)) or not IslandDepth.touches(w, w.idx(x, z), pos)):
+			if not grounded and (w.sheer.has(w.idx(x, z)) or not IslandDepth.touches(w, w.idx(x, z), pos, gliding)):
 				continue
 			var gz := w.level[w.idx(x, z)] * World.LEVEL
 			var dz := gz - pos.y
