@@ -1012,6 +1012,8 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 
 | Setting | Value |
 |---|---|
+| chase | {"secs": [6.0, 10.0], "per_zone": 1, "run": 1.5, "speed_gain": 0.3, "flee_mul": 0.9, "catch_m": 1.2, "grace_s": 1.0, "leg_s": 3.0, "flee_m": 3.5, "hop_s": 0.6, "hop_tries": 8} |
+| chase_doc | Friend chase (scripts/home/base_chase.gd, run by BaseLife): two Boki whose bond is a friendship play a toy-free tag. It lasts secs seconds, only per_zone chases run in a zone at once; run scales the 2.4 m/s farm walk and speed_gain adds up to that share at a full Speed stat; the one being chased runs at flee_mul of its pace, a tag lands within catch_m m (Boki keep about 1 m apart, so it is wider than the plain tag's), the new chaser waits grace_s seconds after a swap before it can tag, and after leg_s seconds without a catch, stops to let itself be caught; it picks a flee spot flee_m m off, trying hop_tries directions; on each swap the new runner hops for hop_s s (no tag clip yet, the rig's hop). Both end resting together (a nap). |
 | days | 30 |
 | seeds | 200 |
 | seeds_doc | Runs per player; the report gives medians (days) and means (per-day rates). |
@@ -1337,6 +1339,7 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | stand_ins | {"_doc": "TODO (until the raid's own Boki are modelled): the game species that stands in for a Heart Raid line of boki_modes.json while that line has no game kin. Same rarity as the line, so the draw tickets match; the line's min_difficulty gates it. Delete an entry once its line gets a kin", "bellowlet": "kindlewren", "grainspin": "glintmole", "lurklet": "gloamshell", "kitlet": "threadwyrm", "malletary": "kilnbadger", "sarcobra": "umbrathere", "siegephant": "moundvark"} |
 | blight_lvl | 0.7 |
 | _blight_lvl | strength of the Blight monsters a wave brings (BlightDir.spawn level; 1 = full) |
+| hints | {"_doc": "first-time one-line hints (HeartRaidHints), each shown once per save in the message lane: diff = on the difficulty pick, boki = a few seconds into the first raid, wave = the first wave's marks go up, boss = the boss rises, seat = the Heart's final seat opens. {boss} is the boss's name", "boki_s": 6.0, "diff": "Hard and Nightmare send tougher, bigger waves and a tougher boss (Nightmare gives it an extra attack), and open rarer raid Boki.", "boki": "The raid's Boki are found only in a Heart Raid: hold the Heart ring at the end to take an egg of one.", "wave": "A ring on the ground and on the map marks the gate the next wave comes out of, a few seconds ahead.", "boss": "{boss} has risen: fight it in the square round the Heart. It hits harder the longer it lives.", "seat": "The Heart's final seat is open: stand in its ring until it fills to win, and take your reward."} |
 | reward | {"_doc": "paid to each Hunter who holds the Heart ring once the boss is down (Heart.pay reads this in a Heart Raid). An egg of one of the raid's Boki open at the difficulty (HeartRaid.boki), fewer gems than the Expedition's major seat", "egg": true, "seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2}, "goods": {"heartwood": 2}, "gems": 100, "trust": 15.0} |
 
 ## hit_flinch (`content/rules/hit_flinch.json`)

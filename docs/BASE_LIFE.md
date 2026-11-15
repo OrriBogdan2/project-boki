@@ -9,6 +9,11 @@ check: `--base-life-check`.
   React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
+- Friend chase (`BaseChase`, numbers in `content/rules/garden_sim.json` "chase"): two friends (bond at `friend_at`) play
+  a toy-free tag in PlayWith for 6-10 s. The more outgoing one (pers.social) is the first chaser; a catch swaps the roles
+  (the new runner hops: there is no tag clip); the runner only flees along ground its zone allows (same island, no void,
+  no deep water unless it paddles); the run pace scales with the Speed stat; at the end both lie down side by side. One
+  chase at a time per zone. Checked by `--base-life-check` (start, cap, swap, end rows).
 - home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
   news: `k["look"]`). While one has a Boki its machine waits, so a Boki that went to look at a Rare Egg you brought
   home carries on in the state it was in (`--homecoming-react-check`). home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
