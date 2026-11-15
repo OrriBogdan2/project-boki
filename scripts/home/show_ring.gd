@@ -23,6 +23,8 @@ const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
 const TOTAL_DELAY := 1.4                      # s after the Bond score that both totals pop: as it fades
 const TOTAL_SPREAD := 0.8                     # m each total sits out from the pair's middle, so they never overlap
+const POSE_S := 1.0                           # s the pair hold their pose when the judges look (BokiHomeClips "pose")
+const BOW_S := 1.2                            # s of the bow the second place takes (BokiHomeClips "bow")
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
@@ -293,6 +295,7 @@ var walk_to := Vector3.ZERO
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var acts: Array = []           # [node, s left] for each Boki playing a show clip (its kact meta)
 var marks: ShowMarks = null    # the result's judge marks and ribbon (show_marks.gd)
 var cue: GardenCues.PopCue = null   # each round's score popping over the Boki while a show runs
 
@@ -400,7 +403,28 @@ func _cheer(grade: String) -> void:
 	GardenSfx.crowd(grade, _shown()["pos"])
 	h._emote(_shown(), {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 
+## The Boki plays a rig clip for `secs` (BokiHomeClips); _step_acts hands it back to its own motion.
+func _act(k: Dictionary, clip: String, secs: float) -> void:
+	if k.is_empty():
+		return
+	(k["node"] as Node3D).set_meta("kact", clip)
+	acts.append([k["node"], secs])
+
+func _step_acts(d: float) -> void:
+	for a in acts:
+		a[1] -= d
+		if a[1] <= 0.0 and is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = acts.filter(func(a: Array) -> bool: return a[1] > 0.0)
+
+func _clear_acts() -> void:
+	for a in acts:
+		if is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = []
+
 func tick(d: float) -> void:
+	_step_acts(d)
 	if card_t > 0.0 and run == null:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
@@ -451,6 +475,7 @@ func _enter() -> void:
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	_clear_acts()
 	var shown: Dictionary = run.recs[run.backed]
 	var key := Settings.key_cap("interact")
 	match run.phase:
@@ -466,8 +491,11 @@ func _enter() -> void:
 			_round_card([["Bond: %s walks to you" % shown["name"], 18, UI.ACCENT_HI],
 					["Press %s as it passes a snack, a toy and its rival" % key, 14, UI.INK]])
 			_lay_walk()
+			_act(_shown(), "strut", float(rules()["walk_s"]))
 		Run.Phase.JUDGE:
 			_round_card(_judge_rows())
+			for k in pair:
+				_act(k, "pose", POSE_S)
 			GardenSfx.reveal(h, stage.position)
 	_place_pair(0.0)
 
@@ -582,6 +610,7 @@ func _walk_pos() -> Vector3:
 	return p
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap(run.recs)
 	var res := settle(run) if finished else {}
 	var shown := _shown()
 	for k in pair:
@@ -592,10 +621,13 @@ func _end(finished: bool) -> void:
 	_clear_lures()
 	cue.clear()
 	cue = null
+	_clear_acts()
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:
-		_card(res)
+		_card(res, before)
+		_act(h._kin_entry(res["win"]), "hop", float(rules()["card_s"]))
+		_act(h._kin_entry(res["lose"]), "bow", BOW_S)
 		GardenSfx.result(h, res)
 		if is_instance_valid(marks):
 			marks.queue_free()
@@ -607,13 +639,11 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+func _card(res: Dictionary, before: Array) -> void:
+	var won: int = run.winner()
+	var totals: Array = res["scores"]
 	var why := " for showing the winner" if res["backed_won"] else ""
-	card = BaseRace.result_card(h, [
-		["%s wins the Show Ring!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
-		["%s sulks: \"came second to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+	card = GameResultCard.open(h, {"game": "Show Ring", "before": before,
+			"place": "%s wins, %.1f to %.1f" % [res["win"]["name"], totals[won]["total"], totals[1 - won]["total"]],
+			"prize": [["+%d gems%s" % [res["gems"], why], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

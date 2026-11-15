@@ -109,7 +109,7 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	var kind_s: String = b["kind"]
 	var sp := spec(kind_s)
 	_pop(b["node"], true)
-	_show_break(at, String(sp["material"]), int(sp["chunks"]))
+	show_break(at, String(sp["material"]), int(sp["chunks"]))
 	if not from_net:
 		KeyBonus.on_break(_m, at, kind_s)
 	_drop_loot(at, sp["loot"], by, from_net)
@@ -163,7 +163,8 @@ func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 		var info := {"src": "boom", "kb": dir * float(ex["knockback"]) * f, "lift": float(ex["lift"]) * f}
 		e.hurt(float(ex["damage"]) * f, credit, info)
 
-func _show_break(at: Vector3, mat_name: String, chunks: int) -> void:
+## Debris, dust, a flash and the material's sound where something breaks (props here; LairBreach's cracks).
+func show_break(at: Vector3, mat_name: String, chunks: int) -> void:
 	var drules: Dictionary = rules()["debris"][mat_name]
 	var mid := at + Vector3(0, 0.35, 0)
 	_fx.shatter(mid, mat_name, chunks)

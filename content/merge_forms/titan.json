@@ -98,7 +98,7 @@
 		"rmb": {
 			"name": "Gravity Well",
 			"icon": "anchor",
-			"desc": "Your right click also drags nearby foes in and slows them. Recharges 20% faster.",
+			"desc": "Your ability also drags nearby foes in and slows them. Recharges 20% faster.",
 			"cd_k": 0.8,
 			"effects": [
 				{

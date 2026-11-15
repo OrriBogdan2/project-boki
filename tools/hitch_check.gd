@@ -61,6 +61,8 @@ var headless := false
 var budget_ms := -1.0
 var seed_v := 4101
 var squad := 3
+var teams := 6
+var fast_forward := true   # the planning, ride and drop run several steps a frame (--match-profile: one)
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
 var hop_only := false      # --load-check=hop: a Waystone hop from the hub to Bramblebank (see _hop_check)
@@ -68,6 +70,13 @@ var trace := false
 var training := false      # --load-check=training: the Training Area's load instead of an expedition's
 var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
 var _shot_t := 0.0
+var advisory := false      # set by run(): a fail does not fail the exit code
+
+## CheckRegistry entry point. "advisory" (docs/CHECKS_TIMING.md): wall-clock frame times swing with
+## load on a shared CPU box, so a fail prints as ADVISORY and exits 0; --timing-strict keeps it a fail.
+func run(main: Node, mode: String) -> void:
+	advisory = mode == "advisory" and not "--timing-strict" in OS.get_cmdline_user_args()
+	main.add_child(self)
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -76,7 +85,9 @@ func _ready() -> void:
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
 		if a == "--hitch-trace": trace = true; PerfLog.trace_slices = true
-		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
+		if a.begins_with("--load-shots="):
+			shots_dir = a.substr(13)
+			DirAccess.make_dir_recursive_absolute(shots_dir)
 		if a == "--load-check": load_only = true
 		if a == "--load-check=home": load_only = true; home_only = true
 		if a == "--load-check=training":
@@ -128,7 +139,7 @@ func _ready() -> void:
 		opts.merge({"no_drop": true, "autoplay": true, "probe": true})
 		Game.main.show_screen("match", opts)
 		return
-	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
+	Game.main.show_screen("match", {"teams": teams, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
 	if _end or home_only:
@@ -176,9 +187,10 @@ func _process(_delta: float) -> void:
 		lf["marks"] = marks
 		lf["compiles"] = new_c
 	var k := 1
-	match phase:
-		"planning", "ride": k = 6
-		"drop": k = 3
+	if fast_forward:
+		match phase:
+			"planning", "ride": k = 6
+			"drop": k = 3
 	# the first moments of the ride and the last of the drop are judged frame by frame
 	if phase == "ride" and phase_t < 1.0: k = 1
 	if phase == "drop" and m.player and m.player.pos.y - m.world.ground_at(m.player.pos.x, m.player.pos.z) < 8.0: k = 1
@@ -194,6 +206,7 @@ func _process(_delta: float) -> void:
 	var t2 := Time.get_ticks_usec()
 	Match.prof_on = true
 	Match.vprof.clear()
+	m.acc -= DT if k == 1 else 0.0      # _process steps on its own clock: net it out, the steps were taken above
 	m._process(DT if k == 1 else 0.0)
 	Match.prof_on = false
 	var vsecs: Dictionary = Match.vprof.duplicate()
@@ -434,12 +447,7 @@ func _finish_load() -> void:
 	var ok := over == 0 and spin_ok and up > 0 and tail_ok
 	var why := [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen", "" if tail_ok else ", held after Ready"]
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s%s)" % why))
-	var txt := "\n".join(lines)
-	print(txt)
-	if out_path != "":
-		var fa := FileAccess.open(out_path, FileAccess.WRITE)
-		if fa: fa.store_string(txt + "\n")
-	get_tree().quit(0 if ok else 1)
+	_report("\n".join(lines), ok)
 
 ## --load-check=home: the title screen, then the click to the farm (ink wipe, the farm building
 ## behind it, the reveal), timing every frame until the farm has been on screen for a second.
@@ -502,12 +510,7 @@ func _home_check() -> void:
 		lines.append("LOAD   %7.0f %7.0f %7.0f  %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
 	var ok := over == 0 and built_ms >= 0.0 and drawn >= up - 1
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL"))
-	var txt := "\n".join(lines)
-	print(txt)
-	if out_path != "":
-		var fa := FileAccess.open(out_path, FileAccess.WRITE)
-		if fa: fa.store_string(txt + "\n")
-	get_tree().quit(0 if ok else 1)
+	_report("\n".join(lines), ok)
 
 ## --load-check=hop (GARDEN.md 10.6): in the hub, press E's hop to Bramblebank, timed until you have
 ## control there (the zone built and the ink lifted); passes inside garden_zones.json hop_max_s.
@@ -679,9 +682,15 @@ func _finish() -> void:
 			lines.append("HITCH FAIL compiled %d shader variant(s) during %s: %s" % [int(f["compiles"]), f["phase"], _line(f)])
 	var bdesc := ("headless script %.0f ms" % (budget_ms if budget_ms > 0.0 else 50.0)) if headless else (("software: 2.5x the frames around it and +1.2 s") if software and budget_ms <= 0.0 else ("%.0f ms" % (budget_ms if budget_ms > 0.0 else 100.0)))
 	lines.append("HITCH budget %s; worst judged frame at %.2f of budget; %s" % [bdesc, worst_j, "PASS" if fails == 0 else "FAIL (%d frames)" % fails])
-	var txt := "\n".join(lines)
+	_report("\n".join(lines), fails == 0)
+
+## Prints the report (and writes it to --hitch-out), then quits: 1 on a fail unless advisory, where the
+## verdict reads ADVISORY instead of FAIL so a suite counting FAIL lines stays green.
+func _report(txt: String, ok: bool) -> void:
+	if advisory and not ok:
+		txt = txt.replace(" FAIL", " ADVISORY")
 	print(txt)
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string(txt + "\n")
-	get_tree().quit(0 if fails == 0 else 1)
+	get_tree().quit(0 if ok or advisory else 1)

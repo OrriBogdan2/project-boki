@@ -1,0 +1,11 @@
+{
+	"desc": "Fliers in the garden (scripts/home/boki_fly.gd, BokiRig's hover, glide and flare clips). A species whose look has wings (its species JSON colors.wing) takes to the air while it roams (BaseLife's Roam) a zone listed in zones, and while it crosses a gap (a bridge over the void, the leap to another isle, The Dash's jump). Each flight picks a height in height (m over the ground); it rises at climb and comes down at sink (m/s), hovering while it stands and gliding while it moves. It flares for flare_s (s) as it touches down: the flare starts sink x flare_s / 2 m up, so the feet land halfway through it. Then it walks.",
+	"zones": ["ridge"],
+	"zones_doc": "Garden zones where a roaming flier stays in the air: Kitewind Ridge.",
+	"height": [0.5, 1.5],
+	"climb": 1.6,
+	"sink": 1.4,
+	"flare_s": 0.4,
+	"gap_lead": 0.5,
+	"gap_lead_doc": "s: a flier takes off this long before it reaches a bridge at its pace, so it is up over the gap."
+}

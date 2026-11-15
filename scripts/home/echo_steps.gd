@@ -279,6 +279,7 @@ static func settle(run: Run) -> Dictionary:
 		Save.remember(win, "echo", "out-danced %s at Echo Steps" % lose["name"], float(R["win_trust"]))
 		Save.remember(lose, "echo", "lost Echo Steps to %s" % win["name"])
 		res.merge({"win": win, "lose": lose, "good": win == you})
+		res["prize"] = GardenPrizes.settle("echo", you, run.recs[RIVAL], win == you)
 	else:
 		var good := float(run.hits[YOU]) >= float(R["solo_good"]) * float(run.beats[YOU])
 		if good:
@@ -286,6 +287,7 @@ static func settle(run: Run) -> Dictionary:
 		var trust := float(R["win_trust"]) if good else 0.0
 		Save.remember(you, "echo", "danced Echo Steps for %d points" % run.score[YOU], trust)
 		res["good"] = good
+		res["prize"] = GardenPrizes.settle("echo", you, {"stats": {}}, good)
 	res["gems"] = int(R["gems_win"]) if res["good"] else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + res["gems"]
 	return res
@@ -599,6 +601,7 @@ func _open_readout() -> void:
 	seen = -1
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap(run.recs.filter(func(rec): return not rec.is_empty()))
 	var res := settle(run) if finished else {}
 	for k in dancers:
 		if not k.is_empty():
@@ -613,7 +616,7 @@ func _end(finished: bool) -> void:
 		readout.queue_free()
 	if finished:
 		GardenSfx.cue("garden_finish", null)
-		_card(res)
+		_card(res, before)
 		if res.has("win"):
 			h._emote(h._kin_entry(res["win"]), "♥", true)
 			h._emote(h._kin_entry(res["lose"]), "…", true)
@@ -621,18 +624,15 @@ func _end(finished: bool) -> void:
 	run = null
 	dancers = []
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, before: Array) -> void:
 	var you: Dictionary = dancers[YOU]["rec"]
-	var rows: Array = []
+	var place := "%s danced: %d points" % [you["name"], res["score"][YOU]]
 	if res.has("win"):
-		rows.append(["%s wins Echo Steps!" % res["win"]["name"], 18, UI.ACCENT_HI])
-		var line := "%s %d points, %s %d" % [you["name"], res["score"][YOU], _who(RIVAL), res["score"][RIVAL]]
-		rows.append([line, 14, UI.INK])
-	else:
-		rows.append(["%s danced Echo Steps: %d points" % [you["name"], res["score"][YOU]], 18, UI.ACCENT_HI])
-	rows.append(["Best streak %d" % res["best"], 14, UI.INK])
-	rows.append(["+%d gems" % res["gems"], 14, UI.GOLD])
+		var won := YOU if res["win"] == you else RIVAL
+		place = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
 	if is_instance_valid(card):
 		card.queue_free()
-	card = BaseRace.result_card(h, rows)
+	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place, "before": before,
+			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]]
+				+ GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

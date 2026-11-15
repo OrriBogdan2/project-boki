@@ -4,10 +4,9 @@ extends RefCounted
 ## farm_build.json base_mode on. A log lies by the Training post. Press interact at it and two rested
 ## Boki out on the base (your partner and the next one) bat a glowing seed over it, first to 5 points;
 ## a Boki that misses gives the other the point. A Boki returns the seed by chance from its strength:
-## Speed and Focus, mood (joy) and trust, and a 10% type edge from the same element table as the Stump
-## Shove, over the hitter's. You back your partner and call one spike on the Training post's timing
-## bar: its next hit is hard to return. The winner gains joy, trust and you a few gems; the loser
-## sulks and remembers (a memory line). Tuning: content/rules/base_volley.json.
+## Speed and Focus, mood (joy) and trust, over the hitter's. You back your partner and call one
+## spike on the Training post's timing bar: its next hit is hard to return. The winner gains joy,
+## trust and you a few gems; the loser sulks and remembers (a memory line). Tuning: content/rules/base_volley.json.
 ##
 ## The match is one explicit state machine (briefs/STATE_MACHINES.md), Run.state: only Run.go() writes
 ## it, and a move the TABLE lacks is refused and counted (--volley-check asserts none). No Run means
@@ -32,7 +31,7 @@ static func rules() -> Dictionary:
 	return Content.rules("base_volley")
 
 ## How well a Boki gets under the seed and reads it, before the hitter's: 1.0 for no points and a plain mood.
-static func strength(rec: Dictionary, foe: Dictionary) -> float:
+static func strength(rec: Dictionary) -> float:
 	var R := rules()
 	var st: Dictionary = rec.get("stats", {})
 	var s := (1.0 + float(st.get("speed", 0)) * float(R["speed_per_point"])) \
@@ -40,12 +39,12 @@ static func strength(rec: Dictionary, foe: Dictionary) -> float:
 	var mood: Array = R["mood"]
 	s *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 	s *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
-	return s * (float(R["edge"]) if BaseShove.has_edge(rec, foe) else 1.0)
+	return s
 
 ## The chance recv returns a seed hit by hitter, before any spike.
 static func p_return(recv: Dictionary, hitter: Dictionary) -> float:
 	var R := rules()
-	return clampf(float(R["base_return"]) * strength(recv, hitter) / strength(hitter, recv),
+	return clampf(float(R["base_return"]) * strength(recv) / strength(hitter),
 			float(R["min_return"]), float(R["max_return"]))
 
 ## a's chance over b's to take a point from a level start: above 0.5 the expected winner is a.
