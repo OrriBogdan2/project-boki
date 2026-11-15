@@ -26,6 +26,7 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const MAX_BOB_CM := 11.0
+const HIP_PHASE := 0.2         # hips and leg spread: a walk wants a correlation under minus this, a run over it
 const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
 ## The start gate: the idle's first pose to the first walk pose played when he sets off (loco "start_phase", the
@@ -133,6 +134,15 @@ func _gate(id: String, live: Dictionary) -> void:
 	var top: Dictionary = live[str(SPEEDS[2])]
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
+		bad += 1
+	var walk_hips: float = live[str(SPEEDS[0])]["hip_spread"]
+	if walk_hips > -HIP_PHASE:
+		print("FAIL %s: hips rise as the legs spread at a walk (correlation %.2f, wanted under %.2f)" % [id,
+				walk_hips, -HIP_PHASE])
+		bad += 1
+	if top["hip_spread"] < HIP_PHASE:
+		print("FAIL %s: hips rise as the legs pass at a run (correlation %.2f, wanted over %.2f)" % [id,
+				top["hip_spread"], HIP_PHASE])
 		bad += 1
 	if top["bob_cm"] > MAX_BOB_CM:
 		print("FAIL %s: hips bob %.1f cm at a run (limit %.0f)" % [id, top["bob_cm"], MAX_BOB_CM])
@@ -311,6 +321,9 @@ func _swing(fr: Array) -> Dictionary:
 		for side in ["L", "R"]:
 			arm[side].append(-((p["hand." + side] as Vector3).z - (p["hips"] as Vector3).z))
 			leg[side].append(-((p["foot." + side] as Vector3).z - (p["hips"] as Vector3).z))
+	var spread: Array = []
+	for i in leg["L"].size():
+		spread.append(absf(leg["L"][i] - leg["R"][i]))
 	var lo: float = hy.min()
 	var hi: float = hy.max()
 	var peaks := 0
@@ -322,7 +335,8 @@ func _swing(fr: Array) -> Dictionary:
 	var reach_r: float = (arm["R"] as Array).max() - (arm["R"] as Array).min()
 	var against_l := -_corr(arm["L"], leg["L"])
 	var against_r := -_corr(arm["R"], leg["R"])
-	return {"bob_cm": 100.0 * (hi - lo), "peaks": peaks, "peak_hz": peaks / span, "reach_L": reach_l,
+	return {"bob_cm": 100.0 * (hi - lo), "hip_spread": _corr(hy, spread), "peaks": peaks, "peak_hz": peaks / span,
+			"reach_L": reach_l,
 			"reach_R": reach_r,
 			"against_L": against_l, "against_R": against_r,
 			"counter": (reach_l * against_l + reach_r * against_r) / maxf(reach_l + reach_r, 0.01),
