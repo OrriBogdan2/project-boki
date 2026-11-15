@@ -25,6 +25,12 @@ row keys came with them: `mid` (Vespyx's tail rings beside it and pulled the bou
 `iris` (Echolop's art has lilac eyes, the proxy amber). A tail that curls another way than the proxy's rides
 `limbs` capsules, and the FRAME row's `tail_tip` is read off the scan.
 
+11-15 batch 2: Glomwort (`glomwort`, lobes merged to root like Gongibbon, so it bobs and turns but its legs do not swing) and
+Selenfin (`selenfin`, the Boki eye sits on the scan's bulging side eyes: `eye_yaw` 1.15, `iris` for its purple eyes). Picks are
+run A of 4 (all four turnaround views); the runs and `gen_log.tsv` are in `~/meshy/boki3d/<id>/ingame1115/`. Glintmole and
+Gloamshell have their picks in `~/meshy/boki/<id>/run1` but no row yet. A new row may leave out `eye_c`, `eye_r` and `eye_yaw`
+for its first fit sheet: it starts on the proxy's eyes.
+
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 
