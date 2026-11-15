@@ -302,20 +302,20 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	Arch.apply_body(self)
+	r = Arch.hit_r(arch, cdat)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
-	Arch.apply_body(self)
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.signature(arch))
-	Arch.apply_body(self)
+	r = Arch.hit_r(arch, cdat)
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -332,7 +332,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
-	Arch.apply_body(self)
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	HunterMove.apply(self)
@@ -1020,11 +1020,11 @@ var wedged_t := 0.0
 func _occ(x: float, z: float, guard: bool) -> float:
 	var st: SkyTrain = m.skytrain
 	if st == null:
-		return m.world.occupy(x, z, hull_r(), pos.y, guard, spirit_t > 0.0)
-	var sw := st.solid_at(x, z, pos.y, hull_r())
+		return m.world.occupy(x, z, r, pos.y, guard, spirit_t > 0.0)
+	var sw := st.solid_at(x, z, pos.y, r)
 	if sw > 0.0:
 		return sw
-	if st.walk_deck(Vector3(x, pos.y, z), hull_r()) > World.VOID + 1.0:
+	if st.walk_deck(Vector3(x, pos.y, z), r) > World.VOID + 1.0:
 		return 0.0
 	if not st.on_deck(pos):
 		return m.world.occupy(x, z, r, pos.y, guard, spirit_t > 0.0)
@@ -2206,7 +2206,7 @@ func _physics(dt: float) -> void:
 			wedged_t += dt
 			if wedged_t > 0.9:
 				wedged_t = 0.0
-				var free: Vector3 = m.world.free_spot_near(pos, [], 1.0, hull_r(), 2.5)
+				var free: Vector3 = m.world.free_spot_near(pos, [], 1.0, r, 2.5)
 				if free.distance_to(pos) > 0.05 and absf(free.y - pos.y) < 1.0:
 					pos = Vector3(free.x, free.y, free.z)
 					m.fx.dust(pos, 4)
@@ -2350,7 +2350,7 @@ func _unclip() -> void:
 		for i in 16:
 			var a := TAU * i / 16.0
 			var x: float = pos.x + cos(a) * rad; var z: float = pos.z + sin(a) * rad
-			if w.is_void(x, z) and w.occupy(x, z, hull_r(), pos.y, false) == 0.0:
+			if w.is_void(x, z) and w.occupy(x, z, r, pos.y, false) == 0.0:
 				pos.x = x; pos.z = z
 				vel.x = 0.0; vel.z = 0.0
 				return
@@ -2488,7 +2488,7 @@ func _try_ledge_grab(dt: float) -> void:
 		if mv.length() < 0.5 or grap_cd > 0.0 or ctrl == "local":
 			push_t = 0.0
 			return
-		var probe := Vector2(pos.x, pos.z) + mv.normalized() * (hull_r() + 0.35)
+		var probe := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.35)
 		var g2 := w.ground_at(probe.x, probe.y)
 		var walkable := g2 <= pos.y + World.STEP + w.stair_slope(pos.x, pos.z, probe.x, probe.y)     # (stairs: walked)
 		if w.is_block(probe.x, probe.y) or walkable or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
@@ -2497,7 +2497,7 @@ func _try_ledge_grab(dt: float) -> void:
 		push_t += dt
 		if push_t < 0.08:
 			return
-		reach = hull_r() + 0.6
+		reach = r + 0.6
 		max_rise = World.LEVEL * 2.0 + 0.1
 	else:
 		push_t = 0.0
@@ -2514,12 +2514,12 @@ func _try_ledge_grab(dt: float) -> void:
 				mv = MantleCarry.heading(self, mv)       # flying in with momentum is a push (item 185b)
 			else:
 				return
-		reach = hull_r() + 0.4
+		reach = r + 0.4
 	var void_here := over_void()
 	if not grounded and mv.length() > 0.3:
 		# a smooth sheer cliff right in front of you has nothing to hold, and its neighbours don't
 		# catch you through it either (the deep abyss reach would otherwise reach round its corner)
-		var fr := Vector2(pos.x, pos.z) + mv.normalized() * (hull_r() + 0.3)
+		var fr := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.3)
 		var fi := Vector2i(int(floor(fr.x)), int(floor(fr.y)))
 		if w.inb(fi.x, fi.y) and w.sheer.has(w.idx(fi.x, fi.y)) and w.ground_at(fr.x, fr.y) > pos.y + World.STEP:
 			return
@@ -2527,8 +2527,8 @@ func _try_ledge_grab(dt: float) -> void:
 		max_rise = MANTLE_REACH_ABYSS      # deep in the abyss, any island wall you touch springs you back up
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
-		reach = hull_r() + WALL_CATCH_REACH
-		var sr := hull_r() + WALL_CATCH_REACH + 0.6
+		reach = r + WALL_CATCH_REACH
+		var sr := r + WALL_CATCH_REACH + 0.6
 		for sz in range(int(floor(pos.z - sr)), int(floor(pos.z + sr)) + 1):
 			for sx in range(int(floor(pos.x - sr)), int(floor(pos.x + sr)) + 1):
 				if w.inb(sx, sz) and w.sheer.has(w.idx(sx, sz)):

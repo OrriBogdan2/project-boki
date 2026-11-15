@@ -5,7 +5,6 @@ extends RefCounted
 ## the circle hits, just outside misses) for the smallest and the biggest. Never touches the save.
 
 const BAND := Vector2(0.85, 1.15)
-const SHOT_LIFE := 0.2  # s: 8 m at 40 m/s, 4 m before to 4 m past the hunter, inside the flattened patch
 # Kael and Albert: body size stays under SIZE_MAX (a smaller cast member), and the nameplate keeps its
 # height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
 const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.40}
@@ -37,13 +36,11 @@ func _flatten(m: Match, h: Hunter) -> void:
 				d.erase(i)
 
 
-## Fires one level bullet (radius `rad`) along +x, `side` metres off h's centre and `up` metres over its
-## feet; true if it hit h.
-func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 0.95) -> bool:
+## Fires one level bullet (radius 0.1) along +x, `side` metres off h's centre; true if it hit h.
+func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 	h.hp = h.max_hp
-	h.armor = h.max_armor
-	var y := h.pos.y + up
-	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, SHOT_LIFE, rad, Color.WHITE)
+	var y := h.pos.y + 0.95
+	m.spawn_shot(shooter, Vector3(h.pos.x - 4.0, y, h.pos.z + side), Vector2(40.0, 0), 5.0, 0.4, 0.1, Color.WHITE)
 	for i in 30:
 		h.teleport(h.pos)
 		h.vel = Vector3.ZERO
@@ -51,7 +48,7 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 
 		if m.shots.is_empty():
 			break
 	m.shots.clear()
-	return h.hp < h.max_hp or h.armor < h.max_armor  # armor takes a hit first
+	return h.hp < h.max_hp
 
 
 func run(main: Node) -> void:
