@@ -123,6 +123,12 @@ body (not in the air, a crouch, or a move that owns the body):
 - **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble 1.0, 0.55; Kael 1.0,
   0.6). The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso,
   arms, head) are held back; the feet stay planted and slide is unchanged.
+- **Hip phase (Nov 15).** The clips bob the hips with the legs the wrong way round: up as the legs spread at a walk
+  (hip-height / leg-spread correlation +0.3 to +0.85 on 9 of 11 Hunters with legs; a walk wants it negative, the hips
+  highest as the legs pass), and the same inverted at a run on 6 of 11. WardenGait now pulls the hips towards a bob of
+  `loco.bob_m` [walk, run] metres (defaults 0.035, 0.06) in step with the thighs' spread, at most 4 cm off the clip's
+  height (so Kael, Dredge and Bulwark also carry a `bob` scale to bring their big clip bob inside that reach). Feet,
+  cadence, knee lift and foot height are untouched (measured). `--anim-audit` fails a walk over -0.2 or a run under 0.2.
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
