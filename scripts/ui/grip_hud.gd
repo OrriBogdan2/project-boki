@@ -91,7 +91,7 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
 	var frac := clampf(k.hp / maxf(1.0, k.max_hp), 0.0, 1.0)
 	var bar := Rect2(r.position + Vector2(6, BOX - 6.0 - BAR_H), Vector2(BOX - 12.0, BAR_H))
-	hud._bar(bar, 0.0 if down else frac, HudStyle.ALLY)
+	hud._bar(bar, 0.0 if down else frac, SideColor.ally())
 	var tag := BokiHud.tag(p)
 	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac}
 	if tag == "":
@@ -109,7 +109,7 @@ static func tip(p: Hunter, i: int) -> Array:
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 		out.append(["Glove %d (empty)" % (i + 1), HudStyle.MUTED])
 		out.append(["Glove  ·  %s" % key, HudStyle.MUTED, 12])
-		var where := "Find gloves in chests, vaults and on bosses, or bring them from your armory. "
+		var where := "Find gloves in chests, vaults and on bosses, or bring them from your gear shed. "
 		where += "Either glove slot takes an active or a passive glove."
 		out.append([where, HudStyle.INK, 14])
 		return out

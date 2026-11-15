@@ -1,13 +1,31 @@
 class_name UiSfx
-extends RefCounted
-## Sounds for the controls Ui.button does not cover: sliders, toggles and dropdowns. Hooked once on
-## the tree (Game), so any HSlider, CheckButton or OptionButton added anywhere gets them for free.
+extends Node
+## Sounds for the controls Ui.button does not cover: sliders, toggles, dropdowns and drag and drop.
+## Hooked once on the tree (Game), so any HSlider, CheckButton or OptionButton added anywhere gets
+## them for free, and so does every drag of one of our things (the Boki box).
 
 const SLIDER_GAP_MS := 55      # a drag over many steps ticks at most this often
 const META := "ui_sfx"         # marks a control already wired
 
+var _ours := false             # the drag under way carries one of our things, not a text field's text
+
 static func hook(tree: SceneTree) -> void:
 	tree.node_added.connect(attach)
+	var ears := UiSfx.new()
+	ears.name = "UiSfx"
+	tree.root.add_child.call_deferred(ears)
+
+## Every node hears a drag begin and end: picking a thing up sounds, setting it down in a slot that
+## takes it sounds, and letting go anywhere else is silent (it goes back where it was).
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_BEGIN:
+		_ours = get_viewport().gui_get_drag_data() is Dictionary
+		if _ours:
+			Sfx.play("pickup", null, -6.0)
+	elif what == NOTIFICATION_DRAG_END and _ours:
+		_ours = false
+		if get_viewport().gui_is_drag_successful():
+			Sfx.play("click", null, -3.0, 0.03, 0.9)
 
 static func attach(n: Node) -> void:
 	if n.has_meta(META): return

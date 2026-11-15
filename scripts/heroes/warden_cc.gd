@@ -7,11 +7,11 @@ extends RefCounted
 ## {"pull": rad the torso leans in, "tug_hz": tugs a second, "twist": rad it wrings side to side, "bow": rad the head
 ## drops under Grounded}.
 
-const PULL := 0.22        # rad: the torso's lean into a pull, when the data has none
-const TUG_HZ := 1.4       # tugs a second
-const TWIST := 0.12       # rad: the wring side to side, at half the tug rate
-const BOW := 0.3          # rad: the head bowed at the cords
-const TUG_REST := 0.6     # of the pull held between tugs: the lean never lets go while the root holds
+const PULL := 0.22  # rad: the torso's lean into a pull, when the data has none
+const TUG_HZ := 1.4  # tugs a second
+const TWIST := 0.12  # rad: the wring side to side, at half the tug rate
+const BOW := 0.3  # rad: the head bowed at the cords
+const TUG_REST := 0.6  # of the pull held between tugs: the lean never lets go while the root holds
 
 var skel: Skeleton3D
 var hips := -1
@@ -20,9 +20,10 @@ var pull := PULL
 var tug_hz := TUG_HZ
 var twist := TWIST
 var bow := BOW
-var root_w := 0.0         # how much of the strain shows
-var gnd_w := 0.0          # how much of the bow shows
-var tug_t := 0.0          # s into this root: each one starts on a fresh pull
+var root_w := 0.0  # how much of the strain shows
+var gnd_w := 0.0  # how much of the bow shows
+var tug_t := 0.0  # s into this root: each one starts on a fresh pull
+
 
 func _init(sk: Skeleton3D, cc: Dictionary) -> void:
 	skel = sk
@@ -33,6 +34,7 @@ func _init(sk: Skeleton3D, cc: Dictionary) -> void:
 	twist = float(cc.get("twist", TWIST))
 	bow = float(cc.get("bow", BOW))
 
+
 ## After tree.advance. `rooted`: the strain owns the torso (only over the legs' own clips); `gnd`: Grounded.
 func apply(dt: float, rooted: bool, gnd: bool) -> void:
 	root_w = move_toward(root_w, 1.0 if rooted else 0.0, dt / WardenClips.FADE)
@@ -40,11 +42,12 @@ func apply(dt: float, rooted: bool, gnd: bool) -> void:
 	tug_t = tug_t + dt if root_w > 0.0 else 0.0
 	if root_w > 0.0 and hips >= 0:
 		var tug := 0.5 - 0.5 * cos(TAU * tug_hz * tug_t)
-		var lean := -pull * lerpf(TUG_REST, 1.0, tug) * root_w     # (about +X a negative turn tips the torso forward)
+		var lean := -pull * lerpf(TUG_REST, 1.0, tug) * root_w  # (about +X a negative turn tips the torso forward)
 		var wring := sin(PI * tug_hz * tug_t) * twist * root_w
 		_turn(hips, Quaternion(Vector3.UP, wring) * Quaternion(Vector3.RIGHT, lean))
 	if gnd_w > 0.0 and head >= 0:
 		_turn(head, Quaternion(Vector3.RIGHT, -bow * gnd_w))
+
 
 ## Turns bone `bi` by `q`, given in the skeleton's own frame, on top of its pose.
 func _turn(bi: int, q: Quaternion) -> void:

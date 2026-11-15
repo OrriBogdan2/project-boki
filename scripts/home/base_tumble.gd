@@ -424,6 +424,7 @@ func _close_bar() -> void:
 	bar = null
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap([run.recs[0]] if run.visitor else run.recs)
 	var res := settle(run) if finished else {}
 	_clips("", "")
 	_close_bar()
@@ -433,7 +434,7 @@ func _end(finished: bool) -> void:
 		k["busy"] = false
 		k["t"] = 1.5
 	if finished:
-		_card(res)
+		_card(res, before)
 		var wi := run.winner()
 		GardenSfx.fanfare(h, pair[wi], pair[1 - wi])
 		for i in 2:
@@ -445,16 +446,9 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
-	var how := "out of the ring" if run.out() else "back after %d exchanges" % run.played
-	card = BaseRace.result_card(h, [
-		["%s wins the Tumble!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is pushed %s" % [lose["name"], how], 14, UI.INK],
-		["%s went with what it wanted %d of %d times (+trust)" % [run.recs[0]["name"], run.follows, run.played],
-				14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+	card = GameResultCard.open(h, {"game": "Tumble", "before": before, "prize": [["+%d gems" % res["gems"], UI.GOLD]],
+			"place": "%s wins, %s" % [res["win"]["name"], "out of the ring" if run.out() else "on points"]})
 	card_t = float(rules()["card_s"])

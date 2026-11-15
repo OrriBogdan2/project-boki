@@ -9,7 +9,7 @@
  },
  "crossers": {
   "shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"},
-  "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Abyssal Hand (pierces terrain)"},
+  "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Deep Reach (pierces terrain)"},
   "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"},
   "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"},
   "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"},

@@ -199,7 +199,7 @@ func _breah() -> void:
 	step(m, 0.5)
 	ok(
 		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		K.wall_stuns >= 1 and T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -433,7 +433,7 @@ func _breah() -> void:
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"stun %.2f" % T.stun_t
 	)
 	ok(
@@ -580,7 +580,7 @@ func _breah() -> void:
 	)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
-	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
+	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
 	ok(
 		"data: the dash rests 12s per charge and starts with one charge (a second at rank 3)",
 		absf(float(K.dash_def()["cd"]) - 12.0) < 0.01 and P.max_dashes() == 1.0 and absf(P.dash_regen() - 12.0) < 0.01,
@@ -605,7 +605,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Molten Guard shield (one 18 stack a punch, rank 1), named",
+		"data: punching your own rocks gives a Shardskin shield (one 18 stack a punch, rank 1), named",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2
 			and P.shield_src == ShieldSrc.MOLTEN,
 		"punches %d stacks %d shield %.1f swept %d src %s" % [K.guard_punches - gp0, K.shield_stacks, P.shield,
@@ -632,7 +632,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"PARITY: Molten Guard is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
+		"PARITY: Shardskin is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - full_shield) < 0.01
 		and absf(P.shield - float(K.d["passive"]["guard"]["shield"])) < 0.01,
 		"tap %.1f full %.1f stacks %d" % [P.shield, full_shield, K.shield_stacks]
@@ -688,7 +688,7 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"rank 3: slamming a foe gives a Molten Guard shield", P.shield >= 17.0 and K.shield_stacks >= 1,
+		"rank 3: slamming a foe gives a Shardskin shield", P.shield >= 17.0 and K.shield_stacks >= 1,
 		"shield %.0f" % P.shield
 	)
 	ok(

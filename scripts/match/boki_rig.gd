@@ -5,7 +5,10 @@ extends Node
 ## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown), "kburst"
 ## (a factor on the gait's cadence) and a flier's "aloft" and "lift" (BokiFly: hover or glide up there, a flare
 ## coming down), and plays the face on top of whatever the body does.
-## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
+## Match body language (the "pose" meta, KinWildPose and KinCompanion) is a layer on Flex over whatever clip runs:
+## a startle, a charge, a cower, a knocked-out sway, a lift into the scan beam; BODY_FEEL bends it per body plan.
+## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
+## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
@@ -149,7 +152,7 @@ const STRIDE := {
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
-const CONTACT := {"cindle": 0.333, "puddlet": 0.367, "burrlet": 0.367}
+const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
@@ -173,10 +176,17 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+const EAR_TWITCH := 0.3       # rad an ear flicks asleep
+## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
+## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
+const SWIM_LINE := 0.5
+const PLANT_GAITS := ["walk", "run"]      # the clips whose paws BokiPlant keeps planted
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
+	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
+## The nap clips (BokiHomeClips), played slower by a bigger Boki (KinNap.slow).
+const NAP_CLIPS := ["settle", "nap", "wake"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
 const STRUT_CADENCE := 1.25
@@ -202,14 +212,31 @@ const CLIP_FACE := {
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
-	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy", "swim": "cheer", "paddle": "focus",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 	"strut": "cheer", "pose": "cheer", "bow": "cheer",
 	"crouch": "focus", "burst": "cheer", "sulk": "sad",
 	"glide": "cheer", "flare": "focus",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
+const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
+	"alert": "focus", "dazed": "sleepy", "scan": "sad"}
+## Pose layers: lean (rad, forward), squat (0..1 of its height, negative stands tall), sway (rad, side to side),
+## shiver (rad); `clip` and `rate` replace the idle, walk and run clips and their speed (a lifted Boki kicks).
+const LAYER := {
+	"alert": {"lean": -0.2, "squat": -0.1},
+	"growl": {"lean": 0.2, "squat": 0.1, "shiver": 0.03},
+	"whine": {"lean": 0.14, "squat": 0.16, "shiver": 0.03},
+	"dazed": {"lean": 0.3, "squat": 0.12, "sway": 0.2, "clip": "idle", "rate": 0.4},
+	"scan": {"lean": -0.15, "squat": -0.2, "shiver": 0.03, "clip": "run", "rate": 0.7},
+}
+## How far each body plan (KinPuppet.BODY) takes the lean and the sway: a flyer or serpent has no spine to tip.
+const BODY_FEEL := {"quad": Vector2(1.0, 1.0), "biped": Vector2(1.0, 1.0), "flyer": Vector2(0.6, 1.4),
+	"serpent": Vector2(0.5, 1.6), "blob": Vector2(0.5, 1.0)}
+const CHASE_POSES := ["growl", "whine"]   # moving at all in these is a run: a charge or a bolt
+const LAYER_RATE := 9.0       # 1/s the layer eases in and out at
+const SWAY_RATE := 4.0        # rad/s of the knocked-out sway
+const SHIVER_RATE := 45.0     # rad/s
 
 static var enabled := true
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
@@ -240,6 +267,9 @@ var _shot_rate := 1.0          # the speed the shot plays at
 var _attacking := false
 var _asleep := false
 var _aloft := false             # a flier in the air (BokiFly's "aloft" meta)
+var _layer := {"lean": 0.0, "squat": 0.0, "sway": 0.0, "shiver": 0.0}
+var _layer_t := 0.0
+var _feel := Vector2.ONE
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -249,11 +279,24 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
+var _swimmer := false          # a Water type: swims level rather than paddling
+var _nap: KinNap
+var _ears := PackedInt32Array()     # ear bones the sleep clip keys, twitched on top of it asleep
+var _plants := {}              # gait clip -> BokiPlant
+var _gait := ""                # the gait whose paws are planted: it eases out after the clip moves on
+var _gait_at := 0.0            # s into it
+var _gait_rate := 1.0
+var _gait_w := 0.0             # how far the planted timing is blended in
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
+static func swimmer(kin_id: String) -> bool:
+	return (BokiWade.rules()["swim"] as Array).has(BokiLines.element_of(kin_id))
 
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
@@ -266,6 +309,7 @@ static func fetch_common() -> void:
 				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			BackgroundWork.request(p)
 
+static var _ear_bones := {}    # species -> its ear bones keyed in the sleep clip
 static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
@@ -294,6 +338,7 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	var rig := BokiRig.new()
 	rig.name = "BokiRig"
 	rig.species = kin_id
+	rig._feel = BODY_FEEL[KinPuppet.BODY.get(kin_id, "blob")]
 	rig.model = model_root
 	rig._dress(c, mats)
 	if FRAME[kin_id].get("hover", false):
@@ -319,12 +364,22 @@ func _ready() -> void:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
+	_nap = KinNap.new(species)
+	if not _ear_bones.has(species):
+		_ear_bones[species] = _keyed_ears()
+	_ears = _ear_bones[species]
+	_swimmer = swimmer(species)
 	_copy_coat()
+	_skel = skeleton()
+	for g in PLANT_GAITS:
+		_plants[g] = BokiPlant.of(species, model, _skel, g)
 	set_clip("idle")
 
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
 func advance(dt: float) -> void:
 	player.advance(dt)
+	_twitch_ears()         # (over the clip's pose, before the skeleton takes it)
+	_plant_feet(dt)
 	_skel.advance(dt)
 
 ## The model's skeleton.
@@ -360,6 +415,9 @@ func _process(dt: float) -> void:
 	if not root.is_visible_in_tree():
 		return
 	_flinch.update(root, dt)
+	_water = float(root.get_meta("kwater", 0.0))
+	if _water > 0.0:
+		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
@@ -372,8 +430,13 @@ func _process(dt: float) -> void:
 ## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	var squat: float = _layer["squat"]
+	var swing := _layer_t * SWAY_RATE
+	var sway := float(_layer["sway"])
+	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) + cos(swing) * sway * 0.4, 0.0,
+		sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
+	var wide := _flinch.wide * (1.0 + squat * 0.5)
+	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -382,12 +445,16 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip in OWN_HEIGHT else 0.0       # the clip does the hopping, not home
 	var lift := float(root.get_meta("lift", 0.0))
 	if lift > 0.0 and _shadow == null:
 		_shadow = _ground_shadow(flex)           # a flier's first time up: from now on its shadow marks the ground
+	var afloat := _float_lift()
+	model.position.y = 0.0
+	if clip in OWN_HEIGHT or afloat > 0.0:
+		# the clip hops or floats, not home
+		model.position.y = afloat / flex.global_basis.y.length() - body.position.y
 	if _shadow:
-		_shadow.global_position.y = root.global_position.y - lift + SHADOW_LIFT
+		_shadow.global_position.y = root.global_position.y - lift + _water + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
@@ -409,6 +476,7 @@ func _pick_clip(dt: float) -> void:
 	_attacking = attacking
 	_shot_left -= dt
 	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
@@ -420,9 +488,18 @@ func _pick_clip(dt: float) -> void:
 			_start_shot("flare")
 		elif _shot == "flare":
 			_shot_left = 0.0          # up again before the flare is done
+	var feel: Dictionary = LAYER.get(String(root.get_meta("pose", "")), {})
+	_step_layer(feel, dt)
 	var want := _state_clip()
+	if want in GAITS and feel.has("clip"):
+		want = feel["clip"]
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
+	if want in NAP_CLIPS:
+		player.speed_scale /= _nap.slow
+	if feel.has("rate"):
+		player.speed_scale = float(feel["rate"])
+		return
 	if want not in ["run", "walk", "carry", "strut"]:
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -436,17 +513,74 @@ func _pick_clip(dt: float) -> void:
 func gait_fade() -> float:
 	return GAIT_FADE.get(species, FADE)
 
+## Plants the walk's or run's paws (BokiPlant), easing in after the clip starts and out after it ends.
+func _plant_feet(dt: float) -> void:
+	if clip == _gait:
+		_gait_at = player.current_animation_position
+		_gait_rate = player.speed_scale
+		_gait_w = move_toward(_gait_w, 1.0, dt / FADE)
+	else:
+		_gait_at += dt * _gait_rate
+		_gait_w = move_toward(_gait_w, 0.0, dt / FADE)
+		if _gait_w == 0.0:
+			_gait = clip if clip in PLANT_GAITS else ""
+	if _gait_w > 0.0:
+		plant(_gait, _gait_at, _gait_rate, _gait_w)
+
+## Poses `gait`'s legs at `at` s into it, playing at `rate` x, with the paws planted at this Boki's speed and size.
+func plant(gait: String, at: float, rate: float, weight := 1.0) -> void:
+	(_plants[gait] as BokiPlant).pose(_skel, at, rate, _speed, model.global_basis.z.length(), weight)
+
+## Eases the pose layer toward what the pose asks (zero for none); lean and sway scale with the body plan.
+func _step_layer(feel: Dictionary, dt: float) -> void:
+	_layer_t += dt
+	for key in _layer:
+		var mult := 1.0
+		if key == "lean":
+			mult = _feel.x
+		elif key == "sway":
+			mult = _feel.y
+		var want := float(feel.get(key, 0.0)) * mult
+		_layer[key] = lerpf(float(_layer[key]), want, 1.0 - exp(-LAYER_RATE * dt))
+
 ## Plays a one-off clip, at `rate` times its speed.
 func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
 	_shot_rate = rate
-	_shot_left = player.get_animation(which).length / rate
+	_shot_left = player.get_animation(which).length / rate * (_nap.slow if which in NAP_CLIPS else 1.0)
+
+## The root ear bones the nap clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
+## sets them every frame, so a twitch on top never builds up.
+func _keyed_ears() -> PackedInt32Array:
+	var out := PackedInt32Array()
+	var anim := player.get_animation("nap")
+	for i in anim.get_track_count():
+		var bone := _skel.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
+		if bone >= 0 and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D and _is_ear(bone) \
+				and not _is_ear(_skel.get_bone_parent(bone)):
+			out.append(bone)
+	return out
+
+func _is_ear(bone: int) -> bool:
+	var bone_name := _skel.get_bone_name(bone) if bone >= 0 else ""
+	return bone_name.begins_with("ear") and not bone_name.begins_with("ear_")
+
+## Asleep, an ear flicks now and then (KinNap.twitch), on top of the nap clip's pose.
+func _twitch_ears() -> void:
+	if _nap.twitch <= 0.0 or clip != "nap":
+		return
+	var turn := Quaternion(Vector3.BACK, sin(_nap.twitch * TAU) * EAR_TWITCH)
+	for b in _ears:
+		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
 
 func _state_clip() -> String:
 	if _aloft:
 		return "glide" if _speed >= WALK_SPEED else "hover"
 	if _shot == "flare" and _shot_left > 0.0:
 		return _shot          # it touches down before it does what it came down for
+	var swim := _swim_clip()
+	if swim != "":
+		return swim
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
@@ -461,14 +595,33 @@ func _state_clip() -> String:
 		return _shot
 	if root.get_meta("happy", false):
 		return "hop"
-	if _speed >= RUN_SPEED:
+	if _speed >= RUN_SPEED or (_speed >= WALK_SPEED and String(root.get_meta("pose", "")) in CHASE_POSES):
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
+
+## "swim" or "paddle" while the water is deeper than SWIM_LINE of its height, else "".
+func _swim_clip() -> String:
+	if _water <= _afloat() or FRAME[species].get("hover", false):
+		return ""
+	return "swim" if _swimmer else "paddle"
+
+## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
+func _afloat() -> float:
+	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+
+## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
+func _float_lift() -> float:
+	if FRAME[species].get("hover", false):
+		return _water
+	return maxf(0.0, _water - _afloat())
 
 func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	var pf := String(POSE_FACE.get(String(root.get_meta("pose", "")), ""))
+	if pf != "":
+		return pf
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")
@@ -482,7 +635,7 @@ func _clip_face() -> String:
 		return best
 	if String(cf) != "":
 		return String(cf)
-	return String(POSE_FACE.get(String(root.get_meta("pose", "")), "neutral"))
+	return "neutral"
 
 func _face_step(dt: float) -> void:
 	set_face(_clip_face())

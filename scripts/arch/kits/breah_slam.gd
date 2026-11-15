@@ -6,7 +6,7 @@ extends RefCounted
 ## everyone sees the circle where the hop will land with its sweet spot growing from the centre; he can walk
 ## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
 ## foes in the air are dunked, rocks inside fly outward, and at rank 3 each slam that catches something
-## adds a Molten Guard shield stack (DolmKit.guard_stack).
+## adds a Shardskin shield stack (DolmKit.guard_stack).
 
 var k: DolmKit
 var leapt := false  # jumped during this charge (the leap forward)
@@ -244,8 +244,6 @@ func slam(c: float, at_feet: bool) -> void:
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 			k.vfx("dunk", f.pos)
 		f.hurt(d2, h, o)
-		if in_core:
-			KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
 			m.displace.spike(f, -22.0, h)  # spiked down (after the hit, which would lift it)
 		gained = true

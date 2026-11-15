@@ -82,6 +82,7 @@ var hw: HomeWork = null            # kin at work: jobs, stations and the Job Boa
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
+var item_fx: GardenItemFx          # the moment on a Boki given a shaping item (garden_item_fx.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -418,6 +419,8 @@ func _ready_rest() -> void:
 	await world.build_meshes()
 	world.stage_cb = Callable()
 	fx = Fx.new(); add_child(fx)
+	item_fx = GardenItemFx.new()
+	add_child(item_fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
 	_apply_cam_settings()
@@ -1189,6 +1192,10 @@ func _keep_off_hub(c) -> void:
 	var room_l := hr.end.x + 12.0
 	var centred := (vw - cr.size.x) * 0.5
 	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	# too wide to sit beside the hub (big text): centred over it, not pushed off the screen
+	if room_l + cr.size.x > vw - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
+		want = centred
+		cc.global_position.y = hr.position.y - cr.size.y - 6.0
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
@@ -1380,6 +1387,7 @@ func _move_player(d: float) -> void:
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps["idle_break"] = true
 	ps.merge(verbs.step(d))
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	ps.merge(carry.anim_state())
@@ -1456,6 +1464,7 @@ func _move_kin(d: float) -> void:
 					_emote(k, "♪"); _emote(other, "!")
 					var cue := KinVoice.cue(other["rec"]["species"], "happy")
 					Sfx.play(cue, other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					Sfx.play("garden_friend", other["pos"], -16.0)
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -1796,7 +1805,7 @@ func _open_rack() -> void:
 		tc.custom_minimum_size = Vector2(150, 0)
 		var tv := UI.vbox(1); tc.add_child(tv)
 		var nl := UI.label(String(sk["name"]), UI.T_BODY, UI.INK if owned else UI.MUTED, UI.semi)
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		tv.add_child(nl)
 		var st := "Equipped" if Gliders.equipped() == sid else ("Owned" if owned else ("Earned" if sk.has("unlock") else "%d gems" % int(sk["cost"])))
 		tv.add_child(UI.label(st, 12, UI.GOOD if Gliders.equipped() == sid else (UI.MUTED if owned else (UI.FAINT if sk.has("unlock") else UI.GOLD))))
@@ -2149,7 +2158,7 @@ func _find_interact() -> void:
 		for one in row.get_children():
 			var l: Label = one.get_child(one.get_child_count() - 1)
 			l.add_theme_font_override("font", UI.big)
-			l.add_theme_font_size_override("font_size", 18)
+			l.add_theme_font_size_override("font_size", UI.fs(18))
 			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
 		prompt_box.add_child(row)
 		prompt_box.reset_size()
@@ -2157,7 +2166,7 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	var py_at := vp.y - 110.0
+	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
@@ -2173,8 +2182,8 @@ func _update_hover() -> void:
 		hover_lbl.bbcode_enabled = true; hover_lbl.fit_content = true; hover_lbl.scroll_active = false
 		hover_lbl.custom_minimum_size = Vector2(300, 0)
 		hover_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hover_lbl.add_theme_font_size_override("normal_font_size", 14)
-		hover_lbl.add_theme_font_size_override("bold_font_size", 19)
+		hover_lbl.add_theme_font_size_override("normal_font_size", UI.fs(14))
+		hover_lbl.add_theme_font_size_override("bold_font_size", UI.fs(19))
 		hover_lbl.add_theme_font_override("bold_font", UI.big)
 		hover_box.add_child(hover_lbl)
 		root_ui.add_child(hover_box)
@@ -2886,7 +2895,7 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 	var hr := UI.hbox(10); card.add_child(hr)
 	var lv := UI.vbox(4); lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(String(c[1]), UI.T_BODY, UI.INK if not donec else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	lv.add_child(nm)
 	var pr := UI.hbox(8)
 	var cur := mini(Progress.stat(c[3]), int(c[4]))
@@ -2968,6 +2977,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
 	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
+	Sfx.play("garden_pet", null, -6.0)
 	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
@@ -2995,7 +3005,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	k["fetch"] = {"ball": ball, "from": ball.position, "to": to, "t": 0.0, "phase": "fly", "life": 14.0}
 	k.erase("chase"); k.erase("task")
 	_emote(k, "!")
-	Sfx.play("throw", null, -8.0)
+	Sfx.play("garden_toy", null, -6.0)
 	verbs.play("toss")
 	kin_frame.start(k, ppos)
 
@@ -3109,9 +3119,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
-			l.autowrap_mode = TextServer.AUTOWRAP_OFF
-			l.clip_text = true
-			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			FitLabel.shrink(l)
 			l.tooltip_text = String(ln[0])
 			l.mouse_filter = Control.MOUSE_FILTER_PASS
 			c2.add_child(l)
@@ -3458,12 +3466,14 @@ func _send_chat() -> void:
 var exp_cls := ""
 var exp_tier := 0
 var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
+var raid_squad := 0        # Heart Raid: the squad size picked in HeartRaidPick (0: an Expedition)
 
 func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	raid_squad = 0
 	if ClassUnlock.needs_starters():
 		FirstRelic.offer(self, _open_expedition)      # (the garden path's first Relic waits for the portal)
 		return
@@ -3546,6 +3556,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	fl.add_child(UI.ghost("Heart Raid (prototype)", func(): HeartRaidPick.open(self), 0, "heart"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3609,6 +3620,8 @@ func _start_match() -> void:
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
+	if raid_squad > 0:
+		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -3663,7 +3676,7 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
-		Sfx.play("unlock")
+		Sfx.play("garden_trait")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		building_now = false
@@ -3782,7 +3795,6 @@ func _construct(b: String) -> void:
 	get_tree().create_timer(1.55).timeout.connect(func():
 		Sfx.play("unlock")
 		fx.burst(l["at"] + Vector3(0, 2.6, 0), UI.GOLD, 26, 6.0, 0.8, 8.0, 1.2)
-		fx.ring(l["at"], 4.0, Color(UI.GOLD, 0.9), 0.5)
 		l["built"] = true
 		building_now = false
 		if b == "greenhouse": _build_plots()
@@ -3836,7 +3848,7 @@ func _care_trust(rec: Dictionary, kind: String, food := "") -> void:
 	if line != "": _toast(line)
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
+	UI.toast(root_ui, txt, UI.GOLD, guide.toast_top() if guide else 100.0)
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)
@@ -4255,6 +4267,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		k["slept"] = 0.0
 		k["nap_t"] = 30.0
 		k["z_t"] = 0.5
+		Sfx.play("boki_sleep", pos, -8.0, 0.1, Unique.voice(rec))
 	if k.has("stare") and Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < 0.5:
 		var at: Vector3 = k["stare"]
 		k.erase("stare")
@@ -4330,7 +4343,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("boki_eat", fp, -8.0, 0.1, Unique.voice(rec)))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4350,6 +4363,8 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
+		item_fx.play(k, res)
 		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
 		Save.save_game()
@@ -4375,11 +4390,13 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1)
+		Sfx.play("garden_feed", null, -4.0)
 		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -8.0)
+		Sfx.play("garden_feed", null, -8.0)
 		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
@@ -4451,6 +4468,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
+		Sfx.play("boki_sleep", k["pos"], -8.0, 0.1, Unique.voice(rec))
 	_say(k, BokiLines.say(rec, "nap"))
 	Sfx.play(KinVoice.cue(rec["species"], "sleepy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
 
@@ -4717,7 +4735,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	tv.add_child(nm)
 	var spl := UI.label(Evo.form_name(o), 11, UI.MUTED)
 	spl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	spl.clip_text = true
+	spl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tv.add_child(spl)
 	var st := UI.hbox(6)
 	st.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -4825,7 +4843,6 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
-	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
@@ -4869,7 +4886,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("unlock")
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.

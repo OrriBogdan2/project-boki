@@ -35,7 +35,9 @@ func _new_save() -> void:
 		rec["traits"]["bravery"] = BOKI[nm][2]
 		d["roster"].append(rec)
 	d["active"] = d["roster"][0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
+	# no base tutorial (Lead); whistle_hint: the whistle nudge (WhistleHint) is its own pill on a timer and
+	# would land in the "no panel or toast" count whenever the partner strays out of view mid-run
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true, "whistle_hint": true}
 	Save.d = d
 	HomeLayout.ensure(d)
 

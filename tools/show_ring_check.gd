@@ -212,7 +212,8 @@ func _on_base() -> void:
 		ok(beats.has("strut@" + str(ShowRing.Run.Phase.BOND)), "on: it struts on the walk-in")
 		ok(beats.has("pose@" + str(ShowRing.Run.Phase.JUDGE)), "on: it holds a pose when the judges look")
 		ok(not beats.has("pose@" + str(ShowRing.Run.Phase.LOOK)), "on: no pose before the judges' round")
-		ok(sr.run == null and is_instance_valid(sr.card), "on: the show ends with a result card (%.1f s)" % t)
+		ok(sr.run == null and is_instance_valid(sr.card) and sr.card.name == "GameResultCard",
+				"on: the show ends with the shared result card (%.1f s)" % t)
 		var shown: bool = is_instance_valid(sr.marks) and sr.marks.get_parent() == home.root_ui
 		ok(shown, "on: the result shows its marks and ribbon")
 		var clips: Array = []

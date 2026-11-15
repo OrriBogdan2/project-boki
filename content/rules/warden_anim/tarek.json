@@ -41,24 +41,20 @@
 		"glide": "glide",
 		"dive": "dive"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.42,
-		"min_fall": 0.5
-	},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"breah_throw": {
 			"clip": "lmb_throw",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
 			"hold_from": 0.24
-		},
+		, "air_legs": true},
 		"breah_punch": {
 			"clip": "lmb_punch",
 			"upper": "moving"
-		},
+		, "air_legs": true},
 		"breah_crouch": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
@@ -90,7 +86,7 @@
 		},
 		"breah_raise": {
 			"clip": "e_row"
-		},
+		, "air_legs": true},
 		"breah_sense": {
 			"clip": "sense"
 		},

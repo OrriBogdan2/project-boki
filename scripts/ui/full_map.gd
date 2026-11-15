@@ -300,7 +300,7 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		var kind := String(lb["kind"])
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
-			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var col := Heart.gate_col().lightened(0.3) if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
 		else:
@@ -543,7 +543,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:
@@ -650,7 +650,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
-			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
+			var shrine := "Shrine (hold %s: a power-up)" % Settings.key_cap("interact")
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), shrine, 12, INK)
 			row_y += 22
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)

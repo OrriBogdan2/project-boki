@@ -1,18 +1,19 @@
 class_name PinFx
 extends Node3D
 ## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
-## coloured ones are layered (KitShaders): an alpha-blended body in her orchid, its pale half and gold with the glow
+## coloured ones are layered (KitShaders): an alpha-blended body in her red, its pale half and gold with the glow
 ## on top, so they keep their colour on bright grass.
-## - fletch bursts (her own motif: feathers radiating from a core): the orchid stage-ready flash at the bow,
+## - fletch bursts (her own motif: feathers radiating from a core): the red stage-ready flash at the bow,
 ##   the gold perfect-release burst with its ring, the glint at the bow hand (only while a stage is ready:
-##   orchid Empowered, pale orchid Supercharged and a full Heavy Shot)
-## - stars: the orchid X-star on a Supercharged hit, the orchid-white Heavy Shot impact
-## - arrows: the look of each of her shots (Empowered orchid bolt, Supercharged white-orchid beam, a dull
-##   overdrawn shaft, the big orchid Heavy Shot with a hot core), each with its own trail, drawn
+##   red Empowered, white-hot Supercharged and a full Heavy Shot)
+## - stars: the red X-star on a Supercharged hit, the red-white Heavy Shot impact
+## - arrows: the look of each of her shots (Empowered red bolt, Supercharged white-red beam, a dull
+##   overdrawn shaft, the big red Heavy Shot with a hot core), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one that lands with no hit stays stuck in the ground, thread attached, for 4 s
-## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
-##   burn flames on foes inside
+## - the Rain of Arrows (Hail Wall): needle posts round the arc laced together like her corset, red thread
+##   criss-crossing between the posts and across the ground the wall covers (her laces, red, not a
+##   glowing band), arrows streaking down, blue burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
 ## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
@@ -22,7 +23,11 @@ const ARROWS := 10
 const SPENT := 8
 const STREAKS := 26
 const FLAMES := 4
-## her dash after-image: orchid fletch streaks left at hip, chest and shoulder height, how long each lasts
+const POSTS := 9               # the Hail Wall's needle posts (8 gaps, each laced)
+const LACE_W := 0.06           # m: a lace's thickness, a thread that still holds at the match camera
+const LACE_Y := Vector2(0.15, 0.9)  # m: where the upright laces cross between two posts, low and high
+const LACE_IN := 0.25          # s the laces take to draw across as the wall goes up
+## her dash after-image: red fletch streaks left at hip, chest and shoulder height, how long each lasts
 ## (s), how many are pooled and how often a set is left (s)
 const WISP_T := 0.26
 const WISPS := 12
@@ -31,10 +36,12 @@ const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
+const HEAVY_BACK := 4.5        # m the Heavy Shot's arrow reaches back from its head: it grows in over that much
+                               # flight, so it never lies back across her (it leaves the bow)
 const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
-const THREAD := Color("e04aff")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
-const PALE := Color("f4c8ff")       # the pale half of her orchid: heads and hot cores
-const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the overdrawn trail
+const THREAD := Color("d41e2e")     # her laces' crimson (archetypes/archer.json "color"; owner 11-11: red, never pink)
+const PALE := Color("ffe4d6")       # her white-hot: heads and hot cores (warm white, not a pastel pink)
+const DEEP := Color("7a0c14")       # her laces in shade: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
@@ -51,9 +58,8 @@ var hits: Array = []           # [pos, time] of shot hits (a shot that hit someo
 var bursts: Array = []         # fletch bursts {node, t, dur, size, pow}
 var bow_glint: MeshInstance3D  # the fletch glint at the bow hand while a stage is ready
 var rain := {}                 # the live wall: {center, dir, radius, deg, t, every}
-var panels: Array = []
 var posts: Array = []
-var glow: MeshInstance3D
+var laces: Array = []          # {node, a, b}: the Hail Wall's threads, a -> b in the world
 var streaks: Array = []        # {node, t, from, to}
 var flames: Array = []         # {node, foe}
 var wisps: Array = []          # {node, t}
@@ -88,9 +94,13 @@ func _ready() -> void:
 	for i in SPENT:
 		var n := _arrow_node()
 		spent.append({"node": n, "t": 0.0})
-	for i in 8:
-		panels.append(KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", THREAD)))
-	for i in 9:
+	# the laces: solid toon thread (no added glow, so the red holds on bright grass); every other one in
+	# shade, the strand passing under
+	for i in (POSTS - 1) * 4:
+		var tone := THREAD if i % 2 == 0 else THREAD.darkened(0.3)
+		var lace := KitMeshes.inst(self, Models.box(LACE_W, LACE_W, 1.0), Models.toon(tone, false, 0.5))
+		laces.append({"node": lace, "a": Vector3.ZERO, "b": Vector3.ZERO})
+	for i in POSTS:
 		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
 		var fl := MeshInstance3D.new()
 		fl.mesh = Models.prism_tip()
@@ -101,7 +111,6 @@ func _ready() -> void:
 		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		p.add_child(fl)
 		posts.append(p)
-	glow = KitMeshes.inst(self, KitMeshes.band(1.0, 1.0, -1.0, 1.0), KitShaders.mat("swirl", THREAD))
 	for i in STREAKS:
 		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
 		streaks.append({"node": streak_node, "t": 0.0})
@@ -149,7 +158,7 @@ func _arrow_node() -> Node3D:
 	return n
 
 ## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale].
-## Trails are streaks (a white-hot centre line in an orchid body): the widths hold at the match camera.
+## Trails are streaks (a white-hot centre line in a red body): the widths hold at the match camera.
 const LOOK := {
 	"tap": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.7), 1.6, 0.16, 0.8],
 	"arrow": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.85), 2.6, 0.22, 1.0],
@@ -161,6 +170,7 @@ const LOOK := {
 
 func _dress(n: Node3D, kind: String) -> void:
 	var lk: Array = LOOK.get(kind, LOOK["arrow"])
+	n.scale = Vector3.ONE
 	(n.get_node("Shaft") as MeshInstance3D).material_override.set_shader_parameter("albedo", lk[0])
 	(n.get_node("Head") as MeshInstance3D).material_override.set_shader_parameter("albedo", lk[1])
 	for f in ["Fin0", "Fin2"]:
@@ -268,6 +278,8 @@ func tick_shots() -> void:
 		var p := (s["prev"] as Vector3).lerp(s["pos"], a)
 		var v: Vector2 = s["vel"]
 		n.global_position = p
+		if e["kind"] == "heavy":
+			n.scale = Vector3.ONE * clampf(p.distance_to(s["start"]) / HEAVY_BACK, 0.15, 1.0)
 		if v.length() > 0.5:
 			n.rotation = Vector3(0, atan2(-v.x, -v.y), 0)
 		e["pos"] = s["pos"]
@@ -325,7 +337,7 @@ func stake(at: Vector3, dir: Vector2) -> void:
 	staked += 1
 	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
-## Her dash after-image: three orchid fletch streaks at hip, chest and shoulder height, lying along the way
+## Her dash after-image: three red fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).
 func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 	var now := float(h.m.time)
@@ -342,7 +354,7 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 		n.scale = Vector3(1.3, 0.16, 1.0) * body_scale
 		w["t"] = WISP_T
 
-## Hail Wall's cast: orchid arrows streaking up out of the bow, lobbed toward `dir`.
+## Hail Wall's cast: red arrows streaking up out of the bow, lobbed toward `dir`.
 func lob(at: Vector3, dir: Vector2) -> void:
 	var launched := 0
 	for c in streaks:
@@ -367,39 +379,48 @@ func _tick_wisps(delta: float) -> void:
 		n.visible = float(w["t"]) > 0.0
 
 # ------------------------------------------------------------------ Rain of Arrows
-## Shows the wall for `t` s: an arc of `deg` round `center` at `radius`, facing `dir`.
-func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float) -> void:
+## Shows the wall for `t` s: an arc of `deg` round `center` at `radius`, facing `dir`, `width` m deep. The
+## laces draw across over LACE_IN (_tick_rain).
+func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, width: float, t: float) -> void:
 	rain = {"center": center, "dir": dir, "radius": radius, "deg": deg, "t": t, "t0": t, "every": 0.0}
 	var yaw := atan2(-dir.x, -dir.y)
 	var half := deg_to_rad(deg) * 0.5
-	var n := panels.size()
-	for i in n + 1:
-		var u := lerpf(-half, half, float(i) / n)
-		var q := _arc_pt(center, yaw, radius, u)
+	var gaps := POSTS - 1
+	for i in POSTS:
+		var q := _arc_pt(center, yaw, radius, lerpf(-half, half, float(i) / gaps))
 		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
 		(posts[i] as Node3D).visible = true
-		if i > 0:
-			_stitch(_arc_pt(center, yaw, radius, lerpf(-half, half, float(i - 1) / n)), q, t)
-	for i in n:
-		var u0 := lerpf(-half, half, float(i) / n)
-		var u1 := lerpf(-half, half, float(i + 1) / n)
-		var q0 := _arc_pt(center, yaw, radius, u0)
-		var q1 := _arc_pt(center, yaw, radius, u1)
-		var pn: MeshInstance3D = panels[i]
-		var mid := (q0 + q1) * 0.5
-		pn.global_position = mid + Vector3(0, 1.0, 0)
-		pn.scale = Vector3(q0.distance_to(q1), 2.0, 1.0)
-		pn.rotation = Vector3(0, -atan2(q1.z - q0.z, q1.x - q0.x), 0)
-		pn.visible = true
-	glow.mesh = KitMeshes.band(radius - 0.5, radius + 0.5, -half, half, 28)
-	glow.global_position = AimMode.ground(h.m, center) + Vector3(0, 0.05, 0)
-	glow.rotation = Vector3(0, yaw, 0)
-	glow.visible = true
+		if i == 0:
+			continue
+		var u0 := lerpf(-half, half, float(i - 1) / gaps)
+		var u1 := lerpf(-half, half, float(i) / gaps)
+		var p := _arc_pt(center, yaw, radius, u0)
+		var lo := Vector3(0, LACE_Y.x, 0)
+		var hi := Vector3(0, LACE_Y.y, 0)
+		var gnd := Vector3(0, 0.05, 0)
+		var w := width * 0.5
+		var n := (i - 1) * 4
+		# upright: an X between the two posts; on the ground: an X across the wall's depth
+		_lace(n, p + lo, q + hi)
+		_lace(n + 1, p + hi, q + lo)
+		_lace(n + 2, _arc_pt(center, yaw, radius - w, u0) + gnd, _arc_pt(center, yaw, radius + w, u1) + gnd)
+		_lace(n + 3, _arc_pt(center, yaw, radius + w, u0) + gnd, _arc_pt(center, yaw, radius - w, u1) + gnd)
+	_pull_laces(0.0, 1.0)
 
-## The thread running from one needle post to the next, stitching the wall to the ground.
-func _stitch(a: Vector3, b: Vector3, t: float) -> void:
-	var to := Vector2(b.x - a.x, b.z - a.z)
-	HeroVfx.of(h.m).play(h, "rain_thread", a, to.normalized(), {"len": to.length(), "t": t})
+func _lace(i: int, a: Vector3, b: Vector3) -> void:
+	laces[i]["a"] = a
+	laces[i]["b"] = b
+
+## Every lace drawn `grow` (0..1) of the way from its start, `thick` (0..1) of its thickness.
+func _pull_laces(grow: float, thick: float) -> void:
+	for l in laces:
+		var n: MeshInstance3D = l["node"]
+		var a: Vector3 = l["a"]
+		var b: Vector3 = a.lerp(l["b"], maxf(grow, 0.01))
+		n.visible = true
+		n.global_position = (a + b) * 0.5
+		n.look_at(b, Vector3.UP if absf((b - a).normalized().y) < 0.98 else Vector3.RIGHT)
+		n.scale = Vector3(thick, thick, a.distance_to(b))
 
 func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 	var a := yaw + u
@@ -408,8 +429,8 @@ func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 
 func rain_off() -> void:
 	rain = {}
-	for p in panels + posts: (p as Node3D).visible = false
-	glow.visible = false
+	for p in posts: (p as Node3D).visible = false
+	for l in laces: (l["node"] as Node3D).visible = false
 	for f in flames:
 		(f["node"] as Node3D).visible = false
 		f["foe"] = null
@@ -426,10 +447,12 @@ func _tick_rain(dt: float) -> void:
 	if rain.is_empty():
 		return
 	rain["t"] = float(rain["t"]) - dt
-	var k := clampf(float(rain["t"]) / 0.4, 0.0, 1.0) * clampf((float(rain["t0"]) - float(rain["t"])) / 0.25, 0.0, 1.0)
-	for p in panels:
-		(p as MeshInstance3D).material_override.set_shader_parameter("power", k)
-	glow.material_override.set_shader_parameter("life", k * 0.8)
+	# the laces draw across as it goes up and thin away over its last 0.4 s (moved only while they change)
+	var grow := clampf((float(rain["t0"]) - float(rain["t"])) / LACE_IN, 0.0, 1.0)
+	var thick := clampf(float(rain["t"]) / 0.4, 0.0, 1.0)
+	if grow < 1.0 or thick < 1.0 or not rain.has("laced"):
+		_pull_laces(grow, thick)
+		if grow >= 1.0: rain["laced"] = true
 	if float(rain["t"]) <= 0.0:
 		rain_off()
 		return
@@ -539,7 +562,7 @@ func _tick_bursts(delta: float) -> void:
 # ------------------------------------------------------------------ Spirit Walk aura
 var aura: MeshInstance3D = null
 
-## A soft orchid shell over her while she walks as a spirit (k 0 = off).
+## A soft red shell over her while she walks as a spirit (k 0 = off).
 func aura_on(k: float) -> void:
 	if aura == null:
 		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))

@@ -7,18 +7,22 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const HOVER := 3
 const GLIDE := 3
 const FLARE := 2
-const LIFT := 1.0                    # m: a hover in the middle of boki_fly.json's height band
-const TALL := 1.5                    # frame height over width: room for the flier and its shadow under it
+const LIFT := 1.0  # m: a hover in the middle of boki_fly.json's height band
+const TALL := 1.5  # frame height over width: room for the flier and its shadow under it
 var species := ["kestrike", "wisplet"]
+
 
 func run(m: Node) -> void:
 	var s := Shots.new()
 	s.main = m
 	s.px = 256
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): s.out = a.substr(12)
-		if a.begins_with("--species="): species = Array(a.substr(10).split(","))
-		if a.begins_with("--px="): s.px = int(a.substr(5))
+		if a.begins_with("--shots-dir="):
+			s.out = a.substr(12)
+		if a.begins_with("--species="):
+			species = Array(a.substr(10).split(","))
+		if a.begins_with("--px="):
+			s.px = int(a.substr(5))
 	DirAccess.make_dir_recursive_absolute(s.out)
 	if m.get("fade") != null:
 		m.fade.reveal(0.01)
@@ -53,6 +57,7 @@ func run(m: Node) -> void:
 	sheet.save_png(s.out.path_join("fly.png"))
 	print("BOKI_FLY_SHOTS_DONE")
 	m.get_tree().quit()
+
 
 ## [clip, 0..1 of it, m up] for each column: the loops at LIFT, the flare sinking from where it starts to the ground.
 func _plan() -> Array:

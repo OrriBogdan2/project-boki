@@ -451,6 +451,18 @@ The theme (venom, gravity, prism, ...) only tints particles and picks the sweete
 changes the category colour of a decal or impact flash. This is KIN_GRAMMAR's Phase 4 "colour means
 effect category" made concrete.
 
+**Heals read one way, whatever gives them.** Every heal goes through `Hunter.heal`, which calls
+`Fx.healed`: the healed Hunter gets a soft green-gold glow (`#b8f06a`, the sustain colour) that rises
+over them and moves with them, and a green `+N` (`HudStyle.HEAL`) above the damage numbers. That covers
+Meeko's Hearthlight and Hearth Call, Albert's Mending Ground, Kael's Gilded Riposte, lifesteal (a Void
+weapon, a merge's leech, Fever), tonics and knock heals. A heal number is its own kind: it adds up only
+with heals, never with a hit or a Daze `+N`, and it still shows with damage numbers turned off. A heal
+too small to read (lifesteal on a light hit) waits, hidden, until the heals add up. While the glow is up,
+more heals only grow the number, so fast heals pulse instead of stacking. A Hunter you can't see shows
+nothing. A heal on an online teammate shows on the healer's screen straight away. A kit adds only its
+theme particles (Meeko's stars). No kit draws its own heal pulse or heal number. Checked by
+`--heal-read-check`.
+
 ### 5.2 Allegiance: whose is it
 
 Built (2026-11-11, docs/COMBAT_CLARITY.md): `SideColor.fx` leans other people's areas, telegraphs and shot halos to

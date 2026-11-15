@@ -30,7 +30,6 @@ const R := {
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
 }
 
-const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
@@ -200,7 +199,6 @@ static func tick_stomps(m: Match, dt: float) -> void:
 			# a foot comes down
 			h.stomp["hits"] = int(h.stomp["hits"]) + 1
 			m.fx.dust(h.pos, 10)
-			m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, Color(1, 0.8, 0.7, 0.6), 0.25)
 			m.sfx("thump", h.pos, -2.0, 0.85)
 			if near:
 				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
@@ -282,7 +280,7 @@ static func owner_col(m: Match, b: Dictionary) -> Color:
 	var o: Hunter = b["owner"]
 	if m.player != null and o.team == m.player.team:
 		return m.mate_col(o)
-	return RIVAL_BOX
+	return SideColor.foe()
 
 ## The box's body takes its owner's colour and a ring round it, so whose box it is reads at a glance
 ## (the beam and trim keep the value colour).
@@ -543,7 +541,6 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	if o.ctrl == "bot":
 		o.ai = m.bot_brain.new_mind(m.rng, float(m.opts.get("bot_skill", m.bot_cfg.get("skill", 0.6))), m.bot_cfg)
 	m.sfx("revive", o.pos, 0.0)
-	m.fx.ring(o.pos, 2.2, Color("9ee2a0"), 0.5)
 	m.fx.burst(o.pos + Vector3(0, 1.0, 0), Color("cff6e0"), 26, 5.0, 0.6, -2.0)
 	if o == m.player:
 		m.killcam_text = ""

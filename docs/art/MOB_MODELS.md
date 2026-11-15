@@ -28,3 +28,6 @@ The pipeline scripts live with the art outputs (`/home/boki/meshy/mobs-spend-111
    auto-rig of the same mesh with its humanoid bones mapped onto the pivots
    (`--weights-from`). The procedural pivots are exported once per kind with `_mobpivots.tscn`.
 4. Judge it in game: rest from 4 sides, walk and windup, against the turnaround and the old body.
+
+Lair bosses use the same swap: their legendary Boki models have no primitives under them, so `MobGlb`
+gives each bone a bare pivot where it rests (docs/BOSS_ANIM.md).

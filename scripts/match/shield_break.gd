@@ -1,7 +1,7 @@
 class_name ShieldBreak
 extends Node3D
 ## The one shield break, the same for every shield (an ability or heal shield, Cinder's Furnace Cloak, Tenzo's
-## Molten Guard, a Boki's or a Fuse's shield, Albert's raised aegis): when a hit breaks it before it runs out, a
+## Shardskin, a Boki's or a Fuse's shield, Albert's raised aegis): when a hit breaks it before it runs out, a
 ## jagged crack runs across the shell and is gone in CRACK_S, and a few shards drop off it, all in the owner's
 ## ability colour and sized to read from 30 m. No burst, ring or disc; every quality preset keeps it (the particle
 ## setting doesn't thin it). Pooled: nodes are made once, with the match. The game that owns the body plays it and

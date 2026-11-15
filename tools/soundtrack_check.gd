@@ -10,12 +10,15 @@ var main: Node
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
-const SHUFFLE_ROLLS := 40      # scene changes: with three styles, every style turns up long before this
+const SHUFFLE_ROLLS := 40  # scene changes: with three styles, every style turns up long before this
+
 
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	printerr("SOUNDTRACK %-58s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -29,15 +32,19 @@ func run(main_node: Node) -> void:
 	print("SOUNDTRACK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func pick(style: String, hand := {}) -> void:
 	Settings.set_v("soundtrack", style, false)
 	Settings.set_v("music_shuffle", false, false)
 	for pl in Soundtrack.places():
 		Settings.set_v(Soundtrack.HAND_PICK[pl["id"]], String(hand.get(pl["id"], "")), false)
 
+
 func _data() -> void:
-	ok("Classic Adventure is the default", String(Settings.DEFAULTS["soundtrack"]) == "classic"
-		and String(Soundtrack.data()["default"]) == "classic")
+	ok(
+		"Classic Adventure is the default",
+		String(Settings.DEFAULTS["soundtrack"]) == "classic" and String(Soundtrack.data()["default"]) == "classic"
+	)
 	var missing := []
 	for sid in Soundtrack.styles():
 		for pl in Soundtrack.places():
@@ -47,8 +54,12 @@ func _data() -> void:
 	ok("every style names an existing track for every place", missing.is_empty(), str(missing))
 	ok("three styles to pick from", Soundtrack.styles().size() >= 3, str(Soundtrack.styles().keys()))
 	var opts := Soundtrack.options("boss")
-	ok("a place's picker: the soundtrack's own, then one track per style",
-		opts.size() == Soundtrack.styles().size() + 1 and opts[0][0] == "", str(opts))
+	ok(
+		"a place's picker: the soundtrack's own, then one track per style",
+		opts.size() == Soundtrack.styles().size() + 1 and opts[0][0] == "",
+		str(opts)
+	)
+
 
 func _picks() -> void:
 	pick("classic")
@@ -56,8 +67,14 @@ func _picks() -> void:
 	ok("classic: the garden plays its one track on any island", Soundtrack.track("base", "orchard") == "classic_base")
 	ok("classic: an expedition runs single tracks", not Soundtrack.layered())
 	pick("isles")
-	ok("first score: places keep their own music", Soundtrack.track("menu", "title") == "title"
-		and Soundtrack.track("base", "home_night") == "home_night" and Soundtrack.track("victory", "title") == "title")
+	ok(
+		"first score: places keep their own music",
+		(
+			Soundtrack.track("menu", "title") == "title"
+			and Soundtrack.track("base", "home_night") == "home_night"
+			and Soundtrack.track("victory", "title") == "title"
+		)
+	)
 	ok("first score: an expedition keeps its layered stems", Soundtrack.layered())
 	pick("isles", {"boss": "lofi_boss"})
 	ok("a hand pick wins over the style", Soundtrack.picked("boss") == "lofi_boss" and not Soundtrack.layered())
@@ -69,13 +86,14 @@ func _picks() -> void:
 	Sfx.play_music("classic_menu", 0.1)
 	ok("a soundtrack track doesn't join the house's record list", Save.d.get("music", []) == had)
 
+
 func _shuffle() -> void:
 	pick("classic")
 	Settings.set_v("music_shuffle", true, false)
 	var seen := {}
 	var steady := true
 	for i in SHUFFLE_ROLLS:
-		Soundtrack.track("menu", "title")      # another scene in between: the next match rolls again
+		Soundtrack.track("menu", "title")  # another scene in between: the next match rolls again
 		var s := Soundtrack.style_for("calm")
 		steady = steady and Soundtrack.style_for("boss") == s and Soundtrack.style_for("final") == s
 		seen[s] = true
@@ -86,11 +104,13 @@ func _shuffle() -> void:
 	ok("shuffle: a hand pick still wins", Soundtrack.picked("calm") == "lofi_calm")
 	pick("classic")
 
+
 func go(screen: String, opts := {}) -> Node:
 	Game.goto(screen, opts)
 	for i in 6:
 		await main.get_tree().process_frame
 	return main.current
+
 
 func _title() -> void:
 	await go("title")
@@ -100,20 +120,24 @@ func _title() -> void:
 	ok("title: a new soundtrack is heard at once", Sfx.music_name == "lofi_menu", Sfx.music_name)
 	pick("classic")
 
+
 func start_match(opts: Dictionary) -> Match:
 	opts["autoplay"] = true
 	var m: Match = await go("match", opts)
 	m.set_process(false)
 	return m
 
+
 ## Runs the match and its music for `secs`; with `music_only` just the music reads it (a state the
 ## match itself would undo, like a boss fight with the player outside any arena, holds).
 func tick(m: Match, secs: float, music_only := false) -> void:
 	var t := 0.0
 	while t < secs:
-		if not music_only: m.step(DT)
+		if not music_only:
+			m.step(DT)
 		m.music_dir.tick(m, DT)
 		t += DT
+
 
 func _match() -> void:
 	var m := await start_match({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
@@ -136,9 +160,18 @@ func _match() -> void:
 	pick("classic")
 	m.player.extract_prog = 0.0
 
+
 func _training() -> void:
-	var opts := {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
-		"no_drop": true}
+	var opts := {
+		"training": true,
+		"practice": true,
+		"teams": 1,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true
+	}
 	var m := await start_match(opts.duplicate())
 	tick(m, 1.0)
 	ok("training: Practice Yard plays", Sfx.music_name == "classic_training", Sfx.music_name)
@@ -146,6 +179,7 @@ func _training() -> void:
 	m = await start_match(opts.duplicate())
 	ok("training, first score: the layered stems as before", not m.music_dir.single and Sfx.layers.size() > 0)
 	pick("classic")
+
 
 func _garden() -> void:
 	await go("home")
