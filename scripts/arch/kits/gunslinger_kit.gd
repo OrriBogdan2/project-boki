@@ -292,7 +292,8 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true):
 			return true
-		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)),
+				{"invuln": 0.08, "feel": "long"})
 		play("gunslinger_dash_ex")
 		vfx("slide_air", null, null, {"ex": true})
 		last_dash_kind = "air"

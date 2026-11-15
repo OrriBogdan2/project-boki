@@ -1059,8 +1059,10 @@ func dash_with(e: Dictionary) -> void:
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
 		ex_next = false
+		var k: Array = e.get("ex_feel", [1.0, 1.0])    # a Shift move's own dash_feel row (ArchKit.travel "feel")
 		roll_t = float(cdat.get("ex_time", roll_t * 1.45))
-		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) / roll_t
+		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) * float(k[0]) / (roll_t * float(k[1]))
+		roll_t *= float(k[1])
 		vel.y = maxf(vel.y, 0.0)
 	roll_t /= Loco.dash_speed(arch)      # a hunter whose dash is slowed (tuning.json dash_speed) keeps its distance
 	inv_t = maxf(inv_t, float(e.get("invuln", 0.14)))

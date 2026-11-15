@@ -348,7 +348,7 @@ func on_dash(use_ex: bool) -> bool:
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
 			return true
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
-		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0})
+		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0, "feel": "long"})
 		play("mage_dash_ex")
 		vfx("dash_ex", null, h.roll_dir, {"len": ex_dist})
 		last_dash_kind = "ex"
