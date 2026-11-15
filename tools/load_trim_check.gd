@@ -134,10 +134,15 @@ func _same_rig(a: String) -> void:
 	var pr: Dictionary = p.get_meta("rig_rest")
 	var off := gr.keys().filter(func(b): return not pr.has(b) or not (gr[b] as Transform3D).is_equal_approx(pr[b]))
 	var same: bool = off.is_empty() and gr.size() == pr.size() and g.get_meta("hip_y") == p.get_meta("hip_y") \
-			and g.get_meta("arm_k") == p.get_meta("arm_k") and g.scale.is_equal_approx(p.scale)
+			and g.get_meta("arm_k") == p.get_meta("arm_k") and (g.scale * _bulk_root(a)).is_equal_approx(p.scale)
 	_ok("%s: its .glb's rig is the procedural rig (%d bones, off %s)" % [a, gr.size(), str(off)], same)
 	g.free()
 	p.free()
+
+## The procedural fallback scales its root by the body's bulk (x, z); a .glb Warden thins its skin instead (WardenBulk).
+func _bulk_root(a: String) -> Vector3:
+	var bulk := float(Arch.body(a).get("bulk", 1.0))
+	return Vector3(bulk, 1.0, bulk)
 
 func _ok(what: String, cond: bool) -> void:
 	print("LOADTRIM %s %s" % ["ok  " if cond else "FAIL", what])
