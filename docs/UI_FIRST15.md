@@ -52,6 +52,37 @@ and the Relics page (6 blocks each, plus 12 Relic tiles). The in-match HUD is th
 and every step adds a second prompt (the tip card plus a world prompt, or a toast) so "one what-to-do prompt" is also broken. In the tutorial the tip
 card and its fading copy show twice at once (`18`, `25`: the faded copy sits at y 490-570 under the live card).
 
+### 2b. Re-shoot on a real GPU: before / after
+
+Re-run on the 0.24.5 integration (ext/release-integ-0245 272368589, with the declutter and plain-words branches in it) on RTX GPUs through
+`jobq submit --needs gpu`: `--first15-shots --size=1280x720` (job 20261111-125238-04685, RTX 4070 SUPER, OpenGL) and `--size=1920x1080`
+(20261111-130811-00632, RTX 4090, Forward+). Same tool, same fresh save, same counting rule as section 1. Shots (key ones): [`gpu_1280x720/`](ui_first15/gpu_1280x720),
+[`gpu_1920x1080/`](ui_first15/gpu_1920x1080). `layout.txt` of both runs: **0 controls CLIPPED** (the 1920x1080 run lays out in the same 1280x720 space; the HUD is identical).
+Only the screens that were over the limit were recounted; the others keep their count above. "Before" = section 2 (llvmpipe, main d0e20ae47).
+
+| Screen | Before | After (GPU) | Now | What is in it |
+|---|---|---|---|---|
+| 11 Tutorial landing | 9 | **9** | over | minimap, vitals, ability row, glider strip, belt 1-4, Q/V/X, weapon, Relics/Leave, tip. Unchanged: nothing is held back |
+| 12-22 steps (dash shown, [14](ui_first15/gpu_1280x720/14_tutorial_06_dash.jpg)) | 9-11 | **9-10** | over | the 9 plus a world marker/label; one tip card, no faded copy |
+| 23 Fight / ult step ([23](ui_first15/gpu_1280x720/23_tutorial_17_ult.jpg)) | 12 | **11** | over | the 9 plus the perk line and a type chip (VENOM) top right; a few toasts and loot hints still overlap in the lane |
+| 24-26 go-exit, uplink, defend ([25](ui_first15/gpu_1280x720/25_tutorial_20_uplink.jpg)) | 10-11 | **10-11** | over | the 9, a bar prompt ("Hold F ..."), the perk line; tip card carries the detail line |
+| 28 Farm arrival | 5 | **5** | at the limit | modal, Hob banner, Black Market toast, top bar, hotbar |
+| 30 Expedition panel ([30](ui_first15/gpu_1280x720/30_expedition_panel.jpg)) | 6 blocks | **5** | at the limit | Hunter grid (12, 11 locked), Where (3), Match, Training Grounds link, Start; the 3 mode links are folded to 1 |
+| 32 Plan your drop ([32](ui_first15/gpu_1280x720/32_expedition_plan.jpg)) | 7+ | **7** | over | title/timer, squad panel, map, "This match" legend (4 kinds + 4 states), Ways out (now 3 rows, was 5), top counters, dimmed bottom HUD |
+| 33 Ship ([33](ui_first15/gpu_1280x720/33_expedition_ship.jpg)) | 9 | **11** | **worse** | the 9 plus the new Ways Out strip (Lair/Heart/Uplink/Final timers, Squads left) and the "Press SPACE to jump" card |
+| 34-35 Landed, 15 s ([35](ui_first15/gpu_1280x720/35_expedition_15s.jpg)) | 10 | **11** | **worse** | minimap, clock/status, Ways Out strip, counters, vitals, abilities, glider strip, belt, Q/V/X, weapon, tip; no Truce chip in view |
+
+Result: of the 5 breach groups, **one improved** (the fight: 12 to 11; no faded second tip card in any step shot), the expedition panel left the breach list (6 to 5 blocks),
+Plan your drop lost 2 "Ways out" rows, and **two got worse** (the first expedition HUD, 9-10 to 11, because the Ways Out strip landed). The tutorial landing
+and steps are unchanged at 9-10: the HUD is still drawn whole from the first frame; the staged reveal in section 5, item 1 has not been done. On a GPU the pictures
+read the same as llvmpipe (same positions, same text); only water, light and the sky differ, so the llvmpipe counts held.
+
+No breach was a clean one-line fix (each needs a staged-reveal rule across a god file, or a design call on the Ways Out strip), so no code was changed here.
+The per-second prompt log (`--fresh-run-log`, from ext/tut-fresh-run; GPU job 20261111-131630-17882, rp1-2, `--new-player-flow-check` part 0 failures):
+**no gap over 8 s with no prompt** anywhere from the prologue to the farm tutorial; the world marker was hidden or off screen for the 10 s of the farm
+"crop" step only (the farm has no edge arrow); texts over 110 characters: the hatch screens (176-525 characters in all, the cards' bodies) and two farm hints
+(task 114, sell 119). Its 42 per-step shots are in the job's out dir, not in the repo. The log was run at the default window, not per size.
+
 ## 3. Clipping at 1280x720 and 1920x1080
 
 Nothing is cut by the window edge except these two, **both fixed here** (under 20 lines):
@@ -82,6 +113,20 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save Files".
 
+### Tutorial HUD terms: what was done (ext/tut-hud-term-hints)
+
+Hints are one lane line each, once per save (`TermHints`, `scripts/ui/term_hints.gd`; flags `term_*` in `Save.d["tutorial"]`, off with the Tips setting), fired the moment the thing first changes.
+
+| Term | What was done |
+|---|---|
+| Fever | Name kept (owner-set kit name). Hint when it first lights: "Fever is lit: your hits heal you until it burns out". |
+| FIGHTING / FOLLOW (under the portrait) | Plain words: "attacking" while it has a target, else "with you" / "guarding" / "chasing" (`KinFollow.PLAIN`). The order names (Follow, Guard...) stay on the G wheel and tile. |
+| COMMON / UNCOMMON (armour tier) | Tier 0 shows no tier word. The tier name appears at the first tier-up, with a hint: "Armor tier up: hitting foes fills it, and each tier adds plates". Tier names kept (owner-set). |
+| AUTO | Kept on the tile. Hint the first time the Boki is out: "Your Boki fights and uses its move by itself (AUTO)  ·  hold G for orders". |
+| "from Boki" | Plain words: "Boki's move" (over the Boki ability tile). |
+
+Not touched (still in the list above): CARRY OFF FOLLOW, the Relics / Leave bar, glider strip, belt, Q V X, Box, weapon class, perk toasts.
+
 ### Plain words pass (branch ext/ui-plain-words-menus)
 
 Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery as a tooltip word, glider and armor-tier names). Each term gets plain words or a tooltip.
@@ -106,6 +151,24 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 
 ## 5. For the declutter jobs (not done here)
 
+**2c. Recount on main 18402df5b (2026-11-13).** Main changed the tutorial after 2b (one-line objective strip instead of the tip card, real run
+levels, rank step gone), so the key screens were shot again (`--first15-shots --size=1280x720`, local xvfb + llvmpipe on rpc1; shots not committed;
+`layout.txt`: 0 CLIPPED). Landing 9 (the strip replaced the tip card), fight/ult 11, expedition panel 5, ship 11: as in 2b.
+Uplink step 12 (was 10-11): strip + "Hold F" bar prompt + the step's tip in the message lane, and that tip read **"x58"**, because
+`Tutorial._words()` runs every frame and pushed the same tip each time (571 pushes on the glove step). Fixed here: the tip goes once per new line
+(`--tutorial-hud-check` row). Landed 15 s: 11, plus the rival hover card when the cursor rests on a rival; it covers the strip and the Ways Out clocks.
+The ranked follow-ups below still hold.
+
+**Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
+1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
+2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
+3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen).
+4. **Q/V/X slots and the belt:** draw only the slots that hold something or are unlocked (saves 2).
+5. **Plan your drop:** fold the "This match" legend behind a key (7 to 5).
+6. **One prompt:** while a tip card shows, hold the second bar prompt ("Hold F ...") and the perk line.
+7. **Expedition panel:** fold locked Hunters (11 of 12 are locked tiles) so the panel is Where plus Start.
+
+Original list (section 2 era):
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
 2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail once a step; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, and the whole F prompt waits under a fresh strip, `TutorialHud.prompt_shows`; URGENT lines and revive / stomp prompts still show; `--tutorial-hud-check`). The old card's faded copy went with the one-line strip (not in fresh `--tutorial-hud-shots` renders). Still open outside the tutorial.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.

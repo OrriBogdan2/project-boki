@@ -355,9 +355,11 @@ func healed(h: Hunter, n: float) -> void:
 	(glow["node"] as Node3D).reparent(h)
 	_emit(h.global_position + Vector3(0, 0.25, 0), col, HEAL_MOTES, 2.6, GLOW_DUR, -4.0, 1.3, Vector3.UP, 20.0)
 
-## What a floating number counts. A number adds up only with its own kind on a target, so a heal never
-## joins a damage number (or a Daze bonus) on the same body.
-enum Num { HIT, HEAL }
+## What a floating number counts, and so its look: your direct hits, a heal, a Boki's hits (smaller, in
+## its type colour) and over-time ticks (burn, poison: small, a second of them on one number). A number
+## adds up only with its own kind on a target, so a heal never joins a damage number on the same body,
+## and a Boki's hits, your hits and a burn on one body stay three numbers.
+enum Num { HIT, HEAL, KIN, TICK }
 const NUM_MIN := 0.5          # a number under this would read 0: such a hit shows nothing, such a heal waits
 const HEAL_NUM_Y := 2.1       # m over the feet: heal numbers sit above the damage numbers (1.5 m)
 const HEAL_MOTES := 16        # motes in a heal's rise, before the particle quality scales them
@@ -370,7 +372,7 @@ const HEAL_MOTES := 16        # motes in a heal's rise, before the particle qual
 func number(
 	at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", kind := Num.HIT, small := false
 ) -> void:
-	if v <= 0.0 or (kind == Num.HIT and (v < NUM_MIN or (prefix == "" and not Settings.get_v("damage_numbers")))):
+	if v <= 0.0 or (kind != Num.HEAL and (v < NUM_MIN or (prefix == "" and not Settings.get_v("damage_numbers")))):
 		return
 	at = _off_reticle(at)
 	for n in nums:
@@ -386,8 +388,8 @@ func number(
 				ln.modulate = col
 			elif not n.get("crit", false):
 				ln.modulate = col
-			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), bool(n["small"]))
+			_num_look(ln, bool(n.get("crit", false)), kind)
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), bool(n["small"]), kind)
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			ln.visible = float(n["val"]) >= NUM_MIN
@@ -399,8 +401,8 @@ func number(
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
-	_num_look(l, crit)
-	l.font_size = _num_size(v, crit, small)
+	_num_look(l, crit, kind)
+	l.font_size = _num_size(v, crit, small, kind)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = v >= NUM_MIN       # a sliver of a heal (lifesteal on a light hit) shows once more adds up
@@ -411,6 +413,7 @@ func number(
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
+## A tick number takes no more once it has gathered TICK_WINDOW of ticks.
 func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, kind: int, small: bool) -> bool:
 	if String(n["pre"]) != prefix or int(n["kind"]) != kind or bool(n["small"]) != small:
 		return false
@@ -420,16 +423,46 @@ func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: St
 		return false
 	if crit or n["crit"]:
 		return float(n["last"]) < MERGE_T
-	return float(n["last"]) < ROLL_T and float(n["t"]) < ROLL_MAX_T
+	var max_t := TICK_WINDOW if kind == Num.TICK else ROLL_MAX_T
+	return float(n["last"]) < ROLL_T and float(n["t"]) < max_t
 
-## A hit on `target` from `src`, over its head; one source's hits on one target roll together.
-func hit_number(target: Ent, src: Ent, v: float, col: Color, crit: bool) -> void:
-	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0)
-	number(at, v, col, crit, "", roll_key(src, target), Num.HIT, target is Kin)
+## A tick number that has gathered TICK_WINDOW of ticks: it takes no more and floats off.
+func _second_up(n: Dictionary) -> bool:
+	return int(n["kind"]) == Num.TICK and float(n["t"]) >= TICK_WINDOW
 
-## The roll key for damage from `src` onto `target`.
-static func roll_key(src: Ent, target: Ent) -> String:
-	return "%d>%d" % [src.get_instance_id() if src else 0, target.get_instance_id()]
+## The kind of number a hit by `by` shows (o: the hit's options): a burn or poison tick, or any hit
+## flagged as a tick, then a Boki's own hit, else a direct hit.
+static func num_kind(by: Ent, o: Dictionary) -> Num:
+	if String(o.get("src", "")) == "burn" or o.get("tick", false):
+		return Num.TICK
+	return Num.KIN if by is Kin else Num.HIT
+
+## The number for `d` dealt to `target` by `by` (o: the hit's options), in the look its source picks.
+## Only damage that involves `you` shows (dealt by you or your Boki, or taken by you): other fights
+## nearby don't spray digits over yours. One source's hits on one target in one look roll into one number.
+func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, armor_hit := false) -> void:
+	var credit: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+	if you == null or (credit != you and target != you):
+		return
+	var kind := num_kind(by, o)
+	var crit: bool = o.get("crit", false)
+	var on_your_kin := target is Kin and (target as Kin).owner_h == you
+	var plain := DexView.type_col(String((by as Kin).sp.get("type", ""))) if kind == Num.KIN else HudStyle.HIT
+	var col := DotLook.COL if kind == Num.TICK else HudStyle.dmg_col(crit, armor_hit, target == you, on_your_kin, plain)
+	if credit is Hunter and (credit as Hunter).ak and target != you:
+		col = (credit as Hunter).ak.number_col(target, col, o)
+	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind)
+	number(at, d, col, crit, "", roll_key(by, target, kind), kind, target is Kin)
+
+## Where a kind's number sits from your hits' spot (LOOK_SPOT), along the camera's right and up.
+func _look_spot(kind: Num) -> Vector3:
+	var s: Vector2 = LOOK_SPOT[kind]
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	return (cam.global_basis.x if cam else Vector3.RIGHT) * s.x + Vector3.UP * s.y
+
+## The roll key for damage from `src` onto `target` of one kind: one source on one target, per kind.
+static func roll_key(src: Ent, target: Ent, kind := Num.HIT) -> String:
+	return "%d>%d:%d" % [src.get_instance_id() if src else 0, target.get_instance_id(), kind]
 
 ## `at` moved (in the camera's plane, same depth) off the reticle's screen area, so a number
 ## never prints over where you are aiming.
@@ -456,6 +489,7 @@ const MERGE_T := 0.45
 const STICK_T := 0.3
 const ROLL_T := 1.1            # s: a tick joins its number if the last one was this recent (slow ticks included)
 const ROLL_MAX_T := 5.0        # s: a number rolls this long, then the next tick starts a new one
+const TICK_WINDOW := 1.0       # s: ticks on one body add up on one number this long, then a new one starts
 const RETICLE_CLEAR_PX := 70.0 # px round the reticle where no number spawns
 
 const CRIT_POP := 1.7          # a crit lands this many times its size and settles
@@ -466,21 +500,26 @@ const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot em
 ## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
 const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
 const CRIT_SIZE := 10
+const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]   # size and outline by Num: a Boki's hits smaller, a tick's small
+## m along the camera's right and up from your hits' spot, by Num: a Boki's beside yours, a tick lower on
+## the body, so the three don't print over each other on one target (a heal has its own height)
+const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
 
 ## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
-## a yellower number (pooled labels are reused, so every number sets this).
-func _num_look(l: Label3D, crit: bool) -> void:
+## a yellower number; it thins with a smaller kind (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, crit: bool, kind := Num.HIT) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+	l.outline_size = int((20 if crit else 14) * float(NUM_SCALE[kind]))
 
-## Big hits read big: the size steps up with the damage tier, a crit is larger again.
-static func _num_size(v: float, crit: bool, small := false) -> int:
+## Big hits read big: the size steps up with the damage tier, a crit is larger again; a number on a
+## Boki (small) and a Boki's or a tick's number (NUM_SCALE) are smaller.
+static func _num_size(v: float, crit: bool, small := false, kind := Num.HIT) -> int:
 	var px := 0
 	for t in SIZE_TIERS:
 		if v >= float(t[0]):
 			px = int(t[1])
 	px += CRIT_SIZE if crit else 0
-	return int(px * Juice.BOKI_NUM_K) if small else px
+	return int(px * (Juice.BOKI_NUM_K if small else 1.0) * float(NUM_SCALE[kind]))
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -668,7 +707,7 @@ func _process(delta: float) -> void:
 			var lt: float = n["last"]
 			var base: Vector3 = n["base"]
 			var rise := minf(float(n["t"]), 0.25) * 1.6
-			if lt < STICK_T:
+			if lt < STICK_T and not _second_up(n):
 				l.global_position = l.global_position.lerp(base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0))
 			else:
 				n["vel"].y -= 5.0 * delta

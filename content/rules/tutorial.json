@@ -103,6 +103,7 @@
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
+  "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%T sends %s at a monster; tap again to recall %s.",

@@ -42,7 +42,9 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
+var ktip: KnockTip = null           # the first-knock card, in the same two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
@@ -87,6 +89,7 @@ var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var ult_cue := UltReadyCue.new()   # the chime when your R is back
+var barks := HunterBarks.new()     # your Hunter's voice callouts, and your squad's "Boki down"
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
@@ -285,6 +288,8 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	crouch_hint = CrouchHint.for_match(self, o)
+	ktip = KnockTip.for_match(self, guide)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1421,7 +1426,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				_tip("rings", TipText.rings())
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -1585,9 +1590,9 @@ func _mouse_aim() -> Vector3:
 		aim_y = g
 	return Vector3(p.x, base_y, p.z)
 
-## How much grip the ground has here (ice patches in a frost region make it slippery).
-func ground_grip(p: Vector3) -> float:
-	return biomes.grip(p) if biomes else 1.0
+## How much grip the ground has here for h (ice in a frost region makes it slippery).
+func ground_grip(p: Vector3, h: Hunter = null) -> float:
+	return biomes.grip(p, h) if biomes else 1.0
 
 ## wilds: wild Boki count (every hit does, BokiHit); target picking and danger sensing pass false.
 func foes_of(team: int, wilds := true) -> Array:
@@ -1686,7 +1691,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var mood := "happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: mood = "unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: mood = "alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover", "hazard_risk"]: mood = "alert"
 		sfx(KinVoice.cue(k.species, mood), null, -3.0, Unique.voice(k.rec))     # its own voice, over the fight
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx(KinVoice.cue(k.species, "alert"), k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling out
@@ -1749,14 +1754,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 			ArmourHint.hit(self, credit, target)
-	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
-	if credit is Hunter and (credit as Hunter).ak and target != player:
-		col = (credit as Hunter).ak.number_col(target, col, o)
-	# only numbers that involve you: other fights nearby don't spray digits over yours
-	if mine:
-		fx.hit_number(target, credit, d, col, crit)
+	fx.damage_number(target, by, d, o, player, armor_hit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
@@ -1767,12 +1766,14 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		var tick: String = "crit" if crit else HeroSfx.hit_tick(credit as Hunter, o)
+		sfx(tick, target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
+		if ktip: ktip.note(by, d, o)
 		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
@@ -1792,7 +1793,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
-	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+	if by is Blight:
+		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -1805,6 +1808,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h == player:
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
+		if ktip: ktip.on_knock()
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
@@ -1856,6 +1860,7 @@ func _reward_moment(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
 	Sfx.duck(0.25)
 	sfx("kill", null, -2.0)
+	barks.knock_landed(self)
 
 func _slow(t: float, k: float) -> void:
 	if net_on:
@@ -1920,7 +1925,9 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
-	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+	if by is Blight:
+		kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+		h.add_stat("blight_out")      # (TipPick)
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2194,6 +2201,7 @@ func on_kin_down(k: Kin) -> void:
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
+	barks.boki_down(self, k)
 	_check_team(k.team)
 
 ## Its owner scooped it up, or it came round on its own.
@@ -2353,6 +2361,7 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if player == null:
 		return
 	player.chase = thief
+	player.add_stat("wisp_stolen")      # (TipPick)
 	ping(thief.pos, Color("ffd23f"))
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
@@ -2382,7 +2391,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		_tip("stagger", TipText.stagger(String(mb.md["name"])))
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -2889,6 +2898,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3877,6 +3888,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	BoxRevive.mirror_remote(self, dt)
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -3891,6 +3903,7 @@ func step(dt: float) -> void:
 	if heart: heart.tick(dt)
 	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
+	barks.tick(self)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
@@ -3929,6 +3942,7 @@ func step(dt: float) -> void:
 		_update_training(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
@@ -4108,6 +4122,7 @@ func _update_box_hums() -> void:
 				_box_ray(b, true)
 			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
 			_box_ray_tick(b, prog)
+			BoxReviveFx.place(self, b, prog)
 			if int(time * 2.0) != int((time - DT) * 2.0):
 				note_sound(b.get("rev_by"), b["pos"], "revive")
 		elif key != "" and box_hums.has(key):
@@ -4119,6 +4134,7 @@ func _box_hum_stop(b: Dictionary) -> void:
 		box_hums.erase(key)
 		Sfx.loop_stop(key)
 	_box_ray(b, false)
+	BoxReviveFx.clear(b)
 
 ## The soft column of light and the ring on the ground over a box while it's being revived.
 func _box_ray(b: Dictionary, on: bool) -> void:
@@ -4385,17 +4401,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
-# ---- Training Grounds
-## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press %s again in the air and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your utility ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your hunter ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
-	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
-	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
-	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""],
-	["dodge", "Dodge the Strafer's red shot 3 times: dash (%s) through it or out of it", "dash"]]
+# ---- training area
 var train := {}
 var train_t := 0.0
 
@@ -4482,7 +4488,7 @@ func _update_training(dt: float) -> void:
 			train[k] = true
 			Sfx.play("unlock", null, -8.0)
 			var left := train_rows().filter(func(t): return not train.has(t[0])).size()
-			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
+			if hud: hud.toast(("Done: %s" % TrainDrill.label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
 			if left == 0:
 				Save.d["tutorial"]["training"] = true
 	# keep a few target dummies around you
@@ -4494,16 +4500,8 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
-	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
-
-func _train_text(t: Array) -> String:
-	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
-
-func _train_label(k: String) -> String:
-	for t in TRAIN:
-		if t[0] == k: return _train_text(t)
-	return k
+	var rows := TrainDrill.rows().filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
+	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
@@ -4958,6 +4956,7 @@ func _finish() -> void:
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		r["stats"] = player.stats.duplicate()
 		r["squad"] = ResultsStage.roster(hunters, player)
+		r["used"] = player.used.duplicate()      # (TipPick: was E used)
 		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
@@ -5350,6 +5349,7 @@ func _net_ev(x, from: String) -> void:
 				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
+				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
 		"knock":
@@ -5634,18 +5634,17 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
-	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
+	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(true))
 		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(false))
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
@@ -5661,13 +5660,13 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			_tip("throw", TipText.send(String(k.rec.get("name", "your Boki"))))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+		_tip("catch", TipText.scan())
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:

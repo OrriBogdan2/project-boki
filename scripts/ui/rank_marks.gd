@@ -3,7 +3,8 @@ extends RefCounted
 ## The run-level marks on a ranked ability slot (HudSlot.skill_slot): tier pips over the slot, and
 ## while a skill point can go in, a pulsing gold frame and a big gold "+" in the corner that you can
 ## click (RankClick) or spend with Alt + the ability's key. The "ALT+key" hint shows over every
-## rankable slot for a few seconds when a new point arrives, and on hover after that.
+## rankable slot for a few seconds when a new point arrives, and on hover after that; the new point also
+## chimes (RankSfx).
 
 const PIP_W := 12.0            # px: one tier pip
 const PIP_H := 5.0
@@ -17,16 +18,30 @@ const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slo
 static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
 static var beams := {}         # slot -> HudPanels.draws when its beam was drawn
 static var _pts_was := 0
+static var _lvl_was := 0
+static var _match_id := 0      # the match the two above count for: a new one starts from its own, quietly
 static var _hint_until := 0.0
 
+## Once a panel redraw, before the ability row (HudPanels): a newly earned point starts the ALT+key hint
+## and queues its chime (RankSfx), which plays once it's due.
+static func watch(H) -> void:
+	var m: Match = H.m
+	var p: Hunter = m.player
+	if m.get_instance_id() != _match_id:
+		_match_id = m.get_instance_id()
+		_pts_was = p.skill_pts
+		_lvl_was = p.lvl
+		RankSfx.ready_at = -1.0
+	if p.skill_pts > _pts_was or p.lvl > _lvl_was:      # (a level's point counts even if spent since the last redraw)
+		_hint_until = float(m.time) + HINT_SECS
+		RankSfx.ready_at = float(m.time) + RankSfx.READY_DELAY
+	_pts_was = p.skill_pts
+	_lvl_was = p.lvl
+	RankSfx.tick(p, float(m.time))
+
 ## Tier pips over `r`: one per rank the slot can reach, lit up to `lv`; gold once the slot is maxed.
-## Also notes a newly earned point, which starts the ALT+key hint.
 static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
 	var c: CanvasItem = H.c
-	var pts: int = H.m.player.skill_pts
-	if pts > _pts_was:
-		_hint_until = float(H.m.time) + HINT_SECS
-	_pts_was = pts
 	var tiers := int(Hunter.SLOT_MAX.get(slot, 3))
 	var maxed := lv >= tiers
 	var x0 := r.get_center().x - (tiers * PIP_W + (tiers - 1) * PIP_GAP) * 0.5

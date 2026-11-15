@@ -59,6 +59,7 @@ func _draw_panels() -> void:
 		if p and not p.out and not p.extracted:
 			SafeArea.begin("vitals")
 			HudVitals.draw(hud, sz, p)
+			RankMarks.watch(hud)
 			SafeArea.begin("abilities")
 			hud._draw_abilities(sz, p)
 			SafeArea.begin("weapon")

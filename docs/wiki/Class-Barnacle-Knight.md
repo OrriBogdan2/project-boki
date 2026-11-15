@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | Passive: Guard | Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
 | Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
-| RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
+| RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, your dash key is a Shield Charge on its own cooldown. |
 | E: Mending Ground | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
 | Hunter ultimate: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
 | Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |

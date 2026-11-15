@@ -43,6 +43,17 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
 | juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
+| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
+| archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
+| tender (Elluna) | LMB rank 0 | 7.12 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.12 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.33 | 11.40 | 1.17 | ok |
+| dolm (Tetra) | LMB rank max | 13.33 | 11.40 | 1.17 | ok |
+| dredge (Kingpin) | LMB rank 0 | 7.38 | 3.50 | 2.11 | FAIL |
+| dredge (Kingpin) | LMB rank max | 7.38 | 3.50 | 2.11 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 3.35 | 13.40 | 0.25 | FAIL |
+| rimewright (Celeste) | LMB rank max | 3.35 | 13.40 | 0.25 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
 | ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
 | ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
