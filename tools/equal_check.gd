@@ -67,7 +67,7 @@ func _start(tier: int, seed := 9001) -> Match:
 	return m
 
 func _look(P: Hunter) -> Dictionary:
-	return {"max_hp": P.max_hp, "max_armor": P.max_armor, "armor": P.armor, "base_armor": P.base_armor,
+	return {"max_hp": P.max_hp, "max_armor": P.max_armor, "armor": P.armor,
 		"tier": P.armor_tier, "perks": P.perks.duplicate(),
 		"glide": P.glide_max, "pack": P.pack_cap, "speed": P.base_speed,
 		"armor_gear": (P.gear[2] as Dictionary).is_empty(), "dashes": P.max_dashes(),
@@ -321,15 +321,31 @@ func _armor_levels() -> void:
 		mb.visible = false
 	ok(P.armor_tier == 0 and B.armor_tier == 0, "everyone starts at armor level 0")
 	var base := P.max_armor
+	m.hud.c.queue_redraw()      # draw once at 0 xp so the next hit shows as a gain
+	for i in 2: await main.get_tree().process_frame
 	B.hurt(100.0, P, {"src": "shot"})
 	ok(P.armor_tier == 0 and P.armor_xp > 0.0, "damage to a rival fills your armor progress (%.0f xp)" % P.armor_xp)
 	ok(not ArmorHud.tip(P).is_empty() and String(ArmorHud.tip(P)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
+	var hud = m.hud
+	hud.c.queue_redraw()
+	for i in 2: await main.get_tree().process_frame
+	ok(is_equal_approx(P.armor_frac(), P.armor_xp / float(Hunter.ARMOR_TIERS[1][2])) and P.armor_frac() > 0.0,
+			"the armour bar follows armor_xp toward the next level (%.2f)" % P.armor_frac())
+	var seen := float(hud.get_meta("armor_xp_seen", -1.0))
+	ok(float(hud.get_meta("armor_tick_at", -9.0)) == m.time and is_equal_approx(seen, P.armor_xp),
+			"a hit that added armour progress ticks the bar")
+	m.time += ArmorHud.TICK + 0.1
+	hud.c.queue_redraw()
+	for i in 2: await main.get_tree().process_frame
+	ok(float(hud.get_meta("armor_tick_at", -9.0)) < m.time - ArmorHud.TICK,
+			"the tick is over %.1f s after the hit, no new hit" % ArmorHud.TICK)
 	for i in 3: B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier >= 1 and P.max_armor > base,
-			"enough damage levels your armor up: more plates (%.0f -> %.0f)" % [base, P.max_armor])
-	ok(is_equal_approx(P.max_armor, round(P.base_armor * (1.0 + Hunter.ARMOR_TIER_BONUS * P.armor_tier))),
-			"each level adds %d%% of the base armor" % int(Hunter.ARMOR_TIER_BONUS * 100.0))
+	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
+			"enough damage levels your armor up: it blocks more (tier %d)" % P.armor_tier)
+	var tier_dur := float(Hunter.ARMOR_TIERS[P.armor_tier][4]) - float(Hunter.ARMOR_TIERS[0][4])
+	ok(is_equal_approx(P.max_armor - base, tier_dur),
+			"its durability is the tier's (%.0f -> %.0f; --armour-check holds the numbers)" % [base, P.max_armor])
 	ok(B.armor_tier == 0, "the one who was hit does not level")
 	var xp0 := P.armor_xp
 	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
@@ -339,6 +355,7 @@ func _armor_levels() -> void:
 	P.armor_gain(5000.0)
 	ok(P.armor_tier == Hunter.ARMOR_TIERS.size() - 1 and ArmorHud.tip(P).size() == 3,
 			"the top level is reachable and the HUD says so")
+	ok(P.armor_frac() == 1.0 and P.armor_col() == Hunter.ARMOR_TIERS[-1][1], "the bar is full in the top tier's colour")
 	ok(m.hud != null and ResourceLoader.exists("res://scripts/ui/armor_hud.gd"),
 			"the HUD has the armor badge (ArmorHud)")
 	await _drop(m)

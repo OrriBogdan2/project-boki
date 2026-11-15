@@ -67,7 +67,7 @@ static func _setup_parts() -> Array:
 		RenderingServer.get_current_rendering_method(), _driver(), RenderingServer.get_video_adapter_name(),
 		RenderingServer.get_video_adapter_api_version()]
 	parts.append(Settings.quality())
-	for k in ["shadows", "msaa", "warden_models"]:
+	for k in ["shadows", "msaa"]:
 		parts.append(str(Settings.get_v(k)))
 	return parts
 

@@ -19,6 +19,8 @@ const POP_T := 0.25             # s the strip takes to drop in on a new objectiv
 const GLOW_PX := 10.0           # how far the soft glow reaches past the rim at its brightest
 
 const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
+const CHIME := "ui_open"        # the UI set's panel-drop sound, played once as a new objective's pulse starts
+const FIGHT_S := 3.0            # s after your last hurt that still counts as a fight (the chime ducks)
 
 ## Where the strip sits for a screen size: under the safe margin, and under `below` (the bottom of the
 ## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
@@ -26,6 +28,17 @@ static func rect(sz: Vector2, below := 0.0) -> Rect2:
 	var w := sz.x * WIDTH_FRAC
 	var top := maxf(maxf(SAFE_MIN, sz.y * SAFE_FRAC), below + GAP if below > 0.0 else 0.0)
 	return Rect2(Vector2((sz.x - w) * 0.5, top), Vector2(w, sz.y * HEIGHT_FRAC))
+
+## The one quiet chime of a new objective, on the first frame of its pulse (never a nag's re-pulse or an
+## unchanged objective: the callers only ask when the objective itself changes). Levels: content/rules/
+## sfx_levels.json "cue_db"; `m` is the match (null on the farm), a fight there plays the ducked one.
+static func chime(m: Match = null) -> void:
+	Sfx.play(CHIME, null, chime_db(m), 0.02)
+
+## The chime's volume_db: ducked while `m`'s player is in a fight.
+static func chime_db(m: Match) -> float:
+	var fight := m != null and m.player != null and m.time - m.player.hurt_at < FIGHT_S
+	return float(Content.rules("sfx_levels")["cue_db"]["objective_fight" if fight else "objective"])
 
 ## 1 the moment the objective changes, easing to 0 over PULSE_T.
 static func glow(age: float) -> float:

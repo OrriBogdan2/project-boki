@@ -14,13 +14,21 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 
 ## The drop
 
-The match opens with a short **planning phase**: the full map is up and everyone can ping where they
-want to land (bots ping too). Then the skyship crosses the map.
+The match opens on the skyship's deck: a short **squad intro** shows your three Hunters side by side
+with their Boki wisps, each striking a pose under their name ("Vex the Hired Gun"), then the camera
+cranes up into the ride view. Any key skips it after a second and a half, and the same lineup is not
+shown twice in a row. Then comes a short **planning phase**: the full map is up and everyone can ping
+where they want to land (bots ping too). Then the skyship crosses the map with your squad on deck,
+its engines droning and its shadow sweeping over the islands below.
 
-- Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
-- After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
-  the far side is dropped.
+- Your squad has a **drop leader**. The leader launches the squad's **mini rocket** and steers it down;
+  everyone else rides along, and a ring on the ground shows where it will hit. Do nothing and the
+  squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
+- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket, still fast; steer it like any
+  jump) and a second **Jump** or the glide key opens your glider at any height to travel further. Holding
+  Jump never opens it; never opening it, it opens by itself just above the ground. Anyone still aboard the ship at the far side is launched.
+- Aboard the rocket the screen is bare: the map, the landing ring, and the keys (the leader's
+  "Steer with WASD", everyone's "Jump out"). No health or ability bars until you are out.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
@@ -63,7 +71,7 @@ heartbeat and a warning near the end. There's room to recover:
   Walls cast sight shadows, teammates share what they see, tall grass hides you, and firing or getting
   hit gives you away for a moment. Sneaking (Ctrl) slows you, steadies your aim and keeps you hidden
   until rivals are close. Red arcs round the middle of the screen point at whoever is hitting you.
-- **Levels.** You start at level 1. XP comes from fighting; each level is a skill point. Your ultimate
+- **Levels.** You start at level 1. XP comes from knocking rivals down and from lair bosses, not from time or damage (damage to Hunters only builds your armour); each level is a skill point. Your ultimate
   opens at level 6. Some chests and events offer **run perks** (pick one of three with 1-3).
 - **Stagger.** Big monsters open short purple-ring windows while winding up a slam. Hit one with an
   ability (not a plain shot) in that window: a big hit, a long stun, extra damage the whole time, and
@@ -107,10 +115,12 @@ Each map and what it rolls is on [Maps and biomes](Maps.md).
 Walled arenas, each sealed by a ward and holding a boss and the **Rare Egg** it guards. Each match
 rolls which lairs are live (the rest lie dormant).
 
-- **Getting in.** Every lair has a **lock dial** at its gate: a needle sweeps round and you press F as
-  it crosses each lit arc, through three or four locks that get faster and tighter. A miss resets the
-  lock, rings a chime that pings you to everyone nearby, and calls guards. Some lairs have a second way
-  in: three **rune pylons** to light (Stormcrown Eyrie) or three **ward stones** to break (the Thornhive).
+- **Getting in.** Every lair's gate is barred by a **Gate Seal**, a wall of stone you break down with
+  sustained damage (2000 health at tier 0: about two minutes alone, about 20 s for a squad of three).
+  It cracks in four stages; each crack drops blocks out of it, shakes the ground, rings out to everyone
+  nearby and calls two guards. Walk away and nothing resets: after 15 s it knits back slowly, but never
+  past its last crack. Some lairs also have three **rune pylons** to light (Stormcrown Eyrie) or three
+  **ward stones** to break (the Thornhive): each one knocks a fifth off the seal.
 - **The fight.** Step past the threshold and the boss wakes and the gate seals behind you for up to 90
   seconds. Everyone within 150 m hears the roar and gets a ping, a shaft of light rises over the lair,
   and the seal's clock floats over the gate, so a squad outside can camp it. Bosses have phases at 66%
@@ -119,7 +129,8 @@ rolls which lairs are live (the rest lie dormant).
   - **Stormcoil, the Sky Serpent:** telegraphed lunges, lightning circles, a coiled discharge.
   - **The Brood Mother:** acid spit and puddles, egg sacs that hatch adds, burrowing.
 - **After.** The gate stays shut for 15 seconds unless someone inside pulls the lever by it, and an
-  updraft at the back carries the winners over the wall to glide out another way.
+  updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
+  roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
   your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Colossus), Zephyrak
   (Stormcoil) or Hivara (Brood Mother).
@@ -172,7 +183,8 @@ The Wyrm's corruption, a faction that hunts every squad by **noise and light**.
 - **The tide closes on the Heart.** From 15 s the Blight's ring shrinks toward the Heart's site over 4 minutes.
   Outside it the Blight is stronger and comes sooner, and the tide itself hurts you every second, past your
   armor: barely at first (a full-health medium Hunter lasts minutes), 26 s to die by the third of its 11 stages,
-  and about 3 s once it has closed.
+  and about 3 s once it has closed. Bots walk in ahead of the next ring (harder bots with more room),
+  fight at the edge, and drop the fight to run in, dashing or gliding, when the wall reaches them.
 
 ## Raid conditions
 
