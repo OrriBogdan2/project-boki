@@ -64,6 +64,8 @@
 	"dash": {
 		"id": "relay_step",
 		"name": "Relay Step",
+		"card_range": "dist",
+		"icon": "dash",
 		"icon": "tender_dash",
 		"col": "#ffe2a8",
 		"cd": 7.0,
@@ -85,6 +87,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Burrseed",
+		"card_range": "seed.range",
 		"short": "Burr",
 		"icon": "tender_rmb",
 		"col": "#c8e07a",
@@ -121,6 +124,8 @@
 		"ground": {"range": "reach", "r": "thrown_radius", "recast": true},
 		"delivery": "zone",
 		"name": "Hearthlight",
+		"card_range": "reach",
+		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
 		"col": "#ffd27a",
@@ -135,7 +140,7 @@
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press the key again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press it again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -169,6 +174,7 @@
 	"lmb_note": "Ember Cast",
 	"x": {
 		"name": "Hearth Call",
+		"card_range": "range",
 		"short": "Call",
 		"icon": "tender_x",
 		"col": "#9cf07a",

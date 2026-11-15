@@ -2,7 +2,8 @@ class_name WaysOutHud
 extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
-## the Blight (squads and players left are the top-right AliveCounter). Plus the carrier's Heart Gate prompt.
+## the Blight (squads and players left are the top-right AliveCounter). Under it, the quest tracker (QuestTracker).
+## Plus the carrier's Heart Gate prompt.
 ## Reads the match only: the Heart's state for the two Heart seats, the QuestSeat machines for who is on or took a
 ## quest seat, their schedule (content/rules/heart.json "quest") for the rest. Drawn with HudStyle on the Hud's canvas.
 
@@ -113,12 +114,14 @@ static func draw(hud) -> void:
 	var sd := seats(m)
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, top_y(c.size)), Vector2(w, CELL.y))
+	SafeArea.note_as("ways_strip", r)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	for i in [0, 2]:
 		QuestRace.draw(m, c, Vector2(r.position.x + CELL.x * i + 17.0, r.end.y + 7.0), QuestRace.read(m, i))
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 32.0))
+	QuestTracker.draw(hud, r)
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
@@ -177,10 +180,13 @@ static func pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fi
 		c.draw_polyline(pts, col, 2.0, true)
 
 # ------------------------------------------------------------------ the Heart Gate prompt
+static func is_gate_prompt(it: Dictionary) -> bool:
+	return it.get("kind", "") == "heart" and it.get("act", "") == "leave"
+
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
 ## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
 static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
-	if it.get("kind", "") != "heart" or it.get("act", "") != "leave":
+	if not is_gate_prompt(it):
 		return false
 	var c: Control = hud.c
 	var key := Settings.key_cap("interact")
@@ -190,6 +196,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
 	var edge := Color(Heart.gate_col(), 0.7)
+	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))      # (the box and its hold bar)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
 	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.gate_col())
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
@@ -198,6 +205,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var stay := stay_line(hud.m)
 	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
 	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
+	SafeArea.note_as("gate_stay", back)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
 	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true

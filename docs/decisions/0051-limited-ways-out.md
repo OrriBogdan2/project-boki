@@ -50,6 +50,9 @@ UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out stri
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
+Quest tracker (owner DECISIONS 11-10 / 11-08): scripts/ui/quest_tracker.gd, under the strip while your squad is on a
+quest seat (QuestSeats IN_USE): plain words, your progress, the leading rival squad's on a quest seat (thin bar), the
+distance; read from the seats only, so no Net change. Hidden inside the boss fight, where the boss bar is the objective.
 
 ## The quest seats (spec task 4)
 `QuestSeats` (scripts/match/quest_seats.gd, `Exits.seats`, null outside the mode) owns the schedule from heart.json

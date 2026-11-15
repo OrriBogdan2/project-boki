@@ -2,6 +2,7 @@
 
 PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (28 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
 PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (20 of 38 rows today); that is the finding, not a flake. Tuned so far: Sparkle's and Sable's damage (ext/parity-ttk-sparkle-sable-lace, pinned in content/rules/kit_parity.json); the other outliers are listed with their causes as suggestions. Rows of Hunters not tuned here moved since 11-09 with other changes on main.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (18 of 38 rows today); that is the finding, not a flake. Only Motley is tuned (below); the other outliers are listed with their causes as suggestions.
 
 **Method**
 - Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, supervive_physics.md) and Common armour, 20% reduction (docs/SUPERVIVE_DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1); a footage row read at level N faces the level N mean (1285 + (N - 1) x 77.1).
@@ -10,6 +11,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
 - Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES` (none yet: line 162, Motley "loses ~15% held-fire DPS, no compensation buff", explains 15% of a 1.9x gap, so it does not cover Motley).
 - Gil has no source hero. His bar is the roster median: the median source time of the same row (LMB or combo, same rank) across the Hunters that have one. He gets no per-cast share rows. His combo varies by a few tenths of a second between runs, because the Grab Bag draws vary.
+- Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES`, which names the damage share the owner gave up; a row then passes as override up to 1.25 / (1 - share). One today: Motley, DECISIONS 2026-11-06 (item 117, briefs/archive/OWNER_REVIEW_1103-2026-11-06.md) "loses ~15% held-fire DPS, no compensation buff", so up to 1.47.
 
 **Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
 
@@ -33,6 +35,13 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | juggernaut (Brall) | LMB rank 0 | 8.47 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | LMB rank max | 8.47 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | combo rank 0 | 4.42 | 7.70 | 0.57 | FAIL |
+| gunslinger (Ghost) | LMB rank 0 | 8.07 | 2.48 | 3.25 | FAIL |
+| gunslinger (Ghost) | LMB rank max | 8.07 | 2.48 | 3.25 | FAIL |
+| gunslinger (Ghost) | combo rank 0 | 1.77 | 1.92 | 0.92 | ok |
+| gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
+| juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
+| juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
+| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
 | juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
 | ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
@@ -71,6 +80,20 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | gil (roster median) | LMB rank max | 6.43 | 6.60 | 0.97 | ok |
 | gil (roster median) | combo rank 0 | 5.43 | 4.95 | 1.10 | ok |
 | gil (roster median) | combo rank max | 5.03 | 4.95 | 1.02 | ok |
+| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
+| archer (Myth) | LMB rank 0 | 7.83 | never | n/a | n/a |
+| archer (Myth) | LMB rank max | 7.83 | never | n/a | n/a |
+| tender (Elluna) | LMB rank 0 | 7.10 | never | n/a | n/a |
+| tender (Elluna) | LMB rank max | 7.10 | never | n/a | n/a |
+| dolm (Tetra) | LMB rank 0 | 13.30 | never | n/a | n/a |
+| dolm (Tetra) | LMB rank max | 13.30 | never | n/a | n/a |
+| dredge (Kingpin) | LMB rank 0 | 9.43 | never | n/a | n/a |
+| dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
+| rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
+| rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
@@ -91,6 +114,9 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | ostra (Void) | e | 0.091 | 0.154 | 0.59 |
 | rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
 | rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
+| thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
+| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
+| ostra (Void) | e | 0.172 | 0.154 | 1.11 |
 <!-- ttk:table -->
 
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
@@ -139,5 +165,8 @@ Within the bar: Gil (roster median, since 11-12), Sable at both ranks (0.85 to 0
 
 **Not done here:** no tuning; Lace, Meeko, Tenzo, Grimble and Neve have footage LMB rows only, no combo rows (their ability tooltips are a different level from the footage).
 **Lace (Myth), shares of the target with no LMB anchor** (source level 1 against 1285, ours against 154; not tuned, no check row: the check's RMB tap does not loose her held Heavy Shot): Heavy Shot 16 to 30 is 10.4 to 19.5% against Heartpiercer 35 = 2.7% (3.8 to 7.1x), its wall hit +79 to +148 against +173 = 13.5% (3.8 to 7.1x); Hail Wall 10 a second is 6.5% against Rain of Arrows 61 = 4.7% a second (1.37x); Starpiercer 18 / 18 / 23.3 is 11.7 / 11.7 / 15.1% against 326 / 326 / 422 = 25.4 / 25.4 / 32.8% (0.46x). The third beam keeps the source's 422 : 326 = 1.29x (25 -> 23.3). At the source's shares: Heavy Shot about 4.2, wall +20.7, Hail Wall 3.7 a tick, Starpiercer 39 / 50.6.
+| Motley (Void) | was LMB 1.91; combo 2.15, 1.74; now 1.09; 1.13, 1.00 | Orb 9 was 5.8% of the target against 263 of 2365 = 11.1%; Snap and seed about half the source. | Done (ext/parity-ttk-motley): orb 9 -> 14.5 (the source's 17.1 share less the owner's ~15%, item 117), Snap 9.5 -> 18 and seed 12.5 -> 23.7 (source shares, hit 1.00x and 1.11x), seed burn 8.2 -> 16.2 (250 vs 365). The 0.6 s cadence, the charge to 1.4 s, the +34% full orb, Swollen +44% and the 3.5x peak are unchanged. |
+
+Within the bar: Motley at both ranks (1.00 to 1.13), Sable at both ranks, Vex combo rank 0, Albert combo rank max (0.84). The Kael, Sparkle and Albert causes above predate main's later kit merges (the 2026-11-11 table moved Kael's combo to 0.55 and 0.59, Sparkle's to 0.17 and 0.20); re-read them before tuning.
 
 **Not done here:** no tuning past Sparkle and Sable; the five Hunters with no LMB number (and their combos) need the source's LMB damage, which no file in briefs has.

@@ -199,7 +199,7 @@ func _users(main: Node) -> void:
 		ok(tag + "a rival's hit marker", foe._marker_col() == p["foe"])
 		ok(tag + "your squad's hit marker", _same(Color(mate._marker_col(), 1.0), p["ally"]))
 		ok(tag + "a rival's box", Life.owner_col(m, {"owner": foe}) == p["foe"])
-		ok(tag + "an enemy ping", PingInput.color(m, me, "enemy") == p["foe"])
+		ok(tag + "an enemy ping", PingInput.color("enemy") == p["foe"])
 		ok(tag + "squad map colours", m.mate_col(me) == p["mates"][0] and m.mate_col(mate) == p["mates"][1])
 		ok(tag + "the hostile tint on telegraphs", SideColor.rim() == p["rim"])
 		_ways_users(m, me, mate, foe, id, tag)

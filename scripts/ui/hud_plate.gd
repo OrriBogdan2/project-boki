@@ -139,6 +139,11 @@ static func shield_frac(h: Hunter) -> float:
 
 ## Another hunter's plate. `show_name`: Hud's rule (allies always; rivals near, hovered or down).
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
+	TextCache.world = true      # plates hang on the world over each head: their text keeps its design size
+	_draw_plate(H, sp, h, show_name)
+	TextCache.world = false
+
+func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0:
 		return
 	sp = sp.round()
@@ -194,6 +199,11 @@ static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -
 
 ## Your own plate over your head: wider, with your health number.
 func draw_self(H, sp: Vector2, p: Hunter) -> void:
+	TextCache.world = true
+	_draw_self(H, sp, p)
+	TextCache.world = false
+
+func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var dt: float = H.get_process_delta_time()
 	var s := _watch(p, dt)

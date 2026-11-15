@@ -67,6 +67,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Storm Rod",
+		"card_range": "coil.range",
 		"short": "Rod",
 		"icon": "mage_rmb",
 		"col": "#ff7ac4",
@@ -107,6 +108,7 @@
 		"ground": {"range": "reach", "r": "radius"},
 		"delivery": "burst",
 		"name": "Skycall",
+		"card_range": "reach",
 		"short": "Sky",
 		"icon": "mage_e",
 		"col": "#ffc6e6",
@@ -134,6 +136,8 @@
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Kitefall",
+		"card_range": "range",
+		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "mage_x",
 		"col": "#ffd36a",
