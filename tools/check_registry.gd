@@ -265,6 +265,7 @@ const CHECKS := {
 	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],
 	# a tap inside a hit-stop goes when it ends
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
+	"--mantle-press-check": ["res://tools/mantle_press_check.gd", "mantle_press_check", null],
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],  # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],  # Sparkle 11-10
@@ -725,6 +726,12 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
+	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake
+	"--boki-nap-shots": ["res://tools/boki_nap_check.gd", "boki_nap_check", "shots"],  # --shots-dir=<dir>
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
+	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],      # air casts, frame by frame
+	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
+	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
