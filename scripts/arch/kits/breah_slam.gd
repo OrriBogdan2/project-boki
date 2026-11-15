@@ -120,6 +120,9 @@ func _tick_wind(dt: float) -> void:
 	wind_t += dt
 	h.vel.x = 0.0
 	h.vel.z = 0.0
+	# the circle stays up through the wind-up, where the hop will come down
+	var to := wind_dir.normalized() * float(sd()["hop"]) + wind_run * flight()
+	_circle(h.pos + Vector3(to.x, 0, to.y), wind_k)
 	if wind_t >= float(feel()["windup"]):
 		wind_t = -1.0
 		_take_off()
