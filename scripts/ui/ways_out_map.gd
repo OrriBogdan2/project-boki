@@ -4,12 +4,9 @@ extends RefCounted
 ## a badge on each site (a dark ring, a countdown arc in the seat's state colour) and, for the dead and the
 ## watching, one line: "Ways out left: N" and which seat your squad is nearest.
 ## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. The Lair and Uplink sites are the
-## quest seats' own (QuestSeats' seeded pick).
+## quest seats' own (QuestSeats' seeded pick); QuestRace draws the progress pips under them.
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
-const LOCKED_COL := Color("9fb0d8")    # a seat not open yet: cool blue-grey
-const OPEN_COL := Color("fff4d0")
-const LOST_COL := Color("8a3a4a")
 const LINE_FS := 13
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
@@ -30,16 +27,19 @@ static func sites(m: Match) -> Array[Vector3]:
 			_sites[2] = qs.uplink.ref["pos"]
 	return _sites
 
+## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
+## squad's colour as the viewer sees it (squad or rival; a seat taken by nobody in particular goes locked-grey).
 static func color_of(s: Dictionary) -> Color:
 	match int(s["st"]):
 		WaysOutHud.St.LOCKED:
-			return LOCKED_COL
+			return SideColor.tone("seat_locked")
 		WaysOutHud.St.OPEN:
-			return OPEN_COL
+			return SideColor.tone("seat_open")
 		WaysOutHud.St.LOST:
-			return LOST_COL
-	var team: int = s["team"]
-	var squad: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
+			return SideColor.tone("seat_lost")
+	if int(s["team"]) < 0:
+		return SideColor.tone("seat_locked")
+	var squad := SideColor.of_team(s["viewer"], s["team"])
 	return squad.darkened(0.25) if int(s["st"]) == WaysOutHud.St.TAKEN else squad
 
 ## How much of the badge's ring is lit, 0..1: a locked seat fills up to its opening, an open one with a shut time
@@ -69,15 +69,18 @@ static func _open_at(i: int, q: Dictionary) -> float:
 
 ## The short word under a badge on the full map.
 static func word(i: int, s: Dictionary) -> String:
+	var who := ""
+	if int(s["team"]) >= 0:
+		who = " · " + WaysOutHud.state_word(s).to_lower()      # (whose: ours or rival)
 	match int(s["st"]):
 		WaysOutHud.St.LOCKED:
 			return "%s %s" % [WORDS[i], _clock(float(s["t"]))]
 		WaysOutHud.St.OPEN:
 			return "%s open" % WORDS[i]
 		WaysOutHud.St.USE:
-			return "%s in use" % WORDS[i]
+			return "%s in use%s" % [WORDS[i], who]
 		WaysOutHud.St.TAKEN:
-			return "%s taken" % WORDS[i]
+			return "%s taken%s" % [WORDS[i], who]
 	return "%s lost" % WORDS[i]
 
 static func _clock(t: float) -> String:
@@ -98,6 +101,8 @@ static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now:
 		c.draw_arc(pv, r, 0, TAU, 32, col, w, true)
 	elif f > 0.0:
 		c.draw_arc(pv, r, -PI * 0.5, -PI * 0.5 + TAU * f, 32, col, w, true)
+	if st == WaysOutHud.St.USE and int(s["team"]) >= 0:
+		WaysOutHud.pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)      # the squad's disc or a rival's diamond
 	if st == WaysOutHud.St.TAKEN or st == WaysOutHud.St.LOST:
 		c.draw_line(pv + Vector2(-r, r) * 0.7, pv + Vector2(r, -r) * 0.7, col, w, true)
 
@@ -133,6 +138,7 @@ static func full_map(fm) -> void:
 		var pv: Vector2 = fm.to_screen(at[i])
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
+			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
 			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
 			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))

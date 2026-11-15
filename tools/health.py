@@ -4,7 +4,8 @@
 Usage: python3 tools/health.py [--strict]
 Prints file sizes, god-file budgets, duplicate content folders, dynamic calls, checks registered inline
 in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded
-(ship.sh runs it in strict mode so god files can't grow). Budgets ratchet: lower them as files get split.
+(ship.sh runs it in strict mode so god files can't grow); also on the style ratchet and on a sound off its category's
+loudness (tools/sfx_loudness.py --check). Budgets ratchet: lower them as files get split.
 """
 import os, re, subprocess, sys
 
@@ -84,6 +85,10 @@ def main():
     print(style.rstrip())
     if "STYLE FAIL" in style:
         bad.append("style ratchet (docs/STYLE.md)")
+    loud = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "sfx_loudness.py"), "--check"], capture_output=True, text=True)
+    print((loud.stdout or loud.stderr).rstrip())
+    if loud.returncode:
+        bad.append("sfx loudness (docs/AUDIO.md)")
     if bad:
         print("HEALTH FAIL: " + ", ".join(bad) + " (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)")
         if strict:
