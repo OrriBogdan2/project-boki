@@ -206,8 +206,8 @@ func _big_event_duck(P: Hunter) -> void:
 ## clear; a revive or a heal lifts it.
 func _muffle(m: Match, P: Hunter) -> void:
 	var room := SfxMix.Muffle
-	var hp := P.hp
-	var armor := P.armor
+	P.hp = P.max_hp
+	P.armor = P.max_armor
 	P.downed = true
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.DOWN], SfxMix.MUFFLE_DB[room.DOWN], "downed")
 	ok(Sfx.mix.bus_for("ping", false, false) == &"UI" and Sfx.mix.bus_for("ping", false, false) != &"SFX",
@@ -217,8 +217,8 @@ func _muffle(m: Match, P: Hunter) -> void:
 	P.hp = 1.0
 	P.armor = 0.0
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line")
-	P.hp = hp
-	P.armor = armor
+	P.hp = P.max_hp
+	P.armor = P.max_armor
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "healed")
 
 func _muffle_step(m: Match, hz: float, db: float, what: String) -> void:
