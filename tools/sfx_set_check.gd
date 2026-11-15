@@ -44,6 +44,7 @@ const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const STONE_BREAK := "br_crumble"  # the Gate Seal's crumble (LairBreach): stone props reuse that one take
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
@@ -544,7 +545,8 @@ func _breakables() -> void:
 	var wrong := []
 	for mat in rules["debris"]:
 		var sname := String(rules["debris"][mat]["sound"])
-		if not own.has(sname) or _takes(sname).size() < 3 or used.has(sname):
+		var shared := sname == STONE_BREAK and not _takes(sname).is_empty()
+		if not shared and (not own.has(sname) or _takes(sname).size() < 3) or used.has(sname):
 			wrong.append("%s: %s" % [mat, sname])
 		used[sname] = true
 	ok(wrong.is_empty(), "%d materials break with their own sound in 3 takes (wrong: %s)" % [used.size(), wrong])

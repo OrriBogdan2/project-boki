@@ -277,6 +277,7 @@
 				"wings",
 				"tail"
 			],
+			"cue": "dark",
 			"word": "DARK",
 			"rider": {
 				"slow_k": 0.2,
