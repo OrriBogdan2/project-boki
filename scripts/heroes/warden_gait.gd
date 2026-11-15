@@ -12,6 +12,12 @@ extends RefCounted
 ##    bobs too far for the speed (Grimble 17 cm, Kael 16 cm at a run). The clip's bob is the root bone's, which the
 ##    thighs hang from too, so only the hips and what hangs from them (torso, arms, head) are held back: the feet stay
 ##    planted.
+##  - the hips rise and fall with the legs' spread, the way a body moves over its feet: in a walk they are highest as
+##    the legs pass (feet together) and lowest with the legs apart; in a run lowest as the legs pass (the push-off)
+##    and highest with the legs apart (the flight). A clip keyed the other way round is pulled towards it, at most
+##    BOB_FIX_MAX; "loco.bob_m": [walk, run] is the up and down travel that aims at (m). Only as far as the blend
+##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob; and by
+##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -19,9 +25,17 @@ const MEAN_TAU := 0.8        # s: the running mean a stride or an arm swing is s
 const RATE_MIN := 0.6        # x: slowest the walk and run clips play
 const RATE_MAX := 1.4        # x: fastest
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
+const BOB_M := [0.035, 0.06] # m: the hips' up and down travel at a walk and at a run
+const BOB_FIX_MAX := 0.04    # m: furthest the hips are moved off the clip's height to put the bob in step with the legs
+const SPREAD_TAU := 2.0      # s: how fast the widest leg spread seen fades (a slower stride re-learns it)
 
 var skel: Skeleton3D
 var bob := 1.0               # x: the hips' vertical travel at this speed
+var bob_m := 0.035           # m: the hips' up and down travel at this speed
+var bob_sign := -1.0         # -1 walk (high when the legs pass), +1 run (low when they pass), 0 between
+var spread_mean := 0.0       # rad: running mean of the legs' pitch spread
+var spread_peak := 0.0       # rad: the widest spread above the mean, fading
+var pull := 1.0              # 0..1: how far the bob is pulled in step (forward or back, not sideways; "bob_fix")
 var hips := -1               # hips bone index
 var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
 var hips_keyed := false      # the clips do key it (data "offset_bones": Motley's spring): their height, not the rest
@@ -70,6 +84,11 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	gain = lerpf(float(stride[0]), float(stride[1]), w)
 	var b: Array = lc.get("bob", [1.0, 1.0])
 	bob = lerpf(float(b[0]), float(b[1]), w)
+	var bm: Array = lc.get("bob_m", BOB_M)
+	bob_m = lerpf(float(bm[0]), float(bm[1]), w)
+	bob_sign = clampf((w - 0.5) * 4.0, -1.0, 1.0)
+	var bf: Array = lc.get("bob_fix", [1.0, 1.0])
+	pull = (1.0 - side_k) * lerpf(float(bf[0]), float(bf[1]), w)
 	var cycle := lerpf(walk_len, run_len, w)
 	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
 	return clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, RATE_MAX) * run_len / cycle
@@ -86,7 +105,9 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 		var base := hp.y if hips_keyed else hips_rest_y
 		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - base)   # (the clip's, without our offset)
 		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
+		var dev := (gy - hips_y) * bob
 		hp.y = base - (gy - hips_y) * (1.0 - bob) * legs_w
+		hp.y += clampf(_bob_target(a, dt) - dev, -BOB_FIX_MAX, BOB_FIX_MAX) * legs_w * pull
 		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])
@@ -114,3 +135,14 @@ func _basis_q(bi: int) -> Quaternion:
 	if bi < 0:
 		return Quaternion.IDENTITY
 	return skel.get_bone_global_pose(bi).basis.orthonormalized().get_rotation_quaternion()
+
+## Where the hips should be about their mean (m): `bob_m` of travel, with the legs' pitch spread: the thighs' angle
+## apart, as a share of the widest seen. `a`: the running-mean step of this frame, `dt` its length.
+func _bob_target(a: float, dt: float) -> float:
+	if legs.size() < 2:
+		return 0.0
+	var spread := absf(angle_difference(_pitch(skel.get_bone_global_pose(legs[0][0]).basis.y),
+			_pitch(skel.get_bone_global_pose(legs[1][0]).basis.y)))
+	spread_mean = lerpf(spread_mean, spread, a)
+	spread_peak = maxf(spread - spread_mean, spread_peak * exp(-dt / SPREAD_TAU))
+	return bob_sign * 0.5 * bob_m * clampf((spread - spread_mean) / maxf(spread_peak, 0.05), -1.0, 1.0)
