@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-14> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -22,7 +22,8 @@ extends RefCounted
 ##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
 ##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
-##   13 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
+##   14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
 ##                   (the see-through canopies: SeeThrough)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
@@ -96,7 +97,8 @@ func run(main_node: Node) -> void:
 		10: await _base_tp()
 		11: await _shift_glide(secs)
 		12: await _dive_feather(secs)
-		13: await _forest(secs)
+		13: await _boss_focus(secs)
+		14: await _forest(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -320,7 +322,7 @@ func _hatch(secs: float) -> void:
 		t += FRAME
 		frame += 1
 
-# ------------------------------------------------------------------ 12: forest walk
+# ------------------------------------------------------------------ 14: forest walk
 const WOOD_R := 11.0             # m: how near trees count as one wood
 const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
 const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
@@ -624,3 +626,27 @@ func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunt
 		if foe and t >= hit_at and me.base_t > 0.0:
 			me.hurt(6.0, foe, {"src": "media"}),
 		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
+# ------------------------------------------------------------------ 13: boss focus
+func _boss_focus(secs: float) -> void:
+	await _start("ashwick", "cindle", true)
+	var P := m.player
+	var L: Dictionary = m.lairs.list[0]
+	L["active"] = false      # (_start purged its sleeping boss with the other mobs: wake the lair up again)
+	m.lairs.activate(L)
+	for g in L["guards"]:
+		if is_instance_valid(g):
+			g.dead = true
+			g.visible = false
+	m.lairs.open(L, P, "dial")
+	var side := Vector3(-L["out"].y, 0, L["out"].x)
+	P.teleport(_ground(L["c"] + side * 3.0))
+	var B := _hunter("b0", 1, "juggernaut", "pebbit", _ground(L["c"] - side * 3.0))
+	var boss: Boss = m.lairs.boss_of(L)
+	_zoom(0.6)
+	still_at = 5.0
+	_mark("start")
+	var each := func(_t: float) -> void:
+		for h in [P, B]:
+			h.hp = h.max_hp
+		boss.hp = maxf(boss.hp, boss.max_hp * 0.3)      # (still up when the clip ends)
+	await _go(secs, each, func(_t: float): return (P.pos + B.pos + boss.pos) / 3.0)
