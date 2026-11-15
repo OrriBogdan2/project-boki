@@ -232,9 +232,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _rooted(id, m, sync, clips, dd)
 	await _handover(id, m, sync, clips, dd)
-	await _climb(id, m, sync, clips, dd)
 	await _flinch(id)     # (before the carry: the flinch pairs of Ostra drift with the frames already run)
 	await _carry(id, m, sync, clips, dd)
+	await _climb(id, m, sync, clips, dd)   # (after the carry: its frames would shift the walk phase the carry reads)
 	if id == "archer":
 		_release_snap(id, sync, clips, m)
 	_recoil(id, m, sync, clips, dd)

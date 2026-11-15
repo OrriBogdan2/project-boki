@@ -14,7 +14,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
   launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has
+  them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
+  holds each loop's pelvis to the forward loop's height at the same phase).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
