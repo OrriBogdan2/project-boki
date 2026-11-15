@@ -48,6 +48,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel distance | 105-144 px, about 4.5m (3.9-5.4) [footage] | 4.5m x the global dash feel = 3.8m | 4.5m (taken off the global dash feel, content/rules/dash_feel.json) |
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
+| Cartwheel exit | upright and moving by about 0.5s; the speed runs down into the hasted run with no dip (415 -> 315 -> 211 -> 154 -> 140 px/s, then 127-136); the shot can leave mid-flip (0193) [footage] | the fitted curve (decision 0025, dash_feel.json "thief") ended at 0.25 of its mean, 2.6 m/s under the 5.5 m/s hasted run: four steps under it past the peak, the hand-over at 0.47x, then the walk back up | on the ground the curve's tail past its peak never drops under her hasted run (`ThiefKit._tick_curve`; the crouch ramp and the peak are the fit's): hand-over at 1.0x, no step under it, a bolt on the step the flip ends (`--move-feel-check` vault_exit_run, vault_slow_frames, vault_shot_gap_frames); the air cartwheel's carry (owner 11-09) unchanged |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
 | Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | 5s, 1 charge (the data wins over the card, as for the LMB range; `--kit-parity-check` row `thief Shift dash.cd`; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
@@ -457,7 +458,7 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 | LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
 | Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
 | RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
-| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_RELEASE_S`) / 0.08 / 0.47 | matches; asserted |
 | E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
 | Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
 | Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |
@@ -521,6 +522,6 @@ dagger is lost; holding the step until she is free would read better.
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); R reaches it through
   `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared R base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
-  Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
+  Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

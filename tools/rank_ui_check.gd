@@ -7,6 +7,10 @@ extends RefCounted
 ##      clicking the "+" spends the point; with no points left the "+" and its click target go away
 ##   5. a quiet beam shows over each slot that can rank, and clears after the pick
 ##   6. a new point shows the ALT+key hint for a few seconds
+##   7. ranking plays the slot's own confirm (RankSfx, pitched per slot), the top rank its accent instead;
+##      a bot's ranks make no sound
+##   8. a new point chimes once, after the level-up chime, never again while it waits, and not at all
+##      when it was spent first
 ## Runs a real match headless with the real HUD. Never touches the save.
 
 var bad := 0
@@ -34,9 +38,11 @@ func run(main_node: Node) -> void:
 			o.ctrl = "idle"
 			o.teleport(P.pos + Vector3(40, 0, 40))
 			bot = o
+	await m.hud.panels.draw      # (in play the HUD has drawn long before the first level-up)
 	_max_e_first(P)
 	_bot_ranks(bot)
 	await _bar(m, P)
+	await _ready_chime(m, P)
 	print("RANKUI DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -47,8 +53,13 @@ func _max_e_first(P: Hunter) -> void:
 	var cd1 := P.ak.cd_k("kin")
 	P.gain_xp(float(Hunter.XP_TO[e_max - 1]) - P.xp + 1.0)
 	ok(P.lvl == e_max and P.skill_pts == e_max, "level %d banks %d points (%d)" % [e_max, e_max, P.skill_pts])
+	var ups := _count("rank_up")
+	var maxes := _count("rank_max")
 	for i in e_max:
 		P.level_slot("kin")
+	var sounds_ok := _count("rank_up") == ups + e_max - 1 and _count("rank_max") == maxes + 1
+	ok(sounds_ok and _pitch("rank_up") == RankSfx.SLOT_PITCH["kin"] and _pitch("rank_max") == _pitch("rank_up"),
+		"E's confirm for ranks 1-%d, then the max accent instead at rank %d, both at E's pitch" % [e_max - 1, e_max])
 	ok(int(P.slot_lv["kin"]) == e_max and P.skill_pts == 0, "every point went into E: rank %d of %d" % [
 		int(P.slot_lv["kin"]), e_max])
 	ok(int(P.slot_lv["sec"]) == 0 and int(P.slot_lv["dash"]) == 0, "RMB and dash untouched (E-max first)")
@@ -65,12 +76,14 @@ func _bot_ranks(bot: Hunter) -> void:
 	if bot == null:
 		ok(false, "a bot in the match")
 		return
+	var heard := str(RankSfx.heard)
 	bot.gain_xp(float(Hunter.XP_TO[4]) - bot.xp + 1.0)
 	var spent := 0
 	for s in Hunter.SLOTS:
 		spent += int(bot.slot_lv[s])
 	ok(bot.skill_pts == 0 and spent == bot.lvl, "a bot at level %d spent its points by itself (%s)" % [
 		bot.lvl, str(bot.slot_lv)])
+	ok(str(RankSfx.heard) == heard, "and made no rank sound (%s)" % str(RankSfx.heard))
 
 ## 4 + 5: the "+" and its click target on the real bar.
 func _bar(m: Match, P: Hunter) -> void:
@@ -78,6 +91,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	ok(clicks.size() == Hunter.SLOTS.size(), "one click target per ranked slot (%d)" % clicks.size())
 	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
 	P.level_slot("dash")
+	var dash_pitch := _pitch("rank_up")
 	await _frames(3)
 	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
 	await m.hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
@@ -102,10 +116,47 @@ func _bar(m: Match, P: Hunter) -> void:
 	click.pressed = true
 	rc._gui_input(click)
 	ok(int(P.slot_lv["sec"]) == 1 and P.skill_pts == 0, "clicking the + spent the point on RMB")
+	ok(_pitch("rank_up") == RankSfx.SLOT_PITCH["sec"] and dash_pitch == RankSfx.SLOT_PITCH["dash"]
+		and dash_pitch != _pitch("rank_up"), "with RMB's confirm, a step under dash's (%.3f, %.3f)" % [
+		_pitch("rank_up"), dash_pitch])
 	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
 	ok(not RankMarks.beam_on("sec") and not RankMarks.beam_on("dash"), "after the pick the beam is cleared")
+
+## 7: _bar's point was spent within frames, so its chime never came; the next one waits out the level-up
+## chime, plays once and keeps quiet while the point waits; two levels at once chime once.
+func _ready_chime(m: Match, P: Hunter) -> void:
+	await _wait(m, RankSfx.READY_DELAY + 0.2)
+	ok(_count("rank_ready") == 0, "a point spent within a moment never chimed")
+	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	await m.hud.panels.draw
+	var due := RankSfx.ready_at - float(m.time)
+	ok(_count("rank_ready") == 0 and due > RankSfx.READY_DELAY - 0.1,
+		"level %d's point: its chime waits out the level-up chime (due in %.2f s)" % [P.lvl, due])
+	await _wait(m, due + 0.2)
+	ok(_count("rank_ready") == 1, "then it chimes once")
+	await _wait(m, RankSfx.READY_DELAY * 2.0)
+	ok(_count("rank_ready") == 1 and P.skill_pts == 1, "and never again while the point waits")
+	P.level_slot("ult")
+	ok(_pitch("rank_up") == RankSfx.SLOT_PITCH["ult"], "opening R plays R's confirm (%.2f)" % _pitch("rank_up"))
+	P.gain_xp(float(Hunter.XP_TO[P.lvl + 1]) - P.xp + 1.0)
+	await m.hud.panels.draw
+	await _wait(m, RankSfx.READY_DELAY + 0.2)
+	ok(_count("rank_ready") == 2 and P.skill_pts == 2, "two levels in one go: one chime, not two on top of each other")
+
+## How many times RankSfx played `cue`, and the pitch of its last play.
+func _count(cue: String) -> int:
+	return int(RankSfx.heard.get(cue, [0])[0])
+
+func _pitch(cue: String) -> float:
+	return float(RankSfx.heard.get(cue, [0, 0.0])[1])
+
+## Wait out `secs` of match time.
+func _wait(m: Match, secs: float) -> void:
+	var until := float(m.time) + secs
+	while float(m.time) < until:
+		await main.get_tree().process_frame
 
 func _frames(n: int) -> void:
 	for i in n:

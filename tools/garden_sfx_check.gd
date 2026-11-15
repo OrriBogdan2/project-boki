@@ -242,6 +242,7 @@ func _tumble(home) -> void:
 
 func _echo(home) -> void:
 	var es: EchoSteps = home.hecho
+	Save.d["tutorial"]["echo_practice"] = true        # not the first dance: the full versus, not the slow practice
 	es.use()
 	var r: EchoSteps.Run = es.run
 	var every := int(EchoSteps.rules()["cheer_every"])

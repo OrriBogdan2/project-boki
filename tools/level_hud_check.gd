@@ -96,5 +96,17 @@ func run(main: Node) -> void:
 		m.on_damage(m.mobs[0], P, 30.0, {})
 	ok(P.xp == 0.0 and P.lvl == 1, "a damage-only fight gives no XP (%.1f)" % P.xp)
 	ok(P.armor_xp >= 30.0, "damage to a Hunter still builds armour (%.1f)" % P.armor_xp)
+	# ---------------------------------------------------------------- 6. the new point's chime follows the level-up's
+	RankMarks.watch(hud)
+	var heard := str(RankSfx.heard)
+	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	RankMarks.watch(hud)
+	var after := RankSfx.ready_at - float(m.time)
+	ok(is_equal_approx(after, RankSfx.READY_DELAY) and str(RankSfx.heard) == heard,
+		"level %d: the point's chime waits %.1f s, so the level-up chime plays alone" % [P.lvl, after])
+	RankSfx.ready_at = -1.0
+	B.gain_xp(float(Hunter.XP_TO[B.lvl]) - B.xp + 1.0)
+	RankMarks.watch(hud)
+	ok(RankSfx.ready_at < 0.0 and str(RankSfx.heard) == heard, "a rival's level-up and ranks make no rank sound")
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

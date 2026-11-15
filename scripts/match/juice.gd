@@ -174,7 +174,22 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 		m.freeze_frame(0.045)
 
 
-## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
+## The flash colour of a kill: the colour of the side that got it (your squad or a rival squad), as
+## the player sees it, so a steal reads on the spot. `credit` is the same Hunter Match.on_mob_dead pays.
+## The dissolving body glows in it too. No credit (a fall, the Blight) or no player to be relative to:
+## the monster's own colour, body untouched.
+static func kill_col(m: Match, mb: Mob, credit: Ent, own: Color) -> Color:
+	if not credit is Hunter or m.player == null:
+		return own
+	var col := SideColor.of_team(m.player.team, credit.team)
+	for mt in mb.mats:
+		if mt is ShaderMaterial:
+			mt.set_shader_parameter("flash_color", col)
+	return col
+
+
+## A monster dying (Match.on_mob_dead): a flash in the killer side's colour, a spray in its own,
+## a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	if m == null or m.fx == null:
 		return
@@ -186,7 +201,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,
@@ -211,7 +227,7 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 		return
 	var col: Color = b.md.get("color", Color("ffb070"))
 	var c := b.pos + Vector3(0, 1.4, 0)
-	m.fx.flash(c, Color(1, 0.96, 0.88), 2.4, 0.3)
+	m.fx.flash(c, kill_col(m, b, credit, Color(1, 0.96, 0.88)), 2.4, 0.3)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.35), 40, 15.0, 70.0, 0.7, 12.0, 2.0)
 	m.fx.spark(c, Vector3.UP, Color(1, 0.95, 0.8), 24, 9.0, 180.0, 0.5, 6.0, 1.4)
 	m.fx.ring(b.pos, 7.5, Color(col, 0.9), 0.6)
@@ -260,23 +276,11 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 
 
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
-## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
+## what's underfoot (StepSurface: grass, stone, wood, snow, the sky train's metal decks) and the Hunter's weight.
+## It carries as far as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
-	var w: World = m.world
-	var ix := int(floorf(h.pos.x))
-	var iz := int(floorf(h.pos.z))
-	if not w.inb(ix, iz):
-		return
-	var i := w.idx(ix, iz)
-	var surf := "grass"
-	if w.bridge.has(i):
-		surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
-		surf = "stone"
-	elif w.style_at(i) == "frost":
-		surf = "snow"
-	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+	var surf := StepSurface.at(m, h.pos)
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
