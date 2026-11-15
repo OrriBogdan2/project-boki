@@ -30,7 +30,7 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	var lim: Dictionary = Content.rules(WardenStance.RULES)["check"]
 	var ids := Arch.ids()
-	ok(ids.size() == 12, "12 Wardens (%d)" % ids.size())
+	ok(ids.size() == 13, "13 Wardens (%d)" % ids.size())
 	var poses := {}
 	for id in ids:
 		ok(WardenStance.new(id).has_stance(), "%s has a stance" % id)

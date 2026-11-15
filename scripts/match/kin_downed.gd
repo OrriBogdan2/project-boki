@@ -22,6 +22,7 @@ extends RefCounted
 const ARMS_FWD := 0.42    # m: how far in front of the carrier the Boki rides
 const ARMS_UP := 0.9      # m: the height of the arms above the carrier's feet
 const LEAVE_META := "leave"   # on a Boki put down on purpose: no automatic pick-up until the owner steps away
+const DOWN_CRY_DB := -4.0   # dB: the Boki's cry as it goes down, in its own voice
 const ENEMY_NEAR := 6.0   # m: with a foe this close, running into the Boki does not pick it up (press interact)
 const F_EDGE_S := 0.1     # s: an interact press this recent counts as a fresh press
 const BLOCKED_INPUTS := ["jump", "glide", "fire", "sig", "sec", "sec_hold", "skill", "ult", "kin_ab", "gear1", "gear2",
@@ -50,6 +51,7 @@ static func begin(k: Kin, fell: bool) -> void:
 	if fell:
 		k.teleport(k.last_safe if k.last_safe != Vector3.INF else (k.owner_h.pos if k.owner_h else k.pos))
 	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+	k.m.sfx("kin_unsure", k.pos, DOWN_CRY_DB, Unique.voice(k.rec))
 
 ## Can the owner scoop it up right now?
 static func rescuable(k: Kin) -> bool:
@@ -165,7 +167,7 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 	if at != Vector3.INF:
 		k.teleport(at)
 	if why == "cc":
-		k.m.sfx("kin_unsure", k.pos, -6.0)
+		k.m.sfx(KinVoice.cue(k.species, "unsure"), k.pos, -6.0)
 		if h.is_local() and k.m.hud:
 			k.m.hud.toast_small("Dropped it", Color("ffd89a"))
 
@@ -240,11 +242,9 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.rescue_on = false          # (its own recovery can fire mid-rescue: the rescuer is free again)
 	k.rescue_block = 0.0
 	k.down_void = false
-	var from := k.pos
 	k._hop_on()
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
-	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
 	k.m.sfx("recall", k.owner_h.pos, -4.0)
 	if rescued:
 		k.note("rescued", "you ran in and carried it out", 1.5)
@@ -253,7 +253,6 @@ static func come_round(k: Kin, rescued: bool) -> void:
 
 static func rescue(k: Kin) -> void:
 	k.m.fx.flash(k.pos + Vector3(0, 0.8, 0), Color.WHITE, 1.2, 0.1)           # the finish pop
-	k.m.fx.ring(k.pos, 2.0, Color(k.sp.get("glow", k.sp["color"]), 0.9), 0.4)
 	k.m.sfx("revive_done", k.pos, -2.0)
 	come_round(k, true)
 
@@ -293,5 +292,7 @@ static func scoop_pose(k: Kin) -> void:
 	var lift := smoothstep(0.0, float(rules()["carry_lift_s"]), k.rescue_t)
 	var bob := 0.04 * sin(k.m.time * 4.0)
 	var arms := h.global_position + Vector3(-sin(h.face) * ARMS_FWD, ARMS_UP + bob, -cos(h.face) * ARMS_FWD)
+	if h.model != null and h.model.has_meta(WardenCarry.SOCKET):
+		arms = (h.model.get_meta(WardenCarry.SOCKET) as Vector3) + Vector3(0.0, bob, 0.0)   # (a .glb Hero's cradle)
 	k.global_position = k.global_position.lerp(arms, lift)
 	k.model.scale *= lerpf(1.0, 0.7, lift)

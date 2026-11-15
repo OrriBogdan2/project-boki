@@ -14,7 +14,7 @@ class EggSpy extends EggHatch:
 	var heard: Array = []
 	func _init(sp_id: String, fx_ref: Fx, mystery_egg := false) -> void:
 		super(sp_id, fx_ref, 0.32, 0.42, 1.0, {"species": sp_id})
-		mystery = mystery_egg
+		kind = "mystery" if mystery_egg else ""
 	func _sfx(n: String, _vol := 0.0, _pitch := 1.0) -> void:
 		heard.append(n)
 

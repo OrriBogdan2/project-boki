@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import grimble_sculpt as G
 import crouchkit
+import skin_relax
 from posekit import Clip, FnClip, Solver, ang_dir as D, at, eul, frame_of
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -361,6 +362,8 @@ if __name__ == "__main__":
         done.append((c.name, round(c.dur, 3)))
     bpy.ops.object.mode_set(mode="OBJECT")
     print("clips", len(done), done)
+    if not wanted:
+        skin_relax.relax(arm)       # no edge may stretch past 1.3x its rest length in any clip (tools/stretch_check.gd)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(a[1])[0] + "_anim.blend")
     bpy.ops.object.select_all(action="DESELECT")
     for o in bpy.data.objects:

@@ -14,7 +14,7 @@
 //   8 links    a ring of chain links (Dredge Grounded while he reels)
 //   9 flame icon  a small teardrop flame (the burn pips over a foe)
 //  10 spiral   a stun spiral (Anchor Drop victims)
-//  11 wave     a ring that opens over life (the Anchor's landing ring, Cinder Shot's fizzle)
+//  11 wave     a cel shockwave ring that races out over life (the Anchor's landing ring, Cinder Shot's fizzle)
 //  12 dot      a round dot with a dark core (a slug hanging at its stop line)
 uniform vec4 color : source_color = vec4(1.0, 0.6, 0.2, 1.0);
 uniform vec4 color2 : source_color = vec4(1.0, 1.0, 0.8, 1.0);
@@ -25,6 +25,7 @@ uniform float seed = 0.0;
 uniform float strength = 1.0;
 uniform bool billboard = false;
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 // A camera-facing modelview keeping the node's scale (for `billboard` looks).
 mat4 ld_billboard(mat4 model, mat4 view, mat4 inv_view) {
@@ -38,13 +39,14 @@ vec3 fire_ramp(float t) {
 	vec3 b = vec3(1.0, 0.42, 0.08);
 	vec3 c = vec3(0.78, 0.12, 0.06);
 	vec3 d = vec3(0.2, 0.07, 0.1);
+	t = cel(clamp(t, 0.0, 1.0));
 	if (t < 0.35) return mix(a, b, t / 0.35);
 	if (t < 0.65) return mix(b, c, (t - 0.35) / 0.3);
 	return mix(c, d, clamp((t - 0.65) / 0.35, 0.0, 1.0));
 }
 
-// The look of `mode` at uv01: body colour and cover (alpha-blended) and glow (added on top).
-void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
+// The look of `mode` at uv01, before the cel pass (ld_look).
+void ld_soft_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 	float k = 1.0 - life;
 	vec2 uv = uv01 * 2.0 - 1.0;
 	float d = length(uv);
@@ -147,12 +149,12 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		alpha = arm * strength;
 		glow = color.rgb * arm * 0.25 * strength;
 	} else if (mode == 11) {
-		float r = 0.2 + 0.78 * smoothstep(0.0, 0.6, life);
-		float ring = 1.0 - smoothstep(0.0, 0.07 + 0.06 * k, abs(d - r));
-		float fill = (1.0 - smoothstep(0.0, r, d)) * 0.25 * k * color2.a;
-		body = mix(color2.rgb, color.rgb, ring);
-		alpha = clamp(ring + fill, 0.0, 1.0) * k;
-		glow = color.rgb * ring * 0.3 * k;
+		float go = smoothstep(0.0, 0.6, life);
+		vec2 ring_v = cel_ring(uv01, go, life, seed);
+		float fill = hard(go * 0.9 - d) * 0.25 * k * color2.a;
+		body = mix(color2.rgb, mix(color.rgb, vec3(1.0), ring_v.y * 0.5), ring_v.x);
+		alpha = clamp(ring_v.x + fill, 0.0, 1.0) * k;
+		glow = color.rgb * ring_v.y * 0.3 * k;
 	} else if (mode == 13) {
 		// a thin ribbon of smoke climbing from the quad's foot, wavering and breaking into streaks
 		float h = 1.0 - uv01.y;
@@ -163,7 +165,7 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		float ribbon = 1.0 - smoothstep(w * 0.45, w, abs(x));
 		float streak = smoothstep(0.32, 0.62, n + 0.2);
 		float ends = smoothstep(0.0, 0.1, h) * (1.0 - smoothstep(0.5, 0.95, h));
-		body = mix(color2.rgb, color.rgb, smoothstep(0.0, 0.6, h));
+		body = mix(color2.rgb, color.rgb, hard(-x));                // two tones: lit on the left, shaded on the right
 		alpha = ribbon * streak * ends * color.a * smoothstep(0.0, 0.15, life) * (1.0 - smoothstep(0.55, 1.0, life));
 	} else {
 		float cover = 1.0 - smoothstep(0.7, 1.0, d);
@@ -172,4 +174,12 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		alpha = cover * k;
 		glow = color.rgb * (1.0 - smoothstep(0.5, 1.0, d)) * 0.25 * k;
 	}
+}
+
+// The look of `mode` at uv01: body colour and cover (alpha-blended) and glow (added on top), in cel steps.
+void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
+	ld_soft_look(uv01, body, alpha, glow);
+	vec2 nuv = uv01 * 0.5 + seed * 0.37;
+	alpha = cel_cover(alpha, nuv);
+	glow = cel_glow(glow, nuv);
 }

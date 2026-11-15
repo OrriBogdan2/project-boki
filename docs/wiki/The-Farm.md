@@ -37,7 +37,9 @@ the **cooking pot** (20). The **market stall** (30) is a good next step. Older s
 
 **Chopping and mining.** Buy an **Axe** or a **Pickaxe** at the market (Farm tab), walk up to a wild
 tree or boulder and press F: three swings and it comes down. Trees grow back in about 15 minutes and
-boulders in about 25, in real time, so the wild never runs out. Cliffs stay put.
+boulders in about 25, in real time, so the wild never runs out. Cliffs stay put. Work comes first: with a
+crop, a tree, a boulder, a station or a feeder in reach, F does that job even if a Boki is closer, and Boki
+step out of your swing. Step away from the work to pet them.
 
 ## Boki at work
 
@@ -73,7 +75,7 @@ tonics, treats for your next match, snacks, a level for your partner (Starfruit)
 - **Ransom House:** Old Pell's place, where lost Boki turn up and you deal with rivals who took yours.
 - **Challenge House:** challenges, their rewards and what they unlock at the market.
 - **Graveyard** and **Soul Shrine:** a grave for every Boki that died; with a Soul Ember the Shrine brings one back, a little different.
-- **The training area:** open it from the portal's "Training area" button or the Esc menu. See [Arena and training](Arena-and-Training.md).
+- **The Training Grounds:** open it from the portal's "Training Grounds" button or the Esc menu. See [Arena and training](Arena-and-Training.md).
 - **The portal:** expeditions, and (on the web build) the ferry to other players' islands and the town.
 
 ## Planned

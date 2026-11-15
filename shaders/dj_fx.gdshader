@@ -5,7 +5,7 @@ shader_type spatial;
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y (bolt and dagger trails)
 //   3 crescent a two-tone blade arc: UV.x along the sweep, UV.y from the edge (0) inward (1);
 //              color is the outer edge, color2 the inner fill; progress sweeps it
-//   4 puff     a camera-facing soft ring that opens and fades (a bolt fizzling at the cursor)
+//   4 puff     a camera-facing cel shockwave ring that opens and breaks up (a bolt fizzling at the cursor)
 //   5 links    a chain: alternating bright and dark links along UV.x (stripes = links per metre * length)
 //   6 bolt     a jagged lightning ribbon along UV.x (the empowered shot)
 // life runs 0 -> 1 over the effect. This one is additive: glows, cores and sparks. Colour and darkness

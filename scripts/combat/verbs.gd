@@ -15,7 +15,9 @@ var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
 var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
 var drags: Array = []     # {ent, from, to, t, dur, h}
+var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank, set down at `to` when it ends
 var decoys: Array = []    # {pos, team, t, node, owner}
+var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
@@ -24,6 +26,7 @@ const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bea
 func _init(match_node: Node) -> void:
 	m = match_node
 	m.world.dyn_walls = walls
+	ripple = BarrierRipple.new(m)
 
 # ------------------------------------------------------------------ barrier walls
 ## A wall segment centred at `at`, running across `d` (the aim), `length` long.
@@ -95,22 +98,33 @@ func _break_wall(w: Dictionary) -> void:
 static func blocks_sight(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
-## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
-static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
+## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
+## crosser class (Blockers): "phase" for a Spirit Walk.
+static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not w["move"]:
-			continue
-		if absf(y - float(w["y"])) > 1.9:
-			continue
-		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
-		var top := StoneStand.top_for(w) if w.has("top") else 3.0
-		if y >= float(w["y"]) + top - World.STEP:
+		var top := wall_top(w, y)
+		if top <= 0.0 or not Blockers.wall_stops(w, cls):
 			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
-		if p.distance_to(c) < r * 0.8 + float(w["th"]):
-			return float(w["y"]) + top
+		if p.distance_to(c) < wall_reach(w, r):
+			return top
 	return 0.0
+
+## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
+## block movement, or the body is above or on it).
+static func wall_top(w: Dictionary, y: float) -> float:
+	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+		return 0.0
+	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+	var top := StoneStand.top_for(w) if w.has("top") else 3.0
+	if y >= float(w["y"]) + top - World.STEP:
+		return 0.0
+	return float(w["y"]) + top
+
+## How close the centre of a body of radius r may come to barrier w's line.
+static func wall_reach(w: Dictionary, r: float) -> float:
+	return r * 0.8 + float(w["th"])
 
 # ------------------------------------------------------------------ reflect windows
 ## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
@@ -275,6 +289,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 		h.roll_t = 0.0
 		h.launch_to(to + Vector3(0, 0.3, 0), dur)
 		h.knock_t = 0.0
+		for y in yanked:
+			if y["hunter"] == h:
+				yanked.erase(y)
+				break
+		yanked.append({"hunter": h, "to": to, "t": 0.0, "dur": maxf(0.12, dur)})
 		return
 	if ent.mass() >= 6.0:
 		return          # too heavy to drag (wardens, sentinels)
@@ -304,6 +323,23 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only;
+## cls is the shot's crosser class, Blockers: a "pierce" shot passes rocks.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float, cls := "solid") -> bool:
+	if (w["block"] != "all" and int(w["team"]) == team) or not Blockers.wall_stops(w, cls):
+		return false
+	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		return false
+	var p2 := Vector2(p.x, p.z)
+	return p2.distance_to(Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])) <= float(w["th"]) + r
+
+## The barrier that stopped a shot of `team` that ended at p ({} if none: terrain did).
+func stopper(p: Vector3, team: int, r: float) -> Dictionary:
+	for w in walls:
+		if _stops(w, team, p, r):
+			return w
+	return {}
+
 ## Called for every step of every shot. Returns "" (carry on), "end" (stopped by a wall) or
 ## "bounce" (reflected: it now belongs to the reflector).
 func shot_check(s: Dictionary, p: Vector3) -> String:
@@ -311,14 +347,11 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
+	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
-			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
-			continue
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()
@@ -326,11 +359,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			if v.dot(nrm) > 0.0: nrm = -nrm
 			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
-			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
+			_hit_wall(w, float(s["dmg"]) * 0.5, p)
 			return "bounce"
-		_hit_wall(w, float(s["dmg"]), s["col"])
-		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
-		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
+		_hit_wall(w, float(s["dmg"]), p)
 		m.sfx("ab_shield_hit", p, -8.0)
 		return "end"
 	for mr in mirrors:
@@ -352,7 +383,6 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			var att = s["by"]
 			if float(mr["riposte"]) > 0.0 and is_instance_valid(att) and att is Ent:
 				(att as Ent).hurt(4.0, ent, {"stun": float(mr["riposte"]), "src": "abil", "ab": "parry", "kb": (att as Ent).dir_to(ent) * -5.0})
-				m.fx.word(att.pos + Vector3(0, 2.0, 0), "PARRIED", mr["col"], true)
 			m.fx.flash(p, mr["col"], 0.5, 0.08)
 			m.sfx("shield", p, 0.0, 1.8)
 			m.sfx("ab_parry", p, 0.0)
@@ -396,22 +426,27 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
 ## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
-func absorb(w: Dictionary, dmg: float) -> void:
+## `from` is where the blow came from.
+func absorb(w: Dictionary, dmg: float, from: Vector3) -> void:
 	if walls.has(w):
-		_hit_wall(w, dmg, Color.WHITE)
+		_hit_wall(w, dmg, from)
 
-func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
+## `from`: the shot's position, or where the blow came from; the ripple lands on the face that side.
+func _hit_wall(w: Dictionary, dmg: float, from: Vector3) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
 	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
 		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
-	if float(w["hp"]) <= 0.0:
+	var broke := float(w["hp"]) <= 0.0
+	ripple.on_wall(w, from, broke)
+	if broke:
 		_break_wall(w)
 
 # ------------------------------------------------------------------ simulation
 func tick(dt: float) -> void:
+	ripple.tick(dt)
 	for w in walls.duplicate():
 		w["t"] = float(w["t"]) - dt
 		w["hit_t"] = maxf(0.0, float(w["hit_t"]) - dt)
@@ -458,13 +493,11 @@ func tick(dt: float) -> void:
 			(t["kx_snap"] as Callable).call(a, b)
 			t["kx_end"] = null
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			_drop_tether(t)
 		elif d > float(t["max"]):
 			# stretched too far: it snaps, and the snap hurts
 			b.hurt(float(t["dmg"]), a, {"stun": float(t["stun"]), "src": "abil", "ab": "tether", "kb": b.dir_to(a) * 7.0, "lift": 2.0})
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			m.sfx("zap", b.pos, 0.0, 0.8)
 			m.sfx("ab_tether", b.pos, 0.0, 0.7)
 			m.fx.flash(b.pos + Vector3(0, 1.0, 0), Color(t["col"]).lerp(Color.WHITE, 0.4), 1.0, 0.14)
@@ -497,7 +530,6 @@ func tick(dt: float) -> void:
 				c3["target"] = f
 				if float(tr["reveal"]) > 0.0 and f is Hunter:
 					f.reveal_t = maxf(f.reveal_t, float(tr["reveal"]))
-				m.fx.word(at + Vector3(0, 1.6, 0), "TRAP", tr["col"], false)
 				m.sfx("click", at, 0.0, 1.7)       # the snap before it goes off
 				m.fx.flash(at + Vector3(0, 0.4, 0), Color(tr["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
 				if caster.dead:
@@ -530,6 +562,17 @@ func tick(dt: float) -> void:
 		ent.grounded = false
 		if k >= 1.0:
 			drags.erase(dg)
+	for y in yanked.duplicate():
+		var h: Hunter = y["hunter"]
+		y["t"] = float(y["t"]) + dt
+		if not is_instance_valid(h) or h.dead:
+			yanked.erase(y)
+		elif float(y["t"]) >= float(y["dur"]) and h.pad.is_empty():
+			# the arc ends at the hook's spot and stops there: no launch speed left to slide it into the caster
+			var to: Vector3 = y["to"]
+			h.pos = Vector3(to.x, h.pos.y, to.z)
+			h.vel = Vector3(0.0, minf(h.vel.y, 0.0), 0.0)
+			yanked.erase(y)
 	for dc in decoys.duplicate():
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:
