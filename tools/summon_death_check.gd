@@ -74,7 +74,7 @@ func _death() -> void:
 	var want := Vector2(from.x - f.pos.x, from.z - f.pos.z).length() / float(KinSummon.rules()["home_speed"])
 	ok(k.summon.fly > 0.0 and want > 0.2 and absf(k.summon.fly_len - want) < 0.05,
 		"...it flies home at home_speed (%.2f s)" % k.summon.fly_len)
-	k.render(DT, 1.0)
+	m.step(DT)      # (the sim draws the streak: KinWisp.ride sets the wisp's spot each tick)
 	ok(k.global_position.distance_to(k.summon.fly_from) < 1.0, "...the streak starts where it fell")
 	_frames(k.summon.fly_len + 0.1)
 	ok(k.summon.fly == 0.0 and k.state == "shoulder", "...and ends on its owner's shoulder")
