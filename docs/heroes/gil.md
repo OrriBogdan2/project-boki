@@ -9,9 +9,9 @@ footage and no source row. Every number below is the live data (`content/archety
 ## Per-slot table
 | Slot | Input | What it does | Numbers (live) |
 |---|---|---|---|
-| Passive, Fish Out of Water | none | each different potion effect (shock, slime, gust, fire, zeep) puts a splash mark on the foe it hits; three different marks inside the window Beach them (a stun, "BEACHED!"), then the marks clear | window 5 s, 3 marks, stun 0.75 s, once per foe every 8 s; the Fencer, Riptide, Ground Swim and the wave mark nothing |
+| Passive, Fish Out of Water | none | each different potion effect (shock, slime, gust, fire, geyser) puts a splash mark on the foe it hits; three different marks inside the window Beach them (a stun, "BEACHED!"), then the marks clear | window 5 s, 3 marks, stun 0.75 s, once per foe every 8 s; the Fencer, Riptide, Ground Swim and the wave mark nothing |
 | LMB, Fencer (swordfish) | hold | two quick thrusts and a longer lunge, each stepping him in; the lunge slows | 7 / 7 / 11 damage, reach 2.5 / 2.5 / 3.2 m, arc 50 / 50 / 34 deg, step 0.7 / 0.7 / 1.3 m, knockback 1.2; 0.32 s between thrusts, 0.48 s after the lunge; the chain restarts after 0.75 s idle; the lunge slows 30% for 0.5 s (a 0.1 hit carries it) |
-| RMB, Grab Bag | tap; hold (0.25 s) to aim further; in the air it drops | throws the next potion from a shuffled bag in an arc to the cursor; the next one shows on the slot and glows in his hand | 2 charges, 5 s each; 8 m at most (hold: x1.5 = 12 m); flight 0.35 s + 0.03 s a metre (0.59 s at 8 m); in the air: straight down, 0.25 s; the bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Super Zeep, reshuffled when empty |
+| RMB, Grab Bag | tap; hold (0.25 s) to aim further; in the air it drops | throws the next potion from a shuffled bag in an arc to the cursor; the next one shows on the slot and glows in his hand | 2 charges, 5 s each; 8 m at most (hold: x1.5 = 12 m); flight 0.35 s + 0.03 s a metre (0.59 s at 8 m); in the air: straight down, 0.25 s; the bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Geyser, reshuffled when empty |
 | Shift, Ground Swim | tap | dives and swims the shared dash direction, the fin cutting the ground; still hittable; surfacing knocks nearby foes up. The air dash (long dash) is a plain travel with no dive or surfacing | 6 m in 0.4 s (the shared dash feel's time scale), surfacing radius 2.2 m, 4 damage, lift 8, knockup 0.5 s; 8 s a charge |
 | E, Riptide | tap, then E again (or wait) | spins with the swordfish, hitting around him, then sends a waterspout down the aim; the longer the spin, the longer, wider and faster the spout | spin up to 2 s, radius 2.2 m, a tick every 0.25 s rising 2 -> 5 (8 ticks: 2.0 ... 4.8), he walks at 70%; spout 7 -> 11 m long, 1.2 -> 2.2 m wide, 14 -> 22 m/s, 10 damage, lift 9, knockup 1 s, each foe once; 12 s |
 | X, Tidal Wave (level 6) | tap | surfs a wave 14 m down the aim, untargetable; every foe it rolls over is knocked up then slowed; lands with a shield | 14 m in 1 s, 3.6 m wide, 18 damage, knockup 1 s, then 50% slow (2 s after the knockup), shield 40 for 3 s; 90 s |
@@ -24,7 +24,7 @@ footage and no source row. Every number below is the live data (`content/archety
 | Slime | 2.4 m | 4 | 40% slow 1.5 s; a 2.4 m puddle for 4 s that slows 25% | slime |
 | Air | 2.6 m | 4 | pushes foes out from the centre (push 4, lift 3) | gust |
 | Fire | 2.2 m | 12 | burn 4 for 3 s | fire |
-| Super Zeep | 3.6 m | 16 | lift 9, knockup 0.75 s | zeep |
+| Geyser | 3.6 m | 16 | lift 9, knockup 0.75 s | geyser |
 
 ### Ranks (the shared steps; Gil has no `rank_cd` / `rank_dmg` rows)
 RMB and E cooldowns x0.9 at rank 2 and x0.8 at rank 3 (RMB 4.5 s / 4 s, E 10.8 s / 9.6 s); damage +15% / +30%; Shift
@@ -35,7 +35,7 @@ this: see F6.
 | Do this | You get | Asserted by (check line) |
 |---|---|---|
 | Hold LMB on a foe | three thrusts, each stepping in, the third slowing | "Fencer: a three-hit chain lands on the dummy"; "Fencer: each swing steps him forward"; "Fencer: the third, longer thrust slows (30% for 0.5 s)"; "numbers LMB: ..." (3 lines) |
-| Throw each potion | its own effect | "Thunder: ..."; "Slime: ..." (2); "Air: ..."; "Fire: ..."; "Super Zeep: ..." |
+| Throw each potion | its own effect | "Thunder: ..."; "Slime: ..." (2); "Air: ..."; "Fire: ..."; "Geyser: ..." |
 | Empty the bag | 2/2/2/2/1, refilled and reshuffled, the next potion on the HUD | "bag: ..." (4 lines) |
 | Hold RMB / RMB in the air | 12 m / straight down | "Grab Bag hold: lands +50% further (12 m against 8)"; "Grab Bag in the air: drops the vial straight down" |
 | RMB x3 | two throws, the third does nothing; a charge back 5 s after the first | "numbers RMB: ..." (3 lines) |
