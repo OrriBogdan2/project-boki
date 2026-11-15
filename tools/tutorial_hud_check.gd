@@ -282,6 +282,7 @@ func _reach() -> void:
 # ------------------------------------------------------------------ 7. the glide dive line
 func _glide_secs(g: FirstMatchGuide, p: Hunter, secs: float) -> void:
 	p.dropping = false
+	p.riding = false      # landed: a match starts aboard the skyship, where the guide is quiet
 	p.gliding = true
 	p.pos.y += float(FirstMatchGuide.rules()["dive_height"]) + 5.0 - GlideDive.height(p)
 	for i in int(secs * 10.0):
@@ -336,6 +337,7 @@ func _zone_match() -> Match:
 		if h != zm.player:
 			h.pos = zm.player.pos + Vector3(300, 0, 0)
 	zm.player.dropping = false
+	zm.player.riding = false      # landed: a match starts aboard the skyship, where the guide is quiet
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		if not row[0] in FirstMatchGuide.ONCE_PER_PROFILE:
 			zm.guide.shown[row[0]] = true
