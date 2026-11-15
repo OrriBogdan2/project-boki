@@ -46,7 +46,7 @@
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"},
 		"card_range": "slam.reach"},
 	"e": {"delivery": "burst", "name": "Stone Row", "short": "Row", "icon": "dolm_e", "col": "#7aa8ff", "cooldown": 12.5, "dist": 3.4, "gap": 2.4, "curve": 0.45, "row_gap": 3.6, "tell": 0.2,
-		"desc": "A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.",
+		"desc": "A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 4.8m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"},
 		"card_range": "dist"},
 	"x": {"name": "Basalt Spine", "short": "Spine", "icon": "dolm_x", "col": "#3a7cff", "cooldown": 45.0,
