@@ -38,8 +38,8 @@ func run(main: Node) -> void:
 	ok(ally != null and foes.size() == 3, "a 3v3: a teammate, three rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
-	ok(SideColor.of(m, P) == SideColor.YOU and SideColor.of(m, ally) == SideColor.ALLY, "you and your ally")
-	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "every rival is the foe colour")
+	ok(SideColor.of(m, P) == SideColor.you() and SideColor.of(m, ally) == SideColor.ally(), "you and your ally")
+	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.foe()), "every rival is the foe colour")
 	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)

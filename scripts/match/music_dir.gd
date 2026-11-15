@@ -19,6 +19,7 @@ var heat := 0.0               # 0..1, how much of a fight is going on
 var goal := 0.0               # where heat is heading: 1 fight, 0.65 rival close, 0 calm
 var goal_at := -99.0          # match time the goal last changed
 var rival_close := false
+var stings := RaritySting.new()   # rare Boki coming into sight
 var started := false
 var ended := false            # the run-end sting has played
 var last_said := false        # the last-squad sting has played
@@ -119,6 +120,7 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		stings.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0
