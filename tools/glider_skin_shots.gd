@@ -6,17 +6,19 @@ extends "res://tools/warden_shots.gd"
 ## random). Needs a renderer.
 
 const SKINS_PER_ROW := 6
-const SKIN_GAP := 2.6               # m between Hunters: an open canopy is 2.1-2.3 m across
+const SKIN_GAP := 2.6  # m between Hunters: an open canopy is 2.1-2.3 m across
 const TEAMS := {"red": 0, "blue": 1}  # file prefix -> Data.TEAM_COLORS index (the "team" canopy colours)
-const WARDEN := "gunslinger"        # any Warden: the canopy is the same over every body
-const OPEN_TILT := 0.25             # rad: the open canopy's pitch in flight (Hunter's glide pop at full open)
-const CLOSE_PITCH := 50.0           # degrees: the close camera looks down on the canopies' tops
+const WARDEN := "gunslinger"  # any Warden: the canopy is the same over every body
+const OPEN_TILT := 0.25  # rad: the open canopy's pitch in flight (Hunter's glide pop at full open)
+const CLOSE_PITCH := 50.0  # degrees: the close camera looks down on the canopies' tops
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -36,6 +38,7 @@ func run(main: Node) -> void:
 	print("GLIDER_SKIN_SHOTS_DONE")
 	tree.quit()
 
+
 ## A row of Hunters in one team's colours, each with its glider open in one of `skins`.
 func _open_row(skins: Array, team: int) -> Array:
 	var row: Array = []
@@ -54,6 +57,7 @@ func _open_row(skins: Array, team: int) -> Array:
 		anims.append([HunterAnim.new(h), h])
 		row.append(h)
 	return row
+
 
 ## The row near, from above and behind, framed to its width.
 func _top_strip(row: Array) -> Image:

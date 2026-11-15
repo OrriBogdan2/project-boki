@@ -10,14 +10,20 @@ const KNEE := 0.2                  # m: knee below the hip joint
 ## tip curves up 1.9 cm, so the toe is the ball it rests on, not the tip).
 const SOLE := [Vector3(0.0, -0.263, 0.03), Vector3(0.0, -0.268, -0.06), Vector3(0.0, -0.245, -0.16)]
 
+## A sole point `p` (knee space) in the leg's space with the hip joint at the origin: down the thigh, the knee's
+## bend (x), then the leg node's own z scale `zk` (a woman's legs are 0.9 in x and z, Unmasked._shape).
+static func at(p: Vector3, knee: float, zk: float) -> Vector3:
+	var v := Vector3(0.0, -KNEE, 0.0) + Basis(Vector3.RIGHT, knee) * p
+	v.z *= zk
+	return v
+
 ## How far below the hip joint the boot's lowest point hangs, for the hip's turn (x forward, z out) and the
-## knee's bend (x), all in radians.
-static func reach(hip: float, knee: float, out: float) -> float:
+## knee's bend (x), all in radians, on a leg of z scale `zk`.
+static func reach(hip: float, knee: float, out: float, zk: float) -> float:
 	var leg := Basis.from_euler(Vector3(hip, 0.0, out))
-	var shin := Basis(Vector3.RIGHT, knee)
 	var low := 0.0
 	for p in SOLE:
-		low = maxf(low, -(leg * (Vector3(0.0, -KNEE, 0.0) + shin * (p as Vector3))).y)
+		low = maxf(low, -(leg * at(p, knee, zk)).y)
 	return low
 
 # ==================================================================== feet on the terrain
@@ -49,7 +55,7 @@ static func near(h: Hunter) -> bool:
 
 ## After a.update: plants the feet of a.model on w's ground. want: false under animation LOD or far away (the pose
 ## stays the clip's and nothing is sampled). y: the body's height in the game (Hunter.pos.y; the drawn body sits off
-## it while it eases up a step, Hunter.step_vis: a terrace, or one of Tenzo's rocks onto a higher one, and the feet
+## it while it eases up a step, StepSmooth: a terrace, or one of Tenzo's rocks onto a higher one, and the feet
 ## stay on the top meanwhile). r: the body's radius, so a rock it stands on counts as Ent.ground counts it.
 func plant(a: HunterAnim, w: World, dt: float, want: bool, y := INF, r := 0.0) -> void:
 	world = w

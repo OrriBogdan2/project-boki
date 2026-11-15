@@ -24,6 +24,8 @@ extends RefCounted
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
+##   lace    bool    lines, lanes and arc walls: two strands criss-crossing like laces instead of the plain
+##                   line or the fill (Lace's own look)
 
 const BH := 1.8           # m in one body height (the hero sheets measure in bh)
 
@@ -90,12 +92,14 @@ static func vee(h: Hunter, id: String, p := {}) -> void:
 	_ray(h, e, p)
 	_put(h, id, e)
 
-## A cone (wedge) from `from` along `dir`; "edges" draws only the two edge lines (a shotgun spread).
-## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), fill (0..1 radial front)
+## A cone (wedge) from `from` along `dir`; "edges" draws only the two edge lines (a shotgun spread), "outline"
+## the whole rim (both edges and the far arc) with no fill.
+## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), outline (false), fill (0..1 radial front)
 static func cone(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "cone", p)
 	e["len"] = float(p.get("len", 4.0)); e["deg"] = float(p.get("deg", 60.0)); e["inner"] = float(p.get("inner", 0.3))
-	e["edges"] = bool(p.get("edges", false)); e["fill"] = float(p.get("fill", -1.0))
+	e["edges"] = bool(p.get("edges", false)); e["outline"] = bool(p.get("outline", false))
+	e["fill"] = float(p.get("fill", -1.0))
 	_ray(h, e, p)
 	_put(h, id, e)
 
@@ -166,7 +170,8 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## A long placement line centred on `at`, along `dir` (default: across the aim), with chevrons pointing
 ## in toward a centre ring (a wall or a rift that closes on its middle).
 ## p: at (the cursor point, clamped to `range`), range, dir, len (8), chevrons (3), ring (true), bend (radians the
-## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
+## line turns end to end, 0 = straight), bow (unit normal the middle bulges toward) and width (m: a faint band
+## of the true area under the line, 0 = none)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
 	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
@@ -177,6 +182,7 @@ static func span(h: Hunter, id: String, p := {}) -> void:
 	e["len"] = float(p.get("len", 8.0)); e["chevrons"] = int(p.get("chevrons", 3)); e["ring"] = bool(p.get("ring", true))
 	e["bend"] = float(p.get("bend", 0.0))
 	e["bow"] = p.get("bow", Vector2.ZERO)
+	e["width"] = float(p.get("width", 0.0))
 	_put(h, id, e)
 
 ## A flat 4-point glint on the ground (a charge riding a line, a lock-on). p: at, size (0.4), rot
@@ -255,7 +261,7 @@ static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
 		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
-		"fletch": float(p.get("fletch", 0.0))}
+		"fletch": float(p.get("fletch", 0.0)), "lace": bool(p.get("lace", false))}
 
 ## At full charge: hot unless the kit set it, and the full colour if it gave one.
 static func _full(e: Dictionary, p: Dictionary, k: float) -> void:

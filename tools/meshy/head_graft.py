@@ -14,16 +14,21 @@ Both glbs must share a frame (Meshy outputs of the same character: soles and cro
 y < YMAX): props outside it (Sparkle's rods behind the head) stay the body's. `--min-island N` drops the specks such
 boxes cut off (islands under N triangles, joined through shared positions). `--head-box XMAX,ZMIN,YMAX,YC` is an
 ellipse in x/y centred at (0, YC) instead (a face oval, no framed box corners where new hair meets the kept face).
+`--hair-zone YBOT` carries the head's hair down past the cut to YBOT: there, behind z HZ_ZMAX and inside |x| HZ_XH,
+the head's triangles whose texel is not skin (closed HZ_CLOSE rings) are kept and the body's own hair there (grown
+HZ_DILATE rings) is dropped, so the hair is one continuous fall with no ledge at the cut (Cinder B-A, 11-13).
 `--interleave` deals the body into round-robin chunks, so a dense body's top chunk is not taken for a head part.
 Run: blender -b --factory-startup --python tools/meshy/head_graft.py -- HEAD_GLB BODY_GLB OUT_GLB --cut Y
      [--keep-node NAME]... [--compact] [--ramp M] [--body-fit S,TX,TY,TZ]
-     [--head-box XMAX,ZMIN[,YMAX[,YC]]]... [--min-island N] [--interleave]"""
+     [--head-box XMAX,ZMIN[,YMAX[,YC]]]... [--min-island N] [--interleave] [--hair-zone YBOT]"""
 
 import argparse
 import json
 import struct
 import sys
+import tempfile
 
+import bpy
 import numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
@@ -36,6 +41,11 @@ MAX_PRIM_VERTS = 200000  # body vertices per primitive (the head's face primitiv
 NEAR_CUT = 0.08  # m: head triangles this close to the cut (kept or not) are the surface the body is pulled onto
 REACH = 0.03  # m: farthest a body vertex looks for its layer of the head surface
 FACING = 0.5  # cos: the head surface a body vertex snaps to faces within ~60 deg of its own normal
+HZ_ZMAX = 0.06  # m: --hair-zone takes triangles behind this z (the back and the sides, not the chest)
+HZ_XH = 0.30  # m: ... and inside this |x| (not the arms)
+HZ_VSKIN = 0.32  # skin texel: a purple-to-pink hue (250-350 deg), value above this, saturation under 0.5
+HZ_CLOSE = 3  # rings: the head's hair zone is closed (grown, then shrunk back) to fill strand gaps
+HZ_DILATE = 4  # rings: the body's hair zone is grown, so no stray body strand tips stay under the head's hair
 
 
 def read(path):
@@ -233,6 +243,64 @@ def in_box(P, T, boxes):
     return inside
 
 
+def _texels(j, bn, prim):
+    """the primitive's base-colour image (h, w, 3 floats, row 0 at the bottom, as Blender keeps it) and its TEXCOORD_0."""
+    m = j["materials"][prim["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    im = j["images"][j["textures"][m]["source"]]
+    with tempfile.NamedTemporaryFile(suffix=".png" if "png" in im["mimeType"] else ".jpg") as f:
+        f.write(view_bytes(j, bn, im["bufferView"]))
+        f.flush()
+        img = bpy.data.images.load(f.name)
+        w, h = img.size
+        px = np.empty(w * h * 4, np.float32)
+        img.pixels.foreach_get(px)
+        bpy.data.images.remove(img)
+    return px.reshape(h, w, 4)[..., :3], acc(j, bn, prim["attributes"]["TEXCOORD_0"])
+
+
+def _not_skin(j, bn, prim, T):
+    """triangles of T whose texel at the UV centroid is not skin (hair, horn, lava)."""
+    px, uv = _texels(j, bn, prim)
+    h, w = px.shape[:2]
+    c = uv[T].mean(1)
+    x = np.clip((c[:, 0] % 1) * w, 0, w - 1).astype(int)
+    y = np.clip((c[:, 1] % 1) * h, 0, h - 1).astype(int)
+    rgb = px[h - 1 - y, x]
+    mx, mn = rgb.max(1), rgb.min(1)
+    d = mx - mn + 1e-6
+    r, g, b = rgb.T
+    hue = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60
+    return ~((hue > 250) & (hue < 350) & (mx > HZ_VSKIN) & (d / (mx + 1e-6) < 0.5))
+
+
+def _grow(P, T, sel, geo, n, solid=None):
+    """n rings of growth (n > 0, inside geo) or shrink (n < 0; solid triangles count as inside) of the set sel."""
+    _, weld = np.unique(np.round(P / 1e-5).astype(np.int64), axis=0, return_inverse=True)
+    W = weld.ravel()[T]
+    for _ in range(abs(n)):
+        mark = np.zeros(W.max() + 1, bool)
+        if n > 0:
+            mark[W[sel].ravel()] = True
+            sel = geo & mark[W].any(1)
+        else:
+            mark[W[~sel & ~solid].ravel()] = True
+            sel = sel & ~mark[W].any(1)
+    return sel
+
+
+def hair_zone(j, bn, prim, P, T, cut, ybot, head):
+    """--hair-zone: the triangles of T from ybot up to the cut that are hair (see the docstring)."""
+    c = P[T].mean(1)
+    geo = (c[:, 1] > ybot) & (c[:, 1] <= cut) & (c[:, 2] < HZ_ZMAX) & (np.abs(c[:, 0]) < HZ_XH)
+    z = geo & _not_skin(j, bn, prim, T)
+    if head:
+        z = _grow(P, T, _grow(P, T, z, geo, HZ_CLOSE), geo, -HZ_CLOSE, c[:, 1] > cut)
+    else:
+        z = _grow(P, T, z, geo, HZ_DILATE)
+    print("HAIRZONE %s %d of %d triangles in the box" % ("head" if head else "body", z.sum(), geo.sum()), flush=True)
+    return z
+
+
 def drop_islands(P, T, min_tris):
     """T without its islands (connected through shared positions, so UV seams do not split them) of fewer than
     min_tris triangles: box-cut prop specks."""
@@ -265,6 +333,7 @@ def graft(
     fit=(1.0, 0.0, 0.0, 0.0),
     boxes=(),
     min_island=0,
+    zone_bot=None,
 ):
     hj, hb = read(head_path)
     bj, bb = read(body_path)
@@ -277,8 +346,12 @@ def graft(
     BP = acc(bj, bb, bp["attributes"]["POSITION"]).astype(np.float64) * fit[0] + np.array(fit[1:])
     BT = acc(bj, bb, bp["indices"]).reshape(-1, 3)
 
-    head_tris = HT[(HP[HT, 1].mean(1) > cut - OVERLAP) & in_box(HP, HT, boxes)]
-    body_tris = BT[(BP[BT, 1].mean(1) <= cut) | ~in_box(BP, BT, boxes)]
+    head_keep = (HP[HT, 1].mean(1) > cut - OVERLAP) & in_box(HP, HT, boxes)
+    body_keep = (BP[BT, 1].mean(1) <= cut) | ~in_box(BP, BT, boxes)
+    if zone_bot is not None:
+        head_keep |= hair_zone(hj, hb, hp, HP, HT, cut, zone_bot, True)
+        body_keep &= ~hair_zone(bj, bb, bp, BP, BT, cut, zone_bot, False)
+    head_tris, body_tris = HT[head_keep], BT[body_keep]
     head_tris, body_tris = drop_islands(HP, head_tris, min_island), drop_islands(BP, body_tris, min_island)
 
     near = HT[np.abs(HP[HT, 1].mean(1) - cut) < NEAR_CUT]
@@ -377,12 +450,13 @@ def main():
     ap.add_argument(
         "--interleave", action="store_true", help="round-robin body chunks (no body chunk centred in the head band)"
     )
+    ap.add_argument("--hair-zone", type=float, default=None, help="YBOT: carry the head's hair down to this +Y (m)")
     a = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :])
     global INTERLEAVE
     INTERLEAVE = a.interleave
     fit = [float(v) for v in a.body_fit.split(",")]
     boxes = [[float(v) for v in b.split(",")] for b in a.head_box]
-    graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp, fit, boxes, a.min_island)
+    graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp, fit, boxes, a.min_island, a.hair_zone)
 
 
 main()

@@ -1,10 +1,11 @@
 {
-	"desc": "The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.",
+	"desc": "The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out. tier 1-3 is how grand the finished chime is (BowlSfx).",
 	"recipes": [
 		{
 			"id": "fourfold_bun",
 			"gives": "fourfold_bun",
 			"n": 1,
+			"tier": 3,
 			"need": {
 				"kind": "different",
 				"of": [
@@ -20,6 +21,7 @@
 			"id": "bramble_honey",
 			"gives": "bramble_honey",
 			"n": 1,
+			"tier": 2,
 			"need": {
 				"kind": "snack_type",
 				"types": [
@@ -34,6 +36,7 @@
 			"id": "glassdew",
 			"gives": "glassdew",
 			"n": 1,
+			"tier": 2,
 			"need": {
 				"kind": "snack_type",
 				"types": [
@@ -48,6 +51,7 @@
 			"id": "cinderbrittle",
 			"gives": "cinderbrittle",
 			"n": 1,
+			"tier": 2,
 			"need": {
 				"kind": "snack_type",
 				"types": [
@@ -63,6 +67,7 @@
 			"id": "hush_truffle",
 			"gives": "hush_truffle",
 			"n": 1,
+			"tier": 2,
 			"need": {
 				"kind": "snack_type",
 				"types": [
@@ -77,6 +82,7 @@
 			"id": "windfloss",
 			"gives": "windfloss",
 			"n": 1,
+			"tier": 2,
 			"need": {
 				"kind": "snack_type",
 				"types": [
@@ -92,6 +98,7 @@
 			"id": "twinbun",
 			"gives": "twinbun",
 			"n": 1,
+			"tier": 1,
 			"need": {
 				"kind": "same",
 				"item": "sweetbun",

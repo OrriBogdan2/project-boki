@@ -9,6 +9,9 @@ extends RefCounted
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+## [sex, height, build] of the bodies that stood highest (2.1 to 2.8 cm) while EmptyGait solved a woman's legs
+## (leg node z scale 0.9) as if they were unscaled: each is its own row.
+const WORST_FEET := [[0, 2, 1], [0, 2, 2], [0, 1, 0], [0, 1, 1]]
 
 var bad := 0
 
@@ -130,12 +133,29 @@ func _model(main: Node) -> void:
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
-	var flare := _width(woman.get_node("Rig/Torso/ShroudBones")) > _width(man.get_node("Rig/Torso/ShroudBones"))
-	ok(absf(w_sh) < absf(m_sh) * 0.9 and flare,
-		"a woman has narrower shoulders and a shroud that flares wider at the hem")
+	var hem := -0.35       # m, torso space: just above the cloak's hem
+	var her_flare := _cloth_at(woman, hem) / _cloth_at(woman, 0.47)
+	var flare := her_flare > _cloth_at(man, hem) / _cloth_at(man, 0.47) * 1.15
+	ok(absf(w_sh) < absf(m_sh) * 0.8 and flare,
+		"a woman has much narrower shoulders (%.2f / %.2f m) and a shroud that flares out more below them"
+		% [w_sh, m_sh])
+	var her := _build({"unmasked": true, "gender": 0, "shroud": 1})      # (Wrap: no hood over the crown)
+	var him := _build({"unmasked": true, "gender": 1, "shroud": 1})
+	var gap := _top(him) - _top(her)
+	ok(gap > 0.06 and gap < 0.08, "she stands %.3f m shorter (6 to 8 cm; %.2f / %.2f m)" % [gap, _top(her), _top(him)])
+	her.free()
+	him.free()
+	var w_fig := [_cloth_at(woman, 0.47), _cloth_at(woman, 0.26), _cloth_at(woman, 0.0)]
+	var m_fig := [_cloth_at(man, 0.47), _cloth_at(man, 0.26), _cloth_at(man, 0.0)]
+	ok(m_fig[0] / m_fig[2] > w_fig[0] / w_fig[2] * 1.2 and w_fig[1] / w_fig[2] < m_fig[1] / m_fig[2] * 0.9,
+		"the cloth is cut to the figure: his shoulders broad over his hips, her waist in over fuller hips "
+		+ "(shoulders, waist, hips: %.2f %.2f %.2f / %.2f %.2f %.2f m)" % (m_fig + w_fig))
+	var st: Dictionary = Content.rules(WardenStance.RULES)
 	ok(String(woman.get_meta("stance")) == "empty_f" and String(man.get_meta("stance")) == "empty_m"
-		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance(),
-		"and her own stance (weight on one hip); his is square")
+		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance()
+		and float(st["empty_f"]["pose"]["hip"]) > 3.0 * float(st["empty_m"]["pose"]["hip"])
+		and float(st["empty_m"]["gait"]["width"]) > 2.0 * float(st["empty_f"]["gait"]["width"]),
+		"and her own stance (weight on one hip, feet close); his is square and wide")
 	var slight := _build({"unmasked": true, "build": 0})
 	var sturdy := _build({"unmasked": true, "build": 2})
 	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
@@ -158,6 +178,15 @@ func _anim(main: Node) -> void:
 		await main.get_tree().process_frame
 	ok(is_instance_valid(base), "the hunter animations run on it")
 	base.queue_free()
+
+## The shroud's cloth width round height y (m, torso space).
+func _cloth_at(m: Node3D, y: float) -> float:
+	var cloth := m.get_node("Rig/Torso/ShroudBones/ClothBody") as MeshInstance3D
+	var half := 0.0
+	for v in cloth.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+		if absf(v.y - y) < 0.03:
+			half = maxf(half, absf(v.x))
+	return half * 2.0
 
 ## The top of a model's meshes, in metres (its height as built).
 func _top(m: Node3D) -> float:
@@ -236,6 +265,7 @@ func _feet(main: Node) -> void:
 	var worst := 0.0
 	var worst_body := ""
 	var cases := 0
+	var per := {}
 	var tree := main.get_tree()
 	for g in 2:
 		for h in Unmasked.HEIGHTS.size():
@@ -250,15 +280,21 @@ func _feet(main: Node) -> void:
 						"vel": Vector3(0, 0, -3.5) if walking else Vector3.ZERO})
 					if i == 59 or (walking and i % 4 == 0):
 						lows.append(_sole_y(m))
+				var body_worst := 0.0
 				for y in lows:
-					if absf(y) > worst:
-						worst = absf(y)
-						worst_body = "sex %d height %d build %d" % [g, h, b]
+					body_worst = maxf(body_worst, absf(y))
+				per[[g, h, b]] = body_worst
+				if body_worst > worst:
+					worst = body_worst
+					worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
 		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
+	for body in WORST_FEET:
+		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, %s, %s: feet on the ground (%.1f cm)" % [
+			Unmasked.SEXES[body[0]], Unmasked.HEIGHTS[body[1]], Unmasked.BUILDS[body[2]], float(per[body]) * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
