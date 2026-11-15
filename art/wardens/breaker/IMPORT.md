@@ -36,3 +36,9 @@ hatch shield kept on `x_shield` (`keep`).
   core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
+
+The strikes lmb_slam and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
+them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files (the swap keeps the clips): import the shipped .glb in Blender
+(bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
+the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.py <shipped> <new> <clip,...>` (the
+other clips re-bake byte-equal that way).

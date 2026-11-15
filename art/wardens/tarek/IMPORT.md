@@ -62,3 +62,9 @@ on the A swatch [62,78,85]. Runes are masked out and keep their emission.
   Face, skin, sash, beads, hair and trousers are unchanged. On the site master, head_diff is [].
 - Re-running `v95_swap` on this rig drops the split. The recolour scripts (grade.py, gamesplit.py, armprim.py) and their
   inputs are in /home/boki/meshy/tenzo-arm-3d-1113/ (NOTES.md, work/).
+
+The strikes lmb_punch and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
+them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files: import the shipped .glb in Blender
+(bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
+the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.py <shipped> <new> <clip,...>` (the
+other clips re-bake byte-equal that way).

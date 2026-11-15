@@ -185,20 +185,22 @@ class Clips:
         self.rig = Rig(arm)
         self.arm = arm
         self.lengths = {}
+        self.rates = {}        # clip -> keys a second, the clips not keyed at FPS
         self.remap = None      # a key's pose -> this rig's (keys written for another build)
 
-    def bake(self, name, dur, keys, base=None, loop=False, over=None):
-        """keys: [(t, pose)]; base: a pose merged under every key; over(t, pose): edits the pose per frame (breath, sway)."""
+    def bake(self, name, dur, keys, base=None, loop=False, over=None, fps=FPS):
+        """keys: [(t, pose)]; base: a pose merged under every key; over(t, pose): edits the pose per frame (breath, sway).
+        fps: keys a second; a clip not at FPS is keyed one per frame at its own rate (fine_export.py)."""
         rig = self.rig
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
-        n = int(round(dur * FPS)) + 1
+        n = int(round(dur * fps)) + 1
         names = [b for b in rig.b.keys() if not b.startswith("spring_") and b != "x_fish"]
         data = {b: np.empty((n, 4), np.float32) for b in names}
         loc = {"root": np.empty((n, 3), np.float32)}
         kk = [(t, self.remap(p) if self.remap else p) for t, p in keys]
         for f in range(n):
-            t = min(f / FPS, dur)
+            t = min(f / fps, dur)
             pose = evaluate(kk, t)
             if over:
                 over(t, pose)
@@ -235,5 +237,7 @@ class Clips:
             fc.keyframe_points.foreach_set("co", co)
             fc.keyframe_points.foreach_set("interpolation", np.ones(n, np.int32))
             fc.update()
-        self.lengths[name] = (n - 1) / FPS
+        self.lengths[name] = (n - 1) / fps
+        if fps != FPS:
+            self.rates[name] = fps
         return act

@@ -12,6 +12,7 @@ import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fistkit as A  # noqa: E402
+import fine_export  # noqa: E402
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
@@ -383,7 +384,7 @@ COCK = m(STANCE, pos=(0.02, -0.06, -0.16), hips=(-6, 8, -38), head=(4, -6, 40), 
 FLUNG = m(STANCE, pos=(-0.02, 0.1, -0.12), hips=(-20, -6, 34), head=(12, 0, -28), hr=hand(-0.06, 0.66, -0.08), hl=lhand(0.2, -0.22, -0.4), er=(0.7, -0.7, 0.1), lip=0.5, jaw=0.5, fing_r=0.05, thumb_r=0.1,
           fr=(AX + 0.12, -0.3, AZ), fl=(-AX - 0.1, 0.32, AZ), fra=-30.0)
 THRU = m(FLUNG, hips=(-24, -4, 46), hr=hand(-0.3, 0.42, -0.34), hl=lhand(0.24, -0.26, -0.42), fing_r=0.5)
-C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="lin")), (0.24, THRU), (0.55, STANCE)])
+C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="lin")), (0.24, THRU), (0.55, STANCE)], fps=60)
 # LMB hold, the wind: sunk and twisted far, the right fist behind the hip, the left forearm up; it holds, trembling
 WIND = m(STANCE, pos=(0.03, -0.1, -0.24), hips=(-12, 8, -44), head=(8, -8, 44), hr=hand(0.24, -0.5, -0.46), hl=lhand(-0.02, 0.36, 0.06), el=(-0.8, 0.0, -0.7), lip=-0.8, jaw=0.08,
          fr=(AX + 0.14, -0.34, AZ), fl=(-AX - 0.12, 0.3, AZ), fra=-18.0)
@@ -402,7 +403,7 @@ C.bake("lmb_wind", 0.64, [(0, STANCE), (0.1, m(WIND, e="out")), (0.24, m(WIND, p
 PUNCH = m(STANCE, pos=(0, 0.3, -0.12), rot=(0, 0, 8), hips=(-26, -4, 30), head=(14, 0, -24), hr=hand(-0.06, 0.74, 0.02), hl=lhand(0.2, -0.3, -0.34), er=(0.8, -0.5, 0.1), lip=0.2, jaw=0.75,
           fr=(AX + 0.12, -0.5, AZ + 0.02), fl=(-AX - 0.1, 0.52, AZ), fra=-38.0, flt=0.0, frt=-10.0)
 OVER = m(PUNCH, pos=(0, 0.38, -0.14), hips=(-32, -6, 42), hr=hand(-0.12, 0.78, -0.04), head=(18, 0, -34))
-C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)])
+C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)], fps=60)
 # RMB hold: a low gather, both fists drawn in at the hips
 GATHER = m(STANCE, pos=(0, -0.04, -0.34), rot=(0, 0, 0), hips=(-24, 0, 0), head=(18, 0, 0), hr=hand(0.0, 0.2, -0.52), hl=lhand(0.0, 0.2, -0.52), er=(0.9, -0.5, 0), el=(-0.9, -0.5, 0),
            fr=(AX + 0.16, -0.06, AZ), fl=(-AX - 0.16, 0.06, AZ), frt=-16.0, flt=16.0, fra=0.0, fla=0.0, kr=(0.6, 1, 0), kl=(-0.6, 1, 0), lip=-0.7, jaw=0.06)
@@ -496,9 +497,10 @@ if OUT_GLB != "-":
         st = tr.strips.new(act.name, 0, act)
         tr.mute = False
     bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.export_scene.gltf(filepath=OUT_GLB, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="NLA_TRACKS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=93, export_extras=False, export_force_sampling=False,
-                              export_frame_range=False, export_optimize_animation_size=False, export_def_bones=False, export_bake_animation=False)
+    fine_export.export(arm, C.rates, OUT_GLB, dict(
+        export_format="GLB", use_selection=True, export_apply=False, export_animations=True, export_animation_mode="NLA_TRACKS",
+        export_skins=True, export_yup=True, export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=93,
+        export_extras=False, export_force_sampling=False, export_frame_range=False, export_optimize_animation_size=False,
+        export_def_bones=False, export_bake_animation=False))
     print("exported", os.path.getsize(OUT_GLB))
 print("clips", json.dumps(C.lengths))
