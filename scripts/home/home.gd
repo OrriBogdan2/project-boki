@@ -3677,8 +3677,8 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
-		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		Sfx.play("garden_trait")
+		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
@@ -4845,7 +4845,6 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
-	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
@@ -4889,8 +4888,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("garden_egg")
-	GardenSfx.cue("garden_egg", NEST_AT)
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.

@@ -195,7 +195,12 @@ const MIN_GAP := {
 	"land": 80,
 	"step0": 60,
 	"step1": 60,
-	"step2": 60
+	"step2": 60,
+	"xp_tick": 60,
+	"steal_won": 400,
+	"steal_lost": 400,
+	"hostile_cast": 100,
+	"armor_up": 120
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
@@ -226,6 +231,8 @@ var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
+var sound_gain := {}
 var last_played := {}
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
@@ -269,6 +276,7 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_sets()
+	sound_gain = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))["gain_db"]
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
@@ -652,7 +660,8 @@ func play(
 		voices.cut.emit(sname, rk, &"gap")
 		return
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	var v := vol_db + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r)
+	v += BLAST_DB if sname in BLAST else 0.0
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -733,7 +742,7 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.bus = bus
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry, "sound": sname, "bus": bus}
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(sound_gain.get(sname, 0.0)), "reach": carry, "sound": sname, "bus": bus}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:

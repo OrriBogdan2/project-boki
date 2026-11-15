@@ -10,7 +10,6 @@ const REACTIONS := [
 	["scripts/home/home.gd", "_pet_kin", "garden_pet"],
 	["scripts/home/home.gd", "_after_feed", "garden_feed"],
 	["scripts/home/home.gd", "_play_with_kin", "garden_toy"],
-	["scripts/home/home.gd", "_make_egg", "garden_egg"],
 	["scripts/ui/incubator_view.gd", "", "garden_egg"],
 	["scripts/home/home.gd", "_play_evolutions", "garden_trait"],
 	["scripts/ui/results.gd", "_kin_card", "garden_trait"],
