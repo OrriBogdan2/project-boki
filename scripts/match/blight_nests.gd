@@ -133,6 +133,7 @@ func wake(n: Dictionary, at: Vector3) -> void:
 
 func _cue(n: Dictionary) -> void:
 	m.sfx("v_skitter", n["pos"], -4.0, 0.42)
+	m.sfx("blight_rumble", n["pos"], -6.0)
 	m.sfx("thump", n["pos"], -10.0, 0.6)
 	m.fx.ring(n["pos"], 2.2, BlightModels.EMBER, rule("warn_s"))
 	m.blight_ping(n["pos"])
