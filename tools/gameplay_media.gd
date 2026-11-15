@@ -121,7 +121,7 @@ func _record(res: String) -> void:
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
 		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
 		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
-	if "--media-log" in OS.get_cmdline_user_args():     # logs only (clip 14's feet): headless, no video, same 1/30 s steps
+	if "--media-log" in OS.get_cmdline_user_args():     # the TSV only: headless, no video, same 1/30 s steps
 		args = ["--headless", "--fixed-fps", "30", "--path", ProjectSettings.globalize_path("res://"), "--"]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--media-child")
