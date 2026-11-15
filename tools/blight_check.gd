@@ -1,8 +1,8 @@
 extends RefCounted
 ## --blight-check: the Blight (scripts/match/blight.gd, blight_dir.gd). Its strength curve (weak
 ## early and on the outer islands, stronger with time, the core and night), where Wardens stand,
-## the grace period after landing, noise drawing Skitters in, a level-1 hunter beating or
-## outrunning an early Skitter, a Warden's light and shriek (a warning early, Skitters later),
+## noise in the open drawing no Skitters (they only come from nests: --blight-nest-check), a level-1
+## hunter beating or outrunning an early Skitter, a Warden's light and shriek (never makes Skitters),
 ## Skitters going for bots and bots fighting back, idle ones burrowing away, and the network
 ## snapshot of a Blight. Never touches the save.
 
@@ -53,6 +53,8 @@ func run(main: Node) -> void:
 	_noise_and_fights(main)
 	_warden(main)
 	_bots(main)
+	_tide(main)
+	_tide_sfx(main)
 	print("BLIGHT DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -136,29 +138,19 @@ func _spawns(main: Node) -> void:
 			if b.flat_dist(c["pos"]) < 8.0: bad_spot += 1
 		if m.lairs and not m.lairs.lair_of(b.pos, 3.0).is_empty(): bad_spot += 1
 	ok(bad_spot == 0, "Wardens stand clear of camps and lairs")
-	# the grace period: nothing comes for a squad in its first GRACE seconds, even if it's loud
+	# noise in the open draws nothing out of the ground: Skitters only come from nests (blight_nests.gd)
 	_quiet(m)
 	var P := m.player
-	B.land_at.clear()
+	B.land_at[P.team] = m.time - 600.0
+	var far := true
+	for n in B.nests.list:
+		far = far and P.flat_dist(n["pos"]) > 30.0
 	var n0 := B.spawned
-	_run(m, 2.0)
-	_run(m, BlightDir.GRACE - 6.0, func():
-		if int(m.time * 60.0) % 30 == 0: m.note_sound(P, P.pos, "shot"))
-	ok(B.spawned == n0, "nothing claws out of the ground in the first %ds after landing (%d spawned)" % [int(BlightDir.GRACE), B.spawned - n0])
-	# after it, noise brings them: a loud squad draws a Skitter
-	var t_end := m.time + 40.0
-	while m.time < t_end and B.spawned == n0:
-		if int(m.time * 60.0) % 20 == 0: m.note_sound(P, P.pos, "shot")
-		P.hp = P.max_hp
-		m.step(Match.DT)
-	var first: Array = B.alive().filter(func(x): return x.mkind == "bl_skitter")
-	print("BLIGHT after the grace period a loud squad drew %d Skitter(s) at t=%.1f (heat %.2f)" % [B.spawned - n0, m.time, float(B.heat.get(P.team, 0.0))])
-	ok(B.spawned > n0, "noise after the grace period draws Skitters")
-	ok(B.spawned - n0 <= 2, "early on that's one or two, not a swarm")
-	if not first.is_empty():
-		var f: Blight = first[0]
-		ok(f.flat_dist(P) > 10.0, "they claw out of the ground away from you (%.1f tiles)" % f.flat_dist(P))
-		ok(not m.sees(P.team, f.pos) or f.flat_dist(P) > 12.0, "... out of your sight")
+	_run(m, 30.0, func():
+		if int(m.time * 60.0) % 20 == 0: m.note_sound(P, P.pos, "boom")
+		P.hp = P.max_hp)
+	print("BLIGHT 30 s of blasts late in a run, %s every nest: %d Skitter(s)" % ["away from" if far else "near", B.spawned - n0])
+	ok(not far or B.spawned == n0, "noise away from any nest draws no Skitters (they only come from nests)")
 	m.queue_free()
 
 # ------------------------------------------------------------------ 3. noise, a fight, a chase
@@ -285,14 +277,14 @@ func _warden(main: Node) -> void:
 	ok(P.reveal_t > 0.0, "the light lights you up for everyone")
 	ok(B.skitters_alive() == n_sk, "early on the shriek is only a warning: no Skitters came out of it")
 	# a nearby idle Skitter heard the shriek
-	# late in a squad's run, a shriek brings Skitters out of the ground round the Warden
+	# late in a squad's run, a shriek still makes no Skitters of its own (it may wake a nest: --blight-nest-check)
 	B.land_at[P.team] = m.time - 600.0
 	W.set_level(B.level(W.pos, P.team))
 	W.shriek_cd = 0.0
-	var sh0 := B.skitters_alive()
+	var sh0 := B.spawned
 	W.shriek(P)
-	print("BLIGHT a late shriek (lvl %.2f) brought %d Skitters" % [W.lvl, B.skitters_alive() - sh0])
-	ok(B.skitters_alive() > sh0, "late on, a shriek brings Skitters")
+	print("BLIGHT a late shriek (lvl %.2f) made %d Skitters" % [W.lvl, B.spawned - sh0])
+	ok(B.spawned == sh0, "late on, a shriek still makes no Skitters of its own")
 	# crouching just past the shortened reach: not spotted
 	for b in B.alive():
 		if b != W: (b as Blight).burrow()
@@ -350,3 +342,103 @@ func _bots(main: Node) -> void:
 	var fl: Vector3 = Bot.new()._blight_flee(m, bot)
 	ok(fl != Vector3.INF and Vector2(fl.x - s3.pos.x, fl.z - s3.pos.z).length() > s3.flat_dist(bot), "a hurt bot picks a spot away from the Blight")
 	m.queue_free()
+
+# ------------------------------------------------------------------ 6. the tide's damage
+## The source's death circle per stage, flat, scaled by our medium health over theirs (heart.json).
+const TIDE_SRC := [3.0, 6.0, 50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0]
+
+func _tide(main: Node) -> void:
+	var m := _match(main, 7105, "clear", {"heart": true})
+	_quiet(m)
+	var H: Heart = m.heart
+	var rl := Heart.rules()
+	var k := float(Data.CLASSES["medium"]["hp"]) / float(rl["tide_src_hp"])
+	var t0 := float(rl["tide_start_s"])
+	var close := float(rl["tide_close_s"])
+	m.time = t0 - 1.0 - m.sess_t0
+	ok(Heart.tide_stage(m) == -1, "no tide stage before the tide starts")
+	var stages_ok := true
+	for st in Heart.TIDE_STAGES:
+		m.time = t0 + close * (st + 0.5) / Heart.TIDE_STAGES - m.sess_t0
+		var want: float = TIDE_SRC[st] * k
+		stages_ok = stages_ok and Heart.tide_stage(m) == st and is_equal_approx(Heart.tide_dmg(st), want)
+		var ttk := ""
+		for c in ["light", "medium", "heavy"]:
+			var ticks := ceili(float(Data.CLASSES[c]["hp"]) / Heart.tide_dmg(st))
+			ttk += " %s %ds" % [c, ticks * int(rl["tide_tick_s"])]
+		var from := t0 + close * st / Heart.TIDE_STAGES
+		print("BLIGHT tide stage %d from %.0fs: %.2f a tick (source %.0f), full health dies in%s"
+			% [st, from, Heart.tide_dmg(st), TIDE_SRC[st], ttk])
+	ok(stages_ok, "the close runs the source's 11 stages, each at its damage scaled by health")
+	m.time = t0 + close * 3.0 - m.sess_t0
+	ok(Heart.tide_stage(m) == Heart.TIDE_STAGES - 1, "the last stage holds once the ring is closed")
+	# a live tick: stage 2, the player outside the ring loses the stage's damage, the armor stays
+	m.time = t0 + close * 2.5 / Heart.TIDE_STAGES - m.sess_t0
+	var P: Hunter = m.player
+	var far := H.site + Vector3(Heart.tide_r(m) + 20.0, 0, 0)
+	P.teleport(m.world.free_spot_near(far, [], 1.0, 0.45, 15.0))
+	var outside := Vector2(P.pos.x - H.site.x, P.pos.z - H.site.z).length() > Heart.tide_r(m)
+	var hp0 := P.hp
+	var ar0 := P.armor
+	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
+	var lost := hp0 - P.hp
+	print("BLIGHT tide live: outside %s, lost %.2f health in two ticks, armor %.0f -> %.0f"
+		% [outside, lost, ar0, P.armor])
+	var two_ticks := absf(lost - Heart.tide_dmg(2) * 2.0) < 0.5
+	ok(outside and two_ticks and P.armor == ar0, "outside the ring: the stage's damage a tick, past armor")
+	P.teleport(m.world.free_spot_near(H.site, [], 1.0, 0.45, 6.0))
+	hp0 = P.hp
+	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
+	ok(P.hp >= hp0, "inside the ring the tide doesn't hurt")
+	m.queue_free()
+
+# ------------------------------------------------------------------ 7. the tide's sounds
+## Onset once when the tide starts, a sting at each new close stage and none inside one, the front's rumble on
+## the nearest point of the ring, louder the nearer the wall (content/sfx/tide.json, scripts/match/tide_sfx.gd).
+func _tide_sfx(main: Node) -> void:
+	Sfx.loop_stop(TideSfx.FRONT_KEY)       # (the last section's match was freed without a frame to lapse its hold)
+	var m := _match(main, 7106, "clear", {"heart": true})
+	_quiet(m)
+	var H: Heart = m.heart
+	var T: TideSfx = H.audio.tide
+	var rl := Heart.rules()
+	var t0 := float(rl["tide_start_s"])
+	var stage_s := float(rl["tide_close_s"]) / Heart.TIDE_STAGES
+	var files := ["tide_onset", "tide_rumble", "tide_warn"].all(func(n): return Sfx.ensure(n))
+	var reach := float(Sfx.sound_reach.get("tide_rumble", 0.0))
+	ok(files and reach >= 60.0, "the three tide sounds exist and the rumble carries")
+	m.step(Match.DT)
+	m.time = t0 - 1.0 - m.sess_t0
+	m.step(Match.DT)
+	ok(T.cues.is_empty() and not Sfx.loop_on(TideSfx.FRONT_KEY), "before the tide starts: no cue, no rumble")
+	m.time = t0 + 1.0 - m.sess_t0
+	m.step(Match.DT)
+	ok(T.cues == ["tide_onset"], "the tide starting plays the onset swell once (%s)" % [T.cues])
+	m.time = t0 + 2.0 - m.sess_t0
+	m.step(Match.DT)
+	ok(T.cues.size() == 1, "...and nothing more inside the same stage")
+	m.time = t0 + stage_s + 1.0 - m.sess_t0
+	m.step(Match.DT)
+	ok(T.cues == ["tide_onset", "tide_warn"], "the next close stage plays the warning sting once (%s)" % [T.cues])
+	m.time = t0 + stage_s * 2.0 + 1.0 - m.sess_t0
+	m.step(Match.DT)
+	ok(T.cues.size() == 3 and T.cues[2] == "tide_warn", "each new stage stings again")
+	# the front's rumble: on the ring's nearest point, rising as the wall comes close
+	var P: Hunter = m.player
+	var tr := Heart.tide_r(m)
+	var vols: Array = []
+	for gap: float in [60.0, 12.0]:
+		P.teleport(m.world.free_spot_near(H.site + Vector3(tr - gap, 0, 0), [], 1.0, 0.45, 6.0))
+		Sfx.listener = P.pos
+		m.step(Match.DT)
+		vols.append(_rumble_db())
+	var at: Vector3 = Sfx.loops[TideSfx.FRONT_KEY]["pos"] if Sfx.loop_on(TideSfx.FRONT_KEY) else Vector3.INF
+	var on_ring := absf(Vector2(at.x - H.site.x, at.z - H.site.z).length() - tr) < 0.5
+	print("BLIGHT tide rumble: %.1f dB at 60 m, %.1f dB at 12 m; on the ring %s" % [vols[0], vols[1], on_ring])
+	ok(on_ring and vols[1] > vols[0] + 3.0, "the rumble sits on the wall and rises as it nears you")
+	m.queue_free()
+
+func _rumble_db() -> float:
+	if not Sfx.loop_on(TideSfx.FRONT_KEY):
+		return -99.0
+	return (Sfx.loops[TideSfx.FRONT_KEY]["p"] as AudioStreamPlayer).volume_db

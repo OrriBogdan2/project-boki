@@ -1,4 +1,4 @@
-"""Pip's head from the Meshy scan of briefs/art-refs/pip_head.png (front, side, back; 40 credits): fitted on the rig, cut at the neck, decimated, baked
+"""Pip's head from the Meshy scan of the v2 turnaround's heads (front, 3/4, side, back; 40 credits): fitted on the rig, cut at the neck, decimated, baked
 to its own 2048 texture (colour and normal, selected to active). Ears, goggles, band, flowers and the bandage are the scan's.
 Run: blender -b --factory-startup --python tools/art1/pip_head_scan.py -- <scan.glb> <WORK> [tris]
 Out: WORK/head_scan.pkl (verts, faces, per-corner uv), WORK/face.jpg, face_normal.jpg, face_emit.jpg"""
@@ -23,7 +23,7 @@ a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, WORK = a[0], a[1]
 TRIS = int(a[2]) if len(a) > 2 else 6000
 SIZE = 2048
-HEAD_W = 0.524               # m, cheek tuft to cheek tuft (pip_head.png scale)
+HEAD_W = 0.50                # m, cheek tuft to cheek tuft at the nose's height (the v2 turnaround's head, a little smaller than the old sheet's)
 NOSE_Y = 0.255               # the nose tip's y from HC
 CUT = -0.215                 # the neck is cut here, from HC, under the collar leaves
 F = np.float32
@@ -44,9 +44,10 @@ me.vertices.foreach_get("co", co)
 co = co.reshape(-1, 3)
 P = co * (-1, -1, 1)                                     # to +Y facing, her right on +X
 i_nose = int(np.argmax(P[:, 1]))
-k = HEAD_W / float(P[:, 0].max() - P[:, 0].min())
+band = (np.abs(P[:, 2] - P[i_nose, 2]) < 0.01) & (P[:, 1] > P[i_nose, 1] - 0.3)     # cheek to cheek at the nose's height (the scan also has wings and a body)
+k = HEAD_W / float(P[band, 0].max() - P[band, 0].min())
 P = (P - P[i_nose]) * k + K.HC + (0, NOSE_Y, K.NOSE[2])
-P[:, 0] -= (P[:, 0].max() + P[:, 0].min()) / 2 - 0.0
+P[:, 0] -= (P[band, 0].max() + P[band, 0].min()) / 2
 print("scan", n, "k", round(k, 4), P.min(0).round(3), P.max(0).round(3))
 me.vertices.foreach_set("co", P.ravel())
 me.update()

@@ -4,6 +4,8 @@ extends RefCounted
 ## boom default kept), every telegraph shape shown, updated, expired and hidden, who sees what, the
 ## membership tests, pooling (no node growth over 300 frames of every shape), the cursor states (charge
 ## ring, full flare, perfect star) and the merge-start cleanup through ArchKit.drop_holds().
+## The range preview (AimReach): every ground-target slot of the 12 Hunters, aimed at twice its range, shows
+## the faint ring at the data range round the caster and the landing mark stopped on that range.
 ## With --shots-dir=<dir>: one screenshot per telegraph and cursor state (aimkit_*.png).
 
 var main: Node
@@ -30,12 +32,17 @@ func run(main_node: Node) -> void:
 	ak.step(m, 0.5)        # the rounds _aim_modes fired: Vex's firing brackets lapse, so only the shapes below show
 	_shapes(m, P, T)
 	_seen(m, P, T)
+	_net(m, P, T)
+	_soft(P)
 	_membership()
 	_pooling(m, P, T)
 	await _reticle(m, P)
 	_cleanup(m, P)
+	m.queue_free()
+	var g: Array = ak.setup("gunslinger", 30.0, "", false)
+	_ground_reach(g[0], g[1])
 	if shots != "":
-		m.queue_free()
+		g[0].queue_free()
 		await main.get_tree().process_frame
 		await load("res://tools/aimkit_shots.gd").new().take(main, shots)
 	print("AIMKIT DONE, %d checks, failures: %d" % [n, fails])
@@ -43,6 +50,7 @@ func run(main_node: Node) -> void:
 
 func _aim(P: Hunter, d: float) -> void:
 	P.inp["aim"] = P.pos + Vector3(d, 0.9, 0); P.inp["aim_y"] = P.pos.y
+	P.aim_dir()      # as a frame would: a cursor past the body sets the last good aim (feel-aim-near-body)
 
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
@@ -51,7 +59,13 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 	if m.shots.size() <= before:
 		return -1.0
 	var s: Dictionary = m.shots.back()
-	return float(s["life0"]) * (s["vel"] as Vector2).length()
+	# the sweep starts at the body (ShotOrigin), so the muzzle lead is off: flight past the muzzle
+	var lead := 0.0
+	if s.has("muzzle"):
+		var mz: Vector3 = s["muzzle"]
+		var st: Vector3 = s["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	var rng := float(P.wpn["range"])
@@ -61,6 +75,14 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	ok("mode: cursor past range clamps to range", is_equal_approx(AimMode.dist(P, 12.0), 12.0))
 	_aim(P, 0.4)
 	ok("mode: point-blank still travels the minimum", is_equal_approx(AimMode.dist(P, 12.0), AimMode.MIN_D))
+	var near := AimMode.place(P, 12.0)
+	var dx := near.x - P.pos.x
+	ok("place: a zone at a 0.4 m cursor lands there, not 1.5 m out", absf(dx - 0.4) < 0.01, "%.2f" % dx)
+	AimKit.circle(P, "pl", {"r": 1.0})
+	var mark: Vector2 = AimKit.entry(P, "pl")["at"]
+	ok("place: the default circle marker sits at the cursor too", absf(mark.x - P.pos.x - 0.4) < 0.01)
+	_aim(P, 20.0)
+	ok("place: past range clamps to range", absf(AimMode.place(P, 12.0).x - P.pos.x - 12.0) < 0.01)
 	_aim(P, 5.0)
 	ok("mode: max = always the full range", is_equal_approx(AimMode.dist(P, 12.0, AimMode.MAX), 12.0))
 	var pt := AimMode.point(P, 12.0)
@@ -94,18 +116,22 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	for s in m.shots: s["life"] = 0.0
 	m.step(DT)
 
-func _all_shapes(P: Hunter, k: float, T: Hunter) -> void:
-	AimKit.lane(P, "lane", {"len": 8.0, "len0": 2.0, "k": k, "width": 1.0, "width_to": 0.3, "chevrons": 3, "tip": true})
-	AimKit.dotted(P, "dotted", {"len": 9.0})
-	AimKit.vee(P, "vee", {"k": k, "glint": 0.4})
-	AimKit.cone(P, "cone", {"from": T.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k})
-	AimKit.circle(P, "circle", {"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)})
-	AimKit.sweet(P, "sweet", {"self": true, "k": k})
-	AimKit.arc_wall(P, "arc")
-	AimKit.swap(P, "swap", {"fill": k})
-	AimKit.line(P, "line")
-	AimKit.span(P, "span", {"len": 10.0})
-	AimKit.star(P, "star")
+func _all_shapes(caster: Hunter, k: float, other: Hunter, all := false) -> void:
+	var a := {"all": all}
+	var lp := {"len": 8.0, "len0": 2.0, "k": k, "width": 1.0, "width_to": 0.3, "chevrons": 3, "tip": true}
+	AimKit.lane(caster, "lane", a.merged(lp))
+	AimKit.dotted(caster, "dotted", a.merged({"len": 9.0}))
+	AimKit.vee(caster, "vee", a.merged({"k": k, "glint": 0.4}))
+	var cone := {"from": other.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k}
+	AimKit.cone(caster, "cone", a.merged(cone))
+	var disc := {"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)}
+	AimKit.circle(caster, "circle", a.merged(disc))
+	AimKit.sweet(caster, "sweet", a.merged({"self": true, "k": k}))
+	AimKit.arc_wall(caster, "arc", a)
+	AimKit.swap(caster, "swap", a.merged({"fill": k}))
+	AimKit.line(caster, "line", a)
+	AimKit.span(caster, "span", a.merged({"len": 10.0}))
+	AimKit.star(caster, "star", a)
 
 const IDS := ["lane", "dotted", "vee", "cone", "circle", "sweet", "arc", "swap", "line", "span", "star"]
 
@@ -164,6 +190,139 @@ func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)
+
+## Net (AimNet, event "tele"): every shape kind of a local hunter's `all` telegraph goes out once per
+## SEND_GAP, crosses the wire as JSON and draws on the other game under its remote copy as the caster drew
+## it; the caster's hide drops it there; aim reticles, echoes and events naming a local hunter stay put.
+func _net(m: Match, caster: Hunter, other: Hunter) -> void:
+	var layer := AimKit.layer(m)
+	AimNet.capture = true
+	AimNet.sent_log.clear()
+	_aim(caster, 6.0)
+	_all_shapes(caster, 0.5, other, true)
+	AimKit.lane(caster, "aim")
+	var ids := {}
+	for ev in AimNet.sent_log: ids[String(ev[2])] = ev
+	ok("net: one \"tele\" event per all telegraph, none for the aim lane", AimNet.sent_log.size() == IDS.size()
+		and ids.size() == IDS.size() and not ids.has("aim"), "%d sent" % AimNet.sent_log.size())
+	var t := 0.0
+	while t < 0.5 - 0.001:
+		m.time += DT      # the clock only: a real step here moves the match the pool check counts
+		t += DT
+		_all_shapes(caster, 0.5, other, true)
+	var per := AimNet.sent_log.size() / float(IDS.size())
+	var each := "%.1f sends each" % per
+	ok("net: refreshed every step for 0.5 s, it goes out about every 0.1 s", per >= 4.0 and per <= 7.0, each)
+	var wire: Array = []
+	for id in ids:
+		var ev: Array = (AimNet.sent_log.filter(func(x): return String(x[2]) == id) as Array).back().duplicate()
+		ev[1] = other.nid
+		wire.append(JSON.parse_string(JSON.stringify(ev)))
+	AimNet.net_in(m, wire[0])
+	ok("net: an event naming a hunter this game runs is ignored", not AimKit.shown(other, String(wire[0][2])))
+	other.remote = true
+	var before := AimNet.sent_log.size()
+	for ev in wire: AimNet.net_in(m, ev)
+	ok("net: the remote copy's entries are not sent back", AimNet.sent_log.size() == before)
+	for id in IDS:
+		var mine := AimKit.entry(caster, id)
+		var theirs := AimKit.entry(other, id)
+		var off := _unlike(mine, theirs)
+		ok("net %s: shows on the other game as the caster drew it" % String(mine.get("kind", id)), off == "", off)
+	var keep := float(AimKit.entry(other, "lane")["keep"])
+	ok("net: a received one outlives its keep by AimNet.LAG", is_equal_approx(keep,
+		float(AimKit.entry(caster, "lane")["keep"]) + AimNet.LAG))
+	layer.rebuild()
+	ok("net: both sets draw, the caster's and the remote copy's", layer.built == 2 * IDS.size(),
+		"built %d" % layer.built)
+	AimNet.sent_log.clear()
+	AimKit.hide(caster, "lane")
+	layer.rebuild()
+	var drop: Array = AimNet.sent_log.filter(func(x): return x.size() == 3 and String(x[2]) == "lane")
+	ok("net: the caster's hide sends the drop", drop.size() == 1)
+	if drop.size() == 1:
+		AimNet.net_in(m, ["tele", other.nid, "lane"])
+	ok("net: the drop takes it off the other game", not AimKit.shown(other, "lane") and AimKit.shown(other, "cone"))
+	AimNet.sent_log.clear()
+	AimKit.circle(caster, "one", {"self": true, "all": true})
+	# replaced inside the gap, never again
+	AimKit.circle(caster, "one", {"self": true, "all": true, "r": 3.0, "dur": 1.0})
+	m.time += AimNet.SEND_GAP
+	layer.rebuild()
+	var one: Array = AimNet.sent_log.filter(func(x): return x.size() == 4 and String(x[2]) == "one")
+	var late := one.size() == 2 and is_equal_approx(float(one[1][3]["r"]), 3.0)
+	ok("net: a one-off that replaces it inside the gap still goes out, at the next sweep", late, str(one.size()))
+	other.remote = false
+	AimKit.clear(caster)
+	AimKit.clear(other)
+	layer.rebuild()
+	AimNet.capture = false
+	AimNet.sent_log.clear()
+
+## "" when every drawn key of `b` matches `a` (to the wire's rounding), else the first that does not.
+func _unlike(a: Dictionary, b: Dictionary) -> String:
+	if a.is_empty() or b.is_empty():
+		return "missing (%s / %s)" % [a.size(), b.size()]
+	for k in a:
+		if k in AimNet.LOCAL or k == "keep":
+			continue
+		if not b.has(k):
+			return "%s: missing" % k
+		var x = a[k]
+		var y = b[k]
+		var same: bool
+		match typeof(x):
+			TYPE_VECTOR2: same = y is Vector2 and (x as Vector2).distance_to(y) < 0.002
+			TYPE_COLOR: same = y is Color and (x as Color).to_html(true) == (y as Color).to_html(true)
+			TYPE_FLOAT, TYPE_INT: same = absf(float(x) - float(y)) < 0.002
+			_: same = x == y
+		if not same:
+			return "%s: %s vs %s" % [k, x, y]
+	return ""
+
+## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
+func _soft(P: Hunter) -> void:
+	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
+	AimKit.cone(P, "soft_cone", {"len": 4.0, "deg": 70.0, "inner": 0.0, "fill": 1.0, "soft": true, "all": true})
+	var lane := measure(AimKit.entry(P, "soft_lane"), 0.6, 1.08)
+	var cone := measure(AimKit.entry(P, "soft_cone"), 0.6, 3.98)
+	ok("soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
+			lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5)
+	ok("soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
+			cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5)
+	AimKit.hide(P, "soft_lane")
+	AimKit.hide(P, "soft_cone")
+
+## [the drawn alpha at the shape's centre line `at` of the way along it, the alpha `edge` m out from the
+## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone).
+static func measure(e: Dictionary, at: float, edge: float) -> Array:
+	if e.is_empty():
+		return [-1.0, -1.0]
+	var g := AimGeo.new()
+	AimShapes.build(g, e)
+	var o: Vector2 = e["from"]
+	var u: Vector2 = e["dir"]
+	var mid := o + u * float(e["len"]) * at
+	var rim := mid + Vector2(-u.y, u.x) * edge if e["kind"] == "lane" else o + u * edge
+	return [alpha_at(g, mid), alpha_at(g, rim)]
+
+## The alpha the triangles of `g` stack to over ground point `p` (each blended over the last).
+static func alpha_at(g: AimGeo, at: Vector2) -> float:
+	var p := at + Vector2(0.0013, 0.0007)        # off the shared triangle edges, so none counts twice
+	var clear := 1.0
+	for i in range(0, g.v.size(), 3):
+		var a := Vector2(g.v[i].x, g.v[i].z)
+		var b := Vector2(g.v[i + 1].x, g.v[i + 1].z)
+		var c := Vector2(g.v[i + 2].x, g.v[i + 2].z)
+		var den := (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
+		if absf(den) < 1e-9:
+			continue
+		var wa := ((b.y - c.y) * (p.x - c.x) + (c.x - b.x) * (p.y - c.y)) / den
+		var wb := ((c.y - a.y) * (p.x - c.x) + (a.x - c.x) * (p.y - c.y)) / den
+		if wa < 0.0 or wb < 0.0 or wa + wb > 1.0:
+			continue
+		clear *= 1.0 - clampf(g.c[i].a * wa + g.c[i + 1].a * wb + g.c[i + 2].a * (1.0 - wa - wb), 0.0, 1.0)
+	return 1.0 - clear
 
 func _membership() -> void:
 	var o := Vector3.ZERO
@@ -257,3 +416,78 @@ func _cleanup(m: Match, P: Hunter) -> void:
 	# the base kit runs drop_holds every step while merged (ArchKit.tick); every kit's override runs first
 	var src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
 	ok("drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds", src.count("\t\tdrop_holds()") >= 2 and not src.contains("\t\t_drop_holds()"))
+
+## Every ground-target slot ("ground" in content/archetypes) and the id of its landing mark: "<slot>_spot" is
+## the held-key preview (Quick cast off, Match.aim_hold); the others are the kit's own aim hold.
+const GROUND := {
+	"gunslinger.x": "x_spot", "mage.e": "e_spot", "mage.x": "x_spot", "tender.e": "e_spot", "ostra.e": "e_spot",
+	"ostra.x": "x_spot", "rimewright.rmb": "rmb", "ostra.dash": "swap", "dolm.x": "x"}
+
+func _ground_slots() -> Array:
+	var out := []
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		for slot in ["rmb", "e", "x", "dash"]:
+			if (d.get(slot, {}) as Dictionary).has("ground"):
+				out.append("%s.%s" % [f.get_basename(), slot])
+	out.sort()
+	return out
+
+func _ground_reach(m: Match, P: Hunter) -> void:
+	var want := GROUND.keys()
+	want.sort()
+	ok("reach: the data's ground-target slots are the ones checked", _ground_slots() == want, str(_ground_slots()))
+	for key in GROUND:
+		var a := String(key).get_slice(".", 0)
+		var slot := String(key).get_slice(".", 1)
+		P.reclass(Arch.weight(a), a)
+		P.unlock_all()
+		P.lvl = 6
+		P.slot_lv["ult"] = 1
+		P.dashes = P.max_dashes()
+		AimKit.clear(P)
+		var g := AimReach.of(P.ak, slot)
+		_aim(P, 2.0 * g.x)
+		_aim_slot(m, P, key, slot)
+		var ring := AimKit.entry(P, slot + "_reach")
+		var me := Vector2(P.pos.x, P.pos.z)
+		ok("reach %s: the ring sits round the caster at the data range" % key,
+				not ring.is_empty() and absf(float(ring.get("r", 0.0)) - g.x) < 0.01
+				and (ring.get("at", Vector2.INF) as Vector2).distance_to(me) < 0.05, "%.1f m" % g.x)
+		var mark := AimKit.entry(P, GROUND[key])
+		var at: Vector2 = mark.get("b" if GROUND[key] == "swap" else "at", Vector2.INF)
+		var r_ok := g.y <= 0.0 or absf(float(mark.get("r", 0.0)) - g.y) < 0.01
+		var out := at.distance_to(me)
+		ok("reach %s: the landing mark stops on the range, cursor at 2x" % key,
+				not mark.is_empty() and absf(out - g.x) < 0.2 and r_ok, "%.2f of %.1f" % [out, g.x])
+		for k in ["sec_hold", "dash_down", "x_down"]:
+			P.inp[k] = false
+		ak.step(m, 0.5)
+	m.aim_hold = ""
+
+## Aim one slot the way a player does: hold its key (Quick cast off), or the kit's own hold.
+func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
+	match key:
+		"rimewright.rmb":
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			ak.step(m, 0.1)
+		"ostra.dash":
+			P.inp["dash_down"] = true
+			P.ak.on_dash(false)
+			ak.step(m, 0.1)
+		"dolm.x":
+			ok("reach dolm.x: R aims on its own hold, not Match's", not AimReach.holds(P.ak, "x"))
+			P.inp["x_down"] = true
+			P.ak.cast_ult()
+			ak.step(m, 0.1)
+		_:
+			if key == "tender.e":
+				m.aim_hold = "signature"
+				m._update_indicators(1.0)
+				ok("reach tender.e: her first E is self-cast, so no preview", not AimKit.shown(P, "e_spot"))
+				P.ak.use_e()
+			if slot == "x":
+				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
+			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
+			m._update_indicators(1.0)

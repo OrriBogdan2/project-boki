@@ -1,6 +1,6 @@
 extends "res://tools/vv_shots.gd"
 ## --ostra-orb-shots --shots-dir=<dir>: items 60 and 117's review shots in a live Arena match (xvfb with a renderer),
-## on the Sparkle/Vex shot rig. Strips crop round the orb (or Motley, for the glow) at gameplay zoom;
+## on the Sparkle/Vex shot rig. Strips crop round the orb (or Motley, for the glow) at gameplay zoom, then the Trade.
 ## <dir>/MANIFEST_ostra.txt gets one line per file. The rock row is a real blocking row with a box drawn on it.
 
 const ROW_X := 4.0           # m east of Ostra: the rock row
@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	await _impacts()
 	_rock_row()
 	await _through_wall()
+	await _trade()
 	var f := FileAccess.open(dir.path_join("MANIFEST_ostra.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)
@@ -141,3 +142,24 @@ func _through_wall() -> void:
 			marks.append([(dist - 0.6) / speed, file, file, cap, _orb_at])
 		marks.append([3.0 / speed, "full", file + "_view", cap, _orb_at])
 		await _shot(float(row[1]), 0.5, marks)
+
+## The Trade (Shift tap) at gameplay zoom: the lantern rising, near its peak, falling, and his arrival.
+func _trade() -> void:
+	await _reset(11.0, 3.0)
+	var land := home + Vector3(8.0, 0, 0)
+	_aim(land)
+	cam_at = home + Vector3(4.0, 0, 0)
+	K.on_dash(false)
+	var cap := "The Trade: lantern %s"
+	var marks := [
+		[0.35, "full", "trade_rise", cap % "rising", _star_at],
+		[0.95, "full", "trade_peak", cap % "at its peak", _star_at],
+		[1.55, "full", "trade_fall", cap % "falling onto the circle", _star_at],
+		[1.9, "full", "trade_arrive", "The Trade: he arrives (both ends fold in)", func(): return land],
+	]
+	await _go(2.1, Callable(), marks, 3.0)
+	cam_at = Vector3.ZERO
+
+func _star_at() -> Vector3:
+	var n = KitLooks.of(m).held.get("os_star", {}).get("n")
+	return (n as Node3D).global_position if n != null else P.position + Vector3(0, 0.9, 0)

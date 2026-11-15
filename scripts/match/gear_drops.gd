@@ -85,6 +85,9 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 	var ut := UtilityDrops.roll(m, name, at, rng, ctx)
 	if not ut.is_empty():
 		made.append(ut)
+	var ink := InkDrops.roll(m, name, at, ctx)
+	if not ink.is_empty():
+		made.append(ink)
 	return made
 
 ## What a bot starts with: a few slots filled, by its difficulty (what a player may bring: boots and

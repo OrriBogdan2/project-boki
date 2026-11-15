@@ -1,0 +1,93 @@
+# Checks every pull request to main must pass before it merges (the branch-protection required check is "pr-checks").
+# It runs the quick tier the release gates run (docs/GATE_0245.md "Checks"), headless, no GPU:
+#   Godot import (0 SCRIPT ERROR), --check (every script loads), gen_wiki --check, the matchmaker unit tests,
+#   and tools/check.sh (health --strict + the lint ratchet against tools/lint_baseline.json).
+# The long per-flag suite (all registry -check flags under xvfb, 900 s each) stays on the build servers.
+# Caches: the Godot binary (by version), the lint venv + glTF validator (by tools/lint-requirements.txt and
+# tools/lint_gate.py), and .godot. .godot is saved only from main pushes (PR caches can't be shared across PRs and
+# would fill the 10 GB repo quota); every run restores the newest one and Godot reimports only what changed.
+# release.yml and itch.yml build and ship; this workflow never exports.
+name: pr-checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]      # keeps the .godot cache warm for the next PRs
+  workflow_dispatch:
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.6.2"
+  GODOT: godot
+
+jobs:
+  pr-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Install Godot
+        run: |
+          set -e
+          if [ ! -x ~/godot-bin/godot ]; then
+            base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+            curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+            unzip -q godot.zip && mkdir -p ~/godot-bin && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot-bin/godot
+            rm godot.zip
+          fi
+          sudo ln -sf ~/godot-bin/godot /usr/local/bin/godot
+          godot --version
+          echo "XDG_DATA_HOME=$RUNNER_TEMP/xdg" >> "$GITHUB_ENV"
+
+      - name: Cache lint tools
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/boki-lint
+          key: boki-lint-${{ runner.os }}-${{ env.ImageOS }}-${{ hashFiles('tools/lint-requirements.txt', 'tools/lint_gate.py') }}
+
+      - name: Restore .godot
+        uses: actions/cache/restore@v4
+        with:
+          path: .godot
+          key: godot-import-${{ env.GODOT_VERSION }}-${{ github.sha }}
+          restore-keys: godot-import-${{ env.GODOT_VERSION }}-
+
+      - name: Godot import
+        run: |
+          godot --headless --path . --import > import.log 2>&1 || true
+          tail -n 3 import.log
+          if grep -q "SCRIPT ERROR" import.log; then grep -A2 "SCRIPT ERROR" import.log | head -n 40; exit 1; fi
+
+      - name: Save .godot
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: .godot
+          key: godot-import-${{ env.GODOT_VERSION }}-${{ github.sha }}
+
+      - name: Every script loads (--check)
+        run: |
+          timeout 600 godot --headless --path . -- --check > check.log 2>&1 || true
+          grep -E "^FAIL|SCRIPT ERROR" check.log | head -n 40 || true
+          grep -q "CHECK DONE, failures: 0" check.log
+
+      - name: Wiki is current (gen_wiki --check)
+        run: python3 tools/gen_wiki.py --check
+
+      - name: Matchmaker unit tests
+        run: python3 -m unittest discover -s server/matchmaker/tests
+
+      - name: Health and lint ratchet (tools/check.sh)
+        run: tools/check.sh

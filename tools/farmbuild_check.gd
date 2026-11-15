@@ -7,9 +7,13 @@ extends RefCounted
 ##   3. a placed building is a construction site: it pays gems + materials, drops out of the working
 ##      stations, is drawn scaffolded with a bar, can be moved, taken down for a full refund, undone
 ##   4. Boki build it: swings, progress, skill makes swings quicker, the finished building works
+##      4b. a Boki assigned to a site (Assign list in its panel) goes there within 5 s, keeps a slot of
+##      its own, stays until the site stands; the assignment is saved and tidied on load
 ##   5. upgrades: tier 2 and 3 cost materials and labour, need farm level, show on the model and
 ##      speed the station up; a station keeps working while it is upgraded
 ##   6. save and load of sites and tiers (JSON round trip), and an old save with none of it
+##   7. lot buildings (Workshop, Cottage, Armory, Challenge House) place as sites, Boki complete them for
+##      the same cost and gates, the Soul Shrine keeps its own gate, and an old save's marked-out lot becomes a site
 ## Never touches the real save.
 
 var bad := 0
@@ -57,6 +61,15 @@ func _mats(wood: int, stone: int, fibre: int, coals: int) -> void:
 	Save.d["mats"] = {"wood": wood, "stone": stone, "fibre": fibre}
 	Save.d["items"]["coals"] = coals
 
+func _build_job(hw: HomeWork, u: int, slot: int) -> Dictionary:
+	for j in hw.jobs:
+		if String(j["kind"]) == "build" and int(j["u"]) == u and int(j["slot"]) == slot: return j
+	return {}
+
+## The uids of the Boki in a save dictionary that are assigned to a site.
+func _crew_of(d: Dictionary) -> Array:
+	return d["roster"].filter(func(r): return r.has("build_at")).map(func(r): return r["uid"])
+
 func _sim(home, hw: HomeWork, secs: float, until: Callable = Callable()) -> void:
 	for i in int(secs / 0.05):
 		for k in home.kins:
@@ -66,6 +79,82 @@ func _sim(home, hw: HomeWork, secs: float, until: Callable = Callable()) -> void
 		hw.tick(0.05)
 		if until.is_valid() and until.call(): return
 		if i % 100 == 0: await main.get_tree().process_frame
+
+## The Job Board's Craft priority and a pin steer builders (docs/DEBT.md): three free Boki on chores
+## (ripe crops, Craft Low) and two sites. Craft on top and a pin to Craft put the pinned Boki at a site
+## within BUILD_ARRIVE secs; unpinned (Craft back to Low) it returns to a chore. (A pin is per Boki and
+## per kind of job: there is no per-site pin.)
+const BUILD_ARRIVE := 5.0       # secs for the pinned Boki to be hammering at a site
+
+func _building(k: Dictionary) -> bool:
+	return k.has("job") and String(k["job"]["kind"]) == "build"
+
+func _on_chore(k: Dictionary) -> bool:
+	return k.has("job") and String(k["job"]["kind"]) != "build"
+
+## Runs until `until` holds (or BUILD_ARRIVE secs pass): the secs it took, or -1.
+func _within(home, hw: HomeWork, until: Callable, secs := BUILD_ARRIVE) -> float:
+	var t := 0.0
+	while t < secs:
+		_ripen()
+		await _sim(home, hw, 0.25)
+		t += 0.25
+		if until.call(): return t
+	return -1.0
+
+## Every crop patch is ripe, so there is always a chore.
+func _ripen() -> void:
+	for pd in Save.d["plots"]:
+		var c: String = Data.CROPS.keys()[0]
+		pd["crop"] = c
+		pd["stage"] = int(Data.CROPS[c]["grow"])
+
+func _craft_steer(home, hw: HomeWork, hb: HomeBuild, pinned: Dictionary) -> void:
+	for r in Save.d["roster"]: Work.set_pin(r, "")
+	Work.set_prio("craft", 1)
+	_mats(60, 60, 60, 6)
+	hb.toggle()
+	for off in [Vector3(7, 0, 6), Vector3(-9, 0, 7)]:
+		hb.take("storage_chest")
+		_put(hb, _spot(hb, home.spots["house"] + off))
+	hb.toggle()
+	var made: Array = FarmSites.sites().duplicate()
+	ok(made.size() == 2, "two construction sites are marked out")
+	_ripen()
+	for k in home.kins: hw.drop(k)
+	hw.scan_t = 0.0
+	hw.scan()
+	var pk: Dictionary = home._kin_entry(pinned)
+	var first := await _within(home, hw, func() -> bool: return _on_chore(pk))
+	ok(first >= 0.0, "with Craft Low a free Boki is on a chore within %.0f s (%.2f s)" % [BUILD_ARRIVE, first])
+	Work.set_prio("craft", 3)
+	Work.set_pin(pinned, "craft")
+	hw.drop(pk)      # (the Job Board's pin menu drops the job, as here)
+	pk["t"] = 0.0
+	var at := await _within(home, hw, func() -> bool: return _building(pk) and String(pk["job"]["phase"]) == "work")
+	print("FARMBUILD  Craft top + pin: %s at a site after %.2f s" % [pinned["name"], at])
+	ok(at >= 0.0, "a Boki pinned to Craft (Craft on top) is hammering at a site within %.0f s" % BUILD_ARRIVE)
+	var chore_j: Array = hw.jobs.filter(func(j): return String(j["kind"]) != "build")
+	ok(not chore_j.is_empty() and not hw.takes_job(pinned, chore_j[0]), "while pinned it takes no chores")
+	Work.set_pin(pinned, "")
+	Work.set_prio("craft", 1)
+	hw.drop(pk)
+	pk["t"] = 0.0
+	var back := await _within(home, hw, func() -> bool: return pk.has("job"))
+	print("FARMBUILD  unpinned, Craft Low: back on a job after %.2f s" % back)
+	ok(Work.pin(pinned) == "" and hw.takes_job(pinned, chore_j[0]) and back >= 0.0,
+			"unpinning releases it: chores are open to it again and it picks a job within %.0f s" % BUILD_ARRIVE)
+	# tidy up: the sites come down (full refund) and the crops go
+	Work.set_prio("craft", 2)
+	for k in home.kins: hw.drop(k)
+	hb.toggle()
+	for e in made:
+		hb.pick_up_at(HomeLayout.deco_cells(e)[0])
+		hb.store_held()
+	hb.toggle()
+	for pd in Save.d["plots"]:
+		pd["crop"] = ""
+		pd["stage"] = 0
 
 func run(m: Node) -> void:
 	main = m
@@ -324,13 +413,89 @@ func run(m: Node) -> void:
 	ok(lvs.size() >= 1 and sorted_ok, "a higher building skill makes a swing quicker (%d builders seen)" % lvs.size())
 	var bj := {"kind": "build", "el": "craft", "u": cu}
 	ok(Work.level(rk, "craft") == 2 and Work.level(Save.d["roster"][0], "craft") == 0 and FarmSites.level(Save.d["roster"][0], bj) == 1 and FarmSites.level(rk, bj) == 2 and Work.speed(2) > Work.speed(1),
-			
+
 		"a Boki with no Craft knack still builds at skill 1; a Craft 2 Boki builds at 2, which is quicker (x%.2f)" % (Work.speed(2) / Work.speed(1)))
 	# a site whose builders are not allowed (Craft Off on the Job Board): nobody builds it
 	Work.set_prio("craft", 0)
 	var j_off := {"kind": "build", "el": "craft", "u": cu}
 	ok(not FarmSites.takes(rk, j_off), "Craft set to Off on the Job Board stops the building")
 	Work.set_prio("craft", 2)
+	await _craft_steer(home, hw, hb, ash)
+	# ---------------------------------------------------------------- 4b. assigning a Boki to a site
+	_mats(30, 30, 30, 6)
+	hb.toggle()
+	hb.take("quarry")
+	ok(_put(hb, _spot(hb, home.spots["house"] + Vector3(-5, 0, -6))), "a Quarry site goes down for the assignment rows")
+	hb.toggle()
+	var qu := int(_entry(L, "quarry")["u"])
+	hw.scan_t = 0.0
+	hw.scan()
+	var s0 := _build_job(hw, qu, 0)
+	var s1 := _build_job(hw, qu, 1)
+	ok(int(s0["crew"]) == 0 and hw.takes_job(rk, s0) and hw.takes_job(ash, s0) and hw.takes_job(rk, s1),
+			"before any assignment both Boki may take either slot of the site")
+	FarmSites.assign(ash, qu)
+	hw.reassign(ash)
+	hw.scan()
+	s0 = _build_job(hw, qu, 0)
+	s1 = _build_job(hw, qu, 1)
+	ok(FarmSites.crew(qu).size() == 1 and hw.takes_job(ash, s0) and not hw.takes_job(rk, s0) and hw.takes_job(rk, s1),
+			"the assigned Boki has a slot kept for it: the other one is left only the free slot")
+	ok(not hw.takes_job(ash, {"key": "w", "el": "tide", "kind": "water"}),
+			"an assigned Boki takes no other kind of job")
+	Work.set_prio("craft", 0)
+	ok(hw.takes_job(ash, s0) and not hw.takes_job(rk, s1),
+			"Craft Off on the Job Board stops the others, not the assigned Boki")
+	Work.set_prio("craft", 2)
+	var seen_at := [-1.0]          # sim seconds until the assigned Boki held its site's job (a lambda sees copies)
+	var t_sim := [0.0]
+	var stole := [0]
+	await _sim(home, hw, 5.0, func() -> bool:
+		t_sim[0] += 0.05
+		for k in home.kins:
+			var jb: Dictionary = k.get("job", {})
+			if String(jb.get("kind", "")) != "build" or int(jb["u"]) != qu:
+				continue
+			if k["rec"] == ash and seen_at[0] < 0.0: seen_at[0] = t_sim[0]
+			elif k["rec"] != ash and int(jb["slot"]) < 1: stole[0] += 1
+		return false)
+	ok(seen_at[0] > 0.0 and seen_at[0] <= 5.0,
+			"an assigned Boki is on its way to the site within 5 s (%.1f s)" % seen_at[0])
+	ok(stole[0] == 0, "no other Boki took the assigned Boki's slot (%d steals in 5 s)" % stole[0])
+	var rt: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
+	HomeLayout.ensure(rt)
+	var rt_ash: Dictionary = rt["roster"].filter(func(r): return r["uid"] == ash["uid"])[0]
+	ok(typeof(rt_ash.get("build_at")) == TYPE_INT and int(rt_ash["build_at"]) == qu and not _crew_of(rt).has(rk["uid"]),
+			"the assignment is saved on the Boki and comes back as a whole number")
+	for e in (rt["layout"]["deco"] as Array):
+		if int(e["u"]) == qu: e.erase("site")
+	HomeLayout.ensure(rt)
+	ok(_crew_of(rt).is_empty(), "a save whose site is already built loses the assignment on load")
+	await _sim(home, hw, 300.0, func() -> bool: return not FarmSites.has_site(_entry(L, "quarry")))
+	ok(not FarmSites.has_site(_entry(L, "quarry")) and not ash.has("build_at"),
+			"it stays until the site stands, then the assignment ends")
+	_mats(30, 30, 30, 6)
+	hb.toggle()
+	hb.take("quarry")
+	ok(_put(hb, _spot(hb, home.spots["house"] + Vector3(-8, 0, -8))), "a second site goes down")
+	hb.toggle()
+	var q2 := int(FarmSites.sites()[0]["u"])
+	FarmSiteAssign.open(home, FarmSites.entry(q2))
+	var btns: Array = home.panel_host.find_children("*", "Button", true, false)
+	var pick: Array = btns.filter(func(b): return b.text == "Assign" and not b.disabled)
+	var can_build: Array = Save.d["roster"].filter(func(r): return Work.can_work(r))
+	ok(home.panel_open != "" and pick.size() == can_build.size(),
+			"the site panel lists the free Boki with an Assign button each (%d)" % pick.size())
+	pick[0].pressed.emit()
+	ok(FarmSites.crew(q2).size() == 1, "picking one in the panel sends it to the site")
+	home._close_panel()
+	FarmSites.assign(ash, q2)
+	Work.assign(ash, 99)
+	ok(not ash.has("build_at") and Work.assigned(ash) == 99, "assigning a Boki to a station ends its site assignment")
+	FarmSites.assign(ash, q2)
+	ok(Work.assigned(ash) < 0 and FarmSites.site_of(ash) == q2, "and a site assignment replaces a station one")
+	FarmSites.assign(ash, -1)
+	Work.assign(ash, -1)
 	# ---------------------------------------------------------------- 5. upgrades
 	_stats(0, 0, 0, 24)          # farm level 2: tier 2 needs 3
 	_mats(40, 40, 40, 6)
@@ -444,5 +609,92 @@ func run(m: Node) -> void:
 	ok(old_cost.is_empty(), "and its new buildings still go up at once")
 	home4.queue_free()
 	await main.get_tree().process_frame
+	await _lots()
 	print("FARMBUILD DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
+## 7. The lot buildings go up as construction sites (FarmLots); there is no walk-up build.
+func _lots() -> void:
+	Save.d = _new_save()
+	Save.d["gems"] = 600
+	Save.d["matches"] = 1
+	for nm in ["Wisp", "Ash"]:
+		var r := Save.new_kin("wisplet", nm)
+		r["level"] = 5
+		Care.ensure(r)
+		for nd in Care.NEEDS: r["needs"][nd] = 100.0
+		Save.d["roster"].append(r)
+	HomeLayout.ensure(Save.d)
+	_stats(1, 1, 3, 130, 3)       # farm level 5, the first extraction and boss
+	_mats(40, 40, 40, 2)
+	var home = await main._hb_home()
+	var hb: HomeBuild = home.hb
+	home._close_panel()
+	hb.toggle()
+	var lots := ["workshop", "cottage", "armory", "board"]
+	var shore := Vector3(HomeLayout.LANDING.x, 0, HomeLayout.LANDING.z)       # open ground near the portal
+	hb.take_building("shrine")
+	var shrine_put := _put(hb, _spot(hb, shore, 5.0))
+	ok(not shrine_put and not HomeLayout.placed("shrine", Save.d),
+			"the Soul Shrine keeps its own gate, no lot without the expeditions and an ember (%s)" % Econ.shrine_why())
+	hb._drop_held()
+	var gems0 := int(Save.d["gems"])
+	for b in lots:
+		hb.take_building(b)
+		var cs := _spot(hb, shore, 5.0)
+		ok(_put(hb, cs), "the %s lot is put down" % b)
+		var e := FarmLots.entry(b)
+		var need: Dictionary = FarmLots.cost(b)
+		var standing: bool = Save.has_building(b) or home.lots[b]["built"]
+		ok(FarmSites.is_site(e) and int(e["site"]["need"]) == int(need["labour"]) and not standing,
+				"a %s is a site of %d swings and not a building yet" % [b, int(e["site"]["need"])])
+		ok(_scaffold(home, b), "the %s is drawn as scaffolding with a bar" % b)
+	ok(int(Save.d["gems"]) == gems0 and Work.mat("wood") == 40, "marking them out spent nothing")
+	hb.toggle()
+	var js := JSON.stringify(Save.d)
+	home.queue_free()
+	await main.get_tree().process_frame
+	Save.d = JSON.parse_string(js)
+	home = await main._hb_home()
+	var back := FarmLots.entry("armory")
+	ok(FarmSites.is_site(back) and typeof(back["site"]["got"]) == TYPE_INT and _scaffold(home, "armory"),
+			"a saved and loaded lot site is still a site, drawn")
+	home.hw.scan_t = 0.0
+	home.hw.scan()
+	await _sim(home, home.hw, 900.0, func() -> bool: return FarmLots.sites().is_empty())
+	await main.get_tree().create_timer(2.0).timeout      # the building pops up (Home._construct)
+	var made := true
+	for b in lots:
+		made = made and Save.has_building(b) and home.lots[b]["built"] and not FarmSites.has_site(FarmLots.entry(b))
+	var spent_gems := 90 + 110 + 40
+	var mats_ok := Work.mat("wood") == 40 - 6 and Work.mat("stone") == 40 - 4
+	ok(made and int(Save.d["gems"]) == gems0 - spent_gems and mats_ok,
+			"Boki finished all four for the old prices (gems %d, the Challenge House 6 wood and 4 stone)" % spent_gems)
+	# an old save: a lot marked out under the building pass but never built (and a marked-out shrine)
+	var od := Save.fresh()
+	var drip := Save.new_kin("puddlet", "Drip")
+	od["roster"].append(drip)
+	od["active"] = drip["uid"]
+	od["tutorial"] = {"hatched": true, "intro": true}
+	Save.d = od
+	var ol := HomeLayout.ensure(Save.d)
+	ol["b"]["workshop"] = {"x": 28, "z": 26, "r": 0}
+	ol["b"]["shrine"] = {"x": 49, "z": 35, "r": 0}
+	Save.d = JSON.parse_string(JSON.stringify(Save.d))
+	HomeLayout.ensure(Save.d)
+	var old := FarmLots.entry("workshop")
+	var paid: Dictionary = old.get("site", {}).get("paid", {"x": 1})
+	var unpaid: bool = FarmSites.is_site(old) and int(old["site"]["got"]) == 0 and paid.is_empty()
+	ok(unpaid and not Save.has_building("workshop"),
+			"an old save's marked-out lot loads as a site with nothing paid")
+	ok(not HomeLayout.placed("shrine", Save.d), "and a marked-out Soul Shrine goes back to being unplaced")
+	home.queue_free()
+	await main.get_tree().process_frame
+	home = await main._hb_home()
+	ok(_scaffold(home, "workshop"), "and the loaded farm draws it as a site")
+	home.queue_free()
+	await main.get_tree().process_frame
+
+## Does the lot's model carry a scaffold's progress bar?
+func _scaffold(home, b: String) -> bool:
+	return home.lots[b]["node"].get_child(0).get_node_or_null("Bar") is Sprite3D
