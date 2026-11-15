@@ -3,15 +3,16 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the green-fire rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a
-## foe damages and Dazes it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m, riding up
-## ramps and low ledges, and sticks where it meets a steep wall: a cone shows back toward you for its fuse,
-## then blasts, shoving everyone in it along the cone (toward you), hurting and Dazing them too. At the
-## lane's end on no foe and no wall, on the ground or in the air, it is a dud: a puff and nothing else (a
-## miss is a miss; the source's cone is wall-only). The rifle does +76% to a Dazed foe, in big gold numbers,
-## and the string doesn't decay on them. Slipstep goes where you move and you keep shooting. Longneedle:
-## stand still while the line narrows, the aim turning only so fast, then a long beam through walls. A knock
-## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
+## damages and Dazes it ("rat" Rattled in code) on the spot.
+## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
+## or on a placed wall or shield (it rides it, and drops if it goes): a cone shows
+## back toward you for its fuse, then blasts, shoving
+## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
+## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
+## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
+## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
+## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
@@ -26,6 +27,7 @@ const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats abov
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
 const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
+const BURR_R := 0.15                 # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const HIT_HOLD := 0.3                # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
@@ -451,6 +453,7 @@ func _tick_burrs(dt: float) -> void:
 		if float(b["fuse"]) >= 0.0:
 			# stuck: blinks faster, the cone shows back toward the thrower for everyone
 			b["fuse"] = float(b["fuse"]) - dt
+			BurrRide.tick(b, m.verbs.walls, m.world, dt)
 			var k := 1.0 - float(b["fuse"]) / float(b["fuse0"])
 			if is_instance_valid(n):
 				n.global_position = b["pos"]
@@ -487,6 +490,10 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 			return
 		var gy := ground(q).y
 		q.y = maxf(lerpf(float(b["y0"]), gy + BURR_RIDE, u * u) + 0.6 * sin(PI * u), gy + BURR_RIDE)
+		var obj: Dictionary = m.verbs.stopper(q, h.team, BURR_R)      # a shield, barricade, rink wall or rock
+		if not obj.is_empty():
+			_stick(b, at, obj)
+			return
 		var victim := _burr_victim(at, q)
 		if victim != null:
 			burrs.erase(b)
@@ -570,13 +577,16 @@ func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
 	daze_for[foe.get_instance_id()] = seconds
 
-## It meets a wall and sticks: the cone points back the way it came.
-func _stick(b: Dictionary, at: Vector3) -> void:
+## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides
+## that wall (BurrRide).
+func _stick(b: Dictionary, at: Vector3, on := {}) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	b["pos"] = at
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
+	if not on.is_empty():
+		BurrRide.pin(b, on, at, b["out"])
 	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
 	vfx("rmb_stick", at, b["out"])       # stuck: a small flare and a dull dust puff, nothing on a foe
 

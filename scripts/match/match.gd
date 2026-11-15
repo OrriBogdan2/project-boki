@@ -2891,6 +2891,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3879,6 +3881,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	BoxRevive.mirror_remote(self, dt)
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -4110,6 +4113,7 @@ func _update_box_hums() -> void:
 				_box_ray(b, true)
 			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
 			_box_ray_tick(b, prog)
+			BoxReviveFx.place(self, b, prog)
 			if int(time * 2.0) != int((time - DT) * 2.0):
 				note_sound(b.get("rev_by"), b["pos"], "revive")
 		elif key != "" and box_hums.has(key):
@@ -4121,6 +4125,7 @@ func _box_hum_stop(b: Dictionary) -> void:
 		box_hums.erase(key)
 		Sfx.loop_stop(key)
 	_box_ray(b, false)
+	BoxReviveFx.clear(b)
 
 ## The soft column of light and the ring on the ground over a box while it's being revived.
 func _box_ray(b: Dictionary, on: bool) -> void:
@@ -4207,6 +4212,8 @@ func _update_interact(dt: float) -> void:
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
 					var open_now: bool = h == player and hud != null and hud.loot_is(b)
+					if open_now:
+						h.set_hold("loot")     # (your open loot window is the channel: WardenOpen's pose)
 					var lt := ("Press %s again to smart loot  ·  click items to take them" % Settings.key_cap("interact")) if open_now else ("Press %s to open %s  ·  twice to smart loot" % [Settings.key_cap("interact"), whose])
 					best = {"kind": "loot", "box": b, "label": lt if h == player else "Hold %s to loot %s" % [Settings.key_cap("interact"), whose], "col": Life.box_color(b)}
 					break
@@ -4471,7 +4478,7 @@ func _update_training(dt: float) -> void:
 		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
+		"ledge": player.grap.size() > 0 or player.mantling(),
 		"smash": train.get("_smash", false),
 		"stagger": train.get("_stagger", false),
 		"weapon": train.get("_weapon", false),
