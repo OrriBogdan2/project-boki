@@ -497,7 +497,7 @@ func load_kin_content() -> void:
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
 		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
-			sp["trade_to"] = String(home["trade_to"])      # evolves when it comes home from a sleepover
+			sp["trade_to"] = String(home["trade_to"])  # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 
@@ -781,8 +781,8 @@ const MOBS := {
 		"ward": true
 	},
 	"gate":
+	# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
 	{
-		# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
 		# damage. 2000 health at tier 0: one bot ~2 min (with the guards each crack calls), three ~20 s
 		"name": "Gate Seal",
 		"hp": 2000.0,
