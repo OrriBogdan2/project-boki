@@ -16,7 +16,8 @@ extends RefCounted
 ##    the legs pass (feet together) and lowest with the legs apart; in a run lowest as the legs pass (the push-off)
 ##    and highest with the legs apart (the flight). A clip keyed the other way round is pulled towards it, at most
 ##    BOB_FIX_MAX; "loco.bob_m": [walk, run] is the up and down travel that aims at (m). Only as far as the blend
-##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob.
+##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob; and by
+##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -34,7 +35,7 @@ var bob_m := 0.035           # m: the hips' up and down travel at this speed
 var bob_sign := -1.0         # -1 walk (high when the legs pass), +1 run (low when they pass), 0 between
 var spread_mean := 0.0       # rad: running mean of the legs' pitch spread
 var spread_peak := 0.0       # rad: the widest spread above the mean, fading
-var fwd := 1.0               # 0..1: how far the loco blend points forward or back rather than sideways
+var pull := 1.0              # 0..1: how far the bob is pulled in step (forward or back, not sideways; "bob_fix")
 var hips := -1               # hips bone index
 var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
 var hips_keyed := false      # the clips do key it (data "offset_bones": Motley's spring): their height, not the rest
@@ -86,7 +87,8 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	var bm: Array = lc.get("bob_m", BOB_M)
 	bob_m = lerpf(float(bm[0]), float(bm[1]), w)
 	bob_sign = clampf((w - 0.5) * 4.0, -1.0, 1.0)
-	fwd = 1.0 - side_k
+	var bf: Array = lc.get("bob_fix", [1.0, 1.0])
+	pull = (1.0 - side_k) * lerpf(float(bf[0]), float(bf[1]), w)
 	var cycle := lerpf(walk_len, run_len, w)
 	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
 	return clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, RATE_MAX) * run_len / cycle
@@ -105,7 +107,7 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
 		var dev := (gy - hips_y) * bob
 		hp.y = base - (gy - hips_y) * (1.0 - bob) * legs_w
-		hp.y += clampf(_bob_target(a, dt) - dev, -BOB_FIX_MAX, BOB_FIX_MAX) * legs_w * fwd
+		hp.y += clampf(_bob_target(a, dt) - dev, -BOB_FIX_MAX, BOB_FIX_MAX) * legs_w * pull
 		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])
