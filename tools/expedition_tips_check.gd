@@ -2,8 +2,9 @@ extends RefCounted
 ## --expedition-tips-check: the one-time expedition tips (ExpeditionTips through Match._tip). In a real
 ## match: no tip at the start; the Blight tip only once the ring closes within BLIGHT_M of you; the camp
 ## tip after your first monster kill; the deathbox tip with the live interact key at a lootable box; each
-## once per save (a seen tip never comes back, the next one is not held behind it). The tutorial match and
-## the Training Grounds show none.
+## once per save (a seen tip never comes back, the next one is not held behind it); the wall-kick tip with
+## the live jump key when airborne against a kickable wall, none after a kick of your own. The tutorial match
+## and the Training Grounds show none.
 var bad := 0
 
 
@@ -15,7 +16,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	for k in ["blight", "camp", "deathbox"]:
+	for k in ["blight", "camp", "deathbox", "wallkick"]:
 		Save.d["tutorial"].erase(k)
 	var m := Match.new()
 	main.add_child(m)
@@ -41,13 +42,30 @@ func run(main: Node) -> void:
 	var line := String(ExpeditionTips.next(m)[1]) if _due(m) == "deathbox" else ""
 	ok(line.contains(Settings.key_cap("interact")), "a lootable deathbox: the tip with the interact key")
 	Save.d["tutorial"]["deathbox"] = true
-	ok(ExpeditionTips.next(m).is_empty(), "all three seen: nothing more on this save")
+	_wall_rows(m, p)
+	ok(ExpeditionTips.next(m).is_empty(), "all four seen: nothing more on this save")
 	m.queue_free()
 	ok(_via_tips(main, "") == true, "a real match: Match._tips shows the camp tip")
 	for k in ["tutorial", "arena"]:
 		ok(_via_tips(main, k) == false, "%s match: Match._tips shows none of them" % k)
 	print("EXTIPS DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The wall-kick tip: on the ground none; in the air against a kickable wall, the line with the jump key;
+## a save whose player has kicked on their own never sees it.
+func _wall_rows(m: Match, p: Hunter) -> void:
+	p.grounded = true
+	p.wall_touch_t = 0.2
+	ok(_due(m) == "", "on the ground by a wall: no wall-kick tip")
+	p.grounded = false
+	p.last_gy = p.pos.y
+	ok(_due(m) == "wallkick" and String(ExpeditionTips.next(m)[1]).contains(Settings.key_cap("jump")),
+		"in the air against a kickable wall: the wall-kick tip with the jump key")
+	p.stats["wall_kicks"] = 1
+	ok(_due(m) == "" and Save.d["tutorial"].get("wallkick", false), "kicked on your own: marked seen, never shown")
+	p.stats.erase("wall_kicks")
+	p.wall_touch_t = 0.0
 
 
 func _due(m: Match) -> String:
