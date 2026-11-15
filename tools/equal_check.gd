@@ -340,6 +340,7 @@ func _armor_levels() -> void:
 	for i in 2: await main.get_tree().process_frame
 	ok(float(hud.get_meta("armor_tick_at", -9.0)) < m.time - ArmorHud.TICK,
 			"the tick is over %.1f s after the hit, no new hit" % ArmorHud.TICK)
+	_armor_up_own(P, B)
 	for i in 3: B.hurt(100.0, P, {"src": "shot"})
 	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
 			"enough damage levels your armor up: it blocks more (tier %d)" % P.armor_tier)
@@ -347,6 +348,7 @@ func _armor_levels() -> void:
 	ok(is_equal_approx(P.max_armor - base, tier_dur),
 			"its durability is the tier's (%.0f -> %.0f; --armour-check holds the numbers)" % [base, P.max_armor])
 	ok(B.armor_tier == 0, "the one who was hit does not level")
+	_armor_up_rival(m, P, B)
 	var xp0 := P.armor_xp
 	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
 	mob.hurt(30.0, P, {"src": "shot"})
@@ -359,6 +361,51 @@ func _armor_levels() -> void:
 	ok(m.hud != null and ResourceLoader.exists("res://scripts/ui/armor_hud.gd"),
 			"the HUD has the armor badge (ArmorHud)")
 	await _drop(m)
+
+## The tier-up cue (Juice.armor_up), part 1: a break and a heal play no cue, then your own tier-up plays the
+## fuller one at the tier's pitch (P is set 50 xp short of tier 1, so B's 150 hp is enough whatever the tier's xp is).
+func _armor_up_own(P: Hunter, B: Hunter) -> void:
+	Sfx.listener = P.pos
+	var own0 := int(Sfx.last_played.get("armor_up_own", -1000))
+	var near0 := int(Sfx.last_played.get("armor_up", -1000))
+	P.armor_xp = float(Hunter.ARMOR_TIERS[1][2]) - 50.0
+	P.armor = 5.0
+	P.hurt(40.0, B, {"src": "shot"})
+	P.heal(30.0)
+	ok(P.armor <= 0.0 and int(Sfx.last_played.get("armor_up_own", -1000)) == own0
+			and int(Sfx.last_played.get("armor_up", -1000)) == near0, "an armor break and a heal play no tier-up cue")
+	B.hurt(150.0, P, {"src": "shot"})
+	ok(P.armor_tier == 1 and int(Sfx.last_played.get("armor_up_own", -1000)) > own0
+			and int(Sfx.last_played.get("armor_up", -1000)) == near0, "your own tier-up plays the fuller cue, once")
+	var p1 := Juice.armor_up_pitch(1)
+	var p4 := Juice.armor_up_pitch(4)
+	var own_pitch := _cue_pitch("armor_up_own")
+	ok(is_equal_approx(own_pitch, p1) and p4 > p1, "pitched by tier: higher is brighter (%.2f-%.2f)" % [p1, p4])
+
+## Part 2: a rival's tier-up plays the short positional cue; out of earshot nothing (the falloff of other combat cues).
+func _armor_up_rival(m: Match, P: Hunter, B: Hunter) -> void:
+	var near0 := int(Sfx.last_played.get("armor_up", -1000))
+	var own0 := int(Sfx.last_played.get("armor_up_own", -1000))
+	Sfx.listener = B.pos + Vector3(4, 0, 0)
+	P.hp = 9000.0
+	P.max_hp = 9000.0
+	P.hurt(400.0, B, {"src": "shot"})
+	ok(B.armor_tier >= 1 and int(Sfx.last_played.get("armor_up", -1000)) > near0
+			and int(Sfx.last_played.get("armor_up_own", -1000)) == own0, "a rival's tier-up plays the positional cue")
+	var pitch := _cue_pitch("armor_up")
+	ok(is_equal_approx(pitch, Juice.armor_up_pitch(B.armor_tier)), "...at its tier's pitch (%.2f)" % pitch)
+	var far0 := int(Sfx.last_played.get("armor_up", -1000))
+	Sfx.listener = B.pos + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	B.armor_gain(5000.0)
+	m._armor_up(B)
+	ok(int(Sfx.last_played.get("armor_up", -1000)) == far0, "a tier-up out of earshot is not played")
+
+## The pitch the pool voice playing `sname` was started at (0 if none).
+func _cue_pitch(sname: String) -> float:
+	for p in Sfx.players:
+		if p.playing and p.stream == Sfx.streams.get(sname):
+			return p.pitch_scale
+	return 0.0
 
 # ------------------------------------------------------------------ bots
 func _bots() -> void:
