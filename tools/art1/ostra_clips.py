@@ -220,11 +220,10 @@ CLIPS = {
     # ---------------------------------------------------------------- Shift: Lantern Trade
     # holding Shift: the spring compresses, the smoke winds on
     "swap_aim": {"len": 0.66, "base": STILL, "add": lambda P, t: t > 0.16 and twitch(0.35, 30.0)(P, t), "keys": [(0.00, {}), (0.167, AIM_LOW, "out"), (0.66, AIM_LOW)]},
-    # the launch: the spring lets go with the lob (0.14 it leaves)
+    # the launch: the lantern leaves with the press, so the lob stroke is done by 0.033 (the coil is swap_aim's hold; --contact-check)
     "swap": {"len": 0.85, "base": AIM_LOW, "keys": [
         (0.00, {}),
-        (0.067, {"hR": (0.28, -0.32, 0.86), "spine": (6.0, 24.0, 4.0), "lift": (0.0, 0.0, -0.28)}),
-        (0.133, {"hR": (0.14, 0.26, 1.60), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 0.9, -0.4), "eR": (1.0, -0.2, -0.3), "cR": 0.05, "sR": 1.0, "hL": (-0.34, -0.05, 0.98), "fL": (-0.4, -0.3, -0.8), "pL": (0.5, 0.3, -0.3),
+        (0.033, {"hR": (0.14, 0.26, 1.60), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 0.9, -0.4), "eR": (1.0, -0.2, -0.3), "cR": 0.05, "sR": 1.0, "hL": (-0.34, -0.05, 0.98), "fL": (-0.4, -0.3, -0.8), "pL": (0.5, 0.3, -0.3),
                   "spine": (-10.0, -12.0, -5.0), "head": (-26.0, 8.0, -4.0), "jaw": 10.0, "cheek": 1.0, "lift": (0.0, 0.04, 0.16), "smoke": 0.0, "box": (0.0, 0.0)}, "smooth"),
         (0.30, {"lift": (0.0, 0.0, -0.05)}),
         (0.43, {"hR": (0.2, 0.22, 1.46), "fR": (0.3, 0.5, 0.8), "cR": 0.2, "head": (-20.0, 8.0, 6.0), "jaw": 5.0, "lift": (0.0, 0.0, 0.03)}),

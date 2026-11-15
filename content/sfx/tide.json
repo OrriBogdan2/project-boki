@@ -1,0 +1,18 @@
+{
+ "group": "tide",
+ "name": "Blight tide",
+ "script": "tools/gen_sfx_tide.py",
+ "sounds": {
+  "tide_onset": "cast",
+  "tide_rumble": "loop",
+  "tide_warn": "cast"
+ },
+ "reach": {
+  "tide_rumble": 70
+ },
+ "loops": [
+  "tide_rumble"
+ ],
+ "signature": [],
+ "replaces": []
+}
