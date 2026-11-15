@@ -9776,3 +9776,4 @@ READY ext/stuck-integ-aeb8eb0f c7db1ef82a (supersedes: fix-canary-glide-spike-11
 READY ext/stuck-integ-b6204ee2 05495a401b (bulk-rebase: origin/main merged in mechanically, was 5a5ebc14b1; union 2 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-hunters1-1114 b8e6c98e492db7b88708044e03843726be654c2f (merge lane hunters1: 9 anim branches resolved on main; suite NEW-RED 0, export dry-run OK)
 READY ext/merge-lane-vfxsfx2-1115 a722f1d4c224 (merge lane vfxsfx2 partial bundle: sfx-pick-taken + vfx-vex-precast-slab residue; targeted checks NEW-RED 0, export-pack 446.3 MB)
+READY ext/fix-strafe-cadence-1115 4d4dde3817e077e87a74a7f40b2d3273d60c8a5d (strafe drift: the 35%-slow reading was the camera lean skewing the foot log; rig fixed (--media-log, model-frame height), Kael side_foot_mps, drift table + before/after mp4 in /home/boki/anim/strafe_1115)
