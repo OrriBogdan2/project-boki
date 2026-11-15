@@ -5,22 +5,34 @@ extends RefCounted
 ## house decor and some of their Boki, all from the island snapshot they already publish (no new writes);
 ## the showcase wall shows the Boki in clanbase/<gid>, cleaned by Social.clean_clanbase.
 
-const SLOTS := 24               # corner places round the island; at least Social.CLAN_CAP so every member fits
-const KIN_BUDGET := 24          # corner Boki on the island at most (each runs the farm kin AI), split across members
-const KIN_PER_CORNER := 3       # a corner's Boki when the clan is small enough
+const SLOTS := 24  # corner places round the island; at least Social.CLAN_CAP so every member fits
+const KIN_BUDGET := 24  # corner Boki on the island at most (each runs the farm kin AI), split across members
+const KIN_PER_CORNER := 3  # a corner's Boki when the clan is small enough
 # where a corner's house decor stands, in metres beside the sign
 const DECOR_AT := [Vector3(1.0, 0, 0.4), Vector3(-1.0, 0, 0.4)]
-const RING := 0.62              # corners sit at this fraction of the home island's radius
-const DECOR_SCALE := 0.45       # house furniture is room-sized; shrunk to sit beside a signpost
-const WALL_GAP := 0.9           # metres between Boki on the showcase wall
+const RING := 0.62  # corners sit at this fraction of the home island's radius
+const DECOR_SCALE := 0.45  # house furniture is room-sized; shrunk to sit beside a signpost
+const WALL_GAP := 0.9  # metres between Boki on the showcase wall
+
 
 ## Reads the clan's members, roll and base doc, then goes there. The house gifts go to the founder.
 static func open(gid: String, gdoc: Dictionary) -> void:
 	var founder := Social.txt_of(gdoc.get("founder"))
-	Social.guild_members(gid, func(members: Array):
-		Social.clan_roster(gid, founder, func(roll: Array):
-			Social.get_doc("clanbase/" + gid, func(d: Dictionary):
-				Game.goto("home", {"visit": snapshot(gid, gdoc, members, roll, d), "visit_id": founder}))))
+	Social.guild_members(
+		gid,
+		func(members: Array):
+			Social.clan_roster(
+				gid,
+				founder,
+				func(roll: Array):
+					Social.get_doc(
+						"clanbase/" + gid,
+						func(d: Dictionary):
+							Game.goto("home", {"visit": snapshot(gid, gdoc, members, roll, d), "visit_id": founder})
+					)
+			)
+	)
+
 
 ## The visit snapshot: shaped like Social.clean_island's, named for the clan; its Boki are the corners' Boki.
 ## members: [{id, d}] as Social.guild_members gives them; roll: Social.clan_roster rows; base_doc: raw clanbase doc.
@@ -36,6 +48,7 @@ static func snapshot(gid: String, gdoc: Dictionary, members: Array, roll: Array,
 	snap["roster"] = kin
 	snap["clan_base"] = {"corners": cs, "showcase": Social.clean_clanbase(base_doc, ids)["showcase"]}
 	return snap
+
 
 ## One corner per member: {id, name, slot, kin, decor}. A member's corner seed (from the roll, or the one
 ## they'd be given) picks the slot; the next free slot if two seeds collide.
@@ -60,9 +73,17 @@ static func corners(gid: String, members: Array, roll: Array) -> Array:
 			var k: Dictionary = rec.duplicate()
 			k["owner"] = id
 			kin.append(k)
-		out.append({"id": id, "name": m["d"]["name"], "slot": slot, "kin": kin,
-			"decor": (m["d"]["decor"] as Array).slice(0, DECOR_AT.size())})
+		out.append(
+			{
+				"id": id,
+				"name": m["d"]["name"],
+				"slot": slot,
+				"kin": kin,
+				"decor": (m["d"]["decor"] as Array).slice(0, DECOR_AT.size())
+			}
+		)
 	return out
+
 
 ## home.gd calls this once a visit is built; it draws nothing unless the visit is a clan base.
 static func draw(home: Node3D, world: World, kins: Array, base: Dictionary) -> void:
@@ -87,6 +108,7 @@ static func draw(home: Node3D, world: World, kins: Array, base: Dictionary) -> v
 	var wall_at := world.free_spot_near(Vector3(mid.x, 0, mid.y), taken, 3.0)
 	_wall(root, base["showcase"], names, wall_at)
 
+
 ## A signpost with the member's name, facing the middle, and their decor beside it.
 static func _corner(root: Node3D, corner: Dictionary, at: Vector3, a: float) -> void:
 	var holder := Node3D.new()
@@ -103,6 +125,7 @@ static func _corner(root: Node3D, corner: Dictionary, at: Vector3, a: float) -> 
 		f.rotation.y = int(e["r"]) * PI * 0.5
 		holder.add_child(f)
 
+
 ## The member's Boki start out in their corner.
 static func _gather(world: World, kins: Array, who: String, at: Vector3) -> void:
 	var near: Array = [at]
@@ -113,6 +136,7 @@ static func _gather(world: World, kins: Array, who: String, at: Vector3) -> void
 		near.append(p)
 		(kd["node"] as Node3D).position = p
 		kd["pos"] = p
+
 
 ## A long shelf with each showcased Boki standing on it, its name and its keeper's (names: member id -> name).
 static func _wall(root: Node3D, wall: Array, names: Dictionary, at: Vector3) -> void:

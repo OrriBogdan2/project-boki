@@ -11,6 +11,7 @@ const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
 const SETTLE_SPEED := 4.0      # time scale while settling
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
+const ROWS := 18               # rows a full run asserts: fewer means a step errored out and skipped its rows
 
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
@@ -50,26 +51,33 @@ func step(m: Match, secs: float) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	# the layered stems and the "title" track are the first score's (Soundtrack); --soundtrack-check covers the rest
+	Settings.set_v("soundtrack", Soundtrack.OWN_STYLE, false)
 	Save.d["music"] = Save.d.get("music", [])
 	await _training_duel_leave()
 	await _match_to_title()
 	await _farm_to_title()
+	ok("all %d rows ran" % ROWS, n == ROWS, "%d ran" % n)
 	print("MUSICLEAVE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Opens a screen the way the game does (Game.goto) and waits for it to be up.
+## Opens a screen the way the game does (Game.goto) and waits for it to be up. With fades on (any
+## display, xvfb too) the old screen stays current until the 0.3 s ink has covered it, so this waits
+## for a new current screen, not a fixed frame count.
 func go(screen: String, opts := {}) -> Node:
+	var was: Node = main.current
 	Game.goto(screen, opts)
 	for i in 6:
+		await main.get_tree().process_frame
+	while main.current == was or not is_instance_valid(main.current) or not main.current.is_inside_tree():
 		await main.get_tree().process_frame
 	return main.current
 
 func start_match(opts: Dictionary, live := false) -> Match:
 	if live:
 		# the real way in: the loading screen, then the match running on its own for a while
-		var was: Node = main.current      # (the old screen stays current until the 0.3 s fade has covered it)
 		var m0: Match = await go("match", opts)
-		while m0 == was or not is_instance_valid(m0) or not m0.is_inside_tree() or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
+		while not is_instance_valid(m0) or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
 			await main.get_tree().process_frame
 			m0 = main.current
 		return m0
@@ -100,8 +108,8 @@ func _training_duel_leave() -> void:
 	a = audible()
 	ok("leave duel: no stem of the match score is left", Sfx.layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("layer:")), str(a))
 	ok("leave duel: only the farm's own music + ambience", Sfx.music_name.begins_with("home") or Sfx.music_name in ["orchard", "meadow", "summit"], "music '%s' %s" % [Sfx.music_name, str(a)])
-	var match_beds := ["abyss", "ruins"]      # music_dir's beds; the farm keeps its own (HomeAmbience)
-	ok("leave duel: no match ambience beds (abyss / ruins)", match_beds.all(func(n): return not Sfx.amb_layers.has(n)) and a.keys().all(func(k): return not String(k).trim_prefix("amb_layer:") in match_beds), str(a))
+	# the farm plays its own garden beds (HomeAmbience: time of day + zone), so only the match's beds must be gone
+	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.MATCH_BEDS.all(func(b): return not Sfx.amb_layers.has(b) and not a.has("amb_layer:" + b)), str(a))
 	ok("leave duel: nothing stray on the Music bus", a.keys().all(func(k): return not String(k).begins_with("stray")), str(a))
 	await go("title")
 	await settle()

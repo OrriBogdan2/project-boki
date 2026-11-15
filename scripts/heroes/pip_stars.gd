@@ -1,7 +1,7 @@
 class_name PipStars
 extends RefCounted
-## Pip's gold constellations (the emission layer of art/wardens/pip): they rest faint and brighten while she heals. The
-## kit calls pulse() on each heal tick; the glow falls back by itself, nothing runs between pulses.
+## A model's emission layer rests faint and brightens on a pulse (Pip's appeal3 look has none: the stars are paint).
+## The kit calls pulse() on each heal tick; the glow falls back by itself, nothing runs between pulses.
 ## Any model's emission layer can use it: Cinder's magma cracks flare on each tick of her fire (ashwick_kit.gd).
 
 const PEAK := 3.2  # the layer's emission at the top of a pulse

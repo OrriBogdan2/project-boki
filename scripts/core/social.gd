@@ -174,9 +174,7 @@ func publish_profile(force := false) -> void:
 static func profile_doc() -> Dictionary:
 	var roster: Array = []
 	for r in KinBox.farm().slice(0, 12):       # visitors see the kin out on your farm
-		Evo.ensure(r)
-		roster.append({"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
-			"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"], "shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)})
+		roster.append(snap_kin(r))
 	var d := {
 		"name": Save.d.get("name", "Hunter"), "cls": Data.class_of_save(), "weapon": Save.d.get("weapon", ""),
 		"active": Save.d.get("active", ""), "roster": roster,
@@ -184,12 +182,18 @@ static func profile_doc() -> Dictionary:
 		"plots": Save.d["plots"], "gh_plots": Save.d.get("gh_plots", []),
 		"extracts": int(Save.d.get("extracts", 0)), "matches": int(Save.d.get("matches", 0)),
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
-		"tag": ClanInfo.my_tag(), "last": ClanInfo.last_deed(Save.d.get("log", [])),
 		"decor": Save.d.get("decor", {}).get("house", []),
 		"showcase": Save.d.get("showcase", []),
 	}
 	d.merge(VisitZones.doc())
 	return d
+
+## What others see of one of your Boki (read back with clean_snap_kin).
+static func snap_kin(r: Dictionary) -> Dictionary:
+	Evo.ensure(r)
+	return {"uid": r["uid"], "species": r["species"], "name": r["name"], "level": int(r["level"]),
+		"trust": int(r["trust"]), "zone": GardenZones.zone_of(r), "forms": r["forms"], "muts": r["muts"],
+		"shimmer": r.get("shimmer", false), "mutations": Mutations.of(r)}
 
 ## cb gets [{id, d}] with d already cleaned (see clean_island).
 func list_islands(cb: Callable) -> void:
@@ -280,7 +284,7 @@ func refresh_guild(cb := Callable()) -> void:
 	get_guild(gid, func(g: Dictionary):
 		if g.is_empty():
 			# missing or unreachable: stay in it under the name we last saw
-			g = clean_guild({"name": Save.d.get("guild_name", "Your guild"), "tag": ClanInfo.my_tag()})
+			g = clean_guild({"name": Save.d.get("guild_name", "Your guild")})
 		guild = g
 		guild["id"] = gid
 		Save.d["guild_name"] = g["name"]
@@ -351,7 +355,6 @@ func _keep_clan(gid: String, g: Dictionary) -> void:
 		clan["role"] = "founder"
 	elif clan["role"] == "founder":
 		clan["role"] = "member"        # the guild doc says someone else founded it
-	clan["tag"] = txt_of(g.get("tag"))
 	Save.d["clan"] = clan
 	set_doc("clanroster/%s_%s" % [gid, me], {"guild": gid, "role": clan["role"], "joined": clan["joined"],
 		"corner_seed": clan["corner_seed"], "last_seen": now_ms()})
@@ -360,12 +363,12 @@ func _keep_clan(gid: String, g: Dictionary) -> void:
 static func clan_for(gid: String, who: String, role: String, joined: float) -> Dictionary:
 	return {"id": gid, "role": role, "corner_seed": (who + gid).hash() % 1000000, "joined": joined}
 
-func create_guild(name_txt: String, motto: String, tag: String, cb: Callable) -> void:
+func create_guild(name_txt: String, motto: String, cb: Callable) -> void:
 	if busy("guild"):
 		return
 	_busy["guild"] = true
 	var gid := "g" + str(Time.get_ticks_usec() % 100000000) + str(randi() % 1000)
-	set_doc("guilds/" + gid, {"name": say_of(name_txt, "Guild", 24), "motto": say_of(motto, "", 60), "tag": ClanInfo.clean_tag(tag), "founder": me, "created": now_ms(),
+	set_doc("guilds/" + gid, {"name": say_of(name_txt, "Guild", 24), "motto": say_of(motto, "", 60), "founder": me, "created": now_ms(),
 		"color": Color.from_hsv(randf(), 0.5, 0.9).to_html(false), "built": [], "open": true}, func(okk: bool):
 		_busy.erase("guild")
 		if not okk:
@@ -672,13 +675,10 @@ func post_notice(text: String, cb: Callable) -> void:
 # ------------------------------------------------------------------ cleaning
 static func clean_guild(d: Dictionary) -> Dictionary:
 	var col := txt_of(d.get("color"), "", 8)
-	var gname := say_of(d.get("name"), "Guild", 24)
-	var tag := ClanInfo.clean_tag(d.get("tag"))
 	var built: Array = []
 	for k in arr_of(d.get("built")):
 		if PROJECTS.has(k) and not built.has(k): built.append(String(k))
-	return {"name": gname, "motto": say_of(d.get("motto"), "", 60),
-		"tag": tag if tag != "" else ClanInfo.tag_from_name(gname),
+	return {"name": say_of(d.get("name"), "Guild", 24), "motto": say_of(d.get("motto"), "", 60),
 		"color": col if col.is_valid_html_color() else "f2a24a", "founder": txt_of(d.get("founder")),
 		"created": num_of(d.get("created")), "built": built, "open": d.get("open", true) != false}
 
@@ -750,8 +750,6 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
-		"tag": ClanInfo.clean_tag(d.get("tag")),
-		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
 		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
@@ -770,7 +768,8 @@ static func clean_snap_kin(rv) -> Dictionary:
 		if Evo.PART_NAMES.has(mid) and Evo.AFF.has(aff):
 			muts.append({"id": mid, "lv": clampi(int_of(m.get("lv"), 1), 1, 5), "aff": aff})
 	return {"uid": txt_of(r.get("uid"), "", 24), "species": sp, "name": say_of(r.get("name"), "Kin", 14),
-		"level": clampi(int_of(r.get("level"), 1), 1, 999), "zone": txt_of(r.get("zone"), GardenZones.start(), 24), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
+		"level": clampi(int_of(r.get("level"), 1), 1, 999), "zone": txt_of(r.get("zone"), GardenZones.start(), 24),
+		"trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
 		"forms": forms.slice(0, 50), "muts": muts.slice(0, 40), "traits": Data.KIN[sp]["traits"].duplicate(), "memory": [],
 		"shimmer": r.get("shimmer", false) == true, "mutations": arr_of(r.get("mutations")).map(func(x): return txt_of(x)).filter(func(x): return not Mutations.info(x).is_empty()).slice(0, 4)}
 

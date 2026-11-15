@@ -59,7 +59,9 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd` | Planning phase, the skyship, squad drop formation |
+| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket (its HUD: `scripts/ui/drop_hud.gd`) |
+| `squad_intro.gd` | The squad intro on the skyship deck before the planning map |
+| `skyship_model.gd`, `sky_deck.gd` | The skyship's look; the squad, wisps, shadow and engine sound aboard |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |
@@ -67,7 +69,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `biome_run.gd` | Regional monsters and hazards on authored maps |
 | `sky_train.gd` | The sky train |
 | `train_halts.gd`, `train_lamp.gd` | The sky train's halt beacons and pier glow; its headlight, beam and trail |
-| `arena.gd`, `duel.gd` | The Arena's practice tools; the duel room |
+| `arena.gd`, `duel.gd`, `duel_ring.gd`, `duel_ring_hint.gd` | The Arena's practice tools; the duel room (bot or online rival); the duel ring panel and its first-visit hint |
 | `cam.gd` | The match camera |
 | `fx.gd`, `juice.gd`, `abyss_fx.gd` | Pooled effects; hit feel; the abyss tint |
 | `models.gd`, `kin_models.gd`, `hero_kit.gd`, `hero_gear.gd`, `hero_hair.gd`, `props_sculpt.gd`, `flora.gd` | Characters and props built in code |
@@ -82,7 +84,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `arch.gd` | Class data: lookups, weapon families, Boki infusion into sockets |
 | `arch_kit.gd` | One hunter's kit at run time; base class for the six kits |
 | `kits/*.gd` | `thief_kit`, `archer_kit`, `mage_kit`, `gunslinger_kit`, `juggernaut_kit`, `bulwark_kit` |
-| `hex.gd`, `kit_status.gd` | The Mage's Hex; kit statuses sent over the network |
+| `kit_status.gd` | Kit statuses sent over the network |
 | `oomph.gd`, `feel.gd` | Combat weight; the global feel spec |
 | `arch_demo.gd` | Screenshot tooling |
 

@@ -1,67 +1,102 @@
-NEED OWNER: Celeste LMB reference
+PART 2 flags: 12 of 26. The other 14 are KEEP.
 
-# Neve the Snowglide (`rimewright`) vs Celeste: owner playtest 11-08
-
-## Part 1: LMB (Ice Darts): not pinned down, so Step 1 was skipped per the brief's guard
-
-What could be found (trust D > wiki; notes and sources in `art-refs/source/celeste_lmb/README.md`):
-
-- Kit text: "HOLD to fire a barrage of semi-homing Ice Darts (18 + 5%). At the end of the burst, fire 3
-  larger darts that deal double damage, fly faster and travel further." Barrage cooldown 0.5 s.
-- No text source gives dart speed, fire rate or dart count. The footage frames in the hero brief show a
-  uniform stream while held; nothing in them shows "tap = bigger, hold = smaller".
-- Hypothesis (unverified): the 3 large darts fire when the burst ends on release, so a quick tap gives the
-  large darts at once and a long hold a stream of small ones first. That would read as "tap = bigger".
-- No clip frames could be saved: the footage lives on YouTube and the owner's sheet, and this worker cannot
-  download it (yt-dlp refused, no pip); namu.wiki, thebackdash and deltiasgaming blocked the fetch.
-
-What the owner can settle in one line: dart speed (m/s or body heights/s), darts a second while held,
-and whether the 3 large darts come on release (tap) or only after a full barrage. Alternative if no
-answer comes: implement the hypothesis (release fires the 3 large darts, a hold streams the small ones)
-and slow the small darts to roughly the footage's stream.
-
-## Part 2: E Rink Wall vs Frozen Barricade
-
-| | Celeste Frozen Barricade (source) | Neve Rink Wall before | after | note |
-|---|---|---|---|---|
-| Cooldown | 20 / 17.5 / 15 s by rank [D]; footage card 16.7 with CDR | 17 s | 17 s | kept: footage card matches |
-| Wall health | 1750 [wiki], about 50 of her own darts (35 a dart) | 70 HP (17 of our darts) | 200 HP (50 of ours at 4) | changed: dart-ratio parity |
-| Cast tell | short wind-up | 0.2 s sparkle, path shown | same | match |
-| Width | grows as it slides | 1.8 m to 4.5 m | same | match |
-| Slide speed | about 2.5 body heights/s [F] | 4.5 m/s (2.5 bh/s) | same | match |
-| Travel / life | about 6 bh (10.8 m), about 3 s [F] | 16.2 m, 4.5 s | same | kept: owner item 13 asked for +50% |
-| Recast freeze | 6 s | 6 s | same | match |
-| Foes touched | pushed along | shoved | same | match |
-| Blocks shots | yes | yes | yes | match |
-| Look | solid translucent ice sheet, flashes when hit | a row of leaning pillars on a frosted footing, see-through gaps | a solid ice slab (2.2 m tall, 0.5 m deep, lit from inside, flashing on a block) is now the body of the wall, the pillars slimmer crystals on top of it, so the sheet reads from the gameplay camera | look stays ours; source quality |
-
-Alternative not taken: travel 10.8 m / life 3 s (source parity) against owner item 13.
-
-## Part 3: X Rimelock
-
-| | source (Celeste Ice Crash) | before | after |
+|Name|Rating|Why|Better|
 |---|---|---|---|
-| Rink radius | 4 bh = 7.2 m [F]; no number in the data | 7.2 m | 8.3 m (+15%, hitbox and the drawn rink, one `radius`) |
-| Statue slide (cast from a skate) | none in the source (our mechanic) | skate speed easing out over 0.8 s, about 6 m | 1.05x the skate speed, about 6.3 m (`carry_k`) |
-| Hold / crack | 3.5 s | 3.5 s | 3.5 s (unchanged) |
-| Her body | eight-point ice star | a frost bud of six ice petals closing over her (a shell) | her body is ice: every mesh of her model trades its material for `shaders/hero_ice.gdshader` |
+|Glassloth|BAD|art lead withdrew it (it is a pangolin now); one syllable from Glassolotl|keep Pangolith|
+|Magnestick, Magnestaff|BAD|magnet creature + "Magne-" = the Magnemite/Magneton/Magnezone family|Polestick, Polestaff|
+|Lunafin|WEAK|Palafin (also a dolphin, same "-afin"), Lunala; near Lunink|Moonfin|
+|Bastling|WEAK|Basculin 0.75 (check limit 0.72); Bastiodon stem; unlike its parent's name|Fortlet|
+|Crabulwark|WEAK|Crabrawler; clashes with Bulwartoad; "bulwark" is obscure|Fortcrab|
+|Citadoad|WEAK|the toad is hidden, hard to say; Palpitoad/Seismitoad ending|Macetoad|
+|Candelapi|WEAK|one letter from Chandelapi; the line still mirrors Litwick to Chandelure|Waxapi|
+|Glowris|WEAK|the loris is unreadable|Glowloris|
+|Gemole|WEAK|reads "guh-mole-ay"; Golem 0.73; near line-mate Geodemole|Jewelmole|
+|Clionice|WEAK|obscure root; three ways to say it|Frostangel|
+|Duskspire|WEAK|reads as a place (map has Stormspire); Dusknoir 0.71|Spirargot|
 
-Parity used for the size: Celeste's rink measured at 4 body heights (7.2 m) from the footage, then +15%.
-Celeste's data gives no radius, so the footage number is the base.
+PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/` where shown.
 
-The ice body (`scripts/arch/kits/ice_body.gd`): on the cast a frost front climbs from her feet to above her
-head over the 0.2 s snap, every surface turning to translucent refractive ice (screen refraction, fresnel
-rim, inner glow, Voronoi frost cracks, a sparkle) that keeps her own colour and atlas under the ice; the
-front runs back down over 0.2 s when it ends, then her own materials return. It works on the procedural
-model (one material_override a part) and on `claire.glb` (one override a surface); the toon outline stays
-as the next pass. The frost bud is gone from `ult_look.gd`.
+**Hunters.** ABILITY_NAMES_AUDIT (11-09) CLEAR rows stand (Jade Ward, Blunderbuss, Ice Darts, Moth Knife, Hand Fire). Below: its open rows, what it missed, and Gil.
 
-## Checks
+|Current|Proposed|Alt|Why|
+|---|---|---|---|
+|Vex: Quill Rifle `weapons/quill_rifle.json:3`|Tally Gun|Brass Barrels|no rifle; the gun is her arm|
+|Cinderfall `archetypes/gunslinger.json:119`|Brass Rain|Sky Shell|clashes with Cinder|
+|Albert: 360 Smash `archetypes/bulwark.json:95`|Capstan Spin|Round Turn|dev label with a number|
+|Faultline `:186`|Keelbreak|Hull Splitter|Valorant Breach's Fault Line|
+|Oathsteel, Iron Oath `rules/class_unlock.json:93,96`|Hullsteel, Iron Vow|Brinesteel|Supervive's shield hunter is Oath|
+|Sparkle: Kitefall `archetypes/mage.json:133`|Boltfall|Spire Drop|her design has no kite|
+|Kael: Smash `archetypes/juggernaut.json:24`|Final Bell|Verdict|generic|
+|Lace: Hawk Sense `archetypes/archer.json:35`|Red Thread|Loose Thread|LoL Ashe's Hawkshot|
+|Spirit Walk `:49`|Blind Stitch|Cut Strings|Diablo skill, exact|
+|Heavy Shot `:64`|Bodkin|Great Needle|generic; a bodkin is needle and arrowhead|
+|Hail Wall `:102`|Hemline|Pin Row|weather on a seamstress|
+|Starpiercer `:128`|Final Stitch|Through-Stitch|no star on her; avoid "Needlework" (LoL Gwen)|
+|Cinder: Flue Flight `archetypes/ashwick.json:29`|Ember Flight|Ash Wing|"flue" is obscure|
+|Grimble: Barge `archetypes/dredge.json:17`|Scramble|Scurry|boat word, old design|
+|Anchor Drop `:24`|Hook Slam|Scrap Slam|anchors are Albert's|
+|Brass Broadside `:27`|King's Ransom|Scrap Volley|ship word|
+|Neve: Hoarfrost `archetypes/rimewright.json:47`|Frostbloom|Glaze|"hoar" sounds wrong aloud|
+|Ice Spear `:81`|Frostpike|Sugar Spear|generic; Pokemon's Icicle Spear|
+|Meeko: Carrier `archetypes/tender.json:58`|Piggyback|Fox Carry|dev label|
+|Relay Step `:67`|Foxtrot|Sunskip|dev label|
+|Burrseed `:88`|Cloudburst|Drizzle Snare|nothing plant-like on her|
+|Hearth Call `:181`|Homecoming|Dawnline|second "Hearth" in one kit|
+|Motley: Tether Lantern `weapons/tether_lantern.json:3`|Baubles|Stolen Laughs|he has no lantern|
+|Lantern Trade `archetypes/ostra.json:55`|Box Swap|Pop Swap|same; avoid "Switcheroo" (Pokemon move)|
+|Shard Snap `:73`|Rimshot|Card Snap|no glass on him|
+|Brimseed `:112`|Gag Gift|Big Laugh|a jester has no seeds|
+|Sable: Bola `archetypes/thief.json:16`|Key Ring|Moth Snare|no bola on the model|
+|Encore `:27`|Last Bow|Swan Song|LoL Seraphine's ult; Pokemon move|
+|Gil: Ground Swim `archetypes/gil.json:29`|Duck Under|Dirt Paddle|dev label|
+|Riptide `:44`|Spoutspin|Fish Twister|Dota Naga Siren's Rip Tide|
+|Tidal Wave `:49`|Bowl Over|Big Spill|LoL Nami's ult, exact|
 
-`--rimewright-combo-check`: 95 checks, 0 failures (new: the wall slab row, the 8.3 m rink, carry 6.3 m, the ice body's swap,
-freeze, thaw and restore on every surface).
+**Boki moves and Fusions**
 
-## Clips
+|Current|Proposed|Alt|Why|
+|---|---|---|---|
+|Refraction `abilities_v2/refraction.json:4`|Prism Veil|Glintback|Dota Templar Assassin skill, exact|
+|Puffcap Mines `abilities_v2/puffcap_mines.json:4`|Dustcap Mines|Burstcaps|"puffcap" is Teemo's mushroom in LoL|
+|Gravity Well `merge_forms/titan.json:99`|Starsink|Deep Pull|Valorant Astra skill, exact|
+|Storm Surge `merge_forms/stormwing.json:108`|Squall Rush|Cloudbreak|LoL item Stormsurge|
+|Eclipse `merges_v2/tempest.json:4`|Moonswell|Owl Moon|Dota Luna's ult; clashes with Eclipsowl|
+|Venom Fusion `merges_v2/blaze_mantle.json:4`|Sting Mantle|Wasp Mail|a label, not a name|
 
-Before/after stills: `docs/art/wardens/neve_rink_wall_before_after.jpg` and `neve_rimelock_before_after.jpg`
-(GPU renders via `--neve-shots`; see the report for whether they landed before the GPU queue cleared).
+**Items, perks, gliders**
+
+|Current|Proposed|Alt|Why|
+|---|---|---|---|
+|Power Glove `gear/power_core.json:3`|Wallop Glove|Brawn Glove|Nintendo's Power Glove|
+|Shield cell `utility/shield_cell.json:3`|Shell Patch|Ward Wafer|Apex Legends item, exact|
+|Second Wind `scripts/core/data.gd:118`|Fresh Legs|Spare Breath|LoL rune, exact|
+|Tailwind `:127`|Fair Wind|Kite Luck|Pokemon move, exact|
+|Nightwing `scripts/core/gliders.gd:21`|Batsail|Gloomwing|DC hero|
+
+**Maps, modes, UI**
+
+|Current|Proposed|Alt|Why|
+|---|---|---|---|
+|Dash Isle, Ledge Isle, Training Range `maps/tutorial.json:11,13,17`|Skipstone Isle, Tiptoe Isle, Tin-Can Range|Hopscotch, Shelf, Scarecrow Row|dev labels|
+|Stormreach `maps/skyreach.json:405`|Thunder Shelf|Gale Steps|a D&D Online city; sixth Storm- name|
+|"uplink" (the exit) `scripts/match/exits.gd:153`|Waylight|Homebeam|sci-fi word in a fantasy world|
+|Supervive (camera preset) `rules/camera.json:4`|Skyview|Kite View|another game's name in Settings|
+|Inborn · IVs `scripts/ui/iv_view.gd:205`|Inborn Gifts|Birth Gifts|Pokemon fan jargon|
+|Vulpin `scripts/match/models.gd:520`|Brushtail|Russet|one letter from Vulpix|
+|Owlet `:528`|Featherfolk|Tuftfolk|one letter from Rowlet; matches Scalefolk|
+
+**Enemies** (`scripts/core/data.gd`)
+
+|Current|Proposed|Alt|Why|
+|---|---|---|---|
+|The Brood Mother `:269`|The Hive Matron|Mother Thrum|Dota hero Broodmother|
+|The Stone Colossus `:263`|Cairnfather|The Standing Hill|generic; drops a Cairnback egg|
+|The Watcher, Blight Watcher `:259,277`|The Vigil, Blight Vigil|Old Unblink|generic|
+|Spitter `:245`|Lobling|Hackle|one letter from Skitter; Left 4 Dead enemy|
+|Cinder Skitter `biomes/ember.json:18`|Coal Skitter|Soot Skitter|clashes with Cinder|
+
+**Notes**
+- Old weapon utilities copy exact names (`hunter_abilities/*.json:3`: Earthshatter = Reinhardt, Combat Roll = Cassidy, Riposte = Fiora, Breach = Valorant). Delete if dead, else Cratermaker, Duck Roll, Turnabout, Door Kick.
+- Owner-decided, not in data yet: Coin Blast, Palm Lance (`archetypes/gunslinger.json:59,92`), Training Grounds (`maps/arena.json:3`).
+- Owner-set, not renamed here, but the biggest risk: "Bokidex" is one consonant from Pokédex.
+- Checks: every proposal run against PokeAPI's 1,025 species names; no real match (top scores are chance letter overlaps). The other six games were checked from memory, not fetched lists.

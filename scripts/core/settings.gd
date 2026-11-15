@@ -5,35 +5,55 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
+## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
+## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
+const UI_SCALE_MIN := 0.75
+const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
-	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
+	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
+	"master": 0.9, "music": 0.85, "sfx": 1.0, "voices": 1.0, "ambience": 0.9, "ui_sounds": 1.0, "audio_v": 2,
+	"mute_unfocused": false,
+	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
+	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
+	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
 	# video
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
-	"warden_models": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a",
+	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false,
+	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+}
+## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
+const TEXT_SIZES := [1.0, 1.25, 1.5]
+
+## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
+const BUSES := {
+	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
-const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
+## Camera ids renamed 11-13 (they were a third-party name): an old settings.cfg value maps to the new id.
+const CAM_IDS := {
+	"cam_style": {"supervive": "default", "supervive_wide": "default_wide"},
+	"cam_follow": {"supervive": "lean"},
+}
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
 ## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
@@ -47,32 +67,33 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "occ": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "occ": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "occ": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -145,19 +166,25 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
+	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
-	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
 	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
+	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
+	["level_mod", "Hold with a slot key to level it"], ["kit_card", "Hunter kit card (hover a hunter)"],
+	["confirm", "Press the open panel's main button"], ["push_to_talk", "Push to talk (before a match)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
 	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
@@ -171,8 +198,32 @@ var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
 
+## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
+static func migrate_cam(d: Dictionary) -> void:
+	for k in CAM_IDS:
+		var old := String(d.get(k, ""))
+		if CAM_IDS[k].has(old):
+			d[k] = CAM_IDS[k][old]
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := load_file()
+	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
+	_quality_basics = not cf.has_section_key("s", "quality")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--quality="):
+			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
+	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
+		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
+	get_tree().node_added.connect(_on_node_added)
+	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().root.size_changed.connect(_apply_render_scale)
+
+## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
+func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
@@ -185,12 +236,15 @@ func _ready() -> void:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
+		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
+	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
+	_migrate_volumes(cf)
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -205,18 +259,21 @@ func _ready() -> void:
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
-	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
-	_quality_basics = not cf.has_section_key("s", "quality")
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--quality="):
-			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
-	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
-		save.call_deferred()
-	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
-		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
-	get_tree().node_added.connect(_on_node_added)
-	get_tree().root.size_changed.connect(_apply_ui_scale)
-	get_tree().root.size_changed.connect(_apply_render_scale)
+	if not cf.has_section_key("s", "voices"):
+		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
+		v["voices"] = v["sfx"]
+		v["ui_sounds"] = v["sfx"]
+	return cf
+
+## The Text size choice nearest `x` (anything unreadable or out of range lands on 100%).
+static func snap_text_size(x: Variant) -> float:
+	if not (x is float or x is int):
+		return 1.0
+	var best: float = TEXT_SIZES[0]
+	for s: float in TEXT_SIZES:
+		if absf(s - float(x)) < absf(best - float(x)):
+			best = s
+	return best
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -225,6 +282,16 @@ func _migrate_belt_keys() -> void:
 		if ks.has(pair[0]):
 			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
 			ks.erase(pair[0])
+
+## The volume sliders became perceptual (audio_v 2, Sfx.slider_db: gain = slider squared). A level saved
+## before that moves its slider to where it sounds the same, so nobody's mix changes.
+func _migrate_volumes(cf: ConfigFile) -> void:
+	if cf.has_section_key("s", "audio_v"):
+		return
+	for k in BUSES:
+		if cf.has_section_key("s", k) or v[k] != DEFAULTS[k]:
+			v[k] = sqrt(clampf(float(v[k]), 0.0, 1.0))
+	v["audio_v"] = 2
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
@@ -288,11 +355,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:
@@ -316,6 +382,7 @@ func apply(k: String) -> void:
 		"quality", "quality_found":
 			_apply_quality()
 		"ui_scale": _apply_ui_scale()
+		"text_size": UI.set_text_size(float(v[k]))
 		"rec_level":
 			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
 			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):
@@ -335,11 +402,8 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
-	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
-	# never let the user's own size setting push the layout past the window either
-	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
+	var user := clampf(float(v.get("ui_scale", 1.0)), UI_SCALE_MIN, UI_SCALE_MAX)
+	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
 
@@ -498,9 +562,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	sl[slot] = s
-	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_put(sl, slot, s)
 	_set_slots(action, sl)
+
+## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
+func _put(sl: Array, slot: int, code: String) -> void:
+	sl[slot] = code
+	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -508,35 +576,55 @@ func clear_bind(action: String, slot: int) -> void:
 	sl[slot] = ""
 	_set_slots(action, sl)
 
-## Other rebindable actions already using this key or button: [[action, slot], ...].
-func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+## Actions already on this key or button code: [[action, slot], ...].
+func holders(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code: out.append([a[0], i])
 	return out
 
-## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
-func _shared_ok(a: String, b: String) -> bool:
+## Actions that only run at home (the garden) and ones that only run in a match.
+const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
+const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+
+## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
+## training-only actions, the lobby's push to talk).
+const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+		["goals", "throw"], ["fold_guide", "whistle"]]
+
+## Two actions may share a key only when they never run in the same place: one at home, the other in a match
+## (or a pair listed in SHARED_OK).
+func can_share(a: String, b: String) -> bool:
+	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY): return true
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
-## `action` had there.
-func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+## Other rebindable actions that would clash with this key or button: [[action, slot], ...] (the
+## ones that run somewhere else don't count).
+func conflicts(ev: InputEvent, except := "") -> Array:
+	return holders(ev_code(ev), except).filter(func(h): return not can_share(h[0], except))
+
+## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
+## what `action` had there instead, so none of them loses a key.
+func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
 	var mine := slots(action)
-	var theirs := slots(other)
-	theirs[other_slot] = mine[slot]
-	mine[slot] = ev_code(ev)
-	_set_slots(other, theirs)
+	var old: String = mine[slot]
+	_put(mine, slot, ev_code(ev))
+	for o in owners:
+		var theirs := slots(o[0])
+		_put(theirs, o[1], old)
+		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
+
+## True when an action has no key at all (the Controls page marks it red).
+func unbound(action: String) -> bool:
+	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")
@@ -559,6 +647,12 @@ func key_caps(action: String) -> String:
 		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
 		out.append(t.to_upper() if c.begins_with("key:") else t)
 	return " / ".join(out) if out.size() > 0 else "?"
+
+## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
+func fill_keys(text: String) -> String:
+	for a in ACTIONS:
+		text = text.replace("{%s}" % a[0], key_cap(a[0]))
+	return text
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:
