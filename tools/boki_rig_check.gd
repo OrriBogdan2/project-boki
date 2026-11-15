@@ -27,7 +27,7 @@ const MESHY_TRIS := 20000
 const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
 	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS,
 	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS, "cindle": MESHY_TRIS,
-	"puddlet": MESHY_TRIS}
+	"puddlet": MESHY_TRIS, "burrlet": MESHY_TRIS, "pebbit": MESHY_TRIS, "zapple": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in

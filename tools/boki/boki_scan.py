@@ -19,11 +19,11 @@ BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
 # right side only; "merge": proxy bones whose part the scan has fused into another bone's; "drop": proxy pieces the
 # scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
-# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "cover": eye
+# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "iris": hex,
+# when the art's eye colour is not the proxy's; "cover": eye
 # radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
 # far the scan stands above its lowest point (a hanging tail), "mid": how far right of its bounds' middle the
-# scan's midline is (game m), when a part off to one side (a curled tail) pulls the bounds off the head; "yaw":
-# degrees the scan turns about the vertical first, when it faces off its axis (made from a three-quarter view); and
+# scan's midline is (game m), when a part off to one side (a curled tail) pulls the bounds off the head, and
 # "pose": the bones (game-axis euler) that lift such a part into the rest pose;
 # "limbs": (bone, from, to, radius from, radius to) in scan space, for a part the fit cannot follow (a tail that hangs
 # another way): the bone lies along it and the capsule replaces the bone's proxy primitives (".L" also makes ".R");
@@ -182,6 +182,51 @@ SCANS = {
         "cover": 1.3,
     },
 
+    "burrlet": {
+        "height": 0.5,
+        "tris": 16000,
+        "x": [(0.14, 0.1), (0.2, 0.2)],
+        "y": [(0.0, 0.0), (0.172, 0.15), (0.286, 0.2), (0.42, 0.4), (0.55, 0.5)],
+        "z": [(-0.4, -0.31), (-0.31, -0.22), (-0.09, -0.12), (0.21, 0.1), (0.43, 0.31), (0.6, 0.33)],
+        "eye_c": (0.065, 0.2, -0.22),
+        "eye_r": (0.022, 0.022, 0.011),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.3,
+    },
+
+    "pebbit": {
+        "height": 0.55,
+        "tris": 16000,
+        "x": [(0.15, 0.14), (0.25, 0.24)],
+        "y": [(0.0, 0.0), (0.238, 0.13), (0.309, 0.2), (0.547, 0.5), (0.7, 0.6)],
+        "z": [(-0.5, -0.4), (-0.43, -0.29), (-0.12, -0.15), (0.2, 0.15), (0.505, 0.51), (0.6, 0.55)],
+        "merge": {"horn": "head"},
+        "eye_c": (0.08, 0.2, -0.29),
+        "eye_r": (0.03, 0.03, 0.015),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.3,
+    },
+
+    "zapple": {
+        "height": 0.9,
+        "tris": 16000,
+        "x": [(0.08, 0.07), (0.12, 0.17), (0.142, 0.25)],
+        "y": [(0.0, 0.0), (0.372, 0.43), (0.452, 0.5), (0.565, 0.62), (0.905, 0.9)],
+        "z": [(-0.34, -0.31), (-0.283, -0.24), (-0.11, -0.17), (0.13, 0.05), (0.31, 0.3), (0.45, 0.33)],
+        "merge": {"wing1.L": "spine", "wing1.R": "spine", "wing2.L": "spine", "wing2.R": "spine"},
+        "eye_c": (0.075, 0.47, -0.215),
+        "eye_r": (0.03, 0.03, 0.015),
+        "eye_yaw": 0.5,
+        "iris": "9b7bc4",
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.3,
+    },
+
 }
 
 
@@ -251,8 +296,7 @@ class Scan:
         s = SCANS[species]
         self._mods, self._s = (creature, paint, anim), s
         self.fit = Fit(s["x"], s["y"], s["z"])
-        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0),
-                              s.get("yaw", 0.0))
+        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
         self.REST_POSE = s.get("pose", {})
         self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
         face = {**boki_face.FACE, **creature.FACE}  # a species' FACE holds only what differs from the defaults
@@ -271,6 +315,8 @@ class Scan:
                       for name, clip in anim.CLIPS.items()}     # planted paws aim from the fitted rig (boki_gait)
         self.LID = paint.hexc(s["lid"]) if "lid" in s else self._around_eyes(1.6, 0.0)
         self.LILAC = paint.hexc(s["brow"]) if "brow" in s else self._around_eyes(1.0, 2.4) * BROW_DARK
+        if "iris" in s:
+            self.IRIS = paint.hexc(s["iris"])
         deep = self._deepest()
         self.HIDE_AT = {name: tuple(deep - bone[0]) for name, bone in self.BONES.items() if name.startswith("prop_")}
         self._proxy = {p.name: p for p in creature.parts()["body"][0].prims}
