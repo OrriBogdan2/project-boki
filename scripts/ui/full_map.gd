@@ -12,6 +12,12 @@ const MUTED := Color("a9b0bf")
 const GOLD := Color("f2c84a")
 const BAD := Color("ff5a4a")
 const SEA := Color(0.05, 0.07, 0.13, 0.96)
+const LINE_K := 1.1            # a place name's step when it moves off a marker, x its size
+const ISLAND_REACH := 1.0      # x its island's radius: how far a region name may move (to the edge, no further)
+const SMALL_REACH := 2.2       # x its size: how far a small place name may move
+const NUDGES_X := [0.0, -1.5, 1.5]     # x its size: on each line, a name also tries a little left and right
+const MARKER_PAD := 8.0        # px a place name keeps between its text and a marker's centre (a marker's radius)
+const LABEL_TRIES := 3         # lines a countdown may step (down or up) to find a free spot
 
 var hud            # the Hud that draws it
 var m: Match
@@ -20,6 +26,8 @@ var auto := false              # opened by the planning phase (closes when the s
 var zoom := 1.0
 var center := Vector2.ZERO     # the world point (x, z) at the middle of the map
 var rect := Rect2()            # where the map is on screen
+var _taken: Array = []         # Rect2s of the names drawn this frame: a name never prints over another
+var _spots := PackedVector2Array()    # this frame's marker centres (_obstacles): place names keep off them
 var _press := Vector2.INF
 var _press_center := Vector2.ZERO
 var _dragged := false
@@ -289,9 +297,10 @@ func _labels(c: Control, kk: float) -> void:
 	var w := m.world
 	var big_k := clampf(kk / (rect.size.x / w.w), 1.0, 2.0)
 	var zoomed := big_k >= 1.45
-	var taken: Array = []      # Rect2s of names already drawn
+	_taken.clear()
+	_obstacles()
 	var regions := {}
-	for isl in w.islands: regions[String(isl.get("name", ""))] = true
+	for isl in w.islands: regions[String(isl.get("name", ""))] = isl
 	var later: Array = []
 	for lb in w.labels:
 		var pv := to_screen(lb["pos"])
@@ -302,7 +311,9 @@ func _labels(c: Control, kk: float) -> void:
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
-			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
+			var up := nm.to_upper()
+			var reach := float(regions[nm].get("r", 0.0)) * kk * ISLAND_REACH
+			label(up, _clear_spot(up, pv + Vector2(0, 5), sz, reach), sz, col, true)
 		else:
 			later.append([lb, pv])
 	for e in later:
@@ -314,17 +325,18 @@ func _labels(c: Control, kk: float) -> void:
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
 				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
-				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
-					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
+				if not label("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), zoomed) and zoomed:
+					label(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), true)
 			"rail":
 				pass      # (the halts are TrainMap's)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
 				if zoomed:
-					_name(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), taken)
+					label(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9))
 			_:
-				_name(nm, pv + Vector2(0, 21), int(11 * big_k), Color(INK, 0.85), taken, zoomed)
+				var px := int(11 * big_k)
+				label(nm, _clear_spot(nm, pv + Vector2(0, 21), px, px * SMALL_REACH), px, Color(INK, 0.85), zoomed)
 	if w.labels.is_empty():
 		for isl in w.islands:
 			var cc: Vector2 = isl["c"]
@@ -332,18 +344,83 @@ func _labels(c: Control, kk: float) -> void:
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
 
-## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
-## Returns whether it drew.
-func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force := false) -> bool:
-	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-	var r := Rect2(at + Vector2(-tw * 0.5 - 3.0, -size * 0.95), Vector2(tw + 6.0, size * 1.25))
+## Draws a centred name unless it would overlap one already drawn this frame (force draws it anyway).
+## Returns whether it drew. The halts and the Heart draw their names through it too.
+func label(txt: String, at: Vector2, px: int, col: Color, force := false) -> bool:
+	var r := _label_rect(txt, at, px)
 	if not force:
-		for q in taken:
+		for q in _taken:
 			if (q as Rect2).intersects(r):
 				return false
-	taken.append(r)
-	hud._ctext(at, txt, size, col, hud.big)
+	_taken.append(r)
+	hud._ctext(at, txt, px, col, hud.big)
 	return true
+
+## A name that has to show (a countdown): the first free line from `at` stepping down (`dir` 1) or up (-1),
+## else `at` itself.
+func label_near(txt: String, at: Vector2, px: int, col: Color, dir := 1.0) -> void:
+	for i in LABEL_TRIES:
+		if label(txt, at + Vector2(0, px * 1.25 * i * dir), px, col):
+			return
+	label(txt, at, px, col, true)
+
+func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
+	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	return Rect2(at + Vector2(-tw * 0.5 - 3.0, -px * 0.95), Vector2(tw + 6.0, px * 1.25))
+
+## What place names keep off this frame: every marker's centre (spawn spots, each one shown scouted or not,
+## ways out, Ways Out seats) and the words pinned to a spot, reserved before any name is placed (each seat's
+## word, the hot zone's caption: they draw at their spot, forced).
+func _obstacles() -> void:
+	_spots.clear()
+	if m.spawn_plan:
+		for cnd in m.spawn_plan.cands:
+			_spots.append(to_screen(cnd["pos"]))
+	if m.exits:
+		for x in m.exits.list:
+			_spots.append(to_screen(x["pos"]))
+	if m.heart:
+		var at := WaysOutMap.sites(m)
+		var sd := WaysOutHud.seats(m)
+		var r := WaysOutMap.badge_r(k())
+		for i in at.size():
+			if at[i] != Vector3.INF:
+				var pv := to_screen(at[i])
+				_spots.append(pv)
+				_taken.append(_label_rect(WaysOutMap.word(i, sd[i]), pv + Vector2(0, WaysOutMap.word_dy(i, r)),
+						WaysOutMap.WORD_PX))
+	if m.biomes and not m.biomes.hot.zone.is_empty():
+		_taken.append(_label_rect(HotZone.CAPTION, m.biomes.hot.caption_at(self, k()), HotZone.CAPTION_PX))
+
+## Where a place name goes: the first line from its spot (0, one up, one down, two up...) within `reach` px,
+## nudged a little sideways if need be, that is clear of every marker and of the names already placed; when
+## none is, the try that covers the fewest.
+func _clear_spot(txt: String, at: Vector2, px: int, reach: float) -> Vector2:
+	var best := at
+	var least := -1
+	var step := px * LINE_K
+	for i in int(reach / step) * 2 + 1:
+		for dx in NUDGES_X:
+			var p: Vector2 = at + Vector2(px * dx, step * ceilf(i / 2.0) * (-1.0 if i % 2 == 1 else 1.0))
+			var n := _hits(_label_rect(txt, p, px))
+			if n == 0:
+				return p
+			if least < 0 or n < least:
+				best = p
+				least = n
+	return best
+
+## How many names placed this frame overlap `r`, and how many markers sit within MARKER_PAD of it.
+func _hits(r: Rect2) -> int:
+	var n := 0
+	for q in _taken:
+		if r.intersects(q):
+			n += 1
+	var padded := r.grow(MARKER_PAD)
+	for s in _spots:
+		if padded.has_point(s):
+			n += 1
+	return n
 
 func _spawns(c: Control, team: int, kk: float) -> void:
 	_hover = {}
