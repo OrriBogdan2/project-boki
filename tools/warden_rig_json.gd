@@ -23,13 +23,19 @@ func run(main: Node) -> void:
 		bones[b] = {"head": _v(g.origin), "y": _v(g.basis.y), "z": _v(g.basis.z),
 			"parent": String(WardenSkeleton.PARENT[b])}
 	sk.free()
-	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
-	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var on := WardenGlb.uses_model(arch)
+	WardenGlb.set_model(arch, false)      # (the crown is the procedural head's: a .glb Warden builds none)
+	var neutral := PlayerLook.neutral()
+	var pm := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", neutral, arch)
+	WardenGlb.set_model(arch, on)
+	var head := pm.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
 	var land := {
 		"crown": ((rest["head"] as Transform3D) * head.transform * head.mesh.get_aabb()).end.y,
 		"knee": (rest["shin.L"] as Transform3D).origin.y,
 		"sole": 0.0,
 	}
+	pm.free()
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var box := AABB()
 	var first := true
