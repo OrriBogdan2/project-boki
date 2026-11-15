@@ -716,6 +716,7 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--impact-weight-check": ["res://tools/impact_weight_check.gd", "impact_weight_check", null],      # hit weights
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
