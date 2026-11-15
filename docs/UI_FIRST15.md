@@ -82,6 +82,35 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save Files".
 
+### Glossary pass (ext/ui-glossary-pass)
+
+One shared first-time path: `Glossary.first_line(word)` / `Glossary.add_note(box, word)` (`scripts/ui/glossary.gd`, lines in
+`content/rules/glossary.json`). The line shows under the word for the whole session it is first seen in, then never again
+(seen words: `Save.d["tutorial"]["glossary"]`; nothing with hints off or in a clean recording). Canonical names stay.
+Check: `--glossary-check`. Expedition panel, Relics page, the drop and the title, term by term (merged with origin/main ca96e707c5; the Plain words pass table below is the other branch's):
+
+| Term | Where | What we did |
+|---|---|---|
+| BOKI AT RISK | Expedition: tier tag | Plain words, same as ui-plain-words-menus: the tag reads "Boki can be lost". |
+| Relic | Expedition / Relics | Already explained (prologue, first portal line); no longer on the expedition panel ("Hunter" section). |
+| The Meadow / Dusk Isles / The Hollow | Expedition | Place names; the picked one shows its own description line. Left as is. |
+| Solo / Duos / Trios; Arena / Training area / Duel room | Expedition | Gone: now "Extraction: trios, 7 squads of three" and the canonical "Training Grounds". |
+| Boki move names (Hot, Cinderfall, Burr) | Expedition: Boki row | Not done: per-move text, not a one-line term; each Boki's page explains them. |
+| Mastery | Relics | First-time line: "Goals played as this Hunter: each one done gives a new look." |
+| Colourway | Relics: mastery rewards | Plain words: "Colours", set by ext/ui-plain-words-menus (class_unlock.json `reward_kinds`). |
+| Emote, Trail, Glider (as rewards) | Relics: mastery rewards | Covered by the Mastery line (rewards are looks). |
+| Glider, Field Wing | Relics: glider pick | Label reads "Glider (looks only)" (ui-plain-words-menus); first-time line under it: "What you glide on after a jump: they all fly the same." |
+| Hot Streak, Boki Fusion | Relics: Hunter viewer | Already explained: the viewer lists each with its one line. |
+| Boss lair, Vault, Rare Boki, Item cache | The drop: legend | First-time line under each row (the row grows 14 px that session); `--glossary-check` fails if a spawn category has none. |
+| Uplink outpost | The drop: Ways out | Plain words: "Uplink outpost (hold it, fly out)", like the Shrine and Revive beacon rows. |
+| Revive beacon, Shrine | The drop: Ways out | Already explained in the row ("your squad back", "hold F: a power-up"). |
+| Skiff dock, Rift hatch | The drop | Gone from the map since the Ways Out rework. |
+| Drop leader | The drop: squad list | Plain words: "Leads the drop" (main reworded the other drop states: rocket, aboard, gliding). |
+| Pass the lead | The drop: key row | Plain words: "Let a squadmate lead" (the key's name in Settings is unchanged). |
+| Truce | Emote wheel / offer toast | Plain words in the offer toast: "X offers a truce: no shooting each other. Hold <emote key>, pick Deal" (the accept toast already explains it). No Truce chip on the landing HUD now. |
+| Arena | Title | Gone: the canonical "Training Grounds"; its loading card explains it. |
+| Save files | Title | Already plain words. Left as is. |
+
 ### Plain words pass (branch ext/ui-plain-words-menus)
 
 Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery as a tooltip word, glider and armor-tier names). Each term gets plain words or a tooltip.
@@ -113,7 +142,7 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
-8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
+8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words. Done for the expedition panel, Relics page, the drop and the title (section 4 table).
 
 ## 6. Rerun on the 0.24.5 line (ext/ui-first15-0245)
 

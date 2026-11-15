@@ -6,7 +6,7 @@ extends CanvasLayer
 ## (drag it, or A/D, the arrow keys or the right stick) and read its card. "Name it" closes this
 ## and hands over to whatever naming step the caller has.
 ##
-## Intimate and grounded on purpose (docs/POSITIONING.md): no flash, fanfare, light rays, star
+## Intimate and grounded on purpose: no flash, fanfare, light rays, star
 ## bursts or rarity colours. A shimmer shows in the Boki's own coat (and a faint sparkle in it);
 ## where a rare one came from is a line of provenance on the card.
 ##

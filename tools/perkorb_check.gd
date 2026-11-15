@@ -282,13 +282,14 @@ func _paths() -> void:
 				if gained != 1: odd_ok = false
 				else: got.append(P.perks[P.perks.size() - 1])
 				var step_name := String(Data.PERKS[String(P.perks[P.perks.size() - 1])]["name"])
-				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  %s" % [lvl, step_name]]): pop_ok = false
+				if not String(m.hud.lvl_cue.lines[2]).contains(step_name): pop_ok = false
 			else:
 				if gained != 0: odd_ok = false
 				if m.hud.lvl_pop <= 0.0: pop_ok = false
-				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  +1 skill point" % lvl]): pop_ok = false
+				if not String(m.hud.lvl_cue.lines[2]).contains("to spend"): pop_ok = false
+			if m.hud.lvl_cue.lines[0] != "LEVEL %d" % lvl or not m.hud.msgs.texts().is_empty(): pop_ok = false
 		ok("%s: levels 2, 4, 6, 8, 10 each apply their path step, odd levels none" % arch, odd_ok and got == steps, "%s vs %s" % [str(got), str(steps)])
-		ok("%s: the level-up line names the weapon step on even levels, the skill point on odd ones" % arch, pop_ok)
+		ok("%s: the level-up card names the weapon step on even levels, the skill point on odd ones" % arch, pop_ok)
 		ok("%s: each level adds 6%% health and 3.9%% ability power" % arch, grow_ok, grow_info)
 		ok("%s: by level 10 that is +54%% health and +35.1%% ability power" % arch, is_equal_approx(P.max_hp - P.get_meta("growth_hp", 0.0), P.max_hp - base_hp * 0.54) and is_equal_approx(LevelGrowth.ap(P), 1.351), "ap %.3f" % LevelGrowth.ap(P))
 		ok("%s: the signature weapon stays and is stronger or faster" % arch, P.wid == Arch.signature(String(arch)) and (float(P.wpn["dmg"]) > d0 or steps.has("quickfeed") or steps.has("longreach")))

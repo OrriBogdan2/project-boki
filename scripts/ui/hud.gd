@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## In-match interface, drawn every frame: health, ability bar, kin card, timer, minimap, kill feed,
-## kin speech bubbles, callout pings, interaction prompts, crosshair and the scoreboard.
+## kin speech bubbles, callout pings, interaction prompts, crosshair and the Tab squad board (SquadBoard).
 
 var m: Match
 var c: Control
@@ -287,11 +287,7 @@ func _draw_all() -> void:
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
-	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
-		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
-		for i in 5:
-			var inset := i * 16.0
-			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.75, 0.05, 0.05, (0.09 - i * 0.016) * (0.6 + pulse * 0.4)), false, 16.0)
+	HurtWash.draw(c, sz, p, dmg_dir.hits, m.time)      # low health: the red edge, heavier where the hits came from
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
@@ -321,16 +317,16 @@ func _draw_all() -> void:
 		elif p.out and not p.gone and not m.result.get("ending", false):
 			_draw_dead(sz, p)
 	edge_world.draw(c, m.time)
-	if Input.is_action_pressed("scores"):
-		_draw_scores(sz)
-	else:
-		score_mute.hide()
 	if wheel_open:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
 		_draw_hover_tip(sz, p)
 		if hover_id == "":
 			_draw_world_hover(sz, p)
+	if Input.is_action_pressed("scores"):
+		SquadBoard.draw(self, sz)
+	else:
+		score_mute.hide()
 	if map_open():
 		full_map.draw(sz)
 	elif m.skydrop and m.skydrop.planning and p:
@@ -370,6 +366,7 @@ func _draw_world_labels() -> void:
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
+		lvl_cue.body(self, cam, m.player)
 	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
@@ -601,30 +598,7 @@ func _draw_duel(sz: Vector2) -> void:
 	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
-var feed_top := 18.0
-## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
-## loss you caused, blue for your own side, gold for everything else.
-func _draw_feed(sz: Vector2) -> void:
-	var y := feed_top
-	var mine: Array = []
-	if m.player:
-		for h in m.hunters:
-			if h.team == m.player.team: mine.append(h.pname)
-	for f in m.feed:
-		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = f["text"]
-		var w := TextCache.width(big, s, 13)
-		var ours := false; var first := ""
-		for nm in mine:
-			var at := s.find(String(nm))
-			if at >= 0 and (first == "" or at < s.find(first)): first = String(nm)
-		ours = first != "" and s.begins_with(first)
-		var col := Color("5fb6ff") if ours else (Color("ff6a5a") if first != "" else GOLD)
-		var br := Rect2(Vector2(sz.x - 18 - w - 26, y), Vector2(w + 26, 24))
-		_rounded(br, Color(0.04, 0.05, 0.08, 0.82 * a), 6)
-		c.draw_rect(Rect2(br.position, Vector2(4, br.size.y)), Color(col, a))
-		_text(br.position + Vector2(14, 17), s, 13, Color(INK, a), big)
-		y += 28
+var feed_top := 18.0        # px: where the kill feed (KnockFeed) starts, under the counters and any boss bar
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
@@ -834,9 +808,6 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := TextCache.width(big, phase, 11)
 	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
-	if m.player:
-		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - TextCache.width(big, lt, 12), r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
@@ -1014,18 +985,15 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
+var lvl_cue := LevelUpCue.new()      # the level-up moment over your hero and over the vitals
 var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
 var xp_shown := -1.0     # the XP the bar has filled to
 var xp_pop := 0.0        # s left of the pop after XP landed
-## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
-## weapon's step on even levels, which also get a gold wash).
+## A level just went up (Hunter.gain_xp; `info` is the weapon's step on even levels): the level number
+## goes gold and LevelUpCue says what improved.
 func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
-	var line := "LEVEL %d  ·  +1 skill point" % lv
-	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+	lvl_pop = HudVitals.LVL_POP
+	lvl_cue.start(m.player, lv, info)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1759,26 +1727,8 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
 
-func _draw_scores(sz: Vector2) -> void:
-	var r := Rect2(Vector2(sz.x * 0.5 - 345, sz.y * 0.18), Vector2(690, 40 + m.hunters.size() * 28))
-	_panel(r, Color(0.05, 0.06, 0.09, 0.9), 14)
-	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
-	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED); _text(r.position + Vector2(450, 30), "Damage", 14, MUTED); _text(r.position + Vector2(530, 30), "State", 14, MUTED)
-	var hs := m.hunters.duplicate()
-	hs.sort_custom(func(a, b): return a.team < b.team)
-	var y := r.position.y + 58
-	for h in hs:
-		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), h.pname, 15, INK if h != m.player else GOLD)
-		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
-		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
-		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
-		var st := "Out" if h.out else ("Extracted" if h.extracted else ("Down" if h.downed else "Alive"))
-		_text(Vector2(r.position.x + 530, y), st, 14, BAD if h.out else (Color("8fe3c8") if h.extracted else INK))
-		score_mute.draw(self, h, r.position.x + 606, y)
-		y += 28
-
+var abyss_cued := false
+var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
@@ -2444,9 +2394,6 @@ func _build_pack() -> void:
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.para(LoadoutPanel.HINT, 12)
-	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
-	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])

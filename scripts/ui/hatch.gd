@@ -52,7 +52,7 @@ var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
 var new_rec: Dictionary = {}  # the hatchling's record, made when the name card opens (so its sex mark shows there) and kept by _finish
 var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
-var mystery_found := false    # its card shows once you've hovered or picked the black egg
+var egg_hover: EggHover       # the pointer's glow on the eggs and the black egg's hint
 var locker: LookLocker      # making yourself (stage "create")
 var edit_only := false
 var sub_lbl: Label        # opened from the menu just to change how you look
@@ -425,8 +425,8 @@ func _show_pick() -> void:
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
-		if mystery and not mystery_found:
-			continue
+		if mystery and i != chosen:
+			continue      # the hidden egg's card only while it's the picked one (its hint: EggHover)
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
 		# every egg card the same size, with its button on the same line at the bottom
@@ -444,6 +444,7 @@ func _show_pick() -> void:
 		hr.add_child(tt)
 		hr.add_child(UI.section(d["temper"], ecol))
 		v.add_child(hr)
+		v.add_child(EggPreview.build(d["species"], mystery, get_tree()))
 		var dl := UI.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -470,13 +471,12 @@ func _pick(i: int) -> void:
 		_start_hatch()
 		return
 	chosen = i
-	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
 	_show_pick()
 
 ## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
-## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
+## inside get stronger. No flashes or bursts: it's a small, close moment.
 const TAPS := 7
 var taps := 0
 func _tap_egg() -> void:
@@ -498,7 +498,7 @@ func _tap_egg() -> void:
 	# a new crack each time, and a few flakes of shell
 	var base := 8 + taps * 3
 	wegg._crack(base, base + 2 + int(k * 2.0))
-	fx.burst(holder.position + Vector3(0, 0.5, 0), wegg.col.lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
+	fx.burst(holder.position + Vector3(0, 0.5, 0), EggHatch.CHIP_COL.lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
@@ -508,6 +508,8 @@ func _tap_egg() -> void:
 
 func _start_hatch() -> void:
 	stage = "warm"
+	hover = -1
+	if egg_hover: egg_hover.clear()
 	hatch_t = 0.0
 	_clear_bottom()
 	title.text = "Knock on the shell"
@@ -560,13 +562,10 @@ func _process(delta: float) -> void:
 		if hv != hover:
 			hover = hv
 			if hover >= 0: Sfx.play("hover", null, -12.0)
-			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
-				mystery_found = true
-				_show_pick()
-		for i in eggs.size():
-			var hs := 1.12 if i == hover else 1.0
-			var hn: Node3D = eggs[i]["holder"]
-			hn.scale = hn.scale.lerp(Vector3.ONE * hs, minf(1.0, delta * 10.0))
+		if not egg_hover:
+			var hidden := egg_defs.find_custom(func(d): return d.get("mystery", false))
+			egg_hover = EggHover.new(eggs, hidden, root_ui)
+		egg_hover.update(delta, hover, chosen, cam)
 	if stage == "warm" and chosen >= 0:
 		if auto_warm and int(t * 3.0) != int((t - delta) * 3.0):
 			_tap_egg()          # test hook: taps by itself
@@ -640,24 +639,10 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # (either path card below keeps the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
@@ -666,17 +651,17 @@ func _show_name() -> void:
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
 	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false)))
+			func(): _finish(sp_id, step.chosen(), ye.text, false)))
 	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true)))
+			func(): _finish(sp_id, step.chosen(), ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Tend the garden"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ne.grab_focus()
-	ne.select_all()
+	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.box.grab_focus()
+	step.box.select_all()
 
 ## One of the two equal ways on from the naming card: a button and a line under it, one click.
 func _path_card(label: String, line: String, go: Callable) -> Control:

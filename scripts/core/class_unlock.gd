@@ -101,6 +101,10 @@ static func open_ids() -> Array:
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
+## A starter the pickers tag "Start here": until the save has played `start_here_matches` matches.
+static func start_here(id: String) -> bool:
+	return starters().has(id) and int(Save.d.get("matches", 0)) < int(rules().get("start_here_matches", 0))
+
 static func picks_needed() -> int:
 	return int(rules().get("starter_picks", 1))
 

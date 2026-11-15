@@ -63,8 +63,8 @@ func _setup_input() -> void:
 	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
 	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
-	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
+	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hunter's right-click ability (its variants: tap, hold, air...)
+	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the hunter's ability, Shift the hunter's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.

@@ -7,6 +7,8 @@ extends CanvasLayer
 
 signal shown
 
+## A tip's {action} marks are replaced by that action's current key (Settings.key_cap).
+const TIP_KEYS := ["throw", "util1", "util2", "ultimate", "gear1", "gear2", "base", "interact"]
 const TIPS := [
 	"Press {jump} again in the air and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",

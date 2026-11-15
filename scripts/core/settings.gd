@@ -239,7 +239,7 @@ func load_file() -> ConfigFile:
 		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
 	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
-		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
+		v["keys"] = {}          # the kit changed (E utility, R hunter ultimate, X fuse, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
 	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)

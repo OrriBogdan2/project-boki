@@ -31,7 +31,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Weapons](Weapons.md) *(generated)* | Weapon stats, rarities, elements, named weapons, run perks |
 | [Gloves](Gloves.md) *(generated)* | Every glove |
 | [Rules](Rules.md) *(generated)* | Tiers, death and revive numbers, bond meter, Boki AI, combos |
-| [Arena and training](Arena-and-Training.md) | Practice tools, the training island and the duel room |
+| [Training Grounds](Arena-and-Training.md) | Practice tools, the training island and the duel room |
 
 ## For the team
 
