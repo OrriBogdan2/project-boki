@@ -975,6 +975,7 @@ func _rime_ends(main: Node) -> void:
 	_clear(V)
 	m.queue_free()
 
+
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
 ## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
 ## tells the dots the ground under it.
