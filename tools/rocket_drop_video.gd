@@ -5,9 +5,10 @@ extends RefCounted
 ##   1 ride     the leader launches and does nothing: the squad rides the rocket down and lands together
 ##   2 fall     jump out early and free-fall forward (the glider opens by itself near the ground)
 ##   3 glide    jump out early and open the glider at once, flying on forward
+##   4 looks    the leader rides it down while a squadmate jumps out (its trail, the puff, the dust where it lands)
 
 const LAUNCH_AT := 6.0           # s into the ship's run: over the islands on this seed
-const OUT_AT := 1.0              # s after the launch the player jumps out (clips 2 and 3)
+const OUT_AT := 1.0              # s after the launch the player (clips 2 and 3) or a squadmate (clip 4) jumps out
 const AFTER_S := 2.5             # s kept after landing
 const CAP_S := 40.0              # s at most
 
@@ -53,7 +54,11 @@ func _drop(clip: int) -> void:
 	var t0 := m.time
 	var down_at := -1.0
 	while m.time - t0 < CAP_S and (down_at < 0.0 or m.time - down_at < AFTER_S):
-		if clip > 1 and P.rocket != null and m.time - t0 >= OUT_AT:
+		if clip == 4 and P.rocket != null and P.rocket.riders.size() > 2 and m.time - t0 >= OUT_AT:
+			var riders: Array = P.rocket.riders
+			m.skydrop.detach(riders[1] if riders[0] == P else riders[0])
+			print("MEDIA_MARK out t=%.1f" % m.time)
+		if clip in [2, 3] and P.rocket != null and m.time - t0 >= OUT_AT:
 			m.skydrop.detach(P)
 			Input.action_press("up")
 			print("MEDIA_MARK out t=%.1f" % m.time)

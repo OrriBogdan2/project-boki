@@ -19,7 +19,6 @@ const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetyp
 const PLANT := 0.7         # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
 const LATER := ["juggernaut"]    # Kael: landing after art1-integ
-const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
 var holder: Node3D
@@ -118,7 +117,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	if feet:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
 		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
-		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
+		ok(carry >= PLANT, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
 	ok(hmax - hmin <= BOB + _float_bob(id), "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:
 		_tick(m, a, sync, 1.0)
@@ -159,6 +158,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	dd["crouch"] = keep
 
 ## Sneaking at the game's crouch speed: the planted foot's speed back along the ground, as a share of it (1: no skate).
+## The median over the frames down, so the frame a foot lands on (still slowing from its swing) doesn't count.
 func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed: float) -> float:
 	var v := Vector3(0, 0, -speed)
 	var bone := WardenSkeleton.find(sk, _foot(sk, "L"))
@@ -174,13 +174,12 @@ func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed:
 		vz.append((f.z - prev.z) / DT)
 		prev = f
 	var low: float = ys.min()
-	var sum := 0.0
-	var n := 0
+	var down: Array[float] = []
 	for i in ys.size():
 		if ys[i] <= low + PLANTED:
-			sum += vz[i]
-			n += 1
-	return sum / maxf(n, 1) / speed
+			down.append(vz[i])
+	down.sort()
+	return down[down.size() / 2] / speed
 
 ## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
 ## m: the rise and fall a floating hero's hover adds on its own (Motley's bob, KMovesStone), allowed on top.
