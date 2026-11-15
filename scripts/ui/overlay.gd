@@ -181,7 +181,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
-		if s is Match:
+		if s and s.has_method("on_menu_opened"):
 			s.on_menu_opened()
 	var pb := UI.scroll_panel(title_txt, width, back, "Back" if stack.size() > 0 else "Close", scroll)
 	host.add_child(pb[0])
@@ -396,7 +396,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")
 	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
-	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	var follow := [["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
 	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 
@@ -698,20 +698,41 @@ func open_inventory() -> void:
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters
 		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
+	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
 	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
+	var cell := func(title_txt: String, count_txt: String, desc: String, col: Color, action_txt := "", action := Callable(), icon := "") -> void:
+		var c := UI.card(UI.CARD, 12, 12)
+		c.custom_minimum_size = Vector2(222, 0)
+		var cv := UI.vbox(6); c.add_child(cv)
+		var top := UI.hbox(10)
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
+		top.add_child(dot)
+		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi)
+		tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		tc.add_child(tl)
+		if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
+		top.add_child(tc)
+		cv.add_child(top)
+		if desc != "":
+			var dl := UI.para(desc, 12, UI.MUTED)
+			cv.add_child(dl)
+		if action.is_valid():
+			cv.add_child(UI.button(action_txt, action))
+		grid.add_child(c)
 	var empty := true
 	match inv_tab:
 		"Items":
 			empty = false
-			_inv_cell(grid, "Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
-			_inv_cell(grid, "Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40%% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
+			cell.call("Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
+			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40%% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: _inv_cell(grid, Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
@@ -720,27 +741,27 @@ func open_inventory() -> void:
 						take = func():
 							ItemHold.want(id)
 							close()
-					_inv_cell(grid, GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD,
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD,
 							"Hold" if take.is_valid() else "", take)
 			if FarmUnlocks.base_mode():
-				_inv_cell(grid, "Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
+				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
 						"Open", open_bowl)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
-				_inv_cell(grid, "Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
+				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
 		"Seeds":
 			for k in Data.CROPS:
 				var n := int(Save.d["seeds"].get(k, 0))
 				if n <= 0: continue
 				empty = false
-				_inv_cell(grid, Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
+				cell.call(Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
 		"Crops":
 			for k in Data.CROPS:
 				var n := int(Save.d["crops"].get(k, 0))
 				if n <= 0: continue
 				empty = false
 				var ck: String = k
-				_inv_cell(grid, Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
+				cell.call(Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
@@ -754,7 +775,7 @@ func open_inventory() -> void:
 				var n := int(Save.d.get("furniture", {}).get(k, 0))
 				if n <= 0: continue
 				empty = false
-				_inv_cell(grid, Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press %s." % Settings.key_cap("build"), Color("c99a6a"))
+				cell.call(Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press %s." % Settings.key_cap("build"), Color("c99a6a"))
 		"Kin":
 			for rec in Save.d["roster"]:
 				empty = false
@@ -768,7 +789,7 @@ func open_inventory() -> void:
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
-		v.add_child(UI.empty_state(String(INV_ICON.get(inv_tab, "gem")), es[0], es[1]))
+		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
 
 ## A Boki in the inventory's Boki tab: its portrait, name with its sex, level, form and bond.
 func _boki_card(rec: Dictionary) -> Control:
@@ -876,57 +897,64 @@ func open_admin() -> void:
 	var grid := GridContainer.new(); grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
 	v.add_child(grid)
-	_admin_add(grid, "+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
-	_admin_add(grid, "+10 of every seed", func():
+	var add := func(txt: String, f: Callable):
+		var b := UI.button(txt, func():
+			f.call()
+			Sfx.play("pickup")
+			Save.save_game()
+			_admin_refresh(), 290)
+		grid.add_child(b)
+	add.call("+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
+	add.call("+10 of every seed", func():
 		for s in Data.CROPS: Save.add_seed(s, 10))
-	_admin_add(grid, "+5 of every crop", func():
+	add.call("+5 of every crop", func():
 		for s in Data.CROPS: Save.d["crops"][s] = int(Save.d["crops"].get(s, 0)) + 5)
-	_admin_add(grid, "+5 tonics", func(): Save.add_item("tonic", 5))
-	_admin_add(grid, "Partner +1 level", func():
+	add.call("+5 tonics", func(): Save.add_item("tonic", 5))
+	add.call("Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
 			Evo.level_up(k)
 			Game._evolve(k, {}))
-	_admin_add(grid, "Partner full trust", func():
+	add.call("Partner full trust", func():
 		var k := Save.active_kin()
 		if not k.is_empty(): k["trust"] = 100.0)
-	_admin_add(grid, "Grow every crop now", func():
+	add.call("Grow every crop now", func():
 		for arr in ["plots", "gh_plots"]:
 			for p in Save.d.get(arr, []):
 				if p["crop"] != "":
 					p["stage"] = int(Data.CROPS[p["crop"]]["grow"])
 					p["care"] = p["stage"]
 		if c == "home": _reload_home())
-	_admin_add(grid, "Unlock every building and bridge", func():
+	add.call("Unlock every building and bridge", func():
 		for b in Data.BUILDINGS:
 			if not Save.d["buildings"].has(b): Save.d["buildings"].append(b)
 		for i in Data.ISLES:
 			if not Save.d["bridges"].has(i): Save.d["bridges"].append(i)
 		Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10)
 		if c == "home": _reload_home())
-	_admin_add(grid, "Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
-	_admin_add(grid, "Replay the tutorials", func(): Save.d["tutorial"] = {})
+	add.call("Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
+	add.call("Replay the tutorials", func(): Save.d["tutorial"] = {})
 	var spawn := UI.button("Spawn a Boki…", open_spawn_kin, 290)
 	grid.add_child(spawn)
 	if c == "home":
 		var h = Game.main.screen_node()
-		_admin_add(grid, "Morning", func(): h.day_t = 0.27)
-		_admin_add(grid, "Night", func(): h.day_t = 0.95)
-		_admin_add(grid, "Rain on / off", func():
+		add.call("Morning", func(): h.day_t = 0.27)
+		add.call("Night", func(): h.day_t = 0.95)
+		add.call("Rain on / off", func():
 			h.raining = not h.raining
 			h.weather_t = 999.0 if h.raining else 60.0
 			h.rain.emitting = h.raining)
 	if c == "match":
 		var m = Game.main.screen_node()
-		_admin_add(grid, "Ultimate and ability ready", func():
+		add.call("Ultimate and ability ready", func():
 			if m.player:
 				m.player.ult = 1.0; m.player.sig_cd = 0.0)
-		_admin_add(grid, "Defeat every monster", func():
+		add.call("Defeat every monster", func():
 			for mb in m.mobs:
 				if not mb.dead: mb.hurt(99999.0, m.player, {}))
-		_admin_add(grid, "Exits ready now", func():
+		add.call("Exits ready now", func():
 			if m.exits: m.exits.admin_ready())
-		_admin_add(grid, "Extract now", func():
+		add.call("Extract now", func():
 			if m.player and not m.player.out:
 				close()
 				m._extract(m.player))
@@ -969,7 +997,7 @@ func open_spawn_kin() -> void:
 			Save.save_game()
 			Sfx.play("unlock")
 			var s = Game.main.screen_node() if Game.main else null
-			if s and s.has_method("_spawn_kin"):  # Home/Interior, see unstick
+			if s and s.has_method("_spawn_kin"):
 				s._spawn_kin()
 			_admin_refresh(), 196)
 		b.add_theme_color_override("font_color", Data.KIN[sid]["color"])
@@ -985,41 +1013,9 @@ func _admin_refresh() -> void:
 		var k := Save.active_kin()
 		(st as Label).text = "%d gems · partner %s level %d, trust %d" % [int(Save.d["gems"]), k.get("name", "none"), int(k.get("level", 0)), int(k.get("trust", 0))]
 	var s = Game.main.screen_node() if Game.main else null
-	if s and s.has_method("_refresh_top"):  # Home only
+	if s and s.has_method("_refresh_top"):
 		s._refresh_top()
 
 func _reload_home() -> void:
 	close()
 	Game.goto("home")
-
-const INV_ICON := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
-
-func _inv_cell(grid: GridContainer, title_txt: String, count_txt: String, desc: String, col: Color,
-		action_txt := "", action := Callable(), icon := "") -> void:
-	var c := UI.card(UI.CARD, 12, 12)
-	c.custom_minimum_size = Vector2(222, 0)
-	var cv := UI.vbox(6); c.add_child(cv)
-	var top := UI.hbox(10)
-	var dot := UI.badge(icon if icon != "" else String(INV_ICON.get(inv_tab, "gem")), col, 36.0)
-	top.add_child(dot)
-	var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi)
-	tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	tc.add_child(tl)
-	if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
-	top.add_child(tc)
-	cv.add_child(top)
-	if desc != "":
-		var dl := UI.para(desc, 12, UI.MUTED)
-		cv.add_child(dl)
-	if action.is_valid():
-		cv.add_child(UI.button(action_txt, action))
-	grid.add_child(c)
-
-func _admin_add(grid: GridContainer, txt: String, f: Callable) -> void:
-	var b := UI.button(txt, func():
-		f.call()
-		Sfx.play("pickup")
-		Save.save_game()
-		_admin_refresh(), 290)
-	grid.add_child(b)
