@@ -38,7 +38,8 @@ func _new_save() -> void:
 	Save.d = d
 	Econ.ensure()
 	HomeLayout.ensure(d)
-	HomeLayout.of(d)["seed"] = ISLAND_SEED  # a farm start picks a random island: pinned, the run (and its averages) is the same every time
+	# a farm start picks a random island: pinned, so the run is the same every time
+	HomeLayout.of(d)["seed"] = ISLAND_SEED
 	HomeLayout.of(d)["sk"] = HomeLayout.fs_scale(ISLAND_SEED)
 	HomeLayout.of(d)["fb"] = 0  # no building pass: the stall is open at every level, so is the Shelter
 
