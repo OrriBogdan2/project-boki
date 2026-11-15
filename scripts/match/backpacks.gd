@@ -220,5 +220,5 @@ static func shop_upgrade(h) -> bool:
 static func tip(h) -> Array:
 	var tier := int(h.backpack)
 	var how := "Gear and treasure you're carrying home. Extract to keep it all; die and it stays in your deathbox, "
-	how += "backpack too. Bring a bigger one from your armory, take one from a deathbox or buy one at a shop."
+	how += "backpack too. Bring a bigger one from your gear shed, take one from a deathbox or buy one at a shop."
 	return [["%s  %d/%d" % [name_of(tier), h.pack.size(), h.pack_cap], HudStyle.INK], [how, HudStyle.INK, 14]]
