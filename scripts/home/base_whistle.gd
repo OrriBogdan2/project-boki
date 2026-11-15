@@ -45,6 +45,7 @@ func sulky(rec: Dictionary) -> bool:
 ## The key went down: the partner is called now, the nearest other Boki if it stays down.
 func press() -> void:
 	held = 0.0
+	GardenSfx.cue(TAP, h.ppos)
 	hint.used()
 	GardenSfx.cue(TAP, h.ppos)
 	var mine := partner()
