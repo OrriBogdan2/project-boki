@@ -178,7 +178,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	Sfx.play("kill")
 	P.ak.cd["x"] = 0.05
 	_step(m, 0.1)
-	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB
+	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB + float(Sfx.cue_db.get(UltReadyCue.SOUND, 0.0))
 	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
