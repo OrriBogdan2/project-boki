@@ -716,6 +716,7 @@ const CHECKS := {
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
 	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
 	"--hurtbox-check": ["res://tools/hurtbox_check.gd", "hurtbox_check", null],
+	"--hurtbox-shots": ["res://tools/hurtbox_shots.gd", "hurtbox_shots", null],      # GPU, --shots-dir=<dir>
 	"--kite-check": ["res://tools/kite_check.gd", "kite_check", null],         # Kite Tow part 1, GARDEN_MODERN 4.2
 	"--levelup-check": ["res://tools/levelup_check.gd", "levelup_check", null],
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],  # docs/decisions/0044

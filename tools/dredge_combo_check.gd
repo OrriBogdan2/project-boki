@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_gun_range_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_anim_time_check.gd").new(self).run(ak)
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
