@@ -780,6 +780,23 @@ const MOBS := {
 		"attack": "none",
 		"ward": true
 	},
+	"gate":
+	{
+		# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
+		# damage. 2000 health at tier 0: one bot ~2 min (with the guards each crack calls), three ~20 s
+		"name": "Gate Seal",
+		"hp": 2000.0,
+		"speed": 0.0,
+		"dmg": 0.0,
+		"range": 0.0,
+		"windup": 1.0,
+		"cd": 999.0,
+		"r": 1.4,
+		"gems": 0,
+		"color": Color("8a8494"),
+		"attack": "none",
+		"ward": true
+	},
 }
 ## The lair bosses, in the order generated maps hand them out.
 const BOSSES := ["colossus", "serpent", "brood"]
@@ -1145,7 +1162,7 @@ const BUILDINGS := {
 	},
 	"armory":
 	{
-		"name": "Armory",
+		"name": "Gear Shed",
 		"isle": "main",
 		"cost": 40,
 		"rect": [45, 25, 47, 26],
