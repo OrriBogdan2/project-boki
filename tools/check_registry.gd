@@ -736,6 +736,41 @@ const CHECKS := {
 	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],      # air casts, frame by frame
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames
+	# moved out of main.gd (ext/checks-out-of-main-c)
+	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
+	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
+	"--balloon-check": ["res://tools/balloon_check.gd", "balloon_check", null],
+	"--blight-check": ["res://tools/blight_check.gd", "blight_check", null],
+	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
+	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
+	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
+	"--farm-start-check": ["res://tools/farm_start_check.gd", "farm_start_check", null],
+	"--gear-check": ["res://tools/gear_check.gd", "gear_check", null],
+	"--hero-check": ["res://tools/hero_check.gd", "hero_check", null],
+	"--hold-check": ["res://tools/hold_check.gd", "hold_check", null],
+	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
+	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
+	"--keybind-check": ["res://tools/keybind_check.gd", "keybind_check", null],
+	"--lair-lock-check": ["res://tools/lair_lock_check.gd", "lair_lock_check", null],
+	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],
+	"--life-check": ["res://tools/life_check.gd", "life_check", null],
+	"--mantle-check": ["res://tools/mantle_check.gd", "mantle_check", null],
+	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--nook-check": ["res://tools/nook_check.gd", "nook_check", null],
+	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
+	"--pack-ui-check": ["res://tools/pack_ui_check.gd", "pack_ui_check", null],
+	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
+	"--raid-check": ["res://tools/raid_check.gd", "raid_check", null],
+	"--record-check": ["res://tools/record_check.gd", "record_check", null],
+	"--revive-check": ["res://tools/revive_check.gd", "revive_check", null],
+	"--swim-check": ["res://tools/swim_check.gd", "swim_check", null],
+	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
+	"--train-check": ["res://tools/train_check.gd", "train_check", null],
+	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
+	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
+	"--weapon-check": ["res://tools/weapon_check.gd", "weapon_check", null],
+	"--weapon-clip-check": ["res://tools/weapon_clip_check.gd", "weapon_clip_check", null],
+	"--work-check": ["res://tools/work_check.gd", "work_check", null],
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

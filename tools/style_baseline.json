@@ -311,9 +311,9 @@
 "semicolon": 2
 },
 "scripts/main.gd": {
-"long_line": 353,
-"nested_ternary": 6,
-"semicolon": 367
+"long_line": 312,
+"nested_ternary": 5,
+"semicolon": 334
 },
 "scripts/match/abilities.gd": {
 "long_line": 1
@@ -907,6 +907,10 @@
 "nested_ternary": 9,
 "semicolon": 6
 },
+"tools/hold_check.gd": {
+"long_line": 1,
+"semicolon": 6
+},
 "tools/incubator_check.gd": {
 "long_line": 23,
 "semicolon": 12
@@ -940,6 +944,10 @@
 "tools/level_hud_check.gd": {
 "long_line": 6,
 "semicolon": 4
+},
+"tools/life_check.gd": {
+"long_line": 8,
+"semicolon": 13
 },
 "tools/loop_tour.gd": {
 "long_line": 20,
@@ -993,6 +1001,10 @@
 "long_line": 20,
 "semicolon": 5
 },
+"tools/record_check.gd": {
+"long_line": 12,
+"semicolon": 7
+},
 "tools/revive_check.gd": {
 "long_line": 11,
 "semicolon": 25
@@ -1033,6 +1045,11 @@
 "long_line": 5,
 "nested_ternary": 1,
 "semicolon": 14
+},
+"tools/weapon_check.gd": {
+"long_line": 4,
+"nested_ternary": 1,
+"semicolon": 6
 },
 "tools/weapon_clip_check.gd": {
 "long_line": 2,

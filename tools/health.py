@@ -13,7 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUDGETS = {
     "scripts/match/match.gd": 5725,
     "scripts/home/home.gd": 5950,
-    "scripts/main.gd": 4100,
+    "scripts/main.gd": 3300,
     "scripts/ui/hud.gd": 2753,
     "scripts/match/models.gd": 3500,
     "scripts/match/hunter.gd": 3500,
