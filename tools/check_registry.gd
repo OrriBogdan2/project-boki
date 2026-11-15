@@ -365,7 +365,7 @@ const CHECKS := {
 	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
-	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],      # air casts before/after, frame by frame
+	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],  # air casts, frame by frame
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],  # every Hunter gliding: turns, dive
@@ -399,7 +399,7 @@ const CHECKS := {
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],  # rigged Boki gait gate
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],  # rigged Boki gait strips
 	"--boki-idle-check": ["res://tools/boki_idle_check.gd", "boki_idle_check", null],    # rigged Boki idles and fidgets
-	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],    # a strip of every idle and fidget
+	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],  # every idle and fidget
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],  # Sable (same check)
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
@@ -641,7 +641,7 @@ const CHECKS := {
 	# 2 games, relay: kit statuses
 	"--status-net-check": ["res://tools/status_net_check.gd", "status_net_check", null],
 	"--blocker-check": ["res://tools/blocker_check.gd", "hero_pair_check", null],      # docs/ABILITIES.md blockers
-	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],      # 2 games, 100 ms, 2% loss
+	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],  # 100 ms, 2% loss
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
