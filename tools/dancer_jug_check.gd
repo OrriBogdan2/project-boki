@@ -670,9 +670,9 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
 			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
-	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
-			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 12.0 and T.slow_t > 0.0 and K.res > 30.0,
-			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
+	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast, the full wave does not slow)",
+			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 12.0 and T.slow_t <= 0.0 and K.res > 30.0,
+			"mid %.2f took %.0f rage %.0f slow %.2f" % [midk, A.dmg(T), K.res, T.slow_t])
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0

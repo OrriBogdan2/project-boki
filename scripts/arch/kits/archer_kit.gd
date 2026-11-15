@@ -453,7 +453,7 @@ func _tick_rain(dt: float) -> void:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
-		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+		if w.downed and not w.dead and w.team != h.team and _in_rain(w):
 			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots
