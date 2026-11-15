@@ -16,6 +16,12 @@ reads at the match camera and he keeps the line-up height), the ruff at 0.80, si
     blender -b ~/art1/motley/ostra.blend --python tools/art1/ostra_anim.py -- all --export art/wardens/ostra/ostra.glb
     godot --headless --path . --import
 
+Re-keying clips on the swapped model (there is no ostra.blend with its mesh): key on the game .glb's own rig, then copy the clips in
+(every other clip stays byte for byte the same):
+
+    blender -b --factory-startup --python tools/art1/ostra_anim.py -- walk_f,orb --from art/wardens/ostra/ostra.glb --export /tmp/keyed.glb
+    python3 tools/art1/glb_add_clips.py art/wardens/ostra/ostra.glb /tmp/keyed.glb walk_f,orb
+
 **Appeal swap (2026-11-11, owner-approved):** the mesh is now the appeal3 master, body b with the new starry face (`~/meshy/v95/Motley/r2/appeal3/cand_b.glb`),
 put on this rig, its clips and anchors by the v95 swap (`art/wardens/src/ostra_v95.json`, docs/art/wardens/V95_SWAP.md). It replaces the
 build above's mesh (the build scripts still make the rig and clips): one 2048 atlas (`ostra_atlas.jpg`) and a baked `ostra_normal.jpg`, slots
@@ -32,6 +38,6 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **No weapon (item 136):** the void orb is gone. `anchor_orb`, `anchor_hand_r` (right palm), `anchor_hand_l`, `anchor_cards` (left palm), `weapon_muzzle` (right fingertips, an FX
   point the Gun follows). The fan of cards on `x_fan` is the deck. The flurry's card is `void_card.png`, built by `scripts/heroes/void_card.gd`.
 - **Cards:** `orbit_cards`, `orbit_cardsb` on the hips, tumbled by WardenSway (`sway` in content/rules/warden_anim/ostra.json), some burnt or torn.
-- **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
+- **Clips:** `tools/art1/ostra_clips.py` (keys; gliding, the box swings back on the spring's top, `swing`, and treads), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).

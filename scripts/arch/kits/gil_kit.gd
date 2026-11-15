@@ -332,6 +332,7 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
+		m.sfx("pay_flashpoint", f.pos, 0.0, 1.0)      # the Beach: its own payoff sting
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)

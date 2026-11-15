@@ -10,12 +10,13 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
+##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
+##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
+##   9. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
+##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
-##  10. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
-## 11. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
-##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
-## 12. the low-health wash grows with missing health and leans toward the side the last hits came from
+##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -213,10 +214,36 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
-	await _frames(m, hud, P)
 	await _check_ult(P)
+	_check_safe(hud)
+	await _frames(m, hud, P)
 	await _check_wash(P)
 	_done()
+
+## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap
+## and the tip card sit inside HudStyle.safe_rect, at the window size the run has and at 1280x720 / 1920x1080.
+func _check_safe(hud) -> void:
+	var sz: Vector2 = hud.c.size
+	var pad := HudStyle.safe_pad(sz)
+	var safe := HudStyle.safe_rect(sz).grow(0.5)
+	var out: Array = []
+	for spot in hud.hover_spots:
+		if not safe.encloses(spot[0]):
+			out.append("%s %s" % [spot[1], spot[0]])
+	ok(out.is_empty(), "every drawn HUD block is inside the %.0f x %.0f margin (%s)" % [pad.x, pad.y, out.slice(0, 3)])
+	ok(hud.mm_bottom - 196.0 >= pad.y - 0.5, "the minimap starts under the top margin")
+	for size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080)]:
+		var tag := "%dx%d" % [size.x, size.y]
+		var s := HudStyle.safe_rect(size)
+		var slot := Rect2(s.end - Vector2(20, 20), Vector2(20, 20))      # a slot in the safe corner
+		var tip := Rect2(HudTip.place(slot, Vector2(300, 120), size), Vector2(300, 120))
+		ok(s.encloses(tip), "%s: the tip card by a corner slot stays in the safe area" % tag)
+		var reach: float = hud.HUD_REACH
+		var origin: Vector2 = hud._hud_origin(size)
+		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
+		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
+		var strips := minf(WaysOutHud.top_y(size), TutorialStrip.rect(size).position.y)
+		ok(strips >= s.position.y, "%s: the top strips start under it" % tag)
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
 ## a hit drains it before health, and it fades over its last ShieldStrip.FADE_S before it drops.
@@ -370,38 +397,6 @@ func _redraw(hud) -> void:
 	await hud.panels.draw
 	await main.get_tree().process_frame
 
-## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
-## DamageDir.hit) weights the left edge, and a second later the wash is even again.
-func _check_wash(P: Hunter) -> void:
-	var hud = P.m.hud
-	var hp_was := P.hp
-	P.hp = P.max_hp * 0.5
-	var above := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.3
-	var high := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.1
-	var low := HurtWash.strength(P)
-	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
-		% [int(HurtWash.BELOW * 100.0), high, low])
-	var foe: Hunter = P.m.hunters.filter(func(x): return x.team != P.team)[0]
-	foe.pos = P.pos + Vector3(-6.0, 0.0, 0.0)
-	hud.dmg_dir.hits.clear()
-	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
-	hud.dmg_dir.hit(P.m, foe, P, 30.0)
-	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
-	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
-	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
-	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
-	ok(left > 0.9 and right == 0.0 and top < left, said)
-	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
-	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
-	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
-	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
-	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
-	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
-	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
-	P.hp = hp_was
-
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
@@ -490,44 +485,40 @@ func _banner_closes(kb: KnockBanner) -> void:
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
 
-## 9. The squad frames follow the match: knocked, dead, squad size, solo.
-func _frames(m: Match, hud, P: Hunter) -> void:
-	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
-	mate.downed = false
-	m.knock(mate, m.hunters.filter(func(x): return x.team != P.team)[0], {})
-	await main.get_tree().process_frame
-	await hud.panels.draw
-	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
-	var mine: Dictionary = SquadFrames.shown.get(P.nid, {})
-	ok(SquadFrames.shown.size() == squad.size() and int(mine.get("row", -1)) == squad.size() - 1,
-		"a row per squad member (%d), you last (row %d)" % [SquadFrames.shown.size(), int(mine.get("row", -1))])
-	var row: Dictionary = SquadFrames.shown.get(mate.nid, {})
-	var knocked_for := m.time - float(hud.mates.since.get(mate.nid, -99.0))
-	ok(row.get("state", "") == "WISP" and float(row.get("bleed", 0.0)) > 0.0 and knocked_for < 5.0,
-		"the knocked teammate's row shows their bleed-out (%s) and the ping has its knock time" % str(row))
-	mate.out = true
-	mate.gone = true
-	await hud.panels.draw
-	row = SquadFrames.shown.get(mate.nid, {})
-	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
-		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
-	var teams := {}
-	for h in squad:
-		teams[h] = h.team
-	var others: Array = squad.filter(func(x): return x != P and x != mate)
-	for h in others:
-		h.team = 99
-	await hud.panels.draw
-	ok(SquadFrames.shown.size() == 2, "a 2-player squad gets two rows (%d)" % SquadFrames.shown.size())
-	mate.team = 99
-	await hud.panels.draw
-	ok(SquadFrames.shown.is_empty(), "solo: no squad frames (%d rows)" % SquadFrames.shown.size())
-	for h in squad:
-		h.team = teams[h]
-	mate.out = false
-	mate.gone = false
+## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## DamageDir.hit) weights the left edge, and a second later the wash is even again.
+func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
+	var hp_was := P.hp
+	P.hp = P.max_hp * 0.5
+	var above := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.3
+	var high := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.1
+	var low := HurtWash.strength(P)
+	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
+		% [int(HurtWash.BELOW * 100.0), high, low])
+	var foe: Hunter = P.m.hunters.filter(func(x): return x.team != P.team)[0]
+	foe.pos = P.pos + Vector3(-6.0, 0.0, 0.0)
+	hud.dmg_dir.hits.clear()
+	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.dmg_dir.hit(P.m, foe, P, 30.0)
+	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
+	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
+	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
+	ok(left > 0.9 and right == 0.0 and top < left, said)
+	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
+	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
+	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
+	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
+	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
+	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
+	P.hp = hp_was
 
-## 11. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
+
+## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
 func _channel(m: Match, hud, P: Hunter) -> void:
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
 	ok(not mates.is_empty(), "an ally to be Meeko (%d)" % mates.size())
@@ -542,14 +533,19 @@ func _channel(m: Match, hud, P: Hunter) -> void:
 	ok(ChannelBar.shown.is_empty(), "no channel, no bar")
 	K.hearth_call = {"who": P, "left": total, "tick": 0.0, "fx": 0.0}
 	await hud.panels.draw
+	# the match may tick a step before the HUD draws, so the bar is read against the seconds left at that draw
 	var bar: Dictionary = ChannelBar.shown.get(M.nid, {})
-	# (a frame or two of the kit's tick may land before the draw: a slow machine drains a few percent)
-	ok(not bar.is_empty() and float(bar["frac"]) > 0.9 and total == 5.0,
+	var live := float(K.hearth_call["left"]) / total
+	ok(not bar.is_empty() and absf(float(bar["frac"]) - live) < 0.01 and live > 0.85 and total == 5.0,
 		"her channel on you (%.1f s): the bar is up, full (%s)" % [total, bar])
 	K.hearth_call["left"] = total * 0.4
 	await hud.panels.draw
 	var drained := float(ChannelBar.shown.get(M.nid, {}).get("frac", -1.0))
-	ok(drained > 0.3 and drained <= 0.4, "it drains with the seconds left (%.2f, want 0.40)" % drained)
+	live = float(K.hearth_call["left"]) / total
+	# the match drains it a few steps before each HUD draw (up to 8 a slow frame: 0.36 / 0.34 seen on a loaded box,
+	# the full read 0.97), so: the bar follows the seconds left, which sit under the 0.4 set, never above it
+	ok(absf(drained - live) < 0.01 and live <= 0.4 and live > 0.2,
+		"it drains with the seconds left (%.2f, want %.2f)" % [drained, live])
 	var row: Array = m._ser(M)
 	K.hearth_call = {}
 	M.remote = true
@@ -570,6 +566,47 @@ func _channel(m: Match, hud, P: Hunter) -> void:
 	ok(ChannelBar.shown.is_empty(), "Meeko knocked down mid-channel: gone that frame")
 	M.downed = false
 	M.remote = false
+
+## 9. The squad frames follow the match: knocked, dead, squad size, solo.
+func _frames(m: Match, hud, P: Hunter) -> void:
+	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
+	mate.downed = false
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	m.knock(mate, foe, {})
+	mate.last_hit_by = foe      # (a hit does this; knock() alone does not)
+	await main.get_tree().process_frame
+	await hud.panels.draw
+	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
+	var mine: Dictionary = SquadFrames.shown.get(P.nid, {})
+	ok(SquadFrames.shown.size() == squad.size() and int(mine.get("row", -1)) == squad.size() - 1,
+		"a row per squad member (%d), you last (row %d)" % [SquadFrames.shown.size(), int(mine.get("row", -1))])
+	var row: Dictionary = SquadFrames.shown.get(mate.nid, {})
+	var knocked_for := m.time - float(hud.mates.since.get(mate.nid, -99.0))
+	ok(row.get("state", "") == "WISP" and float(row.get("bleed", 0.0)) > 0.0 and knocked_for < 5.0,
+		"the knocked teammate's row shows their bleed-out (%s) and the ping has its knock time" % str(row))
+	mate.out = true
+	mate.gone = true
+	await hud.panels.draw
+	row = SquadFrames.shown.get(mate.nid, {})
+	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
+		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
+	ok(row.get("killer", "") == foe.nid and SquadFrames.shown.get(P.nid, {}).get("killer", "x") == "",
+		"the dead row carries the finisher's face (%s); live rows carry none" % str(row.get("killer", "")))
+	var teams := {}
+	for h in squad:
+		teams[h] = h.team
+	var others: Array = squad.filter(func(x): return x != P and x != mate)
+	for h in others:
+		h.team = 99
+	await hud.panels.draw
+	ok(SquadFrames.shown.size() == 2, "a 2-player squad gets two rows (%d)" % SquadFrames.shown.size())
+	mate.team = 99
+	await hud.panels.draw
+	ok(SquadFrames.shown.is_empty(), "solo: no squad frames (%d rows)" % SquadFrames.shown.size())
+	for h in squad:
+		h.team = teams[h]
+	mate.out = false
+	mate.gone = false
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)
