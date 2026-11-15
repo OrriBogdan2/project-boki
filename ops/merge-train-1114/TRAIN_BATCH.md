@@ -4,7 +4,7 @@ Main moves every 20-30 min, so a green that must have `behind_by 0` is stale bef
 `train-batch run` folds every green-but-behind PR into one `ext/merge-train-<MMDD>-<HHMM>` branch (main + each PR head, merge_batch.sh
 conflict policy; conflicting or head-moved PRs are skipped and logged), gates it once with `gate-shard`, opens one PR listing the folded
 PRs and posts `GATE GREEN <full sha>` on it. `train-batch finish` closes the folded PRs ("merged via #N") after the train merged.
-Details: `train-batch` docstring. Test: `bash ops/merge-train-1114/train_batch_test.sh` (15 checks, local, no cluster).
+Details: `train-batch` docstring. Test: `bash ops/merge-train-1114/train_batch_test.sh` (18 checks, local, no cluster).
 
 ## Install (coordinator, hetzner)
     cp ops/merge-train-1114/{train-batch,gate-shard,gate_shard_run.gd} /home/boki/coord/boki-tools/merge-train/ && boki-install boki-tools/merge-train
@@ -39,3 +39,11 @@ coordinator's (texts: `pr-body.md`, `gate-comment.md`). A full gate is 10-50 min
 - Without a token, `select` reads comments of ~35 behind PRs (60 API calls/h): cached in `$TRAIN_STATE/comments-cache.json` by updated_at.
 - The train only pays off once merge-ready-watch has the hold line above and the box that runs `run` can open the PR within minutes
   (hetzner, gh): a train published 90 min after its gate is as stale as the greens it folded.
+
+## Third look (11-15 16Z, rpc7, job 20261115-155513-a1)
+- Of 50 open PRs only 5 have a GATE GREEN at their head (#93 #87 #84 #91 #85); all 5 conflict with main d65f00de26 itself (#53 landed
+  412 files). #93 was GATE GREEN 6 times today (07:27 to 15:07) and never merged: the one-by-one re-gate loses to main every time.
+- Skip labels now come from a scratch merge with merge_batch's policy (git 2.34 has no `merge-tree --write-tree`, so every skip used to
+  say "only with the others"). merge_batch takes ours on `.uid` conflicts: #87's only conflict was an add/add `.uid`.
+- regate-bot: when >= 2 PRs are green-but-behind, start `train-batch run` instead of one regate-run each, and start nothing while
+  `train-batch hold` is 0 (the hold line above in merge-ready-watch is still required; without it the train goes stale too).
