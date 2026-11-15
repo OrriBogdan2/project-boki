@@ -1497,6 +1497,18 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | max_top_frac | 0.2 |
 | _max_top_frac | the lowest its top goes for toasts (past it, it sits over them): the name pill stays above ~37%, clear of your Hunter |
 
+## knock_tip (`content/rules/knock_tip.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys. |
+| showings | 2 |
+| gap | 10 |
+| far_m | 22 |
+| sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
+
 ## lantern_match (`content/rules/lantern_match.json`)
 
 Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
@@ -1533,18 +1545,6 @@ Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6,
 | gems | 4 |
 | gems_doc | Gems to you when a game ends (win or not). |
 | card_s | 6 |
-
-## knock_tip (`content/rules/knock_tip.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| doc | The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys. |
-| showings | 2 |
-| gap | 10 |
-| far_m | 22 |
-| sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
 
 ## lean (`content/rules/lean.json`)
 
@@ -1919,12 +1919,12 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
-Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). look: the surface shader (shaders/terrain_hazard.gdshader).
+Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). icon: the menu icon the home cards show beside its "Walks <noun> safely" line. look: the surface shader (shaders/terrain_hazard.gdshader).
 
 | Setting | Value |
 |---|---|
 | hint | {"near_m": 8.0, "every_s": 0.5, "again_s": 30.0} |
-| kinds | {"lava": {"name": "Lava Field", "noun": "the lava", "hurts": "burning", "effect": {"burn_dps": 9.0, "burn_linger_s": 1.2}, "counter": {"themes": ["ember"], "kin": []}, "look": {"mode": 0, "deep": "ff5a14", "shallow": "3a1610", "edge": "ffb04a", "glow": 2.2, "alpha": 1.0}}, "deep_water": {"name": "Deep Water", "noun": "deep water", "hurts": "slow, weak hits, short of breath", "effect": {"speed": 0.55, "dmg_out": 0.6, "breath_s": 6.0, "drown_dps": 8.0, "swim_haste": true}, "counter": {"themes": [], "kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]}, "look": {"mode": 1, "deep": "123a7a", "shallow": "3a8ac0", "edge": "d8f4ff", "glow": 0.15, "alpha": 0.82}}, "ice": {"name": "Ice Sheet", "noun": "the ice", "hurts": "no footing", "effect": {"grip": 0.12}, "counter": {"themes": ["frost"], "kin": []}, "look": {"mode": 2, "deep": "9fd8f0", "shallow": "e6f8ff", "edge": "ffffff", "glow": 0.25, "alpha": 0.9}}, "static": {"name": "Static Flats", "noun": "the static", "hurts": "shocks", "effect": {"every_s": 3.2, "warn_s": 0.9, "dmg": 9.0, "stun_s": 0.35}, "counter": {"themes": ["storm", "tempest"], "kin": []}, "look": {"mode": 3, "deep": "2a2a3a", "shallow": "4a4a60", "edge": "fff27a", "glow": 1.6, "alpha": 1.0}}, "bramble": {"name": "Bramble", "noun": "the thorns", "hurts": "slow, scratches", "effect": {"speed": 0.6, "dps": 3.0}, "counter": {"themes": ["bloom", "spore"], "kin": []}, "look": {"mode": 4, "deep": "2e3a1a", "shallow": "4a3a22", "edge": "8ac04a", "glow": 0.0, "alpha": 1.0}}} |
+| kinds | {"lava": {"icon": "fireball", "name": "Lava Field", "noun": "the lava", "hurts": "burning", "effect": {"burn_dps": 9.0, "burn_linger_s": 1.2}, "counter": {"themes": ["ember"], "kin": []}, "look": {"mode": 0, "deep": "ff5a14", "shallow": "3a1610", "edge": "ffb04a", "glow": 2.2, "alpha": 1.0}}, "deep_water": {"icon": "wave", "name": "Deep Water", "noun": "deep water", "hurts": "slow, weak hits, short of breath", "effect": {"speed": 0.55, "dmg_out": 0.6, "breath_s": 6.0, "drown_dps": 8.0, "swim_haste": true}, "counter": {"themes": [], "kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]}, "look": {"mode": 1, "deep": "123a7a", "shallow": "3a8ac0", "edge": "d8f4ff", "glow": 0.15, "alpha": 0.82}}, "ice": {"icon": "gem", "name": "Ice Sheet", "noun": "the ice", "hurts": "no footing", "effect": {"grip": 0.12}, "counter": {"themes": ["frost"], "kin": []}, "look": {"mode": 2, "deep": "9fd8f0", "shallow": "e6f8ff", "edge": "ffffff", "glow": 0.25, "alpha": 0.9}}, "static": {"icon": "shock", "name": "Static Flats", "noun": "the static", "hurts": "shocks", "effect": {"every_s": 3.2, "warn_s": 0.9, "dmg": 9.0, "stun_s": 0.35}, "counter": {"themes": ["storm", "tempest"], "kin": []}, "look": {"mode": 3, "deep": "2a2a3a", "shallow": "4a4a60", "edge": "fff27a", "glow": 1.6, "alpha": 1.0}}, "bramble": {"icon": "thornwake", "name": "Bramble", "noun": "the thorns", "hurts": "slow, scratches", "effect": {"speed": 0.6, "dps": 3.0}, "counter": {"themes": ["bloom", "spore"], "kin": []}, "look": {"mode": 4, "deep": "2e3a1a", "shallow": "4a3a22", "edge": "8ac04a", "glow": 0.0, "alpha": 1.0}}} |
 
 ## timed_spawns (`content/rules/timed_spawns.json`)
 
