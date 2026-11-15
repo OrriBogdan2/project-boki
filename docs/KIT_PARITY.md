@@ -915,10 +915,10 @@ The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, 
 | | RMB Burrseed wind-up | aim lane while held, walk not measured | 0.5 (`rmb.wind_move`) | owner item 118 |
 | | E Hearthlight | instant | 1.0 | match |
 | | R Hearth Call channel | walks normally, several bh in f41-f72 | 1.0 | match |
-| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.72 (was 0.9)** | **fixed**: `arc_bolts.fire_slow`, asserted in `--dancer-combo-check` |
+| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.71 (was 0.72, 0.9)** | **fixed**: `arc_bolts.fire_slow`; the frames re-read 2026-11-12 give 0.71 (docs/MOVEMENT_FEEL.md), asserted 0.67-0.75 in `--dancer-combo-check` |
 | | RMB Bola wind-up (0.4 s) | no stop shown | 1.0 | match |
 | | E dagger, throw and blink | no stop shown | 1.0 | match |
-| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.72 | match |
+| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.71 | match |
 | | After the Vault | 127-136 px/s for 1-1.5 s: 1.12-1.2 | 1.18 for up to 2 s | match |
 | Motley `ostra` (ostra.md, 205 px/s) | LMB Gravity Orb | the LMB-window plateaus (0082-0087, 0102-0106) are not tied to a shot | 0.9 (`tether_lantern`) | not measured |
 | | RMB Void Snap aim | not seen | 0.75 (`rmb.snap.cast_slow`) | not seen |
