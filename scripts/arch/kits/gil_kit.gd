@@ -24,14 +24,14 @@ var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var aim_t := 0.0
+const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const TELE_LW := 0.1                 # m, their rim
+var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 var lmb_t := -1.0                  # s the Tide Lunge has been charging (-1: not)
 var lmb_was := false
 var lmb_buf := 0.0                 # s a click still waits to thrust
 var press_at := -9.0               # when the attack key went down
 var tide := {}                     # the Tide Lunge under way: {left, dir, hit, full, dmg}
-const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
-const TELE_LW := 0.1                 # m, their rim
-var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 
 func _setup() -> void:
 	rng.seed = hash("gil_bag_%d" % h.get_instance_id())
@@ -460,7 +460,7 @@ func _release_spout() -> void:
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"id": _tele_id(), "from": h.pos, "len": length, "col": col_of(ed),
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
-		"ab": "k1", "fx_t": 0.0})
+		"col": col_of(ed), "ab": "k1", "fx_t": 0.0})
 	play("gil_spout")
 	vfx("spout", h.pos, dir, {"len": length, "w": w, "k": k})
 
@@ -526,7 +526,7 @@ func _start_wave() -> bool:
 		"id": "x", "from": h.pos, "len": length, "col": col_of(xd),
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
-		"dmg": float(xd["dmg"]) * power("ult"), "ab": "ult", "fx_t": 0.0}
+		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult", "fx_t": 0.0}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	# along the wave's own line: a bare dash steers by the move keys, so a moving cast surfed off the wave
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t, "dir": dir}], h, ctx)

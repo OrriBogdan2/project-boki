@@ -1,9 +1,10 @@
 class_name UiSfx
-extends RefCounted
+extends Node
 ## The one place the game's menu and event cues are named, so a sound changes in one spot.
 ## Files are made by tools/gen_sfx_ui.py (see docs/AUDIO.md); every cue is a 2D UI sound.
-## Sounds for the controls Ui.button does not cover (sliders, toggles, dropdowns) are hooked once on the tree
-## (Game): any HSlider, CheckButton or OptionButton added anywhere gets them for free.
+## Sounds for the controls Ui.button does not cover (sliders, toggles, dropdowns, drag and drop) are hooked once on
+## the tree (Game): any HSlider, CheckButton or OptionButton added anywhere gets them for free, and so does every
+## drag of one of our things (the Boki box).
 
 const HOVER_DB := -12.0      # dB: the tick under the cursor stays well under a click
 const FOCUS_DB := -14.0      # dB: keyboard and pad moves are a touch quieter than the mouse
@@ -49,8 +50,25 @@ static func lobby_lock(arch: String, mine: bool) -> void:
 static func lobby_tick(sec: int) -> void:
 	Sfx.play("lobby_tick_urgent" if sec <= URGENT_FROM else "lobby_tick", null, -4.0, 0.02)
 
+var _ours := false             # the drag under way carries one of our things, not a text field's text
+
 static func hook(tree: SceneTree) -> void:
 	tree.node_added.connect(attach)
+	var ears := UiSfx.new()
+	ears.name = "UiSfx"
+	tree.root.add_child.call_deferred(ears)
+
+## Every node hears a drag begin and end: picking a thing up sounds, setting it down in a slot that
+## takes it sounds, and letting go anywhere else is silent (it goes back where it was).
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_BEGIN:
+		_ours = get_viewport().gui_get_drag_data() is Dictionary
+		if _ours:
+			Sfx.play("pickup", null, -6.0)
+	elif what == NOTIFICATION_DRAG_END and _ours:
+		_ours = false
+		if get_viewport().gui_is_drag_successful():
+			Sfx.play("click", null, -3.0, 0.03, 0.9)
 
 static func attach(n: Node) -> void:
 	if n.has_meta(META): return

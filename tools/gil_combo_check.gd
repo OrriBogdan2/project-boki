@@ -1,13 +1,25 @@
 extends "res://tools/hero_pair_check.gd"
 ## --gil-combo-check (old name --gil-kit-check): Gil, the Novice Mage (content/archetypes/gil.json,
-## scripts/arch/kits/gil_kit.gd), on a training dummy through the real match code: the Fencer chain (steps, third-hit
-## slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish Out of Water (three marks
-## Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider
-## spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield) and its telegraphs (AimKit, seen by
-## everyone, no Fx node of their own). Last, his sound set: every move and phase that ran plays a sound of its own
-## (content/vfx/gil.json, made by tools/gen_sfx_gil.py), none shared with another move or the stock set. Each cast plays
-## its own move, and every move but the dive has his clip. Then the dash-flow rows (content/dash_flow/gil.json,
-## tools/dash_flow_check.gd).
+## scripts/arch/kits/gil_kit.gd, docs/heroes/gil.md), on a training dummy through the real match code: the Fencer
+## chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish
+## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
+## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
+## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
+## (tools/dash_flow_check.gd), and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
+## Last, his sound set: every move and phase that ran plays a sound of its own (content/vfx/gil.json, made by
+## tools/gen_sfx_gil.py), none shared with another move or the stock set, and each cast plays its own move (every
+## move but the dive has his clip); the potion leaves his hand on the toss clip's pull-out key.
+
+## Each move or phase of the kit -> the sound it plays (the thrusts and the dash pick theirs by "k" and HeroSfx).
+const OWN_SOUNDS := {
+	"thrust": ["gil_thrust", "gil_thrust_low"], "lunge": ["gil_lunge"], "thrust_hit": ["gil_thrust_hit"],
+	"lunge_hit": ["gil_lunge_hit"], "tide_wind": ["gil_tide_wind"], "tide_full": ["gil_tide_full"],
+	"tide_lunge": ["gil_tide_lunge"], "tide_hit": ["gil_tide_hit"], "throw": ["gil_toss"],
+	"shatter_thunder": ["gil_pop_thunder"], "shatter_slime": ["gil_pop_slime"], "shatter_air": ["gil_pop_air"],
+	"shatter_fire": ["gil_pop_fire"], "shatter_zeep": ["gil_pop_zeep"], "mark": ["gil_mark"],
+	"beached": ["gil_beached"], "surface": ["gil_surface"], "spin": ["gil_spin"], "spout": ["gil_spout"],
+	"wave": ["gil_wave"], "wave_land": ["gil_wave_land"],
+}
 
 var m: Match
 var P: Hunter
@@ -34,8 +46,12 @@ func run(main_node: Node) -> void:
 	_swim()
 	_riptide()
 	_wave()
-	_sounds()
 	_telegraphs()
+	_numbers()
+	_cancels()
+	_recast()
+	_clips()
+	_sounds()
 	_moves()
 	await done(m)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "gil")
@@ -60,6 +76,7 @@ func _reset(dist := 6.0) -> void:
 	K.combo_n = 0
 	P.teleport(home)
 	P.vel = Vector3.ZERO
+	P.roll_t = 0.0            # (a ride or dash left over from the last trial: DashFlow would hold the next press)
 	P.grounded = true
 	P.shield = 0.0
 	P.shield_t = 0.0
@@ -266,19 +283,6 @@ func _hold_and_air() -> void:
 	ok("Grab Bag in the air: drops the vial straight down", below)
 	_land()
 
-## The potion stays in the bag until the toss clip's pull-out key (rmb draw), then leaves his hand.
-func _pull_out() -> void:
-	_reset(6.0)
-	tap(m, P)
-	var held: bool = not K.flying.is_empty() and not K.flying[0].has("from")
-	while not K.flying.is_empty() and not K.flying[0].has("from") and m.time - K.anim_at < 1.0:
-		step(m, DT)
-	var out_t := m.time - K.anim_at
-	var draw := float(K.rmb_def()["draw"])
-	ok("Grab Bag: the potion comes out of the bag on the toss key", held and absf(out_t - draw) <= 1.0 / 30.0,
-		"out %.3f s, key %.3f s" % [out_t, draw])
-	_land()
-
 func _beach() -> void:
 	_reset(6.0)
 	for v in ["air", "fire", "slime"]: K.bag.append(v)      # slime first, then fire, then air (none stuns alone)
@@ -335,11 +339,6 @@ func _riptide() -> void:
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
 	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
-	var w := K.recast_window()
-	ok("Riptide: RecastCue's ring runs over the 2 s spin and the spout goes by itself (no EXPIRED)",
-		float(w.get("total", 0.0)) == 2.0 and float(w.get("left", 0.0)) < 1.1 and bool(w.get("auto", false)), str(w))
-	ok("Riptide: the recast opens and ticks in Gil's own sounds",
-		HeroSfx.of(P, "recast_open", "") == "gil_recast_open" and HeroSfx.of(P, "recast_tick", "") == "gil_recast_tick")
 	_reset(7.0)
 	K.use_e()
 	step(m, 0.3)
@@ -408,38 +407,295 @@ func _wave_way(run: Vector2) -> void:
 	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
 		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
 
-## Each move or phase of the kit -> the sound it plays (the thrusts and the dash pick theirs by "k" and HeroSfx).
-const OWN_SOUNDS := {
-	"thrust": ["gil_thrust", "gil_thrust_low"], "lunge": ["gil_lunge"], "thrust_hit": ["gil_thrust_hit"],
-	"lunge_hit": ["gil_lunge_hit"], "tide_wind": ["gil_tide_wind"], "tide_full": ["gil_tide_full"],
-	"tide_lunge": ["gil_tide_lunge"], "tide_hit": ["gil_tide_hit"], "throw": ["gil_toss"],
-	"shatter_thunder": ["gil_pop_thunder"], "shatter_slime": ["gil_pop_slime"], "shatter_air": ["gil_pop_air"],
-	"shatter_fire": ["gil_pop_fire"], "shatter_zeep": ["gil_pop_zeep"], "mark": ["gil_mark"],
-	"beached": ["gil_beached"], "surface": ["gil_surface"], "spin": ["gil_spin"], "spout": ["gil_spout"],
-	"wave": ["gil_wave"], "wave_land": ["gil_wave_land"],
-}
+# ------------------------------------------------------------------ gil.md: numbers per slot
+## One press of a one-step key (Hunter.inp: "sig" E, "sec" RMB, "dash" Shift, "jump"), held for a single step.
+func _press(key: String) -> void:
+	P.inp[key] = true
+	m.step(DT)
+	P.inp[key] = false
 
-func _sounds() -> void:
-	var moves: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/gil.json"))["moves"]
-	var set_names: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/gil.json"))["sounds"]
-	var wrong := []
-	var silent := []
-	for mv in OWN_SOUNDS:
-		var names := (moves[mv].get("sfx", []) as Array).map(func(e): return String(e["n"]))
-		if names != OWN_SOUNDS[mv] or not names.all(func(n): return set_names.has(n) and Sfx.ensure(n)):
-			wrong.append("%s %s" % [mv, names])
-		if int(HeroVfx.of(m).plays.get(mv, 0)) == 0:
-			silent.append(mv)
-	ok("sounds: every move and phase plays its own levelled gil_* sound (wrong: %s)" % [wrong], wrong.is_empty())
-	ok("sounds: every one of those moves ran in this check (never ran: %s)" % [silent], silent.is_empty())
-	ok("sounds: the dive is the dash sound alone (no second layer)", not moves["dive"].has("sfx"))
-	P.grounded = true
-	var ground := HeroSfx.dash_name(P)
-	P.grounded = false
-	var air := HeroSfx.dash_name(P)
-	P.grounded = true
-	ok("sounds: Ground Swim dives in gil_dash, the air dash plays gil_dash_air",
-		ground == "gil_dash" and air == "gil_dash_air", "%s / %s" % [ground, air])
+func _numbers() -> void:
+	_lmb_numbers()
+	_rmb_numbers()
+	_dash_numbers()
+	_e_numbers()
+	_x_numbers()
+	_passive_numbers()
+	_rank_numbers()
+
+## Fencer: 7 / 7 / 11 a thrust, 0.32 s between thrusts and 0.48 s after the lunge, the chain resets after 0.75 s.
+func _lmb_numbers() -> void:
+	_reset(2.0)
+	K.combo_n = 0
+	var by_n := {}
+	var cds := {}
+	var t := 0.0
+	while t < 1.1:
+		P.inp["fire"] = t < 0.9 and fmod(t, 0.12) < 0.05      # clicking (holding is the Tide Lunge), one chain
+		var was := K.combo_n
+		m.step(DT)
+		t += DT
+		if K.combo_n != was: cds[K.combo_n] = P.fire_cd
+		by_n[K.combo_n] = dmg(T)
+	P.inp["fire"] = false
+	var hit := [float(by_n.get(1, 0.0)), float(by_n.get(2, 0.0)) - float(by_n.get(1, 0.0)),
+		float(by_n.get(3, 0.0)) - float(by_n.get(2, 0.0))]
+	ok("numbers LMB: 7, 7, then 11 on the lunge (+0.1 for the slow)",
+		absf(hit[0] - 7.0) < 0.2 and absf(hit[1] - 7.0) < 0.2 and absf(hit[2] - 11.1) < 0.2, str(hit))
+	ok("numbers LMB: 0.32 s between thrusts, 0.48 s after the lunge",
+		absf(float(cds.get(1, 0.0)) - 0.32) < 0.02 and absf(float(cds.get(3, 0.0)) - 0.48) < 0.02, str(cds))
+	step(m, 0.8)
+	P.inp["fire"] = true
+	m.step(DT)
+	P.inp["fire"] = false
+	ok("numbers LMB: after 0.75 s idle the chain starts again at the first thrust", P.combo_i == 1, "i %d" % P.combo_i)
+
+## Grab Bag: 2 charges, 5 s each, 8 m to the cursor, 0.35 s + 0.03 s a metre in the air.
+func _rmb_numbers() -> void:
+	_reset(6.0)
+	aim_at(P, home + Vector3(30, 0, 0))
+	var t0 := m.time
+	tap(m, P)
+	var at: Vector3 = K.flying[0]["at"] if not K.flying.is_empty() else home
+	var far := Vector2(at.x - home.x, at.z - home.z).length()
+	var ft: float = K.flying[0]["t"] if not K.flying.is_empty() else 0.0
+	ok("numbers RMB: a tap lands 8 m out at most, 0.59 s in the air there", absf(far - 8.0) < 0.3
+		and absf(ft - (0.35 + 0.03 * far)) < 0.01, "%.2f m %.2f s" % [far, ft])
+	tap(m, P)
+	var thrown := K.flying.size()
+	tap(m, P)
+	ok("numbers RMB: two charges, a third press throws nothing", thrown == 2 and K.flying.size() == 2,
+		"%d then %d" % [thrown, K.flying.size()])
+	while K.ch_rmb < 1.0 and m.time - t0 < 7.0:
+		m.step(DT)
+	ok("numbers RMB: a charge comes back 5 s after the first throw", absf(m.time - t0 - 5.0) < 0.1,
+		"%.2f s" % (m.time - t0))
+
+## Ground Swim: under for 0.4 s, 4 damage and the 0.5 s knockup on surfacing, a charge back after 8 s.
+func _dash_numbers() -> void:
+	_reset(5.0)
+	var d0 := P.dashes
+	_press("dash")
+	var under := 0.0
+	while K.swim_t > 0.0 and under < 1.0:
+		m.step(DT)
+		under += DT
+	step(m, 0.1)
+	ok("numbers Shift: under the ground about 0.4 s (the shared dash feel's time scale)", under > 0.25 and under < 0.6,
+		"%.2f s" % under)
+	ok("numbers Shift: surfacing deals 4", absf(dmg(T) - 4.0) < 0.2, "%.1f" % dmg(T))
+	var back := 0.0
+	while P.dashes < d0 and back < 10.0:
+		m.step(DT)
+		back += DT
+	ok("numbers Shift: a charge back in 8 s at rank 1", absf(back + under + 0.1 - 8.0) < 0.3,
+		"%.2f s" % (back + under + 0.1))
+
+## Riptide: ticks every 0.25 s rising 2 -> 5, he walks at 70% while spinning, the full-spin spout is 11 m long,
+## 2.2 m wide, 22 m/s, and does 10.
+func _e_numbers() -> void:
+	_reset(1.6)
+	var seen := {"ticks": [], "last": 0.0, "k": 1.0}
+	_press("sig")
+	step(m, 1.95, func():
+		seen["k"] = minf(seen["k"], K.move_k())
+		if dmg(T) > float(seen["last"]) + 0.01:
+			seen["ticks"].append(snappedf(dmg(T) - float(seen["last"]), 0.01))
+			seen["last"] = dmg(T))
+	var ticks: Array = seen["ticks"]
+	ok("numbers E: 8 spin ticks, 2 at first, rising, under 5", ticks.size() == 8 and absf(float(ticks[0]) - 2.0) < 0.2
+		and float(ticks[-1]) > float(ticks[0]) and float(ticks[-1]) <= 5.0, str(ticks))
+	ok("numbers E: he moves at 70% while he spins", absf(float(seen["k"]) - 0.7) < 0.01, "%.2f" % seen["k"])
+	var spout := {}
+	step(m, 0.2, func(): if spout.is_empty() and not K.spouts.is_empty(): spout.merge(K.spouts[0]))
+	ok("numbers E: a full 2 s spin sends an 11 m, 2.2 m wide, 22 m/s spout",
+		absf(float(spout.get("left", 0.0)) - 11.0) < 0.6 and absf(float(spout.get("w", 0.0)) - 2.2) < 0.05
+		and absf(float(spout.get("spd", 0.0)) - 22.0) < 0.5 and K.move_k() == 1.0, str(spout.get("left", 0.0)))
+	_reset(5.0)
+	_press("sig")
+	step(m, 0.3)
+	_press("sig")
+	step(m, 0.6)
+	ok("numbers E: the spout does 10 (nothing else reaches 5 m)", absf(dmg(T) - 10.0) < 0.2, "%.1f" % dmg(T))
+
+## Tidal Wave: locked below level 6, 14 m in 1 s, 18 damage, a 40 shield for 3 s.
+func _x_numbers() -> void:
+	_reset(6.0)
+	P.lvl = 5
+	var cast := HunterKeys.ult_pressed(P)
+	ok("numbers X: no wave below level 6", not cast and K.wave.is_empty() and float(K.cd["x"]) == 0.0)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	var x0 := P.pos.x
+	HunterKeys.ult_pressed(P)
+	var t := 0.0
+	while not K.wave.is_empty() and t < 2.0:
+		m.step(DT)
+		t += DT
+	ok("numbers X: he rides about 14 m in 1 s", absf(t - 1.0) < 0.1 and absf(P.pos.x - x0 - 14.0) < 1.5,
+		"%.2f s %.2f m" % [t, P.pos.x - x0])
+	ok("numbers X: 18 to a foe in the line", absf(dmg(T) - 18.0) < 0.2, "%.1f" % dmg(T))
+	ok("numbers X: lands with a 40 shield for 3 s", P.shield == 40.0 and absf(P.shield_t - 3.0) < 0.05,
+		"%.1f for %.2f s" % [P.shield, P.shield_t])
+
+## Fish Out of Water: marks older than 5 s drop, so two marks, a 5 s wait and a third don't Beach.
+func _passive_numbers() -> void:
+	_reset(6.0)
+	for v in ["slime", "fire"]: K.bag.append(v)      # fire, then slime, then (after the wait) air: none stuns alone
+	for i in 2:
+		K.ch_rmb = 2.0
+		aim_at(P, T.pos)
+		tap(m, P)
+		_land()
+	step(m, 5.1)
+	fresh(T)
+	K.bag.append("air")
+	K.ch_rmb = 2.0
+	aim_at(P, T.pos)
+	tap(m, P)
+	var top := _land()
+	ok("numbers passive: marks last 5 s (two, a 5 s wait, a third: no Beach)",
+		K.marks_on(T) == 1 and top["stun"] == 0.0,
+		"marks %d stun %.2f" % [K.marks_on(T), top["stun"]])
+
+## The shared rank steps (ArchKit.cd_k, dash_k, power): RMB and E -10% cooldown a rank, Shift -15% a rank.
+func _rank_numbers() -> void:
+	var p1 := K.power("sec")
+	for s in ["sec", "dash", "kin"]: P.slot_lv[s] = 2
+	var r2 := [K.cd_k("sec"), K.cd_k("kin"), P.dash_regen(), K.power("sec") / p1]
+	for s in ["sec", "dash", "kin"]: P.slot_lv[s] = 3
+	var r3 := [K.cd_k("sec"), K.cd_k("kin"), P.dash_regen(), K.power("sec") / p1]
+	for s in ["sec", "dash", "kin"]: P.slot_lv[s] = 1
+	ok("numbers ranks: RMB and E cooldowns x0.9 then x0.8", is_equal_approx(r2[0], 0.9) and is_equal_approx(r2[1], 0.9)
+		and is_equal_approx(r3[0], 0.8) and is_equal_approx(r3[1], 0.8), "%s %s" % [r2, r3])
+	ok("numbers ranks: Shift recharges in 6.8 s then 5.6 s (the card says 7 s and 6 s)",
+		absf(float(r2[2]) - 6.8) < 0.01 and absf(float(r3[2]) - 5.6) < 0.01, "%.2f %.2f" % [r2[2], r3[2]])
+	ok("numbers ranks: damage +15% then +30%", absf(float(r2[3]) - 1.15) < 0.01 and absf(float(r3[3]) - 1.3) < 0.01,
+		"%.3f %.3f" % [r2[3], r3[3]])
+
+# ------------------------------------------------------------------ gil.md: cancels (second press, first action)
+func _cancels() -> void:
+	_spin_cancels()
+	_wave_cancels()
+	_cc_cancels()
+
+## During the Riptide spin: LMB and RMB go with it, Shift is locked (dash_flow into_dash.e), X sends the spout first.
+func _spin_cancels() -> void:
+	_reset(1.6)
+	_press("sig")
+	step(m, 0.3)
+	var held := {"t": 0.0}
+	step(m, 0.4, func():
+		held["t"] += DT
+		P.inp["fire"] = fmod(held["t"], 0.12) < 0.05)      # clicking (held, it is a Tide Lunge on release)
+	P.inp["fire"] = false
+	ok("cancel E spin + LMB: both (the thrusts land, the spin goes on)", K.combo_n >= 1 and K.spin_t >= 0.0,
+		"thrusts %d" % K.combo_n)
+	tap(m, P)
+	ok("cancel E spin + RMB: both (the potion flies, the spin goes on)", K.flying.size() == 1 and K.spin_t >= 0.0)
+	var d0 := P.dashes
+	_press("dash")
+	ok("cancel E spin + Shift: locked (no dash, no charge spent, the spin goes on)",
+		P.dashes == d0 and K.swim_t <= 0.0 and P.roll_t <= 0.0 and K.spin_t >= 0.0,
+		"dashes %d->%d roll %.2f" % [d0, P.dashes, P.roll_t])
+	var y0 := P.pos.y
+	_press("jump")
+	step(m, 0.15)
+	ok("cancel E spin + jump: both (he hops, still spinning)", P.pos.y - y0 > 0.2 and K.spin_t >= 0.0,
+		"%.2f m" % (P.pos.y - y0))
+	step(m, 0.6)
+	HunterKeys.ult_pressed(P)
+	ok("cancel E spin + X: the spout goes first, then the wave", K.spin_t < 0.0 and K.spouts.size() == 1
+		and not K.wave.is_empty())
+
+## During the Tidal Wave (an Effects dash, so DashFlow's default rows): E, RMB and LMB wait for the landing and go
+## then; Shift is dropped (into_dash.x lock: no charge, no swim, not replayed); X does nothing (no early landing).
+func _wave_cancels() -> void:
+	_reset(6.0)
+	HunterKeys.ult_pressed(P)
+	m.step(DT)
+	var d0 := P.dashes
+	_press("sig")
+	_press("sec")
+	step(m, 0.1, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	var mid := [K.spin_t >= 0.0, K.flying.size(), K.combo_n, P.dashes]
+	var left := K.untarget_t
+	HunterKeys.ult_pressed(P)
+	m.step(DT)
+	ok("cancel X wave + X: nothing (no early landing)", not K.wave.is_empty() and K.untarget_t < left)
+	_press("dash")
+	ok("cancel X wave + E, RMB, LMB: nothing goes mid-ride", not mid[0] and mid[1] == 0 and mid[2] == 2, str(mid))
+	var t := 0.0
+	while not K.wave.is_empty() and t < 2.0:
+		m.step(DT)
+		t += DT
+	step(m, 0.1)
+	ok("cancel X wave + E, RMB, LMB: each waits and goes on landing (spin, potion, a fresh first thrust)",
+		K.spin_t >= 0.0 and K.flying.size() == 1 and K.combo_n == 1, "spin %.2f potions %d thrust %d" % [
+		K.spin_t, K.flying.size(), K.combo_n])
+	ok("cancel X wave + Shift: dropped (no charge spent, no swim after the landing)", P.dashes == d0
+		and K.swim_t <= 0.0 and float(mid[3]) == d0)
+	K.drop_holds()
+
+## A stun stops the presses (ArchKit.busy) but not a spin already going; a Boki merge drops it with no spout.
+func _cc_cancels() -> void:
+	_reset(1.6)
+	_press("sig")
+	step(m, 0.3)
+	P.stun_t = 0.6
+	var d0 := dmg(T)
+	step(m, 0.55)
+	ok("cancel E spin + stunned: the spin goes on and keeps hitting (finding F5)", K.spin_t >= 0.0 and dmg(T) > d0,
+		"%.1f" % (dmg(T) - d0))
+	K.drop_holds()
+	step(m, 1.8)
+	ok("cancel E spin + Boki merge (drop_holds): it ends, no spout", K.spin_t < 0.0 and K.spouts.is_empty(),
+		"spin %.2f spouts %d" % [K.spin_t, K.spouts.size()])
+
+# ------------------------------------------------------------------ gil.md: the Riptide recast window
+func _recast() -> void:
+	_reset(7.0)
+	_press("sig")
+	var w := K.recast_window()
+	ok("recast E: the spin opens an E window for RecastCue (slot e, at Gil)", String(w.get("slot", "")) == "e"
+		and float(w.get("left", 0.0)) > 1.9)
+	ok("recast E: the window's total is its time left, the ring never empties (finding F1)",
+		is_equal_approx(float(w.get("total", 0.0)), float(w.get("left", -1.0))) and not bool(w.get("auto", true)))
+	_press("sig")
+	ok("recast E: a press in the first 0.12 s is eaten, not buffered (finding F2)", K.spin_t >= 0.0
+		and K.spouts.is_empty() and K.recast_buf.is_empty())
+	step(m, 0.2)
+	_press("sig")
+	ok("recast E: from 0.12 s a press sends the spout and closes the window", not K.spouts.is_empty()
+		and K.recast_window().is_empty() and float(K.cd["e"]) > 11.0)
+	_reset(7.0)
+	_press("sig")
+	step(m, 2.1)
+	ok("recast E: left alone the spout goes at 2 s, and the cue reads it as EXPIRED (finding F1)",
+		(not K.spouts.is_empty() or dmg(T) > 0.0) and String(K.cue.get("exp_slot", "")) == "e")
+	_reset(6.0)
+	HunterKeys.ult_pressed(P)
+	m.step(DT)
+	ok("recast X: Tidal Wave opens no recast window", not K.wave.is_empty() and K.recast_window().is_empty())
+	K.drop_holds()
+
+# ------------------------------------------------------------------ gil.md: the Relic screen clips
+func _clips() -> void:
+	var want := {"lmb": "swing", "rmb": "bolt", "e": "nova", "dash": "dash", "x": "strike"}
+	var got := {}
+	var lines_ok := true
+	var moves := 0
+	for s in want:
+		got[s] = AbilityClip.fx_for("gil", s)
+		lines_ok = lines_ok and AbilityClip.line_for("gil", s) == String(K.d["clip"]["lines"][s])
+		moves += HunterViewer.moves_for("gil", s).size()
+	ok("clips: effects swing / bolt / nova / dash / strike (from the deliveries, no clip.fx)", got == want, str(got))
+	ok("clips: each line is gil.json clip.lines", lines_ok)
+	ok("clips: no kit moves under them (Gil has no keyed moves yet)", moves == 0, "%d" % moves)
+	K.bag.append("fire")
+	ok("colour: the RMB slot wears the next potion's colour, not Gil's blue (finding F3)",
+		K.slot_info("sec")["col"] == Color("#ff5a3a"))
 
 ## Every telegraph Gil makes goes through AimKit (docs/AIMKIT.md), where everyone sees it, and none makes a
 ## tweened Fx telegraph node (the old ArchKit.tele_circle/tele_lane path is gone). The R fuse ring is ArchKit's.
@@ -497,6 +753,43 @@ func _telegraphs() -> void:
 	step(m, 0.15)
 	ok("telegraph: none of it made an Fx telegraph node", m.fx.teles.size() == nodes,
 		"%d -> %d" % [nodes, m.fx.teles.size()])
+
+## The potion stays in the bag until the toss clip's pull-out key (rmb draw), then leaves his hand.
+func _pull_out() -> void:
+	_reset(6.0)
+	tap(m, P)
+	var held: bool = not K.flying.is_empty() and not K.flying[0].has("from")
+	while not K.flying.is_empty() and not K.flying[0].has("from") and m.time - K.anim_at < 1.0:
+		step(m, DT)
+	var out_t := m.time - K.anim_at
+	var draw := float(K.rmb_def()["draw"])
+	ok("Grab Bag: the potion comes out of the bag on the toss key", held and absf(out_t - draw) <= 1.0 / 30.0,
+		"out %.3f s, key %.3f s" % [out_t, draw])
+	_land()
+
+
+
+func _sounds() -> void:
+	var moves: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/gil.json"))["moves"]
+	var set_names: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/gil.json"))["sounds"]
+	var wrong := []
+	var silent := []
+	for mv in OWN_SOUNDS:
+		var names := (moves[mv].get("sfx", []) as Array).map(func(e): return String(e["n"]))
+		if names != OWN_SOUNDS[mv] or not names.all(func(n): return set_names.has(n) and Sfx.ensure(n)):
+			wrong.append("%s %s" % [mv, names])
+		if int(HeroVfx.of(m).plays.get(mv, 0)) == 0:
+			silent.append(mv)
+	ok("sounds: every move and phase plays its own levelled gil_* sound (wrong: %s)" % [wrong], wrong.is_empty())
+	ok("sounds: every one of those moves ran in this check (never ran: %s)" % [silent], silent.is_empty())
+	ok("sounds: the dive is the dash sound alone (no second layer)", not moves["dive"].has("sfx"))
+	P.grounded = true
+	var ground := HeroSfx.dash_name(P)
+	P.grounded = false
+	var air := HeroSfx.dash_name(P)
+	P.grounded = true
+	ok("sounds: Ground Swim dives in gil_dash, the air dash plays gil_dash_air",
+		ground == "gil_dash" and air == "gil_dash_air", "%s / %s" % [ground, air])
 
 ## The moves each cast plays (KMovesGil ids, content/rules/warden_anim/gil.json), in the order they play. The dive
 ## is the rig's keyed pose, not a clip: it takes the whole body under the ground, the swim clip only

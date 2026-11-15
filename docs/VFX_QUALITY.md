@@ -78,37 +78,23 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
-- Only six kits are data-driven (`content/vfx/`: archer, ashwick, dredge, juggernaut, rimewright, tender). The rest draw with
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
-- **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
-  ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Only eight kits are data-driven (`content/vfx/`: archer, ashwick, bulwark, dolm, gil, juggernaut, rimewright, tender). The rest draw with
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
-- Only a few kits are data-driven (`content/vfx/`: archer, ashwick, bulwark, dolm, juggernaut, rimewright, tender). The rest
-  draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`). Moving each to `HeroVfx` data is
+- Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
+  rimewright, tender. The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
-- Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, gunslinger, juggernaut, rimewright, tender. The rest
-  to `HeroVfx` data is how a kit reaches the bar.
-  with a near-opaque flat colour that hides the target. Rule: a zone is a lit rim plus a soft inner falloff (alpha 0.25
-  or less at the centre), never a solid fill. Each kit sets these, so the fix is per kit (backlog). Done: Meeko's seed
-  disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the vortex's dark core thinned; the
-  seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring since `5e9ea1d07`; `--dancer-combo-check`
-  now measures its centre at 0.10).
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
-- **Opaque zone fills** (seen in the strips): Vex's X scorch (`VvFx.disc`, fixed on ext/vfx-gunslinger), Motley's well dome, Meeko's seed and
-  ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
+  ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
   rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
-  is per kit (backlog). Done for `VVFx.disc` (Vex's Cinderfall countdown and scorch, Sparkle's Skycall share it): the
-  rim sits on the hit radius, the falloff runs from 0.45 by the rim to `DISC_FILL_A` 0.2 at the centre
-  (`--gunslinger-combo-check` asserts both). Only Vex's X uses it; Vex's E (Longneedle beam) draws no disc.
-- Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
-  moves them to teal. The alternative (keep void violet) would clash with Sable.
+  is per kit (backlog). Done for `VVFx.disc` (Sparkle's Skycall): the rim sits on the hit radius, the falloff
+  runs from 0.45 by the rim to `DISC_FILL_A` 0.2 at the centre. Vex's discs are HeroVfx data since ext/vfx-vex-data.
+  Done too: Meeko's seed disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the
+  vortex's dark core thinned; the seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring
+  since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10).
+- Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
+  void violet) would clash with Sable.
 
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
@@ -185,17 +171,18 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Tenzo | dolm | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 22 | re-scored 11-12 (was 14): cobalt lane, rings and Rockfall slam read at match zoom, layered crack + debris + blast. Under the bar: `scripts/arch/kits/kit_looks.gd` `_build_rock` still builds the thrown boulder/rock as a molten orange lump with an orange haze (heat 0.75-0.95, haze `Color(1.0, 0.42, 0.1, 0.28)`): give it basalt + cobalt rim (heat 0, haze `#3a7cff`); `content/vfx/dolm.json` palette `dust` `#c8b496` puffs land as opaque beige clouds that hide the foe in the quake, rocks and dash strips: lower the `smoke` layers' alpha / size or tint `stone` `#8f9cb8`; the dust puffs are thin (gain 0.4, half height, 0.6x life, fewer and smaller) so the crack and debris carry the read, ext/vfx-tenzo-dust-thin |
-| 2 | Motley | ostra | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | re-scored 11-12 (was 14): teal orb, Snap spear, seed circle and Nightwell read at once and the zones are lit rims, not solid fills. Under the bar: the Trade dash is a magenta pentagram circle with a violet mask (`scripts/arch/kits/ostra_kit.gd` `TRADE_EDGE` `#ff3fd0`, `content/vfx/ostra.json` palette `pink` `#ff4fd8`): move both to the sea-teal slots; LMB hit is still a small burst (`ostra.json` orb-hit recipe: size up, add a shard layer); the Nightwell's black orbs are the only dark mass left |
+| 2 | Motley | ostra | 2→4 | 2→4 | 1→3 | 2→3 | 2→4 | 2→4 | 3 | 14→25 | re-scored 11-11 from --hero-vfx-reel strips (ext/vfx-motley-data, `docs/shots/vfx-motley-data/*_before_after.jpg`, xvfb opengl3; GPU strip jobq 20261111-151420-01798 seen, `gpu_after_full_e_r.jpg`, same read): his moments are content/vfx/ostra.json on HeroVfx in sea teal; X is a teal rim with arms and no floor, E a low teal drum, both clear over the target; every LMB orb bursts on the foe it hits (flash, shards, from half charge a ring). Left: the Trade lantern and its sigils stay violet (owner 11-08), Swollen pink; sounds unchanged. Orb-hit follow-up 11-12 (ext/vfx-motley-orb-hit, `docs/shots/vfx-motley-orb-hit/{lmb,r}_{before,after}.jpg`, local xvfb opengl3; the GPU jobq strip stayed queued behind 17+ jobs): the LMB impact is sized by the orb hit radius (`orb_hit` flare 4.5x and ring 5x the radius, 0.28 m plain to x1.9 full) with a second layer of longer pale shards; the black orbs (Nightwell rim orbs, Snap wind-up, the hand orb) are near-black glass with a broad lit sea-teal rim (`KitLooks.dark_mat`) |
 | 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | re-scored 11-12 (was 15): lime/green-fire throughout, the Longneedle beam and Cinderfall burst are the strongest frames, E/X are soft discs now. Under the bar: `content/vfx/gunslinger.json` `shot_trail` / `shot` (LMB) are still a short pale puff, the round is not in flight on most frames of the LMB strip (this tree lacks `ext/vfx-vex-tracer`, which conflicts with the data port): widen the tracer to ~0.34 m with a hot core as that branch does; `x_cast` pre-cast zone reads as a pale-yellow wash at 0.1 s: tint it `main` with a lit rim; the Burr dash slab (`slide`, `slide_air`) is a faint flat green rectangle: add a core streak |
 | 4 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | re-scored 11-12 (was 16): gold wedges with a lit rim for E and X, gold slugs and chain, the hook bite reads. Under the bar: E has no Anchor Drop fist (`ext/vfx-grimble-anchor`, conflicts with the wedge data in `content/vfx/dredge.json` + `scripts/match/hero_vfx.gd`): port the `fist` layer onto the wedge look; the dash has no recipe at all in `content/vfx/dredge.json` (no barge/dash key): its camo stone ball with an orange ring and orange glow comes from code, give it `main` `ffc832` + `hot`; the X hit throws pink flecks (`scripts/arch/kits/dredge_blast.gd` hit sparks): coin gold |
 | 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
 | 6 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 2 | 4 | 21 | re-scored 11-12 (was 17), tree = main + kindle numbers + zone rims + root field (the look-weight branch `ext/vfx-meeko-weight-rebased-rebased` conflicts and is not in it). Under the bar: `content/vfx/tender.json` palette: LMB orb is lilac `#c8a8ff` / pink `#f6a6c8` with a lilac ring, Hearthlight E ring is gold, and the Hearth Call dome rim is cyan: only the root field is leaf green; move orb, ring and dome rim to `#5fdc6a` slots (gold stays the heal accent); LMB hit is a thin ring (no debris layer: add a leaf-spark burst in the same file); Hearth Call (R) is a small pale bubble with a tiny ring, ~1 m across next to E's 7 m dome: scale it to the tether range |
 | 7 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
 | 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
-| 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
+| 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 22 | re-scored 11-11 (ext/vfx-sparkle-ult-local, was 20): the lightning body is pink-white on the hot pink core (no cyan left in `mage_*.gd`, her ability colours and the coilcaster rounds in content are pink); Kitefall draws only the range ring, no 14 m violet dome (the screen-wide purple), the look stays at the ring and the landing spot; strips: `--hero-vfx-reel --reel-hero=mage` jobq 20261111-154346-29635 (before, main) / 20261111-154229-09126 (after), queued, NOT seen yet |
 | 10 | Neve | rimewright | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | reads well (shards, shatter burst). Done (ext/vfx-neve-ice-path): the skate's ice path was up to 24 pooled flat untextured boxes (a node and material each); now one MultiMesh strip (`IceStrip`, `shaders/ice_strip.gdshader`): cel-lit pale ice, a faint frost rim, a lighter facet step, a ragged cel fade at the tail; same plate size, form-in, spacing, 24-plate length and 3 s life. Left: the plates are still laid flat (no relief on slopes) |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
-| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Done (ext/sfx-kael-slash-edge): the LMB slash sound has a hard edge (snap, short shing, chop) on its contact at 0.08 s, 4-6 dB over the swish like the cleave's cut and about 4 dB under it in game; same 0.42 s, still on the press (was the swish alone, loudest at 0.22-0.27 s); the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
+| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: hold-blade glow (the ground clipping is done: soft edges above) |
+| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Done (ext/sfx-kael-slash-edge): the LMB slash sound has a hard edge (snap, short shing, chop) on its contact at 0.08 s, 4-6 dB over the swish like the cleave's cut and about 4 dB under it in game; same 0.42 s, still on the press (was the swish alone, loudest at 0.22-0.27 s); the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish). Done (ext/vfx-kael-smash-lane): the Slam lane (4.3 x 0.72 m) and the Lunge lane are AimKit "soft" shapes in his #ff3a2a, drawn = hit (`docs/art/vfx_rescore/juggernaut_{lunge,slam}_before_after.jpg`) |
+| 13 | Gil | gil | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 26 | scored 11-11 (ext/vfx-gil-bar, his reel `tools/vfx_reel/gil.gd`): every look is `content/vfx/gil.json` + keyed poses (`kmoves_gil.gd`); the slime puddle is a lit rim for exactly its slow. Under the bar: RMB Air and Super Zeep breaks are opaque smoke puffs; the held RMB landing ring re-fires every 0.1 s |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her
@@ -232,68 +219,6 @@ and keyed poses (`scripts/match/kmoves_gil.gd`) on every move: thrust streaks an
 sweep and spout, the wave's wake and crest. Scored 11-11 in the re-score table below; the rework's game-camera clips
 are in `docs/parity_reel/gil_rework/`. Left: his own sound set (the recipes reuse shared sounds).
 
-## Scorecard: before (11-08) and re-score (11-09)
-Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
-carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
-**After** is scored from the new reel strips only, by the same rubric.
-
-**What was rendered.** origin/main (d255acbee) has neither this doc nor most of the per-hero VFX jobs: they are READY
-branches, not merged. So the reels ran on a scratch merge of origin/main with every READY `ext/vfx-*` branch that
-merges cleanly: quality-base, ostra-abilities, tender, archer, thief, dredge, mage, rimewright-quality, dolm,
-bulwark, gunslinger, kael-polish (Cinder is already on main). Not in it: `ext/vfx-vex`, `vfx-breaker`,
-`vfx-lisette`, `vfx-motley`, `vfx-ryzz`, `vfx-sable` and `vfx-tarek` (older takes of the same heroes, they conflict
-with the READY ones). Two clashes had to be hand-fixed in the scratch tree (`HeroVfx` mode 8 taken by both
-dredge's `chain` and bulwark's `dome`, and a `shine` shader name used twice); both need fixing when those two
-branches are merged. The scores are therefore for "all READY VFX branches merged", not for main today. The worker's
-ground renders yellow, so read colours against that.
-
-Strips: `docs/art/vfx_rescore/<arch>.jpg`, every reel part stacked top to bottom (alphabetical: dash, e, hold, lmb, ...,
-r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader errors in the logs.
-
-| Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
-| Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
-| Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
-| Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
-| Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
-| Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
-| Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
-| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
-| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
-| Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
-| Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
-| Gil | gil | - | 4 | 3 | 4 | 4 | 4 | 4 | 3 | **26** | RMB Air and Super Zeep breaks: opaque smoke puffs over the target; held RMB: the landing ring re-fires every 0.1 s |
-
-**Gil (11-11, ext/vfx-gil-bar)**, the 13th Hunter, by the same rubric from his own reel (`tools/vfx_reel/gil.gd`: the
-generic LMB, hold and dash, Thunder held, the other four potions tapped onto one dummy, one Slime puddle to its end,
-Riptide sent off as a spout, the wave followed down its line) on main + 0.24.5 + ext/gil-rework-1111 (all his looks
-are his own data, so no other READY VFX branch is needed). Strip: `docs/art/vfx_rescore/gil.jpg`, before this branch,
-as scored (a local xvfb render, software GL, green ground: the GPU queue was 110 jobs deep; GPU reels jobq
-20261111-221944-22972 before, 20261111-220920-10712 after). He scored 25 (T 3): every move reads, the water body is sea blue with foam cores, the lanes and circles
-match their hitboxes, and his weakest look was the RMB Slime puddle. It slowed for 4 s but was drawn as a 2.2 s
-fire-crack decal and then only an `Fx` ring re-fired every 0.25 s in a hard-coded green: a strobe with nothing inside.
-Now `GilKit._add_puddle` draws one zone on the shared ring shader for exactly its slow: Gil's lit rim (`Arch.color`)
-on `puddle_r` over a faint inside in the slime's own colour (clear at the centre, 0.24 alpha by the rim), a 3-frame
-white flare as it lands, an ease-out fade over its last 0.4 s. The break swaps the crack decal for goo bubbles across
-the radius. T 3 -> 4: **26**. Before/after, the puddle and bag parts: `docs/art/vfx_rescore/gil_slime.jpg` (before
-left, after right). The puddle is drawn by the kit, so it shows on the caster's game only, like the other kit-drawn
-zones (docs/DEBT.md).
-
-Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
-Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
-Cinder 30, Kael 29); scoring all twelve from the strips with one hand puts them 1-2 lower. Neve went down one point
-(26 to 25): her Rimelock X reads as a screen-wide wash next to the others.
-
-Parity rule (DECISIONS: match the source's readability and polish, no explosions on dashes, a ground ring means
-gameplay): no Hunter's dash plays an explosion in these strips. Ground rings worth a check against a hitbox: Vex's
-Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a hitbox here.
-
-## Backlog (remaining fixes, from the table)
-1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
-2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
-3. Vex LMB and hold: a wider, brighter tracer at match zoom.
 ## Meeko and Albert ground rings (ext/vfx-gold-ground-rings)
 Rule (DECISIONS, Movement and combat feel): a ground ring means gameplay (a hit area, a zone, a tether range). Kept rings
 are in the Hunter's own colour (`content/archetypes` "color": Meeko `#5fdc6a`, Albert `#fff0b0`), never the shared gold,

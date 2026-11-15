@@ -131,6 +131,7 @@ var hit_from := Vector2.ZERO   # which way the last hit pushed
 var stagger_t := 0.0           # staggered by a big hit (Oomph)
 var extracted := false
 var extract_prog := 0.0
+var dash_glide := DashGlide.new()      # an air dash's exit eases out, and Shift hands over to the glider
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
 ## "" or one of HOLD_KINDS. Set every tick by whatever the hold works on; it lapses when not refreshed.
 const HOLD_KINDS := ["scan", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
@@ -187,6 +188,7 @@ var wall_n := Vector2.ZERO
 var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed into (HunterMove.along_wall)
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
+var abyss_sfx := AbyssSfx.new()        # whoosh, catch, strain and fall-out cues (everyone's, from synced state)
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
@@ -889,8 +891,12 @@ func can_glide() -> bool:
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
 ## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
 ## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
+## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or downed or shot_down:
+	var in_dash := roll_t > 0.0 and move_kind == "dash"
+	var just_after := roll_t <= 0.0 and dash_glide.fresh(self)
+	if not (in_dash or just_after) or grounded or dropping or downed or shot_down or stun_t > 0.0 \
+			or (ak != null and ak.no_glide()) or not loco.can(Loco.S.GLIDING):
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
@@ -1629,7 +1635,7 @@ func slot_info(slot: String) -> Dictionary:
 			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
 			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
 			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
-			out.merge({"name": "Fusion", "short": "Fusion", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+			out.merge({"name": "Fusion", "short": "Fusion", "icon": KinText.merge_icon(u), "col": f["glow"], "desc": txt, "form": f, "bond": ult,
 				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": maxf(KinParts.MERGE_SPENT_TIME, MergeRelease.rest_s()) if kin != null and kin.resting() else KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
 				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out
@@ -1652,7 +1658,6 @@ func use_kin_ability(slot: String) -> void:
 			var kc := KinText.color(k.runner.def_of(slot))
 			if k.flat_dist(self) > 2.5 and k.state != "shoulder":
 				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(kc, 0.8))
-			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
 		_ab_feedback(slot, "deny")
 
@@ -1740,17 +1745,18 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": Color(wpn["color"]).to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float, tint := Color.TRANSPARENT) -> void:
+func heal(n: float) -> void:
 	if downed or out:
 		return
 	if remote:
 		m.net_event(["heal", nid, n])
+		m.fx.healed(self, minf(n, max_hp - hp))     # its own game heals it; the heal shows here now
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	ReceiverCue.heal(self, hp - before, tint)
+	m.fx.healed(self, hp - before)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -1791,6 +1797,7 @@ func sim(dt: float) -> void:
 		return
 	Hex.tick(self, dt)
 	prev = pos
+	abyss_sfx.tick(self, dt)
 	if out or extracted:
 		if not merge_st.is_empty():
 			KinMerge.end(self, "broken")      # (eliminated or extracted mid-merge: the form goes with you)
@@ -2085,6 +2092,7 @@ func _physics(dt: float) -> void:
 			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 		else:
 			hv = Loco.air_step(hv, mv, spd, dt)     # strong WASD air control (owner 11-08), the farm's too
+	hv = dash_glide.step(self, Vector2(vel.x, vel.z), hv, dt)
 	hv = MantleCarry.step(self, hv, dt)
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
@@ -3117,7 +3125,7 @@ func render(delta: float, alpha: float) -> void:
 	if LOCAL_RENDER_LEAD and is_local() and freeze_t <= 0.0 and not remote:
 		position = render_pos(alpha)
 	StepSmooth.ease(self, delta)
-	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
+	visible = (not out or HunterWisp.out_visible(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
 			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
@@ -3237,5 +3245,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.ring(pos + Vector3(0, 0.05, 0), 1.05, Color(1.0, 0.33, 0.22, 0.85), 0.24)
 			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)

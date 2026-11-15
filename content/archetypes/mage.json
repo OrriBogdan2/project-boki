@@ -49,7 +49,7 @@
 		"gap": 0.15,
 		"blow_dmg": 16.0,
 		"blow_pct": 0.18,
-		"col": "#c6fff2"
+		"col": "#ffd2ec"
 	},
 	"passive": {
 		"name": "Static",
@@ -58,8 +58,8 @@
 	"dash": {
 		"id": "wirerun",
 		"name": "Wirerun",
-		"icon": "dash",
-		"col": "#9ff5e0",
+		"icon": "mage_dash",
+		"col": "#ff9ad0",
 		"cd": 8.0,
 		"reset_mult": 1.5,
 		"reset_charge": 0.75,
@@ -82,9 +82,10 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Storm Rod",
+		"card_range": "coil.range",
 		"short": "Rod",
-		"icon": "shock",
-		"col": "#7dffd8",
+		"icon": "mage_rmb",
+		"col": "#ff7ac4",
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
@@ -121,9 +122,10 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Skycall",
+		"card_range": "reach",
 		"short": "Sky",
-		"icon": "updraft",
-		"col": "#b8f7ff",
+		"icon": "mage_e",
+		"col": "#ffc6e6",
 		"cooldown": 10.5,
 		"reach": 11.0,
 		"delay": 0.8,
@@ -155,8 +157,10 @@
 			"r": "radius"
 		},
 		"name": "Kitefall",
+		"card_range": "range",
+		"again": "strike down at the cursor",
 		"short": "Fall",
-		"icon": "quake",
+		"icon": "mage_x",
 		"col": "#ffd36a",
 		"cooldown": 42.0,
 		"windup": 0.3,

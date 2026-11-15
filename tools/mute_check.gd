@@ -9,10 +9,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MUTE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -24,11 +26,13 @@ func run(main: Node) -> void:
 	print("MUTE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _list() -> void:
 	ok(not MuteList.has("Wren"), "nobody is muted at first")
 	ok(MuteList.toggle("Wren") and MuteList.has("Wren") and not MuteList.has("Pike"), "toggling mutes that name only")
 	ok(not MuteList.toggle("Wren") and not MuteList.has("Wren"), "toggling again unmutes")
 	ok(not Save.fresh().has("muted"), "the save carries no mute list")
+
 
 func _lobby(main: Node) -> void:
 	var o := {"teams": 10, "squad": 2, "tier": 0}
@@ -37,7 +41,7 @@ func _lobby(main: Node) -> void:
 	view.setup(o)
 	main.add_child(view)
 	await main.get_tree().process_frame
-	view.pm.squad[1].merge({"name": "Wren", "peer": "p1", "bot": false}, true)     # the bot mate stands in for a player
+	view.pm.squad[1].merge({"name": "Wren", "peer": "p1", "bot": false}, true)  # the bot mate stands in for a player
 	view._fill_squad()
 	var chat := func(t: String) -> void: view._on_msg("chat", {"name": "Wren", "t": t}, "p1")
 	chat.call("one")
@@ -62,14 +66,17 @@ func _lobby(main: Node) -> void:
 	ok(voice.receive("Wren", frame) and played == ["Wren"], "an unmuted teammate's voice frame plays")
 	view.queue_free()
 
+
 func _shown(view: Control) -> int:
 	return view.chat_log.get_children().filter(func(l): return l.visible).size()
+
 
 func _mute_button(view: Control) -> Button:
 	for chip in view.squad_box.get_children():
 		for n in chip.find_children("*", "Button", true, false):
 			return n
 	return null
+
 
 func _match(main: Node) -> void:
 	var m := Match.new()

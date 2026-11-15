@@ -66,6 +66,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
+	HeroVfx.of(m).set_process(false)      # its looks run on the match's steps below, as at a steady 60 fps
 	P = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -150,6 +151,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		m.render_shots(1.0)      # (the stock rounds a kit's trail follows move as in a match)
+		HeroVfx.of(m)._process(DT)
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()

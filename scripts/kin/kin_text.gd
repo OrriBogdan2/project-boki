@@ -139,10 +139,12 @@ static func color(ab: AbilitySpec) -> Color:
 			return KinRules.effects_color(st.effects)
 	return KinRules.cat_color("sustain" if not ab.stages.is_empty() and ab.stages[0].delivery.type == "wall" else "utility")
 
-## A HUD icon from the shape of the ability (Icons ids).
+## A HUD icon for the ability (Icons ids): its painted icon (art/icons/boki_<id>.png), else a glyph from its shape.
 static func icon(ab: AbilitySpec) -> String:
 	if ab == null or ab.stages.is_empty():
 		return "bond"
+	if Icons.art("boki_" + ab.id):
+		return "boki_" + ab.id
 	var st: StageSpec = ab.stages[0]
 	var types := ab.effect_types()
 	match st.delivery.type:
@@ -256,6 +258,12 @@ static func owner_bonus(bonus: Dictionary) -> String:
 		out.append(String(OWNER_POINTS.get(key, key + " %s")) % vs)
 	return ", ".join(out)
 
+## The Fusion's icon (Icons ids): the merge's painted icon (art/icons/merge_<id>.png), else the bond glyph.
+static func merge_icon(ms: MergeSpec) -> String:
+	if ms and Icons.art("merge_" + ms.id):
+		return "merge_" + ms.id
+	return "bond"
+
 ## A merge in a few lines: [what it gives, what its shots do, what it does over time].
 static func merge(ms: MergeSpec, giant := false) -> Array:
 	if ms == null:
@@ -291,10 +299,10 @@ static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the Fusion ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
 	var a: Dictionary = fd["aug"]
 	out.append("You keep your own abilities and they get stronger:")
-	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])
-	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
-	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
-	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("fire"), a["lmb"]["name"], a["lmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("secondary"), a["rmb"]["name"], a["rmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("signature"), a["e"]["name"], a["e"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("dash"), a["dash"]["name"], a["dash"]["desc"]])
 	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
 	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
 	return out

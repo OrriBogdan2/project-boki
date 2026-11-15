@@ -44,7 +44,7 @@
 		"rank3_speed": 0.25,
 		"rank3_speed_t": 2.0,
 		"name": "Slipstep",
-		"icon": "dash",
+		"icon": "gunslinger_dash",
 		"col": "#e6ffb0",
 		"cd": 8.5,
 		"charges": 1,
@@ -61,8 +61,9 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Coin Blast",
+		"card_range": "burr.range",
 		"short": "Coin",
-		"icon": "skypierce",
+		"icon": "gunslinger_rmb",
 		"col": "#c8f560",
 		"cooldown": 6.5,
 		"charges": 1,
@@ -81,7 +82,7 @@
 			"wall_daze": 0.6
 		},
 		"variants": {
-			"tap": "Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 19.5 damage and Dazed 1.4s.",
+			"tap": "Tap the ability key: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 19.5 damage and Dazed 1.4s.",
 			"full": "Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone."
 		},
 		"sockets": {
@@ -94,8 +95,9 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Palm Lance",
+		"card_range": "range",
 		"short": "Lance",
-		"icon": "haymaker",
+		"icon": "gunslinger_e",
 		"col": "#eaffa8",
 		"cooldown": 11.5,
 		"charge": 0.6,
@@ -121,8 +123,9 @@
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Cinderfall",
+		"card_range": "range",
 		"short": "Fall",
-		"icon": "earthshatter",
+		"icon": "gunslinger_x",
 		"col": "#b8f03c",
 		"cooldown": 42.0,
 		"range": 14.0,

@@ -40,6 +40,7 @@ static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
 static var press_buffer := 0.0   # s an early press waits to be allowed: a dash's end, a recast window, a CC's end
+static var dash_glide_ease := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -72,6 +73,7 @@ static func load_tuning() -> bool:
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
 	press_buffer = T["press_buffer"]
+	dash_glide_ease = T["dash_glide"]["ease_t"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
@@ -87,6 +89,11 @@ static func machine() -> Fsm:
 static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
+
+## Seconds after an air dash ends that a fresh glide press still counts as a press in the dash (DashGlide).
+static func dash_glide_grace(arch: String) -> float:
+	var g: Dictionary = T["dash_glide"]["grace"]
+	return float(g.get(arch, g["default"]))
 
 ## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
 ## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).

@@ -27,6 +27,7 @@ static func afterglow(h: Hunter) -> void:
 	ReceiverCue.shield(h, h.max_hp * float(r.get("shield_frac", 0.08)), col, ShieldSrc.FUSE)
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
+	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
 	if h.is_local():
 		h.m.sfx("unlock", h.pos, -3.0, 1.35)
 

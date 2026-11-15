@@ -20,6 +20,7 @@ const HOT := Color("eaffa8")         # palette "hot"
 const DEEP := Color("4f8a12")        # palette "deep"
 const BRONZE := Color("b9732f")      # Cinderfall's shell metal (a material, not an effect)
 const GOLD := Color("ffcf3f")        # the Coin Blast's coin (unshaded: the toon light turns gold red-brown)
+const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const GOLD_DARK := Color("d99a1e")   # its struck faces
 const DUD_DUST := Color("6b4a2e")    # a dud Coin Blast's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
@@ -178,7 +179,7 @@ func combo_read(t: Ent) -> Dictionary:
 	if not KitStatus.rattled(t):
 		return {}
 	var bd := rmb_def()["burr"] as Dictionary
-	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
+	return {"icon": "mark_daze", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
 ## Dazed foes take +76% from the rifle (the source's +39 on 51): a crit-style big gold number.
@@ -197,7 +198,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 ## burst add up on it) and a pink flare on the body. Only the shooter's screen gets the number.
 func _daze_bonus_fx(t: Ent, bonus: float) -> void:
 	vfx("daze_hit", t.pos, h.dir_to(t))
-	if h.is_local() and Settings.get_v("damage_numbers"):
+	if h.is_local():
 		m.fx.number(t.pos + Vector3(0, DAZE_NUM_LIFT, 0), bonus, DAZE_PINK, true, "+")
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
@@ -219,11 +220,13 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
+	m.sfx("vn_stim", h.pos, -3.0)
 	vfx("knock")                   # the rifle hand's swoosh and a lift of green fire
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a muzzle flash, a thin lime tracer riding the round (its hit is on_deal's), the shoulder kick.
+## Each round: a muzzle flash on the rifle's mouth, a lime tracer riding the round (its hit is on_deal's), the
+## shoulder kick.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -234,11 +237,16 @@ func _tick_lmb() -> void:
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
 			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
-			vfx("shot", sd["start"], sd["vel"] as Vector2, faded)
+			var mouth := _gun_muzzle()
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2, faded)
 			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
+
+## The Gun's Muzzle on her model (the rifle's mouth), or null with no model.
+func _gun_muzzle() -> Node3D:
+	return h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
 
 ## While the rifle fires, two thin arcs bracket her left and right (your screen only; the footage's firing
 ## brackets), gone a beat after the trigger rests.
@@ -584,7 +592,7 @@ func _stick(b: Dictionary, at: Vector3) -> void:
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
 	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
-	vfx("rmb_stick", at, b["out"])       # the miss: a small flare and a dull dust puff, nothing on a foe
+	vfx("rmb_stick", at, b["out"])       # stuck: a small flare and a dull dust puff, nothing on a foe
 
 ## The lane's end with no foe and no wall, wherever the coin is (ground or air): a miss is a miss. A small
 ## puff and a dull low thunk, no damage, no Daze, no cone.

@@ -91,7 +91,7 @@
 	"dash": {
 		"id": "spark_leap",
 		"name": "Soot Ram",
-		"icon": "ram",
+		"icon": "ashwick_dash",
 		"col": "#ff6a2a",
 		"cd": 9.0,
 		"dist": 3.4,
@@ -108,13 +108,14 @@
 		"rank3_boost_t": 2.0,
 		"rank3_shield": 0.116,
 		"rank3_shield_t": 2.0,
-		"desc": "A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed."
+		"desc": "A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.",
+		"card_range": "dist"
 	},
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Cinder Shot",
 		"short": "Cinder",
-		"icon": "bolt",
+		"icon": "ashwick_rmb",
 		"col": "#ff7a1a",
 		"cooldown": 7.0,
 		"charges": 1,
@@ -135,13 +136,14 @@
 			"ctrl": "add",
 			"ctrl_cap": "soft",
 			"mod": "add"
-		}
+		},
+		"card_range": "range"
 	},
 	"e": {
 		"delivery": "burst",
 		"name": "Furnace Cloak",
 		"short": "Cloak",
-		"icon": "shield",
+		"icon": "ashwick_e",
 		"col": "#ff7a30",
 		"cooldown": 10.5,
 		"on_press": true,
@@ -161,12 +163,13 @@
 			"ctrl_cap": "soft",
 			"guard": "add",
 			"mod": "add"
-		}
+		},
+		"card_range": "radius"
 	},
 	"x": {
 		"name": "Flue Flight",
 		"short": "Flight",
-		"icon": "updraft",
+		"icon": "ashwick_x",
 		"col": "#ff7a2a",
 		"unlock": 6,
 		"cooldown": 36.0,
@@ -184,7 +187,8 @@
 		"char": 4.0,
 		"slow": 0.3,
 		"slow_for": 0.5,
-		"desc": "Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s."
+		"desc": "Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.",
+		"again": "land early"
 	},
 	"order": [
 		"sec",

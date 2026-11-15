@@ -50,6 +50,9 @@ UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out stri
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
+Quest tracker (owner DECISIONS 11-10 / 11-08): scripts/ui/quest_tracker.gd, under the strip while your squad is on a
+quest seat (QuestSeats IN_USE): plain words, your progress, the leading rival squad's on a quest seat (thin bar), the
+distance; read from the seats only, so no Net change. Hidden inside the boss fight, where the boss bar is the objective.
 
 ## The quest seats (spec task 4)
 `QuestSeats` (scripts/match/quest_seats.gd, `Exits.seats`, null outside the mode) owns the schedule from heart.json
@@ -109,6 +112,20 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 `seat_beam.gdshader`, one ring, one glyph, two materials made once); `WaysOutVfx` owns the beacons. No bursts and no
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
+
+From afar (ext/vfx-ways-out-read): the match camera frames about 15 m round the player (66 deg down, 23 m back, a 32
+deg lens), so no beam or wall farther off is ever in frame, however tall. `WaysOutPins` (scripts/ui/ways_out_pins.gd)
+puts a pin on the play box's edge for every seat still to be had and off screen (open or in use from anywhere, locked
+within 90 m): the map badge (its shape, colour and countdown arc; the using squad's colour) under a beam while open or
+in use, the word and the distance. The Heart ring's locked pin waits while the Gate is still to be had; the open
+ring's pin replaces the Heart's FINAL waypoint (the charging Heart keeps its own). The Blight's wall within 70 m gets
+a crimson bar on the edge toward it, heavier as it nears. Canvas draws only, the same at every preset. The maps' Lair
+and Uplink badges (and so the pins) now stand on QuestSeats' seeded Sealed Lair and Uplink (they stood on the first
+lair and the outpost farthest from it), and the strip takes a quest seat's squad (in use, taken) from its QuestSeat:
+only the Sealed Lair's own fight puts it in use, and a won Lair or a ridden Uplink stays taken (the lair's flown list
+empties once its winners land, a ridden Uplink seat goes to "closed"). Check: --ways-out-map-ui-check section 9.
+Shots: --ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera with a fight beside the player, per
+--quality (docs/shots/vfx-ways-out-read/).
 
 ## First-time hints (a new player's first match)
 `WaysHints` (scripts/match/ways_hints.gd) gives the three moments that teach the mode one plain line each in the

@@ -908,7 +908,7 @@ func _mend_tick() -> void:
 		if o.downed:
 			continue
 		ticks_healed += 1
-		o.heal(heal, Feel.cat_color("sustain"))
+		o.heal(heal)
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -923,7 +923,7 @@ func _mend_burst() -> void:
 			kickstarts += 1
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
-			o.heal(heal, Feel.cat_color("sustain"))
+			o.heal(heal)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))

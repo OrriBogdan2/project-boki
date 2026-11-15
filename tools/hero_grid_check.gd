@@ -6,20 +6,24 @@ extends RefCounted
 ## With --shots-dir: relics_<W>x<H>.png (needs a real renderer: jobq submit --needs gpu).
 
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080)]
-const MAX_LINES := 2          # a name or title may wrap to this many lines
+const MAX_LINES := 2  # a name or title may wrap to this many lines
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HEROGRID %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()
 	Save.no_write = true
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): shots = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			shots = String(a).substr(12)
 	var d := Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
 	d["roster"].append(k)
@@ -27,7 +31,7 @@ func run(main: Node) -> void:
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"
 	d["arch"] = "gunslinger"
-	d["classes"] = ClassUnlock.legacy()      # every Hunter open, so the order is the canonical one
+	d["classes"] = ClassUnlock.legacy()  # every Hunter open, so the order is the canonical one
 	Save.d = d
 	main.show_screen("home", {})
 	var guard := 0
@@ -35,18 +39,23 @@ func run(main: Node) -> void:
 		guard += 1
 		await tree.create_timer(0.1).timeout
 	var hm: Node = main.current
-	for i in 90: await tree.process_frame
+	for i in 90:
+		await tree.process_frame
 	for win in SIZES:
 		tree.root.size = win
-		for i in 10: await tree.process_frame
+		for i in 10:
+			await tree.process_frame
 		HomeClasses.open(hm)
-		for i in 20: await tree.process_frame
+		for i in 20:
+			await tree.process_frame
 		_size_rows(hm, win)
-		if shots != "": tree.root.get_texture().get_image().save_png("%s/relics_%dx%d.png" % [shots, win.x, win.y])
+		if shots != "":
+			tree.root.get_texture().get_image().save_png("%s/relics_%dx%d.png" % [shots, win.x, win.y])
 		hm._close_panel()
 	hm.queue_free()
 	print("HEROGRID CHECK DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
+
 
 func _size_rows(hm: Node, win: Vector2i) -> void:
 	var at := "%dx%d" % [win.x, win.y]
@@ -68,6 +77,7 @@ func _size_rows(hm: Node, win: Vector2i) -> void:
 	var last: Rect2 = grid.get_children().back().get_global_rect()
 	ok(seen.encloses(last), "%s: the grid shows without scrolling (bottom %.0f of %.0f)" % [at, last.end.y, seen.end.y])
 
+
 ## One label: not clipped or ellipsed, its widest word fits, at most MAX_LINES lines.
 func _label_row(lab: Label, what: String) -> void:
 	var font := lab.get_theme_font("font")
@@ -80,9 +90,11 @@ func _label_row(lab: Label, what: String) -> void:
 	var fits: bool = widest <= lab.size.x + 0.5 and lab.get_line_count() <= MAX_LINES
 	ok(fits, what + " fits (%d lines, widest word %.0f of %.0f px)" % [lab.get_line_count(), widest, lab.size.x])
 
+
 func _labels(n: Node) -> Array:
 	var out: Array = []
 	for c in n.get_children():
-		if c is Label: out.append(c)
+		if c is Label:
+			out.append(c)
 		out.append_array(_labels(c))
 	return out

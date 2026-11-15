@@ -53,6 +53,42 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | R Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rock Hop (owner item 111), dust only (no ring or blast) | owner design |
 
+## Parity verify, Nov 9
+Tenzo on main d255acbee against docs/KIT_PARITY.md (Tenzo block), the source cards (briefs/supervive-data/supervive_kits.md, Tetra), the
+guide sheet (briefs/hero-ref/breah.md) and DECISIONS (2026-11-07: RMB out of a glide, allies hop, enemies stay blocked, he walks up his own;
+Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: match, differ (owner), regressed, open. Asserted in
+`--dolm-combo-check` (170 before, `verify Nov 9` and the rows named below).
+
+| Row | Verdict | Where / why |
+|---|---|---|
+| Passive Molten Guard: a punch into your own rocks gives a shield | match | dolm_kit.gd:452-454, :611 (one stack per punch, 18 x4, 6s); `audit tarek: ... gives no Molten Guard` for an ally's rocks |
+| Passive Tremor Sense: sneak shows foes in front through walls, cone grows | match (angle grows, not length) | dolm_kit.gd:264-297, dolm.json:26 (16m, 25 to 40 deg over 2s). In flight: ext/tenzo-cone-grow (length 18 to 25m) |
+| LMB tap: boulder, 0.6s | match | dolm.json:29 `rate` 0.6, dolm_kit.gd:391-395; `parity breah: tapped, a boulder every 0.6s` |
+| LMB hold: punch, 0.6s, launches foes and rocks, wall stun | regressed, fixed | dolm.json:30 `rate` was 0.7 (KIT_PARITY called it a match), now 0.6; dolm_kit.gd:432 sets `fire_cd` at the cast; asserted `verify Nov 9: LMB tap and punch both 0.6s`. Rocks and wall stun: dolm_kit.gd:428-480, `combo: ...` lines |
+| LMB damage ratios (boulder 9 : punch 12-24 : rock 14, source 169 : 199 : 244) | differ (owner scaling) | dolm.json:28-31; punch 1.33x the boulder at a tap (source 1.18x), rock 1.56x (source 1.44x). Charge scaling is ours; no owner call to change it |
+| RMB Volcano Crusher: hold, centre stun, jump to leap, dunk, 11s | match | dolm.json:38 (cooldown 11), breah_slam.gd:105-111 (jump leap), :205-215 (core stun, dunk); `audit tarek: cooldowns`, `rmb: jump while charging...`, `rmb: a foe in the air is dunked` |
+| RMB charge time (source 1.0-1.5s; ours 0.2 tap window + 0.25) | differ (owner item 61) | dolm.json:38 `slam.time` |
+| RMB out of a glide (hold) | match | breah_slam.gd:131-137 folds the glider, dolm_kit.gd:243-260 plunges at the glider's dive speed; `glide slam: ...` |
+| RMB reset on a knock or kill | match to the card (no reset; the guide sheet says reset) | owner data and item 14; `data: a slam that knocks does not reset Quakefall` |
+| E Rockwave: 3 rocks, ground only, 12.5s | match | dolm.json:44 (cooldown 12.5), dolm_kit.gd:100-103 (no room in the air), :623-673 |
+| E allies hop the rocks by jumping (hold) | match | stone_stand.gd:35, :77, :91-93 (ally in the air); foes blocked, he walks up his own (stone_stand.gd:68-80); `rock (item 25): ...`, `hop rocks: an ally in the air hops them, a foe is stopped`. KIT_PARITY gap 14 and this file's older rows said "not built": stale, fixed here. Bots hopping at once: ext/tenzo-ally-hop (in flight) |
+| E extra row at rank 3 (source IV) | match | dolm_kit.gd:623-632 |
+| R Tetraform: tap wall, hold-drag angle, slows, 45s | differ (owner item 15: rocks only; the slow is kept) | dolm.json:47-48 (cooldown 45, slow_k 0.35), breah_spine.gd:48-75; `ult drag: ...`, `ult: the rise slows ...` |
+| R ranks (-5s, +2.5s lifetime x2) | open | our X has no ranks (dolm.json:47); not small (a rank table for the ult) |
+| Shift Landslide: dash, launches a rock, slows, 12s, rank +1 charge and 33% | differ (owner item 111: Rock Hop, held) | dolm.json:32 (cd 12, hops 3, `slow_t` 1.5, last landing's rolling rock), breah_hop.gd:41-358; `dash: total distance...`, `data rank 3: a second charge...`, `crash: ...` |
+| Q glove | ours | no source, nothing to match |
+| Ability colour blue (owner 11-07) | open (held; in flight) | dolm.json ability cols are ochre and orange (:32, :38, :44, :47); ext/vfx-tenzo-impacts adds the blue impacts |
+| Two-step clarity for the Rock Hop recast (owner 11-08) | open (in flight) | breah_hop.gd has no "KEY AGAIN" cue; ext/recast-* branches |
+| Cancels: a press in the glider, the Quakefall's hop, leap or air press, a merge, a stun or knock | match (ours where the source is silent) | dolm_kit.gd:226-251 (glider wins after a hop), :562 (`locks_glide`), :287-300 (`_drop_holds`); `glide (item 26...)`, `merge hold: ...` |
+| Dash flow, ground: LMB and RMB fire mid-hop and carry, E buffers, X and Q fire | match | content/dash_flow/dolm.json:6-10 (LMB and RMB cite the guide's Punch to Extend and Dunk Combo; E cites the ground-only card) |
+| Dash flow, air: LMB, RMB, X, Q fire, E never | differ (source silent, owner item 51; fire since 4e788af65) | content/dash_flow/dolm.json:13-17 |
+| Dash flow into_dash and hold rows | open ([?], no source) | content/dash_flow/dolm.json:21-35 (the six `hold` rows are `keep`, unsourced, listed in KIT_PARITY item 20) |
+| Clips: 17 moves | match on coverage | content/rules/warden_anim/tarek.json:47-101 maps every `breah_*` move the kit plays (throw, wind, punch, crouch, leap, lunge, slam, dive, slam_land, hop, skate, leap_land, exdash, raise, spine_aim, spine, sense); `audit tarek: the hunter viewer plays his own RMB and X moves`. Rebakes and hand poses: ext/anim-hand-tenzo-rebased (in flight) |
+
+Fixed here: the punch cadence (asserted), and the stale ally-hop rows in this file (E in the per-slot table, Small mechanics, Data pass,
+Rock ownership). Not fixed: R ranks, the blue colour and the recast cue (in flight or owner-sized), the ratios, the `[?]` hold rows,
+KIT_PARITY's Tenzo rows (E "no ally hop", gap 14, LMB "punch .7"), left to ext/parity-no-riders-grimble-tenzo, which edits that file.
+
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/tarek_ostra_claire.md. (a) done on this branch, (b) fixed now, (c) not applied, with
 the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glide slam: ...`, `small: ...`).
@@ -326,6 +362,7 @@ would also settle the same row on the boulder.
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | not built: the owner wants only the rock's own caster to climb it (review item 25 overrides the source and the data pass's ally climb); allies and foes are stopped, walking or jumping |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on R; asserted `ult drag: ...` |
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built (owner 23:55): an ally jumping against the rock is lifted over (`StoneStand` `_ally_hop`); walking, allies are stopped; foes are stopped either way; only the caster climbs by walking (item 25) |
+| Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built (StoneStand._ally_hop, owner 23:55 and DECISIONS 2026-11-07): an ally in the air against his rock is lifted over; walking, allies are stopped; foes are stopped either way |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
 | Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built as rocks, not tiles (owner, Nov 2026, reversing item 15): over the abyss the ridge's rocks are ground you can stand on while they last |
@@ -342,6 +379,11 @@ would also settle the same row on the boulder.
 - The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10s (`rank_cd.dash` [1, 0.8333, 0.8333]: the data's -2s), rank 3
   adds the second charge (the data's +1 charge) and the third-further reach (its +33%), still 10s per charge.
 - Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 replaced that: only the
+- The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10.2s (the shared -15% step; the data's -2s), rank 3
+  adds the second charge (the data's +1 charge) and the third-further reach (its +33%) on top of the shared step (8.4s per
+  charge, faster than the data's 10s: the shared rank step cannot be switched off for one hunter).
+- Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 narrowed it to the caster, then owner 23:55 and
+  DECISIONS 2026-11-07 put the data back: allies hop by jumping, foes stay blocked, he walks up his own (see Rock ownership).
   rock's caster climbs it (see Rock ownership).
 - Not touched: the X wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (now 11s and 12.5s, the data's;
   they were 9s and 13s when this pass was written).
@@ -420,8 +462,14 @@ While moving (source: she walks off a punch, throws on the move, moves while aim
   another Tenzo's rocks are a wall to her too. A body that lands on
   a rock from above still stands on it and can walk off.
 - Ally hop (owner 23:55, the source lets allies hop friendly walls): `StoneStand._ally_hop`; item 25 only stops allies walking.
+- A rock belongs to the Tenzo who raised it (Stone Row, Basalt Spine): the wall's `by`. He climbs it by walking: walking into
+  its face (moving into it, no jump) lifts him at 5 m/s with his walk carried on, so he rises onto the top and walks
+  over it in about half a second (asserted at most 0.6s). His allies hop it: in the air against its face (a jump) it lifts
+  them over; walking, they are stopped. Foes, every foe bot and Boki are stopped by it as by a full wall, walking or jumping.
+  A body that lands on a rock from above still stands on it and can walk off.
+- Item 25 had narrowed the climb to the caster; the owner's 23:55 note and DECISIONS 2026-11-07 (the source decides) bring the ally hop back.
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),
-  StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
+  StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster, or an ally in the air).
 
 ## In the air
 
