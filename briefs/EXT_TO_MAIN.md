@@ -9862,3 +9862,4 @@ READY ext/merge-lane-vfxsfx1-1115 b7653ea371 (conflict-resolved vs main d65f00de
 READY ext/merge-lane-vfx2-1115r2 820aaebae11384d40ab919523d529169706a156f (merge lane vfx2 r2: 3 of 37 branches, hero VFX gate NEW-RED 0, 29 HARD, 4 pre-archived, 3 archived)
 READY ext/integ-1113-D1 071e4c9886 (main fix after #53 merged: tools/wild_type_cue_check.gd used SideColor.YOU/ALLY/FOE, gone from main -> parse error + hang; now SideColor.you()/ally()/foe(); --wild-type-cue-check 0 failures. Needs a new PR: #53 is merged)
 READY ext/merge-lane-vfxsfx2-1115 9e4a32fb4b17cbdbebc65dab6a7cca60d369f144 (verify-only follow-up, sha unchanged, 0 behind origin/main d65f00de26: --hatch-check exit 0 with 8 SCRIPT ERRORs in EggHatch, the same 8 lines as main (diff empty), so NEW-RED 0; the earlier note "not verified vs main" is now verified)
+READY ext/merge-lane-misc1-1115 325fe1ab53 (merge lane misc1: 9 branches, suite NEW-RED 0 after fixes, export OK 452.5 MB; PR via gh-outbox)
