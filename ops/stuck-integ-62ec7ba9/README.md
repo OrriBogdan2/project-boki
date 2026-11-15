@@ -18,3 +18,27 @@ Buckets over the 785 conflicts: >=95% landed 29, <=20 unlanded lines 21, 21-100 
 Ported on ext/stuck-integ-62ec7ba9: integ-1113-D1 (merge), combat-daze-status (hand port, 1a959429f0).
 The rest needs per-area port jobs (sort triage.tsv by unlanded_lines and port smallest first; check each against
 main's current code first: a red or a stale row here is often already solved).
+
+## Pass 2 (job 20261115-203509-a1, role feel, main b9d6a0834e)
+
+Read each small row's unlanded lines (`git diff -U0 merge-base..READY`, minus lines already in main's file) against main's
+current code. Every one below is on main in another form, or only differs in generated/doc wording:
+
+| branch | why superseded |
+|---|---|
+| fold-feel-glide-1112 | main's `_aim_rel` already clears mobs per run (`_clear_mobs`), the root cause of the aim_* reds |
+| no-hardcoded-keys | main has all six actions (undo, keep_placing, level_mod, kit_card, confirm, push_to_talk) and SHARED_OK pairs |
+| feel-fire-slow-sable | arc_bolts fire_slow 0.72 on main, RUN_KEEP [0.66, 0.78]; hoar_fan's 0.9 is live on main (`Hunter._fire_slow`), so it stays |
+| tut-belt-hint-rebased | BeltTips ported (5fe58ca159); the pickup toast was replaced by LootFeed (f98a4044f1) |
+| parity-pin-kael-drop | `rmb.drop.radius` row already in content/rules/kit_parity.json |
+| ui-meeko-channel-ally | scripts/ui/channel_bar.gd on main; leftovers are a Net VERSION line and check wording |
+| tut-hints-blight-camp-box | expedition_tips has blight/camp/deathbox (+wallkick) on main |
+| series-boki-1112 | main draws through HeartRaid.boki_for / ModeBoki.draw (site_pool replaced) |
+| sfx-silence-audit | tools/sfx_silence_audit.gd on main; leftovers are option text |
+| vfx-albert-ivory-arcs | main's bulwark palette is a superset (adds "red") |
+| tut-first-games-port, fix-ghost-shot-sfx-1113 | only generated wiki / hero-doc table wording left |
+| 9 rows at 0 unlanded lines | creator-sex-distinct-shots scrapking-lmb-clips tut-first-heartspark-rebased tut-first-race-rebased vfx-archer-strips vfx-dolm-shots vfx-mage-strips vfx-neve-rimelock-area vfx-strips-tender |
+
+Checks on this branch: --recast-cue-check 80 checks, 2 fails (ostra e ticks / EXPIRED), same 2 on main's files (79 checks):
+NEW-RED 0. --wild-type-cue-check 0 fails. health --strict: style red in dj_fx.gd / glide_net_check.gd (main's, untouched),
+sfx_loudness needs numpy (not on w2).
