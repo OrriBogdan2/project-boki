@@ -1,4 +1,7 @@
 exec(open("/home/boki/cj/20261115-193602-a3/tree/ops_tmp_grimble/common.py").read())
+import sys
+for _a in sys.argv:
+    if "=" in _a and _a.split("=")[0].isupper(): os.environ[_a.split("=")[0]]=_a.split("=",1)[1]
 import time
 t0=time.time()
 def T(s): print("T %.0f %s"%(time.time()-t0,s),flush=True)
@@ -33,6 +36,16 @@ def dilate(mask,k):
     return mask
 C=dilate(C,int(os.environ.get("DIL","1")))
 C&=(co[:,0]>0.107)&(co[:,0]<0.135)&(co[:,1]<-0.34)
+# residual stage: strict-gold strands in front of the lip at the mouth corner
+reg=(co[:,0]>0.09)&(co[:,0]<0.14)&(co[:,2]>0.20)&(co[:,2]<0.31)&(co[:,1]<-0.30)&~C
+R=strict&reg
+l2=components(R,ev,nv); i2,c2=np.unique(l2[R],return_counts=True)
+R2=np.zeros(nv,bool)
+for i,c in zip(i2,c2):
+    sm=l2==i
+    if c>=3 and co[sm,1].min()<-0.362 and co[sm,0].min()>=0.088: R2|=sm
+R2=dilate(R2,1)&(co[:,1]<-0.34)&(co[:,0]>0.088)
+print("residual del verts",R2.sum()); C|=R2
 print("C verts",C.sum(),"bbox",co[C].min(0),co[C].max(0))
 cn=np.zeros(len(m.loops)*3,np.float32); m.corner_normals.foreach_get('vector',cn); cn=cn.reshape(-1,3)
 smooth=np.zeros(nf,bool); m.polygons.foreach_get('use_smooth',smooth)
@@ -62,6 +75,9 @@ for a0 in list(nxt):
     loops.append(lp)
 print("loops",len(loops),sorted(len(l) for l in loops)[-10:])
 # vertex normal average
+keptv=np.zeros(nv,bool); keptv[fvk.reshape(-1)]=True
+vuvk=np.zeros((nv,2),np.float32); vuvk[fvk.reshape(-1)]=uvk.reshape(-1,2)
+rgbk=rgb
 vnrm=np.zeros((nv,3),np.float32); np.add.at(vnrm,fvk.reshape(-1),cnk.reshape(-1,3))
 vnrm/=np.maximum(np.linalg.norm(vnrm,axis=1),1e-9)[:,None]
 newco=[];newf=[];newuv=[];newcn=[]
@@ -70,10 +86,17 @@ for lp in loops:
     n=len(lp)
     if n<3 or n>400: print("skip loop",n); continue
     cidx=base+len(newco); c3=co[lp].mean(0); newco.append(c3)
-    cu=vuv[lp].mean(0); cnn=vnrm[lp].mean(0); cnn/=max(np.linalg.norm(cnn),1e-9)
+    cnn=vnrm[lp].mean(0); cnn/=max(np.linalg.norm(cnn),1e-9)
+    uvs=vuvk[lp]; spread=np.ptp(uvs,axis=0).max()
+    if spread>0.004:
+        cen=co[lp].mean(0); nb=np.where((np.linalg.norm(co-cen,axis=1)<0.018)&keptv)[0]
+        if len(nb)<5: nb=np.array(lp)
+        mc=np.median(rgb[nb],axis=0); j=nb[int(np.argmin(np.linalg.norm(rgb[nb]-mc,axis=1)))]; uvs=np.repeat(vuvk[j:j+1],n,0)
+        print("loop spread",round(float(spread),4),"n",n,"-> flat uv")
+    cu=uvs.mean(0)
     for k in range(n):
         a=lp[k]; bq=lp[(k+1)%n]
-        newf.append((bq,a,cidx)); newuv.append((vuv[bq],vuv[a],cu)); newcn.append((vnrm[bq],vnrm[a],cnn))
+        newf.append((bq,a,cidx)); newuv.append((uvs[(k+1)%n],uvs[k],cu)); newcn.append((vnrm[bq],vnrm[a],cnn))
 if newf:
     allco=np.concatenate([co,np.array(newco,np.float32)]); 
     F=np.concatenate([fvk,np.array(newf,np.int32)]); UV=np.concatenate([uvk,np.array(newuv,np.float32)]); CN=np.concatenate([cnk,np.array(newcn,np.float32)])
@@ -103,11 +126,17 @@ if os.environ.get("DBG")=="1":
         sm=l2==i; print("RES n",c,"x[%.3f,%.3f] y[%.3f,%.3f] z[%.3f,%.3f]"%(co[sm,0].min(),co[sm,0].max(),co[sm,1].min(),co[sm,1].max(),co[sm,2].min(),co[sm,2].max()))
     cc=np.ones((nv,4),np.float32); cc[:,:3]=rgb*0.7; cc[R]=(1,0,0,1)
     cat=m.color_attributes if False else None
-    ccn=cc[used]
+    ccn=np.concatenate([cc,np.ones((len(allco)-nv,4),np.float32)])[used]
     ca=nm.color_attributes.new("dbg",'FLOAT_COLOR','POINT'); ca.data.foreach_set('color',ccn.ravel()); nm.color_attributes.active_color=ca
     sc,cam=setup_render(900); sc.display.shading.color_type='VERTEX'
-    for a_ in (0,30,60): shot(sc,cam,f"{out}/dbg_{a_}.png",a_,(0.115,-0.38,0.22),0.24)
+    for a_ in (0,30,60): shot(sc,cam,f"{out}/dbg_{a_}.png",a_,(0.10,-0.36,0.25),0.14)
     raise SystemExit
+if os.environ.get("INPAINT")=="1":
+    exec(open("/home/boki/cj/20261115-193602-a3/tree/ops_tmp_grimble/inpaint_lib.py").read())
+    regk=(co[:,0]>0.088)&(co[:,0]<0.14)&(co[:,2]>0.20)&(co[:,2]<0.31)&(co[:,1]<-0.30)&~C
+    Rk=dilate(strict&regk,1)&~C
+    fin=Rk[fvk].any(1); print("inpaint faces",fin.sum())
+    for n_ in ('Image_0','Image_1'): inpaint_img(n_,uvk[fin],4); T("inpaint "+n_)
 sc,cam=setup_render(900); sc.display.shading.color_type='TEXTURE'
 for a in (-30,0,30,60): shot(sc,cam,f"{out}/zdel_{a}.png",a,(0.115,-0.38,0.22),0.24)
 for a in (-30,0,30): shot(sc,cam,f"{out}/ztop_{a}.png",a,(0.11,-0.38,0.29),0.12)
