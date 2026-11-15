@@ -24,7 +24,8 @@ extends RefCounted
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
 ##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
 ##  14 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
-##                   backpedal facing east, on the game camera; <dir>/loco_<id>.tsv logs body and feet per frame
+##                   backpedal facing east, on the game camera; <dir>/loco_<id>.tsv logs body and feet per frame;
+##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
@@ -120,6 +121,8 @@ func _record(res: String) -> void:
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
 		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
 		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
+	if "--media-log" in OS.get_cmdline_user_args():     # logs only (clip 14's feet): headless, no video, same 1/30 s steps
+		args = ["--headless", "--fixed-fps", "30", "--path", ProjectSettings.globalize_path("res://"), "--"]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--media-child")
 	var out: Array = []
@@ -610,8 +613,8 @@ func _boss_focus(secs: float) -> void:
 ## [from s, move (screen x east, y south; length = stick), label]: the player always faces east (the aim stays put).
 const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"], [4.0, Vector2.ZERO, "stop"],
 		[5.0, Vector2(1, 0), "run"], [8.0, Vector2.ZERO, "stop"], [9.0, Vector2(0, -1), "strafe_l"],
-		[11.0, Vector2.ZERO, "stop"], [12.0, Vector2(0, 1), "strafe_r"], [14.0, Vector2.ZERO, "stop"],
-		[15.0, Vector2(-1, 0), "back"], [17.0, Vector2.ZERO, "stop"]]
+		[13.0, Vector2.ZERO, "stop"], [14.0, Vector2(0, 1), "strafe_r"], [18.0, Vector2.ZERO, "stop"],
+		[19.0, Vector2(-1, 0), "back"], [23.0, Vector2.ZERO, "stop"]]
 
 ## The player (--media-hunter) walks, runs and strafes the plan on the game camera; feet and speed go to a TSV.
 func _locomotion(secs: float) -> void:
@@ -633,24 +636,27 @@ func _locomotion(secs: float) -> void:
 		pl.inp["move"] = move
 		pl.inp["aim"] = pl.pos + Vector3(8, 0.9, 0)
 		var pts := AUDIT.points(sk)
-		var fl: Vector3 = pts["foot.L"]
+		var lean_inv := pl.model.global_transform.affine_inverse()     # (the game leans the model toward the camera:
+		var fl: Vector3 = pts["foot.L"]                                # a foot's height is read in its own frame)
 		var fr: Vector3 = pts["foot.R"]
+		var hl := (lean_inv * fl).y
+		var hr := (lean_inv * fr).y
 		log.store_line("%.4f\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f" % [t, label, pl.pos.x,
-				pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z]),
+				pl.pos.z, pl.vel.x, pl.vel.z, fl.x, hl, fl.z, fr.x, hr, fr.z]),
 		func(_t: float): return pl.render_pos(1.0), true)
 	log.close()
 
-## The nearest spot to `p` with the plan's whole path (east 21 m, north 10 m, back, west 10 m) on open, level ground.
+## The nearest spot to `p` with the plan's whole path (east 22 m, then north 21 m and back) on open, level ground.
 func _loco_start(p: Vector3) -> Vector3:
 	for rad in range(0, 90, 3):
 		for k in maxi(1, int(TAU * rad / 3.0)):
 			var a := TAU * k / maxi(1, int(TAU * rad / 3.0))
 			var at := Vector2(p.x + cos(a) * rad, p.z + sin(a) * rad)
 			var ok := true
-			for i in 23:
-				ok = ok and m.world.call("_fits", at.x + i, at.y, 0.7)
-				ok = ok and m.world.call("_fits", at.x + 22.0, at.y - 0.5 * i, 0.7)
-				ok = ok and absf(m.world.ground_at(at.x + i, at.y) - m.world.ground_at(at.x, at.y)) < 0.3
+			for i in 44:
+				var along := Vector2(at.x + minf(i, 22.0), at.y - maxf(i - 22.0, 0.0))
+				ok = ok and m.world.call("_fits", along.x, along.y, 0.7)
+				ok = ok and absf(m.world.ground_at(along.x, along.y) - m.world.ground_at(at.x, at.y)) < 0.3
 				if not ok:
 					break
 			if ok:
