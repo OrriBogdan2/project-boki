@@ -261,7 +261,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Input | Ours (content) | In game | Source | Verdict |
 |---|---|---|---|---|
 | LMB shotgun | stop at 6.3, 7 slugs, first volley on the aim line | reach 8.8 (7.8 + 0.6 + 0.4: the probe's weapon reads 7.8); lane 1.2 | slugs stop about 3.5 bh out (6.3) | match (6.3 asserted by --dredge-combo-check) |
-| RMB Abyssal Hand | range 11.5 | reach 12.9 (11.5 + 0.6 + 0.4 + step), lane 1.4 | 6-7 bh (10.8-12.6) | match |
+| RMB Deep Reach | range 11.5 | reach 12.9 (11.5 + 0.6 + 0.4 + step), lane 1.4 | 6-7 bh (10.8-12.6) | match |
 | E Anchor Drop | hop 1.8, radius 3.0, 110 deg | far 5.2 = 1.8 + 3.0 + 0.4, near 0.5 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | match (+11% depth, inside footage error) |
 | R Brass Broadside | 6 orbs x 2 waves, fan 105, range 5.9 | far 5.9 (5.5 net), arc of centres 112 | fan 100-110, 3.3 bh (5.9) | match (-7%) |
 
@@ -508,7 +508,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | LMB | 7 slugs, bloom [D]; [F] fan 20 rested, 30 firing, fixed stop ~3.5 bh, no falloff with range | 7 slugs, the first volley of a burst on the aim line (owner 11-10), then fan 20 + bloom to 30 (was 30 + 15, fixed), stop 6.3 m, no falloff; aimed volley 14.0 at 2, 6 and 6.2 m; a 30 degree volley 14.0 at 2 m, 8.9 (3 slugs) at 6 m and 6.2 m, asserted in `--dredge-combo-check` | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, slugs hang at 6.3 m, bloom folds back 0.7 s after the last shot | match |
-| RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D] | Abyssal Hand: 11.5 m through rocks and cliffs (a placed wall stops it), reel, braced shuffle at 1/5 walk, ally and Wisps caught, cd 12 | match; 0.67x cd (gap 10) |
+| RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D] | Deep Reach: 11.5 m through rocks and cliffs (a placed wall stops it), reel, braced shuffle at 1/5 walk, ally and Wisps caught, cd 12 | match; 0.67x cd (gap 10) |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd · cd **open** (gap 10) |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
@@ -864,7 +864,7 @@ Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DEC
 | LMB | 7 slugs, 0.5 s, stop 6.3 m | as source | match |
 | LMB | fan [F] 20 rested, 30 firing | 30 rested + bloom to 45 | differ (READY lmb-range-parity d1aa84b8d, scrapking-lmb d5891bd37) |
 | LMB | bloom resets on dash (tier 3) | rank 3 barge resets it | match |
-| RMB | Abyssal Hand through terrain (DECISIONS: walls and cliffs, placed walls stop it) | `pierce_terrain` on the hook (match.gd:3186): rocks, props, cliffs pass; `--dredge-combo-check` cliff and rock rows PASS (grab 6.3 m behind a cliff, drag over rocks); reel also climbs cliffs, stops at a placed wall | match |
+| RMB | Deep Reach through terrain (DECISIONS: walls and cliffs, placed walls stop it) | `pierce_terrain` on the hook (match.gd:3186): rocks, props, cliffs pass; `--dredge-combo-check` cliff and rock rows PASS (grab 6.3 m behind a cliff, drag over rocks); reel also climbs cliffs, stops at a placed wall | match |
 | RMB | what stops it | placed walls (Verbs.shot_check), domes, and breakable props (`_shot_break`) end the flight without a grab; no main assert for the placed wall (READY decisions-hero-asserts a6d970278) | match; breakables `[?]` (source says terrain only) |
 | RMB | first target, ally, wisps, caster Grounded, rank 3 half cd | all built and asserted | match |
 | RMB | cooldown 18 s (data L1), card 11.7 s at footage level 9 | 12 | differ 0.67x (READY grimble-parity-verify d94bc7769 sets 18; see ranked 2) |
@@ -915,7 +915,7 @@ Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DEC
 4. Albert shield: drop the 2 m push, 3 s lock and Surf unless the owner keeps them; assert hook, stun, slow and root from the front (bulwark_kit.gd:176, 267; M, owner).
 5. Crush: test the real knock into a wall, not terrain within 1.5 m (bulwark_kit.gd:307; M).
 6. Grimble LMB fan 20 + 10 (READY), knock heal 16% remove or keep (dredge.json; S, owner).
-7. Breakable props ending the Abyssal Hand: source says terrain only (match.gd:3298; S, `[?]`).
+7. Breakable props ending the Deep Reach: source says terrain only (match.gd:3298; S, `[?]`).
 
 Suggestion, not built: show Albert's Bash cooldown on the dash slot icon so the Shift choice reads at a glance.
 

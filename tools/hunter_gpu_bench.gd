@@ -10,7 +10,7 @@ const HUNTERS := 6
 const BOKI := 4
 const GAP := 1.9              # m between models in a row
 const WARMUP := 90            # frames before measuring: shaders compile, the first frames upload meshes
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 
