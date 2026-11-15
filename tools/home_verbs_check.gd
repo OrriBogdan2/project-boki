@@ -118,6 +118,7 @@ func reach() -> Dictionary:
 	main.add_child(holder)
 	var model := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", Unmasked.default_look(), Arch.of_save())
 	model.get_node("Rig/Torso/Aim/Gun").free()
+	model.set_meta("anim_seed", 1)      # (else the idle phase follows the instance id, and a hand lands 8 cm off)
 	holder.add_child(model)
 	await main.get_tree().process_frame
 	var a := HunterAnim.new(model)
