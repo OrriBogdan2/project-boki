@@ -11,6 +11,7 @@ extends RefCounted
 ## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
 ## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And Motley's hover hum (no footsteps): held while he moves, swelling and rising with speed, gone when still.
 ## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
 ## and they recover; then the autoplay match runs LOUD_S and each bus's peak meter is reported (MATCHAUDIO BUS).
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
@@ -21,6 +22,7 @@ var fails := 0
 var n := 0
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
 const LOUD_S := 12.0           # s of autoplay match the bus meters are read over
+const REPEAT_GAP_MS := 200     # ms of real time between two chimes: past Sfx.STACK_MS, so not stacked
 const WALK_S := 8.0            # s: the longest an abyss walk is run
 const ABYSS_NAMES := ["abyss_whoosh", "abyss_catch", "abyss_fallout"]
 
@@ -71,10 +73,12 @@ func run(main_node: Node) -> void:
 	_steps(m, P)
 	_shields(m, P)
 	await _glider(P, "yours")
+	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
+	await _hover(other, "another player's")
 	other.remote = false
 	await _loudness(m)
 	# extract mid-channel and go home
@@ -131,7 +135,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	m.revive_hunter(P, mate)
 	_step(m, 0.1)
 	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
-	await main.get_tree().create_timer(0.2).timeout      # (Sfx spaces repeats in real ms)
+	await _wait_real_ms(REPEAT_GAP_MS)
 	Sfx.play("kill")
 	P.ak.cd["x"] = 0.05
 	_step(m, 0.1)
@@ -349,6 +353,38 @@ func _glider(h: Hunter, who: String) -> void:
 	var running := Sfx.loop_on(wind) or Sfx.loop_on(burn) or Sfx.loop_on(hiss)
 	ok(not running, "%s glider: all loops stop once the glider is folded" % who)
 
+## Motley floats with no feet (HoverHum): his hum holds while he drifts, swells and rises with his speed and
+## stops once he is still; a Hunter with feet has no hum. `h` wears his sounds for the test.
+func _hover(h: Hunter, who: String) -> void:
+	var was := h.arch
+	var key := HoverHum.key(h)
+	h.arch = "ostra"
+	h.unseen = false
+	h.crouch = false
+	_set_speed(h, h.base_speed * 0.3, 0.0)
+	HoverHum.tick(h)
+	var on := Sfx.loop_on(key)
+	ok(on, "%s hover: Motley drifting hums" % who)
+	var slow_db := float(Sfx.loops[key]["vol"]) if on else 0.0
+	var slow_pitch := _pitch(key) if on else 0.0
+	_set_speed(h, h.base_speed, 0.0)
+	HoverHum.tick(h)
+	var fast_db := float(Sfx.loops[key]["vol"]) if on else 0.0
+	ok(on and fast_db > slow_db and _pitch(key) > slow_pitch,
+		"%s hover: the hum swells and rises with speed (%.1f -> %.1f dB)" % [who, slow_db, fast_db])
+	if h.remote:
+		ok(on and Sfx.loops[key]["pos"] != null, "another player's hover: the hum is positional")
+	_set_speed(h, 0.0, 0.0)
+	HoverHum.tick(h)
+	await main.get_tree().create_timer(0.5).timeout
+	ok(not Sfx.loop_on(key), "%s hover: still, the hum stops" % who)
+	h.arch = "gunslinger"
+	_set_speed(h, h.base_speed, 0.0)
+	HoverHum.tick(h)
+	ok(not Sfx.loop_on(key), "%s hover: a Hunter with feet has no hum" % who)
+	h.arch = was
+	_set_speed(h, 0.0, 0.0)
+
 func _set_speed(h: Hunter, flat: float, vy: float) -> void:
 	h.vel = Vector3(flat, vy, 0)
 	h.net_vel = h.vel
@@ -364,6 +400,16 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
+
+## Waits ms of wall-clock time. Sfx spaces and stacks repeats in real ms, and a SceneTreeTimer is no
+## measure of that: its first frame's delta also counts the match steps run before it was made, so
+## create_timer(0.2) could end ~80 ms after the last chime, inside Sfx.STACK_MS (the chime came out a
+## stacked 3.5 dB quieter and the gate went red at random).
+func _wait_real_ms(ms: int) -> void:
+	var until := Time.get_ticks_msec() + ms
+	while Time.get_ticks_msec() < until:
+		await main.get_tree().process_frame
+
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

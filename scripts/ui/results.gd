@@ -123,7 +123,7 @@ func show_result(r: Dictionary) -> void:
 	if won and eggs_home > 0:
 		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		var gear_head := "Gear you kept, in the armory"
+		var gear_head := "Gear you kept, in the gear shed"
 		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
 		v.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
@@ -136,7 +136,7 @@ func show_result(r: Dictionary) -> void:
 			det.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
 					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
-			det.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
+			det.add_child(_note("Your gear shed was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
 	v.add_child(ClassCard.results_strip(s))
 	var lost_it: Array = s.get("lost_items", [])
 	if not won and not lost_it.is_empty():
