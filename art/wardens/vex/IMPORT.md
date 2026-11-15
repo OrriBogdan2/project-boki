@@ -1,6 +1,14 @@
 # Vex (gunslinger): import note
 
-## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+## LIVE master in game (2026-11-15, ext/hunter-3d-vex-sparkle-1115): the CURRENT live 2D look
+`~/meshy/v95/Vex/r4/hunter3d1115/cand_A.glb` = Meshy multi-image (meshy-7.1, enhancement OFF, 2k geometry, 8k PBR; front, 3/4, side, back of
+`vex-turn-1115` turnaround A, the turnaround refreshed from the live splash: top D, bust A, gold cheek wire on her right). Only the enhancement-off runs kept the
+minigun (7 of 21 candidates carried it; this was the closest face). Swapped by `tools/art1/v95_swap.py` with `art/wardens/src/vex_v95.json` onto the
+same skeleton, all its clips (47) and anchors (the muzzles stay on forearm.R, re-placed on the new gun). 13.0k tris, one 2048 atlas. Changes: the master's own choker
+coin replaces the kept pendant mesh (no `keep`), the head is smaller (true to the turnaround), so `height_3d` in `warden_model_check.gd` is 1.05.
+Raw candidates, sheet, turntables, gen log: ~/meshy/hunter-3d-1115 (answer.md).
+
+## Previous: v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Vex/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), the muzzles still on forearm.R (anchor_bones). Was appeal3 body b below. 13.1k tris, one 2048 atlas, 39 clips.
 Spec `art/wardens/src/vex_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
 

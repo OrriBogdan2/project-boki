@@ -19,9 +19,10 @@ const WARDENS := {
 	"bulwark": {"hit_r": 0.46, "height": 1.03, "height_3d": 1.55, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
-	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
-	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
-	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
+	# (slim; height_3d: the 11-15 master has the turnaround's smaller head)
+	"gunslinger": {"hit_r": 0.416, "height": 1.09, "height_3d": 1.05, "width": [0.5, 1.15], "moves": "gunslinger_"},
+	# (slim and long-legged; height_3d: her rods stand over the head, a little lower on the 11-15 master)
+	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.09, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
 	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
