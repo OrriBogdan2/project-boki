@@ -104,11 +104,15 @@ static func _whirl(A, ev: String, which := "") -> Dictionary:
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
+	var up := [false]      # RMB / E ends the hold with the button let go: a button still down starts a fresh hold (--held-fire-resume-check)
 	var held := func():
-		P.inp["fire"] = true
+		P.inp["fire"] = not up[0]
 		A.aim_at(P, T.pos)
 	P.inp["fire"] = true
-	_ending(A, m, P, ev, func(): _press_key(P, which), held)
+	var press := func():
+		_press_key(P, which)
+		up[0] = true
+	_ending(A, m, P, ev, press, held)
 	var out := {"whirling": P.ak.lmb_t >= 0.0, "anim": P.ak.anim_id}
 	P.inp["fire"] = false
 	A.step(m, 0.4)
