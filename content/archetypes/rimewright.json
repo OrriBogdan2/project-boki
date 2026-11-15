@@ -70,6 +70,7 @@
 		"ground": {"range": "lance.range", "r": "lance.zone_r"},
 		"delivery": "projectile",
 		"name": "Ice Spear",
+		"card_range": "lance.range",
 		"short": "Spear",
 		"icon": "rimewright_rmb",
 		"col": "#8fe8d8",
@@ -103,6 +104,8 @@
 	"e": {
 		"delivery": "wall",
 		"name": "Rink Wall",
+		"card_range": "travel",
+		"again": "freeze the wall in place",
 		"short": "Rink",
 		"icon": "rimewright_e",
 		"col": "#9af0e6",
@@ -150,6 +153,8 @@
 	},
 	"x": {
 		"name": "Rimelock",
+		"card_range": "radius",
+		"again": "break out early",
 		"short": "Rime",
 		"icon": "rimewright_x",
 		"col": "#7fd8ff",

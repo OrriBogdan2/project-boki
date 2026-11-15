@@ -3,7 +3,7 @@ extends PanelContainer
 ## One archetype's whole kit on one page (docs/ARCHETYPES.md), simple and visual: a header (portrait,
 ## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
 ## Fusion), each with its key cap, a big icon, its name, key numbers as chips (damage, cooldown, charges)
-## and ONE line of at most MAX_WORDS words (content/archetypes `card`). Hovering a row shows the rules; its
+## and ONE line of at most MAX_WORDS words (content/archetypes `card`). Hovering a row shows its AbilityCard; its
 ## "Details" opens that ability's page (preview, every rule) in the same frame (no scroll, no resizing:
 ## the card is always SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
 
@@ -116,7 +116,7 @@ func _row(slot: String) -> Control:
 	p.custom_minimum_size = Vector2(0, ROW_H)
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
 	p.set_meta("slot", slot)
-	p.tooltip_text = "\n".join((info["detail"] as Array).map(_para_text))
+	AbilityCard.hover(p, arch, slot)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	p.add_child(row)
@@ -149,10 +149,6 @@ func _row(slot: String) -> Control:
 	db.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(db)
 	return p
-
-## One detail paragraph as a line ("Tap:  ..."), for the row's hover text.
-static func _para_text(para: Array) -> String:
-	return String(para[1]) if para[0] == "" else "%s: %s" % [para[0], para[1]]
 
 ## An ability's page: everything about it, in the same frame as the grid.
 func _show_detail(slot: String) -> void:
@@ -359,7 +355,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
-		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
+		AbilityCard.hover(b, a, s)
 		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
 		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
 		b.add_theme_stylebox_override("normal", rest_box)
@@ -551,15 +547,6 @@ class KitPreview extends Control:
 				draw_circle(pt, R * (0.6 + 0.5 * k11), col)
 				draw_arc(pt, R * (1.1 + 0.6 * k11), 0, TAU, 14, Color(col, 0.5), 2.0, true)
 				hit = k11 >= 1.0 and t < 0.95
-			"hex":
-				var k12 := clampf(t / 0.5, 0.0, 1.0)
-				if k12 < 1.0:
-					draw_circle(me.lerp(foe, k12), R * 0.7, col)
-				else:
-					# the foe turned into a small critter, a ring of runes over it
-					draw_circle(foe + Vector2(0, R * 0.5), R * 0.6, Color("f7c6ff"))
-					draw_arc(foe, R * 2.0, t * 6.0, t * 6.0 + TAU * 0.8, 16, Color(col, 0.8), 2.0, true)
-					foe = Vector2(-99, -99)
 			"mirror":
 				for sgn in [-1.0, 1.0]:
 					var mp := me + Vector2(R * 1.5, sgn * h * 0.25)

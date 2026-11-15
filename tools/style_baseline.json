@@ -18,10 +18,6 @@
 "long_line": 1,
 "semicolon": 13
 },
-"scripts/arch/hex.gd": {
-"long_line": 1,
-"semicolon": 1
-},
 "scripts/arch/kit_status.gd": {
 "long_line": 2,
 "nested_ternary": 1,
@@ -361,7 +357,7 @@
 "scripts/match/arena.gd": {
 "long_line": 22,
 "nested_ternary": 2,
-"semicolon": 36
+"semicolon": 32
 },
 "scripts/match/arena_demo.gd": {
 "long_line": 2

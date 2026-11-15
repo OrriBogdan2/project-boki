@@ -16,6 +16,14 @@ static func of(h: Hunter, kind: String, fallback: String) -> String:
 		_has[own] = Sfx.ensure(own)
 	return own if _has[own] else fallback
 
+## The tick of `h`'s left-click weapon landing (its "hit" in content/weapons/<id>.json: hit_gun, hit_bow,
+## hit_blade, hit_blunt, hit_magic or hit_thrown), else the shared `hit`. An ability's hit keeps the shared one.
+static func hit_tick(h: Hunter, o: Dictionary) -> String:
+	if h == null:
+		return "hit"
+	var lmb: bool = o.get("src", "") == "shot" or o.get("ab", "") in ["primary", "lmb"]
+	return String(h.wpn.get("hit", "hit")) if lmb else "hit"
+
 ## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
 ## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.
 static func dash_name(h: Hunter) -> String:

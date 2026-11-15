@@ -50,6 +50,11 @@ func retreat_frac() -> float:
 func idle_radius() -> float:
 	return 1.4 + (1.0 - loyalty) * 2.6
 
+## A bot's Boki in a boss fight leaves alone the rivals its bot is sparing (Lairs.spares).
+func spares(f: Ent) -> bool:
+	var own := k.owner_h
+	return f is Hunter and own != null and own.ctrl == "bot" and k.m.lairs != null and k.m.lairs.spares(own, f)
+
 ## The foe it goes for: the best score among the foes within chase range that it can walk to. An idle
 ## Boki asks every sim step, so the pass is one distance test per foe; the other filters, your focus and the
 ## walk test (a line of ground samples) run only for the few in range, the walk test only for the winner.
@@ -60,7 +65,7 @@ func pick_target() -> Ent:
 	for f in k.m.foes_of(k.team, false):
 		if k.flat_dist(f) > reach:
 			continue
-		if f is Hunter and (f.downed or f.cloak_t > 0.0):
+		if f is Hunter and (f.downed or f.cloak_t > 0.0 or spares(f)):
 			continue
 		if not f.hittable() or Shrubling.hidden(f):
 			continue      # (a disguised Shrubling is not given away by its Boki)

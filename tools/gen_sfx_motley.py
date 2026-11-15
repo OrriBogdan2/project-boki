@@ -19,11 +19,14 @@ low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle
   os_empower                   Swollen: the Void inflating round him, a giggle
   os_well / os_well_hum        Nightwell: the gathering implosion / the well opening
   ostra_dash                   a floating lurch, a small spring and the cap bells
-  ostra_step_<surface>         he floats: soft hover pulses, the surface faintly under him, a bell now and then
+  ostra_hover (loop)           no footsteps, he floats: a soft low Void hum with a whisper on it while he moves
+                               (HoverHum levels and pitches it with his speed)
   ostra_hurt/down/death        wordless voice
 
 The os_* files were first written by tools/gen_pair_sfx.py; this script replaces them (content/sfx/
 ostra.json lists them under "replaces"). Original synthesis and an original tune, no samples.
+`python3 gen_sfx_motley.py hover` writes only ostra_hover (the other files were made with an older numpy, so a
+full run re-rolls their noise).
 """
 import os, sys
 import numpy as np
@@ -312,7 +315,7 @@ def well_hum():
     return lpf(mix(soft(snap_, 1.0), hum, pull), 7000)
 
 
-# ------------------------------------------------------------------ dash, steps
+# ------------------------------------------------------------------ dash, hover
 def dash():
     """A floating lurch: a soft whoosh, a small spring and a flick of the cap bells."""
     d = 0.5
@@ -322,25 +325,17 @@ def dash():
     return pad(mix(fo(air), boing, jingle), d)
 
 
-def footstep(surface, i):
-    """He floats: a soft hover pulse (a breath of the Void pushing down), the surface faintly answering
-    beneath, and on some takes one cap bell."""
-    d = 0.3
-    puff = lpf(noise(0.18), 500) * np.sin(np.pi * np.linspace(0, 1, N(0.18))) ** 2 * 0.9
-    thrum = S.sweep(95 + 4 * i, 80, 0.2) * np.sin(np.pi * np.linspace(0, 1, N(0.2))) ** 2 * 0.35
-    if surface == 'grass':
-        under = bpf(noise(0.2), 1200, 4000) * np.sin(np.pi * np.linspace(0, 1, N(0.2))) ** 3 * 0.2
-    elif surface == 'stone':
-        under = at(fo(ring((1150 + 30 * i, 1720), 0.12, (0.02, 0.012), (0.12, 0.05)), 0.4), 0.06)
-    elif surface == 'wood':
-        under = at(fo(ring((190 + 6 * i, 330), 0.18, (0.05, 0.03), (0.35, 0.15)), 0.4), 0.05)
-    else:
-        under = lpf(grains(0.2, 260, 600, 2600, 0.001, 0.003, fall=0.08), 3200) * 0.3
-    out = mix(puff, thrum, under)
-    if i in (1, 3):
-        f = (2050, 2350)[i // 2]
-        out = mix(out, at(fo(ring((f, f * 1.51), 0.18, (0.05, 0.03), (0.07, 0.03)), 0.4), 0.07))
-    return fo(pad(lpf(out, 6500), d), 0.25)
+def hover():
+    """He floats, no feet (source: no footsteps, a soft low hum or whisper while he moves): the Void's two
+    beating low sines, a breath of dark noise slowly swelling and ebbing, a faint airy whisper over it. Every
+    tone is a whole number of cycles in the loop, so it repeats without a seam."""
+    d = 2.4; t = T(d)
+    swell = 0.8 + 0.2 * np.sin(2 * np.pi * t / d)
+    drone = (np.sin(2 * np.pi * 55 * t) + 0.8 * np.sin(2 * np.pi * (55 + 1 / d * 3) * t + 1.0)
+             + 0.25 * np.sin(2 * np.pi * 110 * t + 0.4)) * 0.4
+    breath = lpf(noise(d), 420) * (0.75 + 0.25 * np.sin(2 * np.pi * 2 * t / d + 2.0)) * 0.9
+    whisper = bpf(noise(d), 1800, 4200) * (0.5 + 0.5 * np.sin(2 * np.pi * 3 * t / d)) ** 2 * 0.07
+    return lpf(mix(drone, breath, whisper) * swell, 5000)
 
 
 # ------------------------------------------------------------------ voice: a hollow, eerie, playful man
@@ -388,13 +383,17 @@ def build():
     S.save_cat('os_well', well(), 'cast')
     S.save_cat('os_well_hum', well_hum(), 'impact')
     S.save_cat('ostra_dash', dash(), 'dash')
-    for surf in ('grass', 'stone', 'wood', 'snow'):
-        S.takes_cat('ostra_step_' + surf, lambda i, s=surf: footstep(s, i), 3, 'step')
     S.takes_cat('ostra_hurt', hurt, 3, 'grunt')
     S.save_cat('ostra_down', down(), 'grunt')
     S.save_cat('ostra_death', death(), 'grunt')
+    build_hover()
+
+
+def build_hover():
+    S.reseed(6624)
+    S.save_loop('ostra_hover', hover(), 'loop')
 
 
 if __name__ == '__main__':
-    build()
+    build_hover() if sys.argv[1:] == ['hover'] else build()
     print('gen_sfx_motley: done')

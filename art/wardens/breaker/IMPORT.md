@@ -1,21 +1,5 @@
 # Mossy, the Breaker (Albert, bulwark): v95 master with the appeal3 face (owner pick 11-10)
 
-**11-14 i1 (live master):** the master is now `~/meshy/v95/Albert/r3/meshy1112/candidates/i1/glb.glb` (current.json since 11-12
-20:35Z: angry porthole eyes, no drum or shield over the front; the scan has no hammer, shield or lure ball, so the whole glb is the
-master). It starts from main's breaker.glb (the clean1 swap plus the x1.205 hammer): every moved point in the spec (`to`, the
-anchors, the screen) is absolute, so nothing applies twice and the hammer, shield (`keep`) and clips come through untouched.
-- **Cyan fix:** i1 has no emission map (its cracks are painted cyan), so `emit` baked the base colour as glow (PR #44's solid cyan).
-  `emit_paint` makes the emissive texture from the baked atlas's cyan texels instead (h 0.44-0.56, s >= 0.35, v >= 0.55).
-- **Face:** `screen_uvs` was lost from v95_swap.py in a merge before the clean1 swap, so since 11-11 the mood shader drew on atlas
-  UVs: a blank teal porthole in game. Restored; shaders/warden_mood.gdshader now draws i1's face (pale-cyan eyes under a lid
-  slanting to the middle, no mouth, near-black glass), the ring's copper past the glass edge so the porthole reads round.
-- Model top 1.774x a medium hunter (i1's masts stand higher): `height_3d` 1.77 in warden_model_check. Shots and the compare
-  sheet: `~/meshy/albert-ingame-i1-1114/`.
-
-    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/breaker_v95.json WORK OUT.glb
-    (WORK/game.glb: main's breaker.glb from before this swap; the hammer is already at 1.012 m, no glb_prop_scale step)
-
-
 **11-11 clean1:** the master is now `~/meshy/v95/Albert/r2/clean1/cand_A.glb` (masts pulled in to x 0.72, cleaned; job 20261111-172943-a4), as
 `albert_clean1_body.glb` beside it (its mesh `body.001` only; the copies of the hammer, shield and lure ball dropped). Same spec and
 steps; the game .glb the swap starts from is the pre-swap 11-08 one (`git show 8a738e4dd:art/wardens/breaker/breaker.glb` as WORK/game.glb).
@@ -52,3 +36,15 @@ hatch shield kept on `x_shield` (`keep`).
   core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
+
+- **Idle pilot (2026-11-11, ext/anim-pilot-four):** `idle` is now a Meshy animation-library idle (action 89, generated through Meshy's API on the Tarek rig, task 01a1c429-a8e4-75b0-943c-8f3e89f43a9a; licence: Meshy generated asset, our account) retargeted onto Albert's x_foot rig with his own arms carried from the old idle (pose and attitude stay his), 1.71 s played twice (3.42 s), seam 0.08 deg (was 4.2). Meshy can't auto-rig Albert, so the source is cross-rig. Blind judge (6-point pilot1 rubric): 4.8 vs the old idle 4.2. Walk/run unchanged (ext/anim-pilot-albert-neve). Recipe: `python3 tools/art1/glb_pick_clip.py <candidate.glb> <clip> <name> <tile> /tmp/x.glb`, then `python3 tools/art1/glb_add_clips.py <this glb> /tmp/x.glb <name>`. Candidate GLBs and renders: ~/anim/four (glb/, renders/blind/).
+
+- **Walk/run (ext/anim-pilot-albert-neve, stacked):** the generated stride of tools/art1/breaker_gait.py (soles locked to the floor at 2.0 and 4.8 m/s in Blender). Not carried (2026-11-13): walk_f/run_f; `--anim-audit` on the game rig reads run slide 51% and the arms swing with their leg (-0.32) (main's own clip 11%, arms 0.68, limit 25%), so main's clip stays. The candidate is `walk_f`/`run_f` in ext/anim-pilot-four 37d910944's breaker.glb, to copy with `glb_add_clips.py --hold-moved-rest` once the in-game foot slide is fixed.
+- Carried onto the v95 appeal3 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ext/anim-pilot-four 37d910944 glb> idle --hold-moved-rest` (2026-11-13, merge of origin/main 18402df5b): the core bones' rest is identical between the two builds and main's old idle matched the judged ones, so the clips are the judged ones; the spring bones the new model moved (spring_hangfish_0) hold this model's rest in them, as every other clip does.
+- **Directional loops (ext/anim-dirloops-albert-neve):** `walk_*` and `run_*` (f, b, l, r, fl, fr, bl, br) are the clips of that branch, copied onto this
+  build with `glb_add_clips.py ... --skip=spring_hangfish,x_fish` (the rig is the 11-08 one; main's build moved the fish chain to the left mast, so the
+  old chain's keys are left out and the spring solver poses it). They were baked on the scan-and-sculpt model: walk_f/run_f with
+  tools/art1/breaker_gait.py (a generated giant stride, soles locked at 2.0 and 4.8 m/s, 2.7 and 3.2 steps/s, hammer carried clear of the floor), the
+  rest with `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb OUT.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55`
+  in step with walk_f/run_f (the walks take two steps a side in walk_f's time, his legs can't reach one; docs/art/wardens/dirloops/JUDGE.md).
+  Re-run both on the v95 model in Blender when one is free; the legs and hips are the same rig, so the loops carry over as they are.

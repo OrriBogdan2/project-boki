@@ -49,6 +49,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Burr Charge",
+		"card_range": "burr.range",
 		"short": "Burr",
 		"icon": "gunslinger_rmb",
 		"col": "#c8f560",
@@ -82,6 +83,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Longneedle",
+		"card_range": "range",
 		"short": "Needle",
 		"icon": "gunslinger_e",
 		"col": "#eaffa8",
@@ -109,6 +111,7 @@
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Cinderfall",
+		"card_range": "range",
 		"short": "Fall",
 		"icon": "gunslinger_x",
 		"col": "#b8f03c",
