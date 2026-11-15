@@ -16,6 +16,14 @@ static func of(h: Hunter, kind: String, fallback: String) -> String:
 		_has[own] = Sfx.ensure(own)
 	return own if _has[own] else fallback
 
+## The tick of `h`'s left-click weapon landing (its "hit" in content/weapons/<id>.json: hit_gun, hit_bow,
+## hit_blade, hit_blunt, hit_magic or hit_thrown), else the shared `hit`. An ability's hit keeps the shared one.
+static func hit_tick(h: Hunter, o: Dictionary) -> String:
+	if h == null:
+		return "hit"
+	var lmb: bool = o.get("src", "") == "shot" or o.get("ab", "") in ["primary", "lmb"]
+	return String(h.wpn.get("hit", "hit")) if lmb else "hit"
+
 ## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
 ## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.
 static func dash_name(h: Hunter) -> String:
@@ -30,9 +38,9 @@ static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 		m.sfx(sname, h.pos, vol_db)
 
 ## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
-## (`<arch>_hit`, tools/gen_sfx_hits.py), else the shared blade bite for a melee weapon or the shared tick.
-static func hit_sound(by: Ent) -> String:
+## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
+static func hit_sound(by: Ent, o := {}) -> String:
 	if not by is Hunter:
 		return "hit"
 	var h := by as Hunter
-	return of(h, "hit", "slash_hit" if bool(h.wpn.get("melee", false)) else "hit")
+	return of(h, "hit", hit_tick(h, o))

@@ -232,24 +232,17 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _rooted(id, m, sync, clips, dd)
 	await _handover(id, m, sync, clips, dd)
-<<<<<<< HEAD
 	await _flinch(id)     # (before the carry: the flinch pairs of Ostra drift with the frames already run)
 	await _carry(id, m, sync, clips, dd)
 	await _climb(id, m, sync, clips, dd)   # (after the carry: its frames would shift the walk phase the carry reads)
 	if id == "archer":
 		_release_snap(id, sync, clips, m)
 	_recoil(id, m, sync, clips, dd)
-=======
 	_feel(id, m, sync, clips, bool(dd.get("rig_root", false)))
->>>>>>> 045d1bc7fc (Landing squash and run-start/stop lean for every Hunter's clips and for Boki (visual only))
 	m.free()
 	_turn(id)
 	await _cc(id, dd)
 
-<<<<<<< HEAD
-## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
-## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
-=======
 ## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
 ## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
 ## ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only the lean is his.
@@ -277,7 +270,8 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 	m.remove_meta(WardenClips.FEEL)
 	clips.force = {}
 
->>>>>>> 045d1bc7fc (Landing squash and run-start/stop lean for every Hunter's clips and for Boki (visual only))
+## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
+## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
