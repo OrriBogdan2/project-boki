@@ -76,7 +76,7 @@ func _eggs() -> void:
 		var boss: String = bosses[i % bosses.size()]
 		Incubator.add(String(Data.MOBS[boss]["egg"]), boss)
 	for e in Incubator.eggs():
-		e["heat"] = Incubator.HEAT_NEED * (1.0 - 0.2 * float(int(e["slot"]) % 5))
+		e["heat"] = Incubator.need() * (1.0 - 0.2 * float(int(e["slot"]) % 5))
 
 ## [panel name, where it opens: "home" (the farm's panel) or "overlay"]. _open() builds each by its name.
 func _panels() -> Array:

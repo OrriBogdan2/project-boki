@@ -346,18 +346,23 @@
 			"acts": [
 				"(huffs and squares up)",
 				"(glares across the bowl)",
-				"(puffs out its chest)",
+				"(puffs up, squares off)",
 				"(stamps a paw)"
 			],
 			"lines": {
 				"_": [
-					"Hmph. I was here first.",
+					"I was here first!",
 					"Don't you dare.",
 					"Back off, that's mine.",
 					"Hmph!",
 					"Watch it.",
 					"You again?",
-					"Go on, try me."
+					"Go on, try me.",
+					"Hands off, I mean it.",
+					"Not today, friend.",
+					"Step aside, please.",
+					"This spot is mine.",
+					"Find your own bowl."
 				]
 			}
 		},
