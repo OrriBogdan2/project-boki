@@ -932,6 +932,7 @@ class Sync extends Node:
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
 	var blade_bone := -1
@@ -989,6 +990,7 @@ class Sync extends Node:
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
+		opener = WardenOpen.make(clips) if clips else null
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		flinch = WardenFlinch.make(root, skel) if clips else null
 		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))

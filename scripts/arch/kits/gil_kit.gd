@@ -16,6 +16,7 @@ var beach_at := {}                  # foe instance id -> time it can be Beached 
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
+var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
 var swim_t := 0.0                   # Ground Swim under way
 var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
 var spin_tick := 0.0
@@ -329,12 +330,26 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 	if n >= int(pd.get("need", 3)) and m.time >= float(beach_at.get(key, -99.0)):
 		marks.erase(key)
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
+		CombatBus.tech.emit(h, "gil")
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
+
+## The drill rig (SignatureDrill): one splash mark on `f`, of an effect that is not in the next two potions.
+func add_mark(f: Ent) -> void:
+	var next := next_vial()                   # refills an empty bag first
+	var after := String(bag[-2]) if bag.size() > 1 else ""
+	var soon := [vial_def(next).get("mark", ""), vial_def(after).get("mark", "")]
+	for v in rmb_def().get("vials", {}):
+		var mk := String(vial_def(String(v)).get("mark", v))
+		if mk not in soon:
+			var have: Dictionary = marks.get(f.get_instance_id(), {})
+			have[mk] = m.time
+			marks[f.get_instance_id()] = have
+			return
 
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:
@@ -388,6 +403,12 @@ func cast_e() -> bool:
 
 func e_recastable() -> bool:
 	return spin_t >= 0.0
+
+## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+func recast_window() -> Dictionary:
+	if spin_t < 0.0:
+		return {}
+	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
 
 func e_recast() -> bool:
 	if spin_t < 0.0:

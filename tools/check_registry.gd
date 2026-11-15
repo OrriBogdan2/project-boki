@@ -715,6 +715,16 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],      # the evolve moment at home
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],      # --shots-dir=<dir>
+	"--fusion-band-check": ["res://tools/fusion_band_check.gd", "fusion_band_check", null],      # Fusions stay inside the Hunter ultimates' band
+	"--impact-weight-check": ["res://tools/impact_weight_check.gd", "impact_weight_check", null],      # hit weights
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
+	"--nook-moment-check": ["res://tools/nook_moment_check.gd", "nook_moment_check", "check"],
+	"--nook-moment-shots": ["res://tools/nook_moment_check.gd", "nook_moment_check", "shots"],
+	"--tut-first-capture-check": ["res://tools/tut_first_capture_check.gd", "tut_first_capture_check", null],      # the first-time capture hint
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

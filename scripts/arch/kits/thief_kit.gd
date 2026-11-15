@@ -359,8 +359,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:
@@ -576,6 +574,7 @@ func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
 	if marks_on(t) > 0:
 		ComboMark.payoff(m, h, t)
+	CombatBus.tech.emit(h, "thief")
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0

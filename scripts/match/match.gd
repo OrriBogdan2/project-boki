@@ -1762,9 +1762,9 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
-	# impact: hitstop and shake by tier (docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5), from what the hit did
+	# impact: hitstop and shake by the hit's weight (ImpactWeight, docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5)
 	if src != "burn":
-		var tier := Feel.hitstop(self, by, target, d, o)
+		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
@@ -1837,7 +1837,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	_check_team(h.team)
 
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, t)
+	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -4204,6 +4204,8 @@ func _update_interact(dt: float) -> void:
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
 					var open_now: bool = h == player and hud != null and hud.loot_is(b)
+					if open_now:
+						h.set_hold("loot")     # (your open loot window is the channel: WardenOpen's pose)
 					var lt := ("Press %s again to smart loot  ·  click items to take them" % Settings.key_cap("interact")) if open_now else ("Press %s to open %s  ·  twice to smart loot" % [Settings.key_cap("interact"), whose])
 					best = {"kind": "loot", "box": b, "label": lt if h == player else "Hold %s to loot %s" % [Settings.key_cap("interact"), whose], "col": Life.box_color(b)}
 					break
@@ -5669,8 +5671,7 @@ func _tips() -> void:
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
-	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+	FirstCapture.tick(self)
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
