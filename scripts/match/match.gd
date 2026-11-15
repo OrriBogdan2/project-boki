@@ -5028,6 +5028,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
 			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
+			player.clan_tag = ClanInfo.clean_tag(r.get("tag"))
 			Equal.start(self, player)
 			if player.kin:
 				_apply_treat(player.kin)
@@ -5035,6 +5036,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		else:
 			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
 			h.remote = true
+			h.clan_tag = ClanInfo.clean_tag(r.get("tag"))
 			if h.kin:
 				h.kin.remote = true
 	if not is_host:

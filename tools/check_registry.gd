@@ -276,7 +276,7 @@ const CHECKS := {
 	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
-	# clans slices 1-2: roster, join, leave, old saves, base
+	# clans slices 1-3: roster, join, leave, old saves, base, tags, deeds
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
