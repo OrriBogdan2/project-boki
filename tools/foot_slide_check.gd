@@ -10,12 +10,19 @@ const AUDIT := preload("res://tools/anim_audit.gd")
 const STEP := 0.5            # m/s between swept speeds
 const WARM_S := 2.4          # s at a speed before sampling: three of WardenGait.MEAN_TAU, so the stride has settled
 const SAMPLE_S := 6.0        # s sampled a speed: walk and run loops of unequal length drift through ~3 phase beats
+const WOBBLE := 0.2          # rad: the aim's sway (0.7 Hz) while a run-and-aim Hunter runs 90 deg off it
+const WOBBLE_HZ := 0.7
 const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0, 0), "r": Vector3(1, 0, 0)}
 ## m/s: the worst mean planted-foot slip each Hunter may show anywhere in the sweep, the measured worst of the
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
 ## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
 const BAR := {"archer": 1.75, "juggernaut": 1.0, "gunslinger": 1.0, "bulwark": 1.35, "ashwick": 1.4, "tender": 1.05,
 		"dolm": 2.7, "dredge": 0.95, "mage": 1.55, "thief": 1.5}
+## m/s: a run-and-aim ("loco.aim_twist") Hunter running at its run speed 90 deg off an aim that sways WOBBLE: each sway
+## across the turn-round margin swung the legs from the forward run to the back run and the feet dragged (Vex 3.30
+## m/s with the 0.1 rad default margin, 0.97 with her "twist_hyst" 0.35; owner bug 11-15). A Hunter without a bar
+## only prints its WOBBLE line (Lace `archer` and Cinder `ashwick` keep the default margin: open, FOOT_SLIDE.md).
+const WOBBLE_BAR := {"gunslinger": 1.0}
 
 var bad := 0
 var holder: Node3D
@@ -69,6 +76,13 @@ func _hero(main: Node, id: String) -> bool:
 		print("FAIL %s: a planted foot slips %.2f m/s (%s at %.2f m/s), bar %.2f" % [id, worst[0], worst[1],
 				worst[2], BAR[id]])
 		bad += 1
+	if clips.twist_on:
+		var wob := _slip(m, sync, clips, sk, Vector3(-run_speed, 0, 0), WOBBLE)
+		print("WOBBLE %-10s %.2f m/s (run %.2f m/s 90 deg off the aim, sway %.2f rad)" % [id, wob, run_speed, WOBBLE])
+		if WOBBLE_BAR.has(id) and wob > float(WOBBLE_BAR[id]):
+			print("FAIL %s: running 90 deg off a swaying aim a planted foot slips %.2f m/s, bar %.2f" % [id, wob,
+					WOBBLE_BAR[id]])
+			bad += 1
 	m.free()
 	return true
 
@@ -82,14 +96,20 @@ func _speeds(run_speed: float) -> Array:
 	out.append(run_speed)
 	return out
 
-## Mean flat speed of a planted foot against the ground (m/s) while the model moves at `vel`, facing -Z.
-func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vector3) -> float:
+## Mean flat speed of a planted foot against the ground (m/s) while the model moves at `vel`, facing -Z; with `sway`
+## (rad) the facing swings that far either way at WOBBLE_HZ (the model stays put: the feet are read in its own frame,
+## so each frame's velocity is turned into it).
+func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vector3, sway := 0.0) -> float:
 	m.set_meta(WardenClips.STATE, {"vel": vel, "face": 0.0, "grounded": true})
 	clips.loco_pos = Vector2.ZERO
 	for k in int(WARM_S / AUDIT.DT):
 		sync.call("_process", AUDIT.DT)
 	var fr: Array = []
+	var faces: Array = []
 	for k in int(SAMPLE_S / AUDIT.DT):
+		var face := sway * sin(TAU * WOBBLE_HZ * k * AUDIT.DT)
+		m.set_meta(WardenClips.STATE, {"vel": vel, "face": face, "grounded": true})
+		faces.append(face)
 		sync.call("_process", AUDIT.DT)
 		fr.append(AUDIT.points(sk))
 	m.set_meta(WardenClips.STATE, {})
@@ -105,6 +125,7 @@ func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vecto
 			if (fr[i][f] as Vector3).y > lo + AUDIT.PLANT_BAND * maxf(hi - lo, 0.02):
 				continue
 			var foot_v: Vector3 = ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * AUDIT.DT)
-			total += Vector2(vel.x + foot_v.x, vel.z + foot_v.z).length()
+			var v: Vector3 = vel.rotated(Vector3.UP, -float(faces[i]))
+			total += Vector2(v.x + foot_v.x, v.z + foot_v.z).length()
 			n += 1
 	return total / maxi(n, 1)
