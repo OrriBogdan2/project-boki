@@ -124,9 +124,7 @@ func _match() -> Array:
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
 	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+	main.get_tree().node_added.connect(count_node)
 	Match.prof_on = true
 	Match.prof.clear()
 	Match.vprof.clear()
@@ -398,6 +396,14 @@ func _sections(home) -> void:
 	ks.sort_custom(func(a, b): return us[a] > us[b])
 	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
 	print("BENCH base steps (ms per frame): " + ", ".join(top))
+
+func count_node(n: Node) -> void:
+	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+	added[k] = int(added.get(k, 0)) + 1
+
+## One frame's row in the CSV (the brawl's frames too).
+func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
+	_frame(part, i, wall, script_ms)
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
