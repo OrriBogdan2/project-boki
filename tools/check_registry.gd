@@ -32,6 +32,20 @@ const CHECKS := {
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],  # EdgeMarker
+	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
+	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
+	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
+	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
+	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
+	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
+	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
+	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
+	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
+	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
+	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
+	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
+	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
+	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
 	"--heart-raid-solo-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 0],      # a whole solo raid
 	"--heart-raid-squad-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 1],      # 4, Normal
@@ -322,6 +336,7 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
+	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
@@ -675,6 +690,11 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
+	# 2 games, relay: a raid client's boss top bar
+	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
+	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
+	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
+	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
@@ -684,6 +704,9 @@ const CHECKS := {
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],  # 2 games, relay
 	"--sfx-remote-check": ["res://tools/sfx_remote_check.gd", "sfx_remote_check", null],  # 2 games, relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
+	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],      # 0061 dropped players
+	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
+	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--tele-net-shots": ["res://tools/tele_net_shots.gd", "tele_net_shots", null],     # 2 games, GPU, --shots-dir=
 	"--glide-net-check": ["res://tools/glide_net_check.gd", "glide_net_check", null],     # 2 games, relay
 	# + a server, delay
@@ -757,6 +780,7 @@ const CHECKS := {
 	"--npc-shots": ["res://tools/npc_shots.gd", "npc_shots", null],  # --shots-dir=<dir> (a renderer, GPU)
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
+	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # palettes
 	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=

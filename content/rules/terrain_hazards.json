@@ -1,0 +1,119 @@
+{
+	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). look: the surface shader (shaders/terrain_hazard.gdshader).",
+	"hint": {
+		"near_m": 8.0,
+		"every_s": 0.5,
+		"again_s": 30.0
+	},
+	"kinds": {
+		"lava": {
+			"name": "Lava Field",
+			"noun": "the lava",
+			"hurts": "burning",
+			"effect": {
+				"burn_dps": 9.0,
+				"burn_linger_s": 1.2
+			},
+			"counter": {
+				"themes": ["ember"],
+				"kin": []
+			},
+			"look": {
+				"mode": 0,
+				"deep": "ff5a14",
+				"shallow": "3a1610",
+				"edge": "ffb04a",
+				"glow": 2.2,
+				"alpha": 1.0
+			}
+		},
+		"deep_water": {
+			"name": "Deep Water",
+			"noun": "deep water",
+			"hurts": "slow, weak hits, short of breath",
+			"effect": {
+				"speed": 0.55,
+				"dmg_out": 0.6,
+				"breath_s": 6.0,
+				"drown_dps": 8.0,
+				"swim_haste": true
+			},
+			"counter": {
+				"themes": [],
+				"kin": ["lilybara", "floenatee", "spatewader", "puddlet", "selenfin", "zephyrak"]
+			},
+			"look": {
+				"mode": 1,
+				"deep": "123a7a",
+				"shallow": "3a8ac0",
+				"edge": "d8f4ff",
+				"glow": 0.15,
+				"alpha": 0.82
+			}
+		},
+		"ice": {
+			"name": "Ice Sheet",
+			"noun": "the ice",
+			"hurts": "no footing",
+			"effect": {
+				"grip": 0.12
+			},
+			"counter": {
+				"themes": ["frost"],
+				"kin": []
+			},
+			"look": {
+				"mode": 2,
+				"deep": "9fd8f0",
+				"shallow": "e6f8ff",
+				"edge": "ffffff",
+				"glow": 0.25,
+				"alpha": 0.9
+			}
+		},
+		"static": {
+			"name": "Static Flats",
+			"noun": "the static",
+			"hurts": "shocks",
+			"effect": {
+				"every_s": 3.2,
+				"warn_s": 0.9,
+				"dmg": 9.0,
+				"stun_s": 0.35
+			},
+			"counter": {
+				"themes": ["storm", "tempest"],
+				"kin": []
+			},
+			"look": {
+				"mode": 3,
+				"deep": "2a2a3a",
+				"shallow": "4a4a60",
+				"edge": "fff27a",
+				"glow": 1.6,
+				"alpha": 1.0
+			}
+		},
+		"bramble": {
+			"name": "Bramble",
+			"noun": "the thorns",
+			"hurts": "slow, scratches",
+			"effect": {
+				"speed": 0.6,
+				"dps": 3.0
+			},
+			"counter": {
+				"themes": ["bloom", "spore"],
+				"kin": []
+			},
+			"look": {
+				"mode": 4,
+				"deep": "2e3a1a",
+				"shallow": "4a3a22",
+				"edge": "8ac04a",
+				"glow": 0.0,
+				"alpha": 1.0
+			}
+		}
+	}
+}
