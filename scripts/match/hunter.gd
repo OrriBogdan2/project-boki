@@ -369,7 +369,6 @@ func _chase_mod(mv: Vector2) -> float:
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
 	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
 	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
-	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
 	return k
@@ -972,8 +971,8 @@ const DASH_BUFFER := 0.18
 func do_dash() -> void:
 	if downed or out:
 		return
-	# stunned, rooted, hexed or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
-	if stun_t > 0.0 or root_t > 0.0 or Hex.active(self) or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
+	# stunned, rooted or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
+	if stun_t > 0.0 or root_t > 0.0 or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
@@ -1132,7 +1131,7 @@ func _shove_along(dt: float) -> void:
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 
 func can_fire() -> bool:
-	if Hex.active(self) or Capture.active(self):
+	if Capture.active(self):
 		return false
 	if ak and not ak.can_shoot():
 		return false
@@ -1790,7 +1789,6 @@ func sim(dt: float) -> void:
 	if dt <= 0.0:
 		prev = pos                  # a far, calm bot's off step (SimLod)
 		return
-	Hex.tick(self, dt)
 	prev = pos
 	abyss_sfx.tick(self, dt)
 	if out or extracted:
@@ -1848,6 +1846,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
+	HoverHum.tick(self)
 	abyss_snd.tick(self)
 	if remote:
 		net_follow(dt)
@@ -1903,7 +1902,7 @@ func sim(dt: float) -> void:
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
 		if inp.get("gear%d" % (gi + 1), false):
-			if Hex.active(self) or (ak and ak.cast_locked()):
+			if (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
 				_ab_feedback("gear%d" % gi, "deny")
@@ -1915,7 +1914,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false) and not Hex.active(self) and not ak.cast_locked(): use_boki_c()
+		if inp.get("kin_ab", false) and not ak.cast_locked(): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -2022,7 +2021,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (HunterMove.sneak_speed if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -2255,7 +2254,8 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12
@@ -2479,7 +2479,7 @@ func _update_glide(dt: float) -> void:
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
 	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 \
-			or stun_t > 0.0 or root_t > 0.0 or Hex.active(self):
+			or stun_t > 0.0 or root_t > 0.0:
 		push_t = 0.0
 		return
 	var w: World = m.world
@@ -2494,7 +2494,8 @@ func _try_ledge_grab(dt: float) -> void:
 			return
 		var probe := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.35)
 		var g2 := w.ground_at(probe.x, probe.y)
-		if w.is_block(probe.x, probe.y) or g2 <= pos.y + World.STEP or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
+		var walkable := g2 <= pos.y + World.STEP + w.stair_slope(pos.x, pos.z, probe.x, probe.y)     # (stairs: walked)
+		if w.is_block(probe.x, probe.y) or walkable or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
 			push_t = 0.0
 			return
 		push_t += dt
@@ -2601,8 +2602,8 @@ func _try_ledge_grab(dt: float) -> void:
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
 ## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
-## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
-## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+## Over the top you pop up a little toward your keys. Moving off the face, a fresh glide press, a stun or a
+## knock end it. A press in the rise goes by its mantle row (DashFlow); a jump flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
 const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
@@ -3220,7 +3221,7 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
+	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
 	BodyTell.tick(self, delta)
@@ -3228,7 +3229,6 @@ func render(delta: float, alpha: float) -> void:
 	ring.visible = not downed
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
-	Hex.tick(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:

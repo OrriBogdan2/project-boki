@@ -2715,7 +2715,7 @@ func _update_shots(dt: float) -> void:
 			# terrain and rocks
 			var gp := world.ground_at(p.x, p.z)
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			# an Abyssal Hand pierces terrain: it flies over rocks and props and through cliff faces
+			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
 			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not pierces
 			if rock_hit or (gp > p.y and not over_ok and not pierces):
@@ -5336,10 +5336,6 @@ func _net_ev(x, from: String) -> void:
 		"kst":
 			# a kit status (Grounded, Blight, Shred) landed on a body: its own game runs the rule
 			KitStatus.from_net(self, x)
-		"hex":
-			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
-			who = ents_by_id.get(String(x[1]), null)
-			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}
