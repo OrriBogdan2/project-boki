@@ -723,7 +723,7 @@ const CHECKS := {
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
 	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
-	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],      # no natural death, the cures
+	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],      # sick and recover
 	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 }
 
