@@ -46,20 +46,23 @@ class Meshy:
     _loaded = {}
 
     @classmethod
-    def get(cls, src, height, sink=0.0):
+    def get(cls, src, height, sink=0.0, mid=0.0):
         """The model in directory `src`, scaled to `height` game metres, then lowered by `sink` (feet that stand
-        above a hanging tail); loaded once."""
+        above a hanging tail), its midline `mid` right of the middle of its bounds (a tail curled to one side pulls
+        the bounds off the head); loaded once."""
         if src not in cls._loaded:
-            cls._loaded[src] = cls(src, height, sink)
+            cls._loaded[src] = cls(src, height, sink, mid)
         return cls._loaded[src]
 
-    def __init__(self, src, height, sink=0.0):
+    def __init__(self, src, height, sink=0.0, mid=0.0):
         import bpy
         from mathutils.bvhtree import BVHTree
         glb = os.path.join(src, "glb.glb")
         if not os.path.exists(glb):
             raise SystemExit("the raw Meshy model is not at %s (see docs/art/kin/MESHY_BOKI_RECIPE.md)" % glb)
         self.src, self.tag = src, "%d_%d" % (round(height * 1000), round(sink * 1000))
+        if mid:
+            self.tag += "_%d" % round(mid * 1000)
         before = {k: set(getattr(bpy.data, k)) for k in ("objects", "meshes", "materials", "images", "textures")}
         bpy.ops.import_scene.gltf(filepath=glb)
         o = next(o for o in bpy.data.objects if o.type == "MESH" and o not in before["objects"])
@@ -72,7 +75,7 @@ class Meshy:
         g = np.stack([-w[:, 0], w[:, 2], w[:, 1]], -1)     # game axes, facing -Z
         g[:, 1] -= g[:, 1].min()
         g *= height / g[:, 1].max()
-        g[:, 0] -= (g[:, 0].max() + g[:, 0].min()) / 2
+        g[:, 0] -= (g[:, 0].max() + g[:, 0].min()) / 2 + mid
         g[:, 1] -= sink
         nt = len(me.loop_triangles)
         tv = np.zeros(nt * 3, dtype=np.int32)

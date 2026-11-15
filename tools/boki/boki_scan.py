@@ -7,6 +7,7 @@ import math
 import os
 import re
 
+import face as boki_face
 import numpy as np
 
 from boki_meshy import Meshy, MeshShape
@@ -20,8 +21,9 @@ BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
 # texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "cover": eye
 # radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
-# far the scan stands above its lowest point (a hanging tail), and "pose": the bones (game-axis euler) that lift such
-# a part into the rest pose;
+# far the scan stands above its lowest point (a hanging tail), "mid": how far right of its bounds' middle the
+# scan's midline is (game m), when a part off to one side (a curled tail) pulls the bounds off the head, and
+# "pose": the bones (game-axis euler) that lift such a part into the rest pose;
 # "limbs": (bone, from, to, radius from, radius to) in scan space, for a part the fit cannot follow (a tail that hangs
 # another way): the bone lies along it and the capsule replaces the bone's proxy primitives (".L" also makes ".R");
 # "at": {grown part: where its attach point goes on the scan}, when the fit puts it wrong (tools and grown parts move
@@ -129,6 +131,34 @@ SCANS = {
         "sat": 0.8,
         "cover": 1.6,
     },
+    "cindle": {
+        "height": 0.9,
+        "mid": 0.045,
+        "tris": 16000,
+        "x": [(0.1, 0.17), (0.235, 0.245)],
+        "y": [(0.0, 0.0), (0.25, 0.25), (0.4, 0.43), (0.6, 0.68), (0.905, 0.9)],
+        "z": [(-0.35, -0.38), (-0.08, -0.13), (0.2, 0.05), (0.42, 0.25)],
+        "drop": ("clawL", "clawR"),
+        "merge": {"arm.L": "spine", "arm.R": "spine", "claw.L": "spine", "claw.R": "spine", "nip.L": "spine",
+                  "nip.R": "spine"},
+        "limbs": [
+            ("tail1", (-0.12, 0.1, 0.08), (-0.27, 0.09, 0.22), 0.05, 0.05),
+            ("tail2", (-0.27, 0.09, 0.22), (-0.3, 0.2, 0.33), 0.05, 0.055),
+            ("tail3", (-0.3, 0.2, 0.33), (-0.31, 0.36, 0.35), 0.055, 0.055),
+            ("tail4", (-0.31, 0.36, 0.35), (-0.31, 0.52, 0.32), 0.055, 0.055),
+            ("tail5", (-0.31, 0.52, 0.32), (-0.3, 0.65, 0.26), 0.055, 0.055),
+            ("tail6", (-0.3, 0.65, 0.26), (-0.3, 0.71, 0.17), 0.055, 0.05),
+            ("tail7", (-0.3, 0.71, 0.17), (-0.3, 0.68, 0.11), 0.05, 0.05),
+            ("sting", (-0.3, 0.68, 0.11), (-0.3, 0.6, 0.08), 0.06, 0.06),
+        ],
+        "eye_c": (0.11, 0.497, -0.3),
+        "eye_r": (0.05, 0.05, 0.025),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.2,
+    },
+
 }
 
 
@@ -198,10 +228,10 @@ class Scan:
         s = SCANS[species]
         self._mods, self._s = (creature, paint, anim), s
         self.fit = Fit(s["x"], s["y"], s["z"])
-        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0))
+        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
         self.REST_POSE = s.get("pose", {})
         self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
-        face = creature.FACE
+        face = {**boki_face.FACE, **creature.FACE}  # a species' FACE holds only what differs from the defaults
         mouth = self.fit.fwd(v3(face["brow_x"], face["mouth_y"], face["mouth_z"]))
         self.FACE = {**face, "brow_x": mouth[0], "mouth_y": mouth[1], "mouth_z": mouth[2], **s["face"]}  # the row wins
         self.BONES = {
