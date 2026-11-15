@@ -684,6 +684,8 @@ func _beats(cue: LowHpCue, s: float, secs: float) -> int:
 		if cue.step(s, 1.0 / 60.0):
 			n += 1
 	return n
+
+
 ## 16. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
 func _voices() -> void:
 	HomeVoice._until.clear()
