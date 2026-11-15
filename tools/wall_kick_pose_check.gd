@@ -7,7 +7,7 @@ extends "res://tools/wallmove_check.gd"
 ## prints what the clips alone leave there. With --shots-dir and a renderer it also writes the frames side-on:
 ## <dir>/<id>_<case>_<on|off>_<frame>.png (tools/wall_pose_sheet.py lays them out). Never touches the save.
 
-const CONTACT_M := 0.1         # m: the sole on the wall face, either side of it
+const CONTACT_M := 0.1         # m: the sole on the wall face, either side of it, for a Hunter at VIS_SCALE
 const MIN_TURN := 0.05         # rad: the chest's least turn away from the wall at its most
 const FRAMES := 24             # steps from the event the case watches (0.4 s: the plant, the push and the let go)
 
@@ -19,6 +19,7 @@ const CAM_UP := 1.1            # m above the feet
 var shots := ""
 var main_node: Node
 var cam: Camera3D
+var contact_m := CONTACT_M     # CONTACT_M grown with the camera's hunter_scale: the same miss in body sizes
 
 func run(main: Node) -> void:
 	main_node = main
@@ -46,6 +47,7 @@ func run(main: Node) -> void:
 		var look := PlayerLook.neutral()
 		var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
 		h.set_model(model)
+		contact_m = CONTACT_M * h.vis_k / Hunter.VIS_SCALE
 		var sync := model.get_node_or_null("Warden/Sync")
 		var wall: WardenWall = sync.get("wall") if sync else null
 		if wall == null and id in NO_CLIPS:
@@ -59,9 +61,9 @@ func run(main: Node) -> void:
 		for kind in ["kick", "push", "bounce"]:
 			var on: Dictionary = await _case(String(id), kind, wl, sync, -1)
 			var off: Dictionary = await _case(String(id), kind, wl, sync, int(on["contact"]))
-			ok(on["event"] and absf(on["d"]) <= CONTACT_M, "%s %s: sole %.3f m off the wall on contact frame %d " % [
+			ok(on["event"] and absf(on["d"]) <= contact_m, "%s %s: sole %.3f m off the wall on contact frame %d " % [
 				id, kind, on["d"], on["contact"]] + "(clips alone: %.2f m), %d frames within %.2f m" % [
-				off["d"], on["held"], CONTACT_M] + "; sole's biggest step to it %.3f m, after %.3f (alone %.3f)" % [
+				off["d"], on["held"], contact_m] + "; sole's biggest step to it %.3f m, after %.3f (alone %.3f)" % [
 				on["reach"], on["push"], off["push"]])
 			ok(int(on["start"]) <= 1, "%s %s: the plant starts %d frames after the kick (one at most)" % [
 				id, kind, on["start"]])
@@ -120,7 +122,7 @@ func _case(id: String, kind: String, wl: Dictionary, sync: Node, contact: int) -
 		if since == int(res["contact"]) or (on and int(res["contact"]) < 0 and wall.w >= 1.0):
 			res["contact"] = since
 			res["d"] = d
-		res["held"] = int(res["held"]) + (1 if absf(d) <= CONTACT_M else 0)
+		res["held"] = int(res["held"]) + (1 if absf(d) <= contact_m else 0)
 		var rel: Vector3 = h.model.global_transform.affine_inverse() * sole
 		if last != Vector3.INF:
 			var moved := rel.distance_to(last) * h.model.global_transform.basis.get_scale().y
