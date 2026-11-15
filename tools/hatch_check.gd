@@ -231,24 +231,27 @@ func _egg_cards(tree: SceneTree) -> void:
 	ok(hx.stage == "pick" and secret != "mystery" and Data.KIN.has(secret),
 		"the mystery egg's species is rolled when the pick opens (%s)" % secret)
 	var cards: Array = hx.bottom.get_child(0).get_children()
-	ok(cards.size() == 4, "four egg cards, each with its Boki's name line (%d)" % cards.size())
-	for i in mini(cards.size(), 4):
+	# main hides the mystery egg's card until it is the picked one (EggHover gives its hint): three starter cards
+	ok(cards.size() == 3, "three starter egg cards, each with its Boki's name line (%d)" % cards.size())
+	for i in mini(cards.size(), 3):
 		var sp: String = hx.egg_defs[i]["species"]
-		var type_line := "%s type" % DexView.type_name(DexView.type_of(sp))
 		var card: Node = cards[i]
 		var pic: CanvasItem = card.find_child("Picture", true, false)
-		var all_text := " ".join(card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text))
+		var type_line := "%s type" % DexView.type_name(DexView.type_of(sp))
 		ok(_card_text(card, "TypeChip") == type_line, "card %d shows its type '%s'" % [i, type_line])
-		if i < 3:
-			var boki_name := String(Data.KIN[sp]["name"])
-			ok(_card_text(card, "BokiName") == boki_name, "starter card %d shows its Boki's name (%s)" % [i, sp])
-			ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
-		else:
-			var secret_name := String(Data.KIN[sp]["name"])
-			var shown_name := _card_text(card, "BokiName")
-			ok(shown_name == "???" and not all_text.contains(secret_name), "the mystery card has no name")
-			ok(pic != null and pic.modulate.is_equal_approx(DexView.SILHOUETTE), "the mystery card shows a silhouette")
+		ok(_card_text(card, "BokiName") == String(Data.KIN[sp]["name"]), "starter card %d shows its Boki's name (%s)" % [i, sp])
+		ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
 	hx._pick(3)
+	await tree.process_frame      # (the old row is freed at the end of the frame)
+	var myst: Array = hx.bottom.get_child(0).get_children().filter(func(c): return c.find_child("BokiName", true, false) \
+			and _card_text(c, "BokiName") == "???")
+	var secret_name := String(Data.KIN[secret]["name"])
+	var mpic: CanvasItem = myst[0].find_child("Picture", true, false) if myst.size() == 1 else null
+	ok(myst.size() == 1 and not " ".join(myst[0].find_children("*", "Label", true, false).map(
+			func(l): return (l as Label).text)).contains(secret_name), "picked, the mystery card shows with no name")
+	ok(mpic != null and mpic.modulate.is_equal_approx(DexView.SILHOUETTE), "the mystery card shows a silhouette")
+	ok(myst.size() == 1 and _card_text(myst[0], "TypeChip") == "%s type" % DexView.type_name(DexView.type_of(secret)),
+		"the mystery card shows its real type")
 	hx._pick(3)
 	ok(hx.stage == "warm" and hx.egg_defs[3]["species"] == secret and (hx.eggs[3]["egg"] as EggHatch).species == secret,
 		"the egg that hatches is the species the card showed (%s)" % secret)
