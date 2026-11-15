@@ -1,6 +1,6 @@
 extends RefCounted
 ## For checks: the shared store (tools/shell.html's local mode) in memory, so two players in one
-## process can talk through Social (Social.fake_store = store.reply). Docs are "col/id" -> JSON text;
+## process can talk through Social (Social.store_stub). Docs are "col/id" -> JSON text;
 ## queries support "==" only and ignore the order, which is all the callers here use.
 
 var docs := {}
