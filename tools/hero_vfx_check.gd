@@ -5,12 +5,12 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
-## models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
+## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it
+## and melts when it runs out. Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
+## And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
 ## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
 ## The drop rocket's looks (DropRocket): its trail, the puff where a Hunter jumps out and the dust where it lands.
-## Neve's Rimelock breaks outward when she ends it and melts when it runs out.
 
 const MAX_LIFE := 2.2  # s a look may linger (no long-lived noise)
 const ROCKET_AT := 6.0  # s into the ship's run when the squad launches: over the islands on ROCKET_SEED
@@ -148,15 +148,13 @@ func run(main: Node) -> void:
 	await _lisette(main, V)
 	await _vex_core(main)
 	await _scarf(main)
+	await _rime_ends(main)
 	_dots(m)
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
 	await _vex_tracer(main)
 	await _slam_fill(main)
-	var mr: Match = flow._match(main, "rimewright")
-	await main.get_tree().process_frame
-	_rime_ends(mr)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -931,6 +929,52 @@ func _slam_fill(main: Node) -> void:
 	m.queue_free()
 
 
+## Rimelock's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
+## the shell outward with a flash, the time running out melts it off her. Warm, each look spawns in under END_MS.
+func _rime_ends(main: Node) -> void:
+	var m: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	var K: RimewrightKit = P.ak
+	var hold := float(K.x_def()["hold"])
+	var late := hold - float(K.x_def()["late"]) * 0.5
+	for path: Array in [["X early", 1.0, "x"], ["X late", late, "x"], ["Shift", 1.0, "dash"], ["time up", hold, ""]]:
+		V.plays.clear()
+		K._start_rime()
+		K.rime["t"] = float(path[1]) - 0.001
+		match String(path[2]):
+			"x":
+				K.ult_recast()
+			"dash":
+				P.inp["dash"] = true
+				K._tick_rime(0.01)
+				P.inp["dash"] = false
+			_:
+				K._tick_rime(0.01)
+		var want := "rime_melt" if path[2] == "" else "rime_break"
+		var not_want := "rime_break" if path[2] == "" else "rime_melt"
+		ok(
+			K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
+			"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want]
+		)
+	for mv: String in ["rime_break", "rime_melt"]:
+		var best := INF
+		for i in 5:
+			var t0 := Time.get_ticks_usec()
+			V.play(P, mv, P.pos, Vector2.RIGHT)
+			best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
+		ok(best < END_MS, "%s spawns in %.3f ms (< %.1f)" % [mv, best, END_MS])
+	for i in 20:
+		V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+		V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	var made := V.made
+	V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
+	_clear(V)
+	m.queue_free()
+
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
 ## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
 ## tells the dots the ground under it.
@@ -1354,47 +1398,3 @@ func _sable_ring(main: Node) -> void:
 		P.pos.distance_to(from) > 3.0 and worst < 0.1,
 		"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst
 	)
-
-
-## Rimelock's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
-## the shell outward with a flash, the time running out melts it off her. Warm, each look spawns in under END_MS.
-func _rime_ends(m: Match) -> void:
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	var K: RimewrightKit = P.ak
-	var hold := float(K.x_def()["hold"])
-	var late := hold - float(K.x_def()["late"]) * 0.5
-	for path: Array in [["X early", 1.0, "x"], ["X late", late, "x"], ["Shift", 1.0, "dash"], ["time up", hold, ""]]:
-		V.plays.clear()
-		K._start_rime()
-		K.rime["t"] = float(path[1]) - 0.001
-		match String(path[2]):
-			"x":
-				K.ult_recast()
-			"dash":
-				P.inp["dash"] = true
-				K._tick_rime(0.01)
-				P.inp["dash"] = false
-			_:
-				K._tick_rime(0.01)
-		var want := "rime_melt" if path[2] == "" else "rime_break"
-		var not_want := "rime_break" if path[2] == "" else "rime_melt"
-		ok(
-			K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
-			"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want]
-		)
-	for mv: String in ["rime_break", "rime_melt"]:
-		var best := INF
-		for i in 5:
-			var t0 := Time.get_ticks_usec()
-			V.play(P, mv, P.pos, Vector2.RIGHT)
-			best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
-		ok(best < END_MS, "%s spawns in %.3f ms (< %.1f)" % [mv, best, END_MS])
-	for i in 20:
-		V.play(P, "rime_break", P.pos, Vector2.RIGHT)
-		V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
-	var made := V.made
-	V.play(P, "rime_break", P.pos, Vector2.RIGHT)
-	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
-	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
-	_clear(V)
