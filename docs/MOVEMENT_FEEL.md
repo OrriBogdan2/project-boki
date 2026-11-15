@@ -201,7 +201,8 @@ Other checks:
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
-  - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
+  - Letting go: moving 0.9m out from the face, a fresh glide press, a stun or a knock ends the rise.
+  - Presses in the rise (`content/rules/mantle_press.json`, read by `DashFlow`, the same for every hero): a dash goes and the rise carries it over the top; a jump flings (below); LMB, RMB, E and R wait for the top.
   - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
   - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
@@ -232,7 +233,7 @@ Other checks:
   - The hunter's silhouette is ~10.5% of the screen's height (75–80 px of 742), centred across, with the feet ~3–4% below the centre. The ground across is ~17 silhouette heights. Crates read ~1.1 and walkways ~1.5 silhouette heights wide.
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
-  - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
+  - The movefeel framing stays available as "Default (wider lens)" (`default_wide`). `--cam-style=<id>` picks a style for one tooling run.
 - **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
@@ -452,6 +453,25 @@ What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate
   731.1, 735.9, 745.1 s, mooshmoosh.md) are her kit's float; 706-712 and 729-747 s show no glider.
 Settling them needs a 60 fps clip of glides by the player: three opens (off a ledge at run speed, out of a dash,
 from a fall) and three back-key brakes from cruise and from a dash speed, on a view with ground at glider height.
+## Knock arc: how far, how fast it slows, keys back, wall slam (`--move-feel-check`, `knock_*`)
+
+One shared rule moves every knocked body (`Hunter.impulse`, reached by a hit and by `Displace.knock`): the push sets your speed along the hit, you slide `knock_t` = 0.1 + 0.02 s per m/s (0.12-0.35 s) losing 6 m/s² and steering at the hit's `kbi` (0.3-0.5), then speed over a run sheds at `GROUND_SHED` 110 m/s². A wall counts as a slam inside 0.6 s of the knock while the body is still faster than 8 m/s (0.9 s stun or the hit's `wallstun`, 10 damage).
+
+Measured headlessly by `tools/move_feel_knock.gd` (part of `--move-feel-check`): a standing medium Hunter on flat ground, no keys, pushed through `Displace.knock` at each kit's full-charge push on main d255acbee. "Wall reach" is how far it slides while a wall still counts; "cliff step" is the 60 Hz step a cliff face 1.5 m ahead stuns it (the body's edge meets it at ~1.1 m). 1 bh = 1.8 m.
+
+| Knock (ours, push) | Source footage / card | 0.1 / 0.2 / 0.4 s | At rest | Keys back | Wall reach | Cliff step |
+|---|---|---|---|---|---|---|
+| Lace Heavy Shot, 12 (`archer.json rmb.pin.push` 8-12) | Myth Impaling Shot: 2-3 bh (3.6-5.4 m) along the shot (pin.md `0273`); card: hitting terrain stuns, any charge | 1.17 / 2.27 / 4.13 m | 4.45 m (2.5 bh), 0.58 s | 0.350 s | 3.95 m | 6 |
+| Sparkle Storm Rod, 9 (`mage.json rmb.coil.push` 6-9) | Joule spear: ~1 bh (1.8 m) on open ground, done by `0066` (0.4 s); card: into a wall or another target stuns | 0.86 / 1.67 / 2.72 m | 2.79 m (1.55 bh), 0.50 s | 0.283 s | 1.28 m | 8 |
+| Albert hammer swing, 13 (`bulwark.json lmb.smash_kb` 5-13; the flash launch is x1.4) | Oath charged swing: 2-3 bh along the swing, `0148`-`0151`; passive: any knock into a wall stuns | 1.26 / 2.47 / 4.61 m | 5.10 m (2.8 bh), 0.62 s | 0.367 s | 4.49 m | 6 |
+| Kael Finishing Slam, 6 (`juggernaut.json rmb.slam.push`) | Brall Execution Slam: the dummy was executed (`0158`), no distance shown; no wall stun on the card | 0.56 / 1.07 / 1.63 m | 1.63 m (0.9 bh), 0.43 s | 0.233 s | none (6 < 8 m/s) | none |
+
+What the source settles, and what it doesn't:
+- **The curve (how fast it slows): not settled, kept.** The game data has only Mass 100 and Knockback 1.0 for every Hunter; the knock effects themselves are not decoded. If a source knock were a plain speed on a walking body, UE's brake with the data's numbers (22.2 m/s² + 2/s friction) would stop these four pushes at 1.90 / 1.19 / 2.16 / 0.59 m, half the footage's distances, so the source's push speeds or its knock model differ and the shape can't be read back from the end distance. The footage is 5 fps (10 fps for Ghost's cone) and resolves only that a knock is done in about 0.4 s (Joule spear `0064`-`0066`, Ghost's cone 3.5 bh in ~0.4 s). Ours lands 90-99% of the distance by 0.4 s and rests by 0.43-0.62 s, within one footage frame. `knock_done_04` asserts the 0.4 s share (>= 0.85); the distances are asserted to within 5-10 cm of the table so a change to the shared curve shows.
+- **Keys back: not settled, kept.** Every knock in the footage lands on a dummy; no clip shows a knocked Hunter taking the keys back. The patch notes (SUPERVIVE_DATA.md, Knockback) say players steer a knock with WASD at high or medium influence, as our `kbi` 0.3-0.5 does during `knock_t`. Joule's ~2 s pink tint after the spear is a tint, not a control signal.
+- **Distance: the kits'.** Lace and Albert land inside the footage's 2-3 bh. Sparkle's 2.79 m is longer than the footage's ~1.8 m; that is the kit's push (vireo.md gap 15; ext/sparkle-rmb-knock retunes it), not the curve.
+- **When a wall slam counts: differs, left for the kits.** In the source the wall stun belongs to an ability (Joule's spear, Myth's Heartpiercer, Oath's passive, Tetra's punch) with no speed floor on any card. Ours is one shared rule with an 8 m/s floor, so a tap Heavy Shot (push 8), a tap Storm Rod (6) and a low hammer swing (5) never slam although their cards say they stun, and any other knock over 8 m/s does slam. Moving to the source's shape means a per-kit `wallstun` flag and no floor, which changes kits, so it is a report item, not this change.
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, a landing or arrival pose (`"land": true` in the move's keys: Sparkle's streak arrival, Motley's Trade arrival, Tenzo's crash) never holds the glider, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
@@ -741,7 +761,7 @@ or sits inside a documented lock the source shares.
 | Tenzo | E Stone Row | free: at once | n/a (does not go off here) | Not shown in the footage `[?]`. |
 | Tenzo | R (ult) Basalt Spine | free: at once | lock 0.97s: end +0.75s, end +0.52s, end +0.27s | Not shown in the footage `[?]`. |
 | Grimble | LMB | free: at once | lock 0.35s: end +0.30s, end +0.20s, end +0.12s | Not shown in the footage `[?]`. |
-| Grimble | RMB Abyssal Hand | lock 0.88s: never, never, never | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Footage card 0127 'GROUNDED while reeling'; owner item 31. Held from the throw to the end of the reel (`into_jump.rmb` lock). Match. |
+| Grimble | RMB Deep Reach | lock 0.88s: never, never, never | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Footage card 0127 'GROUNDED while reeling'; owner item 31. Held from the throw to the end of the reel (`into_jump.rmb` lock). Match. |
 | Grimble | E Anchor Drop | free: at once | free: at once | Not shown in the footage `[?]`. |
 | Grimble | R (ult) Brass Broadside | free: at once | lock > 1.50s: never, never, never | ults.md: source planted 1.1 s charge; ours walks at 30% on purpose (owner item 36). No jump shown `[?]`. Air: the blast holds him, the glider never opens while it runs `[?]`. |
 | Neve | LMB | free: at once | lock 0.13s: end +0.13s, end +0.10s, end +0.07s | Not shown in the footage `[?]`. |
@@ -1062,6 +1082,13 @@ only the hand-over changed (below).
   moves the machine GLIDING -> MANTLING (the farm avatar ranks it so too), and that edge folds the glider
   there, with its fold sound (the grab used to clear the flag silently), and no feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
   reopen it over the lip; a player's press-only keys never do.
+## Stairs: one smooth walk up and down (`--stairs-check`, decision 0060; owner 11-11)
+A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy`), the non-local ledge lean
+(`Hunter._try_ledge_grab`) and the "left the ground" test now allow the rise or fall the slope gives over the
+distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
+no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
+the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

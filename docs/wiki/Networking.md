@@ -13,7 +13,7 @@ The current model is **owner-authoritative per entity**, not server-authoritativ
   wild Boki, the Blight. `Net.owner_of(nid)` decides: ids starting with `P` belong to that peer,
   the rest to the host.
 - Owners send **snapshots** of what they own. Anyone who hits something they don't own sends the hit to
-  its owner, which applies it. One-off happenings (effects, catches, chests, hexes) go as events.
+  its owner, which applies it. One-off happenings (effects, catches, chests) go as events.
 - So shots are the shooter's call: the shooter's game flies the shot against its own view of the target,
   and a hit there is a hit. Other games only draw a copy, spawned when the event arrives (about 0.2 s late
   at 100/150 ms pings). `--lagcomp-check` proves no hit is lost over a slow line (lag relay, two games).
@@ -43,7 +43,7 @@ lobby; in the pre-match lobby `loaded`, `pick` `{arch, final}` and `chat`), `joi
 |---|---|---|
 | `st` | Every owner, every 0.1 s; the host's world every 0.15 s | Snapshots of owned entities, with the match time as a header. Unreliable channel. |
 | `hit` | Anyone who hits something they don't own | `[target nid, damage, knockback x, z, lift, crit, ...]`, applied by the owner |
-| `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `hex`, `knock`, `out`, `catch` / `caught`, `chest`, and more |
+| `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `knock`, `out`, `catch` / `caught`, `chest`, and more |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 

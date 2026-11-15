@@ -3,7 +3,8 @@ extends RefCounted
 ## (_menus: Settings, the inventory and the Field Book).
 ##   1. every listed sound has a file (audio/<name>.wav or its takes <name>_1..4.wav)
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
-##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
+##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface (a
+##      Hunter with no feet, KMovesStone.gait < 0.5: no step files, a <arch>_hover loop for HoverHum instead),
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##      and its signature weapon's JSON names one of them (no stock sound)
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
@@ -23,13 +24,33 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
+##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
+##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
+##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
+##      even when X is pressed again, and it is gone within one frame of every way the channel can end
+## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
+##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
+##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
+##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
+##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+## Never touches the save.
+##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
+##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
+##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
 ##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
 ##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
 ##  13. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
-## Reads the files only; never touches the save.
+##  15. the Training Grounds (TrainingSfx): every cue is a sound of the training set with its own file (a shared
+##      fallback such as "revive" fails), the stations and the duel ring play them, the count-in plays 3-2-1 and
+##      one horn, the expanse has the full wind and a sky island less of it under its own bed, the beds sit on
+##      the Ambience bus, and the grounds never play the match's beds
+##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##  17. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -38,6 +59,16 @@ const REACH_MAX := 80.0        # m: past this a sound would carry over most of t
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {
+	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
+	"blight_rumble": ["match/blight.gd", "match/blight_nests.gd"],
+	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_fuse": ["match/merge_xform.gd"], "boki_unfuse": ["match/merge_xform.gd", "match/kin_net.gd"],
+	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+}
 
 var bad := 0
 var levels := {}
@@ -58,6 +89,7 @@ func run(main: Node) -> void:
 	print("SFXSET %d sound sets" % sets)
 	await _menus(main)
 	_dash_air()
+	_wired()
 	_fallback()
 	_ult_cues()
 	_nuke_fall()
@@ -65,11 +97,36 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_chop_mine()
+	_rarity_stings()
+	await _call_loop(main)
+	_hostile()
+	_level_cues()
+	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	_hit_ticks()
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
+	_training()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _boki_cues() -> void:
+	var missing := []
+	for id in KinLib.kin_ids():
+		var cue := KinLib.cue_of(String(KinLib.species(id).get("type", "")))
+		if _takes(cue).is_empty() and not missing.has(cue):
+			missing.append(cue)
+	ok(missing.is_empty(), "every Boki type has a cast cue file %s" % str(missing))
+	var no_cue := KinLib.TYPES.filter(func(t): return _takes("k_" + t).is_empty())
+	ok(KinLib.TYPES.size() == 19 and no_cue.is_empty(), "each of the 19 types has a cast cue %s" % str(no_cue))
+	var mapped := KinLib.cue_of("shadow") == "k_dark" and KinLib.cue_of("ghost") == "k_ghost"
+	ok(mapped, "shadow maps to k_dark, ghost to k_ghost")
+	var types := {}
+	for theme in KinLib.TYPE_OF_THEME:
+		types[KinLib.TYPE_OF_THEME[theme]] = true
+	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -124,11 +181,15 @@ func _boki_voices(sounds: Dictionary) -> void:
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
-	var need := ["dash"] + VOICE
-	for s in SURFACES:
-		need.append("step_" + s)
+	var floats := KMovesStone.gait(arch) < 0.5
+	var moves: Array = ["hover"] if floats else SURFACES.map(func(s): return "step_" + s)
+	var need: Array = ["dash"] + VOICE + moves
 	var missing := need.filter(func(k): return not sounds.has("%s_%s" % [arch, k]))
-	ok(missing.is_empty(), "%s: voice, dash and footsteps on every surface (missing %s)" % [arch, missing])
+	ok(missing.is_empty(), "%s: voice, dash and %s (missing %s)" % [arch, moves, missing])
+	if floats:
+		var steps := SURFACES.filter(func(s): return not _takes("%s_step_%s" % [arch, s]).is_empty())
+		ok(steps.is_empty() and d.get("loops", []).has(arch + "_hover"),
+			"%s: no feet, so no step files (%s) and %s_hover is a loop" % [arch, steps, arch])
 	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
@@ -140,10 +201,11 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
-	for kind in ["dash", "step_wood", "hurt"]:
+	var kinds := ["dash", moves[0], "hurt"]
+	for kind in kinds:
 		picked.append(HeroSfx.of(h, kind, kind))
 	h.free()
-	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
+	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
 
@@ -251,6 +313,64 @@ func _nuke_fall() -> void:
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
+## 11. A rival's cast is heard as a threat; yours and your allies' are not.
+func _hostile() -> void:
+	var reach: float = Sfx.sound_reach.get(HostileCue.NAME, 0.0)
+	var near_30 := reach >= 25.0 and reach <= 35.0
+	ok(Sfx.ensure(HostileCue.NAME) and near_30, "the rival-cast layer exists, reach %.0f m" % reach)
+	var h := Hunter.new()
+	var once := []
+	for arch in Arch.ids():
+		var k := ArchKit.new()
+		k.d = Arch.def(arch)
+		h.ak = k
+		var r_slots := ["ult_fuse", "ult"] if k.fuse_time() > 0.0 else ["ult"]
+		var r_n := r_slots.filter(func(s): return HostileCue.starts_threat(h, s)).size()
+		var others := ["secondary", "dodge", "primary", "ultimate"]
+		var quiet := others.all(func(s): return not HostileCue.starts_threat(h, s))
+		if HostileCue.starts_threat(h, "kin") and (k.r_def().is_empty() or r_n == 1) and quiet:
+			once.append(arch)
+	h.ak = null
+	ok(once.size() == Arch.ids().size(),
+			"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once])
+	var you := Hunter.new()
+	you.team = 1
+	Sfx.listener = Vector3.ZERO
+	var heard := func(team: int, at: Vector3) -> bool:
+		var before := int(Sfx.last_played.get(HostileCue.NAME, -1))
+		h.team = team
+		h.pos = at
+		HostileCue.play(you, h)
+		return int(Sfx.last_played.get(HostileCue.NAME, -1)) != before
+	var ally: bool = heard.call(1, Vector3(5, 0, 0))
+	var far: bool = heard.call(2, Vector3(40, 0, 0))
+	var rival: bool = heard.call(2, Vector3(5, 0, 0))
+	ok(rival and not ally, "a rival's cast at 5 m plays the layer, an ally's does not (%s, %s)" % [rival, ally])
+	ok(not far, "a rival's cast at 40 m does not")
+	h.free()
+	you.free()
+	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var cue_src := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var used := hunter_src.contains("HostileCue.on_used(self, slot)")
+	var x := cue_src.contains("HostileCue.play(m.player, h)")
+	var net := match_src.contains("\"hcast\": HostileCue.net_in")
+	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
+
+## 9. Levelling up has its own cues, each called from one place, for the local Hunter only.
+func _level_cues() -> void:
+	var made := true
+	for sname in ["level_up", "rank_up", "rank_max"]:
+		made = made and Sfx.ensure(sname) and Sfx.sound_reach.get(sname, 0.0) == 0.0
+	ok(made, "level_up, rank_up and rank_max exist and are not positional")
+	var pitched := true
+	for slot in Hunter.SLOTS:
+		pitched = pitched and LevelSfx.SLOT_PITCH.has(slot)
+	ok(pitched, "every ranked slot has its own confirm pitch")
+	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
 	var stub := GDScript.new()
@@ -316,6 +436,41 @@ func _cc_heard(h: Hunter, kind: String) -> Array:
 func _rms(sname: String) -> float:
 	var takes := _takes(sname)
 	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
+
+## 7. Each sound in WIRED is in a set and its script(s) play it by name; the warning thresholds are sane.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
+		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	_warn_behaviour()
+
+## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
+func _warn_behaviour() -> void:
+	var h := Hunter.new()
+	h.max_hp = 100.0
+	var seen := []
+	for st in [[100.0, false], [20.0, false], [20.0, true], [0.0, false]]:
+		h.hp = st[0]
+		h.downed = st[1]
+		WarnSfx.beat_in = 0.0
+		WarnSfx.low_hp(h, 0.016)
+		seen.append(WarnSfx.beat_in > 0.0)
+	h.free()
+	WarnSfx.beat_in = 0.0
+	ok(seen == [false, true, false, false], "heartbeat only when hurt and up (full, 20 pct, downed, 0: %s)" % [seen])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -418,6 +573,52 @@ func _plays(sname: String, act: Callable) -> bool:
 	act.call()
 	return Sfx.last_played.has(sname)
 
+## 11. Meeko's channel loop, one training match per end path.
+const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
+const FRAME := 1.0 / 60.0
+
+func _call_loop(main: Node) -> void:
+	for path in END_PATHS:
+		var m := Match.new()
+		main.add_child(m)
+		m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+			"cls": Arch.weight("tender"), "arch": "tender", "weapon": Arch.signature("tender")})
+		m.set_process(false)
+		var P: Hunter = m.player
+		P.set_arch("tender")
+		P.lvl = 6
+		var mate_at := P.pos + Vector3(-2.5, 0, 1.5)
+		var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, mate_at, {"arch": "none"})
+		var K: TenderKit = P.ak
+		P.inp["aim"] = A.pos
+		HunterKeys.ult_pressed(P)
+		m.step(FRAME)
+		var key := "call%d" % P.get_instance_id()
+		var up := not K.hearth_call.is_empty() and Sfx.loop_on(key) and Sfx.loop_on(key + "_ally")
+		ok(up, "channel loop (%s): it sounds on her and the ally once the call starts" % path)
+		if up:
+			var quieter := float(Sfx.loops[key]["vol"]) > float(Sfx.loops[key + "_ally"]["vol"])
+			ok(quieter, "channel loop (%s): the ally's is quieter" % path)
+			HunterKeys.ult_pressed(P)
+			m.step(FRAME)
+			var n := Sfx.loops.keys().filter(func(k): return String(k).begins_with(key)).size()
+			ok(n == 2, "channel loop (%s): X again does not stack a second loop (%d)" % [path, n])
+		match path:
+			"ally out of reach": A.teleport(P.pos + Vector3(-30.0, 0, 0))
+			"stun": P.stun_t = 0.5
+			"knock": m.knock(P, null, {})
+			"dead": m.eliminate(P, null, "test", true)
+			"ally dead": A.out = true
+			"merge": K.drop_holds()
+		var frames := 0
+		while not K.hearth_call.is_empty() and frames < 600:
+			m.step(FRAME)
+			frames += 1
+		ok(frames < 600 and not Sfx.loop_on(key) and not Sfx.loop_on(key + "_ally"),
+			"channel loop (%s): both loops are gone the frame the channel ends (%d frames in)" % [path, frames])
+		m.queue_free()
+		await main.get_tree().process_frame
+
 ## 10. The build and decorate cues.
 func _build_cues() -> void:
 	var names := ["build_pick", "build_rotate", "build_place_wood", "build_place_stone", "build_store",
@@ -458,6 +659,23 @@ func _strip_chime() -> void:
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
+
+## 11. Rare and very rare Boki have a sting each; a common one plays nothing; each is under the scan chime.
+func _rarity_stings() -> void:
+	var rare: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	var common: String = Data.common_kin()[0]
+	var tiers := [RaritySting.tier(common, {}), RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
+			RaritySting.tier(common, {"shimmer": true})]
+	ok(tiers == [0, 1, 2], "rarity tiers: common 0, a rare species 1, a shimmer 2 %s" % [tiers])
+	var names: Array = RaritySting.NAMES.slice(1)
+	var quiet := RaritySting.DB.slice(1).all(func(db): return db < 0.0) and RaritySting.DB[1] <= RaritySting.DB[2]
+	ok(names.all(func(n): return Sfx.ensure(n)) and quiet, "rarity stings exist, under the scan chime %s" % [names])
+	var src := {"scripts/match/music_dir.gd": "stings.tick(", "scripts/match/capture.gd": "RaritySting.claim(",
+			"scripts/ui/egg_hatch.gd": "RaritySting.play("}
+	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
+	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
+	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
+
 ## 12. The inventory cues.
 func _inv_cues() -> void:
 	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
@@ -482,6 +700,64 @@ func _inv_cues() -> void:
 	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
 	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
+
+## 15. The Training Grounds' cues and beds.
+func _training() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/training.json"))
+	var shared := FileAccess.get_file_as_string("res://scripts/core/sfx.gd")
+	var off := []
+	for c in TrainingSfx.CUES:
+		if not (d["sounds"] as Dictionary).has(c) or _takes(c).is_empty() or shared.contains("\"%s\"," % c):
+			off.append(c)
+	ok(off.is_empty(), "training: %d cues of its own set, each with its own file (off: %s)"
+			% [TrainingSfx.CUES.size(), off])
+	var arena := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
+	var duel := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
+	var wired := arena.contains("cue(TrainingSfx.RESET)") and arena.contains("cue(TrainingSfx.DUMMY_HIT")
+	wired = wired and arena.contains("cue(TrainingSfx.BOT_SPAWN") and duel.contains("cue(TrainingSfx.BOT_SPAWN")
+	wired = wired and duel.contains("TrainingSfx.count_start()") and duel.contains("TrainingSfx.count_in(")
+	var borrowed := arena.contains("m.sfx(\"revive\"") or duel.contains("m.sfx(\"revive\"")
+	ok(wired and not borrowed, "training: the stations and the duel ring play their own cues, not the shared revive")
+	TrainingSfx.heard.clear()
+	TrainingSfx.count_start()
+	var left := TrainingSfx.COUNT_S
+	while left > -1.0:
+		TrainingSfx.count_in(left, left - 0.25)
+		left -= 0.25
+	var heard := [int(TrainingSfx.heard.get(TrainingSfx.COUNT, 0)), int(TrainingSfx.heard.get(TrainingSfx.HORN, 0))]
+	ok(heard == [3, 1], "training: the duel ring counts 3-2-1 and sounds the horn once %s" % [heard])
+	var missing := [TrainingSfx.WIND, TrainingSfx.ISLAND].filter(
+			func(b): return not ResourceLoader.exists("res://audio/amb_%s.ogg" % b))
+	ok(missing.is_empty(), "training: both beds have their file %s" % [missing])
+	var w := World.new()
+	w.generate(4242, 64, 7)
+	var big := TrainingSfx.expanse_of(w)
+	var other := (big + 1) % w.islands.size()
+	var on_big: Vector2i = w.islands[big]["cells"][0]
+	var on_other: Vector2i = w.islands[other]["cells"][0]
+	var t := TrainingSfx.new()
+	var at_big := t.beds_at(w, on_big.x + 0.5, on_big.y + 0.5)
+	var at_isle := t.beds_at(w, on_other.x + 0.5, on_other.y + 0.5)
+	var big_wind := float(at_big[TrainingSfx.WIND])
+	var quieter := float(at_isle[TrainingSfx.WIND]) < big_wind and float(at_isle[TrainingSfx.ISLAND]) > 0.0
+	ok(big_wind == 1.0 and quieter, "training: full wind on the expanse, less on an island %s %s" % [at_big, at_isle])
+	var h := Hunter.new()
+	h.pos = Vector3(on_other.x + 0.5, 0, on_other.y + 0.5)
+	Sfx.play_ambience("")
+	t.ambience(w, h)
+	var on_bus := Sfx.amb_layers.size() == 2
+	for n in Sfx.amb_layers:
+		on_bus = on_bus and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience"
+	ok(on_bus, "training: both beds play on the Ambience bus %s" % [Sfx.amb_layers.keys()])
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var music := FileAccess.get_file_as_string("res://scripts/match/music_dir.gd")
+	var own := match_src.contains("Sfx.play_ambience(\"\" if o.get(\"training\", false) else \"match\")")
+	own = own and music.contains("training.ambience(w, p)\n\t\treturn\n\tvar voids")
+	var none_borrowed := not (Sfx.amb_layers.has("abyss") or Sfx.amb_layers.has("ruins") or Sfx.amb_name == "match")
+	ok(own and none_borrowed, "training: never the match's wind, abyss or ruins beds")
+	h.free()
+	w.free()
+	Sfx.clear_amb_layers(0.0)
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -522,6 +798,50 @@ func _data(path: String) -> PackedByteArray:
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
 
+## 11. The farm's chop and mine: the set has the axe and pick in several takes, and every sound HomeGather
+## plays by literal name exists (the old stand-ins, break_wood / armor_hit / thump, are not used there).
+func _chop_mine() -> void:
+	ok(_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
+			"chop: the axe bite and pick strike come in 3 takes")
+	var re := RegEx.create_from_string("Sfx\\.play\\(\"([a-z0-9_]+)\"")
+	var src := FileAccess.get_file_as_string("res://scripts/home/home_gather.gd")
+	var played := []
+	for hit in re.search_all(src):
+		played.append(hit.get_string(1))
+	var silent := played.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "chop: every sound HomeGather plays exists (silent: %s)" % [silent])
+	var own := ["axe_bite", "trunk_creak", "tree_down", "pick_strike", "rock_crack", "rock_break"]
+	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
+	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
+			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
+
+## 11. One hit tick per weapon family; each Hunter's weapon names one; ability hits keep the shared tick.
+func _hit_ticks() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/hit.json"))
+	var family: Array = (set_d["sounds"] as Dictionary).keys()
+	ok(family.size() == 6, "hit ticks: six families (%s)" % [family])
+	var used := {}
+	var unmapped := []
+	var h := Hunter.new()
+	for arch in Arch.ids():
+		var w := Data.weapon_stats(Arch.signature(arch))
+		var tick := String(w.get("hit", ""))
+		used[tick] = true
+		if not family.has(tick):
+			unmapped.append("%s (%s)" % [arch, tick])
+	ok(unmapped.is_empty(), "hit ticks: every Hunter's weapon names one of them (%s)" % [unmapped])
+	var idle := family.filter(func(f): return not used.has(f))
+	ok(idle.is_empty(), "hit ticks: every family is some Hunter's weapon (unused %s)" % [idle])
+	h.wpn = Data.weapon_stats("longbow")
+	var shot := HeroSfx.hit_tick(h, {"src": "shot"})
+	var swing := HeroSfx.hit_tick(h, {"src": "abil", "ab": "primary"})
+	var cast := HeroSfx.hit_tick(h, {"src": "abil", "ab": "e"})
+	var picks := [shot, swing, cast]
+	ok(picks == ["hit_bow", "hit_bow", "hit"], "hit ticks: shot, primary, ability %s" % [picks])
+	h.wpn = Data.weapon_stats("rifle")
+	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
+	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
+	h.free()
 ## The menus (UiSfx, Ui.button), walked tab by tab: Settings, the inventory and the Field Book. Every
 ## tab plays the tab sound; a slider ticks once for a burst of steps; a toggle sounds higher turning on
 ## than off; a dropdown sounds; a Field Book tile sounds when pointed at and when picked, and its page's

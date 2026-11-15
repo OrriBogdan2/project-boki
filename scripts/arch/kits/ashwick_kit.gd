@@ -149,6 +149,7 @@ func stoke(f: Ent) -> int:
 func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var key := f.get_instance_id()
 	ignites[key] = {"e": f, "lvl": lvl, "until": m.time + float(rd()["ignite_t"])}
+	if f.remote: KitStatus.apply(f, "ign", float(rd()["ignite_t"]), float(lvl), true, "", h.nid)
 	var dps := float(rd()["dps%d" % lvl]) * f.max_hp * power("sec")
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
@@ -647,6 +648,7 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	ShieldSrc.give(h, h.max_hp * float(dd["rank3_shield"]), ShieldSrc.HEAT)
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
+	h.shield_kind = "cloak"
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -690,6 +692,7 @@ func _cloak_blast() -> void:
 		var amount: float = h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k
 		ShieldSrc.give(h, amount, ShieldSrc.HEAT)
 		h.shield_t = float(ed["shield_t"])
+		h.shield_kind = "cloak"
 		st["shield_on"] = true
 		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)

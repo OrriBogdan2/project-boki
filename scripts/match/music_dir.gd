@@ -20,6 +20,7 @@ var heat := 0.0               # 0..1, how much of a fight is going on
 var goal := 0.0               # where heat is heading: 1 fight, 0.65 rival close, 0 calm
 var goal_at := -99.0          # match time the goal last changed
 var rival_close := false
+var stings := RaritySting.new()   # rare Boki coming into sight
 var last_fight := -99.0
 var last_done := 0.0
 var started := false
@@ -62,6 +63,7 @@ var amb_t := 0.0
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
+var training := TrainingSfx.new()   # the Training Grounds' beds, in place of these
 
 func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t -= dt
@@ -70,6 +72,9 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t = 0.25
 	var w: World = m.world
 	if w == null:
+		return
+	if m.opts.get("training", false):
+		training.ambience(w, p)
 		return
 	var voids := 0; var walls := 0; var n := 0
 	for r: float in [3.0, 6.0, 9.5]:
@@ -122,6 +127,7 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		stings.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0

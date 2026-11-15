@@ -135,7 +135,7 @@ Tenzo 3.75 to 3.4.
 
 ## Strafe drift, measured in the game rig (Nov 15, ext/fix-strafe-cadence-1115)
 
-`--gameplay-media --media-clip=14 --media-hunter=<id>` walks, runs, strafes and backpedals a Hunter on the game camera
+`--gameplay-media --media-clip=15 --media-hunter=<id>` walks, runs, strafes and backpedals a Hunter on the game camera
 and logs the feet (`loco_<id>.tsv`); `--media-log` writes only the TSV, headless at a fixed 1/30 s step (a variable
 step skews the feet). The planted foot is the lowest 30 % of its height. The game leans every model 20 degrees toward
 the camera (`Cam.char_lean`), so a foot's world height mixes in its north-south position: on a strafe toward or
