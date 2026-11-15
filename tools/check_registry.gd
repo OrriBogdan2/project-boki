@@ -457,29 +457,6 @@ const CHECKS := {
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
 	# the first-time capture hint
 	"--tut-first-capture-check": ["res://tools/tut_first_capture_check.gd", "tut_first_capture_check", null],
-	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
-	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
-	# fight beats per starter
-	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
-	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],  # the Empty creator + Relic moment shots
-	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],  # the Wardens' painted faces
-	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
-	# Ways Out first-time hints
-	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
-	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>: any first Relic
-	# Skip on every step
-	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],
-	# no span without a prompt or a marker
-	"--tutorial-dead-air-check": ["res://tools/tutorial_dead_air_check.gd", "tutorial_dead_air_check", null],
-	"--duo-tutorial-check": ["res://tools/duo_tutorial_check.gd", "duo_tutorial_check", null],      # 2v2 tutorial
-	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar
-	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
-	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
-	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
-	"--ui-sfx-check": ["res://tools/ui_sfx_check.gd", "ui_sfx_check", null],     # slider, toggle, tab sounds
-	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
-	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
-	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
