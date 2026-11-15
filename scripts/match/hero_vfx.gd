@@ -56,6 +56,7 @@ var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
+var rng := RandomNumberGenerator.new()   # the noise seeds' own stream: what is on screen must not shift the sim's dice
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
@@ -264,9 +265,11 @@ func color(h: Hunter, key: String) -> Color:
 	return _pal(h, key, key)
 
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
-	var pal: Dictionary = data(h.arch).get("palette", {})
-	var key := String(name_or_hex) if name_or_hex != null else fallback
-	return Color(String(pal.get(key, key)))
+	return col(h.arch, String(name_or_hex) if name_or_hex != null else fallback)
+
+## A colour of a Hero's palette by name (a hex passes through): kits that draw in code read their table here.
+static func col(arch: String, name_or_hex: String) -> Color:
+	return Color(String(data(arch).get("palette", {}).get(name_or_hex, name_or_hex)))
 
 func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
 	var from := String(layer.get("at", "here"))

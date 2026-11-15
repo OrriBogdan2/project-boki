@@ -13,9 +13,13 @@ extends ArchKit
 ## his big moves and sparking when he leaps) are HeroVfx's (content/vfx/dolm.json); the rock skins, held fist
 ## glows and stun crowns KitLooks'.
 
-const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
-const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
+
+# His looks, from his table (content/archetypes/dolm.json "palette"): every look of his kit is cobalt
+static var main_col := Arch.fx_col("dolm", "main")
+static var hot_col := Arch.fx_col("dolm", "hot")
+static var pale_col := Arch.fx_col("dolm", "pale")       # the punch lane: as bright as an aim reticle
+static var stone_col := Arch.fx_col("dolm", "stone")     # rock dust
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
@@ -25,7 +29,7 @@ var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
-var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
+var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": pale_col}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Shardskin stacks
 var shield_at := -99.0
@@ -136,7 +140,7 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 	var rd := rock_def()
 	var spd := float(rd["speed"])
 	m.spawn_shot(
-		h, start, dir * spd, dmg, rng / spd, 0.45, Color("3a7cff"),
+		h, start, dir * spd, dmg, rng / spd, 0.45, main_col,
 		{
 			"kb": float(rd["kb"]) if src != "dash" else float(dash_def()["kb"]), "tracer": 0.3, "src": "abil",
 			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)
@@ -170,7 +174,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		x.merge(slow)
 		if e is Hunter:
 			launch_pay += 1
-			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
+			payoff_fx(e.pos, hot_col, "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
 		var f_dmg := splash_dmg * _repeat_k(f)
@@ -376,7 +380,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			_punch_tele(k)
 			HeroVfx.of(m).hold(h, "punch_charge", k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
-			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
+			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, main_col.lerp(hot_col, k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
 		if lmb_t < float(ld["tap"]): _boulder()
@@ -395,11 +399,11 @@ func _punch_tele(k: float) -> void:
 	AimKit.lane(
 		h, "punch",
 		{
-			"len": float(pd["len"]), "width": float(pd["width"]), "chevrons": 3, "k": k, "fill": k, "col": LANE_COL,
-			"col_full": Color("d8ecff")
+			"len": float(pd["len"]), "width": float(pd["width"]), "chevrons": 3, "k": k, "fill": k, "col": pale_col,
+			"col_full": pale_col
 		}
 	)
-	AimKit.charge(h, k, {"col": COBALT})
+	AimKit.charge(h, k, {"col": main_col})
 
 func _boulder() -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
@@ -414,7 +418,7 @@ func _boulder() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var rng := AimMode.dist(h, float(bd["range"]), AimMode.MAX)
 	m.spawn_shot(
-		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("9ad0ff"),
+		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), hot_col,
 		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
 	)
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], "boulder"))
@@ -427,7 +431,7 @@ func _boulder() -> void:
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
-	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
+	m.fx.ring(g, float(bd["splash"]), main_col, 0.28)
 	vfx("boulder_hit", at, null, {"r": float(bd["splash"])})
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
@@ -679,7 +683,7 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p: Vector3 = spots[j][0]
 		AimKit.circle(
-			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("3a7cff"), "all": true, "dur": tell}
+			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": main_col, "all": true, "dur": tell}
 		)
 		vfx("row_tell", p, dir)
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
