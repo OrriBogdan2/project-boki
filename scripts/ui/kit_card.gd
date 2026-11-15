@@ -14,18 +14,18 @@ const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
 const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
-## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
-## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
-## ultimate on its "x" tile.
+## Icons the kits name that the icon set draws under another id (weapons and four stray names).
+const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
+	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
+	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
+## The action behind each tile, so its key cap follows the player's bindings: the Merge tile is "r",
+## the hunter's own ultimate "x".
+const ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature",
+		"r": "ultimate", "x": "hunter_ult"}
 static func _cap(slot: String) -> String:
-	if slot == "x":
-		return Settings.key_cap("hunter_ult")
-	if slot == "r":
-		return Settings.key_cap("ultimate")
-	return String(KEYS[slot])
+	return Settings.key_cap(String(ACTIONS[slot])) if ACTIONS.has(slot) else ""
 
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Ability", "e": "Utility", "r": "Ultimate",
 	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
@@ -115,6 +115,7 @@ func _row(slot: String) -> Control:
 	p.custom_minimum_size = Vector2(0, ROW_H)
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
 	p.set_meta("slot", slot)
+	AbilityCard.hover(p, arch, slot)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	p.add_child(row)
@@ -357,7 +358,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
-		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
+		AbilityCard.hover(b, a, s)
 		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
 		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
 		b.add_theme_stylebox_override("normal", rest_box)
@@ -380,7 +381,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		bv.add_child(kl)
 		var nl := UI.label(String(info["name"]).split(" ")[0], 11, UI.INK, UI.big)
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(nl)
 		b.add_child(bv)
