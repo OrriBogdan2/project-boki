@@ -2,65 +2,65 @@
  "tolerance_pct": 5,
  "platforms": {
   "Web": {
-   "total": 474554088,
+   "total": 478162936,
    "categories": {
-    "textures": 371189576,
+    "textures": 374797802,
     "models": 45272456,
     "audio": 41372010,
-    "scripts": 11980239,
-    "other": 1935766,
+    "scripts": 11980453,
+    "other": 1936108,
     "data": 1552466,
     "shaders": 211464,
     "fonts": 202850
    }
   },
   "Windows": {
-   "total": 474554088,
+   "total": 478162936,
    "categories": {
-    "textures": 371189576,
+    "textures": 374797802,
     "models": 45272456,
     "audio": 41372010,
-    "scripts": 11980239,
-    "other": 1935766,
+    "scripts": 11980453,
+    "other": 1936108,
     "data": 1552466,
     "shaders": 211464,
     "fonts": 202850
    }
   },
   "macOS": {
-   "total": 474554088,
+   "total": 478162936,
    "categories": {
-    "textures": 371189576,
+    "textures": 374797802,
     "models": 45272456,
     "audio": 41372010,
-    "scripts": 11980239,
-    "other": 1935766,
+    "scripts": 11980453,
+    "other": 1936108,
     "data": 1552466,
     "shaders": 211464,
     "fonts": 202850
    }
   },
   "Linux": {
-   "total": 474554088,
+   "total": 478162936,
    "categories": {
-    "textures": 371189576,
+    "textures": 374797802,
     "models": 45272456,
     "audio": 41372010,
-    "scripts": 11980239,
-    "other": 1935766,
+    "scripts": 11980453,
+    "other": 1936108,
     "data": 1552466,
     "shaders": 211464,
     "fonts": 202850
    }
   },
   "Linux Server": {
-   "total": 474554136,
+   "total": 478162984,
    "categories": {
-    "textures": 371189576,
+    "textures": 374797802,
     "models": 45272456,
     "audio": 41372010,
-    "scripts": 11980239,
-    "other": 1935822,
+    "scripts": 11980453,
+    "other": 1936164,
     "data": 1552466,
     "shaders": 211464,
     "fonts": 202850

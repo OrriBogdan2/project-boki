@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://oed2v26pd3i6"
-path="res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.ctex"
+path.bptc="res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.bptc.ctex"
+path.astc="res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "32c60088e3237f688986831bfed47021"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/umbrathere/umbrathere_umbrathere_face.webp"
-dest_files=["res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.ctex"]
+dest_files=["res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.bptc.ctex", "res://.godot/imported/umbrathere_umbrathere_face.webp-c0339ca9321864753119cd1e03ec2379.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

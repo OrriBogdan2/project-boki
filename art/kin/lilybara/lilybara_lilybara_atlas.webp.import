@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjbgkmawfvxop"
-path="res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.ctex"
+path.bptc="res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.bptc.ctex"
+path.astc="res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2750fdf09e2805cb8df1068f00727551"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lilybara/lilybara_lilybara_atlas.webp"
-dest_files=["res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.ctex"]
+dest_files=["res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.bptc.ctex", "res://.godot/imported/lilybara_lilybara_atlas.webp-04f6ab24931b39d8fd2ea99828a00cef.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

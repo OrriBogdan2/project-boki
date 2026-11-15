@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfdrkagnrcba2"
-path="res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.ctex"
+path.bptc="res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.bptc.ctex"
+path.astc="res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a7410f294a8b6ddae66c21f46df53eae"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lilybara/lilybara_lilybara_eye.webp"
-dest_files=["res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.ctex"]
+dest_files=["res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.bptc.ctex", "res://.godot/imported/lilybara_lilybara_eye.webp-18271e6c8f6e2534b789190ca3bcb5ac.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

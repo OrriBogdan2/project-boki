@@ -251,7 +251,9 @@ func _match() -> void:
 ## Two gloves (Q and V) chain into each other: a hook drags a foe in and a fissure on the other key
 ## throws them up at once; each glove keeps its own cooldown; a passive glove sits in either slot.
 func _glove_combos() -> void:
-	var r: Array = main._ac_setup(7.0)
+	var ac = load("res://tools/ability_check.gd").new()      # its dummy-rival setup (moved out of main.gd)
+	ac.main = main
+	var r: Array = ac._ac_setup(7.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
