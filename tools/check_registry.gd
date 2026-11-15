@@ -455,6 +455,8 @@ const CHECKS := {
 	# the sight wedge first-time hint
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
+	# the first-time capture hint
+	"--tut-first-capture-check": ["res://tools/tut_first_capture_check.gd", "tut_first_capture_check", null],
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice

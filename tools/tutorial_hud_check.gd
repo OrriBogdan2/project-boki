@@ -17,7 +17,9 @@ extends RefCounted
 ##   7. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
 ##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
 ##      again; a save that has dived never sees it
-##   8. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
+##   8. the first stun, root and Grounded in a real match: one hint card each (content/rules/tutorial.json
+##      "tips"), never again on the same save; a hunter's own short hold is not a root; none in the tutorial
+##   9. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
 
 var bad := 0
 var m: Match
@@ -36,6 +38,7 @@ func run(mn: Node) -> void:
 	_course()
 	_reach()
 	_dive_hint()
+	_cc_tips()
 	_zone_lines()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -325,7 +328,50 @@ func _dive_hint() -> void:
 	_glide_secs(g2, p, 5.0)
 	ok(g2.line == "", "shown once per save: not again after it ran out")
 	dm.queue_free()
-# ------------------------------------------------------------------ 8. the closing zone's two lines
+
+# ------------------------------------------------------------------ 8. the first crowd control
+func _cc_tips() -> void:
+	var tips: Dictionary = Content.rules("tutorial")["tips"]
+	for cc: String in ["stun", "root", "grounded"]:
+		Save.d["tutorial"].erase("cc_" + cc)
+	for case_name: String in ["real match", "same save again", "tutorial"]:
+		if case_name == "tutorial":
+			for cc: String in ["stun", "root", "grounded"]:
+				Save.d["tutorial"].erase("cc_" + cc)
+		if m: m.queue_free()
+		m = Match.new()
+		main.add_child(m)
+		var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
+		opts["tutorial"] = case_name == "tutorial"
+		m.start(opts)
+		m.set_process(false)
+		var p: Hunter = m.player
+		p.dropping = false
+		m._tip_t = 2.0
+		m._tips()
+		m.hud.msgs.clear()
+		p.root_t = Match.SELF_HOLD_S
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: a hunter's own hold shows nothing" % case_name)
+		p.root_t = 0.0
+		for cc: String in ["stun", "root", "grounded"]:
+			match cc:
+				"stun": p.stun_t = 1.0
+				"root": p.root_t = 1.0
+				"grounded": KitStatus.apply(p, "gnd", 1.5, 0.0, false)
+			m._tips()
+			var shown: bool = m.hud.msgs.count() == 1 and m.hud.msgs.texts().has(tips[cc])
+			var said := "shown" if shown else "not shown"
+			ok(shown == (case_name == "real match"), "%s: %s card %s" % [case_name, cc, said])
+			m.hud.msgs.clear()
+			m._tips()
+			ok(m.hud.msgs.count() == 0, "%s: no repeat while still %s" % [case_name, cc])
+			p.stun_t = 0.0
+			p.root_t = 0.0
+			p.set_meta("gnd_until", 0.0)
+	for cc: String in tips:
+		ok(not String(tips[cc]).contains("%") and String(tips[cc]).length() < 70, "the %s card is one short line" % cc)
+# ------------------------------------------------------------------ 9. the closing zone's two lines
 ## A real expedition with the first-match guide, every other guide line already shown, the player landed.
 func _zone_match() -> Match:
 	var zm := Match.new()

@@ -42,7 +42,8 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
-var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
+var guide: FirstMatchGuide = null   # "what to do next" in a save's first three Extractions
+var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
@@ -285,6 +286,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	ktip = KnockTip.for_match(self, guide)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1773,6 +1775,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
+		if ktip: ktip.note(by, d, o)
 		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
@@ -1803,6 +1806,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
+		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
 		Sfx.duck(0.6)
@@ -5624,6 +5628,9 @@ func tip_once(key: String) -> bool:
 	seen[key] = true
 	return true
 
+var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+const SELF_HOLD_S := 0.12   # s of root a hunter's own statue or stomp keeps refreshing: not a foe's root
+
 func _tips() -> void:
 	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
@@ -5633,6 +5640,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	ult_hint.tick(self)
 	tips_live = true
 	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
 	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
@@ -5648,7 +5656,12 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
-	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
+	var seen: Dictionary = Save.d["tutorial"]
+	var cc_tips: Dictionary = Content.rules("tutorial")["tips"]
+	if player.stun_t > 0.0 and not seen.has("cc_stun"): _tip("cc_stun", cc_tips["stun"])
+	elif player.root_t > SELF_HOLD_S and not seen.has("cc_root"): _tip("cc_root", cc_tips["root"])
+	elif KitStatus.grounded(player) and not seen.has("cc_grounded"): _tip("cc_grounded", cc_tips["grounded"])
+	if _tip_t > VisionHint.AFTER_S and not seen.has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
@@ -5666,8 +5679,7 @@ func _tips() -> void:
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
-	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+	FirstCapture.tick(self)
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
