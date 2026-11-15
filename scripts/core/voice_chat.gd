@@ -5,6 +5,7 @@ extends RefCounted
 ## local indicator, and the lobby says voice isn't connected.
 
 var transport := Callable()
+var sink := Callable()      # where a teammate's voice frame plays: a Callable taking `from: String, frame`
 var talking := false
 
 func available() -> bool:
@@ -15,3 +16,10 @@ func set_talking(on: bool) -> void:
 	talking = on
 	if transport.is_valid():
 		transport.call(on)
+
+## A voice frame from teammate `from`; played through `sink` unless you muted them. Returns whether it played.
+func receive(from: String, frame: PackedByteArray) -> bool:
+	if MuteList.has(from) or not sink.is_valid():
+		return false
+	sink.call(from, frame)
+	return true

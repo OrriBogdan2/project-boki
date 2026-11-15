@@ -6,10 +6,11 @@ extends RefCounted
 ## hair_<pick>_braid.png (the same from behind). hair_7 also writes face.png (from the front at head
 ## height). Prints the hair and eye colours the model is handed. Needs a renderer; the paint is --warden-glb-check.
 
-const HAIRS := [0, 7, 14]      # PlayerLook hair_col picks: dark brown, pink, lilac
+const HAIRS := [0, 7, 14]  # PlayerLook hair_col picks: dark brown, pink, lilac
 
 var main: Node
 var dir := ""
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -44,22 +45,27 @@ func run(main_node: Node) -> void:
 		var h := Models.hunter(Arch.weight("thief"), Data.TEAM_COLORS[0], Arch.signature("thief"), "", look, "thief")
 		m.add_child(h)
 		h.global_position = Vector3(c.x, m.world.ground_at(c.x, c.z), c.z)
-		h.rotation.y = PI       # facing the match camera
+		h.rotation.y = PI  # facing the match camera
 		var p := MantleLook.params("thief", look)
-		print("SABLE-HAIR pick %d hair %s eyes %s" % [pick, (p["hair_col"] as Color).to_html(false),
-			(p["eye_col"] as Color).to_html(false)])
+		print(
+			(
+				"SABLE-HAIR pick %d hair %s eyes %s"
+				% [pick, (p["hair_col"] as Color).to_html(false), (p["eye_col"] as Color).to_html(false)]
+			)
+		)
 		m.cam.dist_mul = 1.0
 		m.cam.snap(c)
 		await _grab("hair_%d.png" % pick)
 		m.cam.dist_mul = 0.3
 		m.cam.snap(c)
 		var img := await _grab("hair_%d_close.png" % pick)
-		var at := img.get_size() / 2 + Vector2i(0, img.get_height() / 14)   # (the camera leads her a little)
+		var at := img.get_size() / 2 + Vector2i(0, img.get_height() / 14)  # (the camera leads her a little)
 		var half := img.get_height() / 7
 		var r := Rect2i(Vector2i(at) - Vector2i(half, half), Vector2i(half * 2, half * 2)).intersection(
-				Rect2i(Vector2i.ZERO, img.get_size()))
+			Rect2i(Vector2i.ZERO, img.get_size())
+		)
 		img.get_region(r).save_png(dir.path_join("hair_%d_head.png" % pick))
-		h.rotation.y = 0.0      # her back to the camera: the braid
+		h.rotation.y = 0.0  # her back to the camera: the braid
 		img = await _grab("hair_%d_back.png" % pick)
 		img.get_region(r).save_png(dir.path_join("hair_%d_braid.png" % pick))
 		if pick == HAIRS[1]:
@@ -67,6 +73,7 @@ func run(main_node: Node) -> void:
 		h.queue_free()
 	print("SABLE-HAIR-SHOTS done ", dir)
 	main.get_tree().quit()
+
 
 ## Her face from the front at head height, in the match's own world and light (a second camera; the match camera
 ## looks down on her crown): the eyes stay solid grey-black whatever the eye pick. Writes face.png.
@@ -82,6 +89,7 @@ func _face(m: Match, h: Node3D) -> void:
 	await _grab("face.png")
 	cam.queue_free()
 	m.cam.make_current()
+
 
 func _grab(file: String) -> Image:
 	for i in 30:

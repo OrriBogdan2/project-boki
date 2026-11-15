@@ -9,8 +9,8 @@ const BAR_W := 64
 const BAR_H := 9
 
 static func _size(id: String) -> Vector2:
-	var s: Array = HomeLayout.CATALOG.get(id, {}).get("size", [1, 1])
-	return Vector2(float(s[0]), float(s[1]))
+	var s := HomeLayout.size_of(id, 0)
+	return Vector2(float(s.x), float(s.y))
 
 ## The stages the scaffold's rising walls come in (a rebuild each time, so the bar moves in between).
 static func stage_of(e: Dictionary) -> int:
@@ -174,7 +174,7 @@ static func tick_bars(hw) -> void:
 			var J: Dictionary = k["job"]
 			live[int(J["u"])] = float(live.get(int(J["u"]), 0.0)) + 1.0 - float(J["left"]) / maxf(0.01, float(J["dur"]))
 	for e in FarmSites.sites():
-		var n: Node3D = hw.h.hb.nodes.get(int(e["u"]))
+		var n: Node3D = FarmLots.node_of(hw.h, e) if FarmLots.is_lot(e) else hw.h.hb.nodes.get(int(e["u"]))
 		if is_instance_valid(n):
 			set_bar(n, e, float(live.get(int(e["u"]), 0.0)))
 			set_need(n, e)
@@ -229,6 +229,7 @@ static func toy(id: String) -> Node3D:
 
 # ------------------------------------------------------------------ the hub's Waystone (GARDEN.md 10.1)
 const STONE_DARK := "4a4f45"     # a locked zone's standing stone: dark and grown over
+const STONE_GLOW := 0.6         # a lit standing stone's glow (ZoneReveal warms a woken one up to it)
 const RING_R := 1.6              # m, the Waystone's ring; its standing stones stand just outside it
 
 ## The Waystone: a flat stone ring with one standing stone per zone round it. stones: [{colour, open, keys}].
@@ -243,7 +244,7 @@ static func waystone(stones: Array) -> Node3D:
 		var at := Vector3(sin(a), 0, cos(a)) * (RING_R + 0.45)
 		var lit: bool = stones[i]["open"]
 		var col := Color(stones[i]["colour"] if lit else STONE_DARK)
-		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, 0.6 if lit else 0.0),
+		var st := Models.part(n, Models.box(0.36, 1.25, 0.24), Models.toon(col, true, STONE_GLOW if lit else 0.0),
 				at + Vector3(0, 0.62, 0), Vector3.ONE, Vector3(0, a, 0), "Stone%d" % i)
 		st.set_meta("open", lit)
 		if lit:
@@ -251,16 +252,25 @@ static func waystone(stones: Array) -> Node3D:
 			var top := at + Vector3(0, 1.34, 0)
 			Models.part(n, Models.sphere(0.13, 8), cap, top, Vector3.ONE, Vector3.ZERO, "Cap%d" % i)
 			continue
-		var moss_at := at + Vector3(0, 0.12, 0)
-		_piece(n, Models.box(0.4, 0.22, 0.28), "5f7a3e", moss_at, "Moss%d" % i, false, Vector3(0, a, 0))
-		var face := Basis(Vector3.UP, a)
-		var keys: Dictionary = stones[i].get("keys", {})
-		for j in 2:
-			var held: bool = keys.get(["seed", "lean"][j], false)
-			var mark := Color(stones[i]["colour"]) if held else Color("2c302a")
-			var spin := Vector3(0, a, PI * 0.25 * float(1 - j))      # seed mark: diamond; Boki mark: square
-			Models.part(n, Models.box(0.09, 0.09, 0.02), Models.toon(mark, false, 0.8 if held else 0.0),
-					at + face * Vector3(-0.07 + 0.14 * j, 0.8, 0.125), Vector3.ONE, spin, "Key%d_%d" % [i, j])
+		var lock := stone_lock(stones[i]["colour"], stones[i].get("keys", {}))
+		lock.position = at
+		lock.rotation.y = a
+		lock.name = "Lock%d" % i
+		n.add_child(lock)
+	return n
+
+## A locked stone's lock look, set at the stone's foot and turned with it: its moss and, on its face, the
+## two key marks (a seed diamond and a Boki square) in the zone's `colour` once held, else dull.
+## ZoneReveal drops it off the stone when the zone wakes.
+static func stone_lock(colour: String, keys: Dictionary) -> Node3D:
+	var n := Node3D.new()
+	_piece(n, Models.box(0.4, 0.22, 0.28), "5f7a3e", Vector3(0, 0.12, 0), "Moss", false)
+	for j in 2:
+		var held: bool = keys.get(["seed", "lean"][j], false)
+		var mark := Color(colour) if held else Color("2c302a")
+		var spin := Vector3(0, 0, PI * 0.25 * float(1 - j))      # seed mark: diamond; Boki mark: square
+		Models.part(n, Models.box(0.09, 0.09, 0.02), Models.toon(mark, false, 0.8 if held else 0.0),
+				Vector3(-0.07 + 0.14 * j, 0.8, 0.125), Vector3.ONE, spin, "Key%d" % j)
 	return n
 
 ## A zone's return pad: a small flat stone in the zone's colour, the way back to the hub.

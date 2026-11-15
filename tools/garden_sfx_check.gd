@@ -155,6 +155,7 @@ func _shove(home) -> void:
 
 func _dash(home) -> void:
 	var race: BaseRace = home.hrace
+	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var runners: int = race.runners.size()
 	var offs := [0.0, (TimingBar.GOOD + TimingBar.GREAT) * 0.5, 0.9]      # a perfect, a good and a missed press
@@ -343,9 +344,9 @@ func _chimes(home) -> void:
 	rec["forms"].append("fierce")
 	hc.tick(gap)
 	ok(_count("garden_chime_evolve") == 1 and _total("garden_chime_") == 3, "chimes: one evolve chime for a form")
-	rec["xp"] = 100 * int(rec["level"]) - 1
+	rec["xp"] = Game.xp_need(int(rec["level"])) - 1
 	Care.add_stat(rec, "guard", 2)
-	GardenXp.give(rec, "drill", false, 4)
+	GardenXp.give(rec, "drill", 4)
 	hc.tick(gap)
 	Care.add_stat(rec, "speed", 1)
 	hc.tick(0.3)

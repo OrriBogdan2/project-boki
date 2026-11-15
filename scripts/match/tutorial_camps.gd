@@ -7,6 +7,8 @@ extends RefCounted
 ## the next pick step says (Hunter.can_level asks lets_level), until the ranks step opens them all.
 
 const PICK_LVL := {"sec": 1, "dash": 2, "kin": 3, "ult": 6}     # the level each pick step is at
+## m to a row camp's first monster: past an idle monster's notice (Mob, 7.5 m), so the line holds
+const ROW_FROM := 10.0
 
 var tu: Tutorial
 var granting := false        # the tutorial is paying XP right now (any other XP is ignored)
@@ -71,28 +73,45 @@ func reach(lvl: int) -> void:
 func spawn(sid: String) -> void:
 	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
 	var kinds: Array = c.get("foes", [])
-	if kinds.is_empty():
-		kinds = Content.rules("tutorial")["fight_foes"].get(tu.m.player.arch, ["skitter", "spitter", "skitter"])
 	if alive() > 0:
 		return
 	ledger.clear()
 	count = kinds.size()
+	var camp_hp: float = Content.rules("tutorial")["mob"]["camp_hp"]
 	var ang := randf() * TAU
 	for i in kinds.size():
 		var at := Vector3.INF
 		if c.get("row", false):
-			at = tu.spot(8.0 + i * 1.6, ang)       # (one behind the other, to line up)
+			at = tu.spot(ROW_FROM + i * 1.6, ang)       # (one behind the other, to line up)
 		elif c.get("far", false):
 			at = tu.spot(8.5 - i * 3.0, ang + i * 0.7)
 		else:
 			at = tu.spot(6.0 + (i % 3) * 1.2, ang + i * 1.3)
 		if at != Vector3.INF:
 			var mb := tu.m.spawn_mob(kinds[i], at)
-			tu.tank(mb, c.has("to"))
+			tu.tank(mb, float(c.get("hp", camp_hp)))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
+
+## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, and if that
+## empties the camp a new one comes.
+func _cull_strays() -> void:
+	var p := tu.m.player
+	if not p.grounded:
+		return
+	var isl := tu.m.world.island_of(p.pos.x, p.pos.z)
+	var culled := false
+	for e: Dictionary in ledger:
+		var mb: Mob = e["mb"]
+		if is_instance_valid(mb) and not mb.dead and tu.m.world.island_of(mb.pos.x, mb.pos.z) != isl:
+			mb.dead = true
+			mb.visible = false
+			culled = true
+	if culled and alive() == 0:
+		spawn(tu.id())
 
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:
+	_cull_strays()
 	for e: Dictionary in ledger:
 		if e["paid"] or (is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead):
 			continue
