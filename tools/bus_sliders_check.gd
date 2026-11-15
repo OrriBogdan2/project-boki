@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. every bus exists, and the sounds with a bus of their own are routed to it
 ##   2. moving each slider sets its bus volume; letting go plays the sample through that bus
 ##   3. the volumes survive a save and a load
-##   4. an older settings file (no Voices or UI volume) loads, both starting where Effects was
+##   4. an older settings file (no Voices or UI volume) loads at the same loudness, both starting where Effects was
 ## Prints BUSSLIDERS lines and "BUSSLIDERS DONE, failures: N". Puts the settings file back afterwards.
 
 var main: Node
@@ -106,7 +106,8 @@ func _save_load() -> void:
 		Settings.apply(key)
 		ok(
 			"'%s' survives a save and a load" % key,
-			is_equal_approx(float(Settings.get_v(key)), want) and is_equal_approx(_bus_level(key), want),
+			is_equal_approx(float(Settings.get_v(key)), want)
+			and is_equal_approx(_bus_level(key), db_to_linear(Sfx.slider_db(want))),
 			"%.3f" % float(Settings.get_v(key))
 		)
 
@@ -117,8 +118,11 @@ func _old_file() -> void:
 		cf.set_value("s", pair[0], pair[1])
 	cf.save(Settings.PATH)
 	Settings.load_file()
+	# an old file's levels were linear gains: Settings._migrate_volumes moves each slider to sqrt, so it sounds the same
 	var got := [Settings.get_v("master"), Settings.get_v("music"), Settings.get_v("ambience")]
-	ok("an older settings file keeps its volumes", got == [0.6, 0.5, 0.3], str(got))
+	var heard := got.map(func(v): return snappedf(float(v) * float(v), 0.001))
+	ok("an older settings file keeps its volumes", heard == [0.6, 0.5, 0.3], str(heard))
 	var voices := float(Settings.get_v("voices"))
 	var ui := float(Settings.get_v("ui_sounds"))
-	ok("...and Voices and UI start where Effects was", is_equal_approx(voices, 0.4) and is_equal_approx(ui, 0.4))
+	var fx := sqrt(0.4)
+	ok("...and Voices and UI start where Effects was", is_equal_approx(voices, fx) and is_equal_approx(ui, fx))
