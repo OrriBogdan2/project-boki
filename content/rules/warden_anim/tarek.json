@@ -63,6 +63,10 @@
 			"clip": "rmb_leap",
 			"hold_from": 0.3
 		},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
 		"breah_slam": {
 			"clip": "rmb_slam"
 		},
