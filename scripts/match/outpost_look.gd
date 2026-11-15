@@ -44,18 +44,13 @@ static func apply(n: Node3D, lit: float, col: Color, raise: float) -> void:
 static func sway(n: Node3D, t: float) -> void:
 	(n.get_node("Mast/Banner") as Node3D).rotation.y = sin(t * SWAY_RATE) * SWAY_RAD
 
-## The yard's edge (and the charge ring on it): shown while `visible_ring`, coloured for a contest.
-static func rings(n: Node3D, visible_ring: bool, contested: bool, charging: bool, prog: float) -> void:
-	var zone := n.get_node("Zone") as MeshInstance3D
+## The charge ring on the yard's edge: shown while charging and you stand in it or it is contested.
+static func rings(n: Node3D, visible_ring: bool, charging: bool, prog: float) -> void:
 	var charge := n.get_node("Charge") as MeshInstance3D
-	if zone.visible != visible_ring:
-		zone.visible = visible_ring
 	var show_charge := visible_ring and charging
 	if charge.visible != show_charge:
 		charge.visible = show_charge
-	if visible_ring:
-		var edge := Color("ff7a5a") if contested else ExitModels.UPLINK
-		(zone.material_override as ShaderMaterial).set_shader_parameter("color", Color(edge, 0.3))
+	if show_charge:
 		(charge.material_override as ShaderMaterial).set_shader_parameter("arc", prog)
 
 static func _mat(mi: Node) -> ShaderMaterial:

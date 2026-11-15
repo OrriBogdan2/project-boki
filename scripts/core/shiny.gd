@@ -26,25 +26,31 @@ const FALLBACK := {
 
 static var _pal := {}
 
+
 ## The chance a wild kin shimmers where it was found.
 static func wild_chance(tier := 0, rare_spot := false) -> float:
 	var m := (RARE_SPOT_MULT if rare_spot else 1.0) * (HOLLOW_MULT if tier >= HOLLOW_TIER else 1.0)
 	return minf(1.0, WILD * m)
 
+
 static func roll_wild(rng: RandomNumberGenerator, tier := 0, rare_spot := false) -> bool:
 	return rng.randf() < wild_chance(tier, rare_spot)
+
 
 ## The chance an egg from these two parents shimmers.
 static func egg_chance(a: Dictionary, b: Dictionary) -> float:
 	var n := (1 if a.get("shimmer", false) else 0) + (1 if b.get("shimmer", false) else 0)
 	return float(EGG[n])
 
+
 static func roll_egg(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> bool:
 	return rng.randf() < egg_chance(a, b)
+
 
 ## "1 in 1024" for showing odds.
 static func odds_text(p: float) -> String:
 	return "1 in %d" % int(round(1.0 / maxf(p, 1e-9)))
+
 
 # ------------------------------------------------------------------ colours
 ## A species' shimmer palette: {color, belly, glow, wing} as Colors. Hand-picked in the kin JSON
@@ -68,10 +74,13 @@ static func palette(species: String) -> Dictionary:
 		"glow": Color(String(raw["glow"])) if raw.has("glow") else Care.shimmer_col(base_g),
 		"hand": not raw.is_empty(),
 	}
-	if raw.has("wing"): out["wing"] = Color(String(raw["wing"]))
-	elif sp.has("wing"): out["wing"] = Care.shimmer_col(sp["wing"])
+	if raw.has("wing"):
+		out["wing"] = Color(String(raw["wing"]))
+	elif sp.has("wing"):
+		out["wing"] = Care.shimmer_col(sp["wing"])
 	_pal[species] = out
 	return out
+
 
 ## One colour slot ("color", "belly", "glow", "wing") for this kin: ghostly, shimmering or plain.
 static func col(species: String, rec: Dictionary, slot := "color") -> Color:
@@ -84,9 +93,11 @@ static func col(species: String, rec: Dictionary, slot := "color") -> Color:
 		return p.get(slot, base)
 	return base
 
+
 ## Shorthand for the body colour of a record (what most menus tint with).
 static func body(rec: Dictionary) -> Color:
 	return col(String(rec.get("species", "")), rec, "color")
+
 
 # ------------------------------------------------------------------ the entrance
 ## A burst of stars round a shimmer as it shows up, and its chime. parent: a 3D node to hang the
@@ -109,9 +120,12 @@ static func sparkle(parent: Node, at: Vector3, species := "", size := 1.0, sound
 	pt.initial_velocity_min = 1.6 * size
 	pt.initial_velocity_max = 3.6 * size
 	pt.gravity = Vector3(0, -1.5, 0)
-	pt.damping_min = 2.0; pt.damping_max = 3.5
-	pt.scale_amount_min = 0.6; pt.scale_amount_max = 1.3
-	var qm := QuadMesh.new(); qm.size = Vector2(0.16, 0.16) * size
+	pt.damping_min = 2.0
+	pt.damping_max = 3.5
+	pt.scale_amount_min = 0.6
+	pt.scale_amount_max = 1.3
+	var qm := QuadMesh.new()
+	qm.size = Vector2(0.16, 0.16) * size
 	var pm := StandardMaterial3D.new()
 	pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	pm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
@@ -122,7 +136,8 @@ static func sparkle(parent: Node, at: Vector3, species := "", size := 1.0, sound
 	qm.material = pm
 	pt.mesh = qm
 	var gr := Gradient.new()
-	gr.set_color(0, Color(cols[0], 1.0)); gr.set_color(1, Color(gc, 0.0))
+	gr.set_color(0, Color(cols[0], 1.0))
+	gr.set_color(1, Color(gc, 0.0))
 	pt.color_ramp = gr
 	pt.position.y = 0.5 * size
 	root.add_child(pt)
@@ -130,7 +145,8 @@ static func sparkle(parent: Node, at: Vector3, species := "", size := 1.0, sound
 	# and a ring of bigger stars that pop out, twinkle and fade
 	for i in 6:
 		var s := MeshInstance3D.new()
-		var q := QuadMesh.new(); q.size = Vector2(0.42, 0.42) * size
+		var q := QuadMesh.new()
+		q.size = Vector2(0.42, 0.42) * size
 		var m := pm.duplicate() as StandardMaterial3D
 		m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 		m.vertex_color_use_as_albedo = false
@@ -157,7 +173,10 @@ static func sparkle(parent: Node, at: Vector3, species := "", size := 1.0, sound
 	tm.tween_callback(root.queue_free)
 	return root
 
+
 static var _star: ImageTexture = null
+
+
 ## A soft four-point star.
 static func _star_tex() -> ImageTexture:
 	if _star != null:
@@ -174,26 +193,32 @@ static func _star_tex() -> ImageTexture:
 	_star = ImageTexture.create_from_image(img)
 	return _star
 
+
 static var _chime: AudioStreamWAV = null
+
+
 ## The shimmer chime: two bright bell runs that glitter upward, made here (no files).
 static func chime() -> AudioStreamWAV:
 	if _chime != null:
 		return _chime
 	var rate := 22050
 	var dur := 1.25
-	var buf := PackedFloat32Array(); buf.resize(int(dur * rate))
+	var buf := PackedFloat32Array()
+	buf.resize(int(dur * rate))
 	var notes := [[88, 0.0], [91, 0.07], [95, 0.14], [100, 0.21], [96, 0.42], [100, 0.49], [103, 0.56], [107, 0.63]]
 	for nt in notes:
 		var f := 440.0 * pow(2.0, (float(nt[0]) - 69.0) / 12.0)
 		var s0 := int(float(nt[1]) * rate)
-		var len := int(0.55 * rate)
-		for i in len:
+		var steps := int(0.55 * rate)
+		for i in steps:
 			var ti := float(i) / rate
 			var env := minf(1.0, ti / 0.003) * exp(-ti * 7.5)
 			var v := sin(TAU * f * ti) + sin(TAU * f * 2.01 * ti) * 0.25 + sin(TAU * f * 3.98 * ti) * 0.08
 			var j := s0 + i
-			if j < buf.size(): buf[j] += v * env * 0.16
-	var data := PackedByteArray(); data.resize(buf.size() * 2)
+			if j < buf.size():
+				buf[j] += v * env * 0.16
+	var data := PackedByteArray()
+	data.resize(buf.size() * 2)
 	for i in buf.size():
 		data.encode_s16(i * 2, int(clampf(tanh(buf[i] * 1.3), -1.0, 1.0) * 30000.0))
 	var w := AudioStreamWAV.new()

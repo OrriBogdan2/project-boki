@@ -3,6 +3,7 @@
  "default": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"],
  "paths": {
   "thief": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"],
+  "gil": ["quickfeed", "longreach", "hotload", "quickfeed", "longreach"],
   "archer": ["hotload", "longreach", "quickfeed", "hotload", "longreach"],
   "mage": ["hotload", "hotload", "quickfeed", "longreach", "hotload"],
   "gunslinger": ["quickfeed", "hotload", "deepmag", "hotload", "longreach"],

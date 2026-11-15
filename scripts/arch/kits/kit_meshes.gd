@@ -87,6 +87,35 @@ static func pillar(r_top: float, r_foot: float, hgt: float, seg := 18) -> ArrayM
 	_cache[key] = mesh
 	return mesh
 
+## A flat jagged crack facing +Z, centred, 1 m long (x -0.5..0.5), kinking up to +-`kink` m off its line, `half`
+## m half-wide mid-way and pinched to a point at both ends; UV.x along it, UV.y across (0 and 1 are its edges).
+static func crack(half: float, kink: float, segs := 12) -> ArrayMesh:
+	var key := "crack|%.2f|%.2f|%d" % [half, kink, segs]
+	if _cache.has(key):
+		return _cache[key]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_normal(Vector3.BACK)
+	var prev_c := Vector2.ZERO
+	for i in segs + 1:
+		var u := float(i) / segs
+		# a fixed uneven zigzag: the sign flips every joint, the size wanders on a sine
+		var c := Vector2(u - 0.5, kink * (1.0 if i % 2 == 0 else -1.0) * (0.5 + 0.5 * sin(i * 2.3)) * sin(PI * u))
+		if i > 0:
+			var span := [[prev_c, float(i - 1) / segs], [c, u]]
+			var strip := []
+			for e in span:
+				var w: float = half * sin(PI * e[1])
+				strip.append([Vector3(e[0].x, e[0].y + w, 0), Vector2(e[1], 0)])
+				strip.append([Vector3(e[0].x, e[0].y - w, 0), Vector2(e[1], 1)])
+			for k in [0, 1, 3, 0, 3, 2]:
+				st.set_uv(strip[k][1])
+				st.add_vertex(strip[k][0])
+		prev_c = c
+	var mesh := st.commit()
+	_cache[key] = mesh
+	return mesh
+
 ## A quad facing +Z (for billboards and standing panels), centred, with UV (0,0) at the top left.
 static func quad(w: float, hgt: float) -> QuadMesh:
 	var key := "quad|%.2f|%.2f" % [w, hgt]

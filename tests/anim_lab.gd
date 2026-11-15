@@ -221,7 +221,7 @@ func _emotes() -> void:
 		_hunter(cls, GUN[cls], i, Vector3((i - 3.5) * 1.55, 0, 0), "emote:" + ids[i], PI + 0.3)
 
 func _states() -> void:
-	var ss := ["downed", "crawl", "revive", "stomp", "base", "stun", "hit", "cast", "drink", "ledge"]
+	var ss := ["revive", "stomp", "base", "stun", "hit", "cast", "drink", "ledge"]
 	for i in ss.size():
 		var cls: String = CLS[i % 3]
 		_hunter(cls, GUN[cls], i, Vector3((i % 5 - 2.0) * 2.1, 0, (i / 5) * -2.4), ss[i], PI + 0.4)
@@ -323,8 +323,6 @@ func _drive(c: Dictionary, dt: float) -> void:
 			else:
 				s["fired"] = cyc2 - 1.4
 				s["reload"] = clampf((cyc2 - 2.0) / 1.8, 0.0, 1.0) if cyc2 < 3.8 else -1.0
-		"downed": s["downed"] = true
-		"crawl": s["downed"] = true; s["vel"] = fwd * 1.3
 		"revive": s["reviving"] = true
 		"stomp": s["stomp"] = fmod(t, 0.8) / 0.8
 		"base": s["base"] = fmod(t, 3.0) / 3.0

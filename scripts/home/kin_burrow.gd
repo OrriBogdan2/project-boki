@@ -66,6 +66,7 @@ static func model(sleepers := 0) -> Node3D:
 	root.add_child(light)
 	# a flat stone step in front of the door
 	Models.part(root, Models.cyl(0.42, 0.46, 0.08, 16), stone, Vector3(0, 0.04, 1.5), Vector3(1.3, 1.0, 0.8))
+	Models.merge_static(root, false, true)      # the unnamed parts: a mesh per material
 	return root
 
 ## Lights the right number of windows for how many kin sleep inside.
