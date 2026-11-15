@@ -66,7 +66,7 @@ static func _armory(body: Node3D) -> void:
 	var crates := _prop("dungeon/crates_stacked", 0.8)
 	if crates:
 		crates.position = Vector3(1.35, 0, -0.6); crates.rotation.y = 0.4; body.add_child(crates)
-	body.add_child(_label("Armory", Color("ffd79a"), 3.05))
+	body.add_child(_label("Gear Shed", Color("ffd79a"), 3.05))
 
 static func _shrine(body: Node3D) -> void:
 	var stone := Models.toon(Color("a8a3b8")); var dark := Models.toon(Color("4a4560"))

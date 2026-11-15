@@ -1,7 +1,7 @@
 extends RefCounted
 ## The match camera's framing against the source (docs/MOVEMENT_FEEL.md, "Camera framing vs the source").
 ## --cam-framing-check, on a 1920x1080 view:
-##   1. the Supervive style takes its numbers from content/rules/camera.json and sits inside the source's
+##   1. the default style takes its numbers from content/rules/camera.json and sits inside the source's
 ##      bands there: pitch, lens, and your feet a little below the screen's centre
 ##   2. that style is the default, shows the source's ground across and draws Hunters bigger to match its
 ##      Hunter size; the wheel runs from about the old 23 m view to well past the new one, and reach() follows
@@ -49,11 +49,11 @@ func run(main: Node, what: String) -> void:
 
 func _style(cam: CamRig) -> void:
 	var src: Dictionary = CamRig.RULES["source"]
-	var st: Dictionary = CamRig.RULES["styles"]["supervive"]
-	cam.use_style("supervive")
+	var st: Dictionary = CamRig.RULES["styles"]["default"]
+	cam.use_style("default")
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
 			and is_equal_approx(cam.fov, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
-			"the Supervive style is camera.json's: %s" % str(st))
+			"the default style is camera.json's: %s" % str(st))
 	var pitch := rad_to_deg(cam.pitch)
 	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
 	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg inside the source's %s" % [cam.fov, str(src["fov_deg"])])
@@ -63,7 +63,7 @@ func _style(cam: CamRig) -> void:
 			% [feet, str(src["feet_below_pct"])])
 
 func _lean(cam: CamRig) -> void:
-	var fm: Array = CamRig.FOLLOW["supervive"]
+	var fm: Array = CamRig.FOLLOW["lean"]
 	var deadzone := float(fm[0])
 	ok(cam.lean_to(Vector3(deadzone * 0.9, 0, 0)) == Vector3.ZERO, "no lean inside the %.1f m deadzone" % deadzone)
 	for z in ZOOMS:
@@ -137,14 +137,14 @@ func _pair_margin(cam: CamRig, fr: HomeKinFrame, z: float) -> float:
 
 func _source_style(cam: CamRig) -> void:
 	var src: Dictionary = CamRig.RULES["source"]
-	ok(Settings.DEFAULTS["cam_style"] == "supervive", "the Supervive view is the default (the Settings camera is %s)"
+	ok(Settings.DEFAULTS["cam_style"] == "default", "the default view is the default (the Settings camera is %s)"
 			% Settings.DEFAULTS["cam_style"])
-	var across := CamRig.style_across("supervive")
+	var across := CamRig.style_across("default")
 	ok(_inside(across, src["across_m"]), "it shows %.1f m across, inside the source's %s"
 			% [across, str(src["across_m"])])
 	ok(cam.hunter_scale > 1.5, "it draws Hunters %.2fx bigger (the source's Hunter size)" % cam.hunter_scale)
 	var r: Dictionary = CamWheel.rules()["match"]
-	var old := CamRig.style_across("supervive_close")
+	var old := CamRig.style_across("default_close")
 	var closest := across * float(r["min"])
 	ok(absf(closest - old) <= old * 0.12, "the wheel's closest view is %.1f m across, about the old %.1f m"
 			% [closest, old])

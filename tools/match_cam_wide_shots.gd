@@ -14,7 +14,7 @@ const FIGHT_AT := 2.0            # s into the match: the rivals and the pack are
 const EDGE_IN := 0.85            # of the outermost island's radius: where the edge still stands
 const NOTCH_EVERY := 8           # video frames between wheel notches
 const HOLD := 45                 # video frames held still between the wheel's runs
-const OLD_STYLE := "supervive_close"
+const OLD_STYLE := "default_close"
 
 var main: Node
 var bench := PerfBench.new()
@@ -38,7 +38,7 @@ func run(main_node: Node) -> void:
 	Settings.v["tips"] = false
 	await _style("old", OLD_STYLE, [["old", 1.0]], false)
 	var out: float = CamWheel.rules()["match"]["max"]
-	await _style("new", "supervive", [["new", 1.0], ["max", out]], video)
+	await _style("new", "default", [["new", 1.0], ["max", out]], video)
 	print("WIDECAM DONE")
 	main.get_tree().quit()
 

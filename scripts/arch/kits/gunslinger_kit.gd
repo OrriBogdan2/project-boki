@@ -654,7 +654,7 @@ func aim_lock() -> Vector2:
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
 	needle["t"] = float(needle["t"]) + dt
-	if h.downed or h.stun_t > 0.0 or Hex.active(h):
+	if h.downed or h.stun_t > 0.0:
 		_end_needle()
 		return
 	_turn_needle(dt)

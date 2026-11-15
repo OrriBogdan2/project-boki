@@ -6,7 +6,7 @@ extends RefCounted
 ## everyone sees the circle where the hop will land with its sweet spot growing from the centre; he can walk
 ## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
 ## foes in the air are dunked, rocks inside fly outward, and at rank 3 each slam that catches something
-## adds a Molten Guard shield stack (DolmKit.guard_stack).
+## adds a Shardskin shield stack (DolmKit.guard_stack).
 
 var k: DolmKit
 var leapt := false  # jumped during this charge (the leap forward)

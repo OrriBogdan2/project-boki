@@ -113,6 +113,7 @@ const T := {
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
+	"sneak_speed":             ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run speed"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"swoop_x":                 ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
 	"swoop_fade_s":            ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
@@ -725,6 +726,7 @@ func _glide_dive() -> void:
 		if P.grounded:
 			break
 	rec("dive_vy", peak)
+	rec("sneak_speed", HunterMove.sneak_speed)
 	rec("dive_vy_t", t90)
 	rec("dive_cancel_h", cancel_h)
 	# the keys in the plunge against the keys under the glider, from a standstill
@@ -1754,7 +1756,7 @@ func _screen_scale() -> void:
 	var cam: CamRig = m.cam
 	if cam == null or P.model == null:
 		return
-	cam.use_style("supervive_close")      # the older 23 m view, these bands' own (the default view: _source_scale)
+	cam.use_style("default_close")      # the older 23 m view, these bands' own (the default view: _source_scale)
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
 	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
@@ -1774,7 +1776,7 @@ func _screen_scale() -> void:
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
-	print("MFEEL framing: style supervive_close pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
+	print("MFEEL framing: style default_close pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
@@ -1803,7 +1805,7 @@ func _screen_scale() -> void:
 ## across and its Hunter size together, then it stays the style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
-	cam.use_style("supervive")
+	cam.use_style("default")
 	P.render(DT, 1.0)      # Hunter.fit_scale picks the style's hunter_scale up
 	cam.snap(P.pos)
 	for i in 120:
@@ -1823,7 +1825,7 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 		var hm := _stand_in(id, PlayerLook.neutral())
 		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / vh * 100.0])
 		hm.free()
-	cam.use_style("supervive")
+	cam.use_style("default")
 	P.render(DT, 1.0)
 	cam.snap(P.pos)
 

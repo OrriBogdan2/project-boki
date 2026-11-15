@@ -8,7 +8,7 @@ extends ArchKit
 ## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
 ##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
 ##   shot. At dash rank 3 pellet hits trim the barge recharge.
-## - RMB, Abyssal Hand: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
+## - RMB, Deep Reach: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
 ##   takes half the cooldown off.
@@ -22,7 +22,7 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("8a5aff")       # the Abyssal Hand: the bruised-purple flesh of the stretched arm
+const ARM_COL := Color("8a5aff")       # the Deep Reach: the bruised-purple flesh of the stretched arm
 const SLUDGE := Color("4a2278")        # the purple-black drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
 const BRASS := Color("e0a040")
@@ -315,7 +315,7 @@ func _tick_model(_dt: float) -> void:
 	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty() or snap_t > 0.0)
 	coins.tick(h, m.time, tells_visible())
 
-# ------------------------------------------------------------------ RMB: Abyssal Hand
+# ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
 	last_variant = "tap"
