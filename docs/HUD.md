@@ -193,6 +193,14 @@ nothing else on screen:
 - Taking, swapping, dragging, dropping into a slot and wearing each play a short, quiet inventory cue (`InvSfx`, docs/AUDIO.md) from the inventory and loot code, in place of the generic click.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## The recast marker (world)
+While a recast is open, a ring and a key cap sit in the world on what the key will trigger, in the ability's
+colour, shrinking and fading as the window closes. `RecastMarker.show_at` (scripts/ui/recast_marker.gd) is
+called every step by the kit; only the caster's game draws it and nothing goes over Net. In: Tenzo's Rock Hop
+(the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall, E freezes it), Sparkle's Kitefall
+(the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
+`--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
+
 ## Steal window (StealTell)
 
 DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
