@@ -205,7 +205,9 @@ def run(args):
         main = new_main
     sha = git("rev-parse", "HEAD", cwd=cand)
     if not summary.startswith("GATE GREEN"):
-        log(f"train {stamp} RED: {summary or 'gate failed'}; hold stays until the cap ({HOLD_MIN} min) or `rm {HOLD_FILE}`")
+        os.remove(HOLD_FILE)  # a red train must not block main for the rest of the cap: free the hold, drop the train branch
+        git("push", "-q", "origin", "--delete", branch)
+        log(f"train {stamp} RED: {summary or 'gate failed'}; hold released, {branch} deleted")
         return 1
     if subprocess.run(["git", "-C", REPO, "merge-base", "--is-ancestor", "origin/main", sha]).returncode != 0:
         log(f"train {stamp}: main moved again after 3 gates, not publishing"); return 1
