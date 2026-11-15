@@ -639,24 +639,10 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_row.add_child(ne)
+	var step := NameStep.new(sp_id, "")      # ("Head out together" below keeps the name)
+	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(step)
 	v.add_child(name_row)
-	# a few ideas, and a button for a fresh handful
-	var picks := UI.hbox(6)
-	var fill_picks := func(self_ref: Callable) -> void:
-		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picks.add_child(il)
-		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-		for nm in pool.slice(0, 4):
-			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
-		more.flat = true
-		picks.add_child(more)
-	fill_picks.call(fill_picks)
-	v.add_child(picks)
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
@@ -665,17 +651,17 @@ func _show_name() -> void:
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
 	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false)))
+			func(): _finish(sp_id, step.chosen(), ye.text, false)))
 	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true)))
+			func(): _finish(sp_id, step.chosen(), ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
 	# Enter in either box is the same as "Tend the garden"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
-	ne.grab_focus()
-	ne.select_all()
+	step.chosen()_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
+	step.box.grab_focus()
+	step.box.select_all()
 
 ## One of the two equal ways on from the naming card: a button and a line under it, one click.
 func _path_card(label: String, line: String, go: Callable) -> Control:
