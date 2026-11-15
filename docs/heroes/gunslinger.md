@@ -8,6 +8,7 @@ streaming scarf, a bandolier of spiked charges, one bronze pauldron and a long-s
 Palette: her green fire (owner 11-08): signature lime `#b8f03c`, fire green, pale-lime hot cores, deep green and
 white; bronze is only the charge's metal. Every look is HeroVfx data in `content/vfx/gunslinger.json`
 (docs/HERO_VFX.md); the kit only says when. Payoff: the skewer (no word).
+Palette: ember orange, bronze and hot white.
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.
@@ -309,6 +310,10 @@ Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tool
 
 The per-slot table's "while held: a white lane" and the Shift "white ring" lines are stale (rows 4 and 10); they
 are left alone here because every in-flight Vex branch rewrites those rows.
+
+## X range re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage venator_ghost, 1 bh = top of the health bar to the feet = 1.8 m)
+
+Cinderfall cast range 14: **Not determinable**. Frames 0190-0255 hold the only two casts. Both land on the cursor: on the dummy (0191-0195) and on empty ground 136 px over a 44 px body = 3.1 bh = 5.6 m (0226-0228). The reticle has no range ring and no clamp shows; 14 stays. Note: footage/venator is a different (sniper) hero; Ghost is footage/venator_ghost.
 
 ## Ultimate choice
 R is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
