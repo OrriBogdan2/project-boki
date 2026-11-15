@@ -400,14 +400,14 @@ func _keys_upper(anim: Animation, dd: Dictionary) -> bool:
 ## spring: no dip to read), a kerb plays no landing, running the legs are back within JL_FREE_S, and the body is back
 ## within the data's promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
 func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
-	var jl := preload("res://tools/jump_land_check.gd")
+	var JumpLand := preload("res://tools/jump_land_check.gd")
 	var ld: Dictionary = dd.get("land", {})
 	# (skeleton metres to world metres: the rigs are built at their own sizes and scaled to the Hunter's body)
 	var on_screen := WardenGlb.skeleton(m.get_node("Warden")).global_basis.get_scale().y
 	for running: bool in [true, false]:
 		var hop_dip := 0.0
 		for way: String in ["jump", "drop", "glide", "kerb"]:
-			var r: Dictionary = jl.measure(m, sync, clips, running, way)
+			var r: Dictionary = JumpLand.measure(m, sync, clips, running, way)
 			var tag := "%s %s" % [way, "run" if running else "still"]
 			var world_dip: float = r["dip"] * on_screen
 			print(("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f"
@@ -427,12 +427,12 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 			if not dd.has("sway"):
 				var deep := way != "jump"
 				var need := maxf(JL_DIP_M, hop_dip * JL_DEEPER) if deep else JL_HOP_DIP_M
-				ok(r["dip"] <= -need and r["dip_t"] <= jl.DIP_WINDOW,
+				ok(r["dip"] <= -need and r["dip_t"] <= JumpLand.DIP_WINDOW,
 						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
 						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
 			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
 			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
-			var promise := hold + WardenClips.FADE_LOCO + jl.DT
+			var promise := hold + WardenClips.FADE_LOCO + JumpLand.DT
 			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
 					"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
 					% [id, tag, r["back"], promise, JL_BACK_MAX])

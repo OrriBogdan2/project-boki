@@ -5,9 +5,9 @@ revive: down on the right knee beside the fallen, the hands pressing, a loop.
 A Hero's clips file gives its ready pose and what is its own: `hold` {"stomp": {...}, "drink": {...}, "revive": {...}} are pose keys laid over the shared ones
 (its free hand, its weapon, how far its feet reach); `mouth` is where the flask meets the face, in armature space."""
 
-CYCLE = 0.7     # s, Life.R["stomp_cycle"]
-SLAM = 0.49     # s into the cycle the heel lands: 0.7 of it (Life: hit_at = cycle * 0.7)
-DRINK = 1.1     # s, Hunter.DRINK_TIME
+CYCLE = 0.7  # s, Life.R["stomp_cycle"]
+SLAM = 0.49  # s into the cycle the heel lands: 0.7 of it (Life: hit_at = cycle * 0.7)
+DRINK = 1.1  # s, Hunter.DRINK_TIME
 
 
 def shift(p, **d):
@@ -30,21 +30,54 @@ def stomp(C, ready, a_z, hands, over=None):
     reach, lift = o.pop("reach", 0.22), o.pop("lift", 0.5)
     fr = ready["FR"]
     s0 = ride(dict(ready, **o.get("set", {})), -0.02, hands)
-    s0 = dict(s0, pel=(ready["pel"][0] - 0.035, ready["pel"][1], ready["pel"][2] - 0.02), FR=(fr[0], fr[1], a_z + 0.03), FRp=0.2)
-    up1 = dict(s0, FR=(fr[0], fr[1] + 0.1, a_z + 0.34), FRp=0.3, pel=(ready["pel"][0] - 0.05, ready["pel"][1], ready["pel"][2] + 0.0),
-               tor=(ready["tor"][0] - 0.08, ready["tor"][1], ready["tor"][2]), hed=(ready["hed"][0] - 0.06, ready["hed"][1], ready["hed"][2]))
-    top = dict(up1, FR=(fr[0], fr[1] + 0.18, a_z + lift), FRp=0.1, pel=(ready["pel"][0] - 0.05, ready["pel"][1], ready["pel"][2] + 0.01),
-               tor=(ready["tor"][0] - 0.2, ready["tor"][1], ready["tor"][2]), prt=(ready["prt"][0] - 0.06, ready["prt"][1], ready["prt"][2]),
-               hed=(ready["hed"][0] - 0.1, ready["hed"][1], ready["hed"][2]))
+    s0 = dict(
+        s0,
+        pel=(ready["pel"][0] - 0.035, ready["pel"][1], ready["pel"][2] - 0.02),
+        FR=(fr[0], fr[1], a_z + 0.03),
+        FRp=0.2,
+    )
+    up1 = dict(
+        s0,
+        FR=(fr[0], fr[1] + 0.1, a_z + 0.34),
+        FRp=0.3,
+        pel=(ready["pel"][0] - 0.05, ready["pel"][1], ready["pel"][2] + 0.0),
+        tor=(ready["tor"][0] - 0.08, ready["tor"][1], ready["tor"][2]),
+        hed=(ready["hed"][0] - 0.06, ready["hed"][1], ready["hed"][2]),
+    )
+    top = dict(
+        up1,
+        FR=(fr[0], fr[1] + 0.18, a_z + lift),
+        FRp=0.1,
+        pel=(ready["pel"][0] - 0.05, ready["pel"][1], ready["pel"][2] + 0.01),
+        tor=(ready["tor"][0] - 0.2, ready["tor"][1], ready["tor"][2]),
+        prt=(ready["prt"][0] - 0.06, ready["prt"][1], ready["prt"][2]),
+        hed=(ready["hed"][0] - 0.1, ready["hed"][1], ready["hed"][2]),
+    )
     top = ride(dict(top, **o.get("top", {})), 0.02, hands)
-    hit = dict(top, FR=(fr[0], fr[1] + reach, a_z), FRp=-0.05, pel=(ready["pel"][0] - 0.01, ready["pel"][1] + 0.03, ready["pel"][2] - 0.16),
-               tor=(ready["tor"][0] + 0.28, ready["tor"][1], ready["tor"][2]), prt=(ready["prt"][0] + 0.16, ready["prt"][1], ready["prt"][2]),
-               hed=(ready["hed"][0] + 0.12, ready["hed"][1], ready["hed"][2]))
+    hit = dict(
+        top,
+        FR=(fr[0], fr[1] + reach, a_z),
+        FRp=-0.05,
+        pel=(ready["pel"][0] - 0.01, ready["pel"][1] + 0.03, ready["pel"][2] - 0.16),
+        tor=(ready["tor"][0] + 0.28, ready["tor"][1], ready["tor"][2]),
+        prt=(ready["prt"][0] + 0.16, ready["prt"][1], ready["prt"][2]),
+        hed=(ready["hed"][0] + 0.12, ready["hed"][1], ready["hed"][2]),
+    )
     hit = ride(dict(hit, **o.get("hit", {})), -0.14, hands)
-    rebound = dict(hit, pel=(ready["pel"][0] - 0.02, ready["pel"][1] + 0.02, ready["pel"][2] - 0.1), tor=(ready["tor"][0] + 0.18, ready["tor"][1], ready["tor"][2]),
-                   prt=(ready["prt"][0] + 0.1, ready["prt"][1], ready["prt"][2]), hed=(ready["hed"][0] + 0.06, ready["hed"][1], ready["hed"][2]))
+    rebound = dict(
+        hit,
+        pel=(ready["pel"][0] - 0.02, ready["pel"][1] + 0.02, ready["pel"][2] - 0.1),
+        tor=(ready["tor"][0] + 0.18, ready["tor"][1], ready["tor"][2]),
+        prt=(ready["prt"][0] + 0.1, ready["prt"][1], ready["prt"][2]),
+        hed=(ready["hed"][0] + 0.06, ready["hed"][1], ready["hed"][2]),
+    )
     rebound = ride(rebound, 0.04, hands)
-    return C("stomp", CYCLE, [(0.0, s0), (0.2, up1, "out"), (0.38, top), (SLAM, hit, "in"), (0.57, rebound, "out"), (CYCLE, s0)], loop=True)
+    return C(
+        "stomp",
+        CYCLE,
+        [(0.0, s0), (0.2, up1, "out"), (0.38, top), (SLAM, hit, "in"), (0.57, rebound, "out"), (CYCLE, s0)],
+        loop=True,
+    )
 
 
 def drink(C, ready, mouth, over=None):
@@ -52,26 +85,83 @@ def drink(C, ready, mouth, over=None):
     o = dict(over or {})
     key = o.pop("hand", "LP")
     hed = ready["hed"]
-    sip = dict(ready, **{key: mouth, "hed": (hed[0] - 0.34, hed[1], hed[2]), "tor": (ready["tor"][0] - 0.06, ready["tor"][1], ready["tor"][2]),
-                         "brow": -0.2, "lid": 0.5})
+    sip = dict(
+        ready,
+        **{
+            key: mouth,
+            "hed": (hed[0] - 0.34, hed[1], hed[2]),
+            "tor": (ready["tor"][0] - 0.06, ready["tor"][1], ready["tor"][2]),
+            "brow": -0.2,
+            "lid": 0.5,
+        },
+    )
     sip.update(o.get("sip", {}))
     gulp = dict(sip, hed=(hed[0] - 0.4, hed[1], hed[2]))
     tilt = dict(sip, hed=(hed[0] - 0.46, hed[1], hed[2]), **{key: (mouth[0], mouth[1] - 0.03, mouth[2] + 0.015)})
-    lift = dict(ready, **{key: (mouth[0] * 0.5 + ready[key][0] * 0.5, mouth[1] * 0.6, ready[key][2] * 0.5 + mouth[2] * 0.5 - 0.08)}, hed=(hed[0] - 0.1, hed[1], hed[2]))
-    return C("drink", DRINK, [(0.0, ready), (0.14, lift), (0.28, sip, "out"), (0.45, tilt), (0.54, gulp), (0.64, tilt), (0.72, gulp), (0.84, sip), (1.0, lift), (DRINK, ready)])
+    lift = dict(
+        ready,
+        **{key: (mouth[0] * 0.5 + ready[key][0] * 0.5, mouth[1] * 0.6, ready[key][2] * 0.5 + mouth[2] * 0.5 - 0.08)},
+        hed=(hed[0] - 0.1, hed[1], hed[2]),
+    )
+    return C(
+        "drink",
+        DRINK,
+        [
+            (0.0, ready),
+            (0.14, lift),
+            (0.28, sip, "out"),
+            (0.45, tilt),
+            (0.54, gulp),
+            (0.64, tilt),
+            (0.72, gulp),
+            (0.84, sip),
+            (1.0, lift),
+            (DRINK, ready),
+        ],
+    )
 
 
 def revive(C, ready, a_z, hands, over=None):
     """On the right knee, the left foot out before it, leaning over: both hands press down and ease, a slow pair of pulses every loop. over["kneel"]: the Hero's
     hands and weapon on the fallen."""
     fl, fr = ready["FL"], ready["FR"]
-    kn = dict(ready, pel=(ready["pel"][0], 0.05, ready["pel"][2] - 0.46), prt=(0.2, ready["prt"][1], ready["prt"][2]), tor=(0.3, ready["tor"][1] * 0.5, ready["tor"][2]),
-              hed=(0.18, 0.0, 0.0), FL=(fl[0], 0.34, a_z), FR=(fr[0] * 0.8, -0.3, a_z + 0.07), FLp=0.0, FRp=0.8, FLy=0.1, FRy=-0.2, brow=0.5, lid=0.1)
+    kn = dict(
+        ready,
+        pel=(ready["pel"][0], 0.05, ready["pel"][2] - 0.46),
+        prt=(0.2, ready["prt"][1], ready["prt"][2]),
+        tor=(0.3, ready["tor"][1] * 0.5, ready["tor"][2]),
+        hed=(0.18, 0.0, 0.0),
+        FL=(fl[0], 0.34, a_z),
+        FR=(fr[0] * 0.8, -0.3, a_z + 0.07),
+        FLp=0.0,
+        FRp=0.8,
+        FLy=0.1,
+        FRy=-0.2,
+        brow=0.5,
+        lid=0.1,
+    )
     kn.update((over or {}).get("kneel", {}))
-    low = shift(dict(kn, tor=(kn["tor"][0] + 0.04, kn["tor"][1], kn["tor"][2]), pel=(kn["pel"][0], kn["pel"][1], kn["pel"][2] - 0.012)), **{k: (0.0, 0.0, -0.045) for k in hands})
-    return C("revive", 1.6, [(0.0, kn), (0.2, low, "out"), (0.4, kn), (0.8, kn), (1.0, low, "out"), (1.2, kn), (1.6, kn)], loop=True, base=kn)
+    low = shift(
+        dict(
+            kn,
+            tor=(kn["tor"][0] + 0.04, kn["tor"][1], kn["tor"][2]),
+            pel=(kn["pel"][0], kn["pel"][1], kn["pel"][2] - 0.012),
+        ),
+        **{k: (0.0, 0.0, -0.045) for k in hands},
+    )
+    return C(
+        "revive",
+        1.6,
+        [(0.0, kn), (0.2, low, "out"), (0.4, kn), (0.8, kn), (1.0, low, "out"), (1.2, kn), (1.6, kn)],
+        loop=True,
+        base=kn,
+    )
 
 
 def clips(C, ready, a_z, hands, mouth, hold=None):
     h = hold or {}
-    return [stomp(C, ready, a_z, hands, h.get("stomp")), drink(C, ready, mouth, h.get("drink")), revive(C, ready, a_z, hands, h.get("revive"))]
+    return [
+        stomp(C, ready, a_z, hands, h.get("stomp")),
+        drink(C, ready, mouth, h.get("drink")),
+        revive(C, ready, a_z, hands, h.get("revive")),
+    ]

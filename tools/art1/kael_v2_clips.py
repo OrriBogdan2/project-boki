@@ -5,6 +5,7 @@ written out but read off his own v2 idle (frame 0), so the actions start and end
 He is enormous and grim: the stomp is a slow lift and a dead drop, the sword stays in his right fist through all of it, the left hand drinks and presses.
 Run: blender -b --factory-startup --python tools/art1/kael_v2_clips.py -- <kael.glb> [out.glb, default: the input]
 (the glb is imported, the clips baked and exported, then copied onto the input by glb_add_clips: everything else in it stays byte for byte)."""
+
 import math
 import os
 import sys
@@ -20,9 +21,9 @@ import kael_pieces as K
 from glb_add_clips import add, read, write
 from posekit import Clip, Solver, ang_dir as D, bake, FPS
 
-SHIN = 0.30          # kael_rig.json: knee 0.492, ankle 0.192
+SHIN = 0.30  # kael_rig.json: knee 0.492, ankle 0.192
 NAMES = ("stomp", "drink", "revive")
-MOUTH = (-0.07, 0.24, 1.53)     # the left wrist with the flask at his lips (armature space, standing)
+MOUTH = (-0.07, 0.24, 1.53)  # the left wrist with the flask at his lips (armature space, standing)
 
 
 def be(a, e, edge=(0, 0, 1)):
@@ -36,8 +37,14 @@ def rig_of(arm):
     b = Vector(K.GRIP_DIR).normalized()
     e = b.cross(Vector((1, 0, 0))).normalized()
     e = e if e.z > 0 else -e
-    return {"grip_rest": tuple(hr + Vector((0, 0, -0.08))), "blade_rest": tuple(b), "edge_rest": tuple(e), "pelvis": arm.data.bones["hips"].head_local.z,
-            "hilt_l": 0.12, "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": tuple(hl + Vector((0.006, 0, -0.05)))}}
+    return {
+        "grip_rest": tuple(hr + Vector((0, 0, -0.08))),
+        "blade_rest": tuple(b),
+        "edge_rest": tuple(e),
+        "pelvis": arm.data.bones["hips"].head_local.z,
+        "hilt_l": 0.12,
+        "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": tuple(hl + Vector((0.006, 0, -0.05)))},
+    }
 
 
 def solver(arm):
@@ -70,9 +77,24 @@ def ready_of(arm, s, clip="idle", frame=0):
 
     def ankle(sd):
         return pb["shin." + sd].matrix @ Vector((0, SHIN, 0))
-    p = {"pel": tuple(pel), "prt": unq(Q["root"]), "tor": unq(Q["root"].inverted() @ Q["hips"]), "hed": unq(Q["hips"].inverted() @ Q["head"]),
-         "G": tuple(G), "BE": (tuple(blade), tuple(edge)), "Lw": 0.0, "LP": tuple(pb["hand.L"].head), "FL": tuple(ankle("L")), "FR": tuple(ankle("R")),
-         "FLy": 0.22, "FRy": -0.42, "FLp": 0.0, "FRp": 0.0, "skirt": 0.0}
+
+    p = {
+        "pel": tuple(pel),
+        "prt": unq(Q["root"]),
+        "tor": unq(Q["root"].inverted() @ Q["hips"]),
+        "hed": unq(Q["hips"].inverted() @ Q["head"]),
+        "G": tuple(G),
+        "BE": (tuple(blade), tuple(edge)),
+        "Lw": 0.0,
+        "LP": tuple(pb["hand.L"].head),
+        "FL": tuple(ankle("L")),
+        "FR": tuple(ankle("R")),
+        "FLy": 0.22,
+        "FRy": -0.42,
+        "FLp": 0.0,
+        "FRp": 0.0,
+        "skirt": 0.0,
+    }
     arm.animation_data.action = None
     return p
 
@@ -83,17 +105,43 @@ def clips(ready):
 
     def C(name, dur, keys, loop=False, base=ready):
         return Clip(name, dur, keys, base, loop)
+
     # the stomp: the sword drawn up and out to his right so the foot comes down clear of the blade; the left fist balls and swings back for the drop
-    stomp = {"set": {"G": (g[0] + 0.06, g[1] - 0.04, g[2] + 0.04), "BE": be(-30, -38, (0.5, 0.2, 0.85))},
-             "top": {"G": (g[0] + 0.12, g[1] - 0.1, g[2] + 0.16), "BE": be(-48, -20, (0.5, 0.0, 0.85)), "LP": (lp[0] - 0.06, lp[1] + 0.14, lp[2] + 0.2), "skirt": -0.3},
-             "hit": {"G": (g[0] + 0.1, g[1] - 0.02, g[2] - 0.02), "BE": be(-34, -44, (0.5, 0.2, 0.85)), "LP": (lp[0] - 0.04, lp[1] - 0.12, lp[2] - 0.02), "skirt": 0.45},
-             "reach": 0.2, "lift": 0.46}
+    stomp = {
+        "set": {"G": (g[0] + 0.06, g[1] - 0.04, g[2] + 0.04), "BE": be(-30, -38, (0.5, 0.2, 0.85))},
+        "top": {
+            "G": (g[0] + 0.12, g[1] - 0.1, g[2] + 0.16),
+            "BE": be(-48, -20, (0.5, 0.0, 0.85)),
+            "LP": (lp[0] - 0.06, lp[1] + 0.14, lp[2] + 0.2),
+            "skirt": -0.3,
+        },
+        "hit": {
+            "G": (g[0] + 0.1, g[1] - 0.02, g[2] - 0.02),
+            "BE": be(-34, -44, (0.5, 0.2, 0.85)),
+            "LP": (lp[0] - 0.04, lp[1] - 0.12, lp[2] - 0.02),
+            "skirt": 0.45,
+        },
+        "reach": 0.2,
+        "lift": 0.46,
+    }
     # the drink: only the left arm and the head; the sword hand stays where it was
     drink = {"sip": {}}
     # the revive kneel: the sword grounded on a slant out to his right front (fist to tip ~1.25 m, the point just in the ground, clear of the fallen),
     # the right fist resting on it; the left hand presses on the fallen
-    kneel = {"kneel": {"G": (0.32, 0.18, 0.56), "BE": be(-55, -29, (0, 0, 1)), "LP": (-0.12, 0.52, 0.3), "skirt": 0.4, "hed": (0.34, 0.0, 0.0)}}
-    return [actionkit.stomp(C, ready, a_z, ("G", "LP"), stomp), actionkit.drink(C, ready, MOUTH, drink), actionkit.revive(C, ready, a_z, ("LP",), kneel)]
+    kneel = {
+        "kneel": {
+            "G": (0.32, 0.18, 0.56),
+            "BE": be(-55, -29, (0, 0, 1)),
+            "LP": (-0.12, 0.52, 0.3),
+            "skirt": 0.4,
+            "hed": (0.34, 0.0, 0.0),
+        }
+    }
+    return [
+        actionkit.stomp(C, ready, a_z, ("G", "LP"), stomp),
+        actionkit.drink(C, ready, MOUTH, drink),
+        actionkit.revive(C, ready, a_z, ("LP",), kneel),
+    ]
 
 
 def extras(P):
@@ -105,7 +153,7 @@ def keep(nm):
 
 
 if __name__ == "__main__":
-    a = sys.argv[sys.argv.index("--") + 1:]
+    a = sys.argv[sys.argv.index("--") + 1 :]
     src = os.path.abspath(a[0])
     out = os.path.abspath(a[1]) if len(a) > 1 else src
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -114,13 +162,38 @@ if __name__ == "__main__":
     bpy.context.scene.render.fps = FPS
     s = solver(arm)
     ready = ready_of(arm, s)
-    print("ready", {k: (tuple(round(x, 3) for x in v) if isinstance(v, tuple) and not isinstance(v[0], tuple) else v) for k, v in ready.items()})
+    print(
+        "ready",
+        {
+            k: (tuple(round(x, 3) for x in v) if isinstance(v, tuple) and not isinstance(v[0], tuple) else v)
+            for k, v in ready.items()
+        },
+    )
     Q, _ = s.solve(ready)
     arm.animation_data.action = bpy.data.actions["idle"]
     bpy.context.scene.frame_set(0)
     bpy.context.view_layer.update()
-    off = {n: round(math.degrees((arm.pose.bones[n].matrix.to_quaternion() @ s.R0[n].inverted()).rotation_difference(Q[n]).angle), 1)
-           for n in ("hips", "head", "upper_arm.R", "forearm.R", "hand.R", "upper_arm.L", "forearm.L", "thigh.L", "shin.L", "thigh.R", "shin.R")}
+    off = {
+        n: round(
+            math.degrees(
+                (arm.pose.bones[n].matrix.to_quaternion() @ s.R0[n].inverted()).rotation_difference(Q[n]).angle
+            ),
+            1,
+        )
+        for n in (
+            "hips",
+            "head",
+            "upper_arm.R",
+            "forearm.R",
+            "hand.R",
+            "upper_arm.L",
+            "forearm.L",
+            "thigh.L",
+            "shin.L",
+            "thigh.R",
+            "shin.R",
+        )
+    }
     print("ready vs idle (deg)", off)
     arm.animation_data.action = None
     for act in list(bpy.data.actions):
@@ -132,9 +205,20 @@ if __name__ == "__main__":
     arm.select_set(True)
     for o in arm.children:
         o.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=tmp, export_format="GLB", use_selection=True, export_animations=True, export_animation_mode="ACTIONS", export_skins=True,
-                              export_yup=True, export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False,
-                              export_materials="NONE")
+    bpy.ops.export_scene.gltf(
+        filepath=tmp,
+        export_format="GLB",
+        use_selection=True,
+        export_animations=True,
+        export_animation_mode="ACTIONS",
+        export_skins=True,
+        export_yup=True,
+        export_force_sampling=True,
+        export_frame_step=1,
+        export_optimize_animation_size=False,
+        export_def_bones=False,
+        export_materials="NONE",
+    )
     sj, sb = read(tmp)
     for an in sj["animations"]:
         an["channels"] = [ch for ch in an["channels"] if keep(sj["nodes"][ch["target"]["node"]].get("name", ""))]

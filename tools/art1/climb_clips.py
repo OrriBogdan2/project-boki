@@ -4,6 +4,7 @@ onto the rig's own bones and appended to the .glb (a clip of the same name is re
 byte). Poses sit on the hero's idle, so his own twist and proportions carry through. The game drives "mantle" by how far
 up the face the body is (0..1, WardenClips), so the clip is a pose per progress, not a speed.
 Run: python3 tools/art1/climb_clips.py <hero> [--sheet out.png] [--out other.glb]   (hero: ryzz breaker sable ostra)"""
+
 import math
 import os
 import sys
@@ -17,30 +18,62 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "art
 
 
 # ---------------------------------------------------------------- vectors and quaternions (x, y, z, w)
-def add(a, b): return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
-def sub(a, b): return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
-def mul(a, k): return (a[0] * k, a[1] * k, a[2] * k)
-def dot(a, b): return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-def cross(a, b): return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
-def length(a): return math.sqrt(dot(a, a))
+def add(a, b):
+    return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
+
+
+def sub(a, b):
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def mul(a, k):
+    return (a[0] * k, a[1] * k, a[2] * k)
+
+
+def dot(a, b):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def length(a):
+    return math.sqrt(dot(a, a))
+
+
 def unit(a):
     n = length(a)
     return (a[0] / n, a[1] / n, a[2] / n) if n > 1e-9 else (0.0, 1.0, 0.0)
-def lerp(a, b, u): return a + (b - a) * u
-def lerpv(a, b, u): return tuple(lerp(x, y, u) for x, y in zip(a, b))
 
 
-def qconj(q): return (-q[0], -q[1], -q[2], q[3])
+def lerp(a, b, u):
+    return a + (b - a) * u
+
+
+def lerpv(a, b, u):
+    return tuple(lerp(x, y, u) for x, y in zip(a, b))
+
+
+def qconj(q):
+    return (-q[0], -q[1], -q[2], q[3])
 
 
 def qmul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
-    return (aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
-            aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz)
+    return (
+        aw * bx + ax * bw + ay * bz - az * by,
+        aw * by - ax * bz + ay * bw + az * bx,
+        aw * bz + ax * by - ay * bx + az * bw,
+        aw * bw - ax * bx - ay * by - az * bz,
+    )
 
 
-def qinv(q): return (-q[0], -q[1], -q[2], q[3])
+def qinv(q):
+    return (-q[0], -q[1], -q[2], q[3])
+
+
 def qaxis(axis, deg):
     h = math.radians(deg) / 2.0
     s = math.sin(h)
@@ -120,6 +153,7 @@ class Rig:
                 visit(self.parent[i])
             seen.add(i)
             out.append(i)
+
         for i in range(len(self.nodes)):
             visit(i)
         return out
@@ -135,7 +169,8 @@ class Rig:
                 wp[i] = add(wp[p], qrot(wr[p], pos[i]))
         return wr, wp
 
-    def n(self, name): return self.idx[name]
+    def n(self, name):
+        return self.idx[name]
 
     def seg(self, name):
         """A bone's length: where its first child sits along it."""
@@ -170,7 +205,7 @@ def solve(rig, pose, legs=True, foot_names=None):
     head = rig.n("head")
     rot[head] = qmul(euler(*pose.get("head", (0, 0, 0))), rig.rot[head])
     wr, wp = rig.fk(rot, pos)
-    if "shoulder" in pose:      # (height, forward) the shoulders sit at: the body pivots over the hands, not the feet
+    if "shoulder" in pose:  # (height, forward) the shoulders sit at: the body pivots over the hands, not the feet
         mid = mul(add(wp[rig.n("upper_arm.L")], wp[rig.n("upper_arm.R")]), 0.5)
         pos[root] = add(pos[root], (0.0, pose["shoulder"][0] - mid[1], -pose["shoulder"][1] - mid[2]))
         wr, wp = rig.fk(rot, pos)
@@ -270,13 +305,18 @@ def build(rig, name, keys, legs, foot_names):
     t_in = accessor(times, "SCALAR")
     t_const = accessor([0.0, dur], "SCALAR")
     for node in sorted(rig.animated):
-        for path, kind, series in (("translation", "VEC3", [f[1][node] for f in frames]), ("rotation", "VEC4", [f[0][node] for f in frames]),
-                                   ("scale", "VEC3", None)):
+        for path, kind, series in (
+            ("translation", "VEC3", [f[1][node] for f in frames]),
+            ("rotation", "VEC4", [f[0][node] for f in frames]),
+            ("scale", "VEC3", None),
+        ):
             if path == "scale":
                 v = tuple(rig.nodes[node].get("scale", (1, 1, 1)))
                 anim["samplers"].append({"input": t_const, "output": accessor([v, v], kind), "interpolation": "LINEAR"})
             elif all(max(abs(x - y) for x, y in zip(series[0], s)) < 1e-6 for s in series):
-                anim["samplers"].append({"input": t_const, "output": accessor([series[0], series[0]], kind), "interpolation": "LINEAR"})
+                anim["samplers"].append(
+                    {"input": t_const, "output": accessor([series[0], series[0]], kind), "interpolation": "LINEAR"}
+                )
             else:
                 if path == "rotation":
                     for i in range(1, len(series)):
@@ -292,8 +332,18 @@ def build(rig, name, keys, legs, foot_names):
 # ---------------------------------------------------------------- stick figures (a check you can look at)
 def sheet(rig, frames, times, path, picks=6):
     from PIL import Image, ImageDraw
-    pairs = [("hips", "head"), ("upper_arm.L", "forearm.L"), ("forearm.L", "hand.L"), ("upper_arm.R", "forearm.R"),
-             ("forearm.R", "hand.R"), ("thigh.L", "shin.L"), ("shin.L", "foot.L"), ("thigh.R", "shin.R"), ("shin.R", "foot.R")]
+
+    pairs = [
+        ("hips", "head"),
+        ("upper_arm.L", "forearm.L"),
+        ("forearm.L", "hand.L"),
+        ("upper_arm.R", "forearm.R"),
+        ("forearm.R", "hand.R"),
+        ("thigh.L", "shin.L"),
+        ("shin.L", "foot.L"),
+        ("thigh.R", "shin.R"),
+        ("shin.R", "foot.R"),
+    ]
     sc, w, h = 150, 260, 330
     img = Image.new("RGB", (w * picks, h), "white")
     d = ImageDraw.Draw(img)
@@ -313,6 +363,7 @@ def sheet(rig, frames, times, path, picks=6):
 
 def main():
     import climb_data
+
     hero = sys.argv[1]
     spec = climb_data.HEROES[hero]
     path = os.path.join(ROOT, hero, hero + ".glb")
