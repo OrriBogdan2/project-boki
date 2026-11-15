@@ -3537,7 +3537,12 @@ func _open_expedition() -> void:
 	var rx: Control = more if first else right
 	rx.add_child(UI.spacer(2))
 	rx.add_child(UI.section("Match"))
-	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	var solo := ExpMode.is_solo()
+	var mtabs := UI.tabs(["Solo", "Trios"], "Solo" if solo else "Trios", func(nm): Save.d["exp_mode"] = "solo" if nm == "Solo" else "trio"; _open_expedition(), {}, 96)
+	for tb in mtabs.get_child(0).get_children():
+		tb.tooltip_text = ExpMode.TEXT["solo" if String(tb.get_meta("tab")) == "Solo" else "trio"]
+	rx.add_child(mtabs)
+	rx.add_child(UI.label(ExpMode.TEXT["solo" if solo else "trio"], UI.T_SMALL, UI.MUTED))
 	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
@@ -3616,7 +3621,7 @@ func _start_match() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
+	var o := ExpMode.opts()
 	o["total"] = Data.MATCH_PLAYERS
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
