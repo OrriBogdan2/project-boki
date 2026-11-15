@@ -637,7 +637,8 @@ func _locomotion(secs: float) -> void:
 		var fr: Vector3 = pts["foot.R"]
 		var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
 		var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
-		log.store_line("%.4f\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f" % [
+		var cols := "%.4f\t%s" + "\t%.4f".repeat(14)
+		log.store_line(cols % [
 				t, label, pl.pos.x, pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z, pl.pos.y,
 				(pts["hips"] as Vector3).y, knee_l.y, knee_r.y]),
 		func(_t: float): return pl.render_pos(1.0), true)
