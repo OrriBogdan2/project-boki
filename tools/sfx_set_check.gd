@@ -24,36 +24,27 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
+##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
+##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
+##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
+##      even when X is pressed again, and it is gone within one frame of every way the channel can end
+## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
+##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
+##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
+##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
+##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+## Never touches the save.
+##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
+##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
+##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
 ##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
 ##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
 ##  13. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
-##  15. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
-##      even when X is pressed again, and it is gone within one frame of every way the channel can end
-##  16. Sable's Encore: the blade whirr is a keyed loop that starts once the ring has grown, follows her
-##      through a dash and is gone in the frame the ring ends
-##  17. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
-##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
-##  18. held fire (docs/AUDIO.md): every weapon under FireSfx.HELD_RATE, and Neve's dart, fired every HELD_STEP_MS for
-##      HELD_S seconds through FireSfx keeps at most FireSfx.VOICES voices sounding, opens on its base take and goes
-##      round three or more others without repeating one
-##  19. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
-##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
-##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
-##  20. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
-##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
-##  21. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
-##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
-##  22. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
-##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
-##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
-##  23. the rank HUD's cues (RankSfx) are in the ui set, play at least UNDER_COMBAT_DB under a weapon shot,
-##      and the new-point chime is short
-##  24. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
-##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
-## Reads the files (and, for 15 and 16, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -96,6 +87,13 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_chop_mine()
+	_rarity_stings()
+	await _call_loop(main)
+	_hostile()
+	_level_cues()
+	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	_hit_ticks()
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
@@ -298,6 +296,64 @@ func _nuke_fall() -> void:
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
+## 11. A rival's cast is heard as a threat; yours and your allies' are not.
+func _hostile() -> void:
+	var reach: float = Sfx.sound_reach.get(HostileCue.NAME, 0.0)
+	var near_30 := reach >= 25.0 and reach <= 35.0
+	ok(Sfx.ensure(HostileCue.NAME) and near_30, "the rival-cast layer exists, reach %.0f m" % reach)
+	var h := Hunter.new()
+	var once := []
+	for arch in Arch.ids():
+		var k := ArchKit.new()
+		k.d = Arch.def(arch)
+		h.ak = k
+		var r_slots := ["ult_fuse", "ult"] if k.fuse_time() > 0.0 else ["ult"]
+		var r_n := r_slots.filter(func(s): return HostileCue.starts_threat(h, s)).size()
+		var others := ["secondary", "dodge", "primary", "ultimate"]
+		var quiet := others.all(func(s): return not HostileCue.starts_threat(h, s))
+		if HostileCue.starts_threat(h, "kin") and (k.r_def().is_empty() or r_n == 1) and quiet:
+			once.append(arch)
+	h.ak = null
+	ok(once.size() == Arch.ids().size(),
+			"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once])
+	var you := Hunter.new()
+	you.team = 1
+	Sfx.listener = Vector3.ZERO
+	var heard := func(team: int, at: Vector3) -> bool:
+		var before := int(Sfx.last_played.get(HostileCue.NAME, -1))
+		h.team = team
+		h.pos = at
+		HostileCue.play(you, h)
+		return int(Sfx.last_played.get(HostileCue.NAME, -1)) != before
+	var ally: bool = heard.call(1, Vector3(5, 0, 0))
+	var far: bool = heard.call(2, Vector3(40, 0, 0))
+	var rival: bool = heard.call(2, Vector3(5, 0, 0))
+	ok(rival and not ally, "a rival's cast at 5 m plays the layer, an ally's does not (%s, %s)" % [rival, ally])
+	ok(not far, "a rival's cast at 40 m does not")
+	h.free()
+	you.free()
+	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var cue_src := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var used := hunter_src.contains("HostileCue.on_used(self, slot)")
+	var x := cue_src.contains("HostileCue.play(m.player, h)")
+	var net := match_src.contains("\"hcast\": HostileCue.net_in")
+	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
+
+## 9. Levelling up has its own cues, each called from one place, for the local Hunter only.
+func _level_cues() -> void:
+	var made := true
+	for sname in ["level_up", "rank_up", "rank_max"]:
+		made = made and Sfx.ensure(sname) and Sfx.sound_reach.get(sname, 0.0) == 0.0
+	ok(made, "level_up, rank_up and rank_max exist and are not positional")
+	var pitched := true
+	for slot in Hunter.SLOTS:
+		pitched = pitched and LevelSfx.SLOT_PITCH.has(slot)
+	ok(pitched, "every ranked slot has its own confirm pitch")
+	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
 	var stub := GDScript.new()
@@ -532,8 +588,9 @@ func _plays(sname: String, act: Callable) -> bool:
 	act.call()
 	return Sfx.last_played.has(sname)
 
-## 15. Meeko's channel loop, one training match per end path.
+## 11. Meeko's channel loop, one training match per end path.
 const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
+const FRAME := 1.0 / 60.0
 
 func _call_loop(main: Node) -> void:
 	for path in END_PATHS:
@@ -616,6 +673,23 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+
+
+## 11. Rare and very rare Boki have a sting each; a common one plays nothing; each is under the scan chime.
+func _rarity_stings() -> void:
+	var rare: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	var common: String = Data.common_kin()[0]
+	var tiers := [RaritySting.tier(common, {}), RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
+			RaritySting.tier(common, {"shimmer": true})]
+	ok(tiers == [0, 1, 2], "rarity tiers: common 0, a rare species 1, a shimmer 2 %s" % [tiers])
+	var names: Array = RaritySting.NAMES.slice(1)
+	var quiet := RaritySting.DB.slice(1).all(func(db): return db < 0.0) and RaritySting.DB[1] <= RaritySting.DB[2]
+	ok(names.all(func(n): return Sfx.ensure(n)) and quiet, "rarity stings exist, under the scan chime %s" % [names])
+	var src := {"scripts/match/music_dir.gd": "stings.tick(", "scripts/match/capture.gd": "RaritySting.claim(",
+			"scripts/ui/egg_hatch.gd": "RaritySting.play("}
+	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
+	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
+	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
 
 ## 12. The inventory cues.
 func _inv_cues() -> void:
@@ -721,6 +795,50 @@ func _data(path: String) -> PackedByteArray:
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
 
+## 11. The farm's chop and mine: the set has the axe and pick in several takes, and every sound HomeGather
+## plays by literal name exists (the old stand-ins, break_wood / armor_hit / thump, are not used there).
+func _chop_mine() -> void:
+	ok(_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
+			"chop: the axe bite and pick strike come in 3 takes")
+	var re := RegEx.create_from_string("Sfx\\.play\\(\"([a-z0-9_]+)\"")
+	var src := FileAccess.get_file_as_string("res://scripts/home/home_gather.gd")
+	var played := []
+	for hit in re.search_all(src):
+		played.append(hit.get_string(1))
+	var silent := played.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "chop: every sound HomeGather plays exists (silent: %s)" % [silent])
+	var own := ["axe_bite", "trunk_creak", "tree_down", "pick_strike", "rock_crack", "rock_break"]
+	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
+	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
+			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
+
+## 11. One hit tick per weapon family; each Hunter's weapon names one; ability hits keep the shared tick.
+func _hit_ticks() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/hit.json"))
+	var family: Array = (set_d["sounds"] as Dictionary).keys()
+	ok(family.size() == 6, "hit ticks: six families (%s)" % [family])
+	var used := {}
+	var unmapped := []
+	var h := Hunter.new()
+	for arch in Arch.ids():
+		var w := Data.weapon_stats(Arch.signature(arch))
+		var tick := String(w.get("hit", ""))
+		used[tick] = true
+		if not family.has(tick):
+			unmapped.append("%s (%s)" % [arch, tick])
+	ok(unmapped.is_empty(), "hit ticks: every Hunter's weapon names one of them (%s)" % [unmapped])
+	var idle := family.filter(func(f): return not used.has(f))
+	ok(idle.is_empty(), "hit ticks: every family is some Hunter's weapon (unused %s)" % [idle])
+	h.wpn = Data.weapon_stats("longbow")
+	var shot := HeroSfx.hit_tick(h, {"src": "shot"})
+	var swing := HeroSfx.hit_tick(h, {"src": "abil", "ab": "primary"})
+	var cast := HeroSfx.hit_tick(h, {"src": "abil", "ab": "e"})
+	var picks := [shot, swing, cast]
+	ok(picks == ["hit_bow", "hit_bow", "hit"], "hit ticks: shot, primary, ability %s" % [picks])
+	h.wpn = Data.weapon_stats("rifle")
+	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
+	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
+	h.free()
 ## The menus (UiSfx, Ui.button), walked tab by tab: Settings, the inventory and the Field Book. Every
 ## tab plays the tab sound; a slider ticks once for a burst of steps; a toggle sounds higher turning on
 ## than off; a dropdown sounds; a Field Book tile sounds when pointed at and when picked, and its page's

@@ -13,6 +13,8 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
+const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
 # Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
 # (1 step of its 4 cel bands = 0.25), so a foe standing in the middle stays readable.
 const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1 (the seed's field fill is tender.json's)
@@ -786,7 +788,7 @@ func _tick_call(dt: float) -> void:
 	if float(hearth_call["tick"]) >= every:
 		hearth_call["tick"] = float(hearth_call["tick"]) - every
 		_call_heal(who, float(xd["heal_ps"]) * every)
-	_call_look(who)
+	_call_look(who, dt)
 	Sfx.loop_set(_loop_key(true), h.pos)
 	Sfx.loop_set(_loop_key(false), who.pos)
 	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
@@ -813,6 +815,9 @@ func _call_look(who: Hunter) -> void:
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "all": true, "dashed": true})
 	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": own, "all": true})
 	ulk().keep("tether", "tether", CareUtil.hand_at(h, false), {"b": who.pos + Vector3(0, 1.1, 0)})
+	hearth_call["fx"] = float(hearth_call["fx"]) - dt
+	if float(hearth_call["fx"]) <= 0.0:
+		hearth_call["fx"] = 0.22
 
 
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;

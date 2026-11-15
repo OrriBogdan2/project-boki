@@ -45,12 +45,15 @@ const CHECKS := {
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--alive-counter-check": ["res://tools/alive_counter_check.gd", "alive_counter_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
+	"--quest-race-check": ["res://tools/quest_race_check.gd", "quest_race_check", null],      # 0051 quest race pips
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],  # GPU
 	"--hud-groups-check": ["res://tools/hud_groups_check.gd", "hud_groups_check", null],      # HUD groups, four moments
 	"--loot-feed-check": ["res://tools/loot_feed_check.gd", "loot_feed_check", null],      # loot feed rows
 	"--hud-groups-shots": ["res://tools/hud_groups_shots.gd", "hud_groups_shots", null],      # GPU, --shots-dir=
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
+	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
+	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
@@ -101,7 +104,6 @@ const CHECKS := {
 	"--family-tree-check": ["res://tools/family_tree_check.gd", "family_tree_check", null],  # GARDEN_MODERN 5.8
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],  # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],  # --shots-dir=<dir>
-	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],      # GPU
 	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
 	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	"--save-chain-check": ["res://tools/save_chain_check.gd", "save_chain_check", null],      # SAVE_CHAIN_0245
@@ -137,6 +139,7 @@ const CHECKS := {
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
+	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
@@ -213,6 +216,10 @@ const CHECKS := {
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],      # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],      # 0051 results
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
+	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],      # kill XP tick, steal stings
+	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],  # camp time-to-fall table
+	"--knock-reset-check": ["res://tools/knock_reset_check.gd", "knock_reset_check", null],  # docs/KNOCK_RESETS.md
+	"--mob-notice-check": ["res://tools/mob_notice_check.gd", "mob_notice_check", null],  # one cue per camp waking
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
@@ -290,6 +297,8 @@ const CHECKS := {
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--buff-stack-check": ["res://tools/buff_stack_check.gd", "buff_stack_check", null],
+	"--buff-stack-shots": ["res://tools/buff_stack_check.gd", "buff_stack_check", "shots"],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--number-looks-check": ["res://tools/number_looks_check.gd", "number_looks_check", null],      # by source
 	# hit arcs round your Hunter
@@ -303,6 +312,7 @@ const CHECKS := {
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
+	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],      # drawn keys follow a rebind
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--tips-check": ["res://tools/tips_check.gd", "tips_check", null],      # context tips
@@ -464,6 +474,7 @@ const CHECKS := {
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],     # 2 games, relay
+	"--ult-ready-shots": ["res://tools/ult_ready_shots.gd", "ult_ready_shots", null],      # --shots-dir=<dir> (GPU)
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
@@ -510,6 +521,7 @@ const CHECKS := {
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# the loading screen: splash, tip, bar
 	"--loading-check": ["res://tools/loading_check.gd", "loading_check", null],
+	"--hud-safe-shots": ["res://tools/hud_safe_shots.gd", "hud_safe_shots", null],      # GPU, --size= --shots-dir=
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
@@ -586,9 +598,11 @@ const CHECKS := {
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],  # the Dash's showcase wall
 	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],  # 4.2 game 4
+	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds
+	"--garden-react-check": ["res://tools/garden_react_check.gd", "garden_react_check", null],      # SFX_AUDIT 22
+	"--nook-check": ["res://tools/nook_check.gd", "nook_check", null],      # Nook gate, breeding, sounds
 	"--glint-fx-shots": ["res://tools/glint_fx_shots.gd", "glint_fx_shots", null],  # the looks sheet (GPU)
 	"--bowl-sfx-check": ["res://tools/bowl_sfx_check.gd", "bowl_sfx_check", null],      # Mixing Bowl sounds
-	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],  # GARDEN_MODERN 4.2 game 3
@@ -685,6 +699,7 @@ const CHECKS := {
 	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
 	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
+	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],  # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],  # also --shots-dir=
@@ -694,13 +709,11 @@ const CHECKS := {
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
 	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
-	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # palettes
-	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=
+	"--card-numbers-check": ["res://tools/card_numbers_check.gd", "card_numbers_check", null],
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],      # Hob's clear ring
 	"--hob-spot-shots": ["res://tools/hob_spot_shots.gd", "hob_spot_shots", null],      # =<dir>, before/after
 	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
-	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],  # steps never jolt
 	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],      # --shots-dir=<dir>
 	# every monster kind has every state; wind-up = telegraph

@@ -328,7 +328,7 @@ func _boss_down() -> void:
 	_note("boss down")
 	m.heart.go(Heart.S.FINAL, "boss down")
 	if m.hud and m.player and not m.player.out:
-		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.COL)
+		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.col())
 	_broadcast()
 
 ## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client has no host

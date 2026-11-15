@@ -361,9 +361,12 @@ func _migrate_18_to_19(data: Dictionary) -> void:
 	if not data.has("active2"):
 		data["active2"] = ""
 
-## v19 -> v20: matches played per Hunter (the Stats tab, HunterStats).
+## v19 -> v20: matches played per Hunter (the Stats tab, HunterStats). A dev save from the integ-1113-D1 line
+## (its v15 was this step, before main's v15 drills) skipped the drills: it gets the empty dict here.
 func _migrate_19_to_20(data: Dictionary) -> void:
 	HunterStats.migrate(data)
+	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
+		data["drills"] = {}
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

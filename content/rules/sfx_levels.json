@@ -22,7 +22,7 @@
  "table_cats": {
   "fire": ["smg", "rifle", "shotgun", "sniper", "rail", "swipe", "cleave", "ab_throw", "ab_rail"],
   "impact": ["hit", "hit_heavy", "crit", "slash_hit", "armor_hit", "armor_break", "ab_hit", "ab_shield_hit", "thump", "boom", "ab_blast", "ab_slam", "break_wood", "break_clay", "break_metal", "train_hit", "br_crumble", "br_rumble", "knock", "pay_slam", "pay_rockfall", "pay_collapse", "hero_skewer", "hero_blowout", "splash"],
-  "cast": ["ab_blink", "ab_charge", "ab_guard", "ab_leap", "ab_parry", "ab_plant", "ab_slow", "ab_stun", "ab_tether", "ab_wall", "ab_whirr", "charge", "cloak", "shield", "heal", "ult", "combo", "swap", "zap", "whoosh", "pay_called", "pay_cashin", "pay_deadeye", "pay_flashpoint", "pay_rage", "revive", "revive_done", "portal", "horn", "warn", "fuse_hiss"],
+  "cast": ["ab_blink", "armor_up", "armor_up_own", "ab_charge", "ab_guard", "ab_leap", "ab_parry", "ab_plant", "ab_slow", "ab_stun", "ab_tether", "ab_wall", "ab_whirr", "charge", "cloak", "shield", "heal", "ult", "combo", "swap", "zap", "whoosh", "pay_called", "pay_cashin", "pay_deadeye", "pay_flashpoint", "pay_rage", "revive", "revive_done", "portal", "horn", "warn", "fuse_hiss"],
   "grunt": ["hurt", "v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big"],
   "dash": ["dash", "jump", "land", "fall", "glide"],
   "step": ["step0", "step1", "step2", "step_grass", "step_snow", "step_stone", "step_wood", "swim", "drip"],
