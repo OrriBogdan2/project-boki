@@ -102,7 +102,10 @@ func tick(d: float) -> void:
 		return
 	_walk(d)
 
+## Free to lead: not busy, at work, napping or hungry (a hungry Boki looks for food first).
 func _free(k: Dictionary) -> bool:
+	if float(k["rec"]["needs"]["food"]) < Econ.HUNGRY_AT:
+		return false
 	return not (k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("job") or k.has("fetch")
 			or k.has("bath") or float(k.get("nap_t", 0.0)) > 0.0 or k.has("called_t"))
 
