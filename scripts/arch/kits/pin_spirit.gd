@@ -148,8 +148,9 @@ func tick(dt: float) -> void:
 		passed += 1
 	else:
 		entry = h.pos
-	k.fx.tint_to(1.0 if inside else 0.0)
-	k.fx.aura_on(clampf(t / 0.3, 0.0, 1.0))
+	var fade := clampf(t / FADE_T, 0.0, 1.0)
+	k.fx.tint_to((1.0 if inside else PinFx.TINT_WALK) * fade)
+	k.fx.aura_on(fade)
 
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
