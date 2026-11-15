@@ -1479,7 +1479,6 @@ func _social_cmd(c: String, current) -> void:
 				current.ppos = Vector3(float(p[2]), 0, float(p[3]))
 			_soc_reply(true)
 
-
 func _hb_home():      # the farm for the checks that build one (tools/*_check.gd call main._hb_home())
 	var H = load("res://scripts/home/home.gd")
 	var hm = H.new()
