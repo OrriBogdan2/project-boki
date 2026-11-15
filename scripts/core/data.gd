@@ -289,6 +289,10 @@ const MOBS := {
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},
+	# a lair's gate seal (LairBreach): stone braced across the portcullis, broken down by sustained
+	# damage. 2000 health at tier 0: one bot ~2 min (with the guards each crack calls), three ~20 s
+	"gate": {"name": "Gate Seal", "hp": 2000.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 1.4, "gems": 0, "color": Color("8a8494"), "attack": "none", "ward": true},
 }
 ## The lair bosses, in the order generated maps hand them out.
 const BOSSES := ["colossus", "serpent", "brood"]
