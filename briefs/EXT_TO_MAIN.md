@@ -9751,3 +9751,4 @@ READY ext/merge-lane-hunters5-1114-b decb442c7a59054c93d8cf8b0783b99a2c01e24f (m
 READY ext/merge-lane-uihud-1114 b347df30b6 (merge lane uihud A: 15 UI/HUD branches, suite NEW-RED 0 after rerun (chore-check flake), export OK 446 MB)
 READY ext/merge-lane-d2art-1114 85a2272c3fcd466680964779af1da40ad92355cf (d2art bundle A merged with main a78831ec, clean merge; --check 0 failures, health --strict OK; full suite not rerun, last run NEW-RED 0 at f594568a)
 READY ext/merge-auto-mixed-1114 f6ea11743d29d90a5e4f683ea1be44b4869e473f (merge-auto bundle 1/2 merged onto main a78831ecd1; portraits.json thief/rimewright = main framing; health --strict OK; godot --check hits main's own glide_spike static-init error (PR 98), needs GATE after PR 98)
+READY ext/merge-lane-boki3d-1114 ab8ff3e2cc0da498ac0a602e4a2653b5cdb60a16 (merge lane boki3d: checks out of main.gd, gate-speed, Boki key C, sick-recover, loading bar, evolve card, 2 Boki rigs; NEW-RED 0 after fixes, export OK)
