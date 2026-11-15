@@ -39,7 +39,6 @@ var dash_t := 0.0
 var dash_hit := {}
 var buried := false
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
-var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
 var add_k := 0               # egg-sac adds hatched so far: the next one's kind cycles BROOD_ADDS, no dice
 const BROOD_ADDS := ["skitter", "skitter", "bomber", "spitter"]   # phase 0 cycles the first two, then +1 a phase
@@ -79,12 +78,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			return 0.0
 	if invul_t > 0.0:
 		d *= 0.15
-	var real: Ent = by
-	if by is Kin and (by as Kin).owner_h: real = (by as Kin).owner_h
-	var dealt := super.hurt(d, by, opts)
-	if real and dealt > 0.0:
-		damage_by[real.team] = float(damage_by.get(real.team, 0.0)) + dealt
-	return dealt
+	return super.hurt(d, by, opts)
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_clear_attack()

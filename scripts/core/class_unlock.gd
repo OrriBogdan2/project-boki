@@ -15,7 +15,8 @@ extends RefCounted
 ## first expedition (old saves)], second: [the second-Relic choices still to pick from], second_ready: bool (the
 ## first expedition is done, so the pick is on offer), fresh: [just opened, not announced], told: int (ready unlocks
 ## already announced), reveal: [ids], seen: [ids], stats: {stat: n} (every expedition),
-## hunters: {id: {stat: n}} (expeditions played as that Hunter)}. No "classes" key reads as all open.
+## hunters: {id: {stat: n}} (expeditions played as that Hunter, with "matches" and
+## "damage"; HunterStats shows them)}. No "classes" key reads as all open.
 # "mask" in code = "Relic" in game, owner 2026-11-07 (also the setting key demo_all_masks)
 
 const RULES_PATH := "res://content/rules/class_unlock.json"
@@ -195,6 +196,8 @@ static func match_counts(r: Dictionary) -> Dictionary:
 		if typeof(ms[k]) == TYPE_INT:
 			out[k] = int(ms[k])
 	var escaped := bool(r.get("extracted", false))
+	out["matches"] = 1
+	out["damage"] = int(r.get("damage", 0))
 	out["knocks"] = int(r.get("knocks", 0))
 	out["revives"] = int(r.get("revives", 0))
 	out["extracts"] = 1 if escaped else 0

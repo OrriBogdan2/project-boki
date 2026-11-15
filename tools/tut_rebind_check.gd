@@ -170,10 +170,10 @@ func _garden() -> void:
 		for stage in (st["hints"] as Dictionary):
 			n += 1
 			var raw := String(st["hints"][stage])
-			var line := FarmTutorial.fill_hint(raw).replace("{secs}", "9")
+			var line := FarmTutorial.fill(raw).replace("{secs}", "9")
 			_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
 	ok(n >= 20, "all %d garden hints read" % n)
-	var build := FarmTutorial.fill_hint("Press {build}")
+	var build := FarmTutorial.fill("Press {build}")
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 
 ## The Training Area checklist: no key in the words (the HUD prints the live cap beside each row).
