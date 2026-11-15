@@ -56,14 +56,12 @@ class Run:
 	var boost := 1.0                # your press, on the backed Boki's push
 	var boost_t := 0.0              # s of boost left
 	var base: Array = []            # each side's push over the other's hold
-	var wobble: float               # +- fraction of each side's push roll: the rules', or the twist's
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
+	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
 		R = BaseShove.rules()
 		recs = pair
 		backed = back
 		rng = r
-		wobble = float(tw.get("wobble", R["wobble"]))
 		for i in 2:
 			base.append(BaseShove.push(recs[i]) / BaseShove.hold(recs[1 - i]))
 
@@ -88,7 +86,7 @@ class Run:
 		if roll_t <= 0.0:
 			roll_t = float(R["wobble_s"])
 			for i in 2:
-				roll[i] = rng.randf_range(1.0 - wobble, 1.0 + wobble)
+				roll[i] = rng.randf_range(1.0 - float(R["wobble"]), 1.0 + float(R["wobble"]))
 		var force: Array = []
 		for i in 2:
 			var f := float(base[i]) * float(roll[i])
@@ -125,7 +123,6 @@ var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
 var creaked := false           # the lean creak has played this bout
-var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -177,7 +174,6 @@ func label() -> String:
 	return "Start a Stump Shove (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
-	h.hrace.release()
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
 		h._toast("The Stump Shove needs two rested Boki out on the base")
@@ -185,9 +181,8 @@ func use() -> void:
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
-		BaseRace.act(k, "push")
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), BaseRace.tweak("shove"))
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))
@@ -218,16 +213,12 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-		if card_t <= 0.0:
-			BaseRace.let_go(held)
-			held = []
 	if run == null:
 		return
 	run.step(d)
 	if not run.shoved:
 		bar.step(d)
 	_place_pair()
-	cue.update(run.balance)
 	_hear_strain()
 	if run.over():
 		_end(true)
@@ -259,10 +250,7 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
-		BaseRace.act(k, "")
 	bar.close()
-	cue.clear()
-	cue = null
 	stump.rotation.z = 0.0
 	Sfx.loop_stop("shove_strain")
 	if finished:
@@ -272,7 +260,6 @@ func _end(finished: bool) -> void:
 		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
-		held = BaseRace.hold(h, res)
 		Save.save_game()
 	run = null
 	pair = []

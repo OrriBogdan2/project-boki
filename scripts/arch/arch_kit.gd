@@ -833,7 +833,6 @@ func retime(at: float) -> void:
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
 	anim_id = move
-	anim_n += 1
 	anim_at = m.time
 
 ## A hold clip: it starts HOLD_POSE_T into the hold (key down `t` s), never on the press, and not again while it plays.
@@ -1024,7 +1023,7 @@ func armed_fx(slot := "sec") -> void:
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Flashpoint, Called Shot): a double ring, a
+## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).

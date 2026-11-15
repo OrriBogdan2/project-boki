@@ -758,14 +758,12 @@ func _draw_minimap(sz: Vector2) -> void:
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
-		var life := float(sp.get("life", 1.6))
-		if age > life: continue
+		if age > 1.6: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
 		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
 		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
-		if sp["kind"] == "wisp": col = Color("9fe8ff")      # a rival's killed Boki showing its owner
-		var a := clampf(1.0 - age / life, 0.0, 1.0)
+		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 2.5, Color(col, a))
@@ -1914,7 +1912,8 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(p.ak.res_col(), 0.9), 12])
+		var rd := p.ak.res_def()
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 

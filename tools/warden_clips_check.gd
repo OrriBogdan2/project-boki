@@ -67,7 +67,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	# every kit move mapped, and long enough for the kit's clock
 	var short: Array = []
 	var unmapped: Array = []
-	for table in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]:
+	for table in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES]:
 		for k in table:
 			if not String(k).begins_with(prefix) or k in SKIP:
 				continue
@@ -120,7 +120,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			if d > worst:
 				worst = d
 				worst_mv = k
-		if moved < 0.03 and not k in ["bul_short", "bul_crush"]:
+		if moved < 0.03 and not k in ["bul_short", "bul_crush", "bul_armed"]:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])

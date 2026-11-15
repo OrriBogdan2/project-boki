@@ -7,8 +7,7 @@ extends RefCounted
 ##   4. friends and rivals: friends share a good sniff, rivals slow the slower one
 ##   5. a settled hunt: winner joy and trust up, loser sulks (less with a friend), both remember it, gems, bonds
 ##   6. the state machine refuses moves its table lacks
-##   7. on the base: no basket with base_mode off; with it on, take, hide and hunt to a result card;
-##      a faint scent trail appears with the hunt and is gone at the end
+##   7. on the base: no basket with base_mode off; with it on, take, hide and hunt to a result card
 ## Never touches the real save.
 
 const ROUNDS := 20
@@ -212,18 +211,10 @@ func _on_base() -> void:
 		home.ppos = far
 		sk.use()
 		ok(sk.state == BaseSeek.S.HUNT and sk.hunt != null and sk.pair.size() == 2, "on: hidden, two Boki hunt")
-		ok(sk.cue != null, "cue: a scent trail appears with the hunt")
 		var t := 0.0
-		var dots := 0
-		var faint := true
 		while sk.state == BaseSeek.S.HUNT and t < float(BaseSeek.rules()["max_s"]) + 5.0:
 			sk.tick(0.1)
 			t += 0.1
-			if sk.cue != null:
-				dots = maxi(dots, int(sk.cue.shown[0]) + int(sk.cue.shown[1]))
-				faint = faint and sk.cue.strength.all(func(s): return s > 0.0 and s <= GardenCues.SeekCue.MAX_ALPHA)
-		ok(dots > 0 and faint, "cue: the trail shows (%d dots) and stays faint" % dots)
-		ok(sk.cue == null, "cue: the trail is gone when the hunt ends")
 		var carded: bool = sk.state == BaseSeek.S.RESULT and is_instance_valid(sk.card)
 		ok(carded, "on: the hunt ends with a result card (%.1f s)" % t)
 		sk.tick(float(BaseSeek.rules()["card_s"]) + 1.0)

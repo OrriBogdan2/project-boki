@@ -251,8 +251,6 @@ func _on_base() -> void:
 			k.erase("indoors")
 		race.use()
 		ok(race.run != null and race.runners.size() >= 2, "on: a race starts with %d Boki" % race.runners.size())
-		var fresh: bool = race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0
-		ok(fresh, "cue: three unlit marks and a finish line with the lap")
 		if race.run != null:
 			race.bar.m = race.bar.zone        # a press right on the gold
 			var press := InputEventAction.new()
@@ -378,7 +376,6 @@ func _solo(home) -> void:
 	rec["stats"]["speed"] = 10
 	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
 	await _lap(home, false)
-	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
 	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
 			"solo: a lap of missed cheers adds no Speed")
 	rec["needs"]["energy"] = 90.0

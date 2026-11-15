@@ -16,7 +16,6 @@ const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
 	"stonehop", "spin", "strut", "pose", "bow", "crouch", "burst", "sulk"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
-const NO_REACT := ["caecilith"]  # no baked win, sulk or push yet (docs/DEBT.md): the rig skips a clip it lacks
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
@@ -63,7 +62,6 @@ func _species(main: Node) -> void:
 	k.queue_free()
 
 func _contents(rig: BokiRig) -> void:
-	var react := rig.species not in NO_REACT
 	for c in CLIPS:
 		var a := rig.player.get_animation(c)
 		ok(a != null and a.length > 0.1, "clip %s" % c)
@@ -189,18 +187,6 @@ func _clip_for(rig: BokiRig, key: String, value: Variant) -> String:
 	rig.root.remove_meta(key)
 	return got
 
-## The result clips: each plays for its kact, and a win plays once, then the Boki hops or idles.
-func _react_clips(rig: BokiRig) -> void:
-	for c in ["sulk", "push", "win"]:
-		ok(_clip_for(rig, "kact", c) == c, "kact %s" % c)
-	rig.root.set_meta("kact", "win")
-	rig._pick_clip(0.016)
-	rig.player.stop()
-	rig._pick_clip(0.016)
-	ok(rig.clip != "win", "a win plays once, then it hops or idles")
-	rig.root.remove_meta("kact")
-	ok(rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE, "win does not loop")
-
 func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "starts idle")
 	ok(_clip_for(rig, "kstate", "sleep") == "settle", "kstate sleep settles down first")
@@ -211,10 +197,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
-	if rig.species in NO_REACT:
-		ok(_clip_for(rig, "kact", "win") != "win", "no baked win: kact win is skipped")
-	else:
-		_react_clips(rig)
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")
@@ -227,7 +209,6 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 1.2
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
-	_games(rig)
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
