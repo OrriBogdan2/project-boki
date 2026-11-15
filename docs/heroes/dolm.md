@@ -224,6 +224,8 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
+| Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
