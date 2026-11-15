@@ -762,7 +762,7 @@ func _training() -> void:
 	w.free()
 	Sfx.clear_amb_layers(0.0)
 
-## 11. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
+## 18. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
 func _pick_taken() -> void:
 	ok(Sfx.ensure("ui_confirm") and not _takes("ui_confirm").is_empty(), "pick taken: the confirm family has takes")
 	ok(_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
