@@ -382,7 +382,14 @@ func _tutorial() -> void:
 	var fell_t := -1.0
 	var back_ok := false
 	while t < 600.0 and not m.player.extracted:
-		TutorialDrive.drive(m)
+		if fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
+			# the fall is the test: the driver stands down, or it steers the faller back onto an island
+			# (jump, dash, glide) before the void takes it and the respawn is never reached (timing-fragile)
+			for k in TutorialDrive.KEYS:
+				m.player.inp[k] = false
+			m.player.inp["move"] = Vector2.ZERO
+		else:
+			TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
 		var tu: Tutorial = m.tut
 		var id := tu.id()
