@@ -357,6 +357,8 @@ func _init(m: Node3D, fixed_seed := -1) -> void:
 		gait = EmptyGait.new(legs, st)
 		legs_sway = 0.0
 	ws = WardenStance.new(stance)
+	moth = WardenWings.make(WardenClips.data(WardenGlb.art(arch)).get("wings", {}),
+			int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)))
 	rng = int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0

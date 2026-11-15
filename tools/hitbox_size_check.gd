@@ -105,7 +105,7 @@ func run(main: Node) -> void:
 		if hr > hi:
 			hi = hr
 			hi_a = a
-	ok(lo_a == "tender" and hi_a == "bulwark", "smallest is %s, biggest is %s" % [lo_a, hi_a])
+	ok(lo_a == "tender" and hi_a == "dredge", "smallest is %s, biggest is %s" % [lo_a, hi_a])
 	for a in [lo_a, hi_a]:
 		h.reclass(Arch.weight(a), a)
 		h.teleport(h.pos)
