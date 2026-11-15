@@ -9833,3 +9833,4 @@ READY ext/stuck-integ-b6204ee2 86c02fcb95 (bulk-rebase: origin/main merged in me
 READY ext/merge-lane-vfxsfx1-1115 bf6d2d8f39 (bulk-rebase: origin/main merged in mechanically, was 5f4c7d0321; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc3-1115 babbc113b0 (bulk-rebase: origin/main merged in mechanically, was ec867f0e5b; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc3-1115-b 54b682a54f (bulk-rebase: origin/main merged in mechanically, was c1b20696d7; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/merge-lane-boki3d-1114 9ea5da02549f3ca02237c4bc3bcf57c1f31168da (origin/main merged; Rules.md=main's, size_budget regenerated; size --check OK; health --strict only fails 3 style lines in files identical to main)
