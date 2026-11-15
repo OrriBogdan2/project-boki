@@ -757,7 +757,7 @@ func _start_call() -> bool:
 	var who := call_target()
 	if who == null:
 		return false
-	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0}
+	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
 	_call_loops(who)
 	play("mm_call")
@@ -786,7 +786,7 @@ func _tick_call(dt: float) -> void:
 	if float(hearth_call["tick"]) >= every:
 		hearth_call["tick"] = float(hearth_call["tick"]) - every
 		_call_heal(who, float(xd["heal_ps"]) * every)
-	_call_look(who)
+	_call_look(who, dt)
 	Sfx.loop_set(_loop_key(true), h.pos)
 	Sfx.loop_set(_loop_key(false), who.pos)
 	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
@@ -807,7 +807,7 @@ func _call_heal(who: Hunter, amount: float) -> void:
 		_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
 
 
-func _call_look(who: Hunter) -> void:
+func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
 	var own := AimKit.hero_col(h)
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "all": true, "dashed": true})

@@ -168,7 +168,6 @@ const MIN_GAP := {
 	"break_clay": 40,
 	"break_metal": 40,
 	"fuse_hiss": 80,
-	"hostile_cast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
