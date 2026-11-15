@@ -77,7 +77,8 @@ print("loops",len(loops),sorted(len(l) for l in loops)[-10:])
 # vertex normal average
 keptv=np.zeros(nv,bool); keptv[fvk.reshape(-1)]=True
 vuvk=np.zeros((nv,2),np.float32); vuvk[fvk.reshape(-1)]=uvk.reshape(-1,2)
-rgbk=rgb
+_ix=np.clip((vuvk[:,0]*w).astype(int),0,w-1); _iy=np.clip((vuvk[:,1]*h).astype(int),0,h-1)
+rgbk=px[_iy,_ix,:3]
 vnrm=np.zeros((nv,3),np.float32); np.add.at(vnrm,fvk.reshape(-1),cnk.reshape(-1,3))
 vnrm/=np.maximum(np.linalg.norm(vnrm,axis=1),1e-9)[:,None]
 newco=[];newf=[];newuv=[];newcn=[]
@@ -91,7 +92,7 @@ for lp in loops:
     if spread>0.004:
         cen=co[lp].mean(0); nb=np.where((np.linalg.norm(co-cen,axis=1)<0.018)&keptv)[0]
         if len(nb)<5: nb=np.array(lp)
-        mc=np.median(rgb[nb],axis=0); j=nb[int(np.argmin(np.linalg.norm(rgb[nb]-mc,axis=1)))]; uvs=np.repeat(vuvk[j:j+1],n,0)
+        mc=np.median(rgbk[nb],axis=0); j=nb[int(np.argmin(np.linalg.norm(rgbk[nb]-mc,axis=1)))]; uvs=np.repeat(vuvk[j:j+1],n,0)
         print("loop spread",round(float(spread),4),"n",n,"-> flat uv")
     cu=uvs.mean(0)
     for k in range(n):
