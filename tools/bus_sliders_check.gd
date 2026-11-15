@@ -75,7 +75,9 @@ func _sliders() -> void:
 		sl.value = want
 		ok(
 			"'%s' slider sets bus %s" % [key, Settings.BUSES[key]],
-			is_equal_approx(_bus_level(key), want) and is_equal_approx(float(Settings.get_v(key)), want),
+			# the bus hears the slider through Sfx.slider_db (perceptual: gain = slider squared)
+			is_equal_approx(_bus_level(key), db_to_linear(Sfx.slider_db(want)))
+			and is_equal_approx(float(Settings.get_v(key)), want),
 			"%.3f" % _bus_level(key)
 		)
 		sl.drag_ended.emit(true)
