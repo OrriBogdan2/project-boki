@@ -55,7 +55,6 @@ const CHECKS := {
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
 	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
-	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
@@ -83,8 +82,6 @@ const CHECKS := {
 	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--wade-check": ["res://tools/wade_check.gd", "wade_check", null],  # GARDEN.md 4 Boki wading
 	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
-	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],      # no natural death, the cures
-	"--sleepover-check": ["res://tools/sleepover_check.gd", "sleepover_check", null],      # docs/decisions/0022
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],  # wishes, away gifts
@@ -102,15 +99,13 @@ const CHECKS := {
 	# last-hit XP and the 30 m squad share
 	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],      # Heartspark carry layer
 	"--save-chain-check": ["res://tools/save_chain_check.gd", "save_chain_check", null],      # SAVE_CHAIN_0245
+	"--sleepover-check": ["res://tools/sleepover_check.gd", "sleepover_check", null],      # docs/decisions/0022
 	"--base-breed-check": ["res://tools/base_breed_check.gd", "base_breed_check", null],      # GARDEN.md 6
 	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
 	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
-	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
-	"--ridge-shots": ["res://tools/ridge_shots.gd", "ridge_shots", null],      # Kitewind Ridge, --shots-dir=<dir>
-	"--homecoming-check": ["res://tools/homecoming_check.gd", "homecoming_check", null],      # GARDEN.md 2
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
@@ -727,6 +722,9 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
+	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
+	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],      # no natural death, the cures
+	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

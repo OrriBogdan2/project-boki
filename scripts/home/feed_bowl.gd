@@ -176,7 +176,7 @@ static func _eat(h, k: Dictionary, e: Dictionary, since: float) -> void:
 	if not v.has("seated"):
 		v["seated"] = true      # at the bowl now: the chewing starts
 		v["t0"] = since
-		HomeVoice.say(k["rec"], "boki_eat", pos)
+		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), k["pos"], -8.0, 0.12, Unique.voice(k["rec"]))
 	var held := since - float(v["t0"])
 	if held < EAT_SECS:
 		var body: Node3D = (k["node"] as Node3D).get_node_or_null("Body")
