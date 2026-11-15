@@ -594,6 +594,8 @@ func step(dt: float) -> void:
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
+			if act_w <= 0.0:
+				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
