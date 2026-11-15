@@ -1074,7 +1074,9 @@ func _hand_piece(sk: Skeleton3D) -> float:
 			var reach := WardenCarry.on_hands(arrays, head, piece)
 			for t in range(0, idx.size(), 3):   # (only what a triangle draws: a stripped mesh keeps the weapon's
 				if idx[t] != idx[t + 1]:        # vertices, and an emptied surface one degenerate triangle)
-					most = maxf(most, float(reach.get(piece[idx[t]], 0.0)))
+					var rr := float(reach.get(piece[idx[t]], 0.0))
+					if rr > 0.25: print("DBGPIECE ", mi.mesh.surface_get_name(si), " ", rr, " piece ", piece[idx[t]])
+					most = maxf(most, rr)
 	return most
 
 ## The most triangles a shown mesh still draws on the named surface (an emptied one keeps a single degenerate one).
