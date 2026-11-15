@@ -9874,3 +9874,4 @@ READY ext/merge-lane-misc3-1115-b 3a00723afa (conflicts with main f71704b3d8 in 
 READY ext/merge-lane-hunt2-1115r2 9c574c582bbbf883e87f9c1ccb9eeb16f8cca217 (hunt2 lane: 5 feel branches merged, export OK)
 READY ext/merge-lane-misc3-1115-b afbc45aed6 (0 behind main f71704b3d8; tut-first-capture-check fixed: forces tips on and lands the player, "hang" was a slow ~115 s run, now 0 failures; style ratchet red from main fixed (3 comments moved); --check 0, health --strict OK (needs numpy python), tutorial-hud/first-match-guide/first-time-hint/tut-first-games/xp-hint/glide-net 0 failures; SUPERSEDES 3a00723afa)
 READY ext/merge-lane-hunt2-1115r2 2ed2097cfe7db207265d16518c038017a30f64c8 (hunt2 lane: 6 branches incl. fight-hitch perf; move-feel same reds as main, export OK 452 MB)
+READY ext/regate-carry-1115 814b66b0416a38f7c68304c83ecf835e8b93e628 (regate-bot skip-regate carry + GREEN cache + opt-in train; installed)
