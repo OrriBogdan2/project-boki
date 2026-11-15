@@ -1844,6 +1844,7 @@ func sim(dt: float) -> void:
 	glider_snd.tick(self)
 	HoverHum.tick(self)
 	abyss_snd.tick(self)
+	if ak: ak.sound_tick(dt)
 	if remote:
 		net_follow(dt)
 		return
