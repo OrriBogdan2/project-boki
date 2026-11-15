@@ -27,7 +27,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). Question: does the source's kit d
 | dolm | E | Stone Row | none listed | same as vs Hunters, x1.0 | [?] |
 | dolm | R | Basalt Spine | none listed | same as vs Hunters, x1.0 | [?] |
 | dredge | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| dredge | RMB | Abyssal Hand | none listed | same as vs Hunters, x1.0 | [?] |
+| dredge | RMB | Deep Reach | none listed | same as vs Hunters, x1.0 | [?] |
 | dredge | E | Anchor Drop | none listed | same as vs Hunters, x1.0 | [?] |
 | dredge | R | Brass Broadside | none listed | same as vs Hunters, x1.0 | [?] |
 | gunslinger | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
