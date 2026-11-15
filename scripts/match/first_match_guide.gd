@@ -2,8 +2,7 @@ class_name FirstMatchGuide
 extends RefCounted
 ## "What to do next" for a new player's first two real Extractions: one highlighted plain line at a time
 ## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
-## on its trigger or after its time, and never in the plane or the drop.
-## It is only drawn: it never pauses or blocks anything. The save's
+## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
 ## The "dive" line outlives that: the first time the glider has been open for a while, high up, in any
 ## Extraction, it says which key dives. It shows once per save and stops at the first dive
@@ -14,7 +13,7 @@ extends RefCounted
 
 const MINT := Color("8fe3c8")
 ## What to say first when two lines are due.
-const ORDER := ["land", "dive", "zone", "wall", "mates", "blight", "exit", "rank", "send", "chest"]
+const ORDER := ["land", "dive", "zone", "wall", "squad", "mates", "blight", "exit", "rank", "send", "chest"]
 ## The closing zone's two lines: taught once, then the save remembers.
 const ONCE_PER_PROFILE := ["zone", "wall"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
@@ -58,7 +57,7 @@ static func migrate(data: Dictionary) -> void:
 
 func tick(dt: float) -> void:
 	var p := m.player
-	if p == null or p.out or p.extracted or p.downed or p.riding or p.dropping:
+	if p == null or p.out or p.extracted or p.downed:
 		line = ""
 		id = ""
 		return
@@ -109,6 +108,13 @@ func _start(lid: String, p: Hunter) -> void:
 func _left() -> float:
 	return (m.length - m.time) / m.length
 
+func _enemy_near(p: Hunter) -> bool:
+	for h in m.hunters:
+		if h.team != p.team and not h.out and not h.extracted and not h.downed \
+				and h.pos.distance_to(p.pos) <= float(rules()["squad_range"]):
+			return true
+	return false
+
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
 
@@ -116,11 +122,11 @@ func _zone_told(lid: String) -> bool:
 	return bool(Save.d["tutorial"].get("guide_" + lid, false))
 
 
-## B is worth knowing: a teammate can take you, and they're all far off.
+## B is worth knowing: a teammate can take you, and either a squad just came up or they're all far off.
 func _mates_due(p: Hunter) -> bool:
 	if BaseRecall.target(m, p) == null:
 		return false
-	return BaseRecall.mates(m, p).all(
+	return shown.has("squad") or BaseRecall.mates(m, p).all(
 			func(o: Hunter): return o.pos.distance_to(p.pos) > float(rules()["mates_far"]))
 
 func _kin_ready(p: Hunter) -> bool:
@@ -138,6 +144,7 @@ func _due(lid: String, p: Hunter) -> bool:
 		"dive": return not dive_taught() and _glide_t >= float(rules()["dive_open_s"])
 		"zone": return m.zone.told >= 1
 		"wall": return m.zone.k >= 1 and m.zone.outside(p.pos)
+		"squad": return _enemy_near(p)
 		"mates": return _mates_due(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
@@ -152,6 +159,7 @@ func _done(lid: String, p: Hunter) -> bool:
 		"dive": return p.glide_dive.on or not p.gliding
 		"land": return not p.dropping
 		"wall": return not m.zone.outside(p.pos)
+		"squad": return not _enemy_near(p)
 		"mates": return BaseWheel.is_open(p) or p.base_t > 0.0
 		"exit": return _exit_near(p)
 		"rank": return p.skill_pts == 0
