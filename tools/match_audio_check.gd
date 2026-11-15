@@ -69,8 +69,10 @@ func run(main_node: Node) -> void:
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
 	_buses()
+	await _muffle(m, P)
 	await _big_event_duck(P)
 	_steps(m, P)
+	_shields(m, P)
 	await _glider(P, "yours")
 	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
@@ -92,6 +94,7 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
+	ok(not Sfx.mix.muffle_state().on, "the world is clear again once the match is left")
 	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
@@ -143,6 +146,37 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
+
+## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
+## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
+func _shields(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
+	P.inv_t = 0.0
+	P.hp = P.max_hp        # the ult-ready part revived you low; three breaks must not down you
+	for kind in ["ward", "cloak", "molten"]:
+		P.shield = 30.0
+		P.shield_kind = "" if kind == "ward" else kind
+		for part in ["hit", "break"]:
+			var cue := "shield_%s_%s" % [kind, part]
+			ok(Sfx.ensure(cue), "%s is a sound on file" % cue)
+			Sfx.last_played.clear()
+			P.hurt(10.0 if part == "hit" else 40.0, R, {})
+			var shield_cues := Sfx.last_played.keys().filter(func(k): return k.begins_with("shield_"))
+			ok(shield_cues == [cue], "your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues])
+		ok(P.shield_kind == "" and P.shield <= 0.0, "...and the break clears the material")
+	Sfx.listener = P.pos
+	R.shield = 30.0
+	R.shield_kind = "molten"
+	R.pos = P.pos + Vector3(70, 0, 0)
+	Sfx.last_played.clear()
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.is_empty(), "a rival's shield 70 m away is out of earshot")
+	R.pos = P.pos + Vector3(5, 0, 0)
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.has("shield_molten_hit"), "...and 5 m away its thunk is heard")
+	R.shield_t = 0.01
+	R.sim(0.1)
+	ok(R.shield <= 0.0 and R.shield_kind == "", "a shield that runs out clears the material")
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
@@ -200,6 +234,32 @@ func _big_event_duck(P: Hunter) -> void:
 
 ## The match runs on its own for LOUD_S; each bus's peak meter (max and mean, dBFS) is reported. Only the
 ## master limiter is asserted (nothing past its ceiling); the levels are for reading.
+## Down or out dulls the SFX bus hard, under the low-health line a little; the UI bus (pings, the heartbeat) stays
+## clear; a revive or a heal lifts it.
+func _muffle(m: Match, P: Hunter) -> void:
+	var room := SfxMix.Muffle
+	P.hp = P.max_hp
+	P.armor = P.max_armor
+	P.downed = true
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.DOWN], SfxMix.MUFFLE_DB[room.DOWN], "downed")
+	ok(Sfx.mix.bus_for("ping", false, false) == &"UI" and Sfx.mix.bus_for("ping", false, false) != &"SFX",
+		"pings go through the UI bus, so the muffle skips them")
+	P.downed = false
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "revived")
+	P.hp = 1.0
+	P.armor = 0.0
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line")
+	P.hp = P.max_hp
+	P.armor = P.max_armor
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "healed")
+
+func _muffle_step(m: Match, hz: float, db: float, what: String) -> void:
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(SfxMix.MUFFLE_S + 0.2).timeout
+	var st := Sfx.mix.muffle_state()
+	ok(is_equal_approx(st.hz, hz) and is_equal_approx(st.db, db) and st.on == (hz < 20000.0),
+		"%s: the SFX bus low-pass %.0f Hz, duck %.0f dB (%s)" % [what, hz, db, st])
+
 func _loudness(m: Match) -> void:
 	var names: Array = ["Master"] + SfxMix.BUSES.keys()
 	var top := {}

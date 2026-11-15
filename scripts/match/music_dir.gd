@@ -20,6 +20,7 @@ var heat := 0.0               # 0..1, how much of a fight is going on
 var goal := 0.0               # where heat is heading: 1 fight, 0.65 rival close, 0 calm
 var goal_at := -99.0          # match time the goal last changed
 var rival_close := false
+var stings := RaritySting.new()   # rare Boki coming into sight
 var last_fight := -99.0
 var last_done := 0.0
 var started := false
@@ -108,10 +109,17 @@ func last_squad() -> void:
 		if single:
 			Sfx.duck(STING_DUCK)
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> SfxMix.Muffle:
+	if p.downed or p.out:
+		return SfxMix.Muffle.DOWN
+	return SfxMix.Muffle.LOW_HP if LowHpCue.under_line(p) else SfxMix.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.mix.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true
@@ -122,6 +130,7 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		stings.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0

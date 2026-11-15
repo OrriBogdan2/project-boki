@@ -18,8 +18,10 @@
   "vv_sky_place": "cast",
   "vv_sky_count": "cast",
   "vv_sky_strike": "impact",
+  "vv_ult_charge": "cast",
   "vv_ult_rise": "cast",
   "vv_ult_hum": "loop",
+  "vv_ult_crack": "impact",
   "vv_ult_slam": "impact",
   "mage_step_grass": "step",
   "mage_step_stone": "step",
@@ -29,6 +31,7 @@
   "mage_down": "grunt",
   "mage_death": "grunt"
  },
+ "loops": ["vv_ult_hum"],
  "signature": [
   "mage_zap",
   "mage_bubble_pop"
@@ -45,8 +48,10 @@
   "vv_sky_place",
   "vv_sky_count",
   "vv_sky_strike",
+  "vv_ult_charge",
   "vv_ult_rise",
   "vv_ult_hum",
+  "vv_ult_crack",
   "vv_ult_slam"
  ],
  "kit_files": [

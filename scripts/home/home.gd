@@ -1438,7 +1438,7 @@ func _move_kin(d: float) -> void:
 				if arrived:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
-					Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
+					HomeVoice.say(k["rec"], "happy", k["pos"], -10.0)
 					if k.has("welcome"): _say(k, BokiLines.say(k["rec"], "greet"))
 				k.erase("welcome")
 		var pos: Vector3 = k["pos"]
@@ -1464,6 +1464,7 @@ func _move_kin(d: float) -> void:
 					_emote(k, "♪"); _emote(other, "!")
 					var cue := KinVoice.cue(other["rec"]["species"], "happy")
 					Sfx.play(cue, other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					Sfx.play("garden_friend", other["pos"], -16.0)
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -1904,7 +1905,7 @@ func _whistle() -> void:
 			k.erase("nap_go"); k.erase("nap_go_t"); k.erase("going_in")
 			k["called_t"] = 7.0
 			_emote(k, "!")
-			Sfx.play(KinVoice.cue(k["rec"]["species"], "alert"), k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
+			HomeVoice.say(k["rec"], "alert", k["pos"], -12.0)
 			if world.island_of(k["pos"].x, k["pos"].z) != my_isle and my_isle >= 0:
 				_start_leap(k, ppos + slot))
 	if not inside.is_empty():
@@ -2975,7 +2976,8 @@ func _pet_kin(k: Dictionary) -> void:
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
+	HomeVoice.say(rec, "happy", null, -4.0, 0.12)
+	Sfx.play("garden_pet", null, -6.0)
 	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
@@ -3003,7 +3005,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	k["fetch"] = {"ball": ball, "from": ball.position, "to": to, "t": 0.0, "phase": "fly", "life": 14.0}
 	k.erase("chase"); k.erase("task")
 	_emote(k, "!")
-	Sfx.play("throw", null, -8.0)
+	Sfx.play("garden_toy", null, -6.0)
 	verbs.play("toss")
 	kin_frame.start(k, ppos)
 
@@ -3674,7 +3676,7 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
-		Sfx.play("unlock")
+		Sfx.play("garden_trait")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		building_now = false
@@ -4207,7 +4209,7 @@ func _update_bubbles(d: float) -> void:
 			if rl != "":
 				_say(k, rl)
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
-				Sfx.play(KinVoice.cue(rec["species"], "happy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
+				HomeVoice.say(rec, "happy", k["pos"], -8.0)
 				Save.save_game()
 		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and panel_open == "" and not chat_open and train.is_empty() and not k.get("busy", false):
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
@@ -4252,6 +4254,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		if float(k["z_t"]) <= 0.0:
 			k["z_t"] = 2.2
 			_emote(k, "z")
+			HomeVoice.say(rec, "sleepy", pos, -10.0)
 		k["slept"] = float(k.get("slept", 0.0)) + d
 		if float(k["nap_t"]) <= 0.0:
 			Care.change(rec, "energy", 40.0 * clampf(float(k["slept"]) / 30.0, 0.0, 1.0))
@@ -4265,6 +4268,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		k["slept"] = 0.0
 		k["nap_t"] = 30.0
 		k["z_t"] = 0.5
+		Sfx.play("boki_sleep", pos, -8.0, 0.1, Unique.voice(rec))
 	if k.has("stare") and Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < 0.5:
 		var at: Vector3 = k["stare"]
 		k.erase("stare")
@@ -4340,7 +4344,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("boki_eat", fp, -8.0, 0.1, Unique.voice(rec)))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4387,11 +4391,13 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1)
+		Sfx.play("garden_feed", null, -4.0)
 		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -8.0)
+		Sfx.play("garden_feed", null, -8.0)
 		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
@@ -4463,8 +4469,9 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
+		Sfx.play("boki_sleep", k["pos"], -8.0, 0.1, Unique.voice(rec))
 	_say(k, BokiLines.say(rec, "nap"))
-	Sfx.play(KinVoice.cue(rec["species"], "sleepy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
+	HomeVoice.say(rec, "sleepy", k["pos"], -8.0)
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
 func _start_drill(rec: Dictionary, stat: String) -> void:
@@ -4837,7 +4844,6 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
-	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
@@ -4881,7 +4887,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("unlock")
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.
