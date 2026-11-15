@@ -82,6 +82,8 @@ const T := {
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	"dash_jump_keep":                 ["~", [0.74, 0.76], "x", "[est] 0.75: source undecoded, no footage"],
+
 	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
@@ -264,7 +266,8 @@ func _flat_spot(r: float) -> Vector3:
 			return Vector3(floor(g.x) + 0.5, g.y, floor(g.z) + 0.5)
 	return w.random_ground()
 
-func run(main: Node) -> void:
+## A quiet match with one local hunter (P), everything unlocked, and the flat spot found.
+func _begin(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	m = Match.new()
@@ -283,6 +286,9 @@ func run(main: Node) -> void:
 	P.unlock_all()
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
+
+func run(main: Node) -> void:
+	_begin(main)
 	_ground()
 	_face_turn()
 	_jump()
@@ -293,6 +299,7 @@ func run(main: Node) -> void:
 	_dash_exit()
 	_slow_ramp()
 	_dash_curves()
+	_dash_jump_keep()
 	_plain_dash()
 	_kit_dashes()
 	_flue_flight()
@@ -986,6 +993,37 @@ func _dash_curves() -> void:
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
 	P.reclass(cls_was, kit_was)
+
+## Jump out of a ground dash, keys let go: the take-off keeps tuning.json dash.jump_keep of the dash's speed. The
+## jump is pressed once the dash is at full travel (past Kael's wind-up and the slow start of Lace's roll); the
+## speed after the jump step has that step's air drag (Loco.air_step, no keys) undone. One shared value: the
+## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (docs/MOVEMENT_PARITY.md).
+func _dash_jump_keep() -> void:
+	var was := [P.cls, P.arch]
+	var keep := Loco.dash_jump_keep
+	ok(is_equal_approx(keep, 0.75), "dash.jump_keep = 0.75, one value for every Hunter (%s)" % keep)
+	for id in ["gunslinger", "juggernaut", "archer", "ashwick"]:
+		P.reclass(Arch.weight(id), id)
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		for i in 40:
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["move"] = Vector2.ZERO
+			if _hv(P).length() > 1.5 * P.base_speed: break
+		var before := _hv(P).length()
+		var dashing := P.roll_t > 0.0 and P.grounded
+		P.inp["jump"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		var cap := P.base_speed
+		var took := (_hv(P).length() / exp(-Loco.air_idle_drag * DT) - cap) / exp(-Loco.air_drag * DT) + cap
+		print("MFEEL dash jump: %s %.2f -> %.2f m/s (dashing %s)" % [id, before, _hv(P).length(), dashing])
+		ok(dashing and not P.grounded, "dash jump %s: pressed mid-dash on the ground, takes off" % id)
+		rec("dash_jump_keep", took / before)
+	P.reclass(was[0], was[1])
 
 ## Meeko's air dash is her kit's own measured curve (tender.json dash.air: ramp, burst, float-out): from a
 ## height, so it ends on time rather than on a touchdown; its distance, time and the speed it floats out at.
