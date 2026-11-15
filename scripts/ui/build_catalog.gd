@@ -85,7 +85,7 @@ func _init() -> void:
 	col.add_child(_foot)
 	hint = UI.label("", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
-	hint.clip_text = true
+	hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_foot.add_child(hint)
 	_extras_row = UI.hbox(6)
@@ -204,7 +204,7 @@ func _tile(e: Dictionary) -> Control:
 	col.add_child(_picture(e))
 	var title := UI.label(String(e["name"]), 13, UI.INK)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.clip_text = true
+	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
 	col.add_child(title)
 	var cost: Dictionary = e.get("cost", {})
@@ -214,7 +214,7 @@ func _tile(e: Dictionary) -> Control:
 	if note != "":
 		var line := UI.label(note, 12, UI.MUTED)
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		line.clip_text = true
+		line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		line.autowrap_mode = TextServer.AUTOWRAP_OFF
 		col.add_child(line)
 	return tile
