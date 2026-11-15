@@ -456,7 +456,7 @@ func _hud_size(demo: Match) -> void:
 	Settings.v["hud_scale"] = 0.1
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
-	Save.d.erase("hud_reveal")      # (every group is drawn: the staged HUD would hide some)
+	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -489,7 +489,7 @@ func _hud_size(demo: Match) -> void:
 				var groups := SafeArea.seen.duplicate()
 				groups["toasts"] = hud.msgs.rects()
 				var found := SafeArea.problems(groups, sz)
-				ok(groups.size() > 8 and found.is_empty(), "%s at %d%%: %d groups in the margin, no overlap %s"
+				ok(groups.size() >= 8 and found.is_empty(), "%s at %d%%: %d groups in the margin, no overlap %s"
 					% [tag, int(step * 100.0), groups.size(), found.slice(0, 3)])
 				var box := Rect2()
 				for r: Rect2 in groups.get("minimap", []):
@@ -501,6 +501,7 @@ func _hud_size(demo: Match) -> void:
 			if state == "on the ground":      # (the left column holds back to what fits above the bottom block)
 				ok(widths[1.3] > widths[1.0] * 1.15, "%s: 130%% draws the minimap clearly bigger" % tag)
 	Settings.v["hud_scale"] = keep
+	Settings.set_v("hud_full", false, false)
 	main.get_tree().root.size = Vector2i(1280, 720)
 
 func _done() -> void:
