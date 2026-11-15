@@ -10,7 +10,7 @@ extends RefCounted
 
 ## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
 const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXFar": "SFX",
-	"SFXMuffled": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
+	"SFXPan": "SFX", "SFXMuffled": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
 ## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
@@ -87,6 +87,11 @@ func _sfx_effects() -> void:
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(AudioServer.get_bus_index("SFXFar"), lp)
+	var pan_bus := AudioServer.get_bus_index("SFXPan")
+	var dull := AudioEffectLowPassFilter.new()
+	dull.cutoff_hz = 2600.0
+	AudioServer.add_bus_effect(pan_bus, dull)
+	AudioServer.add_bus_effect(pan_bus, AudioEffectPanner.new())
 	var muf := AudioServer.get_bus_index("SFXMuffled")
 	var mlp := AudioEffectLowPassFilter.new()
 	mlp.cutoff_hz = OCCLUDED_HZ

@@ -3,6 +3,7 @@
  "name": "The Hollow Crown",
  "size": 540,
  "seed": 5150,
+ "legendaries": ["cairnback", "hivara"],
  "hand": true,
  "notes": "Hand-made expedition map (tools/make_hollowcrown.py; the format is described there; the design is docs/MAP_V2.md). A broken continent round the Hollow: wide joined land in the west, broken high ground in the east, Stormbreak's shards in the void between, the walled Crown on its north rim; each region a different fight. Nothing is placed by dice except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
  "regions": [
