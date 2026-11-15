@@ -147,6 +147,26 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
+## Its level form, for the Growth card: [species id, level, has art], or [] when no level evolves it.
+static func level_form(rec: Dictionary) -> Array:
+	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
+	if not line.has("level"):
+		return []
+	var at := rec.duplicate()
+	at["level"] = maxi(int(line["level"]), int(rec.get("level", 1)))
+	var to := next_for(at, "level")
+	return [] if to == "" else [to, int(line["level"]), has_art(to)]
+
+## The Growth card's line for its next level form: when it comes, or that it waits on its art
+## (DECISIONS 2026-11-08: never into a form whose model is not in the game).
+static func level_note(rec: Dictionary) -> String:
+	var f := level_form(rec)
+	if f.is_empty():
+		var has_line: bool = rules()["lines"].has(String(rec.get("species", "")))
+		return "No level form: Inks or trades evolve it" if has_line else "No next form yet"
+	var nm := String(Data.KIN[f[0]]["name"]) if Data.KIN.has(f[0]) else String(f[0]).capitalize()
+	return ("Evolves into %s at level %d" if f[2] else "%s (level %d) waits on its art") % [nm, f[1]]
+
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
