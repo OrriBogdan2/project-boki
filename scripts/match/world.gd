@@ -2677,7 +2677,7 @@ func _stamp_lair(D: Dictionary, ii: int) -> void:
 	islands[ii]["lair"] = true
 	lair_defs.append({"id": String(D.get("id", "lair%d" % lair_defs.size())), "name": String(D.get("name", "Boss Lair")),
 		"boss": String(D.get("boss", "colossus")), "c": c, "half": hf, "gate": gate, "gate_tiles": gate_tiles, "out": out,
-		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"])})
+		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["breach"])})
 	labels.append({"name": String(D.get("name", "Boss Lair")), "pos": Vector3(c.x, 0, c.y), "kind": "lair", "role": "lair", "height": lv * LEVEL})
 
 ## Nothing else is placed inside a lair: no spawns, chests, camps, wild kin or loot lying about.
@@ -2737,7 +2737,7 @@ func _place_lairs() -> void:
 		var gate := ("e" if to_mid.x > 0 else "w") if absf(to_mid.x) > absf(to_mid.y) else ("s" if to_mid.y > 0 else "n")
 		var boss: String = Data.BOSSES[(b0 + lair_defs.size()) % Data.BOSSES.size()]
 		var nm: String = {"colossus": "The Sunken Forge", "serpent": "Stormcrown Eyrie", "brood": "The Thornhive"}.get(boss, "Boss Lair")
-		var entry: Array = {"colossus": ["dial"], "serpent": ["dial", "runes"], "brood": ["dial", "wards"]}.get(boss, ["dial"])
+		var entry: Array = {"serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
 		_stamp_lair({"id": "lair%d" % lair_defs.size(), "name": nm, "boss": boss, "at": [best.x, best.y], "half": hf, "gate": gate, "entry": entry}, ii)
 		used.append(ii)
 	_clear_lair_spots()
