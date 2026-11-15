@@ -192,6 +192,7 @@ var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
+var wallstun_at := -9.0       # s (match time) the hit that set wallstun landed (Displace.knocked keeps it)
 var land_t := 0.0
 var ghost_t := 0.0
 var step_t := 0.0
@@ -507,6 +508,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		BaseRecall.cancel(self, "you took damage", true)
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
+		wallstun_at = m.time
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
 	# and you take normal damage. What it does is drain the glider at triple the usual rate. Only
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
@@ -754,9 +756,9 @@ func _render_balloon(delta: float) -> void:
 		string.position = Vector3(0, len * 0.5, 0)
 		string.scale = Vector3(1, len, 1)
 
-## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
-## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
+## Knockback is a clean, predictable shove: a knock replaces the flight you were in (Displace.knock_speed: a
+## second knock takes over from the first, a pull or a reel), you slide for a fixed moment without control,
+## and it never pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
@@ -774,11 +776,12 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 		return
 	if s > 4.0:
 		kb_t = m.time
-	var hv := HunterMove.push(Vector2(vel.x, vel.z), k / k.length(), s)
+	var hv := Displace.knock_speed(Vector2(vel.x, vel.z), k / k.length(), s)
 	vel.x = hv.x; vel.z = hv.y
-	if s > 2.5:
+	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 		HunterMove.cut_air_dash(self)
+		if m is Match: (m as Match).displace.knocked(self)
 	if lift > 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
