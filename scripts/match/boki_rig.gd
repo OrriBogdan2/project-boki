@@ -273,6 +273,7 @@ var _look_t := 1.0
 var _look := Vector2.ZERO
 var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
+var _idle := BokiIdle.new()    # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
@@ -363,6 +364,8 @@ func _ready() -> void:
 	_skel = skeleton()
 	for g in PLANT_GAITS:
 		_plants[g] = BokiPlant.of(species, model, _skel, g)
+	BokiIdle.build(player, _skel, species)
+	_idle.rest(_rng)
 	set_clip("idle")
 
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
@@ -479,6 +482,10 @@ func _pick_clip(dt: float) -> void:
 	var feel: Dictionary = LAYER.get(String(root.get_meta("pose", "")), {})
 	_step_layer(feel, dt)
 	var want := _state_clip()
+	if want == "idle":
+		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
+	else:
+		_idle.rest(_rng)
 	if want in GAITS and feel.has("clip"):
 		want = feel["clip"]
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
