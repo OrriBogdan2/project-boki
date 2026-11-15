@@ -501,6 +501,7 @@ func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	var dl := UI.label(txt, 12, UI.MUTED)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	dl.tooltip_text = txt      # trimmed at large text sizes: the row's tooltip carries it whole
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dl.custom_minimum_size.x = 60
 	h.add_child(dl)
