@@ -4,7 +4,7 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
-static var _rules: Dictionary = _load()
+static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 ## 1/s: GroundFriction x BrakingFrictionFactor, the share of the speed the walking brake sheds per second
@@ -34,14 +34,6 @@ static var dive_timeout: float = _phys["dive_timeout"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
-
-static func _load() -> Dictionary:
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
-	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
-	return parsed
-
-static func rules() -> Dictionary:
-	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
