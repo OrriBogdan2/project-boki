@@ -84,6 +84,7 @@ const CHECKS := {
 	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
+	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],  # wishes, away gifts
 	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],  # garden snack patch
 	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],  # food lean by type (base_mode)
@@ -475,6 +476,8 @@ const CHECKS := {
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
 	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the XP first-time lines
+	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
+	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--bus-sliders-check": ["res://tools/bus_sliders_check.gd", "bus_sliders_check", null],      # a volume per bus
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
@@ -578,6 +581,7 @@ const CHECKS := {
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],  # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],  # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],  # docs/decisions/0013-market.md
+	"--solo-drop-check": ["res://tools/solo_drop_check.gd", "solo_drop_check", null],      # Solo / Trios pick, 20x1 and 7x3
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],  # the opening drop
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],  # --expedition-shots=<dir>
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>

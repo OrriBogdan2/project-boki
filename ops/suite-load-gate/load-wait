@@ -1,0 +1,8 @@
+#!/bin/bash
+# load-wait [MAXSECS=900]: wait until loadavg1 <= LOAD_MAX (default 1.5 x nproc), at most MAXSECS; always exit 0 and print what it did.
+# Used before starting a suite / merge lane / import (11-15: load 26-34 on 16 cores made the canary time out, ENV-BROKEN on both trees).
+max=${LOAD_MAX:-$(( $(nproc) * 3 / 2 ))}; lim=${1:-900}; t=0; l=$(awk '{print int($1 + 0.5)}' /proc/loadavg)
+[ "$max" = 0 ] && exit 0
+while [ "$l" -gt "$max" ] && [ $t -lt $lim ]; do sleep 5; t=$((t + 5)); l=$(awk '{print int($1 + 0.5)}' /proc/loadavg); done
+[ $t -gt 0 ] && echo "load-wait: waited ${t}s (loadavg1 now $l, limit $max)"
+exit 0

@@ -1035,7 +1035,7 @@ func _on_new_track(name: String) -> void:
 func _update_sky(d: float) -> void:
 	_update_music(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
-	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
+	var sun_h := sin((HomeAmbience.clock_in(GardenZones.here, day_t) - 0.25) * TAU)  # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d
@@ -2558,7 +2558,7 @@ func _refresh_top() -> void:
 		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the Boki that comes on expeditions with you"))
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
 	TopChips.add_to(top_chips)
-	if treat != "":
+	if treat != "" and not FarmUnlocks.base_mode():
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
 ## One number on the top bar: an icon, the value, and a tooltip saying what it is.
@@ -3537,7 +3537,12 @@ func _open_expedition() -> void:
 	var rx: Control = more if first else right
 	rx.add_child(UI.spacer(2))
 	rx.add_child(UI.section("Match"))
-	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	var solo := ExpMode.is_solo()
+	var mtabs := UI.tabs(["Solo", "Trios"], "Solo" if solo else "Trios", func(nm): Save.d["exp_mode"] = "solo" if nm == "Solo" else "trio"; _open_expedition(), {}, 96)
+	for tb in mtabs.get_child(0).get_children():
+		tb.tooltip_text = ExpMode.TEXT["solo" if String(tb.get_meta("tab")) == "Solo" else "trio"]
+	rx.add_child(mtabs)
+	rx.add_child(UI.label(ExpMode.TEXT["solo" if solo else "trio"], UI.T_SMALL, UI.MUTED))
 	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
@@ -3616,7 +3621,7 @@ func _start_match() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
+	var o := ExpMode.opts()
 	o["total"] = Data.MATCH_PLAYERS
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
