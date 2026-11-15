@@ -6,7 +6,6 @@ extends RefCounted
 ##   4. the cue fades out as the capture scan fills, and when the Boki is no longer wild
 ## Never touches the save.
 
-const SIDE := [SideColor.YOU, SideColor.ALLY, SideColor.FOE]
 const MIN_APART := 0.1          # RGB distance between two type colours
 const MIN_FROM_SIDE := 0.2      # RGB distance from a type colour to a side colour
 
@@ -35,7 +34,7 @@ func _colours() -> void:
 	ok(close == 0, "no two type colours within %.2f of each other" % MIN_APART)
 	var near := 0
 	for t in types:
-		for s in SIDE:
+		for s in [SideColor.you(), SideColor.ally(), SideColor.foe()]:
 			if _dist(WildTypeCue.COLORS[t], s) < MIN_FROM_SIDE:
 				near += 1
 				print("  near a side colour: %s" % t)
