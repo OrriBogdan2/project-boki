@@ -2,29 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-<<<<<<<< HEAD:audio/ashwick_lock.wav.import
-uid="uid://dvi32uad66br7"
-path="res://.godot/imported/ashwick_lock.wav-ebb3af40c46feb5f21b60b02b00ca697.sample"
-|||||||| merged common ancestors:audio/air_ring_pass.wav.import
-uid="uid://4dbb2fmn8sfh"
-path="res://.godot/imported/air_ring_pass.wav-b13d66358cb1c6c32752f9f2ab39de82.sample"
-========
 uid="uid://bg7cyv6eb6pbi"
 path="res://.godot/imported/abyss_strain.wav-c576f0ca9fe3f3a0172825f9c94ff675.sample"
->>>>>>>> origin/main:audio/abyss_strain.wav.import
 
 [deps]
 
-<<<<<<<< HEAD:audio/ashwick_lock.wav.import
-source_file="res://audio/ashwick_lock.wav"
-dest_files=["res://.godot/imported/ashwick_lock.wav-ebb3af40c46feb5f21b60b02b00ca697.sample"]
-|||||||| merged common ancestors:audio/air_ring_pass.wav.import
-source_file="res://audio/air_ring_pass.wav"
-dest_files=["res://.godot/imported/air_ring_pass.wav-b13d66358cb1c6c32752f9f2ab39de82.sample"]
-========
 source_file="res://audio/abyss_strain.wav"
 dest_files=["res://.godot/imported/abyss_strain.wav-c576f0ca9fe3f3a0172825f9c94ff675.sample"]
->>>>>>>> origin/main:audio/abyss_strain.wav.import
 
 [params]
 

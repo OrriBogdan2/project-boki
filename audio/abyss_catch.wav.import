@@ -2,29 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-<<<<<<<< HEAD:audio/archer_lock.wav.import
-uid="uid://d236udwh5a8n7"
-path="res://.godot/imported/archer_lock.wav-b18d8f087cd53814edd92610f52abc3b.sample"
-|||||||| merged common ancestors:audio/air_ring_hum.wav.import
-uid="uid://d3toc8sj0q4"
-path="res://.godot/imported/air_ring_hum.wav-db7d309f8e558df35e9ac233ac29f203.sample"
-========
 uid="uid://4lekm1uujysi"
 path="res://.godot/imported/abyss_catch.wav-c03c55059cfd81981ade88e549d92375.sample"
->>>>>>>> origin/main:audio/abyss_catch.wav.import
 
 [deps]
 
-<<<<<<<< HEAD:audio/archer_lock.wav.import
-source_file="res://audio/archer_lock.wav"
-dest_files=["res://.godot/imported/archer_lock.wav-b18d8f087cd53814edd92610f52abc3b.sample"]
-|||||||| merged common ancestors:audio/air_ring_hum.wav.import
-source_file="res://audio/air_ring_hum.wav"
-dest_files=["res://.godot/imported/air_ring_hum.wav-db7d309f8e558df35e9ac233ac29f203.sample"]
-========
 source_file="res://audio/abyss_catch.wav"
 dest_files=["res://.godot/imported/abyss_catch.wav-c03c55059cfd81981ade88e549d92375.sample"]
->>>>>>>> origin/main:audio/abyss_catch.wav.import
 
 [params]
 

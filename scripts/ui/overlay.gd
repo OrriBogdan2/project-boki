@@ -258,9 +258,11 @@ func open_controls() -> void:
 	var hero: String = (psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save())
 	ControlsCard.fill(v, hero)
 	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
+	UI.footer_left(v).add_child(UI.ghost("Help: words", open_words))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
-## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met.
+## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met. Linked from the
+## Controls page footer (Esc > More > Controls), so the Esc menu stays at four buttons.
 func open_words() -> void:
 	WordsView.fill(_page("words", "Help: words", 560, true))
 
@@ -286,7 +288,6 @@ func open_more() -> void:
 			close()
 			scr._start_training())
 	_menu_item(v, "Controls", "dash", open_controls)
-	_menu_item(v, "Help", "info", open_words)
 	if ctx != "match":
 		_menu_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 		_menu_item(v, "Save Files", "satchel", open_saves)

@@ -56,11 +56,12 @@ func _ready() -> void:
 		_slots.append({"mi": mi, "mat": mat, "e": null, "t": 0.0, "dur": 1.0, "rise": false, "a": 1.0})
 
 ## `e` just gained `n` health from a giver of ability colour `tint` (transparent: the receiver's own).
-static func heal(e: Ent, n: float, tint := Color.TRANSPARENT) -> void:
+## number false: the rise only (Hunter.heal leaves the number to Fx.healed, so a heal shows one number).
+static func heal(e: Ent, n: float, tint := Color.TRANSPARENT, number := true) -> void:
 	if e == null or n <= 0.0 or not e.is_inside_tree():
 		return
 	var c := of(e.m as Match)
-	if n >= NUMBER_MIN:
+	if number and n >= NUMBER_MIN:
 		e.m.fx.number(e.pos + Vector3(0, 1.6, 0), n, HEAL_COLOR, false, "+")
 	c._start(e, "heal", tint, RISE_S, true, 1.0)
 

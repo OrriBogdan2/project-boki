@@ -1745,7 +1745,8 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": Color(wpn["color"]).to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float) -> void:
+## tint: the giver's ability colour for the ReceiverCue rise; Fx.healed draws the number and glow.
+func heal(n: float, tint := Color.TRANSPARENT) -> void:
 	if downed or out:
 		return
 	if remote:
@@ -1757,6 +1758,7 @@ func heal(n: float) -> void:
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)
+	ReceiverCue.heal(self, hp - before, tint, false)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
