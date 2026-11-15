@@ -1016,7 +1016,6 @@ func tender() -> void:
 			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false

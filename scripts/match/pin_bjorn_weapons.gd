@@ -75,8 +75,7 @@ static func _longbow(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 	Models.part(gun, Models.cyl(0.036, 0.036, 0.14, 10), m_dark, Vector3(0, 0, -0.18))
 	for k in 3:
 		Models.part(gun, Models.cyl(0.039, 0.039, 0.012, 10), m_acc, Vector3(0, -0.05 + k * 0.05, -0.18))
-	# the nocked arrow: a pale shaft, red fletching, a steel head; it is the bow's "Mag" (a reload
-	# takes it off the string and puts it back)
+	# the nocked arrow: a pale shaft, red fletching, a steel head; it is the bow's "Mag".
 	var arrow := Node3D.new()
 	arrow.name = "Mag"
 	gun.add_child(arrow)

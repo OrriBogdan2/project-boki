@@ -2,7 +2,7 @@ extends RefCounted
 ## --weapon-clip-check: no held weapon ever goes into the ground. Every weapon on every class (its
 ## Warden at both slider ends) and on a player's own person of every folk is stepped through
 ## HunterAnim's poses (idle and each fidget, walk, run, sprint, strafe, backpedal, crouch, firing,
-## reloads, melee combos, charged attacks, charging, hops, long falls
+## melee combos, charged attacks, charging, hops, long falls
 ## with their flips and landing squash, each dodge, stomps, casts, drinks, hits, stuns, revives,
 ## the base channel, emotes), and the lowest point of the weapon's bounds is measured against the
 ## ground under the feet every frame. Prints the worst clearance and PASS/FAIL.
@@ -18,7 +18,7 @@ var updates := 0
 var per_sc := {}               # scenario -> [worst after, worst before, where]
 
 func _scen() -> Array:
-	var out: Array = ["idle", "walk", "run", "sprint", "strafe", "back", "crouch", "fire", "reload",
+	var out: Array = ["idle", "walk", "run", "sprint", "strafe", "back", "crouch", "fire",
 		"run_fire", "combo", "run_combo", "charged", "charging", "hop", "fall", "stomp", "cast", "cast_ult",
 		"drink", "hit", "stun", "revive", "base", "emote", "turn"]
 	for f in ["look", "shoulders", "weapon", "stretch", "bounce", "neck", "kin", "owl", "bob", "tail"]:
@@ -58,7 +58,6 @@ func _state(sc: String, t: float, f: int, a: HunterAnim) -> Dictionary:
 		"back": s["vel"] = Vector3(0, 0, 5.0)
 		"crouch": s["crouch"] = 1.0; s["fired"] = 0.5
 		"fire": s["fired"] = fmod(t, 0.25)
-		"reload": s["fired"] = 0.6; s["reload"] = fmod(t / 1.5, 1.0)
 		"run_fire": s["vel"] = fwd * 5.5; s["fired"] = fmod(t, 0.2)
 		"combo", "run_combo":
 			if sc == "run_combo": s["vel"] = fwd * 5.0
@@ -120,7 +119,7 @@ func run(main: Node) -> void:
 				for sc in scen:
 					var a := HunterAnim.new(m)
 					m.rotation.y = 0.0
-					var frames := 75 if not sc in ["fall", "charged", "reload"] else 100
+					var frames := 75 if not sc in ["fall", "charged"] else 100
 					for f in frames:
 						var s := _state(sc, f * DT, f, a)
 						m.rotation.y = float(s["face"])

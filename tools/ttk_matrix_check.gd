@@ -77,7 +77,6 @@ func _time_to_down(m: Match, P: Hunter, T: Hunter, mode: String, dist: float, hp
 	step(m, 1.5, func(): P.inp["fire"] = false)      # rest: magazines refill, combos and cooldowns end
 	P.fire_cd = 0.0
 	P.warm_t = 0.0
-	P.reload_t = 0.0
 	T.max_hp = hp
 	T.hp = hp
 	T.max_armor = armor

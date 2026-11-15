@@ -43,7 +43,6 @@ func _wall(m: Match, face: int, z: int, cliff: bool) -> void:
 
 func _fire(m: Match, P: Hunter, key: String, at: Vector3) -> void:
 	P.fire_cd = 0.0
-	P.reload_t = 0.0
 	P.ammo = maxi(P.ammo, 3)
 	for k in P.ak.cd: P.ak.cd[k] = 0.0
 	P.ak.ch_rmb = maxf(P.ak.ch_rmb, 1.0)

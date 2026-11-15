@@ -8,8 +8,6 @@
 		"dmg": 9.5,
 		"rate": 0.55,
 		"speed": 26,
-		"mag": 12,
-		"reload": 1.4,
 		"kb": 1.6,
 		"spread": 0.0,
 		"range": 10.0,
