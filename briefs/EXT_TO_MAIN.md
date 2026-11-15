@@ -9781,3 +9781,4 @@ READY ext/merge-lane-onboard-1115 6e8b681e549917be3beaa0e52d52ea29b6621e19 (merg
 READY ext/hunter-loco-polish-1115 24e5716a086945f3dcfbc66b58302215522a8fae (hunter locomotion polish: hip bob phase fixed on 11 legged hunters, anim_audit hip-phase gate, Vex gait + clip 14 loco log; numbers+MP4s in /home/boki/anim/loco_polish_1115)
 READY ext/merge-lane-feelcombat-1115 4f19e2c7881329b97fabf1319b22e5c5d8ac03b6 (merge lane feelcombat: 6 of 53 merged + Cinder/Tenzo glide-cancel cherry-picks; targeted checks green, NEW-RED 0, export dry-run OK 447 MB; breah-combo timed out under load)
 READY ext/merge-lane-vfx4-1114 bcb03790d5 (PR #89 regate fix: DJFx own RNG fixes boss-focus NEW-RED + main c73c07f3cc merged; GATE GREEN full suite NEW-RED 0, export 447 MB)
+READY ext/merge-lane-hunters7-1114 872d6b5743 (PR #86 regate fix: old-name doc lines + main c73c07f3cc merged; GATE GREEN NEW-RED 0, export 447 MB)
