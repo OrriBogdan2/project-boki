@@ -36,6 +36,7 @@ static func open(home: Node, sel := "") -> void:
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
 	UI.subtitle(v, "Who you play. Every Hunter opens with its own challenge, then hold to unlock it. "
 			+ "K: the full kit card.")
+	v.add_child(HunterStats.tab_row(home, TITLE))
 	var cols := UI.hbox(16)
 	v.add_child(cols)
 	var left := UI.vbox(10)
@@ -68,7 +69,7 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_parts", [details, acts])
 	_fill(home, sel, viewer)
 	var kit := func(): HomeHero.kit(home, String(home.get_meta("hunters_sel")))
-	UI.footer_left(v).add_child(UI.ghost("Kit card (K)", kit, 0))
+	UI.footer_left(v).add_child(UI.ghost("Kit card (%s)" % Settings.key_cap("kit_card"), kit, 0))
 
 ## The picked Hunter's mastery goals and glider (left) and what you can do with it (over the viewer).
 static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:

@@ -77,6 +77,15 @@ func _force(to: S, why: String, t := -1) -> void:
 		S.SHUT:
 			m.add_feed("%s has shut" % title().capitalize())
 
+## How far the squad on it is, 0 to 1: the uplink's charge, or the health taken off the lair's boss.
+func progress() -> float:
+	if kind == "uplink":
+		return clampf(float(ref.get("prog", 0.0)), 0.0, 1.0)
+	var b: Boss = m.lairs.boss_of(ref) if m.lairs else null
+	if b == null or b.max_hp <= 0.0:
+		return 0.0
+	return clampf(1.0 - b.hp / b.max_hp, 0.0, 1.0)
+
 ## "Amber squad" style words for a squad (the name of one of its hunters when that's all we have).
 func squad(t: int) -> String:
 	for h in m.hunters:

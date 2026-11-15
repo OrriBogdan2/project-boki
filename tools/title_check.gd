@@ -48,7 +48,7 @@ func _pass() -> void:
 	var want: Array = ["Continue" if has else "New Game", "Training Grounds"]
 	if has: want.append_array(["Demo Match", "Play with Your Boki"])
 	if Net.available(): want.append("Play with Friends")
-	want.append_array(["Save Files", "Settings"])
+	want.append_array(["Save Files", "Settings", "Help"])
 	if not OS.has_feature("web"): want.append("Quit")
 	ok(labels == want, "menu items %s" % [labels])
 	ok(labels.all(_title_case), "every menu item is in Title Case (playtest 11-13: \"New game\")")

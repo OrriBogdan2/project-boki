@@ -1,0 +1,22 @@
+{
+	"doc": "The Training Area checklist (Match.train_rows, scripts/match/train_drill.gd): [id, what to do, the action whose key cap the HUD shows beside it (\"\" for none)]. Never write a key in the text: the HUD prints the live cap in front of each line; {key} puts that same cap inside a line.",
+	"rows": [
+		["move", "Walk around", "up"],
+		["dash", "Dash", "dash"],
+		["glide", "Jump, then press again in the air to glide", "jump"],
+		["shoot", "Shoot a target dummy", "fire"],
+		["ability", "Use your ability", "signature"],
+		["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"],
+		["secondary", "Use your weapon's ability", "secondary"],
+		["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+		["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
+		["throw", "Sic your Boki at a dummy", "throw"],
+		["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"],
+		["tonic", "Heal with a tonic (belt slot 1)", "util1"],
+		["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
+		["smash", "Break a crate or pot", "fire"],
+		["weapon", "Take a found weapon off the ground", "interact"],
+		["ledge", "Dash off an edge and float back up", ""],
+		["dodge", "Dodge the Strafer's red shot 3 times: dash through it or out of it", "dash"]
+	]
+}

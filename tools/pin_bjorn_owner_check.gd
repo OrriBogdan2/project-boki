@@ -369,6 +369,10 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
 	var pins0 := K.pins
+	var spent0 := 0
+	for c in K.fx.spent:
+		if (c["node"] as Node3D).visible:
+			spent0 += 1
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.8, rmb_at.bind(P, T.pos))
@@ -409,13 +413,13 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it pins the foe to the wall and the target flashes",
 		K.pins >= pins0 + 1 and T.stun_t > 0.5 and flashed > 0.0, "pins %d stun %.2f flash %.2f" % [K.pins - pins0,
 			T.stun_t, flashed])
-	ok("pin heavy: a stake stays in the wall after the pin", K.fx.staked >= 1, "stakes %d" % K.fx.staked)
-	step(m, 5.0)
+	step(m, 1.0)
 	var standing := 0
 	for c in K.fx.spent:
-		if float(c["t"]) > 0.5 and (c["node"] as Node3D).visible:
+		if (c["node"] as Node3D).visible:
 			standing += 1
-	ok("pin heavy: the stake is still standing 5 s later", standing >= 1, "standing %d" % standing)
+	ok("pin heavy: a wall pin leaves nothing in the wall or on the ground (the owner's 11-08 note)", standing <= spent0,
+		"standing %d, %d before" % [standing, spent0])
 
 func bjorn() -> void:
 	var r := setup("bulwark", 7.0, "", true)

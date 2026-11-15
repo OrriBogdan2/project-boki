@@ -133,7 +133,10 @@ static func hint_text(id: String) -> String:
 	var s := step_def(id)
 	if s.is_empty():
 		return ""
-	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
+	return fill_hint(String((s["hints"] as Dictionary).get(stage(id), "")))
+
+## A hint line with the player's own keys, the Boki's name and the house cost filled in.
+static func fill_hint(raw: String) -> String:
 	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))

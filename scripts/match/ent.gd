@@ -116,6 +116,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
+		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
@@ -151,8 +152,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	freeze_t = 0.05 if d >= 10.0 else 0.03
-	squash = 0.1
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash or hold, only the flash
+		freeze_t = 0.05 if d >= 10.0 else 0.03
+		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
 			set("knock_steer", float(opts.get("kbi", 0.3)))
@@ -340,12 +342,13 @@ func tick_status(dt: float) -> void:
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
-## The burn's tick number, only for burns that involve you; it rolls into the same label as the
-## burner's other damage on this body.
+## The burn's tick number: Fx.damage_number's tick kind, only for burns that involve you; it rolls
+## with the burner's other ticks on this body.
 func _burn_number() -> void:
 	var mt := m as Match
-	if mt and (self == mt.player or burn_by == mt.player):
-		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false, "", Fx.roll_key(burn_by, self))
+	if mt:
+		var by: Ent = burn_by if is_instance_valid(burn_by) else null
+		mt.fx.damage_number(self, by, burn_dps * 0.25, {"src": "burn"}, mt.player)
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:

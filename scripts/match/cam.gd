@@ -89,6 +89,9 @@ var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
+## Match Hunters are drawn this many times bigger (the style's "hunter_scale"; 1 but for the source_scale test
+## style, see Hunter.fit_scale).
+var hunter_scale := 1.0
 
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
@@ -103,12 +106,16 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
+	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
-## Training Grounds. Cheap enough to call every frame.
+## Training Grounds. Cheap enough to call every frame. A style that scales Hunters is the match's
+## alone: the home has no match Hunters to scale, so it keeps the Supervive view.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
+	if (STYLES.get(sty, {}) as Dictionary).has("hunter_scale"):
+		sty = "supervive"
 	if sty != style_id:
 		use_style(sty)
 
