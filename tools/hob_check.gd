@@ -252,8 +252,6 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	await _wait(func(): return not hob.node.bubble.visible, 8.0)      # (a shout from before the beat may still be up)
-	await _frames(2)
 	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
 	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
 	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,

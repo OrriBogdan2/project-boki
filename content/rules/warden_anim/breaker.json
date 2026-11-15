@@ -83,22 +83,18 @@
 		"bul_smash": {
 			"clip": "lmb_slam",
 			"air_legs": true,
-			"fade": 0.05,
 			"strike": ["tip", "lmb/smash_reach", "edge"]
 		},
 		"bul_launch": {
-			"fade": 0.05,
 			"clip": "lmb_launch"
 		},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
 			"hold_from": 0.12,
-			"air_legs": true,
-			"fade": 0.05
+			"air_legs": true
 		},
 		"bul_break": {
-			"fade": 0.05,
 			"clip": "guard_break",
 			"upper": true
 		},
@@ -111,7 +107,6 @@
 			"strike": ["tip", "dash/whirl", "edge"]
 		},
 		"bul_charge": {
-			"fade": 0.05,
 			"clip": "shift_charge"
 		},
 		"bul_short": {
@@ -136,7 +131,6 @@
 			"air_legs": true
 		},
 		"bul_ult_wind": {
-			"fade": 0.05,
 			"clip": "x_wind",
 			"hold_from": 0.4
 		},

@@ -34,8 +34,6 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SNAP_BY := 0.05          # s: a release move's blend-in is over this long after the arrow's spawn
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
-const SNAP_MPS := 8.0          # m/s: an arm bone this fast at a clip's start is a strike or release snapping in
-const FRAME := 1.0 / 60.0      # s: the game frame the kit clock steps by
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
 const POSE_MIN_DEG := 25       # a keyed result pose turns at least one bone this far from the rest
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
@@ -244,7 +242,6 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	if id == "archer":
 		_release_snap(id, sync, clips, m)
 	_recoil(id, m, sync, clips, dd)
-	_snaps(id, m, clips, dd)
 	await _pond(id, m, sync, clips)
 	var reach := StrikeReach.new()
 	await reach.hero(id, m, sync, dd, holder.get_tree())
@@ -1033,91 +1030,6 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 		t += DT
 	m.free()
 	return out
-## Snaps (docs/MOVEMENT_FEEL.md, Strike snaps): a clip whose strike or release key, where its fastest arm bone stops,
-## lands inside the blend-in carries a shorter "fade", so the strike pose is at full weight from locomotion on its key.
-## (An authored fade longer than FADE marks a wind-up blend, not a strike.)
-func _snaps(id: String, m: Node3D, clips: WardenClips, dd: Dictionary) -> void:
-	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var arms := [WardenSkeleton.find(sk, "upper_arm.L"), WardenSkeleton.find(sk, "upper_arm.R")]
-	var bones: Array = []
-	for bi in sk.get_bone_count():
-		var up := bi
-		while up >= 0 and not up in arms:
-			up = sk.get_bone_parent(up)
-		if up >= 0 and not sk.get_bone_name(bi).begins_with("spring_"):
-			bones.append(bi)
-	clips.tree.active = false
-	var moves: Dictionary = dd.get("kmoves", {})
-	var snaps: Array = []
-	var late: Array = []
-	for km in moves:
-		var key := _strike_key(sk, clips.lib.get_animation(String(moves[km]["clip"])), bones)
-		if key < 0.0 or key >= WardenClips.FADE - 0.005 or float(moves[km].get("fade", 0.0)) > WardenClips.FADE:
-			continue
-		snaps.append(km)
-		var w := _weight_on(m, clips, String(km), key)
-		if w < 0.99:
-			late.append("%s %.2f at %.3f s" % [km, w, key])
-	clips.tree.active = true
-	ok(late.is_empty(), "%s: %d moves snap inside the %.1f s blend, each at full weight on its key (%s)"
-			% [id, snaps.size(), WardenClips.FADE, ", ".join(late)])
-
-## s: where the clip's fastest arm bone stops (its speed back under a third), if it snaps (SNAP_MPS) in its first 0.4 s;
-## -1 when it does not.
-func _strike_key(sk: Skeleton3D, an: Animation, bones: Array) -> float:
-	var step := FRAME / 2.0
-	var last: Array = []
-	var top := 0.0
-	var top_bone := 0
-	var speeds := {}
-	var t := 0.0
-	sk.reset_bone_poses()      # (bones the clip does not key stay at rest, not where the last check left them)
-	while t <= minf(an.length, 0.4):
-		_clip_pose(sk, an, t)
-		var now: Array = bones.map(func(bi): return sk.get_bone_global_pose(bi).origin)
-		for i in last.size():
-			var v := (now[i] as Vector3).distance_to(last[i]) / step
-			(speeds.get_or_add(i, []) as Array).append(v)
-			if v > top:
-				top = v
-				top_bone = i
-		last = now
-		t += step
-	if top < SNAP_MPS:
-		return -1.0
-	var sp: Array = speeds[top_bone]
-	var k := sp.find(top)
-	while k < sp.size() - 1 and float(sp[k]) > 0.35 * top:
-		k += 1
-	return k * step
-
-## The clip's own pose at `t`, straight onto the skeleton (the blend tree off).
-func _clip_pose(sk: Skeleton3D, an: Animation, t: float) -> void:
-	for tr in an.get_track_count():
-		var bi := sk.find_bone(an.track_get_path(tr).get_concatenated_subnames())
-		if bi < 0:
-			continue
-		match an.track_get_type(tr):
-			Animation.TYPE_POSITION_3D: sk.set_bone_pose_position(bi, an.position_track_interpolate(tr, t))
-			Animation.TYPE_ROTATION_3D: sk.set_bone_pose_rotation(bi, an.rotation_track_interpolate(tr, t))
-			Animation.TYPE_SCALE_3D: sk.set_bone_pose_scale(bi, an.scale_track_interpolate(tr, t))
-
-## The move's weight on screen when the kit clock reaches `key`, started from standing as the game feeds it.
-func _weight_on(m: Node3D, clips: WardenClips, km: String, key: float) -> float:
-	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
-	m.set_meta(WardenClips.STATE, s)
-	for i in 30:
-		clips.step(FRAME)
-	var t := 0.0
-	while true:
-		s["kmove"] = km
-		s["kmove_t"] = t
-		clips.step(FRAME)
-		if t >= key - 0.001:
-			break
-		t += FRAME
-	var side := clips.xf if clips.chan == 1 else 1.0 - clips.xf
-	return maxf(clips.up_w, clips.act_w * side)
 ## The rescue carry (WardenCarry): the walk legs stay on the clips, both wrists come in round the socket the Boki
 ## rides at, the data's weapon bones are put away, the legs keep stepping, and it lets go when the carry ends.
 func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:

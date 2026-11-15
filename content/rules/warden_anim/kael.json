@@ -31,7 +31,6 @@
 		"arm_swing": {"L": 0.5},
 		"start_phase": 0.75,
 		"start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]},
-		"blend_rate": 7.5,
 		"cadence": 1.5
 	},
 	"crouch": {
@@ -68,14 +67,12 @@
 			"clip": "slash_r",
 			"fade_out": 0.4,
 			"air_legs": true,
-			"fade": 0.05,
 			"strike": ["tip", "lmb/reach", "edge"]
 		},
 		"jug_slash_l": {
 			"clip": "slash_l",
 			"fade_out": 0.4,
 			"air_legs": true,
-			"fade": 0.05,
 			"strike": ["tip", "lmb/reach", "edge"]
 		},
 		"jug_wave_wind": {
@@ -88,7 +85,6 @@
 			"clip": "wave",
 			"fade_out": 0.4,
 			"air_legs": true,
-			"fade": 0.05,
 			"lead": 0.05
 		},
 		"jug_slam": {
@@ -106,7 +102,6 @@
 		"jug_lunge": {
 			"clip": "lunge",
 			"fade_out": 0.4,
-			"fade": 0.05,
 			"rate": 1.5,
 			"lead": -0.17
 		},
@@ -123,14 +118,12 @@
 		"jug_dash": {
 			"clip": "dash",
 			"fade_out": 0.4,
-			"fade": 0.05,
 			"rate": 1.1
 		},
 		"jug_exdash": {
 			"clip": "exdash",
 			"fade_out": 0.4,
-			"air_clip": "exdash",
-			"fade": 0.05
+			"air_clip": "exdash"
 		},
 		"jug_chain": {
 			"clip": "chain",
@@ -140,8 +133,7 @@
 			"clip": "reel",
 			"hold_from": 0.25,
 			"heading": true,
-			"fade_out": 0.4,
-			"fade": 0.05
+			"fade_out": 0.4
 		},
 		"jug_spin": {
 			"clip": "spin",
@@ -150,8 +142,7 @@
 		},
 		"jug_chainlunge": {
 			"clip": "chainlunge",
-			"fade_out": 0.4,
-			"fade": 0.05
+			"fade_out": 0.4
 		},
 		"jug_haul_wind": {
 			"clip": "haul_wind",
@@ -161,19 +152,16 @@
 		},
 		"jug_haulslam": {
 			"clip": "haulslam",
-			"fade_out": 0.4,
-			"fade": 0.05
+			"fade_out": 0.4
 		},
 		"jug_guard": {
 			"clip": "guard",
 			"hold_from": 0.2,
-			"fade_out": 0.4,
-			"fade": 0.05
+			"fade_out": 0.4
 		},
 		"jug_riposte": {
 			"clip": "riposte",
 			"fade_out": 0.4,
-			"fade": 0.05,
 			"lead": -0.08,
 			"strike": ["tip", "x/len", "edge"]
 		},

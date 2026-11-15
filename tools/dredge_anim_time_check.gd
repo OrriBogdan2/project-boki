@@ -295,8 +295,6 @@ func _barges(ak: RefCounted, m: Match, P: Hunter, K: DredgeKit, home: Vector3) -
 	C.ok("Grimble timing barge: three lunges, one a press, a dash and a gap apart; the dash inside a footage frame",
 			presses.size() == 3 and longest <= land + float(K.dash_def()["gap"]) + 0.05 and land <= FRAME,
 			"gaps %s dash %.2f" % [gaps, land])
-	C.ok("Grimble timing barge: the lunge clip outlasts the chain gap and the body stays on it through the three",
-			clip >= longest and min_w >= 0.95, "clip %.2f gaps %s, owned >= %.2f" % [clip, gaps, min_w])
 	_settle(m, P, home, 1.0)
 
 ## Air Shift: the pounce plays on the press and owns the body inside the blend-in (no source: the footage

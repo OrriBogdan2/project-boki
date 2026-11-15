@@ -1,5 +1,5 @@
 extends RefCounted
-## Thrown-prop hand-off, run inside the hero combo checks (Albert's hammer, Grimble's hook, Kael's Warchain, Sable's
+## Thrown-prop hand-off, run inside the hero combo checks (Albert's hammer, Kael's Warchain, Sable's
 ## dagger, Neve's spear): sampled after every step of a real throw, the prop leaves the hand on the throw frame (the
 ## kit's key time, not before or after), the hand and the air never both show it, the hand is never empty with
 ## nothing flying for more than a step, and it snaps back on the step it stops flying. Each hero is one trace of
@@ -20,7 +20,6 @@ func _init(ak, ok_fn: Callable) -> void:
 func run(who: String) -> void:
 	match who:
 		"bulwark": await _albert()
-		"dredge": await _grimble()
 		"juggernaut": await _kael()
 		"thief": await _sable()
 		"rimewright": await _neve()
@@ -94,20 +93,6 @@ func _albert() -> void:
 	ok.call("Albert hammer: the catch step plays bul_recall at its catch key (%.2f s)" % BulwarkKit.RECALL_CATCH,
 			cp[0] == "bul_recall" and absf(float(cp[1]) - BulwarkKit.RECALL_CATCH) <= DT * 1.5,
 			"%s at %.3f s" % [cp[0], float(cp[1])])
-	m.queue_free()
-
-func _grimble() -> void:
-	var r: Array = A.setup("dredge", 9.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: DredgeKit = P.ak
-	A.aim_at(P, r[4] + Vector3(0, 0, -8.0))
-	P.inp["sec_hold"] = false
-	P.ak.press_rmb()
-	var rows := trace(m, 1.0,
-			func(): return [not bool(P.model.get_meta(WardenGlb.CHAIN_OUT, false)),
-					int(not K.hook_sd.is_empty() or K.snap_t > 0.0 or not K.pull.is_empty())])
-	judge("Grimble hook", rows, 0.14, 0.0, true)     # (dr_throw plays from its start through the 0.2 s coil-back)
 	m.queue_free()
 
 func _kael() -> void:

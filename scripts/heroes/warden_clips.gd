@@ -32,7 +32,6 @@ const AIR_FADE := 0.12
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
-const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move ("loco.blend_rate" per Hunter)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -875,7 +874,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	if twist_on:
 		goal = _aim_twist(flat, face, k)
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * float(lc.get("blend_rate", LOCO_RATE))))
+	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
 	var ring := _walk_ring()
 	var rate := gait.plan(spd, lc, loco_pos, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))

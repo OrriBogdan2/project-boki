@@ -219,10 +219,10 @@ func _finishers() -> void:
 		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
 		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
 		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
-		var dk := clips._pick({"drink": 0.5}, 0.0)
+		var dk := clips._pick({"drink": 0.5, "vel": Vector3(3.0, 0.0, 0.0)}, 0.0)
 		var upper := bool(dk.get("upper", false))
 		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
-		ok(is_drink and upper, "%s: the drink is an upper-body clip" % art_name)
+		ok(is_drink and upper, "%s: drinking on the move plays the drink on the upper body" % art_name)
 		m.free()
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,

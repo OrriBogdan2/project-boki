@@ -105,3 +105,17 @@ branch's clips or 0245's data):
     warden-clips-check: CLIPS FAIL ostra: the drink clip is  s (the game's )
     warden-clips-check: CLIPS FAIL ryzz: the drink clip is  s (the game's )
     warden-clips-check: CLIPS FAIL sable: the drink clip is  s (the game's )
+
+## On main (11-15, ext/mantle-port-a merged with origin/main d65f00de26)
+Main had moved 13,000 commits (34 merge bases). Main's newer structure kept; the wave's own work ported onto it:
+- glbs: main's file plus only the clips the wave keyed and main did not (tools/art1/glb_add_clips.py): drink and stomp
+  on all 12; the mantle on Vex, Kael, Cinder, Meeko; Grimble's anchor and 8 loops; Sparkle's 8 loops; Lace's idle.
+- one ledge-climb system, main's "climb" (anim-mantle-2's): the mantle-1 clips play through it (rise = the clip second
+  of the lip). Lace and Tenzo keep the procedural mantle (main: --stretch-check); Tarek and Vex's diagonals stay out
+  (main's newer loops; a ring is one length).
+- left out as second systems next to main's: the Boki wisp/summon/guardian stack and the guardian stance (dropped on
+  main's lanes too, d61f15fb87), WardenAimLead (main: WardenLookAt), NookMoment (main: NestReveal + NookSfx), the
+  Boki bite wind-up (main: Kin.strike_t; the cast wind-up stays), Vex's lime ribbon (main: HeroVfx), the archer tap
+  shot (main: a tap looses nothing), anim-audit's free-arm gate (main's audit rework).
+- kept: Kael's tap strike on main's lane slam, EvolveMoment, the swim/wade states, WardenBeats, move rate/air_clip/
+  ground_clip, loco blend_rate/cadence, Boki idle fidgets, --clip-check's snaps, pond, beats and strike reach.

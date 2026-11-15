@@ -139,7 +139,7 @@ func _rig() -> Dictionary:
 
 func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
 	A.step(m, 2.2)                 # (the Searing Wave's burn ticks for 2 s)
-	K.warchain.snap("")
+	K.warchain.snap()
 	K.riposte.drop()
 	K.res = 0.0
 	K.enraged_t = 0.0           # (an Enrage would play jug_roar over the move)
