@@ -22,7 +22,8 @@ BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "cover": eye
 # radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
 # far the scan stands above its lowest point (a hanging tail), "mid": how far right of its bounds' middle the
-# scan's midline is (game m), when a part off to one side (a curled tail) pulls the bounds off the head, and
+# scan's midline is (game m), when a part off to one side (a curled tail) pulls the bounds off the head; "yaw":
+# degrees the scan turns about the vertical first, when it faces off its axis (made from a three-quarter view); and
 # "pose": the bones (game-axis euler) that lift such a part into the rest pose;
 # "limbs": (bone, from, to, radius from, radius to) in scan space, for a part the fit cannot follow (a tail that hangs
 # another way): the bone lies along it and the capsule replaces the bone's proxy primitives (".L" also makes ".R");
@@ -159,6 +160,28 @@ SCANS = {
         "cover": 1.2,
     },
 
+    "puddlet": {
+        "height": 0.45,
+        "mid": 0.045,
+        "tris": 16000,
+        "x": [(0.205, 0.1), (0.34, 0.21)],
+        "y": [(0.0, 0.0), (0.215, 0.17), (0.352, 0.283), (0.42, 0.44), (0.61, 0.46)],
+        "z": [(-0.4, -0.29), (-0.11, -0.13), (0.285, 0.05), (0.4, 0.15), (0.93, 0.2)],
+        "limbs": [
+            ("tail1", (-0.07, 0.1, 0.15), (-0.165, 0.07, 0.2), 0.05, 0.045),
+            ("tail2", (-0.165, 0.07, 0.2), (-0.265, 0.05, 0.15), 0.045, 0.04),
+            ("tail3", (-0.265, 0.05, 0.15), (-0.3, 0.04, 0.05), 0.04, 0.035),
+            ("tail4", (-0.3, 0.04, 0.05), (-0.3, 0.04, -0.05), 0.035, 0.03),
+            ("tail5", (-0.3, 0.04, -0.05), (-0.285, 0.04, -0.12), 0.03, 0.025),
+        ],
+        "eye_c": (0.065, 0.283, -0.25),
+        "eye_r": (0.025, 0.025, 0.013),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.3,
+    },
+
 }
 
 
@@ -228,7 +251,8 @@ class Scan:
         s = SCANS[species]
         self._mods, self._s = (creature, paint, anim), s
         self.fit = Fit(s["x"], s["y"], s["z"])
-        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
+        self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0),
+                              s.get("yaw", 0.0))
         self.REST_POSE = s.get("pose", {})
         self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
         face = {**boki_face.FACE, **creature.FACE}  # a species' FACE holds only what differs from the defaults
