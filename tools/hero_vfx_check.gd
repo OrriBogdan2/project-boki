@@ -156,7 +156,7 @@ func _recipes(arch: String) -> void:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
-			var flare_big: bool = layer["p"] in ["flare", "portal"] and big > MAX_FLARE
+			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
 			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):
