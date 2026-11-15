@@ -49,7 +49,7 @@ const ROWS := [
 	{"s": "Relay brace", "at": "garden", "want": "brace", "expect": "brace", "relay": RelayBeats.CLIP_BRACE},
 	{"s": "Relay duo tap", "at": "garden", "want": "stonehop", "expect": "stonehop", "relay": RelayBeats.CLIP_DUO},
 	{"s": "Relay win", "at": "garden", "want": "win", "expect": "hop", "relay": RelayBeats.CLIP_WIN},
-	{"s": "Relay sulk", "at": "garden", "want": "sulk", "expect": "idle", "relay": RelayBeats.CLIP_SULK},
+	{"s": "Relay sulk", "at": "garden", "want": "sulk", "expect": "sulk", "relay": RelayBeats.CLIP_SULK},
 ]
 
 var bad := 0

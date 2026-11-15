@@ -271,13 +271,13 @@ on top, no clip).
 | Tumble rush, brace, dodge; Echo hop (stonehop), spin | garden | same name | retargeted |
 | Relay bump (nudge), brace, duo tap (stonehop) | garden | same name | retargeted |
 | Relay win | garden | hop | fallback, authored |
-| Relay sulk | garden | idle, head dropped | fallback, authored |
+| Relay sulk | garden | sulk (the Dash's huff; idle with the head drop on a rig without it) | retargeted |
 
 Gaps found and filled without new art: a **fainted** Boki (a match `downed` state) lay on its side but kept playing
 idle (or the walk, sliding); `Kin.render` now sets the `kdown` meta and `BokiRig` treats it like home sleep: settle
-down, nap (curled, slow breathing), wake on revive. The Relay's **win** and **sulk** names have no clip on any rig, so
-both played a happy `stonehop`; the data in `content/rules/base_relay.json` "beats"."fallback" now gives win its
-hop and sulk its idle (with the head drop). `eat` and `pet` are baked but no game state plays them.
+down, nap (curled, slow breathing), wake on revive. The Relay's **win** name has no clip on any rig, so it
+played a happy `stonehop`; the data in `content/rules/base_relay.json` "beats"."fallback" now gives win its
+hop (and sulk its idle with the head drop, on a rig without the retargeted Dash `sulk`). `eat` and `pet` are baked but no game state plays them.
 
 Shared base: where a species did not write its own clip, it plays the shared one from `boki_clips.py` with only
 its sway layer on top. Those are, per species, cindle, puddlet, burrlet, glintmole, rimeshrew, nettlynx: idle, walk,

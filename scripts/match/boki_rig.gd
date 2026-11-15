@@ -585,7 +585,7 @@ func _state_clip() -> String:
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _lying():
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
