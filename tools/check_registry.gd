@@ -508,6 +508,7 @@ const CHECKS := {
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# the loading screen: splash, tip, bar
 	"--loading-check": ["res://tools/loading_check.gd", "loading_check", null],
+	"--title-loading-shots": ["res://tools/title_loading_shots.gd", "title_loading_shots", null],  # GPU, --shots-dir=
 	"--hud-safe-shots": ["res://tools/hud_safe_shots.gd", "hud_safe_shots", null],      # GPU, --size= --shots-dir=
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
