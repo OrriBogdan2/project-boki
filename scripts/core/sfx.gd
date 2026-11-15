@@ -137,7 +137,6 @@ const NAMES := [
 	"break_metal",
 	"keg_fuse",
 	"keg_blast",
-	"fuse_hiss",
 	"axe_bite",
 	"trunk_creak",
 	"tree_down",
