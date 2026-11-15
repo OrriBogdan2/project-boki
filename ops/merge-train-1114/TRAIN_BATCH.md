@@ -21,3 +21,9 @@ In merge-ready-watch, before it merges a PR (`$head_ref` = that PR's head branch
     if train-batch hold --except "$head_ref" > /dev/null; then echo "held for $(train-batch hold)"; continue; fi
 
 so only the train PR (head ref `ext/merge-train-*`) passes while the hold is on. regate-bot should skip PRs while `train-batch hold` is 0.
+
+## First real run (11-15, rpc4, #98 #82 #85)
+Build 2 min; full gate 51 min (rpc4 under load: 253 flags red on both sides and re-run, 3 rounds) -> NEW-RED 1 (`--ability-card-check`, red on
+main as well, a lost shard job on the candidate); main moved (#82 merged by merge-ready-watch, which has no hold yet) -> `regate-run` delta
+gate 4 min -> GREEN, branch `ext/merge-train-1115-0201` behind main 0. rpc4 has no gh, so the PR and the GATE GREEN comment are the
+coordinator's (texts: `pr-body.md`, `gate-comment.md`). A full gate is 10-50 min and main moves every 20-30, so the delta gate and the hold are what make a train land.

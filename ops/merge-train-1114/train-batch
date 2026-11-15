@@ -13,12 +13,12 @@
 run = (1) ext/merge-train-<MMDD>-<HHMM> := origin/main + each PR head, one --no-ff merge each with ops/merge-rush-1113/merge_batch.sh's
 conflict policy (a PR that conflicts is skipped and reported, a PR whose head moved since its green is skipped); the branch is pushed
 at once, which is also the hold flag for boxes that cannot write the coordinator's file (rpc workers: git push works, gh does not);
-(2) one gate-shard run (suite vs main, NEW-RED rule, export dry-run); if main moved meanwhile it is merged in and re-gated (max 3 rounds);
+(2) one gate-shard run (suite vs main, NEW-RED rule, export dry-run); if main moved meanwhile it is merged in and re-gated (a delta gate, max 3 rounds);
 (3) publish: open the PR (body lists the folded PRs), post "GATE GREEN <full sha>: ..." on it. Without gh/GH_TOKEN (rpc4) the texts are
 left in the state dir for the coordinator: pr-body.md, gate-comment.md, close-<pr>.md. Nothing is merged, approved or bypassed here.
 Env: TRAIN_STATE (default /home/boki/cj/merge-train), TRAIN_WORK (default ../train-work next to the repo), GATE (gate script, tests),
 REPO_SLUG, HOLD_MIN, GS_* (gate-shard)."""
-import json, os, re, subprocess, sys, time, urllib.request
+import json, os, re, shutil, subprocess, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 REPO = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
@@ -153,6 +153,29 @@ def merge_in(cand, items, out, tag):
     return {l.split()[0]: l.split("conflict:", 1)[1].strip() for l in open(skips) if "conflict:" in l}
 
 
+def regate(cand, branch, old_main, new_main, out, rnd):
+    """Main moved: regate-run merges it into the branch and gates only the checks whose inputs changed (4 min, a full gate is 10-50);
+    without regate-run the merge is done here and everything is gated again. Returns the new GATE GREEN/RED summary line."""
+    sha, rg = git("rev-parse", "HEAD", cwd=cand), os.path.join(out, f"regate-{rnd}")
+    tool = os.environ.get("REGATE_RUN", shutil.which("regate-run"))
+    if tool:
+        env = dict(os.environ, BOKI_REPO=REPO, REGATE_WORK=os.path.join(WORK, "regate"))
+        subprocess.run([tool, "0", branch, sha, sha, rg], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        res = open(os.path.join(rg, "result")).read() if os.path.exists(os.path.join(rg, "result")) else "ERROR no result"
+        log(f"main {old_main[:10]} -> {new_main[:10]}, delta gate {rnd}: {res.strip()[:120]}")
+        if not res.startswith("GREEN"):
+            return ""
+        git("fetch", "-q", "origin", branch)
+        git("reset", "-q", "--hard", f"origin/{branch}", cwd=cand)
+        return "GATE GREEN " + open(os.path.join(rg, "comment.md")).read().split(": ", 1)[1].strip()
+    merge_in(cand, [("origin/main", new_main)], out, f"m{rnd}")
+    git("push", "-q", "origin", f"HEAD:refs/heads/{branch}", cwd=cand)
+    fresh_tree(os.path.join(WORK, "main-regate"), new_main)
+    summary = sh_gate(os.path.join(WORK, "main-regate"), cand, os.path.join(out, f"gate-{rnd}"))
+    log(f"main {old_main[:10]} -> {new_main[:10]}, full re-gate {rnd}: {summary}")
+    return summary
+
+
 def run(args):
     dry = "--dry" in args
     publish = "--no-publish" not in args
@@ -190,18 +213,15 @@ def run(args):
     json.dump({"branch": branch, "start": time.time()}, open(HOLD_FILE, "w"))
     git("push", "-q", "origin", f"HEAD:refs/heads/{branch}", cwd=cand, check=True)  # the branch is also the hold flag for other boxes
     log(f"pushed {branch} {git('rev-parse', 'HEAD', cwd=cand)[:10]}; hold set")
-    summary, rounds = "", 0
-    while rounds < 3:
-        rounds += 1
-        fresh_tree(mtree, main)
-        summary = sh_gate(mtree, cand, os.path.join(out, f"gate-{rounds}"))
-        log(f"gate {rounds}: {summary or 'no summary (import failure?)'}")
+    fresh_tree(mtree, main)
+    summary = sh_gate(mtree, cand, os.path.join(out, "gate-1"))
+    log(f"gate 1: {summary or 'no summary (import failure?)'}")
+    for rnd in (2, 3, 4):  # main moved during the gate: merge it in and gate the delta
         git("fetch", "-q", "origin", "main")
         new_main = git("rev-parse", "origin/main")
         if not summary.startswith("GATE GREEN") or new_main == main:
             break
-        merge_in(cand, [("origin/main", new_main)], out, f"m{rounds}")  # main moved during the gate: bring it in, gate again
-        git("push", "-q", "origin", f"HEAD:refs/heads/{branch}", cwd=cand)
+        summary = regate(cand, branch, main, new_main, out, rnd)
         main = new_main
     sha = git("rev-parse", "HEAD", cwd=cand)
     if not summary.startswith("GATE GREEN"):
