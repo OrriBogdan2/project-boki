@@ -32,91 +32,64 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | gunslinger (Ghost) | LMB rank max | 5.47 | 2.48 | 2.20 | FAIL |
 | gunslinger (Ghost) | combo rank 0 | 2.72 | 1.92 | 1.41 | FAIL |
 | gunslinger (Ghost) | combo rank max | 2.38 | 1.76 | 1.35 | FAIL |
-| juggernaut (Brall) | LMB rank 0 | 8.47 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | LMB rank max | 8.47 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 4.42 | 7.70 | 0.57 | FAIL |
-| gunslinger (Ghost) | LMB rank 0 | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | LMB rank max | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | combo rank 0 | 1.77 | 1.92 | 0.92 | ok |
-| gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
-| juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
-| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
-| ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
-| ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
-| ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
-| mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
-| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
-| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | combo rank 0 | 2.68 | 9.00 | 0.30 | FAIL |
-| bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
-| thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
-| thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
-| ostra (Void) | LMB rank 0 | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
-| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| juggernaut (Brall) | LMB rank 0 | 13.22 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | LMB rank max | 13.22 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | combo rank 0 | 8.08 | 7.70 | 1.05 | ok |
+| juggernaut (Brall) | combo rank max | 7.25 | 7.00 | 1.04 | ok |
+| ashwick (Felix) | LMB rank 0 | 5.72 | 6.20 | 0.92 | ok |
+| ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
+| ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
+| ashwick (Felix) | combo rank max | 2.63 | 3.00 | 0.88 | ok |
+| mage (Joule) | LMB rank 0 | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | LMB rank max | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | combo rank 0 | 8.13 | 9.00 | 0.90 | ok |
+| mage (Joule) | combo rank max | 6.63 | 6.40 | 1.04 | ok |
+| bulwark (Oath) | LMB rank 0 | 6.55 | 6.75 | 0.97 | ok |
+| bulwark (Oath) | LMB rank max | 6.55 | 6.75 | 0.97 | ok |
+| bulwark (Oath) | combo rank 0 | 5.38 | 5.85 | 0.92 | ok |
+| bulwark (Oath) | combo rank max | 5.25 | 5.00 | 1.05 | ok |
+| thief (Shiv) | LMB rank 0 | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | LMB rank max | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | combo rank 0 | 4.23 | 4.95 | 0.86 | ok |
+| thief (Shiv) | combo rank max | 4.23 | 4.95 | 0.86 | ok |
+| ostra (Void) | LMB rank 0 | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | LMB rank max | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | combo rank 0 | 5.43 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.83 | 4.80 | 1.01 | ok |
 | archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
 | archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
-| tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
-| tender (Elluna) | LMB rank max | 7.10 | 10.40 | 0.68 | FAIL |
-| dolm (Tetra) | LMB rank 0 | 13.30 | 11.40 | 1.17 | ok |
-| dolm (Tetra) | LMB rank max | 13.30 | 11.40 | 1.17 | ok |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | 3.50 | 2.70 | FAIL |
-| dredge (Kingpin) | LMB rank max | 9.43 | 3.50 | 2.70 | FAIL |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | 13.40 | 0.22 | FAIL |
-| rimewright (Celeste) | LMB rank max | 2.93 | 13.40 | 0.22 | FAIL |
-| gil (roster median) | LMB rank 0 | 6.43 | 6.60 | 0.97 | ok |
-| gil (roster median) | LMB rank max | 6.43 | 6.60 | 0.97 | ok |
-| gil (roster median) | combo rank 0 | 5.43 | 4.95 | 1.10 | ok |
-| gil (roster median) | combo rank max | 5.03 | 4.95 | 1.02 | ok |
-| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
-| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
-| archer (Myth) | LMB rank 0 | 7.83 | never | n/a | n/a |
-| archer (Myth) | LMB rank max | 7.83 | never | n/a | n/a |
-| tender (Elluna) | LMB rank 0 | 7.10 | never | n/a | n/a |
-| tender (Elluna) | LMB rank max | 7.10 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank 0 | 13.30 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank max | 13.30 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| tender (Elluna) | LMB rank 0 | 7.12 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.12 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.33 | 11.40 | 1.17 | ok |
+| dolm (Tetra) | LMB rank max | 13.33 | 11.40 | 1.17 | ok |
+| dredge (Kingpin) | LMB rank 0 | 7.38 | 3.50 | 2.11 | FAIL |
+| dredge (Kingpin) | LMB rank max | 7.38 | 3.50 | 2.11 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 3.35 | 13.40 | 0.25 | FAIL |
+| rimewright (Celeste) | LMB rank max | 3.35 | 13.40 | 0.25 | FAIL |
+| gil (roster median) | LMB rank 0 | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | LMB rank max | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | combo rank 0 | 4.95 | 4.95 | 1.00 | ok |
+| gil (roster median) | combo rank max | 4.62 | 4.95 | 0.93 | ok |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
 | gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 |
 | gunslinger (Ghost) | e | 0.156 | 0.157 | 0.99 |
-| juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
-| juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
-| ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
-| ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
-| ashwick (Felix) | e | 0.045 | 0.060 | 0.76 |
+| juggernaut (Brall) | rmb | 0.101 | 0.101 | 1.00 |
+| juggernaut (Brall) | dash | 0.013 | 0.038 | 0.34 |
+| juggernaut (Brall) | e | 0.023 | 0.023 | 1.00 |
+| ashwick (Felix) | rmb | 0.094 | 0.082 | 1.14 |
+| ashwick (Felix) | dash | 0.117 | 0.117 | 1.00 |
+| ashwick (Felix) | e | 0.058 | 0.060 | 0.98 |
 | mage (Joule) | rmb | 0.104 | 0.104 | 1.00 |
 | mage (Joule) | dash | 0.119 | 0.119 | 1.00 |
 | mage (Joule) | e | 0.126 | 0.126 | 1.00 |
 | bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
 | thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
-| ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
-| ostra (Void) | e | 0.091 | 0.154 | 0.59 |
-| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
-| rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
-| thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
 | ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
 | ostra (Void) | e | 0.172 | 0.154 | 1.11 |
+| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
+| rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
 <!-- ttk:table -->
 
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
