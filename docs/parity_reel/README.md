@@ -66,7 +66,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 [dredge.mp4](dredge.mp4)
 
 Still differs:
-- Cooldowns: Abyssal Hand 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
+- Cooldowns: Deep Reach 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
 - Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
@@ -298,7 +298,8 @@ Still differs:
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
   (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
   stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
-- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
+- Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches. Range, past-the-cursor flight,
+  speed and comet size now match (13.5 m, ext/meeko-crook-range); this reel predates it and its cursor sits on the dummy.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
@@ -337,7 +338,7 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+- Shardskin: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
   a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
   damage and knockback only.
 
