@@ -382,14 +382,23 @@ func _tutorial() -> void:
 	var fell_t := -1.0
 	var back_ok := false
 	while t < 600.0 and not m.player.extracted:
-		TutorialDrive.drive(m)
+		if fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
+			# the fall is the test: the driver stands down, or it steers the faller back onto an island
+			# (jump, dash, glide) before the void takes it and the respawn is never reached (timing-fragile)
+			for k in TutorialDrive.KEYS:
+				m.player.inp[k] = false
+			m.player.inp["move"] = Vector2.ZERO
+		else:
+			TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
 		var tu: Tutorial = m.tut
 		var id := tu.id()
 		steps_seen[id] = true
 		if id == "glove" and fell_t < 0.0:
 			fell_t = t
-			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
+			# under the abyss line (Ent: y < -40 falls out anywhere): a fall that no glide or updraft can save
+			m.player.teleport(Vector3(70.0, -41.0, 30.0))
+			m.player.vel = Vector3.ZERO
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):

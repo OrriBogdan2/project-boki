@@ -24,6 +24,7 @@ var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
 var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
+var belt_tips := BeltTips.new()  # the local player's one-time belt item tips
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -1629,13 +1630,12 @@ func ping(p: Vector3, col: Color) -> void:
 	sfx("ping", null, -10.0)
 
 ## Squad members' colours on the map and their pings (in squad order).
-const MATE_COLS := [Color("ffd23f"), Color("5fd0ff"), Color("8ff0a0"), Color("ff9be8"), Color("ffa25f")]
 func mate_col(h: Hunter) -> Color:
 	var i := 0
 	for x in hunters:
 		if x == h: break
 		if x.team == h.team: i += 1
-	return MATE_COLS[i % MATE_COLS.size()]
+	return SideColor.mate(i)
 
 const SQUAD_PING_T := 45.0
 ## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and as a marker
@@ -1767,7 +1767,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		sfx("crit" if crit else HeroSfx.hit_tick(credit as Hunter, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
@@ -1826,7 +1826,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
-	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
+	fx.burst(h.pos + Vector3(0, 0.8, 0), SideColor.of(self, h), 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
@@ -1842,11 +1842,10 @@ func freeze_frame(t: float) -> void:
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
-	var col := h.armor_col()
 	HeroVfx.of(self).tier_up(h, h.armor_tier)
-	if h == player:
-		sfx("revive", null, -6.0)
-		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
+	Juice.armor_up(self, h)
+	if h == player and hud:
+		hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), h.armor_col())
 
 ## A knock you landed: the short freeze, ring, burst and confirm sound. No slow-mo, no full-screen
 ## flash, so offline and online keep one rhythm (docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment).
@@ -2107,10 +2106,10 @@ func on_fell(e: Ent) -> void:
 		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
-			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
-			e.teleport(back)
 			if tut:
-				hud.toast("Back to your last stop. Try again", Color("f3eee2"))
+				tut.retry()      # (the beat starts again, back at the last stop)
+				return
+			e.teleport(e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground()))
 			e.vel = Vector3.ZERO
 			return
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
@@ -2165,11 +2164,13 @@ func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
+	var top := KillCues.top_team(mb)
 	if net_on:
-		net_event(["mobdead", mb.nid, by.nid if by else ""])
+		net_event(["mobdead", mb.nid, by.nid if by else "", top])
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	KillCues.on_kill(self, mb, credit, top)
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -2889,6 +2890,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3877,6 +3880,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	BoxRevive.mirror_remote(self, dt)
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -4108,6 +4112,7 @@ func _update_box_hums() -> void:
 				_box_ray(b, true)
 			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
 			_box_ray_tick(b, prog)
+			BoxReviveFx.place(self, b, prog)
 			if int(time * 2.0) != int((time - DT) * 2.0):
 				note_sound(b.get("rev_by"), b["pos"], "revive")
 		elif key != "" and box_hums.has(key):
@@ -4119,6 +4124,7 @@ func _box_hum_stop(b: Dictionary) -> void:
 		box_hums.erase(key)
 		Sfx.loop_stop(key)
 	_box_ray(b, false)
+	BoxReviveFx.clear(b)
 
 ## The soft column of light and the ring on the ground over a box while it's being revived.
 func _box_ray(b: Dictionary, on: bool) -> void:
@@ -4849,7 +4855,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
-	var col: Color = {"uplink": ExitModels.UPLINK, Heart.HOW_EARLY: Heart.COL, Heart.HOW_FINAL: Heart.COL}.get(how, Color("8fe3c8"))
+	var col: Color = {"uplink": ExitModels.UPLINK, Heart.HOW_EARLY: Heart.col(), Heart.HOW_FINAL: Heart.col()}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
 	Juice.extract(self, h, col)
@@ -5351,6 +5357,7 @@ func _net_ev(x, from: String) -> void:
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
+				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
@@ -5460,6 +5467,7 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				MobSfx.death(self, who as Mob, false)
+				KillCues.on_kill(self, who, ents_by_id.get(String(x[2]), null), int(x[3]) if x.size() > 3 else -1)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
@@ -5640,6 +5648,8 @@ func _tips() -> void:
 	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
+	var belt_tip := belt_tips.next(player)
+	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
@@ -5654,6 +5664,10 @@ func _tips() -> void:
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+	var heart_tip := heart.tip_for(player) if heart else []
+	if heart_tip: _tip(heart_tip[0], heart_tip[1])
+	var ex := ExpeditionTips.next(self)
+	if ex: _tip(ex[0], ex[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
