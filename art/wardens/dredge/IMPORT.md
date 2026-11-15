@@ -51,3 +51,4 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   his own hunch and hook arm). Walk 1.000 -> 0.750 s, run 0.633 -> 0.542 s; planted sole 1.03 -> 2.20 m/s (loco 2.2) and 3.15 -> 4.40 (loco 4.4),
   pelvis dip 0, seam last key = first. Alternative kept out: a shorter "A" build (walk 0.604 s, run 0.5 s) that steps too fast for a 1.49 m
   hunched Hero. Rebuild: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- dredge.glb out.glb walk_f run_f b,l,r,f 0.75 0.542`.
+**Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".

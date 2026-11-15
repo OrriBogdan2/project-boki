@@ -35,13 +35,16 @@ face marks (eyes, brows, blush) are replaced by a hollow: a shell of the head dr
 (a socket with a glowing rim, a starfield seen with parallax, ghost features floating in it), a small glowing void
 on the chest where the heart is, and motes round the head. A woman's body is drawn into an hourglass with a
 flared tunic, narrower shoulders and her own stance (warden_stance.json "empty_f"); a man's is broad and square
-("empty_m"). Height scales the whole model (the hit ring keeps its size). Old face-marks looks migrate in
+("empty_m", wide-footed and chest up). Every shroud cut is tailored to the figure (`ShroudTailor.FIGURE`: in at
+her shoulders and waist, out over her hips; broad across his shoulders over lean hips), her collar and hood are
+slimmer, her face narrower and his jaw longer (`Unmasked.SEX_FACE`), and she stands about 7 cm shorter (owner
+2026-11-08: the two must read apart at a glance). Height scales the whole model (the hit ring keeps its size). Old face-marks looks migrate in
 `Unmasked.clean` (eyes -> hollow, brows -> ghost, blush -> a rose glow). The first Relic is no longer a pick
 before the egg: after you name your Boki, Vex's Relic drifts to you and you put it on (`MaskMoment`, staged by
-`MaskBeat`, about 1.5 s: you touch the Relic, a ghostly porcelain face flickers over yours three times, the
-Hunter fades in from the feet up and idles; any key skips it after the first time). The second Relic comes from Hob on the farm after
-the first expedition (`HobTalk`, `HobOffer`: a pick of Kael, Cinder or Meeko in conversation, then the same
-beat without the swap).
+`MaskBeat`: build-up, the Relic rising, black and silence, memory frames of the fallen Hunter, the snap back
+with the name and title; content/rules/mask_moment.json). The second Relic comes from Hob on the farm after
+the first expedition (`HobTalk`, `HobOffer`: a pick of Kael, Cinder or Meeko in conversation, then a short
+Relic moment).
 
 ## Update: the shroud, the void head, the aura, the soles (owner, Nov 4, items 77-81)
 - The whole head is the void (`void_face.gdshader`: a dim starfield all round with a lit edge); the hollow's socket

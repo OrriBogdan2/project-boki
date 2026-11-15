@@ -1,13 +1,11 @@
-"""Keys the ledge climb clip ('mantle') into a Hunter's .glb with no Blender (posekit.py needs bpy, which only some boxes have).
+"""Keys the climb clips ('mantle', 'ledge') into a Hunter's .glb with no Blender (posekit.py needs bpy, which only some boxes have).
 Poses are written as targets like posekit's: the hips lean and move, each limb segment aims along a direction given as
 (pitch, out) in degrees (pitch 0 hangs down, 90 forward, 180 straight up; out spreads it sideways), the head tilts. Every key is
 solved to the rig's local rotations from its rest pose; bones not driven here (hands, feet, pauldrons, skirt, face) hold the
 idle clip's first pose, so a weapon or hook riding a hand stays in it. Hero tweaks are small edits on the shared keys.
 Run: python3 tools/art1/glb_climb_clips.py <hero art id> [out.glb]   (hem, tarek, dredge, claire; art/wardens/<id>/<id>.glb)
-Timing (content/rules/warden_anim/<id>.json "mantle", WardenClips._mantle, the same path as Vex/Kael/Cinder/Meeko): the
-first `rise` share of the clip (MANTLE_RISE s of its length) plays with the ledge rise (Hunter._rise_k), so the hands meet
-the lip when the body does; the vault after the lip runs on in real time. Data rise = MANTLE_RISE / the printed length.
-(ext/anim-mantle-2 also keyed a 'ledge' hang clip; the game never sets the ledge (grapple) state, so it is not keyed.)"""
+Timing (content/rules/warden_anim/<id>.json "climb"): the mantle clip plays with the ledge rise up to MANTLE_RISE s (the hands
+meet the lip when the body does), then runs on in time; the ledge clip hangs to LEDGE_HOLD s, then pulls up."""
 import copy
 import math
 import struct
@@ -18,6 +16,7 @@ from glb_add_clips import read, write
 
 FPS = 30
 MANTLE_RISE = 0.28
+LEDGE_HOLD = 0.30
 LIMBS = {"upper_arm.L": ("forearm.L", -1), "forearm.L": ("hand.L", -1), "upper_arm.R": ("forearm.R", 1), "forearm.R": ("hand.R", 1),
          "thigh.L": ("shin.L", -1), "shin.L": ("foot.L", -1), "thigh.R": ("shin.R", 1), "shin.R": ("foot.R", 1)}
 KEY_LIMB = {"uL": "upper_arm.L", "fL": "forearm.L", "uR": "upper_arm.R", "fR": "forearm.R",
@@ -45,6 +44,20 @@ def keys_mantle():
                     tL=(-30, 3), sL=(-45, 3), tR=(35, 3), sR=(-35, 3))),
     ]
 
+
+def keys_ledge():
+    return [
+        (0.00, pose(lean=3, head=20, hip=(0, 0, 0), uL=(170, 12), fL=(175, 8), uR=(170, 12), fR=(175, 8),
+                    tL=(10, 3), sL=(-20, 3), tR=(-5, 3), sR=(-15, 3))),
+        (LEDGE_HOLD, pose(lean=3, head=20, hip=(0, 0.01, 0), uL=(170, 12), fL=(175, 8), uR=(170, 12), fR=(175, 8),
+                          tL=(-5, 3), sL=(-25, 3), tR=(8, 3), sR=(-18, 3))),
+        (0.55, pose(lean=20, head=22, hip=(0, -0.06, -0.10), uL=(110, 16), fL=(165, 12), uR=(110, 16), fR=(165, 12),
+                    tL=(60, 3), sL=(-15, 3), tR=(0, 3), sR=(-30, 3))),
+        (0.75, pose(lean=28, head=18, hip=(0, -0.03, -0.12), uL=(35, 20), fL=(5, 16), uR=(35, 20), fR=(5, 16),
+                    tL=(95, 3), sL=(0, 3), tR=(25, 3), sR=(-45, 3))),
+        (0.90, pose(lean=12, head=6, hip=(0, 0, -0.03), uL=(10, 12), fL=(45, 10), uR=(10, 12), fR=(45, 10),
+                    tL=(10, 3), sL=(-20, 3), tR=(-5, 3), sR=(-15, 3))),
+    ]
 
 
 # per Hunter: [clip, key time, pose entries] replaced on the shared keys (lean_mul scales every lean)
@@ -268,10 +281,10 @@ def main(art, out):
     path = "art/wardens/%s/%s.glb" % (art, art)
     j, b = read(path)
     rig = Rig(j, b)
-    for name, keys in (("mantle", keys_mantle()),):
+    for name, keys in (("mantle", keys_mantle()), ("ledge", keys_ledge())):
         times, tracks = bake(rig, tweak(keys, art), art, name)
         add_clip(j, b, name, times, tracks)
-        print(art, name, len(times), "frames", times[-1], "s", "rise %.3f" % (MANTLE_RISE / times[-1]))
+        print(art, name, len(times), "frames", times[-1], "s")
     write(out, j, b)
 
 

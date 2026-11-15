@@ -7,7 +7,6 @@ extends RefCounted
 ## the wisp prototype's job. Every wisp is one mesh on one shared material plus TRAIL_AMOUNT sparkles.
 
 const SHADER := preload("res://shaders/boki_wisp.gdshader")
-const DOT_SHADER := preload("res://shaders/fx_dot.gdshader")      # the soft round dots Fx bursts use
 const BODY_RADIUS := 0.15     # m; the head-and-body blob, about a third of a Boki's height
 const EYE_COL := Color("1c1a26")
 const TRAIL_AMOUNT := 24      # sparkles alive per wisp: ten wisps stay under 300
@@ -16,7 +15,6 @@ const TRAIL_LIGHTEN := 0.35   # sparkles are the glow colour lifted, so dark glo
 const HOP_HZ := 2.2           # hops per second: quick, never the slow bob of a Hunter Wisp
 const HOP_HEIGHT := 0.1       # m at the top of a hop
 const SQUASH := 0.25          # fraction of its height it flattens by as it lands
-const DIM := 0.4              # its brightness while its summon rests (KinSummon); 1 when ready
 const DART := 0.05            # m; the little side-to-side dart between hops
 const DART_HZ := 0.55         # darts per second
 const DART_LEAN := 3.0        # rad of lean per metre of dart
@@ -106,7 +104,6 @@ const BODY_FEATURES := {
 }
 
 static var _body_mat: ShaderMaterial
-static var _dot_mat: ShaderMaterial
 static var _unit_arrays := {}
 
 ## The wisp of a species: a node with "Body" (the critter mesh) and "Trail" (its sparkles). rec is the
@@ -160,14 +157,6 @@ static func pose(wisp: Node3D, t: float) -> void:
 	body.scale = Vector3(1.0 + squash * 0.6, 1.0 - squash, 1.0 + squash * 0.6)
 	body.rotation.z = -dart * DART_LEAN
 	(wisp.get_node("Trail") as Node3D).position = body.position
-
-## Dim with no sparkles while its summon rests, bright when it is ready. Cheap to call every frame.
-static func dim(wisp: Node3D, resting: bool) -> void:
-	var trail := wisp.get_node("Trail") as CPUParticles3D
-	if trail.emitting != resting:
-		return
-	trail.emitting = not resting
-	(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("dim", DIM if resting else 1.0)
 
 ## Adds the left twin of every part off the middle line (x > 0), with its tilt turned the other way.
 static func _mirrored(parts: Array) -> Array:
@@ -242,10 +231,7 @@ static func _trail(col: Color) -> CPUParticles3D:
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	p.mesh = quad
-	if _dot_mat == null:
-		_dot_mat = ShaderMaterial.new()
-		_dot_mat.shader = DOT_SHADER
-	p.material_override = _dot_mat
+	p.material_override = FxDot.material()
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return p
 

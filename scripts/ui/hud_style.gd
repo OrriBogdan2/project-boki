@@ -14,9 +14,6 @@ const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
 const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
-const SELF := Color("9be36e")             # your own health (leaf green)
-const ALLY := Color("63c7ff")             # your squad's health (sky blue)
-const FOE := Color("ff5a4a")              # rivals' health (coral red)
 const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
 const DOWNED := Color("ffb36a")           # a downed hunter's bleed-out bar
 const STOMPED := Color("ff3a2a")          # ... while someone is finishing them
@@ -38,9 +35,10 @@ const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
+const ITALIC_SLANT := 0.22     # glyph x shift per unit of height: BIG leaned into a bold italic
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
-const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
+const HP_PER_SEG := 17.0       # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
 const PLATE_W := 100.0         # overhead health bar width (rivals and allies)
@@ -54,18 +52,33 @@ const PLATE_NAME_FS := 13
 const PLATE_ICON_ROW := 22.0
 const SLOT_RAD := 9            # ability slot corner radius
 const KEY_FS := 12             # key label size
+## The one screen-edge margin: the share of the window's width and height kept clear on every side
+## (strict title-safe, 64 x 36 px at 1280x720, 96 x 54 at 1080p). The HUD, the tip card, the lobby and
+## the menu panels all read it; decision: docs/UI_FIRST15.md section 3 (the alternative, a fixed
+## 24 px margin, keeps the blocks inside the 5% band).
+const SAFE_FRAC := 0.05
+const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+
+## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
+static func safe_pad(sz: Vector2) -> Vector2:
+	return (sz * SAFE_FRAC).round()
+
+## The window less its safe margin: everything that matters sits inside this rect.
+static func safe_rect(sz: Vector2) -> Rect2:
+	var pad := safe_pad(sz)
+	return Rect2(pad, sz - pad * 2.0)
 
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
-		return SELF
-	return ALLY if h.team == viewer.team else FOE
+		return SideColor.you()
+	return SideColor.ally() if h.team == viewer.team else SideColor.foe()
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and
 ## pulse under a third; rivals stay red (a low rival pulses brighter instead).
 static func hp_fill(role: Color, frac: float, time: float) -> Color:
 	var pulse := 0.5 + 0.5 * sin(time * 9.0)
-	if role == FOE:
+	if role == SideColor.foe():
 		return role.lerp(Color.WHITE, 0.25 * pulse) if frac < 0.3 else role
 	var col := role.lerp(LOW, clampf((0.55 - frac) / 0.3, 0.0, 1.0))
 	return col.lerp(Color.WHITE, 0.2 * pulse) if frac < 0.3 else col
@@ -140,15 +153,16 @@ static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") ->
 
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
-	var kw := BIG.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS).x
+	var kw := TextCache.width(BIG, key, KEY_FS)
 	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
 	c.draw_style_box(box(KEY_BG, 9, Color(col, 0.8), 1), kr)
-	c.draw_string(BIG, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
+	var at := Vector2(kr.position.x + 6, kr.position.y + 14)
+	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(KEY_FS), col)
 
 ## A small count badge (charges, stack sizes) centred on `at`.
 static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	var s := str(n)
-	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
+	var w := maxf(16.0, TextCache.width(BIG, s, 11) + 8.0)
 	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
@@ -168,6 +182,15 @@ static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT
 
+static var _italic: FontVariation
+## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
+static func big_italic() -> Font:
+	if _italic == null:
+		_italic = FontVariation.new()
+		_italic.base_font = BIG
+		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
+	return _italic
+
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
@@ -185,3 +208,9 @@ static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 		sb.anti_aliasing = true
 		_boxes[key] = sb
 	return sb
+
+## Width of the clock chip: the time at the left, the phase in the middle and "LV nn" at the right never touch,
+## at every Text size (196 px is enough at 100%).
+static func clock_w(time_txt: String, phase: String) -> float:
+	var side := maxf(TextCache.width(BIG, time_txt, 16), TextCache.width(BIG, "LV 99", 12))
+	return maxf(196.0, TextCache.width(BIG, phase, 11) + 2.0 * side + 28.0)

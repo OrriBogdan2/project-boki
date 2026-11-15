@@ -7,7 +7,9 @@ extends RefCounted
 ##     holds there gate_hold_s, and every member of that squad within gate_take_r of the Gate leaves: MINOR.
 ##   - the final seat: at final_s (or at once, rush_k faster, when one squad is left) the Heart ring opens.
 ##     A squad holding it alone fills it (faster with more of them, Exits.crew_rate); a standing rival stalls
-##     it; an empty ring drains. Full: that squad's members in the ring leave, MAJOR, the islands fall soon.
+##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
+##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
+##     members in the ring leave, MAJOR, the islands fall soon.
 ##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
@@ -30,9 +32,7 @@ const NEXT := {
 const HOW_EARLY := "heart_early"    # the `how` of a Hunter who left by the Heart Gate
 const HOW_FINAL := "heart_final"    # ...and by the Heart ring
 const RULES_PATH := "res://content/rules/heart.json"
-const COL := Color("ff5d78")        # the Heart's soft pink-red light
 const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
-const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
 const HELD_SCALE := 0.45             # the Heartspark in a carrier's hand, against 0.9 floating over the head
@@ -49,6 +49,13 @@ static func rules() -> Dictionary:
 
 static func r(k: String) -> float:
 	return float(rules()[k])
+
+## The Heart's soft pink-red light, and its Gate's: the colour-vision palette's `heart` and `gate` tones.
+static func col() -> Color:
+	return SideColor.tone("heart")
+
+static func gate_col() -> Color:
+	return SideColor.tone("gate")
 
 ## A Heart in this match? Real matches only; tests with an endless clock opt in with opts["heart"].
 static func enabled(opts: Dictionary) -> bool:
@@ -78,19 +85,17 @@ static func tide_out(m: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; tide_r1 once the ring holds).
-static func next_r(m: Match) -> float:
+## tide starts, so the drop map shows it; tide_r1 once the ring holds). `ahead` 2: two such steps on (bots).
+static func next_r(m: Match, ahead := 1) -> float:
 	if m.heart == null:
 		return 0.0
-	return ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale)
+	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
 
-## Extra Skitter spawn heat per second for a squad out in the tide.
-static func tide_heat(m: Match, p: Vector3) -> float:
-	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+## (A squad out in the tide also stirs the nearest Blight nest on a clock: BlightNests._tide.)
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).
@@ -127,6 +132,7 @@ var early_team := -1           # the squad that took the early seat
 var final_team := -1           # the squad whose progress the Heart ring holds
 var final_prog := 0.0          # 0..1
 var rush := false              # one squad left: the final seat is open and faster
+var locked := false            # Heart Raid: no timer or last squad opens it, only HeartRaid (its boss down)
 var drops := 0
 var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
@@ -211,11 +217,11 @@ func _force(to: S, why: String) -> void:
 			if carrier == null and spark_pos == site and why == "charged":
 				m.add_feed("The Heartspark is charged")
 				m.sfx("portal", site, 2.0, 0.7)
-				m.fx.ring(site + Vector3(0, 0.3, 0), 6.0, COL, 0.8)
+				m.fx.ring(site + Vector3(0, 0.3, 0), 6.0, col(), 0.8)
 		S.FINAL:
 			m.add_feed("The Heart opens: hold its ring to leave")
 			m.sfx("portal", site, 3.0, 0.5)
-			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), COL, 1.0)
+			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), col(), 1.0)
 	_broadcast()
 
 ## Is the early seat's Heartspark charged, unused and out there (lying or carried)?
@@ -241,7 +247,7 @@ func tick(dt: float) -> void:
 
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
-	if state == S.ASLEEP and t >= r("wake_s"):
+	if state == S.ASLEEP and t >= r("wake_s") and not locked:
 		go(S.CHARGING, "wake")
 	if state == S.CHARGING:
 		charge += dt
@@ -251,14 +257,14 @@ func _host_tick(dt: float) -> void:
 			go(S.READY, "charged")
 	if carrier != null and (carrier.downed or carrier.out or carrier.extracted):
 		_drop(carrier.pos)
-	if t >= r("final_s") and state < S.FINAL:
+	if t >= r("final_s") and state < S.FINAL and not locked:
 		go(S.FINAL, "time")
 	if state == S.FINAL:
 		_ring_tick(dt)
 
 ## Only one squad is left (Match._check_last): the final seat opens for them at once, faster.
 func on_last_team() -> void:
-	if site == Vector3.INF or not host() or state == S.DONE:
+	if site == Vector3.INF or not host() or state == S.DONE or locked:
 		return
 	rush = true
 	if state != S.FINAL:
@@ -320,6 +326,9 @@ func _ring_crews() -> Dictionary:
 
 func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
+	if final_team >= 0 and not crews.has(final_team) and crews.size() == 1:
+		final_team = -1      # the holders are out of the ring or down: a squad standing in it alone takes it over
+		final_prog = 0.0
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
 		audio.call_out("start", "final", final_team)
@@ -380,7 +389,7 @@ func _pick(h: Hunter) -> void:
 	else:
 		_broadcast()
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col(), 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:
 	if carrier == null:
@@ -421,28 +430,29 @@ func interact_for(h: Hunter) -> Dictionary:
 	if spark_live() and carrier == null and at_spark:
 		var need := r("pickup_hold_s")
 		var slow := int(r("carrier_slow") * 100.0)
-		return {"kind": "heart", "act": "pick", "need": need, "col": COL, "prog": float(_hold.get(h.nid, 0.0)) / need,
+		return {"kind": "heart", "act": "pick", "need": need, "col": col(), "prog": float(_hold.get(h.nid, 0.0)) / need,
 			"label": "Hold %s to take the Heartspark  ·  %d%% slower and everyone sees you" % [key, slow]}
 	if spark_live() and carrier != null and h.flat_dist(gate) <= r("gate_r") + 1.0:
 		if h == carrier:
 			var gneed := r("gate_hold_s")
-			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
+			return {"kind": "heart", "act": "leave", "need": gneed, "col": gate_col(),
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
 				"label": "Hold %s: leave now, small reward" % key}
-		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
+		return {"kind": "heart", "col": gate_col(), "label": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
 	var say := ""
 	match state:
 		S.ASLEEP:
-			say = "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
+			say = "The Heart sleeps until the raid's boss falls" if locked \
+				else "The Heart is asleep  ·  it wakes in %ds" % int(ceil(r("wake_s") - m.sess_time()))
 		S.CHARGING:
 			say = "The Heartspark is charging  ·  %d%%  ·  everyone can see it" % int(charge / r("charge_s") * 100.0)
 		S.WAITING:
 			say = "The Heart opens in %ds" % int(ceil(r("final_s") - m.sess_time()))
 		S.FINAL:
 			say = "Hold the Heart ring to leave  ·  %d%%" % int(final_prog * 100.0)
-	return {} if say == "" else {"kind": "heart", "col": COL, "label": say}
+	return {} if say == "" else {"kind": "heart", "col": col(), "label": say}
 
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if not it.has("act"):
@@ -475,10 +485,12 @@ func act(what: String, h: Hunter) -> void:
 ## settles them at home).
 func pay(h: Hunter, how: String) -> Dictionary:
 	var rw: Dictionary = rules()["reward"]["major" if how == HOW_FINAL else "minor"]
+	if m.heart_raid:
+		rw = HeartRaid.reward()
 	var out := {"egg": {}, "goods": (rw["goods"] as Dictionary).duplicate(),
 		"seeds": (rw["seeds"] as Dictionary).duplicate(), "gems": int(rw["gems"]), "trust": float(rw["trust"])}
 	if bool(rw["egg"]):
-		var sp := _egg_species()
+		var sp: String = m.heart_raid.egg_species() if m.heart_raid else _egg_species()
 		out["egg"] = {"sp": sp, "boss": String(Data.KIN.get(sp, {}).get("boss", ""))}
 	for s in out["seeds"]:
 		h.seeds[s] = int(h.seeds.get(s, 0)) + int(out["seeds"][s])
@@ -555,24 +567,26 @@ func _build() -> void:
 	_root.add_child(h)
 	Models.part(h, Models.cyl(1.5, 1.7, 0.3, 14), Models.toon(Color("cfc6c8")), Vector3(0, 0.15, 0))
 	Models.part(h, Models.cyl(1.1, 1.25, 0.2, 14), Models.toon(Color("e6dde0")), Vector3(0, 0.4, 0))
-	var glass := Models.toon(GLASS, false, 0.45)
-	Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
-	Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
-	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(COL, 0.1)), Vector3(0, 1.6, 0))
+	# the sculpted glass heart; without its model, a glass egg
+	if ItemArt.add(h, "heart", 0.5, Color.WHITE, 0.3) == null:
+		var glass := Models.toon(GLASS, false, 0.45)
+		Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
+		Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
+	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(col(), 0.1)), Vector3(0, 1.6, 0))
 	_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(7.0)
-	ring.material_override = Models.ring_mat(COL, 0.04)
+	ring.material_override = Models.ring_mat(col(), 0.04)
 	ring.position = Vector3(0, 0.35, 0)
 	h.add_child(ring)
 	# the Heartspark: a small bright mote that grows as it charges
 	_spark = Node3D.new()
 	_root.add_child(_spark)
 	Models.part(_spark, Models.sphere(0.32, 12), Models.toon(Color("ffd0d8"), false, 1.0))
-	var sh := Models.part(_spark, Models.sphere(0.62, 12), Models.glow_mat(Color(COL, 0.35)))
+	var sh := Models.part(_spark, Models.sphere(0.62, 12), Models.glow_mat(Color(col(), 0.35)))
 	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# the world beam
-	_beam_mat = Models.glow_mat(Color(COL, 0.2))
+	_beam_mat = Models.glow_mat(Color(col(), 0.2))
 	_beam = MeshInstance3D.new()
 	_beam.mesh = Models.cyl(0.25, 0.6, BEAM_H, 12)
 	_beam.material_override = _beam_mat
@@ -614,7 +628,7 @@ func _update_nodes() -> void:
 	var a := 0.3 + 0.1 * pulse
 	if state == S.CHARGING:
 		a = 0.07 + 0.2 * f
-	_beam_mat.set_shader_parameter("color", Color(COL, a))
+	_beam_mat.set_shader_parameter("color", Color(col(), a))
 	var hs := 1.0 if lying or state == S.FINAL else 0.0
 	if state == S.CHARGING:
 		hs = f

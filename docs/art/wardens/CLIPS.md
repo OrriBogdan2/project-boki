@@ -15,6 +15,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time).
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r; fl, fr, bl, br where the Hero has
+  them), speeds, `in_step` (the ring's loops share a length and a strike key: the blend keeps them in time; `--clip-check`
+  holds each loop's pelvis to the forward loop's height at the same phase).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
@@ -30,6 +33,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
   `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
   plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (the sneak clip's own ground speed, m/s: the clip runs at the game's crouch speed over it, up to `WardenClips.CROUCH_RATE_MAX`, so the planted foot stays put; `--crouch-check` measures it). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+  `aim_twist` (Vex, Lace, Cinder): run-and-aim as the source does it. The walk and run play forward with the legs turned
+  to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
+  (~96 deg). Past 90 deg the legs turn round and play the backward run (they hold it 0.1 rad either side of 90, so a
+  run near it does not flicker). While he runs, the legs hold their way when the aim swings. Off: the f, b, l, r ring.
+  Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
+  `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
+  (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
@@ -52,6 +63,20 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `lead` (s: the clip starts that far in, so a late strike key lands on the kit's hit; under zero, its first frame is held that long)}.
   The clip is seeked to the kit's own `kmove_t` (plus the lead), so it can't drift from the hit. Clip length = the table's last key.
+  Over the glide clip (and the dive, which
+  plays it too) the whole body takes HunterAnim's air tilt (root meta `AIR_TILT`, WardenClips._air_tilt): the roll into
+  a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
+  glider stays in the hands. A Boki riding on you sits on the torso you see (`WardenGlb.shown_torso`, the hips bone back
+  through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
+  swing of its own side's leg; `side_foot_mps` [walk, run] is the strafe loops' own foot speed, mixed in by how far the
+  move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
+  so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
+  `--foot-slide-check`). No key: the clip plays as keyed.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
+- `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
+  `Oomph.HEAVY_FLINCH`); any other hit is `WardenFlinch`: a torso spring (front, back, left, right from `hit_dir`) added after
+  the clips, so it rides over a run or a cast without stopping it. `--flinch-layer-check` holds each Hero's LMB move and hits it.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `emotes`: the clip each wheel emote (`Truce.EMOTES`) plays, {emote id: clip}, all eight, all different, each shorter than the 2.6 s bubble. A clip is one of the `.glb` or a gesture `g_<name>` keyed at load from `warden_anim/emote_gestures.json` (`WardenGestures`: degrees from the rig's rest, axes in that file's doc). Moving, it plays on the upper layer (the legs keep running); standing, a `.glb` clip owns the body and a gesture still only moves the upper body. An id off the wheel (the bots' replies) plays `states.emote`. Remote players get it from the existing `emo` event. `--clip-check` asserts the map; `--emote-shots` renders it.
 - `lockin`: the pre-match lobby pose when you pick the Hunter ({clip, from (s, 0), dur (s, 1-1.5), rate, fade (s in,
@@ -72,13 +97,45 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, mantles, bases; stomp and drink for a Hero with no clip). A kit move with no clip does too.
 - `states.stomp`, `states.drink` (shared actions, item: parity): the clip name; the clip is the game's phase 0..1 (Hunter state `stomp` = time in `Life.R.stomp_cycle`, `drink` = over `Hunter.DRINK_TIME`) laid over its length, so the stomp clip is 0.7 s with the slam at 0.49 s (the kit's hit at 0.7 of the cycle) and the drink clip is 1.1 s, an upper-body one (the legs keep walking). `states.reviving`'s clip is a loop. Motley, Albert, Sparkle and Sable have all three (`tools/art1/*_clips.py` `stomp`, `revive`, `drink`); a Hunter with no clip keeps the procedural pose.
 - `procedural`: state keys that hand back to the rig (ledges, mantles; `stomp` and `drink` for a Hunter with no clip). A kit move with no clip does too. `--action-shots --warden=<id> --state=stomp|revive|drink --shots-dir=<dir>` renders the three (`--variant=proc` the rig's pose).
+- `turn`: {`dur` s, `lift` rad}, the step of turning on the spot (TurnStep, WardenTurn). Standing, the legs stay put
+  while the aim swings (the body turns at `turn_rate`, 1280°/s) and the upper body leads; past 90° the foot on the side
+  of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot
+  (0.25 s), a cast (0.6 s), a kit move or an emote cancels it (`TurnStep.busy`). Heavy Heroes take a slower, lower
+  step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
+- `cc` (scripts/heroes/warden_cc.gd): how the Hero fights crowd control, laid over the clips and in and out in 0.1 s. A stun plays the `stun` state (its sway loop); a root keeps the legs planted on the idle while the torso pulls (`pull` rad of lean, `tug_hz` tugs a second, `twist` rad of wring); Grounded drops into the `crouch` layer (no dip) and bows the head `bow` rad at the cords. `--clip-check` asserts all three for every Hero.
+- `climb` (mantle, ledge): {clip, `rise`}. A ledge rise (Hunter `_rise_k`, 0 at the start of the face, 1 at the lip) seeks the mantle clip to progress x `rise` s, so the hands meet the lip when the body does; a ledge float (dash off an edge) hangs `rise` s; either then runs on to the clip's end unless a move, the glider or death takes over. Keyed with `tools/art1/glb_climb_clips.py` (no Blender). A model without the clips (or the key) plays the procedural pose.
+- `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
   the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
-timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
+under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
+renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
+
+## The drop poses (WardenDropPose, `content/rules/drop_poses.json`)
+One pose set every Hero wears over its clips or rig, not a clip per Hero: `ride` (braced on the squad rocket's hull,
+DropRocket.seat) and `skydive` (belly down, arms and legs spread, banking `lean` deg and tipping `pitch` deg with the
+steer), which eases off over `open` s into the `air.glide` clip when the canopy opens. The body line and each limb are
+aimed along a direction in the body's own frame, read off the armature's rest, so the numbers fit every rig. Runs in
+WardenGlb's Sync after the clips, before the hands and blade are read. No per-Hero offsets: the lineup shots
+(`--clip-shots --drop`, docs/shots/anim-skydive) show no body clipping itself. `--clip-check` asserts both poses, the
+bank and the hand-over for all 12.
+
+## Opening a box
+No clip: one shared layer on the contract bones (`scripts/heroes/warden_open.gd`, WardenOpen), laid over the clips by
+Sync while the Hero holds a chest or a deathbox open (`Hunter.holding()` "chest" or "loot"; the player's open loot
+window holds "loot"). The state's `act_at` is the lid's top (`WardenOpen.lid_near`: the nearest closed chest or full
+box). It turns the root to the box, steps in (at most 0.45 m), sinks with the soles kept (leg IK), leans the hips and
+lays both wrists on the lid (arm IK, elbows out): in over 0.25 s, a small stir while held, back in 0.1 s when the hold
+ends. Step, drop and lean are searched once per reach against the Hero's own shoulders and arm length, so a tall Hero
+folds deeper and every Hero's hands reach the same lid. A move, a dash, a cast, a hit, a jump, or anything the clips
+play over the walk (`WardenClips.busy`: a kit move, a stun, an emote, a hand-back to the rig) takes it off the frame it
+comes; a hold that goes on reaches in again. The channel's timing is the game's own (ChestLoot `hold_s`, Life
+`loot_time`): the layer only shows it. `--loot-open-check` asserts all 12 Heroes and a chest opened in a real match;
+with `--shots-dir=<dir>` (GPU) it shoots `loot_open_strip.png`.
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.
@@ -116,3 +173,5 @@ whirl (3.2 m straight out, 3.5 m ring). Albert's smash was fixed in the clip wit
 (`tools/art1/glb_bone_turn.py`: a bone turned about a model-frame axis over a window of the clip): his arm pitched up 36
 degrees at the impact, so the hammer head lands 2.45 m out on the ground instead of 1.7 m out and 0.6 m under it
 (`--strike-reach-check --reach-trace` prints the head's path frame by frame; before/after strips still to render on a GPU).
+While you carry your downed Boki (pose id `rs_carry`, KinDowned) the legs stay on the walk and run clips at the carry's 90% speed and `scripts/heroes/warden_carry.gd` lays one upper-body layer over them: two-bone IK brings both wrists in round a chest socket, the torso leans back a little, and the bones the Hero's data lists as `"carry_stow"` shrink away (Albert's weapon and shield, Hem's bow, Dredge's gun, Vex's gatling and launcher, Ostra's card fan). A weapon modelled straight into the hand mesh leaves the shown mesh instead: once a session per mesh, `WardenCarry.held` copies the body mesh without it, the carry shows that copy while it is in and the whole mesh again when it lets go. Kael's sword and Claire's spear ride `hand.R` rigidly as their own pieces (the hands listed as `"carry_drop"`: each piece that rides one of them alone and reaches more than 0.1 m from it goes). Sable's two flintlocks are fused into her v95 body by blended weights (mostly the forearms), so they go by surface (`"carry_drop_surfaces": ["metal-atlas"]`, her import note's pistol slot). `--clip-check` asserts per Hero, off the meshes and not the data, that while carrying no shown piece on a hand alone reaches more than 0.25 m from it (a hand, not a weapon), and that each listed surface is emptied. The Boki rides at the socket (`carry_socket` model meta, read by `KinDowned.scoop_pose`); a broad body sets its cradle further out (`"carry_fwd"`, arm lengths: Albert's barrel, Ostra's ruff), and `--clip-check` asserts the socket clears the body's front by 0.1 m. It runs on the contract bones, so no clip is authored. Cinder, Ryzz, Tarek and Pip hold no weapon (Tarek's fist shards keep orbiting). A scan of every .glb skin for pieces led by a hand or forearm (2026-11-11) finds no other weapon: Dredge's big left hand is his gauntlet (his IMPORT.md), Sable's two leather pieces under the hands are bone-heat blends (60% hand, 40% leg; her slot rule puts the pistols in metal), and Gil has no clips yet, so the carry layer does not run on him (his Swordfish rides hand.R as its own mesh). Strip: docs/art/anim_audit/carry_pose.jpg (Vex, Kael, Albert, Sable, Claire; the other seven are asserted by --clip-check, not yet shot).
+While you carry your downed Boki (pose id `rs_carry`, KinDowned) the legs stay on the walk and run clips at the carry's 90% speed and `scripts/heroes/warden_carry.gd` lays one upper-body layer over them: two-bone IK brings both wrists in round a chest socket, the torso leans back a little, and the bones the Hero's data lists as `"carry_stow"` shrink away (Albert's weapon and shield, Hem's bow, Dredge's gun, Vex's gatling and launcher, Ostra's card fan). A weapon modelled straight into the hand mesh (Kael's sword, Claire's spear: the hands listed as `"carry_drop"`; Sable's v95 flintlocks are fused to her hands by blended weights, so the hand test finds nothing and she carries them in view until a by-surface drop lands (ext/anim-carry-weapons)) leaves the shown mesh instead: once a session per mesh, `WardenCarry.held` copies the body mesh without each piece that rides one of those hands alone and reaches more than 0.1 m from it, and the carry shows that copy while it is in. The Boki rides at the socket (`carry_socket` model meta, read by `KinDowned.scoop_pose`); a broad body sets its cradle further out (`"carry_fwd"`, arm lengths: Albert's barrel, Ostra's ruff), and `--clip-check` asserts the socket clears the body's front by 0.1 m. It runs on the contract bones, so no clip is authored. Cinder, Ryzz, Tarek and Pip hold no weapon (Tarek's fist shards keep orbiting). Strip: docs/art/anim_audit/carry_pose.jpg (Vex, Kael, Albert, Sable, Claire).

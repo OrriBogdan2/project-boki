@@ -1,5 +1,7 @@
 # Pip / Meeko (tender): import note, v95 swap of Meeko appeal3, body b (2026-11-10)
 
+**11-13 (ext/showcase-1113):** `pip.glb` is now Meeko's current master (`~/meshy/v95/Meeko/r2/n95/best.glb`, current.json), the same recipe below on `best_nocomp.glb` (its body `Mesh_0` and wings `model_part0`/`model_part5`; the master's sun and cloud stripped). Its wings sit on their own textured material, which needed bake_warden's per-material colour bake. 14,293 tris.
+
 `pip.glb`: the owner's pick (11-10), Meeko v95 r2 appeal3 `cand_b.glb` (the appeal3 face; body widened 7% at the torso and
 hips), swapped onto Pip's own skeleton, 45 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/pip_v95.json`, then the sun and raincloud put back by `tools/art1/pip_companions.py`. Raw files in
@@ -38,3 +40,27 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
 - `pip_fit.json`, `pip_bake.json`, `pip_recipe.json` belong to the old pipeline and no longer build this model.
 - **Paws and the walk/run pilot (2026-11-11):** the paws were skinned to `root` (pip_source.py took the leg weights only near the thigh's line; fixed there), so in every clip they sat 2-10 cm in the floor and slid with her body. `tools/art1/pip_feet_weights.py` moves those 211 verts onto foot.L/R in the shipped GLB (blending into the shin across the ankle). `tools/art1/pip_gait.py` then rebuilds all eight walk/run loops (f, b, l, r) on her old upper body, with a short float: walk 4.8 steps/s ahead, 6.0 back, 7.7 sideways; run 5.9, 7.4, 9.5 (her legs reach less behind and to the side, so those steps are shorter). Planted paws 2.2 and 4.55 m/s in every direction, matching loco (before: 0.09-0.22 m/s, i.e. sliding while sunk 7-11 cm). Run `pip_feet_weights.py`, `pip_gait.py`, then `glb_add_clips.py` with the eight names.
 - **Walk and run pilot (2026-11-10):** a Meshy rig retargeted onto Meeko's walk_f/run_f (rig, rig with the current arms carried, a115 Quick Walk, a16 Run Fast) did not beat the current loops in the blind Fable judge (walk 4.00 vs 3.50, run 4.25 vs 4.00 at best), so the shipped clips stay. Her 0.35 m legs cannot reach the planted stride at 2.2 and 4.55 m/s: one foot locked (2.49 and 5.14) and the other did not (0.98 and 2.67). The current clips skate at 1.06 and 3.33 m/s; a stride generated for short legs (like Albert's `breaker_gait.py`) is the open fix.
+- **Imports:** pip.glb.import `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`, `animation/fps=48` (the walk/run keys' rate); textures VRAM compressed high quality, mipmapped, at most 2048. Normal maps through hero_toon `use_nrm` (from ext/art1-hem).
+- **Burrseed `seed` clip (ext/meeko-lane-picks, from ext/meeko-rmb-verify):** the release-hop `seed` (tools/art1/pip_clips.py)
+  went onto this appeal3 glb Blender-free with `glb_add_clips.add`, exact name `seed` (the CLI matches by prefix and would
+  also take `seed_aim`); the other 44 clips, meshes, skins and nodes are byte-identical.
+  Re-applied 2026-11-14 (ext/fix-main-reds-1114) on the v95 master: the v95 swap (61515dc4fc) was built on the glb from
+  before the hop went in and brought the flat `seed` back; same command, `=seed` from dd00ee939e's pip.glb.
+  Merged into ext/merge-batch-10-1113 the same day: its walk/run glb with `=seed` from main's pip.glb on top (after the eight walk/run clips, re-run `=seed` the same way).
+- **Paws, walk and run (2026-11-11):** the appeal3 bone heat left the heels on the shin (left) and the thigh (right);
+  `tools/art1/pip_feet_weights.py` moves the 200 paw verts below the ankle onto foot.L/R (blending into the shin across
+  the ankle). `tools/art1/pip_gait.py` (ext/anim-pilot-loops-cm-v2) then rebuilds the eight walk/run loops (f, b, l, r)
+  on her old upper body with each stance sole pinned to a floor at loco speed, all on one 0.34 s period (16 keys at 48/s:
+  0.333 s); warden_anim/pip.json `loco.cycle_s` 0.34 makes WardenClips' BlendSpace2D run them synced, so they stay in
+  step at a diagonal and from the walk ring into the run ring. Her legs reach less behind and to the side, so those soles
+  are down for less of the period (duty x0.8 back, x0.62 sideways: a longer float). Walk and run 5.9 steps/s, steps 0.37
+  and 0.77 m; soles 2.2 and 4.55 m/s in Blender in every direction, ankle miss 0, hence `foot_mps` [2.2, 4.55] (no
+  `stride` gain). Re-baked on main's v95 model (2026-11-13, ext/anim-meeko-loops-length): walk and run share one duty
+  (0.25) and one heel-to-toe roll, each swing leaves and meets the floor at its speed, and the old clips' forward lean
+  sits on the hips instead of the root (walk_f 7 deg, run_f 12 deg: the thighs hang from the root, so two leans put the
+  hips in two places). All three keep the walk-run blend planted: --foot-slide-check worst 1.80 m/s (main's loops 2.46),
+  --anim-audit run 13 % (main 12 %). At Godot's default 30 fps import the
+  run's 80 ms stance kept 2 or 3 keys and the soles wobbled. Run `pip_feet_weights.py`, `pip_gait.py`, then
+  `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).
+
+- **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.

@@ -7,10 +7,12 @@ extends Node
 ## On top of that, each body plan moves its own way (BODY below): quadrupeds trot and break into a
 ## gallop with the back rocking, bipeds (the hare) hop, flyers hover and beat their wings, the sky
 ## serpent ripples along its length, blobs jiggle. Each has an idle breath, a curled-up sleep, a
-## lunge for attacks, a wiggle of joy, a crouch before a jump and a stretch in the air.
+## lunge for attacks, a wiggle of joy, a crouch before a jump and a stretch in the air. Its naps (KinNap)
+## settle it down, breathe slow with an ear twitch and end in a stretch.
 ##
 ## It reads a few metas on the kin root, all optional:
-##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
+##   "dazed" (bool) "starry" (bool: the circling stars; when unset, while dazed) "happy" (bool)
+##   "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
@@ -44,7 +46,6 @@ var eye_base: Array[Vector3] = []
 var t := 0.0
 var blink_t := 2.0
 var blink_k := 0.0
-var lids := 0.0        # eyes held shut, 0..1 (BokiWispPop: eyes open last, close first)
 var y_prev := 0.0
 var vy := 0.0
 var vy_prev := 0.0
@@ -72,8 +73,10 @@ var quirk_t := 3.0     # until the next time it does its habit
 var quirk_k := 0.0     # 1 at the start of one, down to 0
 var pose_last := ""
 var fl := KinFlinch.new()
+var nap: KinNap
 var rot_base := Vector3.ZERO     # the lean before the hit jolt is added
-var pz := {"sx": 1.0, "sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
+var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
+const SLEEP_EAR := 0.3       # rad the ears lie back asleep
 const POSE_T := {
 	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
 	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
@@ -115,6 +118,7 @@ func _ready() -> void:
 	blink_t = randf_range(0.8, 3.5)
 	plan = String(BODY.get(species, "blob"))
 	fl.plan = plan
+	nap = KinNap.new(species)
 	flex_base = flex.position
 	quirk = String(root.get_meta("quirk", ""))
 	girth = float(root.get_meta("girth", 1.0))
@@ -179,12 +183,13 @@ func _process(dt: float) -> void:
 	var ks := String(root.get_meta("kstate", ""))
 	var ek := 1.0 - exp(-8.0 * dt)
 	att_k = lerpf(att_k, 1.0 if ks == "attack" else 0.0, 1.0 - exp(-18.0 * dt))
-	sleep_k = lerpf(sleep_k, 1.0 if ks == "sleep" else 0.0, 1.0 - exp(-3.0 * dt))
+	nap.update(root, ks == "sleep", dt)
+	sleep_k = nap.lie
 	perch_k = lerpf(perch_k, 1.0 if ks == "perch" else 0.0, ek)
 	happy_k = lerpf(happy_k, 1.0 if happy else 0.0, ek)
 	air = lerpf(air, clampf(vy * 0.4, -1.0, 1.0), 1.0 - exp(-10.0 * dt))
 	gait += dt * (4.0 + move_k * 12.0 + happy_k * 4.0)
-	var breathe := sin(t * (2.2 - sleep_k * 1.0) + phase) * (0.018 + sleep_k * 0.03) * (1.0 - move_k)
+	var breathe := sin(t * 2.2 + phase) * 0.018 * (1.0 - sleep_k) * (1.0 - move_k) + nap.breath
 	var sx := 1.0 + sq * 0.6 + swell + breathe * 0.5
 	var sy := 1.0 - sq + swell * 0.6 + breathe
 	var sz := 1.0
@@ -262,11 +267,10 @@ func _process(dt: float) -> void:
 		if pose == "flinch":
 			sq_v += 3.0; ear_v -= 6.0
 		pose_last = pose
-	var pt: Dictionary = KinGuardStance.row(plan) if pose == "stance" else POSE_T.get(pose, {})
+	var pt: Dictionary = POSE_T.get(pose, {})
 	for key in pz:
-		var base := 1.0 if key in ["sx", "sy", "sz"] else 0.0
+		var base := 1.0 if key in ["sy", "sz"] else 0.0
 		pz[key] = lerpf(float(pz[key]), float(pt.get(key, base)), 1.0 - exp(-10.0 * dt))
-	sx *= float(pz["sx"])
 	sy *= float(pz["sy"])
 	sz *= float(pz["sz"])
 	rx += float(pz["rx"])
@@ -277,6 +281,10 @@ func _process(dt: float) -> void:
 	rz += sleep_k * 0.25
 	rx += sleep_k * 0.1
 	off.y -= sleep_k * 0.03
+	# waking: a stretch, long and low with the front down
+	sz += nap.long
+	sy -= nap.low
+	rx -= nap.bow
 	sx *= fl.wide
 	sy *= fl.tall
 	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5))
@@ -304,7 +312,6 @@ func _process(dt: float) -> void:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
-	shut = maxf(shut, lids)
 	for i in eyes.size():
 		var b := eye_base[i]
 		eyes[i].scale = Vector3(b.x * (1.0 + shut * 0.15), b.y * maxf(0.08, 1.0 - shut), b.z)
@@ -320,14 +327,14 @@ func _process(dt: float) -> void:
 		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k + float(pz["tail"])), 1.0 - exp(-6.0 * dt))
 	# ears: spring that flops on landing, perks on a cast, twitches now and then
 	if ears:
-		twitch_t -= dt
+		twitch_t -= dt * (1.0 - sleep_k)
 		if twitch_t <= 0.0:
 			twitch_t = _idle_rng.randf_range(2.0, 5.0)
 			twitch = 1.0
 		twitch = maxf(0.0, twitch - dt * 6.0)
 		var droop := 0.35 if dazed else 0.0
-		ears.rotation.x = clampf(ear_flop * 0.12, -0.5, 0.5) + droop + float(pz["ear"])
-		ears.rotation.z = sin(twitch * PI * 2.0) * 0.12
+		ears.rotation.x = clampf(ear_flop * 0.12, -0.5, 0.5) + droop + float(pz["ear"]) + sleep_k * SLEEP_EAR
+		ears.rotation.z = sin(maxf(twitch, nap.twitch) * PI * 2.0) * 0.12
 	# legs: a trot that speeds up with it (diagonal pairs together), a gallop when running (front
 	# pair, then back pair), both feet together for hoppers, tucked up asleep, dangling for flyers
 	var gal := clampf((move_k - 0.55) / 0.45, 0.0, 1.0)
@@ -360,11 +367,12 @@ func _process(dt: float) -> void:
 	if spin:
 		spin.rotation.y += dt * (1.2 + move_k * 2.0)
 	# stars circling the head while dazed
-	if dazed and stars == null:
+	var starry: bool = root.get_meta("starry", dazed)
+	if starry and stars == null:
 		_make_stars()
 	if stars:
-		stars.visible = dazed
-		if dazed:
+		stars.visible = starry
+		if starry:
 			stars.rotation.y += dt * 4.0
 
 func _make_stars() -> void:

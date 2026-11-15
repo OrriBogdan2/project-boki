@@ -1,21 +1,21 @@
 extends RefCounted
-## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
-## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, the Wisp
-## trails when it moves, a revive brings the hero back (scaled up from the pop) and frees the Wisp, and a
-## bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
-## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
-## that lists only a few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
-## off by default (the Boki walks); on, every Boki rides as a critter-outline wisp orbiting its hunter at
-## shoulder height, carry passives on, no orders or hits, the AI not ticking, and the snapshot flag turns a
-## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
-## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
-## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Also the outline rule (round body with a
-## head, team rim, white core, low hover, no flicker, one mesh in one material). Prints PASS/FAIL.
+## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For every hero,
+## a bot teammate and the tutorial: down a hero, the Wisp is on it from the first frame while the hero plays
+## the knocked-down beat (HunterFall: its death clip, or a kneel without one; held where it went down and
+## facing the way it faced, pushed away from the knocker, fading as the Wisp rises out of it, for its
+## weight's time), then the hero model hides, the Wisp hums, it
+## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
+## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out plays the elimination beat (once,
+## mid-beat too; ends with the deathbox, nothing left). The
+## downed gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
+## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
+## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
+## few keys builds, and the saved id round-trips. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
 var bad := 0
+var _was_on := false
 var m: Match
 var main: Node
 var _spot: Vector3       # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
@@ -23,15 +23,14 @@ var _spot: Vector3       # each hero cycle starts here: the drift rows walk the 
 func run(main_node: Node) -> void:
 	main = main_node
 	_looks()
+	_styles()
+	_picker()
 	_start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
 	_bleed_out()
 	_teammate()
-	_boki_wisps()
-	_summon_data()
-	_summon()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -57,6 +56,7 @@ func _start(opts: Dictionary) -> void:
 		h.inp["move"] = Vector2.ZERO
 
 func _frames(secs: float, drift := Vector3.ZERO) -> void:
+	Sfx.listener = m.player.pos      # the hum is heard only in earshot
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
@@ -66,6 +66,18 @@ func _frames(secs: float, drift := Vector3.ZERO) -> void:
 				h.pos += drift
 				h.prev = h.pos
 			h.render(DT, 1.0)
+		_sync(m.player)
+
+## Steps the player's Hero clips (WardenGlb's Sync runs in _process, which the checks do not run).
+func _sync(h: Hunter) -> void:
+	var sync := h.model.get_node_or_null("Warden/Sync") if h.model else null
+	if sync:
+		sync.set_process(false)
+		sync.call("_process", DT)
+
+func _clips(h: Hunter) -> WardenClips:
+	var sync := h.model.get_node_or_null("Warden/Sync")
+	return sync.get("clips") as WardenClips if sync else null
 
 ## One hero: up, down (Wisp, hidden hero), moving, revived (hero grows back, Wisp gone).
 func _hero_cycle(arch_id: String) -> void:
@@ -80,15 +92,15 @@ func _hero_cycle(arch_id: String) -> void:
 	var base: Vector3 = p.model.scale
 	m.knock(p, foe, {})
 	p.down_hp = 1e6
-	_frames(0.05)
+	_frames(DT)
 	var wisp := HunterWisp.node_of(p)
 	var spawned: bool = wisp != null and wisp.is_inside_tree() and wisp.get_parent() == p
-	ok(p.downed and spawned, tag + "downed: a Wisp spawns on the hunter")
-	ok(not p.model.visible, tag + "downed: the hero model is hidden")
-	_frames(0.4)
-	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
+	ok(p.downed and spawned, tag + "downed: the Wisp is on the hunter from the first frame")
+	_fall(p, foe, tag)
+	ok(not p.model.visible, tag + "after the beat the hero model is hidden")
+	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the beat ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
-	ok(Sfx.loop_on(HunterWisp.hum_key(p)), tag + "a downed Wisp hums")
+	ok(Sfx.loop_on(WispHum.key(p)), tag + "a downed Wisp hums")
 	_frames(0.3, Vector3(0.08, 0, 0))
 	ok(wisp.position.x < -0.1, tag + "a moving Wisp hangs back behind the hunter (%.2f m)" % -wisp.position.x)
 	ok((wisp.get_node("Body") as Node3D).basis != Basis.IDENTITY, tag + "...and leans")
@@ -100,11 +112,87 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.04)
 	var popping: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
 	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), tag + "the revive stops the hum")
+	ok(not Sfx.loop_on(WispHum.key(p)), tag + "the revive stops the hum")
 	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
 	ok(p.model.scale.is_equal_approx(base), tag + "the hero is back at full size")
+
+## The knocked-down beat, frame by frame while the hunter crawls off and turns: the hero shows and plays its death
+## clip (no clip: HunterAnim kneels), the body stays where it went down, pushed away from the knocker, facing the
+## way it faced; it fades out as the Wisp rises out of it, and hands over after its weight's time, opaque again.
+func _fall(p: Hunter, foe: Hunter, tag: String) -> void:
+	var fall := HunterFall.of(p)
+	ok(fall != null and p.model.visible, tag + "the beat: the hero still shows, falling")
+	if fall == null:
+		return
+	var away := Vector2(p.pos.x - foe.pos.x, p.pos.z - foe.pos.z).normalized()
+	var wisp := HunterWisp.node_of(p)
+	var low := wisp.position.y
+	var facing0 := p.model.basis.z.normalized()
+	var t := DT
+	var mid := false
+	var last_gone := 0.0
+	var rose := 0.0
+	while HunterWisp.mode_of(p) == HunterWisp.IN and t < 1.0:
+		m.step(DT)
+		p.pos = fall.from + Vector3(1.8 * t, 0, 0)       # crawling off, turning away (set: the step may hold it)
+		p.prev = p.pos
+		p.face = fall.facing + 1.2
+		p.render(DT, 1.0)
+		_sync(p)
+		t += DT
+		if HunterWisp.mode_of(p) == HunterWisp.IN:
+			last_gone = _faded(fall)
+			rose = wisp.position.y
+		if not mid and t >= fall.time * 0.5:
+			mid = true
+			_fall_mid(p, fall, away, facing0, tag)
+	var timed := absf(t - fall.time) <= 2.5 * DT
+	ok(timed, tag + "the beat lasts its weight's time (%.2f s, %s %.2f s)" % [t, p.cls, fall.time])
+	ok(last_gone > 0.6 and fall.landed, tag + "the body lands and fades out (%.2f transparent)" % last_gone)
+	ok(rose > low + 0.15, tag + "the Wisp rises out of it (%.2f m -> %.2f m)" % [low, rose])
+	var clean: bool = _faded(fall) == 0.0 and is_zero_approx(p.model.position.x) and is_zero_approx(p.model.position.z)
+	ok(clean, tag + "after the beat the body is opaque and back on the hunter")
+
+func _fall_mid(p: Hunter, fall: HunterFall, away: Vector2, facing0: Vector3, tag: String) -> void:
+	var body := p.model.global_position - fall.from
+	var pushed := Vector2(body.x, body.z)
+	var crawled := Vector2(p.pos.x - fall.from.x, p.pos.z - fall.from.z).length()
+	var held: bool = pushed.length() <= fall.push + 0.02 and crawled > 0.3
+	ok(held, tag + "the body stays where it went down (%.2f m off, the hunter %.2f m)" % [pushed.length(), crawled])
+	ok(pushed.dot(away) >= 0.6 * fall.push, tag + "pushed away from the knocker (%.2f m)" % pushed.dot(away))
+	var faced: bool = p.model.basis.z.normalized().distance_to(facing0) < 0.01
+	ok(faced, tag + "facing the way it fell while the hunter turns")
+	var clips := _clips(p)
+	var states: Dictionary = clips.d.get("states", {}) if clips else {}
+	if states.has("dead"):
+		ok(clips.cur == String(states["dead"]), tag + "it plays its death clip (%s)" % clips.cur)
+	else:
+		ok(p.anim.fall_k > 0.2, tag + "no death clip: it kneels (%.2f in)" % p.anim.fall_k)
+
+## The most transparent of the hero's meshes.
+func _faded(fall: HunterFall) -> float:
+	var most := 0.0
+	for mesh in fall.meshes:
+		if is_instance_valid(mesh):
+			most = maxf(most, (mesh as GeometryInstance3D).transparency)
+	return most
+
+## Heavy Hunters fall heavier, light ones crumple: every beat is 0.4-0.5 s, a heavier one longer and further
+## behind in its clip at the same share of the beat (it holds, then drops), shoved less, and only heavies thud.
+func _styles() -> void:
+	var st := HunterFall.STYLE
+	for w in st:
+		var t := float(st[w]["time"])
+		ok(t >= 0.4 and t <= 0.5, "fall '%s': the beat is %.2f s (0.4-0.5)" % [w, t])
+	var order: bool = st["light"]["time"] < st["medium"]["time"] and st["medium"]["time"] < st["heavy"]["time"]
+	var at := func(w: String) -> float: return pow(0.3, float(st[w]["curve"]))
+	var holds: bool = at.call("heavy") < at.call("medium") and at.call("medium") < at.call("light")
+	ok(order and holds, "a heavy falls slower and holds, a light one folds at once")
+	var shoved: bool = st["heavy"]["push"] < st["medium"]["push"] and st["medium"]["push"] < st["light"]["push"]
+	var thuds: bool = int(st["heavy"]["thud"]) > 0 and int(st["light"]["thud"]) == 0
+	ok(shoved and thuds, "a heavy is shoved least and lands with a thud of dust")
 
 func _bleed_out() -> void:
 	var p: Hunter = m.player
@@ -112,14 +200,72 @@ func _bleed_out() -> void:
 	p.hp = p.max_hp
 	_frames(0.1)
 	m.knock(p, foe, {})
-	_frames(0.4)
-	var burst0: int = m.fx.radial
-	m.eliminate(p, foe, "finished")
 	_frames(0.1)
-	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
-	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "...and stops the hum")
-	ok(m.fx.radial > burst0, "...with a burst of sparks")
+	var fall := HunterFall.of(p)
+	p.last_hit_by = foe
+	m.eliminate(p, foe, "finished")
+	_frames(DT)
+	var reset: bool = fall != null and HunterFall.of(p) == null and _faded(fall) == 0.0
+	ok(reset and is_zero_approx(p.model.position.x),
+		"out mid-beat: the beat stops, the body is opaque and back on the hunter")
+	_frames(0.8)
+	ok(HunterWisp.node_of(p) == null, "...and the Wisp is gone once its elimination beat has played")
+	m.revive_hunter(p, null)
+	Life.bring_back(m, p, p.pos, 0.5, false)
+	_frames(0.1)
+	m.knock(p, foe, {})
+	p.last_hit_by = foe
+	_frames(0.4)
+	var wisp := HunterWisp.node_of(p)
+	m.eliminate(p, foe, "finished")
+	var sparks0: int = m.fx.radial
+	var sparks_after := sparks0
+	var box: Dictionary = Life.box_of(m, p)
+	var box_node := box["node"] as Node3D
+	var core_mat := wisp.get_meta("mat") as ShaderMaterial
+	var beats := 0
+	var was := false
+	var flickered := 0
+	var seen_kcol := false
+	var hero_hidden := true
+	var sank := false
+	var t := 0.0
+	var kcol := SideColor.of(m, foe)
+	while t < 0.9:
+		_frames(DT)
+		t += DT
+		if t < DT * 1.5:
+			sparks_after = m.fx.radial
+		var now := HunterWisp.mode_of(p) == HunterWisp.ELIM
+		beats += 1 if now and not was else 0
+		was = now
+		if now:
+			hero_hidden = hero_hidden and not p.model.visible and p.visible
+			var col: Color = core_mat.get_shader_parameter("core_col")
+			var on := absf(col.h - kcol.h) < 0.02       # the hue is the killer's whatever the dim
+			seen_kcol = seen_kcol or on
+			if t < 0.1:
+				var kept: bool = wisp.is_inside_tree() and wisp.get_parent() == p
+				ok(kept, "elimination: the Wisp stays on the hunter for the beat")
+			flickered += 1 if on and not _was_on else 0
+			_was_on = on
+		if t > 0.3 and not sank:
+			sank = true
+			ok(wisp.position.y < float(WispLook.get_look("")["hover"]) - 0.1, "elimination: the Wisp sinks")
+	ok(not Sfx.loop_on(WispHum.key(p)), "elimination: the hum stops")
+	ok(beats == 1, "elimination: the beat plays once (%d)" % beats)
+	ok(hero_hidden, "elimination: the Wisp shows, the hero model stays hidden")
+	ok(flickered == 1 and seen_kcol, "elimination: the core flickers in the killer's colour once (%d)" % flickered)
+	ok(sparks_after == sparks0, "elimination: no explosion (no burst as the beat starts)")
+	var left_over: bool = HunterWisp.node_of(p) != null or HunterWisp.mode_of(p) != ""
+	for c in p.get_children():
+		left_over = left_over or (c.name == "Wisp" and not c.is_queued_for_deletion())
+	ok(not left_over, "elimination: nothing is left behind after the beat")
+	ok(not p.visible and not p.model.visible, "elimination: the hunter is hidden at the end")
+	var box_ok: bool = box_node != null and is_instance_valid(box_node) and box_node.is_inside_tree()
+	var full: bool = box_ok and box_node.scale.is_equal_approx(Vector3.ONE)
+	ok(full, "elimination: the deathbox is there at full size at the end")
+	ok(Life.box_of(m, p).get("node") == box_node, "elimination: it is the box that holds their gear")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
 	_frames(0.1)
@@ -131,7 +277,7 @@ func _teammate() -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	m.knock(mate, foe, {})
-	_frames(0.3)
+	_frames(0.6)       # past the knocked-down beat
 	ok(HunterWisp.node_of(mate) != null and not mate.model.visible, "a teammate's downed state shows their Wisp")
 	var teammates_downed: bool = mate.downed
 	m.revive_hunter(mate, null)
@@ -145,7 +291,7 @@ func _tutorial() -> void:
 	var base: Vector3 = p.model.scale
 	_frames(0.2)
 	m.knock(p, null, {})
-	_frames(0.3)
+	_frames(0.6)       # past the knocked-down beat
 	ok(p.downed and HunterWisp.node_of(p) != null and not p.model.visible, "tutorial: downed shows the Wisp")
 	var waited := 0.0
 	while p.downed and waited < 10.0:       # the tutorial brings you back after about 3 s of its own time
@@ -165,7 +311,7 @@ func _looks() -> void:
 		for key in default_look:
 			same_keys = same_keys and look.has(key)
 		ok(same_keys, "look '%s' has every key" % id)
-		for spec in [look["pop_in"], look["pop_out"], look["snuff"], look["hum"]]:
+		for spec in [look["pop_in"], look["pop_out"], look["snuff"]]:
 			ok(String(spec["sfx"]) in Sfx.NAMES, "look '%s': sound '%s' exists" % [id, spec["sfx"]])
 		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")
@@ -210,137 +356,45 @@ func _outline(id: String, look: Dictionary) -> void:
 	var heavy: bool = float(look["settle"]) >= 0.3 and float(look["bob_hz"]) <= 0.7
 	ok(heavy, tag + "slow and heavy: settle %.1f s, bob %.2f Hz" % [look["settle"], look["bob_hz"]])
 	body.free()
-## The Boki wisp prototype: the setting's default leaves the walking Boki; on, the Boki rides as a wisp.
-func _boki_wisps() -> void:
-	var base := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle"}
-	ok(Settings.DEFAULTS["boki_wisps"] == false, "Boki wisps: the setting is off by default")
-	_start(base.merged({"boki_wisps": false}))
-	_frames(0.3)
-	var walker: Kin = m.player.kin
-	var walks: bool = not walker.wisp and walker.state == "active" and walker.model.name != "BokiWisp"
-	ok(walks, "Boki wisps off: the Boki walks")
-	_start(base.merged({"boki_wisps": true}))
-	_frames(0.3)
-	var p: Hunter = m.player
-	var k: Kin = p.kin
-	var owned: Array = m.kins.filter(func(x: Kin): return x.owner_h != null)
-	var all_wisps: bool = owned.all(func(x: Kin): return x.wisp and x.state == "shoulder")
-	ok(all_wisps and k.model.name == "BokiWisp", "Boki wisps on: every Boki rides as a critter wisp")
-	ok(k.carried() and p.kin_carry_on(), "...carried by order, so its carry passives are on")
-	ok(HunterWisp.node_of(p) == null, "...and it is not a Hunter Wisp (round = Hunter, critter = Boki)")
-	k.think_t = 5.0
-	var searches := k.path_searches
-	_frames(0.5, Vector3(0.05, 0, 0))
-	ok(k.think_t == 5.0 and k.path_searches == searches, "...its AI does not tick (no thinking, no paths)")
-	var lag := k.pos.distance_to(p.pos + Vector3(0, 1.5, 0))
-	ok(k.state == "shoulder" and lag < 0.06, "...it rides along as you move (%.2f m behind)" % lag)
-	k.throw_to(p.pos + Vector3(5, 0, 0))
-	ok(k.state == "shoulder" and not KinFollow.set_cmd(k, "follow"), "...it takes no throw and no order")
-	ok(k.hurt(50.0, null) == 0.0 and not k.ready_to_fight(), "...it takes no hits and casts nothing")
-	k.render(DT, 1.0)
-	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
-	var high := k.global_position.y - p.position.y
-	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
-	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
-	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
-	var snap := KinNet.kin_extra(k)
-	var row: Array = []
-	row.resize(KinNet.KIN_AT)
-	KinWisp.set_wisp(other, false)
-	KinNet.apply_kin(other, row + snap)
-	ok(other.wisp and other.model.name == "BokiWisp", "online: the snapshot flag shows the wisp on the other game")
-	snap[5] = 0
-	KinNet.apply_kin(other, row + snap)
-	ok(not other.wisp and other.model.name != "BokiWisp", "online: and turns it back into the walking Boki")
 
-## The summon numbers: a table cell for every species' role and size, each inside the uptime band.
-func _summon_data() -> void:
-	var band: Array = KinSummon.rules()["uptime_band"]
-	var bad_ids: Array = []
-	for id in KinLib.kin_ids():
-		var t := KinSummon.times(KinLib.kin(id))
-		var row: Dictionary = KinSummon.rules()["table"].get(String(KinLib.kin(id).ai.get("role", "")), {})
-		var up := t.x / (t.x + t.y)
-		if not row.has(KinLib.kin(id).size) or up < float(band[0]) or up > float(band[1]):
-			bad_ids.append(id)
-	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
-	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
-
-## The summon itself, on the player's Cindle with Boki wisps on.
-func _summon() -> void:
-	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
-	_frames(0.3)
-	var p: Hunter = m.player
-	var k: Kin = p.kin
-	var s := k.summon
-	ok(Settings.key_cap("summon") != "?" and Settings.ACTIONS.any(func(a): return a[0] == "summon"),
-		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
-	var radial0 := m.fx.radial
-	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
-		"summon: the wisp bursts into the full Boki")
-	var pop := k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
-		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
-	var cs := {}
-	KinSummon.anim_state(p, cs)
-	ok(absf(s.left - 8.0) < 0.01 and float(cs["call_t"]) < 0.05,
-		"...on the press (its window already runs) and the Hunter's call gesture starts with it")
-	pop._process(BokiWispPop.DURATION + 0.01)
-	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
-	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
-	var lsh := k.brain.leash()
-	ok(lsh >= 8.0 and lsh <= 12.0, "...on a short leash (%.1f m)" % lsh)
-	ok(m.kins.filter(func(x: Kin): return x.owner_h == p and not x.wisp).size() == 1, "...one summon at a time")
-	k.hurt(k.max_hp * 0.6, null)
-	_frames(0.2)
-	ok(s.left > 0.0 and not k.wisp, "...damage does not end it")
-	p.pos += Vector3(30, 0, 0)
-	p.prev = p.pos
-	_frames(0.1)
-	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
-	_frames(8.0 + KinSummon.SHRINK_S)
-	ok(k.wisp and k.state == "shoulder" and s.cd > 59.0 and s.cd <= 60.0,
-		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd)
-	k.render(DT, 1.0)
-	var trail := k.model.get_node("Trail") as CPUParticles3D
-	ok(not trail.emitting, "...the wisp is dim while it rests")
-	ok(not KinSummon.press(p) and k.wisp, "...and Summon is refused until it is rested")
-	s.cd = 0.0
-	k.render(DT, 1.0)
-	ok((k.model.get_node("Trail") as CPUParticles3D).emitting, "...bright again when ready")
-	KinSummon.press(p)
-	ok(KinSummon.press(p) and s.shrink > 0.0, "summon: Summon again sends it back early")
-	k.render(DT, 1.0)
-	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and not pop.out and not k.model.visible, "...folding into its wisp (BokiWispPop)")
-	_frames(KinSummon.SHRINK_S + 0.05)
-	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
-	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
-	s.cd = 0.0
-	KinSummon.press(p)
-	k.hurt(k.max_hp * 5.0, null)
-	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
-	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding from where it fell up to the shoulder")
-	pop._process(BokiWispPop.DURATION + 0.01)
-	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp rides on")
-	s.cd = 0.0
-	p.set_meta(KinSummon.CALL_AT, -99.0)
-	p.downed = true
-	s.burst()
-	p.downed = false
-	KinSummon.anim_state(p, cs)
-	ok(not k.wisp and float(cs["call_t"]) > 50.0,
-		"summon: a burst while the Hunter is downed (the guardian) makes no call gesture")
-	s.end()
-	_frames(KinSummon.SHRINK_S + 0.05)
-	s.cd = 0.0
-	KinSummon.press(p)
-	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
-	var row: Array = []
-	row.resize(KinNet.KIN_AT)
-	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
-	ok(not other.wisp and absf(other.summon.left - s.left) < 0.11,
-		"online: the snapshot shows the summoned Boki and its seconds")
+## The picker on the Hunters screen (WispPick): a card per look with a live preview, the worn one chosen, a
+## locked one greyed with how to unlock it, a click that wears and saves the Wisp (Save.d["look"]["wisp"]).
+func _picker() -> void:
+	var looks: Dictionary = WispLook.rules()["looks"]
+	looks["check_lock"] = {"name": "Check Lock", "unlock": "extracts:999999", "how": "Make it out 999999 times"}
+	looks["check_open"] = {"name": "Check Open", "core": {"rim": "00ff88"}}
+	WispLook.equip("default")
+	var worn := [0]
+	var picker := WispPick.make(func(): worn[0] += 1)
+	var cards := picker.find_children("*", "VBoxContainer", true, false).filter(func(n): return n.has_meta("wisp"))
+	ok(cards.size() == looks.size(), "the picker has a card per look (%d)" % cards.size())
+	var open_card: Control = cards.filter(func(n): return n.get_meta("wisp") == "check_open")[0]
+	var lock_card: Control = cards.filter(func(n): return n.get_meta("wisp") == "check_lock")[0]
+	var open_btn := open_card.get_child(1) as Button
+	var lock_btn := lock_card.get_child(1) as Button
+	var preview := open_card.get_child(0) as SubViewportContainer
+	var built := preview.get_child(0).get_node_or_null("Wisp") as Node3D
+	ok(built != null and built.get_child_count() == 1 and built.get_node("Body") is MeshInstance3D,
+			"the preview builds the real Wisp body (one round mesh)")
+	var mat := built.get_meta("mat") as ShaderMaterial
+	ok(mat.get_shader_parameter("rim_col") == Color("00ff88") and mat.get_shader_parameter("core_col") == Color.WHITE,
+			"...with the look's own rim and the white core")
+	var greyed: bool = lock_btn.disabled and lock_card.modulate.a < 1.0 and not open_btn.disabled
+	ok(greyed, "a locked Wisp is greyed, an owned one is not")
+	var says_how: bool = lock_btn.tooltip_text.contains("999999") and not WispLook.equip("check_lock")
+	ok(says_how, "...it says how to unlock and cannot be worn")
+	var first := cards[0].get_child(1) as Button
+	ok(not first.disabled and first.theme_type_variation == "Chosen", "the worn Wisp (the default, first) is marked")
+	open_btn.pressed.emit()
+	ok(WispLook.equipped() == "check_open" and Save.d["look"]["wisp"] == "check_open" and worn[0] == 1,
+			"a click wears the Wisp and saves it in look.wisp")
+	var again := WispPick.make(func(): pass)
+	var buttons := again.find_children("*", "Button", true, false)
+	var marked := buttons.filter(func(b): return b.theme_type_variation == "Chosen")
+	var marks_new: bool = marked.size() == 1 and marked[0].get_parent().get_meta("wisp") == "check_open"
+	ok(marks_new, "a rebuilt picker marks the new one")
+	picker.free()
+	again.free()
+	looks.erase("check_lock")
+	looks.erase("check_open")
+	WispLook.equip("default")

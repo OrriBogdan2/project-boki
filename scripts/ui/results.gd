@@ -5,7 +5,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func show_result(r: Dictionary) -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("victory" if r.get("extracted", false) else "menu", "title"))
 	Sfx.play_ambience("")
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
@@ -56,6 +56,8 @@ func show_result(r: Dictionary) -> void:
 		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
 	if WaysResult.hid_line(r) != "":
 		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
+	if r.has("heart_raid"):
+		head.add_child(UI.label(HeartRaid.result_line(r["heart_raid"]), UI.T_BODY, HeartRaid.COL, UI.semi))
 	if won and s.has("heart"):
 		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
 		head.add_child(UI.para(WaysResult.other_line(String(r.get("how", ""))), UI.T_BODY, UI.MUTED))
@@ -64,14 +66,16 @@ func show_result(r: Dictionary) -> void:
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
+	var big4 := [["knock", "Hunters downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]
 		if i > 0:
 			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
 			sh.add_child(sep)
-		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
+		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
+		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
+		sh.add_child(tile)
 	v.add_child(strip)
 	var det := UI.vbox(6)      # what is behind the Details toggle
 	det.visible = false
@@ -81,7 +85,9 @@ func show_result(r: Dictionary) -> void:
 		if int(s["gems"]) > 0:
 			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
 		for sd in s["seeds"]:
-			chips.append(["seed", "%d %s seeds" % [s["seeds"][sd], Data.CROPS[sd]["name"]], Data.CROPS[sd]["color"]])
+			var crop: Dictionary = Data.CROPS[sd]
+			var n := int(s["seeds"][sd])
+			chips.append(["seed", "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"], crop["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
 			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
@@ -89,12 +95,17 @@ func show_result(r: Dictionary) -> void:
 		for it in s.get("haul", []):
 			if Loot.is_rare_egg(it):
 				chips.push_front(["egg", "Brought home a Rare Egg  ·  %s" % Loot.name_of(it), Color("ffd36a")])
+			elif Loot.is_ink(it):
+				chips.append(["gem", "Brought home %s" % Loot.name_of(it), Loot.col_of(it)])
 		if not chips.is_empty():
 			v.add_child(UI.section("Brought home"))
 			var flow := HFlowContainer.new()
 			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
 			for i in chips.size():
 				var ch := _chip(chips[i][0], chips[i][1], chips[i][2], 0.75 + i * 0.14)
+				if chips[i][0] == "seed":
+					ch.tooltip_text = "Plant these on the farm to grow crops."
+					ch.mouse_filter = Control.MOUSE_FILTER_PASS
 				if chips[i].size() > 3:
 					# a Boki you brought home: where it went
 					var krec: Dictionary = chips[i][3]
@@ -107,12 +118,14 @@ func show_result(r: Dictionary) -> void:
 				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
 					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
-	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
+	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
 		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
+		var gear_head := "Gear you kept, in the gear shed"
+		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
+		v.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
@@ -123,7 +136,7 @@ func show_result(r: Dictionary) -> void:
 			det.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
 					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
-			det.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
+			det.add_child(_note("Your gear shed was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
 	v.add_child(ClassCard.results_strip(s))
 	var lost_it: Array = s.get("lost_items", [])
 	if not won and not lost_it.is_empty():
@@ -171,6 +184,9 @@ func show_result(r: Dictionary) -> void:
 	outer.add_child(row)
 	go.grab_focus()
 	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
+
+## One line of plain words on hover for the strip tiles that need one (by icon).
+const STAT_TIPS := {"knock": "Enemy hunters you put on the ground this match."}
 
 ## One stat on the strip: a number that counts up from zero, with what it is under it.
 func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
@@ -246,7 +262,7 @@ func _kin_card(s: Dictionary, det: Control) -> Control:
 	if s["levelup"]:
 		var lu := UI.label("%s grew to level %d!" % [k["name"], k["level"]], 17, UI.GOLD, UI.big)
 		kv.add_child(lu)
-		tw.tween_callback(func(): Sfx.play("unlock", null, -4.0); UI.pop_in(lu))
+		tw.tween_callback(func(): Sfx.play("garden_trait", null, -4.0); UI.pop_in(lu))
 	for et in s.get("evo", []):
 		kv.add_child(UI.label(et, 15, Color("c9a0ff")))
 	var mem: Array = k["memory"]

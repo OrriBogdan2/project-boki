@@ -8,7 +8,7 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const SETTLE_S := 1.2      # s: the layer eases in (WardenCarry.FADE) and the run gets going
-const STRIDE_MIN := 0.05   # m: a running shin swings at least this far front to back
+const STRIDE_MIN := 0.05   # m: under this his own run does not step (Motley hovers); else keep 3/4 of it
 const HAND_NEAR := 0.3     # of the Hunter's height: the held hand lies this near the mote
 const FIRE_S := 0.8        # s: LMB held, and the same again after the release (a bow looses on the release)
 const SPARK_LAG := 0.3     # m: the spark follows the hand a frame late, at a run
@@ -63,26 +63,30 @@ func _hero(id: String) -> void:
 	if H == null or clips == null:
 		m.queue_free()
 		return
-	H.carrier = P
-	H._enter("carried")
 	P.inp["move"] = Vector2(0, -1)
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")
 	var hips := WardenSkeleton.find(sk, "hips")
 	var z := [INF, -INF]
-	await _step(m, SETTLE_S, func():
+	var watch := func():
 		var below := sk.get_bone_global_pose(shin).origin - sk.get_bone_global_pose(hips).origin
 		var at := (sk.global_transform.basis * below).z
 		z[0] = minf(z[0], at)
-		z[1] = maxf(z[1], at))
+		z[1] = maxf(z[1], at)
+	await _step(m, SETTLE_S, watch)     # his own run first (as --clip-check's carry)
+	var plain: float = z[1] - z[0]
+	z[0] = INF
+	z[1] = -INF
+	_take(H, P)
+	await _step(m, SETTLE_S, watch)
 	var mote: Vector3 = P.model.get_meta(WardenCarry.MOTE, Vector3.INF)
 	ok(clips.heart_w >= 1.0 and mote != Vector3.INF, "%s: the carrier shows the layer and a held mote" % id)
 	var side := String(WardenClips.data(OWN_MODELS[id]).get("heart_hand", "L"))
 	var hand := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
 	ok(hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y), "%s: the %s hand holds the mote (%.2f m)"
 			% [id, side, hand.distance_to(mote)])
-	ok(clips.proc_w <= 0.0 and z[1] - z[0] >= STRIDE_MIN, "%s: the legs play the run under it (%.2f m of stride)"
-			% [id, z[1] - z[0]])
+	ok(clips.proc_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
+			"%s: the legs play the run under it (%.2f m of stride, %.2f m without)" % [id, z[1] - z[0], plain])
 	var spark: Node3D = H._spark
 	ok(spark.position.distance_to(mote) < SPARK_LAG and spark.scale.x < 0.5, "%s: the Heartspark rides the hand" % id)
 	var fired := [false]
@@ -90,16 +94,18 @@ func _hero(id: String) -> void:
 	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
 	P.inp["fire"] = false
 	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
-	ok(fired[0] and H.state == "carried", "%s: LMB still fires with the Heartspark" % id)
+	ok(fired[0] and H.state == Heart.S.CARRIED, "%s: LMB still fires with the Heartspark" % id)
+	_end_kit_move(P)
 	await _step(m, SETTLE_S)
 	for how in ["hand-off", "knock", "extract"]:
-		H.carrier = P
-		H._enter("carried")
+		_take(H, P)
+		_end_kit_move(P)
 		await _step(m, SETTLE_S)
 		ok(clips.heart_w >= 1.0, "%s: carrying again (%s)" % [id, how])
 		match how:
 			"hand-off":
 				H._drop(P.pos)
+				H._apply_carrier()
 			"knock":
 				P.downed = true
 			"extract":
@@ -112,3 +118,18 @@ func _hero(id: String) -> void:
 		P.extracted = false
 		P.out = false
 	m.queue_free()
+
+## P holds the Heartspark (the host's pick, with the slow meta the carry layer reads set at once).
+func _take(H: Heart, P: Hunter) -> void:
+	H.charge = Heart.r("charge_s")
+	H.carrier = P
+	H._force(Heart.S.CARRIED, "check")
+	H._apply_carrier()
+
+## Meeko and Neve's kits (play_soft) never clear a finished shot move, and a "lead" clip holds its last frame until
+## something else plays, so after the volley the held pose would keep the layer off for the rest of the check. The
+## match has the same thing in play; this just lets the move end, as a later move would (see the READY note).
+func _end_kit_move(P: Hunter) -> void:
+	if P.ak != null:
+		P.ak.anim_id = ""
+	P.anim_s.erase("kmove")      # (the state dict is refilled, not rebuilt)

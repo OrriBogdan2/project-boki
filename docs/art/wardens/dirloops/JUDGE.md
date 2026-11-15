@@ -106,3 +106,205 @@ Pass = no rubric point under 3. Judged from the measures above and the sheets (s
   whole ring (f too) or a lower `walk_speed` would let every walk plant both feet.
 - **Walk to run blend**: the two rings have different lengths, so feet drift while the speed blends between them.
   As before; `in_step` only keeps one ring in time.
+
+## Third pass: pelvis held to the forward loop (2026-11-11, ext/anim-dirloops-pelvis)
+
+The hip no longer rides a set share of leg length (`RIDE`) less a dip: each key takes the forward loop's hip height
+at the same phase. Where a stride end can't reach the floor from there, the stance shortens (`DUTY_STEP`, more of
+the step flown) until the dip is under `DIP_OK` 0.025 m. Re-baked on main's models (Tarek v2, Vex appeal3 body b).
+`--clip-check` now holds every loop of an `in_step` ring to the forward loop's hip band at the same phase (lowest
+to highest within 1/16 cycle, give or take 0.03 m), so the dip can't come back.
+
+| loops | pelvis under forward at the same phase, worst (2nd pass -> now) | duty | planted sole vs loco |
+|---|---|---|---|
+| Tarek walk b,l,r / fl,fr / bl,br | 0.08 / 0.12 / 0.10 m -> 0.010 / 0.016 / 0.013 | 0.27-0.30 / 0.39 / 0.27 | 2.20, 100% within 5% |
+| Tarek run b,l,r / fl,fr / bl,br | 0.04-0.08 / 0.05 / 0 m -> 0.001-0.022 / 0.019 / 0.001 | 0.26, l/r 0.16-0.18 / 0.20 / 0.26 | 5.00, 100% |
+| Vex walk b,l,r / fl,fr / bl,br | 0.03-0.08 / 0.07 / 0.045 m -> 0.023 / 0 / 0.024 | 0.23-0.26 / 0.30 / 0.26-0.30 | 2.10, 100% |
+| Vex run all | 0.035 under, b/l/r 0.085 over -> 0.002 | 0.28 | 4.55, 100% |
+
+Worst ankle miss 0.0025 m; every ring one length (clip-check). Strip, game renderer, side view, 8 phase-aligned frames
+a loop, forward on top: `pelvis/vex_walk_strip.jpg`, `pelvis/vex_run_strip.jpg` (Tarek's strip job was lost by the GPU worker 4 times, rc 125: still to render with `--clip-shots --warden=dolm --yaw=90`).
+
+Cost: the stance gets short where the forward hip is tall and the step long. Tarek run_l/r stance 0.16-0.18 of the
+cycle (a bounding side step); Vex walk_r 0.23 (a light, springy walk). Fix for both (ours, not built): a shorter stride
+at loco speed needs a faster cadence, i.e. a shorter loop, which breaks the ring's one length; the alternative is
+a lower, longer-legged forward walk (the forward loop sets the band).
+
+## Cinder (heavy) and Sable (light): blind judge (2026-11-11, ext/anim-dirloops-cinder-sable)
+
+Baked with the same recipe plus one change: a swing sole now leaves and meets the floor at `SWING_V` 0.9 of the
+stance speed (was 0.3 and 0.6). The old values made the foot scoot just above the floor at lift-off, which
+`--anim-audit` counts as slide: Cinder run, probe at 90/135/180 deg went from 1.23/1.03/1.04 to 0.70/0.43/0.42 m/s.
+Bake speeds come from each hero's playback rate, because the ring plays at speed / `foot_mps`:
+- Cinder: her `foot_mps` 2.26 / 5.19, so the soles land at 2.2 / 4.6 in game.
+- Sable: 1.39 / 2.9. Her forward loops plant at 0.9 / 2.8 m/s and need `stride` 1.5 and the 1.4 rate cap. Without
+  them her run_f slides 45% (gate 25%), and a re-baked run_f still measured 40%, so her loco data stays as on main.
+
+All loops are the forward loop's length and strike key (Cinder walk 0.667 s, run 0.708; Sable 0.938, 0.625). Soles are
+100% within 5% of the bake speed, the worst pelvis dip is 0.024 m and the worst ankle miss 0.001 m.
+
+The judge is a Fable subagent, blind. Each sheet shows the forward loop (REF) on top, then the current and the new
+loop as rows A/B in seeded random order, 8 frames, 3/4 view. The frames are software renders (Xvfb llvmpipe),
+because the GPU queue sat 60+ min. Scores are contact / weight / seam / look, 1-5:
+
+| clip | new | current | winner |
+|---|---|---|---|
+| Cinder walk_b | 3/3/4/3 | 3/4/4/4 | current (new: stiff, narrow shuffle) |
+| Cinder walk_l | 3/2/3/3 | 3/3/4/3 | current (new: splays wide, pelvis drops) |
+| Cinder walk_r | 2/2/3/2 | 3/4/4/4 | current (new: straddle, legs intersect) |
+| Cinder run_b | 3/3/4/3 | 3/4/4/4 | current (new: too upright, loses the heavy drive) |
+| Cinder run_l | 2/2/3/2 | 3/3/3/3 | current (new: splits, hip sinks) |
+| Cinder run_r | 2/2/3/2 | 3/4/4/4 | current |
+| Sable walk_b | 3/3/4/3 | 3/4/4/4 | current |
+| Sable walk_l | 3/3/4/3 | 3/4/4/4 | current |
+| Sable walk_r | 3/3/3/3 | 3/4/4/4 | current |
+| Sable run_b | 3/3/3/4 | 3/3/3/3 | tie: current kept |
+| Sable run_l | 2/2/3/2 | 3/3/3/3 | current (new: full lunge split) |
+| **Sable run_r** | 3/4/4/4 | 3/3/3/3 | **new** |
+
+There is no current diagonal clip; the current diagonal is a blend of two neighbours, which the audit probe measures
+at 3.0-3.5 m/s slide. A new diagonal is kept if it passes (no score under 3). Sheets are in `cinder_sable/`:
+
+| ring | fl | fr | bl | br |
+|---|---|---|---|---|
+| Cinder walk | 3/4/4/4 pass | 2/2/3/2 FAIL | 2/2/3/2 FAIL | 3/4/4/4 pass |
+| Cinder run | 3/4/4/4 pass | 2/2/3/2 FAIL | 2/2/3/2 FAIL | 3/4/4/4 pass |
+| Sable walk | 3/4/4/4 pass | 3/4/4/4 pass | 3/3/3/3 pass | 3/4/4/4 pass |
+| Sable run | 3/4/4/4 pass | 3/4/4/4 pass | 3/3/3/3 pass | 3/3/3/3 pass |
+
+Shipped:
+- Cinder: walk and run fl and br. fr and bl stay blends.
+- Sable: all eight diagonals and run_r.
+- Both rings are `in_step`, and the hand-keyed b/l/r loops are already the forward loop's length.
+
+Gate (`--anim-audit`, run slide): Cinder 12% (main 13%), Sable 18% (main 17%). Diagonal probe on the shipped set
+(temporary `--anim-audit` patch, not committed): Sable 45 deg 0.92 m/s (was 3.47), 135 deg 1.20 (2.78).
+
+Not passed, and why:
+- The recipe's side steps and Cinder's fr/bl read as a wide straddle or a lunge next to the hand-keyed loops. The
+  turned pelvis plus `WIDEN` spreads the feet, and her heavy, low-duty run (stance 0.15) loses the drive.
+- Stills at 150 px cap contact at 3. The judge could not see sinking or hovering.
+
+## Cinder and Sable, second pass: restride, jets, blind judge again (2026-11-11, ext/anim-dirloops-cinder-sable-2)
+
+The first pass lost every side and back step to the hand-keyed loops on look (straddle, lunge). So for b/l/r the
+recipe now also offers **restride** (`b+`): the shipped loop as keyed, with only each ankle pushed along the move,
+away from its own stance middle, until a planted sole travels at the bake speed. The leg is solved again with the
+shipped knee direction and foot angle, and the pelvis dips (2.5 cm at most, `DIP_OK`) where the longer stance outreaches
+the leg. Where even that leaves a planted ankle more than 1 cm short (`MISS_OK`), the stretch backs off.
+
+| loop | planted sole, hand-keyed -> restride (bake speed) |
+|---|---|
+| Cinder walk_b / l / r | 2.23 / 1.79 / 1.80 -> 2.26 / 2.26 / 2.26 (2.26) |
+| Cinder run_b / l / r | 4.72 / 3.79 / 3.83 -> 5.19 / 4.53 / 4.55 (5.19) |
+| Sable walk_b / l / r | 0.60 / 0.56 / 0.58 -> 1.07 / 1.06 / 1.13 (1.39) |
+| Sable run_b / l / r | 1.92 / 1.99 / 1.94 -> 2.59 / 2.70 / 2.78 (2.90) |
+
+**Bug fixed: Cinder's foot jets.** Every hand-keyed loco clip scales her `jet.0`/`jet.1` bones to (0.25, 0.06, 0.25).
+The recipe keyed only location and rotation, so its loops (incl. the first pass's shipped walk/run fl and br) showed the
+jets full size, as blades under her feet. It now keys bone scale from the source clip.
+
+**Sheets.** Blender Workbench on lavapipe (Vulkan, CPU), 360 px a frame, 8 frames a loop from key 0. The floor is a
+0.25 m checker that scrolls at the bake speed, so a planted sole holds its tile. All rows are main's model plus the
+clips (`glb_add_clips.py`): a model re-exported from Blender skins Cinder's feet wrong. The GPU queue was stuck (oldest
+gpu job 7 h). The judge is a Fable subagent, blind (seeded A/B order). Its scores are contact / weight / seam / look:
+
+| clip | restride | current | winner |
+|---|---|---|---|
+| Cinder walk_b | 3/3/4/3 | 3/3/4/3 | tie: current kept |
+| Cinder walk_l | 3/3/4/3 | 3/3/4/4 | current (restride straddles wide) |
+| Cinder walk_r | 3/3/4/3 | 3/3/4/3 | tie: current kept |
+| **Cinder run_b** | 3/4/4/4 | 3/3/4/3 | **restride** (knee drive, compact scissor) |
+| Cinder run_l | 3/3/4/2 | 3/4/4/4 | current (restride over-lunges) |
+| Cinder run_r | 3/3/3/2 | 3/4/4/4 | current (legs tangle) |
+| **Sable walk_b** | 4/4/4/4 | 4/3/4/3 | **restride** |
+| Sable walk_l | 3/3/4/3 | 4/4/4/4 | current (overreaches sideways) |
+| Sable walk_r | 3/3/3/2 | 4/4/4/4 | current (wide straddle) |
+| **Sable run_b** | 4/4/4/4 | 4/3/4/3 | **restride** (run lean, push-off) |
+| **Sable run_l** | 4/4/4/4 | 4/3/4/3 | **restride** (cleaner leg cross) |
+| Sable run_r | 3/3/3/2 | 3/3/4/3 (first-pass recipe) | first pass kept |
+
+Cinder's diagonals, re-baked with the jets fixed. There is no current clip, so a diagonal is kept if no score is under 3:
+
+| ring | fl | fr | bl | br |
+|---|---|---|---|---|
+| Cinder walk | 3/3/4/3 pass | 3/3/4/3 pass | 3/3/4/3 pass | 3/3/4/3 pass |
+| Cinder run | 3/4/4/3 pass | 3/4/4/3 pass | 3/3/4/3 pass | 3/3/3/2 FAIL (splits) |
+
+Shipped:
+- Cinder: run_b restride, plus walk fl/fr/bl/br and run fl/fr/bl. run_br goes back to the b+r blend; it was shipped in
+  the first pass with the jet bug.
+- Sable: walk_b, run_b and run_l restride, plus the first pass's diagonals and run_r.
+
+Sheets: `cinder_sable/pass2_*.jpg`; the first pass's Cinder sheets are removed (they showed the jet bug). Contact
+stays at 3 for every row, current or new: even with the scrolling floor, the stills don't let the judge tell a 20%
+slide from none. The table above is the measure.
+
+Gate on this tree:
+- `--anim-audit`: ashwick (Cinder) 13% and thief (Sable) 18%, under the 25% limit. dolm and gunslinger fail, as in the
+  stacked branch's NOTE. `gil` hits a SCRIPT ERROR because it has no Warden clips.
+- `--clip-check`: 1 FAIL, Ostra's import flake (DEBT); every Cinder/Sable pelvis row is ok.
+- `--ashwick-combo-check` 125/0, `--dancer-combo-check` 144/0.
+
+Not passed: restride on side steps. Cinder's are already wide hand-keyed straddles, and a longer stance reads as a lunge.
+The next try is a crossover side step, with the trail foot passing in front, and the stance shortened rather than stretched.
+
+### Cinder after the 11-12 merge with main
+Main re-keyed Cinder's run_* (ext/anim-cinder-rekey: a 0.333 s scurry, `foot_mps` 5.15). Only the four walk diagonals
+(walk_fl/fr/bl/br, judged above) stay on her; the run_b restride and run_fl/fr/bl were baked on the old 0.7 s run_f and
+are dropped. Run diagonals on the new run_f are open (needs Blender, not on this worker). Sable and Vex unchanged.
+## Albert and Neve (2026-11-11, ext/anim-dirloops-albert-neve)
+
+Their pilot walk_f/run_f (ext/anim-pilot-albert-neve c70b0f6a2) kept; walk and run b, l, r, fl, fr, bl, br re-baked by
+`tools/art1/hunter_dir_gait.py` on main's models (Albert v2, Neve appeal) in step with them: each ring one length
+(Albert walk 0.750 s, run 0.625 s; Neve walk 0.646 s, run 0.604 s), right strike on the forward loop's key,
+`loco.in_step`, diagonals on the ring. Albert's walk_f/run_f were baked again by `breaker_gait.py` on the v2 hull
+(sole 2.01 / 4.80 m/s). Neve's skate clips (skate*, tm_skate) untouched.
+
+Albert needs three inputs the Hunters don't: SIZE 2.0 (his GLB is half game size), CYCLES 2,1 and TURN 55. His legs
+are 14 cm (model) and walk_f covers 0.75 m a pair: one pair a loop leaves a 0.15 stance share (a hop). Two pairs in
+walk_f's 0.75 s halve the step (stance 0.27-0.30); every second strike still lands on walk_f's. The run keeps one pair
+(31 keys can't hold two). At TURN 40 run_l planted at 1.63 vs 2.4 m/s with a 13 cm (game) dip, run_r half its keys
+off speed; at 55 both hold.
+
+| loops | planted sole vs loco, median (keys within 5%) | stance share | pelvis vs forward band (clip-check) |
+|---|---|---|---|
+| Albert walk b / l, r / fl, fr / bl, br | 2.0 m/s (100 / 57, 71 / 71 / 80%) | 0.30 / 0.30 / 0.27 / 0.30 | 0.016 m under, 0.003 over |
+| Albert run b / l, r / fl, fr / bl, br | 4.8 m/s (71 / 100 / 100 / 80%) | 0.14 | 0 |
+| Neve walk x7 | 2.2 m/s (100%) | 0.40 | worst 0.003 m under |
+| Neve run x7 | 4.6 m/s (100%) | 0.20 | worst 0.001 m under |
+
+Was (current, one length each, no diagonals): Albert walk b/l/r 0.5 s, sole 1.13-1.22 vs 1.0 model m/s, hip 2 cm over
+walk_f's; run b/l/r 0.375 s, 2.8 vs 2.4; Neve walk b/l/r 1.5 s and run b/l/r 1.0 s, soles 0.2-0.6 m/s against
+2.2 / 4.6 (her old skate strokes, stance 0.6-0.94).
+
+### Blind Fable judge (Albert, Neve)
+
+Game renderer (`--clip-shots`, yaw 110, 16 fps; Albert `--dist=11 --at=1.4`), 8 frames a loop under the forward loop;
+current and new in a seeded random A/B order, the judge saw only the sheets. Scores slide / contact / weight / match /
+look, 1-5; pass = none under 3. Diagonals have no current loop (the ring blended two neighbours): judged alone.
+
+| loop | new | current | kept |
+|---|---|---|---|
+| Albert walk_b | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_l | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_r | 3 3 3 3 3 "dip f3-4" | 4 4 4 4 3 | new (see below) |
+| Albert run_b | 4 4 4 4 3 | 3 3 3 4 4 | new |
+| Albert run_l | 3 3 3 3 4 "f1-3 crouch, shield to ground" | 4 4 4 4 3 | new (see below) |
+| Albert run_r | 3 3 3 3 4 | 4 4 4 4 3 | new (see below) |
+| Albert walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Albert run fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Neve walk_b | 4 4 4 3 3 | 3 4 3 2 2 "near-idle shuffle" | new |
+| Neve walk_l, walk_r | 4 4 4 3 3 | 3 4 3 2 2 | new |
+| Neve run_b | 3 4 3 3 3 | 3 4 3 2 2 | new |
+| Neve run_l | 4 4 4 3 4 | 3 4 3 2 2 | new |
+| Neve run_r | 4 4 3 3 3 | 3 4 3 3 3 | new |
+| Neve walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 3 3 | - | new |
+| Neve run fl, fr / bl, br | 4 4 4 4 4 / 3 4 3 3 3 | - | new |
+
+New wins 9 of 12 pairs; every new loop passes. Albert's walk_r, run_l and run_r lost to current. Kept anyway: the
+current ones are 0.5 / 0.375 s against walk_f 0.75 and run_f 0.625, so with them the ring is not one length
+(`--clip-check` fails, `in_step` can't hold) and strafing stays out of step with the new gait, the break this pass
+is for. The low frames the judge marks are the forward loop's own hip dip at the same phase (run_f vaults low, then
+flies), which reads as a crouch on a side run. Next: a side-run hip curve of its own within the clip-check band, or
+the owner keeps current for those three and drops Albert's `in_step`.

@@ -9,10 +9,10 @@ extends RefCounted
 ## Numbers: content/rules/revive.json.
 
 const RULES_PATH := "res://content/rules/revive.json"
+const REMOTE_REACH := 1.5        # m: a remote teammate this close to a box, holding "revive", is channelling it
 const MOVE_DEADZONE := 0.1        # stick length that counts as moving (a resting stick drifts below it)
 const NO_ATTACK := ["sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
 	"gear1", "gear2", "fire", "throw", "kin_ab"]
-const DONE_COL := Color("bff5c0")
 
 static var _rules := {}
 
@@ -45,7 +45,6 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	var need := time_for(o)
 	if h.box_t <= 0.0:
 		h.vuln_fx_t = 0.0
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 	h.box_t += dt
 	# everyone sees (and hears: Match._update_box_hums) a box revive going up, and who's doing it
 	b["rev_prog"] = h.box_t / need
@@ -59,12 +58,34 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	h.box_rev_at = -9.0
 	o.set_meta("box_revived_n", int(o.get_meta("box_revived_n", 0)) + 1)
 	m.sfx("revive_done", b["pos"], 3.0)
-	m.fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, DONE_COL, 0.5)
-	m.fx.burst(b["pos"] + Vector3(0, 1.0, 0), DONE_COL, 26, 4.5, 0.7, -2.0, 1.2)
+	BoxReviveFx.rise(m, b, h)
 	if o.remote:
 		m.net_event(["brev", o.nid, h.nid])      # their own game brings them back (net_in)
 	else:
 		Life.box_revive(m, b, h)
+
+## Online: a remote teammate's channel at a box comes only as the "revive" hold kind in their hunter
+## flags (Match._flags), so it is timed here from that and fills the same rev_prog / rev_by / rev_at
+## the local channel does: the hum, the HUD rings and BoxReviveFx all follow it.
+static func mirror_remote(m: Match, dt: float) -> void:
+	for b in m.boxes:
+		var by := _remote_reviver(m, b)
+		if by == null:
+			b.erase("net_t")
+			continue
+		b["net_t"] = float(b.get("net_t", 0.0)) + dt
+		b["rev_prog"] = minf(float(b["net_t"]) / time_for(b["owner"]), 1.0)
+		b["rev_by"] = by
+		b["rev_at"] = m.time
+
+static func _remote_reviver(m: Match, b: Dictionary) -> Hunter:
+	if not Life.soul_here(m, b):
+		return null
+	var o: Hunter = b["owner"]
+	for h in m.hunters:
+		if h.remote and h.team == o.team and h.holding() == "revive" and h.flat_dist(b["pos"]) <= REMOTE_REACH:
+			return h
+	return null
 
 ## Every step while channelling (Hunter's input step): no attacks; moving, dashing, jumping,
 ## gliding or a stun breaks the channel instead.
@@ -73,7 +94,6 @@ static func guard_inputs(h: Hunter) -> void:
 	var leaping: bool = h.inp.get("dash", false) or h.inp.get("jump", false) or h.roll_t > 0.0
 	if walking or leaping or h.gliding or h.stun_t > 0.0:
 		if h.box_t > 0.0:        # (not when interact was just let go)
-			h.m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 			cancel(h)
 		return
 	for key in NO_ATTACK:

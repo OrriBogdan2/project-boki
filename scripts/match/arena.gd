@@ -7,6 +7,7 @@ extends RefCounted
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
+## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -23,6 +24,7 @@ var m: Match
 var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
 var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
+var drill: DodgeDrill = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -60,6 +62,7 @@ func setup(match_node: Match, which: String) -> void:
 	for i in Gloves.SLOTS:
 		gloves[i] = String(P.gear[i].get("id", "")) if not (P.gear[i] as Dictionary).is_empty() else ""
 	_spawn_dummies()
+	drill = DodgeDrill.new(m, dummies.filter(func(x): return x["kind"] == "strafe")[0]["h"])
 	bot_at = _arena_point(Vector3(26.5, 0, 19.5)) if layout == "arena" else _free_near(home + Vector3(0, 0, -7.0))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
@@ -69,7 +72,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast("Training Grounds  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -221,6 +224,7 @@ func tick(dt: float) -> void:
 			P.remove_meta("arena_down")
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
+	drill.tick(dt)
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -261,7 +265,6 @@ func reset() -> void:
 		D.set_meta("marks", {})
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
-	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.
@@ -274,7 +277,6 @@ func set_arch(a: String, w := "") -> void:
 	_apply_ult()
 	for i in Gloves.SLOTS:
 		if gloves[i] != "": give_glove(String(gloves[i]), i)
-	m.fx.ring(P.pos, 1.8, Arch.color(a), 0.4)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
 	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
@@ -448,8 +450,12 @@ func toggle_card() -> void:
 	if card_layer: _close_card()
 	else: _open_card()
 
-# ---- the loadout panel (L): picks apply on the spot; the panel never changes size
-const MENU := Vector2(1040, 640)
+# ---- the loadout panel (L): picks apply on the spot; the panel never changes size. It fits the view at the
+# default UI scale; the Boki list (every species) scrolls in what is left of the height.
+const MENU_MAX_H := 760.0      # px (logical UI): the tallest the panel gets on tall views
+const MENU_EDGE := 20.0        # px (logical UI): the gap kept between the panel and the screen edge
+const MENU_LEFT_W := 480.0     # px: the left column (Hunter, Boki, bot)
+const MENU_PICK_W := 92.0      # px: a Hunter or Boki button in the left column's five-wide grids
 
 func open_menu() -> void:
 	close_menu()
@@ -467,7 +473,7 @@ func open_menu() -> void:
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
 	var pn := PanelContainer.new()
-	pn.custom_minimum_size = MENU
+	pn.custom_minimum_size.y = minf(MENU_MAX_H, root.get_viewport_rect().size.y - 2.0 * MENU_EDGE)
 	pn.add_theme_stylebox_override("panel", UI.frame(UI.SURFACE, UI.R_PANEL, Color(1, 1, 1, 0.12), 1, 18, 14))
 	center.add_child(pn)
 	var v := VBoxContainer.new()
@@ -480,54 +486,69 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
 		ch.queue_free()
 	var P: Hunter = m.player
-	var hd := HBoxContainer.new()
-	hd.add_child(UI.label("Loadout", 26, UI.INK, UI.big))
-	hd.add_child(UI.label("   Everything applies at once. Esc or L closes.", 14, UI.MUTED))
-	hd.add_child(UI.fill())
-	hd.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))
-	hd.add_child(UI.primary("Done", close_menu, 110))
-	v.add_child(hd)
+	v.add_child(_menu_header(P.arch))
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 22)
+	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(cols)
-	# left: archetype, weapon, Boki
+	# left: the Hunter, the Boki and the sparring bot
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 8)
-	left.custom_minimum_size = Vector2(470, 0)
+	left.custom_minimum_size = Vector2(MENU_LEFT_W, 0)
 	cols.add_child(left)
 	left.add_child(UI.section("Hunter  (keys 2-9 pick the first eight)"))
-	var ag := GridContainer.new(); ag.columns = 3
-	ag.add_theme_constant_override("h_separation", 6); ag.add_theme_constant_override("v_separation", 6)
+	var ag := _pick_grid()
 	for a in Arch.ids():
 		var aa: String = a
-		var b := UI.choice(Arch.name_of(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
-		b.tooltip_text = String(Arch.def(a).get("card", {}).get("loop", ""))
+		var b := UI.choice(HeroTitle.base_name(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), MENU_PICK_W)
+		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))]
+		b.add_theme_font_size_override("font_size", 14)
 		ag.add_child(b)
 	left.add_child(ag)
-	var ll := UI.label(String(Arch.def(P.arch).get("card", {}).get("loop", "")), 13, Arch.color(P.arch))
-	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ll.custom_minimum_size = Vector2(460, 36)
-	left.add_child(ll)
 	left.add_child(UI.section("Boki"))
-	var kg := GridContainer.new(); kg.columns = 3
-	kg.add_theme_constant_override("h_separation", 6); kg.add_theme_constant_override("v_separation", 6)
+	var kg := _pick_grid()
 	var cur := String((P.kin as Kin).species) if P.kin and not (P.kin as Kin).dead else ""
 	for sp in _kin_choices():
 		var ss: String = sp
 		var nm := "None" if sp == "" else String(Data.KIN.get(sp, {}).get("name", sp))
-		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), 150)
+		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), MENU_PICK_W)
+		b.add_theme_font_size_override("font_size", 12)
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
 			b.tooltip_text = "%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(P.arch, ks))]
 		kg.add_child(b)
-	left.add_child(kg)
-	# right: glove, practice toggles, the bot
+	# the species list outgrows any screen: it scrolls (wheel, or the pad moving focus through it)
+	var ks_scroll := ScrollContainer.new()
+	ks_scroll.name = "boki_list"
+	ks_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ks_scroll.follow_focus = true
+	ks_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	ks_scroll.add_child(kg)
+	left.add_child(ks_scroll)
+	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
+	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
+	for md in BOT_MODES:
+		var mm: String = md
+		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 80))
+	left.add_child(br)
+	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
+	ba.add_child(UI.label("Bot Hunter", 14, UI.MUTED))
+	var ids := Arch.ids()
+	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
+	var bl := UI.label(HeroTitle.base_name(bot_arch), 16, Arch.color(bot_arch), UI.big)
+	bl.custom_minimum_size = Vector2(150, 0)
+	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ba.add_child(bl)
+	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
+	left.add_child(ba)
+	# right: the two gloves and the practice toggles
 	var right := VBoxContainer.new()
 	right.add_theme_constant_override("separation", 8)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(right)
 	var gl: Array = Gear.ALL.keys().filter(func(g): return Gear.is_glove(String(g)))
 	gl.sort_custom(func(x, y): return (1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0) or (Gear.active(x) == Gear.active(y) and String(x) < String(y)))
+	var drag := SlotDrag.attach(v, _glove_drop.bind(v))
 	for si in Gloves.SLOTS:
 		var slot: int = si
 		right.add_child(UI.section("Glove %d  (%s)" % [slot + 1, Gloves.key_cap(slot)]))
@@ -537,6 +558,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gg.add_theme_constant_override("v_separation", 4)
 		var nb := UI.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
 		nb.add_theme_font_size_override("font_size", 12)
+		drag.add(nb, {"slot": slot, "id": ""})
 		gg.add_child(nb)
 		for g in gl:
 			var gid: String = g
@@ -544,6 +566,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 			var b := UI.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
 			b.tooltip_text = "%s%s  ·  %s\n%s" % [nm2, ("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive", Gloves.key_cap(slot), Gear.desc_of(gid, 2)]
 			b.add_theme_font_size_override("font_size", 12)
+			drag.add(b, {"slot": slot, "id": gid}, nm2, UI.INK)
 			gg.add_child(b)
 		right.add_child(gg)
 		var gd := UI.label(_glove_line(slot), 13, UI.MUTED)
@@ -552,32 +575,65 @@ func _fill_menu(v: VBoxContainer) -> void:
 		right.add_child(gd)
 	right.add_child(UI.section("Practice"))
 	var tr := HBoxContainer.new(); tr.add_theme_constant_override("separation", 6)
-	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 170))
-	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 200))
+	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 160))
+	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 190))
 	tr.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
 	right.add_child(tr)
-	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
-	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
-	for md in BOT_MODES:
-		var mm: String = md
-		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 96))
-	right.add_child(br)
-	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
-	ba.add_child(UI.label("Bot Hunter", 14, UI.MUTED))
-	var ids := Arch.ids()
-	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
-	var bl := UI.label(Arch.name_of(bot_arch), 16, Arch.color(bot_arch), UI.big)
-	bl.custom_minimum_size = Vector2(150, 0)
-	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ba.add_child(bl)
-	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
-	right.add_child(ba)
+
+## The panel's top row: the hunter's portrait and name with their loop under it, the closing hint and buttons.
+func _menu_header(arch: String) -> HBoxContainer:
+	var hd := HBoxContainer.new()
+	hd.name = "menu_header"
+	hd.add_theme_constant_override("separation", 12)
+	var pic := ClassCard.portrait(arch, 56.0)
+	pic.name = "portrait"
+	hd.add_child(pic)
+	var who := UI.vbox(2)
+	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	who.add_child(UI.label(HeroTitle.base_name(arch), 26, Arch.color(arch), UI.big))
+	who.add_child(UI.para(String(Arch.def(arch).get("card", {}).get("loop", "")), 13, UI.MUTED))
+	hd.add_child(who)
+	var side := UI.vbox(4)
+	var hint := UI.label("Everything applies at once. Esc or L closes.", 12, UI.MUTED)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	side.add_child(hint)
+	var btns := UI.hbox(8)
+	btns.alignment = BoxContainer.ALIGNMENT_END
+	btns.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))
+	btns.add_child(UI.primary("Done", close_menu, 110))
+	side.add_child(btns)
+	hd.add_child(side)
+	return hd
+
+## A five-wide grid of Hunter or Boki buttons for the left column.
+func _pick_grid() -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = 5
+	g.add_theme_constant_override("h_separation", 6)
+	g.add_theme_constant_override("v_separation", 6)
+	return g
 
 func _glove_line(slot: int) -> String:
 	var g := String(gloves[slot])
 	if g == "" or not Gear.ALL.has(g):
 		return "%s: no glove. Pick any to wear it here." % Gloves.key_cap(slot)
 	return "%s: %s%s: %s" % [Gloves.key_cap(slot), String(Gear.ALL[g].get("name", g)), ("  ·  %ss" % KinText.n(Gear.cd_of(g, 2))) if Gear.active(g) else "  ·  passive", Gear.desc_of(g, 2)]
+
+## A glove held and dragged onto the other glove's row (SlotDrag) is worn there; dragging the one you wear
+## swaps the two gloves.
+func _glove_drop(from: Dictionary, to: Dictionary, v: VBoxContainer) -> String:
+	var a := int(from["slot"])
+	var b := int(to["slot"])
+	var gid := String(from["id"])
+	if a == b:
+		return ""
+	var was := String(gloves[b])
+	var swap := String(gloves[a]) == gid
+	give_glove(gid, b)
+	if swap and was != "":
+		give_glove(was, a)
+	_fill_menu(v)
+	return ""
 
 func _kin_choices() -> Array:
 	var out: Array = []
@@ -586,7 +642,7 @@ func _kin_choices() -> Array:
 		if sp != "" and not out.has(sp) and KinLib.kin(sp): out.append(sp)
 	for sp in KinLib.kin_ids():
 		if not out.has(sp) and Data.KIN.has(sp): out.append(sp)
-	out.append("")      # every species, however many there are (the grid scrolls with the menu)
+	out.append("")      # every species, however many there are (the list scrolls)
 	return out
 
 func close_menu() -> void:

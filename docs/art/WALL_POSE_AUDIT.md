@@ -43,3 +43,4 @@ stand-in block (the terrain mesh predates the carve).
 
 Open: remote players (the other machines) still play the air clip on the wall: kicks and bounces run on the owner and
 only the kick's scuff ("whop") goes over the wire. Pip's plant reads small in the side-on strips (her body hides the leg).
+Gil (new on main) has no animation clips in gil.glb yet, so there is no plant and push for him; `--wall-kick-pose-check` skips him through `NO_CLIPS` until he has a clip rig.

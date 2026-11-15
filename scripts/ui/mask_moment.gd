@@ -83,7 +83,6 @@ func _arrive() -> void:
 	relic = MaskRelic.make(hunter_id)
 	relic.position = FROM_AT
 	host.add_child(relic)
-	WardenGlb.fetch(hunter_id)            # (the Hunter's model loads while the Relic drifts)
 	relic.face_to = cam.position          # (it shows you its face as it comes)
 	relic.drift_to(_head() + HOVER, DRIFT_S, 1.2).finished.connect(_wait)
 	Sfx.play("whoosh", null, -10.0)
@@ -132,8 +131,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif phase == "intro" and go_button and event.is_action_pressed("ui_accept"):
 		_go()
 
-## The put-on beat (MaskBeat): you touch the Relic, a porcelain face flickers over yours, and the fallen Hunter
-## fades in over you.
+## The put-on beat (MaskBeat): the Relic rises to your hollow face, a cut to black, the fallen Hunter, and you
+## stand as them.
 func put_on() -> void:
 	if phase != "wait":
 		return

@@ -11,6 +11,9 @@ extends RefCounted
 ##     game light it, put it out and use it.
 ##  6. A bot walks to a dead teammate's box and brings them back with the new timing; with the soul
 ##     gone it lights a beacon instead.
+##  7. It reads from afar (BoxReviveFx): a tether from the reviver to the soul in their side colour and a
+##     core in the soul that grows with the progress, both gone on an interrupt; the soul rises on
+##     completion; a remote teammate's "revive" hold at the box drives the same fx online.
 ## Never touches the save.
 
 var bad := 0
@@ -72,6 +75,7 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	m.biomes = null          # no map hazards: a spore pod's cloud by the box would break every channel
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
@@ -91,6 +95,7 @@ func run(main: Node) -> void:
 	_box_revive(B, C)
 	_hits(B, C, foe)
 	_moves(B, C)
+	_remote(B, C)
 	_beacon(A, B, C, foe)
 	_bot(B, C, home)
 	print("BOX REVIVE CHECK DONE, failures: ", bad)
@@ -104,6 +109,9 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	ok(B.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
 	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(B) - 7.5) < 0.01,
 		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(B))
+	var stand := float(Life.R["box_revive_hp"])
+	ok(stand == float(Life.R["revive_hp"]) and stand >= 0.12 and stand <= 0.35,
+		"revived Hunters stand up with %d%% (same as a Wisp revive; per-tick heal band 12-35%%)" % int(stand * 100.0))
 	var ring: Node = (bx["node"] as Node).get_node_or_null("OwnerRing")
 	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(B), "an ally box wears its owner's squad colour")
 	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
@@ -114,6 +122,7 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	ok(C.box_reviving() and hum != "" and Sfx.loop_on(hum), "mid-channel: kneeling over the box, and it hums")
 	var prog := float(bx.get("rev_prog", 0.0))
 	ok(absf(prog - 0.5) < 0.05, "the progress ring reads half way (%.2f)" % prog)
+	_reads(bx, C, prog, "mid-channel")
 	C.inp["fire"] = true
 	_run(Match.DT)
 	ok(not C.inp["fire"] and C.box_reviving(), "no firing while channelling, and the channel goes on")
@@ -124,6 +133,8 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	var k: Kin = B.kin
 	ok(k != null and not k.dead and k.state == "active" and k.flat_dist(B) < 3.0, "their Boki is back at their side")
 	ok(not Sfx.loop_on(hum), "the hum stops once it's done")
+	ok(_cleared(bx), "the tether and core are gone once it's done")
+	ok(m.get_node_or_null("SoulRise") != null, "the soul rises off the box on completion")
 
 func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
 	var second := BoxRevive.time_for(B)
@@ -148,6 +159,8 @@ func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
 		Hunter.CONSUME_VULN])
 	_run(Match.DT)
 	ok(C.box_t == 0.0 and B.out, "and the hit breaks the channel")
+	_run(0.2)
+	ok(_cleared(bx), "the tether and core clear on the interrupt")
 	_run(1.0)
 	ok(C.box_t == 0.0 and not C.box_reviving(), "holding on does nothing until interact is pressed again")
 	C.inp["interact"] = false
@@ -171,6 +184,43 @@ func _moves(B: Hunter, C: Hunter) -> void:
 	C.inp["move"] = Vector2.ZERO
 	C.inp["interact"] = false
 	_run(Match.DT * 2.0)
+
+## The tether runs from the reviver to the soul in their side colour; the core is sized by the progress.
+func _reads(bx: Dictionary, by: Hunter, prog: float, when: String) -> void:
+	var tether := bx.get("tether_node") as Node3D
+	var soul := (bx["node"] as Node3D).get_node("Soul") as Node3D
+	var core := soul.get_node_or_null("Core") as MeshInstance3D
+	var line := tether.get_node("Line") as MeshInstance3D if tether else null
+	var col: Color = (line.material_override as ShaderMaterial).get_shader_parameter("color") if line else Color.BLACK
+	var reach := tether.position.distance_to(soul.global_position) if tether else 0.0
+	ok(line != null and absf(tether.scale.z - reach) < 0.05 and tether.position.distance_to(by.pos) < 1.2
+		and Color(col, 1.0).is_equal_approx(SideColor.of(m, by)),
+		"%s: a tether from %s to the soul in their side colour (%.2f m)" % [when, by.pname, reach])
+	var want := lerpf(BoxReviveFx.CORE_MIN, 1.0, prog)
+	ok(core != null and core.visible and absf(core.scale.x - want) < 0.02,
+		"%s: the soul's core fills with the progress (%.2f, want %.2f)" % [when, core.scale.x if core else 0.0, want])
+
+func _cleared(bx: Dictionary) -> bool:
+	var core := (bx["node"] as Node3D).get_node("Soul").get_node_or_null("Core") as Node3D
+	return not bx.has("tether_node") and (core == null or not core.visible)
+
+## Online: a remote teammate's channel only arrives as the "revive" hold in their flags.
+func _remote(B: Hunter, C: Hunter) -> void:
+	var bx := Life.box_of(m, B)
+	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
+	C.remote = true
+	var t := 0.0
+	var need := BoxRevive.time_for(B) * 0.4
+	while t < need:
+		C.set_hold("revive", 0.3)
+		_run(Match.DT)
+		t += Match.DT
+	var prog := float(bx.get("rev_prog", 0.0))
+	ok(absf(prog - 0.4) < 0.05 and bx.get("rev_by") == C, "remote: the synced hold times the revive (%.2f)" % prog)
+	_reads(bx, C, prog, "remote")
+	_run(0.5)
+	ok(_cleared(bx) and B.out, "remote: tether and core clear when the hold stops")
+	C.remote = false
 
 func _beacon(A: Hunter, B: Hunter, C: Hunter, foe: Hunter) -> void:
 	m.eliminate(C, null, "finished")

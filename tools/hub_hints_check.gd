@@ -1,9 +1,9 @@
 extends RefCounted
 ## --hub-hints-check [--shots-dir=<dir>] (briefs/design/GARDEN.md 10): the first-time hints in the garden
 ## hub. A new player arriving there gets the Waystone line, then (near the nest corner) the nest line,
-## then the sleeping zone's two-keys line: each once, one at a time, in the message lane and never a
-## panel. A second visit says nothing. With --shots-dir (needs a renderer) the first hint is saved as
-## <dir>/hub_hint.png.
+## then the sleeping zone's two-keys line, and by the Incubator once its first egg is placed (never
+## before) the egg's line: each once, one at a time, in the message lane and never a panel. A second
+## visit says nothing. With --shots-dir (needs a renderer) the first hint is saved as <dir>/hub_hint.png.
 
 const WAIT_S := 30.0      # s to wait for the hub to finish building before failing
 
@@ -48,6 +48,20 @@ func _shot(m: Node) -> void:
 			await RenderingServer.frame_post_draw
 			m.get_viewport().get_texture().get_image().save_png(dir.path_join("hub_hint.png"))
 
+## By the Incubator: nothing while no egg is in it; the first egg placed brings its one line, which names
+## no number (the hatch time is data).
+func _egg(hub, lane: MsgLane, seen: Dictionary, gap: float) -> void:
+	hub.INCUB_AT = hub.ppos + Vector3(-3, 0, 0)
+	lane.clear()
+	hub.hhints.tick(gap)
+	ok(lane.count() == 0 and not seen.has("egg"), "by the Incubator with no egg in it: no egg line")
+	Incubator.add(String(Data.common_kin()[0]))
+	hub.hhints.tick(gap)
+	var said := ", ".join(lane.texts())
+	var one_line: bool = seen.has("egg") and lane.count() == 1 and said.begins_with("It grows while you play")
+	ok(one_line, "the first egg placed: its line (%s)" % said)
+	ok(RegEx.create_from_string("\\d").search(said) == null, "the line names no number")
+
 func _hub(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	_new_save()
@@ -77,9 +91,10 @@ func _hub(m: Node) -> void:
 	hub.NEST_AT = hub.ppos + Vector3(3, 0, 0)
 	hub.hhints.tick(gap)
 	ok(seen.has("nest") and "nest corner" in lane.texts().back(), "near the nest corner: its hint shows")
+	_egg(hub, lane, seen, gap)
 	var n := lane.count()
 	hub.hhints.tick(gap)
-	ok(lane.count() == n and seen.size() == 3, "each hint shows once")
+	ok(lane.count() == n and seen.size() == 4, "each hint shows once")
 	hub.hhints = HubHints.new(hub)
 	hub.hhints.tick(100.0)
 	ok(lane.count() == n, "a later visit says nothing")

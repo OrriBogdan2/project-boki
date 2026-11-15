@@ -22,6 +22,8 @@ var m: Match
 var P: Hunter
 var home: Vector3
 var dummies: Array = []
+var n_dummies := NX * NZ
+var step_dt := STEP
 var parked := false              # the dummies stand behind the hero: a lane probe, only the shots count
 var shot_seen: Array = []        # [flight range, radius] of each non-melee shot the hero fired
 
@@ -60,7 +62,7 @@ func _spawn(main: Node) -> void:
 	P = r[1]
 	home = r[4]
 	(r[2] as Hunter).teleport(home + Vector3(-6.0, 0, -8.0))      # the setup's own target: out of the grid
-	for i in NX * NZ:
+	for i in n_dummies:
 		var d: Hunter = m.make_hunter("D%d" % i, 5, "medium", "Dummy", "idle", {}, _slot(i), {"arch": "none"})
 		d.max_hp = 1e6
 		d.hp = 1e6
@@ -69,6 +71,25 @@ func _spawn(main: Node) -> void:
 ## Fresh hero, fresh dummies, aim down +X; then fires `kind` and returns the slots hit within `secs`.
 func _probe(arch: String, kind: String, hold: float, secs: float, park := false) -> Array:
 	parked = park
+	_prep(arch)
+	var hit := {}
+	var t := 0.0
+	while t < secs:
+		_press(kind, hold, t, t == 0.0)
+		m.step(0.002 if t == 0.0 else step_dt)      # (a tiny first step: a bullet is seen before a dummy eats it)
+		t += step_dt
+		for s in m.shots:
+			if s["by"] == P and not s["x"].get("melee", false) and not s.has("hs_seen"):
+				s["hs_seen"] = true
+				shot_seen.append([float(s["life0"]) * (s["vel"] as Vector2).length(), float(s["r"])])
+		if parked and not shot_seen.is_empty(): break
+		for i in _took_damage(): hit[i] = true
+		if kind == "rmb_hold" and t >= hold: P.inp["sec_hold"] = false
+	_release()
+	return hit.keys()
+
+## The hero as `arch` at home, aimed down +X at full ult and charges, the dummies in their slots.
+func _prep(arch: String) -> void:
 	HeroVfx.of(m).ribbons.clear()      # (a trail still following the old model would read a freed node)
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
@@ -85,37 +106,27 @@ func _probe(arch: String, kind: String, hold: float, secs: float, park := false)
 	m.zones.clear()
 	_clear_dummies()
 	shot_seen.clear()
-	for i in 3: m.step(STEP)
+	for i in 3: m.step(step_dt)
 	_clear_dummies()
-	var hit := {}
-	var t := 0.0
-	var first := true
-	while t < secs:
-		var held := t < hold
-		P.inp["fire"] = (kind == "lmb" and first) or (kind == "lmb_hold" and held)
-		P.inp["sec_hold"] = kind == "rmb_hold" and held
-		P.inp["dash_down"] = (kind == "dash" and first) or (kind == "dash_hold" and held)
-		P.fire_cd = 0.0 if first else P.fire_cd
-		if first:
-			match kind:
-				"rmb", "rmb_hold": P.ak.press_rmb()
-				"e": P.ak.use_e()
-				"x": P.ak.cast_ult()
-				"dash", "dash_hold": P.do_dash()
-		m.step(0.002 if first else STEP)      # (a tiny first step: a bullet is seen before a dummy eats it)
-		first = false
-		t += STEP
-		for s in m.shots:
-			if s["by"] == P and not s["x"].get("melee", false) and not s.has("hs_seen"):
-				s["hs_seen"] = true
-				shot_seen.append([float(s["life0"]) * (s["vel"] as Vector2).length(), float(s["r"])])
-		if parked and not shot_seen.is_empty(): break
-		for i in _took_damage(): hit[i] = true
-		if kind == "rmb_hold" and t >= hold: P.inp["sec_hold"] = false
+
+## One step of input for `kind` `t` seconds into it (`first`: the press itself).
+func _press(kind: String, hold: float, t: float, first: bool) -> void:
+	var held := t < hold
+	P.inp["fire"] = (kind == "lmb" and first) or (kind in ["lmb_hold", "x_fire"] and held)
+	P.inp["sec_hold"] = kind == "rmb_hold" and held
+	P.inp["dash_down"] = (kind == "dash" and first) or (kind == "dash_hold" and held)
+	P.fire_cd = 0.0 if first else P.fire_cd
+	if first:
+		match kind:
+			"rmb", "rmb_hold": P.ak.press_rmb()
+			"e": P.ak.use_e()
+			"x", "x_fire": P.ak.cast_ult()
+			"dash", "dash_hold": P.do_dash()
+
+func _release() -> void:
 	P.inp["fire"] = false
 	P.inp["dash_down"] = false
 	P.inp["sec_hold"] = false
-	return hit.keys()
 
 ## {reach, width, arc, n}: reach to the far edge of what was hit (m), the widest lane across the
 ## aim line (m) and the angle the hits spread over (degrees). Centres are corrected by the dummy's
@@ -164,7 +175,7 @@ func _content(kind: String) -> Dictionary:
 		"lmb", "lmb_hold": d = P.wpn
 		"rmb", "rmb_hold": d = P.ak.rmb_def()
 		"e": d = P.ak.e_def()
-		"x": d = P.ak.x_def()
+		"x", "x_fire": d = P.ak.x_def()
 		_: d = P.ak.dash_def()
 	return {"reach": _top(d, REACH_KEYS), "width": _top(d, WIDTH_KEYS), "arc": _top(d, ARC_KEYS)}
 
