@@ -809,18 +809,12 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
+		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit())
 	return true
 
-## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
-const SPIN_GLIDE := 6.0
-
-## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
-## lies on the hit radius and runs round once with the turn.
-func _spin_hit(wd: Vector2) -> void:
-	if h.grounded:
-		h.vel.x += wd.x * SPIN_GLIDE
-		h.vel.z += wd.y * SPIN_GLIDE
+## The 360 Smash's spin on arrival: one hit all round him, sliding out of the dash at its run-speed hand-over
+## (decision 0061); its ring (HeroVfx "spin") lies on the hit radius and runs round once with the turn.
+func _spin_hit() -> void:
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1

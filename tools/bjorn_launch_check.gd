@@ -238,8 +238,9 @@ func _glide_open(m: Match, P: Hunter, hold: bool) -> float:
 	P.inp["glide_btn"] = false
 	return -1.0
 
-## #49 off a ledge: the perfect launch carries him over the edge; the held swing never opens the glider by itself
-## a fresh glide press just after opens it at >= 70% of the launch's speed (the shared hand-off).
+## #49 off a ledge: the perfect launch carries him over the edge; the held swing never opens the glider by itself;
+## a fresh glide press just after opens it. The launch ended in the air, so it handed over at his run speed like
+## any dash (docs/decisions/0061); a press during the launch keeps its speed (the jump-out trial above).
 func _launch_glide() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
@@ -258,8 +259,8 @@ func _launch_glide() -> void:
 	ok("bjorn 11-09: launched off a ledge with no glide press he falls on (no glider by itself)", not P.gliding,
 		"gliding %s" % P.gliding)
 	var open := _glide_open(m, P, true)
-	ok("bjorn #49: launched off a ledge, a fresh glide press glides at >= 70% of the launch's speed",
-		open >= K.launch.speed * 0.7 and P.pos.x - home.x > 3.0,
+	ok("bjorn #49: launched off a ledge, a fresh glide press glides on, at most his run (the dash hand-over)",
+		open > 0.0 and open <= P.run_speed * 1.05 and P.pos.x - home.x > 3.0,
 		"glide opens at %.1f of %.1f m/s, %.1f m out" % [open, K.launch.speed, P.pos.x - home.x])
 	await done(m)
 

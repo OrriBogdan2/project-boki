@@ -1274,7 +1274,8 @@ func _move_player(d: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= d
 		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
-		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
+		if dash_t <= 0.0 and not (air and Input.is_action_pressed("glide")):
+			hv = HunterMove.dash_exit(hv, run)      # in the air too, but a held glider takes the dash's speed
 	elif gliding:
 		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
 	elif air:
@@ -1321,9 +1322,10 @@ func _move_player(d: float) -> void:
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
-		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
+		if dash_t > 0.0:      # out of a dash, as in a match: it keeps Loco.dash_jump_keep, at most the run
 			dash_t = 0.0
-			pvel *= Loco.dash_jump_keep
+			var keep := HunterMove.dash_exit(Vector2(pvel.x, pvel.z) * Loco.dash_jump_keep, run)
+			pvel = Vector3(keep.x, pvel.y, keep.y)
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
