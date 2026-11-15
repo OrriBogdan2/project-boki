@@ -54,6 +54,19 @@ const PAD := 26          # inside a panel
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
 static var _theme: Theme
+static var text_k := 1.0       # Settings > Text size: every font size below goes through fs()
+
+## A design font size at the player's chosen text size.
+static func fs(px: int) -> int:
+	return roundi(px * text_k)
+
+## Applies a Text size choice: sizes made from now on use it, and the menu theme is rebuilt with it.
+static func set_text_size(k: float) -> void:
+	if is_equal_approx(k, text_k):
+		return
+	text_k = k
+	_theme = null
+	install()
 static var semi: FontVariation       # Rubik at a heavier weight, for buttons and small headers
 static var caps: FontVariation       # spaced-out bold, for section headers
 
@@ -103,7 +116,7 @@ static func keycap(key: String, size := 13) -> PanelContainer:
 	l.text = key
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", caps if caps else body)
-	l.add_theme_font_size_override("font_size", size - 1 if key.length() > 1 else size)
+	l.add_theme_font_size_override("font_size", fs(size - 1 if key.length() > 1 else size))
 	l.add_theme_color_override("font_color", Color(0.16, 0.12, 0.14))
 	p.add_child(l)
 	return p
@@ -131,7 +144,7 @@ static func section(text: String, col := PINK) -> Label:
 	var l := Label.new()
 	l.text = text.to_upper()
 	l.add_theme_font_override("font", caps if caps else body)
-	l.add_theme_font_size_override("font_size", T_CAPS)
+	l.add_theme_font_size_override("font_size", fs(T_CAPS))
 	l.add_theme_color_override("font_color", col)
 	l.set_meta("pg_head", true)
 	return l
@@ -139,7 +152,7 @@ static func section(text: String, col := PINK) -> Label:
 static func label(text: String, size := 16, col := INK, font: Font = null) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", fs(size))
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
@@ -182,6 +195,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var to := func(s: float, secs: float) -> void:
 		if not is_instance_valid(b) or not b.is_inside_tree(): return
 		var tw := b.create_tween()
+		s = minf(s, _room(b))
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
@@ -196,6 +210,15 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 			Sfx.play("hover", null, -14.0, 0.05))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
+
+## How far a button may scale (about its centre) before it pokes past its parent's sides: 1.0 for
+## one that fills its row.
+static func _room(b: Button) -> float:
+	var par := b.get_parent() as Control
+	if par == null or b.size.x < 1.0:
+		return 1.0
+	var gap := minf(b.position.x, par.size.x - b.position.x - b.size.x)
+	return 1.0 + maxf(0.0, gap) * 2.0 / b.size.x
 
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
@@ -877,7 +900,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
-				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))      # held: the same on every tab
+				sc.custom_minimum_size.y = minf(want, sc.get_viewport_rect().size.y - 110.0 - chrome)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
@@ -913,6 +937,7 @@ static func subtitle(body: Control, txt: String) -> void:
 	if p == null: return
 	var s: Label = p.get_meta("sub")
 	s.text = txt
+	s.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # (the label is made empty, so label() left wrapping off)
 	s.visible = txt != ""
 
 ## The panel title's parchment tab (UI_STYLE.md): a torn cream strip with two nails, dark ink on it.

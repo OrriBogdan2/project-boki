@@ -1,4 +1,4 @@
-"""Synthesizes the sky train's sounds into audio/: a two-tone horn and a rail clatter.
+"""Synthesizes the sky train's horn into audio/ (its halt and ride sounds are tools/gen_sfx_train.py).
 Kept apart from gen_sfx.py so rerunning it doesn't reshuffle every other sound.
 Same soft palette as gen_sfx.py: slow fades in, rounded tones, levelled under the music."""
 import numpy as np, wave, os
@@ -31,16 +31,7 @@ droop = 1 - .02 * np.maximum(0, tt - (d - .3)) / .3
 horn = sum(lpf(saw(f * droop, d, 0.004), 650) * a for f, a in ((220, 1), (261.6, .8), (330, .45)))
 save('horn', lpf(horn, 900) * shape, -19)
 
-# rail: wheels rolling over the joints (muted knocks) with a low rumble underneath
-d = 1.0; n = int(SR * d)
-rum = bpf(rng.uniform(-1, 1, n), 50, 260) * 3.0
-clack = np.zeros(n)
-for at in (0.0, .12, .5, .62):
-    i = int(at * SR); seg = min(n - i, int(.09 * SR)); tt2 = np.arange(seg) / SR
-    e = np.minimum(1, tt2 / 0.004) * np.exp(-tt2 / 0.025)
-    clack[i:i + seg] += bpf(rng.uniform(-1, 1, seg), 200, 1100) * e
-save('rail', rum * .7 + clack, -21)
-print('train sounds written')
+print('train horn written')
 
 # train_hit: hit by the sky train. A heavy low thump, an iron clang and a crunch: the loudest thing on
 # the map, so nobody wonders what happened

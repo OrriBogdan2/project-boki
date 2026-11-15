@@ -9,7 +9,6 @@ per family, path meter flips, and XP a day against an expedition-only player wit
   python3 tools/garden_sim.py --write            put the report into the balance brief
   python3 tools/garden_sim.py --garden-sim-check assert the invariants and that the brief is current
 """
-import copy
 import json
 import os
 import random
@@ -59,7 +58,11 @@ def live_rules(sim):
         items = fb["items"]
     paths = load("evo_paths.json")
     line = dict(paths["lines"][sim["line"]], pips=paths["pips"]) if paths else fb["line"]
-    return {"budget": budget, "cup": cup, "games": games, "items": items, "line": line}
+    toys = load("toys.json") or {}
+    joy = {"gain": toys.get("joy_gain", 10.0), "below": toys.get("joy_below", 85.0)}
+    gems_win = (load("base_race.json") or {}).get("gems_win", sim["gems_win"])
+    return {"budget": budget, "cup": cup, "games": games, "items": items, "line": line, "joy": joy,
+            "gems_win": gems_win}
 
 
 class Boki:
@@ -169,11 +172,11 @@ def play_day(sim, rules, p, boki, st, rng):
         won = rng.random() < ex["win_p"]
         boki.add_xp(ex["xp_base"] + (ex["xp_win"] if won else 0) + int(ex["xp_knock"] * ex["knocks"]), xpl, garden=False)
         st["run_xp"] += ex["xp_base"] + (ex["xp_win"] if won else 0) + int(ex["xp_knock"] * ex["knocks"])
-        st["gems"] += ex["gems"]
+        earn(st, ex["gems"])
         locked = [z for z in sim["zones"] if z not in st["open"]]
         if locked and rng.random() < ex["wayseed_p"]:
             st["open"].append(locked[0])
-    st["gems"] += sim["home_gems_day"]
+    earn(st, sim["home_gems_day"])
     if st["day"] % sim["trader_days"] == 0:
         locked = [z for z in sim["zones"] if z not in st["open"]]
         if locked and st["gems"] >= sim["wayseed_price"]:
@@ -208,7 +211,7 @@ def play_day(sim, rules, p, boki, st, rng):
             gain(rules["games"][gid]["first"])
         if won:
             gain(roll_w(rng, rules["games"][gid]["table"]))
-            st["gems"] += sim["gems_win"]
+            earn(st, rules["gems_win"])
         boki.add_xp(xp, xpl)
         st["garden_xp"] += xp
         return won, stat
@@ -251,6 +254,24 @@ def play_day(sim, rules, p, boki, st, rng):
     st["tries"] = {}
 
 
+def earn(st, gems):
+    st["gems"] += gems
+    st["earned"] += gems
+
+
+def visit_joy(sim, rules, p):
+    """Mean joy over one visit: it starts at the away floor, the first cares and toy plays raise it
+    (a toy is only picked below joy_below), the clock lowers it. joy_model holds the sim guesses."""
+    m, j = sim["joy_model"], rules["joy"]
+    start = m["away"]
+    joy = start + m["care"] * sim["garden_xp"]["care_kinds"]
+    for _ in range(int(p["minutes"] * sim["toy_per_min"])):
+        if joy < j["below"]:
+            joy += j["gain"]
+    end = min(100.0, joy - m["decay_per_min"] * p["minutes"])
+    return (start + end) / 2
+
+
 def roll(rng, odds):
     r = rng.random()
     for item, p in odds.items():
@@ -268,7 +289,7 @@ def run_player(sim, rules, p, seed):
     rng = random.Random(seed)
     boki = Boki(rules["budget"])
     st = {"items": {}, "open": [next(iter(sim["zones"]))], "gems": 0, "crowned": set(), "tries": {},
-          "garden_xp": 0, "run_xp": 0, "day": 0}
+          "garden_xp": 0, "run_xp": 0, "day": 0, "earned": 0}
     out = {"level_day": {}, "garden_first": None, "full": None, "flips": 0, "winner": None}
     last = None
     for day in range(1, sim["days"] + 1):
@@ -293,7 +314,8 @@ def run_player(sim, rules, p, seed):
         if f:
             fam[f] += n
     out.update(fam=fam, level=boki.level, stats=dict(boki.stats), zones=len(st["open"]), winner=last,
-               garden_xp=st["garden_xp"] / sim["days"], run_xp=st["run_xp"] / sim["days"])
+               garden_xp=st["garden_xp"] / sim["days"], run_xp=st["run_xp"] / sim["days"],
+               gems=st["earned"] / sim["days"])
     return out
 
 
@@ -328,21 +350,30 @@ def simulate(sim):
             "run_xp": statistics.mean(r["run_xp"] for r in runs),
             "exp_only": run_avg / ex["run_min"] * mins,
             "lv100": to_100 / (statistics.mean(r["garden_xp"] + r["run_xp"] for r in runs)),
+            "gems": statistics.mean(r["gems"] for r in runs),
+            "joy": visit_joy(sim, rules, p),
             "raw": runs,
         }
     return report
 
 
-def flags(sim, report):
-    out = []
+def day_of(text, days):
+    """A median-day string back to a number; '>30' counts as 31."""
+    return days + 1 if text.startswith(">") else float(text)
+
+
+def band_flags(sim, report):
+    """Every number outside its band (garden_sim.json bands) as 'player: what value (band)'."""
+    bands, days, out = sim["bands"], sim["days"], []
     for pid, r in report.items():
-        p = sim["players"][pid]
-        first = r["garden_first"]
-        if p["minutes"] <= 5 and (first.startswith(">") or float(first) > sim["grind_days"]):
-            out.append(f"GRINDY {pid}: garden-only first evolution (level {sim['first_evo_level']}) at day {first}")
-        full = r["full"]
-        if not full.startswith(">") and float(full) <= sim["trivial_days"]:
-            out.append(f"TRIVIAL {pid}: budget full on day {full}")
+        got = {"form_lv4_day": day_of(r["levels"][4], days), "evolution_day": day_of(r["garden_first"], days),
+               "stat_total": r["total"], "gems_day": r["gems"], "joy": r["joy"]}
+        if r["full"] != f">{days}":
+            got["budget_full_day"] = float(r["full"])
+        for key, val in got.items():
+            lo, hi = bands[key]
+            if not lo <= val <= hi:
+                out.append(f"{pid}: {key} {val:.1f} outside {lo} to {hi}")
     return out
 
 
@@ -352,41 +383,24 @@ def render(sim, report):
              f"({sim['days']} days, {sim['seeds']} seeds; days are medians, the rest means).", "",
              "| Player | " + " | ".join(f"Lv {x} (day)" for x in lv)
              + f" | Lv {sim['first_evo_level']}, garden XP only | Budget 240 full | Stat total d{sim['days']} "
-             f"| Level d{sim['days']} | Zones open | Garden XP/day | Run XP/day "
+             f"| Level d{sim['days']} | Gems/day | Joy | Zones open | Garden XP/day | Run XP/day "
              "| Expedition-only XP/day, same minutes | Days to Lv 100 at this rate |",
-             "|---" * (len(lv) + 10) + "|"]
+             "|---" * (len(lv) + 12) + "|"]
     for r in report.values():
         lines.append(f"| {r['name']} | " + " | ".join(r["levels"][x] for x in lv)
-                     + f" | {r['garden_first']} | {r['full']} | {r['total']:g} | {r['level']:g} | {r['zones']:.1f} "
+                     + f" | {r['garden_first']} | {r['full']} | {r['total']:g} | {r['level']:g} | {r['gems']:.0f} | {r['joy']:.0f} | {r['zones']:.1f} "
                      f"| {r['garden_xp']:.0f} | {r['run_xp']:.0f} | {r['exp_only']:.0f} | {r['lv100']:.0f} |")
     lines += ["", "| Player | " + " | ".join(FAMILIES) + " | Meter flips | Ends on Ringrove |",
               "|---" * (len(FAMILIES) + 3) + "|"]
     for r in report.values():
         lines.append(f"| {r['name']} | " + " | ".join(f"{r['fam'][f]:.1f}" for f in FAMILIES)
                      + f" | {r['flips']:.1f} | {r['target']:.0%} |")
-    lines += ["", "Flags: " + ("; ".join(flags(sim, report)) or "none")]
+    lines += ["", "Flags: " + ("; ".join(band_flags(sim, report)) or "none")]
     return "\n".join(lines)
 
 
-def with_proposal(sim):
-    """The sim with the proposal block applied (deep keys; see garden_sim.json proposal)."""
-    out = copy.deepcopy(sim)
-    for key, val in sim.get("proposal", {}).items():
-        if key.endswith("_doc"):
-            continue
-        node = out
-        parts = key.split(".")
-        for k in parts[:-1]:
-            node = node[k]
-        node[parts[-1]] = val
-    return out
-
-
 def body(sim):
-    text = "### Today's numbers\n\n" + render(sim, simulate(sim))
-    if sim.get("proposal"):
-        text += "\n\n### With the proposal (garden_sim.json proposal)\n\n" + render(sim, simulate(with_proposal(sim)))
-    return text
+    return render(sim, simulate(sim))
 
 
 def check(sim):
@@ -406,6 +420,7 @@ def check(sim):
     keen, casual = report.get("keen30"), report.get("casual5")
     if keen and casual and keen["garden_xp"] <= casual["garden_xp"]:
         fails.append("30-minute player earns no more garden XP than the 5-minute one")
+    fails += band_flags(sim, report)
     if render(sim, report) != render(sim, simulate(sim)):
         fails.append("sim is not deterministic")
     with open(BRIEF) as f:
@@ -418,8 +433,17 @@ def check(sim):
     return 1 if fails else 0
 
 
+def load_sim():
+    """garden_sim.json plus the live garden XP and level curve (garden_xp.json), so the sim fits what is built."""
+    sim, live = load("garden_sim.json"), load("garden_xp.json")
+    sim["xp_curve"] = live["curve"]
+    sim["garden_xp"] = dict(sim["garden_xp_unbuilt"], play=live["play"], win=live["win"],
+                            first_win=live["first_win"], care_first=live["care"])
+    return sim
+
+
 def main():
-    sim = load("garden_sim.json")
+    sim = load_sim()
     if "--garden-sim-check" in sys.argv:
         sys.exit(check(sim))
     text = body(sim)

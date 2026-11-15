@@ -12,11 +12,6 @@ const MULT_MIN := 0.85
 const MULT_MAX := 1.15
 const OWNER_MAX := {"armor": 10.0, "sight": 0.15}
 
-## Shimmers (the shinies) are Shiny's: 1 in 4096 in the wild and from an egg, a little more at rare
-## spawn points, in the Hollow and from shimmering parents. These stay for older callers.
-const SHIMMER_WILD := Shiny.WILD
-const SHIMMER_EGG := 1.0 / 4096.0
-
 ## How much more often wild kin are mutated in each tier, and at a rare spawn point.
 const TIER_MULT := [1.0, 1.5, 2.25, 3.0]
 const RARE_SPOT_MULT := 5.0
@@ -69,11 +64,6 @@ static func name_of(id: String) -> String:
 
 static func col_of(id: String) -> Color:
 	return info(id).get("col", Color.WHITE)
-
-
-static func inherit_odds() -> Array:
-	_load()
-	return _inherit
 
 
 ## The mutations a record has (only known ones, oldest records have none).

@@ -13,13 +13,14 @@ Code:
 | Inborn rolls, size, the model dressing, the match trade-off | `scripts/core/unique.gd` (`Unique`) |
 | Ids, provenance, the event log, save migrations | `scripts/core/save.gd` (`Save`) |
 | Breeding (lineage, inherited rolls), Rare Eggs (origin) | `scripts/core/care.gd` |
+| A pair's egg appearing in the Nook (glow ring, type-colour sparkles, one wobble) | `scripts/home/nest_reveal.gd` (`NestReveal`, `--hatch-check`, `--nest-demo=egg`) |
 | Coat marks | `shaders/toon.gdshader` (`mark_*` uniforms) |
 | Idle habits, girth | `scripts/match/kin_puppet.gd` |
 | Hitbox and stat trade-off | `scripts/match/kin.gd` `init_kin` |
 | Wild and bot seeds, where a Boki was caught | `scripts/match/match.gd` (`kin_seed`, `where_at`), `spawn_plan.gd` |
 | The About tab, Nesting Nook and Burrow lines | `scripts/ui/about_view.gd` (`AboutView`) |
 | Species base sizes | `content/kin/<id>.json` `"size": {"cm", "kg"}` |
-| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/save_fixtures/v1_save.json` |
+| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/fixtures/saves/save_v1.json` |
 
 ## The record
 
@@ -141,6 +142,11 @@ reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm an
 Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
 from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
 no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
+With two Boki picked, the Nook's preview card (`NookPreview`) shows what their egg would be, read from
+`Care.breed`'s inputs: both possible kinds pictured in the blended look (`Unique.blend_center`: the look
+`Unique.inherit` rolls around, plain coat), its size, the coats it can take, the lean head start
+(`Care.head_start`) and a note on an unstable mix. `--nest-demo=pair` opens it; `--nook-check` holds it to
+20 of 20 hatched babies.
 Player-facing words say *scanned* (the box and the Field Book say *caught*), not tamed (internal event names stay `caught`).
 
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`

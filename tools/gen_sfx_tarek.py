@@ -225,16 +225,6 @@ def raise_rocks(i):
     return mix(pushes, rumble(0.7, 220, 0.02, 0.25) * 1.0, at(gravel(0.6, 130, 0.2) * 0.5, 0.1))
 
 
-def spine(i):
-    """Basalt Spine: the ground heaving, a ring of basalt columns ripping up, a long settling of stone."""
-    d = 1.6
-    heave = rumble(1.4, 160, 0.15, 0.5) * 1.6
-    cols = mix(*[at(mix(crack(0.12, 250, 2400, 0.02) * 1.2, thud(140 + 15 * (k % 3), 0.6, 0.3)), 0.15 + 0.09 * k)
-                 for k in range(7)])
-    return mix(heave, cols, at(crunch(1.0, 400, fall=0.3, big=8) * 0.7, 0.15), at(gravel(1.2, 120, 0.4) * 0.5, 0.3),
-               sub(48, 30, d, 0.4) * 0.5)
-
-
 # ------------------------------------------------------------------ voice (a wiry man, wordless, with grit)
 VOWEL = ('uh', 'eh', 'ah', 'uh')
 
@@ -296,7 +286,6 @@ def build():
     save('br_roll', roll(0), 'cast')
     save('br_crack', crack_cast(0), 'cast')
     save('br_raise', raise_rocks(0), 'impact')
-    save('br_spine', spine(0), 'impact')
     takes('dolm_hurt', hurt, 3, 'grunt')
     save('dolm_down', down(0), 'grunt')
     save('dolm_death', death(0), 'grunt')

@@ -1,0 +1,34 @@
+walk_loop__albert | ours: walk_f frames=67 planted_slide_m=3.771 foot_min_y=0.060
+walk_loop__albert | uthana: walk loop (locomotion heavyset + loop) frames=67 planted_slide_m=0.794 foot_min_y=0.060
+run_loop__albert | ours: run_f frames=40 planted_slide_m=1.736 foot_min_y=0.060
+run_loop__albert | uthana: run loop (locomotion on_toes + loop) frames=40 planted_slide_m=0.880 foot_min_y=0.057
+idle_v2__albert | ours: idle frames=118 planted_slide_m=0.011 foot_min_y=0.060
+idle_v2__albert | uthana: idle (TTM 2.0) frames=118 planted_slide_m=0.132 foot_min_y=0.067
+hit_v2__albert | ours: hit_f frames=118 planted_slide_m=0.423 foot_min_y=0.060
+hit_v2__albert | uthana: hit react (TTM 2.0) frames=118 planted_slide_m=0.948 foot_min_y=0.002
+light_v1__albert | ours: lmb_slam frames=184 planted_slide_m=6.327 foot_min_y=0.060
+light_v1__albert | uthana: light attack (TTM 1.0) frames=184 planted_slide_m=1.686 foot_min_y=0.057
+light_v2__albert | ours: lmb_slam frames=118 planted_slide_m=3.959 foot_min_y=0.060
+light_v2__albert | uthana: light attack (TTM 2.0) frames=118 planted_slide_m=0.742 foot_min_y=0.061
+light_v3__albert | ours: lmb_slam frames=119 planted_slide_m=3.967 foot_min_y=0.060
+light_v3__albert | uthana: light attack (TTM 3.0) frames=119 planted_slide_m=0.594 foot_min_y=0.047
+heavy_v3__albert | ours: crush frames=119 planted_slide_m=0.000 foot_min_y=0.064
+heavy_v3__albert | uthana: heavy attack (TTM 3.0) frames=119 planted_slide_m=0.897 foot_min_y=0.014
+victory_v3__albert | ours: emote frames=119 planted_slide_m=0.256 foot_min_y=0.058
+victory_v3__albert | uthana: victory (TTM 3.0) frames=119 planted_slide_m=0.095 foot_min_y=0.058
+walk_loop__lace | ours: walk_f frames=67 planted_slide_m=2.555 foot_min_y=0.082
+walk_loop__lace | uthana: walk loop (locomotion heavyset + loop) frames=67 planted_slide_m=3.162 foot_min_y=0.064
+run_loop__lace | ours: run_f frames=40 planted_slide_m=3.252 foot_min_y=0.082
+run_loop__lace | uthana: run loop (locomotion on_toes + loop) frames=40 planted_slide_m=2.436 foot_min_y=0.058
+idle_v2__lace | ours: idle frames=118 planted_slide_m=0.023 foot_min_y=0.080
+idle_v2__lace | uthana: idle (TTM 2.0) frames=118 planted_slide_m=0.469 foot_min_y=0.157
+hit_v2__lace | ours: hit_f frames=118 planted_slide_m=0.000 foot_min_y=0.082
+hit_v2__lace | uthana: hit react (TTM 2.0) frames=118 planted_slide_m=1.480 foot_min_y=0.008
+light_v3__lace | ours: loose frames=119 planted_slide_m=0.000 foot_min_y=0.082
+light_v3__lace | uthana: light attack bow (TTM 3.0) frames=119 planted_slide_m=0.354 foot_min_y=0.070
+dodge_v3__lace | ours: roll frames=119 planted_slide_m=1.224 foot_min_y=0.082
+dodge_v3__lace | uthana: dodge roll (TTM 3.0) frames=119 planted_slide_m=1.516 foot_min_y=-0.777
+death_v3__lace | ours: death frames=119 planted_slide_m=5.971 foot_min_y=0.082
+death_v3__lace | uthana: death (TTM 3.0) frames=119 planted_slide_m=1.523 foot_min_y=-0.007
+cast_v3__lace | ours: spirit frames=119 planted_slide_m=0.000 foot_min_y=0.082
+cast_v3__lace | uthana: ability cast (TTM 3.0) frames=119 planted_slide_m=0.466 foot_min_y=0.076
