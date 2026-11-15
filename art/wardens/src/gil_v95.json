@@ -2,6 +2,7 @@
  "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Gil's v95 master (current.json r2/v95a/cand_B, the first v95 face, a face pass), its own swordfish rapier left out (gil_v95_B_body.glb), onto gil.glb's skeleton, clips and anchors. gil.glb's own skinned swordfish (its own mesh, on hand.R) stays; its scripted tail and dorsal fin stand-ins go (drop_meshes): the master has a real fish tail and fin. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders: the master stands with his body column at y 0.2 and his head forward of it. The tail rides the tail bone, the hat and face the head.",
  "master": "~/meshy/v95/Gil/r2/v95a/gil_v95_B_body.glb",
  "game": "art/wardens/gil/gil.glb",
+ "own": {"drop_mats": ["Material_0.001"]},
  "tris": 12500,
  "max_tris": 13500,
  "head": {"centre": [0.0, 0.38, 1.47], "r": 0.22},
