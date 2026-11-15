@@ -201,7 +201,8 @@ Other checks:
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
-  - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
+  - Letting go: moving 0.9m out from the face, a fresh glide press, a stun or a knock ends the rise.
+  - Presses in the rise (`content/rules/mantle_press.json`, read by `DashFlow`, the same for every hero): a dash goes and the rise carries it over the top; a jump flings (below); LMB, RMB, E and R wait for the top.
   - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
   - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
@@ -232,7 +233,7 @@ Other checks:
   - The hunter's silhouette is ~10.5% of the screen's height (75–80 px of 742), centred across, with the feet ~3–4% below the centre. The ground across is ~17 silhouette heights. Crates read ~1.1 and walkways ~1.5 silhouette heights wide.
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
-  - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
+  - The movefeel framing stays available as "Default (wider lens)" (`default_wide`). `--cam-style=<id>` picks a style for one tooling run.
 - **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
@@ -741,7 +742,7 @@ or sits inside a documented lock the source shares.
 | Tenzo | E Stone Row | free: at once | n/a (does not go off here) | Not shown in the footage `[?]`. |
 | Tenzo | R (ult) Basalt Spine | free: at once | lock 0.97s: end +0.75s, end +0.52s, end +0.27s | Not shown in the footage `[?]`. |
 | Grimble | LMB | free: at once | lock 0.35s: end +0.30s, end +0.20s, end +0.12s | Not shown in the footage `[?]`. |
-| Grimble | RMB Abyssal Hand | lock 0.88s: never, never, never | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Footage card 0127 'GROUNDED while reeling'; owner item 31. Held from the throw to the end of the reel (`into_jump.rmb` lock). Match. |
+| Grimble | RMB Deep Reach | lock 0.88s: never, never, never | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Footage card 0127 'GROUNDED while reeling'; owner item 31. Held from the throw to the end of the reel (`into_jump.rmb` lock). Match. |
 | Grimble | E Anchor Drop | free: at once | free: at once | Not shown in the footage `[?]`. |
 | Grimble | R (ult) Brass Broadside | free: at once | lock > 1.50s: never, never, never | ults.md: source planted 1.1 s charge; ours walks at 30% on purpose (owner item 36). No jump shown `[?]`. Air: the blast holds him, the glider never opens while it runs `[?]`. |
 | Neve | LMB | free: at once | lock 0.13s: end +0.13s, end +0.10s, end +0.07s | Not shown in the footage `[?]`. |
@@ -1062,6 +1063,13 @@ only the hand-over changed (below).
   moves the machine GLIDING -> MANTLING (the farm avatar ranks it so too), and that edge folds the glider
   there, with its fold sound (the grab used to clear the flag silently), and no feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
   reopen it over the lip; a player's press-only keys never do.
+## Stairs: one smooth walk up and down (`--stairs-check`, decision 0060; owner 11-11)
+A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy`), the non-local ledge lean
+(`Hunter._try_ledge_grab`) and the "left the ground" test now allow the rise or fall the slope gives over the
+distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
+no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
+the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

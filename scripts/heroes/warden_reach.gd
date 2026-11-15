@@ -1,6 +1,6 @@
 class_name WardenReach
 extends RefCounted
-## An arm that reaches out to a point in the world (Grimble's Abyssal Hand, owner playtest 11-11): his own arm, not a
+## An arm that reaches out to a point in the world (Grimble's Deep Reach, owner playtest 11-11): his own arm, not a
 ## drawn one. While a kit sets the root meta TIP, the upper arm and forearm lie straight along the line from the
 ## shoulder to the tip, the forearm stretches so the hand (and everything riding it: his slime hand and bone crescent)
 ## sits at the tip, and the hand turns down the line. The clips can't move it meanwhile, so it holds still on the aim
