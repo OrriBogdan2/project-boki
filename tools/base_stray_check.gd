@@ -8,6 +8,7 @@ extends RefCounted
 const DT := 0.25  # s per farm step
 const LOOK_S := 20.0  # s the residents get to come over and look
 const SHY_RUN_S := 150.0  # s of the shy day that are watched
+const ISLAND_SEED := 4242  # the farm's island
 const PAD_R := 3.0  # m: how close to the pad it arrives
 
 var bad := 0
@@ -37,6 +38,8 @@ func _new_save() -> void:
 	Save.d = d
 	Econ.ensure()
 	HomeLayout.ensure(d)
+	HomeLayout.of(d)["seed"] = ISLAND_SEED  # a farm start picks a random island: pinned, the run (and its averages) is the same every time
+	HomeLayout.of(d)["sk"] = HomeLayout.fs_scale(ISLAND_SEED)
 	HomeLayout.of(d)["fb"] = 0  # no building pass: the stall is open at every level, so is the Shelter
 
 
@@ -74,6 +77,9 @@ func run(m: Node) -> void:
 	_new_save()
 	var home = await main._hb_home()
 	home.panel_open = ""
+	home.set_process(false)  # nothing moves on frame time from here: the run below is only the DT steps
+	seed(5)  # the frames of the build above (more of them on a busy machine) used up a varying share of the draws
+	home.world.rng.seed = 5  # (the walks' open spots come from the world's own generator)
 	home.ppos = Vector3(-500, 0, -500)
 	FarmChatter._known.clear()
 	FarmChatter._look_t = 0.0
@@ -133,9 +139,17 @@ func run(m: Node) -> void:
 	ok(not played, "the shy Boki joins no tag and no toy")
 	var kid_mean := kid_d / maxf(kid_n, 1.0)
 	var res_mean := res_d / maxf(res_n, 1.0)
+	# against the island's own typical spot, not the few residents' mean: where those few happen to wander in 150 s
+	# swings by many metres (they were sometimes as far out as the shy one, a flaky red under load)
+	var isle := maxi(home.world.island_of(kid["pos"].x, kid["pos"].z), 0)
+	var mid: Vector2 = home.world.islands[isle]["c"]
+	var typical := 0.0
+	for i in 300:
+		var p: Vector3 = home.world.random_ground(isle)
+		typical += Vector2(p.x, p.z).distance_to(mid) / 300.0
 	ok(
-		kid_n > 0 and kid_mean > res_mean + 1.0,
-		"it keeps to the edge (%.1f m out, the others %.1f m)" % [kid_mean, res_mean]
+		kid_n > 0 and kid_mean > typical + 1.0,
+		"it keeps to the edge (%.1f m out, a typical spot %.1f m, the others %.1f m)" % [kid_mean, typical, res_mean]
 	)
 	var left := float(rec.get("shy_s", 0.0))
 	ok(left > 0.0 and left < float(BaseShy.rules()["secs"]), "the shy day is counting down (%.0f s left)" % left)
