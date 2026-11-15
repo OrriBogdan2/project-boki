@@ -380,7 +380,7 @@ func _air(k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 2.4
 	rig._pick_clip(0.016)
 	ok(rig.clip == "glide", "aloft and moving it glides")
-	rig._keep_flex()
+	rig._keep_flex(0.016)
 	var gap := rig._shadow.global_position.y - (k.global_position.y - 1.0) if rig._shadow else -1.0
 	ok(is_equal_approx(gap, BokiRig.SHADOW_LIFT), "1 m up, its shadow lies on the ground under it")
 	k.set_meta("aloft", false)
@@ -397,4 +397,4 @@ func _air(k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "after the flare it stands")
 	k.remove_meta("aloft")
 	k.remove_meta("lift")
-	rig._keep_flex()
+	rig._keep_flex(0.016)

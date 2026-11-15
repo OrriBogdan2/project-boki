@@ -112,12 +112,13 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return     # nothing to Shatter, and a knocked foe isn't Chilled afterwards (a later dart would Shatter it)
 	if felled:
 		var at := t.pos
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		var delay := float(pd.get("splinter_delay", 0.4))
 		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
 		m.later(
 				delay,
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
-		chill.erase(t.get_instance_id())
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
+		chill.erase(tid)
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":

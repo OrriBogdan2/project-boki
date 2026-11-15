@@ -708,15 +708,16 @@ func feel(dt: float, squash: bool) -> void:
 	lean = lerpf(lean, f.y * LEAN_K, 1.0 - exp(-LEAN_RATE * dt))
 	var bi := WardenSkeleton.find(skel, "root")
 	var k := 1.0 - proc_w
+	var kl := k * (1.0 - up_w)      # (a move that owns the upper body keeps its own posture: no lean over it)
 	var sq := f.x * LAND_SQUASH * k if squash else 0.0
-	if bi < 0 or (sq < 0.001 and absf(lean * k) < 0.001):
+	if bi < 0 or (sq < 0.001 and absf(lean * kl) < 0.001):
 		return
 	# (in the skeleton's space: his up and right, whichever way the .glb was built)
 	var inv := skel.global_basis.inverse()
 	var up := (inv * root.global_basis.y).normalized()
 	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
 	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
-	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k)
+	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * kl)
 	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
