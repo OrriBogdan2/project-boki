@@ -311,6 +311,7 @@ func _ready() -> void:
 		add_child(p)
 		players.append(p)
 		var s := AudioStreamPlayer3D.new()
+		s.bus = "SFX"
 		s.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
 		s.attenuation_filter_db = 0.0
 		s.max_db = 6.0
