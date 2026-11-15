@@ -9847,3 +9847,4 @@ READY ext/merge-lane-onboard-1115 781534ced5 (bulk-rebase: origin/main merged in
 READY ext/merge-lane-vfx3-1114-b b3c32a8397 (bulk-rebase: origin/main merged in mechanically, was e1f6689c8c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-misc2b-1115 63cfce943d (bulk-rebase: origin/main merged in mechanically, was 0c00cb8373; union 0 gen 2 files; the branch's own READY checks still apply)
 READY ext/merge-lane-vfx1-1115r2 905af60155 (merge lane vfx1 r2: particle-budget, sfx-low-hp-filter, garden-voice cap, Sable bola lane ported onto main; suite gate running, PR via gh-outbox)
+READY ext/merge-lane-uiboki-1115r2 bc2b8a6152d3ea74dc757d5a9a301ad82c56cfbb (merge lane uiboki 1115r2: staged HUD, HUD size, loading bar steady, squad killer, next form, mask beat; targeted checks no NEW-RED, export-pack OK)
