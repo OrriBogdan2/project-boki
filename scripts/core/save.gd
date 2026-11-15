@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 19
+const VERSION := 20
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -17,7 +17,8 @@ const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
-		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19"}
+		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
+		19: "_migrate_19_to_20"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -359,6 +360,13 @@ func _migrate_18_to_19(data: Dictionary) -> void:
 		data["sleepovers"] = []
 	if not data.has("active2"):
 		data["active2"] = ""
+
+## v19 -> v20: matches played per Hunter (the Stats tab, HunterStats). A dev save from the integ-1113-D1 line
+## (its v15 was this step, before main's v15 drills) skipped the drills: it gets the empty dict here.
+func _migrate_19_to_20(data: Dictionary) -> void:
+	HunterStats.migrate(data)
+	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
+		data["drills"] = {}
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

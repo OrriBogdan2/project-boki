@@ -1,5 +1,5 @@
 class_name NookRules
-## The Nesting Nook's gate (docs: briefs/design/GARDEN.md section 6). A base-only player can
+## The Nesting Nook's gate and preview (docs: briefs/design/GARDEN.md section 6). A base-only player can
 ## meet every gate: both Grown, both friends, both rested since their last egg, one egg in the nest.
 
 const GROWN_LV: int = Care.STAGES[2][0]     # the level a Boki is Grown
