@@ -109,7 +109,7 @@ static func tip(p: Hunter, i: int) -> Array:
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 		out.append(["Glove %d (empty)" % (i + 1), HudStyle.MUTED])
 		out.append(["Glove  ·  %s" % key, HudStyle.MUTED, 12])
-		var where := "Find gloves in chests, vaults and on bosses, or bring them from your armory. "
+		var where := "Find gloves in chests, vaults and on bosses, or bring them from your gear shed. "
 		where += "Either glove slot takes an active or a passive glove."
 		out.append([where, HudStyle.INK, 14])
 		return out

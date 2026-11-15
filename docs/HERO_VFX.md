@@ -139,3 +139,10 @@ existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_c
 materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
 it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
 `--ult-glow-shots --shots-dir=<dir>`.
+
+## Missed shots
+A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
+puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
+range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
+oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
+asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
