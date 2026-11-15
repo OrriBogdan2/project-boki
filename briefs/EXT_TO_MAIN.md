@@ -9877,3 +9877,4 @@ READY ext/merge-lane-hunt2-1115r2 2ed2097cfe7db207265d16518c038017a30f64c8 (hunt
 READY ext/regate-carry-1115 814b66b0416a38f7c68304c83ecf835e8b93e628 (regate-bot skip-regate carry + GREEN cache + opt-in train; installed)
 READY ext/boki-ingame-1115 66ba22c30138faa2350b1cf5cda184290ccddd73 (starters cindle/puddlet/burrlet + pebbit/zapple on Meshy scan bodies, own rigs; rig-check 0 fail; suite vs main NEW-RED 0 after flake rerun (gated 63be6a8180, +zapple regrade since); export dry-run 5/5 OK 493MB; PR NOT opened: no gh on rpc7, body at /home/boki/cj/20261115-173822-a3/pr_body.md)
 READY ext/boki-summon-1115 672dc61dea2e495e0646de09e13b373784ac7143 (Boki summon on C: KinWisp/KinSummon, leash, snapshot Net fields, --summon-check 21 ok)
+READY ext/regate-carry-1115 dae52da4de (regate-bot carry: git<2.38 merge fallback + per-check carry rule + replay; tools only, install on hetzner via ops/regate-bot/INSTALL.md, never merge to main)
