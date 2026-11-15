@@ -1,6 +1,6 @@
 # stuck-integ-aeb8eb0f 2026-11-15 re-sweep (job 20261115-030534-a5) on origin/main 5ad1408eb9: all 434 skips re-tried with merge_batch.sh policy; 0 merge clean.
 # 3 hand-merged (farm-site-paused, farm-transfer-transport, anim-loot-open); 431 still out (files, all shown). 365 conflict in 4+ files: redo on main, not mergeable.
-ext/farm-toys-joy-tune	f1fcf7e7e	MERGED BY HAND, THEN REVERTED: tools/garden_soak.gd resolves fine, but base_joy_decay 8/min makes the Boki card overflow at 150% (--overflow-check card_*): needs a UI pass first
+ext/farm-toys-joy-tune	f1fcf7e7e	LEFT OUT (hand-merge tried): tools/garden_soak.gd resolves fine (keep main loop.report + size_base, add _report_toys), but base_joy_decay 8/min makes the Boki card overflow at 150% (--overflow-check card_*): needs a UI pass first
 ext/idle-ostra	2a99a0912	art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb tools/clip_check.gd
 ext/vfx-dredge	794ca0e37	content/vfx/dredge.json content/weapons/shotgun.json scripts/arch/kits/dredge_kit.gd scripts/arch/kits/ld_fx.gd scripts/match/hero_vfx.gd shaders/hero_vfx.gdshader
 ext/idle-bulwark-rebased	ccea3879a	art/wardens/breaker/breaker.glb
