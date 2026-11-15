@@ -280,10 +280,18 @@ func _load_sets() -> void:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
 
+
+## Sets a bus (one of Settings.BUSES) from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
 	if i >= 0:
-		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.0001)))
+		AudioServer.set_bus_volume_db(i, slider_db(v))
+
+## A volume slider's bus level. The gain is the slider squared, so the slider follows loudness: 50% is
+## about half as loud (-12 dB) and 0 is silent. (Gain = slider made 50% only -6 dB, and a slider seemed
+## to do nothing until it was nearly at 0.)
+static func slider_db(v: float) -> float:
+	return linear_to_db(maxf(v * v, 0.0001))
 
 
 ## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
