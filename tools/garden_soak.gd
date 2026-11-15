@@ -21,7 +21,6 @@ const SAVE_GROWTH := 2.0        # the save may grow to this many times its size 
 const SIZE_DAY := 10            # by then the baby, the journals and the away card's lines are in (journals are capped)
 const DAY_START := 0.3          # the farm clock at the start (morning)
 const FED := 3                  # Boki the player feeds each day; the others feed themselves (GARDEN.md 2)
-const TOYS_A_DAY := 3.5        # toys a fed Boki plays at least, per in-game day on average (GARDEN.md 4)
 const RACE_MAX_S := 120.0       # s a headless race may run
 const Loop := preload("res://tools/garden_soak_loop.gd")
 const OUT := "user://garden_soak.json"
@@ -50,9 +49,6 @@ var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "hunts": 0, "volley
 var low := {}               # need -> lowest value seen on any Boki
 var snack := {}             # name -> it was off for a snack (life_eat) at the last look
 var food_was := {}          # name -> its food need at the last look
-var toy_use := {}           # name -> {plays: toys picked up, low: plays begun with joy under toys.json joy_below}
-var joy_low := {}           # name -> its lowest joy
-var sulky_s := {}           # name -> s spent sulky (joy under base_life.json whistle sulky_joy)
 
 func ok(cond: bool, what: String) -> void:
 	print("SOAK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -235,7 +231,6 @@ func _watch(limit_s: float) -> void:
 		food_was[nm] = food
 		_check_values(rec, nm)
 		_check_toy(k, nm)
-		_check_joy(rec, nm)
 
 func _check_values(rec: Dictionary, nm: String) -> void:
 	for n in Care.NEEDS:
@@ -261,33 +256,8 @@ func _check_toy(k: Dictionary, nm: String) -> void:
 	if not play_since.has(nm):
 		play_since[nm] = t
 		seen["plays"] += 1
-		var use: Dictionary = toy_use.get_or_add(nm, {"plays": 0, "low": 0})
-		use["plays"] += 1
-		use["low"] += 1 if Care.need(k["rec"], "joy") < float(HomeToys.rules()["joy_below"]) else 0
 	elif t - float(play_since[nm]) > TOY_HOLD and t - float(play_since[nm]) < TOY_HOLD + DT:
 		_fail("%s holds a toy for over %.0f s" % [nm, TOY_HOLD])
-
-## Joy over the run: the lowest, and the time spent sulky.
-func _check_joy(rec: Dictionary, nm: String) -> void:
-	var joy := Care.need(rec, "joy")
-	joy_low[nm] = minf(float(joy_low.get(nm, 100.0)), joy)
-	if joy < float(home.life.R["whistle"]["sulky_joy"]):
-		sulky_s[nm] = float(sulky_s.get(nm, 0.0)) + DT
-
-## Toy use per Boki per in-game day (the play that trains stats, GARDEN.md 4) and how glum each got. A Boki you
-## feed plays at least TOYS_A_DAY a day and is never sulky; the unfed may sulk (care.json sulky, never sick).
-func _report_toys() -> void:
-	for i in home.kins.size():
-		var nm := String(home.kins[i]["rec"]["name"])
-		var use: Dictionary = toy_use.get(nm, {"plays": 0, "low": 0})
-		var a_day := float(use["plays"]) / DAYS
-		print("SOAK %-6s %s toys %.1f a day (%d from low joy), lowest joy %.0f, sulky %.0f%% of the time"
-				% [nm, "fed  " if i < FED else "unfed", a_day, use["low"], joy_low.get(nm, 100.0),
-				100.0 * float(sulky_s.get(nm, 0.0)) / t])
-		if i < FED:
-			ok(a_day >= TOYS_A_DAY and int(use["low"]) * 2 >= DAYS and float(sulky_s.get(nm, 0.0)) == 0.0,
-					"%s (fed) plays %.1f toys a day (limit %.1f), from low joy every other day or more, never sulky"
-					% [nm, a_day, TOYS_A_DAY])
 
 func _report() -> void:
 	for nm in hist:

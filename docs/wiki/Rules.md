@@ -707,8 +707,6 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | natural_death | False |
 | sulky | {"food": 8.0, "energy": 8.0, "joy": 12.0, "clean": 8.0} |
 | sulky_doc | base_mode only (GARDEN.md section 2): needs bottom out here, sulky, and the starve clock never builds, so a Boki left alone is never weak or sick. It gets hungry and glum, and feeds itself from a bowl or a snack (BaseFeed). Off base_mode the starve stages apply. |
-| base_joy_decay | 8 |
-| base_joy_decay_doc | base_mode only: joy (0..100) a Boki loses each awake minute at the base (0.3x asleep, faster when hungry, grubby or worn out). A farm day is 5 minutes (care_day_s). Off base_mode Care.DECAY's 0.6 applies. |
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 | stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
@@ -1620,7 +1618,6 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"dmg": 8.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"dmg": 6.0, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"dmg": 10.0, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.35}, "dash": {"dmg": 8.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "FAIRY", "rider": {"leech": 0.06}, "dash": {"dmg": 6.0, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.3}, "dash": {"dmg": 8.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"dmg": 10.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"dmg": 6.0, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.4}, "dash": {"dmg": 9.0, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"dmg": 12.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"dmg": 5.0, "leech": 0.07}}, "ghost": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "GHOST", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"dmg": 8.0, "slow_k": 0.25, "slow_s": 1.2}}, "dark": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "DARK", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"dmg": 8.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"dmg": 14.0, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.25}, "dash": {"dmg": 6.0, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"dmg": 9.0, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"dmg": 6.0, "kb": 2.0}}} |
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
-| band | {"lo_k": {"burst": 1.0, "sust": 0.0, "ehp": 0.0}} |
 
 ## minigames (`content/rules/minigames.json`)
 
@@ -1890,7 +1887,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 
 | Setting | Value |
 |---|---|
-| joy_below | 90 |
+| joy_below | 85 |
 | pick_chance | 0.5 |
 | play_secs | [8.0, 12.0] |
 | go_timeout | 20 |

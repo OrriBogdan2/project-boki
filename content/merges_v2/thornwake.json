@@ -42,7 +42,7 @@
 				"effects": [
 					{
 						"type": "damage",
-						"amount": 6
+						"amount": 10
 					},
 					{
 						"type": "root",
