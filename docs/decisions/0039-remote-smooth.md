@@ -25,3 +25,9 @@ snap, because a jittered snapshot often arrives after it is needed. Option 3 is 
 `scripts/match/net_smooth.gd` (NetSmooth), 3 lines in `Ent.net_follow`, 3 in `Match._net_apply`. Hunters
 only; Boki and monsters keep the old chase. No wire change, so no Net.VERSION bump. Remote Hunters are hit
 where they are drawn, now ~75 ms further behind their owner. Check: `--remote-smooth-check`.
+
+## Addendum (0.24.4 gate reds)
+The 0.15 s delay assumed 10 snapshots a second, but `Net.tick` sent every 7th step (0.117 s; float steps
+never reach exactly 0). Fixed in `Net.tick` (`SEND_DUE`), with no change to the wire shape. The check now steps on
+the wall clock like `Match._process` and doesn't draw its host, and its lag relay keeps each peer's packets in
+send order (a real queue). Details: docs/ONLINE_FEEL.md.

@@ -5,12 +5,14 @@ extends "res://tools/clip_shots.gd"
 ## --release: only the release strip, <dir>/<id>/release/fNNN.png: the kit's own hand-off from the held draw
 ## into arc_loose, one frame per 1/30 s from the arrow's spawn (the game's blend plays, so a snap eaten by it shows).
 ## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
-## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
-## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing.
+## <dir>/<id>/<strip>/fNNN.png, strips start and start_raw (setting off from a stand, _start), walk, jog, run (the
+## game's own locomotion hand-off at WALK_MPS, JOG_MPS and RUN_MPS, seen from the side with a scrolling floor, so a
+## sliding foot slides against it), idle and atk1, atk2 (the keyed clip, forced); --aim-runs=60,130 adds run_aimN
+## strips, running N degrees off the facing.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
+const JOG_MPS := 3.4       # m/s: between the walk and run rings, where the two clips blend
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
@@ -104,7 +106,9 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		await _release(model, sync, dir.path_join("release"), frames)
 		model.queue_free()
 		return
+	await _start(model, sync, clips, dir, frames)
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
+	await _loco(model, sync, dir.path_join("jog"), JOG_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	for off in aim_runs:
 		await _loco(model, sync, dir.path_join("run_aim%d" % int(off)), RUN_MPS, frames, null, "", deg_to_rad(off))
@@ -137,15 +141,16 @@ func _upper_move(clips: WardenClips, clip: String) -> String:
 
 ## `off` turns the run off the facing (aiming one way, running another).
 ## `over`: a kit move played through the strip as the game plays it (state kmove), the legs still running.
+## `warm_s` of locomotion first, then a frame every 1/`fps` s.
 func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, clips: WardenClips = null,
-		over := "", off := 0.0) -> void:
+		over := "", off := 0.0, warm_s := WARM_S, fps := LOCO_FPS) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW + off), 0.0, -cos(SIDE_YAW + off))
 	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
-	for k in int(WARM_S / DT):
+	for k in int(warm_s / DT):
 		sync.call("_process", DT)
 		_scroll(mps * cos(off), DT)
-	var steps := int(round(1.0 / (LOCO_FPS * DT)))
+	var steps := int(round(1.0 / (fps * DT)))
 	for i in frames:
 		if over != "":
 			var length := clips.lib.get_animation(String(clips.d["kmoves"][over]["clip"])).length
@@ -170,6 +175,22 @@ func _release(model: Node3D, sync: Node, dir: String, frames: int) -> void:
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
+
+## Setting off from a stand at the walk speed, every frame at 30 frames/s: "start" as the game plays it, "start_raw"
+## with no loco "start_phase" or "start_blend" (the clips' own first frame: the before of the first-pose gaps).
+func _start(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	var keep := [clips.ring_starts, clips.start_bones]
+	for raw in [true, false]:
+		if raw:
+			clips.ring_starts = clips.ring_starts.map(func(r: Array) -> Array: return [r[0], 0.0])
+			clips.start_bones = []
+		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true})
+		for k in int(WARM_S / DT):
+			sync.call("_process", DT)
+		await _loco(model, sync, dir.path_join("start_raw" if raw else "start"), WALK_MPS, frames, null, "", 0.0, 0.0,
+				1.0 / DT)
+		clips.ring_starts = keep[0]
+		clips.start_bones = keep[1]
 
 ## A keyed clip, `frames` even steps from its start to just before its end (a loop's seam is the step after the last).
 func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: String, frames: int) -> void:
