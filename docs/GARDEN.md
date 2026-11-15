@@ -74,6 +74,15 @@ Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg nee
 Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
 ## Base-only breeding
 
+Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
+`ItemPreviewCard` (scripts/ui/item_preview_card.gd) slides in with every change drawn as a ghost. It shows the stat
+bars with the real gain after caps, the budget and lean rings, and on a branching line the path meter (both finals
+as silhouettes, pips before and after, the verdict, and a Why? list of pip sources). For a second the Boki tries the
+change on: its new colour or the path token. While the card is up it ticks softly (`garden_item_tick`, every
+`GardenSfx.TICK_S`). Interact there gives the item, and the give plays its family's cue at the Boki (docs/AUDIO.md);
+walking away from that Boki ends the hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
+`EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
+in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 `--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.52 after a ball and a nap, trust 65); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown takes about 11 h per Boki on farm XP (667 min) and 5.3 h with runs (319 min), ratio 2.09 against `pace.grown_max_ratio` 2.2 (main's halved level curve and once-a-day care XP made both faster but the ratio wider than the first-form `max_ratio` 2.0; the Grown limit is its own number, a default taken, the alternative is to raise garden XP), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki and the Grown pace (docs/DEBT.md).
 
 ## Expedition loot into the garden

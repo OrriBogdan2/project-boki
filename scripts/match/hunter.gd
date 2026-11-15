@@ -188,6 +188,7 @@ var wall_n := Vector2.ZERO
 var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed into (HunterMove.along_wall)
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
+var abyss_sfx := AbyssSfx.new()        # whoosh, catch, strain and fall-out cues (everyone's, from synced state)
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
@@ -1791,6 +1792,7 @@ func sim(dt: float) -> void:
 		return
 	Hex.tick(self, dt)
 	prev = pos
+	abyss_sfx.tick(self, dt)
 	if out or extracted:
 		if not merge_st.is_empty():
 			KinMerge.end(self, "broken")      # (eliminated or extracted mid-merge: the form goes with you)

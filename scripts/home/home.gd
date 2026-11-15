@@ -1192,6 +1192,10 @@ func _keep_off_hub(c) -> void:
 	var room_l := hr.end.x + 12.0
 	var centred := (vw - cr.size.x) * 0.5
 	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	# too wide to sit beside the hub (big text): centred over it, not pushed off the screen
+	if room_l + cr.size.x > vw - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
+		want = centred
+		cc.global_position.y = hr.position.y - cr.size.y - 6.0
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
@@ -1799,7 +1803,7 @@ func _open_rack() -> void:
 		tc.custom_minimum_size = Vector2(150, 0)
 		var tv := UI.vbox(1); tc.add_child(tv)
 		var nl := UI.label(String(sk["name"]), UI.T_BODY, UI.INK if owned else UI.MUTED, UI.semi)
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		tv.add_child(nl)
 		var st := "Equipped" if Gliders.equipped() == sid else ("Owned" if owned else ("Earned" if sk.has("unlock") else "%d gems" % int(sk["cost"])))
 		tv.add_child(UI.label(st, 12, UI.GOOD if Gliders.equipped() == sid else (UI.MUTED if owned else (UI.FAINT if sk.has("unlock") else UI.GOLD))))
@@ -2152,7 +2156,7 @@ func _find_interact() -> void:
 		for one in row.get_children():
 			var l: Label = one.get_child(one.get_child_count() - 1)
 			l.add_theme_font_override("font", UI.big)
-			l.add_theme_font_size_override("font_size", 18)
+			l.add_theme_font_size_override("font_size", UI.fs(18))
 			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
 		prompt_box.add_child(row)
 		prompt_box.reset_size()
@@ -2160,7 +2164,7 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	var py_at := vp.y - 110.0
+	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
@@ -2176,8 +2180,8 @@ func _update_hover() -> void:
 		hover_lbl.bbcode_enabled = true; hover_lbl.fit_content = true; hover_lbl.scroll_active = false
 		hover_lbl.custom_minimum_size = Vector2(300, 0)
 		hover_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hover_lbl.add_theme_font_size_override("normal_font_size", 14)
-		hover_lbl.add_theme_font_size_override("bold_font_size", 19)
+		hover_lbl.add_theme_font_size_override("normal_font_size", UI.fs(14))
+		hover_lbl.add_theme_font_size_override("bold_font_size", UI.fs(19))
 		hover_lbl.add_theme_font_override("bold_font", UI.big)
 		hover_box.add_child(hover_lbl)
 		root_ui.add_child(hover_box)
@@ -2889,7 +2893,7 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 	var hr := UI.hbox(10); card.add_child(hr)
 	var lv := UI.vbox(4); lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(String(c[1]), UI.T_BODY, UI.INK if not donec else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	lv.add_child(nm)
 	var pr := UI.hbox(8)
 	var cur := mini(Progress.stat(c[3]), int(c[4]))
@@ -3112,9 +3116,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
-			l.autowrap_mode = TextServer.AUTOWRAP_OFF
-			l.clip_text = true
-			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			FitLabel.shrink(l)
 			l.tooltip_text = String(ln[0])
 			l.mouse_filter = Control.MOUSE_FILTER_PASS
 			c2.add_child(l)
@@ -3461,12 +3463,14 @@ func _send_chat() -> void:
 var exp_cls := ""
 var exp_tier := 0
 var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
+var raid_squad := 0        # Heart Raid: the squad size picked in HeartRaidPick (0: an Expedition)
 
 func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	raid_squad = 0
 	if ClassUnlock.needs_starters():
 		FirstRelic.offer(self, _open_expedition)      # (the garden path's first Relic waits for the portal)
 		return
@@ -3549,6 +3553,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	fl.add_child(UI.ghost("Heart Raid (prototype)", func(): HeartRaidPick.open(self), 0, "heart"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3612,6 +3617,8 @@ func _start_match() -> void:
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
+	if raid_squad > 0:
+		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -3838,7 +3845,7 @@ func _care_trust(rec: Dictionary, kind: String, food := "") -> void:
 	if line != "": _toast(line)
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
+	UI.toast(root_ui, txt, UI.GOLD, guide.toast_top() if guide else 100.0)
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)
@@ -4352,6 +4359,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
 		item_fx.play(k, res)
 		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
@@ -4720,7 +4728,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	tv.add_child(nm)
 	var spl := UI.label(Evo.form_name(o), 11, UI.MUTED)
 	spl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	spl.clip_text = true
+	spl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tv.add_child(spl)
 	var st := UI.hbox(6)
 	st.alignment = BoxContainer.ALIGNMENT_CENTER

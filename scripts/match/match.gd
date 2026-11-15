@@ -23,6 +23,7 @@ var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
+var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -388,6 +389,7 @@ func _start(o: Dictionary) -> void:
 		heart = Heart.new(self)
 		heart.setup(layout)
 		ways_vfx = WaysOutVfx.new(self)
+		if HeartRaid.on(opts): heart_raid = HeartRaid.new(self)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -1233,10 +1235,9 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
-	if h == player and hud:
-		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
+	if not LootFeed.got_item(self, h, Loot.gear(String(wp["gear"]), int(wp["rar"]))):
+		sfx("pickup", h.pos, 0.0, 0.9)
 
 ## Walking over a tuning applies it (to bots too); one you've maxed stays on the ground.
 func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
@@ -1522,7 +1523,7 @@ func _spawn_wild() -> void:
 		live[order[i]] = true
 	for si in spots.size():
 		var p: Vector3 = spots[si]
-		var sp := ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)
+		var sp := BokiModes.draw(HeartRaid.boki_for(opts), rng) if HeartRaid.on(opts) else ModeBoki.draw(Data.common_kin(), "expedition", tier, rng)      # a raid: its own Boki
 		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
@@ -1611,8 +1612,8 @@ func dmg_mult(h: Hunter) -> float:
 	var bot_k := float((h.ai.get("diff", {}) as Dictionary).get("dmg", 1.0)) if h.ctrl == "bot" and h != player else 1.0
 	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
 
-func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
-	Sfx.play(n, p, vol, 0.07, pitch)
+func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
+	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
 ## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
 func shake(a: float, at: Vector3) -> void:
@@ -1638,22 +1639,22 @@ func mate_col(h: Hunter) -> Color:
 	return MATE_COLS[i % MATE_COLS.size()]
 
 const SQUAD_PING_T := 45.0
-## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
-func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
+## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and as a marker
+## in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" (following `foe`) or "loot".
+func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunter = null) -> void:
 	if h == null or (from_net and MuteList.has(h.pname)):
 		return
 	if not world.is_void(p.x, p.z):
 		p.y = world.ground_at(p.x, p.z)
 	else:
 		p.y = 0.0
-	unping(h, true)
-	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
-		"life": SQUAD_PING_T, "kind": kind})
+	PingInput.make_room(self, h)
+	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
+		"life": PingInput.life(kind), "kind": kind, "foe": foe})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
-		net_event(["sping", h.nid, p.x, p.y, p.z, kind])
+		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
@@ -1671,9 +1672,9 @@ func unping(h: Hunter, quiet := false, from_net := false) -> void:
 	if not quiet and net_on and not from_net:
 		net_event(["unping", h.nid])
 
-func my_ping() -> Dictionary:
-	for pg in pings:
-		if player and pg.get("by") == player: return pg
+func my_ping() -> Dictionary:     # (the newest)
+	for i in range(pings.size() - 1, -1, -1):
+		if player and pings[i].get("by") == player: return pings[i]
 	return {}
 
 func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
@@ -1766,7 +1767,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
+		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
@@ -2098,9 +2099,8 @@ func on_fell(e: Ent) -> void:
 	if e is Hunter:
 		if e.out:
 			return
-		sfx("fall", e.pos, 0.0)
-		# swallowed by the cloud sea a few metres under the islands: a whoosh, a puff, a quick fade
-		sfx("whoosh", e.pos, -3.0, 0.7)
+		AbyssSfx.fall_out(e)
+		# swallowed by the cloud sea a few metres under the islands: a puff and a quick fade
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
@@ -2604,16 +2604,16 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
+	var gems0 := h.gems
 	match p["kind"]:
 		"gem": h.gems += int(round(float(p["v"]) * PerkOrbs.gem_mult(h)))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
 		"tonic", "armor": UtilityBelt.pickup(h, UtilityBelt.item_of(p["kind"]), 1)
 		"ckey": KeyRun.on_pickup(self, h)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
-	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
-		if p["kind"] == "seed":
-			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
+	LootFeed.ground(self, h, p, h.gems - gems0)
+	if h != player:
+		Juice.rival_pickup(self, h)
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
@@ -3114,6 +3114,7 @@ func _process(delta: float) -> void:
 		return
 	_tips()
 	if music_dir: music_dir.tick(self, delta)
+	Sfx.voices.keep_squad(hunters, player)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
@@ -3237,9 +3238,7 @@ func _process(delta: float) -> void:
 	for b in bubbles.duplicate():
 		b["t"] += delta
 		if b["t"] > float(b.get("life", 2.6)): bubbles.erase(b)
-	for p in pings.duplicate():
-		p["t"] += delta
-		if p["t"] > float(p.get("life", 4.0)): pings.erase(p)
+	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
 		if f["t"] > 6.0: feed.erase(f)
@@ -3890,6 +3889,7 @@ func step(dt: float) -> void:
 	Beacons.tick(self, dt)
 	ult_cue.tick(self)
 	if heart: heart.tick(dt)
+	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
 	if not net_on:
 		_watch_death()
@@ -4387,9 +4387,9 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press %s again in the air and hold to glide", "jump"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your utility ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
+	["secondary", "Use your hunter ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
@@ -4984,7 +4984,8 @@ func _finish() -> void:
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
-	if player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
+	if heart_raid: r["heart_raid"] = heart_raid.summary()
+	elif player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -5396,6 +5397,8 @@ func _net_ev(x, from: String) -> void:
 			BoxRevive.net_in(self, x)
 		"ht":
 			if heart: heart.net_in(x)
+		"hr":
+			if heart_raid: heart_raid.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
@@ -5407,7 +5410,8 @@ func _net_ev(x, from: String) -> void:
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if ph:
-				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
+				var pfoe := ents_by_id.get(String(x[6]), null) as Hunter
+				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]), pfoe)
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if uh: unping(uh, true, true)
@@ -5632,7 +5636,8 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
+	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
