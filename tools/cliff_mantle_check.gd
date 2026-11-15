@@ -309,7 +309,7 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 		m.step(DT)
 		t += DT
 		var hv1 := Vector2(h.vel.x, h.vel.z).length()
-		var rk := MantleCarry.rise_k(h)
+		var rk := h._rise_k()
 		if rk >= 0.0 and k_was >= 0.0 and rk < k_was - 0.001:
 			res["k_back"] += 1
 		res["k_max"] = maxf(res["k_max"], rk)

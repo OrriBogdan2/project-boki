@@ -59,21 +59,21 @@
 		"jug_slash_r": {
 			"clip": "slash_r",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_slash_l": {
 			"clip": "slash_l",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
 			"fade": 0.25,
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_wave": {
 			"clip": "wave",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
 			"fade": 0.3,
@@ -109,7 +109,7 @@
 		"jug_chain": {
 			"clip": "chain",
 			"fade_out": 0.4
-		},
+		, "air_legs": true},
 		"jug_reel": {
 			"clip": "reel",
 			"hold_from": 0.25,

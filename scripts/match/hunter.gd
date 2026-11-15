@@ -1842,6 +1842,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	glider_snd.tick(self)
+	HoverHum.tick(self)
 	abyss_snd.tick(self)
 	if remote:
 		net_follow(dt)
@@ -2580,8 +2581,8 @@ func _try_ledge_grab(dt: float) -> void:
 	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
-		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
-		"v_in": carry_v, "y0": pos.y,                         # the speed you came in with comes over the top (item 185b)
+		"at": Vector2(pos.x, pos.z), "y0": pos.y, "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
+		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
 		"dash_vy": MantleCarry.dash_rise(self),               # a dash hands over: its speed takes you up the face
 		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
 	if grounded:
@@ -2597,8 +2598,8 @@ func _try_ledge_grab(dt: float) -> void:
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
 ## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
-## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
-## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+## Over the top you pop up a little toward your keys. Moving off the face, a fresh glide press, a stun or a
+## knock end it. A press in the rise goes by its mantle row (DashFlow); a jump flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
 const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
@@ -2994,6 +2995,14 @@ func _dash_anim_kind() -> String:
 	var own := ak.dodge_anim() if ak else ""      # the kit's own (Slipstep's slide)
 	return own if own != "" else String(DODGE_ANIM.get(cls, "roll"))
 
+## How far up the face a ledge rise has you (0 at the start, 1 at the lip), -1 when not rising: the animation's progress.
+func _rise_k() -> float:
+	if lfloat.is_empty():
+		return -1.0
+	var y0 := float(lfloat["y0"])
+	return clampf((pos.y - y0) / maxf(0.05, float(lfloat["lip"]) + 0.12 - y0), 0.0, 1.0)
+
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -3011,10 +3020,10 @@ func _anim_state(stretch: float) -> void:
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["fall"] = HunterFall.clip_k(self)
 	s["ledge"] = grap.size() > 0
-	var mk := -1.0
+	var mk := _rise_k()
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
-	s["mantle"] = mk if mk >= 0.0 else MantleCarry.rise_k(self)
+	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
@@ -3060,6 +3069,8 @@ func _anim_state(stretch: float) -> void:
 				break
 	s["reviving"] = rv or box_reviving()
 	s["act"] = holding()
+	s["act_at"] = WardenOpen.lid_near(m as Match, pos) if s["act"] in WardenOpen.KINDS else Vector3.INF
+	s["idle_break"] = is_local()
 	s["aim_pitch"] = AimPitch.of(self)
 	# an emote bubble over us
 	var em := ""
