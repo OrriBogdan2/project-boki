@@ -25,6 +25,7 @@ var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the ha
 var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 var idle_break: WardenBreak   # the one beat this Hunter breaks a long idle with (WardenBreak), or null
+var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 var hide_out: Array = []      # bone indices that shrink away while WardenGlb.CHAIN_OUT
 var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
@@ -73,6 +74,7 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 	for b in dd.get("hide_while_chain", []):
 		hide_out.append(WardenSkeleton.find(skel, String(b)))
 	clips = WardenClips.make(root, glb, skel, art_name)
+	opener = WardenOpen.make(clips) if clips else null
 	sway = WardenSway.make(root, skel, dd.get("sway", {}))
 	flinch = WardenFlinch.make(root, skel) if clips else null
 	aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
@@ -214,6 +216,8 @@ func _play(dt: float) -> void:
 	lead.apply(skel, root.get_meta(WardenClips.STATE, {}), body_w, clips.proc_w, dt)
 	for l in rig_root:
 		skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+	if opener:
+		opener.step(dt, 1.0 - w)
 	if flinch:
 		flinch.step(dt)
 	if drop_pose:
