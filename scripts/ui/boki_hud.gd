@@ -134,7 +134,7 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 
 ## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
 static func chip(H, ur: Rect2, text: String, col: Color) -> void:
-	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+	var tw: float = TextCache.width(H.big, text, 10) + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)

@@ -28,9 +28,11 @@ func _glide_ok(from: int) -> bool:
 		return true
 	return h.stun_t <= 0.0 and (knock_left <= 0.0 or (from != Loco.S.DASHING and from != Loco.S.MANTLING))
 
-## A dash folds the glider: the fold the glider's own step made the same frame (no feathering after it).
+## A dash folds the glider: the fold the glider's own step made the same frame (no feathering after it). So does a
+## ledge rise caught out of a glide (the source's mantle out of a glide): the rise owns your speed, MantleCarry
+## brings the glide's over the lip, and a fresh glide press mid-rise opens it again (Hunter._ledge_rise).
 func _glide_folded(to: int) -> void:
-	if to == Loco.S.DASHING:
+	if to == Loco.S.DASHING or to == Loco.S.MANTLING:
 		h.glide_off_t = 9.0
 		h.glider_sfx("close")
 

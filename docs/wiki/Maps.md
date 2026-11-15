@@ -81,9 +81,9 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | lock dial, three rune pylons |
-| The Sunken Forge | Stone Colossus | Cinder Steps | lock dial |
-| The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
+| Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | break the Gate Seal down, three rune pylons |
+| The Sunken Forge | Stone Colossus | Cinder Steps | break the Gate Seal down |
+| The Thornhive | Brood Mother | Thornwood | break the Gate Seal down, three ward stones |
 
 **Exits:** 2 uplink outposts.
 
@@ -129,9 +129,9 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| The Sunken Forge | Stone Colossus | Ember Quarry | lock dial |
-| Stormcrown Eyrie | Stormcoil | Stormreach | lock dial, three rune pylons |
-| The Thornhive | Brood Mother | Bloomwild | lock dial, three ward stones |
+| The Sunken Forge | Stone Colossus | Ember Quarry | break the Gate Seal down |
+| Stormcrown Eyrie | Stormcoil | Stormreach | break the Gate Seal down, three rune pylons |
+| The Thornhive | Brood Mother | Bloomwild | break the Gate Seal down, three ward stones |
 
 **Exits:** 2 uplink outposts.
 
@@ -146,7 +146,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Rare Boki | 3 | Lantern Hollow, Gullcrest, Mossmere, Stillwater, Petal Hollow, Icewing Roost, Cinder Steps, Rainbreak |
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
-| Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+| Live boss lairs | 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
 
 
 ## First Flight

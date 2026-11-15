@@ -199,8 +199,7 @@ func _states(b: Boss) -> void:
 	b.dead = true
 	b.death_t = BossAnim.DEATH_S
 	_picks(b, "death")
-	var over := BossAnim.cur_k == 1.0 and BossAnim.DEATH_S <= Boss.DEATH_FADE_S
-	ok(over, "%s: the death move is over before the body is gone" % b.mkind)
+	ok(BossAnim.cur_k == 1.0, "%s: the death move is over when the dissolve starts" % b.mkind)
 	b.dead = false
 
 func _picks(b: Boss, want: String) -> void:

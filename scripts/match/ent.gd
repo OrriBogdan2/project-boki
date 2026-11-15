@@ -25,9 +25,11 @@ var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
+var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
+var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
@@ -119,6 +121,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		if m.net_send_hit(self, dmg, by, opts):
 			if opts.get("src", "") == "wisp":
 				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
+			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
 			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
@@ -169,6 +172,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st1 in ["stun", "root", "slow"]:
 			if float(opts.get(st1, 0.0)) > 0.0:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
+	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
@@ -182,6 +186,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
+	CcSfx.play(self, cc_cue)
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
 			CombatBus.status_applied.emit(self, st, by, float(opts[st]))
@@ -325,9 +330,12 @@ func tick_status(dt: float) -> void:
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
+		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
+		if ticked:
+			dot_tick_at = m.time
 		if not remote:
 			hp -= burn_dps * dt
-			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
+			if ticked:
 				_burn_number()
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
@@ -337,7 +345,7 @@ func tick_status(dt: float) -> void:
 func _burn_number() -> void:
 	var mt := m as Match
 	if mt and (self == mt.player or burn_by == mt.player):
-		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, "", Fx.roll_key(burn_by, self))
+		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false, "", Fx.roll_key(burn_by, self))
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
@@ -359,9 +367,29 @@ func net_follow(dt: float) -> void:
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
+const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
+## Tints the body: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
+func show_flash(hit: float) -> void:
+	var f := hit
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
+	elif f <= 0.0:
+		f = DotLook.amount(self, Settings.quality() == "low")
+		if f > 0.0:
+			fc = DotLook.COL
+	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
+		_flash_set = f
+		_flash_col = fc
+		_flash_n = mats.size()
+		for mt in mats:
+			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -378,16 +406,4 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	var fc := Color.WHITE
-	if f <= 0.0 and wash > 0.0:
-		f = wash
-		fc = wash_col
-	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
-		_flash_set = f
-		_flash_col = fc
-		_flash_n = mats.size()
-		for mt in mats:
-			mt.set_shader_parameter("flash", f)
-			mt.set_shader_parameter("flash_color", fc)
+	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))

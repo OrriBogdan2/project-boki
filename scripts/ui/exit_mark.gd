@@ -10,8 +10,6 @@ const OPENING_COL := Color("45d3e8")    # opening: the uplink is charging, or re
 const CLOSED_COL := Color("8d93a3")     # closed: not yet, or used up
 const DISC := Color(0.05, 0.07, 0.11, 0.96)
 const SAMPLE := {"state": "open", "t": 0.0, "prog": 0.0}     # for the keys: the icon as it looks open
-const PING_S := 2.2                     # minimap edge ping: arrow size multiple at its biggest
-const PING_HZ := 1.6                    # edge ping pulses per second
 
 ## "open", "opening" or "closed".
 static func state(x: Dictionary) -> String:
@@ -100,12 +98,9 @@ static func pill(fm: FullMap, at: Vector2, txt: String, col: Color) -> void:
 	HudStyle.ctext(fm.hud.c, at + Vector2(0, 2.0), txt, 11, col, 3)
 
 ## The minimap: the icon when it is on the map and meant to show, and for an exit that is opening or open
-## and off the map a pulsing arrow on the edge, always (the squad can't miss where to go).
+## and off the map an arrow on the edge, always (the squad can't miss where to go).
 static func minimap(hud, inner: Rect2, x: Dictionary, pv: Vector2, on_map: bool, shown: bool) -> void:
 	if on_map and shown:
 		glyph(hud.c, pv, MapDetail.ICON_R + 1.5, x, hud.m.time)
 	elif not on_map and state(x) != "closed":
-		var arrow := 1.4
-		if state(x) == "open":
-			arrow = lerpf(1.2, PING_S, 1.0 - fmod(hud.m.time * PING_HZ, 1.0))
-		hud._edge_arrow(inner, inner.get_center(), pv, color(x), arrow)
+		hud.edge_mini.add(pv - inner.get_center(), color(x), EdgeMarker.PRIO_GOAL)
