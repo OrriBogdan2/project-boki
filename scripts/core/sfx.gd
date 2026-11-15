@@ -75,6 +75,8 @@ const NAMES := [
 	"slash_hit",
 	"armor_hit",
 	"armor_break",
+	"armor_up",
+	"armor_up_own",
 	"knock_confirm",
 	"extract_ok",
 	"elim_confirm",
@@ -119,7 +121,13 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss"
+	"fuse_hiss",
+	"axe_bite",
+	"trunk_creak",
+	"tree_down",
+	"pick_strike",
+	"rock_crack",
+	"rock_break"
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -191,7 +199,12 @@ const MIN_GAP := {
 	"land": 80,
 	"step0": 60,
 	"step1": 60,
-	"step2": 60
+	"step2": 60,
+	"xp_tick": 60,
+	"steal_won": 400,
+	"steal_lost": 400,
+	"hostile_cast": 100,
+	"armor_up": 120
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
