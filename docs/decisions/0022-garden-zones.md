@@ -24,9 +24,13 @@ unminded egg sits in the Nook, one Boki with the Ember knack that comes over to 
 stall, Burrow, games board) are a template kept as `Save.d["hub_layout"]` (absent in older saves: built on
 first use, so no migration); the Dash's showcase wall hangs by the games board (by the race post
 before the hub opens) and the board lists this week's twist; build mode there offers only the Garden tab. With the garden on and the
-first day's tutorial done, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`); before
-that it lands in Bramblebank, where the tutorial runs. The garden's own house, Nook, stall and Burrow
-stay until the zones are rebuilt (steps 7 and 11).
+first day's tutorial done or skipped, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`);
+before that it lands in Bramblebank, where the tutorial runs. One set (DECISIONS 2026-11-10, the hub at the
+centre): with the garden on, the house, Nook (with its Incubator and the one egg, `Save.d["egg"]`), stall and
+Burrow are the hub's. `HubLayout.holds` keeps Bramblebank from building them (a classic island's fixed set too:
+`ClassicSet`): no nodes, blockers, build-mode tiles or auto-placed stall, so the first-day "pair two Boki in the Nook" and the Ember Boki's minding
+happen at the hub's Nook. An older layout's entries stay on the save (the farm with the garden off still uses
+them), so no migration.
 
 ## Consequences
 Step 10: the profile doc gains "hub_layout" and "zones" ({id: layout} for each open zone that has one) and each
@@ -69,7 +73,9 @@ player the second on day 12 and the third after day 28. A new save starts with 6
 garden brings about 20 a day plus 10 per extra open zone; the day-3 target depends on that (price 110
 sits between day 2 and day 3 of income), so retune the price if those change.
 
-Hub hints (GARDEN.md 10): the hub shows three first-time hints through the message lane (`HubHints`, rules in
-`garden_zones.json` "hub_hints"): the Waystone ring, the nest corner and a sleeping zone's two keys, one at a
+Hub hints (GARDEN.md 10): the hub shows four first-time hints through the message lane (`HubHints`, rules in
+`garden_zones.json` "hub_hints"): the Waystone ring, the nest corner, a sleeping zone's two keys and, by the
+Incubator once its first egg is placed, "It grows while you play: in the garden or out on a run." (DECISIONS
+2026-11-11; no number, the hatch time is data; a ready egg says so by its look alone, with no message). One at a
 time, once per save in `Save.d["tutorial"]["hub_hints"]` (an existing free-form dict, so no migration).
 The garden tutorial's closing Waystone hint stays its own. `--hub-hints-check` covers it.

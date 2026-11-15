@@ -3,8 +3,8 @@ extends Node3D
 ## The one node per match that draws every AimKit telegraph (docs/AIMKIT.md). Entries live in a
 ## dictionary keyed by hunter and id; each frame the whole set is rebuilt into one surface of a single
 ## ImmediateMesh, so showing, moving or hiding a telegraph never creates a node. Its child AimReticle
-## draws the cursor states. Local visuals only: nothing here is synced (a remote hunter's kit draws its
-## own on its own machine).
+## draws the cursor states. `all` entries of the hunters this game runs go to the other games through
+## AimNet (Net event "tele"); a remote hunter's arrive the same way and draw here like a local one.
 
 const KEEP := 0.1          # s of match time an entry lives after its last refresh (kits refresh per step)
 
@@ -17,6 +17,7 @@ var mat := StandardMaterial3D.new()
 var reticle: AimReticle
 var built := 0             # entries drawn by the last rebuild (tests)
 var ret := {}              # hunter instance id -> the cursor states: {h, k, t, col, flare, perfect, pcol}
+var net := AimNet.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -46,11 +47,9 @@ static func key(h: Node, id: String) -> String:
 func put(h: Hunter, id: String, e: Dictionary) -> void:
 	e["h"] = h
 	e["t"] = float(m.time)
-	var k := key(h, id)
-	if e.has("ease"):
-		# the drawn width carries over from the last refresh and glides on from there (track)
-		e["deg_at"] = float((entries[k] as Dictionary).get("deg_at", e["deg"])) if entries.has(k) else float(e["deg"])
-	entries[k] = e
+	entries[key(h, id)] = e
+	if e["all"]:
+		net.out(m, h, id, e)
 
 func drop(h: Node, id: String) -> void:
 	entries.erase(key(h, id))
@@ -69,23 +68,8 @@ func live(e: Dictionary) -> bool:
 	return float(m.time) - float(e["t"]) <= float(e["keep"])
 
 func _process(delta: float) -> void:
-	track(delta)
 	rebuild()
 	tick_reticle(delta)
-
-## Per drawn frame, after the hunters rendered: a "follow" entry starts at its hunter's drawn body and points
-## at the aim gathered this frame; an "ease" cone's width glides toward its latest value (exponential, so the
-## same over any frame rate).
-func track(delta: float) -> void:
-	for k in entries:
-		var e: Dictionary = entries[k]
-		var h = e["h"]
-		if e.get("follow", false) and is_instance_valid(h):
-			var at: Vector3 = (h as Hunter).global_position
-			e["from"] = Vector2(at.x, at.z)
-			e["dir"] = (h as Hunter).aim_dir()
-		if e.has("ease"):
-			e["deg_at"] = lerpf(float(e["deg_at"]), float(e["deg"]), 1.0 - exp(-float(e["ease"]) * delta))
 
 ## The cursor states run on real time, so a perfect-window flash still shows through a hit stop.
 func tick_reticle(delta: float) -> void:
@@ -108,6 +92,7 @@ func rebuild() -> void:
 	for k in entries.keys():
 		if not live(entries[k]):
 			entries.erase(k)
+	net.sweep(m, entries)
 	mesh.clear_surfaces()
 	built = 0
 	geo.world = m.get("world")
@@ -117,10 +102,10 @@ func rebuild() -> void:
 		var e: Dictionary = entries[k]
 		if not e["all"] and e["h"] != me:
 			continue                    # an aim reticle: only its own player sees it
-		if e["all"] and me != null and int((e["h"] as Hunter).team) != int(me.team):
-			e = e.duplicate()
-			e["col"] = (e["col"] as Color).lerp(Feel.RIM_ENEMY, 0.45)     # a foe's telegraph reads hostile
-			e["col2"] = (e["col2"] as Color).lerp(Feel.RIM_ENEMY, 0.3)
+		if e["all"] and me != null and e["h"] != me:
+			e = e.duplicate()            # someone else's telegraph: a rival's reads hostile, a teammate's cool
+			e["col"] = SideColor.fx(m, e["h"], e["col"])
+			e["col2"] = SideColor.fx(m, e["h"], e["col2"])
 		AimShapes.build(geo, e)
 		built += 1
 	if geo.v.is_empty():

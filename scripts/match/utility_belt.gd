@@ -167,16 +167,23 @@ static func grant(h, id: String, n := 1, issued := false) -> int:
 		h.belt_free[id] = int(h.belt_free.get(id, 0)) + put
 	return put
 
+## Swaps two belt slots (the inventory drag): what answers each key, charges and cooldown going along.
+static func swap_slots(h, a: int, b: int) -> void:
+	var s: Dictionary = h.belt[a]
+	h.belt[a] = h.belt[b]
+	h.belt[b] = s
+
 ## Fills one slot outright (the match start): n charges, `issued` of them the everyday issue.
 static func set_slot(h, i: int, id: String, n: int, issued := 0) -> void:
 	h.belt[i] = {"id": id, "n": mini(n, max_of(id)), "cd": 0.0}
 	h.belt_free[id] = mini(issued, mini(n, max_of(id)))
 
-## A pickup from the ground: onto the belt, with a small toast for the local player.
+## A pickup from the ground: onto the belt, and a row in the local player's loot feed (LootFeed).
 static func pickup(h, id: String, n := 1) -> void:
 	var got := grant(h, id, n)
-	if got > 0 and h == h.m.player and h.m.hud:
-		h.m.hud.toast_small("+%d %s" % [got, name_of(id).to_lower()], col_of(id))
+	var feed := LootFeed.of(h.m, h)
+	if feed:
+		feed.add(icon_of(id), name_of(id), got, col_of(id))
 
 ## Removes charges (issued ones go first). Returns how many were taken.
 static func take(h, id: String, n := 1) -> int:
