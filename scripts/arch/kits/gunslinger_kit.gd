@@ -44,6 +44,8 @@ const RELOAD_SFX := "vn_cock"
 const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
+const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
+const BURR_SMEARS := 12              # ember smears alive behind a flying Burr Charge at once (one a step, 0.2 s each)
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
@@ -76,6 +78,16 @@ func _setup() -> void:
 func screen_up() -> Vector3:
 	var cam := m.get_viewport().get_camera_3d()
 	return cam.global_basis.y if cam != null else Vector3.UP
+
+## The rehearsal also pools the burr's smears and cone and builds its ball: the first Burr Charge built the ball
+## mid-fight (11 meshes, 8 shader compiles) and a smear a step behind it.
+func warm_fx(at: Vector3) -> void:
+	fx().prewarm(at, h, 0, BURR_SMEARS)
+	fx().fan(at, Vector2.UP, 1.0, float((rmb_def()["burr"] as Dictionary)["cone_deg"]), EMBER, HOT, VVFx.WARM_T)
+	if burr_pool.is_empty():
+		var n := _burr_mesh()
+		n.visible = false
+		burr_pool.append(n)
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
