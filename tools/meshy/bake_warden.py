@@ -85,8 +85,9 @@ def tris(ob):
     return sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
 
-def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
-    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits.
+def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False):
+    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits
+    (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it).
     With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
     then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
     and the monocle and the strands over the face come out jagged)."""
@@ -99,9 +100,10 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
     _drop_small_parts(bm, floater_verts)
     bm.to_mesh(me)
     bm.free()
-    me.materials.clear()
-    while me.uv_layers:
+    while me.uv_layers and not keep_uv:
         me.uv_layers.remove(me.uv_layers[0])
+    if not keep_uv:
+        me.materials.clear()
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
