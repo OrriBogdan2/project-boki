@@ -271,7 +271,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = pos
 			e["t"] = float(e["t"]) - d
 			var body: Node3D = (k["node"] as Node3D).get_node_or_null("Body")
-			if body:
+			if body and not body.has_node("Flex/BokiRig"):
 				var q := absf(sin(float(e["t"]) * 9.0))
 				body.scale = Vector3(1.0 + q * 0.08, 1.0 - q * 0.1, 1.0 + q * 0.08)
 			if randf() < d * 3.0 and Econ.fill(f) > 0:
@@ -470,7 +470,7 @@ func open_feeder(f: Dictionary) -> void:
 	UI.footer(v).add_child(fill_b)
 	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
-	if fd["auto"]:
+	if Econ.self_fills(f):
 		var on: bool = f.get("auto", true)
 		var ab := CheckButton.new()
 		ab.text = "Refills itself from your pantry"
@@ -567,16 +567,12 @@ func show_away() -> void:
 		_notice("Your Boki are starving", lines)
 
 func _notice(title: String, lines: Array) -> void:
-	if not h.is_inside_tree():
-		return
-	if h.panel_open != "" or h.building_now or not Save.d["tutorial"].get("home", false):
-		h.get_tree().create_timer(1.0).timeout.connect(_notice.bind(title, lines))
-		return
-	var v: VBoxContainer = h._new_panel(title, 560)
-	for l in lines:
-		var lb := UI.label(String(l), 15, UI.INK)
-		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(lb)
+	h.arrivals.add(func():
+		var v: VBoxContainer = h._new_panel(title, 560)
+		for l in lines:
+			var lb := UI.label(String(l), 15, UI.INK)
+			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(lb))
 
 ## Why your partner can't come out (starving too long), or "".
 func refuse_reason() -> String:
@@ -678,14 +674,13 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
 		h._emote(ke, "!", true)
-	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. It knows you, but it isn't quite the same." % rec["name"],
-		"Level %d now, and a %s nature. It'll have new favourite foods to find out." % [int(rec["level"]), Care.nature(rec).to_lower()]])
+	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. %s knows you, but isn't quite the same." % [rec["name"], KinSpeak.about(rec, "{He}")],
+		KinSpeak.about(rec, "Level %d now, and a %s nature. {He}'ll have new favourite foods to find out.") % [int(rec["level"]), Care.nature(rec).to_lower()]])
 
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:
@@ -736,43 +731,13 @@ func open_shrine() -> void:
 		cv.add_child(r)
 		v.add_child(card)
 
-## The empty lot: what the shrine needs before you can build it.
-func open_shrine_lot() -> void:
-	var bd: Dictionary = Data.BUILDINGS["shrine"]
-	var v: VBoxContainer = h._new_panel("Build the Soul Shrine", 520)
-	UI.subtitle(v, String(bd["desc"]))
-	var ex := int(Save.d.get("extracts", 0))
-	v.add_child(UI.section("What it needs"))
-	var need := func(ok: bool, txt: String) -> void:
-		var r := UI.hbox(10)
-		r.add_child(UI.IconDot.new("check" if ok else "lock", UI.GOOD if ok else UI.FAINT, 16.0))
-		r.add_child(UI.label(txt, UI.T_BODY, UI.INK if ok else UI.MUTED))
-		v.add_child(r)
-	need.call(ex >= 3, "3 successful expeditions  (%d)" % ex)
-	need.call(Econ.embers() > 0, "A Soul Ember to light it  (%d)" % Econ.embers())
-	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  (you have %d)" % [int(bd["cost"]), int(Save.d["gems"])])
-	var why := Econ.shrine_why()
-	var btn := UI.primary("Build it", func():
-		if Econ.shrine_why() != "" or Save.has_building("shrine"): return
-		Econ.use_ember()
-		Save.d["gems"] = int(Save.d["gems"]) - int(bd["cost"])
-		Save.d["buildings"].append("shrine")
-		Save.save_game()
-		h._close_panel()
-		h._construct("shrine"), 200)
-	btn.disabled = why != ""
-	btn.tooltip_text = why
-	v.add_child(btn)
-	if why != "":
-		v.add_child(UI.label(why, 13, Color("ffb0a0")))
-
 # ------------------------------------------------------------------ the Armory
 ## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
 ## utility stash and treasure. (Armor is found in the match, not stored: Equal.)
 const ARM_TABS := {"Gloves": [0, 1], "Boots": [3]}
 
 func open_armory() -> void:
-	var v: VBoxContainer = h._new_panel("Armory", 960, true)
+	var v: VBoxContainer = h._new_panel("Gear Shed", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
 	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
@@ -841,7 +806,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 		h._refresh_top()
 		open_armory(), 0, "plus")
 	b.disabled = int(Save.d["gems"]) < int(c[0]) or int(Save.d.get("scrap", 0)) < int(c[1])
-	b.tooltip_text = "More room in the armory: %d gems and %d scrap" % [int(c[0]), int(c[1])]
+	b.tooltip_text = "More room in the gear shed: %d gems and %d scrap" % [int(c[0]), int(c[1])]
 	return b
 
 func _loadout_line() -> String:
@@ -849,7 +814,7 @@ func _loadout_line() -> String:
 	for sl in Econ.LOADOUT_SLOTS:
 		var g := Econ.loadout(sl)
 		if not g.is_empty(): bits.append(Loot.name_of(g))
-	return ", ".join(bits) if not bits.is_empty() else "nothing from the armory"
+	return ", ".join(bits) if not bits.is_empty() else "nothing from the gear shed"
 
 func _in_loadout(it: Dictionary) -> String:
 	for s in Econ.LOADOUT_SLOTS:
@@ -992,13 +957,13 @@ func _treasure(v: VBoxContainer) -> void:
 			Sfx.play("unlock"); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
 
 # ------------------------------------------------------------------ the expedition panel
-## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
+## "From your gear shed" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	HomeBelt.rows(parent, reopen, h.exp_tier)
 	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
-	parent.add_child(UI.section("From your armory  (gloves and boots)"))
+	parent.add_child(UI.section("From your gear shed  (gloves and boots)"))
 	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
@@ -1015,7 +980,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var row := UI.hbox(8); card.add_child(row)
 		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)

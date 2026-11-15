@@ -1,5 +1,5 @@
 extends RefCounted
-## --music-leave-check: the music and ambience follow the screen. Training area -> duel room -> back
+## --music-leave-check: the music and ambience follow the screen. Training Grounds -> duel room -> back
 ## out, a normal match -> title, and the farm -> title: after each change only that place's score is
 ## audible (no stem of the match's layered score, no abyss / ruins bed, and no stray player on the
 ## Music or Ambience bus left playing above silence). Inspects Sfx's players' `playing` and volume_db.
@@ -9,7 +9,9 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
+const SETTLE_SPEED := 4.0      # time scale while settling
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
+const ROWS := 18               # rows a full run asserts: fewer means a step errored out and skipped its rows
 
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
@@ -38,7 +40,9 @@ func audible() -> Dictionary:
 	return out
 
 func settle(secs := SETTLE) -> void:
+	Engine.time_scale = SETTLE_SPEED      # the fades are tweens on game time: the same game seconds in less wall time
 	await main.get_tree().create_timer(secs).timeout
+	Engine.time_scale = 1.0
 
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
@@ -47,17 +51,25 @@ func step(m: Match, secs: float) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	# the layered stems and the "title" track are the first score's (Soundtrack); --soundtrack-check covers the rest
+	Settings.set_v("soundtrack", Soundtrack.OWN_STYLE, false)
 	Save.d["music"] = Save.d.get("music", [])
 	await _training_duel_leave()
 	await _match_to_title()
 	await _farm_to_title()
+	ok("all %d rows ran" % ROWS, n == ROWS, "%d ran" % n)
 	print("MUSICLEAVE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Opens a screen the way the game does (Game.goto) and waits for it to be up.
+## Opens a screen the way the game does (Game.goto) and waits for it to be up. With fades on (any
+## display, xvfb too) the old screen stays current until the 0.3 s ink has covered it, so this waits
+## for a new current screen, not a fixed frame count.
 func go(screen: String, opts := {}) -> Node:
+	var was: Node = main.current
 	Game.goto(screen, opts)
 	for i in 6:
+		await main.get_tree().process_frame
+	while main.current == was or not is_instance_valid(main.current) or not main.current.is_inside_tree():
 		await main.get_tree().process_frame
 	return main.current
 
@@ -65,7 +77,7 @@ func start_match(opts: Dictionary, live := false) -> Match:
 	if live:
 		# the real way in: the loading screen, then the match running on its own for a while
 		var m0: Match = await go("match", opts)
-		while not is_instance_valid(m0) or not m0.is_inside_tree() or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
+		while not is_instance_valid(m0) or m0.player == null or main.get("_ld") != null and is_instance_valid(main.get("_ld")):
 			await main.get_tree().process_frame
 			m0 = main.current
 		return m0
@@ -87,7 +99,7 @@ func _training_duel_leave() -> void:
 	ok("duel: a duel match is up", d.duel != null and d.duel.bot != null and d != m)
 	await settle(8.0)
 	a = audible()
-	ok("duel: the score is the training area's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
+	ok("duel: the score is the Training Grounds's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
 	# leaving the room (Esc > Leave: the match finishes and the game goes on to the farm)
 	d.result = {"extracted": true, "why": "left"}
 	d._finish()
@@ -96,7 +108,8 @@ func _training_duel_leave() -> void:
 	a = audible()
 	ok("leave duel: no stem of the match score is left", Sfx.layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("layer:")), str(a))
 	ok("leave duel: only the farm's own music + ambience", Sfx.music_name.begins_with("home") or Sfx.music_name in ["orchard", "meadow", "summit"], "music '%s' %s" % [Sfx.music_name, str(a)])
-	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.amb_layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("amb_layer")), str(a))
+	# the farm plays its own garden beds (HomeAmbience: time of day + zone), so only the match's beds must be gone
+	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.MATCH_BEDS.all(func(b): return not Sfx.amb_layers.has(b) and not a.has("amb_layer:" + b)), str(a))
 	ok("leave duel: nothing stray on the Music bus", a.keys().all(func(k): return not String(k).begins_with("stray")), str(a))
 	await go("title")
 	await settle()

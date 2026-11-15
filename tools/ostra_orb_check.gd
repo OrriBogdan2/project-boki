@@ -14,19 +14,21 @@ func orbs(main_node: Node) -> void:
 	await _through_walls()
 	await _glow_and_chime()
 	await _weapon_kept()
+	await _no_kit_tick_when_down()
 
 ## Fires one orb `wait` seconds after the last and returns its shot, with the kit's charge at the shot.
 func _fire_after(m: Match, P: Hunter, K: OstraKit, wait: float) -> Dictionary:
 	K.last_shot_t = m.time - wait
 	K._set_charge(K.wait_charge())
 	var k := K.charge
+	var sfx := String(P.wpn["sfx"])      # the release sound the shot will play
 	var shots0 := P.shot_n
 	P.fire_cd = 0.0
 	step(m, 0.05, func(): P.inp["fire"] = P.shot_n == shots0)
 	P.inp["fire"] = false
 	var mine: Array = m.shots.filter(func(s): return s["by"] == P)
 	var sd: Dictionary = mine[-1] if not mine.is_empty() else {}      # (point blank it has already hit)
-	return {"s": sd, "k": k, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
+	return {"s": sd, "k": k, "sfx": sfx, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
 
 func _skin_of(m: Match, sd: Dictionary) -> Dictionary:
 	for e in KitLooks.of(m).live:
@@ -53,11 +55,13 @@ func _charge_curve() -> void:
 		var f := _fire_after(m, P, K, w)
 		var sd: Dictionary = f["s"]
 		var skin: Dictionary = f["skin"]
-		var glass := ((skin["n"] as Node3D).get_node("Spin") as MeshInstance3D).material_override as ShaderMaterial
+		var sn := skin["n"] as Node3D
+		var glass := (sn.get_node("Orb/Glass") as MeshInstance3D).material_override as ShaderMaterial
 		var rim: Color = glass.get_shader_parameter("rim")
 		rows.append({
 			"wait": w, "k": f["k"], "dmg": sd["dmg"], "r": sd["r"], "speed": (sd["vel"] as Vector2).length(),
-			"scale": (skin["n"] as Node3D).scale.x, "bright": rim.get_luminance()
+			"scale": sn.scale.x, "bright": rim.get_luminance(), "orb": (sn.get_node("Orb") as Node3D).visible,
+			"shard": (sn.get_node("Shard") as Node3D).visible, "sfx": f["sfx"]
 		})
 		step(m, 0.05)
 	var at: Dictionary = {}
@@ -82,7 +86,20 @@ func _charge_curve() -> void:
 		float(at[1.4]["scale"]) / float(rows[0]["scale"]) >= 1.6 and float(at[1.4]["r"]) / float(rows[0]["r"]) >= 1.6,
 		"x%.2f" % (float(at[1.4]["r"]) / float(rows[0]["r"]))
 	)
+	var two_looks := rows.all(_two_looks_ok)
+	ok(
+		"owner 11-08: a quick shot is the violet shard, a charged one (k >= 0.5) the void orb, each with its sound",
+		two_looks and bool(rows[0]["shard"]) and bool(at[1.4]["orb"])
+	)
+	var full_x := float(at[1.4]["scale"]) / float(rows[0]["scale"])
+	ok("owner 11-08: the full void orb is drawn at least 1.8x a quick shot", full_x >= 1.8, "x%.2f" % full_x)
 	await done(m)
+
+## Owner 11-08: below ORB_HELD_K a row is the shard with os_orb, from it the void orb with os_orb_hot.
+func _two_looks_ok(q: Dictionary) -> bool:
+	var held_orb := float(q["k"]) >= KitLooks.ORB_HELD_K
+	var sound := "os_orb_hot" if held_orb else "os_orb"
+	return bool(q["orb"]) == held_orb and bool(q["shard"]) != held_orb and String(q["sfx"]) == sound
 
 ## Held, the fire rate never builds a charge: the stream stays plain orbs, so its damage is unchanged.
 func _held_fire() -> void:
@@ -124,7 +141,7 @@ func _full_slows() -> void:
 	_fire_after(m, P, K, 1.4)
 	step(m, 0.6)
 	ok(
-		"slow: a full orb slows (10% for 1.5s, the data's values)",
+		"slow: a full orb slows (6% for 1.5s, the in-game card)",
 		T.slow_t > 0.5 and absf(T.slow_k - float(K.lmb_def()["prime_slow"])) < 0.001, "slow %.2f" % T.slow_t
 	)
 	step(m, 2.0)
@@ -250,3 +267,43 @@ func _weapon_kept() -> void:
 	K.teardown()
 	ok("weapon: teardown leaves the weapon as loaded", absf(float(P.wpn["dmg"]) - plain * 2.0) < 0.01)
 	await done(m)
+
+## A downed Hunter is a Wisp: Motley's kit draws no charge motes or aura and builds no charge, and starts its wait over
+## on revive. The same look scan over all 12 kits is reported (NOTE) only; the other kits are not fixed here.
+func _no_kit_tick_when_down() -> void:
+	var r := setup("ostra", 12.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: OstraKit = P.ak
+	var looks := KitLooks.of(m)
+	K.last_shot_t = m.time - 3.0
+	step(m, 0.1)
+	ok("wisp kit: a charge shows before the down", looks.holding("os_charge") and K.charge >= 1.0)
+	m.knock(P, null, {})
+	step(m, 0.3)
+	ok("wisp kit: downed: no motes held", not looks.held.has("os_charge") and not looks.held.has("os_aura"))
+	ok("wisp kit: downed: no charge built", K.charge == 0.0 and K.wait_charge() < 0.05, "%.2f" % K.charge)
+	m.revive_hunter(P, P)
+	step(m, 0.2)
+	ok("wisp kit: revive: the wait starts over", K.charge == 0.0 and not looks.holding("os_charge"))
+	step(m, 3.0)
+	ok("wisp kit: revive: the charge builds again", K.charge >= 1.0 and looks.holding("os_charge"))
+	step(m, 3.0)
+	m.eliminate(P, null, "test", true)
+	step(m, 0.3)
+	ok("wisp kit: out: no motes held", P.out and not looks.held.has("os_charge") and K.charge == 0.0)
+	await done(m)
+	for arch in Arch.ids():
+		var q := setup(arch, 12.0)
+		var qm: Match = q[0]
+		var qh: Hunter = q[1]
+		step(qm, 3.0)
+		qm.knock(qh, null, {})
+		step(qm, 0.2)
+		var live := 0
+		for key in KitLooks.of(qm).held.keys():
+			var hd: Dictionary = KitLooks.of(qm).held[key]
+			if hd["ent"] == qh and float(hd["t"]) >= qm.time - 0.1: live += 1
+		if arch == "ostra": ok("wisp kit: ostra: no look still updating", live == 0)
+		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live])
+		await done(qm)

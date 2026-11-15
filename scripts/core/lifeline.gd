@@ -1,7 +1,8 @@
 class_name Lifeline
 ## The economy floor (owner decision, ROADMAP §2 "Nobody can be locked out"): a player must never sit
 ## at zero Boki and zero gems with no way to play. The floors, cheapest first:
-##   1. the Shelter (at the market stall): stray commons to adopt at a low price, restocked daily.
+##   1. the Shelter (at the market stall): always at least 3 stray commons to adopt at one low flat fee,
+##      restocked daily and the moment one is adopted (Shelter).
 ##   2. a stray: with no Boki at all on your roster (lost, starved, at the Ransom House), a stray
 ##      common Boki turns up at the farm. You can't empty your roster on purpose (your last Boki can't
 ##      be released, given up or handed on), so the only way to a stray is losing one: no gems are made from it.

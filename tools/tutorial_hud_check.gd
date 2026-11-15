@@ -1,18 +1,29 @@
 extends RefCounted
 ## --tutorial-hud-check: the tutorial shows one voice at a time, in its own lanes.
-##   1. the lanes at 1280x720 and 1920x1080: the banner is at most 35% of the width and 10% of the
-##      height, no two lanes (banner, pill, check, toasts, intro) intersect, none sits in the middle
+##   1. the lanes at 1280x720, 1920x1080 and 3440x1440: the step strip is one line, at most 42% of the width
+##      and 6% of the height, at the top-centre inside the safe margin; no two lanes (strip, check,
+##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
-##      hunter and the Boki are never under the banner
-##   3. the pill counter, the right click taught from its kit data, the Boki step by its state
-##   4. the lookout: every course stop is climbable from the one before it with plain movement
+##      hunter and the Boki are never under the banner; on a step whose card carries the interact key the
+##      world prompt label is held (the card says it)
+##   2b. one prompt: a fresh banner, a toast and a world prompt show as the banner alone; a fight's urgent
+##      line and its revive prompt still show; the step's plain words go to the lane once, not every frame
+##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
+##   4. the panel counter, the right click taught from its kit data, the Boki step's words
+##   5. the strip's new-objective chime: once per step, none on a re-pulse, ducked in a fight
+##   6. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##      wall kick (taller than a jump, within a jump and a kick's climb)
+##   7. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
+##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
+##      again; a save that has dived never sees it
+##   8. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
 
 var bad := 0
 var m: Match
 var main: Node
 
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -24,6 +35,8 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	_dive_hint()
+	_zone_lines()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -33,8 +46,14 @@ func _lanes() -> void:
 		var ln := TutorialHud.lanes(sz)
 		var b: Rect2 = ln["banner"]
 		var tag := "%dx%d" % [sz.x, sz.y]
-		var small: bool = b.size.x <= sz.x * 0.35 + 0.5 and b.size.y <= sz.y * 0.10 + 0.5
-		ok(small, "%s: the banner is at most 35%% x 10%% of the screen (%s)" % [tag, str(b.size)])
+		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
+		var margin := maxf(24.0, sz.y * 0.04)
+		var in_safe := b.position.y >= margin - 0.5 and b.position.x >= margin
+		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
+		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
+		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		ok(pulse_ok, "%s: the glow starts full on a new objective and is calm after PULSE_T" % tag)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -47,8 +66,15 @@ func _lanes() -> void:
 					clash += " %s/%s" % [names[i], names[j]]
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
+		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0, 240.0)
+		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var gb := TutorialStrip.rect(sz, wo_b)
+		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
-# ------------------------------------------------------------------ 2, 3. a run of the course
+# ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
 	m = Match.new()
 	main.add_child(m)
@@ -65,20 +91,37 @@ func _course() -> void:
 	var closed := not tu.intro and held_at < Tutorial.INTRO_T + 0.2
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
 	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
+	_marker()
+	_one_prompt()
 	var t := 0.0
 	var last := -1
 	var step_t := 0.0
 	var worst := 0.0
 	var toast_in_card := 0
 	var bubble_in_card := 0
+	var prompt_in_card := 0
+	var words_seen := 0
 	var shown_after := 0
 	var asked := 0
 	var under := 0
+	var key_label := 0      # frames an interact step's card and a world prompt were both up
+	var key_loud := 0       # ... of those, frames the world label would still have drawn
 	var texts := {}
 	var counters := {}
+	var chimed := 0
+	var stray := 0
+	var changes := 0
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
+		var before := tu.step
+		Sfx.last_played.erase(TutorialStrip.CHIME)
+		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
+		if Sfx.last_played.has(TutorialStrip.CHIME):
+			if tu.step != before: chimed += 1
+			else: stray += 1
+		if tu.step != before:
+			changes += 1
 		t += Match.DT
 		if tu.step != last:
 			if last >= 0:
@@ -93,33 +136,96 @@ func _course() -> void:
 		step_t += Match.DT
 		if m.hud == null:
 			continue
+		if not m.interact.is_empty() and Tutorial.KEYS.get(tu.id(), "") == "interact":
+			key_label += 1
+			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
 			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
+			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
+			words_seen += int(tu.detail != "" and m.hud.msgs.texts().has(tu.detail))
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
+	var once := changes > 3 and chimed == changes and stray == 0
+	ok(once, "one chime per new objective, none otherwise (%d steps, %d chimes, %d stray)" % [changes, chimed, stray])
+	var calm_db := TutorialStrip.chime_db(m)
+	m.player.hurt_at = m.time
+	var fight_db := TutorialStrip.chime_db(m)
+	var ducked := calm_db < -6.0 and fight_db <= calm_db - 6.0
+	ok(ducked, "the chime is quiet (%.0f dB), ducked in a fight (%.0f dB)" % [calm_db, fight_db])
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
+	var frames := "(%d frames over %d steps)" % [words_seen, last + 1]
+	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + frames)
+	ok(prompt_in_card == 0, "no world prompt shows while a banner is up (%d frames)" % prompt_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var held := "(%d of %d frames drawn)" % [key_loud, key_label]
+	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
-	ok(counts_ok, "the pill counts hits and casts (%s)" % str(counters))
+	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
+	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
 	if ak != null:
 		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
 		var why := "(%s hold %s)" % [ak.id, str(hold)]
 		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
-		var line := String(texts.get("utility", ""))
+		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
-	var tl := String(texts.get("throw", ""))
-	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+	var tl := String(texts.get("gkey", "")).to_lower()
+	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+
+## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
+## and revive prompt get through; when the banner settles the toast shows.
+func _one_prompt() -> void:
+	var tu: Tutorial = m.tut
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	tu.card_t = 0.0
+	m.step(Match.DT)        # (the tutorial puts the lane on hold for the fresh banner)
+	m.hud.toast("one prompt", Color.WHITE)
+	m.interact = {"kind": "chest", "label": "Press F to open"}
+	var n := _prompts()
+	ok(tu.card_up() and n == 1, "a fresh banner, a toast and a world prompt: one prompt shows (%d)" % n)
+	lane.push("Your Boki is down", Color.WHITE, MsgLane.URGENT)
+	m.interact = {"kind": "revive", "label": "Hold F to revive"}
+	n = _prompts()
+	ok(n == 3 and lane.waiting() == 1, "a fight's urgent line and revive prompt still show (%d)" % n)
+	m.interact = {}
+	tu.card_t = Tutorial.CARD_T
+	m.step(Match.DT)
+	ok(lane.texts().has("one prompt"), "when the banner settles the toast shows (%s)" % str(lane.texts()))
+	lane.clear()
+
+## What asks for the player's eye now: the banner, the lane's lines on show, the world prompt.
+func _prompts() -> int:
+	var n := 1 if m.tut.step >= 0 else 0
+	n += m.hud.msgs.texts().size()
+	return n + int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
+
+## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
+func _marker() -> void:
+	var cam := m.cam
+	var sz := m.get_viewport().get_visible_rect().size
+	var fwd := -cam.global_transform.basis.z
+	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
+	var me := m.player.pos
+	var near := MarkerDir.off_dir(cam, sz, me + fwd * 1.0, me)
+	ok(near == Vector2.ZERO, "a target at the hunter's feet shows its pin, not an arrow (%s)" % str(near))
+	var aim := sz * Vector2(0.5, 0.3)      # where the pin should land: in the play box, above the hunter
+	var o := cam.project_ray_origin(aim)
+	var ray := cam.project_ray_normal(aim)
+	var pin := o + ray * ((me.y + MarkerDir.PIN_UP - o.y) / ray.y)
+	var ahead := MarkerDir.off_dir(cam, sz, pin - Vector3(0, MarkerDir.PIN_UP, 0), me)
+	ok(ahead == Vector2.ZERO, "a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead))
+	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
+	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:
@@ -141,12 +247,12 @@ func _under_banner() -> int:
 				hit += 1
 	return hit
 
-# ------------------------------------------------------------------ 4. every stop can be reached
+# ------------------------------------------------------------------ 5. every stop can be reached
 ## From each stop to the next on the same island, plain walking: no step up taller than half a jump.
 func _reach() -> void:
 	var tu: Tutorial = m.tut
 	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
-	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
+	var order := ["land", "dash", "exdash", "glide", "crouch", "pickup", "yard"]
 	var worst := 0.0
 	var worst_at := ""
 	for i in range(1, order.size()):
@@ -156,6 +262,8 @@ func _reach() -> void:
 			continue
 		if m.world.island_of(a.x, a.z) != m.world.island_of(b.x, b.z):
 			continue      # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
+		if order[i] == "crouch":
+			continue      # (the lookout: climbed with a wall kick, checked below)
 		var prev := a.y
 		var n := int(a.distance_to(b) / 0.4) + 1
 		for k in range(1, n + 1):
@@ -168,4 +276,146 @@ func _reach() -> void:
 	var msg := "every walk between stops climbs at most 60%% of a jump (%.2fm of %.2fm, %s)"
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
-	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])
+	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
+	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 7. the glide dive line
+func _glide_secs(g: FirstMatchGuide, p: Hunter, secs: float) -> void:
+	p.dropping = false
+	p.gliding = true
+	p.pos.y += float(FirstMatchGuide.rules()["dive_height"]) + 5.0 - GlideDive.height(p)
+	for i in int(secs * 10.0):
+		g.tick(0.1)
+
+func _dive_hint() -> void:
+	Save.d["tutorial"].erase("glide_dive")
+	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])      # past the first matches: dive line only
+	var dm := Match.new()
+	main.add_child(dm)
+	dm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	dm.set_process(false)
+	var g := dm.guide
+	var p: Hunter = dm.player
+	ok(g != null and g.dive_only, "after the first matches the guide stays, for the dive line only")
+	_glide_secs(g, p, float(FirstMatchGuide.rules()["dive_open_s"]) - 0.5)
+	ok(g.line == "", "the glider open for less than dive_open_s: no line")
+	_glide_secs(g, p, 0.6)
+	var cap := Settings.key_cap("crouch")
+	var says := "the dive line with the crouch key (%s)" % g.line
+	ok(g.id == "dive" and g.line.contains(cap), "glider open past dive_open_s: " + says)
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var px := int(strip.size.y * 0.5)
+	var wide: float = dm.hud.big.get_string_size(g.line, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	ok(wide <= strip.size.x - strip.size.y, "the dive line fits the one-line strip at %d px" % px)
+	p.glide_dive.on = true
+	g.tick(0.1)
+	ok(g.line == "" and FirstMatchGuide.dive_taught(), "the dive stops the line and counts as learnt")
+	p.glide_dive.on = false
+	g.shown.clear()
+	_glide_secs(g, p, 5.0)
+	ok(g.line == "", "never again after a dive")
+	ok(FirstMatchGuide.for_match(null, {}) == null, "the next Extraction gets no guide at all")
+	Save.d["tutorial"].erase("glide_dive")
+	var g2 := FirstMatchGuide.for_match(dm, {})
+	g2.shown.clear()
+	_glide_secs(g2, p, 2.0)
+	ok(g2.id == "dive" and FirstMatchGuide.dive_taught(), "the line itself counts as shown for the save")
+	g2.tick(20.0)
+	g2.shown.clear()
+	_glide_secs(g2, p, 5.0)
+	ok(g2.line == "", "shown once per save: not again after it ran out")
+	dm.queue_free()
+# ------------------------------------------------------------------ 8. the closing zone's two lines
+## A real expedition with the first-match guide, every other guide line already shown, the player landed.
+func _zone_match() -> Match:
+	var zm := Match.new()
+	main.add_child(zm)
+	zm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	zm.set_process(false)
+	for h in zm.hunters:
+		if h != zm.player:
+			h.pos = zm.player.pos + Vector3(300, 0, 0)
+	zm.player.dropping = false
+	for row: Array in FirstMatchGuide.rules()["lines"]:
+		if not row[0] in FirstMatchGuide.ONCE_PER_PROFILE:
+			zm.guide.shown[row[0]] = true
+	return zm
+
+func _zone_tick(zm: Match, secs: float) -> void:
+	for i in int(secs * 10.0):
+		zm.zone.tick(0.1)
+		zm.guide.tick(0.1)
+
+func _zone_lines() -> void:
+	Save.d["first_guide"] = 0
+	Save.d["tutorial"].erase("guide_zone")
+	Save.d["tutorial"].erase("guide_wall")
+	var zm := _zone_match()
+	var g := zm.guide
+	var z := zm.zone
+	var p := zm.player
+	ok(g != null and z != null, "a real expedition has the zone and the first-match guide")
+	zm.time = 1.0
+	_zone_tick(zm, 3.0)
+	ok(g.id == "" and not g.shown.has("zone"), "before the first warning there is no zone line")
+	zm.time = z.t0[1] - float(ShrinkZone.rules()["warn_s"]) + 1.0
+	_zone_tick(zm, 2.0)
+	ok(z.told == 1, "the zone's first warning has come (close 1)")
+	var line := g.line.to_lower()
+	var points := line.contains("blue ring") and line.contains("minimap")
+	ok(g.id == "zone" and points, "first warning: the line points to the safe ring on the minimap (%s)" % g.line)
+	ok(line.contains("lose health over time"), "and says outside costs health over time")
+	ok(bool(Save.d["tutorial"].get("guide_zone", false)), "the profile remembers it was told")
+	var zone_secs := 14.0
+	for row: Array in FirstMatchGuide.rules()["lines"]:
+		if row[0] == "zone":
+			zone_secs = float(row[2])
+	_zone_tick(zm, zone_secs + 1.0)
+	ok(g.line == "", "it clears after its time")
+	_zone_tick(zm, 5.0)
+	ok(g.line == "", "the zone line does not repeat in the same match (close %d told)" % z.told)
+	# the wall: inside, nothing; outside after the edge has begun to close, one line, once
+	zm.time = z.t0[1] + 1.0
+	_zone_tick(zm, 3.0)
+	var wall_msg := "outside when the wall passes: a second line (%s)"
+	ok(not z.outside(p.pos) and g.line == "", "inside the ring when the wall passes: no wall line")
+	p.pos = Vector3(z.cur_c.x + z.cur_r + 40.0, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 2.0)
+	ok(z.outside(p.pos) and g.id == "wall", wall_msg % g.line)
+	var wall := g.line.to_lower()
+	ok(wall.contains("losing health") and wall.contains("blue ring"), "it says you are losing health and where to run")
+	ok(bool(Save.d["tutorial"].get("guide_wall", false)), "the profile remembers the wall line too")
+	p.pos = Vector3(z.cur_c.x, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 1.0)
+	ok(g.line == "", "back inside: the wall line clears")
+	p.pos = Vector3(z.cur_c.x + z.cur_r + 40.0, p.pos.y, z.cur_c.y)
+	_zone_tick(zm, 20.0)
+	ok(g.line == "", "outside again: the wall line does not repeat in the match")
+	_zone_widths(zm)
+	zm.queue_free()
+	# a later match of the same profile: neither line comes back
+	var zn := _zone_match()
+	zn.zone.tick(0.0)
+	zn.time = zn.zone.t0[1] - 5.0
+	_zone_tick(zn, 2.0)
+	var quiet := not zn.guide.shown.has("zone") and zn.guide.line == ""
+	ok(zn.zone.told == 1 and quiet, "next match: the first warning gets no zone line")
+	zn.time = zn.zone.t0[1] + 1.0
+	zn.player.pos = Vector3(zn.zone.cur_c.x + zn.zone.cur_r + 40.0, zn.player.pos.y, zn.zone.cur_c.y)
+	_zone_tick(zn, 3.0)
+	ok(zn.guide.line == "", "next match: outside the wall gets no wall line")
+	zn.queue_free()
+
+## Each of the two lines is one line in the guide strip at every screen size.
+func _zone_widths(zm: Match) -> void:
+	for sz: Vector2 in SIZES:
+		var strip := TutorialStrip.rect(sz)
+		for lid in FirstMatchGuide.ONCE_PER_PROFILE:
+			for row: Array in FirstMatchGuide.rules()["lines"]:
+				if row[0] != lid:
+					continue
+				var px := int(strip.size.y * 0.5)
+				var w := strip.size.x - strip.size.y
+				while px > 12 and zm.hud.big.get_string_size(String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+					px -= 1
+				ok(px >= 12, "%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px])

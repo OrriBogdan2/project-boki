@@ -4,7 +4,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## tank jets over the carpet.
 
 func parts() -> Array:
-	return ["lmb", "rmb", "dash", "e", "r"]
+	return ["lmb", "hold", "rmb", "dash", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(4.5)

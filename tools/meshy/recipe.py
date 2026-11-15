@@ -22,6 +22,7 @@ Steps, in order (the ones marked * need your eyes on their output before the nex
   balance    the Meshy balance
   loop       fit + shots: the iteration on the fit spec
 """
+import argparse
 import json
 import os
 import subprocess
@@ -311,8 +312,11 @@ STEPS = {"art": step_art, "crop": step_crop, "edit": step_edit, "prep": step_pre
 
 def main(a):
     global SPEC, RAW
-    if len(a) < 2:
-        sys.exit(__doc__)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("spec", help="art/wardens/src/<name>_recipe.json")
+    ap.add_argument("steps", nargs="+", metavar="STEP", help="steps to run in order (see above; edit:<view>, loop)")
+    args = ap.parse_args(a)
+    a = [args.spec] + args.steps
     SPEC = json.load(open(a[0]))
     RAW = os.path.expanduser(SPEC["raw"])
     os.makedirs(RAW, exist_ok=True)

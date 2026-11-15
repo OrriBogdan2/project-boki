@@ -119,5 +119,49 @@ func run(main: Node) -> void:
 	ok(P.kit_t > 0.0, "repairing armor")
 	P.hurt(6.0, Q, {"src": "abil"})
 	ok(P.kit_t <= 0.0 and P.armor_kits == 1, "a hit spills the repair and keeps the kit")
+	_consumables(m, P)
 	print("AIRHEAL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## The drink's numbers against docs/CONSUMABLES.md: the Vive Brew drinks for 1 s with no slow and heals
+## a flat amount; only damage is sourced as a cancel. Our dash and stun cancels are kept (unsourced).
+func _consumables(m: Match, P: Hunter) -> void:
+	P.gliding = false
+	P.armor = P.max_armor
+	P.roll_t = 0.0
+	P.stun_t = 0.0
+	P.tonics = 3
+	P.hp = P.max_hp * 0.3
+	P.inp["util1"] = false
+	_steps(m, 2)
+	var before := P.hp
+	P.inp["util1"] = true
+	_steps(m, 1)
+	P.inp["util1"] = false
+	ok(P.drink_t > 0.0 and P.drink_t <= 1.0, "the tonic drinks for the Brew's 1 s (%.2f left)" % P.drink_t)
+	ok(UtilityUse.channel_move(P) == 1.0, "and does not slow you (the Brew lists no slow)")
+	_steps(m, int(1.0 / Match.DT) + 2)
+	var healed := P.hp - before
+	ok(P.drink_t <= 0.0 and absf(healed - 42.0) < 1.5 and P.tonics == 2,
+			"it heals a flat 42 (%.1f) and spends one" % healed)
+	P.armor = 0.0
+	P.armor_kits = 2
+	P.inp["util2"] = true
+	_steps(m, 1)
+	P.inp["util2"] = false
+	ok(P.kit_t > 0.0 and absf(UtilityUse.channel_move(P) - 0.45) < 0.001,
+			"an armor kit slows to 0.45 (unsourced, in data)")
+	P.kit_t = 0.0
+	P.hp = P.max_hp * 0.5
+	for cancel in ["dash", "stun"]:
+		P.inp["util1"] = true
+		_steps(m, 1)
+		P.inp["util1"] = false
+		var started := P.drink_t > 0.0
+		P.roll_t = 0.2 if cancel == "dash" else 0.0
+		P.stun_t = 0.3 if cancel == "stun" else 0.0
+		_steps(m, 1)
+		ok(started and P.drink_t <= 0.0 and P.tonics == 2, "a %s ends the drink and keeps the tonic" % cancel)
+		P.roll_t = 0.0
+		P.stun_t = 0.0
+		_steps(m, 2)

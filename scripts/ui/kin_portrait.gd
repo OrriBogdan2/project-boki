@@ -74,13 +74,13 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 static func view(rec: Dictionary, tree: SceneTree, px := 56.0) -> Control:
 	var t := tex(rec, tree)
 	if t != null:
-		var tr := TextureRect.new()
-		tr.texture = t
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		tr.custom_minimum_size = Vector2(px, px)
-		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		return tr
+		var tex_rect := TextureRect.new()
+		tex_rect.texture = t
+		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tex_rect.custom_minimum_size = Vector2(px, px)
+		tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return tex_rect
 	return Disc.new(rec, px)
 
 ## The fallback picture: a disc in the kin's body and belly colours with its glow as a rim.
