@@ -65,7 +65,7 @@ Worst slip per Hunter, origin/main ca96e707c5 (with the anim_audit `soles` compi
 
 | Hunter | main | after | Bar |
 |---|---|---|---|
-| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 1.00 |
+| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 0.95 |
 | Vex (`gunslinger`) | 2.03 (left 3.0) | 1.20 (left 4.0) | 1.20 |
 | Albert (`bulwark`) | 1.97 (right 4.0) | 1.34 (right 4.0) | 1.35 |
 | Cinder (`ashwick`) | 2.33 (left 3.5) | 1.40 (left 3.5) | 1.40 |
@@ -132,3 +132,22 @@ Tenzo 3.75 to 3.4.
 |  | back | 0.01 | 0.52 | 0.84 | 0.71 | 0.89 | 1.55 | 1.82 | 1.75 | 1.54 | 1.35 | 1.39 |
 |  | left | 0.01 | 0.48 | 0.67 | 0.71 | 0.92 | 1.49 | 1.83 | 1.79 | 1.58 | 1.44 | 1.48 |
 |  | right | 0.01 | 0.42 | 0.63 | 0.68 | 0.92 | 1.55 | 1.71 | 1.76 | 1.59 | 1.48 | 1.50 |
+
+## Strafe drift, measured in the game rig (Nov 15, ext/fix-strafe-cadence-1115)
+
+`--gameplay-media --media-clip=14 --media-hunter=<id>` walks, runs, strafes and backpedals a Hunter on the game camera
+and logs the feet (`loco_<id>.tsv`); `--media-log` writes only the TSV, headless at a fixed 1/30 s step (a variable
+step skews the feet). The planted foot is the lowest 30 % of its height. The game leans every model 20 degrees toward
+the camera (`Cam.char_lean`), so a foot's world height mixes in its north-south position: on a strafe toward or
+away from the camera the old log picked the wrong frames as planted and read a strafe that looked ~35 % too slow
+(Vex 1.9 m/s drift, Kael 1.5). The log now reads height in the model's own frame, and the drift is what the clips
+really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfect strafe still drifts about 0.3 m/s.
+
+| Hunter | Strafe L / R drift before (m/s) | after |
+|---|---|---|
+| Vex (`gunslinger`) | 0.34 / 0.35 | unchanged |
+| Cinder (`ashwick`) | -0.17 / -0.15 | unchanged |
+| Meeko (`tender`) | 0.49 / 0.49 | unchanged |
+| Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
+| Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
+
