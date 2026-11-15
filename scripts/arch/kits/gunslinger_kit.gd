@@ -320,9 +320,12 @@ func _slide_end() -> void:
 	if rank("dash") >= 3:
 		h.add_buff("move_speed", float(dash_def()["rank3_speed"]), float(dash_def()["rank3_speed_t"]))
 	var air := bool(slide.get("air", false))
-	if air and not h.gliding:
-		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
-		h.vel.z *= 0.25
+	if not h.grounded and not h.gliding:
+		# ended in the air: at most at her run, as any dash (decision 0061); an air slide stops short instead of
+		# carrying on (a glide press carries it, item 4)
+		var keep := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z) * (0.25 if air else 1.0), h.run_speed)
+		h.vel.x = keep.x
+		h.vel.z = keep.y
 	var kind := "slide" if bool(slide.get("held", false)) else "step"
 	st["last_dash"] = "air_slide" if air else kind
 	last_dash_kind = String(st["last_dash"])
