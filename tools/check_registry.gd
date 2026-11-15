@@ -163,7 +163,7 @@ const CHECKS := {
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
-	"--particle-budget-check": ["res://tools/particle_budget_check.gd", "particle_budget_check", null],  # fx_life per preset
+	"--particle-budget-check": ["res://tools/particle_budget_check.gd", "particle_budget_check", null],  # fx_life
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],

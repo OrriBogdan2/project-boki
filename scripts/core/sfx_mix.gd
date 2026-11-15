@@ -155,7 +155,8 @@ func set_muffle(level: Muffle) -> void:
 ## What the bus has right now (--match-audio-check).
 func muffle_state() -> Dictionary:
 	var bus := AudioServer.get_bus_index("SFX")
-	return {"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at), "db": _muffle_duck.volume_db, "hz": _muffle_fx.cutoff_hz}
+	return {"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at), "db": _muffle_duck.volume_db,
+		"hz": _muffle_fx.cutoff_hz}
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db: float) -> void:
