@@ -12,7 +12,9 @@ const UI_SCALE_MIN := 0.75
 const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
-	"master": 0.8, "music": 0.7, "sfx": 1.0, "voices": 1.0, "ambience": 0.8, "ui_sounds": 1.0, "mute_unfocused": false,
+	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
+	"master": 0.9, "music": 0.85, "sfx": 1.0, "voices": 1.0, "ambience": 0.9, "ui_sounds": 1.0, "audio_v": 2,
+	"mute_unfocused": false,
 	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
@@ -27,7 +29,7 @@ const DEFAULTS := {
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
@@ -46,6 +48,11 @@ const BUSES := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
+## Camera ids renamed 11-13 (they were a third-party name): an old settings.cfg value maps to the new id.
+const CAM_IDS := {
+	"cam_style": {"supervive": "default", "supervive_wide": "default_wide"},
+	"cam_follow": {"supervive": "lean"},
+}
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
@@ -191,6 +198,14 @@ var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
 
+## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
+static func migrate_cam(d: Dictionary) -> void:
+	for k in CAM_IDS:
+		var old := String(d.get(k, ""))
+		if CAM_IDS[k].has(old):
+			d[k] = CAM_IDS[k][old]
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var cf := load_file()
@@ -221,13 +236,15 @@ func load_file() -> ConfigFile:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
+		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
 	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
+	_migrate_volumes(cf)
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -265,6 +282,16 @@ func _migrate_belt_keys() -> void:
 		if ks.has(pair[0]):
 			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
 			ks.erase(pair[0])
+
+## The volume sliders became perceptual (audio_v 2, Sfx.slider_db: gain = slider squared). A level saved
+## before that moves its slider to where it sounds the same, so nobody's mix changes.
+func _migrate_volumes(cf: ConfigFile) -> void:
+	if cf.has_section_key("s", "audio_v"):
+		return
+	for k in BUSES:
+		if cf.has_section_key("s", k) or v[k] != DEFAULTS[k]:
+			v[k] = sqrt(clampf(float(v[k]), 0.0, 1.0))
+	v["audio_v"] = 2
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
