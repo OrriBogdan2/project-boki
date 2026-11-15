@@ -57,9 +57,9 @@ func _check() -> void:
 	rival.teleport(g + Vector3(-1, 0, 0))
 	rival.unseen = false
 	await _go(0.2)
-	_expect("you, behind a cliff, wear the outline", _covered(P) and _tint(P) == SideColor.YOU)
-	_expect("your teammate wears it in the squad colour", _covered(mate) and _tint(mate) == SideColor.ALLY)
-	_expect("a rival in sight wears it in red", _covered(rival) and _tint(rival) == SideColor.FOE)
+	_expect("you, behind a cliff, wear the outline", _covered(P) and _tint(P) == SideColor.you())
+	_expect("your teammate wears it in the squad colour", _covered(mate) and _tint(mate) == SideColor.ally())
+	_expect("a rival in sight wears it in red", _covered(rival) and _tint(rival) == SideColor.foe())
 	rival.unseen = true
 	await _go(0.1)
 	_expect("an unseen rival does not", not _covered(rival))
