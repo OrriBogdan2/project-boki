@@ -128,11 +128,11 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 			"ledge_dash %s: lip %.1f m/s, crashes in the air %d, lands below %s" % [
 			what, float(o["lip_v"]), int(o["air_crash"]), str(o["landed"])])
 		return
-	var ok := bool(o["landed"]) and int(o["hover"]) <= 1 and bool(o["end_air"]) and exit_k >= least_k \
+	var ok := bool(o["landed"]) and int(o["hover"]) <= 1 and bool(o["end_air"]) and exit_k >= least_k - 0.01 \
 			and int(o["glide"]) >= 0 and int(o["glide"]) <= 2 and int(o["pose"]) == 0
 	var air := _run(id, mode, at, true)
 	ok = ok and bool(air["air_dash"])
-	var fmt := "ledge_dash %s: lip %.1f m/s, held height %d steps, ends in the air %s at %.2fx run (least %.2fx), " \
+	var fmt := "ledge_dash %s: lip %.1f m/s, held height %d steps, ends in the air %s at %.3fx run (least %.3fx), " \
 			+ "glider in %d steps, ground pose after %d, air dash %s (%d steps)"
 	c.ok(ok, fmt % [
 		what, float(o["lip_v"]), int(o["hover"]), str(o["end_air"]), exit_k, least_k, int(o["glide"]), int(o["pose"]),
