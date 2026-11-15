@@ -9865,3 +9865,4 @@ READY ext/merge-lane-vfxsfx2-1115 9e4a32fb4b17cbdbebc65dab6a7cca60d369f144 (veri
 READY ext/merge-lane-misc1-1115 325fe1ab53 (merge lane misc1: 9 branches, suite NEW-RED 0 after fixes, export OK 452.5 MB; PR via gh-outbox)
 READY ext/merge-lane-hunt3-1115r2 cc08721a05acfadd7b06d6b6fd2255a9807eff0c (hunt3 lane: hunter-loco-polish-1115 + --move-fx-check audit; 2 branches, move-fx/foot-slide/stride/anim-audit no NEW-RED, export OK)
 READY ext/mantle-port-a 856f912527 (0.24.6 anim wave on current main: ~40 anim branches ported, see docs/MERGE_0246_ANIM.md; NEW-RED explained in docs/DEBT.md; export OK 453 MB)
+READY ext/merge-lane-hunters3-1114 d5f21417240 (main f71704b3d83 merged, remote-smooth green locally)
