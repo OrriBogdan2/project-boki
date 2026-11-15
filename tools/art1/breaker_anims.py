@@ -256,7 +256,26 @@ DOWN = merged(CARRY, pos=(0, -0.08, 0.05), rot=(38, 8, 6), hips=(0, 0, 4), head=
               fr=(AX + 0.03, 0.12, AZ + 0.04), fl=(-AX - 0.03, 0.1, AZ + 0.06))
 C.bake("downed", 1.6, [(0, DOWN), (1.6, {})], over=breathe(1.6, 0.8))
 C.bake("stun", 0.9, [(0, merged(CARRY, rot=(-4, 5, 0), head=(-4, 0, 0))), (0.45, dict(rot=(-4, -5, 6), head=(-4, -10, -8))), (0.9, dict(rot=(-4, 5, 0), head=(-4, 0, 0)))])
-C.bake("revive", 1.0, [(0, merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)), (0.5, dict(rot=(-27, 0, 0))), (1.0, dict(rot=(-24, 0, 0)))])
+# Finishing a downed foe (Hunter.stomp: one stomp = 0.7 s, the hit lands at 0.49 s), reviving a friend, a sip (1.1 s, upper body only).
+# He can't lunge: the hull rocks back onto the left foot, the right comes up late and slowly, and the whole weight drops on the beat.
+REST = merged(CARRY, rot=(0, 0, 0))
+ST_UP = merged(CARRY, pos=(0, -0.02, 0.0), rot=(12, 0, -8), hips=(2, 0, -6), head=(-8, 0, 6), fr=(AX + 0.02, 0.1, AZ + 0.15), fra=-22.0, fl=(-AX, 0.04, AZ),
+               gr=sp(0.12, 0.1, -0.26), sh=sl(0.14, 0.08, -0.34), sn=(-0.9, 0.4, 0.0))
+ST_HIT = merged(CARRY, pos=(0, 0.1, -0.07), rot=(-18, 0, 7), hips=(-3, 0, 4), head=(10, 0, -4), fr=(AX + 0.03, 0.11, AZ), fra=0.0, fl=(-AX, 0.02, AZ),
+                gr=sp(0.04, 0.22, -0.44), gd=(0.1, 0.5, -0.9), sh=sl(0.0, 0.22, -0.44), sn=(-0.7, 0.6, 0.0), e="snap")
+C.bake("stomp", 0.7, [(0, REST), (0.3, merged(ST_UP, e="out")), (0.4, dict(pos=(0, -0.02, 0.012), rot=(15, 0, -9), fr=(AX + 0.02, 0.1, AZ + 0.17), e="in")), (0.49, ST_HIT),
+                      (0.56, dict(pos=(0, 0.1, -0.095), rot=(-21, 0, 7), e="out")), (0.7, REST)])
+# the kneel: no knees to kneel on, so he sinks into the hull, tips over his friend and presses with both hands, hammer hand and door hand alternating
+REV = merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)
+C.bake("revive", 1.2, [(0, REV), (0.3, dict(rot=(-29, 0, 0), pos=(0, 0.05, -0.1), gr=sp(-0.1, 0.4, -0.48), sh=sl(-0.2, 0.42, -0.4), e="out")),
+                       (0.6, dict(rot=(-24, 0, 0), pos=(0, 0.04, -0.07), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.42))),
+                       (0.9, dict(rot=(-29, 0, 0), pos=(0, 0.05, -0.1), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.5), e="out")),
+                       (1.2, dict(rot=(-24, 0, 0), pos=(0, 0.04, -0.07), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.42)))], loop=True)
+# the sip: the door hand lifts to the helmet (the door itself stays put), the whole hull leans back, the head tips, he swallows
+SIP = dict(rot=(8, 0, 0), head=(-18, 0, 0), sh=sl(0.02, 0.2, -0.12))
+C.bake("drink", 1.1, [(0, merged(CARRY, rot=(0, 0, 0))), (0.25, dict(sh=sl(0.06, 0.12, -0.28), rot=(3, 0, 0), e="out")), (0.45, dict(SIP, e="out")),
+                      (0.65, dict(SIP, head=(-22, 0, 0), rot=(7, 0, 0))), (0.85, dict(SIP, sh=sl(0.04, 0.18, -0.2), head=(-6, 0, 0), rot=(3, 0, 0))),
+                      (1.1, merged(CARRY, rot=(0, 0, 0)))])
 C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 0), head=(-14, 0, 0))),
                       (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.14, 0.3), rot=(80, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.14, 0.34), rot=(86, 8, 10)))])
 
