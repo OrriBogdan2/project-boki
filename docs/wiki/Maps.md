@@ -81,9 +81,9 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | lock dial, three rune pylons |
-| The Sunken Forge | Stone Colossus | Cinder Steps | lock dial |
-| The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
+| Stormcrown Eyrie | Sarcobra | Stormcrown Gaol | lock dial, three rune pylons |
+| The Sunken Forge | Siegephant | Cinder Steps | lock dial |
+| The Thornhive | Calderoise | Thornwood | lock dial, three ward stones |
 
 **Exits:** 2 uplink outposts.
 
@@ -129,9 +129,9 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| The Sunken Forge | Stone Colossus | Ember Quarry | lock dial |
-| Stormcrown Eyrie | Stormcoil | Stormreach | lock dial, three rune pylons |
-| The Thornhive | Brood Mother | Bloomwild | lock dial, three ward stones |
+| The Sunken Forge | Siegephant | Ember Quarry | lock dial |
+| Stormcrown Eyrie | Sarcobra | Stormreach | lock dial, three rune pylons |
+| The Thornhive | Calderoise | Bloomwild | lock dial, three ward stones |
 
 **Exits:** 2 uplink outposts.
 

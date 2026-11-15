@@ -10,7 +10,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Stone | medium | tank | Wild, nest eggs |
 | [Mycroll](#mycroll) | Hedgehog + Toadstool | Spore | small | controller | Starter egg |
 | [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
-| [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from The Stone Colossus |
+| [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from Siegephant |
 | [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
@@ -23,7 +23,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Glomwort](#glomwort) | Slime mold + Puffball | Spore | small | controller | Wild, nest eggs |
 | [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Stone | large | tank | Wild, nest eggs |
 | [Crofthorn](#crofthorn) | Highland cow + Stone cottage garden | Bloom | large | tank | Wild, nest eggs |
-| [Hivara](#hivara) | Honeybee + Praying mantis | Swarm | small | bruiser | Rare Egg from The Brood Mother |
+| [Hivara](#hivara) | Honeybee + Praying mantis | Swarm | small | bruiser | Rare Egg from Calderoise |
 | [Skateron](#skateron) | Grey heron + Ice skates | Frost | medium | controller | Wild, nest eggs |
 | [Kestrike](#kestrike) | Kestrel + Copper lightning rod | Storm | small | skirmisher | Wild, nest eggs |
 | [Anvilbrock](#anvilbrock) | Honey badger + Blacksmith's anvil | Ember | medium | tank | Wild, nest eggs |
@@ -56,7 +56,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
 | [Lunowl](#lunowl) | Owl + Luna moth | Lunar | small | trickster | Wild, nest eggs |
 | [Echolop](#echolop) | Hare + Bat | Echo | small | skirmisher | Wild, nest eggs |
-| [Zephyrak](#zephyrak) | Moray eel + Swift | Tempest | small | skirmisher | Rare Egg from Stormcoil, the Sky Serpent |
+| [Zephyrak](#zephyrak) | Moray eel + Swift | Tempest | small | skirmisher | Rare Egg from Sarcobra |
 
 ## Types
 
@@ -143,7 +143,7 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: Zippeli
 
 ## Cairnback
 
-_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnback's shell. Hatched from the Stone Colossus's egg.
+_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnback's shell. Hatched from the egg Siegephant guards.
 
 |  |  |
 |---|---|
@@ -154,8 +154,8 @@ _Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carry
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Bedrock) |
 | Farm work | Stone 4, Timber 3, Haul 2 |
-| Egg | Cairn Egg: Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. The Colossus guarded it. |
-| Rare | Hatches from the Rare Egg The Stone Colossus drops |
+| Egg | Cairn Egg: Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. Siegephant guarded it. |
+| Rare | Hatches from the Rare Egg Siegephant drops |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
@@ -404,7 +404,7 @@ _Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a wal
 
 ## Hivara
 
-_Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows Hivara everywhere. Hatched from the Brood Mother's egg.
+_Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows Hivara everywhere. Hatched from the egg Calderoise guards.
 
 |  |  |
 |---|---|
@@ -415,8 +415,8 @@ _Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folde
 | Fighting style | bruiser; aggression 0.65, loyalty 0.7, caution 0.3 |
 | Rides | shoulder (Sting) |
 | Farm work | Ranch 4, Bloom 3, Craft 2 |
-| Egg | Hive Egg: Waxy and golden, and it hums. Something inside is drumming to get out. The Brood Mother guarded it. |
-| Rare | Hatches from the Rare Egg The Brood Mother drops |
+| Egg | Hive Egg: Waxy and golden, and it hums. Something inside is drumming to get out. Calderoise guarded it. |
+| Rare | Hatches from the Rare Egg Calderoise drops |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
@@ -1065,7 +1065,7 @@ _Hare + Bat_ (`zapple`). A long-eared hare with bat wings. Echolop hears everyth
 
 ## Zephyrak
 
-_Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body with a swift's swept wings, crackling with static. Hatched from Stormcoil's egg.
+_Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body with a swift's swept wings, crackling with static. Hatched from the egg Sarcobra guards.
 
 |  |  |
 |---|---|
@@ -1076,8 +1076,8 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 | Fighting style | skirmisher; aggression 0.75, loyalty 0.4, caution 0.3 |
 | Rides | shoulder (Static) |
 | Farm work | Spark 4, Tide 2, Haul 2 |
-| Egg | Storm Egg: Light as a cloud and buzzing with static. Little sparks jump to your fingers. The Sky Serpent guarded it. |
-| Rare | Hatches from the Rare Egg Stormcoil, the Sky Serpent drops |
+| Egg | Storm Egg: Light as a cloud and buzzing with static. Little sparks jump to your fingers. Sarcobra guarded it. |
+| Rare | Hatches from the Rare Egg Sarcobra drops |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
