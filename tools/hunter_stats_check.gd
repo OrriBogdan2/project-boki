@@ -1,7 +1,7 @@
 extends RefCounted
 ## --hunter-stats-check: the Stats tab beside the Relics screen (HunterStats). A scripted match (through
 ## Game.apply_result, as an expedition ends) updates the right Hunter's row and the totals; unplayed Hunters
-## sort last; an old save's Hunters (no match count) read as 0 matches; the
+## sort last; a v13 save migrates (Hunters it played get a match count, others stay empty); the
 ## tab row has its two tabs. The save is never written.
 
 var bad := 0
@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var old := Save.d
 	_play()
-	_old_save()
+	_migrate()
 	_tabs(main)
 	Save.d = old
 	print("HUNTERSTATS %s (%d failed)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -65,13 +65,21 @@ func _play() -> void:
 	ok(HunterStats.per_match(_row_of("ostra")) == "-", "an empty row shows a dash for damage per match")
 	ok(HunterStats.cells(t)[0] == "All Hunters" and HunterStats.cells(a)[0] == Arch.label("archer"), "row labels")
 
-## A save from before the match count: its Hunters read as 0 matches, with the counts they have.
-func _old_save() -> void:
+## A v14 save (through every step to v20, HunterStats is 19 -> 20): Hunters it counted get a match count (their
+## escapes, at least 1); empty ones stay empty.
+func _migrate() -> void:
+	ok(Save.VERSION >= 20 and Save.MIGRATIONS.get(19, "") == "_migrate_19_to_20", "a 19 -> 20 step exists")
 	var data := Save.fresh()
-	data["classes"]["hunters"] = {"archer": {"extracts": 4, "knocks": 9}, "mage": {}}
-	var row := HunterStats.row("archer", data["classes"]["hunters"]["archer"])
-	ok(row["matches"] == 0 and row["knocks"] == 9 and row["got_out"] == 4, "an old save's Hunter keeps its counts")
-	ok(HunterStats.row("mage", {})["matches"] == 0, "an empty Hunter reads as 0")
+	data["v"] = 14
+	data["classes"]["hunters"] = {"archer": {"extracts": 4, "knocks": 9}, "juggernaut": {"knocks": 1}, "mage": {}}
+	ok(Save.migrate(data) and int(data["v"]) == Save.VERSION, "a v14 save loads")
+	var h: Dictionary = data["classes"]["hunters"]
+	ok(int(h["archer"]["matches"]) == 4 and int(h["archer"]["knocks"]) == 9 and int(h["juggernaut"]["matches"]) == 1,
+		"played Hunters keep their counts and get a match count")
+	ok(not (h["mage"] as Dictionary).has("matches"), "an empty Hunter stays empty")
+	data["v"] = 13
+	Save.migrate(data)
+	ok(int(data["classes"]["hunters"]["archer"]["matches"]) == 4, "migrating again changes nothing")
 
 ## The Relics | Stats tab row (shown on both screens).
 func _tabs(main: Node) -> void:
