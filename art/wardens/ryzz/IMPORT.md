@@ -24,3 +24,11 @@ Run it all with INSTALL=1 ~/meshy/ryzz_f/build.sh [source]. No weapon: fingertip
 
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
+## Pigtail graft (2026-11-15, ext/sparkle-hair-1115): Meshy pigtails on the live model
+Owner 11-15: the in-game hair "goes out too far and isn't wavy enough". Only the pigtails change: the live ones are cut from `Body`
+(hair-atlas faces outside |x| > 0.085 or below z 1.56) and Meshy-made wavy ones (a multi-image-to-3d bust from four head crops of
+the v2 turnaround) are grafted on by `tools/meshy/pigtail_graft.py` (`art/wardens/src/ryzz_pigtails.json`): aligned to the head, sheared in
+toward the neck, graded to the live palette, remeshed to 1.5k tris a side, baked into free atlas rectangles, skinned to `head`. Face, body,
+chest, backpack, rig and clips are untouched (the same file through Blender's glTF export); the pigtails stay rigid on the head bone.
+13.9k tris (live 13.2k). `ryzz_atlas.jpg` is Godot's extract of the new embedded atlas.
