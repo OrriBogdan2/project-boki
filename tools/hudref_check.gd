@@ -209,11 +209,8 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
-<<<<<<< HEAD
 	await _frames(m, hud, P)
-=======
 	await _hud_size(m)
->>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 	_done()
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
@@ -409,7 +406,9 @@ func _banner_closes(kb: KnockBanner) -> void:
 func _frames(m: Match, hud, P: Hunter) -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
 	mate.downed = false
-	m.knock(mate, m.hunters.filter(func(x): return x.team != P.team)[0], {})
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	m.knock(mate, foe, {})
+	mate.last_hit_by = foe      # (a hit does this; knock() alone does not)
 	await main.get_tree().process_frame
 	await hud.panels.draw
 	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
@@ -426,6 +425,8 @@ func _frames(m: Match, hud, P: Hunter) -> void:
 	row = SquadFrames.shown.get(mate.nid, {})
 	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
 		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
+	ok(row.get("killer", "") == foe.nid and SquadFrames.shown.get(P.nid, {}).get("killer", "x") == "",
+		"the dead row carries the finisher's face (%s); live rows carry none" % str(row.get("killer", "")))
 	var teams := {}
 	for h in squad:
 		teams[h] = h.team
@@ -455,6 +456,7 @@ func _hud_size(demo: Match) -> void:
 	Settings.v["hud_scale"] = 0.1
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
+	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -499,6 +501,7 @@ func _hud_size(demo: Match) -> void:
 			if state == "on the ground":      # (the left column holds back to what fits above the bottom block)
 				ok(widths[1.3] > widths[1.0] * 1.15, "%s: 130%% draws the minimap clearly bigger" % tag)
 	Settings.v["hud_scale"] = keep
+	Settings.set_v("hud_full", false, false)
 	main.get_tree().root.size = Vector2i(1280, 720)
 
 func _done() -> void:

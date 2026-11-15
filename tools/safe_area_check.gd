@@ -1,6 +1,5 @@
 extends RefCounted
 ## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-<<<<<<< HEAD
 ## 2560x1080 ultrawide, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
 ## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel,
 ## or a top-level control of a screen) sits inside SafeArea's margin and no two groups of one screen overlap.
@@ -8,14 +7,7 @@ extends RefCounted
 ## panel, settings, inventory and Field Book from their controls.
 ## The Ways Out widgets (the strip, its one line, the quest tracker, the Gate prompt, the uplink's status and the
 ## Blight line) are checked in each of their states (the edge markers: --edge-marker-check).
-=======
-## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
-## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
-## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
-## The Ways Out widgets (the strip, its one line, the Gate prompt, the uplink's status, the Blight line and the
-## edge markers) are checked in each of their states, and every direction an edge marker can point.
 ## --hud-scale=0.8..1.3 runs either at that HUD size (Settings hud_scale).
->>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
 ## and size (<dir>/<W>x<H>_<text %>_<screen>.png) and a contact sheet of them.
 

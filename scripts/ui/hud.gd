@@ -132,15 +132,10 @@ func hurt_flash(d: float) -> void:
 ## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-<<<<<<< HEAD
 	msgs.fight = in_fight()
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
-	msgs.top = 84.0
-=======
-	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
 	msgs.top = HudScale.from_edge(84.0)
->>>>>>> c556bb8a67 (HUD size: Settings hud_scale 80-130% scales each HUD group about its anchor inside the safe area)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over

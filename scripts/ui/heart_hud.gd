@@ -69,6 +69,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	var vc := HudVitals.corner(hud, sz)
 	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)
 		at.y = minf(at.y, vc.y - 12.0)
+	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 
@@ -104,16 +105,16 @@ static func full_map(fm) -> void:
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
 		gate_glyph(c, gv, 7.0, ht.carrier != null)
-		fm.hud._ctext(gv + Vector2(0, 18), "Heart Gate", 11, Heart.GATE_COL, fm.hud.big)
+		fm.label("Heart Gate", gv + Vector2(0, 18), 11, Heart.GATE_COL)
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
-		fm.hud._ctext(hv + Vector2(0, -20), _word(ht), 12, Heart.COL, fm.hud.big)
+		fm.label_near(_word(ht), hv + Vector2(0, -20), 12, Heart.COL, -1.0)
 	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
-			fm.hud._ctext(cv + Vector2(0, -16), "%s  ·  Heartspark" % ht.carrier.pname, 12, Heart.COL, fm.hud.big)
+			fm.label_near("%s  ·  Heartspark" % ht.carrier.pname, cv + Vector2(0, -16), 12, Heart.COL, -1.0)
 
 static func _word(ht: Heart) -> String:
 	match ht.state:
