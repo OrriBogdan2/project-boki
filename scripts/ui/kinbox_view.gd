@@ -98,7 +98,7 @@ func _build() -> void:
 	fo.item_selected.connect(func(i: int): filter = String(fo.get_item_metadata(i)); refresh())
 	fo.tooltip_text = "Show only some Boki (the rest dim; page tabs count the matches)"
 	fo.fit_to_longest_item = false
-	fo.clip_text = true
+	fo.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	fo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fo.custom_minimum_size.x = 120
 	fr.add_child(fo)
@@ -244,7 +244,7 @@ func _build_name() -> void:
 		le.select_all.call_deferred()
 	else:
 		var t := UI.title(KinBox.page_name(page), 22, Color("e6dcff"))
-		t.clip_text = true
+		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_row.add_child(t)
 		var n := KinBox.page_kin(page).size()
@@ -307,8 +307,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	sxi.position = Vector2(0, 13)
 	stack.add_child(sxi)
 	var nm := UI.label(String(rec["name"]), 11, sp["color"].lerp(UI.INK, 0.55))
-	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.clip_text = true
+	FitLabel.shrink(nm, 6)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.position = Vector2(-2, 53)
 	nm.size = Vector2(CELL.x - 4, 16)
@@ -501,7 +500,7 @@ func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	h.add_child(l)
 	var dl := UI.label(txt, 12, UI.MUTED)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dl.custom_minimum_size.x = 60
 	h.add_child(dl)
