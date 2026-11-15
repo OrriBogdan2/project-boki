@@ -89,7 +89,7 @@ func press_ult() -> bool:
 	h.used["r"] = int(h.used.get("r", 0)) + 1
 	m.sfx("charge", h.pos, 0.0, 0.6)
 	m.sfx("warn", h.pos, -4.0, 0.7)
-	play("mf_ult")
+	play(MergeMoves.ult_move(String(form["id"])))
 	var tx: Vector3 = _ult_target(r)
 	announce("ult", tx, _tell_radius(r), float(r.get("end", 1.0)))
 	CombatBus.ability_used.emit(h, "%s_r" % form["id"], "ult")
@@ -190,11 +190,13 @@ func info() -> Dictionary:
 		"ready": lock_left() <= 0.0 and not ulting(), "form": form, "plan": "ult", "timer": float(h.merge_st.get("t", 0.0)), "timer_max": float(h.merge_st.get("T", 1.0)), "ulting": ulting(),
 		"col": form["glow"], "charges": 0, "max_charges": 0, "verb": "", "level": 1}
 
-## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel).
+## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel), and
+## for a beat after the merge ends the release. A form move that has played out leaves the hero's own moves showing.
 ## Other games read the pose id the owner syncs (KinNet) from the hunter's meta.
 static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	var id := ""
 	var at := 0.0
+	var now: float = hunter.m.time
 	var k := of(hunter)
 	if k != null:
 		id = k.anim_id
@@ -202,9 +204,19 @@ static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	elif hunter.remote:
 		id = String(hunter.get_meta("kpose", ""))
 		at = float(hunter.get_meta("kpose_at", -9.0))
-	if id.begins_with("mf_"):
+	if not MergeMoves.playing(id, now - at):
+		id = ""
+	var out_at := float(hunter.get_meta(MergeMoves.OUT_AT, -9.0))
+	# (the release gives way to a move the hero starts after the merge ended)
+	var since_out := now - out_at
+	var shown := String(s.get("kmove", ""))
+	var hero_move: bool = not shown.begins_with("mf_") and float(s.get("kmove_t", 99.0)) < since_out
+	if id == "" and k == null and not hero_move and MergeMoves.playing(MergeMoves.RELEASE, since_out):
+		id = MergeMoves.RELEASE
+		at = out_at
+	if id != "":
 		s["kmove"] = id
-		s["kmove_t"] = hunter.m.time - at
+		s["kmove_t"] = now - at
 	elif String(s.get("kmove", "")).begins_with("mf_"):
 		s.erase("kmove")
 		s.erase("kmove_t")

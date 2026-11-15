@@ -315,9 +315,6 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h):
-		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
-		return true
 	if riposte.move_k() <= 0.0:
 		# planted in the guard or the cleave: a slash press is kept for BUFFER and swings as the cleave lands
 		if held and not lmb_was: lmb_buf = BUFFER
@@ -931,7 +928,7 @@ func _haul_land(k: float) -> void:
 ## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
 ## body while the Searing Wave charges.
 func _tick_tells() -> void:
-	if not h.is_local() or busy() or KinMerge.active(h):
+	if not h.is_local() or busy():
 		return
 	var sl: Dictionary = rmb_def()["slam"]
 	if rmb_ready():
