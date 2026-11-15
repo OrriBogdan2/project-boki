@@ -9793,3 +9793,4 @@ READY ext/merge-lane-anim-1115-b 571636b312 (4 anim branches: stomp-drink-1/2/3,
 READY ext/merge-lane-vfxsfx1-1115 5f4c7d0321 (merge lane vfxsfx1 a: sfx-hatch, sfx-legendary-presence, vfx-garden-games-2; suite NEW-RED 0, export OK)
 READY ext/merge-lane-vfxsfx1-1115-b 9cb32b6500 (merge lane vfxsfx1 b: Neve skate sound ported; rimewright-combo/support/match-audio green)
 READY ext/merge-lane-uihud-1114-b c32789fbbe28bd954d52f20b70445430b2ca02d8 (re-merged origin/main 71734fa391, clean, net.gd VERSION 0.24.12 kept; health --strict OK, size_budget OK, --hatch-check 0 failures; godot --check times out on rpc5 cold cache)
+READY ext/merge-lane-onboard-1115 ae393e0784 (merge lane onboard 11-15: 10 tutorial branches ported onto main, 12 superseded archived, 25 HARD; PR via gh-outbox; gate 3 running) SUPERSEDES ext/tut-first-breed c01bcdf328
