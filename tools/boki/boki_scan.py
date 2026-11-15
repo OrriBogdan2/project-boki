@@ -228,6 +228,36 @@ SCANS = {
         "cover": 1.3,
     },
 
+    "glomwort": {
+        "height": 0.49,
+        "tris": 16000,
+        "x": [(0.06, 0.061), (0.28, 0.168)],
+        "y": [(0.0, 0.0), (0.255, 0.245), (0.44, 0.49)],
+        "z": [(-0.208, -0.235), (0.0, 0.0), (0.3, 0.29)],
+        "drop": ("puffs",),
+        "merge": {"lobe%d" % i: "root" for i in range(7)},
+        "eye_c": (0.061, 0.245, -0.235),
+        "eye_r": (0.032, 0.036, 0.02),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.8,
+        "gain": 1.15,
+        "cover": 1.2,
+    },
+    "selenfin": {
+        "height": 0.73,
+        "tris": 16000,
+        "x": [(0.082, 0.15), (0.27, 0.21)],
+        "y": [(0.0, 0.0), (0.515, 0.37), (0.7, 0.56)],
+        "z": [(-0.41, -0.423), (-0.25, -0.31), (0.435, 0.42)],
+        "eye_c": (0.2, 0.37, -0.29),
+        "eye_r": (0.05, 0.052, 0.03),
+        "eye_yaw": 1.15,
+        "iris": "8a6fa8",
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.2,
+    },
 }
 
 
@@ -299,7 +329,8 @@ class Scan:
         self.fit = Fit(s["x"], s["y"], s["z"])
         self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
         self.REST_POSE = s.get("pose", {})
-        self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
+        self.EYE_C = v3(*s["eye_c"]) if "eye_c" in s else creature.EYE_C  # a new row starts on the proxy's eyes
+        self.EYE_R = v3(*s["eye_r"]) if "eye_r" in s else creature.EYE_R
         face = {**boki_face.FACE, **creature.FACE}  # a species' FACE holds only what differs from the defaults
         mouth = self.fit.fwd(v3(face["brow_x"], face["mouth_y"], face["mouth_z"]))
         self.FACE = {**face, "brow_x": mouth[0], "mouth_y": mouth[1], "mouth_z": mouth[2], **s["face"]}  # the row wins
@@ -352,7 +383,7 @@ class Scan:
         return grid[np.argmax(np.linalg.norm(d, axis=1) * np.where((d * nor).sum(1) < 0, 1.0, -1.0))]
 
     def eye_frame(self, sx):
-        yaw = self._s["eye_yaw"]
+        yaw = self._s.get("eye_yaw", self._mods[0].EYE_YAW)
         fr = frame(v3(sx * math.sin(yaw), 0.1, -math.cos(yaw)), v3(0, 1, 0))
         if (fr[0] @ v3(sx, 0, 0)) < 0:
             fr[0] = -fr[0]
