@@ -9807,3 +9807,4 @@ READY ext/stuck-integ-7fc43430 5aa6ed6590 (supersedes: anim-boki-idle 6d1fcb7e5,
 READY ext/merge-lane-anim-hard-1115 a453996bce (anim HARD set: PR #114 bundle on main after #109 + bul-guard-remote Net 0.24.12; clip-check/warden-clips-check same reds as main; suite-fast+export left to regate, rpc5)
 READY ext/merge-lane-misc2-1115-b 605ff42376 (misc2 -b bundle: clans-slice-3-tag, scrapking-lmb-1111-clips, move-speed-1111; targeted checks 0 new red, export OK 446.6 MB); ext/merge-lane-misc2-1115 be636e1c45 re-merged with main for PR #119
 READY ext/merge-lane-misc3-1115 ec867f0e5b3e21e41de34f23665c0a26be0c6e87 (lane misc3 a, PR #120: + main 24a9d4bd01 + tutorial-hud-check riding fix, was 10 reds on that flag; health OK, targeted checks green)
+READY ext/merge-lane-misc3-1115-b c1b20696d789d627fb2289f552df84a0db6635ca (lane misc3 b: fold-tut-first-1112 first-time hints, stacked on a; health OK, 6 targeted checks 0 failures; PR via gh-outbox new-pr-b.md)
