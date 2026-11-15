@@ -180,6 +180,8 @@ func _on_base() -> void:
 			k["starter"] = true
 			d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
+	for f in ["first_shove", "first_seek", "first_volley"]:      # past the practice rounds (FirstRound)
+		d["tutorial"][f] = true
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
