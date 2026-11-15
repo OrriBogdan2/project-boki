@@ -1,17 +1,20 @@
 shader_type spatial;
 render_mode unshaded, cull_back;
 // A Hunter's face on a screen of glass (Breaker's porthole): glowing shapes drawn from 2D distances, so it holds at any
-// zoom and needs no textures. The look is the owner-approved appeal3 face (v2 portrait): rounded half-moon eyes and a
-// D-shaped smile in cyan with a pale-mint core, on glossy deep-teal glass. Moods: 0 calm, 1 happy, 2 angry,
-// 3 determined, 4 sad; `from` fades into `to` by `k`.
+// zoom and needs no textures. The look is his live v95 master's (Meshy i1, owner promotion 11-12): two pale-cyan eyes,
+// rounded below and cut by a lid that slants down to the middle, no mouth, on near-black glass with a soft highlight top
+// left. Moods: 0 calm (the master's own scowl), 1 happy, 2 angry, 3 determined, 4 sad; `from` fades into `to` by `k`.
 uniform int from_mood = 0;
 uniform int to_mood = 0;
 uniform float k = 1.0;
 uniform float blink = 0.0;        // 0..1: the eyes shut to a line
-uniform vec3 glow = vec3(0.25, 0.95, 0.95);
-uniform vec3 core = vec3(0.8, 1.0, 0.95);
-uniform vec3 glass = vec3(0.12, 0.32, 0.34);
+uniform vec3 glow = vec3(0.42, 0.9, 1.0);
+uniform vec3 core = vec3(0.85, 1.0, 1.0);
+uniform vec3 glass = vec3(0.045, 0.05, 0.058);
 uniform float strength = 1.6;
+// past the glass's edge (r > 1: the screen's triangles that reach onto the porthole ring): the ring's copper, so the
+// glass reads round whatever the low mesh's triangle edges do
+uniform vec3 rim_col : source_color = vec3(0.45, 0.26, 0.21);
 
 // a half-moon: a disc of radius r at c, its underside bitten by a wider disc whose top sits dip*r under c (dip 0..1)
 float moon(vec2 p, vec2 c, float r, float dip) {
@@ -20,33 +23,30 @@ float moon(vec2 p, vec2 c, float r, float dip) {
 	return max(d, r * 1.2 - length(p - c + vec2(0.0, r * (dip + 1.2))));
 }
 
-// a D: flat top, round bottom (up < 0 flips it into a frown); w, h its half sizes
-float dee(vec2 p, vec2 c, float w, float h, float up) {
-	vec2 q = (p - c) / vec2(w, h);
-	q.y *= sign(up);
-	return max(length(q) - 1.0, q.y) * min(w, h);
+// an eye: an ellipse (half sizes w, h) at c, shut toward a line by blink
+float eye(vec2 p, vec2 c, float w, float h) {
+	vec2 q = (p - c) / vec2(w, h * max(1.0 - blink, 0.06));
+	return (length(q) - 1.0) * min(w, h);
 }
 
-float seg(vec2 p, vec2 a, vec2 b) {
-	vec2 pa = p - a, ba = b - a;
-	return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
+// a lid: the eye is cut above a line through (x0, y0) of slope `fall` (> 0 falls toward the middle)
+float lid(vec2 q, float x0, float y0, float fall) {
+	return q.y - y0 - fall * (q.x - x0);
 }
 
 float face(vec2 p, int m) {
 	vec2 q = vec2(abs(p.x), p.y);   // the eyes mirror; q.x small is the inner corner
 	float d = 9.0;
-	if (m == 0) {          // calm: the approved face, rounded eyes and a small smile
-		d = min(moon(q, vec2(0.5, 0.0), 0.26, 0.3), dee(p, vec2(0.0, -0.36), 0.15, 0.14, 1.0));
-	} else if (m == 1) {   // happy: big half-moons and an open grin
-		d = min(moon(q, vec2(0.5, 0.04), 0.3, 0.12), dee(p, vec2(0.0, -0.33), 0.27, 0.2, 1.0));
-	} else if (m == 2) {   // angry: the half-moons cut by a brow slanting down to the middle, a frown
-		float lid = q.y - 0.02 - 0.75 * (q.x - 0.32);
-		d = min(max(moon(q, vec2(0.5, 0.0), 0.27, 0.3), lid), dee(p, vec2(0.0, -0.44), 0.16, 0.09, -1.0));
-	} else if (m == 3) {   // determined: flattened half-moons under a level lid, a straight mouth
-		d = min(max(moon(q, vec2(0.5, -0.02), 0.28, 0.4), q.y - 0.1), seg(p, vec2(-0.15, -0.38), vec2(0.15, -0.38)) - 0.045);
-	} else {               // sad: half-moons drooping to the outside, a small down-turned mouth
-		float lid = q.y - 0.12 + 0.6 * (q.x - 0.5);
-		d = min(max(moon(q, vec2(0.48, -0.04), 0.25, 0.3), lid), dee(p, vec2(0.0, -0.46), 0.13, 0.08, -1.0));
+	if (m == 0) {          // calm: the master's eyes, a lid falling gently to the middle
+		d = max(eye(q, vec2(0.43, -0.02), 0.31, 0.22), lid(q, 0.7, 0.15, 0.42));
+	} else if (m == 1) {   // happy: the eyes lift into round half-moons, no lid
+		d = moon(q, vec2(0.43, 0.02), 0.27, 0.25);
+	} else if (m == 2) {   // angry: a steeper lid, the eyes narrower
+		d = max(eye(q, vec2(0.43, -0.04), 0.31, 0.2), lid(q, 0.7, 0.13, 0.8));
+	} else if (m == 3) {   // determined: a level lid
+		d = max(eye(q, vec2(0.43, -0.02), 0.31, 0.22), lid(q, 0.0, 0.07, 0.0));
+	} else {               // sad: the lid falls to the outside
+		d = max(eye(q, vec2(0.43, -0.05), 0.29, 0.2), lid(q, 0.3, 0.1, -0.45));
 	}
 	return d;
 }
@@ -57,11 +57,13 @@ void fragment() {
 	float line = smoothstep(0.015, -0.015, d);
 	float hot = smoothstep(-0.02, -0.12, d);        // the pale core inside the shapes
 	float halo = exp(-max(d, 0.0) * 9.0);
-	// the glass: deep teal, darker to the rim, a soft highlight top left and a small glint
+	// the glass: near-black, darker to the rim, a soft highlight top left and a small glint
 	float r = length(p);
 	vec3 g = glass * mix(1.1, 0.6, smoothstep(0.3, 1.0, r));
-	float sheen = smoothstep(0.32, 0.0, length((p - vec2(-0.34, 0.5)) * vec2(1.3, 2.4))) * 0.22;
-	float glint = smoothstep(0.07, 0.0, length(p - vec2(-0.5, 0.56))) * 0.5;
+	float sheen = smoothstep(0.3, 0.0, length((p - vec2(-0.3, 0.6)) * vec2(1.2, 2.6))) * 0.3;
+	float glint = smoothstep(0.06, 0.0, length(p - vec2(-0.48, 0.62))) * 0.35;
 	vec3 lit = mix(glow, core, hot * 0.5);
-	ALBEDO = g + vec3(sheen + glint) * vec3(0.8, 1.0, 1.0) + glow * halo * 0.35 + lit * line * strength;
+	vec3 col = g + vec3(sheen + glint) * vec3(0.8, 1.0, 1.0) + glow * halo * 0.35 + lit * line * strength;
+	float bezel = smoothstep(0.9, 0.97, r) * (1.0 - smoothstep(0.97, 1.0, r));   // a dark seat round the glass
+	ALBEDO = mix(col * (1.0 - 0.7 * bezel), rim_col, smoothstep(0.985, 1.01, r));
 }

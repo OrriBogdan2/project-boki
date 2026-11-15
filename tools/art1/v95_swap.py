@@ -136,6 +136,22 @@ def fill_misses(body, steps):
         hole &= ~new
 
 
+def paint_emit(body):
+    """`emit_paint` {h, s, v}: a master with no emission map that paints its glow (Albert i1's cyan cracks): those texels of
+    the baked atlas (hue/sat/value ranges, as `slots`), the rest black, as the game's emissive texture."""
+    r = SPEC["emit_paint"]
+    flat = body.reshape(-1, 4)
+    h, s, v = hsv(flat[:, :3])
+    m = np.ones(len(flat), bool)
+    for key, val in (("h", h), ("s", s), ("v", v)):
+        if key in r:
+            m &= (val >= r[key][0]) & (val <= r[key][1])
+    out = np.zeros_like(flat)
+    out[m] = flat[m]
+    print("emit_paint", int(m.sum()), "glow texels", flush=True)
+    return out.reshape(body.shape)
+
+
 def lay_kept(old, kept, body, tex, socket="Base Color"):
     """The old atlas (or the image on its `socket`) baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
     old_img = BW.base_image(old, socket)
@@ -208,14 +224,19 @@ def bake():
         layers.append(("emit", "Emission Color", src))
     for name, socket, src in layers:
         low.data.materials.clear()
-        img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
-        body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
+        if socket is None:      # `emit_paint`: no bake, the atlas's glow texels
+            img, body = bpy.data.images.new("emit_paint", tex, tex, alpha=False), paint_emit(src)
+        else:
+            img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
+            body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
         if name == "atlas":     # (not the emission map, where black is no glow)
             fill_misses(body, max(32, tex // 64))
-        if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
+        if kept.data.polygons and socket:  # the kept parts: the old image on their new UVs, laid over the body's
             lay_kept(old, kept, body, tex, socket)
         body[..., 3] = 1
         img.pixels = body.ravel()
+        if name == "atlas" and SPEC.get("emit_paint"):
+            layers.append(("emit", None, body))
         if name in bpy.data.images:     # (the game glb's own image of that name: Cinder's "atlas" and "emit")
             bpy.data.images[name].name = name + "-game"
         img.name = name
@@ -609,6 +630,27 @@ def tri_slots(ob, img, top_bone, P):
     return out
 
 
+def screen_uvs(low, slots, P):
+    """`screen` {slot, centre, r}: that slot's triangles (Albert's porthole glass) get their own UVs, the disc of radius r round
+    the centre (master points) on 0..1, his right at u 1 and up at v 1, for shaders/warden_mood.gdshader to draw the face on
+    (lost from this file in a merge before the 11-11 clean1 swap: the face drew on atlas UVs)."""
+    scr = SPEC.get("screen")
+    if not scr:
+        return
+    me = low.data
+    c, r = np.array(scr["centre"], float), float(scr["r"])
+    lv = np.empty(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    uv = np.empty(len(me.loops) * 2, F)
+    me.uv_layers["UVMap"].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    sel = np.repeat(np.asarray(slots) == scr["slot"], 3)
+    q = P[lv[sel]] - c
+    uv[sel] = np.stack([0.5 + q[:, 0] / (2 * r), 0.5 + q[:, 2] / (2 * r)], 1)
+    me.uv_layers["UVMap"].data.foreach_set("uv", uv.ravel())
+    print("SWAP screen", int(sel.sum() // 3), "triangles", flush=True)
+
+
 def move_anchors(arm, T, K):
     """The spec's anchors, through the fit (their own segment weights), in the rest pose; `anchor_bones` {anchor: bone} moves
     one onto another bone (Kael's arm blooms onto the master's cursed left arm)."""
@@ -651,7 +693,9 @@ def main():
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
-    slots = [s + "-atlas" for s in tri_slots(low, img, top, P)] + (kept["slots"].split(",") if kept["slots"] else [])
+    raw = tri_slots(low, img, top, P)
+    screen_uvs(low, raw, P)
+    slots = [s + "-atlas" for s in raw] + (kept["slots"].split(",") if kept["slots"] else [])
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
     gname = {g.index: g.name for g in kept.vertex_groups}
@@ -673,7 +717,7 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
-    emit = bpy.data.images.get("emit") if SPEC.get("emit") else None     # (not the game glb's own "emit")
+    emit = bpy.data.images.get("emit") if SPEC.get("emit") or SPEC.get("emit_paint") else None     # (not the game glb's own)
     for s in names:
         if s in bpy.data.materials:     # (the game glb's own, a kept part's: "flame-jet")
             bpy.data.materials[s].name = s + "-game"
