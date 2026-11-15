@@ -129,7 +129,8 @@ Still differs:
   49, 59); the source stands still [F].
 - Aegis: a 160 HP shield with Shield Charge on Shift; the source's is regenerating shield energy and the routing is
   `[?]`.
-- Faultline: four cells, 0.5 s stun, cooldown 40 vs 50; Mending Ground 12 s vs 8 at the top rank.
+- Faultline: four cells, 0.5 s stun, cooldown 40 vs 50. Mending Ground matches the data: 12 s, 8 s at rank 3 (the
+  reel's rank), as the source's 8 s at tier IV.
 - The hammer has no auto-return (matches); the recall is a second press.
 
 Seen in the reel: the throw's dotted line, the flame-arc swing and the green zone match the footage's beats; the
