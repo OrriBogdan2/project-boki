@@ -435,17 +435,17 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m only; the invented Focus/Deadeye is gone (gap 5 closed) | differ: tall-ledge climb not built |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (ffa20b0f7) | match (gap 5 closed) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m only; the invented Focus/Deadeye is gone (gap 5 closed) | differ: tall-ledge climb not built |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; Focus/Deadeye cut (ffa20b0f7) | match (gap 5 closed) |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .5, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) · **done** `ext/parity-phasewalk-rebased`, `ext/lace-phasewalk-verify`: passes raised terrain, set on top if it ends inside; follow-up in ext/combat-lace-spirit-ledges-rebased (not on the candidate) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open · **done** `ext/parity-lace-focus` (main): Focus and Deadeye cut, Hawk Sense kept; climb asserted (`ext/lace-tall-climb-rebased`) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open · **done** `ext/parity-lace-focus` (main): Focus and Deadeye cut, Red Thread kept; climb asserted (`ext/lace-tall-climb-rebased`) |
 | RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Guard .15 s, wall hit 4.94x the shot (full pin 178), stun 1.2, cd 16, 1 charge | match (verified Nov 9; gaps 6, 7 closed, docs/heroes/archer.md) |
 | Q | none | glove | ours |
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | 3.5 m/.24 s raw → ~3 m/.28 s, walks rocks and barriers, **not ledges** | differ (gap 8: READY `ext/lace-phasewalk-verify` 728a6c834) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB `fire`; 8 of 17 rows unsourced | gap 9 closed here |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 · LMB **done** `ext/parity-dashlmb` (main, fires mid-dash); 8 rows unsourced **open** [?] |
@@ -457,7 +457,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match | still done (tell .35, 4.4 s, slow 35%, cd 15) |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match | still done (3 shots, window 6 s, cd 60); nock now .5 (97ffe28a9) |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) | still differ, open (gap 8, ledges): roll 3.0 m/.27 s unchanged; not played in --arena |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | **closed** (ffa20b0f7): Focus/Deadeye cut, Hawk Sense 22 m kept; gap 5 done |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | **closed** (ffa20b0f7): Focus/Deadeye cut, Red Thread 22 m kept; gap 5 done |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | still done (`hem.glb` 48 clips) |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | gap 9 closed for Hem (4e788af65): 11 `fire` rows; 8 of 17 rows still unsourced `[?]` (open) |
 | Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
@@ -495,7 +495,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match | First tick 0.38 s (tell 0.35), 5 per tick, 8 ticks in 4.4 s at 0.52 s (gap C); slow 35%, cd 15 s. **match** |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match | First beam 0.90 s after the press and fire held (nock 0.5); 18, 18, 25 (finisher under 12%), 1.52 s apart (footage 1.5), cd 60 s. **match** |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) | Roll 3.03 m, 98% by 0.37 s (data 3.0/.27), cd 9.5 s; Spirit Walk passes rocks and terrace walls (combo PASS). Gap 8 closed on terraces. dash-flow rows 0 fail. **match** |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | Hawk Sense shows only the injured (PASS); Focus and Deadeye cut. **match** |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | Red Thread shows only the injured (PASS); Focus and Deadeye cut. **match** |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | Draw, loose, perfect, overdraw, Heavy and ult clips all PASS by name. **match** |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | Draw and hold carry through a dash, jump out in 0.1 s (item 51 PASS). **match** |
 
@@ -1028,9 +1028,9 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 2 | **Closed** bc1a70608 (2026-11-07): brake 22.2 m/s² plus ground_friction 2/s (source), a let-go from a run slides ~0.3 m; 5a2831b2b retired the last ours number (`GROUND_SHED` 110), over-run speed now sheds under the same brake. Still differs: nothing in the stop; asserted in --move-feel-check | none | content/rules/hunter_move.json, scripts/match/hunter.gd | done |
 | 3 | Air control 0.3 vs 0.015, 20x source | Lower it; keep owner-asked steer rows | hunter_move.json, hunter_move.gd | M |
 | 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs only on kits with no source dash (table below) | hunter.gd | M |
-| 5 | Done: Hem's Focus/Deadeye is removed (Hawk Sense only) | none | archer_kit.gd | done |
+| 5 | Done: Hem's Focus/Deadeye is removed (Red Thread only) | none | archer_kit.gd | done |
 | 6 | Done: Hem's Heavy Shot wall payoff is `wall_mult` 4.94 | none | archer.json | done |
-| 5 | **Closed** ffa20b0f7 (2026-11-08, owner decision 2026-11-07): Focus meter, its +20% range and the Deadeye crit cut; Hawk Sense kept. Still differs: nothing; checks assert no meter and a plain arrow into a pinned foe | none | archer_kit.gd, archer.json | done |
+| 5 | **Closed** ffa20b0f7 (2026-11-08, owner decision 2026-11-07): Focus meter, its +20% range and the Deadeye crit cut; Red Thread kept. Still differs: nothing; checks assert no meter and a plain arrow into a pinned foe | none | archer_kit.gd, archer.json | done |
 | 6 | **Closed** 4aa011a49 (2026-11-07): `wall_dmg` 12 and the .4 floor replaced by `pin.wall_mult` 4.94, the source's 173 extra on 35. Still differs: nothing in the payoff | none | archer.json | done |
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
