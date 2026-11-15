@@ -27,15 +27,14 @@ func run() -> void:
 	var stop: float = float(w["range"])
 	var hit_r: float = T.r + float(w["size"])
 	var fan: float = float(w["fan_deg"])
-	var shape_ok: bool = pel == 7 and absf(stop - 6.3) < 0.01 and absf(fan - 20.0) < 0.01
+	var shape_ok: bool = pel == 7 and absf(stop - 6.3) < 0.01 and absf(fan - 10.0) < 0.01
 	var bloom_max: float = float(w["bloom_max_deg"])
-	shape_ok = shape_ok and absf(fan + bloom_max - 30.0) < 0.01
+	shape_ok = shape_ok and absf(fan + bloom_max - 45.0) < 0.01
 	var shape := "%d slugs, stop %.1f m, fan %.0f degrees" % [pel, stop, fan]
-	var shape_label := "gun range: 7 slugs, stop 6.3 m, a fan of 20 degrees after the aimed first volley, 30 at most"
+	var shape_label := "gun range: 7 slugs, stop 6.3 m, a 10 degree pack when waited, 45 at most"
 	ok_fn.call(shape_label, shape_ok, shape)
 	for bloom: float in [0.0, bloom_max]:
-		# the first volley of a burst (no bloom yet) flies straight down the aim line (`aimed_first`)
-		var spread: float = 0.0 if bloom == 0.0 and w.get("aimed_first", false) else fan + bloom
+		var spread: float = fan + bloom      # a waited volley is the tight pack, then the bloom
 		for d: float in [2.0, 6.0, stop - 0.1]:
 			_volley(m, P, T, home, d, bloom, spread, full, hit_r)
 	await ak.done(m)
