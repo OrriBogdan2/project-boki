@@ -1,6 +1,12 @@
 # Ryzz (ART-1 rebuild): how this model is made
 
-## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+## LIVE master in game (2026-11-15, ext/hunter-3d-vex-sparkle-1115): the CURRENT 2D look
+`~/meshy/v95/Sparkle/r4/hunter3d1115/cand_A.glb` = Meshy multi-image (meshy-7.1, enhancement OFF, 2k geometry, 8k PBR; the 4 views of `sparkle-turn-1115` turnaround A: bust
+shape through the top, V notch, scar on her right, kite on the rod, pigtails). `tools/art1/v95_swap.py` with `art/wardens/src/ryzz_v95.json` onto the same skeleton,
+clips (52) and anchors; the old gum bubble kept (`move_bones` onto the new lips). 13.2k tris, one 4096 atlas; the old normal map (`ryzz_nrm.jpg`) is gone (new UVs).
+The master is shorter than the old one (rods lower), so `height_3d` in `warden_model_check.gd` is 1.09. Candidates, sheet, turntables: ~/meshy/hunter-3d-1115.
+
+## Previous: v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Sparkle/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), on the rig before the underbust swap (95f0fef3e5^, so the move_bones deltas apply once). 13.2k tris, one 4096 atlas (head_uv 4), 45 clips.
 Spec `art/wardens/src/ryzz_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
 
