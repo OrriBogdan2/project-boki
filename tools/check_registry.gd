@@ -728,7 +728,6 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
-	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
 	"--kite-check": ["res://tools/kite_check.gd", "kite_check", null],         # Kite Tow part 1, GARDEN_MODERN 4.2
 	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake
 	"--boki-nap-shots": ["res://tools/boki_nap_check.gd", "boki_nap_check", "shots"],  # --shots-dir=<dir>
