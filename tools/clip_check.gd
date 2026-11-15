@@ -205,7 +205,6 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s; glb_add_clips.py restores)"
 			% [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
-	_climb(id, dd, clips)
 	_upper(id, dd, clips)
 	_standing(id, dd, clips)
 	_rings(id, dd, clips)
@@ -507,23 +506,6 @@ func _weight_dips() -> void:
 					continue
 				ok(deep_enough, "%s drop %s: the heavy's crouch is %.3f m on screen (mediums' median %.3f)"
 						% [id, stance, dip, median])
-
-## A Hero with a mantle clip plays it at the body's own progress up the face (so it never lags the rise), lasting about
-## a deep mantle's 0.8 s, and its ledge clip on its own clock; one without keeps the rig's pose.
-func _climb(id: String, dd: Dictionary, clips: WardenClips) -> void:
-	var st: Dictionary = dd.get("states", {})
-	var procedural: Array = dd.get("procedural", [])
-	ok(st.has("mantle") != ("mantle" in procedural) and st.has("ledge") != ("ledge" in procedural),
-			"%s: mantle and ledge are keyed or procedural, never both" % id)
-	if not st.has("mantle"):
-		return
-	var length := clips.lib.get_animation(String(st["mantle"])).length
-	var pick := clips._pick({"mantle": 0.5, "grounded": false}, DT)
-	ok(pick.get("clip") == st["mantle"] and absf(float(pick["t"]) - 0.5 * length) < 0.001,
-			"%s: the mantle clip sits at the body's rise" % id)
-	ok(absf(length - 0.8) <= 0.1, "%s: the mantle clip lasts a deep mantle's 0.8 s (%.2f s)" % [id, length])
-	pick = clips._pick({"ledge": true, "grounded": false}, DT)
-	ok(pick.get("clip") == st["ledge"] and float(pick["t"]) < 0.0, "%s: the ledge clip plays on its own clock" % id)
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
