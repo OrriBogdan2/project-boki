@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://d18j0s8d8ycml"
-path="res://.godot/imported/garden_egg_1.wav-8343a75718e059566bc4329c309b7b50.sample"
+uid="uid://8p8s8rwbbymy"
+path="res://.godot/imported/mob_brute_atk.wav-4e0b0b8ba41bf6465f8675f98cbdeaf3.sample"
 
 [deps]
 
-source_file="res://audio/garden_egg_1.wav"
-dest_files=["res://.godot/imported/garden_egg_1.wav-8343a75718e059566bc4329c309b7b50.sample"]
+source_file="res://audio/mob_brute_atk.wav"
+dest_files=["res://.godot/imported/mob_brute_atk.wav-4e0b0b8ba41bf6465f8675f98cbdeaf3.sample"]
 
 [params]
 

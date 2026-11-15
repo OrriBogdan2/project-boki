@@ -79,6 +79,7 @@ func _bot_ranks(bot: Hunter) -> void:
 		ok(false, "a bot in the match")
 		return
 	var h0 := LevelSfx.heard.duplicate()
+	var heard := str(RankSfx.heard)
 	bot.gain_xp(float(Hunter.XP_TO[4]) - bot.xp + 1.0)
 	ok(LevelSfx.heard == h0, "a rival's levels and ranks made no sound")
 	var spent := 0
@@ -86,7 +87,7 @@ func _bot_ranks(bot: Hunter) -> void:
 		spent += int(bot.slot_lv[s])
 	ok(bot.skill_pts == 0 and spent == bot.lvl, "a bot at level %d spent its points by itself (%s)" % [
 		bot.lvl, str(bot.slot_lv)])
-	ok(str(RankSfx.heard) == heard, "and made no rank sound (%s)" % str(RankSfx.heard))
+	ok(str(RankSfx.heard) == heard, "and no ready chime (%s)" % str(RankSfx.heard))
 
 ## 4 + 5: the "+" and its click target on the real bar.
 func _bar(m: Match, P: Hunter) -> void:

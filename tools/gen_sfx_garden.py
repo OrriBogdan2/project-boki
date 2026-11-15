@@ -36,7 +36,7 @@ Shaping items given to a Boki (GardenSfx.ITEM, one cue a family) and the held it
   garden_locked   a locked zone picked on the Waystone: a soft wooden thud and a lock click
 The garden's moments (SFX_AUDIT row 22), each its own cue instead of the stock unlock, in G like the home theme
 (compose.py home_day, G mixolydian), notes from G major pentatonic so they sit in either:
-  garden_egg       an egg laid in the Nook or ready in the Incubator: a soft shell tap and a warm low G-D-G
+  (garden_egg, the egg laid or ready, is the UI set's: tools/gen_sfx_ui.py egg())
   garden_friends   two Boki become friends (or one with you a bond rank): two chirps answering, a third apart
   garden_chime_part  a new part or a lean's fleck shows on a Boki: a sparkle down onto a single plucked B
   garden_cup       a cup won (the Crown): a wooden clack and a five-note G run up to a held bell
@@ -482,14 +482,6 @@ def wake(i):
 
 
 # ---------------------------------------------------------------- garden moments (G major pentatonic)
-def egg(i):
-    """A soft tap on a shell, then G3-D4-G4 plucked low and warm."""
-    tap = mix(wood_tick(900 * j(i, 0.03), 0.05), 0.5 * bpf(noise(0.03), 1500, 4000) * env(N(0.03), 0.001, 0.006))
-    notes = [at(pluck(f, 0.5 if k == 2 else 0.25, 0.25 if k == 2 else 0.1) * 0.8, 0.08 + 0.09 * k)
-             for k, f in enumerate([196, 294, 392 * j(i, 0.01)])]
-    return B.soft(B.room(mix(0.7 * tap, *notes), 0.4), 3800)
-
-
 def friends(i):
     """Two Boki answer each other, B5 then D6, over a G4-B4 pluck pair: two voices settling into one."""
     a = chirp(988 * j(i, 0.03), 0.12, i)
@@ -568,7 +560,6 @@ def main():
                      ('cinderstep', arrive_cinderstep), ('hushwood', arrive_hushwood), ('ridge', arrive_ridge)):
         S.takes_cat('garden_arrive_' + zone, fn, 1, 'boki')
     S.takes_cat('garden_locked', locked, 1, 'step')
-    S.takes_cat('garden_egg', egg, 1, 'boki')
     S.takes_cat('garden_friends', friends, 2, 'boki')
     S.takes_cat('garden_chime_part', chime_part, 2, 'boki')
     S.takes_cat('garden_cup', cup, 0, 'boki')

@@ -260,6 +260,7 @@ func sim(dt: float) -> void:
 				if flat_dist(e) < e.r + r + 0.3 and absf(e.pos.y - pos.y) < 1.2:
 					lunge_hit[e.nid] = true
 					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
+					_snd("hit", e.pos, -4.0)
 			if st_t <= 0.0:
 				st = "recover"; st_t = MobAnim.LUNGE_REC
 				vel.x *= 0.2; vel.z *= 0.2
@@ -385,19 +386,20 @@ func _strike() -> void:
 			st = "recover"; st_t = MobAnim.RECOVER_S["volley"]
 			for k in [-0.2, 0.0, 0.2]:
 				var d := atk_dir.rotated(k)
-				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5})
-			m.sfx("throw", pos, -8.0, 1.3)        # three bolts hissing out
+				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5, "snd": "mob_%s_hit" % mkind})
+			_snd("atk", pos, -6.0)
 		"fuse":
 			# a puffbomb goes off and takes itself with it
 			var rad := float(md.get("slam_r", 2.3))
 			m.fx.ring(atk_at, rad, Color("ffb070"), 0.35)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb070"])
 			m.fx.burst(atk_at + Vector3(0, 0.5, 0), Color("ffb070"), 28, 6.5, 0.55, 6.0, 1.3)
-			m.sfx("boom", atk_at, 0.0, 1.1)
+			_snd("atk", atk_at, -3.0)
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
 				if to.length() < rad + e.r and absf(e.pos.y - pos.y) < 1.6:
 					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 9.5, "lift": 6.5, "src": "mob"})
+					_snd("hit", e.pos, -4.0)
 			hp = 0.0
 			_on_zero(null, {"self": true})
 			return
@@ -406,11 +408,12 @@ func _strike() -> void:
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)
-			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
+			_snd("atk", atk_at, -2.0)
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
 				if to.length() < float(md.get("slam_r", 2.3)) + e.r and absf(e.pos.y - pos.y) < 1.5:
 					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 7.0, "lift": 5.0, "src": "mob"})
+					_snd("hit", e.pos, -4.0)
 
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
