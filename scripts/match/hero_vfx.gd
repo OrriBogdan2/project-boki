@@ -21,8 +21,8 @@ const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 ## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
 ## the tracers riding Vex's rounds (6)
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "sheen": 6, "fist": 3, "portal": 4, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
-	"drop": 6, "plus": 4}
+	"ring": 6, "sheen": 6, "fist": 3, "portal": 4, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4,
+	"coin": 4, "star": 6, "drop": 6, "plus": 4}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
 	"plus": 12}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
