@@ -9744,3 +9744,4 @@ READY ext/merge-lane-garden1-1114 1321867ac3 (PR #96 follow-up: +5 garden branch
 READY ext/merge-batch-15-1113 4d5a6657b4 (PR #62: tutorial-dead-air NEW-RED fixed, audio no longer shifts gameplay RNG; branch since moved to f2367140bd by another job, re-gate that head)
 READY ext/merge-lane-d2art-1114-b a74f2f6b4808db839edc6dc681b8c03a56addff7 (d2art bundle B: sfx-weapon-fire + stuck-integ-cff77e31; targeted flags green, full gate left to regate)
 READY ext/merge-lane-d2art-1114 f594568a3b75f1c1e4989e7e9d104dc66dee6a86 (d2art bundle A refreshed on main 46458b969c+; 16 branches, suite NEW-RED 0, export OK)
+READY ext/merge-lane-hunters2-1114-b 1c4786a6d8fca4c724d0dabe1805774728540e68 (merge lane hunters2 bundle 2 on bundle 1: stomp lock + per-Hunter stomps, cc-stacking-rule, boki-downed-pose, body-hitbox-parity; carry-two-1111 dropped for tutorial-dead-air NEW-RED; NEW-RED 0 after flake rerun, export 446 MB OK)
