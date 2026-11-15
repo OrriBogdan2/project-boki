@@ -1162,7 +1162,7 @@ const BUILDINGS := {
 	},
 	"armory":
 	{
-		"name": "Armory",
+		"name": "Gear Shed",
 		"isle": "main",
 		"cost": 40,
 		"rect": [45, 25, 47, 26],

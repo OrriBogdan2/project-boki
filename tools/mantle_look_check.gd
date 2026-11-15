@@ -13,7 +13,7 @@ const EPS := 0.0005
 const GRID := 48              # cells across the silhouette window
 const FILL_H := 40.0          # cells: every silhouette is scaled to this height (about its pixels at the match zoom)
 const MIN_OWN_IOU := 0.70     # a slider end keeps this much of the neutral silhouette (Tenzo v2 least: 0.71)
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const SHOT_HUNTERS := ["thief", "juggernaut", "mage", "tender"]
 
 var bad := 0
