@@ -4,6 +4,16 @@
 
 Story in one line: an ancient dragon who ruled Solmere for 300 years as an ageless, beautiful queen behind the first mask. She hid her soul in the Wyrmheart and fed it her people. Kael wounded her, her body died in the Hollowing, and she lives on inside the cracked Heart.
 
+## Main splash: LOCKED (owner, Nov 15, ~00:35 ET) - overrides the pose/tail parts below
+File: `malgrave_splash.jpg` (white gown, standing). Owner: "the white gown reads more serious".
+- She stands at the top of the throne-room stairs, at human scale, with **no tail**. The only dragon tell is the dragon-shaped shadow on the floor. The court kneels on both sides.
+- **Gown:** a flowing pearl-white silk gown with a deep plunge and a crimson scale belt. Its long sheer sleeves and train pour down the stairs.
+- **Collar:** a large white-to-pink feather halo-collar fans out behind her head and shoulders.
+- **Hands:** one hand lifts the glowing crimson heart; the other is open, with gold claw nails.
+- **Unchanged:** the mask, face and hair stay as locked above.
+- **Alts / future skins (kept):** `malgrave_alts/alt_skin_throne_dragon_shadow.jpg` (seated on the throne, no tail, dragon shadow), `malgrave_alts/alt_skin_feather_wings_seated.jpg` (seated with crimson-white feather wings), and the previous tail-throne splash `malgrave_alts/alt_splash_tail_throne_prev.jpg`.
+- **Still to make:** a turnaround and portrait of this look (job malgrave-gown-turn-1115).
+
 ## Her mask: LOCKED (owner, Nov 7, 23:07 ET)
 File: `villain/malgrave_mask.jpg`.
 
