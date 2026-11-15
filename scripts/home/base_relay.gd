@@ -207,6 +207,7 @@ var heard := [0, 0]            # hand-offs sounded so far, per team
 var crossed := [false, false]  # each team's finish sounded
 var beats := RelayBeats.new()  # the runners' hand-off, launch and finish body language
 var finish_left := -1.0        # s the finished teams still show their cheer or sulk (-1: the relay is on)
+var cue: GardenCues.BatonCue = null   # each team's glowing baton while a relay runs
 
 func _init(dash: BaseRace) -> void:
 	race = dash
@@ -277,6 +278,7 @@ func use() -> void:
 		var n := Models.kin(String(rec["species"]), rec)
 		h.add_child(n)
 		visitors.append({"rec": rec, "node": n})
+	cue = GardenCues.BatonCue.new(h)
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s before each mark to hand off" % Settings.key_cap("interact"))
 	_bar_label("")
@@ -316,6 +318,7 @@ func tick(d: float) -> void:
 	_place_runners()
 	_hear()
 	beats.step(run.t)
+	_baton_cue(d)
 	if run.over():
 		if finish_left < 0.0:
 			finish_left = float(RelayBeats.rules()["finish_s"])
@@ -368,6 +371,16 @@ func _place_runners() -> void:
 			n.rotation.y = race.heading(s, f)
 			ents[i]["pos"] = p
 
+## Each team's baton over its runner, blinking while the runner takes it; a burst where it changes hands.
+func _baton_cue(d: float) -> void:
+	cue.step(d)
+	for team in 2:
+		var ents: Array = mine if team == 0 else visitors
+		var leg := int(run.leg[team])
+		var lost: Array = run.lost[team]
+		cue.update(team, ents[leg]["pos"], leg, GardenCues.type_colour(ents[leg]["rec"]), float(run.wait[team]) > 0.0,
+				lost.is_empty() or float(lost[-1]) == 0.0)
+
 func _end(finished: bool) -> void:
 	var res := {}
 	var before := GameResultCard.snap(run.teams[0])
@@ -380,6 +393,8 @@ func _end(finished: bool) -> void:
 	for v in visitors:
 		v["node"].queue_free()
 	bar.close()
+	cue.clear()
+	cue = null
 	if finished:
 		_card(res, before)
 		var k: Dictionary = h._kin_entry(anchor)

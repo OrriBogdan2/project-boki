@@ -123,6 +123,7 @@ var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
 var creaked := false           # the lean creak has played this bout
+var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -190,6 +191,7 @@ func use() -> void:
 	_place_pair()
 	creaked = false
 	GardenSfx.countdown(h, stump.position)
+	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -219,6 +221,7 @@ func tick(d: float) -> void:
 	if not run.shoved:
 		bar.step(d)
 	_place_pair()
+	cue.update(run.balance)
 	_hear_strain()
 	if run.over():
 		_end(true)
@@ -251,6 +254,8 @@ func _end(finished: bool) -> void:
 		k["busy"] = false
 		k["t"] = 1.5
 	bar.close()
+	cue.clear()
+	cue = null
 	stump.rotation.z = 0.0
 	Sfx.loop_stop("shove_strain")
 	if finished:

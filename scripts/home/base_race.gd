@@ -338,6 +338,7 @@ var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
 var beats: RaceBeats = null    # the runners' crouch, burst and finish clips (kept on after the race until played)
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
+var cue: GardenCues.DashCue = null   # the cheer marks and finish line while a lap runs
 
 func _init(home) -> void:
 	h = home
@@ -413,6 +414,13 @@ static func mat(c: Color) -> StandardMaterial3D:
 func ground(p: Vector3) -> float:
 	var g: float = h._ground_h(p.x, p.z)
 	return g if g > -50.0 else 0.0
+
+## Corner i of the loop in the world: the line, then the end of each stretch (the last one closes back on it).
+func _corner(i: int) -> Vector3:
+	if i % 4 == 0:
+		return start
+	var q: Array = course(GardenZones.here)[i % 4 - 1]["pts"][-1]
+	return start + Vector3(q[0], 0.0, q[1])
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or relay.run != null or not is_instance_valid(post):
@@ -495,6 +503,10 @@ func _begin(ks: Array) -> void:
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
+	var marks: Array = []
+	for i in range(1, 4):
+		marks.append(_corner(i) + Vector3(0, ground(_corner(i)), 0))
+	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, ground(_corner(0)), 0), TRACK_W)
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
@@ -541,6 +553,8 @@ func tick(d: float) -> void:
 		return
 	bar.step(d)
 	_place_runners()
+	var home_done: bool = float(run.done_t[run.backed]) >= 0.0
+	cue.update(3 if home_done else int(run.stretch[run.backed]), run.can_cheer(), d)
 	_hear_laps()
 	if run.over():
 		_end(true)
@@ -605,6 +619,8 @@ func _end(finished: bool) -> void:
 	else:
 		beats.stop()
 	bar.close()
+	cue.clear()
+	cue = null
 	if finished:
 		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
