@@ -46,7 +46,7 @@ func spawn(name: String, position: Vector3) -> void:
 # yes
 func spawn(boki_name: String, at: Vector3) -> void:
 ```
-Godot's own warnings (`SHADOWED_VARIABLE`, `SHADOWED_VARIABLE_BASE_CLASS`, `SHADOWED_GLOBAL_IDENTIFIER`) catch most of these. Don't silence them.
+Godot's own warnings (`SHADOWED_VARIABLE`, `SHADOWED_VARIABLE_BASE_CLASS`, `SHADOWED_GLOBAL_IDENTIFIER`) catch these, and they only fire where the script's base class really has that name. They are on in `project.godot`; `tools/check.sh` counts them per file (`godot-shadow` in `tools/lint_baseline.json`) and fails when a file gets one more. Don't silence them.
 
 ## 3. Types and data
 
@@ -74,7 +74,7 @@ Every line we add is a line someone has to read, test and keep working. Before y
 
 ## 6. How it's enforced
 
-- `python3 tools/style_lint.py` counts long lines, packed `;` statements, nested ternaries, shadowed names and history comments in every file. The old code has many of these, so it works as a **ratchet**: a file may never get worse than `tools/style_baseline.json`, and a new file starts at zero.
+- `python3 tools/style_lint.py` counts long lines, packed `;` statements, nested ternaries and history comments in every file. The old code has many of these, so it works as a **ratchet**: a file may never get worse than `tools/style_baseline.json`, and a new file starts at zero.
 - `python3 tools/health.py --strict` runs it, and a ship fails if a file got worse.
 - **When you touch a file, leave it better.** Fix the problems in the functions you edit (`style_lint.py --file <path>` lists them), then run `style_lint.py --update` so the lower count is locked in. Never run `--update` to let new problems in.
 - The reviewer agent checks every merge against this file and AGENTS.md.

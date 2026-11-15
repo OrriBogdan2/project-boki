@@ -1,9 +1,9 @@
 extends "res://tools/archetype_check.gd"
 ## Hit feedback (OWNER_REVIEW_1103 item 96.4, docs/HUD.md "Hit feedback"), run inside --hero-combo-check or
 ## alone as --hit-feedback-check: every Hunter's LMB on a dummy at 2.2 m and 6 m. Prints one AUDIT row per
-## Hunter (the sounds its first hit played, the number's look, the body flash, the hold) and asserts the
+## Hunter (the sounds its first hit played, the number, the body flash, the hold) and asserts the
 ## shared rules: a hit flash, a number, the Hunter's own hit sound, no camera shake from a plain hit; then
-## the looks of a plain, an empowered (heavy) and a crit hit, your Boki's and the hits you take.
+## two empowered hits: the heavy thud and a hold. (The number's looks are main's Fx.hit_number rolls.)
 
 const HUNTERS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
@@ -20,7 +20,6 @@ func audit() -> void:
 	for arch in HUNTERS:
 		await _lmb(arch)
 	await _empowered()
-	await _looks()
 
 ## The sounds that played during one step (names whose last play time moved).
 func _step_sounds(m: Match) -> Array:
@@ -69,7 +68,7 @@ func _until_hit(m: Match, P: Hunter, T: Hunter) -> Array:
 	return []
 
 ## Two empowered hits on the real path: Grimble's scattergun point-blank (most of a volley on one body)
-## and Sable's empowered bolt each get the empowered number, the heavy thud and a hold on the target.
+## and Sable's empowered bolt each get the heavy thud and a hold on the target.
 func _empowered() -> void:
 	for arch in ["dredge", "thief"]:
 		var s: Array = setup(arch, 2.0 if arch == "dredge" else 6.0)
@@ -84,49 +83,6 @@ func _empowered() -> void:
 			heard.append_array(_step_sounds(m))
 			hold = maxf(hold, T.freeze_t)
 		P.inp["fire"] = false
-		var look := -1
-		for nm in m.fx.nums:
-			look = maxi(look, int(nm.get("look", -1)))
-		ok("%s empowered hit: its own number look" % arch, look == Fx.NUM_HEAVY, "look %d" % look)
 		ok("%s empowered hit: the heavy thud" % arch, heard.has("hit_heavy"), str(heard))
 		ok("%s empowered hit: holds the target" % arch, hold >= Feel.HITSTOP[3][1] - 0.001, "%.3f" % hold)
 		await done(m)
-
-## The looks of the shared number: plain < empowered < crit, yours brighter than your Boki's, the hits you
-## take smaller; an empowered hit holds (hit-stop) where a plain one of the same size does not.
-func _looks() -> void:
-	var s: Array = setup("gunslinger", 4.0)
-	var m: Match = s[0]
-	var P: Hunter = s[1]
-	var T: Hunter = s[2]
-	var look := func(o: Dictionary, by: Ent = P, to: Hunter = T) -> Label3D:
-		m.fx.nums.clear()
-		m.hitstop = 0.0
-		Feel._budget.clear()
-		Feel._pair_t.clear()
-		to.hurt(9.0, by, o)
-		return m.fx.nums[-1]["node"] if not m.fx.nums.is_empty() else null
-	var plain: Label3D = look.call({"src": "shot"})
-	var plain_hold := m.hitstop + T.freeze_t
-	T.freeze_t = 0.0
-	var heavy: Label3D = look.call({"src": "shot", "heavy": true})
-	var heavy_hold := m.hitstop
-	var held := T.freeze_t
-	var crit: Label3D = look.call({"src": "shot", "crit": true})
-	ok("number: empowered bigger than plain", heavy.font_size > plain.font_size,
-		"%d vs %d" % [heavy.font_size, plain.font_size])
-	ok("number: empowered has its own colour", heavy.modulate != plain.modulate and heavy.modulate != crit.modulate)
-	ok("number: crit biggest", crit.font_size > heavy.font_size, "%d vs %d" % [crit.font_size, heavy.font_size])
-	ok("hit-stop: an empowered hit holds the target", held >= Feel.HITSTOP[3][1] - 0.001, "%.3f" % held)
-	ok("hit-stop: never on your ranged shot itself", heavy_hold == 0.0 and plain_hold < Feel.HITSTOP[3][1])
-	var rec := Save.new_kin("zapple", "Pip")
-	rec["trust"] = 95.0
-	var k: Kin = m.give_kin(P, rec)
-	var kin_num: Label3D = look.call({"src": "kin"}, k)
-	var dimmer := kin_num.modulate.v < plain.modulate.v
-	ok("number: your Boki's smaller and dimmer than yours", kin_num.font_size < plain.font_size and dimmer,
-		"%d %s" % [kin_num.font_size, kin_num.modulate.to_html(false)])
-	var hurt: Label3D = look.call({"src": "shot"}, T, P)
-	ok("number: hits on you smaller than yours, red",
-		hurt.font_size < plain.font_size and hurt.modulate == HudStyle.HURT)
-	await done(m)

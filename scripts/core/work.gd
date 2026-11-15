@@ -165,6 +165,8 @@ static func why_not(rec: Dictionary) -> String:
 		return "Asleep in the Boki Burrow"
 	if rec.get("work_rest", false):
 		return "Resting only"
+	if Mentor.is_mentor(rec):
+		return "A mentor at the Soul Shrine"
 	if rec.get("ghost_wait", false):
 		return "Away"
 	var ss := Care.starve_stage(rec)
@@ -270,6 +272,7 @@ static func assign(rec: Dictionary, u: int) -> void:
 	if u < 0: rec.erase("work_at")
 	else:
 		rec["work_at"] = u
+		rec.erase("build_at")      # (a site assignment: FarmSites)
 		rec.erase("work_rest")
 		rec.erase("work_pin")
 

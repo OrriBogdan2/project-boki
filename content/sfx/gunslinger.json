@@ -5,7 +5,6 @@
  "sounds": {
   "gunslinger_hit": "heavy_impact",
   "vn_rifle": "fire",
-  "gunslinger_spinup": "signature",
   "gunslinger_grenade_thunk": "signature",
   "vn_cock": "cast",
   "vn_throw": "cast",
@@ -27,8 +26,8 @@
   "gunslinger_down": "grunt",
   "gunslinger_death": "grunt"
  },
+ "reach": {"vn_nuke_fall": 40},
  "signature": [
-  "gunslinger_spinup",
   "gunslinger_grenade_thunk"
  ],
  "replaces": [

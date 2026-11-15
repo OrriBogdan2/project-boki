@@ -1,12 +1,11 @@
 extends RefCounted
-## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural]: the
+## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>]: the
 ## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
 ## enlarged 3x), front_34.png and back_34.png (full length), poses_game.png (idle, run, attack, cast, ult at the
 ## match camera), turnaround_close.png, closeup.png and closeup_front.png (head and shoulders, 3/4 and front),
 ## vs_sheet.png (the concept sheet beside the close turnaround) and moves_close_N.png (the run and the hero's own
 ## kit moves, frame by frame), plus captions.txt.
-## --procedural shoots the procedural models of Wardens that have a 3D one (Settings: Warden models).
 ## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
 
 const YAWS := [PI, PI * 0.75, PI * 0.5, 0.0, -PI * 0.25]
@@ -31,17 +30,13 @@ func run(main: Node) -> void:
 	var out := ""
 	var sheets := ""
 	var wardens := ["bulwark", "archer", "juggernaut"]
-	var procedural := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--sheets="): sheets = a.substr(9)
 		if a.begins_with("--wardens="): wardens = Array(a.substr(10).split(","))
-		if a == "--procedural": procedural = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
-	for id in wardens:
-		WardenGlb.set_model(String(id), not procedural)
 	for id in wardens:
 		await _hero(String(id), out.path_join(String(id)), sheets)
 	print("WARDEN_SHOTS_DONE")

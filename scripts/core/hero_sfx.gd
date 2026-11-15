@@ -2,7 +2,7 @@ class_name HeroSfx
 extends RefCounted
 ## A Hunter's own version of a shared sound: "<arch>_<kind>" (gunslinger_dash, archer_hurt,
 ## bulwark_step_wood) when its sound branch made one, else the shared fallback. Kinds the game asks
-## for: dash, hurt, down, death and step_<surface> (grass, stone, wood, snow). Answers are cached per
+## for: dash, dash_air, hurt, down, death and step_<surface> (grass, stone, wood, snow). Answers are cached per
 ## name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
 
 static var _has := {}          # sound name -> whether audio/ has it
@@ -15,6 +15,13 @@ static func of(h: Hunter, kind: String, fallback: String) -> String:
 	if not _has.has(own):
 		_has[own] = Sfx.ensure(own)
 	return own if _has[own] else fallback
+
+## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
+## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.
+static func dash_name(h: Hunter) -> String:
+	var ground_name := of(h, "dash", "dash")
+	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
+	return of(h, "dash_air", ground_name) if in_air else ground_name
 
 ## Plays `h`'s own sound for `kind` at the hunter (nothing if it has none): the wordless voice lines.
 static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:

@@ -12,7 +12,7 @@ extends RefCounted
 # ------------------------------------------------------------------ colour roles
 const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
-const SHADE := Color(0.03, 0.03, 0.05, 0.86)    # frame backing behind bars and slots
+const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
 const SELF := Color("9be36e")             # your own health (leaf green)
 const ALLY := Color("63c7ff")             # your squad's health (sky blue)
@@ -29,19 +29,19 @@ const HIT := Color("fff4d6")              # your hits
 const HIT_ARMOR := Color("7ac8ff")        # your hits that landed on armour
 const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
-const HEAVY := Color("ff8a3d")            # empowered hits (a wall pin, a primed bolt, a perfect swing)
-const KIN_HIT := Color("d6ccb4")          # your Boki's hits: dimmer than yours
 const HURT := Color("ff6a5a")             # damage you take
+const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
-const KEY_BG := Color(0.04, 0.04, 0.06, 0.95)
+const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
+const ITALIC_SLANT := 0.22     # glyph x shift per unit of height: BIG leaned into a bold italic
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
-const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
+const HP_PER_SEG := 17.0       # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
 const PLATE_W := 100.0         # overhead health bar width (rivals and allies)
@@ -129,27 +129,28 @@ static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> v
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
-	var edge := Color(1, 1, 1, 0.12)
+	var edge := Color(0.75, 0.6, 1.0, 0.16)
 	if state == "ready":
 		edge = col
 	elif state == "cooling":
 		edge = Color(COOLING, 0.55)
-	c.draw_style_box(box(Color(0.05, 0.06, 0.09, 0.92), SLOT_RAD, edge, 2), r)
+	c.draw_style_box(box(Color(0.07, 0.045, 0.11, 0.92), SLOT_RAD, edge, 2), r)
 	if state == "ready":
 		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
 		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)
 
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
-	var kw := BIG.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS).x
+	var kw := TextCache.width(BIG, key, KEY_FS)
 	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
 	c.draw_style_box(box(KEY_BG, 9, Color(col, 0.8), 1), kr)
-	c.draw_string(BIG, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
+	var at := Vector2(kr.position.x + 6, kr.position.y + 14)
+	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(KEY_FS), col)
 
 ## A small count badge (charges, stack sizes) centred on `at`.
 static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	var s := str(n)
-	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
+	var w := maxf(16.0, TextCache.width(BIG, s, 11) + 8.0)
 	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
@@ -162,14 +163,21 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
-## A damage number's colour for its look (Fx.NUM_*): the hits you take are red, your Boki's dimmer
-## than yours, then crit gold, empowered orange, armour blue.
-static func dmg_col(look: int, armor_hit: bool, on_you: bool, by_your_kin: bool) -> Color:
+## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
+static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
 	if on_you: return HURT
-	if by_your_kin: return KIN_HIT
-	if look == Fx.NUM_CRIT: return CRIT_ARMOR if armor_hit else CRIT
-	if look == Fx.NUM_HEAVY: return HEAVY
+	if on_your_kin: return HURT_KIN
+	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT
+
+static var _italic: FontVariation
+## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
+static func big_italic() -> Font:
+	if _italic == null:
+		_italic = FontVariation.new()
+		_italic.base_font = BIG
+		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
+	return _italic
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
@@ -188,3 +196,9 @@ static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 		sb.anti_aliasing = true
 		_boxes[key] = sb
 	return sb
+
+## Width of the clock chip: the time at the left, the phase in the middle and "LV nn" at the right never touch,
+## at every Text size (196 px is enough at 100%).
+static func clock_w(time_txt: String, phase: String) -> float:
+	var side := maxf(TextCache.width(BIG, time_txt, 16), TextCache.width(BIG, "LV 99", 12))
+	return maxf(196.0, TextCache.width(BIG, phase, 11) + 2.0 * side + 28.0)
