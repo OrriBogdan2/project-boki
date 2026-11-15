@@ -56,6 +56,23 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears).
 
+## Damage numbers
+
+Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
+or your Boki, or taken by you) and picks one of three looks (`Fx.Num` HIT, KIN, TICK) from the hit itself (`Fx.num_kind`),
+never from the kit:
+
+| Look | Source | Size | Colour | Where, and what adds up |
+|---|---|---|---|---|
+| hit | your direct hits (and anyone's hits on you) | full | `HudStyle.HIT`, crit / armour / hurt colours | the hit spot; rapid hits add up |
+| Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
+| tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
+
+Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
+Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
+smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
+the draw cost doesn't grow with the sources. Check: `--number-looks-check`.
+
 ## Boki HUD: decision, state, gaps
 
 DECISIONS (Boki HUD, Nov 3; wisps, 11-09): your Boki lives in the right-side box (portrait, health bar, bond ring with %,
