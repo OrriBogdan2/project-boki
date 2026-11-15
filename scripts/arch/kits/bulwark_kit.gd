@@ -822,7 +822,8 @@ func _spin_hit(wd: Vector2) -> void:
 		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
+	# a spin off a ledge ends in the air (the glider is free); a glide pressed in the dash already took over
+	if h.grounded and not h.gliding:
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	vfx("spin", h.pos, null, {"r": r})

@@ -16,6 +16,7 @@ const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const DIRS := preload("res://tools/move_feel_dirs.gd")      # the W A S D and diagonal rows
 const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
+const LEDGE := preload("res://tools/move_feel_ledge.gd")     # the ground dash off a ledge, every kit
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -298,6 +299,7 @@ func run(main: Node) -> void:
 	_plain_dash()
 	_kit_dashes()
 	_flue_flight()
+	LEDGE.new(self).run()
 	_abyss_updraft()
 	_feather()
 	load("res://tools/move_feel_knock.gd").run(self)     # the knock arc (docs/MOVEMENT_FEEL.md "Knock arc")

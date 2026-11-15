@@ -963,6 +963,7 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
+var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
@@ -1053,6 +1054,7 @@ func dash_with(e: Dictionary) -> void:
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
+	roll_falls = false
 	dash_is_ex = ex_next
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
@@ -2024,6 +2026,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
+	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2114,7 +2117,7 @@ func _physics(dt: float) -> void:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
-	elif roll_t > 0.0 and not grounded and not dropping:
+	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
@@ -2256,6 +2259,7 @@ func _physics(dt: float) -> void:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12
+		roll_falls = roll_t > 0.0 and move_kind == "dash"
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt

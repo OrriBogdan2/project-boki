@@ -1089,6 +1089,17 @@ distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight 
 no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
 the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
 
+## Dashing off a ledge (`HunterMove.dash_off_ledge`, decision 0046)
+Walking off a ledge is always allowed (DECISIONS), and so is dashing off one. A ground dash that crosses an edge keeps
+its own course (distance and speed curve) but falls as it goes: the height hold is only for dashes pressed in the air.
+It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
+dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
+`--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
+no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
+no travel of his own) must set him down below the edge.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
