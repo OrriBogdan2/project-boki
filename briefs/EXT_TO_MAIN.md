@@ -9791,3 +9791,4 @@ READY ext/merge-lane-uihud-1114 0964ca0013 (re-merged origin/main; conflicts: ne
 READY ext/merge-lane-hunters2-1114-b 0cc2bd3b7e2ca47bd97ffcfa4c7b259a1ab69b4f (re-merged onto current origin/main; conflicts net.gd VERSION = main 0.24.11 history + 0.24.12 stomp event, hunter.gd speed = branch slow_mult() + main HunterMove.sneak_speed; health --strict OK; godot --check/cc-stack-check not verifiable on w2 (cold-cache hang, 15 min), needs GATE; SUPERSEDES 1c4786a6d8)
 READY ext/merge-lane-anim-1115-b 571636b312 (4 anim branches: stomp-drink-1/2/3, mantle-3; clip/warden-clips/cliff-mantle checks no new red vs main; suite+export left to regate)
 READY ext/merge-lane-vfxsfx1-1115 5f4c7d0321 (merge lane vfxsfx1 a: sfx-hatch, sfx-legendary-presence, vfx-garden-games-2; suite NEW-RED 0, export OK)
+READY ext/merge-lane-vfxsfx1-1115-b 9cb32b6500 (merge lane vfxsfx1 b: Neve skate sound ported; rimewright-combo/support/match-audio green)
