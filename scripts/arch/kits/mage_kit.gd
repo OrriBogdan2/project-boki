@@ -539,7 +539,6 @@ func _blowout(f: Ent) -> void:
 	vfx("blowout", f.position)
 	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
