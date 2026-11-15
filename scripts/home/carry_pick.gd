@@ -89,6 +89,7 @@ static func card(label_t: String, rec: Dictionary, key: String, on_change: Calla
 		pl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		pl.clip_text = true
 		info.add_child(pl)
+		HazardCounter.add_row(info, String(rec["species"]))
 		if note != "": info.add_child(UI.label(note, 12, UI.GOOD))
 	row.add_child(info)
 	var next_b := UI.icon_button("next", func(): go.call(1), "Next Boki", 12.0)
