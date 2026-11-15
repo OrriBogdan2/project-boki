@@ -703,8 +703,11 @@ const CHECKS := {
 	# Fx.number rolls, tiers, reticle
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],
 	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],  # --shots-dir=<dir>
+	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
+	"--wisp-hum-check": ["res://tools/wisp_hum_check.gd", "wisp_hum_check", null],      # the Hunter Wisp hum
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],  # docs/decisions/0019
 	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],  # --shots-dir=<dir> [--dot-hard]
+	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],  # --shots-dir=<dir>
 	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],  # the Boki box tags, bond %
 	"--wisp-hum-check": ["res://tools/wisp_hum_check.gd", "wisp_hum_check", null],      # the Hunter Wisp hum
