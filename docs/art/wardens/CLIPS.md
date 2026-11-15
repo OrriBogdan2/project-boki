@@ -24,6 +24,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
   (~96 deg). Past 90 deg the legs turn round and play the backward run (they hold it 0.1 rad either side of 90, so a
   run near it does not flicker). While he runs, the legs hold their way when the aim swings. Off: the f, b, l, r ring.
+  `twist_hyst` (rad, default `TWIST_HYST` 0.1; Vex 0.35): that margin per Hunter, so an aim swaying about 90 deg while
+  she kites does not turn the legs round and back (docs/art/FOOT_SLIDE.md, the twist margin).
   Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
   `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
   (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).

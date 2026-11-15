@@ -439,12 +439,12 @@ func _drill(home) -> void:
 	var rec := Save.active_kin()
 	rec["needs"]["energy"] = 90.0
 	rec["needs"]["food"] = 90.0
-	home._start_drill(rec, "speed")
+	home.drill.start(rec, "speed")
 	ok(not home.train.is_empty() and home.train["bar"] is TimingBar, "drill: starts on the timing bar")
 	for i in 3:
-		home._train_hit()
+		home.drill.hit()
 		for f in 40:
-			home._train_process(1.0 / 30.0)
+			home.drill.process(1.0 / 30.0)
 	ok(home.train.is_empty(), "drill: three presses end it (%s)" % rec["stats"]["speed"])
 
 ## The species that stand for each body plan: the rigged ones (KinPuppet.BODY) and one older round kin.

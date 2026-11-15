@@ -33,14 +33,14 @@ func run(m: Node) -> void:
 	ok(home.yard == null, "a fresh farm has no Training post")
 	for s in Care.STATS:
 		home._open_train(k)
-		home._start_drill(k, s)
+		home.drill.start(k, s)
 		ok(home.train.is_empty() and not ke.get("busy", false), "no post: %s drill refused, Boki not left busy" % s)
 	home.yard = Models.training_yard()
 	home.yard.position = home.YARD_AT
 	home.add_child(home.yard)
 	for s in Care.STATS:
 		home._open_train(k)
-		home._start_drill(k, s)
+		home.drill.start(k, s)
 		ok(not home.train.is_empty(), "with a post: the %s drill starts" % s)
 		home.train["bar"].close()
 		home.train = {}
