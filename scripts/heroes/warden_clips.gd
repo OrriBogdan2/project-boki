@@ -475,11 +475,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
-	# (a move that has played out leaves the states below showing: a hit, a stun, a landing)
+	# (a move that has played out and does not hold picks nothing: the states below stay off it, or a cast that
+	# lands in the air would snap into its planted stance; --clip-live-check)
 	if moves.has(km):
-		var r := _move_clip(km, moves[km], s)
-		if not r.is_empty():
-			return r
+		return _move_clip(km, moves[km], s)
 	elif km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
