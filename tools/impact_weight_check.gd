@@ -15,6 +15,8 @@ const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
 const FOOTAGE_BOUND_MS := 100      # one 10 fps frame: the reference footage never holds longer
 ## Steps with no hit from the hunter before the next slot, so a zone left behind has run out.
 const QUIET_STEPS := 90
+## Steps LMB is held: a spooling stream (Ashwick: 0.2 s spool, then 3 m at 16 m/s) needs ~0.4 s to reach the dummy.
+const LMB_HOLD := 45
 const DRAIN_MAX := 900             # steps at most spent waiting for it
 ## Kit file name prefix -> the Hunter whose code it is (a Hunter's ult or dash can live in its own file).
 const FILE_HERO := {
@@ -104,6 +106,8 @@ func _presses(m: Match, hero: String) -> void:
 	for slot in SLOTS:
 		flow._ready_up(m)
 		var dummy := _dummy(m)
+		if flow.ally and slot != "x":
+			h.inp["aim"] = dummy.pos + Vector3(0, 0.9, 0)      # _ready_up aims a NEEDS_ALLY hero at its teammate
 		slot_now = slot
 		if slot == "dash":
 			h.inp["move"] = Vector2(0, -1)
@@ -113,7 +117,7 @@ func _presses(m: Match, hero: String) -> void:
 		for i in 150:
 			m.step(Match.DT)
 			h.inp["dash"] = false
-			h.inp["fire"] = slot == "lmb" and i < 20
+			h.inp["fire"] = slot == "lmb" and i < LMB_HOLD
 			dummy.hp = dummy.max_hp
 		slot_now = ""
 		_drain(m, dummy)
@@ -137,7 +141,7 @@ func _drain(m: Match, dummy: Hunter) -> void:
 func _dummy(m: Match) -> Hunter:
 	var h: Hunter = flow.hunter
 	for o in m.hunters:
-		if o != h:
+		if o.team != h.team:      # a NEEDS_ALLY hero's squad mate is no target
 			o.ctrl = "idle"
 			o.teleport(h.pos + Vector3(0, 0, -3))
 			o.hp = o.max_hp
