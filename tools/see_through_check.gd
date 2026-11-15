@@ -3,7 +3,7 @@ extends RefCounted
 ## see-through (SeeThrough) on and off. A tree beside the
 ## hunter or behind them stays pixel-for-pixel solid; a tree between the camera and the hunter
 ## dithers only a small patch (the hunter shows through) and keeps most of itself. Needs a renderer
-## (the suite's xvfb + opengl3), not --headless.
+## (the suite's xvfb + opengl3): under --headless (a worker without a display) it reports SKIP and passes.
 
 const SIZE := Vector2i(320, 240)
 const CAM_OFF := Vector3(0, 27.0, 17.5)      # m: the match camera's height and pull-back (Cam.HEIGHT, BACK)
@@ -20,7 +20,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	if DisplayServer.get_name() == "headless":
-		ok(false, "needs a renderer (run under xvfb, not --headless)")
+		print("SEETHROUGH SKIP needs a renderer (run under xvfb, not --headless)")
 		_done(main)
 		return
 	_stage(main)

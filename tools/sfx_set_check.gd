@@ -52,7 +52,6 @@ extends RefCounted
 ##      the Ambience bus, and the grounds never play the match's beds
 ##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ##  17. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
-## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]

@@ -4340,7 +4340,6 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	var body: Node3D = (k["node"] as Node3D).get_node("Body")
 	var tw := create_tween()
 	if res["ok"]:
-		Sfx.play("boki_eat", fp, -8.0)
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
