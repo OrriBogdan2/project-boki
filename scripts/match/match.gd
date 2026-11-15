@@ -110,7 +110,9 @@ func _run_later() -> void:
 	for it in due:
 		_later.erase(it)
 		SfxCast.scope(it[2])
-		(it[1] as Callable).call()
+		var cb: Callable = it[1]
+		if cb.is_valid():      # (a bound object freed since is skipped, not called)
+			cb.call()
 	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
@@ -2181,7 +2183,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
-	later(MobDissolve.begin(self, mb), func(): MobDrops.spill(self, mb, credit, loot))
+	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot)
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
