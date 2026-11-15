@@ -91,7 +91,9 @@ func run(m: Node) -> void:
 	home.hb.toggle()
 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
 	home.hb.cat = "Base"
-	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
+	var toy_names: Array = HomeLayout.CATALOG.values().filter(func(c): return c.get("toy", false)).map(func(c): return c["name"])
+	var offered: Array = home.hb._tab_items().filter(func(e): return e["name"] in toy_names)
+	ok(offered.size() == 5, "and it offers all five toys (beside the feeding bowl)")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
 	var first_t := -1.0
