@@ -484,7 +484,7 @@ func _clear() -> void:
 
 func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
-		card.queue_free()
+		card.free()     # now, so the new card keeps the name GameResultCard (the practice's card may still show)
 	card = GameResultCard.open(h, {"game": "Tumble", "before": before, "prize": [["+%d gems" % res["gems"], UI.GOLD]],
 			"place": "%s wins, %s" % [res["win"]["name"], "out of the ring" if run.out() else "on points"]})
 	card_t = float(rules()["card_s"])
