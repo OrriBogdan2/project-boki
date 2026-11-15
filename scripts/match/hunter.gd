@@ -3065,6 +3065,7 @@ func _anim_state(stretch: float) -> void:
 	s["reviving"] = rv or box_reviving()
 	s["act"] = holding()
 	s["act_at"] = WardenOpen.lid_near(m as Match, pos) if s["act"] in WardenOpen.KINDS else Vector3.INF
+	s["idle_break"] = is_local()
 	s["aim_pitch"] = AimPitch.of(self)
 	# an emote bubble over us
 	var em := ""
