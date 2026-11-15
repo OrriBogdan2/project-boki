@@ -33,7 +33,7 @@ func _boki(power: int) -> Dictionary:
 	return rec
 
 func _tables() -> void:
-	ok(GardenPrizes.ids().size() == 8, "eight games: dash, shove, seek, volley, show, echo, relay, lantern")
+	ok(GardenPrizes.ids().size() == 9, "nine games: dash, shove, seek, volley, show, echo, relay, lantern, kite")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for id in GardenPrizes.ids():

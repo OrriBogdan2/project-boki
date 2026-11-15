@@ -249,23 +249,26 @@ func _cup() -> void:
 	var xps: Array = []
 	var first := false
 	for i in 3:
+		var before := int(rec["xp"])
 		var res := BaseKite.settle(_lap(6, 30, true), rec, BaseKite.rival(rec), now + i, rng)
 		steps.append(res["prize"]["round"])
-		xps.append(res["xp"])
+		xps.append(int(rec["xp"]) - before)
 		first = first or (i == 0 and res["prize"]["first"])
-	var win := int(XP["game_win"])
+	var win := int(XP["win"])
 	ok(steps == ["Sprout", "Bloom", "Crown"] and GardenPrizes.ribbon_count(rec, "kite") == 1,
 			"three won laps: %s and the Kite Tow Cup Ribbon" % str(steps))
-	ok(first and xps == [win * int(XP["first_win_mult"]), win, win],
-			"XP: first win of the day x%d, then %d a win: %s" % [XP["first_win_mult"], win, str(xps)])
+	ok(first and xps == [int(XP["first_win"]), win, win],
+			"XP: first win of the day %d, then %d a win: %s" % [XP["first_win"], win, str(xps)])
 	var bag: Dictionary = Save.d["items"]
 	ok(int(bag.get("zipseed", 0)) >= 1 and int(bag.get("galeribbon", 0)) == 1,
 			"prizes banked: first-win Zipseed and the Galeribbon cup prize %s" % str(bag))
 	var next_week := now + 8.0 * 86400.0
 	GardenPrizes.settle("kite", rec, BaseKite.rival(rec), true, next_week, rng)
+	var before_lost := int(rec["xp"])
 	var lost := BaseKite.settle(_lap(6, 30, false), rec, BaseKite.rival(rec), next_week + 1.0, rng)
-	ok(not lost["won"] and lost["xp"] == int(XP["game"]) and lost["prize"]["reset"],
-			"a lost lap: %d play XP and the cup starts over" % lost["xp"])
+	var played := int(rec["xp"]) - before_lost
+	ok(not lost["won"] and played == int(XP["play"]) and lost["prize"]["reset"],
+			"a lost lap: %d play XP and the cup starts over" % played)
 	Save.d = Save.fresh()
 
 ## Three Boki on a stock farm (a Training post) whose island has the given theme.

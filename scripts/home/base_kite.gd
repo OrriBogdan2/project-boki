@@ -157,9 +157,8 @@ static func settle(run: Run, rec: Dictionary, foe: Dictionary, now := -1.0,
 	var foe_t := rival_time(foe, run.lap)
 	var won := run.time() <= foe_t
 	var prize := GardenPrizes.settle("kite", rec, foe, won, now, rng)
-	var xp := GardenXp.played(rec, won, prize["first"])
 	return {"rec": rec, "time": run.time(), "hits": run.hits, "misses": run.misses, "gems": gems,
-			"won": won, "rival_time": foe_t, "prize": prize, "xp": xp}
+			"won": won, "rival_time": foe_t, "prize": prize}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -243,7 +242,7 @@ func use() -> void:
 		vent_nodes.append(vn)
 	_paint_hoops()
 	_place_flier()
-	Sfx.play("garden_start", stand.position, BaseRace.GARDEN_DB)
+	GardenSfx.cue("garden_start", stand.position)
 
 ## Esc lands the kite with no result; true when the flight took the press.
 func input(event: InputEvent) -> bool:
@@ -265,7 +264,7 @@ func tick(d: float) -> void:
 	if passed == "vent":
 		h._toast("Updraft! A flap back (%d left)" % run.flaps)
 	elif passed != "":
-		Sfx.play("garden_cheer" if passed == "hit" else "garden_miss", flier["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.cue("garden_cheer" if passed == "hit" else "garden_miss", flier["pos"])
 		_paint_hoops()
 	_place_flier()
 	if run.over():
@@ -343,7 +342,7 @@ func _end(finished: bool) -> void:
 	vent_nodes = []
 	kite = null
 	if finished:
-		Sfx.play("garden_win", land, BaseRace.GARDEN_DB)
+		GardenSfx.cue("garden_win", land)
 		h._emote(flier, "♥", true)
 		_card(res)
 		h._play_evolutions.call_deferred()     # a level the garden XP brought plays its form
@@ -364,7 +363,7 @@ func _card(res: Dictionary) -> void:
 		[title, 18, UI.ACCENT_HI if res["won"] else UI.INK],
 		["%.1f s vs %.1f s; %d of %d rings (+%.0f s for misses)"
 				% [res["time"], res["rival_time"], res["hits"], total, lost], 14, UI.INK],
-		["%s is beaming (+joy, +%d XP)" % [rec["name"], res["xp"]], 14, UI.INK],
+		["%s is beaming (+joy)" % rec["name"], 14, UI.INK],
 		["+%d gems%s" % [res["gems"], " for a clean lap" if res["misses"] == 0 else ""], 14, UI.GOLD]]
 		+ GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])
