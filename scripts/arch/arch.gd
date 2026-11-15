@@ -8,6 +8,7 @@ extends RefCounted
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
 const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"]   # canonical Hunter order (display and unlock order everywhere): Lace, Kael, Vex, Albert, then Neve, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Motley, Gil
+const HIT_H_DEFAULT := 1.5  # m, hurtbox height of a hunter with no archetype body (the old shared band)
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
