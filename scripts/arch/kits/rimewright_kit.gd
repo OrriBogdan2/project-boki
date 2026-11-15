@@ -22,7 +22,7 @@ var seq_next := 0.0            # when the next dart may leave
 var burst_i := 0               # darts so far in this burst (one hold); the let-go ends it on wpn.heavy.n large ones
 var tail := 0                  # large darts still owed to the burst's end (they fly after the let-go)
 var burst_open := 0.0          # when the next burst may start (wpn.barrage_cd after the last large dart)
-var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
+var rinkrun := {}              # the running Skate: {t, dir, loop, slab, rate}
 var skate_snd := RimeSkateSfx.new()     # the skate loop, the carve scrape and the slide-out hiss
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
@@ -445,7 +445,8 @@ func _tick_rinkrun(dt: float) -> void:
 		turn = clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt)
 		cur = cur.rotated(turn)
 	rinkrun["dir"] = cur
-	_edge_spray(cur, turn / maxf(dt, 0.001), dt)
+	rinkrun["rate"] = turn / maxf(dt, 0.001)      # rad/s: the carve scrape (RimeSkateSfx) follows it
+	_edge_spray(cur, float(rinkrun["rate"]), dt)
 	h.roll_dir = cur
 	# full speed within `ramp` s of the push-off; out of Rimelock it starts at full speed (or the speed she
 	# had) and holds it CARRY_T before easing to the skate's own
