@@ -97,7 +97,7 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
 		if p0 and by.team != p0.team:
-			return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
+			return [Color(col.lerp(SideColor.foe(), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
 		return [Color(col, 0.5), shot_size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
 	var vis_size := shot_size * 2.0
