@@ -15,3 +15,4 @@ tools/vfx_reel/tender.gd      # same
 tools/vfx_reel/dolm.gd      # same
 tools/vfx_reel/thief.gd      # same
 tools/anim/uthana_bake.gd      # offline clip bake: godot -s tools/anim/uthana_bake.gd -- --recipes= --out= (docs/UTHANA_RANK.md)
+ops/merge-train-1114/gate_shard_run.gd      # copied into scratch trees by ops/merge-train-1114/gate-shard
