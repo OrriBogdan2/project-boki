@@ -108,6 +108,14 @@ func _cull_strays() -> void:
 			culled = true
 	if culled and alive() == 0:
 		spawn(tu.id())
+## A retry: the camp goes without a kill (no XP) and the ledger starts again, so the camp brought back pays
+## only what is left to its level.
+func clear() -> void:
+	for e: Dictionary in ledger:
+		if is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead:
+			(e["mb"] as Mob).vanish()
+	ledger.clear()
+	count = 0
 
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:
