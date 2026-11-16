@@ -10,6 +10,7 @@ extends RefCounted
 const SIM_SECS := 240.0      # simulated seconds
 const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
+const ISLAND_SEED := 7     # the farm-start island (a random one each run moved the toy and the ball)
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
 const HUB_FRAMES := 600      # frames to wait for the hub to load
 
@@ -26,6 +27,7 @@ func _new_save() -> Dictionary:
 	var recs: Array = []
 	for spec in [["kindlewren", "Wren"], ["glomwort", "Glom"], ["glintmole", "Mole"], ["burrlet", "Bur"]]:
 		var rec := Save.new_kin(spec[0], spec[1])
+		rec["uid"] = "chore_%s" % spec[1]      # likes are seeded from the uid: a random one changes what each Boki does
 		rec["mutations"] = []
 		recs.append(rec)
 		Care.ensure(rec)
@@ -37,6 +39,7 @@ func _new_save() -> Dictionary:
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
+	HomeLayout.new_fs(d, ISLAND_SEED)
 	HomeLayout.ensure(d)
 	return d
 
@@ -50,6 +53,7 @@ func run(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	var d := _new_save()
 	var home = await main._hb_home()
+	seed(7)      # again: the home used up a different number of rolls in the real frames it took to build
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)
 	var center: Vector3 = home.world.random_ground(0)

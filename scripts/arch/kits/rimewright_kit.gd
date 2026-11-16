@@ -22,7 +22,8 @@ var seq_next := 0.0            # when the next dart may leave
 var burst_i := 0               # darts so far in this burst (one hold); the let-go ends it on wpn.heavy.n large ones
 var tail := 0                  # large darts still owed to the burst's end (they fly after the let-go)
 var burst_open := 0.0          # when the next burst may start (wpn.barrage_cd after the last large dart)
-var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
+var rinkrun := {}              # the running Skate: {t, dir, loop, slab, rate}
+var skate_snd := RimeSkateSfx.new()     # the skate loop, the carve scrape and the slide-out hiss
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
@@ -114,12 +115,13 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return     # nothing to Shatter, and a knocked foe isn't Chilled afterwards (a later dart would Shatter it)
 	if felled:
 		var at := t.pos
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		var delay := float(pd.get("splinter_delay", 0.4))
 		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
 		m.later(
 				delay,
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
-		chill.erase(t.get_instance_id())
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
+		chill.erase(tid)
 		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
@@ -137,7 +139,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			var tid := t.get_instance_id()
+			var fan_r := float(pd["splinter_r"]) * 0.8
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
@@ -445,7 +449,8 @@ func _tick_rinkrun(dt: float) -> void:
 		turn = clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt)
 		cur = cur.rotated(turn)
 	rinkrun["dir"] = cur
-	_edge_spray(cur, turn / maxf(dt, 0.001), dt)
+	rinkrun["rate"] = turn / maxf(dt, 0.001)      # rad/s: the carve scrape (RimeSkateSfx) follows it
+	_edge_spray(cur, float(rinkrun["rate"]), dt)
 	h.roll_dir = cur
 	# full speed within `ramp` s of the push-off; out of Rimelock it starts at full speed (or the speed she
 	# had) and holds it CARRY_T before easing to the skate's own
@@ -466,7 +471,6 @@ func _tick_rinkrun(dt: float) -> void:
 	if stride_free and (float(rinkrun["loop"]) <= 0.0 or (striding and anim_id != stride)):
 		rinkrun["loop"] = KMovesCare.length(stride)
 		play(stride)
-		m.sfx("rimewright_skate_scrape", h.pos, -5.0, 1.0)     # each stride's blade on the ice
 	_lay_ice(cur, dt)
 
 ## A jump press in the air skate with no jump left in it, clear of the ground: ending in the air takes the normal
@@ -537,6 +541,9 @@ func _rinkrun_end(into_rime := false) -> void:
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
 
 func rinkrunning() -> bool: return not rinkrun.is_empty()
+
+func sound_tick(dt: float) -> void:
+	skate_snd.tick(self, dt)
 
 ## Carving: a spray of ice and chips off the outside blade, more the harder she turns.
 func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:
