@@ -80,7 +80,7 @@ def wind_skins():
         'leaf': bpf(noise(1.4), 300, 2000) * wobble(1.4, 4, 0.3) * 0.8 + grains(1.4, 45, 1500, 5500, 0.003, 0.01, 0.2) * 0.9,
         'moth': lpf(bpf(noise(1.4), 250, 1800), 1800) * wobble(1.4, 4, 0.2) * (0.55 + 0.9 * np.sin(2 * np.pi * 13 * t) ** 2),
         'bat': bpf(noise(1.4), 120, 1300) * wobble(1.4, 3, 0.45) * 1.1 + lpf(noise(1.4), 280) * 0.5,
-        'glass': bpf(noise(1.4), 500, 3500) * wobble(1.4, 5, 0.2) * 0.7 + glass * 0.025,
+        'glass': bpf(noise(1.4), 500, 3500) * wobble(1.4, 7, 0.2) * 0.7 + glass * 0.025,
         'fire': bpf(noise(1.4), 100, 800) * wobble(1.4, 6, 0.4) * 1.2 + grains(1.4, 20, 500, 3000, 0.002, 0.006) * 0.9 + hpf(noise(1.4), 3000) * 0.06,
         'static': bpf(noise(1.4), 300, 2200) * wobble(1.4, 5, 0.25) * 0.8 + grains(1.4, 16, 1500, 6500, 0.001, 0.004, 0.2),
         'soft': lpf(bpf(noise(1.4), 200, 1500), 1500) * wobble(1.4, 3, 0.3) * 1.2,
