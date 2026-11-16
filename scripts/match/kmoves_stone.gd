@@ -20,8 +20,7 @@ const MOVES := {
 			}
 		]]},
 	# Basalt Spine let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
-	# stays down through the cracks and the 0.8s rise (to 0.95), then heaves up as the ridge stands
-	# (1.0 = x.tell + x.rise), back to stance by 1.4 (the x_spine clip's keys, tools/art1/tarek_clips.py)
+	# stays down through the 0.2s cracks and the 0.4s rise, then heaves up as the ridge stands (0.7)
 	"breah_spine": {"keys": [
 		[
 			0.00,
@@ -45,20 +44,20 @@ const MOVES := {
 			}
 		],
 		[
-			0.95,
+			0.55,
 			{
 				"p": -0.75, "lift": -0.12, "sq": 0.36, "legs": [0.85, -1.45, 0.75, -1.35], "lw": 1.0,
 				"fl": Vector3(-0.32, -0.66, -0.42), "hw": 1.0, "fr": Vector3(0.32, -0.66, -0.42), "rw": 1.0
 			}
 		],
 		[
-			1.00,
+			0.70,
 			{
 				"p": 0.25, "lift": 0.1, "sq": -0.18, "legs": [0.3, -0.6, 0.25, -0.5], "lw": 1.0,
 				"fl": Vector3(-0.5, 0.7, -0.1), "hw": 1.0, "fr": Vector3(0.5, 0.7, -0.1), "rw": 1.0
 			}
 		],
-		[1.40, {}]]},
+		[1.00, {}]]},
 	# Boulder (tap): a side hurl. Twisted far away with the right fist cocked back and out (0.07), the hips
 	# whip round and the arm flings it out long (0.13), the fist follows through across her body (0.24)
 	"breah_throw": {"keys": [

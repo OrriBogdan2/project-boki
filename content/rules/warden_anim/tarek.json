@@ -87,8 +87,10 @@
 			"turn_max": 3.2
 		},
 		"breah_raise": {
-			"clip": "e_row"
-		, "air_legs": true},
+			"clip": "e_row",
+			"upper": "moving",
+			"air_legs": true
+		},
 		"breah_sense": {
 			"clip": "sense"
 		},
