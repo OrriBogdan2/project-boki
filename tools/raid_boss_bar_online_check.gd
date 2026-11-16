@@ -74,7 +74,7 @@ func _on_msg(topic: String, data, from: String) -> void:
 ## The guest's own view of the bar: what boss_for finds, its numbers, the phase the bar would print.
 func _say_bar() -> void:
 	var me := m.player
-	var b: Mob = m.lairs.boss_for(P)
+	var b: Mob = m.lairs.boss_for(me)
 	var nm := String((b as Boss).md["name"]) if b is Boss else String(HeartRaid.rules()["boss"]["name"])
 	var rep := {
 		"pos": [me.pos.x, me.pos.y, me.pos.z],
