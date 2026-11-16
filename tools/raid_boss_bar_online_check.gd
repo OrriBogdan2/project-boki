@@ -73,11 +73,11 @@ func _on_msg(topic: String, data, from: String) -> void:
 
 ## The guest's own view of the bar: what boss_for finds, its numbers, the phase the bar would print.
 func _say_bar() -> void:
-	var P := m.player
+	var me := m.player
 	var b: Mob = m.lairs.boss_for(P)
 	var nm := String((b as Boss).md["name"]) if b is Boss else String(HeartRaid.rules()["boss"]["name"])
 	var rep := {
-		"pos": [P.pos.x, P.pos.y, P.pos.z],
+		"pos": [me.pos.x, me.pos.y, me.pos.z],
 		"has": b != null,
 		"plain": b != null and not (b is Boss),
 		"name": nm,
@@ -92,15 +92,15 @@ func _say_bar() -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var host_g := await _host_up()
+	if host_g == null:
 		return _finish()
 	var rd := m.heart_raid
 	ok(rd != null and rd.host(), "the host runs the raid")
 	var site := m.heart.site
 	home_at = m.world.free_spot_near(site + Vector3(-4, 0, 0), [], 1.0, 0.45, 4.0)
 	m.player.teleport(home_at)
-	await _place(G, m.world.free_spot_near(site + Vector3(-4, 0, 3), [], 1.0, 0.45, 4.0))
+	await _place(host_g, m.world.free_spot_near(site + Vector3(-4, 0, 3), [], 1.0, 0.45, 4.0))
 	rd._spawn_boss()
 	var b := rd.boss as Boss
 	ok(b != null and not b.dormant, "the host raises the boss")
@@ -127,10 +127,10 @@ func _host() -> void:
 		)
 	ok(b.phase == 2, "the host boss reached its third phase")
 	var away := m.world.free_spot_near(site + Vector3(float(rd.lair["half"]) + 14.0, 0, 0), [], 1.0, 0.45, 6.0)
-	await _place(G, away)
+	await _place(host_g, away)
 	r = await _bar()
 	ok(not bool(r["has"]), "guest: outside the boss's square no bar shows", str(r))
-	await _place(G, home_at + Vector3(0, 0, 2))
+	await _place(host_g, home_at + Vector3(0, 0, 2))
 	r = await _bar()
 	ok(bool(r["has"]), "guest: back in the square the bar shows again")
 	b.hurt(b.max_hp * 10.0, m.player, {})
