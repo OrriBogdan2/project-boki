@@ -43,12 +43,12 @@ func run(main: Node) -> void:
 	_level()
 	_item()
 	_trade()
-	_next_form()
 	_art_gate()
 	_cap()
 	_migrate()
 	_inks()
 	_sex()
+	_next_form()      # last: it rewrites the pebbit line
 	var lines: Dictionary = Evo.rules()["lines"]
 	for a in _added:
 		if a[1] == null: lines.erase(a[0])
@@ -169,7 +169,7 @@ func _next_form() -> void:
 	rec["level"] = 5
 	ok(EvoNextForm.info(rec)["frac"] == 1.0, "next form: at its evolve level the bar is full")
 	nf = EvoNextForm.info(_kin("zapple", 3))
-	ok(nf["line"] == "Needs a Tide Ink" and not nf.has("goal"), "next form: an Ink line names the Ink, no bar: %s" % nf["line"])
+	ok(nf["line"] == "Needs a Tide Ink" and not nf.has("goal"), "next form: an Ink line, no bar: %s" % nf["line"])
 	_line("zapple", {"into": [{"id": "cindle", "item": "ink_tide"}, {"id": "thrumbird", "item": "ink_storm"}]})
 	ok(EvoNextForm.info(_kin("zapple", 3))["line"] == "Needs an Ink", "next form: Inks that pick the form say 'an Ink'")
 	ok(EvoNextForm.info(_kin("selenfin", 3))["line"] == "Evolves when traded", "next form: a trade line says so")
