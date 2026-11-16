@@ -297,7 +297,7 @@
   "rime_spear_aim": -2.0,
   "rime_wall": 0.5,
   "rimewright_chime": -2.5,
-  "rimewright_dart_hit": -3.0,
+  "rimewright_hit": -3.0,
   "rimewright_dash": -6.5,
   "rimewright_dash_air": -7.0,
   "rimewright_death": -3.0,
