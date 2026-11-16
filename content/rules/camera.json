@@ -21,6 +21,14 @@
 		"max_gap": 3.5,
 		"cut_speed": 90.0
 	},
+	"zoom": {
+		"doc": "The match camera's zoom (CamWheel, scripts/match/cam_wheel.gd), as a factor on the style's distance. The view starts at max (the widest the wheel allows, 36.8 m back and about 37 m of ground across: the source's 35-39 m) at spawn and after a respawn; the mouse wheel steps it by step per notch between min (close) and max. Holding Ctrl (Sneak) eases the view out to max x ctrl, past the wheel's range, and back on release. cap: the widest the view ever goes, with the glider and height stacked on top.",
+		"min": 0.55,
+		"max": 1.6,
+		"step": 0.1,
+		"ctrl": 1.4,
+		"cap": 2.4
+	},
 	"lean_edge_m": 1.5,
 	"pose_far_m": 40.0,
 	"source": {
