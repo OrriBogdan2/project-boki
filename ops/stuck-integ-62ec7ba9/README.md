@@ -61,3 +61,28 @@ branch is main + ext/stuck-integ-62ec7ba9, not the mc train. Next 11 rows by unl
 | prologue-canon-2 | owner text call: main has Solmere/Malgrave/Hollowing; left: "the Beloved", "floating Skylands", shot 5 "Hunter's Relic" (DECISIONS 11-08 lines 361-362 lean to the branch) |
 | anim-meeko-tiptoe | needs an anim job: the change is a re-baked glb (crouch_f/b/l/r), not text |
 | vfx-cinder-ignite-orb | needs a vfx port job: ashwick_kit/ld_fx orb rider differs from main's |
+
+## Pass 4 (ext/stuck-integ-f1f63a7a, worker rpc1, role feel, main 24078a184b merged in, 2026-11-16)
+
+Next 22 rows by unlanded_lines, each read against main's current code:
+
+| branch | result |
+|---|---|
+| parity-neve-rimelock-ramp | **ported** (4c55bebeab): Rimelock rink slows a flat 35%, the ours-only 15%+12%/s ramp is gone (PARITY FIRST); --rimewright-combo-check 137/0, --kit-parity-check 0 |
+| tut-hatch-beat | **ported** (bug fix): `--hatch-check` divided a seconds clock by 1000, so the "beat < 2.5 s" row read ~0.002 s and could never fail; now 2.01 s, 0 failures |
+| combat-neve-lmb-torn | superseded: main's UiTorn keeps corner points on the edge (depth 0 at k = 0 / steps) |
+| combat-ostra-seed-burn | superseded: --ostra-combo-check reads `e.burn` from the data on main |
+| ui-card-numbers | superseded: main's card text was rewritten since (Sable E "15m at most", Mage tap 16 dmg); the branch's numbers are stale |
+| sfx-boki-wire | superseded: all six Boki cues are played on main (merge_xform, kin_downed, kin_net, home, home_econ) and asserted in --sfx-set-check |
+| mantle-look-one-home | superseded: MantleLook takes the gender from the archetype JSON on main; no gender in mantle_look.json |
+| kit-text-clear-fixes | superseded: main's names/fantasy lines were rewritten later (harbour hauler, quarry-hand, green-fire rifle) |
+| ui-audio-buses | superseded: main's Settings.BUSES has six buses (adds voices, ui_sounds) and Sfx.play_sample |
+| feel-dive-net | superseded: main shows another player's plunge from its fall speed (GliderSfx.DIVE_VY_MIN), no Net flag needed |
+| no-squad-hint-1111 | superseded by a later design: main's first-match guide grew squad + mates lines on purpose (11-13) |
+| ttk-kael | superseded: Kael was re-tuned on main later (LMB 8.0 vs the branch's 5.2); a TTK change needs --ttk-check, not a port |
+| vfx-ground-ring-hitbox | superseded: main has no skate frost/scorch discs and no Basalt Spine cast ring |
+| feel-neve-statue-time | **not ported, owner call**: footage reads 3.3 s, but KIT_PARITY's [D] row says 3.5 s and data outranks footage; main keeps 3.5 |
+| cinder-flue-clips | needs an anim port job (lift-off clips + hero_vfx ribbon), not text |
+| grimble-hook-arm-v2-rebased, anim-pilot-slice3, anim-meeko-crouch-stride, grimble-nose-1109 | art/glb rows: need art jobs from the owner's picks |
+| warden-bob-damp-rebased | superseded: `loco.bob` is on main (WardenGait) and Kael was re-tuned to [1.0, 0.6]; leftovers are a Net VERSION line, release.yml comments, audit doc |
+| tut-keycap-audit | partly on main (--key-text-check, Settings.key_cap in hatch/tutorial_text); left: some card/tutorial strings, not re-read this pass |
