@@ -99,6 +99,13 @@ func run(main: Node) -> void:
 	KeyMigrate.run(two)
 	var untouched: bool = not fresh["keys"].has("gear2") and two["keys"]["gear2"].size() == 2
 	ok(untouched, "an unsaved or two-key glove 2 is untouched")
+	# C: the Boki key (send/recall) in a match, a Boki's details at home; old saved G moves to C
+	ok(S.slots("throw")[0] == "key:%d" % KEY_C and S.conflicts(_key(KEY_C), "throw").is_empty(),
+			"the Boki key ships on C and shares it with details (home only) without a clash")
+	var s6 := {"keys": {"throw": ["key:%d" % KEY_G]}, "keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1,
+			"keys6_v": 1}
+	KeyMigrate.run(s6)
+	ok(not s6["keys"].has("throw") and int(s6["keys7_v"]) == 1, "a saved G Boki key moves to C (%s)" % str(s6))
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))

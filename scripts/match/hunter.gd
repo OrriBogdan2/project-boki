@@ -229,6 +229,8 @@ var auto_glide := false        # carried by a lair's escape updraft: the glider 
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
+var ult_ready := false        # the hero ultimate is ready (UltGlow: read from the kit, or from the net)
+var ult_glow := 0.0           # its glow on the body, 0..1 (UltGlow)
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
 var crit_t := 0.0             # shots crit while this runs (Blink)
 var phase_t := 0.0            # Light's Phase Step: shots pass through you while this runs
@@ -1826,6 +1828,8 @@ func sim(dt: float) -> void:
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
 	KinRegen.owner_shield_tick(self, dt)
+	if is_local():
+		WarnSfx.low_hp(self, dt)
 	if owner_stat("dodge_regen") >= 0.99:
 		dashes = max_dashes()
 	for bk in kbuffs.keys():
@@ -1845,6 +1849,7 @@ func sim(dt: float) -> void:
 	glider_snd.tick(self)
 	HoverHum.tick(self)
 	abyss_snd.tick(self)
+	if ak: ak.sound_tick(dt)
 	if remote:
 		net_follow(dt)
 		return
@@ -3091,27 +3096,17 @@ func _anim_state(stretch: float) -> void:
 		s.erase("air_h")
 
 ## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
-## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
+## heroes "feel more important"). Visual only: the hitbox (r), the TeamRing hit circle under your
+## feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
-var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
 	if n == null:
 		return
-	vis_k = 1.0
-	fit_scale()
-
-## Puts VIS_SCALE x the camera's hunter_scale on the model (again when the Settings camera changes).
-func fit_scale() -> void:
-	var k: float = VIS_SCALE * (m.cam.hunter_scale if m and m.cam else 1.0)
-	if is_equal_approx(k, vis_k):
-		return
-	model.scale *= k / vis_k
-	var ring := model.get_node_or_null("TeamRing") as Node3D
+	n.scale *= VIS_SCALE
+	var ring := n.get_node_or_null("TeamRing") as Node3D
 	if ring:
-		ring.scale /= k / vis_k
-	vis_k = k
+		ring.scale /= VIS_SCALE
 
 ## (movefeel) Where to draw this hunter between simulation steps. Everyone else is interpolated
 ## (drawn up to one step in the past, which is smooth); the local player is drawn at the present
@@ -3135,8 +3130,8 @@ func render(delta: float, alpha: float) -> void:
 			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
-	fit_scale()
 	HunterWisp.tick(self, delta)
+	UltGlow.tick(self, delta)
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
 	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = body_face
