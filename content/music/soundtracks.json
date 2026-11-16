@@ -1,0 +1,46 @@
+{
+	"_doc": "The soundtracks in Settings > Audio > Music (Soundtrack, scripts/core/soundtrack.gd). Each style names one track per place: a track id plays audio/music_<id>.ogg. scene: places that share one shuffle roll. classic and lofi are rendered by tools/compose_soundtracks.py; isles is the game's first score (tools/compose.py), whose places keep their own music (the garden's islands and day/night, the expedition's layered stems).",
+	"default": "classic",
+	"places": [
+		{"id": "menu", "name": "Main menu", "scene": "menu"},
+		{"id": "base", "name": "Garden", "scene": "base"},
+		{"id": "calm", "name": "Expedition: exploring", "scene": "match"},
+		{"id": "tense", "name": "Expedition: fighting", "scene": "match"},
+		{"id": "final", "name": "Expedition: last moments", "scene": "match"},
+		{"id": "boss", "name": "Boss fight", "scene": "match"},
+		{"id": "victory", "name": "Made it out", "scene": "victory"},
+		{"id": "training", "name": "Training", "scene": "training"}
+	],
+	"styles": {
+		"classic": {"name": "Classic Adventure", "tracks": {
+			"menu": ["classic_menu", "Hearthlight"],
+			"base": ["classic_base", "Furrow and Hearth"],
+			"calm": ["classic_calm", "Wayfarer's Road"],
+			"tense": ["classic_tense", "Steel at Dusk"],
+			"final": ["classic_final", "The Narrowing Sky"],
+			"boss": ["classic_boss", "Under the Old Crown"],
+			"victory": ["classic_victory", "Homeward Bells"],
+			"training": ["classic_training", "Practice Yard"]
+		}},
+		"isles": {"name": "Isles Folk (the first score)", "tracks": {
+			"menu": ["title", "Project Boki"],
+			"base": ["home_day", "Hearthwind"],
+			"calm": ["match_calm", "Into the Isles"],
+			"tense": ["match_drive", "Into the Isles: the chase"],
+			"final": ["match_extract", "Into the Isles: the clock"],
+			"boss": ["match_boss", "Into the Isles: the boss"],
+			"victory": ["title", "Project Boki"],
+			"training": ["match_calm", "Into the Isles"]
+		}},
+		"lofi": {"name": "Lantern Lo-fi", "tracks": {
+			"menu": ["lofi_menu", "Lamplight"],
+			"base": ["lofi_base", "Seedlings"],
+			"calm": ["lofi_calm", "Slow Clouds"],
+			"tense": ["lofi_tense", "Close Call"],
+			"final": ["lofi_final", "Last Light"],
+			"boss": ["lofi_boss", "Deep Room"],
+			"victory": ["lofi_victory", "Home Again"],
+			"training": ["lofi_training", "Reps"]
+		}}
+	}
+}

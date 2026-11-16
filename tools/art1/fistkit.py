@@ -7,6 +7,7 @@ free hands. Model space: facing +Y, right +X, up +Z. Pose channels, all optional
   fing_r, fing_l fist 0 (open) .. 1 (clenched)         thumb_r, thumb_l (default: the fist's)
   fr, fl ankle targets in model space                  fra, fla foot pitch (deg, + toes up)         kr, kl knee poles
   jaw 0..1   lip -1 (grit) .. 0 (his grin) .. 1 (a bigger grin)     e ease into this key: io, in, out, lin, snap
+  breath  the rib cage's swell on the leaf bone x_breath (a fraction: 0.02 rises it 2 %), when the rig has one
 """
 import math
 
@@ -15,6 +16,7 @@ import numpy as np
 from mathutils import Euler, Quaternion, Vector
 
 FPS = 30
+BREATH_OUT = 0.6     # x_breath's swell out through the ribs, against its rise up the bone
 
 
 def qe(e):
@@ -75,6 +77,7 @@ class Rig:
         tors = lambda p: ph + H @ (Vector(p) - self.P["hips"])
         G["head"] = H @ qe(k.get("head", (0, 0, 0)))
         G["skirt"] = H
+        G["x_breath"] = H
         for s, sg in (("R", 1.0), ("L", -1.0)):
             lo = s.lower()
             G["pauldron." + s] = H
@@ -155,6 +158,7 @@ class Clips:
         rot = {b: np.empty((n, 4), np.float32) for b in names}
         lips = ("lip.L", "lip.R")
         loc = {b: np.zeros((n, 3), np.float32) for b in ("root",) + lips}
+        scl = {b: np.ones((n, 3), np.float32) for b in ("x_breath",) if b in rig.b}
         for f in range(n):
             t = 0.0 if loop and f == n - 1 else min(f / FPS, dur)
             pose = evaluate(keys, t)
@@ -171,6 +175,10 @@ class Clips:
             for b, sg in ((lips[0], -1.0), (lips[1], 1.0)):
                 v = Vector((sg * (0.008 * lp + 0.006 * jw), 0.0, 0.01 * lp - 0.016 * jw))
                 loc[b][f] = tuple(rig.R[b].inverted() @ v)
+            # (the swell runs up the bone, its local Y, and half as much out through the ribs)
+            for b in scl:
+                br = pose.get("breath", 0.0)
+                scl[b][f] = (1.0 + BREATH_OUT * br, 1.0 + br, 1.0 + BREATH_OUT * br)
         for b in names:
             q = rot[b]
             for f in range(1, n):
@@ -194,5 +202,7 @@ class Clips:
             curves('pose.bones["%s"].rotation_quaternion' % b, rot[b], b)
         for b, a in loc.items():
             curves('pose.bones["%s"].location' % b, a, b)
+        for b, a in scl.items():
+            curves('pose.bones["%s"].scale' % b, a, b)
         self.lengths[name] = (n - 1) / FPS
         return act

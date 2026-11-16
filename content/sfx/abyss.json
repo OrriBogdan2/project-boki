@@ -1,0 +1,11 @@
+{
+ "group": "abyss",
+ "name": "Abyss",
+ "script": "tools/gen_sfx_abyss.py",
+ "sounds": {
+  "abyss_whoosh": "dash", "abyss_catch": "cast", "abyss_strain": "loop", "abyss_fallout": "heavy_impact"
+ },
+ "signature": [],
+ "reach": {"abyss_fallout": 40},
+ "loops": ["abyss_strain"]
+}

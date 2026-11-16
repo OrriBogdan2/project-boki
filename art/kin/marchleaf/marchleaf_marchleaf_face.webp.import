@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvpnmr2s4f5um"
-path="res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.ctex"
+path.bptc="res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.bptc.ctex"
+path.astc="res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9e8d609e60f7f8e76132d58d7c712ec4"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/marchleaf/marchleaf_marchleaf_face.webp"
-dest_files=["res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.ctex"]
+dest_files=["res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.bptc.ctex", "res://.godot/imported/marchleaf_marchleaf_face.webp-a731ba9ec9ff62c8b8d5286db3e9261d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

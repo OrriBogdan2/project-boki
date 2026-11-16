@@ -125,6 +125,7 @@ func _deny(m: Match, P: Hunter) -> void:
 		P.roll_t = 0.0
 		P.dash_buf = 0.0
 		m.hud.slot_fx.erase("dash")
+		PressDeny.last.clear()      # every archetype presses on the same frame: the mash throttle is not tested here
 		P.do_dash()
 		if m.hud.slot_fx.get("dash", {}).get("kind", "") == "deny":
 			denied += 1
@@ -157,8 +158,8 @@ func _home_slot() -> void:
 	home.set_process(false)
 	home.set_physics_process(false)
 	for case in [[float(cap), 0.0], [float(cap - 1) + 0.4, 0.0], [0.0, 3.0]]:
-		home.dash_charges = case[0]
-		home.ex_cd = case[1]
+		home.dash.charges = case[0]
+		home.dash.ex_cd = case[1]
 		await _frames()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
@@ -171,8 +172,8 @@ func _home_slot() -> void:
 			"farm at %.1f charges: pips %s, countdown '%s' (%.2fs)" % [float(case[0]), pips, sh.get("text", ""), left])
 		var cap_txt := Settings.key_cap("dash")
 		ok(HudSlot.shown_keys.get("dash", "") == cap_txt, "the farm's slot shows the dash key '%s'" % cap_txt)
-	home.dash_charges = 0.0
-	home.ex_cd = 0.0
+	home.dash.charges = 0.0
+	home.dash.ex_cd = 0.0
 	slot.slot_fx.erase("dash")
 	home.dash_t = 0.0
 	slot.deny()

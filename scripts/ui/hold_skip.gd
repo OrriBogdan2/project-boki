@@ -1,52 +1,80 @@
 class_name HoldSkip
 extends Control
-## "Hold to skip" for story scenes: a keycap with a ring around it that fills while Esc (or the
-## mouse button, pressed on it) is held, and fires `skipped` when full. Letting go drains it again,
-## so a stray tap never throws away a cutscene.
+## The story player's input: hold to skip, click for next. A tap of any key, mouse button
+## or pad button fires `tapped` (the scene moves on one beat); holding one for HOLD_S fires `skipped`.
+## It sits in a corner unseen until a press: then a small ring with "Hold to skip" beside it fades in,
+## fills while held, and fades away LINGER_S after letting go.
+##
+##   var hs := HoldSkip.new(); add_child(hs)
+##   hs.tapped.connect(...); hs.skipped.connect(...)
+##   in _unhandled_input: if hs.feed(event): get_viewport().set_input_as_handled()
 
+signal tapped
 signal skipped
 
-const HOLD := 0.9
-var k := 0.0
-var mouse_held := false
+const HOLD_S := 1.0        # s held to skip it all
+const TAP_S := 0.35        # s: let go sooner and it was a tap; let go later (but short of HOLD_S) and nothing happens
+const LINGER_S := 1.5      # s the hint stays up after letting go
+const FADE_S := 0.25       # s for the hint to fade in or out
+const RING_R := 11.0       # px: the ring's radius
+const RING_W := 3.0        # px: its line width
+const TEXT := "Hold to skip"
+const TEXT_SIZE := 13
+
+var held: InputEvent = null      # the press being held, until its release
+var held_s := 0.0
+var since_up := LINGER_S         # s since the last release (the hint lingers, then fades)
 var done := false
-var label_txt := "Hold to skip"
 
 func _init() -> void:
-	custom_minimum_size = Vector2(170, 44)
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	custom_minimum_size = Vector2(RING_R * 2.0 + 110.0, RING_R * 2.0 + 8.0)
+	modulate.a = 0.0
 
-func _gui_input(e: InputEvent) -> void:
-	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
-		mouse_held = e.pressed
-		accept_event()
+## Takes a press or release of a key, mouse button or pad button; true when it used the event.
+func feed(event: InputEvent) -> bool:
+	var button := event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton
+	if done or not button or event.is_echo():
+		return false
+	if event.is_pressed():
+		if held == null:
+			held = event
+			held_s = 0.0
+		return true
+	if held == null or not held.is_match(event):
+		return false
+	var tap := held_s < TAP_S
+	held = null
+	since_up = 0.0
+	if tap:
+		tapped.emit()
+	return true
 
 func _process(delta: float) -> void:
-	if done:
-		return
-	var held := mouse_held or Input.is_action_pressed("menu")
-	if mouse_held and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		mouse_held = false
-	var was := k
-	k = clampf(k + (delta / HOLD if held else -delta * 2.5), 0.0, 1.0)
-	if held and was == 0.0 and k > 0.0:
-		Sfx.play("hover", null, -10.0, 0.0, 0.8)
-	if k >= 1.0:
-		done = true
-		Sfx.play("click")
-		skipped.emit()
-	queue_redraw()
+	if held != null and not done:
+		held_s += delta
+		if held_s >= HOLD_S:
+			done = true
+			held = null
+			skipped.emit()
+	else:
+		since_up += delta
+	var up := held != null or done or since_up < LINGER_S
+	modulate.a = move_toward(modulate.a, 1.0 if up else 0.0, delta / FADE_S)
+	if modulate.a > 0.0:
+		queue_redraw()
 
 func _draw() -> void:
-	var c := Vector2(22, size.y * 0.5)
-	var r := 16.0
-	var hot := k > 0.0
-	draw_circle(c, r + 3.0, Color(0, 0, 0, 0.35))
-	draw_arc(c, r, 0, TAU, 40, Color(1, 1, 1, 0.18), 3.0, true)
+	var c := Vector2(RING_R + 2.0, size.y * 0.5)
+	var k := 0.0
+	if done:
+		k = 1.0
+	elif held != null:
+		k = clampf(held_s / HOLD_S, 0.0, 1.0)
+	draw_circle(c, RING_R + 2.0, Color(0, 0, 0, 0.35))
+	draw_arc(c, RING_R, 0.0, TAU, 32, Color(1, 1, 1, 0.22), RING_W, true)
 	if k > 0.0:
-		draw_arc(c, r, -PI / 2, -PI / 2 + TAU * k, 40, UI.ACCENT, 3.5, true)
-	var f: Font = UI.caps if UI.caps else UI.body
-	var tw := f.get_string_size("Esc", HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-	draw_string(f, c + Vector2(-tw * 0.5, 4), "Esc", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1, 1, 1, 0.95 if hot else 0.7))
-	draw_string(UI.semi if UI.semi else UI.body, Vector2(c.x + r + 12, c.y + 5), label_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.9 if hot else 0.6))
+		draw_arc(c, RING_R, -PI / 2.0, -PI / 2.0 + TAU * k, 32, UI.ACCENT, RING_W + 0.5, true)
+	var f: Font = UI.semi if UI.semi else UI.body
+	draw_string(f, Vector2(c.x + RING_R + 10.0, c.y + TEXT_SIZE * 0.35), TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1,
+		TEXT_SIZE, Color(1, 1, 1, 0.8))

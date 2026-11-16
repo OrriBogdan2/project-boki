@@ -1,5 +1,6 @@
 extends RefCounted
-## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512]: the review sheets of a rigged Boki, in the engine.
+## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512] [--normal-k=1]: the review sheets of a rigged
+## Boki, in the engine (--normal-k=0 leaves a Meshy body's normal map out, for an A/B).
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
 ## Needs a renderer.
@@ -42,6 +43,7 @@ func run(m: Node) -> void:
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--species="): species = a.substr(10)
 		if a.begins_with("--px="): px = int(a.substr(5))
+		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:

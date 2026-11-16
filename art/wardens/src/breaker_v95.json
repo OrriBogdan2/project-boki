@@ -1,0 +1,60 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Albert's (Mossy, the Breaker) v95 master with the owner-approved appeal3 face (~/meshy/v95/Albert/r2/appeal3/cand.glb, its copies of the game's hammer, shield and lure ball left out: albert_v95_body.glb) onto breaker.glb's skeleton, clips and anchors; breaker.glb's own hammer mesh and shield (kept on x_shield) stay. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The pelvis sits at the rig's hips height so the girth keeps the master's (k 1: the rig is as wide as he is, much shorter); the neck is where the helmet's pivot goes. The masts and sails ride the hips, the helmet the head, the fish hangs from his left mast on x_fish (its spring chain moved there), the porthole glass is the mood face's screen (eyes-mood) and the cracks glow from the master's emission map.",
+ "master": "~/meshy/v95/Albert/r2/clean1/albert_clean1_body.glb",
+ "game": "art/wardens/breaker/breaker.glb",
+ "tris": 13000,
+ "max_tris": 13000,
+ "head": {"centre": [0.0, 0.08, 1.27], "r": 0.25},
+ "head_tris": 3000,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "emit": true,
+ "keep": ["x_shield"],
+ "joints": {
+  "pelvis": [0.0, 0.0, 0.193],
+  "neck": [0.0, 0.05, 1.1],
+  "crown": [0.0, 0.08, 1.5],
+  "shoulder.R": [0.47, -0.04, 0.92],
+  "elbow.R": [0.5, -0.02, 0.6],
+  "wrist.R": [0.52, 0.0, 0.33],
+  "shoulder.L": [-0.47, -0.04, 0.92],
+  "elbow.L": [-0.5, -0.02, 0.6],
+  "wrist.L": [-0.52, 0.0, 0.33],
+  "hip.R": [0.2, 0.0, 0.21],
+  "knee.R": [0.2, 0.0, 0.14],
+  "ankle.R": [0.2, 0.02, 0.07],
+  "hip.L": [-0.21, 0.0, 0.21],
+  "knee.L": [-0.21, 0.0, 0.14],
+  "ankle.L": [-0.21, 0.02, 0.07]
+ },
+ "past_wrist": {"R": "hand.R", "L": "hand.L"},
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {"bone": "hips", "box": [-9, 9, -9, -0.15, 1.0, 9], "except_segs": [["upper_arm.R", 0.17], ["upper_arm.L", 0.17]]},
+  {"bone": "head", "box": [-0.3, 0.3, -0.15, 0.45, 1.02, 1.62]},
+  {"bone": "x_fish", "box": [-0.66, -0.41, -0.48, -0.06, 1.2, 1.395]}
+ ],
+ "screen": {"slot": "eyes-mood", "centre": [0.0, 0.25, 1.26], "r": 0.105},
+ "slots": [
+  {"slot": "eyes-mood", "box": [-0.115, 0.115, 0.1, 0.5, 1.15, 1.37], "h": [0.38, 0.65]},
+  {"slot": "eyes-mood", "box": [-0.1, 0.1, 0.1, 0.5, 1.16, 1.36], "v": [0, 0.3]},
+  {"slot": "glow-lure", "box": [-0.65, -0.58, -0.45, -0.08, 1.29, 1.36], "h": [0.35, 0.65]},
+  {"slot": "brass", "bone": "head", "h": [0.0, 0.13], "s": [0.25, 1]},
+  {"slot": "brass", "box": [-0.11, 0.11, 0.15, 0.5, 0.66, 0.88], "h": [0.0, 0.16], "v": [0.5, 1]},
+  {"slot": "skin", "bone": "x_fish"},
+  {"slot": "cloth", "box": [-9, 9, -9, -0.1, 1.15, 9], "s": [0, 0.3], "v": [0.55, 1]},
+  {"slot": "cloth", "h": [0.16, 0.4], "s": [0.25, 1]},
+  {"slot": "metal", "s": [0, 0.25], "v": [0.25, 1]}
+ ],
+ "slot_default": "leather",
+ "room": {"*": 0.5},
+ "relax": {"CUTS": 0},
+ "anchors": {
+  "anchor_head_top": [0.0, 0.08, 1.5],
+  "anchor_chest": [0.0, 0.34, 0.77],
+  "anchor_lure": [-0.61, -0.27, 1.326]
+ },
+ "move_bones": {"x_fish": {"to": [-0.525, -0.27, 1.36], "chain": ["spring_hangfish_0", "spring_hangfish_1", "spring_hangfish_2", "spring_hangfish_3"]}}
+}

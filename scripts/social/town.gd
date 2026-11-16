@@ -153,6 +153,7 @@ func _build_guild() -> void:
 	ppos = Vector3(28, 0, 44.5)
 	var fp := Models.ferry_post(); fp.position = Vector3(28, 0, 45.5); fp.rotation.y = PI; add_child(fp)
 	_spot("ferry", Vector3(28, 0, 45.5), "Take the ferry", 2.2)
+	_spot("roster", Vector3(24.2, 0, 44.0), "Read the member roll", 2.2)
 	topbar.text = "Guild isle"
 	Social.get_guild(gid, func(g: Dictionary):
 		if not is_inside_tree(): return
@@ -428,7 +429,7 @@ func _build_ui() -> void:
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
-	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
+	var top := UI.card(Color(UI.NIGHT, 0.78), 12, 12)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
 	th.add_child(UI.title("Project Boki", 26, UI.ACCENT))
@@ -436,12 +437,12 @@ func _build_ui() -> void:
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
 	root_ui.add_child(top)
-	prompt_box = UI.card(Color(0.06, 0.07, 0.1, 0.85), 12, 12)
+	prompt_box = UI.card(Color(UI.NIGHT, 0.85), 12, 12)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
 	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	prompt_box.add_child(prompt_lbl)
 	root_ui.add_child(prompt_box)
-	var hint_box := UI.card(Color(0.06, 0.07, 0.1, 0.7), 8, 10)
+	var hint_box := UI.card(Color(UI.NIGHT, 0.7), 8, 10)
 	var hint := UI.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint_box.add_child(hint)
@@ -511,6 +512,7 @@ func _use(it: Dictionary) -> void:
 				var v := _new_panel("Ferry", 420)
 				v.add_child(UI.button("Home", func(): Game.goto("home"), 360))
 				v.add_child(UI.button("The town", func(): Game.goto("town", {"mode": "hub"}), 360))
+				v.add_child(UI.button("The clan base", func(): ClanBase.open(gid, guild_doc), 360))
 			else:
 				Game.goto("home")
 		"to_guild": Game.goto("town", {"mode": "guild", "gid": Social.my_guild_id()})
@@ -518,6 +520,7 @@ func _use(it: Dictionary) -> void:
 		"market": _open_market()
 		"notices": _open_notices()
 		"guilds": _open_guilds()
+		"roster": _open_roster()
 		"visit": _open_visits()
 		"member":
 			var m = it.get("data")
@@ -638,6 +641,12 @@ func _open_guilds() -> void:
 			Social.leave_guild(func():
 				_toast("You left the guild")
 				if panel_open == "Guild registry": _open_guilds()), 200))
+		if String(Social.guild.get("founder", "")) == Social.me:
+			var open_now: bool = Social.guild.get("open", true)
+			hb.add_child(UI.button("Open to anyone" if not open_now else "Close to newcomers", func():
+				_lock()
+				Social.set_open(gid0, not open_now, func(_okk):
+					Social.refresh_guild(func(): if panel_open == "Guild registry": _open_guilds())), 220))
 		v.add_child(hb)
 	else:
 		v.add_child(UI.label("Guilds share an isle: every member gets a cottage, and you build projects together that help everyone on expeditions.", 14, UI.MUTED))
@@ -665,16 +674,44 @@ func _open_guilds() -> void:
 			list.add_child(UI.label("No guilds yet. Found the first one.", 14, UI.MUTED))
 		for r in rows.slice(0, 10):
 			var g: Dictionary = r["g"]
-			var row := _row(list, g["name"] + (("  ·  " + g["motto"]) if g["motto"] != "" else ""))
+			var title: String = g["name"]
+			if g["motto"] != "":
+				title += "  ·  " + g["motto"]
+			if not g["open"]:
+				title += "  ·  closed"
+			var row := _row(list, title)
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
-			if Social.guild.is_empty():
+			if Social.guild.is_empty() and g["open"]:
 				row.add_child(UI.button("Join", func():
 					_lock()
 					Social.join_guild(rid, func(_okk):
 						Sfx.play("unlock")
 						_toast("Welcome to %s" % g["name"])
 						if panel_open == "Guild registry": _open_guilds()), 90)))
+
+## Who is in this clan and what rank they hold. Members who joined before ranks existed read as members.
+func _open_roster() -> void:
+	var v := _new_panel("Member roll", 480)
+	var list := _loading(v)
+	Social.clan_roster(gid, String(guild_doc.get("founder", "")), func(rows: Array):
+		if not _clear(list): return
+		var ranks := {}
+		for r in rows: ranks[r["id"]] = r["role"]
+		var names := {}
+		for m in members: names[m["id"]] = m["d"]["name"]
+		for id in names:
+			if not ranks.has(id): ranks[id] = "member"
+		var ids: Array = ranks.keys()
+		ids.sort_custom(func(a, b): return _rank_key(ranks, a) < _rank_key(ranks, b))
+		for id in ids:
+			var rank: String = ranks[id]
+			var col := UI.INK if rank == "member" else UI.GOLD
+			_row(list, "%s  ·  %s" % [names.get(id, "A member"), rank], col)
+		list.add_child(UI.label("%d of %d places filled." % [ids.size(), Social.CLAN_CAP], 13, UI.MUTED)))
+
+func _rank_key(ranks: Dictionary, id: String) -> String:
+	return "%d%s" % [Social.ROLES.find(ranks[id]), id]
 
 # ---- guild projects
 func _open_project(k: String) -> void:

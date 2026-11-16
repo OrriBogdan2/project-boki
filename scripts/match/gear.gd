@@ -134,22 +134,37 @@ static func stat_text(id: String, rar: int) -> String:
 	var st: Dictionary = ALL[id]["stats"]
 	var k := mult(rar)
 	for s in st:
-		var v := float(st[s]) * k
-		match s:
-			"speed": bits.append("%+d%% move speed" % int(round(v * 100)))
-			"glide_speed": bits.append("+%d%% glide speed" % int(round(v * 100)))
-			"heat": bits.append("+%d%% glider heat" % int(round(v * 100)))
-			"armor": bits.append("+%d armor" % int(round(v)))
-			"dmg": bits.append("+%d%% damage" % int(round(v * 100)))
-			"cdr": bits.append("%d%% faster abilities" % int(round(v * 100)))
-			"hp": bits.append("+%d health" % int(round(v)))
-			"reload": bits.append("%d%% faster reloads" % int(round(v * 100)))
-			"tonic": bits.append("tonics heal %d%% more" % int(round(v * 100)))
-			"pack": bits.append("+%d backpack slot%s" % [pack_bonus(rar, float(st[s])), "" if pack_bonus(rar, float(st[s])) == 1 else "s"])
-			"dodge": bits.append("dashes back %d%% sooner" % int(round(v * 100)))
-			"gems": bits.append("+%d%% gems" % int(round(v * 100)))
-			"sight": bits.append("+%d%% sight" % int(round(v * 100)))
+		var bit := stat_label(s, float(st[s]) * k)
+		if bit != "":
+			bits.append(bit)
 	return ", ".join(bits)
+
+## One stat as player text, signed ("+12% damage", "-4% move speed"); "" when it rounds to nothing.
+## `v` is the value at its rarity, or a difference between two pieces.
+static func stat_label(stat: String, v: float) -> String:
+	var pct := int(round(v * 100.0))
+	var whole := int(round(v))
+	match stat:
+		"speed": return "" if pct == 0 else "%+d%% move speed" % pct
+		"glide_speed": return "" if pct == 0 else "%+d%% glide speed" % pct
+		"heat": return "" if pct == 0 else "%+d%% glider heat" % pct
+		"armor": return "" if whole == 0 else "%+d armor" % whole
+		"dmg": return "" if pct == 0 else "%+d%% damage" % pct
+		"cdr": return "" if pct == 0 else "%+d%% faster abilities" % pct
+		"hp": return "" if whole == 0 else "%+d health" % whole
+		"reload": return "" if pct == 0 else "%+d%% faster reloads" % pct
+		"tonic": return "" if pct == 0 else "%+d%% tonic healing" % pct
+		"pack": return _pack_label(whole)
+		"dodge": return "" if pct == 0 else "%+d%% faster dash recharge" % pct
+		"gems": return "" if pct == 0 else "%+d%% gems" % pct
+		"sight": return "" if pct == 0 else "%+d%% sight" % pct
+	return ""
+
+static func _pack_label(n: int) -> String:
+	if n == 0:
+		return ""
+	var noun := "slot" if absi(n) == 1 else "slots"
+	return "%+d backpack %s" % [n, noun]
 
 ## Backpack slots a kit adds at a rarity (rounded: 1 up to Rare, 2 from Epic).
 static func pack_bonus(rar: int, base: float) -> int:

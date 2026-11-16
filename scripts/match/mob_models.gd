@@ -66,21 +66,16 @@ static func build(kind: String) -> Node3D:
 	if not pulse.is_empty():
 		root.set_meta("pulse", pulse)
 	_finish(root)
+	MobGlb.dress(root, kind)
 	return root
 
 ## Merges each pivot's plain parts into a mesh per material (a handful of draw calls a monster),
 ## then gives what's left its painted part gradient.
 static func _finish(root: Node3D) -> void:
-	var stack: Array = [root]
-	while not stack.is_empty():
-		var n: Node = stack.pop_back()
-		if n is Node3D and not (n is MeshInstance3D):
-			Models.merge_static(n)
-		for ch in n.get_children():
-			stack.append(ch)
+	Models.merge_tree(root)
 	Models.bake_part_y(root)
 
-static var _meshes := {}
+static var _meshes := MeshCache.new()
 ## Monster-weight meshes: smooth enough for the match camera and close-ups, a fraction of the
 ## triangles of the character meshes (dozens of monsters can be on screen).
 static func _sph(r: float) -> SphereMesh:
@@ -90,8 +85,8 @@ static func _sph(r: float) -> SphereMesh:
 	if not _meshes.has(key):
 		var s := SphereMesh.new()
 		s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(6, sg / 2)
-		_meshes[key] = s
-	return _meshes[key]
+		_meshes.put(key, s)
+	return _meshes.mesh(key)
 
 static func _cone(top: float, bottom: float, h: float) -> CylinderMesh:
 	var key := "c%.4f|%.4f|%.4f" % [top, bottom, h]
@@ -99,14 +94,14 @@ static func _cone(top: float, bottom: float, h: float) -> CylinderMesh:
 		var c := CylinderMesh.new()
 		c.top_radius = top; c.bottom_radius = bottom; c.height = h; c.radial_segments = 9; c.rings = 1
 		c.cap_top = top > 0.0; c.cap_bottom = false
-		_meshes[key] = c
-	return _meshes[key]
+		_meshes.put(key, c)
+	return _meshes.mesh(key)
 
 ## A tapered limb along Y (r0 at the top), rounded at both ends, a little fuller a third of the way down.
 static func _limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "l%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
 	if _meshes.has(key):
-		return _meshes[key]
+		return _meshes.mesh(key)
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	for k in 4:
@@ -119,7 +114,7 @@ static func _limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := pts
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := Models.lathe(prof, int(clampf(maxf(r0, r1) * 70.0, 8.0, 12.0)))
-	_meshes[key] = am
+	_meshes.put(key, am)
 	return am
 
 ## Dark accents go deep and the belly pale, whatever the region's colour, so a monster keeps a

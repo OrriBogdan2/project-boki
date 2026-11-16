@@ -1,7 +1,7 @@
 class_name AbilityDef
 extends Resource
 ## One ability, described as data. `effects` is a list of effect steps (see Effects) so new
-## abilities can be made without writing code. Loaded from content/abilities/<id>.json.
+## abilities can be made without writing code. Loaded from content/hunter_abilities/<id>.json.
 
 @export var id := ""
 @export var display_name := ""

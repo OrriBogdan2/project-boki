@@ -44,6 +44,11 @@ static func point(h: Hunter, max_range: float, mode := CURSOR, min_d := MIN_D) -
 	var r := dist(h, max_range, mode, min_d)
 	return ground(h.m, Vector3(h.pos.x + d.x * r, h.pos.y, h.pos.z + d.y * r))
 
+## Where a ground-placed zone, nuke or lob lands: exactly at the cursor, clamped to range. The source puts
+## these where you point, so unlike a shot there is no minimum travel.
+static func place(h: Hunter, max_range: float) -> Vector3:
+	return point(h, max_range, CURSOR, 0.0)
+
 ## p with y moved onto the ground under it (unchanged over the abyss or off the map).
 static func ground(m: Node, p: Vector3) -> Vector3:
 	if m == null or m.get("world") == null:

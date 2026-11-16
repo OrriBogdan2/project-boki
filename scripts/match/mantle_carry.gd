@@ -6,7 +6,11 @@ extends RefCounted
 ##    does momentum: heading into it that closely at PUSH_SPEED or more. Keys along or away from a
 ##    wall never pull you up it.
 ##  - Over the lip you leave at KEEP of the speed you came in with (SV MiniMantleXYSpeedTargetCoefficient
-##    0.6), never above it, and never under the usual mantle launch (HunterMove.mantle_launch). For
+##    0.6), never above it, and never under the usual mantle launch (HunterMove.mantle_launch). Nor ever
+##    above EXIT_K of your run speed, whatever you came in with or along the face: a dash or a launch
+##    glancing off a ledge doesn't fling you off the top, and while you rise the speed above that bleeds
+##    at RISE_BLEED, so it doesn't slide you on along the face either. A jump in the rise (fling) goes
+##    no faster than its own speed. For
 ##    MINI_S after it (SV MiniMantlePostLaunchDuration) that speed is held while you're still in the air
 ##    and your keys don't pull back, so air drag doesn't take it straight back off you.
 ## The speed you came in with is a decaying peak (carry_v), so the wall that stopped you a step
@@ -17,6 +21,8 @@ const APPROACH_DOT := 0.45     # keys or momentum this far into the face (cos ~6
 const PUSH_SPEED := 2.0        # m/s into the face: momentum alone is a push
 const PEAK_DECAY := 6.0        # m/s per s: how fast the remembered approach speed fades
 const MINI_S := 0.75           # [game data] MiniMantlePostLaunchDuration
+const EXIT_K := 1.2            # x run speed: the fastest you leave a mantle (a little forward flow, never a launch)
+const RISE_BLEED := 60.0       # m/s per s: speed above exit_cap lost while rising up a face (19 m/s gone in ~0.2s)
 
 ## Every step, before the move: hold a fresh mantle's speed, and remember how fast you're going (a
 ## decaying peak). Returns the horizontal velocity to move with.
@@ -30,11 +36,22 @@ static func step(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 			var d: Vector2 = mini["dir"]
 			var short := float(mini["v"]) - hv.dot(d)
 			if short > 0.0 and h.inp["move"].dot(d) >= 0.0:
-				hv += d * short       # held firm: air drag doesn't take it back off you
+				hv = (hv + d * short).limit_length(exit_cap(h))       # held firm: air drag doesn't take it back off you
+	if not h.lfloat.is_empty():
+		hv = hv.limit_length(maxf(exit_cap(h), hv.length() - RISE_BLEED * dt))
 	h.carry_v = maxf(hv.length(), h.carry_v - PEAK_DECAY * dt)
 	if hv.length() > 0.5:
 		h.carry_dir = hv.normalized()
 	return hv
+
+## A Shift dash that meets a ledge in reach hands over to the mantle: what's left of the dash is dropped (the
+## source's mini-mantle sets your speed from here, exit()), and the dash's speed takes you up the face, capped
+## at Hunter.LRISE_SPEED, instead of the suction's slow pull (SV footage: dash at a rim, on top ~0.2 s later
+## at dash-trail speed, no stop). 0 when you aren't dashing.
+static func dash_rise(h: Hunter) -> float:
+	if h.roll_t <= 0.0 or h.move_kind != "dash":
+		return 0.0
+	return minf(h.carry_v, Hunter.LRISE_SPEED)
 
 ## A teleport (a blink, a respawn, a portal) starts you with no momentum to carry.
 static func forget(h: Hunter) -> void:
@@ -56,15 +73,27 @@ static func heading(h: Hunter, mv: Vector2) -> Vector2:
 		return mv
 	return h.carry_dir * (1.0 if h.carry_v >= PUSH_SPEED else 0.0)
 
+## The fastest you leave a mantle, in m/s.
+static func exit_cap(h: Hunter) -> float:
+	return h.base_speed * EXIT_K
+
 ## Over the lip: at least KEEP of the speed you caught the ledge with, toward your keys (or on in the
-## direction you were going), capped at that speed.
+## direction you were going), capped at that speed and at exit_cap.
 static func exit(h: Hunter, hv: Vector2, n: Vector2, mv: Vector2, v_in: float) -> Vector2:
+	var cap := exit_cap(h)
 	var d := mv.normalized() if mv.length() > 0.3 else n
 	if d.dot(n) < 0.0:
-		return hv       # steering back off the ledge: your keys win
-	var want := minf(maxf(v_in * KEEP, HunterMove.mantle_launch(h.base_speed)), maxf(v_in, h.base_speed))
+		return hv.limit_length(cap)       # steering back off the ledge: your keys win
+	var want := minf(maxf(v_in * KEEP, HunterMove.mantle_launch(h.base_speed)), minf(maxf(v_in, h.base_speed), cap))
 	var along := hv.dot(d)
 	if along < want:
 		hv += d * (want - along)
 	h.carry_mini = {"t": MINI_S, "v": want, "dir": d}
-	return hv
+	return hv.limit_length(cap)
+
+## A jump during the ledge rise: at least `spd` toward d, and no faster than that (or exit_cap).
+static func fling(h: Hunter, hv: Vector2, d: Vector2, spd: float) -> Vector2:
+	var along := hv.dot(d)
+	if along < spd:
+		hv += d * (spd - along)
+	return hv.limit_length(maxf(spd, exit_cap(h)))
