@@ -7,7 +7,7 @@ extends RefCounted
 ##   SeekCue    a faint scent trail from the hidden scent toward each hunter
 ##   VolleyCue  a ring where the seed lands, and a flash when your spike is called
 ##   EchoCue    Echo Steps: a stone lights on its beat, a ring keeps the beat you answer, a hit or miss flashes
-##   TellCue    Tumble: the rival's tell as an icon over its head, as sure as the tell is likely to be true
+##   TumbleTellCue Tumble: the rival's tell as an icon over its head, as sure as the tell is likely to be true
 ##   BatonCue   Relay Cup: a glowing baton over each team's runner that bursts at every hand-off
 ##   PopCue     Show Ring: each round's score pops over the Boki as the judges give it
 ## Each cue is fed the live game state by its game's tick and has a `clear()`. The last four share the small
@@ -359,7 +359,7 @@ class EchoCue:
 ## Tumble: the rival's tell over its head while the tell lasts: Rush a double chevron toward your Boki, Brace a
 ## shield, Dodge a hoop. A tell is only probably true, so the icon is never solid: its alpha is the chance it
 ## is honest and it sways more the less sure it is.
-class TellCue:
+class TumbleTellCue:
 	extends RefCounted
 	const POP_S := 0.12                 # s the icon takes to grow in
 	const SWAY := 0.5                   # rad of sway at a coin-flip tell, none at a sure one

@@ -218,7 +218,7 @@ var score_lbl: Label = null
 var buttons: Array = []
 var card: Control = null
 var card_t := 0.0
-var cue: GardenCues.TellCue = null   # the rival's tell over its head while a bout runs
+var cue: GardenCues.TumbleTellCue = null   # the rival's tell over its head while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -269,7 +269,7 @@ func use() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
-	cue = GardenCues.TellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
+	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
