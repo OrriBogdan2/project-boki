@@ -35,7 +35,7 @@
   ],
   [
    "glide",
-   "Jump, press %J again to glide"
+   "Jump, then HOLD %J to glide"
   ],
   [
    "wallkick",
@@ -98,12 +98,12 @@
   "points": "Monsters give XP; every level earns one more point.",
   "pick_sec": "%L",
   "pick_dash": "%L",
+  "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
   "pick_ult": "Merge with %s: one body, with both your powers, for a while.",
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
-  "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%T sends %s at a monster; tap again to recall %s.",

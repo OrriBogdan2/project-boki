@@ -23,6 +23,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
+	"hold_done": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
@@ -168,7 +170,7 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (press again in the air to glide)"], ["glide", "Open glider (in the air)"], ["crouch", "Sneak"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
@@ -659,6 +661,12 @@ func key_caps(action: String) -> String:
 	for c in slots(action):
 		if c != "": out.append(cap_text(c))
 	return " / ".join(out) if out.size() > 0 else "?"
+
+## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
+func fill_keys(text: String) -> String:
+	for a in ACTIONS:
+		text = text.replace("{%s}" % a[0], key_cap(a[0]))
+	return text
 
 ## The four walking keys' caps in a row ("WASD"), joined by `sep`.
 func move_caps(sep := "") -> String:
