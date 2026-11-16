@@ -104,7 +104,8 @@ func _hit(n: Dictionary, tags: Array) -> void:
 	_add(n, "hit")
 	for tag in tags:
 		if String(tag).begins_with("ab:"): _add(n, String(tag))
-	if "shot" in tags or "flame" in tags or t == "primary" or "ab:primary" in tags: _add(n, "lmb hit")      # (Cinder's stream: "flame")
+	if "shot" in tags or "flame" in tags or t == "primary" or "ab:primary" in tags:
+		_add(n, "lmb hit")  # (Cinder's stream: "flame")
 	elif t == "utility": _add(n, "rmb hit")
 	elif t == "k1": _add(n, "e hit")
 
