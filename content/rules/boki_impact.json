@@ -1,0 +1,13 @@
+{
+	"desc": "The impact sound of a Boki's ability hit (BokiImpact, docs/AUDIO.md). Boki types are labels for identity and colour (DECISIONS 11-10, 19 types): each type has ONE impact, ki_<type>, the take set of its cast cue k_<type> (Sfx loads ki_ names from the k_ files, so the impact has its own voice cap and does not eat the cast). Missing file -> the shared hit/crit plays instead. Types not listed use 'default'.",
+	"slots": ["k1", "k2", "zone"],
+	"db": {"you": -8.0, "taken": -9.0, "crit_up": 2.0, "other": -14.0},
+	"pitch": 1.1,
+	"default": "normal",
+	"types": {
+		"normal": "ki_normal", "fire": "ki_fire", "water": "ki_water", "grass": "ki_grass", "spore": "ki_spore",
+		"electric": "ki_electric", "ice": "ki_ice", "rock": "ki_rock", "psychic": "ki_psychic", "flying": "ki_flying",
+		"dragon": "ki_dragon", "dark": "ki_dark", "ghost": "ki_ghost", "poison": "ki_poison", "bug": "ki_bug",
+		"steel": "ki_steel", "fairy": "ki_fairy", "crystal": "ki_crystal", "sound": "ki_sound"
+	}
+}

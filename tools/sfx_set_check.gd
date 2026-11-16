@@ -153,6 +153,7 @@ func run(main: Node) -> void:
 	_boki_cues()
 	_low_hp()
 	_voices()
+	_boki_impacts()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -1462,3 +1463,26 @@ func _voices() -> void:
 	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
+
+func _boki_impacts() -> void:
+	var r := BokiImpact.rules()
+	var types: Dictionary = r.get("types", {})
+	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
+	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
+	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")
+	var kin := Kin.new()
+	var yes := [{"src": "kin", "ab": "k1"}, {"src": "kin", "ab": "zone"}]
+	var no := [{"src": "kin", "ab": "recall"}, {"src": "abil", "ab": "k1"}]
+	ok(yes.all(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "a Boki's k1 and zone hits get a type impact")
+	ok(not no.any(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "...its strike and a Hunter's do not")
+	kin.free()
+	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
+	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
+
+func _impact_ok(types: Dictionary, t: String) -> bool:
+	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
+
+func _type_of(id: String) -> String:
+	return String(KinLib.species(id).get("type", ""))
