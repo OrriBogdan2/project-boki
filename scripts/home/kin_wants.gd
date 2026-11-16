@@ -39,6 +39,11 @@ static func best_food(rec: Dictionary) -> String:
 	var likes: Dictionary = rec["likes"]
 	var have := func(f: String) -> int:
 		return int(Save.d["crops"].get(f, 0)) if Data.CROPS.has(f) else int(Save.d["items"].get(f, 0))
+	if Care.ailing(rec):
+		# weak or sick: the snack crop is the medicine
+		for f in Data.CROPS:
+			if Data.CROPS[f]["use"] == "snack" and f != likes["hates"] and have.call(String(f)) > 0:
+				return String(f)
 	if have.call(String(likes["food"])) > 0:
 		return String(likes["food"])
 	for f in Data.CROPS.keys() + Care.FOODS.keys():
