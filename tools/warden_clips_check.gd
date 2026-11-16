@@ -9,7 +9,7 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const MAX_TRIS := 15000         # S1: weapon and shield included
+const MAX_TRIS := 80000         # weapon and shield included (RIG_CONTRACT "Budget")
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
 const WHIRL_TOL := 0.05         # m (neutral): BjornFx's whirl trail runs this close to the farthest the head goes
 const PREFIX := {"breaker": ["bulwark", "bul_"]}
