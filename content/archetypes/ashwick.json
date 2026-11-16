@@ -12,7 +12,7 @@
 	"fantasy": "The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock.",
 	"howto": ["Play: close-range fire; hold {fire} to set foes Ablaze.", "Combo: burn a foe, then {secondary} for 25% more damage.", "Avoid: {dash} with no foe ahead; it is a head-first ram."],
 	"silhouette": "the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail",
-	"card": {"role_word": "Burner", "loop": "Close-range burner: soak foes in fire until they blaze, then finish them in the flames.", "weapons": {"flamethrower": "Hold to pour fire from your hand 6m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health."}, "rmb": "Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn.", "e": "On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield.", "dash": "Ram head first the way you move (or at the cursor with Dash-to-cursor on); you stop on the first foe with a fiery hit. 2 charges.", "passive": "Flashover: your fire sets foes Ablaze, then Flashes them over. A knock heals you and readies the cloak.", "x": "Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly."},
+	"card": {"role_word": "Burner", "loop": "Close-range burner: soak foes in fire until they blaze, then finish them in the flames.", "dash": "Head-first ram that stops on the first foe with a fiery hit.", "passive": "Your fire sets foes Ablaze, then Flashes them. A knock heals you.", "rmb": "Hold to aim, release: a cinder that slows and sets foes Ablaze.", "e": "Heat blast drags foes in and wraps you in a fire shield.", "x": "Fly toward the cursor, laying a lava carpet; press again to land.", "weapons": {"flamethrower": "Hold to pour fire 6m ahead; it hits harder on burning foes."}, "chips": {"dash": ["18 dmg"], "rmb": ["14 dmg"], "e": ["9 dmg"]}},
 	"signature": "flamethrower",
 	"resource": {"id": "char", "name": "Char", "max": 31, "kind": "stacks", "col": "#ff9a3a", "ignite_at": 31, "ignite_t": 3.0, "dps1": 0.005, "dps2": 0.01, "expire": 5.0, "heal_knock": 0.16},
 	"passive": {"name": "Flashover", "desc": "Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 0.5% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (1%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 6% more from the stream and the cinder (10% once Flashed over), and the stream also takes 0.4% (0.6%) of their health a second. A knock heals you 16% of your health."},
@@ -43,5 +43,13 @@
 	"rank3": {"dash": "+5 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "the shield is 80% bigger in all"},
 	"rank2": {"sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.7s, damage +50%; a second charge.", "dash": "Rank 3: recharge 9s -> 7.5s per charge, +5 damage; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%)."},
-	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"}
+	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"},
+	"src": {
+		"lmb": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [F] [O] (owner item 11) (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }
