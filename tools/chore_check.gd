@@ -3,7 +3,8 @@ extends RefCounted
 ## (home.gd _move_kin at 4 steps a second) in Bramblebank: a Mend one (Glom) beside a glum friend, a Haul one (Mole)
 ## with a toy spot to fetch the ball back to, a Boki with none of those knacks (Bur) and an Ember one (Wren), your
 ## partner, who minds the egg only in the hub, where the one Nook is (HubLayout.holds). Each chore starts for the
-## right Boki and nobody else, ends, writes exactly one journal line each time it is done (a chore that gives up writes none) and shows on the debug readout;
+## right Boki and nobody else, ends, writes exactly one journal line each time it is done (a chore that gives up
+## writes none) and shows on the debug readout;
 ## its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone; no machine
 ## refuses a transition. Never touches the real save.
 
@@ -154,7 +155,9 @@ func _sim(home) -> Dictionary:
 				if not shown.has(kind) and home.life.readout().contains("Chore " + kind):
 					shown[kind] = true
 	print(home.life.readout())
-	return {"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up, "last_chore": last_chore, "shown": shown}
+	return {
+		"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up, "last_chore": last_chore, "shown": shown
+	}
 
 ## `who` did only chore `kind`, it ended, one journal line each time, and the readout showed it.
 func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
@@ -164,8 +167,14 @@ func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
 	var ended := begun - (1 if s["last_chore"].get(who, false) else 0)
 	ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, kind, ended, begun])
 	var writes := int(s["writes"].get(who, 0))
-	var gave_up := int(s["gave_up"].get(who, 0))      # a chore that gives up (boxed in) writes no line: only a done one does
-	ok(writes == ended - gave_up, "%s wrote one journal line per chore done (%d lines, %d done, %d gave up)" % [who, writes, ended - gave_up, gave_up])
+	var gave_up := int(s["gave_up"].get(who, 0))  # a chore that gives up (boxed in) writes no line, only a done one
+	ok(
+		writes == ended - gave_up,
+		(
+			"%s wrote one journal line per chore done (%d lines, %d done, %d gave up)"
+			% [who, writes, ended - gave_up, gave_up]
+		)
+	)
 	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
 
 func _no_refusals(home) -> void:
