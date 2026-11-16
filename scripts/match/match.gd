@@ -1812,8 +1812,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		credit = by.owner_h
 	if h == player:
 		if ktip: ktip.on_knock()
-		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
-		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
+		# knocked: no slow-mo or full-screen flash, sound + feed confirm it (DASHES_AND_ABILITY_FEEL.md §5.4)
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
