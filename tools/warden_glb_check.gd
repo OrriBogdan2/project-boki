@@ -657,9 +657,17 @@ func _ink_shells(m: Node, a: String) -> void:
 		var ink := shell.material_override as ShaderMaterial
 		var twice := range(body.mesh.get_surface_count()).any(
 				func(si): return body.get_active_material(si).next_pass == ink)
-		if ink == null or ink.shader != Models.OUTLINE or shell.skin != body.skin or twice \
+		if ink == null or ink.shader != Models.OUTLINE or not _same_skin(shell.skin, body.skin) or twice \
 				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
 			bad.append(shell.name)
 	ok(bad.is_empty(),
 			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
 			% [a, shells.size(), str(bad)])
+
+## Two skins with the same bind poses (WardenBulk thins each mesh's skin as its own copy, the ink shell's too).
+func _same_skin(a: Skin, b: Skin) -> bool:
+	if a == b:
+		return true
+	if a == null or b == null or a.get_bind_count() != b.get_bind_count():
+		return false
+	return range(a.get_bind_count()).all(func(i): return a.get_bind_pose(i).is_equal_approx(b.get_bind_pose(i)))
