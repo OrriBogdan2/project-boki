@@ -138,6 +138,12 @@ func _near_boki() -> bool:
 	var at: Vector3 = ke["node"].position
 	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
 
+## Where the farm's toasts start: the usual 100 px, or under the goal line (which wraps at big text sizes).
+func toast_top() -> float:
+	if not hint_visible():
+		return 100.0
+	return maxf(152.0, hint_box.rect().end.y + 8.0)
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
 	if id == "":
@@ -151,12 +157,6 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
 	var txt := s.strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
 			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)

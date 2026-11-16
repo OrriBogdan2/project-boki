@@ -73,10 +73,12 @@ func _entry(nm: String) -> Dictionary:
 func _names(came: Array) -> String:
 	return "".join(came.map(func(k): return String(k["rec"]["name"])))
 
-## Runs the farm; returns who spoke, and how far from the spot each stood when it began to look.
+## Runs the farm; returns who spoke, how far from the spot each stood when it began to look, and the pose it was
+## cued (KinHabit).
 func _watch(at: Vector3) -> Dictionary:
 	var spoke := {}
 	var stood := {}
+	var pose := {}
 	for i in int(RUN_S / STEP_S):
 		home._move_kin(STEP_S)
 		ComeLook.tick(home, STEP_S)
@@ -86,7 +88,9 @@ func _watch(at: Vector3) -> Dictionary:
 				stood[nm] = (l["k"]["pos"] as Vector3).distance_to(at)
 			if float(l["k"].get("say_t", 0.0)) > 0.0:
 				spoke[nm] = true
-	return {"spoke": spoke, "stood": stood}
+			if l["k"].has("q_as"):
+				pose[nm] = l["k"]["q_as"]
+	return {"spoke": spoke, "stood": stood, "pose": pose}
 
 func _mem_size(nm: String) -> int:
 	return (_entry(nm)["rec"]["memory"] as Array).size()
@@ -127,6 +131,8 @@ func _newcomer(rare: bool) -> void:
 	var close: float = res["stood"].get("A", 99.0)
 	ok(far > close + 1.0, "%s: D hung back (%.1f m), A stood close (%.1f m)" % [tag, far, close])
 	ok(res["spoke"].has("A"), "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
+	ok(res["pose"].get("A", "") == "sniff" and res["pose"].get("D", "") == "hide",
+		"%s: they react by their traits: curious A sniffs, timid D hides (%s)" % [tag, res["pose"]])
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains(String(who["rec"]["name"])),
 		"%s: A keeps one memory line: '%s'" % [tag, _last_mem("A")])
 	ok(rare == _last_mem("A").contains("Rare Egg"), "%s: the line says it was a Rare Egg only when it was" % tag)

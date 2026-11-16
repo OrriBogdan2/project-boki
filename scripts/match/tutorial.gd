@@ -41,6 +41,7 @@ const DONE_T := 0.9        # s of the step-done sting
 const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded height within this counts
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
+const DOWN_T := 3.0        # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
@@ -65,7 +66,7 @@ var down_t := 0.0
 var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
-var stall_got := 0            # got at the last look: a hit or a cast is progress too
+var stall_got := 0            # got + camp kills at the last look: a hit, a cast or a kill is progress
 var best_d := 1e9            # closest you've been to this step's target
 var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
@@ -83,6 +84,7 @@ var rmb_t_prev := 0.0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
+var pell: TutorialPell = null   # the guide, by each stop (TutorialPell)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -104,6 +106,8 @@ func setup() -> void:
 	for id in GAP_STEPS:
 		_add_pad(id)
 	last_stop = stop("land")
+	if NpcModel.has("pell"):
+		pell = TutorialPell.new(self)
 
 func _add_pad(id: String) -> void:
 	var pad := stop(id, "pad")
@@ -164,7 +168,7 @@ func update(dt: float) -> void:
 		_enter()
 	if p.downed:
 		down_t += dt
-		if down_t > 3.0:
+		if down_t > DOWN_T:
 			down_t = 0.0
 			m.revive_hunter(p, null)
 	if p.kin and p.kin.state == "downed":
@@ -187,6 +191,8 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	if pell:
+		pell.tick(dt)
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(sid, _lead_goal(sid))
 	if wait > 0.0:
@@ -201,6 +207,11 @@ func _finish(sid: String) -> void:
 	if STOP_AFTER.has(sid):
 		last_stop = stop(STOP_AFTER[sid])
 	step += 1
+	var resumed := sid == "land" and TutorialResume.last_beat() != ""
+	if resumed:
+		step = TutorialResume.step_after(TutorialResume.last_beat())
+	else:
+		TutorialResume.remember(sid)
 	if step == 1:
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--tut-from="): _skip_to(int(a.substr(11)))     # test: skip ahead after landing
@@ -210,6 +221,8 @@ func _finish(sid: String) -> void:
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
+	if resumed:
+		_restore()
 	_enter()
 
 ## Test: jump to a step, with the picks of the steps skipped made as if you had (--tut-from).
@@ -252,12 +265,58 @@ func _runners(p: Hunter) -> Array:
 	for k in [p.kin, p.kin2]:
 		if k: out.append((k as Kin).runner)
 	return out
+## Carrying on from a saved beat: back at the last stop it left you at, with what the next one needs.
+func _restore() -> void:
+	for i in step:
+		if STOP_AFTER.has(String(steps()[i][0])):
+			last_stop = stop(STOP_AFTER[String(steps()[i][0])])
+	_back()
+	if id() == "chest" and m.player.chest_keys == 0:
+		m.player.chest_keys = 1
+	if m.hud:
+		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
+
+## The player fell into the abyss: this beat starts again, with its one-line tip (content/rules/tutorial.json
+## "retry"). The step, the levels and the save stay as they were; the player is up, healed and back at the last
+## stop, the Boki comes round, and the beat's counters and camp start again. The camp's ledger starts again
+## with it, so the camp brought back pays only what is left to its level: once in all. (A down in a fight is
+## not a retry: DOWN_T, then the fight goes on.)
+func retry() -> void:
+	var p := m.player
+	if p.downed:
+		down_t = 0.0
+		m.revive_hunter(p, null)
+	p.hp = p.max_hp
+	p.armor = p.max_armor
+	p.vel = Vector3.ZERO
+	if p.kin and p.kin.state == "downed":
+		KinDowned.come_round(p.kin, false)
+	flag = false
+	wait = 0.0
+	camps.clear()
+	_back()
+	_enter()
+	if m.hud:
+		m.hud.toast(retry_tip(), MINT)
+
+## The one line a retry of this beat shows.
+func retry_tip() -> String:
+	var tips: Dictionary = Content.rules("tutorial")["retry"]
+	return _fill(String(tips.get(id(), tips["default"])))
+
+## Back at the last stop, with this beat's camp there (shoot finishes the sec step's camp; the other camp
+## steps bring theirs in _enter).
+func _back() -> void:
+	m.player.teleport(respawn())
+	if id() == "shoot":
+		camps.spawn("sec")
 
 func _enter() -> void:
 	var p := m.player
 	var sid := id()
 	t = 0.0
 	card_t = 0.0
+	TutorialStrip.chime(m)
 	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
 		m.hud.msgs.clear()
@@ -285,24 +344,28 @@ func _enter() -> void:
 		"sec", "gkey", "kin", "hook", "ult":
 			camps.spawn(sid)
 		"glove":
-			var at := stop("pickup")
-			m.spawn_gear("grapple", 1, at, "", false)
-			m.wpicks[-1]["tut"] = true
+			if ground_item().is_empty():      # (a retry finds the glove still lying there)
+				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
+				m.wpicks[-1]["tut"] = true
 		"wayout":
 			var o := outpost()
 			if not o.is_empty():
 				m.ping(o["pos"], ExitModels.UPLINK)
+	if sid == "kin" and p.ak:
+		p.ak.cd["e"] = 0.0      # (an E pressed again on the unlock step fired at nothing: it is ready when asked for)
 	if sid == "hook" and (p.gear[0] as Dictionary).is_empty():
 		p.gear[0] = {"id": "grapple", "rar": 1}      # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
+	if detail != "" and m.hud:
+		m.hud.tip(detail)       # (once a step: the strip is one line, the plain words wait in the message lane)
 
-## The tutorial's monsters: many times the health and bigger, barely a scratch when they hit, slow
-## telegraphed attacks (content/rules/tutorial.json "mob"). A camp's monsters take camp_hp instead of hp, so
-## the kills that pay its XP come quickly. Real matches keep the global stats.
-func tank(mb: Mob, camp: bool) -> void:
+## A tutorial camp's monster: `hp` times the health (camp_hp, or the camp's own "hp"), so the kills that pay
+## its XP come quickly; bigger, barely a scratch when it hits, slow telegraphed attacks (content/rules/tutorial.json
+## "mob"). Real matches keep the global stats.
+func tank(mb: Mob, hp: float) -> void:
 	var c: Dictionary = Content.rules("tutorial")["mob"]
-	mb.max_hp *= float(c["camp_hp"] if camp else c["hp"])
+	mb.max_hp *= hp
 	mb.hp = mb.max_hp
 	mb.dmg_mult = float(c["dmg"])
 	mb.r *= float(c["scale"])
@@ -491,14 +554,19 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	if got != stall_got:
-		stall_got = got
+	# (your hits on a monster are progress too; a camp monster falling is not, as the Boki clears camps
+	# on its own and a slow trickle of its kills kept the nag away from a player who was doing nothing)
+	var progress := got + hits
+	if progress != stall_got:
+		stall_got = progress
 		stall_t = 0.0
 	if target != Vector3.INF and id() not in FOE_STEPS:      # (a monster walking up to you is not progress)
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
 			stall_t = 0.0
+	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
+		stall_t = 0.0      # (holding the circle while the capture runs is the progress)
 	if stall_t >= NAG_T and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
@@ -569,8 +637,6 @@ func _words() -> void:
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
-	if detail != "" and m.hud:
-		m.hud.tip(detail)       # (the strip is one line: the plain words go to the message lane, which waits for it)
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
@@ -636,6 +702,11 @@ func scout_hint() -> String:
 		return ""
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
+
+## The world prompt label waits: while the banner is fresh, and for the whole step when the card already
+## carries the interact key (it says the same thing; one prompt, not two).
+func prompt_quiet() -> bool:
+	return card_up() or (step >= 0 and step < steps().size() and KEYS.get(id(), "") == "interact")
 
 ## The banner is up (the first CARD_T of a step): other popups wait their turn.
 func card_up() -> bool:

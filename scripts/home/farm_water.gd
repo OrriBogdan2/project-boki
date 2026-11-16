@@ -1,12 +1,28 @@
 class_name FarmWater
 extends RefCounted
-## Crops by the water (docs/decisions/0011-farm-builder-tutorial.md). A crop patch within REACH tiles of
-## water (a pond, a river you painted, or the wild water the island came with: all of them live in
-## layout["water"]) waters itself: its plots are tended without you or the rain. Build mode says
-## "near water" in green over the patch you are placing, and the tutorial's crop step points at the water.
+## Placing by the water (docs/decisions/0011-farm-builder-tutorial.md, numbers in docs/FARM_LOOP.md).
+## Water is a pond, a river you painted, or the wild water the island came with: all of it lives in
+## layout["water"]. Within reach tiles of it a crop patch waters itself (its plots are tended without
+## you or the rain) and grows grow_mul() times as fast; a trough tops itself up from your pantry like a
+## hopper. Away from water you water the patch and fill the trough yourself. Build mode shows a water
+## drop and what you get over the patch or trough you are placing; the tutorial's crop step points at the water.
+
+static func _rule(k: String, def: float) -> float:
+	return float(FarmUnlocks.rules().get("water", {}).get(k, def))
 
 static func reach() -> int:
-	return int(FarmUnlocks.rules().get("water", {}).get("reach", 2))
+	return int(_rule("reach", 2))
+
+## How much faster a crop by the water grows (1.25: each stage takes 1 / 1.25 of the time).
+static func grow_mul() -> float:
+	return _rule("grow", 1.25)
+
+## Seconds one growth stage of plot i in arr ("plots" or "gh_plots") takes while you're home.
+static func stage_s(d: Dictionary, arr: String, i: int) -> float:
+	var s := Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)
+	if arr == "plots" and plot_near(d, i):
+		s /= grow_mul()
+	return FarmCropGuide.stage_time(s)
 
 static func tiles(d: Dictionary) -> Dictionary:
 	return HomeLayout.of(d).get("water", {})
@@ -38,6 +54,14 @@ static func plot_near(d: Dictionary, i: int) -> bool:
 	var p := i / 4
 	return p < fx.size() and near_entry(d, fx[p])
 
+## Is a trough (a Save.d feeders entry) by water?
+static func near_feeder(d: Dictionary, f: Dictionary) -> bool:
+	return near_cells(d, [Vector2i(int(floor(float(f.get("x", 0.0)))), int(floor(float(f.get("z", 0.0)))))])
+
+## The plot panel's line for a patch by the water.
+static func plot_note() -> String:
+	return "By the water: it waters itself and grows %d%% faster." % roundi((grow_mul() - 1.0) * 100.0)
+
 ## The water tile nearest to a point (tile coordinates), or Vector2i(-1, -1) if there is none.
 static func nearest(d: Dictionary, from: Vector2) -> Vector2i:
 	var best := Vector2i(-1, -1)
@@ -49,6 +73,3 @@ static func nearest(d: Dictionary, from: Vector2) -> Vector2i:
 			bd = dd
 			best = c
 	return best
-
-static func tip() -> String:
-	return String(FarmUnlocks.rules().get("water", {}).get("tip", ""))

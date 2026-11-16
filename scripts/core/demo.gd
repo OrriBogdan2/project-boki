@@ -46,6 +46,7 @@ static func save(preset: String) -> Dictionary:
 	d["gems"] = 1200
 	d["matches"] = 12
 	d["extracts"] = 9      # the Hollow opens at 5 extractions
+	d["first_guide"] = 99  # the first-match guide lines (FirstMatchGuide) are for new players, not for filming
 	d["classes"] = ClassUnlock.legacy()
 	d["tools"] = HomeGather.TOOLS.keys()
 	for p in d["plots"]:

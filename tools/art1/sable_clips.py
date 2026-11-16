@@ -1,7 +1,7 @@
 """ART-1 Sable's animation set (hand-keyed as targets, solved by posekit). Times match the kit: the thf_* tables in scripts/match/kmoves_dj.gd. Personality: a sly duelist and a dancer. She is never
 where you aimed and she smiles when you miss: weight on one hip, one brow up, the pistols carried loose and flicked up late; the flips are clean and show-off, the landings low and pretty.
 Space: Z up, she faces +Y, her right is +X. G/BE the right pistol (grip, barrel direction + lock's top), GL/BL the left; "flip" (pitch forward, yaw left, roll right) turns the whole solved body about the pelvis.
-Run: blender -b --python tools/art1/sable_clips.py -- <sable.blend> <out.glb> [clip,clip]"""
+Run: blender -b --python tools/art1/sable_clips.py -- <sable.blend or sable.glb> <out.glb> [clip,clip]"""
 import sys, os, math
 import bpy
 import numpy as np
@@ -289,7 +289,7 @@ def clips():
     p2 = dict(p1, pel=(0, -0.02, -0.07), prt=(-0.12, 0, 0), tor=(-0.08, 0, 0), G=(0.18, 0.36, 1.32), BE=PR(-9, 40), GL=(-0.18, 0.36, 1.32), BL=PR(9, 40), hed=(0.04, 0, 0), FL=(-0.12, 0.2, A_Z), FR=(0.13, -0.14, A_Z), FRp=0.0)
     out.append(C("primed", 0.55, [(0.0, p0), (0.04, p1, "out"), (0.12, dict(p1, pel=(0, 0.12, -0.1)), "out"), (0.24, p2), (0.38, dict(p2, G=(0.21, 0.26, 1.14), GL=(-0.21, 0.26, 1.14), BE=PR(-12, 10), BL=PR(12, 10))), (0.55, END)]))
 
-    # the Vault, 0.48 s: 0.05 a crouch with the arms swung up, 0.1 the push-off, the pistols crossed on her chest, one aerial turn to 0.3, a low landing at 0.36, up by 0.48
+    # the Vault, 0.48 s: the crouch with the arms swung up from the first frame (the blend in is the wind-up) held to 0.05, 0.1 the push-off, the pistols crossed on her chest, one aerial turn to 0.3, a low landing at 0.36, up by 0.48
     TUCK = {"G": (0.08, 0.2, 1.24), "BE": PR(38, 56, (0, -1, 0.2)), "GL": (-0.08, 0.2, 1.24), "BL": PR(-38, 56, (0, -1, 0.2))}
     UP = {"G": (0.25, 0.1, 1.56), "BE": PR(-6, 74, (0, -1, 0.2)), "GL": (-0.25, 0.1, 1.56), "BL": PR(6, 74, (0, -1, 0.2))}
     LAND = {"pel": (0, 0, -0.24), "prt": (0.3, 0, 0), "tor": (0.14, 0, 0), "hed": (-0.34, 0, 0), "G": (0.34, 0.14, 0.86), "BE": PR(-32, -6), "GL": (-0.34, 0.14, 0.86), "BL": PR(32, -6), "FL": (-0.15, 0.17, A_Z), "FR": (0.17, -0.13, A_Z), "FRy": -0.5, "FRp": 0.25, "smile": 1.0, "cock": 0.7}
@@ -297,7 +297,7 @@ def clips():
     STAR = dict(TUCK, pel=(0, 0, 0.22), prt=(0, 0, 0), tor=(0, 0, 0), hed=(0.04, 0, 0), FL=(-0.36, 0.0, 0.42), FR=(0.36, 0.0, 0.42), FLy=0.0, FRy=0.0, FLp=0.0, FRp=0.0, smile=1.0, lid=0.15)
     def spin(name, a, pre, mid, flip):
         fa = tuple(0.09 * v for v in flip)
-        keys = [(0.0, END), (0.05, dict(pre, flip=(0, 0, 0)), "out"), (0.1, dict(mid, flip=fa)), (0.3, dict(mid, flip=flip), "lin"), (0.36, dict(LAND, flip=flip), "out"), (0.48, dict(END, flip=flip))]
+        keys = [(0.0, dict(pre, flip=(0, 0, 0))), (0.05, dict(pre, flip=(0, 0, 0)), "out"), (0.1, dict(mid, flip=fa)), (0.3, dict(mid, flip=flip), "lin"), (0.36, dict(LAND, flip=flip), "out"), (0.48, dict(END, flip=flip))]
         out.append(C(name, 0.48, keys))
     spin("vault_r", 0, dict(START, prt=(0.1, 0, 0.32)), STAR, (0.0, 0.0, TAU))
     spin("vault_l", 0, dict(START, prt=(0.1, 0, -0.32)), STAR, (0.0, 0.0, -TAU))
@@ -311,7 +311,7 @@ def clips():
     ST2 = dict(STAR, G=(0.42, 0.06, 1.3), BE=PR(-70, 10), GL=(-0.42, 0.06, 1.3), BL=PR(70, 10))
     FLAT = {"pel": (0, 0, 0.14), "prt": (0.95, 0, 0), "tor": (0.0, 0, 0), "hed": (-0.8, 0, 0), "G": (0.3, -0.26, 1.08), "BE": PR(-120, 4, (0, 0, 1.0)), "GL": (-0.3, -0.26, 1.08), "BL": PR(120, 4, (0, 0, 1.0)),
             "FL": (-0.1, -0.5, 0.56), "FR": (0.12, -0.22, 0.33), "FLp": 0.5, "FRp": 0.9, "FLy": 0, "FRy": 0, "smile": 1.0, "lid": 0.15}
-    out.append(C("exdash", 0.5, [(0.0, END), (0.05, dict(START, prt=(0.25, 0, 0)), "out"), (0.08, dict(ST2, flip=(0, 0, 0.36))), (0.34, dict(ST2, flip=(0, 0, TAU)), "lin"), (0.5, dict(FLAT, flip=(0, 0, TAU)))]))
+    out.append(C("exdash", 0.5, [(0.0, dict(START, prt=(0.25, 0, 0))), (0.05, dict(START, prt=(0.25, 0, 0)), "out"), (0.08, dict(ST2, flip=(0, 0, 0.36))), (0.34, dict(ST2, flip=(0, 0, TAU)), "lin"), (0.5, dict(FLAT, flip=(0, 0, TAU)))]))
     # touching down (thf_land): a low crouch held 0.1, up in 0.08
     out.append(C("land_v", 0.18, [(0.0, LAND), (0.1, dict(LAND, pel=(0, 0, -0.21))), (0.18, END)]))
 
@@ -329,10 +329,10 @@ def clips():
     ks += [(0.42, sl, "out"), (0.5, dict(sl, G=(0.08, 0.54, 1.18))), (0.75, END)]
     out.append(C("bola", 0.75, ks))
 
-    # the Shadow Knife (thf_knife: a whole-body spin, the left hand cocked back, unwinding into a side-arm throw released at 0.12)
+    # the Shadow Knife (thf_knife: a whole-body spin from the first frame, the left hand cocked back, unwinding into a side-arm throw released at 0.12)
     kn0 = dict(READY, GL=(-0.38, -0.12, 1.2), BL=PR(120, 20), hed=(0.0, 0.0, 0), pel=(0, 0, -0.06), FL=(-0.07, 0.03, A_Z + 0.05), FR=(0.07, 0.0, A_Z))
     kn1 = {"tor": (0.1, 0.46, 0), "prt": (0.2, 0.16, 0), "hed": (-0.14, -0.4, 0), "GL": (0.04, 0.56, 1.25), "BL": PR(-14, 4), "G": (0.3, 0.0, 1.02), "BE": PR(-50, -20), "pel": (0, 0.08, -0.08), "FL": (-0.11, 0.26, A_Z), "FR": (0.12, -0.22, A_Z), "smile": 1.0, "cock": 0.0, "brow": 0.2, "FRy": -0.5}
-    out.append(C("knife", 0.45, [(0.0, dict(END, pel=(0, 0, -0.08))), (0.04, dict(kn0, flip=(0, -1.6, 0))), (0.09, dict(kn0, flip=(0, -4.4, 0)), "lin"), (0.12, dict(kn1, flip=(0, -TAU, 0)), "out"), (0.24, dict(kn1, flip=(0, -TAU, 0), GL=(0.02, 0.5, 1.2))), (0.45, dict(END, flip=(0, -TAU, 0)))]))
+    out.append(C("knife", 0.45, [(0.0, dict(kn0, flip=(0, 0, 0))), (0.04, dict(kn0, flip=(0, -1.6, 0))), (0.09, dict(kn0, flip=(0, -4.4, 0)), "lin"), (0.12, dict(kn1, flip=(0, -TAU, 0)), "out"), (0.24, dict(kn1, flip=(0, -TAU, 0), GL=(0.02, 0.5, 1.2))), (0.45, dict(END, flip=(0, -TAU, 0)))]))
     # ... arriving at it: dropped in low out of the blink, one hand to the ground, then rising
     ar0 = dict(LAND, pel=(0, 0, -0.34), prt=(0.5, 0, 0), tor=(0.2, 0, 0), hed=(-0.5, 0, 0), G=(0.3, 0.3, 0.58), BE=PR(-30, -10), GL=(-0.26, 0.2, 0.34), BL=PR(30, -60))
     out.append(C("arrive", 0.6, [(0.0, dict(STAR, pel=(0, 0, 0.1), flip=(0, 0, 0))), (0.06, ar0, "out"), (0.3, dict(ar0, pel=(0, 0, -0.3))), (0.6, END)]))
@@ -355,8 +355,8 @@ def clips():
     out.append(C("encore_dance", 1.6, [(0.0, D0), (0.12, D1), (0.2, D2), (0.32, D3), (0.4, D4), (0.6, D5, "lin"), (0.8, D6, "lin"), (0.92, dict(D1, flip=(0, TAU, 0))), (1.0, D7), (1.12, dict(D3, flip=(0, TAU, 0))),
                                          (1.2, dict(HIGH, flip=(0, TAU, 0))), (1.4, dict(HIGH, G=(0.3, 0.06, 1.62), GL=(-0.3, 0.06, 1.62), flip=(0, math.pi, 0)), "lin"), (1.52, dict(D1, flip=(0, 0.9, 0))), (1.6, D0)]))
 
-    # Vault reset (thf_reset): a heel spin with the arms flung wide, a snap back to aim
-    out.append(C("reset", 0.4, [(0.0, dict(END, pel=(0, 0, -0.08))), (0.08, dict(READY, **OPEN, pel=(0, 0, 0.0), flip=(0, -math.pi, 0), smile=1.0), "lin"), (0.18, dict(READY, **OPEN, pel=(0, 0, -0.05), flip=(0, -TAU, 0), smile=1.0), "lin"), (0.4, dict(END, flip=(0, -TAU, 0)))]))
+    # Vault reset (thf_reset): a heel spin with the arms flung wide from the first frame, a snap back to aim
+    out.append(C("reset", 0.4, [(0.0, dict(READY, **OPEN, pel=(0, 0, -0.08), flip=(0, 0, 0), smile=1.0)), (0.08, dict(READY, **OPEN, pel=(0, 0, 0.0), flip=(0, -math.pi, 0), smile=1.0), "lin"), (0.18, dict(READY, **OPEN, pel=(0, 0, -0.05), flip=(0, -TAU, 0), smile=1.0), "lin"), (0.4, dict(END, flip=(0, -TAU, 0)))]))
     # a knock (thf_flourish): chin up, the left pistol blown out by her lips, the right on the hip
     fo = dict(READY, pel=(0, 0, 0.0), prt=(-0.04, 0.1, 0), tor=(-0.08, -0.14, 0), hed=(-0.22, 0.1, 0.0), GL=(-0.12, 0.17, 1.46), BL=PR(-10, 62, (0, -1, 0.3)), G=(0.26, 0.04, 0.98), BE=PR(-20, -40), smile=1.0, cock=1.0, lid=0.45)
     out.append(C("flourish", 0.75, [(0.0, END), (0.1, fo, "out"), (0.45, dict(fo, pel=(0, 0, -0.01))), (0.75, END)]))
@@ -424,7 +424,13 @@ def extras(P):
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
-    bpy.ops.wm.open_mainfile(filepath=a[0])
+    if a[0].endswith(".glb"):      # the shipped model (its clips then go on with tools/art1/glb_add_clips.py): bone axes as exported
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.ops.import_scene.gltf(filepath=a[0], bone_heuristic="BLENDER")
+        for act in list(bpy.data.actions):      # (the baked clips keep their own names)
+            bpy.data.actions.remove(act)
+    else:
+        bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     rig = {"grip_rest": tuple(K.grip("R")), "grip_l": tuple(K.grip("L")), "blade_rest": tuple(K.B_REST), "edge_rest": tuple(K.U_REST), "pelvis": K.HIPS_Z, "hilt_l": 0.1,
            "lhand": {"k": (0, 1, 0), "o": (-1, 0, 0), "palm": tuple(K.grip("L"))}}

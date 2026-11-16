@@ -85,6 +85,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	if not won:
+		GardenXp.play(id, mine, false, false)
 		out["reset"] = _runs(id).erase(String(mine["uid"]))
 		return out
 	var dice := rng
@@ -101,6 +102,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	for e in got:
 		bank(e)
 	out["items"] = got
+	GardenXp.play(id, mine, true, out["first"])
 	_cup(out, mine, foe, now)
 	return out
 
@@ -131,9 +133,12 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	have["week"] = week_of(now)
 	out["crown"] = true
 	out["ribbon"] = true
-	var prize := {"kind": "item", "id": g["cup_prize"]}
-	bank(prize)
-	(out["items"] as Array).append(prize)
+	var prizes: Array = [{"kind": "item", "id": g["cup_prize"]}]
+	if int(have["n"]) == 1 and g.has("first_crown"):
+		prizes.append({"kind": "item", "id": g["first_crown"]})
+	for prize in prizes:
+		bank(prize)
+		(out["items"] as Array).append(prize)
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
 
 ## The lines a result card adds under the gems: the prizes won and the cup step. font 0 leaves it out.

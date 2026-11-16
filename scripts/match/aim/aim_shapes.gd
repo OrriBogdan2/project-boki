@@ -7,6 +7,7 @@ extends RefCounted
 const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
 const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
+const LACE_P := 0.5       # m: one cross of a laced line's two strands ("lace", Lace's own look)
 const SOFT_A := 0.25      # "soft": the inside never passes this alpha (docs/VFX_QUALITY.md, the zone rule)
 const GLOW_W := 0.3       # m: "soft": how far the lit rim glows inward
 
@@ -54,9 +55,12 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 		g.band(o, end, w0, w1, _fill(e))
 	var f := float(e["fill"])
 	if f > 0.0:
-		if not soft:
-			g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
-		g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
+		if e["lace"]:
+			_lace(g, o, o + u * l * f, lerpf(w0, w1, f * 0.5) * 0.5, lw, _rim(e))
+		else:
+			if not soft:
+				g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
+			g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
 	var tip := end + u * w1 * 0.55
 	for s in [-1.0, 1.0]:
 		g.ribbon(o + n * w0 * 0.5 * s, end + n * w1 * 0.5 * s, lw, _rim(e, 0.8), _rim(e))
@@ -123,6 +127,44 @@ static func _vee(g: AimGeo, e: Dictionary) -> void:
 	elif st >= 0.0:
 		g.star(o + u * l * st, 0.32 + 0.12 * float(e["hot"]), _hot(e), PI * 0.25)
 
+## Two strands laced across the line p0 -> p1 like a cord's criss-cross, `amp` m out each side, one cross
+## every LACE_P; the strand passing under is darker, so it reads woven. Straight pieces (two a cross per
+## strand) keep the per-frame triangle count near a plain ribbon's.
+static func _lace(g: AimGeo, p0: Vector2, p1: Vector2, amp: float, w: float, col: Color) -> void:
+	var d := p1 - p0
+	var l := d.length()
+	if l < 0.01:
+		return
+	var u := d / l
+	var n := Vector2(-u.y, u.x) * amp
+	var under := Color(col.darkened(0.45), col.a)
+	var half := LACE_P * 0.5
+	var at := 0.0
+	var side := 1.0
+	while at < l:
+		var nxt := minf(l, at + half)
+		var k := (nxt - at) / half        # the last piece may be short: it ends part way across
+		var a := p0 + u * at
+		var b := p0 + u * nxt
+		g.ribbon(a + n * side, b + n * side * (1.0 - 2.0 * k), w, col if side > 0.0 else under)
+		g.ribbon(a - n * side, b - n * side * (1.0 - 2.0 * k), w, under if side > 0.0 else col)
+		side = -side
+		at = nxt
+
+## The arc version of _lace: strands crossing between radius r0 and r1 from angle a0 to a1.
+static func _arc_lace(g: AimGeo, ctr: Vector2, r0: float, r1: float, a0: float, a1: float, w: float,
+		col: Color) -> void:
+	var rm := (r0 + r1) * 0.5
+	var steps := maxi(2, int(ceil(absf(a1 - a0) * rm / (LACE_P * 0.5))))
+	var under := Color(col.darkened(0.45), col.a)
+	for i in steps:
+		var p := Vector2.from_angle(lerpf(a0, a1, float(i) / steps))
+		var q := Vector2.from_angle(lerpf(a0, a1, float(i + 1) / steps))
+		var near := r0 if i % 2 == 0 else r1       # this step's strand runs from far to near, the other the other way
+		var far := r0 + r1 - near
+		g.ribbon(ctr + p * far, ctr + q * near, w, col)
+		g.ribbon(ctr + p * near, ctr + q * far, w, under)
+
 ## Feather barbs along a line from p0 to p1, swept back toward p0, biggest near p0 (barb_len m at the
 ## start; 0 draws none).
 static func _barbs(g: AimGeo, p0: Vector2, p1: Vector2, barb_len: float, w: float, col: Color) -> void:
@@ -148,7 +190,8 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 	if bool(e.get("soft", false)):
 		_soft_cone(g, e, o, l, inner, a, h)
 	elif not e["edges"]:
-		g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
+		if not e["outline"]:
+			g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
 		g.ring(o, l, lw, _rim(e), a - h, a + h)
 		var f := float(e["fill"])
 		if f > 0.0:
@@ -220,10 +263,13 @@ static func _arc_wall(g: AimGeo, e: Dictionary) -> void:
 	var pn := maxi(1, int(e["panels"]))
 	var gap := 0.08 / maxf(1.0, r)      # radians between panels
 	var lw := _lw(e)
+	if e["lace"]:
+		_arc_lace(g, ctr, r - th * 0.5, r + th * 0.5, a - h, a + h, lw, _rim(e))
 	for i in pn:
 		var a0 := a - h + 2.0 * h * i / pn + (gap if i > 0 else 0.0)
 		var a1 := a - h + 2.0 * h * (i + 1) / pn - (gap if i < pn - 1 else 0.0)
-		g.sector(ctr, r - th * 0.5, r + th * 0.5, a0, a1, _fill(e, 1.1), _fill(e, 0.7))
+		if not e["lace"]:
+			g.sector(ctr, r - th * 0.5, r + th * 0.5, a0, a1, _fill(e, 1.1), _fill(e, 0.7))
 		g.ring(ctr, r + th * 0.5, lw, _rim(e), a0, a1)
 		g.ring(ctr, r - th * 0.5, lw * 0.7, _rim(e, 0.6), a0, a1)
 	for s in [-1.0, 1.0]:
@@ -258,7 +304,10 @@ static func _line(g: AimGeo, e: Dictionary) -> void:
 		return
 	var w := float(e["lw"]) * (0.8 + 0.8 * float(e["hot"]))
 	var c := _hot(e, 0.75) if float(e["hot"]) > 0.0 else _rim(e, 0.85)
-	g.ribbon(o, t, w, Color(c, c.a * 0.55), c)
+	if e["lace"]:
+		_lace(g, o, t, maxf(w * 1.4, 0.06), w * 0.75, c)
+	else:
+		g.ribbon(o, t, w, Color(c, c.a * 0.55), c)
 	_barbs(g, o, t, float(e["fletch"]), w, c)
 	if e["arrow"]:
 		g.arrow(t, d.normalized(), 0.2, w * 1.2, c)
@@ -283,6 +332,8 @@ static func _span(g: AimGeo, e: Dictionary) -> void:
 	var bend := float(e["bend"])
 	var n: Vector2 = e["bow"]
 	var ch := int(e["chevrons"])
+	if float(e["width"]) > 0.0:
+		_span_band(g, e)
 	if bend > 0.0:
 		var prev := bent(ctr, u, n, bend, float(e["len"]), -hl)
 		for i in SPAN_SEGS:
@@ -302,3 +353,25 @@ static func _span(g: AimGeo, e: Dictionary) -> void:
 			g.chevron(ctr - u * t, u, 0.28, lw, _rim(e, 0.85))
 	if e["ring"]:
 		g.ring(ctr, 0.35, lw, _rim(e))
+
+## The span's true area under its line: a faint band `width` across, following the bend.
+static func _span_band(g: AimGeo, e: Dictionary) -> void:
+	var ctr: Vector2 = e["at"]
+	var u: Vector2 = e["dir"]
+	var n: Vector2 = e["bow"]
+	var l := float(e["len"])
+	var w := float(e["width"])
+	var hw := w * 0.5
+	var bend := float(e["bend"])
+	if bend <= 0.0:
+		g.band(ctr - u * l * 0.5, ctr + u * l * 0.5, w, w, _fill(e))
+		return
+	var prev := bent(ctr, u, n, bend, l, -l * 0.5)
+	var prev_n := bent_tangent(u, n, bend, l, -l * 0.5).orthogonal() * hw
+	for i in SPAN_SEGS:
+		var s := lerpf(-l * 0.5, l * 0.5, float(i + 1) / SPAN_SEGS)
+		var nxt := bent(ctr, u, n, bend, l, s)
+		var nxt_n := bent_tangent(u, n, bend, l, s).orthogonal() * hw
+		g.quad(prev - prev_n, nxt - nxt_n, nxt + nxt_n, prev + prev_n, _fill(e))
+		prev = nxt
+		prev_n = nxt_n

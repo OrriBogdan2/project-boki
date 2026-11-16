@@ -2,7 +2,8 @@
 import boki_clips
 import vespyx
 from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
-from boki_clips import SHARED, idle
+from boki_clips import SHARED, idle, run
+from boki_gait import four_legs, planted
 from vespyx import SIDES, STING_C, TAIL_PTS
 
 # the tail reaching forward over the head, joint by joint: base swings forward, the tip unrolls
@@ -184,6 +185,8 @@ def mine(t):
 
 CLIPS = dict(SHARED)
 CLIPS.update({
+    "run": (0.88, True, planted(run, BONES, four_legs(0.0, 0.5, 0.0), duty=0.16, reach=0.24, lift=0.08,
+                                drop=0.06)),
     "attack": (0.8, False, attack),
     "ability": (1.1, False, ability),
     "sleep": (3.4, True, sleep),
