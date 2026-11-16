@@ -49,6 +49,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   `--foot-slide-check`). No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
+  Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
+  the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
@@ -86,6 +88,9 @@ channels), built in code from the file. A node's output feeds one input only. `-
 timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
 under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
+timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+A re-key with no source .blend at hand: `tools/art1/clip_blend.py` turns the game .glb into the .blend a `*_clips.py` keys on
+(control-bake an untouched clip against the glb first), and `glb_add_clips.py` copies the new clip back.
 
 ## The drop poses (WardenDropPose, `content/rules/drop_poses.json`)
 One pose set every Hero wears over its clips or rig, not a clip per Hero: `ride` (braced on the squad rocket's hull,
