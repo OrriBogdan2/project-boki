@@ -213,8 +213,9 @@ func spawn_all() -> void:
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
-	var pool: Array = Data.common_kin()
-	var sp: String = pool[r.randi_range(0, pool.size() - 1)]
+	var sp := ModeBoki.draw(Data.common_kin(), "expedition", m.tier, r)
+	if HeartRaid.on(m.opts):
+		sp = BokiModes.draw(HeartRaid.boki_for(m.opts), r)      # a raid: its own Boki
 	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
 	rec["level"] = int(lv[1]) + r.randi_range(2, 4)

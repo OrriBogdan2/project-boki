@@ -13,6 +13,9 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
+With `keep_uv` step 1 bakes nothing: the low mesh is the master itself, decimated (`tris`) with its own UVs, materials
+and paint (each base and emission image scaled to `tex` at most), minus the `drop_mats` faces (props the game glb carries);
+the kept parts keep their old materials and atlas. tools/art/v95_to_game.py runs it for a Hunter's current master.
 Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 0, the master's metres (v95_grid.py).
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
@@ -171,6 +174,63 @@ def lay_kept(old, kept, body, tex, socket="Base Color"):
     body[:] = np.where(top[..., 3:] > 0.5, top, body)
 
 
+def own_images(low, tex):
+    """`keep_uv`: the master's own images, each material's base colour and emission scaled to `tex` at most and packed
+    ("v95", "v95b", ...); the material keeps their names as "img" and "emit" (none: "")."""
+    done = {}
+    for m in low.data.materials:
+        for key, socket in (("img", "Base Color"), ("emit", "Emission Color")):
+            src = BW.mat_image(m, socket)
+            if src is not None and src.name not in done:
+                im = src.copy()
+                n = min(tex, max(im.size))
+                if max(im.size) > n:
+                    im.scale(n, n)
+                im.name = "v95" + ("" if not done else chr(ord("a") + len(done)))
+                im.pack()
+                im.use_fake_user = True
+                done[src.name] = im.name
+            m[key] = done[src.name] if src is not None else ""
+        m.node_tree.nodes.clear()       # (the full-size images go with the purge)
+    for m in low.data.materials:        # (a flat-colour part, or a dropped prop's material: the body's paint)
+        m["img"] = m["img"] or next(iter(done.values()))
+
+
+def bake_own(high, game):
+    """Step 1 with `keep_uv`: WORK/bake.blend with Low (the master decimated, its own UVs, materials and images) and Kept
+    (the old parts on their old materials and atlas)."""
+    drop = set(SPEC.get("drop_mats", []))
+    for i, m in enumerate(high.data.materials):
+        m["src"] = m.name
+        m.name = "src%d" % i         # (before the game glb's import: its names stay as they are)
+    bm = bmesh.new()
+    bm.from_mesh(high.data)
+    gone = [f for f in bm.faces if high.data.materials[f.material_index]["src"] in drop]
+    bmesh.ops.delete(bm, geom=gone, context="FACES_ONLY")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(high.data)
+    bm.free()
+    print("SWAP keep_uv: dropped %d faces of %s" % (len(gone), sorted(drop)), flush=True)
+    sole = min(v.co.z for v in high.data.vertices)
+    hd = SPEC.get("head")
+    if hd:
+        x, y, z = hd["centre"]
+        hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
+    low.data.uv_layers[0].name = "UVMap"
+    own_images(low, int(SPEC.get("tex", 4096)))
+    arm, old = import_game(game)
+    kept = kept_parts(old, SPEC.get("keep", []), SPEC.get("keep_mats", []))
+    kept.data.uv_layers.remove(kept.data.uv_layers["UVMap"])
+    kept.data.uv_layers["old"].name = "UVMap"
+    for o in list(bpy.data.objects):
+        if o not in (low, kept):
+            bpy.data.objects.remove(o)
+    bpy.context.scene["sole"] = sole
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "bake.blend"))
+
+
 def bake():
     """Step 1: WORK/bake.blend (Low in the master's frame, Kept in the game's, the atlas packed) and WORK/game.glb."""
     os.makedirs(WORK, exist_ok=True)
@@ -179,6 +239,8 @@ def bake():
         shutil.copy(os.path.join(REPO, SPEC["game"]), game)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     high = BW.import_dense(os.path.expanduser(SPEC["master"]))
+    if SPEC.get("keep_uv"):
+        return bake_own(high, game)
     sole = min(v.co.z for v in high.data.vertices)
     hd = SPEC.get("head")
     if hd:          # (fit frame -> the master's)
@@ -202,7 +264,10 @@ def bake():
     tex = int(SPEC.get("tex", 2048))
     layers = [("atlas", "Base Color", None)]
     if SPEC.get("emit"):        # the master's emission map (Cinder's lava seams) on a second image, the game's emissive texture
-        layers.append(("emit", "Emission Color", BW.base_image(high, "Emission Color")))
+        src = BW.base_image(high, "Emission Color")
+        if src is None:         # (bake_colour would bake the base colour instead: the whole body glows)
+            sys.exit("v95_swap: `emit` is set but the master has no emission map")
+        layers.append(("emit", "Emission Color", src))
     for name, socket, src in layers:
         low.data.materials.clear()
         img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
@@ -515,40 +580,56 @@ def smooth_weights(low, W, passes):
     return W
 
 
-def move_bones(arm, kept):
+def move_bones(arm, kept, T, K):
     """`move_bones` {bone: offset}: the bone's rest (and the kept parts on it) moves by the offset; its translation keys lose
     the offset in proportion to how far each goes toward the largest one, so the clips still end where they did (the junk
-    ball hides in the new body at rest and still grows round him in a dash)."""
-    for name, d in SPEC.get("move_bones", {}).items():
-        d = Vector(d)
-        b = arm.data.bones[name]
-        dl = b.matrix_local.to_3x3().inverted() @ d
-        path = 'pose.bones["%s"].location' % name
-        curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
-        keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
-                for cs in curves if len(cs) == 3]
-        far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max())
-        top = far[np.linalg.norm(far, axis=1).argmax()]
-        for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
-            if len(cs) != 3:
-                continue
-            cs = sorted(cs, key=lambda c: c.array_index)
-            loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
-            frac = loc @ top / float(top @ top)
-            for i, fc in enumerate(cs):
-                for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
-                    kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    ball hides in the new body at rest and still grows round him in a dash). {bone: {"to": point, "chain": [bones]}}: the
+    bone's head onto a master point (through the fit) and its chain by the same offset, the keys as they were (Albert's fish
+    onto the master's mast)."""
+    for name, spec in SPEC.get("move_bones", {}).items():
+        bones, fix = [name], not isinstance(spec, dict)
+        if fix:
+            d = Vector(spec)
+        else:
+            p = np.array([spec["to"]], float)
+            d = Vector(fit(p, fit_weights(arm, p), T, K)[0]) - arm.data.bones[name].head_local
+            bones += spec.get("chain", [])
+        rest = {bn: (arm.data.bones[bn].head_local.copy(), arm.data.bones[bn].tail_local.copy()) for bn in bones}
+        for bn in bones:
+            move_bone(arm, kept, bn, d, fix)
         select([arm], arm)
         bpy.ops.object.mode_set(mode="EDIT")
-        eb = arm.data.edit_bones[name]
-        eb.head += d
-        eb.tail += d
+        for bn, (h, t) in rest.items():     # (from the rest as it was: a connected child follows its parent's tail)
+            arm.data.edit_bones[bn].head = h + d
+            arm.data.edit_bones[bn].tail = t + d
         bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def move_bone(arm, kept, name, d, fix):
+    """One bone's keys (corrected if `fix`) and kept parts."""
+    b = arm.data.bones[name]
+    dl = b.matrix_local.to_3x3().inverted() @ d
+    path = 'pose.bones["%s"].location' % name
+    curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
+    keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
+            for cs in curves if len(cs) == 3]
+    far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max()) if keys and fix else np.zeros((1, 3))
+    top = far[np.linalg.norm(far, axis=1).argmax()]
+    for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
+        if len(cs) != 3:
+            continue
+        cs = sorted(cs, key=lambda c: c.array_index)
+        loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
+        frac = loc @ top / float(top @ top)
+        for i, fc in enumerate(cs):
+            for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
+                kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    if name in kept.vertex_groups:
         gi = kept.vertex_groups[name].index
         for v in kept.data.vertices:
             if any(g.group == gi and g.weight > 0.5 for g in v.groups):
                 v.co += d
-        print("moved", name, tuple(d), "keys", len(keys), flush=True)
+    print("moved", name, tuple(round(x, 3) for x in d), "keys", len(keys), flush=True)
 
 
 # ----------------------------------------------------- step 4: slots, ink room, anchors
@@ -560,14 +641,23 @@ def hsv(rgb):
     return h, (mx - mn) / np.maximum(mx, 1e-6), mx
 
 
-def tri_slots(ob, img, top_bone, P):
+def tri_slots(ob, imgs, top_bone, P):
+    """Each triangle's toon slot, read off its paint: `imgs` by material index (one: the atlas)."""
     me = ob.data
-    n = img.size[0]
-    px = np.array(img.pixels[:], F).reshape(n, n, 4)[..., :3]
     uv = np.empty(len(me.loops) * 2, F)
     me.uv_layers["UVMap"].data.foreach_get("uv", uv)
-    c = uv.reshape(-1, 3, 2).mean(1)
-    rgb = px[np.clip((c[:, 1] * n).astype(int), 0, n - 1), np.clip((c[:, 0] * n).astype(int), 0, n - 1)]
+    c = uv.reshape(-1, 3, 2).mean(1) % 1.0
+    mi = np.zeros(len(me.polygons), np.int32)
+    me.polygons.foreach_get("material_index", mi)
+    mi = np.minimum(mi, len(imgs) - 1)
+    rgb = np.zeros((len(c), 3), F)
+    for k, img in enumerate(imgs):
+        w, h = img.size
+        px = np.empty(w * h * 4, F)
+        img.pixels.foreach_get(px)
+        px = px.reshape(h, w, 4)[..., :3]
+        m = mi == k
+        rgb[m] = px[np.clip((c[m, 1] * h).astype(int), 0, h - 1), np.clip((c[m, 0] * w).astype(int), 0, w - 1)]
     h, s, v = hsv(rgb)
     lv = np.empty(len(me.loops), np.int32)
     me.loops.foreach_get("vertex_index", lv)
@@ -617,8 +707,13 @@ def main():
     bpy.context.scene.render.fps = FPS
     # a game .glb that is itself a swap's output brings a "Kept" of its own to the bake, so ours saves as "Kept.001"
     low, kept = bpy.data.objects["Low"], next(o for o in bpy.data.objects if o.name.startswith("Kept"))
-    img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
-    img.name = "atlas"
+    own = [] if not SPEC.get("keep_uv") else list(low.data.materials)     # (the master's: "img", "emit")
+    if own:
+        imgs = [bpy.data.images[m["img"]] for m in own]
+    else:
+        img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
+        img.name = "atlas"
+        imgs = [img]
     sole = bpy.context.scene["sole"]
     arm, old = import_game(os.path.join(WORK, "game.glb"))
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
@@ -631,19 +726,26 @@ def main():
     P = P[o]
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
-    move_bones(arm, kept)
-    slots = [s + "-atlas" for s in tri_slots(low, img, top, P)] + (kept["slots"].split(",") if kept["slots"] else [])
+    move_bones(arm, kept, T, K)
+    tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
+    slots = [s + "-" + (tags[i] if own else "atlas") for i, s in enumerate(tri_slots(low, imgs, top, P))]
+    kept_slots = kept["slots"].split(",") if kept["slots"] else []
+    slots += kept_slots
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
     gname = {g.index: g.name for g in kept.vertex_groups}
     vals += [room.get(gname[max(v.groups, key=lambda e: e.weight).group], room.get("*", 0.7)) for v in kept.data.vertices]
-    kept.data.uv_layers.remove(kept.data.uv_layers["old"])
+    if "old" in kept.data.uv_layers:       # (keep_uv: the kept parts' old UVs are their UVMap)
+        kept.data.uv_layers.remove(kept.data.uv_layers["old"])
     for o in (low, kept):
         for c in list(o.data.color_attributes):
             o.data.color_attributes.remove(c)
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
     bpy.data.objects.remove(old)
+    for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
+        if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":
+            bpy.data.objects.remove(bpy.data.objects[n])
     select([low, kept], low)
     bpy.ops.object.join()
     me = low.data
@@ -651,15 +753,22 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
-    emit = bpy.data.images.get("emit")
+    emit = bpy.data.images.get("emit") if SPEC.get("emit") else None     # (not the game glb's own "emit")
+    me.materials.clear()
     for s in names:
+        if own and s in kept_slots:     # (keep_uv: a kept part keeps its old material and atlas)
+            me.materials.append(bpy.data.materials[s])
+            continue
         if s in bpy.data.materials:     # (the game glb's own, a kept part's: "flame-jet")
             bpy.data.materials[s].name = s + "-game"
         m = bpy.data.materials.new(s)
         m.use_nodes = True
         b = m.node_tree.nodes["Principled BSDF"]
         t = m.node_tree.nodes.new("ShaderNodeTexImage")
-        t.image = img
+        tag = s.rsplit("-", 1)[1]
+        t.image = bpy.data.images[tag] if own else img
+        if own:
+            emit = next((bpy.data.images[o["emit"]] for o in own if o["img"] == tag and o["emit"]), None)
         m.node_tree.links.new(t.outputs[0], b.inputs[0])
         b.inputs["Roughness"].default_value = 0.8
         if emit:
@@ -685,7 +794,10 @@ def main():
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "fit.blend"))      # (before the relax: for looking at the weights)
     for k, v in SPEC.get("relax", {}).items():      # e.g. {"CUTS": 0}: relax only, no cut-and-cap holes
         setattr(skin_relax, k, v)
-    skin_relax.relax(arm)
+    if bpy.data.actions:
+        skin_relax.relax(arm)
+    else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
+        print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:

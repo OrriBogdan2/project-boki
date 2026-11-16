@@ -225,6 +225,8 @@ func _settle() -> void:
 			"settle: the winner gains joy and trust, the loser sulks")
 	ok(String(a["memory"][-1]["text"]).contains("Ash") and String(b["memory"][-1]["text"]).contains("Pip"),
 			"settle: both remember it")
+	ok((res["prize"]["items"] as Array).size() >= 1 and not (res["prize"]["items"][0]["id"] as String).is_empty(),
+			"settle: a win rolls Echo Steps' prize table into the bag")
 	ok(int(Save.d["gems"]) == gems + int(EchoSteps.rules()["gems_win"]), "settle: win gems for your Boki's win")
 	var solo := EchoSteps.Run.new(_kin(_species(false), "Bo", 0, 0.0), {}, RandomNumberGenerator.new())
 	solo.hits = [10, 0]
@@ -285,7 +287,8 @@ func _on_base() -> void:
 		ok(not you.has_meta("kact"), "on: the spin lasts two beats")
 		es.run.step(LEN_HIGH * 2.0)
 		es.tick(0.1)
-		ok(es.run == null and is_instance_valid(es.card), "on: the dance ends with a result card")
+		ok(es.run == null and is_instance_valid(es.card) and es.card.name == "GameResultCard",
+				"on: the dance ends with the shared result card")
 		ok(not you.has_meta("kact"), "on: and nobody keeps a dance clip")
 	rules["base_mode"] = false
 	home.queue_free()

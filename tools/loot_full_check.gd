@@ -1,8 +1,8 @@
 extends RefCounted
-## --loot-full-check: looting with a full inventory (LootFull, LootHold). Smart loot takes only what
+## --loot-full-check: looting with a full inventory (LootFull, LootWindow). Smart loot takes only what
 ## fits and says so; a click on a thing that doesn't fit moves nothing and reports no success; swap puts
-## your thing in the box and the held one in your backpack; drop puts yours on the ground; counts stay
-## right; a full capsule box doesn't hang smart loot; the box window and the hold window build.
+## your thing in the box and the held one in your backpack; counts stay right; a full capsule box doesn't
+## hang smart loot; the box window builds and holds a clicked thing with a Swap on each of yours.
 ## Never touches the save.
 
 var bad := 0
@@ -62,14 +62,6 @@ func run(main: Node) -> void:
 	ok(P.pack[0] == held_before and bx["pack"][0] == mine_before, "swap: yours is in the box, the held one is yours")
 	ok(P.pack.size() + (bx["pack"] as Array).size() == total and P.pack.size() == 2, "swap: counts stay right")
 	ok(not LootFull.swap_held(m, P, bx, 9, 0), "a stale index swaps nothing")
-	# ---------------------------------------------------------------- 5. drop
-	var drop_held: Dictionary = bx["pack"][1]
-	var drop_mine: Dictionary = P.pack[1]
-	var on_ground := m.wpicks.size()
-	ok(LootFull.drop_for_held(m, P, bx, 1, 1), "drop works")
-	ok(P.pack.size() == 2 and P.pack.has(drop_held) and not P.pack.has(drop_mine), "drop: the held one took the slot")
-	ok(m.wpicks.size() == on_ground + 1 and (bx["pack"] as Array).size() == 1,
-		"drop: yours is on the ground, the box lost the held one")
 	# ---------------------------------------------------------------- 6. room: smart loot takes it
 	bx["pack"] = [Loot.valuable("crown_shard")]
 	P.pack = [Loot.valuable("kin_idol")]
@@ -92,23 +84,42 @@ func run(main: Node) -> void:
 	m.boxes.append(bw)
 	m.hud.open_loot(bw)
 	ok(m.hud.loot_panel != null and is_instance_valid(m.hud.loot_panel), "the box window opens")
-	m.hud.open_hold(Life.box_items(m, P, bw)[0])
+	m.hud.loot_panel.take(Life.box_items(m, P, bw)[0])
 	await main.get_tree().process_frame
-	await main.get_tree().process_frame
-	var lh: PanelContainer = m.hud.loot_hold
-	ok(lh != null and is_instance_valid(lh) and lh.visible, "clicking a thing that doesn't fit opens the hold window")
-	print("LOOTFULL hold pos=%s size=%s modulate=%s scale=%s" % [lh.position, lh.size, lh.modulate, lh.scale])
-	var noop := func(_i: int): pass
-	var hold := LootHold.build(P, bw["pack"][0], noop, noop, func(): pass)
-	var buttons := hold.find_children("*", "Button", true, false).filter(
-		func(b): return (b as Button).text in ["Swap", "Drop"])
-	ok(buttons.size() == 2 * P.pack.size(), "hold window: Swap and Drop for each of your %d things" % P.pack.size())
-	hold.free()
+	var buttons: Array = m.hud.loot_panel.find_children("*", "Button", true, false).filter(
+		func(b): return (b as Button).text == "Swap")
+	ok(buttons.size() == P.pack.size(),
+		"clicking a thing that doesn't fit: a Swap on each of your %d things" % P.pack.size())
+	(buttons[0] as Button).pressed.emit()
+	ok(P.pack.any(func(it): return String(it.get("id", "")) == "old_coin"), "Swap puts the held thing in your backpack")
 	m.hud.close_loot()
+	_double_f(m, P, Q)
 	_merged_drops(m, P)
 	print("LOOT FULL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
+## First F opens the box window, a second F press closes it even when smart loot takes nothing
+## (a full pack, worse things inside), and the player's inputs are free right after.
+func _double_f(m: Match, P: Hunter, Q: Hunter) -> void:
+	P.pack = [Loot.valuable("kin_idol"), Loot.valuable("sky_pearl")]
+	P.backpack = 0
+	m.boxes.clear()      # the nearest box wins the prompt: earlier sections' boxes sit on the same spot
+	var bx := make_box(Q, P.pos, [Loot.valuable("old_coin")])
+	m.boxes.append(bx)
+	P.inp["interact"] = true
+	m._update_interact(0.016)
+	ok(m.hud.loot_is(bx), "double F: the first press opens the box window")
+	P.inp["interact"] = false
+	m._update_interact(0.016)
+	P.inp["interact"] = true
+	m._update_interact(0.016)
+	ok(not m.hud.loot_is(bx) and m.hud.loot_open == null, "double F: the second press closes it with nothing taken")
+	ok(not bx["empty"] and (bx["pack"] as Array).size() == 1, "double F: the box still holds what you didn't take")
+	ok(m.hud.loot_panel == null and not m.hud.mouse_on_panel(), "double F: no window is left to eat mouse input")
+	P.inp["interact"] = false
+	m._update_interact(0.016)
+	m.boxes.erase(bx)
 
 ## Most loose pickups one monster kill, one chest or one prop may leave (one per kind: gem, seed, tonic, armor, key).
 const MAX_PER_KILL := 5

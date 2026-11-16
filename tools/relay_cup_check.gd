@@ -143,7 +143,12 @@ func _cup() -> void:
 	var gems := int(Save.d["gems"])
 	var r := _relay(mine, BaseRelay.rivals(mine, BaseRelay.cup_round(anchor)["min_ratio"]), 5, "great")
 	r.done_t = [30.0, 31.0]       # settle a win
+	var rival_bond := -0.8
+	BaseLife.add_bond(mine[0], mine[2], rival_bond)      # the first and last runner never hand off to each other
 	var res := BaseRelay.settle(r, anchor)
+	var step := BaseLife.bond(mine[0], mine[2]) - rival_bond
+	ok(res["won"] and is_equal_approx(step, float(BaseRival.rules()["win_step"])),
+		"a win together raises each pair's bond by the rivalry win_step")
 	ok(res["won"] and int(Save.d["gems"]) == gems + int(BaseRelay.rules()["gems_win"]), "a win pays the relay's gems")
 	ok(not res["prize"]["items"].is_empty() and res["prize"]["round"] == "Sprout"
 			and GardenPrizes.stage(anchor, "relay") == 1,
@@ -255,8 +260,8 @@ func _on_base() -> void:
 			acted = acted or runners.any(func(n): return n.has_meta("kact"))
 			burst = burst or runners.any(func(n): return float(n.get_meta("kburst", 1.0)) > 1.0)
 			finished = finished or relay.finish_left >= 0.0
-		ok(relay.run == null and is_instance_valid(home.hrace.card),
-				"on: the relay ends with a result card (%.1f s)" % t)
+		ok(relay.run == null and is_instance_valid(home.hrace.card) and home.hrace.card.name == "GameResultCard",
+				"on: the relay ends with the shared result card (%.1f s)" % t)
 		await main.get_tree().process_frame
 		ok(acted and burst, "on: the runners play contact reacts and burst off the baton")
 		ok(finished and runners.all(func(n): return not is_instance_valid(n) or not n.has_meta("kact")),

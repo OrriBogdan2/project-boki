@@ -115,9 +115,14 @@ static func level_up(rec: Dictionary) -> void:
 static func has_art(id: String) -> bool:
 	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
 
-## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
-## art or not; "" when that isn't a way it evolves.
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, "trade", or "path":
+## the path meter's winner when the player presses Evolve), art or not; "" when that isn't a way it evolves.
+## A branching final with a path meter (EvoPath) never evolves by "level" alone: the player presses Evolve.
 static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	if how == "path":
+		return EvoPath.pick(rec)
+	if how == "level" and not EvoPath.line(rec).is_empty():
+		return ""
 	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
 	var fits: Array = []
 	for o in line.get("into", []):
@@ -130,26 +135,47 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 				if String(o.get("item", "")) == item: fits.append(o)
 			"trade":
 				if o.get("trade", false): fits.append(o)
+	fits = fits.filter(func(o): return not o.has("trait") or BokiQuirks.has_trait(rec, String(o["trait"])))
 	if fits.is_empty():
 		return ""
+	for o in fits:
+		if o.has("trait"):      # a rare trait it carries decides the branch
+			return String(o["id"])
 	var lead := leading(rec)
 	for o in fits:
-		if String(o.get("path", "")) == lead: return String(o["id"])
+		var path = o.get("path", "")        # one affinity, or a list of them
+		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
 	var to := next_for(rec, how, item)
-	if to == "" or not has_art(to):
+	if to == "" or not has_art(to) or rec.get("stay", false):      # a worn Stayleaf: no new forms
 		return {}
 	var before := form_name(rec)
-	var a := leading(rec)
+	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
 	rec["was"].append(String(rec["species"]))
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
+	if part != "":
+		ev["lean_part"] = part
+	return ev
+
+## What an Ink would do to this Boki, before using it (its item card in the Feed menu shows this):
+## {"state": "form" | "waits" | "none", "to": species id or "", "name": the form's name or "", "text"}.
+## "waits": its line has that Ink branch but the form has no model yet (has_art), so it would not change.
+static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
+	var to := next_for(rec, "item", ink)
+	if to == "":
+		return {"state": "none", "to": "", "name": "", "text": "No effect on this Boki."}
+	var nm := String(Data.KIN[to]["name"]) if Data.KIN.has(to) else to.capitalize()
+	if not has_art(to):
+		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
+	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
@@ -170,9 +196,6 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
 	var ev := try_evolve(rec, "level")
 	if not ev.is_empty():
-		var part := Lean.grow_part(rec)      # a level form also grows a part from what it leans toward eating
-		if part != "":
-			ev["lean_part"] = part
 		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)

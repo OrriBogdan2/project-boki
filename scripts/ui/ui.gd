@@ -54,6 +54,19 @@ const PAD := 26          # inside a panel
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
 static var _theme: Theme
+static var text_k := 1.0       # Settings > Text size: every font size below goes through fs()
+
+## A design font size at the player's chosen text size.
+static func fs(px: int) -> int:
+	return roundi(px * text_k)
+
+## Applies a Text size choice: sizes made from now on use it, and the menu theme is rebuilt with it.
+static func set_text_size(k: float) -> void:
+	if is_equal_approx(k, text_k):
+		return
+	text_k = k
+	_theme = null
+	install()
 static var semi: FontVariation       # Rubik at a heavier weight, for buttons and small headers
 static var caps: FontVariation       # spaced-out bold, for section headers
 
@@ -103,7 +116,7 @@ static func keycap(key: String, size := 13) -> PanelContainer:
 	l.text = key
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", caps if caps else body)
-	l.add_theme_font_size_override("font_size", size - 1 if key.length() > 1 else size)
+	l.add_theme_font_size_override("font_size", fs(size - 1 if key.length() > 1 else size))
 	l.add_theme_color_override("font_color", Color(0.16, 0.12, 0.14))
 	p.add_child(l)
 	return p
@@ -131,7 +144,7 @@ static func section(text: String, col := PINK) -> Label:
 	var l := Label.new()
 	l.text = text.to_upper()
 	l.add_theme_font_override("font", caps if caps else body)
-	l.add_theme_font_size_override("font_size", T_CAPS)
+	l.add_theme_font_size_override("font_size", fs(T_CAPS))
 	l.add_theme_color_override("font_color", col)
 	l.set_meta("pg_head", true)
 	return l
@@ -139,7 +152,7 @@ static func section(text: String, col := PINK) -> Label:
 static func label(text: String, size := 16, col := INK, font: Font = null) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", fs(size))
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
@@ -182,6 +195,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var to := func(s: float, secs: float) -> void:
 		if not is_instance_valid(b) or not b.is_inside_tree(): return
 		var tw := b.create_tween()
+		s = minf(s, _room(b))
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
@@ -196,6 +210,15 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 			Sfx.play("hover", null, -14.0, 0.05))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
+
+## How far a button may scale (about its centre) before it pokes past its parent's sides: 1.0 for
+## one that fills its row.
+static func _room(b: Button) -> float:
+	var par := b.get_parent() as Control
+	if par == null or b.size.x < 1.0:
+		return 1.0
+	var gap := minf(b.position.x, par.size.x - b.position.x - b.size.x)
+	return 1.0 + maxf(0.0, gap) * 2.0 / b.size.x
 
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
@@ -674,8 +697,8 @@ static func hold(body: Control, h: float) -> void:
 		_hold[key] = h
 
 ## Wraps a VBox of content: it sits at a steady height (the menu's held height, or the tallest it
-## has been while open) and, only if the window is too small for it, scrolls. margin: room left for
-## the rest of the screen. Returns the wrapper to add where the content would have gone.
+## has been while open) and, only if the window is too small for it, scrolls. margin: room the panel
+## needs besides the body (on top of the HudStyle safe margin it keeps clear above and below). Returns the wrapper to add where the content would have gone.
 static func paged(content: VBoxContainer, margin: float, key: String, head: Control = null, width_hint := 600.0, foot: Control = null) -> VBoxContainer:
 	var wrap := vbox(8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -691,7 +714,7 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 			return
 		state["busy"] = true
 		var vp := content.get_viewport_rect().size
-		var maxh := maxf(160.0, vp.y - margin - (head.get_combined_minimum_size().y if head else 0.0) - (foot.get_combined_minimum_size().y + float(GAP_BIG) if foot and foot.visible else 0.0))
+		var maxh := maxf(160.0, vp.y - margin - HudStyle.safe_pad(vp).y * 2.0 - (head.get_combined_minimum_size().y if head else 0.0) - (foot.get_combined_minimum_size().y + float(GAP_BIG) if foot and foot.visible else 0.0))
 		var h := content.get_combined_minimum_size().y
 		# never shrink while it's open, so the menu doesn't hop as its contents change. Sizes are
 		# only trusted once the layout has settled (wrapped text measures tall at first).
@@ -809,6 +832,8 @@ static func scroll_box(content: Control, margin := 120.0) -> Control:
 	return content
 
 # ---------------------------------------------------------------- the panel shell
+const MENU_CHROME := 56.0      # px a menu panel needs besides its body, title and footer (padding, gaps)
+
 ## A menu panel, the same everywhere: a title (and an optional subtitle) with a close X at the top
 ## right, an optional row of tabs, the body, and an optional footer of actions at the bottom right.
 ## The body pages (or, with scroll, scrolls) whenever it's taller than the window, so nothing ends up
@@ -877,14 +902,18 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
-				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				var vp := sc.get_viewport_rect().size
+				var room := vp.y - MENU_CHROME - HudStyle.safe_pad(vp).y * 2.0 - chrome
+				# held: the same on every tab
+				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))
+				sc.custom_minimum_size.y = minf(want, room)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
 		sc.tree_entered.connect(func(): fit.call_deferred())
 		body.set_meta("scroll", sc)
 	else:
-		outer.add_child(paged(body, 110.0, title_txt, top, width - PAD * 2.0, foot))
+		outer.add_child(paged(body, MENU_CHROME, title_txt, top, width - PAD * 2.0, foot))
 	outer.add_child(foot)
 	body.set_meta("shell", p)
 	p.set_meta("key", title_txt)
@@ -892,7 +921,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	p.set_meta("tabs", tabs_slot); p.set_meta("foot", foot); p.set_meta("foot_left", foot_left); p.set_meta("foot_right", foot_right)
 	var fitw := func():
 		if is_instance_valid(p) and p.is_inside_tree():
-			p.custom_minimum_size.x = minf(width, p.get_viewport_rect().size.x - 32.0)
+			var vp := p.get_viewport_rect().size
+			p.custom_minimum_size.x = minf(width, vp.x - HudStyle.safe_pad(vp).x * 2.0)
 	p.tree_entered.connect(func(): fitw.call_deferred())
 	p.custom_minimum_size.x = width
 	# keyboard and pad users start on the first thing they can press
@@ -913,6 +943,7 @@ static func subtitle(body: Control, txt: String) -> void:
 	if p == null: return
 	var s: Label = p.get_meta("sub")
 	s.text = txt
+	s.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # (the label is made empty, so label() left wrapping off)
 	s.visible = txt != ""
 
 ## The panel title's parchment tab (UI_STYLE.md): a torn cream strip with two nails, dark ink on it.

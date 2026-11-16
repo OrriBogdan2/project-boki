@@ -9,6 +9,7 @@ extends Node3D
 
 const SHADER: Shader = preload("res://shaders/dj_fx.gdshader")
 const SHADER_MIX: Shader = preload("res://shaders/dj_fx_mix.gdshader")
+const CRESCENT_CHORD := 1.4          # m: the Searing Wave crescent across, at scale 1
 const M_STAR := 0
 const M_PILLAR := 1
 const M_COMET := 2
@@ -18,6 +19,7 @@ const M_LINKS := 5
 const M_BOLT := 6
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const CORE_W := 0.35           # of a streak's width: its bright core
+const WARM_PUFFS := 12         # puffs made at load for the miss puffs (MissFx)
 const KEEP := 0.1              # s an immediate-style look (place / chain) stays without a refresh
 
 var m: Node
@@ -33,6 +35,7 @@ var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
+var rng := RandomNumberGenerator.new()      # look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -116,6 +119,14 @@ func prewarm(at: Vector3) -> void:
 			add_child(node)
 	for node: MeshInstance3D in _warming:
 		node.global_position = at
+	warm_puffs(WARM_PUFFS)
+
+## Makes the miss puffs now, hidden, so the first misses of a fight take pooled nodes (MissFx).
+func warm_puffs(n: int) -> void:
+	while free_pools.get("puff", []).size() < mini(n, POOL_CAP):
+		_fx("puff", M_PUFF, _quad_mesh(), true)
+	for node: Node3D in free_pools["puff"]:
+		node.visible = false
 
 func prewarm_end() -> void:
 	for node: MeshInstance3D in _warming:
@@ -244,7 +255,7 @@ func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float,
 	mt.set_shader_parameter("color2", col2)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("progress", 0.0)
-	mt.set_shader_parameter("seed", randf() * TAU)
+	mt.set_shader_parameter("seed", rng.randf() * TAU)
 	n.scale = s0
 	live.append({"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt})
 
@@ -417,7 +428,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
 		(sd["node"] as Node3D).visible = false
-	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
+	riders.append({"node": n, "sd": sd, "kind": kind, "spin": rng.randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
 
@@ -449,6 +460,7 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 		match kind:
 			"chakram", "chakram_big", "blade", "bola": head.rotation.y = spin * (2.0 if kind == "bola" else 3.0)
 			"dagger": head.rotation.z = sin(spin) * 0.15
+			"crescent_bolt": head.scale = Vector3.ONE * (width / CRESCENT_CHORD)
 	var tr := n.get_node_or_null("Trail") as Node3D
 	if tr: tr.scale = Vector3(width, width, trail)
 	var core := n.get_node_or_null("Core") as Node3D
@@ -490,7 +502,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	if side.length() < 0.01: side = Vector3.RIGHT
 	side = side.normalized()
 	var n := maxi(8, int(length / 0.08))
-	var links := length / 0.2        # a bright and a dark link every 20 cm
+	var links := length / maxf(0.2, width * 1.2)     # a bright and a dark link per ~1.2 widths (thick rope, not dots)
 	im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in n + 1:
 		var k := float(i) / n

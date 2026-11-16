@@ -231,13 +231,16 @@ func breah() -> void:
 	_tarek_audit(m, P, K, home)
 	await done(m)
 
-## The audit (Nov 3 23:40): cooldowns from the data, the hunter viewer's moves, and Molten Guard only from a
+## The audit (Nov 3 23:40): cooldowns from the data, the hunter viewer's moves, and Shardskin only from a
 ## punch into your OWN rocks (an ally Tarek's rocks still fly, no shield).
 func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	var view: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_viewer.json"))
 	var dv: Dictionary = (view.get("moves", view) as Dictionary).get("dolm", {})
 	ok("audit tarek: cooldowns from the data (Volcano Crusher 11s, Rockwave 12.5s)",
 		float(K.rmb_def()["cooldown"]) == 11.0 and float(K.e_def()["cooldown"]) == 12.5)
+	ok("verify Nov 9: LMB tap and punch both 0.6s (card), Shift 12s, X 45s (data)",
+		float(K.lmb_def()["boulder"]["rate"]) == 0.6 and float(K.lmb_def()["punch"]["rate"]) == 0.6
+		and float(K.dash_def()["cd"]) == 12.0 and float(K.x_def()["cooldown"]) == 45.0)
 	ok("audit tarek: the hunter viewer plays his own RMB and X moves",
 		dv.get("rmb", []) == ["breah_crouch", "breah_slam"] and dv.get("x", []) == ["breah_spine_aim", "breah_spine"],
 		str(dv))
@@ -258,7 +261,7 @@ func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	step(m, 0.6, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	step(m, 0.2)
-	ok("audit tarek: a punch into an ally's rocks launches them but gives no Molten Guard (data: your Rocks)",
+	ok("audit tarek: a punch into an ally's rocks launches them but gives no Shardskin (data: your Rocks)",
 		K.last_sweep >= 1 and K.shield_stacks == 0, "swept %d stacks %d" % [K.last_sweep, K.shield_stacks])
 	ally.queue_free()
 	m.hunters.erase(ally)

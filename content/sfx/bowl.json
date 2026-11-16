@@ -1,0 +1,14 @@
+{
+ "group": "bowl",
+ "name": "Mixing Bowl",
+ "script": "tools/gen_sfx_bowl.py",
+ "sounds": {
+  "bowl_plop_snack": "ui", "bowl_plop_treat": "ui", "bowl_plop_bun": "ui",
+  "bowl_stir": "loop",
+  "bowl_done_1": "ui", "bowl_done_2": "ui", "bowl_done_3": "ui",
+  "bowl_fizzle": "boki", "bowl_taste": "boki"
+ },
+ "signature": [],
+ "replaces": [],
+ "loops": ["bowl_stir"]
+}

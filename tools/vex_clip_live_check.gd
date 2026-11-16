@@ -40,6 +40,89 @@ func _shown(h: Hunter) -> int:
 			n += 1
 	return n
 
+## The world yaw a pair of bones faces: the line from the left one's head to the right one's is his right.
+func _line_yaw(sk: Skeleton3D, left: String, right: String) -> float:
+	var d := sk.global_transform.basis * (sk.get_bone_global_pose(sk.find_bone(right)).origin
+			- sk.get_bone_global_pose(sk.find_bone(left)).origin)
+	return atan2(-d.z, d.x)
+
+## A frame of running `move` (the stick) while aiming +X, or `swing` rad round from it.
+func _run_frame(m: Match, P: Hunter, T: Hunter, home: Vector3, move: Vector2, swing := 0.0) -> void:
+	T.teleport(home + Vector3(30.0, 0, 0))
+	A.aim_at(P, P.pos + Vector3(8.0, 0, 0).rotated(Vector3.UP, swing))
+	P.inp["move"] = move
+	_frame(m, [P])
+
+func _run_rel(P: Hunter) -> float:
+	return wrapf(atan2(-P.vel.x, -P.vel.z) - P.face, -PI, PI)
+
+## Running one way while aiming another (+X): the legs turn to the run, the torso stays on the aim. Within the limit
+## the legs turn the way he runs (the sign of his run off the aim); beyond it they turn round and run backwards, so
+## the turn flips sign and shrinks. Read off the skeleton too, summed over a stride so the run's own sway cancels:
+## the line through the thighs turns, the one through the shoulders stays on the aim.
+func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var c := _clips(P)
+	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+	for deg in [0.0, 60.0, -60.0, 130.0, -130.0, 180.0]:
+		var legs := Vector2.ZERO
+		var torso := Vector2.ZERO
+		for f in 50:
+			_run_frame(m, P, T, home, Vector2(1, 0).rotated(deg_to_rad(deg)))
+			if f >= 20:
+				legs += Vector2.from_angle(_line_yaw(sk, "thigh.L", "thigh.R") - P.face)
+				torso += Vector2.from_angle(_line_yaw(sk, "upper_arm.L", "upper_arm.R") - P.face)
+		var rel := _run_rel(P)
+		var back: bool = absf(rel) > WardenClips.TWIST_MAX
+		var want := rel - signf(rel) * PI if back else rel
+		ok(absf(c.head_turn - want) < 0.15 and c.twist_back == back,
+				"run %d deg off the aim: legs turn %.2f rad (want %.2f, %s)" % [deg, c.head_turn, want,
+				"backwards" if c.twist_back else "forwards"])
+		ok(absf(wrapf(legs.angle() - want, -PI, PI)) < 0.3 and absf(torso.angle()) < 0.3,
+				"  on the skeleton: the thighs face %.2f rad off the aim, the shoulders %.2f" % [legs.angle(),
+				torso.angle()])
+	# near 90 deg off the aim: just past the limit the legs turn round, running backwards holds a little inside it (no
+	# flicker) and lets go further in; either way he never twists past the limit (100 to 88 to 82 on one side, so the
+	# run never swings through the aim on the way)
+	P.teleport(home)
+	var most := 0.0
+	var backs := []
+	for deg in [0.0, 88.0, -100.0, -88.0, -82.0]:
+		for f in 40:
+			_run_frame(m, P, T, home, Vector2(1, 0).rotated(deg_to_rad(deg)))
+			most = maxf(most, absf(c.head_turn))
+		backs.append(c.twist_back)
+	ok(backs == [false, false, true, true, false] and most <= WardenClips.TWIST_MAX + 0.01, ("runs 0, 88, 100, 88, "
+			+ "82 deg off the aim: backwards %s, the twist at most %.2f rad (limit %.2f)") % [backs, most,
+			WardenClips.TWIST_MAX])
+	# the aim swings 70 deg toward his run in a tenth of a second: the legs hold his way, the torso takes the swing
+	var run_60 := Vector2(1, 0).rotated(deg_to_rad(60.0))
+	for f in 40:
+		_run_frame(m, P, T, home, run_60)
+	var swing := deg_to_rad(70.0) * signf(_run_rel(P))
+	var drift := 0.0
+	for f in 15:
+		_run_frame(m, P, T, home, run_60, swing * minf(1.0, f / 6.0))
+		drift = maxf(drift, absf(wrapf(P.face + c.head_turn - atan2(-P.vel.x, -P.vel.z), -PI, PI)))
+	ok(drift < 0.1, "the aim swings 70 deg as he runs: the legs hold his way (off it by %.2f rad at most)" % drift)
+	# a move keyed "heading" (Lace's roll) out of a twisted run turns him whole: the torso eases round with the legs
+	for f in 40:
+		_run_frame(m, P, T, home, run_60)
+	var roll := {"heading": true, "turn_max": 3.2}
+	var st := {"vel": P.vel, "face": P.face}
+	var jump := 0.0
+	for f in 20:
+		var was := c.torso_turn
+		c._turn_to_heading(st, roll, false, DT)
+		jump = maxf(jump, absf(c.torso_turn - was))
+	ok(absf(c.head_turn) > 0.5 and absf(c.torso_turn - c.head_turn) < 0.1 and jump < 0.3, ("a roll out of the run "
+			+ "turns him whole: the torso %.2f rad off the legs, eased (%.2f rad a frame at most)")
+			% [c.torso_turn - c.head_turn, jump])
+	P.inp["move"] = Vector2.ZERO
+	for f in 40:
+		_frame(m, [P])
+	ok(absf(c.head_turn) < 0.05 and absf(c.torso_turn) < 0.05,
+			"the legs and torso unwind when he stops (%.2f, %.2f rad)" % [c.head_turn, c.torso_turn])
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
@@ -86,6 +169,7 @@ func run(main: Node) -> void:
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
+	_twist(m, P, T, home)
 	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
 	var fire := WardenGlb.anchor(P.model, "launcher_fire")
 	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")

@@ -34,9 +34,7 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
-## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
-const TRIS_OVER := {"juggernaut": 24000}
+const TRIS_MAX := 80000         # the game budget (RIG_CONTRACT "Budget"): a v95 master's own mesh, ~60k, plus its props
 ## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
 ## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
 const WHITE_HAIR := {"thief": 0.08}
@@ -93,7 +91,6 @@ func run(main: Node) -> void:
 		await _anchors(main, a)
 		_shading(a)
 		_hitbox(a)
-		_setting(a)
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
 		_shield(a)
@@ -139,10 +136,9 @@ func _contract(a: String) -> void:
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
-	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
-	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
+	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
-			% [a, unskinned, tris, cap, str(slots.keys()), SLOT_MAX])
+			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX])
 	m.free()
 
 ## Every kit move of every table, played on this Warden: after each key, every bone is exactly where its rig
@@ -315,11 +311,11 @@ func _hitbox(a: String) -> void:
 	var shapes := with.get_node("Warden").find_children("*", "CollisionObject3D", true, false).size() \
 			+ with.get_node("Warden").find_children("*", "CollisionShape3D", true, false).size()
 	with.free()
-	WardenGlb.set_model(a, false)
+	WardenGlb._measuring = true
 	var without := _model(a)
 	var ring_p := (without.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
 	without.free()
-	WardenGlb.set_model(a, true)
+	WardenGlb._measuring = false
 	ok(absf(ring_w - ring_p) < 0.0001 and shapes == 0,
 			"%s: hit ring %.3f with the .glb, %.3f without (hit radius %.2f m), no collision in the .glb"
 			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
@@ -643,17 +639,3 @@ func _own_motion(a: String, other: String) -> void:
 	o_sync.free()
 	m.free()
 	o.free()
-
-## Settings > Video > Warden models: off builds the procedural model, on the .glb again.
-func _setting(a: String) -> void:
-	WardenGlb.set_model(a, false)
-	var off := _model(a)
-	var proc := not off.has_node("Warden") and (off.get_node("Rig/Torso/HeadPivot/Head") as Node3D).visible \
-			and not WardenGlb.uses_model(a)
-	off.free()
-	WardenGlb.set_model(a, true)
-	var on := _model(a)
-	var back := on.has_node("Warden") and WardenGlb.uses_model(a)
-	on.free()
-	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
-			% [a, str(proc), str(back)])

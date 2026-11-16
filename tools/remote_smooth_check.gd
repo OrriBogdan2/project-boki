@@ -3,14 +3,22 @@ extends RefCounted
 ## Two real games over the desktop relay, like --displace-net-check (whose match builder it reuses): this
 ## process runs the relay and the host game; the guest (--remote-smooth-check=guest) is a second headless
 ## game. The relay here holds every packet 40 ms +-20 ms one way (80 ms ping, 20 ms jitter each way)
-## and drops 2% of snapshots, keeping ENet's unreliable-ordered rule (a late snapshot behind a newer one
-## is dropped). The host's Hunter runs, stops, turns, dashes, is lifted 5 m (a teleport), glides and is
-## knocked; the guest records where its game puts that Hunter every frame. Both clocks are the wall clock.
+## and drops 2% of snapshots; packets to one peer arrive in the order they were sent, as through a real
+## queue (the host's hunter and world snapshots of one step are two packets). The host's Hunter runs,
+## stops, turns, dashes, is lifted 5 m (a teleport), glides and is knocked, then becomes Sparkle and casts
+## Kitefall (its scripted 0.2 s fall onto a spot 12 m off, numbered on its own); the guest records where its
+## game puts that Hunter every step. Both games step their match on the wall clock as Match._process does
+## (a slow frame takes two steps) and stamp each step with the wall moment it stands for. The host draws
+## nothing: only the line and the guest's buffer are measured, and a host drawn on a loaded software
+## display has frames over Match's 0.1 s clamp that put its match clock behind the wall (the owner's game
+## in slow motion, not the line). RSMOOTH load says what such frames still cost each game's clock in the
+## run, so a stall can be told from a jerk.
 ## Numbers (the drawn path against the true one, shifted by the best-fit delay):
 ##   snaps      frames where the drawn body jumps more than SNAP_STEP; only the one teleport may
 ##   jerks      frames where the drawn speed changes by more than JERK_DV while the true one doesn't
 ##   backsteps  frames where the drawn body steps back against the way the true one moves
 ##   overshoot  frames where the drawn body is more than OFF_PATH from anywhere on the true path
+##   max step   the drawn body's biggest step in one frame (the fall: under NET_CAP, no jump)
 ## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>; the guest prints RSMOOTH guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
@@ -23,40 +31,36 @@ const SNAP_STEP := 0.75       # m in one frame (45 m/s): faster than any run, da
 const JERK_DV := 1.5          # m/s change of the drawn speed in one frame that the true path doesn't make
 const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
+const NET_CAP := 4.0          # m in one frame: Ent.net_follow's snap distance, NetSmooth's SNAP_SPEED x 0.1 s
+const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Kitefall landing, inside the flat strip
 const DN := preload("res://tools/displace_net_check.gd")
 
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
 	var rng := RandomNumberGenerator.new()
-	var held: Array = []          # [due msec, peer id, message, fast, seq]
-	var seq := 0
-	var last_fast := {}           # peer id -> seq of the newest snapshot it got
-	var last_due := {}            # peer id -> due msec of its last reliable message (they stay in order)
+	var held: Array = []          # [due msec, peer id, message, fast]
+	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
 	var lost := 0
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
-		seq += 1
 		if fast and rng.randf() < LOSS:
 			lost += 1
 			return
 		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
-		if not fast:
-			due = maxi(due, int(last_due.get(id, 0)))
-			last_due[id] = due
-		held.append([due, id, d, fast, seq])
+		due = maxi(due, int(last_due.get(id, 0)))
+		last_due[id] = due
+		held.append([due, id, d, fast])
 
 	func _process(dt: float) -> void:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
-		held.sort_custom(func(a, b): return a[0] < b[0])
-		while not held.is_empty() and int(held[0][0]) <= now:
-			var x: Array = held.pop_front()
-			if x[3]:
-				if int(x[4]) < int(last_fast.get(x[1], 0)):
-					lost += 1
-					continue
-				last_fast[x[1]] = x[4]
-			super._send(x[1], x[2], x[3])
+		var later: Array = []
+		for x in held:              # in send order: each peer's due times never go down
+			if int(x[0]) <= now:
+				super._send(x[1], x[2], x[3])
+			else:
+				later.append(x)
+		held = later
 
 var main: Node
 var bad := 0
@@ -64,7 +68,11 @@ var dn                         # the --displace-net-check helper that builds the
 var m: Match = null
 var stop := false
 var dumped := false
-var rec: Array = []            # guest: [wall s, x, y, z] of the host's Hunter each frame
+var rec: Array = []            # guest: [wall s, x, y, z] of the host's Hunter each step
+var acc := 0.0                 # s of wall clock the match is owed (Match._process's accumulator)
+var last_us := 0               # usec of the last frame _tick counted
+var stalls: Array = []         # [wall s, s]: frames over the 0.1 s clamp, the match clock lost that much
+var guest_stalls: Array = []   # the guest's, written with its record
 var guest_pid := 0
 var dir := ""
 
@@ -93,13 +101,14 @@ func run(main_node: Node) -> void:
 # ------------------------------------------------------------------ the host
 func _host() -> void:
 	dn.port = 7990 + OS.get_process_id() % 40
+	RenderingServer.render_loop_enabled = false
 	var relay := LagRelay.new()
 	relay.rng.seed = 80
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	ok(await dn._connect(), "the host is on the relay")
-	var cmd := "cd '%s' && %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
+	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
 		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
@@ -132,7 +141,12 @@ func _host() -> void:
 		await _host_run(0.1, "", [])
 	ok(dumped, "the guest wrote its record")
 	if dumped:
-		_report(truth, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json"))), relay.lost)
+		var got = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json")))
+		if typeof(got) == TYPE_DICTIONARY:
+			guest_stalls = got["stalls"]
+			_report(truth, got["drawn"], relay.lost)
+		else:
+			ok(false, "the guest's record reads")
 	_finish()
 
 ## The run the host's Hunter makes, recorded as [wall s, x, y, z, phase].
@@ -166,18 +180,50 @@ func _script(truth: Array) -> void:
 	await _host_run(1.0, "glide", truth)
 	m.displace.knock(P, Vector2(0, -9.0) * P.mass())      # 9 m/s: a solid hit, lifts it off its feet
 	await _host_run(1.2, "knock", truth)
+	await _kitefall(truth)
+
+## Sparkle's Kitefall: crouch, rise, hang, then the scripted fall the snapshot reports a velocity for.
+## "move" (the reset to the strip's start and its settle) is left out of the numbers.
+func _kitefall(truth: Array) -> void:
+	var P := m.player
+	P.reclass("light", "mage")
+	P.teleport(dn.home + Vector3(-5.0, 0, 0))
+	await _host_run(0.8, "move", truth)
+	var U: MageUlt = (P.ak as MageKit).ult
+	P.inp["aim"] = P.pos + KITE_OFF
+	ok(U.cast(), "Kitefall goes off on the host")
+	await _host_run(0.9, "fall", truth)
+	ok(U.phase() == MageUlt.AIR, "Kitefall hangs", U.phase())
+	U.recast()
+	await _host_run(1.0, "fall", truth)
 
 func _host_run(secs: float, phase: String, truth: Array) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
+		var w: float = await _tick()
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
 		t += DT
 		if phase != "":
 			var p := m.player.pos
-			truth.append([Time.get_unix_time_from_system(), p.x, p.y, p.z, phase])
+			truth.append([w, p.x, p.y, p.z, phase])
+
+## Waits until the wall clock owes the match a step, as Match._process's accumulator counts it (frames
+## clamped to 0.1 s), takes it and returns the wall time (s) that step stands for.
+func _tick() -> float:
+	if last_us == 0:
+		last_us = Time.get_ticks_usec()
+	while acc < DT:
 		await main.get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		var frame := (now - last_us) / 1e6
+		acc += minf(frame, 0.1)
+		if frame > 0.1:
+			stalls.append([Time.get_unix_time_from_system(), frame - 0.1])
+		last_us = now
+	acc -= DT
+	return Time.get_unix_time_from_system() - acc
 
 func _finish() -> void:
 	Net.lobby_emit("rs", {"c": "done"})
@@ -198,14 +244,21 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		return
 	var w0: float = truth[0][0]
 	var w1: float = truth[-1][0]
-	var lag := _best_lag(truth, drawn, w0, w1)
+	var move_w := w1                 # wall time of the reset before Kitefall, and of its cast
+	var fall_w := w1
+	for x in truth:
+		if x[4] == "move": move_w = minf(move_w, x[0])
+		if x[4] == "fall": fall_w = minf(fall_w, x[0])
+	var lag := _best_lag(truth, drawn, w0, move_w - 0.3)
 	var tele_w := 0.0                # wall time of the lift on the true path
 	for i in range(1, truth.size()):
-		if _p(truth[i]).distance_to(_p(truth[i - 1])) > LIFT * 0.8: tele_w = truth[i][0]
+		var lift: bool = truth[i][4] == "glide" and _p(truth[i]).distance_to(_p(truth[i - 1])) > LIFT * 0.8
+		if lift: tele_w = truth[i][0]
 	var tot := {}
-	var phases := ["idle", "run", "dash", "glide", "knock", "all"]
+	var phases := ["idle", "run", "dash", "glide", "knock", "all", "fall"]
 	for ph in phases:
-		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0}
+		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0,
+			"max_step": 0.0}
 	var j := 0
 	for i in range(2, drawn.size()):
 		var w: float = float(drawn[i][0]) - lag
@@ -213,15 +266,18 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			continue
 		while j < truth.size() - 2 and truth[j + 1][0] < w: j += 1
 		var ph: String = truth[j][4]
+		if w > move_w - 0.3 and w < fall_w:
+			continue
 		var q := _p(drawn[i])
 		var step := q - _p(drawn[i - 1])
 		var dv := (step - (_p(drawn[i - 1]) - _p(drawn[i - 2]))).length() / DT
 		var near_tele := absf(w - tele_w) < 0.35
 		var tv := _true_vel(truth, j)
 		var off := _off_path(truth, j, q)
-		for k in [ph, "all"]:
+		for k in ([ph] if ph == "fall" else [ph, "all"]):
 			var r: Dictionary = tot[k]
 			r["n"] += 1
+			r["max_step"] = maxf(r["max_step"], step.length())
 			r["err"] += q.distance_to(_true_at(truth, j, w))
 			if step.length() > SNAP_STEP: r["snaps"] += 1
 			if step.length() > LIFT * 0.8: r["big"] += 1
@@ -230,14 +286,16 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			if tv.length() > 1.0 and step.dot(tv.normalized()) < -0.01: r["backsteps"] += 1
 			if off > OFF_PATH: r["overshoot"] += 1
 			r["max_off"] = maxf(r["max_off"], off)
-	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost or overtaken); drawn %.0f ms behind" % [
+	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
 		ONE_WAY_MS, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
+	print("RSMOOTH load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
+		_stalled(stalls, w0, w1) * 1000.0, _stalled(guest_stalls, w0 + lag, w1 + lag) * 1000.0])
 	for ph in phases:
 		var r: Dictionary = tot[ph]
 		var head := "RSMOOTH %-5s frames %4d  snaps %2d  jerks %3d" % [ph, r["n"], r["snaps"], r["jerks"]]
 		var err: float = r["err"] / maxf(1.0, r["n"])
-		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m" % [
-			r["backsteps"], r["overshoot"], r["max_off"], err])
+		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m  max step %.2f m" % [
+			r["backsteps"], r["overshoot"], r["max_off"], err, r["max_step"]])
 	var a: Dictionary = tot["all"]
 	ok(a["n"] > 400, "the guest drew the whole run", "%d frames" % a["n"])
 	ok(a["big"] == 1 and a["snaps"] == 1, "the lift is one snap and nothing else snaps", "%d snaps" % a["snaps"])
@@ -245,6 +303,16 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	ok(a["backsteps"] == 0, "the drawn body never steps back", "%d backsteps" % a["backsteps"])
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
 	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
+	var f: Dictionary = tot["fall"]
+	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
+		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
+
+## Seconds of match clock the stalls between wall times a and b cost.
+static func _stalled(list: Array, a: float, b: float) -> float:
+	var s := 0.0
+	for x in list:
+		if float(x[0]) >= a and float(x[0]) <= b: s += float(x[1])
+	return s
 
 ## The delay (s) that best lines the drawn path up with the true one.
 func _best_lag(truth: Array, drawn: Array, w0: float, w1: float) -> float:
@@ -306,13 +374,13 @@ func _guest() -> void:
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+		var w: float = await _tick()
 		for mb in m.mobs: mb.queue_free()       # (as on the host: nothing shoves the bodies)
 		m.mobs.clear()
 		m.step(DT)
 		var H: Ent = m.ents_by_id.get("P" + Net.host, null)
 		if H:
-			rec.append([Time.get_unix_time_from_system(), H.pos.x, H.pos.y, H.pos.z])
-		await main.get_tree().process_frame
+			rec.append([w, H.pos.x, H.pos.y, H.pos.z])
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -329,7 +397,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			m = dn.m
 		"dump":
 			var f := FileAccess.open(dir.path_join("drawn.json"), FileAccess.WRITE)
-			f.store_string(JSON.stringify(rec, "", true, true))
+			f.store_string(JSON.stringify({"drawn": rec, "stalls": stalls}, "", true, true))
 			f.close()
 			Net.lobby_emit("rs_r", {"n": rec.size()})
 		"done": stop = true

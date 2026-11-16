@@ -19,7 +19,7 @@ static func rules() -> Dictionary:
 
 ## Seconds `rec` takes over leg `leg` with no wobble.
 static func leg_time(rec: Dictionary, leg: int) -> float:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.course(GardenZones.here)
 	var out := 0.0
 	for s in rules()["legs"][leg]:
 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
@@ -80,7 +80,7 @@ class Run:
 		teams = [mine, theirs]
 		rng = r
 		var at := 0.0
-		for s in BaseRace.rules()["stretches"]:
+		for s in BaseRace.course(GardenZones.here):
 			at += float(s["len"])
 			ends.append(at)
 		for team in 2:
@@ -176,6 +176,8 @@ static func settle(run: Run, anchor: Dictionary) -> Dictionary:
 		else:
 			Care.change(rec, "joy", float(RR["lose_joy"]))
 			Save.remember(rec, "relay", "lost the Relay Cup to the %s" % R["rival_team"])
+	if won:
+		BaseRival.won_together(mine)
 	for i in run.grades.size():
 		if run.grades[i] == "great" or BaseDuo.friends(mine[i], mine[i + 1]):
 			BaseRace.nudge_bond(mine[i], mine[i + 1], float(R["close_step"]))
@@ -345,7 +347,7 @@ func _nodes(ents: Array) -> Array:
 	return ents.map(func(e): return e["node"])
 
 func _place_runners() -> void:
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.course(GardenZones.here)
 	var lane := float(BaseRace.rules()["lane"])
 	for team in 2:
 		var side := lane * (team - 0.5)
@@ -365,11 +367,12 @@ func _place_runners() -> void:
 			var p := race.track_at(s, f, side + out)
 			var n: Node3D = ents[i]["node"]
 			n.position = p
-			n.rotation.y = race.heading(s)
+			n.rotation.y = race.heading(s, f)
 			ents[i]["pos"] = p
 
 func _end(finished: bool) -> void:
 	var res := {}
+	var before := GameResultCard.snap(run.teams[0])
 	if finished:
 		res = settle(run, anchor)
 	beats.clear(_nodes(mine) + _nodes(visitors))
@@ -380,7 +383,7 @@ func _end(finished: bool) -> void:
 		v["node"].queue_free()
 	bar.close()
 	if finished:
-		_card(res)
+		_card(res, before)
 		var k: Dictionary = h._kin_entry(anchor)
 		var pair: Array = [k, visitors[-1]] if res["won"] else [visitors[-1], k]
 		GardenSfx.fanfare(h, pair[0], pair[1])
@@ -391,16 +394,15 @@ func _end(finished: bool) -> void:
 	mine = []
 	visitors = []
 
-func _card(res: Dictionary) -> void:
-	var st: Array = BaseRace.rules()["stretches"]
-	var legs: Array = []
-	for i in run.legs.size():
-		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])
+func _card(res: Dictionary, before: Array) -> void:
+	if is_instance_valid(race.card):
+		race.card.queue_free()
 	var hand := ""
 	for i in run.grades.size():
 		hand += "%s %.1f s  " % [{"great": "★", "good": "●", "miss": "✕"}[run.grades[i]], run.lost[0][i]]
-	var title := "Your team wins the Relay Cup!" if res["won"] else "The %s win the Relay Cup" % rules()["rival_team"]
-	race.show_card(title, [
-		[", ".join(legs), UI.INK],
-		["Hand-offs: %s(%.1f s apart at the line)" % [hand, res["gap"]], UI.MUTED],
-		["+%d gems" % res["gems"], UI.GOLD]] + GardenPrizes.rows(res["prize"]))
+	var winner := "Your team wins" if res["won"] else "The %s win" % rules()["rival_team"]
+	race.card = GameResultCard.open(h, {"game": "Relay Cup", "before": before,
+			"place": "%s by %.1f s" % [winner, res["gap"]],
+			"prize": [["Hand-offs: %s" % hand.strip_edges(), UI.MUTED],
+				["+%d gems" % res["gems"], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
+	race.card_t = float(BaseRace.rules()["card_s"])
