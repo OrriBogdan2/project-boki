@@ -8,7 +8,7 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const SETTLE_S := 1.2      # s: the layer eases in (WardenCarry.FADE) and the run gets going
-const STRIDE_MIN := 0.05   # m at model scale 1 (times the drawn scale, as HAND_NEAR): under this his own run does not step (Motley hovers); else keep 3/4 of it
+const STRIDE_MIN := 0.05   # m at scale 1 (times drawn scale, as HAND_NEAR): under this his run does not step
 const HAND_NEAR := 0.3     # of the Hunter's height: the held hand lies this near the mote
 const FIRE_S := 0.8        # s: LMB held, and the same again after the release (a bow looses on the release)
 const SPARK_LAG := 0.3     # m: the spark follows the hand a frame late, at a run

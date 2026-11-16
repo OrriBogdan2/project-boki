@@ -55,7 +55,6 @@ const NAMES := [
 	"combo",
 	"swap",
 	"horn",
-	"rail",
 	"train_hit",
 	"revive_hum",
 	"revive_done",
