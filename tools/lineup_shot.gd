@@ -9,15 +9,17 @@ extends RefCounted
 
 const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage",
 	"dredge", "tender", "thief", "ostra", "gil"]
-const GAP := 2.0              # m between Hunters (centre to centre)
 const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
-const SHOT_W := 2560
-const SHOT_H := 720
 const PROP_WORDS := ["weapon", "prop", "sword", "hammer", "bow", "staff", "gun", "pistol", "shield", "axe", "blade",
 	"orb", "wand", "torch", "lance", "scythe", "dagger", "knife", "cannon", "tool", "lantern", "book", "trowel"]
 
+var order: Array = ORDER
+var shot_w := 2560
+var shot_h := 720
+var gap := 2.0              # m between Hunters (centre to centre)
+var yaw := 0.0              # degrees the Hunters turn from facing the camera (3/4 view)
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
@@ -29,20 +31,24 @@ func run(main: Node) -> void:
 	var list_meshes := OS.get_cmdline_user_args().has("--list-meshes")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--order="): order = Array(a.substr(8).split(","))
+		if a.begins_with("--gap="): gap = float(a.substr(6))
+		if a.begins_with("--yaw="): yaw = float(a.substr(6))
+		if a.begins_with("--shot-size="): shot_w = int(a.substr(12).split("x")[0]); shot_h = int(a.substr(12).split("x")[1])
 	if out == "":
 		out = "user://lineup"
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	main.get_window().size = Vector2i(SHOT_W, SHOT_H)
-	main.get_viewport().size = Vector2i(SHOT_W, SHOT_H)
+	main.get_window().size = Vector2i(shot_w, shot_h)
+	main.get_viewport().size = Vector2i(shot_w, shot_h)
 	_stage(main)
-	for i in ORDER.size():
-		var id: String = ORDER[i]
+	for i in order.size():
+		var id: String = order[i]
 		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		h.set_meta("anim_seed", 1)
-		h.rotation.y = PI                    # (the export faces -Z: PI turns each to face the camera)
-		h.position = Vector3((i - (ORDER.size() - 1) * 0.5) * GAP, 0, 0)
+		h.rotation.y = PI + deg_to_rad(yaw)                    # (the export faces -Z: PI turns each to face the camera)
+		h.position = Vector3((i - (order.size() - 1) * 0.5) * gap, 0, 0)
 		holder.add_child(h)
 		var ring := h.get_node_or_null("TeamRing") as Node3D
 		if ring:
@@ -65,16 +71,16 @@ func run(main: Node) -> void:
 	print("LINEUP_TABLE id | all_top_m | body_top_m | head_anchor_m | width_m | scale_y | meshes")
 	for i in heroes.size():
 		var h := heroes[i] as Node3D
-		var all := _skinned_top(h, false, list_meshes, ORDER[i])
+		var all := _skinned_top(h, false, list_meshes, order[i])
 		var body := _skinned_top(h, true, false, "")
 		var anchor := WardenGlb.anchor(h, "anchor_head_top")
 		var head := "%.2f" % (anchor.global_position.y - h.global_position.y) if anchor else "-"
-		print("LINEUP_ROW %s | %.2f | %.2f | %s | %.2f | %.3f | %d" % [ORDER[i], all.y, body.y, head, all.x,
+		print("LINEUP_ROW %s | %.2f | %.2f | %s | %.2f | %.3f | %d" % [order[i], all.y, body.y, head, all.x,
 			h.scale.y, int(all.z)])
 	# 1. front: straight on, the whole row
-	var span := (ORDER.size() - 1) * GAP + 3.0
+	var span := (order.size() - 1) * gap + 6.0
 	cam.fov = 30.0
-	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * float(SHOT_W) / SHOT_H)
+	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * float(shot_w) / shot_h)
 	var dist := maxf(span * 0.5 / tan(half_h), 6.0)
 	cam.position = Vector3(0, 1.5, dist)
 	cam.rotation = Vector3(0.0, 0, 0)
@@ -91,7 +97,7 @@ func run(main: Node) -> void:
 	await _grab(out.path_join("lineup_match.png"))
 	print("LINEUP_SHOT ", out.path_join("lineup_match.png"))
 	# 3. the same angle, closer (the row filling the frame; the match camera itself keeps them small)
-	var near := (ORDER.size() * GAP * 0.5 + 1.0) / (tan(deg_to_rad(CAM_FOV * 0.5)) * float(SHOT_W) / SHOT_H)
+	var near := (order.size() * gap * 0.5 + 2.5) / (tan(deg_to_rad(CAM_FOV * 0.5)) * float(shot_w) / shot_h)
 	cam.position = mid + Vector3(0, sin(p), cos(p)) * near
 	await _play(syncs, 2, 0.0)
 	await _grab(out.path_join("lineup_match_close.png"))
@@ -158,7 +164,7 @@ func _grid() -> void:
 	rm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	rm.albedo_color = Color("ffffff")
 	rim.surface_begin(Mesh.PRIMITIVE_LINES, rm)
-	var x0 := -(ORDER.size() * GAP * 0.5) - 0.2
+	var x0 := -(order.size() * gap * 0.5) - 0.2
 	for z in [-1.2]:
 		for hgt in range(0, 4):
 			rim.surface_add_vertex(Vector3(x0, hgt, z))
