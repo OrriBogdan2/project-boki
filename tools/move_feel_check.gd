@@ -56,6 +56,13 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	# Grimble's Barge chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
+	# that arrives with almost no skid and turns back to the aim within ~0.1 s (briefs/hero-ref/dredge.md 296-306)
+	"barge_chain_shoves":      ["~", [3.0, 3.0], "", "[owner 11-03] three charges, a Shift tap inside each shove"],
+	"barge_chain_gap_t":       ["<=", 0.1, "s", "[footage] turned back to the aim within ~0.1 s of the dash"],
+	"barge_chain_dead_frames": ["<=", 0.0, "frames", "a press in a shove or the gap goes on the gap's last step"],
+	"barge_chain_turn90_t":    ["<=", 0.1, "s", "[footage] he turns back to the aim within ~0.1 s after a dash"],
+	"barge_lmb_after_frames":  ["<=", 1.0, "frames", "[footage] aiming by 493.6 s: an LMB in the last shove fires"],
 	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
@@ -227,6 +234,7 @@ func _clear_inp() -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
+## No monsters about: the Blight spawns them as match time passes, and a long run reaches it.
 func _clear_mobs() -> void:
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
@@ -243,6 +251,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
+	_clear_mobs()
 	if "lfloat" in P: P.set("lfloat", {})
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
@@ -301,6 +310,7 @@ func run(main: Node) -> void:
 	_dash_curves()
 	_plain_dash()
 	_kit_dashes()
+	_barge_chain()
 	_flue_flight()
 	_abyss_updraft()
 	_feather()
@@ -1086,12 +1096,72 @@ func _kit_dashes() -> void:
 		ok(not src or off, "felt dash %s: a sourced dash is off the dash feel" % id)
 	P.reclass(was[0], was[1])
 
+## Grimble's Barge run through the real step: one Shift tap in the middle of each shove, the cursor ahead. Reads
+## the shoves made, the still steps between them (and how many of those the gap doesn't explain), the turn to a
+## cursor swung 90 degrees as the first shove ends, and the steps from the last shove's end to the shot of an LMB
+## tapped inside it.
+func _barge_chain() -> void:
+	var was := [P.cls, P.arch]
+	P.reclass(Arch.weight("dredge"), "dredge")
+	_steps(30)
+	_reset(flat + Vector3(-4.0, 0, 0))
+	_clear_inp()
+	P.fire_cd = 0.0
+	var aim0: Vector3 = P.inp["aim"]
+	var gap := float(P.ak.dash_def()["gap"])
+	var shove := float(P.ak.dash_def()["time"]) * float(P.ak.dash_feel()["time"])
+	P.inp["aim"] = P.pos + Vector3(6, 0.9, 0)
+	P.inp["dash"] = true
+	var shoves := 0
+	var at := -9.0
+	var run_n := 0             # steps into the shove under way
+	var still := []            # still steps before each shove after the first
+	var idle := 0
+	var turn_t := -1.0
+	var turn_from := -1
+	var lmb_end := -1
+	var lmb_t := -1.0
+	for i in 90:
+		m.step(DT)
+		P.inp["dash"] = false
+		P.inp["fire"] = false
+		if P.roll_t > 0.0 and P.dash_at != at:
+			at = P.dash_at
+			shoves += 1
+			run_n = 0
+			if shoves > 1: still.append(idle)
+		if P.roll_t > 0.0:
+			run_n += 1
+			idle = 0
+			if run_n == 5:
+				P.inp["dash"] = shoves < 3
+				P.inp["fire"] = shoves == 3
+			continue
+		idle += 1
+		if shoves == 1 and idle == 1:
+			P.inp["aim"] = P.pos + Vector3(0, 0.9, 6)      # swung 90 degrees as the first shove ends
+			turn_from = i
+		if turn_t < 0.0 and turn_from >= 0 and absf(wrapf(P.face - PI, -PI, PI)) < deg_to_rad(5.0):
+			turn_t = (i - turn_from) * DT
+		if shoves == 3 and lmb_end < 0: lmb_end = i
+		if lmb_end >= 0 and lmb_t < 0.0 and P.fire_cd > 0.0: lmb_t = i - lmb_end
+	# the steps the shove's last part-step and the gap leave him still; any more is a dead frame
+	var gap_steps := ceili((shove + gap) / DT - 1e-4) - (ceili(shove / DT - 1e-4) - 1)
+	rec("barge_chain_shoves", shoves)
+	rec("barge_chain_gap_t", gap)
+	rec("barge_chain_dead_frames", (still.max() if still.size() > 0 else 99) - gap_steps)
+	rec("barge_chain_turn90_t", turn_t if turn_t >= 0.0 else 9.0)
+	rec("barge_lmb_after_frames", lmb_t if lmb_t >= 0.0 else 99.0)
+	print("MFEEL barge chain: still steps between shoves %s, the gap's %d" % [str(still), gap_steps])
+	P.inp["aim"] = aim0
+	P.reclass(was[0], was[1])
+
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-## `hold` keeps the dash key down to the end.
-func _felt_dash(air: bool, hold := false) -> Array:
-	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
+## `hold` keeps the dash key down to the end; `long` runs out of charges first (the class's long dash).
+func _felt_dash(air: bool, hold := false, long := false) -> Array:
+	_steps(30)          # past any chain gap from the dash before (Grimble's Barge would hold a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
