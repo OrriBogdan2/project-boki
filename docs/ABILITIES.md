@@ -218,12 +218,12 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
-### Cairnback (Tortoise + Ibex, mount)
+### Cairnhorn (Tortoise + Ibex, mount)
 
-- **E: Boulder Heave** (projectile, 9s): Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- **E: Boulder Heave** (projectile, 9s): Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **Merge: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- **Merge: Cairn Colossus** (8s): Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 
 ### Vespyx (Fox + Scorpion, shoulder)
 
