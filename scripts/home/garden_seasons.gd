@@ -1,8 +1,8 @@
 class_name GardenSeasons
 extends RefCounted
 ## Garden seasons (content/rules/garden_seasons.json, GARDEN_MODERN.md 5 rank 9). Every couple of weeks one zone
-## is in season, on the weekly-event clock (BaseRace.week_now). Its game plays the season twist and that game's Crown
-## adds the season keepsake. Lazy state: rec.keepsakes
+## is in season, on the weekly-event clock (BaseRace.week_now). Its game plays the season twist, the snack patch
+## grows the season snack, and that game's Crown adds the season keepsake. Lazy state: rec.keepsakes
 ## ({keepsake id: season number it was won in}), no migration.
 
 static func rules() -> Dictionary:
@@ -27,6 +27,10 @@ static func twist(game: String, week := -1) -> Dictionary:
 		if t["id"] == s["twist"]:
 			return t
 	return {}
+
+## The extra snack the patch grows right now (unix seconds).
+static func snack(now: float) -> String:
+	return String(season(BaseRace.week_now(now))["snack"])
 
 ## A Crown in `game`: in that game's season, the winner gets the season keepsake once. Returns its name or "".
 static func keepsake(game: String, mine: Dictionary, now: float) -> String:

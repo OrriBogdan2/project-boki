@@ -97,6 +97,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	Prof.begin("hud_tick")
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
@@ -111,6 +112,7 @@ func _process(delta: float) -> void:
 	_clear_under_toasts(delta)
 	c.queue_redraw()
 	cursor.queue_redraw()
+	Prof.end()
 
 var hit_armor := false
 var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
@@ -242,6 +244,11 @@ var hover_t := 0.0
 var hover := HudHover.new(self)      # the hover tips (HUD slots and things in the world)
 
 func _draw_all() -> void:
+	Prof.begin("hud_draw")
+	_draw_parts()
+	Prof.end()
+
+func _draw_parts() -> void:
 	var sz := c.size
 	var p := m.player
 	if m.tut and m.tut.intro:
@@ -698,14 +705,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.exits:
 		for x in m.exits.list:
 			var pv: Vector2 = to_map.call(x["pos"])
-			var busy: bool = String(x["state"]) in ["charging", "open"]
-			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
-				continue
-			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
-				if busy: edge_mini.add(pv - inner.get_center(), Exits.color_of(x), EdgeMarker.PRIO_GOAL)
-				continue
-			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
+			var shown := MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x))
+			ExitMark.minimap(self, inner, x, pv, bool(on_map.call(pv, 4.0)), shown)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
@@ -904,21 +905,6 @@ func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.P
 	else:
 		edge_world.add(d, col, prio, label, dist)
 
-## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
-## when not; a pulsing ring while it's going.
-func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
-	var col: Color = Exits.color_of(x)
-	var usable: bool = m.exits.live(x)
-	var st := String(x["state"])
-	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var held := OutpostLook.held(x)
-	var flag: Color = SideColor.of_team(SideColor.viewer(m), int(x["team"])) if held else Color(0.55, 0.58, 0.64, 0.9)
-	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x), held and int(x["team"]) != SideColor.viewer(m))
-	if st == "charging":
-		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["charging", "open"]:
-		var ph := fmod(m.time * 1.2, 1.0)
-		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
 ## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
 ## anywhere on the map.
