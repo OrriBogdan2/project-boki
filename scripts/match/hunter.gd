@@ -1803,6 +1803,7 @@ func sim(dt: float) -> void:
 				pos = rocket.pos
 			else:
 				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
+			gate_ranks()      # a press on a locked ability still spends a point
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
@@ -1884,8 +1885,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in SLOT_GATES:
-		_gate(gk[0], gk[1], gk[2])
+	gate_ranks()
 	BaseRecall.tick(self, dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2829,6 +2829,11 @@ func unlock_all() -> void:
 	for s in SLOTS:
 		slot_lv[s] = maxi(int(slot_lv[s]), 1)
 	skill_pts = 0
+
+## Every ability key pressed this step: a locked one takes a point if you have one (_gate).
+func gate_ranks() -> void:
+	for gk in SLOT_GATES:
+		_gate(gk[0], gk[1], gk[2])
 
 ## Pressing a locked ability: spend a point on it if you have one, otherwise say it's locked.
 func _gate(key: String, slot: String, fb: String) -> void:
