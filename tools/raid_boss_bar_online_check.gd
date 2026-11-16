@@ -113,10 +113,11 @@ func _host() -> void:
 		b.hp = b.max_hp * f
 		await _run(1.5)
 		r = await _bar()
+		var host_f := b.hp / b.max_hp  # the host's boss can take a hit in the 1.5 s (bots, the hold ring)
 		ok(
-			bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - f) < HP_TOL,
+			bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - host_f) < HP_TOL,
 			"guest: the bar's health is %d%% like the host's" % int(f * 100.0),
-			"%s / %s" % [r.get("hp"), r.get("max")]
+			"%s / %s, host %.3f" % [r.get("hp"), r.get("max"), host_f]
 		)
 		ok(
 			int(r.get("phase", -1)) == b.phase,
