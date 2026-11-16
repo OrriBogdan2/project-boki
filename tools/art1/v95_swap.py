@@ -216,7 +216,8 @@ def bake_own(high, game):
     if hd:
         x, y, z = hd["centre"]
         hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
-    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True,
+                       float(SPEC.get("hold_edges", 0)))
     low.data.uv_layers[0].name = "UVMap"
     own_images(low, int(SPEC.get("tex", 4096)))
     arm, old = import_game(game)

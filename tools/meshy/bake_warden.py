@@ -85,12 +85,14 @@ def tris(ob):
     return sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
 
-def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False):
+def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False, hold_edges=0.0):
     """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits
     (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it).
     With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
     then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
-    and the monocle and the strands over the face come out jagged)."""
+    and the monocle and the strands over the face come out jagged).
+    `hold_edges` (> 0, the decimate's vertex_group_factor): the welded mesh's open edges (a graft seam, a hair strand's rim,
+    a rod tip) are held, the collapse otherwise eats them into ragged teeth (Sparkle's collar and pigtail ends, 11-16)."""
     me = high.data.copy()
     low = bpy.data.objects.new("Low", me)
     bpy.context.scene.collection.objects.link(low)
@@ -98,6 +100,8 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
     bm.from_mesh(me)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     _drop_small_parts(bm, floater_verts)
+    bm.verts.index_update()
+    rim = np.array([any(e.is_boundary for e in v.link_edges) for v in bm.verts], bool) if hold_edges else None
     bm.to_mesh(me)
     bm.free()
     while me.uv_layers and not keep_uv:
@@ -107,31 +111,41 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
+    if rim is not None:
+        log("hold_edges: %d rim verts of %d" % (int(rim.sum()), len(rim)))
     if not head or head_tris <= 0:
-        _decimate(low, n_tris / max(tris(low), 1), None)
+        if rim is not None:
+            g = low.vertex_groups.new(name="body")
+            g.add([int(i) for i in np.nonzero(~rim)[0]], 1.0, "REPLACE")
+        _decimate(low, n_tris / max(tris(low), 1), "body" if rim is not None else None, hold_edges)
+        low.vertex_groups.clear()
     else:
         c, r = Vector(head["centre"]), float(head["r"])
         co = np.array([v.co[:] for v in me.vertices])
         inside = np.clip((r * 1.03 - np.linalg.norm(co - np.array(c), axis=1)) / (r * 0.06), 0.0, 1.0)
         for name, w in (("body", 1.0 - inside), ("head", inside)):
+            if rim is not None:
+                w = np.where(rim, 0.0, w)
             g = low.vertex_groups.new(name=name)
             for i in np.nonzero(w > 0.0)[0]:
                 g.add([int(i)], float(w[i]), "REPLACE")
         n_head = sum(1 for p in me.polygons if (p.center - c).length < r)
         # (a held region doesn't count: the ratio is of the whole mesh)
-        _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
-        _decimate(low, n_tris / tris(low), "head")
+        _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body", hold_edges)
+        _decimate(low, n_tris / tris(low), "head", hold_edges)
         low.vertex_groups.clear()
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
 
 
-def _decimate(ob, ratio, group):
+def _decimate(ob, ratio, group, factor=0.0):
     m = ob.modifiers.new("dec", "DECIMATE")
     m.ratio = min(1.0, ratio)
     m.use_collapse_triangulate = True
     if group:
         m.vertex_group = group
+        if factor:
+            m.vertex_group_factor = factor
     bpy.ops.object.modifier_apply(modifier=m.name)
 
 
