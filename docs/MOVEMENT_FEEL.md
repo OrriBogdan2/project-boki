@@ -646,7 +646,7 @@ camera and the garden camera sit at yaw 0, looking north). There is no deadzone 
 The glide steers toward `move x glide speed`, the class dash takes `move.normalized()` (`ArchKit.dash_dir`),
 so every consumer of the keys sees the same unit vector.
 
-Measured on the match camera (style supervive, pitch 66, cursor pan off so the hunter is on the screen's
+Measured on the match camera (style default, pitch 66, cursor pan off so the hunter is on the screen's
 centre line), medium class, through the real keyboard path (`Match._process`), 2026-11-11, origin/main
 d255acbee. Nothing needed fixing: there was no skew and no speed bonus before this pass; the rows pin it.
 
