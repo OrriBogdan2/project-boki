@@ -123,9 +123,13 @@ func _case_guardian_killed() -> void:
 	_both_down("active")
 	_run(0.5)
 	ok(not bot.out, "3. the guardian is still pulling")
-	bot.kin.go_down()
+	ok(bot.kin.hittable(), "3. the guardian on its pull can be hit")
+	var n := 0
+	while bot.kin.state == KinWispForm.STATE and n < 400:
+		bot.kin.hurt(bot.kin.max_hp * 0.3, foe, {"src": "shot"})
+		n += 1
 	_run(DT)
-	ok(bot.out and P.out, "3. the guardian is killed: the team is wiped at once")
+	ok(bot.out and P.out, "3. an enemy knocks the guardian out: the team is wiped at once (%d hits)" % n)
 
 func _case_late_summon() -> void:
 	_reset()

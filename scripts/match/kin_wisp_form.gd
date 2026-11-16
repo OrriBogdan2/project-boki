@@ -7,7 +7,8 @@ extends RefCounted
 ##     from farther than ZIP_RANGE, or a Boki the way is blocked for, it blinks
 ##     straight there (a puff where it was)
 ##   - it circles the Hunter Wisp as a small Boki wisp (BokiWispLook: critter outline, round = Hunter): it
-##     does not attack, cast or take orders, and nothing can hit or target it (Kin.hittable)
+##     does not attack, cast or take orders; a guardian can be hit, and knocking it out stops the pull
+##     (Kin.hittable)
 ##   - after a short wait (loyal, trusting Boki sooner) it pulls its Hunter up over Life.R kin_revive_time,
 ##     and the bleed-out pauses while it does; an enemy on the Wisp (the stomp) stops the pull
 ##   - revived: it pops back onto the shoulder with its old order. Bled out or finished: the Hunter's death
@@ -17,7 +18,7 @@ extends RefCounted
 
 const STATE := "wisp"
 const JOINS := ["active", "flying", "flying_home", "returning"]   # summoned states: it leaves them to ride as a wisp
-const GUARD_CAP := 10.0      # s: the longest a team stays in on a Boki's pull once its last standing member is down
+const GUARD_CAP := 11.0      # s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull once its last standing member is down
 const ZIP_S := 0.3           # s: the flight back to its Hunter
 const ZIP_RANGE := 14.0      # m: farther (or out of walking reach), it blinks there instead
 const ORBIT_R := 0.75        # m from the Hunter Wisp's centre

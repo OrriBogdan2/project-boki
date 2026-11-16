@@ -1886,8 +1886,8 @@ func _check_team(team: int) -> void:
 	for x in members:
 		if not x.downed or KinWispForm.guarding(self, x):
 			return
-		if x.remote and x.kin and not x.kin.dead and x.kin.state != "downed" and x.kin.hp > 0.0:
-			return           # (its owner's game decides: we only see its Boki's state)
+		if x.remote and x.kin and not x.kin.dead and x.kin.state == KinWispForm.STATE and x.kin.hp > 0.0:
+			return           # a guardian riding its Wisp (its owner's game decides: we only see the Boki's state)
 	for x in members:
 		if not x.remote:
 			eliminate(x, x.last_hit_by, "team wiped")
