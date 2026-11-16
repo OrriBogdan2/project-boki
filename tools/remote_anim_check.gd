@@ -2,15 +2,14 @@ extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop,
-## the same HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move.
-## Both games log every change of the move (the kit's id and HunterAnim's), compared per cast.
-## Vex's tapped RMB also compares the ground cone her Burr Charge shows
-## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
-## draw it as long as the host's.
-## Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
-## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
-## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
+## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop, the same
+## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log every change of the
+## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
+## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
+## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## Then the lair bosses (Net 0.24.6's "bat" event): the
+## host wakes a Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a
+## Boss fed by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
