@@ -84,8 +84,6 @@ func _worn_sums() -> void:
 		p.add_perk(pid)
 		ok(p.gear_stat(pk) != before, "a perk taken counts in the same step (%s: %s)" % [pid, pk])
 
-	var mb: Mob = null
-	for x in m.mobs:
 
 func _mob_naps() -> void:
 	var mb: Mob = null
