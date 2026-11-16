@@ -443,6 +443,13 @@ func _summary(part: String, fl: Array) -> void:
 	var slow := w.filter(func(x): return x > SLOW_MS).size()
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
 		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
+	# (where the slow frames fall: a warm-up tail, a first fight's new effects, or spread over the run)
+	var at: Array = []
+	for i in fl.size():
+		if float(fl[i]["wall"]) > SLOW_MS and at.size() < 60:
+			at.append("%.1f" % (i * DT))
+	print("BENCH %s frames: p50 %.1f ms, p95 %.1f ms, p99 %.1f ms; over %.0f ms at s: %s" % [part,
+		float(w[int((w.size() - 1) * 0.5)]), float(w[int((w.size() - 1) * 0.95)]), p99, SLOW_MS, " ".join(at)])
 	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
 		"render cpu %.2f ms, gpu %.2f ms"
 	print(cpu_line % [
