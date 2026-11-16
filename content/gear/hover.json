@@ -12,5 +12,8 @@
  "desc": "A second jump in mid-air, and your glider is ready the moment you want it.",
  "launch": {
   "up_mps": 11.0
+ },
+ "sfx": {
+  "cast": "gl_hover"
  }
 }
