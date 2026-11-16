@@ -24,7 +24,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var boss := _boss()
-	var sp: String = String(Data.MOBS[boss]["egg"]) if boss != "" else String(Data.common_kin()[0])
+	var sp: String = Data.egg_pool()[0]      # a first form: a legendary boss egg rerolls (egg_rules_check)
 	# ---------------------------------------------------------------- 1. cradles and the shelf
 	Incubator.ensure()
 	ok(Incubator.slots() == 5 and Incubator.eggs().is_empty() and Incubator.shelf().is_empty(), "a fresh save has an Incubator with 5 empty cradles")
