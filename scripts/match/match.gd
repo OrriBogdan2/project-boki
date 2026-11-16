@@ -1282,7 +1282,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
-		sfx("skill", h.pos, -4.0, 1.0)
+		Gear.cast_sfx(self, gid, h.pos, "skill", -4.0, 1.0)
 		return
 	var lau: Dictionary = gd.get("launch", {})      # launch gloves: m/s, m (content/gear)
 	match gid:
@@ -1294,7 +1294,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.shot_down = false
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
 			fx.burst(h.pos + Vector3(0, 0.4, 0), col, 20, 5.0, 0.5, -2.0, 1.0)
-			sfx("glide", h.pos, 0.0, 1.5)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 1.5)
 		"platform":
 			var tiles: Array = []
 			var y := h.pos.y - 0.1
@@ -1318,7 +1318,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 				h.vel.y = 0.0
 			h.glide_fuel = 1.0
 			h.shot_down = false
-			sfx("shield", h.pos, 0.0, 0.8)
+			Gear.cast_sfx(self, gid, h.pos, "shield", 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
 		"rocket":
@@ -1331,7 +1331,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.5)
 			fx.burst(h.pos + Vector3(0, 0.2, 0), col, 26, 6.0, 0.5, -1.0, 1.2, Vector3.DOWN, 30.0)
-			sfx("glide", h.pos, 0.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 0.7)
 		"skyhook":
 			# hook a point toward the cursor and swing up to it: onto a ledge above you if there is
 			# one there, otherwise straight up into the air
@@ -1346,7 +1346,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.launch_to(to, 0.55)
 			h.glide_cd = 0.0
 			fx.bolt(h.pos + Vector3(0, 1.2, 0), to, Color(col, 0.9))
-			sfx("throw", h.pos, -2.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "throw", -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
 			h.vel.y = maxf(h.vel.y, float(lau["up_mps"]))
@@ -1355,7 +1355,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			fx.ring(h.pos, 1.2, col, 0.3)
 			fx.burst(h.pos, col, 14, 3.0, 0.4, 2.0, 1.0, Vector3.DOWN, 50.0)
-			sfx("jump", h.pos, -2.0, 1.3)
+			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
 	for gp in gpads.duplicate():
@@ -1774,14 +1774,14 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else HeroSfx.hit_tick(credit as Hunter, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
 		if ktip: ktip.note(by, d, o)
-		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
+		if src != "zone": sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)    # (the zone ticks instead: ZoneSfx)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
@@ -2953,7 +2953,6 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		if swing_hits.size() > 200:
 			swing_hits.clear()
 		fx.burst(at + Vector3(0, 0.3, 0), s["col"], 8, 3.5, 0.25, 4.0)
-		sfx("hit", at, -4.0, 0.8)
 	var crit := false
 	if e.stun_t > 0.0 and not x.get("mob", false):
 		dmg *= 1.5
@@ -2973,6 +2972,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -2983,8 +2983,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 			pellet_hits.clear()
 		var total: float = dmg * float(x["pn"])
 		dmg = total * float(x["pf"]) if n == 0 else total * (1.0 - float(x["pf"])) / maxf(1.0, float(x["pn"]) - 1.0)
+		if n + 1 == ceili(float(x["pn"]) * Feel.POINT_BLANK): o["heavy"] = true
 	var dir: Vector2 = (s["vel"] as Vector2).normalized()
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
 	if float(x.get("kb", 0.0)) > 0.0:
 		o["kb"] = dir * float(x["kb"])
 	if x.has("burn"): o["burn"] = x["burn"]
@@ -2996,7 +2996,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
-	for kk in ["burn_for", "slow_k", "dr"]:
+	for kk in ["burn_for", "slow_k", "dr", "heavy"]:
 		if x.has(kk): o[kk] = x[kk]
 	if x.has("ride_dmg") and by:
 		# a kin's damage rider on your shots procs at most once a second on each target
@@ -3122,6 +3122,7 @@ func render_shots(alpha: float) -> void:
 		Oomph.place_shot(s, alpha)
 
 func _process(delta: float) -> void:
+	Prof.frame()
 	if paused and not net_on:
 		return
 	HoldTeach.match_tick(self)      # tap-vs-hold teaching (glide, Hold F prompts)
@@ -3159,6 +3160,7 @@ func _process(delta: float) -> void:
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
+	Prof.begin("render_entities")
 	for e in hunters: e.render(delta, alpha)
 	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
@@ -3183,10 +3185,14 @@ func _process(delta: float) -> void:
 		else:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
+	Prof.end()
+	Prof.begin("vfx_render")
 	if verbs: verbs.render(alpha)
 	render_shots(alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
+	Prof.end()
+	Prof.begin("camera")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != cam_style:
@@ -3239,6 +3245,7 @@ func _process(delta: float) -> void:
 		cam.follow(foc, delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
+	Prof.end()
 	_vprof("camera")
 	_update_aim(alpha)
 	_vprof("aim")
@@ -3834,10 +3841,12 @@ func step(dt: float) -> void:
 		KinKeys.apply(player)
 	_prof("pre")
 	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0022)
+	Prof.begin("bots")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
 			bot_brain.tick(self, h, SimLod.step_dt(h, dt))
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
+	Prof.end()
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
@@ -3852,7 +3861,9 @@ func step(dt: float) -> void:
 		arena.tick(dt)
 	if duo: duo.tick(dt)
 	_prof("train")
+	Prof.begin("hunters_sim")
 	for h in hunters: SfxCast.sim(h, SimLod.step_dt(h, dt))
+	Prof.end()
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -3867,13 +3878,17 @@ func step(dt: float) -> void:
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
 	_prof("mobs")
+	Prof.begin("physics")
 	_separate()
 	_collide_breaks()
 	brk.tick(dt)
+	Prof.end()
 	_prof("separate")
+	Prof.begin("combat")
 	_update_rings(dt)
 	_update_shots(dt)
 	flyby.tick(self)
+	Prof.end()
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
@@ -3927,9 +3942,11 @@ func step(dt: float) -> void:
 	_prof("truce_spawns")
 	_update_events()
 	_update_zones(dt)
+	Prof.begin("vfx_tick")
 	fields.tick(dt)
 	verbs.tick(dt)
 	displace.tick(dt)
+	Prof.end()
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
