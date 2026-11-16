@@ -59,7 +59,7 @@ func run(main: Node, part := -1) -> void:
 		main.get_tree().quit(1 if bad > 0 else 0)
 		return
 	for a in args:
-		if String(a).begins_with("--sweep="):    # --sweep=SQUAD:diff:arch: one raid, one HRSWEEP line
+		if String(a).begins_with("--sweep="):  # --sweep=SQUAD:diff:arch: one raid, one HRSWEEP line
 			var p := String(a).substr(8).split(":")
 			await _sim(main, int(p[0]), p[1], seed_v, p[2], true)
 			main.get_tree().quit(0)
@@ -210,7 +210,8 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int, arch := "", sweep := f
 		if n_step % 120 == 0:
 			await main.get_tree().process_frame
 		for h in m.hunters:
-			if h.downed and not was_down.get(h, false): downs += 1
+			if h.downed and not was_down.get(h, false):
+				downs += 1
 			was_down[h] = h.downed
 		if ended_at < 0.0 and not m.result.is_empty():
 			ended_at = m.time
@@ -249,9 +250,22 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int, arch := "", sweep := f
 				)
 			)
 	var wall_s := (Time.get_ticks_msec() - t_wall) / 1000.0
-	print("HRSWEEP %s %s seed %d arch %s: %s at %d s, downs %d, wave %d, boss %s" % [
-		sq, diff, seed_v, arch, HeartRaid.P.keys()[rd.phase], int(ended_at), downs, rd.wave,
-		"yes" if rd.boss != null or rd.boss_down else "no"])
+	print(
+		(
+			"HRSWEEP %s %s seed %d arch %s: %s at %d s, downs %d, wave %d, boss %s"
+			% [
+				sq,
+				diff,
+				seed_v,
+				arch,
+				HeartRaid.P.keys()[rd.phase],
+				int(ended_at),
+				downs,
+				rd.wave,
+				"yes" if rd.boss != null or rd.boss_down else "no"
+			]
+		)
+	)
 	if sweep:
 		await _drop(main, m)
 		return
@@ -451,6 +465,7 @@ func _hints(main: Node) -> void:
 func _run_to(m: Match, t: float) -> void:
 	while m.sess_time() < t:
 		m.step(Match.DT)
+
 
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
