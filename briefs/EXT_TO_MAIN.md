@@ -9921,3 +9921,4 @@ READY ext/ui-overload-1115 3f6e895a6d (UI overload: newcomer HUD staging, one ex
 READY ext/merge-anim-1111-clips 3dd1d5d04c (bulk-rebase: origin/main merged in mechanically, was 27a12702a6; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/anim-fusion-states-rebased-rebased 1ae4cf8328 (bulk-rebase: origin/main merged in mechanically, was fea7301985; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-f1f63a7a 2859511107 (bulk-rebase: origin/main merged in mechanically, was ddae66af66; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/perf-lane-p2-1116 1fb03a00da16e81a13fb5e124a556545e88640be (perf lane P2: WardenMerge draw joins, bot clear-line/truce/gear-sum hot paths, FireTap low-fps input; Mac M5 match avg flat, draws -2.5%, script -7%, p99 no win; PC MRROBOTO offline so unmeasured; FarRanges/occluders/mob-cap dropped; no gh on rpc1 so no PR/GATE GREEN comment)
