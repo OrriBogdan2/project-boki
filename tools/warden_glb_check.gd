@@ -640,22 +640,6 @@ func _own_motion(a: String, other: String) -> void:
 	o_sync.free()
 	m.free()
 	o.free()
-<<<<<<< HEAD
-=======
-
-## Settings > Video > Warden models: off builds the procedural model, on the .glb again.
-func _setting(a: String) -> void:
-	WardenGlb.set_model(a, false)
-	var off := _model(a)
-	var proc := not off.has_node("Warden") and (off.get_node("Rig/Torso/HeadPivot/Head") as Node3D).visible \
-			and not WardenGlb.uses_model(a)
-	off.free()
-	WardenGlb.set_model(a, true)
-	var on := _model(a)
-	var back := on.has_node("Warden") and WardenGlb.uses_model(a)
-	on.free()
-	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
-			% [a, str(proc), str(back)])
 
 ## The model's own meshes: not WardenMerge's ink shells, which draw the ink pass its surfaces gave up.
 func _body_meshes(m: Node) -> Array:
@@ -679,4 +663,3 @@ func _ink_shells(m: Node, a: String) -> void:
 	ok(bad.is_empty(),
 			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
 			% [a, shells.size(), str(bad)])
->>>>>>> 241ac41b49 (WardenMerge: one ink shell per Hunter body instead of an ink pass per surface (draws per 12 Hunters 197 -> 154))
