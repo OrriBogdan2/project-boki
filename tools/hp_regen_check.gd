@@ -7,7 +7,7 @@ extends RefCounted
 ## refills. Never touches the save.
 
 const ARCHS := ["bulwark", "dredge", "thief", "mage", "dolm", "ostra", "ashwick", "juggernaut", "archer",
-	"tender", "gunslinger", "rimewright"]
+	"tender", "gunslinger", "rimewright", "gil"]
 
 var bad := 0
 

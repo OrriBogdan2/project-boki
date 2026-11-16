@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	await m.start(OPTS.duplicate().merged({"training": true, "practice": true}))
 	m.set_process(false)
 	for i in 5: await tree.process_frame
-	_bench(m)
+	await _bench(m)
 	m.queue_free()
 	await tree.process_frame
 	for area in [{"tutorial": true}, Match.duel_opts()]:
@@ -80,6 +80,9 @@ func _clear_dir(m: Match, D: Hunter) -> Vector2:
 	return Vector2.ZERO
 
 func _bench(m: Match) -> void:
+	var shots := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): shots = a.substr(12)
 	var pr := Practice.of(m)
 	var b := ParityBench.of(m)
 	ok(pr != null and b != null and pr.bar_btns.has("bench"), "the Training Area bar has a Bench button")
@@ -100,15 +103,33 @@ func _bench(m: Match) -> void:
 	ok(b.lines()[1] == "Last hit  %d" % int(round(dealt)), "last hit reads %s" % b.lines()[1])
 	var dps := Arena.dps_of(m.arena.dummies[0]["hits"], m.time)
 	ok(dps > 0.0 and b.lines()[0] == "DPS  %d" % int(round(dps)), "rolling DPS reads %s" % b.lines()[0])
+	var five := ParityBench.dealt_in(m.arena.dummies[0]["hits"], m.time, ParityBench.WINDOW)
+	var want := "Last 5 s  %d" % int(round(dealt))
+	ok(absf(five - dealt) < 0.01 and b.lines()[2] == want, "last 5 s reads %s" % b.lines()[2])
+	var need := 145.0 / 0.8
+	var down := "Down a Hunter  %.1f s" % (need / dps)
+	var fast: bool = absf(ParityBench.time_to_down(dps) - need / dps) < 0.001
+	ok(fast and b.lines()[3] == down, "181 / DPS: %s" % b.lines()[3])
+	if shots != "":
+		for i in 3: await m.get_tree().process_frame
+		m.get_tree().root.get_texture().get_image().save_png(shots + "/practice_readout.png")
 	var left := b.cc_until - m.time
-	ok(b.cc_kind == "stun" and absf(left - (STUN - 0.1)) < 0.05, "stun, about 0.9 s left: " + b.lines()[2])
+	var stun_ok: bool = b.cc_kind == "stun" and absf(left - (STUN - 0.1)) < 0.05
+	ok(stun_ok, "stun, about 0.9 s left: " + b.lines()[4])
 	_step(m, b, 0.5)
-	ok(absf((b.cc_until - m.time) - (STUN - 0.6)) < 0.05, "the time left counts down: %s" % b.lines()[2])
+	ok(absf((b.cc_until - m.time) - (STUN - 0.6)) < 0.05, "the time left counts down: %s" % b.lines()[4])
 	_step(m, b, 1.0)
-	ok(b.lines()[2] == "CC  none", "the stun is over: %s" % b.lines()[2])
+	ok(b.lines()[4] == "CC  none", "the stun is over: %s" % b.lines()[4])
 	var moved := Vector2(_ended_at.x - from.x, _ended_at.z - from.z).length()
-	ok(not b.knocking and b.knock_time > 0.0 and b.knock_dist > 0.0, "a knock was read: %s" % b.lines()[3])
+	ok(not b.knocking and b.knock_time > 0.0 and b.knock_dist > 0.0, "a knock was read: %s" % b.lines()[5])
 	ok(absf(b.knock_dist - moved) < 0.3, "knock %.2f m matches the dummy's move (%.2f m)" % [b.knock_dist, moved])
+	_step(m, b, 6.0)
+	var quiet: bool = b.lines()[2] == "Last 5 s  0" and b.lines()[3] == "Down a Hunter  -"
+	ok(quiet, "after 6 s quiet the 5 s total is 0: %s" % str(b.lines()))
+	m.player.pos = D.pos + Vector3(ParityBench.AWAY_DIST + 2.0, 0.0, 0.0)
+	b._process(DT)
+	ok(b.target == null and b.lines().size() == 1, "walking away clears the readout")
+	b.target = D
 	b.reset()
 	var cleared: bool = b.target == null and b.lines().size() == 1 and float(m.arena.dummies[0]["total"]) == 0.0
 	ok(cleared, "reset clears the readout and the dummy's record")

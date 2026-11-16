@@ -5,7 +5,8 @@ extends "res://tools/breah_shots.gd"
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
-## "item66" (LMB held through Flue Flight) or "queen" (LMB from her hands, Flue Flight's fire), or "acc" (Kael's
+## "item66" (LMB held through Flue Flight), "queen" (LMB from her hands, Flue Flight's fire) or "cloak" (the
+## Furnace Cloak's pose against its blast), or "acc" (Kael's
 ## accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
@@ -169,6 +170,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
+	HeroVfx.of(m).set_process(false)      # (ticked by _go's steps, as in vv_shots)
 	P = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -291,6 +293,22 @@ func _dredge() -> void:
 	)
 	await _go(2.3, blast, bmarks)
 
+## Grimble's Barge run (--combo51-part=barge): three shoves 0.42 s apart (the 0.22 s gap and a frame), one burst.
+func _dredge_barge() -> void:
+	await _reset(9.0)
+	P.dashes = 3.0
+	var run := func(t: float):
+		for k in 3:
+			if _at(t, 0.1 + 0.42 * k):
+				P.do_dash()
+	var marks := _strip(
+		"barge_run_strip",
+		"Grimble's Barge, three chained shoves: the first, the ball rolling in the gap, the second, rolling, the third,"
+			+ " the ball still closed as it ends, opening, standing",
+		[0.14, 0.3, 0.48, 0.6, 0.74, 1.02, 1.16, 1.22, 1.45]
+	)
+	await _go(1.5, run, marks)
+
 ## Cinder: the lance held through a ram; Shift in the flight; a jump off the flight.
 func _ashwick() -> void:
 	P.lvl = 6
@@ -356,7 +374,7 @@ func _ashwick_item66() -> void:
 		"item66_lmb_held_strip",
 		"Cinder (item 66), LMB held throughout: the lance roaring; lift-off, the stream goes out; flying, no"
 			+ " flame and no pilot, the carpet behind; still flying, still held; the frame after the flight, the"
-			+ " cyan pilot lights; the lance roars again",
+			+ " gold pilot lights; the lance roars again",
 		[0.6, 0.8, 1.5, 2.4, 2.56, 2.95]
 	)
 	await _go(3.1, held, marks)
@@ -390,6 +408,24 @@ func _ashwick_queen() -> void:
 		[0.05, 0.3, 0.6, 1.0, 1.6, 2.4]
 	)
 	await _go(2.6, lift, umarks)
+
+## Cinder's Furnace Cloak (--combo51-part=cloak): E pressed at 0.1 s, then the frames 0, 0.03, 0.07, 0.13, 0.2 and 0.3 s
+## after it; the arms-wide peak should stand on the blast (0.0-0.05 s), not at 0.13 s.
+func _ashwick_cloak() -> void:
+	var K: AshwickKit = P.ak
+	P.lvl = 6
+	await _reset(6.0)
+	var press := func(t: float):
+		if _at(t, 0.1):
+			K.use_e()
+		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	var marks := _strip(
+		"cloak_peak_strip",
+		"Cinder, Furnace Cloak: the press frame; the arms flung wide with the blast; the peak held; the arms"
+			+ " coming down; settling; standing",
+		[0.1, 0.13, 0.17, 0.23, 0.3, 0.4]
+	)
+	await _go(0.5, press, marks)
 
 ## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.

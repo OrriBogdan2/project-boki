@@ -21,9 +21,20 @@ Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Bok
   relay_finish     the tape swish and three rising bells, one for each leg
   garden_chime_stat / _level / _evolve   a Boki's own chime at home: a stat rose, it levelled up, a change is
                    coming; two, three and four notes over its chirp, pitched by size at play time (home_chimes.gd)
+  garden_chime_ready   a brighter chime when a Boki reaches its evolve level: five quick notes up to a high bell
   garden_hop      the Waystone lighting for a hop: a rising shimmer swelling for 0.5 s, then a soft close
   garden_wake     a zone waking: three slow rising bells and a held shimmer (once, when a zone opens)
-Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd and home_chimes.gd.
+Shaping items given to a Boki (GardenSfx.ITEM, one cue a family) and the held item's preview card:
+  garden_item_bite    a stat bite: two crunches, two plucks up     garden_item_snack   a lean sweet: crunch, "mm", glide
+  garden_item_token   a path token: a charm clinking on            garden_item_pip     its pip snapping into the meter
+  garden_item_lock    Stayleaf: a leaf rustle, a lock closing      garden_item_wash    Rinse Melon: a swish draining off
+  garden_item_aura    an aura starting: air swelling, three bells  garden_item_unwind  Unwind Tea: a sip and a long sigh
+  garden_item_nudge   a nudge to its nature or trust: "hm?"        garden_item_tick    a held item's card: soft tick
+  garden_depart   the hop itself: a short airy whoosh as the screen goes
+  garden_arrive_<zone>  the chime on landing in a zone, tuned to its bed: bramblebank birds, glasswater drops,
+                  cinderstep embers, hushwood a muted minor bell, ridge wind and a high fifth
+  garden_locked   a locked zone picked on the Waystone: a soft wooden thud and a lock click
+Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, home_chimes.gd and hub_waystone.gd.
 """
 import numpy as np
 import sfx_lib as S
@@ -311,6 +322,88 @@ def chime_evolve(i):
     return B.soft(B.room(mix(chime_notes([523, 659, 784, 1047], 0.09, 0.6, 1300 * j(i)), ooh, bell), 0.55), 6000)
 
 
+def chime_ready(i):
+    """It can evolve: brighter than a change, five quick notes up a major pentatonic, a high bell and a shimmer."""
+    shimmer = at(hpf(noise(0.7), 5000) * S.shape(0.7, 0.2, 0.1, 0.4) * 0.15, 0.2)
+    bell = at(0.6 * S.chime(2093, 1.0, 0.4), 0.3)
+    notes = [784, 880, 1047, 1319, 1568]
+    return B.soft(B.room(mix(chime_notes(notes, 0.06, 0.7, 1500 * j(i)), shimmer, bell), 0.55), 8000)
+
+
+# ---------------------------------------------------------------- shaping items
+def crunch(d=0.08, lo=1400, hi=6000):
+    """One bite into something crisp: a short burst of grit over a dull knock."""
+    return mix(bpf(noise(d), lo, hi) * env(N(d), 0.001, d * 0.22), 0.5 * wood_tick(240, d))
+
+
+def item_bite(i):
+    """A stat bite: two quick crunches, then two plucks up a fourth."""
+    bites = mix(crunch(), at(0.75 * crunch(0.07, 1100, 5000), 0.12))
+    up = mix(at(pluck(659 * j(i, 0.02), 0.25, 0.08), 0.2), at(pluck(880, 0.4, 0.13), 0.27))
+    return B.soft(B.room(mix(0.9 * bites, 0.6 * up), 0.3), 6000)
+
+
+def item_token(i):
+    """A path token put on: a small charm clinking, two glassy pings over a felt note."""
+    pings = mix(glint(2093 * j(i, 0.01), 0.16), at(0.6 * glint(2637, 0.14), 0.05))
+    return B.soft(B.room(mix(pings, at(0.6 * pluck(523, 0.35, 0.12), 0.03)), 0.35), 8000)
+
+
+def item_pip(i):
+    """The token's pip clicking into the path meter: a bead snapping into its slot."""
+    snap = hpf(noise(0.06), 3000) * env(N(0.06), 0.0005, 0.004)
+    return B.soft(mix(0.5 * snap, wood_tick(1250 * j(i, 0.03), 0.05), at(0.35 * glint(3520, 0.06), 0.006)), 9000)
+
+
+def item_lock(i):
+    """Stayleaf: the leaf settles with a soft rustle, then a small lock closes round it (click as it starts, clack
+    as it shuts: GardenItemFx's lock at 0.45 and 0.6 s) and a low held note."""
+    rustle = bpf(noise(0.4), 1800, 6500) * S.shape(0.4, 0.08, 0.1, 0.22) * 0.35
+    click = mix(at(wood_tick(900, 0.05), 0.45), at(0.8 * wood_tick(600, 0.06), 0.6))
+    return B.soft(B.room(mix(rustle, click, at(0.4 * pluck(392, 0.4, 0.15), 0.6)), 0.3), 6000)
+
+
+def item_snack(i):
+    """A lean sweet: a sugary crunch, a pleased "mm" and a glide up to a sparkle."""
+    glide = at(0.4 * S.sweep(880, 1320, 0.25) * S.shape(0.25, 0.04, 0.05, 0.15), 0.1)
+    mm = at(0.3 * B.vowel(330 * j(i, 0.03), 392, 0.3, 'mm', 1.2, breath=0.1), 0.12)
+    sparkle = at(0.4 * glint(2637 * j(i, 0.01), 0.14), 0.3)
+    return B.soft(B.room(mix(crunch(0.07, 1800, 7000), glide, mm, sparkle), 0.35), 6500)
+
+
+def item_wash(i):
+    """Rinse Melon: water swishing over it and running off in bubbles, the lean washed away."""
+    swish = bpf(noise(0.6), 300, 2600) * S.shape(0.6, 0.04, 0.1, 0.4) * 0.45
+    pops = [at(B.bubble(S.rng.uniform(420, 1000), 0.05) * S.rng.uniform(0.3, 0.6),
+               0.06 * (k + 1) + S.rng.uniform(0, 0.03)) for k in range(7)]
+    return B.soft(B.room(mix(swish, *pops), 0.4), 5200)
+
+
+def item_aura(i):
+    """An aura starting: airy shimmer swelling up and three soft bells rising into it."""
+    air = hpf(noise(0.8), 4000) * S.shape(0.8, 0.35, 0.1, 0.35) * 0.22
+    bells = [at(S.chime(f, 0.6, 0.3) * 0.45, 0.12 * (k + 1)) for k, f in enumerate([1047, 1319, 1568 * j(i, 0.01)])]
+    return B.soft(B.room(mix(air, *bells), 0.55), 7000)
+
+
+def item_unwind(i):
+    """Unwind Tea: a warm sip, then a long easy sigh and a low note letting go."""
+    sip = lpf(noise(0.14), 1500) * S.shape(0.14, 0.03, 0.04, 0.07) * 0.5
+    sigh = at(0.4 * B.vowel(392 * j(i, 0.03), 262, 0.5, 'ah', 1.2, breath=0.3), 0.16)
+    return B.soft(B.room(mix(sip, sigh, at(0.5 * pluck(262, 0.6, 0.25), 0.2)), 0.45), 4200)
+
+
+def item_nudge(i):
+    """A nudge to its nature or its trust (a trait item, a shared bun, a down feather): a curious "hm?" over a pluck."""
+    hm = mix(0.6 * B.squeak(700 * j(i, 0.04), 0.16, 0.2), at(0.5 * B.squeak(900 * j(i, 0.04), 0.14, -0.15), 0.12))
+    return B.soft(B.room(mix(hm, at(0.5 * pluck(784, 0.3, 0.1), 0.06)), 0.35), 5200)
+
+
+def item_tick(i):
+    """A held item's preview card: the softest wooden tick, like a clock in the next room."""
+    return B.soft(mix(wood_tick(1500 * j(i, 0.04), 0.04), 0.3 * glint(3000, 0.03)), 7000)
+
+
 # ---------------------------------------------------------------- zones
 def hop(i):
     """0.5 s, the length of the Waystone's light-up (hop_fade_s): a shimmer rising and swelling, ending as the screen goes."""
@@ -319,6 +412,59 @@ def hop(i):
     shimmer = hpf(noise(d), 3000) * S.shape(d, 0.4, 0.0, 0.1) * 0.25
     bell = at(S.chime(1320 * j(i, 0.02), 0.25, 0.1), 0.3) * 0.5
     return B.soft(B.room(mix(0.6 * rise, shimmer, bell), 0.4), 5200)
+
+
+def depart(i):
+    """0.35 s as the screen goes: an airy whoosh, the low band swelling first and the high one trailing off."""
+    d = 0.35
+    low = bpf(noise(d), 350 * j(i), 1400) * S.shape(d, 0.12, 0.0, 0.2)
+    high = bpf(noise(d), 1800 * j(i), 5200) * S.shape(d, 0.2, 0.0, 0.15) * 0.5
+    return B.soft(B.room(mix(low, high, 0.15 * S.sweep(600, 300, d) * S.shape(d, 0.1, 0.0, 0.25)), 0.3), 4800)
+
+
+def arrive_bramblebank(i):
+    """Meadow birds: two bright plucks (a major third) and a chirp."""
+    return B.soft(B.room(mix(pluck(784 * j(i, 0.02), 0.35, 0.14), at(pluck(988 * j(i, 0.02), 0.4, 0.16), 0.12),
+                             at(0.5 * chirp(1250, 0.1, i), 0.26)), 0.35), 5500)
+
+
+def arrive_glasswater(i):
+    """Drops on water: three glassy bells falling in pitch, long in the room."""
+    bells = [at(S.chime(f * j(i, 0.015), 0.6, 0.25), t0) * g
+             for f, t0, g in ((1568, 0.0, 0.8), (1319, 0.14, 0.7), (988, 0.3, 0.8))]
+    return B.soft(B.room(mix(*bells), 0.8), 6500)
+
+
+def arrive_cinderstep(i):
+    """Warm embers: a low wooden tone (a fifth) with a few crackles."""
+    tone = mix(pluck(196 * j(i, 0.02), 0.5, 0.25), at(pluck(294 * j(i, 0.02), 0.5, 0.25), 0.1))
+    pops = [at(wood_tick(f, 0.03), t0) * 0.35 for f, t0 in ((1400, 0.18), (1100, 0.27), (1700, 0.38))]
+    return B.soft(B.room(mix(tone, *pops), 0.3), 3800)
+
+
+def arrive_hushwood(i):
+    """Dusk: a muted minor-third bell under a breath."""
+    breath = bpf(noise(0.7), 400, 1400) * S.shape(0.7, 0.3, 0.0, 0.4) * 0.25
+    bells = mix(S.chime(440 * j(i, 0.01), 0.9, 0.5) * 0.8, at(S.chime(523 * j(i, 0.01), 0.9, 0.5), 0.2) * 0.7)
+    return B.soft(B.room(mix(bells, breath), 0.6), 3000)
+
+
+def arrive_ridge(i):
+    """Open wind: an airy rising whistle and a bright fifth on top."""
+    d = 0.6
+    wind = bpf(noise(d), 1500, 4500) * S.shape(d, 0.35, 0.0, 0.25) * 0.3
+    whistle = S.sweep(880, 1320, d) * S.shape(d, 0.3, 0.0, 0.3) * 0.5
+    top = at(mix(S.chime(1760 * j(i, 0.015), 0.5, 0.3), at(S.chime(2637, 0.5, 0.3), 0.1)), 0.25)
+    return B.soft(B.room(mix(wind, whistle, top), 0.5), 6500)
+
+
+def locked(i):
+    """A knock on a shut door: a soft wooden thud, then a small metal click."""
+    thud = mix(S.sweep(160, 90, 0.16) * env(N(0.16), 0.004, 0.07),
+               0.4 * lpf(noise(0.08), 900) * env(N(0.08), 0.002, 0.03))
+    tick = 0.3 * hpf(noise(0.02), 3500) * env(N(0.02), 0.0005, 0.01)
+    click = at(mix(S.chime(2400 * j(i, 0.03), 0.06, 0.02), tick), 0.14)
+    return B.soft(mix(thud, click), 4200)
 
 
 def wake(i):
@@ -362,6 +508,18 @@ def main():
     S.takes_cat('garden_chime_evolve', chime_evolve, 1, 'boki')
     S.takes_cat('garden_hop', hop, 1, 'boki')
     S.takes_cat('garden_wake', wake, 0, 'boki')
+    S.takes_cat('garden_chime_ready', chime_ready, 0, 'boki')
+    for cue, fn, n in [('bite', item_bite, 1), ('token', item_token, 0), ('lock', item_lock, 0),
+                       ('snack', item_snack, 1), ('wash', item_wash, 0), ('aura', item_aura, 0),
+                       ('unwind', item_unwind, 0), ('nudge', item_nudge, 1)]:
+        S.takes_cat('garden_item_' + cue, fn, n, 'boki')
+    S.takes_cat('garden_item_pip', item_pip, 1, 'ui')
+    S.takes_cat('garden_item_tick', item_tick, 1, 'ui')
+    S.takes_cat('garden_depart', depart, 1, 'boki')
+    for zone, fn in (('bramblebank', arrive_bramblebank), ('glasswater', arrive_glasswater),
+                     ('cinderstep', arrive_cinderstep), ('hushwood', arrive_hushwood), ('ridge', arrive_ridge)):
+        S.takes_cat('garden_arrive_' + zone, fn, 1, 'boki')
+    S.takes_cat('garden_locked', locked, 1, 'step')
 
 
 if __name__ == '__main__':

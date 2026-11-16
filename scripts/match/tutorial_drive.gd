@@ -2,7 +2,28 @@ class_name TutorialDrive
 extends RefCounted
 ## Test driver: plays the tutorial course by itself so the whole flow can be checked headless
 ## (--tutorial --tut-test, and the teammate check).
+## Human pace (`human` on, --tutorial-pace-check): the same course played as a first-time player does: each new line
+## of text is read before the first input, shots miss at a set rate, walking is at run speed (no sprint, no teleport).
 
+const READ_WPS := 3.5      # words/s a new player reads at (about 210 words a minute)
+const REACT_S := 0.45      # s from the end of reading to the first input
+const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to the side
+const MISS_OFF := 3.0      # m a missed aim is off the target
+const MISS_WINDOW := 0.5   # s one aim roll holds
+
+const KEYS := [      # the action inputs
+		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+
+static var human := false
+static var reading_t := 0.0      # s of reading and reacting still to go before the next input
+static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
+static var reading := false      # and the idle frame was reading text
+static var _acted := false
+static var _read_line := ""
+static var _miss := false
+static var _rng := RandomNumberGenerator.new()
+static var beats := {}           # human pace: step -> {id, secs, read, idle, worst (longest wait, not reading)}
+static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
@@ -16,9 +37,14 @@ static func drive(m: Match) -> void:
 			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
 	var p := m.player
-	for k in ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]:
+	for k in KEYS:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
+	_acted = false
+	if human:
+		_log(tu)
+	if human and _read(tu):
+		return
 	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
 	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
@@ -61,13 +87,17 @@ static func drive(m: Match) -> void:
 		"glove":
 			var wp := tu.ground_item()
 			if not wp.is_empty():
-				goto.call(wp["pos"])
+				if p.flat_dist(wp["pos"]) > 3.0:
+					_travel(m, wp["pos"])      # (across the bridge: a straight line can end against a cliff)
+				else:
+					goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
+			_acted = true
 		"wayout", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
 	var go: Vector2 = p.inp["move"]
@@ -77,6 +107,38 @@ static func drive(m: Match) -> void:
 			p.inp["jump"] = true       # a ledge in the way: jump it, as a player would
 	if still_t > 1.5 and go != Vector2.ZERO:
 		p.inp["jump"] = true       # (stuck against something: hop)
+	idle = not _acted and go == Vector2.ZERO and not KEYS.any(func(k): return p.inp[k])
+
+## One frame of the step's row: seconds in it, idle, reading, and the longest wait that was not reading.
+static func _log(tu: Tutorial) -> void:
+	if tu.step < 0:
+		return
+	if not beats.has(tu.step):
+		_wait_run = 0.0
+	var row: Dictionary = beats.get_or_add(tu.step,
+			{"id": tu.id(), "secs": 0.0, "read": 0.0, "idle": 0.0, "worst": 0.0})
+	row["secs"] += Match.DT
+	row["read"] += Match.DT if reading else 0.0
+	row["idle"] += Match.DT if idle else 0.0
+	_wait_run = _wait_run + Match.DT if idle and not reading else 0.0
+	row["worst"] = maxf(row["worst"], _wait_run)
+
+## Reads the step's line when it is new; true while the player is still reading (no input this frame).
+static func _read(tu: Tutorial) -> bool:
+	var line := tu.text + " " + tu.detail
+	if tu.text != "" and line != _read_line:
+		_read_line = line
+		reading_t += line.split(" ", false).size() / READ_WPS + REACT_S
+	reading = reading_t > 0.0
+	reading_t = maxf(0.0, reading_t - Match.DT)
+	idle = reading
+	return reading
+
+## Where the aim goes: on the monster, or in human pace sometimes MISS_OFF to the side of it.
+static func _aim_at(m: Match, at: Vector3) -> Vector3:
+	if human and fmod(m.time, MISS_WINDOW) < Match.DT:
+		_miss = _rng.randf() < MISS_RATE
+	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
@@ -88,32 +150,35 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		_rmb(m, tu)
 	if best == null:
 		return
-	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
+	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
 	var reach := 1.6 if melee else 3.0
 	if sid == "hook" and not tu.flag:
 		reach = 9.0
+	elif sid == "kin" and not tu.flag:
+		reach = 14.0       # (the E line reaches the row from where you stand)
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
-		"shoot": p.inp["fire"] = _fire_key(m)
+		"shoot": p.inp["fire"] = fire_key(m)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
-			p.inp["fire"] = tu.flag and _fire_key(m)
+				_acted = true
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"hook":
 			p.inp["gear1"] = not tu.flag and p.flat_dist(best) < 9.5 and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"ult":
 			p.inp["ult"] = not tu.flag and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.
-static func _fire_key(m: Match) -> bool:
+static func fire_key(m: Match) -> bool:
 	var p := m.player
 	var st: Array = p.wpn.get("draw", [])
 	if not st.is_empty():
@@ -130,6 +195,30 @@ static func _rmb(m: Match, tu: Tutorial) -> void:
 	m.player.inp["sec"] = ph < 0.1 or (ph > 0.6 and ph < (1.5 if tu.rmb_has_hold() else 0.7))
 	m.player.inp["sec_hold"] = m.player.inp["sec"]
 
+## Go there the way a bot would: over the bridges, or jump and glide across a gap.
+static func _travel(m: Match, to: Vector3) -> void:
+	var p := m.player
+	var mv := m.bot_brain._path_dir(m, p, to)
+	if p.ai.has("cross"):
+		var L: Dictionary = p.ai["cross"]
+		var land: Vector3 = L["land"]
+		var tol := Vector2(land.x - p.pos.x, land.z - p.pos.z)
+		var past_take: bool = tol.length() < Vector2(land.x - L["take"].x, land.z - L["take"].z).length()
+		# (a stuck hop on the way there is not the jump)
+		var crossing: bool = past_take or p.flat_dist(L["take"]) < 2.0
+		if p.grounded and m.world.island_of(p.pos.x, p.pos.z) == int(L["to"]):
+			p.ai.erase("cross")
+		elif L.get("bridge", false) and past_take:
+			mv = tol.normalized()      # (a bridge is walked across: path_dir would send you back to its take spot)
+		elif not p.grounded and crossing:
+			mv = tol.normalized()
+			p.inp["glide"] = tol.length() > 1.6 or m.world.is_void(p.pos.x, p.pos.z)
+		elif p.grounded and p.flat_dist(L["take"]) < 1.3:
+			mv = tol.normalized()
+			p.inp["jump"] = true
+	p.inp["move"] = mv
+	p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
+
 static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var o := tu.outpost()
@@ -138,22 +227,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var c: Vector3 = o["pos"]
 	match tu.id():
 		"wayout":
-			# go there the way a bot would: over the bridges, or jump and glide across a gap
-			var mv := m.bot_brain._path_dir(m, p, c)
-			if p.ai.has("cross"):
-				var L: Dictionary = p.ai["cross"]
-				var land: Vector3 = L["land"]
-				var tol := Vector2(land.x - p.pos.x, land.z - p.pos.z)
-				if p.grounded and m.world.island_of(p.pos.x, p.pos.z) == int(L["to"]):
-					p.ai.erase("cross")
-				elif not p.grounded:
-					mv = tol.normalized()
-					p.inp["glide"] = tol.length() > 1.6 or m.world.is_void(p.pos.x, p.pos.z)
-				elif p.flat_dist(L["take"]) < 1.3:
-					mv = tol.normalized()
-					p.inp["jump"] = true
-			p.inp["move"] = mv
-			p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
+			_travel(m, c)
 		"uplink":
 			goto.call(c)
 			p.inp["interact"] = p.flat_dist(c) < 1.4
@@ -166,7 +240,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 					bd = p.flat_dist(mb)
 					best = mb
 			if best and p.flat_dist(best) < 8.0:
-				p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
+				p.inp["aim"] = _aim_at(m, best.pos)
 				p.inp["fire"] = true
 		"extract":
 			goto.call(c)

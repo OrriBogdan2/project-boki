@@ -47,14 +47,14 @@ func _good_card(key: String, payload: Dictionary, sub: String, right: Control, w
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
 	var nm := UI.label(Goods.name_of(key, payload), UI.T_BODY, UI.INK, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	top.add_child(UI.tag(Goods.rarity_name(key, payload), Goods.rarity_col(key, payload)))
 	nv.add_child(top)
 	var sl := UI.label(sub, 12, UI.MUTED)
 	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sl.clip_text = true
+	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(sl)
 	hr.add_child(nv)
@@ -144,7 +144,7 @@ func _shelter_card(c: Dictionary) -> Control:
 	var b := UI.button("Adopt  ·  %d" % int(c["price"]), func():
 		var r := Shelter.adopt(cid)
 		if r["ok"]: m.spawn_kin.call()
-		_done(r, "%s is coming home with you" % rec["name"]), 0, "gem")
+		_done(r, Shelter.arrival_line(r["rec"]) if r["ok"] else ""), 0, "gem")
 	b.disabled = int(Save.d["gems"]) < int(c["price"]) or Shelter.gave(String(rec.get("uid", "")))
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(b)

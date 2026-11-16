@@ -1,0 +1,475 @@
+{
+	"active": "b6gwq29kz409bcsmb46d1sr",
+	"arm_lvl": 0,
+	"armory": [],
+	"belt_pick": [
+		"tonic",
+		"armor_kit",
+		"",
+		""
+	],
+	"box_v": true,
+	"bridges": [],
+	"buildings": [],
+	"classes": {
+		"all": false,
+		"hunters": {
+
+		},
+		"open": [],
+		"picks": [],
+		"reveal": [],
+		"seen": [],
+		"stats": {
+
+		},
+		"told": 0
+	},
+	"cls": "medium",
+	"crops": {
+
+	},
+	"egg": {
+		"a": "b6gwq29kz409bcsmb46d1sr",
+		"b": "b6gwq29kz8m1ksc3an7g9re",
+		"m": 22,
+		"sp": "cindle",
+		"t": 1700000000.0
+	},
+	"extracts": 0,
+	"farm_builder": 1,
+	"farm_lvl": 0,
+	"feeder_inv": {
+
+	},
+	"feeders": [],
+	"first_guide": 0,
+	"furniture": {
+		"gramophone": 1,
+		"journal": 1
+	},
+	"gems": 1234,
+	"gh_plots": [
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		}
+	],
+	"goods": {
+
+	},
+	"graves": [],
+	"guild_perks": [],
+	"incubator": {
+		"coal": 0.0,
+		"eggs": [
+			{
+				"boss": "",
+				"heat": 0.0,
+				"id": "re3307561_1",
+				"m0": 21,
+				"slot": 0,
+				"sp": "zapple",
+				"t": 1794416129.01889
+			}
+		],
+		"slots": 5,
+		"t": 1794416129.01887
+	},
+	"items": {
+		"armor_kit": 2,
+		"coals": 4,
+		"tonic": 3
+	},
+	"loadout": {
+
+	},
+	"log": [],
+	"lost_kin": [],
+	"market": {
+		"auction": {
+			"log": [],
+			"lots": []
+		},
+		"black": {
+			"day": "",
+			"stock": []
+		},
+		"n": 0,
+		"shelter": {
+			"day": "",
+			"gave": [],
+			"stock": []
+		},
+		"stall": {
+			"mine": [],
+			"npc": [],
+			"npc_day": "",
+			"sold": []
+		},
+		"transfer": {
+			"out": [],
+			"sent": []
+		}
+	},
+	"matches": 21,
+	"music": [],
+	"name": "Fixture",
+	"offers": [],
+	"plot_cap": 4,
+	"plots": [
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		},
+		{
+			"crop": "",
+			"stage": 0
+		}
+	],
+	"profile": {
+		"id": "p6gwq29kz4fw0z6n10pdsy2",
+		"name": "Hunter"
+	},
+	"raid_belt": {
+
+	},
+	"raid_out": [],
+	"ransom_log": [],
+	"rare_eggs": [
+		{
+			"boss": "",
+			"id": "re_fixture",
+			"rare": true,
+			"sp": "wisplet"
+		}
+	],
+	"rivals": {
+
+	},
+	"roster": [
+		{
+			"born": 1794416129,
+			"dna": {
+				"birth": [
+					"crescent",
+					"back"
+				],
+				"ear": 0.9813,
+				"ears": "splayed",
+				"eye": "classic",
+				"girth": 1.0542,
+				"head": 0.9139,
+				"hue": 0.0002,
+				"limb": 0.9868,
+				"mark": "plain",
+				"mark_col": "glow",
+				"mark_seed": 2094305049,
+				"quirk": "sway",
+				"sat": 0.0193,
+				"seed": 11,
+				"sex": "m",
+				"size": -0.5203,
+				"tail": 0.9731,
+				"tailv": "bobbed",
+				"v": 1,
+				"val": 0.034,
+				"voice": 0.8694
+			},
+			"edition": null,
+			"ivs": {
+				"atk": 23,
+				"bond": 23,
+				"hp": 22,
+				"spd": 20,
+				"work": 25
+			},
+			"known": [],
+			"kos": 0,
+			"level": 3,
+			"likes": {
+				"food": "sunroot",
+				"hates": "puffcorn",
+				"play": "brush"
+			},
+			"matches": 0,
+			"memory": [],
+			"name": "Pip",
+			"needs": {
+				"clean": 75.0,
+				"energy": 80.0,
+				"food": 70.0,
+				"joy": 70.0
+			},
+			"needs_t": 1794416129.01826,
+			"species": "cindle",
+			"stats": {
+				"focus": 0,
+				"guard": 0,
+				"power": 0,
+				"speed": 0
+			},
+			"traits": {
+				"bravery": 0.743605351591618,
+				"curiosity": 0.475807244363145,
+				"loyalty": 0.546034219343209,
+				"temper": 0.637281652299649
+			},
+			"trust": 61.0,
+			"uid": "b6gwq29kz409bcsmb46d1sr",
+			"wins": 0,
+			"xp": 7
+		},
+		{
+			"aff": {
+				"curious": 7.95813930034637,
+				"fierce": 0.717769980430603,
+				"steadfast": 43.7155258655548,
+				"swift": 5.86188441514969
+			},
+			"born": 1794416129,
+			"dna": {
+				"birth": [
+					"diamond",
+					"left cheek"
+				],
+				"ear": 1.0226,
+				"ears": "standard",
+				"eye": "classic",
+				"girth": 1.032,
+				"head": 1.0038,
+				"hue": -0.013,
+				"limb": 0.9654,
+				"mark": "patches",
+				"mark_col": "light",
+				"mark_seed": 1255679260,
+				"quirk": "hop",
+				"sat": 0.0667,
+				"seed": 22,
+				"sex": "m",
+				"size": -0.1155,
+				"tail": 1.0004,
+				"tailv": "standard",
+				"v": 1,
+				"val": 0.12,
+				"voice": 0.9943
+			},
+			"edition": null,
+			"forms": [],
+			"ivs": {
+				"atk": 25,
+				"bond": 3,
+				"hp": 15,
+				"spd": 12,
+				"work": 29
+			},
+			"known": [],
+			"kos": 0,
+			"level": 12,
+			"likes": {
+				"food": "puffcorn",
+				"hates": "starfruit",
+				"play": "chat"
+			},
+			"matches": 0,
+			"memory": [],
+			"muts": [
+				{
+					"aff": "steadfast",
+					"id": "club",
+					"lv": 1
+				},
+				{
+					"aff": "steadfast",
+					"id": "plates",
+					"lv": 1
+				},
+				{
+					"aff": "steadfast",
+					"id": "brow",
+					"lv": 1
+				}
+			],
+			"name": "Bubble",
+			"needs": {
+				"clean": 75.0,
+				"energy": 80.0,
+				"food": 70.0,
+				"joy": 70.0
+			},
+			"needs_t": 1794416129.01834,
+			"species": "puddlet",
+			"stats": {
+				"focus": 0,
+				"guard": 0,
+				"power": 0,
+				"speed": 0
+			},
+			"traits": {
+				"bravery": 0.324068654411277,
+				"curiosity": 0.631389181369121,
+				"loyalty": 0.95,
+				"temper": 0.0586888787167188
+			},
+			"trust": 61.0,
+			"uid": "b6gwq29kz8m1ksc3an7g9re",
+			"was": [],
+			"wins": 0,
+			"xp": 7
+		},
+		{
+			"aff": {
+				"curious": 23.9879493117332,
+				"fierce": 13.019439548254,
+				"steadfast": 179.041199505329,
+				"swift": 10.5285778641701
+			},
+			"born": 1794416129,
+			"dna": {
+				"birth": [
+					"heart",
+					"right flank"
+				],
+				"ear": 1.014,
+				"ears": "standard",
+				"eye": "moss",
+				"girth": 1.0442,
+				"head": 0.9733,
+				"hue": -0.0049,
+				"limb": 0.96,
+				"mark": "patches",
+				"mark_col": "dark",
+				"mark_seed": 577777785,
+				"quirk": "hop",
+				"sat": -0.0026,
+				"seed": 33,
+				"sex": "m",
+				"size": -0.2459,
+				"tail": 0.9726,
+				"tailv": "standard",
+				"v": 1,
+				"val": -0.0331,
+				"voice": 1.0206
+			},
+			"edition": null,
+			"forms": [],
+			"ivs": {
+				"atk": 24,
+				"bond": 25,
+				"hp": 30,
+				"spd": 4,
+				"work": 10
+			},
+			"known": [],
+			"kos": 0,
+			"level": 130,
+			"likes": {
+				"food": "emberberry",
+				"hates": "sweetbun",
+				"play": "bath"
+			},
+			"matches": 0,
+			"memory": [],
+			"muts": [
+				{
+					"aff": "steadfast",
+					"id": "club",
+					"lv": 2
+				},
+				{
+					"aff": "steadfast",
+					"id": "plates",
+					"lv": 1
+				},
+				{
+					"aff": "steadfast",
+					"id": "brow",
+					"lv": 4
+				},
+				{
+					"aff": "steadfast",
+					"id": "shell",
+					"lv": 2
+				},
+				{
+					"aff": "swift",
+					"id": "tail_long",
+					"lv": 1
+				}
+			],
+			"name": "Rocky",
+			"needs": {
+				"clean": 75.0,
+				"energy": 80.0,
+				"food": 70.0,
+				"joy": 70.0
+			},
+			"needs_t": 1794416129.01868,
+			"species": "pebbit",
+			"stats": {
+				"focus": 0,
+				"guard": 0,
+				"power": 0,
+				"speed": 0
+			},
+			"traits": {
+				"bravery": 0.941275046158624,
+				"curiosity": 0.234723495882128,
+				"loyalty": 0.731106663653721,
+				"temper": 0.335488057928796
+			},
+			"trust": 61.0,
+			"uid": "b6gwq29kz83pexq6xpz1ecr",
+			"was": [],
+			"wins": 0,
+			"xp": 7
+		}
+	],
+	"scrap": 0,
+	"seeds": {
+		"emberberry": 1,
+		"tidebloom": 2
+	},
+	"serials": {
+
+	},
+	"settings": {
+		"cam_lead": 1.0,
+		"volume": 0.8
+	},
+	"stats": {
+		"best_gems": 0,
+		"best_kills": 0,
+		"caught": 0,
+		"kills": 0,
+		"knocks": 0
+	},
+	"treat": "",
+	"tutorial": {
+		"hatched": true
+	},
+	"v": 12,
+	"valuables": {
+
+	}
+}
