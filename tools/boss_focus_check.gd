@@ -66,7 +66,7 @@ func run(main: Node) -> void:
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	B.hurt(2.0, P, {"src": "shot"})
 	# (off the bot's line to the boss: a shot through the boss would hit the player)
-	_spot(P, F["c"] + Vector3(-side.z, 0.0, side.x) * 2.5)
+	_spot(P, F["c"] + Vector3(-side.z, 0.0, side.x) * 5.0)      # (5 m: a shot at the boss splashes 2.5 m)
 	_spot(B, F["c"] - side * 2.5)
 	_step()      # (stepping in wakes it)
 	ok(not m.lairs.boss_fight(B).is_empty() and (F["sealed_in"] as Array).has(P),
