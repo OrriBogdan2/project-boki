@@ -6,7 +6,7 @@ SPL = "/home/boki/site-repo/assets/img/hunters/%s-1600.webp"
 HUNT = json.load(open(os.path.join(os.path.dirname(__file__), "hunters.json")))
 GREY, GREEN, RED = (128, 128, 128), (40, 170, 60), (200, 40, 40)
 F = lambda s: ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", s)
-PH = 760; B = 10; G = 14; MH = 700   # panel height, border, gap, model px height for the tallest model
+PH = 830; B = 10; G = 14; MH = 700   # panel height, border, gap, model px height for the tallest model
 def tile(h, tag, ppm_t, meta):
     m = meta[tag]; ims = []
     for v in ("front", "tq"):
@@ -27,13 +27,14 @@ def label(t, txt, sub=None):
     if sub: d.text((10, 38), sub, fill=(60, 60, 60), font=F(17))
 for h in HUNT:
     if not os.path.exists(f"{BA}/{h['id']}/{h['id']}_meta.json"): continue
+    if not all(os.path.exists(f"{BA}/{h['id']}/{h['id']}_{t}_{v}.png") for t in ('old','new') for v in ('front','tq')): continue
     meta = json.load(open(f"{BA}/{h['id']}/{h['id']}_meta.json"))
     ppm = lambda m: m["res_h"] / m["H_view"]
     hmax = max(m["dims"][2] for m in meta.values())
     ppm_t = MH / hmax                       # one px/metre for all four views of this hunter
     to, tn = tile(h, "old", ppm_t, meta), tile(h, "new", ppm_t, meta)
     label(to, f"OLD ({h['old_lbl']})", h["name"]); label(tn, f"NEW ({h['new_lbl']})", h["name"])
-    sp = Image.open(SPL % h["splash"]).convert("RGB"); sp = sp.resize((640, int(sp.height * 640 / sp.width)), Image.LANCZOS); pn = Image.new("RGB", (640, PH), (214, 214, 218)); pn.paste(sp, (0, 70)); sp = pn
+    sp = Image.open(SPL % h["splash"]).convert("RGB"); sp = sp.resize((640, int(sp.height * 640 / sp.width)), Image.LANCZOS); pn = Image.new("RGB", (640, PH), (214, 214, 218)); pn.paste(sp, (0, 80)); sp = pn
     label(sp, f"{h['name']} live splash")
     col = GREEN if h["better"] else RED
     tiles = [(sp, GREY), (to, GREY), (tn, col)]
