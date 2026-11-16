@@ -288,8 +288,8 @@ Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd
 | rival_team_doc | The visiting team's name on the card. Each of its Boki matches one of yours in species and has that Boki's stats times the cup round's min_ratio (garden_prizes.json cup.rounds), so the cup counts every win. |
 | close_step | 0.05 |
 | close_step_doc | A great or duo hand-off brings the two runners this much closer (rec bonds). |
-| beats | {"contact_s": 0.3, "burst_s": 0.4, "burst_rate": 1.6, "sulk_drop": 0.35, "finish_s": 2.0} |
-| beats_doc | Body language (scripts/home/relay_beats.gd). contact_s: s both runners play their react at a hand-off. burst_s and burst_rate: the next runner's run clip plays at this times its pace for this long as it launches (a duo pair swells and eases it). sulk_drop: rad a loser without a sulk clip pitches its head down. finish_s: s the teams show their cheer or sulk before the result card. |
+| beats | {"contact_s": 0.3, "burst_s": 0.4, "burst_rate": 1.6, "sulk_drop": 0.35, "finish_s": 2.0, "fallback": {"win": "hop", "sulk": "idle"}} |
+| beats_doc | Body language (scripts/home/relay_beats.gd). contact_s: s both runners play their react at a hand-off. burst_s and burst_rate: the next runner's run clip plays at this times its pace for this long as it launches (a duo pair swells and eases it). sulk_drop: rad a loser without a sulk clip pitches its head down. finish_s: s the teams show their cheer or sulk before the result card. fallback: the rig clip a runner plays when its species has no clip of that name (win hops; sulk stands, its head drops by sulk_drop). |
 | gems_win | 8 |
 | gems_ran | 2 |
 | gems_doc | Gems to you when your team wins, or for any other relay. |
@@ -1584,6 +1584,22 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | _doc | Quiet growth on every level-up (scripts/match/level_growth.gd), straight lines as in the source (docs/ABILITIES.md 'Level growth'). Each level a hunter reaches adds hp (a share of the class's base health: the source's ~6% of base per level, docs/SUPERVIVE_DATA.md section 6) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities; the source's +5 Power a level comes to ~3.9% of an ability's level-1 number, from Myth's level-1 and level-15 tooltips in briefs/supervive-data/supervive_kits.md). Nothing pops up for it: the level badge flashes and its tooltip shows the totals. |
 | hp | 0.06 |
 | ap | 0.039 |
+
+## low_hp (`content/rules/low_hp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The low-health heartbeat and the red screen-edge pulse that goes with it (scripts/ui/low_hp_cue.gd), for the local player only. Health share = (health + armour) / (max health + max armour). It starts when the share falls below `start_share`, beats faster the lower it goes (`bpm_start` at the line, `bpm_empty` at 0) and stops the moment the share is back above the line, or you are downed or out. `volume_db` is the beat's level; `duck_db` is how much quieter it gets while `duck_voices` or more other sounds are playing (a fight). `edge_alpha` is the strongest edge red; `edge_calm` scales it when Settings > Accessibility > Fewer flashes is on. |
+| start_share | 0.25 |
+| bpm_start | 66 |
+| bpm_empty | 120 |
+| volume_db | -6 |
+| duck_db | -9 |
+| duck_voices | 6 |
+| edge_alpha | 0.09 |
+| edge_calm | 0.3 |
 
 ## mantle_look (`content/rules/mantle_look.json`)
 

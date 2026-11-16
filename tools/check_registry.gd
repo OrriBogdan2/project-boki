@@ -195,6 +195,7 @@ const CHECKS := {
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
+	"--particle-budget-check": ["res://tools/particle_budget_check.gd", "particle_budget_check", null],  # fx_life
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
@@ -783,6 +784,7 @@ const CHECKS := {
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
+	"--impact-weight-check": ["res://tools/impact_weight_check.gd", "impact_weight_check", null],      # hit weights
 	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
 	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
