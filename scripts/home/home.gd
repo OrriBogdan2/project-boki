@@ -1543,9 +1543,9 @@ func _move_kin(d: float) -> void:
 				wish = to.normalized() * (float(k["led"]) if k.has("led") else (4.4 * float(k.get("call_pace", 1.0)) if (k.has("fetch") or k.has("called_t") or k.has("greet_run")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))) * wade.speed(k, pos)
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
-		var nx := pos.x + hv.x * d
+		var nx := Vector3(pos.x + hv.x * d, 0, 0).x      # rounded to pos's float32 first: test the tile it lands on
 		if world.occupy(nx, pos.z, 0.3, 0.0, true) == 0.0: pos.x = nx
-		var nz := pos.z + hv.y * d
+		var nz := Vector3(0, 0, pos.z + hv.y * d).z      # (61.99999 passed as ground, then stored as 62.0: void)
 		if world.occupy(pos.x, nz, 0.3, 0.0, true) == 0.0: pos.z = nz
 		k["vel"] = Vector3(hv.x, 0, hv.y)
 		k["pos"] = pos
@@ -5139,8 +5139,8 @@ func _separate_kin(d: float) -> void:
 		if push == Vector2.ZERO: continue
 		push = push.limit_length(3.5 * d + 0.02)
 		var pos: Vector3 = a["pos"]
-		if world.occupy(pos.x + push.x, pos.z, 0.3, 0.0, true) == 0.0 and not world.is_void(pos.x + push.x, pos.z): pos.x += push.x
-		if world.occupy(pos.x, pos.z + push.y, 0.3, 0.0, true) == 0.0 and not world.is_void(pos.x, pos.z + push.y): pos.z += push.y
+		if world.occupy(pos.x + push.x, pos.z, 0.3, 0.0, true) == 0.0 and not world.is_void(Vector3(pos.x + push.x, 0, 0).x, pos.z): pos.x += push.x
+		if world.occupy(pos.x, pos.z + push.y, 0.3, 0.0, true) == 0.0 and not world.is_void(pos.x, Vector3(0, 0, pos.z + push.y).z): pos.z += push.y
 		a["pos"] = pos
 		(a["node"] as Node3D).position = pos
 
