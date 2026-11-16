@@ -430,6 +430,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
+		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
@@ -661,7 +662,8 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
@@ -705,6 +707,7 @@ func _ground_t() -> float:
 func _tick_bola(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var spd := float(bd["speed"])
+	var reach := float(bd["lane_w"]) * 0.5 - h.r      # m past a foe's body: a foe her size is caught inside the lane
 	var p: Vector3 = bola["pos"]
 	var dir: Vector2 = bola["dir"]
 	var steps := maxi(1, int(ceil(spd * dt / 0.25)))
@@ -738,7 +741,7 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + reach and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o

@@ -8,7 +8,7 @@ extends "res://tools/gameplay_media.gd"
 ## The camera is driven as Match does it, minus the cursor lean (the cursor sits idle).
 ## Needs a renderer (jobq --needs gpu).
 
-const STYLES := ["supervive", "source_scale"]
+const STYLES := ["default", "source_scale"]
 const SIZE := Vector2i(1280, 720)   # px of each shot
 const FIGHT_SECS := 2.0             # s of fight before the open-ground shot
 const SQUAD_SECS := 2.5             # s of fight before the squads shot

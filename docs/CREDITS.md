@@ -54,3 +54,5 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 - Synthesised, no samples (`tools/gen_sfx_egg.py`: egg_knock, egg_crack, egg_ready).
 ### ext/sfx-step-surfaces (shallow water and metal footsteps)
 - Synthesised, no samples (`tools/gen_sfx_steps.py`).
+### ext/sfx-breakables
+- Synthesised, no samples.

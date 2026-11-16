@@ -12,7 +12,7 @@
 	"fantasy": "The duelist. Sticks to one mark from range, cartwheels past them, never lets go.",
 	"howto": ["Play: duelist; stick to one target from range.", "Combo: {dash} vault, then a shot that hits resets it.", "Avoid: missing the shot after {dash}; no reset."],
 	"silhouette": "the long braid, the moth wings and the twin pistols",
-	"card": {"role_word": "Duelist", "loop": "Ranged duelist: stay on one foe, cartwheel, and land the big shot.", "dash": "Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. Shoot straight away and your next shots come quicker.", "passive": "Each hit on the same foe adds a Mark: +1.3 damage on your shots at them, with no cap. Knocks heal you.", "x": "A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge.", "rmb": "A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned.", "e": "Throw a dagger to your cursor or into a foe. Press it again to blink to it.", "weapons": {"arc_bolts": "Bolts from alternating hands every 0.45s. Each one lands at your cursor."}},
+	"card": {"role_word": "Duelist", "loop": "Ranged duelist: stay on one foe, cartwheel, and land the big shot.", "dash": "Cartwheel, then an empowered shot that refunds Vault if it lands.", "passive": "Each hit on a foe adds a Mark: +10% damage, uncapped.", "rmb": "Bola down the lane: grounds the first foe, stuns a second too.", "e": "Throw a dagger; press it again to blink to it.", "x": "A ring of blades for 2s, harder at its edge.", "weapons": {"arc_bolts": "Bolts from alternating hands every 0.45s, landing at your cursor."}, "chips": {"rmb": ["3 dmg", "6.1 pair"], "e": ["8 dmg"], "x": ["3.1-4.5 per blade"]}},
 	"signature": "arc_bolts",
 	"resource": {"id": "marks", "name": "Marks", "max": 8, "kind": "on_targets", "dur": 4.0, "mark_dmg": 1.3, "gap": 0.0, "heal_knock": 0.2, "heal_assist": 0.25, "col": "#ffd23f"},
 	"passive": {"name": "Marks", "desc": "Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +1.3 per Mark (a tenth of a shot, added flat, the empowered shot included). The empowered shot adds 2, the Bola 1. A knock heals you 20% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%."},
@@ -40,5 +40,13 @@
 	"rank3": {"sec": "flies 1m further after the first foe, the cooldown 4.8s, and two foes caught pool their Marks", "dash": "the empowered bonus +40% in all, and the Vault's speed boost is half again as big", "kin": "sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back"},
 	"rank2": {"sec": "Rank 2: damage +50%.", "dash": "Rank 2: the empowered bonus +20%.", "kin": "Rank 2: cooldown 15s -> 10.7s."},
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back.", "dash": "Rank 3: the empowered bonus +40% in all, and the speed boost is half again as big."},
-	"tells": {"half": "gold Mark diamonds over the target, one per stack", "full": "a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs", "dash_spent": "a white cartwheel arc, dash pip dark; the quick bolts after it carry cyan tails and a cyan star at the hand; a landed empowered shot flashes the pip back with RESET at her hand"}
+	"tells": {"half": "gold Mark diamonds over the target, one per stack", "full": "a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs", "dash_spent": "a white cartwheel arc, dash pip dark; the quick bolts after it carry cyan tails and a cyan star at the hand; a landed empowered shot flashes the pip back with RESET at her hand"},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }

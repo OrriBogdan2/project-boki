@@ -2,8 +2,8 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
-ability in a match; **R** turns a piece in build mode and reloads in a match.
+is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and sends or calls back
+your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
 

@@ -71,7 +71,8 @@ func _breah() -> void:
 	var card: Dictionary = K.d["card"]
 	ok(
 		"card: a role line and one line each for LMB, RMB, E, Shift and the passive",
-		["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		["role", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		and not (card.get("weapons", {}) as Dictionary).is_empty()   # the LMB line is the weapon's (kit card rewrite)
 	)
 	# ---- LMB tap: a boulder to full range that splashes the foe beside the one it hit
 	reset.call()
@@ -84,7 +85,15 @@ func _breah() -> void:
 	step(m, 0.08, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	m.step(DT)
+	# the source's throw lets go on the whip of the arm (about 0.13s in), not on the press
+	var early := m.shots.filter(func(s): return s["by"] == P).size()
+	step(m, 0.13)
 	var bshot: Array = m.shots.filter(func(s): return s["by"] == P)
+	ok(
+		"lmb: the boulder leaves the hand 0.13s into the throw, not on the press",
+		early == 0 and bshot.size() == 1 and absf(float(K.d["lmb"]["boulder"]["release"]) - 0.13) < 0.001,
+		"at the press %d, 0.13s later %d" % [early, bshot.size()]
+	)
 	var blen := float(bshot[0]["life"]) * (bshot[0]["vel"] as Vector2).length() if not bshot.is_empty() else 0.0
 	ok(
 		"lmb: tap = boulder (one Match shot, molten skin)",
@@ -1043,7 +1052,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))

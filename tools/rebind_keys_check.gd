@@ -123,7 +123,7 @@ func _match() -> void:
 	P.ak.cue.erase("w")
 	var texts: Array = TextCache.seen.duplicate()
 	for id in ["sec", "k1", "r", "dash"]:
-		for line in m.hud._tip_lines(id, P): texts.append(String(line[0]))
+		for line in m.hud.hover.tip_lines(id, P): texts.append(String(line[0]))
 	none("no hunter slot text or tooltip names a default key (%d texts)" % texts.size(), _stale_in(texts))
 	m.free()
 
@@ -156,7 +156,7 @@ func _tutorial() -> void:
 	ok("the move step's strip cap is the bound move keys ('%s')" % tu.key_cap,
 			tu.key_cap == tu._wasd() and tu.key_cap.begins_with("F"))
 	ok("the strip's key cap is the bound key on %d steps" % capped, capped > 0 and off.is_empty(), str(off))
-	for row in m.train_rows(): texts.append(String(row[1]))
+	for row in m.training.rows(): texts.append(String(row[1]))
 	none("tutorial lines, details, hints, training rows name no default key (%d)" % texts.size(), _stale_in(texts))
 	m.free()
 

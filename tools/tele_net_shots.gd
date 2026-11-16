@@ -24,7 +24,6 @@ var lines: Array = []
 func _init() -> void:
 	tag = "TELESHOT"
 	guest_flag = "--tele-net-shots=guest"
-	guest_bin = OS.get_executable_path()  # a GPU worker has no queue wrapper
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			shots_dir = a.substr(12)

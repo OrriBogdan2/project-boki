@@ -24,6 +24,8 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var cancels = load("res://tools/lace_cancels_check.gd").new()
+	cancels.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
 	if both or "--archer-combo-check" in args:
@@ -33,6 +35,7 @@ func run(main_node: Node) -> void:
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
+		await cancels.cancels()
 		await bow.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
@@ -41,8 +44,12 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n + bow.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
+	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
+	hits.main = main_node
+	if both:
+		await hits.audit()
+	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -158,7 +165,7 @@ func _recall_caught(m: Match, K: BulwarkKit) -> float:
 
 ## Where the recall clip closes the hand (bul_recall's third key; breaker.glb lmb_recall has it at 0.3 s too).
 func _catch_key() -> float:
-	return float(KMovesPinBjorn.MOVES["bul_recall"]["keys"][2][0])
+	return float(KMovesBjorn.MOVES["bul_recall"]["keys"][2][0])
 
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:

@@ -2,8 +2,8 @@ class_name HeroSfx
 extends RefCounted
 ## A Hunter's own version of a shared sound: "<arch>_<kind>" (gunslinger_dash, archer_hurt,
 ## bulwark_step_wood) when its sound branch made one, else the shared fallback. Kinds the game asks
-## for: dash, dash_air, hurt, down, death and step_<surface> (grass, stone, wood, snow; water and
-## metal fall back to StepSurface's steps per weight class). Answers are cached per
+## for: dash, dash_air, hurt, down, death, step_<surface> (grass, stone, wood, snow; water and metal fall back to
+## StepSurface's steps per weight class), pickup and recast_open / recast_tick (RecastCue). Answers are cached per
 ## name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
 
 static var _has := {}          # sound name -> whether audio/ has it
@@ -37,3 +37,11 @@ static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	var sname := of(h, kind, "")
 	if sname != "":
 		m.sfx(sname, h.pos, vol_db)
+
+## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
+## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
+static func hit_sound(by: Ent, o := {}) -> String:
+	if not by is Hunter:
+		return "hit"
+	var h := by as Hunter
+	return of(h, "hit", hit_tick(h, o))
