@@ -16,12 +16,11 @@ import fistkit as A  # noqa: E402
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
 arm = bpy.data.objects["Armature"]
-C = A.Clips(arm)
-AX = float(C.rig.P["foot.R"].x)
-AZ = float(C.rig.P["foot.R"].z)
-SX = float(C.rig.P["upper_arm.R"].x)
-SZ = float(C.rig.P["upper_arm.R"].z)
-HZ = float(C.rig.P["hips"].z)
+REST = {b.name: b.head_local.copy() for b in arm.data.bones}
+AX = float(REST["foot.R"].x)
+AZ = float(REST["foot.R"].z)
+SX = float(REST["upper_arm.R"].x)
+SZ = float(REST["upper_arm.R"].z)
 tau = math.tau
 
 
@@ -75,19 +74,160 @@ def breathe(period, amp=1.0, sway=0.0):
     return f
 
 
-# ---------------------------------------------------------------------- idle, stance
-C.bake("idle", 3.6, [(0, LOOSE), (3.6, {})], over=breathe(3.6, 1.0, 1.0), loop=True)
+# ---------------------------------------------------------------------- idle, stance (docs/art/IDLE_AUDIT.md, Tenzo)
+# A blind seer listening to the ground, light on the balls of his feet. Both loops stand on the same FEET, so the
+# 0.5 s hand-off from idle into stance never slides them, and every curve is whole cycles of the loop or a beat that
+# starts and ends inside it, so the seam closes. Parts follow one another: the pelvis leads, the torso, head and fists
+# trail it by LAG seconds.
+STAND_T = 6.0
+LAG = dict(pelvis=0.0, torso=0.1, head=0.23, hands=0.33)
+FEET = dict(fr=(AX + 0.07, -0.05, AZ), fl=(-AX - 0.04, 0.07, AZ), fra=0.0, fla=0.0, frt=-16.0, flt=9.0)
+# his rest: knees soft, the weight on the left leg, the stone fist hanging heavy, the right hand low and forward,
+# turning a stone over by touch; the head cocked, an ear to the ground
+IDLE = m(LOOSE, FEET, pos=(-0.026, 0, -0.03), hips=(-3, -2.6, -3.5), head=(-5, 5, 7), lip=0.3,
+         hr=hand(0.06, 0.16, -0.5), hl=lhand(0.1, 0.06, -0.57), er=(0.8, -0.6, -0.2), kr=(0.4, 1, 0), kl=(-0.2, 1, 0))
+# the guard: sunk lower on the same feet, fists low before him, palms in, the stones gathered between them
+GUARD = m(IDLE, pos=(0.0, -0.01, -0.065), hips=(-9, 0, 5), head=(5, 3, 9), lip=0.45, jaw=0.06,
+          hr=hand(-0.2, 0.3, -0.36), hl=lhand(-0.26, 0.3, -0.34), er=(0.9, -0.4, -0.5), el=(-0.9, -0.4, -0.5),
+          wr=(0, 0, -20), wl=(0, 0, 20), kr=(0.45, 1, 0), kl=(-0.3, 1, 0))
 
 
-def bounce(t, p):
-    s = math.sin(t / 0.8 * tau * 2)
-    add(p, "pos", (0.012 * math.sin(t / 0.8 * tau), 0, 0.022 * s))
-    add(p, "hips", (1.6 * s, 0, 2.0 * math.sin(t / 0.8 * tau)))
-    add(p, "hr", (0, 0, 0.018 * math.sin(t / 0.8 * tau * 2 - 0.9)))
-    add(p, "hl", (0, 0.015 * math.sin(t / 0.8 * tau), 0.018 * math.sin(t / 0.8 * tau * 2 - 1.3)))
+def add_breath():
+    """The leaf bone x_breath under hips at the bottom of the rib cage, and the rib cage's skin moved onto it from hips
+    (an ellipsoid round the chest, full inside BREATH_CORE, nothing at its rim), so a scale on it swells the chest."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head, eb.tail = (0, 0, 1.36), (0, 0, 1.56)
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    body = bpy.data.objects["tarek_body"]
+    hips, xb = body.vertex_groups["hips"], body.vertex_groups.new(name="x_breath")
+    to_arm = arm.matrix_world.inverted() @ body.matrix_world
+    for v in body.data.vertices:
+        w = next((g.weight for g in v.groups if g.group == hips.index), 0.0)
+        p = to_arm @ v.co
+        r = math.sqrt(sum(((p[i] - BREATH_C[i]) / BREATH_R[i]) ** 2 for i in range(3)))
+        k = min(1.0, max(0.0, (1.0 - r) / (1.0 - BREATH_CORE)))
+        k = w * k * k * (3 - 2 * k)
+        if k > 1e-3:
+            hips.add([v.index], w - k, "REPLACE")
+            xb.add([v.index], k, "REPLACE")
 
 
-C.bake("stance", 0.8, [(0, STANCE), (0.8, {})], over=bounce, loop=True)
+BREATH_C = (0.0, 0.0, 1.53)          # m, the rib cage's centre (hips at 1.22, shoulders at 1.72)
+BREATH_R = (0.17, 0.14, 0.18)        # m, its half sizes: the skin outside moves with hips alone
+BREATH_CORE = 0.55                   # of the half sizes: fully on x_breath inside this
+add_breath()
+C = A.Clips(arm)
+
+
+def ring(t):
+    return t % STAND_T
+
+
+def bump(t, a, b, k=1.0):
+    """0 outside a..b, a smooth hill inside it; k > 1 rises slowly and falls fast (a tap)."""
+    t = ring(t)
+    return math.sin(math.pi * ((t - a) / (b - a)) ** k) ** 2 if a < t < b else 0.0
+
+
+def plateau(t, a, b, c, d):
+    """0 before a, eases up to 1 by b, holds, eases back to 0 from c to d."""
+    t = ring(t)
+    u = min(1.0, max(0.0, (t - a) / (b - a))) if t < c else 1.0 - min(1.0, max(0.0, (t - c) / (d - c)))
+    return u * u * (3 - 2 * u)
+
+
+def settle(t, a, dur):
+    """The overshoot after a move lands at a: one swing past, then still."""
+    u = (ring(t) - a) / dur
+    return math.sin(math.pi * u) * (1 - u) if 0 < u < 1 else 0.0
+
+
+def cyc(t, k, ph=0.0):
+    return math.sin(tau * k * t / STAND_T + ph)
+
+
+def weight(t):
+    """+1 on the left leg, -1 on the right: held, shifted over at 1.9 s, held, back at 4.5 s, each with a settle."""
+    return 1 - 2 * plateau(t, 1.9, 2.7, 4.5, 5.3) - 0.12 * settle(t, 2.7, 0.7) + 0.12 * settle(t, 5.3, 0.6)
+
+
+def lift_heel(p, s, deg):
+    """The heel up off the ground, the foot rolled onto its ball (12 cm ahead of the ankle, 9.5 cm below)."""
+    a = math.radians(deg)
+    add(p, "f" + s, (0, 0.12 * (1 - math.cos(a)) + 0.095 * math.sin(a), 0.12 * math.sin(a) - 0.095 * (1 - math.cos(a))))
+    add(p, "f" + s + "a", -deg)
+
+
+def lift_toes(p, s, deg):
+    """The toes up off the ground, the foot rocked back on its heel (5 cm behind the ankle)."""
+    a = math.radians(deg)
+    add(p, "f" + s, (0, 0.05 * (math.cos(a) - 1) - 0.095 * math.sin(a), 0.05 * math.sin(a) - 0.095 * (1 - math.cos(a))))
+    add(p, "f" + s + "a", deg)
+
+
+def breath(t, p, amp):
+    """Two breaths a loop: the rib cage swells on x_breath, the chest lifts the arms, the head counters."""
+    b = 0.5 - 0.5 * cyc(t, 2, math.pi / 2)
+    p["breath"] = amp * b
+    add(p, "pos", (0, 0, 0.003 * b))
+    add(p, "hips", (1.0 * b, 0, 0))
+    add(p, "head", (-0.6 * b, 0, 0))
+    lag = 0.5 - 0.5 * cyc(t - LAG["hands"], 2, math.pi / 2)
+    add(p, "hr", (0, 0, 0.005 * lag))
+    add(p, "hl", (0, 0, 0.005 * lag))
+
+
+def idle_life(t, p):
+    """The weight shift with the overlap, the listening head, the stone turned in the right hand, a heel lift while he
+    feels the ground, and once a loop the fidget: two toe taps, and the stones answer with a hop."""
+    w = {k: weight(t - lag) for k, lag in LAG.items()}
+    add(p, "pos", (-0.02 * (w["pelvis"] - 1), 0, -0.008 * (1 - w["pelvis"] ** 2)))
+    add(p, "hips", (0, 2.6 * (1 - w["torso"]), 3.5 * (1 - w["torso"])))
+    add(p, "head", (0, -1.8 * (1 - w["head"]), -2.0 * (1 - w["head"])))
+    for s in ("hr", "hl"):
+        add(p, s, (0.025 * (w["hands"] - w["torso"]), 0, 0))
+    breath(t, p, 0.02)
+    # he turns an ear to a sound on his left, holds it, lets it go
+    hear = plateau(t, 0.4, 1.0, 1.7, 2.3)
+    add(p, "head", (-2.0 * hear, 6.0 * hear, 12.0 * hear))
+    # the right heel lifts and lowers while the weight is on the left
+    lift_heel(p, "r", 14.0 * plateau(t, 0.3, 0.8, 1.2, 1.7))
+    # the stone turned over in the right fist by touch
+    add(p, "wr", (8.0 * cyc(t, 2), 0, 26.0 * cyc(t, 1)))
+    add(p, "hr", (0.01 * cyc(t, 2, 1.0), 0.01 * cyc(t, 2, 2.6), 0))
+    # the fidget: the free left foot taps twice, he tips an ear toward it, the stones hop in answer and he grins
+    lift_toes(p, "l", 20.0 * (bump(t, 3.2, 3.58, 1.8) + bump(t, 3.62, 4.0, 1.8)))
+    tip = plateau(t, 3.0, 3.4, 4.0, 4.6)
+    add(p, "head", (-6.0 * tip, 5.0 * tip, 8.0 * tip))
+    hop = bump(t, 4.1, 4.4) - 0.3 * bump(t, 4.4, 4.75)
+    add(p, "head", (7.0 * hop, 0, 0))
+    add(p, "hr", (0, 0.01 * hop, 0.05 * hop))
+    add(p, "wr", (18.0 * hop, 0, 0))
+    add(p, "hl", (0, 0, 0.025 * (bump(t, 4.17, 4.47) - 0.3 * bump(t, 4.47, 4.82))))
+    add(p, "pos", (0, 0, 0.006 * bump(t, 4.12, 4.5)))
+    add(p, "lip", 0.6 * plateau(t, 4.1, 4.3, 4.8, 5.4))
+
+
+def guard_life(t, p):
+    """The stones gathered between his palms in one slow figure-8 a loop, the pelvis a beat ahead of it and the head
+    a beat behind; breath in the shoulders; nothing faster than two cycles a loop."""
+    for s, lag in (("hr", LAG["torso"]), ("hl", LAG["hands"])):
+        add(p, s, (0.07 * cyc(t - lag, 1), 0.02 * cyc(t - lag, 1, math.pi / 2), 0.035 * cyc(t - lag, 2)))
+    add(p, "pos", (0.01 * cyc(t + 0.2, 1), 0.006 * cyc(t, 1, math.pi / 2), 0))
+    add(p, "hips", (0, 1.5 * cyc(t, 1), -4.0 * cyc(t - LAG["torso"], 1)))
+    add(p, "head", (0, 3.0 * cyc(t - LAG["head"], 1), -5.0 * cyc(t - LAG["head"], 1)))
+    add(p, "wr", (0, 0, 12.0 * cyc(t - LAG["hands"], 1)))
+    add(p, "wl", (0, 0, 12.0 * cyc(t - LAG["hands"], 1)))
+    breath(t, p, 0.025)
+
+
+C.bake("idle", STAND_T, [(0, IDLE), (STAND_T, {})], over=idle_life, loop=True)
+C.bake("stance", STAND_T, [(0, GUARD), (STAND_T, {})], over=guard_life, loop=True)
 
 
 # ---------------------------------------------------------------------- walk, run

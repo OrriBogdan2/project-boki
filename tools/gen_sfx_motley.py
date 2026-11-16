@@ -8,21 +8,25 @@ the bells on his cap (which ring only when he swaps) and the Void under it all (
 low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle where a groan should be.
 
   os_orb (fire, 3 takes)       a violet orb flicked out: a soft void puff and a music-box tine
-  os_orb_hot (fire, 3 takes)   the full orb: a deeper puff and a two-tine flourish
+  os_orb_hot (fire, 3 takes)   the charged void orb: a deeper puff, a two-tine flourish, a low gulp
   os_prime                     the orb at full: a quiet tine trill
   ostra_music_box              SIGNATURE: the crank's eerie tune, when Brimseed is nearly ripe (its column)
   ostra_spring_boing           SIGNATURE: the jack springing out as Brimseed pops
   os_snap_wind / os_snap / os_snap_hit   Snap: the crank ratcheting / the spring-loaded spear / the crown stun
-  os_swap_lob / os_swap        Trade: the toss (a rising slide whistle) / the arrival, cap bells ringing
+  os_swap_lob / os_swap        Trade: the toss (a low void whoosh, a whisper and a glass sting) / the
+                               arrival, cap bells ringing
   os_seed / os_pop             Brimseed planted / popped
   os_empower                   Swollen: the Void inflating round him, a giggle
   os_well / os_well_hum        Nightwell: the gathering implosion / the well opening
   ostra_dash                   a floating lurch, a small spring and the cap bells
-  ostra_step_<surface>         he floats: soft hover pulses, the surface faintly under him, a bell now and then
+  ostra_hover (loop)           no footsteps, he floats: a soft low Void hum with a whisper on it while he moves
+                               (HoverHum levels and pitches it with his speed)
   ostra_hurt/down/death        wordless voice
 
 The os_* files were first written by tools/gen_pair_sfx.py; this script replaces them (content/sfx/
 ostra.json lists them under "replaces"). Original synthesis and an original tune, no samples.
+`python3 gen_sfx_motley.py hover` writes only ostra_hover (the other files were made with an older numpy, so a
+full run re-rolls their noise).
 """
 import os, sys
 import numpy as np
@@ -146,14 +150,17 @@ def orb(i):
 
 
 def orb_hot(i):
-    """The full orb: a deeper whoomp from the Void and a two-tine flourish."""
-    d = 0.75
+    """The charged void orb: a deeper whoomp from the Void, a two-tine flourish, then a low gulp and a
+    faint glass ring trailing it (heavier and longer than the quick shard's flick)."""
+    d = 0.9
     whoomp = mix(kick(160, 55, 0.35, 0.02, 0.06, 2.2) * 0.75, lpf(noise(0.3), 700) * env(N(0.3), 0.003, 0.06) * 1.0,
                  sub(70, 45, 0.3, 0.06) * 0.35)
     air = lpf(swoosh(0.36, 450, 1800, 2.0, 0.8, 1.3), 4000) * 0.3
     a, b = SCALE[(i + 2) % len(SCALE)], SCALE[(i + 4) % len(SCALE)]
     notes = mix(tine(hz(a), 0.6, 0.2) * 0.4, at(tine(hz(b), 0.6, 0.22) * 0.45, 0.06))
-    return pad(lpf(mix(soft(whoomp, 1.0), fo(air), notes), 8000), d)
+    gulp = at(fo(void(0.45, 240, 0.15) * 0.5, 0.6), 0.08)
+    glass = at(S.chime(1318.5 * (1 + 0.03 * i), 0.6, 0.25, ((1.0, 1.0), (2.32, 0.35))) * 0.12, 0.1)
+    return pad(lpf(mix(soft(whoomp, 1.0), fo(air), notes, gulp, glass), 8000), d)
 
 
 def prime():
@@ -228,12 +235,18 @@ def snap_hit():
 
 # ------------------------------------------------------------------ Shift: Trade
 def swap_lob():
-    """The toss: a quick whoosh up and a slide whistle rising (the joke before the trick)."""
-    d = 0.55; t = T(d)
-    air = lpf(swoosh(0.4, 400, 1600, 1.8, 0.8, 1.4), 4000) * 0.35
-    f = 520 * (1500 / 520) ** ((t / d) ** 0.8) * (1 + 0.01 * np.sin(2 * np.pi * 6 * t))
-    whistle = (np.sin(2 * np.pi * np.cumsum(f) / S.SR) + 0.1 * bpf(noise(d), 800, 3000)) * np.sin(np.pi * t / d) ** 1.2
-    return mix(fo(air), whistle * 0.35)
+    """The toss: the Void opening under him (a low whoosh over a beating sub swell), a reversed whisper
+    rushing in, then a glassy sting of two near notes rubbing (ominous) and one low tine from the box."""
+    d = 1.1
+    low = lpf(swoosh(0.75, 90, 560, 1.6, 0.7, 1.2), 1400) * 0.9
+    drone = fo(void(0.7, 260, 0.35) * 0.55, 0.5)
+    gulp = at(sub(70, 38, 0.5, 0.12) * 0.5, 0.16)
+    hush = S.voice(0.32, 150, 120, 'ah', breath=0.95, scale=0.9, a=0.01, decay=0.08)[::-1]
+    whisper = hollow(hpf(lpf(soft(hush, 30), 7000), 900)) * 0.5
+    glass = mix(S.chime(1318.5, 0.85, 0.3, ((1.0, 1.0), (2.32, 0.4), (4.25, 0.18))) * 0.3,
+                S.chime(1396.9, 0.85, 0.26, ((1.0, 0.8), (2.32, 0.3))) * 0.25)
+    sting = at(mix(glass, tine(hz(69), 0.7, 0.3) * 0.25), 0.2)
+    return pad(lpf(mix(soft(low, 20), drone, gulp, whisper, sting), 9000), d)
 
 
 def swap():
@@ -302,7 +315,7 @@ def well_hum():
     return lpf(mix(soft(snap_, 1.0), hum, pull), 7000)
 
 
-# ------------------------------------------------------------------ dash, steps
+# ------------------------------------------------------------------ dash, hover
 def dash():
     """A floating lurch: a soft whoosh, a small spring and a flick of the cap bells."""
     d = 0.5
@@ -312,25 +325,17 @@ def dash():
     return pad(mix(fo(air), boing, jingle), d)
 
 
-def footstep(surface, i):
-    """He floats: a soft hover pulse (a breath of the Void pushing down), the surface faintly answering
-    beneath, and on some takes one cap bell."""
-    d = 0.3
-    puff = lpf(noise(0.18), 500) * np.sin(np.pi * np.linspace(0, 1, N(0.18))) ** 2 * 0.9
-    thrum = S.sweep(95 + 4 * i, 80, 0.2) * np.sin(np.pi * np.linspace(0, 1, N(0.2))) ** 2 * 0.35
-    if surface == 'grass':
-        under = bpf(noise(0.2), 1200, 4000) * np.sin(np.pi * np.linspace(0, 1, N(0.2))) ** 3 * 0.2
-    elif surface == 'stone':
-        under = at(fo(ring((1150 + 30 * i, 1720), 0.12, (0.02, 0.012), (0.12, 0.05)), 0.4), 0.06)
-    elif surface == 'wood':
-        under = at(fo(ring((190 + 6 * i, 330), 0.18, (0.05, 0.03), (0.35, 0.15)), 0.4), 0.05)
-    else:
-        under = lpf(grains(0.2, 260, 600, 2600, 0.001, 0.003, fall=0.08), 3200) * 0.3
-    out = mix(puff, thrum, under)
-    if i in (1, 3):
-        f = (2050, 2350)[i // 2]
-        out = mix(out, at(fo(ring((f, f * 1.51), 0.18, (0.05, 0.03), (0.07, 0.03)), 0.4), 0.07))
-    return fo(pad(lpf(out, 6500), d), 0.25)
+def hover():
+    """He floats, no feet (source: no footsteps, a soft low hum or whisper while he moves): the Void's two
+    beating low sines, a breath of dark noise slowly swelling and ebbing, a faint airy whisper over it. Every
+    tone is a whole number of cycles in the loop, so it repeats without a seam."""
+    d = 2.4; t = T(d)
+    swell = 0.8 + 0.2 * np.sin(2 * np.pi * t / d)
+    drone = (np.sin(2 * np.pi * 55 * t) + 0.8 * np.sin(2 * np.pi * (55 + 1 / d * 3) * t + 1.0)
+             + 0.25 * np.sin(2 * np.pi * 110 * t + 0.4)) * 0.4
+    breath = lpf(noise(d), 420) * (0.75 + 0.25 * np.sin(2 * np.pi * 2 * t / d + 2.0)) * 0.9
+    whisper = bpf(noise(d), 1800, 4200) * (0.5 + 0.5 * np.sin(2 * np.pi * 3 * t / d)) ** 2 * 0.07
+    return lpf(mix(drone, breath, whisper) * swell, 5000)
 
 
 # ------------------------------------------------------------------ voice: a hollow, eerie, playful man
@@ -370,7 +375,7 @@ def build():
     S.save_cat('os_snap_wind', snap_wind(), 'cast')
     S.save_cat('os_snap', snap(), 'cast')
     S.save_cat('os_snap_hit', snap_hit(), 'impact')
-    S.save_cat('os_swap_lob', swap_lob(), 'cast')
+    S.save_cat('os_swap_lob', swap_lob(), 'dash')
     S.save_cat('os_swap', swap(), 'impact')
     S.save_cat('os_seed', seed(), 'cast')
     S.save_cat('os_pop', pop(), 'impact')
@@ -378,13 +383,17 @@ def build():
     S.save_cat('os_well', well(), 'cast')
     S.save_cat('os_well_hum', well_hum(), 'impact')
     S.save_cat('ostra_dash', dash(), 'dash')
-    for surf in ('grass', 'stone', 'wood', 'snow'):
-        S.takes_cat('ostra_step_' + surf, lambda i, s=surf: footstep(s, i), 3, 'step')
     S.takes_cat('ostra_hurt', hurt, 3, 'grunt')
     S.save_cat('ostra_down', down(), 'grunt')
     S.save_cat('ostra_death', death(), 'grunt')
+    build_hover()
+
+
+def build_hover():
+    S.reseed(6624)
+    S.save_loop('ostra_hover', hover(), 'loop')
 
 
 if __name__ == '__main__':
-    build()
+    build_hover() if sys.argv[1:] == ['hover'] else build()
     print('gen_sfx_motley: done')

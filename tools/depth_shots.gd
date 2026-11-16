@@ -5,21 +5,29 @@ extends RefCounted
 ##   depth_a_edge   standing a metre from a cliff edge over the abyss
 ##   depth_b_step   at the top of a terrace step, a hunter on the lower tier
 ##   depth_c_low    the same step from below, looking up at a hunter on the upper tier
+##   depth_d_shots  the top of the step again with shots flying along the ledge (their drop shadows)
+## --cues=off draws them with the height cues off, for the before shots (names get a "before_" prefix).
 
 const DT := 1.0 / 60.0
 const SETTLE := 0.5     # s of match time before each capture
+const SHOTS := 5        # shots in the string of the shots capture
+const SHOT_SPEED := 2.0 # m/s of those shots (slow, so they are still in frame at the capture)
 
 var main: Node
 var m: Match
 var P: Hunter
 var dir := ""
 var seed_v := 77
+var prefix := ""
 
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 		if String(a).begins_with("--seed="): seed_v = int(String(a).substr(7))
+		if String(a) == "--cues=off":
+			Settings.set_v("depth_cues", false, false)
+			prefix = "before_"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	var w := m.world
@@ -29,6 +37,7 @@ func run(main_node: Node) -> void:
 	await _shoot("depth_b_step", step[0], step[1], step[2])
 	var low: Vector2i = step[0] + step[1] * 2
 	await _shoot("depth_c_low", low, -step[1], step[0] - step[1])
+	await _shoot("depth_d_shots", step[0], step[1], step[2], Vector2i(-step[1].y, step[1].x))
 	print("DEPTHSHOTS in %s" % dir)
 	main.get_tree().quit(0)
 
@@ -50,12 +59,16 @@ func _find(test: Callable) -> Array:
 						return [Vector2i(x, z), d, Vector2i(x, z) - d * 3]
 	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
 
-func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i) -> void:
+func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire := Vector2i.ZERO) -> void:
 	var w := m.world
 	P.teleport(Vector3(tile.x + 0.5, w.ground_at(tile.x + 0.5, tile.y + 0.5), tile.y + 0.5))
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
 	var fy := w.ground_at(foe_tile.x + 0.5, foe_tile.y + 0.5)
 	if fy > -1e8: foe.teleport(Vector3(foe_tile.x + 0.5, fy, foe_tile.y + 0.5))
+	if fire != Vector2i.ZERO:      # a string of shots leaving along `fire`
+		for k in range(1, SHOTS + 1):
+			var at := P.pos + Vector3(fire.x, 0.0, fire.y) * (1.0 + k * 1.1) + Vector3(0, 1.2, 0)
+			m.spawn_shot(P, at, Vector2(fire) * SHOT_SPEED, 1.0, 5.0, 0.12, Color("ffd66b"))
 	var t := 0.0
 	while t < SETTLE:
 		m.step(DT)
@@ -63,7 +76,7 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i) -> vo
 		m.cam.snap(P.pos)
 		for h in m.hunters: h.render(DT, 1.0)
 		await main.get_tree().process_frame
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + file + ".png"))
 
 func _setup() -> void:
 	m = Match.new()

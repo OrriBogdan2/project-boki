@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the data: every trigger has at least min_lines general lines; every line is at most max_words
 ##      words and one sentence; every action is at most act_words; every tone is a known feeling and
 ##      just the name; aliases point at real triggers
-##   2. the old banks are all covered: every KinVoice category and KinSpeak recall kind has a trigger
+##   2. every category a caller passes (Kin.bark, KinCompanion callouts, recall kinds) has a trigger
 ##   3. no Boki repeats a line within its last no_repeat lines, over PICKS picks of every trigger, for
 ##      every species grown (and three young), and over a mixed run of all triggers
 ##   4. the cooldown: a Boki that just spoke stays quiet until it ends, unless it's answering you
@@ -39,6 +39,9 @@ func _data() -> void:
 	var act_cap := int(BokiLines.tuning("act_words"))
 	var bad_lines: Array = []
 	var bad_acts: Array = []
+	var it_words: Array = []
+	var it_re := RegEx.create_from_string("(?i)\\b(its|itself)\\b")
+	var it_act_re := RegEx.create_from_string("(?i)\\b(its|itself|it (is|was|has|will|wobbles)|it's)\\b")
 	var thin: Array = []
 	var feels_ok := true
 	for id in r["triggers"]:
@@ -49,7 +52,11 @@ func _data() -> void:
 			for s in t["lines"][el]:
 				if not BokiLines.fits(String(s)):
 					bad_lines.append("%s: %s" % [id, s])
+				if it_re.search(String(s)):
+					it_words.append("%s: %s" % [id, s])
 		for a in t["acts"]:
+			if it_act_re.search(String(a)):
+				it_words.append("%s: %s" % [id, a])
 			if BokiLines.words(String(a)) > act_cap or not String(a).begins_with("("):
 				bad_acts.append("%s: %s" % [id, a])
 		feels_ok = feels_ok and r["tones"].has(String(t["feel"]))
@@ -57,6 +64,16 @@ func _data() -> void:
 	ok("every line is <= %d words and one sentence" % cap, bad_lines.is_empty(), str(bad_lines))
 	ok("every action is <= %d words, in brackets" % act_cap, bad_acts.is_empty(), str(bad_acts))
 	ok("every trigger's feeling has tones", feels_ok)
+	for key in KinSpeak.ACTS:
+		for a in KinSpeak.ACTS[key]:
+			if it_act_re.search(String(a)):
+				it_words.append("ACTS.%s: %s" % [key, a])
+	ok("no Boki line or action calls a Boki it/its", it_words.is_empty(), str(it_words))
+	var tpl := "(pats {his} belly, {he} grins, {He} waits for {him} by {himself})"
+	var m_line := KinSpeak.pronouns(tpl, "m")
+	var f_line := KinSpeak.pronouns(tpl, "f")
+	ok("pronoun tokens fill by sex", m_line == "(pats his belly, he grins, He waits for him by himself)"
+			and f_line == "(pats her belly, she grins, She waits for her by herself)", m_line + " / " + f_line)
 	var tones_ok := true
 	for feel in r["tones"]:
 		for tone in r["tones"][feel]:
@@ -71,8 +88,8 @@ func _data() -> void:
 			and BokiLines.fits("Hmm... okay, fine.") and BokiLines.fits("That tickles! ♥"))
 
 # ------------------------------------------------------------------ 2. the old banks are covered
-## The categories the old banks had (KinVoice BASE and CALL, KinSpeak RECALL as back_<kind>): the
-## callers still pass these names, so each must have lines here before the old banks go.
+## The categories the callers pass (Kin.bark, the KinCompanion callouts, Home's recall as back_<kind>):
+## each must resolve to a trigger with lines.
 const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive", "revive_low", "callout", "wild",
 	"kill", "owner_down", "caught", "extract", "behind", "hunter", "sniper", "pack", "boss", "egg", "loot", "exit",
 	"collapse", "low_hp", "tonic", "cover", "goad", "yelp", "relief", "boss_kill", "comfort", "back_carried_out",
@@ -80,7 +97,7 @@ const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive",
 
 func _coverage() -> void:
 	var missing := OLD_NAMES.filter(func(cat): return BokiLines.trigger(String(cat)).is_empty())
-	ok("every old match category and recall kind has a trigger", missing.is_empty(), str(missing))
+	ok("every match category and recall kind a caller passes has a trigger", missing.is_empty(), str(missing))
 
 # ------------------------------------------------------------------ 3. no repeats
 func _no_repeat() -> void:

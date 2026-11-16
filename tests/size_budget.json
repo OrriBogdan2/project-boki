@@ -1,0 +1,70 @@
+{
+ "tolerance_pct": 5,
+ "platforms": {
+  "Web": {
+   "total": 613948780,
+   "categories": {
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
+    "fonts": 202850
+   }
+  },
+  "Windows": {
+   "total": 613948780,
+   "categories": {
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
+    "fonts": 202850
+   }
+  },
+  "macOS": {
+   "total": 613948780,
+   "categories": {
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
+    "fonts": 202850
+   }
+  },
+  "Linux": {
+   "total": 613948780,
+   "categories": {
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
+    "fonts": 202850
+   }
+  },
+  "Linux Server": {
+   "total": 613948828,
+   "categories": {
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967369,
+    "data": 1576186,
+    "shaders": 212976,
+    "fonts": 202850
+   }
+  }
+ }
+}

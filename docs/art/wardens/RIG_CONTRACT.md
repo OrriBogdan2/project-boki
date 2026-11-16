@@ -8,8 +8,7 @@ the kits' effects can find their anchors, and gameplay stays per class. The load
 
 ## How the game uses it
 Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
-ring and the MantleLook sizes. When the Warden's .glb exists and the player hasn't set it to procedural
-(Settings > Video > Warden models, per Warden), `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
+ring and the MantleLook sizes. When the Warden's .glb exists, `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
 and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
 (`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
@@ -44,7 +43,7 @@ Each bone's head sits on its rig node's origin, Y along the limb.
 |---|---|---|
 | `root` | `Rig` | body lean, squash, dives, the downed fall |
 | `hips` | `Rig/Torso` | the torso's twist, bob and lean; everything above hangs on it |
-| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it |
+| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it; the look-at layer turns it to the aim (LOOK_AT.md) |
 | `upper_arm.L` / `.R` | `Rig/Torso/ArmLPivot` / `ArmRPivot` | arm IK (hands on grips, free hands, `fl`/`fr` keys) |
 | `forearm.L` / `.R` | `.../ArmLPivot/Elbow` / `ArmRPivot/Elbow` | elbow bend |
 | `hand.L` / `.R` | `.../Elbow/Hand` | the hand (kits read its world position: `ArchKit.hand_pos`) |
@@ -64,7 +63,6 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 (the loader never writes them), and only that Warden's kit poses them, on their rest, with
 `WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
-- **Sparkle** (`mage`, art `ryzz`): `x_breath` (under `hips`), the rib cage's swell, keyed as scale by the idle and stance (tools/art1/posekit.py `add_breath`, the pose key `breath`); declared in content/rules/warden_anim/ryzz.json `extra_bones`.
 - **Grimble** (`dredge`, art id unchanged): declared in content/rules/warden_anim/dredge.json (`extra_bones`): `hook`, `gun`, `hoard`, `ball`, face and hand bones. See art/wardens/dredge/IMPORT.md.
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
@@ -97,8 +95,8 @@ the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on. 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
 `art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
-picks it for the session (comma-separated for several), and a Settings `warden_models` value of `vex_r3b` for
-that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
+picks it for the session (comma-separated for several); without it, or with the file missing, the Warden's
+own `<art>.glb` loads.
 Whichever design the owner picks ships as `<art>/<art>.glb`.
 
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
@@ -181,19 +179,21 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
-  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
-  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
-- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
-  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
-  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
-  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
+- **At most 80k triangles per Warden, weapon included** (`--warden-glb-check`, `--clip-check`). Since 11-15 (owner:
+  the v95 masters go in as they are) a Hunter is its current v95 master decimated to ~60k with its own UVs and
+  Meshy paint, no rebake: `python3 tools/art1/v95_to_game.py <Name>` (V95_SWAP.md "Own paint"). Measured cost of
+  triangles: DETAIL_PILOT.md (40k: +0.06 ms GPU a frame for six Hunters) and the 11-15 bench in V95_SWAP.md.
+- Textures: the master's own images, each at most 4096² (`v95_to_game.py --tex`), VRAM-compressed
+  (`compress/mode=2`: BPTC on desktop), mipmapped; a kept old prop keeps its 2048² atlas. At most 8 toon slots
+  (slots, not materials, count: a slot spans the master's images, "<slot>-v95", "<slot>-v95b").
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
   surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
   setting turns it procedural and back.
+- `--warden-rest-check`: the baked neutral rest (content/rules/warden_rest.json, WardenRest) equals the one
+  the procedural rig measures now, so a match builds the .glb without measuring it (0.15 to 0.7 s a Warden).
+  `-- --warden-rest-bake` rewrites the bake.
 - The Blender builds: `godot --headless -- --warden-rig-json --warden=<id>` writes the armature and landmarks
   (art/wardens/src/<name>_rig.json); `blender -b --factory-startup --python tools/blender/<name>.py` builds,
   bakes and exports (shared helpers in tools/blender/warden_kit.py; Vex first, see art/wardens/vex/IMPORT.md).

@@ -103,7 +103,7 @@ func _building() -> void:
 	await main.get_tree().create_timer(3.0).timeout
 	await _until_phase("hammer", 0.62)
 	await _shot("01_hold_to_build", "Holding to build: hammer in hand, weapon away, Boki helping, the bar filling")
-	Settings.set_v("cam_style", "supervive", false)
+	Settings.set_v("cam_style", "default", false)
 	_look(hc + Vector3(0, 0, 1.0), 0.6)
 	await _until_phase("hammer", 0.62)
 	await _shot("05_default_camera", "The same hold at the default farm camera")

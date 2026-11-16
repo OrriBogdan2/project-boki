@@ -1,10 +1,11 @@
 class_name SeeThrough
 extends RefCounted
-## See-through props: trees and ruin pillars between the camera and your own hunter (or your Boki)
-## thin out to a light stipple, as in most top-down games, so a big canopy never hides you. The
-## shaders do the test per prop (shaders/see.gdshaderinc, used by flora.gdshader and its outline);
-## this hands them the camera and the two points to keep in view, every frame, from the match and
-## the farm. Purely visual: what blocks sight and shots is still the map data.
+## See-through props: where a tree's canopy or a ruin pillar stands between the camera and your own
+## hunter (or your Boki), the pixels right over them dither to half in a small soft circle, so a big
+## canopy never hides you and the forest around you stays solid (trunks never thin). The shaders do
+## the test per pixel (shaders/see.gdshaderinc, used by flora.gdshader and its outline); this hands
+## them the camera and the two points to keep in view, every frame, from the match and the farm.
+## Purely visual: what blocks sight and shots is still the map data.
 
 static var _on := false
 static var _disabled := -1     # --no-see (before/after screenshots): never thin anything out

@@ -11,9 +11,14 @@ extends RefCounted
 ## How strong the additive glow pass is over a layered material's coloured body.
 const LAYER_GLOW := 0.45
 
+## The cel pass (shaders/cel.gdshaderinc) on a cover `a` that may run past 1 for HDR glow: flat steps with ragged
+## hard edges below 1, untouched above.
+const _CEL := """
+	a = cel_cover(min(a, 1.0), UV * 0.5) * max(a, 1.0);
+"""
 ## The shared ending of every layerable shader: `col` and `a` are set; the body pass shows the colour
 ## itself (alpha-blended, `body` scales its opacity), the glow pass adds it scaled by `glow`.
-const _TAIL := """
+const _TAIL := _CEL + """
 #ifdef MIX_PASS
 	ALBEDO = col;
 	ALPHA = clamp(a * body, 0.0, 1.0) * color.a;
@@ -60,7 +65,8 @@ static func param(mi: GeometryInstance3D, uniform_name: StringName, value: Varia
 static func _one(kind: String, col: Color, body_pass: bool) -> ShaderMaterial:
 	var key := kind + ("|mix" if body_pass else "")
 	if not _cache.has(key):
-		var code := _code(kind)
+		var code := _code(kind).replace("shader_type spatial;",
+				"shader_type spatial;\n#include \"res://shaders/cel.gdshaderinc\"")
 		if body_pass:
 			code = code.replace("shader_type spatial;", "shader_type spatial;\n#define MIX_PASS")
 			code = code.replace("blend_add", "blend_mix")
@@ -163,7 +169,7 @@ void fragment() {
 	float base = smoothstep(0.75, 1.0, UV.y);
 	float sh = 0.5 + 0.5 * sin((UV.y * 9.0 + TIME * 3.0) + UV.x * 2.0);
 	float a = (0.16 + 0.12 * sh * (1.0 - UV.y * 0.5) + edge * 0.8 + top * 0.5 + base * 0.7) * power;
-	ALBEDO = mix(color.rgb, vec3(1.0), edge * 0.4 + top * 0.3) * a;
+""" + _CEL + """	ALBEDO = mix(color.rgb, vec3(1.0), edge * 0.4 + top * 0.3) * a;
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
 """
@@ -183,7 +189,7 @@ void fragment() {
 	float body = (1.0 - smoothstep(w * 0.2, w, abs(uv.x + wob * (1.0 - uv.y) * 0.5)));
 	float h = smoothstep(-1.0, -0.2, -uv.y * 0.9 + 0.1 * sin(t + uv.x * 5.0));
 	float a = body * (1.0 - smoothstep(0.6, 1.0, uv.y)) * smoothstep(-1.0, -0.4, uv.y) * power;
-	ALBEDO = mix(color.rgb, vec3(1.0), body * h * 0.35) * a;
+""" + _CEL + """	ALBEDO = mix(color.rgb, vec3(1.0), body * h * 0.35) * a;
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
 """

@@ -5,6 +5,7 @@ render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabl
 uniform vec4 deep : source_color = vec4(0.06, 0.07, 0.13, 1.0);
 uniform vec4 light : source_color = vec4(0.22, 0.24, 0.38, 1.0);
 uniform vec4 glow : source_color = vec4(1.0, 0.75, 0.55, 1.0);
+uniform float abyss_dim = 1.0;   // below 1 darkens the abyss so it reads as far below the lit ground (DepthCues)
 uniform vec2 sun_xz = vec2(0.6, -0.8);
 uniform float scale = 0.035;
 uniform float speed = 0.012;
@@ -34,5 +35,5 @@ void fragment() {
 	// distance haze
 	float dist = length(wpos.xz - CAMERA_POSITION_WORLD.xz);
 	col = mix(col, mix(light.rgb, glow.rgb, 0.25), smoothstep(80.0, 600.0, dist) * 0.6);
-	ALBEDO = col;
+	ALBEDO = col * abyss_dim;
 }

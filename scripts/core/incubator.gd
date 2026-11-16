@@ -12,6 +12,7 @@ class_name Incubator
 ## On the save:
 ##   Save.d["incubator"]  {slots: n, eggs: [{sp, boss, id, slot, m0 (expeditions when placed), heat (seconds), t}], coal: seconds, t}
 ##   Save.d["rare_eggs"]  [{sp, boss, rare, id}] waiting on the shelf, next first
+##   A wild visitor's egg also carries "visitor" {sp, zone, day} (who left it); an older egg has none.
 ##   Save.d["items"]["coals"]  Ember Coals not used yet
 
 const SLOTS := 5              # cradles to start with
@@ -68,9 +69,11 @@ static func migrate() -> bool:
 	return true
 
 ## A Rare Egg brought home: into a free cradle, or onto the shelf to wait.
-static func add(sp: String, boss := "") -> Dictionary:
+static func add(sp: String, boss := "", visitor := {}) -> Dictionary:
 	ensure()
 	var e := {"sp": sp, "boss": boss, "rare": true, "id": _id()}
+	if not visitor.is_empty():
+		e["visitor"] = visitor
 	(Save.d["rare_eggs"] as Array).append(e)
 	settle()
 	return e
@@ -112,8 +115,11 @@ static func settle() -> int:
 		if q.is_empty(): break
 		if not in_slot(i).is_empty(): continue
 		var e: Dictionary = q.pop_front()
-		(inc["eggs"] as Array).append({"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())), "slot": i,
-			"m0": int(Save.d.get("matches", 0)), "heat": 0.0, "t": Time.get_unix_time_from_system()})
+		var cradle := {"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())),
+			"slot": i, "m0": int(Save.d.get("matches", 0)), "heat": 0.0, "t": Time.get_unix_time_from_system()}
+		if e.has("visitor"):
+			cradle["visitor"] = e["visitor"]
+		(inc["eggs"] as Array).append(cradle)
 		n += 1
 	return n
 
@@ -213,7 +219,7 @@ static func hatch(rng: RandomNumberGenerator, id := "") -> Dictionary:
 		e = rd[0]
 	if not egg_ready(e):
 		return {}
-	var baby := Care.hatch_rare({"sp": e.get("sp", ""), "boss": e.get("boss", "")}, rng)
+	var baby := Care.hatch_rare(e, rng)
 	(_inc()["eggs"] as Array).erase(e)
 	settle()
 	return baby
@@ -240,7 +246,17 @@ static func egg_name(e: Dictionary) -> String:
 	var sp := String(e.get("sp", ""))
 	return "Rare " + (Data.egg_name(sp) if Data.KIN.has(sp) else "Egg")
 
+## The baby's one memory line: a visitor's egg tells who left it, any other where the boss was.
+static func born_line(baby: Dictionary, boss: String) -> String:
+	var v: Dictionary = (baby.get("lineage", {}) as Dictionary).get("visitor", {})
+	if not v.is_empty():
+		return GardenVisitor.born_line(v)
+	var lair := String(Data.MOBS.get(boss, {}).get("name", "a boss's lair"))
+	return "hatched from a Rare Egg you carried home from %s" % lair
+
 static func boss_name(e: Dictionary) -> String:
+	if e.has("visitor"):
+		return "a wild visitor in %s" % GardenVisitor.zone_name(String(e["visitor"].get("zone", "")))
 	return String(Data.MOBS.get(String(e.get("boss", "")), {}).get("name", "a boss's lair"))
 
 ## The colour of the kin inside, for the spots on its gold shell.
