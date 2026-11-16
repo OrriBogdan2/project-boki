@@ -39,7 +39,8 @@ const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd",
 ## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
 ## play its sound.
 const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
-		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
+		"Gliders.sound", "Gliders.equipped", "Gliders.LIST", "Gliders.glide_cue", "Gliders.skin_of",
+		"Gliders.DEFAULT_SNAP", "Gliders.DEFAULT_WIND"]
 
 var bad := 0
 var n := 0

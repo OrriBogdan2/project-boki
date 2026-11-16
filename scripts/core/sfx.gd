@@ -296,6 +296,7 @@ func _ready() -> void:
 	cue_voice = AudioStreamPlayer.new()
 	cue_voice.bus = "SFX"
 	add_child(cue_voice)
+	SfxPicks.load_locked()
 
 ## Each sound set's categories (they pick the bus, SfxMix.learn) and its heavy sounds that carry further than
 ## hear_range (a gatling you hear coming), under "reach" (metres). Past FAR they still go through the muffled

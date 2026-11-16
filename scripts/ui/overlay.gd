@@ -313,6 +313,9 @@ func open_practice(h: Hunter) -> void:
 func open_settings() -> void:
 	_show_settings()
 
+func open_sfx_tester() -> void:
+	SfxTesterPage.fill(_page("sfxtest", "Sound tester", 720, true))
+
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
 	UI.hold(v, SETTINGS_H)
@@ -421,6 +424,9 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_toggle(v, "Ultimate ready", "ult_ready_cue", "A chime when your ultimate (%s) is back" % Settings.key_cap("hunter_ult"))
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
+	_group(v, "Sound tester")
+	_row(v, "Try other sounds", "Glider, dash and Vex's rifle: hear the candidates, play with them, lock one in") \
+		.add_child(UI.button("Open", open_sfx_tester, 120))
 
 func _tab_video(v: VBoxContainer) -> void:
 	_group(v, "Display")
