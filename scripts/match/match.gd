@@ -111,7 +111,9 @@ func _run_later() -> void:
 	for it in due:
 		_later.erase(it)
 		SfxCast.scope(it[2])
-		(it[1] as Callable).call()
+		var cb: Callable = it[1]
+		if cb.is_valid():      # (a bound object freed since is skipped, not called)
+			cb.call()
 	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
@@ -1162,6 +1164,7 @@ func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
 	var p := CPUParticles3D.new()
 	p.amount = 18 if unique else 10
 	p.lifetime = 1.2
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	p.emission_sphere_radius = 0.45
 	p.direction = Vector3.UP; p.spread = 25.0
@@ -1763,9 +1766,9 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
-	# impact: hitstop and shake by tier (docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5), from what the hit did
+	# impact: hitstop and shake by the hit's weight (ImpactWeight, docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5)
 	if src != "burn":
-		var tier := Feel.hitstop(self, by, target, d, o)
+		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else HeroSfx.hit_tick(credit as Hunter, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
@@ -1838,7 +1841,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	_check_team(h.team)
 
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, t)
+	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -2182,7 +2185,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
-	later(MobDissolve.begin(self, mb), func(): MobDrops.spill(self, mb, credit, loot))
+	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot)
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 

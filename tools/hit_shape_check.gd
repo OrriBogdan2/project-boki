@@ -206,7 +206,14 @@ func _secs_for(kind: String, hold: float) -> float:
 		"e": return 1.2
 		"x": return 1.5
 		"lmb": return 0.5
+		"rmb", "rmb_hold": return maxf(hold + 0.5, 0.6) + _flight_s()
 	return hold + 0.5 if hold > 0.0 else 0.6
+
+## Seconds a thrown RMB (Gil's flask) spends in the air before it lands: its flight plus the flight per metre.
+func _flight_s() -> float:
+	var rd := P.ak.rmb_def()
+	var far := float(rd.get("range", 0.0)) * float(rd.get("hold_range", 1.0))
+	return float(rd.get("flight", 0.0)) + float(rd.get("flight_per_m", 0.0)) * far
 
 func _hold_for(kind: String) -> float:
 	match kind:
@@ -221,7 +228,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	await _spawn(main)
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	for a in Arch.ids():
 		var hits := 0
 		P.reclass(Arch.weight(a), a)
@@ -244,7 +251,7 @@ func run(main: Node) -> void:
 			print("HSROW|%s|%s|%d|%s|%.1f|%.1f|%.0f|%.1f|%.1f|%.0f|%s" % [a, kind, meas["n"], src,
 					meas["reach"], meas["width"], meas["arc"], cont["reach"], cont["width"], cont["arc"], flags])
 		ok(hits >= 1, "%s: at least one input hurt a dummy (%d did)" % [a, hits])
-	ok(Time.get_ticks_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((Time.get_ticks_msec() - t0) / 1000.0))
+	ok(CheckClock.own_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((CheckClock.own_msec() - t0) / 1000.0))
 	HeroVfx.of(m).ribbons.clear()
 	print("HIT SHAPE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
