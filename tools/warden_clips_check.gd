@@ -8,6 +8,7 @@ extends RefCounted
 ## move ends keeps them on the legs' own layer (no snap into the stance).
 ## Never touches the save.
 
+const WardenStatesCheck := preload("res://tools/warden_states_check.gd")
 const DT := 1.0 / 60.0
 const MAX_TRIS := 80000         # weapon and shield included (RIG_CONTRACT "Budget")
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
@@ -34,6 +35,7 @@ func run(main: Node) -> void:
 	_companions()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
+	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -250,6 +252,8 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 	WardenMood.poke(m)
 	md.step(0.03)
 	ok(not sk.get_bone_pose_rotation(fish).is_equal_approx(calm), "a blocked hit shivers the fish")
+	if md.lure.is_empty():
+		return
 	var rest_glow := float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow"))
 	m.set_meta(WardenMood.FLARE, true)
 	md.step(1.0)
