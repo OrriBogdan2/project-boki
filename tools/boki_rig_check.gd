@@ -7,10 +7,13 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Fly := preload("res://tools/boki_rig_fly.gd")
-const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
-	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
-	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "gibbelle", "caecilith", "goliathite", "hoarheron", "floenatee"]
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew", "zephyrak", "pebbit", "cairnback",
+	"wisplet", "gloamshell", "selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren",
+	"lodestick", "marchleaf", "mossgrade", "nettlynx", "thrumbird", "gibbelle", "caecilith",
+	"goliathite", "hoarheron", "floenatee", "casquebill", "duskapi", "glaciyak", "heatherhorn",
+	"kilnbadger", "limpetor", "moonloris", "moundvark", "murmurling", "nacrolin", "opalisk",
+	"orchisloth", "scaldamus", "sentrikat", "spatewader", "squalltross", "threadwyrm", "tuatrune",
+	"velvorm", "nimbostrich"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
@@ -24,11 +27,19 @@ const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
 ## A Meshy body (docs/art/kin/MESHY_BOKI_RECIPE.md): 16k of body, the face, the props and the grown parts.
 const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
-const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
-	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS,
-	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS, "cindle": MESHY_TRIS,
-	"puddlet": MESHY_TRIS, "burrlet": MESHY_TRIS, "pebbit": MESHY_TRIS, "zapple": MESHY_TRIS,
-	"glomwort": MESHY_TRIS, "selenfin": MESHY_TRIS}
+const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrade": MESHY_TRIS, "thrumbird": MESHY_TRIS,
+	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS, "goliathite": MESHY_TRIS,
+	"hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS, "cindle": MESHY_TRIS, "puddlet": MESHY_TRIS,
+	"burrlet":         MESHY_TRIS, "pebbit": MESHY_TRIS, "zapple": MESHY_TRIS, "glomwort": MESHY_TRIS,
+	"selenfin": MESHY_TRIS, "casquebill": MESHY_TRIS, "caecilith": MESHY_TRIS, "duskapi": MESHY_TRIS,
+	"glaciyak": MESHY_TRIS, "glintmole":         MESHY_TRIS, "gloamshell": MESHY_TRIS,
+	"heatherhorn": MESHY_TRIS, "hivara": MESHY_TRIS, "kilnbadger":         MESHY_TRIS,
+	"limpetor": MESHY_TRIS, "lodestick": MESHY_TRIS, "moonloris": MESHY_TRIS, "moundvark": MESHY_TRIS,
+	"murmurling": MESHY_TRIS, "nacrolin": MESHY_TRIS, "nettlynx": MESHY_TRIS, "opalisk": MESHY_TRIS,
+	"orchisloth":         MESHY_TRIS, "scaldamus": MESHY_TRIS, "sentrikat": MESHY_TRIS,
+	"spatewader": MESHY_TRIS, "squalltross":         MESHY_TRIS, "threadwyrm": MESHY_TRIS,
+	"tuatrune": MESHY_TRIS, "velvorm": MESHY_TRIS, "wisplet": MESHY_TRIS, "zephyrak": MESHY_TRIS,
+	"nimbostrich": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in

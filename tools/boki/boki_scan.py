@@ -261,6 +261,48 @@ SCANS = {
 }
 
 
+# Species taken from a finished model with no landmarks read by hand (tools/boki/boki_prep.py puts the model in place): an
+# "auto" row fits the proxy's own bounds to the scan's (Scan._auto), the eyes go where the proxy's are, and the
+# overrides here are the few things the sheet shows it got wrong. Borrowed-rig species drop the puffs, lobes on root.
+AUTO_BASE = {"auto": True, "height": 0.5, "tris": 16000, "face": {}, "sat": 0.85, "gain": 1.1, "cover": 1.2}
+BORROWED = {"drop": ("puffs",), "merge": {"lobe%d" % i: "root" for i in range(7)}}
+AUTO = {  # id: overrides on AUTO_BASE
+    "duskapi": BORROWED,
+    "glaciyak": BORROWED,
+    "heatherhorn": BORROWED,
+    "kilnbadger": BORROWED,
+    "limpetor": BORROWED,
+    "moonloris": BORROWED,
+    "moundvark": BORROWED,
+    "murmurling": BORROWED,
+    "nacrolin": BORROWED,
+    "nimbostrich": BORROWED,
+    "opalisk": BORROWED,
+    "orchisloth": BORROWED,
+    "scaldamus": BORROWED,
+    "sentrikat": BORROWED,
+    "spatewader": BORROWED,
+    "squalltross": BORROWED,
+    "threadwyrm": BORROWED,
+    "tuatrune": BORROWED,
+    "velvorm": BORROWED,
+    "casquebill": BORROWED,
+    "caecilith": {},
+    "glintmole": {},
+    "gloamshell": {},
+    "hivara": {},
+    "kindlewren": {},
+    "lodestick": {},
+    "marchleaf": {},
+    "mossgrade": {},
+    "nettlynx": {},
+    "thrumbird": {},
+    "wisplet": {},
+    "zephyrak": {},
+}
+SCANS.update({i: {**AUTO_BASE, **o} for i, o in AUTO.items()})
+
+
 def grade(col, sat, gain):
     """sRGB colours pulled toward their own grey (in linear light, as the toon shader's `desat` does) and scaled:
     the game's warm light and tonemap push a painted texture's mid colours to pure hues."""
@@ -325,9 +367,12 @@ class Scan:
 
     def __init__(self, species, creature, paint, anim):
         s = SCANS[species]
-        self._mods, self._s = (creature, paint, anim), s
-        self.fit = Fit(s["x"], s["y"], s["z"])
+        self._mods = (creature, paint, anim)
         self.model = Meshy.get(os.path.join(ROOT, species, "run1"), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
+        if s.get("auto"):
+            s = self._auto(s, creature)
+        self._s = s
+        self.fit = Fit(s["x"], s["y"], s["z"])
         self.REST_POSE = s.get("pose", {})
         self.EYE_C = v3(*s["eye_c"]) if "eye_c" in s else creature.EYE_C  # a new row starts on the proxy's eyes
         self.EYE_R = v3(*s["eye_r"]) if "eye_r" in s else creature.EYE_R
@@ -352,6 +397,18 @@ class Scan:
         deep = self._deepest()
         self.HIDE_AT = {name: tuple(deep - bone[0]) for name, bone in self.BONES.items() if name.startswith("prop_")}
         self._proxy = {p.name: p for p in creature.parts()["body"][0].prims}
+
+    def _auto(self, s, creature):
+        """The row with its landmarks from the bounds: the proxy body's (no dropped part) to the scan's, front and back,
+        ground and top, and half width; the eyes where the proxy has them."""
+        prims = [p for n, part in creature.parts().items() if n not in s.get("drop", ()) for p in part[0].prims if not p.sub]
+        lo, hi = np.min([p.lo for p in prims], 0), np.max([p.hi for p in prims], 0)
+        a, b = self.model.v.min(0), self.model.v.max(0)
+        fit = Fit([(hi[0], b[0])], [(lo[1], a[1]), (hi[1], b[1])], [(lo[2], a[2]), (hi[2], b[2])])
+        eye = creature.EYE_C
+        return {**s, "x": [(hi[0], b[0])], "y": [(lo[1], a[1]), (hi[1], b[1])], "z": [(lo[2], a[2]), (hi[2], b[2])],
+                "eye_c": tuple(fit.fwd(eye)) if "eye_c" not in s else s["eye_c"],
+                "eye_r": tuple(creature.EYE_R * (b[1] - a[1]) / (hi[1] - lo[1])) if "eye_r" not in s else s["eye_r"]}
 
     def __getattr__(self, name):
         for mod in self._mods:
