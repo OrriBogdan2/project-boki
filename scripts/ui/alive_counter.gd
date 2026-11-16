@@ -36,6 +36,8 @@ static func shows_squads(m: Match) -> bool:
 
 ## Draws both rows; returns the y the kill feed starts at.
 static func draw(c: Control, m: Match) -> float:
+	if not HudReveal.counters_shown(m):
+		return HudStyle.safe_pad(c.size).y      # a new player's counters wait for the first fight (HudReveal)
 	var big := HudStyle.BIG
 	var cells: Array = []
 	if shows_squads(m):

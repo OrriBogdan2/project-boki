@@ -63,7 +63,8 @@ func _draw_panels() -> void:
 			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
 			SafeArea.begin("weapon")
-			hud._draw_weapon(sz, p)
+			if HudReveal.weapon_shown(m, p):
+				hud._draw_weapon(sz, p)
 			SafeArea.begin("gear")
 			GearPanel.draw(hud, sz, p)
 			SafeArea.begin("kin")

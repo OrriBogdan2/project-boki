@@ -312,6 +312,21 @@ removed: `--hud-groups-check` pins the landing at 9 groups for a fresh save (mai
 [After shots](hud_timeline/after), 0-30 s only, taken before the merge (that run was stopped when the walk fell).
 Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh save in a real match, veterans unchanged).
 
+### Newcomer staging and the extraction line (11-15, owner playtest 11-13 "the UI is SO overloaded")
+For a save under `NEW_PLAYER_MATCHES` expeditions in a real Extraction (not the tutorial, training, duel or arena),
+`HudReveal` holds back the weapon card (with the belt, Q/V/X and the backpack count above it) and the whole
+squads/players-left block until the first fight: a shot or swing, a hit taken, a pickup, a kill, knock or gem
+(counters also while Tab or the map key is held). Each test reads a count that only goes up, so what appears stays.
+This reverses the 11-13 call to keep the alive count always on: the owner asked for fewer blocks, and the landing is
+now 5 groups (minimap, clock, vitals, ability row, glider strip), pinned by `--hud-groups-check`.
+`ExtractGoal` is the one line for the way out: seat, when it opens or how far it is, and the key ("Uplink open · 140 m
+Hold F at the outpost until the lift opens"), the open seat or else the one opening soonest. A new player gets it in
+place of the four-seat strip and only for the Uplink and the Heart ring (`hud_groups.json` `newcomer_seats`: no boss
+fight, no carried Heart); everyone else gets it under the strip until they are on a quest seat (the QuestTracker card
+takes the slot). The minimap names the seat's badge (always for the goal, for all four while Tab/M is held) and the
+full map's key lists "Way out" next to "Uplink" (the outpost banner). Checks: `--extract-goal-check`,
+`--hud-groups-check` section 5, `--minimap-check`.
+
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
   the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.

@@ -12,7 +12,9 @@ const MARGIN := 14.0      # px from the map's corner
 const ICON_X := 16.0      # px from the panel's left edge to the icon's centre
 
 ## Every kind, in the order the key lists it: [id, word].
-const KINDS := [["squad", "Squad"], ["boki", "Boki"], ["exit", "Exit"], ["hot", "Hot"], ["stop", "Stop"]]
+const KINDS := [
+	["squad", "Squad"], ["boki", "Boki"], ["exit", "Uplink"], ["way", "Way out"], ["hot", "Hot"], ["stop", "Stop"],
+]
 
 ## The ids of the kinds on the map now, in KINDS order.
 static func kinds(m: Match, tm: TrainMap) -> Array:
@@ -33,6 +35,7 @@ static func _shown(m: Match, id: String, tm: TrainMap) -> bool:
 		"squad": return _mate(m) != null
 		"boki": return BokiHud.mapped_kin(m) != null
 		"exit": return m.exits != null and not m.exits.list.is_empty()
+		"way": return WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
 		"hot": return m.biomes != null and not m.biomes.hot.zone.is_empty()
 		_: return m.skytrain != null and not tm.halts(m.skytrain).is_empty()
 	return false
@@ -72,6 +75,8 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			Icons.draw(c, "paw", at, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
 		"exit":
 			fm.hud._draw_exit_icon(at, m.exits.list[0])
+		"way":
+			WaysOutMap.badge(c, at, 6.0, 2, {"st": WaysOutHud.St.OPEN, "team": -1, "viewer": 0, "t": -1.0}, m.time)
 		"hot":
 			c.draw_arc(at, 6.0, 0.0, TAU, 24, Color(HotZone.COL, 0.85), 2.5)
 		"stop":

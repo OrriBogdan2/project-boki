@@ -5,15 +5,15 @@ extends RefCounted
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
-##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
-##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
-##      the "Your kit" card is not at the landing (rule 4)
+##      The landing is the owner's 5 (a new player's weapon card, belt and counters wait for the first fight:
+##      HudReveal); the fight moments are still over it (docs/UI_FIRST15.md), filed in docs/DEBT.md for the declutter
+##      jobs. The check plays a fresh save (a new player), so the "Your kit" card is not at the landing (rule 4)
 ##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 9, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
+const COUNTS := {"landing": 5, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -43,6 +43,7 @@ static func set_moment(m: Match, id: String) -> void:
 	var sess := 6.0
 	m.interact = {}
 	m.hud.msgs.clear()
+	m.player.dmg_taken = 0.0 if id == "landing" else 1.0      # the first fight has started after the landing
 	match id:
 		"fight":
 			sess = 60.0
@@ -91,6 +92,21 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
+	# 5. the weapon card, belt and counters wait for the first fight (HudReveal), the whole HUD otherwise
+	set_moment(m, "landing")
+	var pl: Hunter = m.player
+	ok(not HudReveal.weapon_shown(m, pl) and not HudReveal.counters_shown(m), "new player: weapon, counters wait")
+	ok(HudGroups.on_screen(hud).size() <= int(HudGroups.rules()["budget"]), "new player: landing within budget")
+	ok(not HudGroups.on_screen(hud).has("belt"), "new player: no belt row before the first fight")
+	pl.dmg_taken = 1.0
+	ok(HudReveal.weapon_shown(m, pl) and HudReveal.counters_shown(m), "the first hit taken brings both")
+	pl.dmg_taken = 0.0
+	pl.pack.append({})
+	ok(HudReveal.weapon_shown(m, pl) and not HudReveal.counters_shown(m), "a pickup brings the weapon card only")
+	pl.pack.clear()
+	m.opts["training"] = true
+	ok(HudReveal.weapon_shown(m, pl) and HudReveal.counters_shown(m), "the training room shows everything")
+	m.opts["training"] = false
 	# 4. what a new player's HUD holds back
 	var p: Hunter = m.player
 	set_moment(m, "landing")

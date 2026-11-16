@@ -111,6 +111,9 @@ static func draw(hud) -> void:
 		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
 		return
 	var c: Control = hud.c
+	if HudReveal.newcomer(m):
+		ExtractGoal.draw(hud, top_y(c.size), true)      # a new player gets the one line, not the four seats
+		return
 	var sd := seats(m)
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, top_y(c.size)), Vector2(w, CELL.y))
@@ -120,6 +123,7 @@ static func draw(hud) -> void:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
+	ExtractGoal.draw(hud, r.end.y + QuestTracker.GAP, false)      # where to go and how, until you are on a quest
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
