@@ -580,7 +580,7 @@ func _plays(sname: String, act: Callable) -> bool:
 	act.call()
 	return Sfx.last_played.has(sname)
 
-## 11. Meeko's channel loop, one training match per end path.
+## 12. Meeko's channel loop, one training match per end path.
 const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
 const FRAME := 1.0 / 60.0
 
