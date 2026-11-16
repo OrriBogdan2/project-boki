@@ -30,17 +30,18 @@ static func open(gid: String, gdoc: Dictionary) -> void:
 		func(members: Array):
 			Social.clan_roster(
 				gid,
-				founder,
-				func(roll: Array):
+				gdoc,
+				func(roll: Array, gone: Dictionary):
+					var kept := members.filter(func(m): return not gone.has(m["id"]))
 					Social.get_doc(
 						"clanbase/" + gid,
 						func(d: Dictionary):
 							ClanBoard.read(
 								gid,
-								members.map(func(m): return m["id"]),
+								kept.map(func(m): return m["id"]),
 								func(b: Dictionary):
 									ClanBoard.claim(gid, b)
-									var snap := snapshot(gid, gdoc, members, roll, d, b)
+									var snap := snapshot(gid, gdoc, kept, roll, d, b)
 									Game.goto("home", {"visit": snap, "visit_id": founder})
 							)
 					)
