@@ -1849,6 +1849,7 @@ func sim(dt: float) -> void:
 	glider_snd.tick(self)
 	HoverHum.tick(self)
 	abyss_snd.tick(self)
+	if ak: ak.sound_tick(dt)
 	if remote:
 		net_follow(dt)
 		return
@@ -2078,7 +2079,7 @@ func _physics(dt: float) -> void:
 	else:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
-			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
+			var grip: float = m.ground_grip(pos, self)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
 				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
 				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
