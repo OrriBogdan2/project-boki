@@ -115,7 +115,7 @@ func _hero_states(hero: String, form: String) -> Dictionary:
 		hp.inp[key] = false
 		_settle(hp, 1.2)
 	hp.hurt(1.0, mf.rival(), {"src": "test"})
-	out["hit"] = _watch(hp, 0.3)
+	out["hit"] = _watch(hp, 0.2)      # (a chip hit shows the flinch for 0.3 s: read it inside that)
 	if form != "":
 		_settle(hp, 0.3)
 		var kit := MergeKit.of(hp)
