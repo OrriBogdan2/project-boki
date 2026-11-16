@@ -5,6 +5,7 @@ extends RefCounted
 
 const SHOT_ARCHS := ["gunslinger", "rimewright", "dolm"]
 const SETTLE_FRAMES := 20
+const TITLE_SETTLE_FRAMES := 150  # the logo drops in and the menu fades up before the shot
 
 var main: Node
 
@@ -29,7 +30,7 @@ func run(m: Node) -> void:
 	main.get_window().size = win
 	await _frames(3)
 	await main.show_screen("title", {})
-	await _frames(SETTLE_FRAMES)
+	await _frames(TITLE_SETTLE_FRAMES)
 	_save(out.path_join("title.png"))
 	for ak in archs:
 		var ld: Node = load("res://scripts/ui/loading.gd").new()
