@@ -101,9 +101,18 @@ func _start(lid: String, p: Hunter) -> void:
 			txt = String(row[1])
 	if lid == "dive":
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
+	if lid == "exit":
+		txt = _exit_text(txt)
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)
+
+## The exit line names the way out the top-centre goal line points at, so the guide, the line and the map agree.
+func _exit_text(txt: String) -> String:
+	var i := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	if i < 0:
+		return String(rules()["exit_none"])
+	return txt.replace("%X", WaysOutMap.WORDS[i]).replace("%H", ExtractGoal.how(i))
 
 func _left() -> float:
 	return (m.length - m.time) / m.length
