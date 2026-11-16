@@ -46,6 +46,8 @@ static func of_hit(by: Ent, target: Ent, d: float, o: Dictionary) -> String:
 		w = "solid" if big else "light"
 	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false):
 		w = TIERS[mini(TIERS.find(w) + 1, TIERS.size() - 1)]
+	if o.get("heavy", false) and w == "light":
+		w = "solid"    # an empowered hit (o.heavy: a point-blank volley, a marked finisher) is never light
 	return w
 
 ## The tier's fixed hit-stop, seconds.
