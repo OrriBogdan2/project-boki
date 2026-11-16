@@ -70,6 +70,7 @@ var commit_end := 0.0          # match time her committed recovery ends (E after
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
+	last_shot = h.shot_n           # a round fired before she took the kit (another hero's) is not hers
 
 ## The world direction that reads as up the screen, so a word rides above a head.
 func screen_up() -> Vector3:
