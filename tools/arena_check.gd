@@ -3,7 +3,7 @@ extends RefCounted
 ## show it, reset works, the Esc menu's Practice page sets your ranks (--practice-shot=<dir> saves
 ## it), archetype / weapon / Boki / glove swaps apply, the toggles work, the kit card builds for all
 ## six archetypes, the expedition loadout shows the card, and the Training Grounds gets the same
-## tools. Prints ARENACHECK PASS/FAIL.
+## tools and its own sounds (TrainingSfx). Prints ARENACHECK PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -460,6 +460,20 @@ func _training() -> void:
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
 	_dodge_drill(m)
+	# the grounds' own sounds (docs/AUDIO.md): a dummy hit, a reset and the bot each play their cue, and the beds
+	# are the grounds' own, not the match's
+	TrainingSfx.heard.clear()
+	CombatBus.hit_landed.emit(P, m.arena.dummies[0]["h"], 10.0, [])
+	m.arena.reset()
+	m.arena.bot_mode = "idle"
+	m.arena._spawn_bot()
+	var cues := [TrainingSfx.DUMMY_HIT, TrainingSfx.RESET, TrainingSfx.BOT_SPAWN]
+	ok("training: dummy hit, reset and bot play their cues", cues.all(func(c): return TrainingSfx.heard.has(c)),
+		str(TrainingSfx.heard))
+	m.music_dir.tick(m, 0.3)
+	var beds := Sfx.amb_layers.keys()
+	ok("training: its own beds, not the match's", beds.has(TrainingSfx.WIND) and not beds.has("abyss")
+		and Sfx.amb_name != "match", "%s %s" % [beds, Sfx.amb_name])
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -524,14 +538,41 @@ func _cards() -> void:
 			"kit card sub-page keeps its size: %s" % a, c.page == "rmb" and c.size.is_equal_approx(s0),
 			"%s -> %s" % [str(s0), str(c.size)]
 		)
-		for s in KitCard.slots_of(a):
+		for s in KitCard.card_slots(a):
 			var info := KitCard.slot_text(a, s)
 			if String(info["line"]) == "" or String(info["name"]) == "":
 				ok("kit card text %s.%s" % [a, s], false)
+			elif String(info["line"]).split(" ", false).size() > KitCard.MAX_WORDS:
+				ok("kit card line is one short line: %s.%s" % [a, s], false, String(info["line"]))
+		_chip_numbers(a)
 		c.queue_free()
 	var inf := KitCard.infusion_lines("thief", KinLib.kin("cindle"))
 	ok("kit card: Boki infusion lines (RMB and E; her ultimate on X isn't infused)", inf.size() == 2, " | ".join(inf))
 	host.queue_free()
+
+## Every number on a hunter's authored damage chips (`card.chips`) is a number its slot's kit data holds.
+func _chip_numbers(a: String) -> void:
+	var num := RegEx.create_from_string("\\d+(\\.\\d+)?")
+	var chips: Dictionary = Arch.def(a)["card"]["chips"]
+	var bad: Array = []
+	for slot in chips:
+		var have: Array = []
+		_numbers_in(Arch.def(a)[slot], have)
+		for c in chips[slot]:
+			for m in num.search_all(String(c)):
+				if not have.any(func(v): return is_equal_approx(v, float(m.get_string()))):
+					bad.append("%s %s" % [slot, c])
+	ok("kit card chips quote the kit's numbers: %s" % a, bad.is_empty(), ", ".join(bad))
+
+func _numbers_in(v: Variant, out: Array) -> void:
+	if v is Dictionary:
+		for k in v:
+			_numbers_in(v[k], out)
+	elif v is Array:
+		for x in v:
+			_numbers_in(x, out)
+	elif v is float or v is int:
+		out.append(float(v))
 
 func _loadout() -> void:
 	var st := KitCard.strip("juggernaut", func(): pass)

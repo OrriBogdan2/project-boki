@@ -63,12 +63,25 @@ const NAMES := [
 	"swipe",
 	"cleave",
 	"charge",
-	"k_venom",
+	"k_normal",
+	"k_fire",
+	"k_water",
+	"k_grass",
 	"k_spore",
-	"k_gravity",
-	"k_prism",
-	"k_lunar",
-	"k_echo",
+	"k_electric",
+	"k_ice",
+	"k_rock",
+	"k_psychic",
+	"k_flying",
+	"k_dragon",
+	"k_dark",
+	"k_ghost",
+	"k_poison",
+	"k_bug",
+	"k_steel",
+	"k_fairy",
+	"k_crystal",
+	"k_sound",
 	"shotgun",
 	"sniper",
 	"hit_heavy",
@@ -199,6 +212,7 @@ const MIN_GAP := {
 	"xp_tick": 60,
 	"steal_won": 400,
 	"steal_lost": 400,
+	"training_dummy_hit": 70,
 	"hostile_cast": 100,
 	"armor_up": 120
 }
@@ -482,6 +496,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 	for p in players:
 		p.stop()
 	voices.friends.resize(0)
+	mix.set_muffle(SfxMix.Muffle.OFF)
 
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
@@ -596,6 +611,14 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
+
+## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	return n
 
 ## The pool voice for a sound of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
 ## null when it gets none.

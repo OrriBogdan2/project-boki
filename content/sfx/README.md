@@ -6,3 +6,4 @@ Format and rules: docs/AUDIO.md.
 `bowl.json` is the Mixing Bowl (scripts/home/bowl_sfx.gd): plops, a stir loop, tiered chimes, a Boki tasting and a fizzle.
 `egg.json` is an egg nearing its hatch (scripts/home/egg_sfx.gd).
 `glint.json` is Glint Fishing (scripts/home/glint_sfx.gd).
+`training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
