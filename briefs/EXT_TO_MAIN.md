@@ -9963,3 +9963,4 @@ READY ext/anim-dirloops-lace-kael eebe095a8755082fd7644ae92774c672efbf82ca (dirl
 READY ext/stretch-reds-1115 4d8856e264f45ef0e21c92af6b8b98cbea4aee23 (glb_relax on 7 v95 glbs; NEW-RED 0, export ok)
 READY ext/docs-kit-parity-names 6394b3498ea17f281636fe43c3c52c0732459dc6 (private-ref lint gate + sv/ pointers on current main; NEW-RED 0 after save-compat fix, export ok)
 READY ext/anim-hymotion 3a3e023c3d5906146a832e822cdb261243052748 (tarek.glb takes main's v95; HY-Motion clips not applied; glb_swap.py tool; gate green, export ok)
+READY ext/anim-key-pose-read 5fb61bbf4d536cc88e5ac8321096e360379e83aa (SUPERSEDES 143de967f9: origin/main dfbe794824 merged in; 4 glb conflicts (cinder/claire/pip/ryzz) took main's v95; net diff vs main = 2 doc lines in KEY_POSE_READ.md; --check 0 failures; health --strict red only on main's own style debt in juggernaut_kit/chore_check/remote_anim_check)
