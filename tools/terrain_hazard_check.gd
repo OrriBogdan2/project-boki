@@ -116,7 +116,7 @@ func _lava(ai: int, safe: bool) -> void:
 func _deep_water(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.3)
-	var spd := P.slow_mult(0.65) * (1.35 if P.haste_t > 0.0 else 1.0)
+	var spd := P.slow_mult() * (1.35 if P.haste_t > 0.0 else 1.0)
 	var hits := TerrainHazards.hit_mult(m, P)
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
 	var lost := P.max_hp - P.hp
@@ -162,7 +162,7 @@ func _static(ai: int, safe: bool) -> void:
 func _bramble(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(2.0)
-	var spd := P.slow_mult(0.65)
+	var spd := P.slow_mult()
 	var lost := P.max_hp - P.hp
 	if safe:
 		ok("bramble with a bloom Boki: not slowed, not scratched", is_equal_approx(spd, 1.0) and lost < 0.5,

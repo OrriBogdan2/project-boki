@@ -278,8 +278,7 @@ func _tier() -> float:
 	return float(m.T.get("mob", 1.0))
 
 func _slow(h: Hunter, k: float) -> void:
-	h.slow_t = maxf(h.slow_t, 0.15)
-	h.slow_k = maxf(h.slow_k, k)
+	h.add_slow(0.15, k)
 
 ## The static flats charge up (the ground's veins brighten) and then shock everyone standing on them.
 func _tick_static(ai: int, dt: float) -> void:
