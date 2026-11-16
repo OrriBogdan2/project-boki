@@ -99,3 +99,12 @@ count swings 780-1480, so a change of a few ms only shows in a same-run A/B.
 - PR #158 (perf lane P2: WardenMerge draw joins, gear-stat sums kept for a step, Bot._clear_line, Truce sight
   asks) on the same worker: fight p50 106 vs 96 ms for main, inside that worker's run-to-run spread; its own
   check numbers (draws per 12 Hunters 227 -> 154) are the measured part.
+- **Where "other scripts" goes** (probe builds, never pushed: each node's `_process` wrapped in a timer; rp1-2,
+  fight, ms a frame, jobs 201219-19953 to 205122-21233): the 3D heroes' WardenSync 12-15 (30 heroes; 4.5-5 in
+  the ride), of which WardenClips.step 7.5-9.3 (its AnimationTree `advance`, engine blending, 5.5-6.4; the clip
+  pick and blend weights around it ~2.4) and the spring chains 1.9-2.8; BokiRig 1.9, KinPuppet 0.8, MobGlb 0.6
+  (after the fix above), key_glint and prop_anim 0.1 each. The HUD's world labels (8.4) split into the plates
+  (3.6), the glove and Boki icons under each rival's plate (GripOverhead, 2.0-2.3) and the loop's own lookups.
+- **Next targets**, biggest first: WardenClips' AnimationTree advance for rivals in view (a lower clip rate for
+  rivals that are not your squad or your target, as SimLod.pose_every already does off screen); render submit
+  (draw count); the hunters' sim (12 ms); the HUD plates and GripOverhead (redraw only what changed).
