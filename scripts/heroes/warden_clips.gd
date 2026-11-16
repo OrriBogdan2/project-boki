@@ -169,6 +169,12 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
+## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
+func move_len(mv: Dictionary) -> float:
+	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
+	var rate := float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	return length / rate - float(mv.get("lead", 0.0))
+
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
@@ -497,9 +503,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			# this move is the landing (it may start in the air): the generic land clip must not follow it
 			land_t = LAND_DONE
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		var length := lib.get_animation(clip).length
+		# ("cut": the clip ends there (clip seconds), "scale": it runs that much faster: to fit the kit's cadence)
+		var length := minf(lib.get_animation(clip).length, float(mv.get("cut", 1e9)))
 		if mv.has("fit"):
 			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
+		tt *= float(mv.get("scale", 1.0))
 		# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
 		if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
 			tt = minf(tt, length - 0.001)

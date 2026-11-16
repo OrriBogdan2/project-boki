@@ -7,7 +7,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
-| Training Grounds | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| Training Grounds | `content/maps/arena.json` | 216 x 216 | 8 | The Training Grounds (--arena). |
 | The Sparring Ring | `content/maps/duo_arena.json` | 40 x 40 | 1 | The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd). |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 540 x 540 | 14 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there; the design is docs/MAP_V2.md). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
@@ -15,16 +15,22 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 ## Training Grounds
 
-The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
+The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding, and the Movement Fields south of the floor over the Bench Bridge: two long dash lanes (91 m and 96 m), tier steps up 6 terraces, a four-step cliff (2 to 5 terraces) for mantles and wall kicks, and a stair up to a Glide Jump-off that glides to Cloud Isle. Pads fire up; glide back down.
 
 ### Islands
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| Training Grounds | grove | Meadow | quiet | 2 |  |
-| Bench | grove | Meadow | quiet | 0 |  |
+| Training Grounds | grove | Meadow | quiet | 6 |  |
+| Movement Fields | grove | Meadow | quiet | 0 |  |
+| Cloud Isle | perch | Bloom | quiet | 0 |  |
+| Hunter Loft | perch | Storm | quiet | 0 |  |
+| Gear Loft | perch | Ember | quiet | 0 |  |
+| Belt Loft | perch | Bloom | quiet | 0 |  |
+| Bot Pen | perch | Gloom | quiet | 0 |  |
+| Boki Roost | perch | Frost | quiet | 0 |  |
 
-**Getting around:** 1 bridges.
+**Getting around:** 1 bridges, 12 glide routes, 5 jump pads.
 
 
 
