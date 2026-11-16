@@ -3,7 +3,7 @@ extends RefCounted
 ## (home.gd _move_kin at 4 steps a second) in Bramblebank: a Mend one (Glom) beside a glum friend, a Haul one (Mole)
 ## with a toy spot to fetch the ball back to, a Boki with none of those knacks (Bur) and an Ember one (Wren), your
 ## partner, who minds the egg only in the hub, where the one Nook is (HubLayout.holds). Each chore starts for the
-## right Boki and nobody else, ends, writes exactly one journal line each time and shows on the debug readout;
+## right Boki and nobody else, ends, writes exactly one journal line each time it is done (a chore that gives up writes none) and shows on the debug readout;
 ## its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone; no machine
 ## refuses a transition. Never touches the real save.
 
@@ -122,6 +122,8 @@ func _sim(home) -> Dictionary:
 	var last_since := {}   # name -> s in its machine's state on the last step
 	var last_chore := {}   # name -> it was in a chore on the last step
 	var last_line := {}    # name -> its newest journal entry on the last step
+	var last_hist := {}    # name -> its machine's newest history line on the last step
+	var gave_up := {}      # name -> chores that ended by giving up (stalled, shut in, too long): no journal line
 	var shown := {}        # kind -> true: it appeared on the debug readout
 	var t := 0.0
 	while t < SIM_SECS:
@@ -135,6 +137,13 @@ func _sim(home) -> Dictionary:
 			if not lines.is_empty() and not is_same(lines.back(), last_line.get(who, null)):
 				writes[who] = int(writes.get(who, 0)) + 1
 				last_line[who] = lines.back()
+			# every transition since the last step (a Boki can give up and begin again in one step)
+			var seen_to: int = fsm.history.rfind(last_hist.get(who, ""))
+			for h in fsm.history.slice(seen_to + 1):
+				if h.contains("gave up"):
+					gave_up[who] = int(gave_up.get(who, 0)) + 1
+			if not fsm.history.is_empty():
+				last_hist[who] = fsm.history[-1]
 			var chore := fsm.is_in(BaseLife.S.CHORE)
 			if chore and (not last_chore.get(who, false) or fsm.since < float(last_since.get(who, 0.0))):
 				starts[who] = int(starts.get(who, 0)) + 1
@@ -146,7 +155,7 @@ func _sim(home) -> Dictionary:
 				if not shown.has(kind) and home.life.readout().contains("Chore " + kind):
 					shown[kind] = true
 	print(home.life.readout())
-	return {"kinds": kinds, "starts": starts, "writes": writes, "last_chore": last_chore, "shown": shown}
+	return {"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up, "last_chore": last_chore, "shown": shown}
 
 ## `who` did only chore `kind`, it ended, one journal line each time, and the readout showed it.
 func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
@@ -156,9 +165,11 @@ func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
 	var ended := begun - (1 if s["last_chore"].get(who, false) else 0)
 	ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, kind, ended, begun])
 	var writes := int(s["writes"].get(who, 0))
+	var gave_up := int(s["gave_up"].get(who, 0))      # a chore that gives up (boxed in) writes no line: only a done one does
+	var done := ended - gave_up
 	# (a cheer whose friend got glad on its own before it arrived ends with no line: BaseChore._cheer)
-	var lines_ok := writes >= 1 and writes <= ended if kind == "cheer" else writes == ended
-	ok(lines_ok, "%s wrote one journal line per chore (%d lines)" % [who, writes])
+	var lines_ok := writes >= mini(1, done) and writes <= done if kind == "cheer" else writes == done
+	ok(lines_ok, "%s wrote one journal line per chore done (%d lines, %d done, %d gave up)" % [who, writes, done, gave_up])
 	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
 
 func _no_refusals(home) -> void:
