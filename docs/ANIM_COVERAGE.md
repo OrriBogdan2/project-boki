@@ -17,6 +17,12 @@ ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
 onto its side (`Kin.render`).
 
+Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
+driven through all 15 Hunter states and fails on a T-pose (every contract bone within 2 deg of rest), a state that
+shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
+bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every state; `--warden-states-shots
+--shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet.
+
 <!-- table:begin -->
 ### Hunters
 
