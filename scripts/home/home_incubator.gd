@@ -154,7 +154,7 @@ func prompt() -> String:
 	if not rd.is_empty():
 		return "Hatch the %s!" % Incubator.egg_name(nearest_ready(h.ppos))
 	if Incubator.count() == 0:
-		return "Incubator (empty: Rare Eggs from boss lairs hatch here)"
+		return "Incubator (empty: Rare Eggs from boss lairs hatch a first-form Boki here)"
 	return "Incubator: %d warming%s" % [Incubator.eggs().size(), (", %d on the shelf" % Incubator.shelf().size()) if not Incubator.shelf().is_empty() else ""]
 
 ## Each cradled egg's sounds as it nears its hatch (EggSfx), from where it sits.
