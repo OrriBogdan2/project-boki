@@ -6,6 +6,7 @@ extends "res://tools/clip_shots.gd"
 const StatesCheck := preload("res://tools/warden_states_check.gd")
 const SHOT_FRAME := 24     # the frame of a state's run that is shown (a hit and a landing show an earlier one)
 const EARLY_FRAME := 6
+const SETTLE_FRAMES := 20  # frames a new model gets to load before it is driven
 const SHOT_YAW := 150.0    # deg: the three-quarter view
 const SHOT_DIST := 5.6     # m
 const SHOT_AT_Y := 0.8     # m: the height the camera looks at
@@ -43,6 +44,8 @@ func _hunter(id: String, out: String) -> void:
 	var ring := model.get_node_or_null("TeamRing") as Node3D
 	if ring:
 		ring.visible = false
+	for i in SETTLE_FRAMES:
+		await tree.process_frame
 	var sync := model.get_node("Warden/Sync") as WardenGlb.Sync
 	sync.set_process(false)
 	var an := HunterAnim.new(model)
