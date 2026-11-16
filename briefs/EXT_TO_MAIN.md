@@ -9959,3 +9959,4 @@ READY ext/stuck-integ-38a28c4e 9b09732547 (bulk-rebase: origin/main merged in me
 READY ext/dex-rename-1116 5240248d4069f74c4deb803bbdd09a4fbc168aee (16 Boki renames, game repo half: Cairnback->Cairnhorn live + 13 cries-roster display names; gh missing on w2 so no PR opened yet)
 READY ext/anim-key-pose-read 143de967f9f9cda1cf32370cdba0af70a9154ada (key-pose tool+docs on main's v95 glbs; gate green, export ok)
 READY ext/idle-mage-rebased 8c4ae677d782e1e17f61889d9788c09df24397c7 (Sparkle idle tools+audit notes; ryzz glb/json = main; gate green, export ok)
+READY ext/anim-dirloops-lace-kael eebe095a8755082fd7644ae92774c672efbf82ca (dirloop tools/checks/docs; main's hem/kael/vex/tarek glbs+json kept; gate green, export ok)
