@@ -49,7 +49,7 @@ extends RefCounted
 ##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
 ##  11. the rank HUD's cues (RankSfx) are in the ui set, play at least UNDER_COMBAT_DB under a weapon shot,
 ##      and the new-point chime is short
-##  11. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
+##  11. each of the 13 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
 ##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
 ##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
 ##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
@@ -948,7 +948,7 @@ func _barks() -> void:
 			if HeroSfx.of(h, "call_" + kind, "") != "%s_call_%s" % [arch, kind]:
 				missing.append("%s_call_%s" % [arch, kind])
 	h.free()
-	ok(voiced.size() == 12 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
+	ok(voiced.size() == 13 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
 			voiced.size(), HunterBarks.KINDS.size(), missing])
 	var far := voiced.filter(func(a): return float(Sfx.sound_reach.get("%s_call_boki" % a, 0.0)) <= Sfx.hear_range)
 	ok(far.is_empty(), "the squad's Boki-down call carries past %d m (short: %s)" % [int(Sfx.hear_range), far])
