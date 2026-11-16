@@ -253,11 +253,6 @@ var occlusion := SfxOcclusion.new()
 ## side a footstep or a landing is on. Its level stays this file's own falloff (_distance_db), so Godot's
 ## attenuation and distance low-pass are off. PAN: how hard it pans (x the project's 3d_panning_strength, 0.5).
 const PAN := 2.0
-## While you are downed or out the world goes dull: the SFXWorld bus (everything but SfxMix.CLEAR, and the far
-## and occluded buses that feed it) is low-passed and ducked, ramped in and out (from SfxMix.MUFFLE_OPEN_HZ).
-const MUFFLE_HZ := 1200.0  # Hz: the low-pass cutoff while muffled
-const MUFFLE_DB := -6.0  # dB: the duck on the world bus while muffled
-const MUFFLE_S := 0.3  # s: ramp in / out
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}  # sound -> start times (ms) still inside the stacking window
@@ -295,8 +290,6 @@ const AMB_DUCK_DB := -9.0  # dB the Ambience bus sinks by at the height of a fig
 var mix: SfxMix
 var cue_db := {}  # sound -> dB the mix pass adds (content/rules/sfx_cues.json, tools/loudness_report.py)
 var duck_rules := {}  # content/rules/sfx_mix.json "duck": depths, holds and the way back
-var _muffle_tw: Tween
-var _muffle_on := false
 
 
 func _ready() -> void:
@@ -489,40 +482,6 @@ func duck_for(kind: String, pos: Vector3) -> void:
 		duck(float(duck_rules[kind + "_hold_s"]), float(duck_rules[kind + "_db"]))
 
 
-## Switches the downed / out muffle on the world bus (SfxMix.muffle_fx plus a duck), eased over MUFFLE_S.
-## Off is also what a match leaving does (reset_scene_audio).
-func set_muffle(on: bool) -> void:
-	if on == _muffle_on:
-		return
-	_muffle_on = on
-	var bus := AudioServer.get_bus_index("SFXWorld")
-	if _muffle_tw and _muffle_tw.is_valid():
-		_muffle_tw.kill()
-	if on:
-		AudioServer.set_bus_effect_enabled(bus, 0, true)
-	var tw := create_tween().set_parallel(true)
-	_muffle_tw = tw
-	tw.tween_property(mix.muffle_fx, "cutoff_hz", MUFFLE_HZ if on else SfxMix.MUFFLE_OPEN_HZ, MUFFLE_S)
-	tw.tween_method(
-		func(db: float): AudioServer.set_bus_volume_db(bus, db),
-		AudioServer.get_bus_volume_db(bus),
-		MUFFLE_DB if on else 0.0,
-		MUFFLE_S
-	)
-	if not on:
-		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, 0, false))
-
-
-## Tooling (--match-audio-check): the muffle as the bus has it right now.
-func muffle_state() -> Dictionary:
-	var bus := AudioServer.get_bus_index("SFXWorld")
-	return {
-		"fx": AudioServer.is_bus_effect_enabled(bus, 0),
-		"db": AudioServer.get_bus_volume_db(bus),
-		"hz": mix.muffle_fx.cutoff_hz
-	}
-
-
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
 ## what's happening decides how loud each is (scripts/match/music_dir.gd sets the levels).
@@ -606,13 +565,13 @@ func reset_scene_audio(fade := 1.2) -> void:
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
 	duck_ambience(0.0)
-	set_muffle(false)
+	mix.set_muffle(SfxMix.Muffle.OFF)
 	for key in loops.keys():
 		loop_stop(key)
 	for p in voice_all:
 		p.stop()
 	voices.friends.resize(0)
-
+	mix.set_muffle(SfxMix.Muffle.OFF)
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
 ## score stems and beds): 0 once a match's reset_scene_audio has run and the fades are done
@@ -743,6 +702,17 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
+## How many pool voices are playing right now, plain and placed: a fight is many at once (the low-health heartbeat
+## ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	for p in spots:
+		if p.playing:
+			n += 1
+	return n
 
 ## The voice for a sound at pos, of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
 ## null when it gets none. A sound with a place and a camera to hear it from plays on a placed voice (it pans),

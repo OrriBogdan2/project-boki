@@ -1,0 +1,11 @@
+{
+	"_doc": "The low-health heartbeat and the red screen-edge pulse that goes with it (scripts/ui/low_hp_cue.gd), for the local player only. Health share = (health + armour) / (max health + max armour). It starts when the share falls below `start_share`, beats faster the lower it goes (`bpm_start` at the line, `bpm_empty` at 0) and stops the moment the share is back above the line, or you are downed or out. `volume_db` is the beat's level; `duck_db` is how much quieter it gets while `duck_voices` or more other sounds are playing (a fight). `edge_alpha` is the strongest edge red; `edge_calm` scales it when Settings > Accessibility > Fewer flashes is on.",
+	"start_share": 0.25,
+	"bpm_start": 66.0,
+	"bpm_empty": 120.0,
+	"volume_db": -6.0,
+	"duck_db": -9.0,
+	"duck_voices": 6,
+	"edge_alpha": 0.09,
+	"edge_calm": 0.3
+}

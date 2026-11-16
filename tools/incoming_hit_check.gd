@@ -142,11 +142,11 @@ func _downed() -> void:
 	var far := _bus_of(_hit_from(P.pos + right * (Sfx.FAR + 4.0), 20.0))      # (past FAR: the SFXFar bus)
 	var far_into := AudioServer.get_bus_send(AudioServer.get_bus_index("SFXFar"))
 	var dulled := near == "SFXWorld" and far == "SFXFar" and far_into == "SFXWorld"
-	ok(Sfx.muffle_state().fx and dulled,
+	ok(Sfx.mix.muffle_state().on and dulled,
 		"downed: the cue goes through the muffled world bus (near %s, far %s into %s)" % [near, far, far_into])
 	P.downed = false
 	m.music_dir.tick(m, 0.0)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.1).timeout
+	await main.get_tree().create_timer(SfxMix.MUFFLE_S + 0.1).timeout
 
 func _cap() -> void:
 	_hush()

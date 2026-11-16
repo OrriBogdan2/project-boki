@@ -2,7 +2,7 @@ class_name SfxMix
 extends RefCounted
 ## The audio buses, set up in one place, and the two ducks. Music, Ambience and UI go straight to the
 ## master; the world's sounds go through SFXWorld into SFX, so they share its glue compressor, room and
-## limiter, and SFXWorld is what the downed muffle dulls (Sfx.set_muffle). Voice (hurt and death voices,
+## limiter, and SFXWorld is what the muffle dulls (set_muffle). Voice (hurt and death voices,
 ## monster cries) feeds SFXWorld, Boki (and CLEAR) go straight into SFX and stay clear, each levelled on
 ## its own; far sounds of any kind go through SFXFar (low-passed) into SFXWorld, ones behind terrain
 ## through SFXMuffled (duller still).
@@ -13,13 +13,18 @@ extends RefCounted
 ## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
 const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXWorld": "SFX",
 	"SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld", "Voice": "SFXWorld", "Boki": "SFX", "UI": "Master"}
-## Sounds with no bus of their own kind that skip SFXWorld, so the downed muffle leaves them as they are
+## Sounds with no bus of their own kind that skip SFXWorld, so the muffle leaves them as they are
 ## (pings, the Wisp hum, Boki voices).
 const CLEAR := ["ping", "wisp_hum", "kin_happy", "kin_unsure", "kin_alert"]
-const MUFFLE_OPEN_HZ := 20000.0  # Hz: the downed muffle's cutoff while off (Sfx.set_muffle), above hearing
 ## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
+## How dull the world is (set_muffle): clear, under the low-health line, downed or out. Each has the
+## low-pass cutoff (Hz) and duck (dB) on the SFXWorld bus; the UI bus (pings, the low-health heartbeat) stays clear.
+enum Muffle { OFF, LOW_HP, DOWN }
+const MUFFLE_HZ := [20000.0, 3500.0, 1200.0]
+const MUFFLE_DB := [0.0, -2.0, -6.0]
+const MUFFLE_S := 0.3            # s: ramp between two levels
 const RULES := "res://content/rules/audio_mix.json"
 
 var rules: Dictionary
@@ -28,10 +33,14 @@ var big_sounds := {}             # sound name -> true: these dip Music and Ambie
 var _host: Node                  # Sfx, which owns the tweens
 var _duck_fx: Array[AudioEffectAmplify] = []    # Music and Ambience: Sfx.duck's stage (slow-motion beats, ults)
 var amb_duck: AudioEffectAmplify      # Ambience: the fight ducking stage (Sfx.duck_ambience)
-var muffle_fx: AudioEffectLowPassFilter     # SFXWorld: the downed muffle (Sfx.set_muffle), off until then
 var _duck_tw: Tween
 var _event_fx: Array[AudioEffectAmplify] = []    # Music and Ambience: the big-event stage
 var _event_tw: Tween
+var _muffle := Muffle.OFF
+var _muffle_fx: AudioEffectLowPassFilter    # SFXWorld: the world gone dull
+var _muffle_duck: AudioEffectAmplify
+var _muffle_tw: Tween
+var _muffle_at := 0                         # the low-pass's slot on the SFXWorld bus
 
 func _init(host: Node) -> void:
 	_host = host
@@ -102,10 +111,13 @@ func _sfx_effects() -> void:
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(AudioServer.get_bus_index("SFXFar"), lp)
 	var world := AudioServer.get_bus_index("SFXWorld")
-	muffle_fx = AudioEffectLowPassFilter.new()
-	muffle_fx.cutoff_hz = MUFFLE_OPEN_HZ
-	AudioServer.add_bus_effect(world, muffle_fx)
-	AudioServer.set_bus_effect_enabled(world, 0, false)
+	_muffle_fx = AudioEffectLowPassFilter.new()
+	_muffle_fx.cutoff_hz = MUFFLE_HZ[Muffle.OFF]
+	_muffle_duck = AudioEffectAmplify.new()
+	_muffle_at = AudioServer.get_bus_effect_count(world)
+	AudioServer.add_bus_effect(world, _muffle_fx)
+	AudioServer.add_bus_effect(world, _muffle_duck)
+	AudioServer.set_bus_effect_enabled(world, _muffle_at, false)
 	var muf := AudioServer.get_bus_index("SFXMuffled")
 	var mlp := AudioEffectLowPassFilter.new()
 	mlp.cutoff_hz = OCCLUDED_HZ
@@ -134,6 +146,31 @@ func _music_effects() -> void:
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music, mlim2)
+
+## Sets how dull the world is (a low-pass and a duck on the SFXWorld bus, eased over MUFFLE_S): DOWN while downed or
+## out, the milder LOW_HP under the low-health line. Boki voices, pings and the heartbeat bypass SFXWorld and stay
+## clear. The low-pass is only switched on while it is not OFF.
+func set_muffle(level: Muffle) -> void:
+	if level == _muffle:
+		return
+	_muffle = level
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	if _muffle_tw and _muffle_tw.is_valid():
+		_muffle_tw.kill()
+	if level != Muffle.OFF:
+		AudioServer.set_bus_effect_enabled(bus, _muffle_at, true)
+	var tw := _host.create_tween().set_parallel()
+	_muffle_tw = tw
+	tw.tween_property(_muffle_fx, "cutoff_hz", MUFFLE_HZ[level], MUFFLE_S)
+	tw.tween_property(_muffle_duck, "volume_db", MUFFLE_DB[level], MUFFLE_S)
+	if level == Muffle.OFF:
+		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, _muffle_at, false))
+
+## What the bus has right now (--match-audio-check).
+func muffle_state() -> Dictionary:
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	return {"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at), "db": _muffle_duck.volume_db,
+		"hz": _muffle_fx.cutoff_hz}
 
 ## Softens the music and the ambience for a moment (eased in over in_s, held `seconds`, back over back_s;
 ## never a sudden drop). Sfx.duck passes the timing from content/rules/sfx_mix.json.

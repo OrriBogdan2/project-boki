@@ -77,6 +77,7 @@ func run(main_node: Node) -> void:
 	_ult_cues(m, P)
 	_tell_cues(m, P)
 	_buses()
+	await _muffle(m, P)
 	await _big_event_duck(P)
 	_steps(m, P)
 	await _region_beds(m, P)
@@ -92,21 +93,12 @@ func run(main_node: Node) -> void:
 	other.remote = false
 	await _loudness(m)
 	_panned(m, P)
-	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
-	await _muffle_step(m, true)
-	var dull := Sfx.muffle_state()
-	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
-		"downed: the world bus is low-passed and ducked (%s)" % dull)
-	var bus := AudioServer.get_bus_index("SFXWorld")
+	# the muffle (_muffle above) hits the SFXWorld bus; Boki voices, pings and the Wisp hum skip it
 	var clear_kinds: bool = Sfx._bus_for(null, "wisp_hum") == &"SFX" and Sfx._bus_for(null, "ping") == &"UI"
 	ok(clear_kinds and Sfx._bus_for(null, "kin_happy") == &"Boki" and Sfx._bus_for(null, "rifle") == &"SFXWorld",
 		"the Wisp hum, pings and Boki voices skip the world bus")
-	await _muffle_step(m, false)
-	var clear := Sfx.muffle_state()
-	ok(not clear.fx and is_zero_approx(clear.db) and is_equal_approx(clear.hz, SfxMix.MUFFLE_OPEN_HZ),
-		"revived: the muffle is off again (%s)" % clear)
-	await _muffle_step(m, true)
-	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
+	m.player.downed = true
+	m.music_dir.tick(m, 0.0)
 	await _duck_check(m)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
@@ -121,9 +113,9 @@ func run(main_node: Node) -> void:
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	var sunk := Sfx.mix.amb_duck.volume_db
 	ok(sunk == 0.0, "the farm's ambience is not left sunk by the fight (%.1f dB)" % sunk)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
-	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
+	await main.get_tree().create_timer(SfxMix.MUFFLE_S + 0.2).timeout
 	await main.get_tree().create_timer(SETTLE).timeout
+	ok(not Sfx.mix.muffle_state().on, "the world is clear again once the match is left")
 	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
@@ -314,6 +306,32 @@ func _big_event_duck(P: Hunter) -> void:
 
 ## The match runs on its own for LOUD_S; each bus's peak meter (max and mean, dBFS) is reported. Only the
 ## master limiter is asserted (nothing past its ceiling); the levels are for reading.
+## Down or out dulls the SFXWorld bus hard, under the low-health line a little; the UI bus (pings, the heartbeat) stays
+## clear; a revive or a heal lifts it.
+func _muffle(m: Match, P: Hunter) -> void:
+	var room := SfxMix.Muffle
+	P.hp = P.max_hp
+	P.armor = P.max_armor
+	P.downed = true
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.DOWN], SfxMix.MUFFLE_DB[room.DOWN], "downed")
+	ok(Sfx.mix.bus_for("ping", false, false) == &"UI" and Sfx.mix.bus_for("ping", false, false) != &"SFX",
+		"pings go through the UI bus, so the muffle skips them")
+	P.downed = false
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "revived")
+	P.hp = 1.0
+	P.armor = 0.0
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line")
+	P.hp = P.max_hp
+	P.armor = P.max_armor
+	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "healed")
+
+func _muffle_step(m: Match, hz: float, db: float, what: String) -> void:
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(SfxMix.MUFFLE_S + 0.2).timeout
+	var st := Sfx.mix.muffle_state()
+	ok(is_equal_approx(st.hz, hz) and is_equal_approx(st.db, db) and st.on == (hz < 20000.0),
+		"%s: the SFXWorld bus low-pass %.0f Hz, duck %.0f dB (%s)" % [what, hz, db, st])
+
 func _loudness(m: Match) -> void:
 	var names: Array = ["Master"] + SfxMix.BUSES.keys()
 	var top := {}
@@ -658,11 +676,6 @@ func _panned(m: Match, P: Hunter) -> void:
 	ok(Sfx.last_voice is AudioStreamPlayer and not Sfx.last_voice is AudioStreamPlayer3D,
 		"a UI sound (no place) plays on a plain voice")
 	_quiet()
-
-func _muffle_step(m: Match, down: bool) -> void:
-	m.player.downed = down
-	m.music_dir.tick(m, 0.0)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
 
 ## Ducking: a rival's ult cast in earshot dips the music and ambience buses;
 ## a knock in earshot dips them too; the dip is gone again after the hold and about a second.

@@ -250,7 +250,7 @@ func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 const RANGE_SMALL := 80.0
 const RANGE_BIG := 125.0
 static func _draw_range(root: Node) -> void:
-	var k := CamRig.draw_k()
+	var k := float(Settings.q("draw"))
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -481,7 +481,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
-	Practice.attach(self)      # the practice areas' bottom bar and J hero picker
+	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -502,7 +502,7 @@ func _build_env() -> void:
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
 		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
 	add_child(env)
-	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0 * CamRig.style_reach(cam_style))
+	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
 	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
 	raid = RaidLook.pick(opts, seed_val)
@@ -1164,6 +1164,7 @@ func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
 	var p := CPUParticles3D.new()
 	p.amount = 18 if unique else 10
 	p.lifetime = 1.2
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	p.emission_sphere_radius = 0.45
 	p.direction = Vector3.UP; p.spread = 25.0
@@ -3163,7 +3164,7 @@ func _process(delta: float) -> void:
 	# the time it skipped); near ones every frame
 	_render_n += 1
 	var cf := cam.focus
-	var near2 := pow(34.0 * cam.reach(), 2.0)
+	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
