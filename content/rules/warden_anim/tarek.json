@@ -49,6 +49,7 @@
 		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
+			"upper": "moving",
 			"hold_from": 0.24
 		, "air_legs": true},
 		"breah_punch": {
