@@ -107,3 +107,51 @@ Next 13 rows by unlanded_lines not read by passes 2-4 or stuck-integ-1833c7c4/TR
 | vfx-motley-data | needs a vfx port job: Swollen pink + seed globe look differ from main's ostra.json/kit_looks |
 | overlay-typed-calls | stale refactor of overlay.gd (79/75 lines), main rewrote the pause menu since; not worth a port |
 | blight-nests, combat-steal-window-tell, tut-xp-share | not read this pass (next by unlanded_lines) |
+
+## Pass 6 (ext/stuck-integ-1324d019, worker rpc3, role feel, main 0e26231988 already in the branch, 2026-11-16)
+
+Same list (786 names, 643 rows still unread after passes 2-5, 1833c7c4/TRIAGE.md and the other open stuck-integ
+trains' supersedes lists). The pass-5 "--farmbuild-check crashes on main at line 321" was a stale
+`.godot/global_script_class_cache.cfg` in that worktree (HeartRaidHints undeclared): after `godot --headless --import`
+the check runs 114 ok / 0 fails, farm-site-paused's "Paused while you were away" row included. Next 93 rows by
+unlanded_lines, each read against main's current code:
+
+| branch | result |
+|---|---|
+| feel-brake-cast | **ported** (check only): 13 `brake_cast` rows + `brake_cast_gap_m` in --move-feel-check (a let-go with RMB the same frame brakes like the plain stop; the rule already held on main, all 13 gaps 0.000 m), rule in hunter_move.json doc, MOVEMENT_FEEL / SUPERVIVE_FEEL |
+| feel-buffers-tuning, feel-buffers-leftovers | **ported**: the input windows move into tuning.json `buffers` (ability_hold 0.15, recast 0.15, jump 0.12, coyote 0.12, shift 0.18, juggernaut_heavy 0.12; values unchanged) read by Loco; the code constants (DashFlow.BUFFER_S, ArchKit.RECAST_BUFFER, Hunter.JUMP_BUFFER / DASH_BUFFER, JuggernautKit.BUFFER, `coyote = 0.12`) are gone from 25 files; --move-feel-check `_buffers` guards that none comes back; docs/decisions 0022 + 0026, HUD.md, KIT_PARITY.md |
+| kael-rmb-dash-turn | **ported** (parity, patch 05.02.25 "turning restricted after RMB into Shift"): a dash out of a Smash (Slam, Lunge, Meteor Drop, Cinder Spin) turns at most 35 degrees for 0.8 s (`dash.lock_t` / `lock_deg` on juggernaut.json, as Dredge already had); ArchKit.lock_turn / turn_limited replace Dredge's inline copy; tools/kael_turn_check.gd runs inside the Zedran feel check |
+| anim-idle-walk-gap-rebased, ostra-gait-rebased, rimewright-skate-rebased (shared leftover) | **ported** the release.yml part: the Linux Server export and its artifact upload are `continue-on-error` (a missing preset blocked the v0.24.3 player release); the anim parts are glb work (anim jobs) |
+| ui-first15-leftovers | **ported** the text part: Save.UNNAMED; a player who never typed a name gets "The Red Stitch made it out" on results and HeroTitle.label; the hatch name box starts empty with a hint; --hero-title-check rows. The coin-pop part is gone (main's LV row replaced the coin) |
+| tut-first-wayseed | **ported**: the first Wayseed in your pack on a run says what it is (once per save, garden_zones.json hub_hints.wayseed_text), the Waystone pulses 4 s on the first arrival home holding one; --hub-hints-check `_seed` rows |
+| sfx-hunter-wisp-hum, sfx-heartspark, ui-squad-killer, ui-tip-card-one-prompt, tut-hot-zone-line, tut-last-hit-xp, farm-carry-trail-0245, train-rank-controls, farm-games-picker-base, sfx-mob-alert-rebased, ui-safe-area-one, ui-prematch-margin, prematch-safe-720, tut-beat-retry, ui-expedition-first, feel-lace-tall-climb-rebased, parity-albert-blow-stun | superseded: on main in another form (WispHum reach_m, HeartSfx, MateAlerts.killer, MsgLane.hold URGENT, HotZone.take_plan_line, xp_hints.gd, HomeCarry catch_gain/top_k, practice_ranks.gd, minigames.json picker, MobNotice, HudStyle.safe_pad, prematch COLUMNS fit, Tutorial.retry, home_classes fold, climb_tall + tall_climb_check, the Crushed wall-stun passive) |
+| vfx-meeko-kindle | superseded by a later design: main's TenderKit.number_col goes yellow at full Kindle (footage), not a step per stack |
+| parity-neve-dart-burst | superseded: main's hold ends on `wpn.heavy.n` large darts |
+| feel-trigger-edge | superseded by an owner call: archer.md "data wins over footage", `rmb.hold` 0.15 is only a tap guard (a tap puts the draw away) |
+| ui-trios-only-text, no-rolling-rebased | superseded by a later design: main kept rolling sessions and its loading line already names Solo/Duos/Trios |
+| sable-marks-resets | superseded: main's add_mark takes only `src shot` with no `ab` (the Bola adds none); Encore and Knife rank 3 reset dashes + ex_cd |
+| kael-black-red, vex-greenfire-1108, vex-yawlock | superseded: main's palettes are newer owner picks (Kael ivory `fff1dc`, Vex LIME `b8f03c`) |
+| ui-text-size | superseded: SafeArea.clipped scan on main; left: ellipsis on six labels, not worth a port |
+| ui-gear-reveal | competing design: main shows empty belt slots with EMPTY_TIP, the branch hides them (owner call) |
+| hud-g-armor-1111 | competing layout: main's HUD ref keeps armour under health (hudref) |
+| wisp-look-net, feel-online-kitefall, feel-remote-move-clear, online-dash-sweep | Net changes (join-kit look, Kitefall fall event, move clear on the wire, 2-game dash sweep): need a Net job with a VERSION bump, not an integ port |
+| sfx-downed-muffle, sfx-reverb-zones | need an sfx job: main's bus layout has no SFXWorld/SFXFar/SFXRoom sends |
+| farm-unmasked-feet | superseded: --unmasked-check 0 fails on main (feet within FOOT_TOLERANCE); main slims legs its own way |
+| skin-relax-slice, anim-skin-relax-b, anim-* (pilot-idle-slice, neve-spear-keys, tenzo-spine-rekey, stomp-drink-2, arm-sable, dash-clips-*, hand-albert, dirloops-pelvis, key-pose-read, boki-slide-starters), hunter-regen-meshy, women-body-1111 | glb / art rows: anim or art jobs from the owner's picks (stretch ceilings live in stretch_check CEILING on main) |
+| vfx-vex-precast-slab, vfx-armour-break, side-cue-telegraphs, vfx-vex-tracer(-strips), vfx-motley-kit | need a vfx job (slab/ribbon riders, shell-coloured body flash, SideColor rims) |
+| ui-self-cc-timer, feel-hurt-dir-wash, tut-start-here-rebased-rebased, egg-picker-preview, ui-dex-legendary-order, ui-font-wght-tag | need a UI/HUD job (hudref layout or GPU shots): your own CC line, HurtWash by hit direction, "Start here" tags on the rewritten picker, egg card previews, Field Book legendary order, UI.weight() |
+| farm-respec, garden-lantern-zone-hub-rebased, solo-drop-20261109-2319 | design rows for their own jobs: Unwind Tea respec (GARDEN_MODERN 2.4), Hushwood night Seek rule, Solo/Trios picker (with modes-solos-1111) |
+| no-reload-path | owner design call (20 files: drop the reload path); main still has reload_t |
+| ttk-five-cast-share | a TTK change (dredge e.dmg 25 -> 31.6, archer pin, tender seed): needs --ttk-check, not a port |
+| bot-kit-lands, perf-heart-final | check additions for their own jobs (90 s bot duels per Hunter; a heart_final perf part) |
+| feel-vex-e-recovery, glider-heat-parity, feel-mantle-timing | **next feel candidates, not ported this pass**: Longneedle 0.6 s recovery from footage (main lets her fire/walk right after the beam), heat numbers into hunter_move.json, mantle_launch_keep 0.6 ledge matrix; each needs its own long checks |
+| anim-pilot-idle-slice, body-hitbox-parity-rebased, lace-climb-tall, kit-card-1111, vfx-dolm, grimble-barge-chain, cancel-matrix-b, checks-out-of-main, npc-hob-guide-1111-r2, anim-dash-clips-cinder-lace | 0 commits ahead of their merge base: already in main |
+| ui-banner-queue-calm | stale bundle (234 commits on an old main): its parts are listed separately |
+
+Checks on this branch (rpc3, after `godot --headless --import`): --move-feel-check 0 fails (13 brake_cast rows, 6 buffers rows;
+a first run before the buffers port showed 3 knock_* fails that did not repeat), --hero-title-check 0, --hatch-check 0,
+--hub-hints-check 0, --dash-flow-check 0 (6 skipped), --farmbuild-check 0, --unmasked-check 0; combo checks below.
+--juggernaut-combo-check 272 checks / 0 fails (the 5 Kael turn-lock rows pass: 35 degrees out of Slam, Lunge, Meteor Drop and
+Spin, free again 0.8 s later); --dredge-combo-check 1 fail (hand brace speed), the same 1 on a fresh origin/main worktree;
+--cc-exit-buffer-check 1 fail (rimewright dash 0.10 s before a stun's end), the same 1 on main; --recast-cue-check the known
+2 ostra rows (pass 2). NEW-RED 0. health --strict OK (style ratchet: the added long lines wrapped).

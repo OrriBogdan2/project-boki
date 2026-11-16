@@ -67,7 +67,8 @@ func slam_rows(m: Match, P: Hunter, home: Vector3) -> void:
 		K.slash_at > t0 and not K.slam_w.is_empty(),
 		"slashed %s" % (K.slash_at > t0)
 	)
-	# RMB again: early in the wind-up it is dropped, in its last buffers.juggernaut_heavy it winds up the next Slam as it strikes
+	# RMB again: early in the wind-up it is dropped, in its last buffers.juggernaut_heavy it winds up the next Slam
+	# as it strikes
 	_fresh(m, P, home)
 	A.tap(m, P)
 	A.step(m, 0.1)

@@ -33,7 +33,7 @@ func run(a) -> void:
 
 func _reset(m: Match, P: Hunter, K: JuggernautKit, T: Hunter, home: Vector3) -> void:
 	A.step(m, 1.0)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	A.fresh(T)

@@ -47,7 +47,7 @@ func show_result(r: Dictionary) -> void:
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
 	var hunter := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
 	if hunter.strip_edges() in ["", Save.UNNAMED]:
-		hunter = HeroTitle.label(hunter, Arch.of_save())      # a player who never gave a name: "The Red Stitch made it out"
+		hunter = HeroTitle.label(hunter, Arch.of_save())      # never gave a name: "The Red Stitch made it out"
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))

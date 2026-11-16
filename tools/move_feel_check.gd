@@ -1074,7 +1074,8 @@ func _dash_curves() -> void:
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
 		# Sparkle's Wirerun is a lane length from the charge, along the aim: the length its run took
-		var want := mage_m if id == "mage" else float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
+		var kit_m := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
+		var want := mage_m if id == "mage" else kit_m
 		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		# against her run, a kit haste in it (Sable hands over at her hasted run)
 		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))

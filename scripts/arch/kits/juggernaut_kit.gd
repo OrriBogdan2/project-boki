@@ -258,7 +258,8 @@ func ult_running() -> bool:
 func lock_left() -> float:
 	return riposte.lock_left()
 
-## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits Loco.buf_juggernaut_heavy for the
+## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits
+## Loco.buf_juggernaut_heavy for the
 ## cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
@@ -320,7 +321,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
 		return true
 	if riposte.move_k() <= 0.0:
-		# planted in the guard or the cleave: a slash press is kept for Loco.buf_juggernaut_heavy and swings as the cleave lands
+		# planted in the guard or the cleave: a slash press is kept for Loco.buf_juggernaut_heavy and swings as the
+		# cleave lands
 		if held and not lmb_was: lmb_buf = Loco.buf_juggernaut_heavy
 		lmb_was = held
 		return true
@@ -648,7 +650,8 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
-## Riposte's guard and cleave) is kept for Loco.buf_juggernaut_heavy and goes off when it ends; in the Warchain's pull (and just
+## Riposte's guard and cleave) is kept for Loco.buf_juggernaut_heavy and goes off when it ends; in the Warchain's
+## pull (and just
 ## after) it spins at once.
 func press_rmb() -> void:
 	if _rmb_waits():

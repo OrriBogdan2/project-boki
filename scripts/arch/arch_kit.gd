@@ -173,7 +173,8 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.buf_ability_hold.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last
+## Loco.buf_ability_hold.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -286,7 +287,8 @@ func _r_end() -> void: pass
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
-## its last Loco.buf_ability_hold for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+## its last Loco.buf_ability_hold for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael,
+## Motley, Sparkle).
 func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false

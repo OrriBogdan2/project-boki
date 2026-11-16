@@ -134,7 +134,8 @@ func _results_name_line(main: Node) -> void:
 	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
 	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	var player := String(Save.d.get("name", Save.UNNAMED)).substr(0, 16)
-	var shown := HeroTitle.label(player, Arch.of_save()) if player in ["", Save.UNNAMED] else player     # unnamed: "The Hired Gun"
+	var unnamed := player in ["", Save.UNNAMED]
+	var shown := HeroTitle.label(player, Arch.of_save()) if unnamed else player     # unnamed: "The Hired Gun"
 	ok(texts.has("%s made it out" % shown), "results: the headline carries the name '%s'" % shown)
 	Save.d["name"] = "Orri"
 	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
