@@ -727,6 +727,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | Setting | Value |
 |---|---|
 | natural_death | False |
+| ailing_pace | {"weak": 0.7, "sick": 0.5} |
+| ailing_pace_doc | Walk speed while weak or sick from hunger (Care.pace); KinAiling droops the body and damps the hop to match, and perks it up (heart, sparkle, toast) when it gets well. |
 | sulky | {"food": 8.0, "energy": 8.0, "joy": 12.0, "clean": 8.0} |
 | sulky_doc | base_mode only (GARDEN.md section 2): needs bottom out here, sulky, and the starve clock never builds, so a Boki left alone is never weak or sick. It gets hungry and glum, and feeds itself from a bowl or a snack (BaseFeed). Off base_mode the starve stages apply. |
 | care_day_s | 300 |
@@ -776,16 +778,17 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. |
+| doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. moves (optional): the feel per Shift move, by the name the kit passes to travel() ({"feel": name}): a move on a x1 kit with no source figure of its own still runs the owner's x0.85 / x1.15 (Albert's Shield Charge, wind-up short dash and lumber; the class long dash out of charges for Vex, Lace (her flick), Sparkle, Sable and Gil); the hunter's dist and time cover every other move. A long dash runs the class's ex_dist / ex_time (Hunter.dash_with) times its move's feel, so Kael's and Tenzo's long dashes pass "long" too and get their hunter's x0.85 / x1.15. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her Cartwheel, on the ground and from a jump (the air one then carries on under air drag to the landing); bulwark's is the 360 Smash only. |
 | default | {"dist": 1.0, "time": 1.0} |
 | juggernaut | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
 | dredge | {"dist": 0.85, "time": 1.15} |
 | dolm | {"dist": 0.85, "time": 1.15} |
-| mage | {"dist": 1.0, "time": 1.15} |
-| gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
-| archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
-| thief | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
-| bulwark | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.15], [0.15, 1.2], [0.52, 1.22], [1, 0.66]]} |
+| mage | {"dist": 1.0, "time": 1.15, "moves": {"long": {"dist": 0.85, "time": 1.15}}} |
+| gunslinger | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
+| archer | {"dist": 1.0, "time": 1.0, "moves": {"flick": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
+| thief | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
+| bulwark | {"dist": 1.0, "time": 1.0, "moves": {"short": {"dist": 0.85, "time": 1.15}, "charge": {"dist": 0.85, "time": 1.15}, "lumber": {"dist": 0.85, "time": 1.15}}, "curve": [[0, 0.15], [0.15, 1.2], [0.52, 1.22], [1, 0.66]]} |
+| gil | {"dist": 1.0, "time": 1.0, "moves": {"long": {"dist": 0.85, "time": 1.15}}} |
 
 ## drop_poses (`content/rules/drop_poses.json`)
 
@@ -1447,6 +1450,17 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | archer | {"line": "Lace: cool, patient, watches everything. She draws a red thread taut between two fingers and lets it go.", "dur": 2.6, "tracks": [{"bone": "upper_arm.L", "rot": [0.5, 0, 0.2], "in": 0.25, "out": 0.2}, {"bone": "upper_arm.R", "rot": [0.5, 0, -0.2], "in": 0.25, "out": 0.2}, {"bone": "forearm.L", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2}, {"bone": "forearm.R", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2}, {"bone": "upper_arm.L", "rot": [0, 0, -0.3], "from": 0.35, "to": 0.75}, {"bone": "upper_arm.R", "rot": [0, 0, 0.3], "from": 0.35, "to": 0.75}, {"bone": "head", "rot": [-0.3, 0, 0]}]} |
 | dredge | {"line": "Grimble: greedy, hunched, a smug squint. He holds a coin to his loupe, then bites it.", "dur": 2.8, "tracks": [{"bone": "upper_arm.R", "rot": [0.55, 0, -0.1], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.1, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.15, -0.25, 0.2], "in": 0.25, "out": 0.25}, {"bone": "hips", "rot": [-0.05, 0, 0]}, {"bone": "head", "rot": [-0.2, 0, 0], "from": 0.55, "to": 0.85, "beats": 2}]} |
 | gil | {"line": "Gil: a fish out of water, twitchy and proud. He flicks his swordfish up, peers along the point, and looks pleased.", "dur": 2.6, "tracks": [{"bone": "upper_arm.R", "rot": [0.6, 0, -0.15], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.0, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.1, -0.2, 0.15], "in": 0.25, "out": 0.25}, {"bone": "upper_arm.R", "rot": [0.2, 0, 0], "from": 0.5, "to": 0.8, "beats": 2}]} |
+
+## impact_weight (`content/rules/impact_weight.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Hit weight (docs/DASHES_AND_ABILITY_FEEL.md §5.4): three tiers with a fixed hit-stop and shake, the tier of every Hunter ability, and the stacking caps that keep a team fight readable. hitstop_ms: how long the struck body holds (and the attacker too on a melee hit when attacker is true). shake: Shake.incoming_big power (0-1) on the struck player's camera only, never the attacker's; only heavy shakes (owner rule, §5.5: only big things that happen to you shake). Hunters: arch id -> ability key (lmb, rmb, dash, e, x, or a kit's own hit tag such as rock or fan) -> tier. --impact-weight-check asserts every damaging ability has one. |
+| tiers | {"light": {"hitstop_ms": 25, "attacker": false, "shake": 0.0}, "solid": {"hitstop_ms": 50, "attacker": true, "shake": 0.0}, "heavy": {"hitstop_ms": 90, "attacker": true, "shake": 0.6}} |
+| cap | {"hitstop_ms": 110, "hitstop_window_s": 0.5, "repeat_s": 0.25, "repeat_k": 0.33, "shake_gap_s": 0.5} |
+| hunters | {"archer": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "juggernaut": {"lmb": "light", "rmb": "heavy", "dash": "solid", "e": "solid", "x": "heavy"}, "gunslinger": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "bulwark": {"lmb": "light", "rmb": "solid", "dash": "solid", "x": "heavy"}, "ashwick": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "tender": {"lmb": "light", "rmb": "solid", "x": "heavy"}, "dolm": {"lmb": "light", "rock": "solid", "rmb": "heavy", "dash": "solid", "x": "heavy"}, "dredge": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "rimewright": {"lmb": "light", "fan": "light", "passive": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "mage": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "thief": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "ostra": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "gil": {"lmb": "light", "passive": "solid", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}} |
 
 ## ink_drops (`content/rules/ink_drops.json`)
 

@@ -277,29 +277,11 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
-	var last := -1
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		var ix := int(floor(px))
-		var iz := int(floor(pz))
-		if ix < 0 or iz < 0 or ix >= w or iz >= h:
-			continue                    # off the map is the void: nothing there to block
-		var ci := iz * w + ix
-		var k := kind[ci]
-		if k == T_VOID:
-			continue
-		var g := 0.0
-		if block_top.has(ci):
-			g = block_top[ci]          # a farm block you can climb: its own top (ground_at's rule)
-		elif stairs.has(ci):
-			g = ground_at(px, pz)        # a flight rises across its tile: this spot's height
-		elif ci == last:
-			continue
-		else:
-			g = level[ci] * LEVEL
-		last = ci
-		if (k == T_BLOCK and g + BLOCK_H > y) or g > y + 0.2:
+		var gy := ground_at(px, pz)      # (once a sample: bots' sight tests march this every think)
+		if gy > y + 0.2 or (gy + BLOCK_H > y and is_block(px, pz)):
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue
