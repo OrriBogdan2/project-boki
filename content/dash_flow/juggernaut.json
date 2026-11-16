@@ -9,7 +9,7 @@
 			"rmb": {
 				"mode": "fire",
 				"carry": true,
-				"source": "Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it."
+				"source": "Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Final Swing starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it."
 			},
 			"e": {
 				"mode": "fire",
@@ -31,7 +31,7 @@
 			},
 			"rmb": {
 				"mode": "cancel",
-				"source": "Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once."
+				"source": "Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Hit the Deck's hang begins at once."
 			},
 			"e": {
 				"mode": "fire",
@@ -54,12 +54,12 @@
 		},
 		"rmb": {
 			"mode": "fire",
-			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
+			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Hit the Deck's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
 		},
 		"e": {
 			"mode": "cancel",
 			"carry": true,
-			"source": "Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes."
+			"source": "Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Short Leash's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes."
 		},
 		"x": {
 			"mode": "buffer",

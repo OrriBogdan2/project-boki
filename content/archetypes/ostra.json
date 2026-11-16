@@ -13,15 +13,15 @@
 		"role_word": "Controller",
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
-		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
-		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
-		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
+		"lmb": "Comic Timing: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
+		"rmb": "Stage Fright: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
+		"e": "Gag Gift: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
+		"dash": "Musical Chairs: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
 		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
 		"weapons": {
 			"tether_lantern": "Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows."
 		},
-		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
+		"x": "Main Attraction: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
 	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
 	"signature": "tether_lantern",
@@ -54,7 +54,7 @@
 	"dash": {
 		"ground": {"range": "reach", "r": "radius"},
 		"id": "swap",
-		"name": "Lantern Trade",
+		"name": "Musical Chairs",
 		"card_range": "reach",
 		"icon": "shadowstep",
 		"col": "#c65cff",
@@ -75,9 +75,9 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Shard Snap",
+		"name": "Stage Fright",
 		"card_range": "snap.range",
-		"short": "Snap",
+		"short": "Fright",
 		"icon": "ostra_rmb",
 		"col": "#9be8dc",
 		"cooldown": 10.0,
@@ -116,10 +116,10 @@
 	"e": {
 		"ground": {"range": "reach", "r": "rmax"},
 		"delivery": "burst",
-		"name": "Brimseed",
+		"name": "Gag Gift",
 		"card_range": "reach",
 		"again": "pop the seed",
-		"short": "Seed",
+		"short": "Gag",
 		"icon": "ostra_e",
 		"col": "#6fd0c6",
 		"cooldown": 10.0,
@@ -145,9 +145,9 @@
 	},
 	"x": {
 		"ground": {"range": "range", "r": "r"},
-		"name": "Nightwell",
+		"name": "Main Attraction",
 		"card_range": "range",
-		"short": "Well",
+		"short": "Attract",
 		"icon": "ostra_x",
 		"col": "#2ee6c0",
 		"cooldown": 70.0,

@@ -17,9 +17,9 @@
 		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
 		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
-		"rmb": "Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall it blasts a cone back at you, hurting and Dazing everyone in it. Anything else is a miss.",
-		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
-		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
+		"rmb": "Coin Blast: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall it blasts a cone back at you, hurting and Dazing everyone in it. Anything else is a miss.",
+		"e": "Palm Spear: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
+		"x": "Penny Drop (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
 		"weapons": {
 			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 76% more (big gold numbers)."
 		}
@@ -37,7 +37,7 @@
 	},
 	"passive": {
 		"name": "Hot Streak",
-		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast blast, Palm Spear) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
 	},
 	"dash": {
 		"id": "slipstep",
@@ -59,9 +59,9 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Burr Charge",
+		"name": "Coin Blast",
 		"card_range": "burr.range",
-		"short": "Burr",
+		"short": "Coin",
 		"icon": "gunslinger_rmb",
 		"col": "#c8f560",
 		"cooldown": 6.5,
@@ -93,9 +93,9 @@
 	},
 	"e": {
 		"delivery": "burst",
-		"name": "Longneedle",
+		"name": "Palm Spear",
 		"card_range": "range",
-		"short": "Needle",
+		"short": "Palm",
 		"icon": "gunslinger_e",
 		"col": "#eaffa8",
 		"cooldown": 11.5,
@@ -121,9 +121,9 @@
 	},
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
-		"name": "Cinderfall",
+		"name": "Penny Drop",
 		"card_range": "range",
-		"short": "Fall",
+		"short": "Penny",
 		"icon": "gunslinger_x",
 		"col": "#b8f03c",
 		"cooldown": 42.0,

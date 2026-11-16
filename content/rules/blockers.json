@@ -9,14 +9,14 @@
  },
  "crossers": {
   "shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"},
-  "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Deep Reach (pierces terrain)"},
-  "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"},
-  "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"},
-  "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"},
-  "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"},
+  "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Sticky Fingers (pierces terrain)"},
+  "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Palm Spear (pierces terrain)"},
+  "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Short Leash (bites the wall it meets)"},
+  "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Molten Hug pull (needs sight)"},
+  "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Groundswell cells"},
   "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"},
   "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"},
-  "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it)"},
+  "phase": {"class": "phase", "arch": "archer", "what": "Lace's Slip Stitch (through walls, objects and raised terrain; only the edge guard stops it)"},
   "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}
  }
 }
