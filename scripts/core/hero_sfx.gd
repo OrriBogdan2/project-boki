@@ -37,3 +37,11 @@ static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	var sname := of(h, kind, "")
 	if sname != "":
 		m.sfx(sname, h.pos, vol_db)
+
+## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
+## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
+static func hit_sound(by: Ent, o := {}) -> String:
+	if not by is Hunter:
+		return "hit"
+	var h := by as Hunter
+	return of(h, "hit", hit_tick(h, o))
