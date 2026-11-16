@@ -2,7 +2,8 @@ extends "res://tools/hero_pair_check.gd"
 ## Rock Hop's presses, for --dolm-combo-check (docs/heroes/dolm.md "Rock Hop"): every Shift press goes through
 ## Hunter.do_dash as a real one-step input, at each point of a chain. A press from the first rock's crouch to the
 ## window's last step is the next hop (a press in the flight waits for the landing), and it leaves the skid
-## running; a press in the last hop's final BUFFER_S, or after the window, is a fresh chain only with a charge up.
+## running; a press in the last hop's final Loco.press_buffer, or after the window, is a fresh chain only with a
+## charge up.
 ## The SHIFT AGAIN prompt is up exactly while a press is the next hop, and its time left is the chain's.
 
 var m: Match
@@ -51,16 +52,16 @@ func _chain_end() -> void:
 	_until(func(): return not K.hop.chaining())
 
 ## A press at each point of the window is the next hop.
-## In hop n's flight, its landing less than BUFFER_S away.
+## In hop n's flight, its landing less than Loco.press_buffer away.
 func _near_landing(n_at: int) -> bool:
 	var to_land := K.hop._flight() - float(K.hop.st.get("t", 0.0))
-	return _phase() == "air" and int(K.hop.st["n"]) == n_at and to_land < DashFlow.BUFFER_S - DT
+	return _phase() == "air" and int(K.hop.st["n"]) == n_at and to_land < Loco.press_buffer - DT
 
 func _in_window() -> void:
 	var cases := {
 		"in the first rock's crouch": func(): pass,
 		"just after the take-off": func(): _until(func(): return _phase() == "air"),
-		"in the last BUFFER_S before the landing": func(): _until(_near_landing.bind(1)),
+		"in the last Loco.press_buffer before the landing": func(): _until(_near_landing.bind(1)),
 		"on the landing, before skid_min": func(): _until(func(): return _phase() == "skid"),
 		"on the window's last step": func(): _until(func(): return _phase() == "skid" and K.hop.left() <= DT * 1.5),
 	}
@@ -83,7 +84,8 @@ func _to_last_flight() -> void:
 		_tap()
 	_until(func(): return _phase() == "air" and int(K.hop.st["n"]) == 3)
 
-## The last hop's final BUFFER_S and the time after the window: a fresh chain with a charge up, nothing without.
+## The last hop's final Loco.press_buffer and the time after the window: a fresh chain with a charge up, nothing
+## without.
 func _late_presses() -> void:
 	for charge in [1.0, 0.0]:
 		_to_last_flight()
@@ -94,7 +96,7 @@ func _late_presses() -> void:
 		step(m, 0.45)
 		var fresh := K.hop.hops > hops0
 		var want := "a fresh chain" if charge else "none"
-		ok("hop press in the last hop's final BUFFER_S, charge %d: %s" % [charge, want],
+		ok("hop press in the last hop's final Loco.press_buffer, charge %d: %s" % [charge, want],
 			fresh == (charge > 0.0) and P.dashes < maxf(charge, 0.5), "fresh %s dashes %.2f" % [str(fresh), P.dashes])
 	_to_last_flight()
 	P.dashes = 1.0

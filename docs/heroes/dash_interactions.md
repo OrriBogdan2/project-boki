@@ -9,6 +9,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 `[?]` in Source marks a row that exists but that no source or footage settles (no source, or "Not determinable"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).
 
+An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; a lock that runs on past that answers with the deny cue. The footage shows no such press dropped (`--cast-lock-buffer-check`).
+
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
 | Lace (archer) | ground dash -> LMB | [?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
