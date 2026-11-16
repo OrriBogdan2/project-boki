@@ -72,7 +72,7 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 				legs += Vector2.from_angle(_line_yaw(sk, "thigh.L", "thigh.R") - P.face)
 				torso += Vector2.from_angle(_line_yaw(sk, "upper_arm.L", "upper_arm.R") - P.face)
 		var rel := _run_rel(P)
-		var back: bool = absf(rel) > WardenClips.TWIST_MAX
+		var back: bool = absf(rel) > c.twist_max
 		var want := rel - signf(rel) * PI if back else rel
 		ok(absf(c.head_turn - want) < 0.15 and c.twist_back == back,
 				"run %d deg off the aim: legs turn %.2f rad (want %.2f, %s)" % [deg, c.head_turn, want,
@@ -81,19 +81,20 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 				"  on the skeleton: the thighs face %.2f rad off the aim, the shoulders %.2f" % [legs.angle(),
 				torso.angle()])
 	# near 90 deg off the aim: just past the limit the legs turn round, running backwards holds a little inside it (no
-	# flicker) and lets go further in; either way he never twists past the limit (100 to 88 to 82 on one side, so the
-	# run never swings through the aim on the way)
+	# flicker) and lets go further in; either way he never twists past the limit (just past it, then 8 deg inside,
+	# then well inside, on one side, so the run never swings through the aim on the way)
 	P.teleport(home)
 	var most := 0.0
 	var backs := []
-	for deg in [0.0, 88.0, -100.0, -88.0, -82.0]:
+	var lim := rad_to_deg(c.twist_max)      # (the Hunter's own turn-round margin, loco.twist_hyst)
+	for deg in [0.0, lim - 8.0, -(lim + 4.0), -(lim - 8.0), -(178.0 - lim)]:
 		for f in 40:
 			_run_frame(m, P, T, home, Vector2(1, 0).rotated(deg_to_rad(deg)))
 			most = maxf(most, absf(c.head_turn))
 		backs.append(c.twist_back)
-	ok(backs == [false, false, true, true, false] and most <= WardenClips.TWIST_MAX + 0.01, ("runs 0, 88, 100, 88, "
-			+ "82 deg off the aim: backwards %s, the twist at most %.2f rad (limit %.2f)") % [backs, most,
-			WardenClips.TWIST_MAX])
+	ok(backs == [false, false, true, true, false] and most <= c.twist_max + 0.01, ("runs 8 inside, 4 past, 8 inside and well "
+			+ "inside the limit: backwards %s, the twist at most %.2f rad (limit %.2f)") % [backs, most,
+			c.twist_max])
 	# the aim swings 70 deg toward his run in a tenth of a second: the legs hold his way, the torso takes the swing
 	var run_60 := Vector2(1, 0).rotated(deg_to_rad(60.0))
 	for f in 40:
