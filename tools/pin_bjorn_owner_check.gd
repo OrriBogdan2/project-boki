@@ -107,9 +107,9 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float:
-		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
-	var eye0: float = eye_ahead.call()
+	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+	ok("114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset",
+		n.eye.distance_to(nock) < 0.01, "eye %s nock %s" % [str(n.eye), str(nock)])
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
@@ -121,12 +121,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
 		"free %.2f held %.2f" % [free_v, held_v])
 	step(m, 0.6, hold)
-	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
-		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	# (hot toward her red thread: the steel loses its green and blue as it heats)
+	ok("114 needle: it glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3
+			and hot.g < PinNeedle.SILVER.g - 0.3 and hot.r > hot.b + 0.3,
+		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -397,8 +398,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
-	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+	ok("pin heavy: a release burst at the bow's mouth, wider than the bow cues, with a screen kick",
+		burst != null and burst.global_position.distance_to(K.bow_mouth()) < 0.6 and burst.scale.x >= 1.2
 			and K.heavy_kicks == kicks0 + 1,
 		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0
@@ -469,9 +470,17 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 		prev = press
 	P.inp["fire"] = false
 	step(m, 1.0)
+	if not K.mace.is_empty():
+		# called home: a planted hammer would turn the next hold's first press into a 0.3 s recall
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.5)
 	return K.throws - t0 if prev or true else 0
 
-## #29: the raised aegis pushes foes back and shows it, is bigger and plated.
+## #29: the raised aegis is bigger and plated. Touching it pushes nobody; only LMB with it up (the boop) shoves
+## the foes in front of it.
 func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -480,34 +489,53 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	K.lock_t = 0.0
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	T.teleport(home + Vector3(2.0, 0, 0))
+	T.teleport(home + Vector3(2.0, 0, 0))      # pressed against the aegis (the old contact push's reach)
 	aim_at(P, T.pos)
-	var sd: Dictionary = K.rmb_def()["shield"]
-	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(sd["len"]) - 4.2) < 0.01,
-		"len %.2f" % float(sd["len"]))
+	var bd: Dictionary = K.rmb_def()["shield"]["boop"]
+	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(K.rmb_def()["shield"]["len"]) - 4.2) < 0.01)
 	var x0 := T.pos.x
+	var throws0 := K.throws
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.35, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
-	var hint := AimKit.entry(P, "aegis_push")
-	ok("bjorn shield: a forward double chevron shows in front of the raised wall, to everyone, as long as the push",
-		AimKit.shown(P, "aegis_push") and int(hint.get("chevrons", 0)) == 2 and bool(hint.get("all", false))
-		and absf(float(hint.get("len", 0.0)) - float(sd["push"])) < 0.01,
-		str(hint.keys()))
-	var d := P.aim_dir()
-	ok("bjorn shield: the chevron points the way the wall faces", (hint.get("dir",
-		Vector2.ZERO) as Vector2).distance_to(d) < 0.01)
-	step(m, 0.6, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
-	var moved := T.pos.x - x0
-	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
-		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
-	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
+	step(m, 0.95, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	ok("bjorn shield: a foe touching the raised wall is not pushed",
+		not K.wall.is_empty() and absf(T.pos.x - x0) < 0.05 and K.boop.boops == 0,
+		"moved %.2f boops %d" % [T.pos.x - x0, K.boop.boops])
+	ok("bjorn shield: no push chevron in front of the raised wall", not AimKit.shown(P, "aegis_push"))
 	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
 		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
 		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
+	# LMB with the aegis held: the boop
+	var dist0 := float(K.wall["dist"])
+	var out := [0.0]             # (an array: the step callback writes into it)
+	P.inp["fire"] = true
+	step(m, 0.05, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	P.inp["fire"] = false
+	step(m, 0.45, func():
+		rmb_at(P, home + Vector3(5.0, 0, 0))
+		out[0] = maxf(out[0], float(K.wall["dist"]) - dist0))
+	var moved := T.pos.x - x0
+	ok("bjorn boop: LMB with the aegis up thrusts the wall out and back",
+		K.boop.boops == 1 and float(out[0]) >= float(bd["thrust"]) * 0.8 and absf(float(K.wall["dist"]) - dist0) < 0.01,
+		"boops %d out %.2f" % [K.boop.boops, out[0]])
+	ok("bjorn boop: it shoves the foe in front back its push distance, no damage",
+		K.boop.booped >= 1 and moved >= float(bd["push"]) - 0.1 and T.hp == T.max_hp,
+		"booped %d moved %.2f hp %.0f/%.0f" % [K.boop.booped, moved, T.hp, T.max_hp])
+	ok("bjorn boop: behind the aegis LMB never throws or swings",
+		K.throws == throws0 and K.lmb_t < 0.0 and not K.wall.is_empty())
+	# walked into: a foe pressed between him and the aegis face is booped too
+	T.teleport(home + Vector3(0.8, 0, 0))
+	K.boop.ready_at = 0.0
+	var x1 := T.pos.x
+	P.inp["fire"] = true
+	step(m, 0.05, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	P.inp["fire"] = false
+	step(m, 0.45, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	ok("bjorn boop: a foe he walked into (inside the aegis face) is shoved too",
+		K.boop.boops == 2 and T.pos.x - x1 >= float(bd["push"]) - 0.1, "moved %.2f" % (T.pos.x - x1))
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
-	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
+	ok("bjorn shield: lowered, the wall is gone", not K.fx.aegis.visible)
 
 ## #30: the held swing ends on a mantle and other actions, lunges him forward and knocks back.
 func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
@@ -566,15 +594,15 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
+	var swings := int(HeroVfx.of(m).plays.get("swing", 0))
 	P.inp["fire"] = false
 	m.step(DT)
-	var on_hit := _crescent_ahead(P, K)
 	step(m, 0.15)
-	var in_carry := _crescent_ahead(P, K)
-	ok("bjorn hold: the swing's crescent sweeps in front of him, inside its reach, on the hit and through the carry",
-		on_hit.x > 0.0 and on_hit.y <= float(K.lmb_def()["smash_reach"]) and in_carry.x > 0.0
-			and in_carry.y <= float(K.lmb_def()["smash_reach"]),
-		"hit: ahead %.2f out %.2f; carry: ahead %.2f out %.2f" % [on_hit.x, on_hit.y, in_carry.x, in_carry.y])
+	var sweep: Dictionary = HeroVfx.data("bulwark")["moves"]["swing"]["fx"][0]
+	ok("bjorn hold: the release plays one flaming sweep over the hit's own 180 degrees, drawn to its reach",
+		int(HeroVfx.of(m).plays.get("swing", 0)) == swings + 1 and sweep["p"] == "sweep" and sweep["size"] == "r"
+			and is_equal_approx(float(sweep["arc"]), float(K.lmb_def()["smash_arc"])),
+		"plays %d arc %s" % [int(HeroVfx.of(m).plays.get("swing", 0)) - swings, sweep["arc"]])
 	step(m, 0.65)
 	var lunge := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).dot(Vector2(1, 0))
 	var knock := Vector2(T.pos.x - t0.x, T.pos.z - t0.z).dot(Vector2(1, 0))
@@ -586,12 +614,6 @@ func _glove_q(P: Hunter) -> void:
 	P.gear[0] = {"id": "barrier", "rar": 1}
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
-
-## The swing crescent's centre against him: x = how far it lies along his facing, y = how far it is from him.
-func _crescent_ahead(P: Hunter, K: BulwarkKit) -> Vector2:
-	var c := K.fx.crescent_centre()
-	var off := Vector2(c.x - P.pos.x, c.z - P.pos.z)
-	return Vector2(off.dot(P.aim_dir()), off.length())
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
@@ -613,15 +635,11 @@ func _bjorn_abyss() -> void:
 	press_x(m, P)
 	step(m, 0.45)
 	var ud: BjornUlt = K.ult
-	var drawn := 0.0
-	var floating := true
-	for i in ud.cells.size():
-		var e := AimKit.entry(P, "x%d" % i)
-		if not e.is_empty():
-			drawn += float(e.get("len", 0.0))
-			var mid := (ud.cells[i] as Vector3) + Vector3(ud.dir.x, 0, ud.dir.y) * ud.cell_len() * 0.5
-			var at_height: bool = absf(float(e.get("y", -999.0)) - ud.origin.y) < 0.05
-			floating = floating and (at_height or W.ground_at(mid.x, mid.z) > World.VOID + 1.0)
+	var lane := AimKit.entry(P, "x")
+	var drawn := float(lane.get("len", 0.0))
+	var mid_lane := ud.origin + Vector3(ud.dir.x, 0, ud.dir.y) * ud.trail_len() * 0.5
+	var floating: bool = absf(float(lane.get("y", -999.0)) - ud.origin.y) < 0.05 \
+		or W.ground_at(mid_lane.x, mid_lane.z) > World.VOID + 1.0
 	var over := 0
 	for i in ud.cells.size():
 		var c: Vector3 = ud.cells[i]
@@ -681,7 +699,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var loosed0 := K.draw.loosed_at
 	P.do_dash()
 	var rolling := P.roll_t > 0.0
-	for i in 3:
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))

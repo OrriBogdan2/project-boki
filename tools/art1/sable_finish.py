@@ -588,7 +588,8 @@ for q_ in tails:
     paint(lambda n, nm=q_[1].name: n == nm, lambda p, n, ao: P.lining(p, n, ao))
 for w_ in wings:
     paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across))
-paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(P.silver_engraved))
+paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock")), free(P.silver_engraved))
+paint(lambda n: n.startswith(("frizzen", "guard", "cap")), free(P.brass))
 paint(lambda n: n.startswith("stock"), free(P.wood))
 paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)

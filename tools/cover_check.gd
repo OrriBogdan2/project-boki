@@ -165,7 +165,7 @@ func _sight(w: World, sd: int) -> void:
 			missing.append("%s at (%d,%d) %s nearest %.1f m, %d in sight" % [ed["kind"], e.x, e.z, b, nd, nlos])
 	ok(
 			"seed %d: a patch in sight of each of the %d exits in bush biomes" % [sd, seen_n],
-			missing.is_empty() and seen_n >= 6, ", ".join(missing))
+			missing.is_empty(), ", ".join(missing))      # (Limited Ways Out: two uplinks a map, often none in bush)
 
 ## Ambush play: in the bush biomes most chests and camps have a patch beside them (within 7 m).
 func _ambush(w: World, sd: int) -> void:
@@ -193,6 +193,11 @@ func _ambush(w: World, sd: int) -> void:
 			"%d of %d" % [near, tot])
 
 # ------------------------------------------------------------------ 4. paths stay open
+## m: the A* leg tests pairs this close. A Boki asks KinPath for a way to its Hunter or quarry within its
+## leash (boki_system.json, 30 m at most); the Hollow Crown 2.0's big islands put landings and chests
+## 150 m apart, past what the capped search was ever meant to cross (the bush-free walk still covers them).
+const A_STAR_M := 100.0
+
 func _paths(w: World, sd: int) -> void:
 	var cut: Array = []
 	var no_path := 0
@@ -212,9 +217,9 @@ func _paths(w: World, sd: int) -> void:
 				pairs += 1
 				if not _free_walk(w, s, g): cut.append("%s -> (%d,%d)" % [w.islands[ii].get("id", ii), g.x, g.z])
 				# the A* is windowed and capped, so a climb up a plateau's stairs is out of its reach:
-				# same-height pairs only
-				if absf(s.y - g.y) < 0.5 and KinPath.find(w, s, g, 14).is_empty() \
-						and Vector2(s.x - g.x, s.z - g.z).length() > 1.5:
+				# same-height pairs only, and no farther apart than A_STAR_M
+				var apart := Vector2(s.x - g.x, s.z - g.z).length()
+				if absf(s.y - g.y) < 0.5 and apart > 1.5 and apart <= A_STAR_M and KinPath.find(w, s, g, 14).is_empty():
 					no_path += 1
 					lost.append("(%d,%d)->(%d,%d)" % [s.x, s.z, g.x, g.z])
 	ok("seed %d: bush never closes a path (%d landing walks)" % [sd, pairs], cut.is_empty(), ", ".join(cut.slice(0, 4)))

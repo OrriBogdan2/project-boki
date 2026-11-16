@@ -284,7 +284,7 @@ const SHOTS := [
 		"smash",
 		0.78,
 		3.5,
-		"360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on"
+		"360 Smash: the one spin hit, the red ring on the hit radius running round with the hammer, sliding on"
 	],
 	[
 		"bjorn_purify_column",
@@ -342,7 +342,7 @@ const SHOTS := [
 		"bjorn_ult",
 		0.55,
 		6.0,
-		"Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead"
+		"Faultline wind-up: one outlined 16 m lane with a glowing crack, shown to everyone, the hammer overhead"
 	],
 	[
 		"ult_bjorn_slam",
@@ -352,14 +352,29 @@ const SHOTS := [
 		6.0,
 		"Key frame: the slam, gold light flooding the near cell, the streak setting off"
 	],
-	["ult_bjorn_impact", "bulwark", "bjorn_ult", 1.25, 6.0, "Impact: slabs heaving up cell by cell, the target thrown"],
+	[
+		"ult_bjorn_stun",
+		"bulwark",
+		"bjorn_ult",
+		0.95,
+		3.0,
+		"The racing fissure stuns the target: stun stars over its head"
+	],
+	[
+		"ult_bjorn_impact",
+		"bulwark",
+		"bjorn_ult",
+		1.25,
+		6.0,
+		"Impact: a column of light erupting cell by cell, the target thrown"
+	],
 	[
 		"ult_bjorn_scar",
 		"bulwark",
 		"bjorn_ult",
 		2.4,
 		6.0,
-		"After: the ember scar along the lane (10 s, slows foes on it)"
+		"After: the crack left as an ember scar along the lane (10 s, slows foes on it)"
 	],
 ]
 ## The owner playtest items of 2026-11-03 (--owner1103): captions open with the item number.
@@ -445,6 +460,38 @@ const OWNER := [
 		"owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it"
 	],
 	[
+		"wall_pin_a_impact",
+		"archer",
+		"heavy_pin",
+		1.36,
+		5.0,
+		"Heavy Shot into a rock at 1.36 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_b_impact",
+		"archer",
+		"heavy_pin",
+		1.42,
+		5.0,
+		"Heavy Shot into a rock at 1.42 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_c_impact",
+		"archer",
+		"heavy_pin",
+		1.52,
+		5.0,
+		"Heavy Shot into a rock at 1.52 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_d_impact",
+		"archer",
+		"heavy_pin",
+		1.9,
+		5.0,
+		"Heavy Shot into a rock 1.80 s into the hold: the burst on the wall face, the stun mark over the foe"
+	],
+	[
 		"o1103_pin_heavy_stake",
 		"archer",
 		"heavy_pin",
@@ -482,23 +529,23 @@ const OWNER := [
 		"aegis",
 		1.0,
 		3.0,
-		"owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front"
+		"owner1103 #29: the raised aegis, plated and bigger"
 	],
 	[
 		"o1103_bjorn_aegis_push",
 		"bulwark",
-		"aegis_push",
-		0.77,
+		"aegis_boop",
+		1.2,
 		3.0,
-		"owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back"
+		"owner 11-11: a foe pressed against the raised aegis is not pushed"
 	],
 	[
 		"o1103_bjorn_aegis_push_b",
 		"bulwark",
-		"aegis_push",
-		1.05,
+		"aegis_boop",
+		1.75,
 		3.0,
-		"owner1103 #29: the foe has slid back 2 m off the aegis"
+		"owner 11-11: LMB with the aegis up, the boop: the foe has slid back 2.8 m"
 	],
 	[
 		"o1103_bjorn_aegis_break",
@@ -891,7 +938,7 @@ func _input(what: String, t: float) -> void:
 		"heavy_pin":
 			if t < DT:
 				crush_rock = _rock_near(home)
-				P.teleport(crush_rock - Vector3(8.0, 0, 0))
+				P.teleport(crush_rock - Vector3(5.0, 0, 0))
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))
 			if t < 1.25:
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))
@@ -899,10 +946,11 @@ func _input(what: String, t: float) -> void:
 			K.res = 0.0
 			P.inp["sec_hold"] = t < 1.25
 			if at.call(0.05): K.press_rmb()
-		"aegis_push":
-			if t < 0.69: T.teleport(home + Vector3(1.9, 0, 0))
+		"aegis_boop":
+			if t < 1.3: T.teleport(home + Vector3(1.9, 0, 0))
 			_aim(home + Vector3(6.0, 0, 0))
 			P.inp["sec_hold"] = t > 0.45
+			P.inp["fire"] = t > 1.3 and t < 1.36
 			if at.call(0.5):
 				K.set("lock_t", 0.0)
 				K.press_rmb()

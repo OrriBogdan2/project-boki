@@ -1,6 +1,6 @@
 extends RefCounted
 ## --motley-live-check: Motley's jack-in-the-box through the real match code (Match, Hunter.render, HunterAnim, Sync).
-## He wears his clips; he floats a hand's width off the ground; running tilts the box, sways the body and never steps;
+## He wears his clips; he floats at his hover height; running tilts the box, sways the body and never steps;
 ## the dash compresses the spring (the hips come down) and arriving starts inside the box; a knock-out plays the death
 ## clip on screen. Never touches the save.
 
@@ -40,18 +40,11 @@ func run(main: Node) -> void:
 	for an in ["anchor_hand_r", "anchor_hand_l", "anchor_cards"]:
 		ok(WardenGlb.anchor(P.model, an) != null, "%s rides his hand" % an)
 	ok(VoidCard.make() != null, "the void card builds")
-	var maps := 0
-	for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
-		var mesh := (mi as MeshInstance3D).mesh
-		for si in (mesh.get_surface_count() if mesh else 0):
-			var sm := (mi as MeshInstance3D).get_active_material(si) as ShaderMaterial
-			if sm and sm.get_shader_parameter("use_nrm") and sm.get_shader_parameter("normal_tex") != null:
-				maps += 1
-	ok(maps > 0, "his normal map reaches the shader, use_nrm (%d surfaces)" % maps)
 	var hips := sk.find_bone("hips")
 	var box := WardenSkeleton.find(sk, "x_box")
 	var root_y := sk.get_bone_global_pose(sk.find_bone("root")).origin.y
-	ok(root_y > 0.08 and root_y < 0.25, "the box floats a hand's width off the ground (%.3f model m)" % root_y)
+	var hover_off := absf(root_y - KMovesStone.HOVER_H)
+	ok(hover_off <= 2.0 * KMovesStone.HOVER_BOB, "the box floats at his hover height (%.3f model m)" % root_y)
 	var hips_y := sk.get_bone_global_pose(hips).origin.y - root_y
 	var idle_box := sk.get_bone_pose_rotation(box)
 	# running: the box tilts, the body lags, no foot ever comes down

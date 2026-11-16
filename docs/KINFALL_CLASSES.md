@@ -109,13 +109,17 @@ Notes on the table:
 
 ## Base to a teammate (B, squads)
 
-- 3s channel toward the teammate nearest your cursor. **Stationary**, like Supervive's recall:
+- Hold B: a wheel opens round the cursor with a slice per teammate (portrait and name, greyed when they
+  can't take you; one teammate still gets the wheel). Point the mouse or right stick at one and let go to
+  start; let go in the middle to cancel (BaseWheel, sharing the G wheel's pick and dead zone).
+- A 5.5s channel (BaseRecall.CHANNEL_S) to that teammate. **Stationary**, like Supervive's recall:
   moving, dashing, jumping, attacking or casting cancels it, and so does any damage (feedback toast,
-  a 4s lockout). Everyone sees a filling ring on you and an "incoming" marker on the teammate.
+  a 4s lockout; no progress kept). A hit breaks it loudly: a red burst, "INTERRUPTED" and its own sound.
+  Everyone, foes too, sees a filling ring on you and a filling circle plus "incoming" on the teammate.
 - You appear beside them with **recall weakness** for 3s: damage dealt ×0.5, the stun/root/slow you
   apply ×0.5, healing and shields you apply ×0.5 (a status icon with a timer on your nameplate).
 - 40s cooldown, shown as a small B slot on the ability bar in squads. Bots far (30m+) from their
-  squad with nothing to fight use it now and then. `--base-check` tests a clean channel and an interrupt.
+  squad with nothing to fight use it now and then. `--base-check` tests the wheel (open, dead zone, slices), a clean 5.5s channel, a hit at 2s and a bot.
 - In the duel room B opens the bot setup instead (there are no teammates there).
 
 ## Vertical play

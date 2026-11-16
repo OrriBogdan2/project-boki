@@ -6,7 +6,8 @@ extends RefCounted
 ##   3. an enemy scans it: it is in the captor's box, the bond pull is on for the owner once up (arrow target = captor,
 ##      the name, a map ping now and every bond_ping_s), the captor is tracked
 ##   4. the captor knocked, or killed: it drops dazed there, the pull ends, the owner cradles it back
-##   5. the match ends with nobody having taken it: "ransom" in the save
+##   5. the match ends with nobody having taken it, or its taker out: "home" (Limited Ways Out), no flag in the save;
+##      the results screen's Boki line says "came home" or "held by <name>"
 ##   6. captured and the captor extracted: "captured_by:<name>" in the save, and it cannot be picked for a match
 ##   7. Net.VERSION is 0.18.0 or later
 ##  10. second review: a host scan of a client's guard (proxy) takes the real Boki and starts the bond; Shift or F
@@ -54,6 +55,11 @@ func _fresh(tier: int) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	# the map's own wild Boki too (three start in this cleared patch on seed 4243): a bot picks fights with
+	# wild Boki near it and the bot rows would never get to their scan. The check spawns the Boki it needs.
+	for k in m.kins.filter(func(x: Kin) -> bool: return x.is_wild()):
+		m.kins.erase(k)
+		k.queue_free()
 	P = m.player
 	var W = m.world
 	var hx := int(floor(P.pos.x))
@@ -255,16 +261,21 @@ func run(main_node: Node) -> void:
 	_die()
 	_run_for(1.0)
 	var res: Array = m._resolve_lost()
-	ok(res.size() == 1 and res[0]["fate"] == "ransom", "5. the match ends with nobody having taken it: ransom")
+	ok(res.size() == 1 and res[0]["fate"] == "home", "5. the match ends with nobody having taken it: home")
 	var sv := {"matches": 7, "roster": [rec5]}
 	KinLoss.after_match(sv, rec5, KinLoss.outcome_of(res[0]["fate"], res[0]["holder"]))
 	ok(
-		rec5.has("ransom") and int(rec5["ransom"]["match"]) == 7 and int(rec5["ransom"]["t"]) > 0
-			and not KinLoss.selectable(rec5),
-		"5. the save holds a ransom flag with the match and the time"
+		KinLoss.selectable(rec5) and not rec5.has("ransom") and not rec5.has("lost_to"),
+		"5. the save holds no flag: it is home"
 	)
-	KinLoss.after_match(sv, rec5, "home")
-	ok(KinLoss.selectable(rec5) and not rec5.has("ransom"), "5. 'home' clears it")
+	ok(
+		WaysResult.boki_line({"kin": rec5, "fate": "home", "holder": ""}) == "%s came home" % rec5["name"],
+		"5. the results line: came home"
+	)
+	ok(
+		WaysResult.boki_line({"kin": rec5, "fate": "rival", "holder": "Lerna"}) == "%s held by Lerna" % rec5["name"],
+		"5. the results line: held by Lerna"
+	)
 
 	# 6. captured and extracted
 	var k6 := _capture()
@@ -277,6 +288,9 @@ func run(main_node: Node) -> void:
 		res6.size() == 1 and res6[0]["fate"] == "rival" and res6[0]["holder"] == F.pname,
 		"6. at the end it is lost to %s" % F.pname
 	)
+	F.out = true
+	ok(m._resolve_lost()[0]["fate"] == "home", "6. its captor went out before the end: home, nobody holds it")
+	F.out = false
 	var other := Save.new_kin("cindle", "Ash")
 	var sv6 := {"matches": 9, "roster": [rec6, other], "active": rec6["uid"], "active2": "none"}
 	var oc: String = KinLoss.outcome_of(res6[0]["fate"], res6[0]["holder"])
@@ -630,10 +644,9 @@ func _review_fixes() -> void:
 	Game.apply_result(rr)
 	var L := Ransom.find(String(mine["uid"]))
 	ok(
-		not L.is_empty() and (L["rec"] as Dictionary).has("ransom") and not KinLoss.selectable(L["rec"]),
-		"8. quitting after the drop still ransoms it"
+		L.is_empty() and KinLoss.selectable(Save.kin(String(mine["uid"]))),
+		"8. quitting after the drop: nobody took it, so it is home, not ransomed"
 	)
-	ok(Save.kin(String(mine["uid"])).is_empty(), "8. and it is off the roster")
 	res = [{"uid": "x", "fate": "rival", "holder": "Lerna", "rec": mine}]
 	var m2 := {"uid": "z", "species": "cindle"}
 	KinLoss.after_match(Save.d, m2, KinLoss.outcome_of(res[0]["fate"], res[0]["holder"]))

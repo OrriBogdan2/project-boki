@@ -31,12 +31,14 @@ var hazards: Array = []             # {kind, pos, node, t, phase, tele, ...}
 var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
 var player_biome := ""
+var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
 var rng := RandomNumberGenerator.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
 	w = m.world
 	rng.seed = int(m.seed_val) * 13 + 5
+	hot = HotZone.new(w, int(m.seed_val))
 	for isl in w.islands:
 		var b := String(isl.get("biome", ""))
 		if b != "" and not defs.has(b):
@@ -223,6 +225,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		if k in ["armored", "swift"]: continue
 		var p := CPUParticles3D.new()
 		p.amount = 10; p.lifetime = 1.0; p.preprocess = 1.0
+		ParticleCount.tune(p)
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = 0.6
 		p.direction = Vector3.UP; p.spread = 30.0; p.initial_velocity_min = 0.4; p.initial_velocity_max = 1.2
 		p.gravity = Vector3.ZERO
@@ -558,13 +561,15 @@ func _tick_hazards(dt: float) -> void:
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
 
 # ------------------------------------------------------------------ loot
-## Slot weights for gear found at p (by slot name): the region leans toward its own kind of gear.
+## Slot weights for gear found at p (by slot name): the biome and the map region lean toward
+## their own kinds of gear.
 func slot_lean_at(p: Vector3) -> Dictionary:
-	return _biome(p).get("loot", {}).get("slots", {})
+	return hot.slot_lean(p, _biome(p).get("loot", {}).get("slots", {}))
 
-## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
+## Extra rarity steps for loot here: the biome's (the Gloom pays better), the island's danger,
+## the map region's own and the hot zone's.
 func rarity_bonus_at(p: Vector3) -> int:
-	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0)
+	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0) + hot.rarity_bonus(p)
 
 ## The region's gear leanings (tags), for glove/gear tables that read them.
 func gear_tags_at(p: Vector3) -> Array:
@@ -579,7 +584,8 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		p.amount = int(clampf(r * 4.0, 20, 70)); p.lifetime = 5.0; p.preprocess = 5.0
+		ParticleCount.tune(p)
 		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)
@@ -652,7 +658,7 @@ func _tick_region_banner() -> void:
 	if P == null or P.out or P.dropping or P.riding or m.hud == null:
 		return
 	if m.opts.get("arena", false) or m.opts.get("training", false):
-		return      # the Arena and the training area aren't a region out in the wild ("Few monsters...")
+		return      # the Arena and the Training Grounds aren't a region out in the wild ("Few monsters...")
 	var b := w.biome_at(P.pos.x, P.pos.z)
 	if b == "" or b == player_biome:
 		return

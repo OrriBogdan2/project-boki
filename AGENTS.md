@@ -34,19 +34,25 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Report the cost.** Your final report lists lines added and removed (`git diff --stat`) and any new files, assets or settings, with why each one is needed.
 
 ## 4. Rules while coding
+- **Follow the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)** (our additions and the 120-character line are in docs/STYLE.md):
+  - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members; a leading `_` for private or unused names.
+  - Code order: `class_name`/`extends`, the doc comment, signals, enums, constants, static vars, `@export` vars, other vars, `@onready` vars, then `_init`/`_ready`/other built-ins, public functions, private functions.
+  - Spacing: tabs, two blank lines between functions, one space around operators and after commas.
+  - Enforcement: `gdformat --line-length 120` and `gdlint` (`gdlintrc`) run in `tools/check.sh`. A branch formats every `.gd` it changes (`tools/check.sh --changed`). Old files get formatted in batches (`tools/README.md`), never in one sweep.
 - **One responsibility per file and per function.** Split rather than append. Aim for files under ~800 lines and functions under ~60.
 - **No duplicate systems or versions.** Don't add `foo_v2` next to `foo`. Migrate, delete the old one, and update the callers in the same change.
 - **Delete what you replace.** Remove dead code, old flags, unused content and compatibility shims when you supersede something. If removing something risks too much, file it in `docs/DEBT.md`.
 - **No silent dynamic calls.** Avoid `has_method`, `call("name")` and `get_script_method_list` for things you control. Use typed references or signals (`CombatBus`).
 - **Constants with a unit and a reason.** Put tuning numbers in `content/rules` or a named `const` with a one-line comment (units, what it controls), not magic numbers inline.
 - **Networking:** anything synced between players goes through `Net`. Bump `Net.VERSION` when the sync shape changes. Never rename Net functions, the `"st"`/`"hit"`/`"ev"` topics, or the `--relay`/`--server=`/`--token=` args.
-- **Saves:** every save-format change comes with a migration. Old saves must load.
+- **Saves:** every save-format change comes with a migration. Old saves must load; add a golden file (`docs/SAVES.md`; `--save-compat-check`). A build that grows more than 5% needs its baseline bumped in the same PR (`docs/SIZE_BUDGET.md`).
 - **Player-facing text:** write it in our own words and use our own names. Never copy text, names or assets from other games.
 
 ## 5. Testing (cheap and meaningful)
 - **Every feature adds or extends a check** that asserts its behaviour, in `tools/` and registered.
 - **While iterating, run only the checks for what you changed.** Run the full suite once, on your final commit.
 - **Don't weaken a check to make it pass.** If a check's assumption is wrong, fix the check and explain why in the commit.
+- **A check must not depend on the box.** Time budgets and wait caps use `CheckClock`, a second game or server uses `CheckChild`, a check that times frames against the wall clock without looking at them turns drawing off, random draws are seeded (`docs/GATE_SPEED_1111.md`).
 - **Godot runs go through `/home/claude/gq`** with a temp `XDG_DATA_HOME`. Never use `--fresh` or the shared dev save.
 
 ## 6. Finishing a change
@@ -56,9 +62,16 @@ Read this before changing code. The goal: every change leaves the codebase as ea
   - the system's doc in `docs/`
   - `docs/DEBT.md` if you knowingly left debt
 - Run `python3 tools/health.py --strict`. It must pass: god-file budgets and the style ratchet (`tools/style_lint.py`: no file may get worse; fix what you touch and lock it in with `--update`).
+- Run `tools/check.sh` (health + style + the lint ratchet: gdlint, gdformat, ruff, vulture, glTF validation of every `.glb`, Godot unused-code and shadowing warnings). Old debt is in `tools/lint_baseline.json` and may not grow; new files must be clean (`gdformat --line-length 120`, `ruff format`). After cleaning a file up, `tools/check.sh --update` lowers its count. `pre-commit install` runs it on staged files.
 - Report: what changed, which files, the checks run and their results, and any debt you left (with the `docs/DEBT.md` entry).
 
-## 7. Review before merge
+## 7. Branches
+- **One branch per task** (`ext/<short-name>`). Retries and follow-ups reuse it: never push a `-rebased` or `-v2` copy. Bring it up to date by merging `origin/main` into it.
+- The branch is deleted after it merges. Job checkpoints (`wip/cj-*`) are deleted when the job ends.
+- **Before building any system, search the repo for an existing one** and extend it (§1, §3).
+- Small, clearly labeled commits (§6).
+
+## 8. Review before merge
 The integrator (the main session) merges branches into `main`. Before merging any feature branch, a separate reviewer agent reads the diff with fresh eyes against this file, looking for:
 - god-file growth
 - bloat: features, options or abstractions nobody asked for; a net line count out of proportion to the task

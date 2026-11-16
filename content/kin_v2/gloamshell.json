@@ -6,8 +6,8 @@
 		"Garden snail",
 		"Smoked obsidian"
 	],
-	"theme": "shadow",
-	"flavor": "A snail whose shell is smoked obsidian glass. It drinks the light around it and leaves a trail of dusk behind.",
+	"theme": "dark",
+	"flavor": "A snail whose shell is smoked obsidian glass. Gloamshell drinks the light around Gloamshell and leaves a trail of dusk behind.",
 	"colors": {
 		"body": "#3a3448",
 		"belly": "#b8a8c8",

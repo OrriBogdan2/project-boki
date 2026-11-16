@@ -14,7 +14,8 @@ LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), he
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5a5568"), hexc("#7d7889"), hexc("#a09bab"), hexc("#bcb8c6"), hexc("#d6d3de")]
 SILVER = [hexc("#3c3a47"), hexc("#5b5968"), hexc("#7b7a8a"), hexc("#9c9bab"), hexc("#c2c1cd")]      # a step under the sheet: the engine lifts metal
-WOOD = [hexc("#2b1316"), hexc("#43201f"), hexc("#5a2d2a"), hexc("#73403a"), hexc("#8c584c")]        # the sheet's deep maroon stock, not red
+WOOD = [hexc("#2a140e"), hexc("#45231a"), hexc("#5e3322"), hexc("#7a4630"), hexc("#96603f")]        # the weapon sheet's walnut stock
+BRASS = [hexc("#4a3416"), hexc("#7a5a22"), hexc("#a9822f"), hexc("#cfa84a"), hexc("#eed283")]       # its guard, butt cap and frizzen
 FUZZ = [hexc("#6a5a80"), hexc("#857596"), hexc("#a08fb0"), hexc("#b9a9c6"), hexc("#d0c3da")]
 STEM = hexc("#4a3a66")
 SKIN_LIFT = np.array([0.92, 0.98, 1.05])
@@ -63,6 +64,10 @@ def silver_engraved(p, n, ao):
     t = lit(n, ao) * 1.2 + 0.1
     eng = smooth(0.42, 0.46, fbm(p * 170.0, 2)) * smooth(0.5, 0.46, fbm(p * 170.0, 2))
     return ramp(np.clip(t - eng * 0.3, 0, 1), SILVER)
+
+
+def brass(p, n, ao):
+    return ramp(np.clip(lit(n, ao) * 1.05 + 0.06, 0, 1), BRASS)
 
 
 def wood(p, n, ao):

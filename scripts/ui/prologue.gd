@@ -3,7 +3,9 @@ extends Node3D
 ## Five shots, each a little set far apart from the others, with a line of story under letterbox bars:
 ##   1. the land whole  2. the Wyrm wakes  3. the Hollowing  4. the Boki  5. hunters race for the Wyrmheart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
-## light (MOODS) and its own action. Space or a click moves on; holding Esc skips it all.
+## light (MOODS) and its own action. A click, key or pad button moves on one shot (or first finishes a line
+## still typing); holding one for a second skips it all (HoldSkip). Once seen (or skipped) a new game goes
+## straight past it.
 
 signal finished
 
@@ -65,10 +67,17 @@ var heart_light: OmniLight3D
 var look_mat: ShaderMaterial    # the storybook screen effect
 var chapter_lbl: Label
 var pips: HBoxContainer
+var hold_skip: HoldSkip
+var type_tw: Tween              # the caption typing itself in (a tap finishes it)
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Sfx.play_music("title")
+	if then_go == "hatch" and Save.d["tutorial"].get("prologue", false):
+		set_process(false)
+		set_process_unhandled_input(false)
+		Game.goto.call_deferred(then_go)      # (seen it already: repeat runs skip it by default)
+		return
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	rng.seed = 77
 	var we := WorldEnvironment.new()
@@ -421,24 +430,23 @@ func _build_ui() -> void:
 	fade.material = wm          # scenes change with a ragged ink wipe, not a plain fade
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(fade)
-	# top bar: how far through the story you are, and a hold-to-skip so a stray key never skips it
-	var skip := HoldSkip.new()
-	skip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	skip.offset_left = -196; skip.offset_right = -24; skip.offset_top = 17; skip.offset_bottom = 61
-	skip.skipped.connect(_finish)
-	root.add_child(skip)
+	# top bar: how far through the story you are
 	pips = HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 8)
 	pips.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	pips.position = Vector2(30, 33)
 	pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(pips)
-	# bottom corner: how to move on
-	var hint := UI.key_hints([["Space", "next"]], 12, Color(1, 1, 1, 0.5))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hint.offset_right = -24; hint.offset_top = -40; hint.offset_bottom = -16
-	root.add_child(hint)
+	# bottom corner: hold to skip (unseen until a press)
+	hold_skip = HoldSkip.new()
+	hold_skip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	hold_skip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hold_skip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hold_skip.offset_right = -24
+	hold_skip.offset_bottom = -16
+	hold_skip.tapped.connect(_tap)
+	hold_skip.skipped.connect(_finish)
+	root.add_child(hold_skip)
 
 ## One dot per scene: done ones filled, the current one long and bright.
 func _draw_pips() -> void:
@@ -473,7 +481,8 @@ func _next_shot() -> void:
 	tw.tween_property(fade, "color:a", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 	tw.parallel().tween_property(chapter_lbl, "modulate:a", 1.0, 0.8).set_delay(0.3)
 	var type_s := maxf(1.2, caption.text.length() * 0.03)
-	tw.parallel().tween_property(caption, "visible_ratio", 1.0, type_s).set_delay(0.6)
+	type_tw = create_tween()
+	type_tw.tween_property(caption, "visible_ratio", 1.0, type_s).set_delay(0.6)
 	if look_mat:
 		var gt := create_tween().set_parallel()
 		var tint: Color = look_mat.get_shader_parameter("tint")
@@ -542,22 +551,26 @@ func _finish() -> void:
 	if done:
 		return
 	done = true
-	var tw := create_tween()
-	tw.tween_property(fade, "color:a", 1.0, 0.5)
-	tw.tween_callback(func():
-		finished.emit()
-		Save.d["tutorial"]["prologue"] = true
-		# the hatch screen still tells its own three lines: the storm, the shrine, the eggs
-		Game.goto(then_go))
+	finished.emit()
+	Save.d["tutorial"]["prologue"] = true
+	# the screen change covers the picture itself (one wipe, not two); the hatch screen still tells its own three lines
+	Game.goto(then_go)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not done and hold_skip.feed(event):
+		get_viewport().set_input_as_handled()
+
+## A tap: finish the line still typing, else on to the next shot (from the title card, the end).
+func _tap() -> void:
 	if done:
 		return
-	# Esc is held to skip (see HoldSkip); Space or a click moves on to the next scene
-	var click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
-	if event.is_action_pressed("jump") or click:
-		if shot < shots.size() and shot_t > 0.8 and not advancing:
-			_advance()
+	if shot >= shots.size():
+		_finish()
+	elif caption.visible_ratio < 1.0:
+		type_tw.kill()
+		caption.visible_ratio = 1.0
+	else:
+		_advance()
 
 # ---------------------------------------------------------------- the show
 func _process(delta: float) -> void:

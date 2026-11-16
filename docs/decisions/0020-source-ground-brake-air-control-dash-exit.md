@@ -17,9 +17,10 @@ docs/KIT_PARITY.md items 2-4 (all heroes): our ground stop braked at 110 m/s² (
 
 ## Decision
 Option 2. All four numbers live in `content/rules/hunter_move.json` `physics` (brake, ground_friction,
-dash_exit_run, air_control), read by `HunterMove.brake/dash_exit/air_steer`. Speed over a run with no keys
-(a kit step, a knock) still sheds at `Hunter.GROUND_SHED` (110 m/s²). That rate is kit-tuned, not from the source, and it keeps the kit
-step lengths. A kit step with a measured total takes the exit slide off its dash (`HunterMove.slide`, Bjorn's
+dash_exit_run, air_control), read by `HunterMove.brake/dash_exit/air_steer`. Speed over a run (a kit step, a knock) sheds under the same brake, keys held or not, as UE's walking
+braking does (`HunterMove.brake_rate`; it was a kit-tuned 110 m/s² with no keys and 30 with keys until the
+2026-11-09 movement pass, so a 10 m/s shove now slides 1.4 m, not 0.7). `Hunter._lunge` solves its push from
+that brake (`HunterMove.slide_speed`), so swing steps keep their lengths. A kit step with a measured total takes the exit slide off its dash (`HunterMove.slide`, Bjorn's
 swing step). A CastHold hover (`ArchKit.hovering`: Dredge's hook and broadside, Ostra's swap) steers like
 the ground, as the owner asked (items 31, 75), not with the near-nil air control.
 

@@ -106,56 +106,6 @@ def wood_col(p, along, tone=0.0):
     return col
 
 
-def stains(col, p):
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    return mix(col, C("4d6a38"), smooth(0.58, 0.72, fbm(x, y, z + 2, 9.0, 3)) * 0.5)
-
-
-def p_hull(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    fr, bk, kk = B.strake(x, y, z)
-    pid = np.floor(fr) * (1 - np.rint(kk)) + np.floor(bk) * np.rint(kk) + 40 * np.rint(kk)
-    q = (fr % 1.0) * (1 - kk) + ((bk + 0.5) % 1.0) * kk
-    seam = np.where(kk > 0.5, smooth(0.09, 0.03, np.abs(((bk + 0.5) % 1.0) - 0.5)), smooth(0.12, 0.03, np.minimum(fr % 1.0, 1 - fr % 1.0)))
-    along = np.where((kk > 0.5)[:, None], np.array((2.5, 2.5, 0.3), np.float32), np.array((0.35, 0.35, 4.0), np.float32))
-    col = wood_col(p * along * 1.0, (1.0, 1.0, 1.0))
-    col = col * (0.8 + 0.42 * vnoise(pid * 3.1, pid * 1.7, pid, 1.0))[:, None]
-    # butt joints along each strake
-    a = np.arctan2(x, y)
-    butt = smooth(0.012, 0.004, np.abs((a * 0.55 + pid * 0.37) % 1.0 - 0.5) / 0.55) * (kk < 0.5) * 0.5
-    col = stains(col, p)
-    col = mix(col, C("1a110c"), np.maximum(seam, butt) * 0.92)
-    col = shade(col, ao, cv * 0.45, n, 0.45, 0.25, (0.6, 0.62, 0.72))
-    # the sea's light: a few long sprung seams, and the collar running down under the helmet
-    patch = smooth(0.6, 0.66, fbm(a * 0.7, a * 0.3, pid * 0.23, 4.0, 2))
-    lit = patch * seam * smooth(0.25, 0.32, z) * smooth(0.76, 0.68, z)
-    ring = smooth(0.74, 0.77, z + (vnoise(a * 7.0, a, a, 1.0) - 0.5) * 0.12) * smooth(-0.02, 0.1, y)
-    hot = np.maximum(lit, ring)
-    col = mix(col, C("3fbfb4"), np.clip(smooth(0.0, 0.5, hot) * 0.55, 0, 1))
-    return mix(col, KEY, smooth(0.45, 0.6, hot))
-
-
-def p_limb(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n)
-    lab = f.label(p)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = stains(wood_col(p, (2.5, 2.5, 0.3)), p)
-    a = np.arctan2(y, np.abs(x) - 0.44)
-    col = shade(col, ao, cv * 0.7, n, 0.65, 0.3, (0.6, 0.62, 0.72))
-    iron = mix(C("5b5048"), C("3e342e"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
-    iron = mix(iron, C("6e4a34"), smooth(0.48, 0.64, fbm(x + 5, y, z, 12.0, 4)) * 0.6)
-    col = np.where((lab == B.IRON)[:, None], shade(iron, ao, cv * 0.8, n, 0.6, 0.9, (0.65, 0.6, 0.7)), col)
-    col = np.where((lab == B.RIVET)[:, None], shade(C("8a7f74") * ones(p), ao, cv * 0.5, n, 0.5, 0.9), col)
-    barn = C("c4bcaa") * ones(p) * (0.8 + 0.4 * fbm(x, y, z, 90.0, 2))[:, None]
-    col = np.where((lab == B.BARN)[:, None], shade(barn, ao, cv, n, 0.8, 0.4), col)
-    # a few long teal splits down the staves
-    sp = smooth(0.74, 0.8, vnoise(x * 5.0, y * 5.0, z * 0.5, 16.0)) * (lab == B.WOOD) * smooth(0.45, 0.5, z) * smooth(0.72, 0.66, z)
-    return mix(col, KEY, sp)
-
-
 def p_mast(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n, (0.006, 0.016), 1.0)
@@ -222,7 +172,7 @@ def p_moss(p, n, c):
 
 def p_sail(p, n, c):
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("cdbf9c"), C("8a7a60"), fbm(x, y, z, 12.0, 3)[:, None] * 1.1)
+    col = mix(C("e8e0d2"), C("a89c8a"), fbm(x, y, z, 12.0, 3)[:, None] * 1.1)     # mossy_v2: off-white torn cloth
     return col * (0.8 + 0.2 * smooth(0.8, 1.05, z))[:, None]
 
 
@@ -273,8 +223,8 @@ def p_fish(p, n, c):
     ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 1.5)
     lab = f.label(p)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("52c8ac"), C("237a78"), smooth(-0.03, 0.05, z - 0.98)[:, None])
-    col = mix(col, C("9ff0d2"), smooth(0.6, 0.8, fbm(x, y, z, 60.0, 2)) * 0.4)
+    col = mix(C("d98a4a"), C("8f3d22"), smooth(-0.03, 0.05, z - 0.98)[:, None])     # mossy_v2: a rust-orange angler
+    col = mix(col, C("5a2414"), smooth(0.6, 0.8, fbm(x, y, z, 60.0, 2)) * 0.4)
     col = shade(col, ao, cv * 0.7, n, 0.7, 0.5, (0.45, 0.6, 0.65))
     col = np.where((lab == 2)[:, None], C("24101c") * ones(p), col)
     col = np.where((lab == 3)[:, None], C("f2ead2") * ones(p), col)
@@ -292,14 +242,15 @@ def p_rope(p, n, c):
 
 
 # ---- the art projected (FINE-DETAIL): model points -> pixels of the turnaround, the weapon and head sheets. Coordinates are read off
-# the 1500-wide view of breaker_turnaround (x, y), scaled at load.
+# mossy_v2_turnaround (the body, read at 1600 wide) and breaker_weapons (the shield, 1500 wide), scaled at load.
 REFS = os.environ.get("BOKI_ART_REFS", "/home/boki/briefs-wt/briefs/art-refs")
 _art = {}
 
 
 def art(name):
     if name not in _art:
-        im = imgio.load(os.path.join(REFS, name + ".png"))
+        path = os.path.join(REFS, name)
+        im = imgio.load(path if os.path.splitext(path)[1] else path + ".png")
         # the sheet's pale background is bled over from the figure, so a texel past the drawn edge never paints white
         lo, hi = im.min(2), im.max(2)
         fg = ~((lo > 0.55) & (hi - lo < 0.07))
@@ -324,102 +275,52 @@ def hot(col):
     return mix(col, KEY, smooth(0.2, 0.3, m) * smooth(0.45, 0.6, col[:, 2]))
 
 
-FC, BC = 242.0, 985.0       # the front and back views' centre x
-SOLE = 487.0
-HY, HH, HW = 295.0, 128.0, 128.0   # the hull in the art: centre y, half height, half width
+V2 = "mossy_v2/mossy_v2_turnaround.jpg"     # read at 1600 wide: the front view's centre x 245, the side's 1023, the back's 1355
+FC, SC, BC = 245.0, 1023.0, 1355.0
+PX = 298.0                                 # px a metre: the helmet's half width, 70 px, is HELM_R[0]
 
 
-def p_hull(p, n, c):
-    Rx, Ry, Rz = B.HULL_R
-    u = p[:, 0] / Rx
-    v = (p[:, 2] - B.HULL_C[2]) / Rz
-    u = np.sign(u) * np.minimum(np.abs(u), 0.97)
-    f = sample("breaker_turnaround", FC - u * HW, HY - v * HH)
-    b = sample("breaker_turnaround", BC + u * HW, HY - v * HH)
-    w = smooth(-0.3, 0.3, n[:, 1])
-    out = mix(b, f, w)
-    # (the compass dial stays warm brass and paper, not the sea's glow)
-    dial = (u * HW) ** 2 + ((v * HH) - (HY - 262.0)) ** 2 < 42.0 ** 2
-    return np.where((dial & (n[:, 1] > 0))[:, None], out, hot(out))
+def _views(f, b, sd, n, side_w=1.0):
+    out = mix(b, f, smooth(-0.25, 0.25, n[:, 1]))
+    return mix(out, sd, smooth(0.5, 0.8, np.abs(n[:, 0]) ** 2) * side_w)
 
 
-ARM = [(0.0, 105.0, 225.0), (0.45, 85.0, 330.0), (0.75, 60.0, 400.0), (1.0, 62.0, 462.0)]   # his right arm, front view: t, x, y
-
-
-def _arm_px(t):
-    tt = [a[0] for a in ARM]
-    return np.interp(t, tt, [a[1] for a in ARM]), np.interp(t, tt, [a[2] for a in ARM])
-
-
-def p_limb(p, n, c):
+def p_fist(p, n, c):
+    """The fists, planar from the front and back views' hands (his right is image left in the front view)."""
     s = float(c["part"]["side"])
-    r = c["part"].get("r", 0.13)
-    z0, z1 = 0.75, 0.03
-    t = np.clip((p[:, 2] - z0) / (z1 - z0), 0, 1)
-    ax, ay = _arm_px(t)
-    lx = (np.abs(p[:, 0]) - 0.557) / r
-    ly = p[:, 1] / r
-    wide = 42.0
-    fx = FC + s * (ax - FC) * -1.0 if False else (ax - wide * lx * 0.95 if s > 0 else 2 * FC - ax + wide * lx * 0.95)
-    f = sample("breaker_turnaround", fx, ay)
-    bx = 2 * BC - ax + wide * lx * 0.95 if s > 0 else ax + (BC - FC) - wide * lx * 0.95
-    b = sample("breaker_turnaround", bx, ay)
-    # the outer face, from the side view (the arm stands clear there)
-    o = sample("breaker_turnaround", 610.0 + ly * wide * 1.05, ay)
-    w = np.maximum(n[:, 0] * s, 0.0) ** 2
-    out = mix(mix(b, f, smooth(-0.3, 0.3, n[:, 1])), o, smooth(0.45, 0.75, w))
-    return hot(out)
-
-
-def p_pauldron(p, n, c):
-    s = float(c["part"]["side"])
-    lx = (np.abs(p[:, 0]) - 0.557) / 0.0027 * 0.4
-    y = 228.0 - (p[:, 2] - 0.76) / 0.0027 * 0.9
-    f = sample("breaker_turnaround", 105.0 - lx if s > 0 else 412.0 + lx, y)
-    b = sample("breaker_turnaround", BC + 153.0 + lx if s > 0 else BC - 153.0 - lx, y)
+    ctr = p.mean(0)
+    hw = max(float(np.abs(p[:, 0] - ctr[0]).max()), 0.02)
+    hh = max(float(np.abs(p[:, 2] - ctr[2]).max()), 0.02)
+    dx, dz = (p[:, 0] - ctr[0]) / hw, (p[:, 2] - ctr[2]) / hh
+    py = 625.0 - dz * 38.0
+    f = sample(V2, FC - s * 178.0 - dx * 30.0, py, 1600.0)
+    b = sample(V2, BC + s * 178.0 + dx * 30.0, py, 1600.0)
     return hot(mix(b, f, smooth(-0.3, 0.3, n[:, 1])))
-
-
-def p_leg(p, n, c):
-    s = float(c["part"]["side"])
-    lx = (np.abs(p[:, 0]) - 0.176) / 0.0027 * 0.6
-    y = np.minimum(SOLE - p[:, 2] / 0.0027 * 0.95, 484.0)
-    f = sample("breaker_turnaround", (FC - 50.0 - lx) if s > 0 else (FC + 50.0 + lx), y)
-    b = sample("breaker_turnaround", (BC + 50.0 + lx) if s > 0 else (BC - 50.0 - lx), y)
-    return mix(b, f, smooth(-0.3, 0.3, n[:, 1]))
-
-
-SQ = "breaker_head_squat"
 
 
 def p_dial(p, n, c):
     """The compass, round and on its own non-glowing brass surface; the rest of the hull is keyed."""
     q = p - c["part"]["centre"]
-    return sample("breaker_turnaround", FC - q[:, 0] / 0.118 * 44.0, 262.0 - q[:, 2] / 0.118 * 44.0)
+    return sample(V2, FC - q[:, 0] / 0.1 * 30.0, 478.0 - q[:, 2] / 0.1 * 30.0, 1600.0)
 
 
 def p_helmet(p, n, c):
-    """breaker_head_squat (1000 wide): front at x 140, back at x 855, side at x 610; the dome's middle at y 195."""
-    rx, ry, rz = B.HELM_R
-    k = 82.0 / rx
+    """The dome from the front, side and back views; the dome's centre at y 325."""
     x, y = p[:, 0], p[:, 1] - B.HELM_C[1]
-    py = 195.0 - (p[:, 2] - B.HELM_C[2]) / rz * 62.0
-    f = sample(SQ, 140.0 - x * k, py, 1000.0)
-    b = sample(SQ, 855.0 + x * k, py, 1000.0)
-    sd = sample(SQ, 615.0 + y / ry * 72.0, py, 1000.0)
-    out = mix(mix(b, f, smooth(-0.25, 0.25, n[:, 1])), sd, smooth(0.5, 0.8, np.abs(n[:, 0]) ** 2))
-    return out
+    py = 325.0 - (p[:, 2] - B.HELM_C[2]) * PX
+    f = sample(V2, FC - x * PX, py, 1600.0)
+    b = sample(V2, BC + x * PX * 0.8, py, 1600.0)      # (the back view draws the dome a fifth narrower)
+    sd = sample(V2, SC + y * PX, py, 1600.0)
+    return _views(f, b, sd, n)
 
 
 def p_collar(p, n, c):
-    """The collar, plan-mapped: round the ring its art runs left to right across the front and back views."""
+    """The collar, plan-mapped: its band runs y 355..395 in the front view, round the dome's brim (y 332) at the back."""
     x, y = p[:, 0], p[:, 1]
-    ang = np.abs(np.arctan2(x, y)) / np.pi      # 0 at the front, 1 at the back
     u = x / 0.34
     r = np.clip(np.sqrt((x / 0.34) ** 2 + (y / 0.3) ** 2), 0, 1)
-    py = 232.0 + (r - 0.7) * 170.0 + 55.0 * (y > 0) * np.clip(y / 0.3, 0, 1)
-    f = sample(SQ, 140.0 - u * 118.0, py, 1000.0)
-    b = sample(SQ, 855.0 + u * 118.0, py, 1000.0)
+    f = sample(V2, FC - u * 101.0, 355.0 + (r - 0.7) / 0.3 * 40.0, 1600.0)
+    b = sample(V2, BC + u * 101.0, 334.0 + (r - 0.7) / 0.3 * 12.0, 1600.0)
     return mix(b, f, smooth(-0.15, 0.15, y))
 
 
@@ -432,24 +333,29 @@ def p_door_art(p, n, c):
     return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+TABLE = {"fist": p_fist, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
+
+
+def tame_warm(col, key):
+    """Every warm texel that is not the key, below the glow key and browner (the turnaround's wood is brown, not red)."""
+    warm = (col[:, 0] - col[:, 2] > 0.1) & ~key
+    r = np.minimum(col[:, 0], 0.41)
+    col[:, 0] = np.where(warm, r, col[:, 0])
+    col[:, 1] = np.where(warm, np.maximum(col[:, 1], r * 0.66), col[:, 1])
+    col[:, 2] = np.where(warm, np.maximum(col[:, 2], r * 0.42), col[:, 2])
+    return col
 
 
 def key_scan(col):
     """The scan's paint for a keyed material: its teal light on the key, every other warm texel below it."""
     out = hot(col)
-    k = np.abs(out - KEY).sum(1) < 0.12
-    warm = (out[:, 0] - out[:, 2] > 0.1) & ~k
-    out[:, 0] = np.where(warm, np.minimum(out[:, 0], 0.41), out[:, 0])
-    return out
+    return tame_warm(out, np.abs(out - KEY).sum(1) < 0.12)
 
 
 def paint(name, p, n, ctx):
     col = np.clip(TABLE[name](p, n, ctx), 0, 1)
     # on a keyed material any bright warm texel glows (hero_toon glow_key): only the real key may stay that bright
     if ctx["part"]["slot"] in ("scan", "wood"):
-        key = np.abs(col - KEY).sum(1) < 0.12
-        warm = (col[:, 0] - col[:, 2] > 0.1) & ~key
-        col[:, 0] = np.where(warm, np.minimum(col[:, 0], 0.41), col[:, 0])
+        col = tame_warm(col, np.abs(col - KEY).sum(1) < 0.12)
     return col
