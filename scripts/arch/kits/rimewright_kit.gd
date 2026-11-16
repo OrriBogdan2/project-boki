@@ -115,12 +115,13 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return     # nothing to Shatter, and a knocked foe isn't Chilled afterwards (a later dart would Shatter it)
 	if felled:
 		var at := t.pos
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		var delay := float(pd.get("splinter_delay", 0.4))
 		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
 		m.later(
 				delay,
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
-		chill.erase(t.get_instance_id())
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
+		chill.erase(tid)
 		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
@@ -138,7 +139,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			var tid := t.get_instance_id()
+			var fan_r := float(pd["splinter_r"]) * 0.8
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
