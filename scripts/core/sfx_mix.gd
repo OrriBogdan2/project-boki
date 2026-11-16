@@ -14,6 +14,12 @@ const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXFa
 ## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
+## How dull the world is (set_muffle): clear, under the low-health line, downed or out. Each has the SFX bus's
+## low-pass cutoff (Hz) and duck (dB); the UI bus (pings, the low-health heartbeat) stays clear.
+enum Muffle { OFF, LOW_HP, DOWN }
+const MUFFLE_HZ := [20000.0, 3500.0, 1200.0]
+const MUFFLE_DB := [0.0, -2.0, -6.0]
+const MUFFLE_S := 0.3            # s: ramp between two levels
 const RULES := "res://content/rules/audio_mix.json"
 
 var rules: Dictionary
@@ -24,6 +30,11 @@ var _duck_fx: AudioEffectAmplify     # Music: Sfx.duck's stage (slow-motion beat
 var _duck_tw: Tween
 var _event_fx: Array[AudioEffectAmplify] = []    # Music and Ambience: the big-event stage
 var _event_tw: Tween
+var _muffle := Muffle.OFF
+var _muffle_fx: AudioEffectLowPassFilter    # SFX: the world gone dull
+var _muffle_duck: AudioEffectAmplify
+var _muffle_tw: Tween
+var _muffle_at := 0                         # the low-pass's slot on the SFX bus
 
 func _init(host: Node) -> void:
 	_host = host
@@ -84,6 +95,13 @@ func _sfx_effects() -> void:
 	var lim := AudioEffectHardLimiter.new()
 	lim.ceiling_db = -2.0
 	AudioServer.add_bus_effect(sfx, lim)
+	_muffle_fx = AudioEffectLowPassFilter.new()
+	_muffle_fx.cutoff_hz = MUFFLE_HZ[Muffle.OFF]
+	_muffle_duck = AudioEffectAmplify.new()
+	_muffle_at = AudioServer.get_bus_effect_count(sfx)
+	AudioServer.add_bus_effect(sfx, _muffle_fx)
+	AudioServer.add_bus_effect(sfx, _muffle_duck)
+	AudioServer.set_bus_effect_enabled(sfx, _muffle_at, false)
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(AudioServer.get_bus_index("SFXFar"), lp)
@@ -115,6 +133,30 @@ func _music_effects() -> void:
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music, mlim2)
+
+## Sets how dull the SFX bus is (a low-pass and a duck, eased over MUFFLE_S): DOWN while downed or out, the milder
+## LOW_HP under the low-health line. The low-pass is only switched on while it is not OFF.
+func set_muffle(level: Muffle) -> void:
+	if level == _muffle:
+		return
+	_muffle = level
+	var bus := AudioServer.get_bus_index("SFX")
+	if _muffle_tw and _muffle_tw.is_valid():
+		_muffle_tw.kill()
+	if level != Muffle.OFF:
+		AudioServer.set_bus_effect_enabled(bus, _muffle_at, true)
+	var tw := _host.create_tween().set_parallel()
+	_muffle_tw = tw
+	tw.tween_property(_muffle_fx, "cutoff_hz", MUFFLE_HZ[level], MUFFLE_S)
+	tw.tween_property(_muffle_duck, "volume_db", MUFFLE_DB[level], MUFFLE_S)
+	if level == Muffle.OFF:
+		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, _muffle_at, false))
+
+## What the bus has right now (--match-audio-check).
+func muffle_state() -> Dictionary:
+	var bus := AudioServer.get_bus_index("SFX")
+	return {"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at), "db": _muffle_duck.volume_db,
+		"hz": _muffle_fx.cutoff_hz}
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db: float) -> void:

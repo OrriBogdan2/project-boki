@@ -102,7 +102,7 @@ Hunter at its run speed 90 deg off an aim swaying 0.2 rad at 0.7 Hz (`WOBBLE` li
 
 `loco.twist_hyst` (rad, default `TWIST_HYST`) is a Hunter's own margin; at 0.35 the legs turn round at 110 deg off the
 aim and back at 70, so the torso can twist up to 110 deg off the legs. Lace and Cinder keep the default (owner order:
-only Vex changed); giving them the same margin is the open follow-up. The rig clip `--gameplay-media --media-clip=14`
+only Vex changed); giving them the same margin is the open follow-up. The rig clip `--gameplay-media --media-clip=15`
 ends with the same 4 s "kite" on the game camera.
 
 Also on this branch (job 20261115-035206-a3): Vex's walk thigh stretch `stride` 1.5 to 1.2 and `foot_mps` [1.65, 5.0]
