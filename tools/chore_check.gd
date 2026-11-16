@@ -3,13 +3,14 @@ extends RefCounted
 ## (home.gd _move_kin at 4 steps a second) in Bramblebank: a Mend one (Glom) beside a glum friend, a Haul one (Mole)
 ## with a toy spot to fetch the ball back to, a Boki with none of those knacks (Bur) and an Ember one (Wren), your
 ## partner, who minds the egg only in the hub, where the one Nook is (HubLayout.holds). Each chore starts for the
-## right Boki and nobody else, ends, writes exactly one journal line each time and shows on the debug readout;
+## right Boki and nobody else, ends, writes exactly one journal line each time it is done (a chore that gives up writes none) and shows on the debug readout;
 ## its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone; no machine
 ## refuses a transition. Never touches the real save.
 
 const SIM_SECS := 240.0      # simulated seconds
 const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
+const ISLAND_SEED := 7     # the farm-start island (a random one each run moved the toy and the ball)
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
 const HUB_FRAMES := 600      # frames to wait for the hub to load
 
@@ -26,6 +27,7 @@ func _new_save() -> Dictionary:
 	var recs: Array = []
 	for spec in [["kindlewren", "Wren"], ["glomwort", "Glom"], ["glintmole", "Mole"], ["burrlet", "Bur"]]:
 		var rec := Save.new_kin(spec[0], spec[1])
+		rec["uid"] = "chore_%s" % spec[1]      # likes are seeded from the uid: a random one changes what each Boki does
 		rec["mutations"] = []
 		recs.append(rec)
 		Care.ensure(rec)
@@ -37,6 +39,7 @@ func _new_save() -> Dictionary:
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
+	HomeLayout.new_fs(d, ISLAND_SEED)
 	HomeLayout.ensure(d)
 	return d
 
@@ -50,6 +53,7 @@ func run(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	var d := _new_save()
 	var home = await main._hb_home()
+	seed(7)      # again: the home used up a different number of rolls in the real frames it took to build
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)
 	var center: Vector3 = home.world.random_ground(0)
@@ -121,6 +125,8 @@ func _sim(home) -> Dictionary:
 	var last_since := {}   # name -> s in its machine's state on the last step
 	var last_chore := {}   # name -> it was in a chore on the last step
 	var last_line := {}    # name -> its newest journal entry on the last step
+	var last_hist := {}    # name -> its machine's newest history line on the last step
+	var gave_up := {}      # name -> chores that ended by giving up (stalled, shut in, too long): no journal line
 	var shown := {}        # kind -> true: it appeared on the debug readout
 	var t := 0.0
 	while t < SIM_SECS:
@@ -134,6 +140,13 @@ func _sim(home) -> Dictionary:
 			if not lines.is_empty() and not is_same(lines.back(), last_line.get(who, null)):
 				writes[who] = int(writes.get(who, 0)) + 1
 				last_line[who] = lines.back()
+			# every transition since the last step (a Boki can give up and begin again in one step)
+			var seen_to: int = fsm.history.rfind(last_hist.get(who, ""))
+			for h in fsm.history.slice(seen_to + 1):
+				if h.contains("gave up"):
+					gave_up[who] = int(gave_up.get(who, 0)) + 1
+			if not fsm.history.is_empty():
+				last_hist[who] = fsm.history[-1]
 			var chore := fsm.is_in(BaseLife.S.CHORE)
 			if chore and (not last_chore.get(who, false) or fsm.since < float(last_since.get(who, 0.0))):
 				starts[who] = int(starts.get(who, 0)) + 1
@@ -145,7 +158,7 @@ func _sim(home) -> Dictionary:
 				if not shown.has(kind) and home.life.readout().contains("Chore " + kind):
 					shown[kind] = true
 	print(home.life.readout())
-	return {"kinds": kinds, "starts": starts, "writes": writes, "last_chore": last_chore, "shown": shown}
+	return {"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up, "last_chore": last_chore, "shown": shown}
 
 ## `who` did only chore `kind`, it ended, one journal line each time, and the readout showed it.
 func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
@@ -155,7 +168,8 @@ func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
 	var ended := begun - (1 if s["last_chore"].get(who, false) else 0)
 	ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, kind, ended, begun])
 	var writes := int(s["writes"].get(who, 0))
-	ok(writes == ended, "%s wrote one journal line per chore (%d lines)" % [who, writes])
+	var gave_up := int(s["gave_up"].get(who, 0))      # a chore that gives up (boxed in) writes no line: only a done one does
+	ok(writes == ended - gave_up, "%s wrote one journal line per chore done (%d lines, %d done, %d gave up)" % [who, writes, ended - gave_up, gave_up])
 	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
 
 func _no_refusals(home) -> void:

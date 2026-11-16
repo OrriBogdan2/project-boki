@@ -30,3 +30,10 @@ The same fit for the second batch: Oath (Albert's 360 Smash) and Shiv (Sable's g
 `VAULT_CURVE` moved into dash_feel.json) get a curve. Meeko's air glide already runs her kit's own measured curve
 (tender.json `dash.air`). Tenzo's Rock Hop, Grimble's barges and Sparkle's 40 m/s Wirerun keep their owner shapes;
 Meeko's ground hop has no footage and Motley's Swap is a teleport. Fits: docs/SUPERVIVE_FEEL.md.
+
+## Addendum (2026-11-13, ext/sable-vault-exit)
+Shiv's fit ends on a 0.25 knot, but the footage's last samples (154, 140 px/s) stay over the 127-136 px/s hasted run.
+On the ground `ThiefKit._tick_curve` holds the tail past the peak at her hasted run, so the Cartwheel hands over at
+1.0x with no dip; the ramp, the peak and the air Cartwheel stay the fit's. Rows: `dash_curve_thief_exit_k` (0.6),
+`vault_exit_run`, `vault_slow_frames`. The other option, re-fitting the curve to end at ~0.6, drops its peak/mean
+under the footage's 1.77 (mean kept at 1), so it was not taken.
