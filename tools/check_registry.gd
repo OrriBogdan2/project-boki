@@ -169,6 +169,7 @@ const CHECKS := {
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
+	"--particle-budget-check": ["res://tools/particle_budget_check.gd", "particle_budget_check", null],  # fx_life
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
@@ -306,6 +307,7 @@ const CHECKS := {
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
+	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
 	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],      # drawn keys follow a rebind
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
@@ -736,6 +738,7 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--impact-weight-check": ["res://tools/impact_weight_check.gd", "impact_weight_check", null],      # hit weights
 	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
 	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
