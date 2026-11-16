@@ -70,7 +70,7 @@ ULTS = {
     "Vv": {"cast": ["vv_ult_rise"], "impact": ["vv_ult_slam"], "loop": ["vv_ult_hum"]},
     "Ostra": {"cast": ["os_well"], "loop": ["os_well_hum"]},
     "Neve": {"cast": ["rime_lock"], "impact": ["rime_crash"]},
-    "Tender": {"cast": ["tend_call"], "impact": ["tend_arrive"], "loop": ["tend_call_hum"]},
+    "Tender": {"cast": ["tend_call"], "impact": ["tend_arrive"], "loop": ["tend_call_loop"]},
     "Sable": {"cast": ["dj_encore"], "impact": ["dj_encore_hit"], "loop": ["dj_encore_whirr"]},
 }
 
