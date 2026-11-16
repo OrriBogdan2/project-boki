@@ -92,9 +92,9 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 			_run_frame(m, P, T, home, Vector2(1, 0).rotated(deg_to_rad(deg)))
 			most = maxf(most, absf(c.head_turn))
 		backs.append(c.twist_back)
-	ok(backs == [false, false, true, true, false] and most <= c.twist_max + 0.01, ("runs 8 inside, 4 past, 8 inside and well "
-			+ "inside the limit: backwards %s, the twist at most %.2f rad (limit %.2f)") % [backs, most,
-			c.twist_max])
+	var held_in := most <= c.twist_max + 0.01
+	ok(backs == [false, false, true, true, false] and held_in, ("runs 8 inside, 4 past, 8 inside and well "
+			+ "inside the limit: backwards %s, the twist at most %.2f rad (limit %.2f)") % [backs, most, c.twist_max])
 	# the aim swings 70 deg toward his run in a tenth of a second: the legs hold his way, the torso takes the swing
 	var run_60 := Vector2(1, 0).rotated(deg_to_rad(60.0))
 	for f in 40:
