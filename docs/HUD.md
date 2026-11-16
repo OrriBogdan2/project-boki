@@ -326,6 +326,9 @@ fight, no carried Heart); everyone else gets it under the strip until they are o
 takes the slot). The minimap names the seat's badge (always for the goal, for all four while Tab/M is held) and the
 full map's key lists "Way out" next to "Uplink" (the outpost banner). Checks: `--extract-goal-check`,
 `--hud-groups-check` section 5, `--minimap-check`.
+The first-match guide's exit line names the same seat and how ("Head for the Uplink badge on your map: Hold F at the
+outpost until the lift opens"; `exit_none` when no seat is on offer), and while a guide line is up the message column
+starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `--first-match-guide-check`.
 
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
