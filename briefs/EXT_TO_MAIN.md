@@ -9977,3 +9977,4 @@ READY ext/ui-clutter-zone-1116 0dbfa518a54fa665821c88a1561a05e89cfe507c (in-matc
 READY ext/team-wipe-rule-1116 d23a69e041 (team wipe rule: only a Boki summoned at the knock is a guardian, otherwise team out at once; --guardian-rule-check 10/10 pass; no gh on rpc8 so no PR opened; full suite-fast not run)
 READY ext/egg-rules-1116 6dfe12c838 (eggs hatch first form only; no_egg list cairnback/zephyrak/hivara; egg-rules-check 12/12; subset NEW-RED 0; export dry-run OOM-killed on rpc7, needs rerun; no gh on rpc7: PR body at /tmp/egg_pr.md on rpc7)
 READY ext/charges-sv-1116 a867daf5f5 (charges vs SV: Albert dash 1, Second Wind = refresh under 30% HP, SV dash discs; PR #168, gate NOT run: rpc7 OOM + hetzner import timeouts)
+READY ext/regate-overload-guard 5b41c02e2a (regate-bot: timeouts not mass-red, skip overloaded workers, cap jobs by free cores)
