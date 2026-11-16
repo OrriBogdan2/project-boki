@@ -4139,9 +4139,9 @@ func _update_box_hums() -> void:
 			if not box_hums.has(key):
 				box_hums[key] = b
 				Sfx.loop_start(key, "revive_hum", b["pos"], HUM_DB, HUM_RANGE)
-				_box_ray(b, true)
+				BoxReviveFx.ray(self, b, true)
 			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
-			_box_ray_tick(b, prog)
+			BoxReviveFx.ray_tick(self, b, prog)
 			BoxReviveFx.place(self, b, prog)
 			if int(time * 2.0) != int((time - DT) * 2.0):
 				note_sound(b.get("rev_by"), b["pos"], "revive")
@@ -4153,49 +4153,8 @@ func _box_hum_stop(b: Dictionary) -> void:
 	if key != "":
 		box_hums.erase(key)
 		Sfx.loop_stop(key)
-	_box_ray(b, false)
+	BoxReviveFx.ray(self, b, false)
 	BoxReviveFx.clear(b)
-
-## The soft column of light and the ring on the ground over a box while it's being revived.
-func _box_ray(b: Dictionary, on: bool) -> void:
-	var n = b.get("ray_node")
-	if on and (n == null or not is_instance_valid(n)):
-		var root := Node3D.new()
-		root.name = "BoxRay"
-		add_child(root)
-		root.position = b["pos"]
-		var col := MeshInstance3D.new()
-		col.mesh = Models.cyl(0.55, 0.85, 7.0, 20)
-		col.position = Vector3(0, 3.5, 0)
-		col.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.18))
-		col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		col.name = "Col"
-		root.add_child(col)
-		var ring := MeshInstance3D.new()
-		ring.mesh = Models.cyl(1.6, 1.6, 0.04, 32)
-		ring.position = Vector3(0, 0.06, 0)
-		ring.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.3))
-		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		ring.name = "Ring"
-		root.add_child(ring)
-		b["ray_node"] = root
-	elif not on and n != null and is_instance_valid(n):
-		(n as Node).queue_free()
-		b.erase("ray_node")
-
-func _box_ray_tick(b: Dictionary, prog: float) -> void:
-	var n = b.get("ray_node")
-	if n == null or not is_instance_valid(n):
-		return
-	var pulse := 0.5 + 0.5 * sin(time * (5.0 + prog * 7.0))
-	var col: MeshInstance3D = (n as Node3D).get_node("Col")
-	var ring: MeshInstance3D = (n as Node3D).get_node("Ring")
-	(col.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse))
-	col.scale = Vector3(1.0 + 0.15 * pulse, 0.6 + 0.4 * prog, 1.0 + 0.15 * pulse)
-	col.position.y = 3.5 * col.scale.y
-	var rs := 1.0 - 0.55 * prog
-	ring.scale = Vector3(rs, 1.0, rs)
-	(ring.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.25 + 0.3 * pulse))
 
 func _update_interact(dt: float) -> void:
 	for h in hunters:
