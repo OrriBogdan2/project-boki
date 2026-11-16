@@ -642,6 +642,9 @@
 "long_line": 2,
 "semicolon": 5
 },
+"scripts/match/training.gd": {
+"long_line": 1
+},
 "scripts/match/truce.gd": {
 "long_line": 6,
 "nested_ternary": 1,
@@ -719,6 +722,10 @@
 "long_line": 190,
 "nested_ternary": 33,
 "semicolon": 40
+},
+"scripts/ui/hud_hover.gd": {
+"long_line": 6,
+"nested_ternary": 3
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
@@ -924,6 +931,9 @@
 "long_line": 24,
 "semicolon": 1
 },
+"tools/glide_net_check.gd": {
+"long_line": 2
+},
 "tools/glide_reach.gd": {
 "semicolon": 7
 },
@@ -995,8 +1005,7 @@
 "semicolon": 4
 },
 "tools/life_check.gd": {
-"long_line": 8,
-"semicolon": 13
+"long_line": 1
 },
 "tools/loop_tour.gd": {
 "long_line": 23,
