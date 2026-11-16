@@ -28,5 +28,33 @@
   "gil_down": "grunt",
   "gil_death": "grunt"
  },
- "signature": ["gil_thrust", "gil_beached"]
+ "signature": [
+  "gil_thrust",
+  "gil_beached"
+ ],
+ "shared_cues": [
+  "ab_ready",
+  "ab_stun",
+  "ab_throw",
+  "as_ignite",
+  "boom",
+  "br_rise",
+  "br_rumble",
+  "dr_dive",
+  "drip",
+  "glider_wind",
+  "hero_skewer",
+  "jug_lunge_hit",
+  "jug_ting",
+  "mage_bubble_pop",
+  "mage_zap",
+  "os_pop",
+  "pay_flashpoint",
+  "shield",
+  "slash_hit",
+  "splash",
+  "swim",
+  "swipe",
+  "whoosh"
+ ]
 }

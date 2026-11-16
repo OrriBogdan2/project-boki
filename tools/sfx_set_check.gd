@@ -57,7 +57,7 @@ extends RefCounted
 ##  24. the garden's moments (SFX_AUDIT row 22) each play their own cue, never the stock unlock: an egg laid or
 ##      ready, two Boki becoming friends (once, as the bond reaches friend_at), a lean's new fleck or a part, a
 ##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
-##  25. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
+##  25. each of the 13 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
 ##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
 ##  26. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
@@ -308,7 +308,11 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	h.free()
 	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
-	_kit_names(arch, d.get("kit_files", []), sounds)
+	# a set may list the shared cues its kit still borrows ("shared_cues": a debt, docs/DEBT.md), each must still exist
+	var allowed := sounds.duplicate()
+	for s in d.get("shared_cues", []):
+		allowed[s] = ""
+	_kit_names(arch, d.get("kit_files", []), allowed)
 
 ## 4. Every sound a kit emits is the Hunter's own, never a shared fallback (a typo plays silence, a stock name
 ## plays another game's sound). The cues are the literal names in <arch>_kit.gd plus the helper files the set
@@ -518,7 +522,7 @@ func _barks() -> void:
 			if HeroSfx.of(h, "call_" + kind, "") != "%s_call_%s" % [arch, kind]:
 				missing.append("%s_call_%s" % [arch, kind])
 	h.free()
-	ok(voiced.size() == 12 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
+	ok(voiced.size() == 13 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
 			voiced.size(), HunterBarks.KINDS.size(), missing])
 	var far := voiced.filter(func(a): return float(Sfx.sound_reach.get("%s_call_boki" % a, 0.0)) <= Sfx.hear_range)
 	ok(far.is_empty(), "the squad's Boki-down call carries past %d m (short: %s)" % [int(Sfx.hear_range), far])
