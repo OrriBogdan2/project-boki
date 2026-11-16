@@ -1,5 +1,5 @@
 {
- "_doc": "One entry per game cue to re-source. cue = the audio/<cue>.wav name the game loads (takes <cue>_1.. are extra variants); mode = oneshot (events) or loop (steady stretch); trim_max = longest clip kept (s); src_max = longest source event considered (s); pos = [regex, weight] on the library path (lowercase), a soft prior; neg = excluded paths; fit = measured clip shape the sound should have: feature -> [zero_below, full_from, full_to, zero_above, weight] (features in sfxclip.features); why = what a good one is.",
+ "_doc": "One entry per game cue to re-source. cue = the audio/<cue>.wav name the game loads (takes <cue>_1.. are extra variants); mode = oneshot (events) or loop (steady stretch); trim_max = longest clip kept (s); src_max = longest source event considered (s); pos = [regex, weight] on the library path (lowercase), a soft prior; neg = excluded paths; fit = measured clip shape the sound should have: feature -> [zero_below, full_from, full_to, zero_above, weight] (features in sfxclip.features); why = what a good one is. tester = its candidates also go to the in-game Sound tester; picks = how many candidates (letters A-H) to keep, default 4.",
  "slots": [
   {
    "id": "ghost_shot",
@@ -60,7 +60,9 @@
      1
     ]
    },
-   "why": "a short, hard crack that can repeat fast without smearing"
+   "why": "a short, hard crack that can repeat fast without smearing",
+   "tester": true,
+   "picks": 6
   },
   {
    "id": "ghost_reload",
@@ -114,30 +116,32 @@
      0.5
     ]
    },
-   "why": "a mechanical ratchet and clack, not a shot"
+   "why": "a mechanical ratchet and clack, not a shot",
+   "tester": true,
+   "picks": 6
   },
   {
-   "id": "dash",
-   "label": "Dash",
-   "cue": "dash",
+   "id": "dash_ground",
+   "label": "Dash on the ground (foot scuff or slide, then a short whoosh)",
+   "cue": "dash_ground",
    "mode": "oneshot",
    "trim_max": 0.4,
    "src_max": 2.5,
    "pos": [
     [
-     "whoosh|swoosh|swish|swipe|woosh",
+     "scuff|slide|skid|drag|scrape|shuffle|sprint|dash|lunge",
      3
     ],
     [
-     "dash|fast|quick|short|flyby|pass",
+     "whoosh|swoosh|swish|swipe|woosh",
      2
     ],
     [
-     "air|wind",
+     "foot|shoe|boot|cloth|gravel|dirt|dust",
      1
     ]
    ],
-   "neg": "footstep|ambien|vocal|voice|trailer|cinematic|long|riser|rise|fall|impact|hit|bullet|jet|car|bomb",
+   "neg": "ambien|vocal|voice|trailer|cinematic|riser|rise|fall|impact|bullet|jet|car|bomb|explos|metal|sword",
    "fit": {
     "len": [
      0.12,
@@ -147,10 +151,10 @@
      2
     ],
     "centroid": [
-     700,
-     1500,
-     5500,
-     9000,
+     500,
+     1200,
+     4500,
+     8000,
      2
     ],
     "flat": [
@@ -158,17 +162,71 @@
      0.1,
      1,
      1.1,
-     1.5
+     1
     ],
     "attack_ms": [
      -1,
      0,
-     120,
-     260,
+     80,
+     200,
+     1.5
+    ]
+   },
+   "why": "a short foot scuff or slide with a whoosh over it: loudest at the start, some low body",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "dash_air",
+   "label": "Dash in the air (wind whoosh, no ground)",
+   "cue": "dash_air",
+   "mode": "oneshot",
+   "trim_max": 0.4,
+   "src_max": 2.5,
+   "pos": [
+    [
+     "wind|air|whoosh|swoosh|swish|flyby|pass|gust",
+     3
+    ],
+    [
+     "fast|quick|short|airy|soft",
+     1
+    ]
+   ],
+   "neg": "footstep|step|scuff|slide|skid|drag|ambien|vocal|voice|trailer|cinematic|riser|rise|impact|hit|bullet|jet|car|bomb|explos|metal|sword|gravel",
+   "fit": {
+    "len": [
+     0.15,
+     0.25,
+     0.5,
+     0.9,
+     2
+    ],
+    "centroid": [
+     1000,
+     2000,
+     6000,
+     9500,
+     2
+    ],
+    "flat": [
+     0.05,
+     0.2,
+     1,
+     1.1,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     10,
+     160,
+     320,
      1
     ]
    },
-   "why": "a quick airy swish, loudest early, nothing tonal"
+   "why": "a soft airy rush of wind, no thud or scrape, swelling and gone",
+   "tester": true,
+   "picks": 6
   },
   {
    "id": "glide_start",
@@ -222,7 +280,9 @@
      1
     ]
    },
-   "why": "a cloth or sail snap that opens into a little air"
+   "why": "a cloth or sail snap that opens into a little air",
+   "tester": true,
+   "picks": 6
   },
   {
    "id": "glide_loop",
@@ -272,7 +332,9 @@
      1.5
     ]
    },
-   "why": "a steady air bed with no beat or pitch movement, joined seamlessly"
+   "why": "a steady air bed with no beat or pitch movement, joined seamlessly",
+   "tester": true,
+   "picks": 6
   },
   {
    "id": "take_damage",

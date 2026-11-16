@@ -1,125 +1,387 @@
 {
- "_doc": "A picks as pointers into the private library: sfx_pack.py cuts them into the private pack. No audio.",
- "picks": [
+ "_doc": "Library sounds as pointers (file, start, end), never audio. pick = the letter the built game plays (sfx_pack.py build cuts it into the private pack as <cue>.wav); empty = the generated sound stays. tester = every candidate is also cut into the pack as sfxtest/<slot>_<letter>.wav for Settings > Audio > Sound tester. Written by sfx_sheet.py, edited by the pick jobs.",
+ "slots": [
   {
    "slot": "ghost_shot",
+   "label": "Vex: basic attack (rifle shot)",
    "cue": "vn_rifle",
    "mode": "oneshot",
-   "src": "2016/Audiobeast - The London Warehouse Firearms Library/Audiobeast_Small_Room_H&K_416_5.56_Assault_Rifle_05m_LS5_001_Single_Shot_x1.wav",
-   "start": 33848,
-   "end": 37840,
    "trim_max": 0.45,
-   "rms_db": -17.0
+   "rms_db": -17.0,
+   "tester": true,
+   "pick": "A",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2016/Audiobeast - The London Warehouse Firearms Library/Audiobeast_Small_Room_H&K_416_5.56_Assault_Rifle_05m_LS5_001_Single_Shot_x1.wav",
+     "start": 33848,
+     "end": 37840
+    },
+    {
+     "letter": "B",
+     "src": "2016/Pole Position Production - De Lisle Carbine .45ACP suppressed/De_Lisle_Carbine_.45ACP_suppressed_55m_in_front_off_axis_clean_Single_shots_x_14.L.wav",
+     "start": 1059816,
+     "end": 1086800
+    },
+    {
+     "letter": "C",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 5of9/MatiasMacSD - THE WEAPONS - SCI-FI WEAPONS/Weapon Shot Blaster-06.wav",
+     "start": 0,
+     "end": 38280
+    },
+    {
+     "letter": "D",
+     "src": "2016/Pole Position Production - Remington 700 7.62x51mm/Remington_700_7.62x51mm_50m_behind_788_Schoeps_B_clean_Single_shots_x_14.wav",
+     "start": 180494,
+     "end": 232540
+    }
+   ]
   },
   {
    "slot": "ghost_reload",
+   "label": "Vex: reload",
    "cue": "reload",
    "mode": "oneshot",
-   "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 5of9/MatiasMacSD - THE WEAPONS - SCI-FI WEAPONS/Weapon Reload-16.wav",
-   "start": 845,
-   "end": 80960,
    "trim_max": 0.8,
-   "rms_db": -24.2
-  },
-  {
-   "slot": "dash",
-   "cue": "dash",
-   "mode": "oneshot",
-   "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 5of8/Soundrangers - Whooshes And Transitions/texture_whoosh_02_fast_02.wav",
-   "start": 6702,
-   "end": 33220,
-   "trim_max": 0.4,
-   "rms_db": -21.7
-  },
-  {
-   "slot": "glide_start",
-   "cue": "glider_snap",
-   "mode": "oneshot",
-   "src": "2020/Systematic-Sound - Sound Themes - Modern Cloth Foley 01/SFX CLOTH Foley Jacket Synthetic Soft Shell Whoosh Flutter.wav",
-   "start": 136674,
-   "end": 150040,
-   "trim_max": 0.55,
-   "rms_db": -18.4
-  },
-  {
-   "slot": "glide_loop",
-   "cue": "glider_wind",
-   "mode": "loop",
-   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 2of8/MatiasMacSD - The Transition/Transition_Sci-fi-12.wav",
-   "start": 291060,
-   "end": 370440,
-   "trim_max": 1.8,
-   "rms_db": -21.0
+   "rms_db": -24.2,
+   "tester": true,
+   "pick": "B",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 5of9/MatiasMacSD - THE WEAPONS - SCI-FI WEAPONS/Weapon Reload-16.wav",
+     "start": 845,
+     "end": 80960
+    },
+    {
+     "letter": "B",
+     "src": "2020/Pole Position - Springfield 1903A3 bolt-action rifle/M1903A3, Handling, Cycling Bolt, MKH416.wav",
+     "start": 19460,
+     "end": 52800
+    },
+    {
+     "letter": "C",
+     "src": "2015/Coll Anderson - Guns/EFX INT AR-15 M4 Charging Handle With Mag 01_A.wav",
+     "start": 383505,
+     "end": 392480
+    },
+    {
+     "letter": "D",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 4of9/Gamemaster Audio -  Gun Sound Pack/gun_semi_auto_rifle_cock_02.wav",
+     "start": 314,
+     "end": 26180
+    }
+   ]
   },
   {
    "slot": "take_damage",
+   "label": "Hit taken (hurt grunt)",
    "cue": "hurt",
    "mode": "oneshot",
-   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/AudioDesire - Voice Pack One - Emma/VO_001_Female_Pain_20.wav",
-   "start": 1245,
-   "end": 24420,
    "trim_max": 0.5,
-   "rms_db": -16.0
+   "rms_db": -16.0,
+   "tester": false,
+   "pick": "B",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/AudioDesire - Voice Pack One - Emma/VO_001_Female_Pain_20.wav",
+     "start": 1245,
+     "end": 24420
+    },
+    {
+     "letter": "B",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Articulated Sounds - Fight Vocalizations/EMOTE Joshua, Man, Pain Hurt Grunt Big 03.wav",
+     "start": 1659,
+     "end": 13860
+    },
+    {
+     "letter": "C",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 1of8/Articulated Sounds - Universal Emotes/EMOTE Ashley, Woman, Anger Fight Grunt Big 02, Mic B.wav",
+     "start": 2718,
+     "end": 26840
+    },
+    {
+     "letter": "D",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 6of8/The Chris Alan - Little Fighter Guy - Vocalizations/Little Fighter Guy - Vocalizations - Punch Kick Chop_19.wav",
+     "start": 927,
+     "end": 10340
+    }
+   ]
   },
   {
    "slot": "hit_confirm",
+   "label": "Hit dealt",
    "cue": "hit",
    "mode": "oneshot",
-   "src": "2015/NoizBoy - Hong Kong Action Kit - Hit Kit #1/Seq 2.1 Hit #1 96 HK1.wav",
-   "start": 4289,
-   "end": 12100,
    "trim_max": 0.3,
-   "rms_db": -18.0
+   "rms_db": -18.0,
+   "tester": false,
+   "pick": "D",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2015/NoizBoy - Hong Kong Action Kit - Hit Kit #1/Seq 2.1 Hit #1 96 HK1.wav",
+     "start": 4289,
+     "end": 12100
+    },
+    {
+     "letter": "B",
+     "src": "2020/PMSFX - Rocky Impacts/PM_RI_Source_53 Rocks Impact Hit Single Stone.wav",
+     "start": 464,
+     "end": 37620
+    },
+    {
+     "letter": "C",
+     "src": "2015/NoizBoy - Hong Kong Action Kit - Hit Kit #2/HKAP2 Spin Hit 1a.wav",
+     "start": 83947,
+     "end": 102520
+    },
+    {
+     "letter": "D",
+     "src": "2016/Alexander Kopeikin - Rocks/rock impact medium 26.wav",
+     "start": 91330,
+     "end": 98120
+    }
+   ]
   },
   {
    "slot": "knockout",
+   "label": "Knockout (big confirm hit)",
    "cue": "knock_confirm",
    "mode": "oneshot",
-   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/3maze - FINAL IMPACT/toon_hit_022.wav",
-   "start": 1589,
-   "end": 29700,
    "trim_max": 1.0,
-   "rms_db": -17.0
+   "rms_db": -17.0,
+   "tester": false,
+   "pick": "B",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/3maze - FINAL IMPACT/toon_hit_022.wav",
+     "start": 1589,
+     "end": 29700
+    },
+    {
+     "letter": "B",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/3maze - IMPACTUS/key_hit_single_bulbul_011.wav",
+     "start": 544,
+     "end": 96360
+    },
+    {
+     "letter": "C",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Soundopolis - Icy Snow 2 HD/Ice_Impact_Debris_Heavy_Single_Fienup_015_SIS2.wav",
+     "start": 7986,
+     "end": 50600
+    },
+    {
+     "letter": "D",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 7of9/Sergey Eybog - Artificial Life/Impacts and Hits - Sub Zero 02.wav",
+     "start": 5842,
+     "end": 53240
+    }
+   ]
   },
   {
    "slot": "scan_capture",
+   "label": "Scan / capture pop",
    "cue": "scan_pop",
    "mode": "oneshot",
-   "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 1of8/Airborne Sound - Interface Accents/Accent,Interface,UI,Data,Chatter,Clean,Crystal,Low.wav",
-   "start": 28,
-   "end": 25740,
    "trim_max": 1.1,
-   "rms_db": -18.6
-  },
-  {
-   "slot": "extract",
-   "cue": "extract_ok",
-   "mode": "oneshot",
-   "src": "2020/The Mooseman - Digital Sci Fi UI Kit 1/positive_1.wav",
-   "start": 0,
-   "end": 21780,
-   "trim_max": 3.0,
-   "rms_db": -17.0
+   "rms_db": -18.6,
+   "tester": false,
+   "pick": "A",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 1of8/Airborne Sound - Interface Accents/Accent,Interface,UI,Data,Chatter,Clean,Crystal,Low.wav",
+     "start": 28,
+     "end": 25740
+    },
+    {
+     "letter": "B",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/BlueZone - Sci-Fi Interface Sound Effects/Bluezone_BC0241_interface_beep_053.wav",
+     "start": 5746,
+     "end": 65780
+    },
+    {
+     "letter": "C",
+     "src": "2020/Transverse Audio - Digital UI/Digital Magic Corrupt Interface_5.wav",
+     "start": 55406,
+     "end": 82940
+    },
+    {
+     "letter": "D",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 3of8/Glitchedtones - User Interface/User Interface Notification Bubbles 04.wav",
+     "start": 0,
+     "end": 31900
+    }
+   ]
   },
   {
    "slot": "ui_click",
+   "label": "UI click",
    "cue": "click",
    "mode": "oneshot",
-   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/The Chris Alan - Analog Synthesized UI & SFX/Analog Synthesized UI - Button Click Tone 1.wav",
-   "start": 518,
-   "end": 3960,
    "trim_max": 0.2,
-   "rms_db": -22.0
+   "rms_db": -22.0,
+   "tester": false,
+   "pick": "A",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/The Chris Alan - Analog Synthesized UI & SFX/Analog Synthesized UI - Button Click Tone 1.wav",
+     "start": 518,
+     "end": 3960
+    },
+    {
+     "letter": "B",
+     "src": "2015/Kpow Sounds - UI SOUNDPACKS/UI_SoundPack11_Select_v14.wav",
+     "start": 110134,
+     "end": 113300
+    },
+    {
+     "letter": "C",
+     "src": "2020/Wav Junction Sound Effects - Controller Buttons/017_Game_Controller_Buttons_Various_3.wav",
+     "start": 24404,
+     "end": 26180
+    },
+    {
+     "letter": "D",
+     "src": "2016/3maze -  Buttons and Switches/button_on_off_064.wav",
+     "start": 2632,
+     "end": 5060
+    }
+   ]
   },
   {
    "slot": "level_up",
+   "label": "Level up",
    "cue": "level_up",
    "mode": "oneshot",
-   "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 5of8/Sound Spark LLC \u2013 Magic Spells, Buffs and Attacks/Ice_Spell_Ice_Spell_Buff_Positive_02.wav",
-   "start": 107,
-   "end": 42020,
    "trim_max": 2.2,
-   "rms_db": -22.0
+   "rms_db": -22.0,
+   "tester": false,
+   "pick": "A",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 5of8/Sound Spark LLC \u2013 Magic Spells, Buffs and Attacks/Ice_Spell_Ice_Spell_Buff_Positive_02.wav",
+     "start": 107,
+     "end": 42020
+    },
+    {
+     "letter": "B",
+     "src": "2020/Sound Spark LLC - Electric Arcs and Energy/Electric_Energy_Bit_Erosion_Blast_Powerup_01.wav",
+     "start": 39607,
+     "end": 160380
+    },
+    {
+     "letter": "C",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 3of8/Gamemaster Audio - Retro 8Bit Sounds/retro_powerup_collect_11.wav",
+     "start": 0,
+     "end": 39820
+    },
+    {
+     "letter": "D",
+     "src": "2020/The Mooseman - Digital Sci Fi UI Kit 1/positive_1.wav",
+     "start": 0,
+     "end": 21780
+    }
+   ]
+  },
+  {
+   "slot": "glide_start",
+   "label": "Glide: start (cloth snap)",
+   "cue": "glider_snap",
+   "mode": "oneshot",
+   "trim_max": 0.55,
+   "rms_db": -18.4,
+   "tester": true,
+   "pick": "",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2020/Systematic-Sound - Sound Themes - Modern Cloth Foley 01/SFX CLOTH Foley Jacket Synthetic Soft Shell Whoosh Flutter.wav",
+     "start": 136674,
+     "end": 150040
+    },
+    {
+     "letter": "B",
+     "src": "2015/Eiravaein Works - Crepitus/Crepitus,flex,pop,snap,crack,multiple,hands,lighttodeep,gritty,MS.wav",
+     "start": 1895,
+     "end": 6160
+    },
+    {
+     "letter": "C",
+     "src": "2016/SoundBits -  Just Whoosh 3 _ Whoosh Essentials/Whoosh_Cloth_Leather_Fight_174.wav",
+     "start": 7546,
+     "end": 23760
+    },
+    {
+     "letter": "D",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 2of8/Matt Script - You Me & Debris/wood_breaking_cracking_snapping_breaking_peeling_bones_break_snap_crack_13.wav",
+     "start": 7867,
+     "end": 57200
+    }
+   ]
+  },
+  {
+   "slot": "glide_loop",
+   "label": "Glide: loop (steady wind)",
+   "cue": "glider_wind",
+   "mode": "loop",
+   "trim_max": 1.8,
+   "rms_db": -21.0,
+   "tester": true,
+   "pick": "",
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 2of8/MatiasMacSD - The Transition/Transition_Sci-fi-12.wav",
+     "start": 291060,
+     "end": 370440
+    },
+    {
+     "letter": "B",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 4of9/Glitchedtones - Whooshes & Transitions/Whoosh Transition Doppler FX 017.wav",
+     "start": 145530,
+     "end": 224910
+    },
+    {
+     "letter": "C",
+     "src": "2017/Sonniss.com - GDC 2017 - Game Audio Bundle Part 1of9/Bluezone Corporation - Signal Communication/Bluezone-BC0223-noise-cracke-014.wav",
+     "start": 52920,
+     "end": 132300
+    },
+    {
+     "letter": "D",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 2of8/Ivo Vicic - Winter textures vol.1/43 Ice on stream_wind_4_MS stereo.wav",
+     "start": 846720,
+     "end": 926100
+    }
+   ]
+  },
+  {
+   "slot": "dash_ground",
+   "label": "dash_ground",
+   "cue": "dash_ground",
+   "mode": "oneshot",
+   "trim_max": 0.4,
+   "rms_db": -21.7,
+   "tester": true,
+   "pick": "",
+   "candidates": []
+  },
+  {
+   "slot": "dash_air",
+   "label": "dash_air",
+   "cue": "dash_air",
+   "mode": "oneshot",
+   "trim_max": 0.4,
+   "rms_db": -21.7,
+   "tester": true,
+   "pick": "",
+   "candidates": []
   }
  ]
 }

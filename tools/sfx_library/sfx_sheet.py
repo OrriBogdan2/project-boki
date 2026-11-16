@@ -4,8 +4,8 @@
 Every library file is decoded, cut into its sounds and measured (loudness, onset, length, spectrum, noise
 floor); a cut is ranked by how close those numbers sit to the slot's `fit` profile in slots.json, with the
 path keywords only as a small prior. Writes OUT_DIR/choices.html, clips/*.mp3 (levelled like the live
-sound), mapping.json (A-D with library path and cut) and, if given, MANIFEST.json (the A picks, which
-sfx_pack.py turns into the private pack). Audio is never sent to an AI service (Sonniss licence v2.0)."""
+sound), mapping.json (A-D with library path and cut) and, if given, MANIFEST.json (every candidate, pick = A
+unless the file already holds a pick; sfx_pack.py turns it into the private pack). Audio is never sent to an AI service (Sonniss licence v2.0)."""
 
 import html
 import json
@@ -22,7 +22,7 @@ import sfxclip as C
 KEEP = 30  # best cuts kept per slot after the scan
 MIN_SNR = 25.0  # dB between the clip peak and the file's quietest stretch
 LOOP_STEP = 0.3
-LETTERS = "ABCD"
+LETTERS = "ABCDEFGH"
 
 
 def trap(v, a, b, c, d):
@@ -118,12 +118,12 @@ def scan(index, lib, slots, work):
     return best
 
 
-def choose(rows):
-    """Top 4 in score order: one per pack and file first, then relax."""
+def choose(rows, n=4):
+    """Top n (a slot's "picks", 4 if it has none) in score order: one per pack and file first, then relax."""
     picks = []
     for one_per_pack in (True, False):
         for r in rows:
-            if len(picks) >= 4:
+            if len(picks) >= n:
                 break
             if any(
                 r["path"].rsplit("/", 1)[-1] == p["path"].rsplit("/", 1)[-1] for p in picks
@@ -222,7 +222,7 @@ def main(game, lib, index_file, slots_file, out, *rest):
             )
         ]
         cands = []
-        for i, r in enumerate(choose(best[slot["id"]])):
+        for i, r in enumerate(choose(best[slot["id"]], slot.get("picks", 4))):
             x = C.decode(os.path.join(lib, r["path"]))
             y = C.level(render(slot, r, x), target)
             fn = "%s_%s.mp3" % (slot["id"], LETTERS[i])
@@ -258,19 +258,22 @@ def main(game, lib, index_file, slots_file, out, *rest):
                 "candidates": cands,
             }
         )
-        if cands:
-            picked.append(
-                {
-                    "slot": slot["id"],
-                    "cue": slot["cue"],
-                    "mode": slot["mode"],
-                    "src": cands[0]["library_path"],
-                    "start": cands[0]["start"],
-                    "end": cands[0]["end"],
-                    "trim_max": slot["trim_max"],
-                    "rms_db": round(target, 1),
-                }
-            )
+        picked.append(
+            {
+                "slot": slot["id"],
+                "label": slot["label"],
+                "cue": slot["cue"],
+                "mode": slot["mode"],
+                "trim_max": slot["trim_max"],
+                "rms_db": round(target, 1),
+                "tester": slot.get("tester", False),
+                "pick": "A" if cands else "",
+                "candidates": [
+                    {"letter": c["letter"], "src": c["library_path"], "start": c["start"], "end": c["end"]}
+                    for c in cands
+                ],
+            }
+        )
         body = "".join(
             '<div class="row %s"><b>%s</b>%s<audio controls preload="none" src="clips/%s"></audio><span class="t">%s</span>%s</div>'
             % (kind, L, wave_svg(y), fn, html.escape(why), '<span class="tag">default pick</span>' if L == "A" else "")
@@ -284,10 +287,17 @@ def main(game, lib, index_file, slots_file, out, *rest):
     open(out + "/choices.html", "w", encoding="utf-8").write(page(sections))
     json.dump(mapping, open(out + "/mapping.json", "w"), indent=1)
     if manifest:
+        keep = {}  # the letters already chosen survive a rerun
+        if os.path.exists(manifest):
+            keep = {x["slot"]: x["pick"] for x in json.load(open(manifest))["slots"]}
+        for x in picked:
+            x["pick"] = keep.get(x["slot"], x["pick"])
         json.dump(
             {
-                "_doc": "A picks as pointers into the private library: sfx_pack.py cuts them into the private pack. No audio.",
-                "picks": picked,
+                "_doc": "Library sounds as pointers (file, start, end), never audio. pick = the letter the built game "
+                "plays (sfx_pack.py build); tester = all candidates also go to the in-game Sound tester "
+                "(sfx_pack.py tester). Written by sfx_sheet.py.",
+                "slots": picked,
             },
             open(manifest, "w"),
             indent=1,
