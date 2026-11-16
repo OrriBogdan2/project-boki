@@ -423,7 +423,6 @@
   "scripts/match/kmoves_care.gd": 1,
   "scripts/match/kmoves_dj.gd": 1,
   "scripts/match/kmoves_pair.gd": 1,
-  "scripts/match/kmoves_pin_bjorn.gd": 1,
   "scripts/match/kmoves_stone.gd": 1,
   "scripts/match/kmoves_vv.gd": 1,
   "scripts/match/lairs.gd": 1,

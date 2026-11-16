@@ -52,6 +52,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Every feature adds or extends a check** that asserts its behaviour, in `tools/` and registered.
 - **While iterating, run only the checks for what you changed.** Run the full suite once, on your final commit.
 - **Don't weaken a check to make it pass.** If a check's assumption is wrong, fix the check and explain why in the commit.
+- **A check must not depend on the box.** Time budgets and wait caps use `CheckClock`, a second game or server uses `CheckChild`, a check that times frames against the wall clock without looking at them turns drawing off, random draws are seeded (`docs/GATE_SPEED_1111.md`).
 - **Godot runs go through `/home/claude/gq`** with a temp `XDG_DATA_HOME`. Never use `--fresh` or the shared dev save.
 
 ## 6. Finishing a change
