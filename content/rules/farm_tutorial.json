@@ -44,7 +44,7 @@
 			],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Hold {interact} at a tree to chop wood for the house."
+				"go": "HOLD {interact} at a tree to chop wood for the house."
 			},
 			"world": {
 				"go": "Chop a tree"
@@ -57,7 +57,7 @@
 			],
 			"title": "Mine rocks for the house",
 			"hints": {
-				"go": "Hold {interact} at a rock with this pickaxe to mine stone."
+				"go": "HOLD {interact} at a rock with this pickaxe to mine stone."
 			},
 			"world": {
 				"go": "Mine this rock"
