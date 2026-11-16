@@ -15,12 +15,12 @@ const GAP := 10.0         # px between the badge, the status and the how
 static func pick(m: Match, newcomer: bool) -> int:
 	var sd := WaysOutHud.seats(m)
 	var at := WaysOutMap.sites(m)
-	var allowed: Array = HudGroups.rules()["newcomer_seats"]
+	var allowed: Array = HudGroups.rules()["newcomer_seats"]      # (JSON numbers are floats)
 	var best := -1
 	var best_k := INF
 	for i in 4:
 		var st := int(sd[i]["st"])
-		if at[i] == Vector3.INF or (newcomer and not i in allowed) or st > WaysOutHud.St.OPEN:
+		if at[i] == Vector3.INF or (newcomer and not float(i) in allowed) or st > WaysOutHud.St.OPEN:
 			continue
 		var k := float(sd[i]["t"]) if st == WaysOutHud.St.LOCKED else -1.0
 		if k < best_k:
