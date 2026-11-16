@@ -7,7 +7,8 @@ muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a
 ultimate back = a low fifth and one bell over it (UltReadyCue).
 Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
 equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
-take = a rustle and a short rising pair (quieter and duller than pickup).
+take = a rustle and a short rising pair (quieter and duller than pickup). Ranks (RankSfx): a point
+ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that fifth with a soft bloom.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
@@ -126,6 +127,15 @@ def level_up(i):
                  pluck(NOTE['E6'], 1.1, 0.3) * 0.5), 0.35)
     glow = at(S.chime(NOTE['G6'], 1.1, 0.4, ((1.0, 0.6), (2.76, 0.15))) * 0.22, 0.36)
     return finish(room(mix(*arp, top, glow), 0.9), 5600)
+
+
+def rank_ready(i):
+    """A rank point waits to be spent: two small bells rising a fourth, short and airy, over a quiet tine."""
+    bell = ((1.0, 0.8), (2.76, 0.12))
+    lo = S.chime(NOTE['D6'], 0.35, 0.12, bell)
+    hi = at(S.chime(NOTE['G6'], 0.5, 0.18, bell), 0.075)
+    tine = at(pluck(NOTE['G5'], 0.35, 0.1, 0.5) * 0.45, 0.075)
+    return finish(room(mix(lo, hi, tine), 0.6), 6000)
 
 
 def rank_up(i):
@@ -351,6 +361,7 @@ def main():
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
+    S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
 
 
 if __name__ == '__main__':
