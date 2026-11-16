@@ -12,7 +12,7 @@ const UNSETTLED := [
 	[["dash", "ground", "x"], "fire"], [["dash", "ground", "q"], "fire"],
 	[["dash", "air", "lmb"], "fire"], [["dash", "air", "rmb"], "fire"], [["dash", "air", "e"], "fire"],
 	[["dash", "air", "x"], "fire"], [["dash", "air", "q"], "fire"],
-	[["into_dash", "rmb"], "fire"],
+	[["into_dash", "rmb"], "fire"], [["into_dash", "e"], "fire"],
 	[["hold", "rmb", "ground"], "keep"], [["hold", "rmb", "air"], "keep"], [["hold", "rmb", "jump"], "keep"],
 ]
 const HOLD_S := 0.5             # s: a draw or a Heavy Shot hold well under way before the second press
