@@ -117,7 +117,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
-	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
@@ -125,7 +124,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
 			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
-			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -154,7 +152,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	last_hit_by = by
 	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:

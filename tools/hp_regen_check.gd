@@ -2,8 +2,8 @@ extends RefCounted
 ## --hp-regen-check: Hunter out-of-combat regen at source values (content/rules/boki_system.json "regen").
 ## The source gives no Hunter health regen of its own, so each of the 12 Hunters with no Boki points
 ## stays hurt; Boki owner_regen heals hp/s (Blight cuts it, none while downed) and shows as the health
-## bar filling; the owner_shield refill waits out the combat window (InCombat) after a hit (a Hunter's, a
-## monster's or Blight's) or a hit dealt, then fills owner_shield_pct_s a second; armour never
+## bar filling; the owner_shield refill waits owner_shield_delay_s after a hit (a Hunter's, a monster's or
+## Blight's), then fills owner_shield_pct_s a second; dealing damage does not restart it; armour never
 ## refills. Never touches the save.
 
 const ARCHS := ["bulwark", "dredge", "thief", "mage", "dolm", "ostra", "ashwick", "juggernaut", "archer",
@@ -43,7 +43,7 @@ func run(main: Node) -> void:
 	for o in m.hunters:
 		if o != P: o.teleport(m.world.random_ground())
 	var rr := KinRegen.rules()
-	var wait := InCombat.window()
+	var wait := float(rr["owner_shield_delay_s"])
 	# (a) source parity: no Hunter heals on its own, however long it stays out of a fight (its Boki
 	# benched, so nothing it does is a heal on hit: dmg_done must not move)
 	var k: Kin = P.kin
@@ -79,7 +79,7 @@ func run(main: Node) -> void:
 	var want := 4.0 * (1.0 - P.blight_k)
 	ok(absf((P.hp - b1) / 2.0 - want) < 0.3, "(b) under Blight: %.2f hp/s (want %.2f)" % [(P.hp - b1) / 2.0, want])
 	P.blight_t = 0.0
-	# (c) the owner_shield: waits out the combat window after any hit, then fills at the data rate
+	# (c) the owner_shield: waits after any hit, then fills at the data rate; dealing damage never restarts it
 	P.kin_bonus = {"owner_shield": 40.0}
 	P.kin_shield = 0.0
 	P.hp = P.max_hp
@@ -89,14 +89,12 @@ func run(main: Node) -> void:
 	ok(P.kin_shield < 0.01, "(c) no shield refill in the first %.1fs after a hit (%.2f)" % [wait - 0.5, P.kin_shield])
 	_run_for(m, 1.0)
 	var s0 := P.kin_shield
+	foe.hurt(5.0, P)
 	_run_for(m, 0.5)
 	var rate := (P.kin_shield - s0) / 0.5 / 40.0
 	var pct := float(rr["owner_shield_pct_s"])
-	ok(absf(rate - pct) < 0.03, "(c) after %.1fs it fills %.2f of its size/s (want %.2f)" % [wait, rate, pct])
-	P.kin_shield = 0.0
-	foe.hurt(5.0, P)
-	_run_for(m, wait - 0.5)
-	ok(P.kin_shield < 0.01, "(c) dealing damage restarts the wait too (%.2f after %.1fs)" % [P.kin_shield, wait - 0.5])
+	var fill := "(c) after %.1fs it fills %.2f of its size/s (want %.2f), dealing damage or not" % [wait, rate, pct]
+	ok(absf(rate - pct) < 0.03, fill)
 	var src_cases := [["a monster's hit", null, {"src": "mob"}], ["Blight damage", null, {"src": "blight"}]]
 	for sc in src_cases:
 		_run_for(m, 4.0)

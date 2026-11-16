@@ -59,6 +59,7 @@
 		"jug_slash_r": {
 			"clip": "slash_r",
 			"scale": 1.38,
+			"upper": "moving",
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_slash_l": {
@@ -111,10 +112,12 @@
 		},
 		"jug_chain": {
 			"clip": "chain",
+			"upper": "moving",
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_reel": {
 			"clip": "reel",
+			"fade": 0.2,
 			"hold_from": 0.25,
 			"heading": true,
 			"fade_out": 0.4

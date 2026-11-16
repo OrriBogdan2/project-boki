@@ -45,7 +45,7 @@ func run(m: Node) -> void:
 			k.position.y = float(shot[2])
 			k.set_meta("lift", float(shot[2]))
 			rig.set_clip(String(shot[0]), 0.0)
-			rig._keep_flex()
+			rig._keep_flex(0.016)
 			var length := rig.player.get_animation(rig.clip).length
 			rig.set_face(s._face_for(rig, rig.clip, float(shot[1])))
 			rig.seek(length * float(shot[1]))
