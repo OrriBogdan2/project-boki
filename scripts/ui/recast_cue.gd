@@ -45,7 +45,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		var n := int(cue.get("tick", 0))
 		if n < TICKS.size() and left <= float(TICKS[n]):
 			cue["tick"] = n + 1
-			Sfx.play("click", null, -4.0, 0.0, 1.5 + 0.2 * n)
+			_play(k, "recast_tick", "click", -4.0, 1.0 + 0.12 * n, 1.5 + 0.2 * n)
 		cue["last"] = left
 	cue["slot"] = String(w.get("slot", ""))
 	cue["w"] = w
@@ -58,6 +58,14 @@ static func track(k: ArchKit, dt: float) -> void:
 	if not pop.is_empty():
 		pop["t"] = float(pop["t"]) - dt
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
+
+## A cue in the hunter's own voice at its own pitch, else the shared `stock` at the pitch tuned for it.
+static func _play(k: ArchKit, kind: String, stock: String, db: float, own_pitch: float, stock_pitch: float) -> void:
+	var own := HeroSfx.of(k.h, kind, "")
+	if own != "":
+		Sfx.play(own, null, db, 0.0, own_pitch)
+	else:
+		Sfx.play(stock, null, db, 0.0, stock_pitch)
 
 ## The payoff landed on `victim`: its badge bursts (ArchKit.payoff_fx and the payoffs that don't go through it).
 static func payoff(k: ArchKit, victim: Ent) -> void:
