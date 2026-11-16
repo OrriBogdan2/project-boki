@@ -9964,3 +9964,5 @@ READY ext/stretch-reds-1115 4d8856e264f45ef0e21c92af6b8b98cbea4aee23 (glb_relax 
 READY ext/docs-kit-parity-names 6394b3498ea17f281636fe43c3c52c0732459dc6 (private-ref lint gate + sv/ pointers on current main; NEW-RED 0 after save-compat fix, export ok)
 READY ext/anim-hymotion 3a3e023c3d5906146a832e822cdb261243052748 (tarek.glb takes main's v95; HY-Motion clips not applied; glb_swap.py tool; gate green, export ok)
 READY ext/anim-key-pose-read 5fb61bbf4d536cc88e5ac8321096e360379e83aa (SUPERSEDES 143de967f9: origin/main dfbe794824 merged in; 4 glb conflicts (cinder/claire/pip/ryzz) took main's v95; net diff vs main = 2 doc lines in KEY_POSE_READ.md; --check 0 failures; health --strict red only on main's own style debt in juggernaut_kit/chore_check/remote_anim_check)
+READY ext/merge-lane-hunt3-1115r2 888f60d6b7 (bulk-rebase: origin/main merged in mechanically, was 2cb807ec57; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/lace-red-thread-1115 febe98cbd5 (bulk-rebase: origin/main merged in mechanically, was 24b33a8a99; union 1 gen 0 files; the branch's own READY checks still apply)
