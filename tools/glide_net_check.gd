@@ -13,7 +13,8 @@ const HOLD_S := 0.8          # s the press is held
 const DROPS := 6             # drops per mode: the press lands at a different phase of the snapshot clock
 const NET_TICK_S := 0.1          # s between snapshots (Net.tick's send_t)
 const LAG_TOL := NET_TICK_S + DT + 0.02   # s: one snapshot, one frame, and the relay hop on one machine
-const WORST_S := 0.6         # s: the loosest any single drop may lag (a loaded box can hitch one snapshot; a lost fallback is seconds)
+# s: the loosest any single drop may lag (a loaded box can hitch one snapshot; a lost fallback is seconds)
+const WORST_S := 0.6
 const MODES := ["btn", "space"]
 
 var host_open_ms := 0        # the host's copy opened (unix ms), 0 until then
@@ -44,7 +45,8 @@ func _host() -> void:
 			frames.append(got[1])
 		var sorted := lags.duplicate()
 		sorted.sort()
-		med[mode] = (sorted[DROPS / 2 - 1] + sorted[DROPS / 2]) / 2.0     # median: one loaded-box hitch does not decide it
+		# median: one loaded-box hitch does not decide it
+		med[mode] = (sorted[DROPS / 2 - 1] + sorted[DROPS / 2]) / 2.0
 		print("%s %s: guest open frames after the press %s; host copy lag (s) %s" % [tag, mode, frames, lags])
 		ok(frames.max() <= (1 if mode == "btn" else 99) and frames.min() >= 1,
 			"%s: the guest's own glider opens mid-fall (button: on the press step)" % mode, str(frames))
