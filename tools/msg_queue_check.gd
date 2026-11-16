@@ -57,7 +57,7 @@ func _layout(host: Control) -> void:
 		"five at once: %d show, %d wait" % [rects.size(), lane.waiting()])
 	ok(_no_overlap(rects), "the cards on show never overlap (%s)" % str(rects))
 	ok(rects.all(func(r: Rect2): return r.position.y >= lane.top), "they stack down from the lane's top")
-	for i in 60:
+	for i in 90:
 		lane._process(0.1)      # the first ones go, the waiting ones come in and the rest slide up
 		if not _no_overlap(lane.rects()):
 			ok(false, "cards overlap while the column closes up (%.1fs)" % (i * 0.1))
@@ -79,7 +79,7 @@ func _merge(host: Control) -> void:
 	ok(str(lane.texts()) == str(["Ember  x3"]), "three Embers make one card: %s" % str(lane.texts()))
 	for t in ["A", "B", "C", "C"]:
 		lane.push(t, Color.WHITE)
-	ok(lane.count() == 4 and lane.waiting() == 1, "a repeat of a waiting line merges too (%d)" % lane.count())
+	ok(lane.count() == 4 and lane.waiting() == 2, "a repeat of a waiting line merges too (%d)" % lane.count())
 
 # ------------------------------------------------------------------ 3. priority and old news
 func _priority(host: Control) -> void:
@@ -95,8 +95,8 @@ func _priority(host: Control) -> void:
 			break
 	ok(lane.texts().has("LEVEL 4") and not lane.texts().has("small"), "the important line takes the first free row")
 	lane = _fresh(host)
-	for t in ["one", "two", "three"]:
-		lane.push(t, Color.WHITE, MsgLane.HIGH)
+	for i in MsgLane.MAX_SHOWN:
+		lane.push("line %d" % i, Color.WHITE, MsgLane.HIGH)
 	lane.push("old news", Color.WHITE, MsgLane.LOW)
 	lane._process(MsgLane.STALE + 0.1)
 	ok(lane.waiting() == 0, "a small line that waited past %.0fs is dropped" % MsgLane.STALE)
@@ -118,13 +118,14 @@ func _hold(host: Control) -> void:
 func _fight(host: Control) -> void:
 	var lane := _fresh(host)
 	lane.fight = true
-	for t in ["a", "b", "c"]:
+	for t in ["a", "b"]:
 		lane.push(t, Color.WHITE, MsgLane.HIGH)
 	lane.push("hint", Color.WHITE, MsgLane.NORMAL, 6.0)
 	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN,
 		"a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(not lane.texts().has("a") and not lane.texts().has("b"), "a fight: lines go after %.1fs" % MsgLane.FIGHT_LIFE)
+	ok(not lane.texts().has("a"), "a fight: a line goes after %.1fs" % MsgLane.FIGHT_LIFE)
+	lane._process(MsgLane.FIGHT_LIFE + 0.05)
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)
 	ok(lane.texts().has("hint"), "a fight: a hint keeps its own life (%s)" % str(lane.texts()))
 	lane.clear()

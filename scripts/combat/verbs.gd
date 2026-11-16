@@ -405,7 +405,6 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			m.sfx("shield", p, -4.0, 1.9)
 			m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
-		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
 	return ""
 

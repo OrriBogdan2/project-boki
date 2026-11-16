@@ -971,7 +971,6 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 			h.glide_fuel = maxf(h.glide_fuel, 0.8)
 			m.sfx("glide", h.pos, 2.0, 1.2)
 			m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(1, 1, 1), 18, 5.0, 0.5, 6.0, 1.0, Vector3.UP, 25.0)
-			if h == m.player and m.hud: m.hud.toast_small("Riding the updraft out", color_of(L))
 		h.grounded = false
 		h.pad = {}
 		if h.pos.y < top - 0.6:

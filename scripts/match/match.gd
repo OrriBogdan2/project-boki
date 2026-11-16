@@ -896,8 +896,6 @@ func ship_jump(h: Hunter, force := false) -> void:
 	if not h.riding or h.rocket != null:
 		return
 	if not force and skydrop.waits(h):
-		if h == player and hud:
-			hud.toast_small("%s leads the drop" % skydrop.leader(h.team).pname, Color("ffd27a"))
 		return
 	skydrop.launch(h if force or skydrop.is_lead(h) else skydrop.leader(h.team))
 
@@ -2426,10 +2424,7 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
-		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
 		hud.hitmarker(true, true)
-	elif h == player and hud:
-		hud.toast_small("Armor down", Color("7ac8ff"))
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
 func on_wall_slam(e: Ent, dir: Vector2) -> void:
@@ -2438,7 +2433,6 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h
 	if sc is Hunter and sc != e: (sc as Hunter).add_stat("slams")
-	if hud and player and (e == player or e.last_hit_by == player): hud.toast_small("WALL SLAM", Color("fff27a"))
 
 ## Sight. Each hunter sees a cone in front of them (where they aim) out to VIEW_RANGE, plus a
 ## small circle all around; a team shares what its members see. Walls and high ground block
