@@ -31,6 +31,7 @@ const LOCK_DEG := 3.0  # a locked body moves no more than this (rounding, a knoc
 ## lands before the late window, so his reel is hauling through it.
 const FOE_AT := {"dredge": Vector3(0, 0, -6.5)}
 const FOE_DEFAULT := Vector3(5.0, 0, 0)
+const REEL_DEG := 10.0  # Dredge's reel turns him onto the body it hauls (face_locked): a few degrees
 const SLOW_GAP := 3.0  # a capped turn: more than locked, no more than deg_s x window plus this
 
 var bad := 0
@@ -153,11 +154,11 @@ func _spent(P: Hunter) -> String:
 
 
 ## Does a turn of `deg` over a window match `rule` ("free", "locked" or a deg/s cap)?
-func matches(rule, deg: float) -> bool:
+func matches(rule, deg: float, lock_deg := LOCK_DEG) -> bool:
 	if rule is String and rule == "free":
 		return deg >= FREE_DEG
 	if rule is String and rule == "locked":
-		return deg <= LOCK_DEG
+		return deg <= lock_deg
 	var cap := float(rule) * float(WINDOWS["early"][1] - WINDOWS["early"][0]) * DT
 	return deg > LOCK_DEG and deg <= cap + SLOW_GAP
 
@@ -185,7 +186,7 @@ func run(main: Node) -> void:
 			for wname in WINDOWS:
 				var rule = want[wname]
 				ok(
-					matches(rule, float(r[wname])),
+					matches(rule, float(r[wname]), REEL_DEG if arch == "dredge" and slot == "rmb" else LOCK_DEG),
 					"%-10s %-8s %-5s turned %5.1f deg, row says %s" % [arch, slot, wname, float(r[wname]), str(rule)]
 				)
 			m.queue_free()

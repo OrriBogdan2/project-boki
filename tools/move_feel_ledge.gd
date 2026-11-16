@@ -131,7 +131,10 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 			"ledge_dash %s: lip %.1f m/s, crashes in the air %d, lands below %s" % [
 			what, float(o["lip_v"]), int(o["air_crash"]), str(o["landed"])])
 		return
-	var ok := bool(o["landed"]) and int(o["hover"]) <= 1 and bool(o["end_air"]) and exit_k >= least_k - 0.01 \
+	# (Dredge's chain: a press made just before the lip is held through the 0.1 s gap and goes in the air, an air
+	# pounce that holds its height for its own 0.2 s: 12 steps, and the exit below is the one that follows it)
+	var hover_max := 13 if id == "dredge" and mode == "chain" else 1
+	var ok := bool(o["landed"]) and int(o["hover"]) <= hover_max and bool(o["end_air"]) and exit_k >= least_k - 0.01 \
 			and int(o["glide"]) >= 0 and int(o["glide"]) <= 2 and int(o["pose"]) == 0
 	var air := _run(id, mode, at, true)
 	ok = ok and bool(air["air_dash"])

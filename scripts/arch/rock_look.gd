@@ -70,7 +70,8 @@ static func _fresh(n: Node3D) -> void:
 		elif c.name == "Cracks":
 			(c as Node3D).visible = true
 			for mi in c.get_children():
-				((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.a = CRACK_A
+				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
+					"color", Color(0.35, 0.6, 1.0, CRACK_A))
 		elif c.name.begins_with("Col"):
 			_stand(c as Node3D, i)
 			i += 1
