@@ -111,8 +111,8 @@ const SHIELD := "shield"        # a shield modelled in the left hand's Shield no
 ## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
-## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air, Grimble's stretched hook
-## arm): the bones the Hero's data lists in "hide_while_chain" shrink away (item 76b.4), so one shows, never two.
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's
+## data lists in "hide_while_chain" shrink away (item 76b.4), so one shows, never two.
 const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
@@ -202,7 +202,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
 	var sync := WardenSync.new()
@@ -447,15 +446,6 @@ static func measure_rest(arch: String) -> Dictionary:
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
-
-## Hides the procedural body's meshes, leaving the KEEP pieces.
-static func _hide_body(n: Node) -> void:
-	for ch in n.get_children():
-		if String(ch.name) in KEEP:
-			continue
-		if ch is MeshInstance3D:
-			(ch as MeshInstance3D).visible = false
-		_hide_body(ch)
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
 ## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon

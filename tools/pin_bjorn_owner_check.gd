@@ -445,10 +445,10 @@ func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
 	for id in ["bul_throw", "bul_recall"]:
-		var keys: Array = KMovesPinBjorn.MOVES[id]["keys"]
+		var keys: Array = KMovesBjorn.MOVES[id]["keys"]
 		tail = maxf(tail, float((keys[-1] as Array)[0]))
 	ok("bjorn auto: the throw and recall poses end with the faster cadence (no pose cut mid-way)",
-		float((KMovesPinBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
+		float((KMovesBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
 			"tail %.2f" % tail)
 	var throws := _throws_in(_m, _P, K, 3.0)
 	ok("bjorn auto: throw, recall and throw again within 3 s at least 4 times", throws >= 4, "throws %d" % throws)
