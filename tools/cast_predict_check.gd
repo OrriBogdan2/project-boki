@@ -47,18 +47,19 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host (listen server)
 func _host() -> void:
-	dn.port = 7870 + OS.get_process_id() % 60
+	dn.port = CheckChild.free_port(7870 + OS.get_process_id() % 60)
 	relay = RelayServer.new()
 	main.add_child(relay)
 	var args := ["--port=%d" % dn.port, "--lag-ms=%d" % LAG_MS, "--loss=%s" % LOSS]
-	if relay.start(PackedStringArray(args)) != OK or not await dn._connect():
+	if relay.start(PackedStringArray(args)) != OK:
+		return _finish("the relay didn't come up")
+	CheckChild.hold(relay.peer, START_S)
+	if not await dn._connect():
 		return _finish("the relay or the host's connection didn't come up")
 	var dir := ProjectSettings.globalize_path("user://cast_predict")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var log_path := dir.path_join("guest.log")
-	var cmd := "cd '%s' && %s --headless -- --cast-predict-check=guest --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), dn.GODOT, dn.port, log_path]
-	guest_pid = OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--cast-predict-check=guest --dn-port=%d" % dn.port, log_path)
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:

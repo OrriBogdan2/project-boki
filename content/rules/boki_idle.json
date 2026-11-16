@@ -904,6 +904,258 @@
 					]
 				]
 			}
+		},
+		"gibbelle": {
+			"fidget": {
+				"note": "sniff: nose up, a quick turn left and right",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.35,
+						1,
+						0.25
+					],
+					[
+						"spine",
+						"x",
+						0.08,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.0,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"caecilith": {
+			"fidget": {
+				"note": "coil: a slow sway, head low",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						0,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.2,
+						1,
+						0
+					],
+					[
+						"tail*",
+						"y",
+						0.4,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.4,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"goliathite": {
+			"fidget": {
+				"note": "shrug: weight rolls, head dips",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"spine",
+						"z",
+						0.1,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.22,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.12,
+						1,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 3.8,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"hoarheron": {
+			"fidget": {
+				"note": "preen: neck bends, head ducks and rises",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.35,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						-0.3,
+						1,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.1,
+						0,
+						0
+					],
+					[
+						"tail*",
+						"x",
+						0.2,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.0,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"floenatee": {
+			"fidget": {
+				"note": "roll: slow lean to one side",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"spine",
+						"z",
+						0.14,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						-0.1,
+						0,
+						0
+					],
+					[
+						"tail*",
+						"y",
+						0.3,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"lilybara": {
+			"fidget": {
+				"note": "doze nod: head sinks and lifts",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.4,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.07,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.12,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.2,
+				"amp": 2.5,
+				"calm": true
+			}
+		},
+		"umbrathere": {
+			"fidget": {
+				"note": "peer: head tilts, a slow look around",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.3,
+						1,
+						0.25
+					],
+					[
+						"spine",
+						"y",
+						0.06,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.0,
+				"amp": 2.5,
+				"calm": true
+			}
 		}
 	}
 }
