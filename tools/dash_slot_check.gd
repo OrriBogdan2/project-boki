@@ -58,7 +58,9 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		P.unlock_all()
 		P.dashes = P.max_dashes()
 		await _drawn(m.hud)
-		var want := 0 if P.ak.single_dash() else int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes())
+		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes())
+		if P.ak.single_dash():
+			want = 0
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
