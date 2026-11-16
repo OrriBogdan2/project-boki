@@ -15,13 +15,13 @@ Refs: briefs/hero-ref sheets (5 fps, 0.2 s a frame); each sheet lands its dash "
 | Hunter | move | kit travel | clip (s) | before: ride / pop | after | fix | footage |
 |---|---|---|---|---|---|---|---|
 | Vex (gunslinger) | Slipstep tap | 4.02 m, 0.52 s | dash 0.87 | 0.43 s (the stand-up rides the run) / 8 | 0.25 / 26 | `rate` 1.25: keyed start-to-stand 0.85 -> 0.68 s | venator.md: tap slide 3 frames (0.6 s) start to stand |
-| Kael (juggernaut) | Quick Dash | 3.59 m, 0.25 s after the 0.07 s crouch | dash 0.43 | 0.27 / 1 | 0.22 / 10 | `rate` 1.1 | juggernaut.md 0387: ~0.2 s, sword thrust |
-| Kael | Lunge, half / full hold | 6.0 m, 0.25 s / 10.5 m, 0.35 s | lunge 0.60 | 0.43 / 0.33 | 0.23 / 0.13 | `rate` 1.5 (the drive 0.05-0.2 s, the ease-back to 0.4 s) | juggernaut.md 0121-0127: ~5 m in ~0.2 s |
+| Kael (juggernaut) | Quick Dash | 3.59 m, 0.25 s after the 0.07 s crouch | dash 0.43 | 0.27 / 1 | 0.22 / 10 | `rate` 1.3, `fade_out` 0.25 | juggernaut.md 0387: ~0.2 s, sword thrust |
+| Kael | Lunge, half / full hold | 6.0 m, 0.25 s / 10.5 m, 0.35 s | lunge 0.60 | 0.43 / 0.33 | 0.23 / 0.13 | `rate` 1.8, `fade_out` 0.25 (the drive 0.05-0.2 s, the ease-back to 0.4 s) | juggernaut.md 0121-0127: ~5 m in ~0.2 s |
 | Lace (archer) | roll | 2.87 m, 0.27 s | roll 0.37 | 0.05 | 0.05 | none | pin.md: a quick dodge roll |
-| Cinder (ashwick) | Soot Ram | 3.34 m, 0.32 s | leap 0.53 | 0.30 / 8 | 0.22 / 18 | `rate` 1.15 | linwick.md 0160-0161: lands upright within a frame |
+| Cinder (ashwick) | Soot Ram | 3.34 m, 0.32 s | leap 0.53 | 0.30 / 8 | 0.22 / 18 | `rate` 1.3, `fade_out` 0.25 | linwick.md 0160-0161: lands upright within a frame |
 | Meeko (tender) | dash | 3.57 m, 0.20 s | skip 0.3 | 0.12 | 0.12 | none | mooshmoosh.md |
 | Tenzo (dolm) | Rock Hop: hop 0.26 s (a launch), skid | 0.6 m, 0.3 s | dash_hop 0.27, dash_skate 0.3 (hold), dash_land 0.7 | 0.45 (the landing rides the run) | 0.08 / 17 | dash_land `upper: moving` (the skid stays full-body: two upper moves in a row swap in a frame, see DEBT) | breah.md (Landslide is one dash; the hop chain is the owner's) |
-| Grimble (dredge) | Barge | 2.71 m, 0.18 s | lunge 0.37 | 0.27 / 5 | 0.23 / 17 | `rate` 1.1 | dredge.md 0188: lands in a crouch, back to the aim within a frame |
+| Grimble (dredge) | Barge | 2.71 m, 0.18 s | lunge 0.37 | 0.27 / 5 | 0.23 / 17 | `lunge_out` `rate` 1.4, `fade_out` 0.12; a lone barge stays curled the gap and `CHAIN_GRACE` (0.18 s, owner item 35), so `AFTER` allows dredge 0.15 s more | dredge.md 0188: lands in a crouch, back to the aim within a frame |
 | Neve (rimewright) | Skate tap (0.2 s min) | 1.72 m, 0.20 s | skate_go 0.17, skate loop, skate_stop 0.5 | 0.58 (the braced stop rides the run) / 40 | 0.07 / 12 | skate_stop `upper: moving` | tamsin.md 0169-0296: hold to skate, release to stop |
 | Motley (ostra) | Trade (lob, then the teleport) | no body travel | swap_aim, swap 0.85 | - | - | none: the frame count is not asked of a lob (`NO_TRAVEL`) | ostra.md 0152-0200 |
 | Albert (bulwark) | 360 Smash | 2.78 m, 0.18 s | shift_whirl 0.75 (spin to 0.58) | 0.60 / 0 | 0.60 / 4 (allowed +0.4) | none: the spin lands on arrival and settles | bjorn.md 0370-0372: dash <= 0.2 s, one spin on arrival, ~0.4 s recovery |

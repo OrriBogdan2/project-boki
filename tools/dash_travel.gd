@@ -13,7 +13,8 @@ const RIDE_S := 0.28           # s: the dash pose may ride the run this long: on
                                # (every sheet lands its dash "within a frame") plus the half of the 0.16 s blend
                                # into the run that still shows the pose
 ## Per archetype, s more the pose may ride: a dash whose hit comes on arrival plays it out on the body.
-const AFTER := {"bulwark": 0.4}    # the 360 Smash spins on arrival and settles over ~0.4 s (bjorn.md 0371-0372)
+const AFTER := {"bulwark": 0.4, "dredge": 0.15}   # the 360 Smash spins on arrival and settles over ~0.4 s (bjorn.md 0371-0372);
+		# a lone barge stays curled the gap and 0.08 s of grace for a chained press (DredgeKit.CHAIN_GRACE, dredge.md)
 const EARLY_S := 0.05          # s: the run may show this long inside the travel (a frame or two of fade)
 const POP_RATE := 30.0         # rad/s over the sim frames beside it, summed on JOINTS: a jerk the eye catches
 const OWN := 0.5               # act_w from which the clip owns the body
