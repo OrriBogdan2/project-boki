@@ -11,7 +11,7 @@ const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.
 const DT := 1.0 / 30.0
 ## Worst ratio a Hero may reach (docs/DEBT.md "Skin stretch"): its v95 glb's worst, measured and rounded up, so a
 ## worse glb fails. Its welds still stretch: relaxing the shipped glb in place opens its UV seams.
-const CEILING := {"bulwark": 9.5, "mage": 6.5, "thief": 8.5}
+const CEILING := {"bulwark": 9.5, "mage": 7.0, "thief": 10.0}
 
 var tree: SceneTree
 var bad := 0

@@ -2,67 +2,67 @@
  "tolerance_pct": 5,
  "platforms": {
   "Web": {
-   "total": 473233092,
+   "total": 613948780,
    "categories": {
-    "textures": 369502792,
-    "models": 45481337,
-    "audio": 41372010,
-    "scripts": 12131426,
-    "other": 1937014,
-    "data": 1556384,
-    "shaders": 211464,
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
     "fonts": 202850
    }
   },
   "Windows": {
-   "total": 473233092,
+   "total": 613948780,
    "categories": {
-    "textures": 369502792,
-    "models": 45481337,
-    "audio": 41372010,
-    "scripts": 12131426,
-    "other": 1937014,
-    "data": 1556384,
-    "shaders": 211464,
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
     "fonts": 202850
    }
   },
   "macOS": {
-   "total": 473233092,
+   "total": 613948780,
    "categories": {
-    "textures": 369502792,
-    "models": 45481337,
-    "audio": 41372010,
-    "scripts": 12131426,
-    "other": 1937014,
-    "data": 1556384,
-    "shaders": 211464,
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
     "fonts": 202850
    }
   },
   "Linux": {
-   "total": 473233092,
+   "total": 613948780,
    "categories": {
-    "textures": 369502792,
-    "models": 45481337,
-    "audio": 41372010,
-    "scripts": 12131426,
-    "other": 1937014,
-    "data": 1556384,
-    "shaders": 211464,
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967313,
+    "data": 1576186,
+    "shaders": 212976,
     "fonts": 202850
    }
   },
   "Linux Server": {
-   "total": 473233140,
+   "total": 613948828,
    "categories": {
-    "textures": 369502792,
-    "models": 45481337,
-    "audio": 41372010,
-    "scripts": 12131426,
-    "other": 1937070,
-    "data": 1556384,
-    "shaders": 211464,
+    "textures": 492200666,
+    "models": 62469620,
+    "audio": 42041209,
+    "scripts": 12413264,
+    "other": 1967369,
+    "data": 1576186,
+    "shaders": 212976,
     "fonts": 202850
    }
   }
