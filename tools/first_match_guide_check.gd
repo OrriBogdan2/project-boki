@@ -121,7 +121,8 @@ func _walk(hunter: String) -> void:
 	_tick(1.6)
 	var way := ExtractGoal.pick(m, HudReveal.newcomer(m))
 	var named: bool = g.line.contains(WaysOutMap.WORDS[way]) if way >= 0 else g.line.contains("exit")
-	ok(g.id == "exit" and named and not g.line.contains("%"), "then: head for the way out the goal line names (%s)" % g.line)
+	var exit_ok: bool = g.id == "exit" and named and not g.line.contains("%")
+	ok(exit_ok, "then: head for the way out the goal line names (%s)" % g.line)
 	var spots: Array = m.exits.spots()
 	p.pos = spots[0]
 	_tick(0.2)
