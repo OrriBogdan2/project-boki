@@ -1,5 +1,6 @@
 {
 	"id": "ashwick",
+	"recast_hint": {"x": "land the Flue Flight"},
 	"title": "Ashen Kiss",
 	"base_name": "Cinder",
 	"gender": "female",

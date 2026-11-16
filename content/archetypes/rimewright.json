@@ -1,5 +1,6 @@
 {
 	"id": "rimewright",
+	"recast_hint": {"e": "freeze the Rink Wall", "x": "crack Rimelock now"},
 	"title": "Snowglide",
 	"base_name": "Neve",
 	"gender": "female",
