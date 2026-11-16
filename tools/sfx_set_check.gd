@@ -52,6 +52,11 @@ extends RefCounted
 ##      the Ambience bus, and the grounds never play the match's beds
 ##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ##  17. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
+##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
+##      drops, and stops on a heal, a down or out
+##  19. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
+##      without taking a slot, and a need falling to urgent sulks once
+## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -111,6 +116,8 @@ func run(main: Node) -> void:
 	_training()
 	_boki_cues()
 	_ui_cues()
+	_low_hp()
+	_voices()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -980,3 +987,60 @@ func _boss_moves() -> void:
 	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
 	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
 	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
+
+## 7. The heartbeat: silent at the line, beating just under it (the first beat at once), faster the lower the
+## share, and silent again on a heal over the line, a down or out. Beats counted over 10 s of 60 fps frames.
+func _low_hp() -> void:
+	var cue := LowHpCue.new()
+	var line := float(Content.rules(LowHpCue.RULES)["start_share"])
+	var at_line := _beats(cue, line, 10.0)
+	ok(at_line == 0 and not cue.active, "heartbeat: silent at the line (%.2f of max health and armour)" % line)
+	var just := _beats(cue, line - 0.01, 10.0)
+	var want := int(ceil(10.0 * cue.bpm(line - 0.01) / 60.0))
+	ok(cue.active and just == want, "heartbeat: starts just under the line, %d beats in 10 s" % just)
+	var low := _beats(cue, line * 0.2, 10.0)
+	ok(low > just, "heartbeat: faster as health drops (%d beats in 10 s near empty)" % low)
+	ok(_beats(cue, line + 0.01, 10.0) == 0 and not cue.active, "heartbeat: stops when you heal back over the line")
+	_beats(cue, 0.1, 1.0)
+	var was := cue.active
+	ok(was and _beats(cue, 1.0, 1.0) == 0 and not cue.active, "heartbeat: stops when downed or out (a full share)")
+	var wav := "res://audio/%s.wav" % LowHpCue.SOUND
+	var on: bool = Settings.DEFAULTS["low_hp_pulse"]
+	ok(on and FileAccess.file_exists(wav), "heartbeat: on by default, sound on file")
+
+func _beats(cue: LowHpCue, s: float, secs: float) -> int:
+	var n := 0
+	for i in int(secs * 60.0):
+		if cue.step(s, 1.0 / 60.0):
+			n += 1
+	return n
+
+
+## 16. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
+func _voices() -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	var at := Sfx.listener + Vector3(2, 0, 0)
+	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	var recs := []
+	for i in 6:
+		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
+	HomeVoice.say(recs[5], "happy", far)
+	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
+	for i in 5:
+		HomeVoice.say(recs[i], "happy", at)
+	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
+	HomeVoice._until.clear()
+	HomeVoice.say(recs[0], "happy", at)
+	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
+	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	var k := {"rec": recs[1], "pos": at}
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	var sulked := HomeVoice._until.size()
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
