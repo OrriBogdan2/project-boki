@@ -665,9 +665,7 @@ func _recovery(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	)
 
 
-## The cleave is a tall crescent standing along the aim (tilt 90, leaning toward the camera so it never shows
-## edge-on): its tip at the strip's far end, its back edge inside the strip, at full lean no wider than the strip
-## (+20%) and still taller than a Hunter.
+## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:
 	var ln := float(d["len"])
 	var w := float(d["width"])
