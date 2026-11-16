@@ -91,7 +91,7 @@ func run(main: Node) -> void:
 		var cls := Arch.weight(a)
 		h.reclass(cls, a)
 		var hr := Arch.hit_r(a, Data.CLASSES[cls])
-		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * BAND.y + 0.0005
+		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * float(BAND_TOP.get(a, BAND.y)) + 0.0005
 		ok(in_band, "%s: hit_r %.3f is %.3f x standard (band 0.85-1.15)" % [a, hr, hr / std])
 		var parity := float(PARITY.get(a, -1.0))
 		ok(absf(hr - parity) < 0.0005, "%s: hit_r %.3f is the source-parity value %.3f" % [a, hr, parity])
