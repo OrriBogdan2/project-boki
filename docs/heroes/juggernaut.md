@@ -18,7 +18,7 @@ docs/wiki/Inspirations.md.
 - **Disagreements:** two guides say "double damage" to the wounded and a "four-hit combo with later hits
   stronger"; both are pre-patch, so the wiki wins. The Flame Step cooldown is 13s in the header and 11/9/7/6 in
   the notes; we use the notes' shape.
-- **Not reproduced:** mana, climbing double-height walls, dodges building Rage, Volcanic Rebuke sending a
+- **Not reproduced:** mana, dodges building Rage, Volcanic Rebuke sending a
   knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
@@ -353,6 +353,10 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
+13. **Open, the guard's edges (guard check, 11-12):** the guard ends at 0.65 s, so a hit in the 0.1 s strike or the
+    recovery lands in full (the source says 0.65 s of invulnerability, nothing after). Crowd control that does not go
+    through a hit (Dredge's reel, a wall slam from a knock before the guard) is not asserted either way; no source row
+    covers it.
 
 ## Small mechanics
 
@@ -374,7 +378,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
-| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
+| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd: a jump into a 4-terrace wall (3.2 m) tops it, 5 terraces not; asserted `combo archer: tall climb, juggernaut ...` (tools/tall_climb_check.gd, run by --archer-combo-check) |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
@@ -446,10 +450,13 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | Every Warchain state and RMB row | as the two tables above | `jug chain:`, `jug pull:`, `jug RMB row:`, `jug buffer:`, `jug meteor:` (tools/zedran_feel_check.gd) |
 | E attached, RMB tap | the normal Finishing Slam; the link chain stays drawn | `combo jug: E > RMB tap = Finishing Slam` |
 | RMB sweet spot, then a knock on that foe (2s) | the Gilded Riposte is ready again; a heal; a Rampage charge back | `combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash` |
-| E, E (pulled in), R, their hit | blocked in the guard, then the cleave lands | `combo jug: E > E > R = pulled in, a hit blocked, the cleave lands` |
-| R, two hits blocked | the cleave 40% harder | `juggernaut R small mechanic: two hits blocked make the answer 40% harder` |
-| R knocks a hunter | ready again at once | `juggernaut R small mechanic: knocking a hunter with it resets it; ...` |
-| R, then a merge | the guard drops, no cleave | `merge hold jug: the Riposte's guard drops, no cleave` |
+| E, E (pulled in), X, their hit | blocked in the guard, then the cleave lands | `combo jug: E > E > X = pulled in, a hit blocked, the cleave lands` |
+| X, two hits blocked | the cleave 40% harder | `juggernaut X small mechanic: two hits blocked make the answer 40% harder` |
+| X, a rifle stream (3 shots, 0.13 s apart) from 0.2 s or 0.5 s in | 0 damage in the guard; the strike still lands at 0.65 s, 43 x 1.4 (a stream blocks two at most); a shot landing after the guard (the 0.5 s stream's third) hurts | `juggernaut X guard: a rifle stream from ...` |
+| X, a stun and knock from 0.2 s or 0.5 s in | no damage, no stun, no push; the strike still lands, 43 x 1.2 (one block) | `juggernaut X guard: a stun and knock landed ...` |
+| X, a foe 3.4 m / 4.6 m ahead | hit (43) / missed: the strip is 3.6 m from the guard spot, plus the body's reach | `juggernaut X guard: the strike reaches ...` |
+| X knocks a hunter | ready again at once | `juggernaut X small mechanic: knocking a hunter with it resets it; ...` |
+| X, then a merge | the guard drops, no cleave | `merge hold jug: the Riposte's guard drops, no cleave` |
 | RMB hold, jump, full, release | lane, jump, flash, fling | `juggernaut RMB hold: you can jump while holding` and the lane/flash checks |
 | RMB hold that strikes nothing | Smash cooldown doubles | `combo jug: RMB hold miss = cooldown x2` |
 | In the air with the Smash ready, RMB | straight down (no sideways travel), the hit circle 0.8 m ahead, foes in it knocked down and foes past it not | `juggernaut RMB air: the down slam lands under him, its hit circle just ahead` |
