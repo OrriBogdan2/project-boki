@@ -256,9 +256,8 @@ func ult_running() -> bool:
 func lock_left() -> float:
 	return riposte.lock_left()
 
-## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits Loco.press_buffer
-## for the
-## cleave to land; E on a held chain pulls, use_e).
+## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits
+## Loco.press_buffer for the cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
 

@@ -3144,7 +3144,6 @@ func _process(delta: float) -> void:
 		acc -= DT
 		steps += 1
 		step(DT)
-		FireTap.stepped(player)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):

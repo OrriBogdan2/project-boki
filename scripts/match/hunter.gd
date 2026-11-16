@@ -1944,6 +1944,7 @@ func sim(dt: float) -> void:
 	inp["kin_ab"] = false
 	for k in PRESS_KEYS:
 		inp[k] = false
+	FireTap.stepped(self)
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
