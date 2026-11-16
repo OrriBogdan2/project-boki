@@ -51,19 +51,19 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Hawk Sense | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
-| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
-| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
-| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
-| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
-| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
-| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Deep Reach | Anchor Drop | none (Boki Fusion) |
-| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
-| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
-| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
-| [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none (Boki Fusion) |
+| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Drawstring | Red Thread | Slip Stitch | Pin Down | Hemline | none (Boki Fusion) |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Bitter End | Bad Blood | Rampage | Final Swing | Short Leash | none (Boki Fusion) |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Brass Tacks | Hot Streak | Slipstep | Coin Blast | Palm Spear | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | Capstan Hammer | Hold Fast | Tideturner | Blue Guard | Safe Harbour | none (Boki Fusion) |
+| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Ice Darts | Cold Snap | Free Skate | Icebreaker | Cold Front | none (Boki Fusion) |
+| [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Open Flame | Boiling Point | Lock Horns | Spitfire | Molten Hug | none (Boki Fusion) |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Stone's Throw | Jade Ward | Leap of Faith | Rock Bottom | Foothold | none (Boki Fusion) |
+| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Finger Guns | Live Wire | Wirerun | Pink Spear | Undercurrent | none (Boki Fusion) |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Potshot | Finders Keepers | Mad Dash | Sticky Fingers | Lump Sum | none (Boki Fusion) |
+| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Hot and Cold | Carry the Day | Foxtrot | Stick Around | Hearthlight | none (Boki Fusion) |
+| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Sleight Trigger | Marks | Vault | Dark Bola | White Flash | none (Boki Fusion) |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Comic Timing | Swell | Musical Chairs | Stage Fright | Gag Gift | none (Boki Fusion) |
+| [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Deep End | Grab Bag | Spin Cycle | none (Boki Fusion) |
 
 ### How Hunters unlock
 
@@ -92,37 +92,37 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
 | the Red Stitch | Stun 12 enemies | 12 | Colours: Fletcher Green |
-| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Spin a Yarn |
 | the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
-| the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
+| the Red Stitch | Make it out after being knocked down | 1 | Title: Loose End |
 | the Unbroken | Knock 10 enemies into walls | 10 | Colours: Forge Red |
 | the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
 | the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Hired Gun | Land 30 hits from 12 m or more | 30 | Colours: Dust Rider |
-| the Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
-| the Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
+| the Hired Gun | Revive 2 teammates | 2 | Emote: Call It |
+| the Hired Gun | Fly through 10 air rings | 10 | Trail: Loose Change |
 | the Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
-| the Barnacle Knight | Revive 3 teammates | 3 | Colours: Oathsteel |
+| the Barnacle Knight | Revive 3 teammates | 3 | Colours: Hullsteel |
 | the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
 | the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
-| the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
+| the Barnacle Knight | Open 6 chests | 6 | Banner: All Aboard |
 | the Snowglide | Slow 40 enemies | 40 | Colours: Hoarfrost |
-| the Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| the Snowglide | Fly through 10 air rings | 10 | Glider: Sugar Glider |
 | the Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
 | the Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | the Ashen Kiss | Set 25 enemies burning | 25 | Colours: Coal and Cinder |
 | the Ashen Kiss | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
-| the Ashen Kiss | Open 6 chests | 6 | Banner: Lantern Flame |
+| the Ashen Kiss | Open 6 chests | 6 | Banner: Pilot Light |
 | the Ashen Kiss | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
 | the Stone Seer | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
 | the Stone Seer | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
-| the Stone Seer | Open 10 chests | 10 | Glider: Slate Kite |
-| the Stone Seer | Make it out after being knocked down, twice | 2 | Title: Bedrock |
+| the Stone Seer | Open 10 chests | 10 | Glider: Prayer Flag |
+| the Stone Seer | Make it out after being knocked down, twice | 2 | Title: Unshaken |
 | the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colours: Storm Violet |
 | the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
 | the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Fully Charged |
 | the Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
 | the Scrap King | Stun 10 enemies | 10 | Colours: Rust and Brine |
 | the Scrap King | Open 10 chests | 10 | Title: Salvager |
@@ -131,20 +131,20 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Dawnfox | Root 10 enemies | 10 | Emote: Big Hug |
 | the Dawnfox | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
 | the Dawnfox | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
-| the Dawnfox | Open 8 chests | 8 | Banner: Moon Lantern |
+| the Dawnfox | Open 8 chests | 8 | Banner: Silver Lining |
 | the Silver Thief | Land 25 hits while in the air | 25 | Colours: Midnight Silk |
 | the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
 | the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
 | the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 | the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
-| the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
-| the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
-| the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
-| the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
-| the Novice Mage | Stun 8 enemies | 8 | Colours: Deep Tide |
+| the Void Jester | Stun 15 enemies | 15 | Trail: Confetti |
+| the Void Jester | Make it out carrying 8 items | 8 | Title: Last Laugh |
+| the Void Jester | Fly through 15 air rings | 15 | Glider: Big Top |
+| the Void Jester | Revive 3 teammates | 3 | Banner: Playbill |
+| the Novice Mage | Stun 8 enemies | 8 | Colours: Undertow |
 | the Novice Mage | Hit 3 enemies at once with one ability, twice | 2 | Emote: Flop |
 | the Novice Mage | Open 6 chests | 6 | Banner: Tide Pool |
-| the Novice Mage | Your Boki lands 40 hits | 40 | Title: Fishmonger |
+| the Novice Mage | Your Boki lands 40 hits | 40 | Title: Small Fry |
 
 ### Run levels
 

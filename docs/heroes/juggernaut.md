@@ -30,21 +30,21 @@ no such upgrade). LMB and the passive have no tiers in the data and do not rank;
 | Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
 |---|---|---|---|---|
 | LMB greatsword | none [D] | - | - | - |
-| RMB Smash | +20% damage / +20% damage / Air Slam -3 s [D] (Air Slam 9 s) | Smash damage +20%, cooldown 2 s flat | +40%; Meteor Drop 7.2 -> 4.8 s | `--juggernaut-combo-check` juggernaut ranks, upgrade parity |
+| RMB Final Swing | +20% damage / +20% damage / Air Slam -3 s [D] (Air Slam 9 s) | Final Swing damage +20%, cooldown 2 s flat | +40%; Hit the Deck 7.2 -> 4.8 s | `--juggernaut-combo-check` juggernaut ranks, upgrade parity |
 | Space Rampage | +1 charge -2 s / -2 s / dodging shots builds empowerment, -1 s [D] (13 s) | recharge 10.4 -> 8.8 s, a 3rd charge | 6.4 s; a dodged shot feeds Rage | same, `juggernaut dash rank 3` |
-| E Warchain | -2 s / -2 s / -2 s [D] (16 s) | cooldown 12.8 -> 11.2 s | 8.0 s (III + IV); no damage step | same |
+| E Short Leash | -2 s / -2 s / -2 s [D] (16 s) | cooldown 12.8 -> 11.2 s | 8.0 s (III + IV); no damage step | same |
 | Passive Rage | none [D] | - | - | - |
 
 ## Scaling
 
 Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam 52, Spin 54, Flame Step 18
 with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
-with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
-Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
-specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 7.2s slot (9s against the Smash's 2.5s, kept as the
+with tip 14, Blow for Blow 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
+Chains, so ours is 22s against the Short Leash's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
+specials. Data pass (SERVER_UPDATE7): the Hit the Deck has its own 7.2s slot (9s against the Final Swing's 2.5s, kept as the
 ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
-a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
--2s three times (12.5% of its cooldown each, merged: 12.5% at rank 2, 37.5% at rank 3); every Smash gets +20% at rank 2 and
+a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Short Leash loses its refund for the data's
+-2s three times (12.5% of its cooldown each, merged: 12.5% at rank 2, 37.5% at rank 3); every Final Swing gets +20% at rank 2 and
 again at rank 3.
 
 ## Per-slot table
@@ -57,28 +57,28 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal | Duration is ours |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (his crimson edge, a white-hot core), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (7 to 14m, 12 to 20, burn 4s, slow 30%) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
-| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
+| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Final Swing is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Blow for Blow (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
-| RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
+| RMB air, Hit the Deck | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
-| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (R) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
+| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Final Swing is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Blow for Blow (R) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
-| RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
+| RMB air, Hit the Deck | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28); neither knocks back (owner 11-11) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
-| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short crimson strike lane everyone sees (lit rim, faint inside filling toward the tip), then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
+| RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short crimson strike lane everyone sees (lit rim, faint inside filling toward the tip), then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Final Swing is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Blow for Blow (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) in his crimson, a faint inside filling toward the far end, its rim flaring hot with a ping at full (0.8s); a rising whine; the cursor ring fills; you walk at 80% and can jump while charging (footage: the Heavy Attack hold is slower than his runs; docs/MOVEMENT_FEEL.md); release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
-| RMB air, Meteor Drop | in the air only (already jumping or falling) | Owner spec 11-10: a down slam, no dive across and no leap. A crimson circle (white-hot stun core) shows where it would hit while it's ready. Press: his drift stops, a 0.08s hang (blade hauled overhead), then a straight drop to the ground under him (24 m/s, 0.12 to 0.35s) with flame streaks. The hit is a 2.4m circle (1.2m stun core) centred 0.8m ahead of where he lands, in his facing at the press, shown to everyone from the press. The landing: a crouch, cracks across the circle, a shock ring and cel dust, debris, a shake for others nearby and a deep boom; 18, and everyone in it knocked down 0.45s (anyone airborne or gliding spiked to the ground); the core +50% and down 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | Ours (owner 11-10): straight down where he is, the hit a little ahead, not at the cursor |
-| RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
+| RMB air, Hit the Deck | in the air only (already jumping or falling) | Owner spec 11-10: a down slam, no dive across and no leap. A crimson circle (white-hot stun core) shows where it would hit while it's ready. Press: his drift stops, a 0.08s hang (blade hauled overhead), then a straight drop to the ground under him (24 m/s, 0.12 to 0.35s) with flame streaks. The hit is a 2.4m circle (1.2m stun core) centred 0.8m ahead of where he lands, in his facing at the press, shown to everyone from the press. The landing: a crouch, cracks across the circle, a shock ring and cel dust, debris, a shake for others nearby and a deep boom; 18, and everyone in it knocked down 0.45s (anyone airborne or gliding spiked to the ground); the core +50% and down 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | Ours (owner 11-10): straight down where he is, the hit a little ahead, not at the cursor |
+| RMB in the pull | during E | Full Circle, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve, walking in speeds and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
-| X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
-| R, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
+| E, Short Leash | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve, walking in speeds and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Short Leash: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| X, Blow for Blow | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
+| E, Short Leash | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Short Leash: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| R, Blow for Blow | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 9 along it, the tip 18 and a big knock (10.4s recharge), orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source, ours 2 charges (3 at rank 2); sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (12.8s cooldown, -12.5% at rank 2, -37.5% at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
-| X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 43, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 36s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
-| E, Warchain | tap, recast | 13m (12.8s cooldown, 11.2s at rank 2, 8s at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
-| X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
+| E, Short Leash | tap, recast | 13m (12.8s cooldown, -12.5% at rank 2, -37.5% at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Short Leash: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| X, Blow for Blow | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (a tall crescent standing at the strip's far end, taller than he is, in his gold run white-hot at the edge, then a white cloud on the foe): 43, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 36s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our colours (gold guard, white-hot gold cleave) replace its red |
+| E, Short Leash | tap, recast | 13m (12.8s cooldown, 11.2s at rank 2, 8s at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Short Leash: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| X, Blow for Blow | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
@@ -116,13 +116,13 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours, **not determinable** from the source (11-11: no clip pays the chain out past its throw; every clip listed under "Tether length"), 24 m kept |
 | E range / cooldown | MED | (b) | cooldown 12.8 s (the data's 16 s at the kit's 0.8x), ranks still -12.5% / -37.5% (8 s at rank 3 = 0.8 x the data's 10 s) |
 | E pull exits | LOW | (a) | kept and re-asserted under the new model ("jug pull: Shift exits ...", "... a jump exits ...") |
-| E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
+| E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Short Leash hooks (no blight ...)" |
 | RMB hold auto-fire, perfect release | HIGH | (a) | ext/parity e6429ccb: held indefinitely, a perfect window at full then once a second (+20%); "jug parity rmb: ..." |
 | RMB hold pose | HIGH | (a) | e6429ccb / 097cff7c: the sword over his head; owner 113.3 levels it forward |
-| Slam resets R on any knock | MED | (b) | any Finishing Slam hit then a knock within 2 s readies the Riposte; the sweet spot now hits 40% harder (the data's "edge hits do more"). "juggernaut Smash: a knock after any Slam hit ..." |
+| Slam resets R on any knock | MED | (b) | any Finishing Slam hit then a knock within 2 s readies the Riposte; the sweet spot now hits 40% harder (the data's "edge hits do more"). "juggernaut Final Swing: a knock after any Slam hit ..." |
 | RMB tap numbers | - | (c) | fine per the audit |
 | Meteor self-shake | MED | (c) | item 50 lands on ext/no-shake; nothing added here |
-| RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
+| RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Full Circle, Haul Slam, Chain Lunge asserts) |
 | LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
 | LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
 | Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
@@ -136,9 +136,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | Self-shake (all) | MED | (c) | ext/no-shake; none added |
 | Passive numbers | - | (c) | fine |
 | Tall-ledge climb doc | LOW | (b) | the "Not built" row now says built (hunter_move.json `climb_tall`) |
-| Docs drift (steer 6 vs 7) | LOW | (a) | the Warchain table now matches the data (1ae768d5) |
+| Docs drift (steer 6 vs 7) | LOW | (a) | the Short Leash table now matches the data (1ae768d5) |
 
-## Warchain: the state machine
+## Short Leash: the state machine
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:
 **[O]** the owner's notes (OWNER_REVIEW items 21/22, the 14:07 ET "small mechanics" note), **[D]** the game data
@@ -159,7 +159,7 @@ maximum tether length, and the footage never shows one: **not determinable** (fr
 length" below): in no clip does he back off past the point where the hook bit, so the chain is never longer than
 its throw and no limit (break, drag or hold) is ever reached. Ours: the chain pays out to **24 m** (about
 1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
-the 5 s). The 24 m is our pick; the owner can set it. **Re-read 2026-11-12 (ext/parity-kael-chain-states)** for the states the owner's note names (briefs/DECISIONS.md:73): facing away or aside at the recast, pulling while backing away and pulling in the air are **Not determinable**: the one pull (0333-0336) is straight, facing the dummy, from a standstill, and no chain shows in the air (0251-0300, 0301-0366). What the frames do settle: the pull about 5 bh in 0.4 s (22.5 m/s; ours 22) and the throw 7 bh in 0.4 s (31.5 m/s; ours 32), both parity rows now. Each state's source string is `e.sources` in the JSON; docs/KIT_PARITY.md "Warchain states" has the table. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
+the 5 s). The 24 m is our pick; the owner can set it. **Re-read 2026-11-12 (ext/parity-kael-chain-states)** for the states the owner's note names (briefs/DECISIONS.md:73): facing away or aside at the recast, pulling while backing away and pulling in the air are **Not determinable**: the one pull (0333-0336) is straight, facing the dummy, from a standstill, and no chain shows in the air (0251-0300, 0301-0366). What the frames do settle: the pull about 5 bh in 0.4 s (22.5 m/s; ours 22) and the throw 7 bh in 0.4 s (31.5 m/s; ours 32), both parity rows now. Each state's source string is `e.sources` in the JSON; docs/KIT_PARITY.md "Short Leash states" has the table. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
 the pull starts at the reel speed plus his motion along the chain (moving in adds all of it, as an impulse adds to
 the velocity; backing away is the owner's slingshot, 0.8 of it; up to +10 m/s), his sideways speed carries in, and
 he flies a circular arc (at most 6 rad/s) to a point beside the anchor.
@@ -204,7 +204,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Ready | E while rooted, Grounded, stunned or on cooldown | stays Ready, the deny buzz | [W] 05.02.25 |
 | Ready | E with the Lunge charging (RMB held) | Throwing; the charge is kept (release once hooked = Chain Lunge) | ours |
 | Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 6 damage (the data's Feysteel 30 : Caldera 43 against our 8 slash; was 8, fixed 11-11 in docs/BALANCE_1111.md), blighted while tethered (healing barely takes) | [D] [W] anti-heal |
-| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 8 damage, no blight from the hook (the Cinder Spin blights; asserted "juggernaut E: Warchain hooks (no blight ...)") | [D] [W] |
+| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 8 damage, no blight from the hook (the Full Circle blights; asserted "juggernaut E: Short Leash hooks (no blight ...)") | [D] [W] |
 | Throwing | hits a wall or a block | Hooked to a wall | [D] |
 | Throwing | passes an ally or your own Boki | keeps flying (it only bites foes and walls) | [D] "enemies or walls" |
 | Throwing | reaches 13 m, or drops into the abyss | Missed: "MISS", the cooldown starts | [W] 07.01.25 |
@@ -243,47 +243,47 @@ Ranks: the cooldown is 12.5% shorter at rank 2 and 37.5% at rank 3 (the data's -
 
 ## RMB: the interaction table
 
-What a Smash press does, by state. "Press" fires on the press; "tap" fires on a release under 0.3 s; "hold" on a
-release after it. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop and its recovery, the
-Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
+What a Final Swing press does, by state. "Press" fires on the press; "tap" fires on a release under 0.3 s; "hold" on a
+release after it. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Hit the Deck and its recovery, the
+Blow for Blow's guard and cleave) is held for 0.12 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
 
 | State | RMB | Result | Source |
 |---|---|---|---|
 | Ground | tap | Finishing Slam: 0.6 s wind-up behind a crimson lane, then the strike down the 4.3 x 0.72 m lane | [D] [F] 0154-0158 |
 | Ground | hold, release | Lunge: the lane grows (crimson, rim hot at full), fling 4.5 to 7.5 m | [D] [F] 0121-0146 |
 | Ground, Lunge charging | jump, release | the Lunge goes from the air along the aim | ours (owner note) |
-| In the air (a jump, a ledge, a chain launch) | press | Meteor Drop straight down where he is: 0.08 s hang, the drop, the impact (2.4 m circle 0.8 m ahead: knockdown, spike), 0.5 s recovery; its own cooldown | [D] [F] 0251-0300; owner 11-10 |
-| In the air, the Meteor Drop resting | tap / hold | as on the ground: a Finishing Slam, or the Lunge charge (E while it charges: a Haul Slam); never a dead press | owner 11-10 (the combo below) |
+| In the air (a jump, a ledge, a chain launch) | press | Hit the Deck straight down where he is: 0.08 s hang, the drop, the impact (2.4 m circle 0.8 m ahead: knockdown, spike), 0.5 s recovery; its own cooldown | [D] [F] 0251-0300; owner 11-10 |
+| In the air, the Hit the Deck resting | tap / hold | as on the ground: a Finishing Slam, or the Lunge charge (E while it charges: a Haul Slam); never a dead press | owner 11-10 (the combo below) |
 | Throwing (chain in flight) | any | as on the ground or in the air; the throw goes on | ours |
 | Hooked, on the ground | tap | Finishing Slam; the chain stays on | ours |
 | Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, a short stun on the foe), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
 | Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, stun 0.25 to 0.6 s) | ours |
-| Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
-| Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
-| Arriving (0.25 s) | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |
+| Hooked, Slam wind-up, Lunge, Hit the Deck hang or dive | E | the pull is kept and goes the moment the Final Swing lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
+| Pulling | press | Full Circle at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
+| Arriving (0.25 s) | press | Full Circle | [F] 0333-0336 (RMB on arrival) |
 | Arrived, window over | tap / hold | Finishing Slam / Lunge from where you stand, with the carried speed | |
 | Arrived beside a foe | tap | the Slam hits as a body hit (you're 1.2 m off, inside the 2.4 to 4.2 m sweet spot); a wall pull or a steered pull that leaves them 2.4 to 4.2 m ahead gets the sweet spot | no special rule (source: edge hits) |
-| Jumped out of a pull | press | Meteor Drop | ours |
-| Rampage (its crouch counts) | any | ground: fires mid-dash, the drive carrying him into it; air dash: ends the dash and the Meteor Drop begins | content/dash_flow/juggernaut.json (docs/heroes/dash_interactions.md) |
+| Jumped out of a pull | press | Hit the Deck | ours |
+| Rampage (its crouch counts) | any | ground: fires mid-dash, the drive carrying him into it; air dash: ends the dash and the Hit the Deck begins | content/dash_flow/juggernaut.json (docs/heroes/dash_interactions.md) |
 | Slam wind-up | Shift | a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the Slam's overhead pose kept, and the Slam lands where it arrives | dash_flow `into_dash.rmb` ("RMB into Shift", turning restricted) |
-| Meteor Drop hang | Shift | the air dash goes at once; the drop then falls straight down from where it took him | dash_flow `into_dash.rmb` (item 51) |
-| Lunge, Meteor Drop dive | Shift | each is a dash of its own: Shift goes the step it ends; the drop's recovery dashes (or jumps) at once | dash_flow `into_dash.rmb` |
+| Hit the Deck hang | Shift | the air dash goes at once; the drop then falls straight down from where it took him | dash_flow `into_dash.rmb` (item 51) |
+| Lunge, Hit the Deck dive | Shift | each is a dash of its own: Shift goes the step it ends; the drop's recovery dashes (or jumps) at once | dash_flow `into_dash.rmb` |
 | Searing Wave charging | Shift, jump | the charge waits through the Rampage or the air dash (and charges on in a jump); let go in it, the wave goes as the dash ends | dash_flow `hold.lmb` (item 51) |
-| Gilded Riposte guard, cleave, a chain held | E | owner 113.7: the chain hauls him in with the guard up (it holds past 0.65 s while a hooked foe comes up); the cleave goes as they come into its reach. E in the cleave's own moment pulls as it lands | `jug 113.7` |
-| Gilded Riposte guard, cleave | glide | owner 113.2: shut; the recovery (the last 0.35 s) is open, a glide there ends the rest of it | `jug 113.2` |
+| Blow for Blow guard, cleave, a chain held | E | owner 113.7: the chain hauls him in with the guard up (it holds past 0.65 s while a hooked foe comes up); the cleave goes as they come into its reach. E in the cleave's own moment pulls as it lands | `jug 113.7` |
+| Blow for Blow guard, cleave | glide | owner 113.2: shut; the recovery (the last 0.35 s) is open, a glide there ends the rest of it | `jug 113.2` |
 | RMB held | glide | owner 113.2: shut, a jump never opens the glider while RMB is held | `jug 113.2` |
 | Finishing Slam wind-up | E | owner 113.5: both go: the hook flies at the cursor, the Slam strikes the way it was started | `jug 113.5` |
-| Gilded Riposte guard, cleave | Shift / jump | Shift held to the step the cleave lands; no jump (planted, as the source); in the recovery after it either goes at once | dash_flow `into_dash.x`, `into_jump.x` |
+| Blow for Blow guard, cleave | Shift / jump | Shift held to the step the cleave lands; no jump (planted, as the source); in the recovery after it either goes at once | dash_flow `into_dash.x`, `into_jump.x` |
 
 Differences from the source, and why:
 - **The Haul Slam and the Chain Lunge** are ours (the source has only the spin in the pull); they give the hold
   a meaning while chained instead of a plain Lunge away from the chain.
 - **During the pull a press spins at once** (the source's Scorching Spin) rather than waiting to tell a tap from a
-  hold; a Smash held when the pull starts (however briefly) becomes a Haul Slam.
+  hold; a Final Swing held when the pull starts (however briefly) becomes a Haul Slam.
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
   it, so it never locks you in.
 - **The tether length** (24 m, held taut there) is ours: **not determinable** from the source (re-audit 11-11, the frames
-  themselves read, not only the notes; do not reopen without new footage). Every Warchain use in the Tether Chain window
+  themselves read, not only the notes; do not reopen without new footage). Every Short Leash use in the Tether Chain window
   (svvid frames/juggernaut 0301-0366, 5 fps), the chain measured hook to hand on screen each frame:
   - Wall test 0302-0317: thrown 0302, bites the pillar 0305, attached to 0317 (2.6 s). He only shuffles near where he
     threw from: the chain is 512-584 px every frame, longest at the bite (0305, 584 px), so it never pays out. Cut at 0318.
@@ -303,7 +303,7 @@ Differences from the source, and why:
 
 The Boki Merge is the same for every hero, on its own key; the hero's own ultimate is on the `hunter_ult` key (default R).
 kits2-nor had folded the old Doomfall (crash, heal, reset on a knock) into the Finishing Slam's sweet spot. With the
-Gilded Riposte on R that fold duplicated the ultimate (a big hit that heals you, re-armed by a knock), so it is
+Blow for Blow on R that fold duplicated the ultimate (a big hit that heals you, re-armed by a knock), so it is
 unfolded: the crash is gone and the Slam is back to the source's Execution Slam, whose sweet-spot knock resets the
 ultimate (now the R cooldown).
 
@@ -328,10 +328,10 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 | LMB | held past 0.22 s, Searing Wave charge | 0.55 | a 0.6-1.0 s charge arc; the walk isn't measured | [?] |
 | RMB | tap, Finishing Slam 0.6 s wind-up | 0.6 | 0.6 s wind-up, blade cocked low; the walk isn't measured | [?] |
 | RMB | held, Lunge charging | **0.8** (`rmb.lunge.walk_k`; was 1.0) | 85-95 px/s against 113-124 on plain runs (0178-0181, 0198-0208), about 0.7 to 0.85 | CHANGED |
-| RMB | air, Meteor Drop | 0 airborne; 0 for 0.2 s after landing, then 0.3 to 1.0 by 0.5 s | the landing walk isn't measured | [?] |
+| RMB | air, Hit the Deck | 0 airborne; 0 for 0.2 s after landing, then 0.3 to 1.0 by 0.5 s | the landing walk isn't measured | [?] |
 | Shift | Rampage | n/a | a dash | n/a |
-| E | Warchain hooked | 1.0 | walks ~2.5 s with the tether attached (0305-0317) | match |
-| X | Gilded Riposte guard and strike | 0.0 | planted through the guard (f33-f38) | match |
+| E | Short Leash hooked | 1.0 | walks ~2.5 s with the tether attached (0305-0317) | match |
+| X | Blow for Blow guard and strike | 0.0 | planted through the guard (f33-f38) | match |
 | X | Riposte recovery | 0.5 | ~0.35 s low recovery, blade dragging; the walk isn't measured | [?] |
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
@@ -364,7 +364,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The tether stays attached while you walk (about 2.5s+) | footage 0305-0317; wiki 5s | yes | Built (5s), drawn as a link chain |
 | The Fiery Lunge doubles its cooldown if nothing is struck | wiki RMB | n/a | Built, asserted |
 | The Execution Slam aims freely during its cast, with a warning over the head | wiki patch 05.02.25 | yes (lane at 0157) | Built: free aim, and a strike lane everyone sees |
-| Execution: x1.5 under 35% | wiki patch 05.02.25 | yes (red outline 0154) | Built, plus the red outline while the Smash is ready |
+| Execution: x1.5 under 35% | wiki patch 05.02.25 | yes (red outline 0154) | Built, plus the red outline while the Final Swing is ready |
 | The dash has wind-down frames: no glide straight out of it | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
 | A knock restores the dash | wiki Shift | n/a | Built as the shared takedown rule: every charge and the cooldown, for every hero (`scripts/match/dash_reset.gd:15`) |
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
@@ -372,7 +372,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
 | Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
-| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
+| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Final Swing stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
 | Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Not built (a turn lock reads as lag in our camera); Assumption 7 |
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
@@ -405,19 +405,19 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
 | RMB Finishing Slam, wind-up (0.6 s) | LMB | not shown | both: the slash goes at once (the wind-up doesn't hold the blade) | settled: chainable, kept | [W] gives a 0.55 s cast time, nothing on presses in it; [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in the Slam's wind-up` |
-| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
+| Slam wind-up, Lunge, Hit the Deck and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
 | Slam wind-up | E | not shown | both: the hook flies, the Slam strikes the way it was started | owner | `jug 113.5` |
 | Slam wind-up | jump | not shown | both: a 0.8 m hop, the wind-up goes on | settled: chainable, kept | [D] [F] [W] silent (the jump lock in [W] is the Riposte's only); DECISIONS "every interaction is chainable"; `jug cancel: a jump in the Slam's wind-up` |
 | Slam wind-up | X | not shown | both: the guard starts and the wind-up runs on under it | unsettled (flagged below) | |
 | RMB held (Lunge charge) | jump | not shown | the Lunge goes from the air along the aim | owner | interaction table |
 | RMB held | glide | not shown | shut | owner | `jug 113.2` |
 | RMB held, chain hooked | E | the source has only the spin in the pull | pull, then a Haul Slam on arrival | ours (flagged below) | [D] |
-| Lunge, Meteor Drop (active) | LMB | not shown | waits: a press in the last 0.12 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Meteor Drop` |
+| Lunge, Hit the Deck (active) | LMB | not shown | waits: a press in the last 0.12 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Hit the Deck` |
 | Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25 |
-| E Warchain, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
+| E Short Leash, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Full Circle at once, the pull goes on | match | [D] |
 | E hooked | E | "reactivate to pull yourself to the target" | pulls | match | [D] |
-| X Gilded Riposte, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
-| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.12 s swings the slash or starts the Smash as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
+| X Blow for Blow, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
+| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.12 s swings the slash or starts the Final Swing as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
 | X guard and cleave | E | not shown | ignored, except a held chain hauls him in | owner | `jug 113.7` |
 | X guard and cleave | glide | not shown | shut; open in the last 0.35 s, which a glide ends | owner | `jug 113.2` |
 | LMB slash, recovery (about 0.34 s) | LMB | "PRESS for a series of quick melee attacks" | waits: a press in the last 0.25 s swings the next slash; earlier presses are ignored | settled: chainable (the series), kept | [D] Caldera; [F] 0026-0033 alternating swings; `jug cancel: LMB in the slash's recovery` |
@@ -434,26 +434,26 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 
 | Sequence | Result | Check |
 |---|---|---|
-| E (hooked), E (pull), RMB tap | Cinder Spin | `combo jug: E > E > RMB tap = Cinder Spin` |
+| E (hooked), E (pull), RMB tap | Full Circle | `combo jug: E > E > RMB tap = Full Circle` |
 | E, hold RMB, let go | Chain Lunge along the chain | `combo jug: E > hold RMB = Chain Lunge` |
 | E, hold RMB, aim away, let go | a plain Lunge where he now aims | `jug rmb steer (chain hooked north)` |
 | E, hold RMB, E while holding | Haul Slam on arrival | `combo jug: E > hold RMB > E = Haul Slam on arrival` |
-| E, E, hold RMB | the Cinder Spin on the press (no Haul Slam) | `combo jug: E > E > hold RMB = Cinder Spin on the press` |
-| Every Warchain state and RMB row | as the two tables above | `jug chain:`, `jug pull:`, `jug RMB row:`, `jug buffer:`, `jug meteor:` (tools/zedran_feel_check.gd) |
+| E, E, hold RMB | the Full Circle on the press (no Haul Slam) | `combo jug: E > E > hold RMB = Full Circle on the press` |
+| Every Short Leash state and RMB row | as the two tables above | `jug chain:`, `jug pull:`, `jug RMB row:`, `jug buffer:`, `jug meteor:` (tools/zedran_feel_check.gd) |
 | E attached, RMB tap | the normal Finishing Slam; the link chain stays drawn | `combo jug: E > RMB tap = Finishing Slam` |
-| RMB sweet spot, then a knock on that foe (2s) | the Gilded Riposte is ready again; a heal; a Rampage charge back | `combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash` |
+| RMB sweet spot, then a knock on that foe (2s) | the Blow for Blow is ready again; a heal; a Rampage charge back | `combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash` |
 | E, E (pulled in), R, their hit | blocked in the guard, then the cleave lands | `combo jug: E > E > R = pulled in, a hit blocked, the cleave lands` |
 | R, two hits blocked | the cleave 40% harder | `juggernaut R small mechanic: two hits blocked make the answer 40% harder` |
 | R knocks a hunter | ready again at once | `juggernaut R small mechanic: knocking a hunter with it resets it; ...` |
 | R, then a merge | the guard drops, no cleave | `merge hold jug: the Riposte's guard drops, no cleave` |
 | RMB hold, jump, full, release | lane, jump, flash, fling | `juggernaut RMB hold: you can jump while holding` and the lane/flash checks |
-| RMB hold that strikes nothing | Smash cooldown doubles | `combo jug: RMB hold miss = cooldown x2` |
-| In the air with the Smash ready, RMB | straight down (no sideways travel), the hit circle 0.8 m ahead, foes in it knocked down and foes past it not | `juggernaut RMB air: the down slam lands under him, its hit circle just ahead` |
-| E, jump, air RMB, jump, hold RMB, E | the slam spikes and knocks down, the chain holds, the jump ends the recovery, the held Smash arms the Haul Slam, the pull arrives and it lands | `jug combo: ...` (tools/kael_accuracy_check.gd) |
+| RMB hold that strikes nothing | Final Swing cooldown doubles | `combo jug: RMB hold miss = cooldown x2` |
+| In the air with the Final Swing ready, RMB | straight down (no sideways travel), the hit circle 0.8 m ahead, foes in it knocked down and foes past it not | `juggernaut RMB air: the down slam lands under him, its hit circle just ahead` |
+| E, jump, air RMB, jump, hold RMB, E | the slam spikes and knocks down, the chain holds, the jump ends the recovery, the held Final Swing arms the Haul Slam, the pull arrives and it lands | `jug combo: ...` (tools/kael_accuracy_check.gd) |
 | Rampage or Lunge, then glide | no glider for the wind-down | `combo jug: Rampage winds down (no instant glide)` |
-| Rooted or Grounded, E | no chain | `combo jug: rooted = no Warchain`, `combo jug: Grounded = no Warchain` |
-| A stun while chained | breaks the chain | `combo jug: stun breaks the Warchain` |
-| Enraged | faster cooldowns | `combo jug: Enraged hastes the Smash` |
+| Rooted or Grounded, E | no chain | `combo jug: rooted = no Short Leash`, `combo jug: Grounded = no Short Leash` |
+| A stun while chained | breaks the chain | `combo jug: stun breaks the Short Leash` |
+| Enraged | faster cooldowns | `combo jug: Enraged hastes the Final Swing` |
 
 ## Animation moves
 
@@ -471,13 +471,13 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 His moments are recipes in content/vfx/juggernaut.json, played by the shared HeroVfx (docs/HERO_VFX.md): flame arcs, burning
 ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke and debris,
 white-hot with his crimson, and gold on the Riposte and chain.
-The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
+The projectile looks that ride a shot and the Short Leash itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
 (`jug_*`, `juggernaut_*`), played from the recipes.
 
 ## Originality
 
 Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the
-Finishing Slam and the Cinder Spin everywhere the player can read them (content, UI, fx words, wiki).
+Finishing Slam and the Full Circle everywhere the player can read them (content, UI, fx words, wiki).
 
 ## In the air
 
@@ -486,7 +486,7 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 | Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
 |---|---|---|---|---|
 | LMB | the slash, as on the ground | blocked | stays open | footage: a slash at the top of the Air Slam jump (`juggernaut.md` 6) |
-| RMB, tap or hold | the Air Slam (Meteor Drop): its own slot and cooldown, not the Execution Slam or the Lunge | the same: folds the glider, dives from the glide height and lands | folds, a slam never waits for it | data: Obsidian Slam (WHILE AIRBORNE), own cooldown slot; footage 0251-0300 |
+| RMB, tap or hold | the Air Slam (Hit the Deck): its own slot and cooldown, not the Execution Slam or the Lunge | the same: folds the glider, dives from the glide height and lands | folds, a slam never waits for it | data: Obsidian Slam (WHILE AIRBORNE), own cooldown slot; footage 0251-0300 |
 | E | the chain throw, as on the ground (the pull runs on) | the same | stays open | silent |
 | Shift | the class long dash `jug_exdash`, no charge spent | the same | closes, reopens after | footage has no air Shift (`juggernaut.md` 9: open) |
 ## Ground shapes (telegraph audit)
@@ -497,23 +497,23 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 |---|---|---|---|---|---|
 | Greatsword (LMB) | sweep arc 175 deg, reach 3.1 m | arc 175, reach 3.1 | everyone | wide slash | fixed: art was 104 deg and 0.86x reach |
 | Searing Wave (LMB hold) | lane growing to 14 m, 1.2 m wide; ring r 1.35 m on her | the wave 0.6 m radius | lane: her screen; ring: her screen | thin ring on the body while charging | lane ok; ring kept (source shows it), it is a charge meter, not an area |
-| Smash tap (RMB) | lane 4.3 x 0.72 m, filling through the wind-up | slam lane 4.3 x 0.72 m (body radius padded, as every lane) | everyone | short strike lane, 0.4 bh wide (0157) | fixed: the hit is now the source's lane (was a 4 m, 70 deg cone) |
-| Smash landing art | scorch lane 4.3 x 0.72 m | same | everyone | - | fixed: the cone scorch, sweep, skirt and 3.6 m ring are gone |
-| Smash hold (RMB) lunge | lane growing 4.5-7.5 m, width = body + 0.6 m each side | contact test uses the same width | her screen | lane along the dash | fixed: was 1.3 m against a 2.06 m test; both now share `lunge_w()` |
+| Final Swing tap (RMB) | lane 4.3 x 0.72 m, filling through the wind-up | slam lane 4.3 x 0.72 m (body radius padded, as every lane) | everyone | short strike lane, 0.4 bh wide (0157) | fixed: the hit is now the source's lane (was a 4 m, 70 deg cone) |
+| Final Swing landing art | scorch lane 4.3 x 0.72 m | same | everyone | - | fixed: the cone scorch, sweep, skirt and 3.6 m ring are gone |
+| Final Swing hold (RMB) lunge | lane growing 4.5-7.5 m, width = body + 0.6 m each side | contact test uses the same width | her screen | lane along the dash | fixed: was 1.3 m against a 2.06 m test; both now share `lunge_w()` |
 | Lunge art | scorch lane, width follows `lunge_w()` | same | everyone | - | fixed: was a fixed 1.3 m |
-| Meteor Drop aim (air) | disc r 2.2 m under him | damage radius 2.2 m | her screen | landing marker | ok, asserted |
-| Meteor Drop marker | disc r 2.2 m filling, core ring 1.2 m | damage 2.2 m, stun core 1.2 m | everyone | crimson disc, white-hot core | ok, asserted |
-| Meteor Drop landing art | scorch r 2.2 m, skirt at the core, shock ring 1.2 m | same | everyone | ground crack + ring | fixed: scorch and skirt were 1.05x and 1.15x |
-| Warchain (E) | chain line to the target; steer reach 3.5 m | hook shot | everyone | chain | not an area; ok |
+| Hit the Deck aim (air) | disc r 2.2 m under him | damage radius 2.2 m | her screen | landing marker | ok, asserted |
+| Hit the Deck marker | disc r 2.2 m filling, core ring 1.2 m | damage 2.2 m, stun core 1.2 m | everyone | crimson disc, white-hot core | ok, asserted |
+| Hit the Deck landing art | scorch r 2.2 m, skirt at the core, shock ring 1.2 m | same | everyone | ground crack + ring | fixed: scorch and skirt were 1.05x and 1.15x |
+| Short Leash (E) | chain line to the target; steer reach 3.5 m | hook shot | everyone | chain | not an area; ok |
 | Rampage (dash) | none | along the dash | - | none | fixed: removed a cosmetic 1.1 m scorch lane |
 | Exec outline on wounded foes | red ring under the foe | marks who can be executed | her screen | red outline | kept, a marker not an area |
-| Gilded Riposte (X) guard | lane 3.6 m x 1.8 m, filling over 0.65 s | strip 3.6 x 1.8 from where he stood | everyone | strip ahead | ok |
+| Blow for Blow (X) guard | lane 3.6 m x 1.8 m, filling over 0.65 s | strip 3.6 x 1.8 from where he stood | everyone | strip ahead | ok |
 
-Decision: the Smash hits the source's lane (hero-ref 0157, 0.4 bh wide, parallel sides) and draws exactly that lane (the true-hit-shape rule).
+Decision: the Final Swing hits the source's lane (hero-ref 0157, 0.4 bh wide, parallel sides) and draws exactly that lane (the true-hit-shape rule).
 
 ## Engine notes
 
-- The Gilded Riposte lives in `scripts/arch/kits/juggernaut_ult.gd` (`JuggernautUlt`, owned by the kit); R
+- The Blow for Blow lives in `scripts/arch/kits/juggernaut_ult.gd` (`JuggernautUlt`, owned by the kit); R
   reaches it through `ArchKit.cast_ult()` on the `hunter_ult` action. Numbers: `x` in
   content/archetypes/juggernaut.json; the shared R base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt`. Sounds: `jug_guard`, `jug_ting` (a blocked hit), `jug_riposte` (the cleave).
 - The guard is `JuggernautKit.incoming` (every hit blocked while guarding), `move_k` (planted) and `busy`.
@@ -523,7 +523,7 @@ Decision: the Smash hits the source's lane (hero-ref 0157, 0.4 bh wide, parallel
 
 Pressing X to Fuse drops everything the Juggernaut was holding or winding up, and none of it fires or is
 left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel_hold`), the Finishing Slam's
-wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
+wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Final Swing (`rmb_down`, cleared by the merge itself), a Hit the Deck in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Blow for Blow
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
 
@@ -595,8 +595,8 @@ their files were left alone, so rows they touch are listed, not fixed.
 | RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
 | RMB hold: Lunge length 4.5 to 7.5 m | open | json:26 | [F] about 5 m fixed; owner "fling far"; ext/kael-lunge-length (5.4 m) unmerged |
 | RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
-| RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
-| RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
+| RMB air: Hit the Deck at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
+| RMB in the pull: Full Circle, blights | match | kit:909, json:29 | [D] |
 | E: throw 13 m, hooks foe or wall, no blight from the hook | match | chain:89, chain:115 | state-machine row said blighted: corrected |
 | E: tether stays attached while he moves, 5s | match | chain:254, json:34 | [F] 0305-0317, [O] |
 | E: tether extends to a max, held taut | differ (owner) | chain:277, json:34 | 24 m is ours: no data or footage length (ext/kael-chain-length marks it `[?]`) |
@@ -609,15 +609,15 @@ their files were left alone, so rows they touch are listed, not fixed.
 | Dash: 2 charges (third at rank 2), 10.4s, tip hits twice | match | kit:455, kit:526, json:21 | |
 | Dash: length 4.5 m x 0.85 feel in 0.17s | open | json:21 | [F] 3.6 to 5.8 m; ext/kael-lunge-length sets 3.6 m in 0.2s |
 | Dash rows, ground: LMB buffer, RMB fire, E fire, X cancel, Q fire | match | flow:5, flow:9, flow:14, flow:18, flow:22 | each row carries its source; Q is ours |
-| Dash rows, air: LMB buffer, RMB cancel (Meteor Drop), E fire, X cancel, Q fire | match | flow:28, flow:32, flow:36, flow:40, flow:44 | air LMB and E have no source |
+| Dash rows, air: LMB buffer, RMB cancel (Hit the Deck), E fire, X cancel, Q fire | match | flow:28, flow:32, flow:36, flow:40, flow:44 | air LMB and E have no source |
 | Into-dash: LMB fire, RMB fire (Slam Drive), X buffer | match | flow:51, flow:55, flow:64 | patch 05.02.25 turn limit not built: ext/kael-rmb-dash-turn unmerged (open) |
 | Into-dash: E cancels the pull | open | flow:59 | source silent |
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |
 | Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
-| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+| Rank text: Short Leash and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
 
-Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
+Fixed on this branch (docs only; the code was right): the Short Leash per-slot row (cooldown 12.8s, not 9.5s), the state-machine
 row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no
-new assert: each is already covered ("juggernaut E: Warchain hooks (no blight ...)", "combo jug: RMB sweet spot > knock = ...
+new assert: each is already covered ("juggernaut E: Short Leash hooks (no blight ...)", "combo jug: RMB sweet spot > knock = ...
 a dash"). Not touched: the KIT_PARITY Kael block (three unmerged branches edit it).

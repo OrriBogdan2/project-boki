@@ -1,6 +1,6 @@
 # The Barnacle Knight
 
-A heavy hammer-and-shield fighter. Blocks with his aegis to build Guard, then slams people into walls
+A heavy hammer-and-shield fighter. Blocks with his Blue Guard to build Guard, then slams people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
 
 <!-- gen:profile -->
@@ -16,37 +16,37 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## How it plays
 
-1. **Hold RMB** to raise his **aegis**, a curved gold shield: it has its own health, regenerates, and
+1. **Hold RMB** to raise his **Blue Guard**, a curved gold shield: it has its own health, regenerates, and
    blocks from the front while you walk slower. Damage it blocks becomes **Guard**.
 2. Let go (or tap) to **Bash**. At 50 Guard the Bash is a **Shield Slam** that stuns.
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
    beacon, shows foes near it to your team, and comes back hitting on a second tap.
 4. **Hold LMB** to spin the hammer up (a glint on its head, a flare when it's full), then let go for a
    **Crushing Blow**: a flaming crescent in front that carries you forward.
-5. Knock someone into a wall or into another foe with a Bash, Shield Charge or full Crushing Blow and
+5. Knock someone into a wall or into another foe with a Bash, Full Ahead or full Crushing Blow and
    they're **Crushed**: stunned, and you heal.
-6. **360 Smash** (Shift): a short dash, then one spinning hit all round you; with the aegis up it's a
-   **Shield Charge**, invulnerable for its length.
-7. **Mending Ground** (E): a green light comes down on your planted hammer (or on you), then heals
-   allies there and mends your aegis.
+6. **Tideturner** (Shift): a short dash, then one spinning hit all round you; with the Blue Guard up it's a
+   **Full Ahead**, invulnerable for its length.
+7. **Safe Harbour** (E): a green light comes down on your planted hammer (or on you), then heals
+   allies there and mends your Blue Guard.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Bash, Shield Charge or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
+| Bash, Full Ahead or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
 | Bash with 50+ Guard | Shield Slam: push 12, stun 0.6 (spends 50) |
-| Shift with the aegis raised | Shield Charge: invulnerable, heavier knock |
-| Throw the hammer, then E | Mending Ground lands where the hammer stands |
+| Shift with the Blue Guard raised | Full Ahead: invulnerable, heavier knock |
+| Throw the hammer, then E | Safe Harbour lands where the hammer stands |
 | Hold LMB, then Shift | A short plain dash for half a charge; the spin keeps charging |
 | RMB in the air (Shield Surf) | Block from the front while gliding |
 
 ## Tips
 
-- Raise the aegis into their fire first: the Guard pays for the Slam.
+- Raise the Blue Guard into their fire first: the Guard pays for the Slam.
 - Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow.
 - Throw the hammer round a corner to scout it, then heal there; it waits until you call it.
-- A broken aegis locks you out for 3s: drop it before it breaks.
+- A broken Blue Guard locks you out for 3s: drop it before it breaks.
 
 ## Kit
 
@@ -56,8 +56,8 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 |  |  |
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
-| Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
+| Signature weapon | Capstan Hammer (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Fantasy | The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the frozen prow shield and the long ice-cased oar |
 | Resource | Guard (max 100) |
 
@@ -67,31 +67,31 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
-| Passive: Guard | Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
-| Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
+| Loop | Frontline tank: block with your Blue Guard, then knock foes into walls with your hammer to stun them. |
+| Passive: Hold Fast | Hold Fast: blocking builds Guard (50 turns your Full Ahead into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
+| Dash: Tideturner | Tideturner: a short dash that ends in one spinning hit around you; with the Blue Guard up, a Full Ahead (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
-| RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
-| E: Mending Ground | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
-| Hunter ultimate: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
-| Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
+| RMB: Blue Guard | Hold to raise your Blue Guard and block shots from the front. With it up, Shift is a Full Ahead on its own cooldown. |
+| E: Safe Harbour | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
+| Hunter ultimate: Groundswell | Groundswell (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
+| Weapon: Capstan Hammer | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
 
 ### Abilities in full
 
-**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
+**Hold Fast (passive).** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 
-**360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
+**Tideturner (dash, Shift, 8s cooldown).** Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
-**Aegis (RMB, 6s cooldown).**
+**Blue Guard (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.
-- *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.
+- *Hold:* Raise the Blue Guard: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Full Ahead on this slot's 6s cooldown.
+- *Tap:* A tap only raises and lowers the Blue Guard; the Bash is the Full Ahead on the dash key.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
-- *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
+- *Resource full:* Guard 50+: the Full Ahead ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
-**Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
+**Safe Harbour (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your Blue Guard is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Groundswell (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 
@@ -100,7 +100,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
-| Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it. |
+| Dash (Shift) | recharge 8s -> 6.5s per charge; the Full Ahead cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Full Ahead cooldown 6s -> 3s; a Tideturner that hits refunds it. |
 | E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
@@ -110,7 +110,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | three rune pips over the helm light at 33 / 66 / 100 Guard |
-| Armed / full | a gold crest light and a hotter aegis; a 0.3s flare before a Slam |
+| Armed / full | a gold crest light and a hotter Blue Guard; a 0.3s flare before a Slam |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

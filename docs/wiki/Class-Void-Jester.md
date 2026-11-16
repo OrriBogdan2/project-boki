@@ -16,8 +16,8 @@ The jester on a spring, floating over his box. Stuns from range, drops a growing
 ## How it plays
 
 1. A thin line always runs to your cursor. Orbs fly their full range; pause and the next is a fast bright bolt that slows.
-2. **Shard Snap** (RMB): a short wind-up (the line becomes two rails), then a bundle of shards that stuns, longer the further it flew.
-3. **Brimseed** (E) drops at the cursor and grows for 6.5s; E again pops it. **Lantern Trade** (Shift): hold to see both ends, let go to lob; you hover until it lands, then everyone in its circle swaps to your spot and you go to theirs.
+2. **Stage Fright** (RMB): a short wind-up (the line becomes two rails), then a bundle of shards that stuns, longer the further it flew.
+3. **Gag Gift** (E) drops at the cursor and grows for 6.5s; E again pops it. **Musical Chairs** (Shift): hold to see both ends, let go to lob; you hover until it lands, then everyone in its circle swaps to your spot and you go to theirs.
 4. Hits fill **Swell**, ten times faster on hunters. Swollen, everything is bigger and quicker.
 
 <!-- gen:kit -->
@@ -26,7 +26,7 @@ The jester on a spring, floating over his box. Stuns from range, drops a growing
 |  |  |
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
-| Signature weapon | Tether Lantern (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Comic Timing (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in. |
 | Silhouette | a floating jester in a three-tailed cap, his smoky tail trailing below |
 | Resource | Swell (max 100) |
@@ -39,26 +39,26 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
 | Passive: Swell | Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by. |
-| Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
-| LMB | Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows. |
-| RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
-| E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
-| Hunter ultimate: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
-| Weapon: Tether Lantern | Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows. |
+| Dash: Musical Chairs | Musical Chairs: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
+| LMB | Comic Timing: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows. |
+| RMB: Stage Fright | Stage Fright: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
+| E: Gag Gift | Gag Gift: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
+| Hunter ultimate: Main Attraction | Main Attraction: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
+| Weapon: Comic Timing | Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows. |
 
 ### Abilities in full
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a light-teal sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold the dash key to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss; aimed at a cliff or a high ledge it lands on top, and never inside a wall or rock. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height (on a ledge, standing on it), and everyone in its 1.9m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
+**Musical Chairs (dash, Shift, 9.5s cooldown).** Hold the dash key to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss; aimed at a cliff or a high ledge it lands on top, and never inside a wall or rock. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height (on a ledge, standing on it), and everyone in its 1.9m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
 
-**Shard Snap (RMB, 10s cooldown).**
+**Stage Fright (RMB, 10s cooldown).**
 
 - *Tap:* A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s.
 
-**Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press it again (from 0.3s) to pop it. It stays at full size until you pop it. Damage 23.7 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
+**Gag Gift (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press it again (from 0.3s) to pop it. It stays at full size until you pop it. Damage 23.7 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
 
-**Nightwell (hunter ultimate, from level 6, 70s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 70s.
+**Main Attraction (hunter ultimate, from level 6, 70s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 70s.
 
 ### Ranks
 

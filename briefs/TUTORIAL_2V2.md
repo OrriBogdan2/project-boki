@@ -23,8 +23,8 @@ Map: `content/maps/duo_arena.json`.
 | 1 | meet | still | waits | you walk up to her | "Hi! I'm Meeko. Come over here, I don't bite." |
 | 2 | slide | still | at your side | 2 slides | "Slide is faster than running. And you look great doing it." |
 | 3 | attack | still | at your side | 4 hits on Clod | "Clod is napping on the job. Go wake him up." |
-| 4 | right click | still | at your side | 1 cast | "Your Heavy Shot hits harder. Show him." (Lace: names come from your kit) |
-| 5 | E | strafe | at your side | 1 cast | "And your Hail Wall. That one's a crowd-pleaser." |
+| 4 | right click | still | at your side | 1 cast | "Your Pin Down hits harder. Show him." (Lace: names come from your kit) |
+| 5 | E | strafe | at your side | 1 cast | "And your Hemline. That one's a crowd-pleaser." |
 | 6 | dodge | poke | at your side | 2 slides with a shot closing in (or a rival in arm's reach) | "Uh-oh, they're awake. When they shoot, slide out of the way!" |
 | 7 | focus | poke | marks Thistle, fights her | Thistle knocked out | "I'm marking Thistle. Both of us, same one. That's the whole trick." |
 | 8 | Boki | poke | fights | you send your Boki | "Cindle is wiggling. Send them in!" |

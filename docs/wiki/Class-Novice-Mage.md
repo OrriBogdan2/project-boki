@@ -20,11 +20,11 @@ throws whatever potion comes out of his bag next, and chains crowd control until
    slows.
 2. **RMB** (Grab Bag, two charges): throw the next potion from a shuffled bag (Thunder, Slime, Air, Fire, and
    a rare Super Zeep). The HUD shows which one is next. Hold for 50% more range; in the air it drops at your feet.
-3. **Shift** (Ground Swim): dive and swim about 6m under the ground. Surfacing next to foes knocks them up.
-4. **E** (Riptide): spin and hit everything around you. Press E again to send a waterspout down the line; the
+3. **Shift** (Deep End): dive and swim about 6m under the ground. Surfacing next to foes knocks them up.
+4. **E** (Spin Cycle): spin and hit everything around you. Press E again to send a waterspout down the line; the
    longer the spin, the wider and faster the spout.
 5. **Fish Out of Water** (passive): three different potion marks on one foe within 5s Beach them (a short stun).
-6. **X** (Tidal Wave): surf a wave toward the cursor, untargetable. It knocks up and slows everyone it rolls
+6. **X** (Surf's Up): surf a wave toward the cursor, untargetable. It knocks up and slows everyone it rolls
    over, and you land with a shield.
 
 ## Combos and interactions
@@ -32,15 +32,15 @@ throws whatever potion comes out of his bag next, and chains crowd control until
 | Do this | And you get |
 |---|---|
 | Two different potions, then a third | Beached: a 0.75s stun |
-| Surface from Ground Swim under a foe | A knockup to follow with a potion |
-| Long Riptide spin, then recast | A wide waterspout and a 1s knockup down the line |
-| Tidal Wave through a group | Knockup, then a 50% slow for 2s |
+| Surface from Deep End under a foe | A knockup to follow with a potion |
+| Long Spin Cycle spin, then recast | A wide waterspout and a 1s knockup down the line |
+| Surf's Up through a group | Knockup, then a 50% slow for 2s |
 
 ## Tips
 
 - Watch the next potion on the HUD and pick the throw for it.
 - Mix potions on one target: three different marks Beach them.
-- Ride the Tidal Wave out of trouble: nothing can target you while you surf.
+- Ride the Surf's Up out of trouble: nothing can target you while you surf.
 
 ## Kit
 
@@ -63,17 +63,17 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Control mage: fence up close, throw the bag's potions, and land three different effects to Beach a foe. |
 | Passive: Fish Out of Water | Each different potion effect, and a full Tide Lunge, marks a foe. Three different marks within 5s Beach them: stunned 0.75s. |
-| Dash: Ground Swim | Dive into the ground and swim 6m in 0.4s (you can still be hit). Surfacing next to foes knocks them up. |
+| Dash: Deep End | Dive into the ground and swim 6m in 0.4s (you can still be hit). Surfacing next to foes knocks them up. |
 | RMB: Grab Bag | Throw the next potion from the bag (Thunder, Slime, Air, Fire, or a rare Super Zeep) in an arc. Hold to aim further; in the air it drops straight down. |
-| E: Riptide | Spin with the swordfish for up to 2s, then send a waterspout down a line that knocks up. A longer spin makes a bigger spout. |
-| Hunter ultimate: Tidal Wave | Surf a tidal wave down a line: it knocks foes up and slows them, and you land with a shield. |
+| E: Spin Cycle | Spin with the swordfish for up to 2s, then send a waterspout down a line that knocks up. A longer spin makes a bigger spout. |
+| Hunter ultimate: Surf's Up | Surf a tidal wave down a line: it knocks foes up and slows them, and you land with a shield. |
 | Weapon: Swordfish | Three quick thrusts with the swordfish; every thrust steps you in, and the third slows. Hold for a Tide Lunge down a line; full charge soaks (a splash mark). |
 
 ### Abilities in full
 
 **Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Super Zeep) and a full Tide Lunge (soak) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
 
-**Ground Swim (dash, Shift, 8s cooldown).** Dive into the ground and swim about 6m in 0.4s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for 0.5s.
+**Deep End (dash, Shift, 8s cooldown).** Dive into the ground and swim about 6m in 0.4s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for 0.5s.
 
 **Grab Bag (RMB, 5s cooldown, 2 charges).**
 
@@ -81,9 +81,9 @@ What the in-game kit card (K) says.
 - *Hold:* The landing circle shows while you hold, and the throw reaches 50% further.
 - *In the air:* In the air or gliding, the potion drops straight down under you.
 
-**Riptide (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press it again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.
+**Spin Cycle (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press it again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.
 
-**Tidal Wave (hunter ultimate, from level 6, 90s cooldown).** Call a wave and surf its crest 14m toward the cursor in 1s; you can't be targeted while you ride it. Every foe it rolls over takes 18, is knocked up for 1s, then slowed 50% for 2s. You land with a 40 shield for 3s.
+**Surf's Up (hunter ultimate, from level 6, 90s cooldown).** Call a wave and surf its crest 14m toward the cursor in 1s; you can't be targeted while you ride it. Every foe it rolls over takes 18, is knocked up for 1s, then slowed 50% for 2s. You land with a 40 shield for 3s.
 
 ### Ranks
 

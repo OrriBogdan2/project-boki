@@ -1,6 +1,6 @@
 # The Scrap King
 
-A harbour hauler in a brass diving helm. Hooks foes with the Deep Reach, reels them in, drops an anchor on them and
+A harbour hauler in a brass diving helm. Hooks foes with the Sticky Fingers, reels them in, drops an anchor on them and
 grows with every knock.
 
 <!-- gen:profile -->
@@ -18,20 +18,20 @@ grows with every knock.
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
 2. **Scattergun** (LMB): seven slugs in a tight fan, a shot every half second. The fan's edges show on the ground while you fire.
-3. **Deep Reach** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
-4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
-5. **Barge** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
+3. **Sticky Fingers** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
+4. **Lump Sum** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
+5. **Mad Dash** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Deep Reach, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
-| Barge while reeling | works; the reel carries on |
-| Deep Reach past a rock | the foe is dragged over it |
-| Deep Reach at a cliff face | it reaches through and drags the foe over |
+| Sticky Fingers, then Lump Sum on the arriving foe | the core combo: damage, a long stun, slam |
+| Mad Dash while reeling | works; the reel carries on |
+| Sticky Fingers past a rock | the foe is dragged over it |
+| Sticky Fingers at a cliff face | it reaches through and drags the foe over |
 | A reel over a gap | the foe falls (the abyss rules) |
-| Jump, then Anchor Drop | a straight-down smash with a ring of damage |
+| Jump, then Lump Sum | a straight-down smash with a ring of damage |
 | Anchor over the abyss | no downward push |
 
 ## Tips
@@ -47,7 +47,7 @@ grows with every knock.
 |  |  |
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
-| Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Potshot (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
 | Silhouette | the round brass helm and the rope drum on one shoulder |
 | Resource | Salvage (max 10) |
@@ -59,26 +59,26 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
-| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
-| Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
-| RMB: Deep Reach | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
-| E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
-| Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
-| Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
+| Passive: Finders Keepers | Finders Keepers: knocks and assists add Salvage health, up to 10 stacks. A knock heals you. |
+| Dash: Mad Dash | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
+| RMB: Sticky Fingers | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
+| E: Lump Sum | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
+| Hunter ultimate: Both Barrels | Both Barrels (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
+| Weapon: Potshot | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
 
 ### Abilities in full
 
-**Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
+**Finders Keepers (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Mad Dash (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
-**Deep Reach (RMB, 12s cooldown).**
+**Sticky Fingers (RMB, 12s cooldown).**
 
 - *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
-**Anchor Drop (E, 7s cooldown).** Raise your fist while the outline of the area shows on the ground in front of you (0.38s) and a giant ghost fist falls into it, then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
+**Lump Sum (E, 7s cooldown).** Raise your fist while the outline of the area shows on the ground in front of you (0.38s) and a giant ghost fist falls into it, then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 
-**Brass Broadside (hunter ultimate, from level 6, 21s cooldown).** Charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area, and it turns with your aim). You can walk slowly while it charges and fires. Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
+**Both Barrels (hunter ultimate, from level 6, 21s cooldown).** Charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area, and it turns with your aim). You can walk slowly while it charges and fires. Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
 ### Ranks
 
