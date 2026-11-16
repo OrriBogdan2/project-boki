@@ -78,6 +78,13 @@ func screen_up() -> Vector3:
 	var cam := m.get_viewport().get_camera_3d()
 	return cam.global_basis.y if cam != null else Vector3.UP
 
+## The rehearsal builds the burr's ball: the first Burr Charge built it mid-fight (11 meshes, 8 shader compiles).
+func warm_fx(_at: Vector3) -> void:
+	if burr_pool.is_empty():
+		var n := _burr_mesh()
+		n.visible = false
+		burr_pool.append(n)
+
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
 
@@ -293,7 +300,8 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true):
 			return true
-		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)),
+				{"invuln": 0.08, "feel": "long"})
 		play("gunslinger_dash_ex")
 		vfx("slide_air", null, null, {"ex": true})
 		last_dash_kind = "air"
@@ -685,14 +693,9 @@ func _tick_needle(dt: float) -> void:
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
 
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
+## The locked aim turns toward the cursor at the "turn" e row's capped deg/s: a flick can't drag it.
 func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
+	needle["dir"] = turn_lock(needle["dir"], turn_deg_s("e", "early"), dt).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:

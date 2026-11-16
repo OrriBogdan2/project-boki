@@ -696,16 +696,24 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84). Searing Wave: 0 px/s in all 7 holds (0062-0067 and 0076-0120, 5 fps; 1 px = 0.05 m) against about 4 m/s on his runs, but he also stands for the taps there, and the one hold away from the dummy (0062-0067) sits between two short walks; a stop by choice can't be told from a forced one | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check`. Searing Wave 0.55 kept: not determinable |
 | Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
-| Neve (Celeste) | full (kit-fired darts; the weapon's `fire_slow` 0.9 never applies) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
+| Neve (Celeste) | full (kit-fired darts never set the fire cooldown; hoar_fan has no `fire_slow`) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
-| Sable (Shiv) | 0.90 (`fire_slow`) | none | full | [F] dancer.md: 77-86 px/s while firing against 113 (0.68-0.76), "not confirmed" | kept (unconfirmed; see below) |
+| **Sable (Shiv)** | **0.71 (`fire_slow`, was 0.90)** | none | full | [F] frames: 92.5 px/s over 1.4 s of held fire against 128-130 on three plain runs (0.71; see below) | **changed**: arc_bolts `fire_slow` 0.71; asserted 0.67-0.75 in `--dancer-combo-check` |
 
-Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
-Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
-source number either way. Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
-Neve's dead `fire_slow` 0.9 on hoar_fan could go. Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are
-not determinable from the footage (2026-11-11; frames on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156):
-both stand still in every charge seen, and no hold is made on the move. A clip of either holding while walking would settle it.
+Sable's fire slow, read off the frames (2026-11-12; ext/hero-ref-footage footage/dancer, 720 px wide at 5 fps,
+frame N = 278 + (N-1)/5 s). Firing: 0008-0015, 1.4 s of a straight up-left run with LMB held on the cursor over empty
+ground (bolts leave at 0009, 0011 and 0014; they fizzle at the cursor between). Plain runs with no bolt: 0071-0075,
+0230-0233, 0311-0316. Her ground motion is the camera pan (NCC on textured world patches; frame by frame and end
+to end agree within 3%) plus her bar's move on screen, with screen height divided by 0.93, the Death Blossom ring's
+own squash (0296-0297). Firing 92.5 px/s in 960 px units (3.5 m/s at 1 body height = 48 px = 1.8 m), plain runs
+127.6-130.3 (4.8 m/s): 0.71 (0.70-0.73 for any squash from none to venator.md's 0.88; the plain runs agree best at
+0.93). dancer.md's 77-86 against 113 read both kinds of run about 12% low, and its 0230-0233 "firing" stretch has
+no bolt in it.
+
+Open, not built (suggestions): Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
+Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are not determinable from the footage (2026-11-11; frames
+on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156): both stand still in every charge seen, and no hold is made
+on the move. A clip of either holding while walking would settle it.
 
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
@@ -1091,6 +1099,17 @@ A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy
 distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
 no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
 the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+
+## Dashing off a ledge (`HunterMove.dash_off_ledge`, decision 0046)
+Walking off a ledge is always allowed (DECISIONS), and so is dashing off one. A ground dash that crosses an edge keeps
+its own course (distance and speed curve) but falls as it goes: the height hold is only for dashes pressed in the air.
+It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
+dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
+`--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
+no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
+no travel of his own) must set him down below the edge.
 
 ## Not touched
 

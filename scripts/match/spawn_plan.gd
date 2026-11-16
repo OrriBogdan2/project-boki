@@ -37,7 +37,10 @@ var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, t
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
-var _t := 0.0
+const REVISIT_S := 0.25       # s between two looks at the same spot
+var _share := 0.0             # spots owed a look this frame (fractional)
+var _next := -1
+var _teams := {}              # squads still in the match, refilled each tick
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -227,31 +230,35 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	return k
 
 # ------------------------------------------------------------------ what each squad knows
+## Each spot is looked at again every REVISIT_S, a slice of them each frame: all of them at once
+## was a sight check per spot per squad in one frame (a 20-30 ms spike with ten squads out).
 func tick(dt: float) -> void:
-	_t -= dt
-	if _t > 0.0:
+	if cands.is_empty():
 		return
-	_t = 0.25
-	for c in cands:
-		if not c["taken"] and c["active"]:
-			c["taken"] = _is_taken(c)
-	var teams := {}                  # team -> its hunters on the ground (one pass, not one per spot)
+	_teams.clear()                   # team -> its hunters on the ground (one pass, not one per spot)
 	for h in m.hunters:
 		if h.out or h.extracted or h.riding:
 			continue
-		if not teams.has(h.team): teams[h.team] = []
-		teams[h.team].append(h)
-	for c in cands:
-		var known: Dictionary = c["known"]
-		for t in teams:
-			if known.has(t):
-				continue
-			if _team_sees(int(t), teams[t], c["pos"]):
-				known[t] = true
-				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
-					var def: Dictionary = cats.get(c["cat"], {})
-					if not def.get("announce", false):
-						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
+		if not _teams.has(h.team): _teams[h.team] = []
+		_teams[h.team].append(h)
+	_share += cands.size() * dt / REVISIT_S
+	while _share >= 1.0:
+		_share -= 1.0
+		_next = (_next + 1) % cands.size()
+		_look(cands[_next])
+
+func _look(c: Dictionary) -> void:
+	if not c["taken"] and c["active"]:
+		c["taken"] = _is_taken(c)
+	var known: Dictionary = c["known"]
+	for t in _teams:
+		if known.has(t) or not _team_sees(int(t), _teams[t], c["pos"]):
+			continue
+		known[t] = true
+		if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
+			var def: Dictionary = cats.get(c["cat"], {})
+			if not def.get("announce", false):
+				m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
 
 ## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
 ## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map

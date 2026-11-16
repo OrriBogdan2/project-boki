@@ -28,7 +28,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | LMB hold: tracking [footage 0102-0108] | turns freely with the cursor (1.5 turns in 1.2 s) | faces the aim (shared turn) | same; asserted: trails a 1.25 turn/s sweep by <= 25 deg, standing and walking (15 deg measured) |
 | LMB hold: movement [footage] | stands in the two holds seen (unclear if forced) | walks at 55% | kept: owner #59 ("he can walk, keep the source hold-walk speed"); the data has no number and the footage can't tell (parity item 12); asserted `bjorn #59: he walks at the hold speed` |
 | LMB release: timing [footage 0146-0149] | one-frame sweep, the impact the frame after, ~0.4 s recovery | the same keys (`bul_smash`), 0.61 s before the next action | unchanged; asserted: the swing goes on the release step at the cursor (even behind him), the hit within 0.1 s, 0.61 s recovery |
-| LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49) |
+| LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49); his body keeps turning to the cursor through the step as in the hold (yaw-lock pass, the `turn` lmb row) |
 | LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand ~0.12 s after the press, as the arm comes through (`THROW_WIND`); asserted |
 | LMB cadence [game data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
 | RMB [game data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
