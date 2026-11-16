@@ -183,6 +183,7 @@ const CHECKS := {
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--legendary-check": ["res://tools/legendary_check.gd", "legendary_check", null],      # legendary Boki
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--sting-check": ["res://tools/sting_check.gd", "sting_check", null],  # run-end stingers
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
@@ -363,6 +364,8 @@ const CHECKS := {
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
+	"--garden-cue-shots": ["res://tools/garden_cue_shots.gd", "garden_cue_shots", null],  # the four games' world cues
+	"--garden-games-vfx-check": ["res://tools/garden_games_vfx_check.gd", "garden_games_vfx_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--lace-1111-check": ["res://tools/lace_1111_check.gd", "lace_1111_check", null],      # Lace 11-11 notes
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
@@ -492,6 +495,7 @@ const CHECKS := {
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
+	"--hatch-sfx-check": ["res://tools/hatch_sfx_check.gd", "hatch_sfx_check", null], # hatch stage sounds, mystery egg
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],      # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
