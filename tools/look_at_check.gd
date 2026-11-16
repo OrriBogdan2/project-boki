@@ -204,6 +204,6 @@ func _full_body_move() -> String:
 		var mv: Dictionary = moves[id]
 		if mv.has("upper") or mv.has("hold_from") or mv.has("lead") or mv.has("fade"):
 			continue
-		if sync.clips.lib.get_animation(String(mv["clip"])).length >= CLIP_MIN:
+		if sync.clips.move_len(mv) >= CLIP_MIN:
 			return String(id)
 	return ""

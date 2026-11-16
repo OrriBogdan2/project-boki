@@ -12,7 +12,7 @@ var stung := false
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind

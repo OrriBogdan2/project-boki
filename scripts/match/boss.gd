@@ -126,12 +126,12 @@ func _pick_target() -> Ent:
 
 # ------------------------------------------------------------------ telegraphs and hits on match time
 func _tele_c(at: Vector3, rad: float, c: Color, dur: float) -> Node3D:
-	var n: Node3D = m.fx.telegraph_circle(at, rad, c)
+	var n: Node3D = m.fx.telegraph_circle(at, rad, c, SideColor.ORDER_FOE)
 	teles.append({"n": n, "t": 0.0, "dur": dur})
 	return n
 
 func _tele_r(at: Vector3, d: Vector2, length: float, width: float, c: Color, dur: float) -> Node3D:
-	var n: Node3D = m.fx.telegraph_rect(at, d, length, width, c)
+	var n: Node3D = m.fx.telegraph_rect(at, d, length, width, c, SideColor.ORDER_FOE)
 	teles.append({"n": n, "t": 0.0, "dur": dur})
 	return n
 

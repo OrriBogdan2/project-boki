@@ -141,7 +141,7 @@ func _ready() -> void:
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_ambience("")        # the beds of HomeAmbience take over
 	Sfx.new_track.connect(_on_new_track)
 	if not Game.last_result.is_empty():      # back from a run: the welcome-home sting, once

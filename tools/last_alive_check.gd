@@ -71,11 +71,11 @@ func run(main: Node) -> void:
 	ok(_heard("last_alive_end") == 0, "no release while it lasts")
 	ok(absf(P.buff("move_speed") - LastAlive.SPEED) < 0.001, "move speed +%.0f%%" % (P.buff("move_speed") * 100.0))
 	P.hp = P.max_hp * 0.5
-	P.regen_wait = 3.0
+	P.combat_at = m.time      # just hit (InCombat)
 	var h0 := P.hp
 	_run_for(m, 1.0)
 	ok(P.hp <= h0 + 0.01, "no mending while a hit is fresh")
-	P.regen_wait = 0.0
+	P.combat_at = -99.0
 	h0 = P.hp
 	_run_for(m, 2.0)
 	ok(absf((P.hp - h0) / 2.0 - LastAlive.MEND_PER_S) < 0.2, "mends %.2f hp/s" % ((P.hp - h0) / 2.0))
