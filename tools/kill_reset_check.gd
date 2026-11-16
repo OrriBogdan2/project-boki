@@ -166,6 +166,8 @@ func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
 	ok(cues.size() == n0 + 1 and cues[-1][1] == "assist", "(j) with the assist cue (%s)" % str(cues.slice(n0)))
 
 	# (k) a 2-charge dash gains exactly one charge
+	if P.ak.single_dash():      # Vex's dash holds one charge by design: use a kit whose dash holds several
+		P.reclass(Arch.weight("dredge"), "dredge", Arch.signature("dredge"))
 	if P.max_dashes() < 2.0: P.perks.append("secondwind")
 	var v3: Hunter = foes[-3]
 	_spend(P)
