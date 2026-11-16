@@ -191,11 +191,11 @@ func _walk(m: Match) -> void:
 
 func _key() -> void:
 	var c := InputEventKey.new()
-	c.physical_keycode = KEY_C
-	ok(Settings.key_cap("scout") == "C" and InputMap.has_action("scout"), "the far look is on C by default (key cap %s)"
+	c.physical_keycode = KEY_G
+	ok(Settings.key_cap("scout") == "G" and InputMap.has_action("scout"), "the far look is on G by default (key cap %s)"
 			% Settings.key_cap("scout"))
 	ok(Settings.conflicts(c, "scout").is_empty(),
-			"C clashes with nothing in a match (home's Details shares it on purpose)")
+			"G clashes with nothing in a match (home's Goals shares it on purpose)")
 
 func _shots(main: Node) -> void:
 	Save.no_write = true
