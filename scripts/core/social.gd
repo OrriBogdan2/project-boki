@@ -8,6 +8,7 @@ extends Node
 ## gems or items to this save is taken on the store's word alone.
 
 signal ready_changed(ok: bool)
+signal clan_removed(clan_name: String)   # my game found I was removed from my clan (and left it)
 
 var ok := false            # the store answered
 var mode := ""             # "db" (shared with everyone the page is shared with) or "local" (this browser)
@@ -28,6 +29,7 @@ const PROJECTS := {
 }
 const ROLES := ["founder", "officer", "member"]   # a clan's ranks; what you like to do in it is taste, not permission
 const CLAN_CAP := 24                # members a clan shows (the store query's limit)
+const OUT_CAP := 48                 # removals one founder or officer keeps on record (oldest drop first)
 const SHOWCASE_CAP := 12            # Boki on a clan base's showcase wall, one per member
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this
 
@@ -285,14 +287,18 @@ func refresh_guild(cb := Callable()) -> void:
 		if g.is_empty():
 			# missing or unreachable: stay in it under the name we last saw
 			g = clean_guild({"name": Save.d.get("guild_name", "Your guild")})
-		guild = g
-		guild["id"] = gid
-		Save.d["guild_name"] = g["name"]
-		_keep_clan(gid, g)
-		load_progress(gid, guild, func(prog: Dictionary):
-			guild_progress = prog
-			_store_perks()
-			if cb.is_valid(): cb.call()))
+		_keep_clan(gid, g, func(kept: bool):
+			if not kept:
+				clan_removed.emit(g["name"])
+				leave_guild(func(): if cb.is_valid(): cb.call())
+				return
+			guild = g
+			guild["id"] = gid
+			Save.d["guild_name"] = g["name"]
+			load_progress(gid, guild, func(prog: Dictionary):
+				guild_progress = prog
+				_store_perks()
+				if cb.is_valid(): cb.call())))
 
 func get_guild(gid: String, cb: Callable) -> void:
 	get_doc("guilds/" + gid, func(g: Dictionary):
@@ -347,17 +353,20 @@ func _store_perks() -> void:
 
 ## My clan is the guild I'm in: same id, plus a rank and a corner seed. Saves that joined before clans exist
 ## get theirs here; my roster doc is rewritten so a member who joined before clans shows up in the list.
-func _keep_clan(gid: String, g: Dictionary) -> void:
-	var clan := dict_of(Save.d.get("clan"))
-	if txt_of(clan.get("id")) != gid:
-		clan = clan_for(gid, me, "member", now_ms())
-	if txt_of(g.get("founder")) == me and me != "":
-		clan["role"] = "founder"
-	elif clan["role"] == "founder":
-		clan["role"] = "member"        # the guild doc says someone else founded it
-	Save.d["clan"] = clan
-	set_doc("clanroster/%s_%s" % [gid, me], {"guild": gid, "role": clan["role"], "joined": clan["joined"],
-		"corner_seed": clan["corner_seed"], "last_seen": now_ms()})
+## My rank is what the guild doc says. done gets false if someone above me removed me (removed_from).
+func _keep_clan(gid: String, g: Dictionary, done: Callable) -> void:
+	query("clanout", [["guild", "==", gid]], "", "asc", CLAN_CAP, func(outs: Array):
+		if removed_from(outs, gid, g).has(me):
+			done.call(false)
+			return
+		var clan := dict_of(Save.d.get("clan"))
+		if txt_of(clan.get("id")) != gid:
+			clan = clan_for(gid, me, "member", now_ms())
+		clan["role"] = rank_of(g, me)
+		Save.d["clan"] = clan
+		set_doc("clanroster/%s_%s" % [gid, me], {"guild": gid, "role": clan["role"], "joined": clan["joined"],
+			"corner_seed": clan["corner_seed"], "last_seen": now_ms()})
+		done.call(true))
 
 ## A fresh clan record. The corner seed picks your plot in the shared base (the same for the same two ids).
 static func clan_for(gid: String, who: String, role: String, joined: float) -> Dictionary:
@@ -390,15 +399,33 @@ func join_guild(gid: String, cb: Callable) -> void:
 		var after := func():
 			refresh_guild(func():
 				_busy.erase("guild")
-				cb.call(true))
+				cb.call(my_guild_id() == gid))   # false: someone in the clan removed you
 		if txt_of(c.get("guild")) != gid:
 			set_doc("contrib/" + me, {"guild": gid, "amounts": {}, "updated": now_ms()}, func(_o): after.call())
 		else:
 			after.call())
 
 ## Leaving keeps what you put in with the guild you gave it to (it stops counting until you're back).
+## A founder who leaves first hands the clan on (successor_of); the last one out leaves the doc idle.
 func leave_guild(cb: Callable) -> void:
 	var gid := my_guild_id()
+	if gid == "":
+		_leave(gid, cb)
+		return
+	get_guild(gid, func(g: Dictionary):
+		if rank_of(g, me) != "founder":
+			_leave(gid, cb)
+			return
+		clan_roster(gid, g, func(rows: Array, _gone: Dictionary):
+			var heir := successor_of(rows, me)
+			if heir == "":
+				_leave(gid, cb)
+				return
+			_founder_edit(gid, func(raw: Dictionary) -> bool:
+				_crown(raw, heir, "")
+				return true, func(_okk): _leave(gid, cb))))
+
+func _leave(gid: String, cb: Callable) -> void:
 	if gid != "":
 		del_doc("clanroster/%s_%s" % [gid, me])
 	Save.d["guild_id"] = ""
@@ -420,19 +447,67 @@ func guild_members(gid: String, cb: Callable) -> void:
 	query("profiles", [["guild", "==", gid]], "", "asc", 24, func(rows: Array):
 		cb.call(rows.map(func(r): return {"id": r["id"], "d": clean_island(r["data"])})))
 
-## The founder opens the clan to anyone or closes it to new members.
-func set_open(gid: String, open: bool, cb: Callable) -> void:
+## Only the founder writes the guild doc: edit(g) changes the raw doc and returns false to refuse.
+func _founder_edit(gid: String, edit: Callable, cb: Callable) -> void:
 	get_doc("guilds/" + gid, func(g: Dictionary):
-		if g.is_empty() or txt_of(g.get("founder")) != me:
+		if g.is_empty() or txt_of(g.get("founder")) != me or not edit.call(g):
 			cb.call(false)
 			return
-		g["open"] = open
 		set_doc("guilds/" + gid, g, cb))
 
-## cb gets the clan's roster: [{id, role, joined, corner_seed}], cleaned (see clean_roster).
-func clan_roster(gid: String, founder: String, cb: Callable) -> void:
-	query("clanroster", [["guild", "==", gid]], "", "asc", CLAN_CAP, func(rows: Array):
-		cb.call(clean_roster(rows, gid, founder)))
+## The founder opens the clan to anyone or closes it to new members.
+func set_open(gid: String, open: bool, cb: Callable) -> void:
+	_founder_edit(gid, func(g: Dictionary) -> bool:
+		g["open"] = open
+		return true, cb)
+
+## The founder makes a member an officer, or an officer a member again.
+func set_officer(gid: String, who: String, officer: bool, cb: Callable) -> void:
+	_founder_edit(gid, func(g: Dictionary) -> bool:
+		var officers: Array = clean_guild(g)["officers"]
+		officers.erase(who)
+		if officer:
+			officers.append(who)
+		g["officers"] = officers
+		return who != "" and who != me, cb)
+
+## The founder hands the founder role to an officer and becomes an officer.
+func hand_founder(gid: String, who: String, cb: Callable) -> void:
+	_founder_edit(gid, func(g: Dictionary) -> bool:
+		if not clean_guild(g)["officers"].has(who):
+			return false
+		_crown(g, who, me)
+		return true, cb)
+
+## Makes `who` the founder of raw guild doc g; the old founder `was` stays on as an officer ("" when leaving).
+static func _crown(g: Dictionary, who: String, was: String) -> void:
+	var officers: Array = clean_guild(g)["officers"]
+	officers.erase(who)
+	if was != "":
+		officers.append(was)
+	g["officers"] = officers
+	g["founder"] = who
+
+## Founder and officers remove someone below their rank by listing them in their own clanout/<gid>_<me> doc
+## (one writer per doc, like the roster). The removed member's game leaves the clan on its next refresh.
+func remove_member(gid: String, who: String, cb: Callable) -> void:
+	get_guild(gid, func(g: Dictionary):
+		if ROLES.find(rank_of(g, me)) >= ROLES.find(rank_of(g, who)):
+			cb.call(false)
+			return
+		var path := "clanout/%s_%s" % [gid, me]
+		get_doc(path, func(d: Dictionary):
+			var ids: Array = arr_of(d.get("ids")).filter(func(x): return txt_of(x) != who)
+			ids.append(who)
+			set_doc(path, {"guild": gid, "ids": ids.slice(-OUT_CAP)}, cb)))
+
+## cb gets the clan's roll [{id, role, joined, corner_seed}] (see clean_roster) and who was removed
+## ({id: true}, see removed_from). g is the cleaned guild doc.
+func clan_roster(gid: String, g: Dictionary, cb: Callable) -> void:
+	query("clanout", [["guild", "==", gid]], "", "asc", CLAN_CAP, func(outs: Array):
+		var gone := removed_from(outs, gid, g)
+		query("clanroster", [["guild", "==", gid]], "", "asc", CLAN_CAP, func(rows: Array):
+			cb.call(clean_roster(rows, gid, g, gone), gone)))
 
 ## Puts gems into a guild project. Each member keeps their own running total, so nobody overwrites anybody.
 func contribute(project: String, gems: int, cb: Callable) -> void:
@@ -678,13 +753,44 @@ static func clean_guild(d: Dictionary) -> Dictionary:
 	var built: Array = []
 	for k in arr_of(d.get("built")):
 		if PROJECTS.has(k) and not built.has(k): built.append(String(k))
+	var founder := txt_of(d.get("founder"))
+	var officers: Array = []
+	for v in arr_of(d.get("officers")).slice(0, CLAN_CAP):
+		var who := txt_of(v)
+		if who != "" and who != founder and not officers.has(who): officers.append(who)
 	return {"name": say_of(d.get("name"), "Guild", 24), "motto": say_of(d.get("motto"), "", 60),
-		"color": col if col.is_valid_html_color() else "f2a24a", "founder": txt_of(d.get("founder")),
+		"color": col if col.is_valid_html_color() else "f2a24a", "founder": founder, "officers": officers,
 		"created": num_of(d.get("created")), "built": built, "open": d.get("open", true) != false}
 
-## Roster docs are untrusted. A row stays only if it is this clan's and has a known rank; "founder" is only
-## believed for the guild doc's founder; at most CLAN_CAP rows, one per member.
-static func clean_roster(rows: Array, gid: String, founder: String) -> Array:
+## A rank comes from the cleaned guild doc (its founder and officers), never from a member's own docs.
+static func rank_of(g: Dictionary, who: String) -> String:
+	if who != "" and who == txt_of(g.get("founder")):
+		return "founder"
+	return "officer" if arr_of(g.get("officers")).has(who) else "member"
+
+## Removal docs (clanout/<gid>_<by> = {guild, ids}) are untrusted. A removal holds only while its author
+## outranks the member (guild doc ranks), and an officer the founder removed removes nobody. {id: true}.
+static func removed_from(outs: Array, gid: String, g: Dictionary) -> Dictionary:
+	var lists := {}
+	for r in outs:
+		var id := txt_of(dict_of(r).get("id"))
+		var d := dict_of(dict_of(r).get("data"))
+		if txt_of(d.get("guild")) == gid and id.begins_with(gid + "_"):
+			lists[id.trim_prefix(gid + "_")] = arr_of(d.get("ids")).slice(0, OUT_CAP)
+	var gone := {}
+	for rank in ["founder", "officer"]:
+		for by in lists:
+			if rank_of(g, by) != rank or gone.has(by):
+				continue
+			for v in lists[by]:
+				var who := txt_of(v)
+				if ROLES.find(rank_of(g, who)) > ROLES.find(rank):
+					gone[who] = true
+	return gone
+
+## Roster docs are untrusted. A row stays only if it is this clan's, has a known rank and its member is not
+## in gone; the rank shown is the guild doc's (rank_of), whatever the row claims; at most CLAN_CAP rows.
+static func clean_roster(rows: Array, gid: String, g: Dictionary, gone := {}) -> Array:
 	var out: Array = []
 	var seen := {}
 	for r in rows:
@@ -693,16 +799,26 @@ static func clean_roster(rows: Array, gid: String, founder: String) -> Array:
 		var who := id.trim_prefix(gid + "_")
 		var role := txt_of(d.get("role"))
 		var mine: bool = txt_of(d.get("guild")) == gid and id.begins_with(gid + "_")
-		if not mine or not ROLES.has(role) or who == "" or seen.has(who):
+		if not mine or not ROLES.has(role) or who == "" or seen.has(who) or gone.has(who):
 			continue
 		seen[who] = true
-		if role == "founder" and who != founder:
-			role = "member"
-		out.append({"id": who, "role": role, "joined": maxf(0.0, num_of(d.get("joined"))),
+		out.append({"id": who, "role": rank_of(g, who), "joined": maxf(0.0, num_of(d.get("joined"))),
 			"corner_seed": clampi(int_of(d.get("corner_seed")), 0, 999999)})
 		if out.size() >= CLAN_CAP:
 			break
 	return out
+
+## Who takes over when founder `leaving` goes: the longest-serving officer, else the longest-serving member
+## (earliest `joined` on a clean_roster roll; ties go to the lower id). "" when nobody else is left.
+static func successor_of(roll: Array, leaving: String) -> String:
+	var best := {}
+	for r in roll:
+		if r["id"] == leaving or r["role"] == "founder":
+			continue
+		var key := [0 if r["role"] == "officer" else 1, r["joined"], r["id"]]
+		if best.is_empty() or key < best["key"]:
+			best = {"key": key, "id": r["id"]}
+	return best.get("id", "")
 
 ## A clan base doc (clanbase/<gid>) is untrusted. The showcase wall keeps one Boki per current member
 ## (`members`: their ids), cleaned like a visited island's, at most SHOWCASE_CAP.
