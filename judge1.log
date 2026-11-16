@@ -1,0 +1,11 @@
+v95-promote: judge fable try 1 failed: 'NoneType' object has no attribute 'group'
+v95-promote: judge fable try 2 failed: 'NoneType' object has no attribute 'group'
+v95-promote: judge claude-opus-5-5 try 1 failed: 'NoneType' object has no attribute 'group'
+v95-promote: judge claude-opus-5-5 try 2 failed: 'NoneType' object has no attribute 'items'
+Traceback (most recent call last):
+  File "/home/boki/meshy/v95/_tools/n95_judge.py", line 8, in <module>
+    r = vp.judge(name, os.path.abspath(cmp), wd)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/boki/meshy/v95/_tools/v95-promote.py", line 284, in judge
+    raise RuntimeError("judge failed")
+RuntimeError: judge failed
