@@ -626,6 +626,9 @@ func rinkrunning() -> bool:
 func sound_tick(dt: float) -> void:
 	skate_snd.tick(self, dt)
 
+func sound_tick(dt: float) -> void:
+	skate_snd.tick(self, dt)
+
 ## Carving: a spray of ice and chips off the outside blade, more the harder she turns.
 func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:
 	var hard := clampf(absf(turn_rate) / 3.0, 0.0, 1.0)

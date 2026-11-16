@@ -1161,8 +1161,8 @@ func _barge_chain() -> void:
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-## `hold` keeps the dash key down to the end.
-func _felt_dash(air: bool, hold := false) -> Array:
+## `hold` keeps the dash key down to the end; `long` runs out of charges first (the class's long dash).
+func _felt_dash(air: bool, hold := false, long := false) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge would hold a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
