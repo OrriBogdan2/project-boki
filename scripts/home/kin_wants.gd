@@ -39,6 +39,11 @@ static func best_food(rec: Dictionary) -> String:
 	var likes: Dictionary = rec["likes"]
 	var have := func(f: String) -> int:
 		return int(Save.d["crops"].get(f, 0)) if Data.CROPS.has(f) else int(Save.d["items"].get(f, 0))
+	if Care.ailing(rec):
+		# weak or sick: the snack crop is the medicine
+		for f in Data.CROPS:
+			if Data.CROPS[f]["use"] == "snack" and f != likes["hates"] and have.call(String(f)) > 0:
+				return String(f)
 	if have.call(String(likes["food"])) > 0:
 		return String(likes["food"])
 	for f in Data.CROPS.keys() + Care.FOODS.keys():
@@ -74,6 +79,8 @@ static func update(home: Node, dt: float, now: float) -> void:
 		var rec: Dictionary = k["rec"]
 		var w := Care.want(rec) if home.visit.is_empty() else ""
 		_relief(home, k, w)
+		if not k.has("indoors"):
+			HomeVoice.sulk_edge(k, w)
 		if w != "" and _free_to_show(k):
 			cands.append(k)
 	cands.sort_custom(func(a, b): return urgency(a["rec"]) > urgency(b["rec"]))
@@ -112,6 +119,7 @@ static func _relief(home: Node, k: Dictionary, w: String) -> void:
 	k["joy_t"] = 0.9
 	home._emote(k, "♥", true)
 	home.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 8, 1.6)
+	HomeVoice.say(k["rec"], "happy", k["pos"])
 
 static func _pose(home: Node, k: Dictionary, shown: bool, dt: float, now: float) -> void:
 	var bub: Node3D = k.get("bubble")
