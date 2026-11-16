@@ -42,3 +42,22 @@ current code. Every one below is on main in another form, or only differs in gen
 Checks on this branch: --recast-cue-check 80 checks, 2 fails (ostra e ticks / EXPIRED), same 2 on main's files (79 checks):
 NEW-RED 0. --wild-type-cue-check 0 fails. health --strict: style red in dj_fx.gd / glide_net_check.gd (main's, untouched),
 sfx_loudness needs numpy (not on w2).
+
+## Pass 3 (ext/stuck-integ-f1f63a7a, worker rpc7, main 0704553134, 2026-11-16)
+
+Same list (~700 of the 825 rows). Not bulk-merged: 785 rows conflict and are thousands of commits behind; the newest
+merge train ext/mc-20261115-1300 itself conflicts with main in 22 files (hunter.gd, match.gd, sfx.gd ...), so this
+branch is main + ext/stuck-integ-62ec7ba9, not the mc train. Next 11 rows by unlanded_lines, read against main:
+
+| branch | result |
+|---|---|
+| parity-sable-e-range | **ported** (509c64d23a): Sable E range 16.2 -> 15 m, frame re-read; KIT_PARITY row was "open" on main; --kit-parity-check 0 fails |
+| vfx-kael-smash-lane-on-slam-lane | superseded: main's slam lane is already 0.72 m wide (main later chose red, not magenta) |
+| anim-race-beats | superseded: crouch/burst/sulk clips timed by RaceBeats are on main (boki_home_clips.gd) |
+| sfx-dash-per-hunter-rebased | superseded: HeroSfx picks <arch>_dash_air on main, 78 dash_air files |
+| tarek-appeal, vex-body7-1111 | superseded: main's v95 masters are newer (tarek n95/c01, vex tilt1112 cand_A2) |
+| warden-check-heights | superseded: main re-measured height_3d later (thief 1.10, mage 1.13 vs the branch's 1.18) |
+| cinder-sable-polish-rebased | stale art: art1 paint/piece tweaks on a Sable source since rebuilt; needs an owner art pick, not a port |
+| prologue-canon-2 | owner text call: main has Solmere/Malgrave/Hollowing; left: "the Beloved", "floating Skylands", shot 5 "Hunter's Relic" (DECISIONS 11-08 lines 361-362 lean to the branch) |
+| anim-meeko-tiptoe | needs an anim job: the change is a re-baked glb (crouch_f/b/l/r), not text |
+| vfx-cinder-ignite-orb | needs a vfx port job: ashwick_kit/ld_fx orb rider differs from main's |
