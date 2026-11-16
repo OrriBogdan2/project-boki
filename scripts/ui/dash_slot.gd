@@ -9,6 +9,7 @@ extends RefCounted
 
 const PIP_Y := 16.0                     # px from the slot's bottom edge to the rank pips (clears the key pill)
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
+const AIR_Y := 18.0                     # px from the slot's top edge to the diamond: under the charge discs on the top edge
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
 const AIR_CD_FS := 10                   # the air dash's countdown while airborne
@@ -69,7 +70,7 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	if float(s["air_max"]) > 0.0:
 		var back := 1.0 - float(s["air_cd"]) / float(s["air_max"])
 		shown[hid]["air"] = clampf(back, 0.0, 1.0)
-		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + 9.0), back)
+		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + AIR_Y), back)
 		shown[hid]["air_text"] = ""
 		if bool(s["airborne"]) and float(s["air_cd"]) > 0.0:
 			var at := HudSlot.cd_text(float(s["air_cd"]))      # in the air the pounce's own timer is spelled out
