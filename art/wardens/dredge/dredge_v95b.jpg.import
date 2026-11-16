@@ -2,26 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dvb2f1lma0xq4"
-path.bptc="res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.bptc.ctex"
-path.astc="res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.astc.ctex"
+uid="uid://bd60resvedqma"
+path.s3tc="res://.godot/imported/dredge_v95b.jpg-81f28d941b1508410163bdb4d05164a3.s3tc.ctex"
+path.etc2="res://.godot/imported/dredge_v95b.jpg-81f28d941b1508410163bdb4d05164a3.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "7ffd973048495448ed52574fe72f426a"
+"md5": "f6a7b2f72130b8e4033094cb3b4ab80c"
 }
 
 [deps]
 
-source_file="res://art/wardens/ryzz/ryzz_nrm.jpg"
-dest_files=["res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.bptc.ctex", "res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.astc.ctex"]
+source_file="res://art/wardens/dredge/dredge_v95b.jpg"
+dest_files=["res://.godot/imported/dredge_v95b.jpg-81f28d941b1508410163bdb4d05164a3.s3tc.ctex", "res://.godot/imported/dredge_v95b.jpg-81f28d941b1508410163bdb4d05164a3.etc2.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1
