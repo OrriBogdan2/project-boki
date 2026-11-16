@@ -4,7 +4,7 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Burr Charge shows
+## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Coin Blast shows
 ## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
 ## draw it as long as the host's.
 ## Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
@@ -21,7 +21,7 @@ const SKEW := 0.05           # s: clocks of two processes on one machine
 const NET_SNAP_TOL := 0.08   # s: a re-time on the copy is the host's to within the age snap plus a frame
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
-const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
+const WALK := 3.6            # s more after Lace's Slip Stitch starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const BOSSES := {"colossus": "slam", "serpent": "dash", "brood": "spit"}      # the attack each plays
@@ -244,7 +244,7 @@ func _tele_ok(what: String, theirs: Dictionary) -> void:
 		var ids := tele.keys().map(func(id): return "%s %s" % [tele[id][0], id])
 		print("%s %s  telegraphs: %s (guest shows %d)" % [tag, what, ", ".join(ids), theirs.size()])
 
-## Lace's Spirit Walk darkens her body on both games: on within LAG_TOL of the host's, and off again within
+## Lace's Slip Stitch darkens her body on both games: on within LAG_TOL of the host's, and off again within
 ## LAG_TOL of the host's (the copy's walk is the base length, so it never outstays the walk).
 func _wash_rows_ok() -> void:
 	var h_on := _wash_at(wash_host, true)
@@ -252,7 +252,7 @@ func _wash_rows_ok() -> void:
 	var h_off := _wash_at(wash_host, false)
 	var g_off := _wash_at(wash_guest, false)
 	var detail := "host %s guest %s" % [str(wash_host), str(wash_guest)]
-	ok(h_on >= 0.0 and h_off > h_on + 2.0, "archer: the host's own body tints through the Spirit Walk", detail)
+	ok(h_on >= 0.0 and h_off > h_on + 2.0, "archer: the host's own body tints through the Slip Stitch", detail)
 	ok(g_on >= h_on - SKEW and g_on <= h_on + LAG_TOL, "archer: the guest's copy tints within %.1f s" % LAG_TOL, detail)
 	ok(g_off > g_on + 2.0 and g_off <= h_off + LAG_TOL, "archer: the copy's tint ends with the walk", detail)
 

@@ -1,5 +1,5 @@
 extends "res://tools/archer_bulwark_combo_check.gd"
-## The X ultimates of Hem (Starpiercer) and Breaker (Faultline), run from --archer-combo-check and
+## The X ultimates of Hem (Finishing Touch) and Breaker (Groundswell), run from --archer-combo-check and
 ## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds its counts): the level gate, the cast,
 ## the telegraph, the payoff, the cooldown, bond sent only on a land, the small mechanics, a merge
 ## dropping the holds, and the burst cap (the whole ult, then a merge, never takes a full-health light
@@ -57,7 +57,7 @@ func pin() -> void:
 	# the level gate
 	P.lvl = 5
 	press_x(m, P)
-	ok("pin ult gate: no Starpiercer below level 6", not K.ult.active() and float(K.cd["x"]) <= 0.0)
+	ok("pin ult gate: no Finishing Touch below level 6", not K.ult.active() and float(K.cd["x"]) <= 0.0)
 	P.lvl = 6
 	# the cast: no bond on the cast alone, the telegraph, its own move
 	P.ult = 0.0
@@ -152,7 +152,7 @@ func pin() -> void:
 	await _pin_window()
 	await _pin_burst()
 
-## The window, the cooldown, the bow coming back, Spirit Walk between shots, a wall, a merge.
+## The window, the cooldown, the bow coming back, Slip Stitch between shots, a wall, a merge.
 func _pin_window() -> void:
 	var r := setup("archer", 7.0, BURST_KIN, false)
 	var m: Match = r[0]
@@ -172,13 +172,13 @@ func _pin_window() -> void:
 	ok("pin ult: after the window the bow draws as normal", P.draw_t > 0.5, "draw_t %.2f" % P.draw_t)
 	P.inp["fire"] = false
 	step(m, 0.3)
-	# Spirit Walk between shots keeps the empowered shots
+	# Slip Stitch between shots keeps the empowered shots
 	K.cd["x"] = 0.0
 	press_x(m, P)
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true
 	step(m, 0.3)
-	ok("pin ult small: Spirit Walk between shots keeps them", K.ult.active() and K.ult.left == 3 and K.spirit.active())
+	ok("pin ult small: Slip Stitch between shots keeps them", K.ult.active() and K.ult.left == 3 and K.spirit.active())
 	# a wall stops the beam
 	fresh(T)
 	_wall_at(m, home + Vector3(4, 0, 0), lv, 0)
@@ -237,7 +237,7 @@ func bjorn() -> void:
 	step(m, 0.3)
 	P.lvl = 5
 	press_x(m, P)
-	ok("bjorn ult gate: no Faultline below level 6", K.ult.phase == "" and float(K.cd["x"]) <= 0.0)
+	ok("bjorn ult gate: no Groundswell below level 6", K.ult.phase == "" and float(K.cd["x"]) <= 0.0)
 	P.lvl = 6
 	P.ult = 0.0
 	T.teleport(home + Vector3(7, 0, 0))
@@ -347,7 +347,7 @@ func _bjorn_more() -> void:
 	press_x(m, P)
 	_jump_in_plant(m, P, K)
 	step(m, 0.9)
-	ok("bjorn ult bond: a Faultline that hits nobody pays nothing",
+	ok("bjorn ult bond: a Groundswell that hits nobody pays nothing",
 		K.ult.slams == 1 and best(P) == 0.0 and HeroUlt.cast_id(K) != "",
 		"owed %.2f" % best(P))
 	press_x(m, P)
@@ -382,7 +382,7 @@ func _bjorn_more() -> void:
 		"slams %d" % K.ult.slams)
 	await done(m)
 
-## Burst cap: a Faultline then straight into a merge and its attacks on a full-health light hunter.
+## Burst cap: a Groundswell then straight into a merge and its attacks on a full-health light hunter.
 func _bjorn_burst() -> void:
 	var r := setup("bulwark", 3.0, BURST_KIN, false)
 	var m: Match = r[0]
@@ -398,7 +398,7 @@ func _bjorn_burst() -> void:
 	merge_now(P)
 	hold_fire(m, P, T.pos, MERGE_OPEN)
 	P.inp["fire"] = false
-	ok("bjorn ult burst: a Faultline then a merge leave a full-health light hunter standing",
+	ok("bjorn ult burst: a Groundswell then a merge leave a full-health light hunter standing",
 		not T.downed and not T.dead and T.hp > 0.0 and K.ult.slams == 1 and after_ult > 0.0,
 		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp])
 	await done(m)

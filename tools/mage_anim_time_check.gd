@@ -75,7 +75,7 @@ func _settle(secs: float) -> void:
 
 
 ## Plays `secs` of frames and keeps, a frame each: t (s from the start), id (the kit's move), at (the move's
-## clock, kmove_t), w (how much a clip owns the body), clip (the one playing), ph (Kitefall's phase), x.
+## clock, kmove_t), w (how much a clip owns the body), clip (the one playing), ph (Stormfall's phase), x.
 func _rec(secs: float, each := Callable()) -> Array:
 	var c := _clips()
 	var out := []
@@ -200,7 +200,7 @@ func _lmb_held() -> void:
 	_settle(0.8)
 
 
-## One Storm Rod: held `rel` s then let go (-1: held through the auto throw). Gives the beats from the press: the
+## One Pink Spear: held `rel` s then let go (-1: held through the auto throw). Gives the beats from the press: the
 ## flash (full), the throw clip (play), the bolt leaving (coil) and when the hold pose let go before it.
 func _rod(rel: float) -> Dictionary:
 	_settle(0.5)
@@ -238,7 +238,7 @@ func _rod(rel: float) -> Dictionary:
 	return r
 
 
-## RMB Storm Rod (the source: press -> the rod appears, the white flash at 1.0 s, the throw at 1.2 s, about 0.4 s
+## RMB Pink Spear (the source: press -> the rod appears, the white flash at 1.0 s, the throw at 1.2 s, about 0.4 s
 ## to recover): the hold clip owns the arm within the blend and keeps it to the throw, the flash is at 1.0, the
 ## auto throw at 1.2, and the throw clip's release key lands on the bolt (a tap's 0.33 s summon included).
 func _rmb() -> void:
@@ -392,7 +392,7 @@ func _wire() -> void:
 	)
 
 
-## One Skycall: E held `drag` s from the press then let go, the strike's beats from the press.
+## One Undercurrent: E held `drag` s from the press then let go, the strike's beats from the press.
 func _sky_run(drag: float) -> Dictionary:
 	_settle(0.5)
 	K.cd["e"] = 0.0
@@ -442,13 +442,13 @@ func _sky_run(drag: float) -> Dictionary:
 	return r
 
 
-## Skycall (the source: the strike 0.8 s after the commit, a one-arm sweep, no long wind-up; the drag time is not
+## Undercurrent (the source: the strike 0.8 s after the commit, a one-arm sweep, no long wind-up; the drag time is not
 ## shown): the arm goes up on the press and stays up through the drag (up to 1 s) and the 0.8 s count to the strike,
 ## then the snap clip sweeps it down on the strike's frame.
 func _sky() -> void:
 	var a := _sky_run(0.0)
 	C.ok(
-		"Sparkle timing Skycall: the arm goes up on the press, owned within the blend",
+		"Sparkle timing Undercurrent: the arm goes up on the press, owned within the blend",
 		(
 			float(a["play"]) >= 0.0
 			and float(a["play"]) <= DT * FRAMES
@@ -458,7 +458,7 @@ func _sky() -> void:
 		"play %.2f in %.2f" % [a["play"], a["in"]]
 	)
 	C.ok(
-		"Sparkle timing Skycall: a tap strikes 0.8 s after the commit and the snap sweeps on that frame",
+		"Sparkle timing Undercurrent: a tap strikes 0.8 s after the commit and the snap sweeps on that frame",
 		(
 			absf(float(a["snap"]) - float(a["commit"]) - 0.8) <= DT * 2.0
 			and float(a["snap_in"]) - float(a["snap"]) <= BLEND_IN
@@ -468,7 +468,7 @@ func _sky() -> void:
 	)
 	var b := _sky_run(1.0)
 	C.ok(
-		"Sparkle timing Skycall: dragged 1.0 s, the arm stays up through the count to the strike (clip 1.4 s)",
+		"Sparkle timing Undercurrent: dragged 1.0 s, the arm stays up through the count to the strike (clip 1.4 s)",
 		(
 			float(b["commit"]) >= 0.95
 			and float(b["snap"]) > float(b["len"])
@@ -478,13 +478,13 @@ func _sky() -> void:
 		"commit %.2f strike %.2f (clip %.2f) arm let go %.2f" % [b["commit"], b["snap"], b["len"], b["drop"]]
 	)
 	C.ok(
-		"Sparkle timing Skycall: the arm comes down over the snap clip (0.55 s) and the legs are hers a fade after",
+		"Sparkle timing Undercurrent: the arm comes down over the snap clip (0.55 s), the legs are hers a fade after",
 		float(b["out"]) > float(b["snap"]) + 0.5 and float(b["out"]) < float(b["snap"]) + 0.55 + HAND_BACK,
 		"strike %.2f out %.2f" % [b["snap"], b["out"]]
 	)
 
 
-## One Kitefall: cast at 0, the second press at `recast` s (-1: none, she comes down by herself); the phases' times
+## One Stormfall: cast at 0, the second press at `recast` s (-1: none, she comes down by herself); the phases' times
 ## from the press and any frame the clips let go of the body inside the cast.
 func _ult_run(recast: float) -> Dictionary:
 	_settle(0.5)
@@ -534,7 +534,7 @@ func _ult_run(recast: float) -> Dictionary:
 	return r
 
 
-## Kitefall (the source: the leap ~0.4 s after the press, up 1.2-1.8 s, the streak down, the pillar after): the
+## Stormfall (the source: the leap ~0.4 s after the press, up 1.2-1.8 s, the streak down, the pillar after): the
 ## crouch is 0.3 s (the data; the source's frames give 0.4-0.6), the climb 0.3, the hover 1.7 (inside the source's
 ## 1.2-1.8), the drop 0.2, the strike's re-form 0.5, and one clip or another owns the body from the press to the
 ## re-form's end.
@@ -543,7 +543,7 @@ func _kitefall() -> void:
 	var xd := K.x_def()
 	var rise_at := float(xd["windup"])
 	C.ok(
-		"Sparkle timing Kitefall: crouch 0.3, climb 0.3, hover 1.7 (source 1.2-1.8), drop 0.2, re-form 0.5 s",
+		"Sparkle timing Stormfall: crouch 0.3, climb 0.3, hover 1.7 (source 1.2-1.8), drop 0.2, re-form 0.5 s",
 		(
 			bool(a["cast"])
 			and absf(float(a[MageUlt.RISE]) - rise_at) <= DT * 2.0
@@ -558,7 +558,7 @@ func _kitefall() -> void:
 		)
 	)
 	C.ok(
-		"Sparkle timing Kitefall: a clip owns the body from the crouch to the re-form's end (no let-go)",
+		"Sparkle timing Stormfall: a clip owns the body from the crouch to the re-form's end (no let-go)",
 		(
 			float(a["in"]) >= 0.0
 			and float(a["in"]) <= BLEND_IN
@@ -569,7 +569,7 @@ func _kitefall() -> void:
 	)
 	var b := _ult_run(0.8)
 	C.ok(
-		"Sparkle timing Kitefall: a second press in the hover brings her down at once (drop 0.2 s)",
+		"Sparkle timing Stormfall: a second press in the hover brings her down at once (drop 0.2 s)",
 		(
 			float(b[MageUlt.FALL]) >= 0.8 - DT
 			and float(b[MageUlt.FALL]) <= 0.8 + DT * 3.0

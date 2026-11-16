@@ -53,7 +53,7 @@ func _ready_all() -> void:
 	K.ch_rmb = 1.0
 
 
-## Runs `second` 0.2 s into the Longneedle's charge; true when the charge was still on then and the beam fired.
+## Runs `second` 0.2 s into the Palm Spear's charge; true when the charge was still on then and the beam fired.
 func _in_charge(second: Callable) -> bool:
 	_ready_all()
 	K.needle_dir = Vector2.ZERO
@@ -87,7 +87,7 @@ func _needle_rows() -> void:
 			n["burrs"] = K.burrs.size() - b0
 	)
 	C.ok(
-		"Vex cancel E wind-up + RMB: both (rule), the Burr Charge leaves and the beam goes",
+		"Vex cancel E wind-up + RMB: both (rule), the Coin Blast leaves and the beam goes",
 		beam and int(n["burrs"]) == 1,
 		"burrs %d, beam %s" % [n["burrs"], beam]
 	)
@@ -105,7 +105,7 @@ func _needle_rows() -> void:
 			n["ult"] = K.ult.casts - u0
 	)
 	C.ok(
-		"Vex cancel E wind-up + X: both (rule; was ignored), Cinderfall goes and the beam goes",
+		"Vex cancel E wind-up + X: both (rule; was ignored), Penny Drop goes and the beam goes",
 		beam and int(n["ult"]) == 1,
 		"casts %d, beam %s" % [n["ult"], beam]
 	)
@@ -136,7 +136,7 @@ func _needle_rows() -> void:
 	)
 
 
-## The cast ends at the beam: the very next step takes a jump, a Burr Charge and a round.
+## The cast ends at the beam: the very next step takes a jump, a Coin Blast and a round.
 func _needle_recovery() -> void:
 	_ready_all()
 	K.use_e()
@@ -168,7 +168,7 @@ func _ult_then() -> void:
 	K.use_e()
 	var both := K.ult.casts > u0 and K.burrs.size() > b0 and not K.needle.is_empty()
 	C.ac.step(m, 1.0)
-	C.ok("Vex cancel X + E, RMB: both (rule), the Burr Charge and the Longneedle go with the shell falling", both)
+	C.ok("Vex cancel X + E, RMB: both (rule), the Coin Blast and the Palm Spear go with the shell falling", both)
 
 
 ## The held string goes on through each press: rounds keep leaving in the 0.3 s after it.

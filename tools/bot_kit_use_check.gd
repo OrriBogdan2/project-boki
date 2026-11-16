@@ -11,8 +11,8 @@ const MUST := {
 	"juggernaut": ["rmb hold", "lunge perfect", "chain reel"],
 	"bulwark": ["rmb hold", "hammer throw", "hammer recall", "shield charge"],
 	"rimewright": ["skate", "rink freeze"],
-	"dolm": ["hop recast", "ab:rmb", "rocks raised", "rocks launched", "ab:rock"],      # Quakefall, Stone Row rocks
-	"ostra": ["snaps", "ab:rmb", "pops", "ab:e"],      # Shard Snap and its hits, Brimseed pops and their hits
+	"dolm": ["hop recast", "ab:rmb", "rocks raised", "rocks launched", "ab:rock"],      # Rock Bottom, Foothold rocks
+	"ostra": ["snaps", "ab:rmb", "pops", "ab:e"],      # Stage Fright and its hits, Gag Gift pops and their hits
 	"ashwick": ["cloak pull"],
 }
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
@@ -147,5 +147,6 @@ func _report(arch: String, n: Dictionary) -> void:
 			print("KITUSE FAIL %s never uses '%s'" % [arch, key])
 			bad += 1
 	if arch == "bulwark" and int(n.get("rmb tap", 0)) * 4 > int(n.get("rmb hold", 0)):
-		print("KITUSE FAIL bulwark taps the Aegis (%d taps, %d holds)" % [n.get("rmb tap", 0), n.get("rmb hold", 0)])
+		print("KITUSE FAIL bulwark taps the Blue Guard (%d taps, %d holds)" % [n.get("rmb tap", 0), n.get("rmb hold",
+			0)])
 		bad += 1

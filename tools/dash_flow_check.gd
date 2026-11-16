@@ -14,7 +14,7 @@ const QUIET_MAX := 900          # steps: the last trial's ability (an ult, a zon
 const DASH_WAIT := 40           # steps: a dash with a wind-up shows up within this
 const WATCH := 120              # steps after the press that we watch for the ability
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
-const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Hearth Call): a squad of 2
+const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Rise and Shine): a squad of 2
 const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:

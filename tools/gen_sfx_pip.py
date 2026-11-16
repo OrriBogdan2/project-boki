@@ -5,7 +5,7 @@ dark. Her lantern holds a star she caught as a kid; it is her relic and her cour
 
 Light, warm and cute, never fiery: soft air, small brass-and-glass lantern rings, warm sine chords and
 starry sparkles kept under 6 kHz; seeds and roots are leafy and woody. Signature: the lantern chime
-(tender_lantern_chime: the Hearthlight and Hearth Call), and she cheers when a Hearth Call mends someone
+(tender_lantern_chime: the Hearthlight and Rise and Shine), and she cheers when a Rise and Shine mends someone
 (tender_cheer). Her voice is small and wordless. The kit's older tend_* files are rebuilt under their own
 names (content/sfx/tender.json "replaces"). Original synthesis, no samples.
 """
@@ -87,7 +87,7 @@ def pvoice(d, f0, f1, vowel='ee', breath=0.3, vib=0.02, a=0.01):
     return S.voice(d, f0, f1, vowel, breath=breath, rasp=0.0, vib=vib, scale=1.38, a=a) * shape(d, 0.0, d * 0.55, d * 0.45)
 
 
-# ------------------------------------------------------------------ LMB: Ember Cast (soft light, not fire)
+# ------------------------------------------------------------------ LMB: Hot and Cold (soft light, not fire)
 def ember(i):
     """A puff of warm light pushed from her hand: a soft fwip and a small twinkle."""
     d = 0.4
@@ -113,7 +113,7 @@ def kindled(i=0):
     return mix(bloom, thump, sparkle(d, 8, fall=0.15, gain=0.35), puff(0.3, 2000, 600, 0.005) * 0.4)
 
 
-# ------------------------------------------------------------------ RMB: Burrseed
+# ------------------------------------------------------------------ RMB: Stick Around
 def seed_aim():
     """Coiling for the throw: a rustle in her seed pouch and a faint rising shimmer."""
     d = 0.6
@@ -189,7 +189,7 @@ def flare():
     return mix(chord, lift, sparkle(d, 9, gain=0.3), at(bell(1568, 0.8, 0.25) * 0.25, 0.02))
 
 
-# ------------------------------------------------------------------ Shift: Relay Step, Carrier
+# ------------------------------------------------------------------ Shift: Foxtrot, Carry the Day
 def hop():
     """A light skip (or the start of her glide): a soft pad off the ground and a breath of air."""
     d = 0.35
@@ -214,9 +214,9 @@ def pickup():
     return mix(effort, cloth, at(shield, 0.1))
 
 
-# ------------------------------------------------------------------ X: Hearth Call
+# ------------------------------------------------------------------ X: Rise and Shine
 def call():
-    """Hearth Call: a soft wordless choir swelling up, and her lantern ringing out."""
+    """Rise and Shine: a soft wordless choir swelling up, and her lantern ringing out."""
     d = 1.3
     choir = np.zeros(N(d))
     for f in (392, 494, 587, 784):
@@ -229,7 +229,7 @@ LOOP_D = 2.0     # s: the channel loop's length; every note in it is a whole num
 
 
 def call_loop():
-    """The channel's warm loop (Hearth Call, 5 s): a G-major lantern chord breathing slowly, with soft
+    """The channel's warm loop (Rise and Shine, 5 s): a G-major lantern chord breathing slowly, with soft
     lantern chimes on a fixed beat whose tails wrap round the seam. Each note is a whole number of cycles
     in LOOP_D, so it repeats without a click. The game loops it on her and, quieter, on the ally."""
     n = N(LOOP_D); t = np.arange(n) / S.SR

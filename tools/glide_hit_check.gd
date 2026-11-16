@@ -5,7 +5,7 @@ extends "res://tools/abyss_check.gd"
 ## reopening in the air, the 0.7 s stun on landing. A monster's hit never spikes. Knocked: the glider stays
 ## open and the shove carries it. Stunned, or reeled in by Grimble's arm (which stuns): shut for the stun, a
 ## press reopens it once the stun ends. Then the air-knock rows ("Knocked in the air"): Lace, Kael, Vex and Albert
-## hit by Kael's LMB, Kael's RMB Smash, Albert's full Crushing Blow and a stun while gliding, in an air dash or
+## hit by Kael's LMB, Kael's RMB Final Swing, Albert's full Crushing Blow and a stun while gliding, in an air dash or
 ## falling. Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const SHOT := 10.0          # damage of the test shot
@@ -136,7 +136,7 @@ func _stun() -> void:
 	_wait_stun()
 	ok(_press_opens(Match.DT), "...a press opens it once the reel and its stun are over")
 
-## The air-knock hits, from the content: Kael's LMB, his RMB Smash push, Albert's full Crushing Blow, a stun.
+## The air-knock hits, from the content: Kael's LMB, his RMB Final Swing push, Albert's full Crushing Blow, a stun.
 func _air_hits() -> Dictionary:
 	var kael: Dictionary = Arch.def("juggernaut")
 	var blow: Dictionary = Arch.def("bulwark")["lmb"]

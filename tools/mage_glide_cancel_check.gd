@@ -1,6 +1,6 @@
 extends RefCounted
 ## The glider ends Sparkle's states (source patch 05.03.25: "Stuns, Roots, Grounds, and Glider cancel the
-## state"): a fresh press of the glide key in the air ends the Wirerun's charge or streak and Kitefall's hang the
+## state"): a fresh press of the glide key in the air ends the Wirerun's charge or streak and Stormfall's hang the
 ## way a stun ends the charge. The charge stays spent, the glider opens that step, nothing hits after the cancel.
 ## Holding Space never does it (DECISIONS 11-08). Runs inside --mage-combo-check and reports through its ok().
 
@@ -115,21 +115,22 @@ func _hang() -> void:
 	T.teleport(home + Vector3(3, 0, 0))
 	ac.aim_at(P, T.pos)
 	var hits0 := U.hits
-	ok("glider: Kitefall goes off", HunterKeys.ult_pressed(P))
+	ok("glider: Stormfall goes off", HunterKeys.ult_pressed(P))
 	ac.step(m, 0.6, func(): ac.aim_at(P, T.pos))
 	var hanging := U.phase() == MageUlt.AIR
 	_keys(true, false)
 	ac.step(m, 0.1)
-	ok("glider: Space held in the hang leaves Kitefall hanging", hanging and U.phase() == MageUlt.AIR and not P.gliding,
+	ok("glider: Space held in the hang leaves Stormfall hanging",
+		hanging and U.phase() == MageUlt.AIR and not P.gliding,
 			U.phase())
 	_keys(false, false)
 	m.step(DT)
 	var y0 := P.pos.y
 	_keys(false, true)
 	m.step(DT)
-	ok("glider: the glide key in the hang ends Kitefall into a glide from up there, the cooldown stays spent",
+	ok("glider: the glide key in the hang ends Stormfall into a glide from up there, the cooldown stays spent",
 			not U.running() and P.gliding and P.pos.y > y0 - 0.2 and float(K.cd["x"]) > 0.0,
 			"phase '%s' glide %s y %.1f -> %.1f cd %.1f" % [U.phase(), P.gliding, y0, P.pos.y, float(K.cd["x"])])
 	ac.step(m, 1.0, func(): _keys(false, true))
-	ok("glider: no strike after Kitefall's cancel", U.hits == hits0 and ac.dmg(T) == 0.0 and P.gliding,
+	ok("glider: no strike after Stormfall's cancel", U.hits == hits0 and ac.dmg(T) == 0.0 and P.gliding,
 			"hits %d took %.0f" % [U.hits - hits0, ac.dmg(T)])

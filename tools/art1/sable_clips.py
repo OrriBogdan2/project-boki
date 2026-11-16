@@ -315,7 +315,7 @@ def clips():
     # touching down (thf_land): a low crouch held 0.1, up in 0.08
     out.append(C("land_v", 0.18, [(0.0, LAND), (0.1, dict(LAND, pel=(0, 0, -0.21))), (0.18, END)]))
 
-    # the Bola (thf_bola: 0.05 the arm up, circles every 0.13 to 0.394, the sling at 0.42, the follow-through to 0.5, 0.75): the right fist whirled over her head, the left pistol out for balance
+    # the Dark Bola (thf_bola: 0.05 the arm up, circles every 0.13 to 0.394, the sling at 0.42, the follow-through to 0.5, 0.75): the right fist whirled over her head, the left pistol out for balance
     B = dict(hed=(-0.06, 0.1, 0.0), tor=(-0.04, -0.2, 0.04), prt=(-0.02, -0.08, 0), GL=(-0.3, 0.2, 1.06), BL=PR(30, 0), BE=PR(0, 80, (0, -1, 0.1)), smile=0.9, cock=0.8, pel=(0, -0.02, -0.05), FL=(-0.11, 0.1, A_Z), FR=(0.13, -0.08, A_Z))
     rc = lambda a_: (0.14 + 0.13 * math.cos(a_), 0.04 + 0.13 * math.sin(a_), 1.68)
     ks = [(0.0, END), (0.05, dict(B, G=rc(0.0)))]
@@ -329,7 +329,7 @@ def clips():
     ks += [(0.42, sl, "out"), (0.5, dict(sl, G=(0.08, 0.54, 1.18))), (0.75, END)]
     out.append(C("bola", 0.75, ks))
 
-    # the Shadow Knife (thf_knife: a whole-body spin from the first frame, the left hand cocked back, unwinding into a side-arm throw released at 0.12)
+    # the White Flash (thf_knife: a whole-body spin from the first frame, the left hand cocked back, unwinding into a side-arm throw released at 0.12)
     kn0 = dict(READY, GL=(-0.38, -0.12, 1.2), BL=PR(120, 20), hed=(0.0, 0.0, 0), pel=(0, 0, -0.06), FL=(-0.07, 0.03, A_Z + 0.05), FR=(0.07, 0.0, A_Z))
     kn1 = {"tor": (0.1, 0.46, 0), "prt": (0.2, 0.16, 0), "hed": (-0.14, -0.4, 0), "GL": (0.04, 0.56, 1.25), "BL": PR(-14, 4), "G": (0.3, 0.0, 1.02), "BE": PR(-50, -20), "pel": (0, 0.08, -0.08), "FL": (-0.11, 0.26, A_Z), "FR": (0.12, -0.22, A_Z), "smile": 1.0, "cock": 0.0, "brow": 0.2, "FRy": -0.5}
     out.append(C("knife", 0.45, [(0.0, dict(kn0, flip=(0, 0, 0))), (0.04, dict(kn0, flip=(0, -1.6, 0))), (0.09, dict(kn0, flip=(0, -4.4, 0)), "lin"), (0.12, dict(kn1, flip=(0, -TAU, 0)), "out"), (0.24, dict(kn1, flip=(0, -TAU, 0), GL=(0.02, 0.5, 1.2))), (0.45, dict(END, flip=(0, -TAU, 0)))]))
@@ -337,7 +337,7 @@ def clips():
     ar0 = dict(LAND, pel=(0, 0, -0.34), prt=(0.5, 0, 0), tor=(0.2, 0, 0), hed=(-0.5, 0, 0), G=(0.3, 0.3, 0.58), BE=PR(-30, -10), GL=(-0.26, 0.2, 0.34), BL=PR(30, -60))
     out.append(C("arrive", 0.6, [(0.0, dict(STAR, pel=(0, 0, 0.1), flip=(0, 0, 0))), (0.06, ar0, "out"), (0.3, dict(ar0, pel=(0, 0, -0.3))), (0.6, END)]))
 
-    # Encore (thf_encore): pistols raised as the ring grows, a little sink, then a whole-body spin opening out; the dance takes over at 0.4
+    # Last Dance (thf_encore): pistols raised as the ring grows, a little sink, then a whole-body spin opening out; the dance takes over at 0.4
     OPEN = {"G": (0.5, 0.14, 1.32), "BE": PR(-78, 8), "GL": (-0.5, 0.14, 1.32), "BL": PR(78, 8)}
     en0 = dict(UP, pel=(0, 0, -0.1), prt=(0.1, 0, 0), smile=1.0, cock=0.9, lid=0.2)
     out.append(C("encore", 0.55, [(0.0, END), (0.08, en0), (0.2, dict(en0, pel=(0, 0, -0.14))), (0.38, dict(READY, **OPEN, pel=(0, 0, 0.02), flip=(0, TAU, 0)), "smooth"), (0.55, dict(END, flip=(0, TAU, 0)))]))

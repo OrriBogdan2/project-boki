@@ -12,20 +12,20 @@ const OWN := 0.5                # a vertex belongs to the bone with this much of
 ## "node:<empty>", a .glb anchor its kit reads by name.
 const EMITTERS := {
 	"gunslinger": [["LMB rounds", "node:weapon_muzzle", "forearm.R"],
-		["RMB Burr Charge", "node:launcher_fire", "forearm.R"],
-		["RMB Burr Charge bell", "node:launcher_muzzle", "forearm.R"]],
-	"juggernaut": [["LMB slash", "blade_tip", "hand.R"], ["RMB Smash", "blade_tip", "hand.R"],
-		["E Warchain throw", "hand_chain", "hand.R"], ["E Warchain line", "node:anchor_chain", "hand.R"],
-		["X Gilded Riposte", "blade_tip", "hand.R"]],
-	"archer": [["LMB arrow", "bow_root", "bow"], ["RMB Heavy Shot nock", "nock", "bow_s"],
-		["E Hail Wall", "bow_root", "bow"], ["X Starpiercer", "bow_root", "bow"]],
-	"ashwick": [["LMB lance (right palm)", "nozzle", "hand.R"], ["RMB Cinder Shot", "nozzle", "hand.R"],
-		["left palm", "node:weapon_muzzle_l", "hand.L"], ["E Furnace Cloak", "chest", "hips"],
-		["X Flue Flight jet L", "heel_l", "jet.0"], ["X Flue Flight jet R", "heel_r", "jet.1"]],
-	"bulwark": [["LMB swing", "hammer_head", "x_weapon"], ["RMB Aegis", "shield_face", "x_shield"],
+		["RMB Coin Blast", "node:launcher_fire", "forearm.R"],
+		["RMB Coin Blast bell", "node:launcher_muzzle", "forearm.R"]],
+	"juggernaut": [["LMB slash", "blade_tip", "hand.R"], ["RMB Final Swing", "blade_tip", "hand.R"],
+		["E Short Leash throw", "hand_chain", "hand.R"], ["E Short Leash line", "node:anchor_chain", "hand.R"],
+		["X Blow for Blow", "blade_tip", "hand.R"]],
+	"archer": [["LMB arrow", "bow_root", "bow"], ["RMB Pin Down nock", "nock", "bow_s"],
+		["E Hemline", "bow_root", "bow"], ["X Finishing Touch", "bow_root", "bow"]],
+	"ashwick": [["LMB lance (right palm)", "nozzle", "hand.R"], ["RMB Spitfire", "nozzle", "hand.R"],
+		["left palm", "node:weapon_muzzle_l", "hand.L"], ["E Molten Hug", "chest", "hips"],
+		["X Red Carpet jet L", "heel_l", "jet.0"], ["X Red Carpet jet R", "heel_r", "jet.1"]],
+	"bulwark": [["LMB swing", "hammer_head", "x_weapon"], ["RMB Blue Guard", "shield_face", "x_shield"],
 		["hammer catch", "hammer_grip", "x_weapon"]],
-	"tender": [["RMB Burrseed", "lantern", "sun"], ["E Hearthlight", "lantern", "sun"],
-		["X Hearth Call", "lantern", "sun"], ["dash", "chest", "hips"]]}
+	"tender": [["RMB Stick Around", "lantern", "sun"], ["E Hearthlight", "lantern", "sun"],
+		["X Rise and Shine", "lantern", "sun"], ["dash", "chest", "hips"]]}
 const DT := 1.0 / 60.0
 
 var owner_check: RefCounted

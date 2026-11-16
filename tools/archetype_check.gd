@@ -296,7 +296,7 @@ func _data() -> void:
 	var rmb: Dictionary = Arch.def("archer")["rmb"]
 	var push: Array = rmb["pin"]["push"]
 	var push_text := "push %d -> %d" % [push[0], push[1]]
-	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
+	ok("Lace: Pin Down card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -337,7 +337,7 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
-## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s), opening at level 6.
+## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Surf's Up is 90s), opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
 	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 90.0 and int(rd.get("unlock", 6)) == 6
@@ -359,12 +359,12 @@ func _archer() -> void:
 	# no Focus meter (KIT_PARITY 5, cut by the owner): standing still builds nothing
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.6)
-	ok("archer passive: no Focus meter (Hawk Sense only)",
+	ok("archer passive: no Focus meter (Red Thread only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
+	# Red Thread stays: a rival under half health is seen through cover within 22m
 	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Red Thread: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
@@ -373,14 +373,14 @@ func _archer() -> void:
 		P.warm_t > 0.0 and P.shot_range_k == 1.0, "warm %.2f range_k %.1f" % [P.warm_t, P.shot_range_k])
 	P.equip("longbow")
 	step(m, 0.3)
-	# the Longbow draws: a full draw hits for 60
+	# the Drawstring draws: a full draw hits for 60
 	fresh(T)
 	step(m, 0.05, func(): P.inp["fire"] = true)
 	step(m, 1.2, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	step(m, 0.5)
-	ok("archer weapon: Longbow full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))
-	# the Heavy Shot is hold only: a tap looses nothing and spends no charge
+	ok("archer weapon: Drawstring full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))
+	# the Pin Down is hold only: a tap looses nothing and spends no charge
 	fresh(T); K.ch_rmb = 1.0
 	tap(m, P)
 	step(m, 0.3)
@@ -402,7 +402,7 @@ func _archer() -> void:
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
-	ok("archer RMB hold: Heavy Shot pins to the wall", K.last_variant == "hold" and dmg(T) >= 14.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	ok("archer RMB hold: Pin Down pins to the wall", K.last_variant == "hold" and dmg(T) >= 14.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
 	# a full charge: the hold reached full (the shared charge feedback ticked)
 	ok("archer RMB hold: charge reached full", K.charge_fulls >= 1 and K.charge_last >= 0.99, "fulls %d last %.2f" % [K.charge_fulls, K.charge_last])
 	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
@@ -416,17 +416,17 @@ func _archer() -> void:
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
 		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
-	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
+	# Slip Stitch: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	ok("archer dash: Spirit Walk", K.st.get("last_dash") == "spirit" and K.spirit.active() and P.spirit_t > 2.0, "dash %s ghost %.2f" % [str(K.st.get("last_dash")), P.spirit_t])
+	ok("archer dash: Slip Stitch", K.st.get("last_dash") == "spirit" and K.spirit.active() and P.spirit_t > 2.0, "dash %s ghost %.2f" % [str(K.st.get("last_dash")), P.spirit_t])
 	step(m, 0.3)
 	ok("archer dash: the roll moves you", P.pos.z > home.z + 1.5, "z %.1f" % (P.pos.z - home.z))
 	step(m, 3.0)
 	P.inp["move"] = Vector2.ZERO
-	ok("archer dash: Spirit Walk ends after 2.8s", not K.spirit.active() and P.spirit_t <= 0.0)
-	# in the air the press still starts a draw: the Heavy Shot has no air variant
+	ok("archer dash: Slip Stitch ends after 2.8s", not K.spirit.active() and P.spirit_t <= 0.0)
+	# in the air the press still starts a draw: the Pin Down has no air variant
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and not bool(K.rmb_ctx["air"]) and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
@@ -440,15 +440,15 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer bow: perfect release, Supercharged damage, a quick next draw", K.perfects == pf0 + 1 and dmg(T) >= 55.0 and dmg(T) <= 66.0 and K.draw.quick, "perfects %d took %.0f quick %s" % [K.perfects - pf0, dmg(T), K.draw.quick])
-	# E: Hail Wall: a line of falling arrows; damage over time, slow, blight
+	# E: Hemline: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("archer E: Hail Wall cast", K.in_e())
+	ok("archer E: Hemline cast", K.in_e())
 	step(m, 2.0)
-	ok("archer E: Hail Wall hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
+	ok("archer E: Hemline hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
 	step(m, 3.0)
-	ok("archer E: Hail Wall ends", not K.in_e())
+	ok("archer E: Hemline ends", not K.in_e())
 	await done(m)
 
 # ------------------------------------------------------------------ Mage
@@ -457,7 +457,7 @@ func _mage() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: MageKit = P.ak
-	ok("vireo: Coilcaster in hand, light weight", P.wid == "coilcaster" and Arch.weight("mage") == "light" and not Arch.def("mage").has("r"))
+	ok("vireo: Finger Guns in hand, light weight", P.wid == "coilcaster" and Arch.weight("mage") == "light" and not Arch.def("mage").has("r"))
 	# Sparks: weapon hits load one each, four make a Live foe
 	K.on_deal(T, 4.0, {"src": "shot"})
 	ok("vireo passive: a weapon hit loads a Spark", K.spark_n(T) == 1)
@@ -487,12 +487,12 @@ func _mage() -> void:
 	ok("vireo RMB hold: Coilshot hits + Sparks", K.last_variant == "hold" and dmg(T) >= 12.0 and K.spark_n(T) >= 1, "took %.0f" % dmg(T))
 	ok("vireo RMB: a hit drops a charge orb", K.motes.size() >= 1, str(K.motes.size()))
 	ok("vireo RMB: the orb does not give Wirerun back (only a full-Static foe does)", P.dashes < 1.0)
-	# Skycall: lightning flings and grounds
+	# Undercurrent: lightning flings and grounds
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(5, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.cd["e"] = 0.0
 	var x0 := T.pos.x
 	P.ak.use_e()
 	step(m, 2.2)
-	ok("vireo E: Skycall damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
+	ok("vireo E: Undercurrent damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
 	ok("vireo E: Grounded (no dashing)", KitStatus.grounded(T))
 	var d0 := T.dashes
 	T.do_dash()
@@ -505,7 +505,7 @@ func _gunslinger() -> void:
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
 	var medium := Arch.weight("gunslinger") == "medium"
-	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and medium and not Arch.def("gunslinger").has("r"))
+	ok("venator: Brass Tacks in hand, medium, no R", P.wid == "quill_rifle" and medium and not Arch.def("gunslinger").has("r"))
 	# Fever: an ability that lands lights one flat 6% lifesteal
 	P.hp = 60.0
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
@@ -515,7 +515,7 @@ func _gunslinger() -> void:
 	K.on_deal(T, 100.0, {"src": "shot"})
 	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge: fired at a foe, it goes off on them (damage + Dazed, no cone); only a wall gives the cone
+	# Coin Blast: fired at a foe, it goes off on them (damage + Dazed, no cone); only a wall gives the cone
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)
@@ -530,10 +530,10 @@ func _gunslinger() -> void:
 			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 7.6))
 	_burr_terrain(m, P, T, K, home, r[5])
 	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
-	# Longneedle: charge, then a piercing beam
+	# Palm Spear: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("venator E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
+	ok("venator E: Palm Spear winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
@@ -545,7 +545,7 @@ func _gunslinger() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
 
-## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
+## Coin Blast over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
 ## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
 ## Puts the strip back after.
 func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
@@ -593,7 +593,7 @@ func _bulwark() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	var home: Vector3 = r[4]
 	var K: BulwarkKit = P.ak
-	ok("bulwark: War Hammer & Aegis", P.wid == "tower_shield")
+	ok("bulwark: Capstan Hammer", P.wid == "tower_shield")
 	# hold: raise the shield; blocked shots become Guard
 	K.res = 0.0
 	P.inp["sec_hold"] = true
@@ -606,7 +606,7 @@ func _bulwark() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
-	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Shield Charge ends in a Shield Slam
+	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Full Ahead ends in a Shield Slam
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
@@ -620,7 +620,7 @@ func _bulwark() -> void:
 	step(m, 0.3)
 	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and dmg(T) <= 0.0 and absf(T.pos.x - x0 - 2.0) < 0.3, "pushed %.1f" % (T.pos.x - x0))
 	K.res = 0.0
-	# Crushed: a Shield Charge into a wall stuns (no heal)
+	# Crushed: a Full Ahead into a wall stuns (no heal)
 	var W: World = m.world
 	var lv: int = r[5]
 	var wk: PackedByteArray = W.kind; var wl: PackedByteArray = W.level
@@ -642,7 +642,7 @@ func _bulwark() -> void:
 	step(m, 0.35, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
-	ok("bulwark payoff: Shield Charge into a wall Crushes (stun, no heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp <= hp0 + 1.0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
+	ok("bulwark payoff: Full Ahead into a wall Crushes (stun, no heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp <= hp0 + 1.0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
 	for dz in range(-3, 4):
 		for dx in range(0, 3):
 			wl[W.idx(int(home.x) + 3 + dx, int(home.z) + dz)] = lv
@@ -664,7 +664,7 @@ func _bulwark() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok("bulwark LMB hold: full Crushing Blow (damage, no stun of its own)", dmg(T) >= 30.0 and T.stun_t <= 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
-	# dash: Whirl; with the shield up, a Shield Charge
+	# dash: Whirl; with the shield up, a Full Ahead
 	P.teleport(home); P.dashes = P.max_dashes(); fresh(T); T.teleport(home + Vector3(6, 0, 0)); aim_at(P, T.pos)
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
@@ -679,15 +679,15 @@ func _bulwark() -> void:
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false; P.inp["move"] = Vector2.ZERO
 	step(m, 0.1)
-	ok("bulwark dash with the shield up: Shield Charge", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
-	# E: Mending Ground: the column comes down for 1s, then the zone heals over time and ends in a burst
+	ok("bulwark dash with the shield up: Full Ahead", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
+	# E: Safe Harbour: the column comes down for 1s, then the zone heals over time and ends in a burst
 	P.teleport(home); P.hp = P.max_hp - 100.0; hp0 = P.hp
 	P.inp["aim"] = home + Vector3(1, 0, 0)
 	P.ak.use_e()
 	step(m, 0.5)
 	var mid := P.hp
 	step(m, 4.8)
-	ok("bulwark E: Mending Ground heals after its delay, over its zone", mid <= hp0 + 1.0 and P.hp >= hp0 + 30.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
+	ok("bulwark E: Safe Harbour heals after its delay, over its zone", mid <= hp0 + 1.0 and P.hp >= hp0 + 30.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R
@@ -748,7 +748,7 @@ func _infusion() -> void:
 	var v := Arch.infusion(KinLib.kin("cindle"))
 	var f := Arch.fill(Arch.def("thief")["rmb"]["sockets"], v, "rmb", "projectile")
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
-	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
+	ok("infusion: Vespyx poisons the Thief's Dark Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
 	ok("infusion: Gravadillo adds a control to Sparkle's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
@@ -772,8 +772,8 @@ func _infusion() -> void:
 	var r := setup("thief", 6.0, "cindle")
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	tap(m, P)
-	step(m, 0.8)          # (the Bola's 0.4s wind-up with the lane, then its flight)
-	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
+	step(m, 0.8)          # (the Dark Bola's 0.4s wind-up with the lane, then its flight)
+	ok("infusion runtime: Dark Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
 	r = setup("mage", 5.0, "puddlet")
 	m = r[0]; P = r[1]; T = r[2]
@@ -795,15 +795,15 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Skycall and Longneedle show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
+	ok("feel: Undercurrent and Palm Spear show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
-	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
+	ok("feel: the Dark Bola and Short Leash are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
 	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
-			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
+			+ " (the game data runs to 80s; Gil's Surf's Up 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0

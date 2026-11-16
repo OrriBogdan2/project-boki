@@ -199,7 +199,7 @@ func _juggernaut_lmb() -> void:
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
 	await _go(2.1, swing, _sheet("lmb",
-			"LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash "
+			"LMB Bitter End: a slash, the arc burning away, tip burst on the dummy; the next slash "
 			+ "back the other way",
 			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
 	await _go(GAP)
@@ -268,7 +268,7 @@ func _juggernaut_drop() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+			"RMB in the air, Hit the Deck: the jump, the press near its top (the hit circle ahead of him), "
 			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
 			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
@@ -302,7 +302,7 @@ func _juggernaut_e() -> void:
 		var at_foe: bool = K.warchain.state == "hooked"
 		return (T.position if at_foe else P.position) + Vector3(0, 0.9, 0)
 	await _go(2.6, chain, _sheet("e",
-			"E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the "
+			"E, Short Leash: the throw from the hand, the hook biting the dummy (sparks, a scorch), the "
 			+ "chain straining as he backs off, E again: the haul with sparks off his feet, the arrival",
 			[0.13, 0.3, 0.38, 0.5, 0.9, 1.24, 1.32, 1.5, 1.8], on_action), 4.5)
 	await _go(GAP)
@@ -319,7 +319,7 @@ func _juggernaut_spin() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(2.0, spin, _sheet("spin",
-			"Smash in the Warchain's pull, Cinder Spin: the full arc, the low wall of flame, the "
+			"Final Swing in the Short Leash's pull, Full Circle: the full arc, the low wall of flame, the "
 			+ "burn under him",
 			[0.75, 0.82, 0.88, 0.96, 1.05, 1.15, 1.3, 1.5, 1.8]), 4.0)
 	await _go(GAP)
@@ -335,7 +335,7 @@ func _juggernaut_r() -> void:
 			K.riposte.block(T, {})
 		_aim(T.pos)
 	await _go(2.7, ult, _sheet("r",
-			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
+			"X, Blow for Blow: the gold guard, a blocked hit, the cleave up through the strip, the "
 			+ "gold scorch and embers",
 			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]), 1.5)
 	await _go(GAP)
@@ -449,7 +449,7 @@ func _archer_heavy() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
-			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
+			"RMB Pin Down: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
 			+ "with its thick thread, the shove, the seam it leaves",
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
@@ -464,7 +464,7 @@ func _archer_dash() -> void:
 		_aim(T.pos)
 	var on_her := func() -> Vector3: return P.position + Vector3(0, 0.9, 0)
 	await _go(3.6, dash, _sheet("dash",
-			"Shift, Spirit Walk: the roll unspooling thread, the walk trailing loose threads through a rock, the end",
+			"Shift, Slip Stitch: the roll unspooling thread, the walk trailing loose threads through a rock, the end",
 			[0.2, 0.28, 0.36, 0.5, 0.9, 1.5, 2.2, 3.0, 3.4], on_her), 2.0)
 	await _go(GAP)
 
@@ -477,7 +477,7 @@ func _archer_e() -> void:
 			K.cast_e()
 		_aim(T.pos)
 	await _go(5.4, hail, _sheet("e",
-			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, her red "
+			"E Hemline: the volley up, needles raining on the arc, silver sparks where they land, her red "
 			+ "laces criss-crossing post to post and across the ground", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
 			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
 	await _go(GAP)
@@ -492,7 +492,7 @@ func _archer_r() -> void:
 		P.inp["fire"] = t > 0.6 and t < 0.66 or t > 1.6 and t < 1.66 or t > 2.6 and t < 2.66
 		_aim(T.pos)
 	await _go(4.6, ult, _sheet("r",
-			"X Starpiercer: armed, a nock, the beam stitching a seam across the ground, the hit, the last and "
+			"X Finishing Touch: armed, a nock, the beam stitching a seam across the ground, the hit, the last and "
 			+ "deepest beam", [0.15, 0.3, 0.8, 0.95, 1.05, 1.3, 2.95, 3.1, 4.4]), 3.0)
 	await _go(GAP)
 

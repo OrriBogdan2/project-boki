@@ -155,7 +155,7 @@ func _presses() -> void:
 	ok(KinMerge.active(P), "X merges you with your Boki")
 	P = _fresh()
 	P.lvl = int(Hunter.ULT_AT[0])
-	var has_own := P.ak != null and P.ak.has_ult()        # the default medium (Vex) has one: Cinderfall
+	var has_own := P.ak != null and P.ak.has_ult()        # the default medium (Vex) has one: Penny Drop
 	P.lvl = 1
 	ok(not HunterKeys.ult_pressed(P), "R before level %d does nothing" % int(Hunter.ULT_AT[0]))
 	P.lvl = int(Hunter.ULT_AT[0])

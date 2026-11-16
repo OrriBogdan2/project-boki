@@ -410,7 +410,7 @@ C.bake("rmb_gather", 0.46, [(0, STANCE), (0.08, m(GATHER, e="out")), (0.16, m(GA
 # jump while charging: tucked, fists rising overhead, leaning in
 LEAP = m(JUMP, pos=(0, 0.04, 0.16), hips=(-20, 0, 0), head=(14, 0, 0), hr=hand(0.0, 0.2, 0.3), hl=lhand(0.0, 0.2, 0.3), fr=(AX, 0.2, AZ + 0.46), fl=(-AX, 0.12, AZ + 0.4), lip=0.6, jaw=0.4, **FIGHT)
 C.bake("rmb_leap", 0.5, [(0, GATHER), (0.1, m(LEAP, pos=(0, 0.06, 0.1), e="out")), (0.3, LEAP), (0.5, m(LEAP, pos=(0, 0.04, 0.18)))])
-# RMB let go, Quakefall (1.36, the hop a real 0.6 s arc, ext/kit-tarek-61-67): up off both legs (0.05), arched at the top,
+# RMB let go, Rock Bottom (1.36, the hop a real 0.6 s arc, ext/kit-tarek-61-67): up off both legs (0.05), arched at the top,
 # fists behind the head (0.3), over and down (0.5), the smash on landing (0.6, knees wide), a rebound in the crater (0.7),
 # low over the fists (0.88), heaved up (1.12-1.36)
 ARCH = m(LEAP, pos=(0, 0.0, 0.22), hips=(16, 0, 0), head=(-12, 0, 0), hr=hand(-0.06, -0.14, 0.58), hl=lhand(-0.06, -0.14, 0.58), er=(0.9, 0.2, 0.4), el=(-0.9, 0.2, 0.4), fr=(AX + 0.06, -0.14, AZ + 0.3), fl=(-AX - 0.06, -0.1, AZ + 0.34), jaw=0.5, lip=0.7)
@@ -437,24 +437,24 @@ C.bake("dash_land", 0.75, [(0, m(SMASH, pos=(0, 0.04, -0.3))), (0.05, m(SMASH, p
 BARGE = m(JUMP, pos=(0, 0.2, 0.04), rot=(0, 0, 26), hips=(-26, 12, 20), head=(14, 0, -30), hr=hand(-0.1, 0.46, -0.4), hl=lhand(-0.12, 0.2, -0.16), el=(-0.7, -0.3, -0.5), fr=(AX, -0.5, AZ + 0.08), fl=(-AX, -0.34, AZ + 0.2), fra=-50.0, fla=-40.0, lip=-0.5, jaw=0.4)
 C.bake("dash_air", 0.23, [(0, JUMP), (0.03, m(JUMP, hr=hand(-0.14, 0.2, -0.2), hl=lhand(-0.14, 0.2, -0.2), hips=(-14, 0, -8), e="out")), (0.08, m(BARGE, e="snap")), (0.18, m(BARGE, pos=(0, 0.22, 0.04))),
                           (0.23, m(BARGE, fr=(AX, 0.1, AZ + 0.3), fl=(-AX, 0.0, AZ + 0.36), fra=-10.0, fla=-10.0, hips=(-12, 6, 10)))])
-# E, Stone Row (0.95): reared back, fists high (0.06), slammed down on the tell (0.18), held, heaved up and out as the
+# E, Foothold (0.95): reared back, fists high (0.06), slammed down on the tell (0.18), held, heaved up and out as the
 # rocks rise (0.36), a proud settle
 REAR = m(ARCH, pos=(0, -0.08, 0.02), hips=(14, 0, 0), head=(-12, 0, 0), fr=(AX + 0.14, -0.12, AZ), fl=(-AX - 0.14, 0.1, AZ), fra=0.0, fla=20.0, jaw=0.3, lip=0.6)
 HEAVE = m(STANCE, pos=(0, 0.0, -0.06), rot=(0, 0, 0), hips=(8, 0, 0), head=(-12, 0, 0), hr=hand(0.3, 0.3, 0.38), hl=lhand(0.3, 0.3, 0.38), er=(0.9, -0.4, -0.4), el=(-0.9, -0.4, -0.4), lip=1.0, jaw=0.45, fr=(AX + 0.16, -0.02, AZ), fl=(-AX - 0.16, 0.02, AZ), frt=-20.0, flt=20.0)
 C.bake("e_row", 0.95, [(0, STANCE), (0.06, m(REAR, e="out")), (0.18, m(SMASH, pos=(0, 0.06, -0.5), hr=hand(-0.12, 0.58, -0.7), hl=lhand(-0.12, 0.58, -0.7), e="snap")), (0.26, m(SMASH, pos=(0, 0.06, -0.47), hr=hand(-0.12, 0.58, -0.68), hl=lhand(-0.12, 0.58, -0.68))),
                        (0.38, m(HEAVE, e="out")), (0.6, m(HEAVE, pos=(0, 0, -0.04))), (0.95, STANCE)])
-# X held, Basalt Spine: sunk wide, both fists out at the ground; he leans along the ridge being dragged
+# X held, Backbone: sunk wide, both fists out at the ground; he leans along the ridge being dragged
 SPAIM = m(GATHER, pos=(0, 0, -0.44), hips=(-16, 0, 0), head=(10, 0, 0), hr=hand(0.5, 0.14, -0.62), hl=lhand(0.5, 0.14, -0.62), er=(0.5, -0.6, 0.6), el=(-0.5, -0.6, 0.6), fr=(AX + 0.3, -0.04, AZ), fl=(-AX - 0.3, 0.04, AZ), jaw=0.1, lip=-0.5)
 C.bake("x_aim", 0.62, [(0, STANCE), (0.12, m(SPAIM, e="out")), (0.32, m(SPAIM, pos=(0, 0, -0.46))), (0.62, m(SPAIM, pos=(0, 0, -0.44)))], over=tremble)
 # X let go (1.0): fists up (0.05), driven down (0.1, the cracks), held through the 0.2 s cracks and 0.4 s rise, heaved up
 # as the ridge stands (0.7)
 C.bake("x_spine", 1.0, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.0, 0.2, 0.5), hl=lhand(0.0, 0.2, 0.5), e="out")), (0.1, m(SMASH, pos=(0, 0.04, -0.58), hr=hand(0.0, 0.56, -0.74), hl=lhand(0.0, 0.56, -0.74), e="snap")),
                         (0.55, m(SMASH, pos=(0, 0.04, -0.54), hr=hand(0.0, 0.56, -0.7), hl=lhand(0.0, 0.56, -0.7))), (0.7, m(HEAVE, e="out")), (1.0, STANCE)])
-# Tremor Sense: a palm flat on the ground, the head cocked at what it feels, the other fist up
+# Sight Unseen: a palm flat on the ground, the head cocked at what it feels, the other fist up
 SENSE = m(GATHER, pos=(0, 0.02, -0.5), hips=(-34, 0, 10), head=(14, 16, -24), hr=hand(-0.04, 0.5, -0.66), hl=lhand(0.0, 0.3, -0.16), er=(0.8, -0.4, 0.2), el=(-0.7, -0.3, -0.6), fing_r=0.0, thumb_r=0.0, wr=(-50, 0, 0), lip=0.5, jaw=0.05)
 C.bake("sense", 0.75, [(0, STANCE), (0.12, m(SENSE, e="out")), (0.45, SENSE), (0.75, STANCE)])
 
-# Rock Hop (item 111, breah_hop, breah_skate): one hop off a rock that rises under the foot, low and fast (0.28), and the
+# Leap of Faith (item 111, breah_hop, breah_skate): one hop off a rock that rises under the foot, low and fast (0.28), and the
 # short skate on the rock as it rises, one foot forward, the stone arm out behind for balance (0.3)
 SKATE = m(STANCE, pos=(0, 0, -0.2), rot=(0, 0, 58), hips=(-16, 0, -12), head=(10, 0, -46), hr=hand(0.26, -0.3, -0.14), hl=lhand(0.24, 0.26, -0.26), jaw=0.2, lip=1.0,
           fr=(AX + 0.18, -0.2, AZ), fl=(-AX - 0.14, 0.26, AZ), fra=-8.0, fla=10.0, frt=0.0, flt=0.0)

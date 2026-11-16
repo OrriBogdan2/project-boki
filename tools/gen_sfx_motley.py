@@ -10,14 +10,14 @@ low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle
   os_orb (fire, 3 takes)       a violet orb flicked out: a soft void puff and a music-box tine
   os_orb_hot (fire, 3 takes)   the charged void orb: a deeper puff, a two-tine flourish, a low gulp
   os_prime                     the orb at full: a quiet tine trill
-  ostra_music_box              SIGNATURE: the crank's eerie tune, when Brimseed is nearly ripe (its column)
-  ostra_spring_boing           SIGNATURE: the jack springing out as Brimseed pops
+  ostra_music_box              SIGNATURE: the crank's eerie tune, when Gag Gift is nearly ripe (its column)
+  ostra_spring_boing           SIGNATURE: the jack springing out as Gag Gift pops
   os_snap_wind / os_snap / os_snap_hit   Snap: the crank ratcheting / the spring-loaded spear / the crown stun
   os_swap_lob / os_swap        Trade: the toss (a low void whoosh, a whisper and a glass sting) / the
                                arrival, cap bells ringing
-  os_seed / os_pop             Brimseed planted / popped
+  os_seed / os_pop             Gag Gift planted / popped
   os_empower                   Swollen: the Void inflating round him, a giggle
-  os_well / os_well_hum        Nightwell: the gathering implosion / the well opening
+  os_well / os_well_hum        Main Attraction: the gathering implosion / the well opening
   ostra_dash                   a floating lurch, a small spring and the cap bells
   ostra_hover (loop)           no footsteps, he floats: a soft low Void hum with a whisper on it while he moves
                                (HoverHum levels and pitches it with his speed)
@@ -260,7 +260,7 @@ def swap():
     return pad(lpf(mix(soft(rush, 30), pop, jingle, fo(tail_)), 8000), d)
 
 
-# ------------------------------------------------------------------ E: Brimseed
+# ------------------------------------------------------------------ E: Gag Gift
 def seed():
     """The seed dropped: a soft void plop, a little wind-up of the crank, a single low tine."""
     d = 0.7
@@ -272,7 +272,7 @@ def seed():
 
 
 def pop():
-    """Brimseed popped: a deep void blast, the air sucked back in, confetti of bells."""
+    """Gag Gift popped: a deep void blast, the air sucked back in, confetti of bells."""
     d = 1.3
     blast = mix(click(0.005, 1500, 6500) * 1.4, kick(140, 38, d, 0.03, 0.12, 3.2) * 0.85,
                 crack(0.5, 200, 3000, 0.04) * 2.2, sub(55, 30, 0.9, 0.2) * 0.55)
@@ -293,9 +293,9 @@ def empower():
     return pad(mix(soft(swell, 20), inflate, laugh, shimmer), d)
 
 
-# ------------------------------------------------------------------ R: Nightwell
+# ------------------------------------------------------------------ R: Main Attraction
 def well():
-    """Nightwell called: the Void gathering in an implosion, a hollow drone deepening, the box's tune bent low."""
+    """Main Attraction called: the Void gathering in an implosion, a hollow drone deepening, the box's tune bent low."""
     d = 1.6; t = T(d)
     gather = mix(void(1.0, 800, 1.0) * 1.0, swoosh(1.0, 2500, 300, 1.4, 1.0, 0.6) * 0.5)
     drone = S.sweep(110, 55, d) * 0.3 * np.minimum(1, t / 0.4) * np.exp(-np.maximum(0, t - 1.1) / 0.2)

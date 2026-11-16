@@ -2,7 +2,7 @@ extends RefCounted
 ## --cinder-art-check: Cinder's model (ART-1) against her kit, through the real match code and render path.
 ## The fire leaves her casting palm (no weapon; the left palm has its own point) through the idle hold and
 ## the stream, and that palm is really held out, while its rules still start where they did (the kit's NOZZLE);
-## her magma cracks brighten while it runs and fall back after; in Flue Flight the fire bursts from both heels
+## her magma cracks brighten while it runs and fall back after; in Red Carpet the fire bursts from both heels
 ## (their flames stretched by the clip) and the tail, no stream runs and the hand is free; the fire surfaces are
 ## on the flame shader. Never touches the save.
 
@@ -107,7 +107,7 @@ func run(main: Node) -> void:
 	await main.get_tree().create_timer(AshwickKit.CRACKS_FADE + 0.2).timeout
 	ok(_emit(P) < emit0 + 0.2, "the cracks fall back after (%.1f)" % _emit(P))
 	var jet := kit.jet
-	ok(jet.start(), "Flue Flight lifts off")
+	ok(jet.start(), "Red Carpet lifts off")
 	var spread := 0.0
 	var heels_low := true
 	var tail_behind := true

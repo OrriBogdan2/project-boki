@@ -162,17 +162,17 @@ func _start_dict() -> Dictionary:
 ## What the host plays once the guest's hunter is here (G): the displace moves.
 func _scenario(G: Hunter) -> void:
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + BOT_AT, {"arch": "none"})
-	await _move("Kael Warchain self-pull", "juggernaut", Vector3(6, 0, 0), _kael, 1.8, G, B, ["self"])
-	await _move("Kael Warchain sling", "juggernaut", Vector3(6, 0, 0), _sling, 1.8, G, B, ["self"])
-	await _move("Grimble Deep Reach reel", "dredge", Vector3(6, 0, 0), _dredge, 2.0, G, B, ["guest"])
+	await _move("Kael Short Leash self-pull", "juggernaut", Vector3(6, 0, 0), _kael, 1.8, G, B, ["self"])
+	await _move("Kael Short Leash sling", "juggernaut", Vector3(6, 0, 0), _sling, 1.8, G, B, ["self"])
+	await _move("Grimble Sticky Fingers reel", "dredge", Vector3(6, 0, 0), _dredge, 2.0, G, B, ["guest"])
 	await _move("Motley swap dash", "ostra", Vector3(8, 0, 0), _ostra, 2.2, G, B, ["guest", "self"], {"tp": true})
-	await _move("Meeko Hearth Call pull", "tender", Vector3(8, 0, 0), _meeko, 5.4, G, B, ["guest"],
+	await _move("Meeko Rise and Shine pull", "tender", Vector3(8, 0, 0), _meeko, 5.4, G, B, ["guest"],
 		{"mates": true, "tp": true})
-	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"])
+	await _move("Sparkle Stormfall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"])
 	await _move("Knock into a wall", "mage", Vector3(4, 0, 2), _knock, 1.4, G, B, ["guest"])
 	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
-	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
-	await _move("Neve Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
+	await _move("Grimble Mad Dash dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
+	await _move("Neve Free Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
 
 ## One move: the same ability on a bot (the offline reference), then on the guest's hunter from the same spot.
 ## `who` lists whose path is measured: "self" (the caster, on the host) and/or "guest" (the one it moves).

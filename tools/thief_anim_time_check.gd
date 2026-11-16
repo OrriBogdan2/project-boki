@@ -133,7 +133,7 @@ func _lmb(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			at.size() >= 3 and absf(gap - 0.45) < 0.03 and hands[0] != hands[1], "gap %.3f %s" % [gap, str(hands)])
 	_settle(m, P, K, home, 0.8)
 
-## RMB Bola: the lane shows 0.4 s (the footage's 0.4-0.6 s), the sling leaves on the clip's sling key.
+## RMB Dark Bola: the lane shows 0.4 s (the footage's 0.4-0.6 s), the sling leaves on the clip's sling key.
 func _bola(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	A.aim_at(P, home + Vector3(6.0, 0, 0))
 	_settle(m, P, K, home, 0.3)
@@ -142,12 +142,12 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.inp["sec_hold"] = false
 	P.ak.press_rmb()
 	var r := _time(m, P, K, ["thf_bola"], 1.2, func() -> bool: return not K.bola.is_empty())
-	A.ok("Sable timing Bola: thrown 0.4-0.6 s after the press (the source's lane), on the clip's sling key",
+	A.ok("Sable timing Dark Bola: thrown 0.4-0.6 s after the press (the source's lane), on the clip's sling key",
 			float(r["hit"]) >= 0.4 - DT and float(r["hit"]) <= 0.6 and absf(float(r["at"]) - BOLA_SLING) < FRAME * 0.5
 			and float(r["in"]) <= BLEND_IN, "thrown %.2f clip %.2f in %.2f" % [r["hit"], r["at"], r["in"]])
 	_settle(m, P, K, home, 0.6)
 
-## E Shadow Knife: the throw is released on the clip's key (spun into a side-arm throw), the recast is one
+## E White Flash: the throw is released on the clip's key (spun into a side-arm throw), the recast is one
 ## frame (the source: under 0.2 s) and arrives with its clip; the forced return at 6 s steps to the dagger too,
 ## from a cartwheel as well.
 func _knife(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
@@ -252,7 +252,7 @@ func _vault_air(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			down > 0.0 and land >= down - DT and land <= down + DT * 2.0, "down %.2f land %.2f" % [down, land])
 	_settle(m, P, K, home, 0.8)
 
-## X Encore: the ring grows 0.4 s, then a blade every 0.2 s for 2 s (10 beats), the dance clip on the beat from
+## X Last Dance: the ring grows 0.4 s, then a blade every 0.2 s for 2 s (10 beats), the dance clip on the beat from
 ## 0.4 s, and nothing after 2.4 s.
 func _encore(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	_settle(m, P, K, home, 0.3)
@@ -281,14 +281,14 @@ func _encore(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	var gap := (float(beats[-1]) - float(beats[0])) / maxf(beats.size() - 1, 1) if beats.size() > 1 else 0.0
 	print("TIME thf_encore: first %s, beats %d from %.2f every %.3f, dance from %.2f (clip clock %.2f), over %.2f"
 			% [first, beats.size(), beats[0] if beats.size() > 0 else -1.0, gap, dance_at, danced_at, gone])
-	A.ok("Sable timing Encore: the cast clip on the press, a blade beat at 0.4 s then every 0.2 s (10 beats)",
+	A.ok("Sable timing Last Dance: the cast clip on the press, a blade beat at 0.4 s then every 0.2 s (10 beats)",
 			first == "thf_encore" and beats.size() == int(d["shots"])
 			and absf(float(beats[0]) - float(d["grow"])) < DT * 2.0
 			and absf(gap - float(d["time"]) / float(d["shots"])) < 0.02
 			and absf(gone - float(d["grow"]) - float(d["time"])) < 0.1,
 			"%s %d beats first %.2f gap %.3f over %.2f"
 			% [first, beats.size(), beats[0] if beats.size() > 0 else -1.0, gap, gone])
-	A.ok("Sable timing Encore: the dance takes over by the first beat, on the beat's clock",
+	A.ok("Sable timing Last Dance: the dance takes over by the first beat, on the beat's clock",
 			dance_at >= 0.0 and dance_at <= float(d["grow"]) + DT * 2.0
 			and absf(dance_at - danced_at - float(d["grow"])) < DT * 2.0,
 			"dance from %.2f, clip clock starts %.2f" % [dance_at, dance_at - danced_at])

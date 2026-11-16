@@ -138,14 +138,15 @@ func _arena() -> void:
 		"dummy label shows DPS", String((A.dummies[0]["label"] as Label3D).text).begins_with("DPS"),
 		String((A.dummies[0]["label"] as Label3D).text)
 	)
-	# a real Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
+	# a real Dark Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
 	P.teleport(D.pos + Vector3(0, 0, 4.0)); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
+	step(m, 0.75)          # (the Dark Bola's 0.4s wind-up with the lane, then its flight)
 	var tk := P.ak as ThiefKit
-	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
+	ok("thief Dark Bola hits a dummy, Grounds and Marks it",
+		float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
 		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
 	(P.ak as ThiefKit).add_mark(D, 4, true)
 	step(m, 0.05)
@@ -235,15 +236,15 @@ func _arena() -> void:
 		var mid := -1.0
 		var ring_ok := false
 		if a == "gunslinger":
-			# Vex's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			# Vex's hold is Palm Spear's charge (E): a ring, a full tick, the shot
 			P.ak.cd["e"] = 0.0; P.ak.use_e()
 			step(m, 0.5)
 			ok(
-				"hold: gunslinger Longneedle winds up (ring)",
+				"hold: gunslinger Palm Spear winds up (ring)",
 				not P.ak.chg.is_empty() and is_instance_valid(P.ak.chg.get("ring"))
 			)
 			step(m, 0.7)
-			ok("hold: gunslinger Longneedle ticks full and fires", P.ak.charge_fulls > f0 and P.ak.chg.is_empty())
+			ok("hold: gunslinger Palm Spear ticks full and fires", P.ak.charge_fulls > f0 and P.ak.chg.is_empty())
 			continue
 		var t := 0.0
 		while t < 1.45:
@@ -292,8 +293,8 @@ func _arena() -> void:
 		JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05,
 		"enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
 	# X is Kael's own ultimate (the Arena opens it with the ult toggle at level 6); R stays the Merge
-	ok("juggernaut: his own ultimate is on X (Gilded Riposte)",
-		String(Arch.def("juggernaut")["x"]["name"]) == "Gilded Riposte")
+	ok("juggernaut: his own ultimate is on X (Blow for Blow)",
+		String(Arch.def("juggernaut")["x"]["name"]) == "Blow for Blow")
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")

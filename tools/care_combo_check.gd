@@ -396,9 +396,9 @@ func _statue_locks() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
-## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
+## Item 27: no glide while sealed in Freeze Frame (she falls; each press is refused), and Shift ends it and
 ## skates straight out at speed instead of stopping.
-## The held Rink Wall look's slab, or null when no wall look is up.
+## The held Cold Front look's slab, or null when no wall look is up.
 func _wall_slab(K: RimewrightKit) -> MeshInstance3D:
 	var e: Dictionary = K.lk().held.get("wall", {})
 	if e.is_empty() or not is_instance_valid(e["n"]):
@@ -452,13 +452,13 @@ func _rime_glide_skate() -> void:
 		prev = P.pos
 	var skate_v := float(K.dash_def()["speed"])
 	ok(
-			"tm X: Shift ends Rimelock and she skates straight out at speed (first 0.3 s >= 80%)",
+			"tm X: Shift ends Freeze Frame and she skates straight out at speed (first 0.3 s >= 80%)",
 			out_of_ult and slowest >= 0.8 * maxf(before, skate_v),
 			"slowest %.1f m/s (before %.1f, skate %.1f)" % [slowest, before, skate_v])
 	P.inp["dash_down"] = false
 	await _free(m)
 
-## Skating into Rimelock (items 64/65): the skate's momentum carries the frozen statue on as the shell closes
+## Skating into Freeze Frame (items 64/65): the skate's momentum carries the frozen statue on as the shell closes
 ## (x.carry_t, easing to a stop: skate speed * carry_t * 2/3), the rink riding with her, her facing locked; then
 ## she is rooted (no slide on the ice) until it ends,
 ## and an early recast frees her.
@@ -541,7 +541,7 @@ func _rime_skate_in() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
-## Skates east for 0.4 s and casts Rimelock from it; returns the skate's speed at the cast.
+## Skates east for 0.4 s and casts Freeze Frame from it; returns the skate's speed at the cast.
 func _skate_into_rime(m: Match, P: Hunter) -> float:
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(1, 0)
@@ -555,7 +555,7 @@ func _skate_into_rime(m: Match, P: Hunter) -> float:
 	P.inp["dash_down"] = false
 	return v
 
-## How Rimelock moves her (docs/heroes/rimewright.md "Movement settled"): WASD never steers the carry; after the
+## How Freeze Frame moves her (docs/heroes/rimewright.md "Movement settled"): WASD never steers the carry; after the
 ## crash she has no momentum and the next step is hers; the carry slides off a terrace (never blocked) sinking
 ## gently, then she drops rooted to the ground below; over the void it carries on, and X frees her glider.
 func _rime_move() -> void:
@@ -648,7 +648,7 @@ func _rime_move() -> void:
 			"over %s glider at %.2f s (break move %.2f s)" % [over, opened_t, brk])
 	await _free(m)
 
-## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
+## Rank 3 Free Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
 	for rank_n in [1, 3]:
@@ -1024,7 +1024,7 @@ func tender() -> void:
 			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
-	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
+	# --- Stick Around (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
 	K.kind.clear()
 	T.hp = T.max_hp
 	T.root_t = 0.0
@@ -1167,7 +1167,7 @@ func tender() -> void:
 				and absf(K.hearth_r() - 2.9) < 0.01 and K.anim_id == "mm_toss",
 			"%s at %.2f m" % [String(K.hearth.get("mode", "")), land_off])
 	step(m, 3.0)
-	# --- Relay Step goes where you move, not at the cursor, with its own hop and a lantern trail
+	# --- Foxtrot goes where you move, not at the cursor, with its own hop and a lantern trail
 	K.cd["e"] = 8.0
 	var p0 := P.pos
 	sc.aim_at(P, P.pos + Vector3(0, 0, -6))
@@ -1181,7 +1181,7 @@ func tender() -> void:
 	step(m, 0.25)
 	P.inp["move"] = Vector2.ZERO
 	ok(
-			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and a trail of stars",
+			"mm Shift: Foxtrot goes where you move (cursor elsewhere), its own hop and a trail of stars",
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
 			"dx %.1f dz %.1f trail %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
 	ok(
@@ -1212,7 +1212,7 @@ func tender() -> void:
 			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
-	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
+	# --- Carry the Day: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
 	A.teleport(P.pos + Vector3(0.5, 0, 0))
 	T.teleport(A.pos)
@@ -1233,7 +1233,7 @@ func tender() -> void:
 	P.inp["crouch"] = false
 	step(m, 0.1)
 	await _free(m)
-	# --- merge start drops the Burrseed aim (no throw, the lane and pose gone)
+	# --- merge start drops the Stick Around aim (no throw, the lane and pose gone)
 	r = sc.setup("tender", 6.0)
 	m = r[0]
 	P = r[1]
@@ -1251,7 +1251,7 @@ func tender() -> void:
 	P.inp["sec_hold"] = false
 	step(m, float(K.rmb_def()["windup"]) + 0.2)
 	ok(
-			"mm merge: drop_holds ends the Burrseed wind-up without a throw",
+			"mm merge: drop_holds ends the Stick Around wind-up without a throw",
 			aiming
 			and not K.seed_aim
 			and not K.rmb_down
@@ -1373,8 +1373,8 @@ func _dashes_cute() -> void:
 	await _moosh_audit()
 
 ## Audit: the glide is airborne only (on the ground with the hop spent, Shift is refused, never a glide
-## along the ground); the move keys steer the glide (air control); Burrseed 10.5 s (the data's ratio to E);
-## her Ember Cast has no magazine and no slow while firing (the source has neither).
+## along the ground); the move keys steer the glide (air control); Stick Around 10.5 s (the data's ratio to E);
+## her Hot and Cold has no magazine and no slow while firing (the source has neither).
 func _moosh_audit() -> void:
 	var r: Array = sc.setup("tender", 20.0)
 	var m: Match = r[0]
@@ -1410,10 +1410,10 @@ func _moosh_audit() -> void:
 			turned > 40.0 and turned < 90.0, "turned %.0f deg in 0.4 s" % turned)
 	step(m, 1.0)
 	ok(
-			"mm RMB: Burrseed 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s)",
+			"mm RMB: Stick Around 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s)",
 			absf(float(K.rmb_def()["cooldown"]) - 10.5) < 0.01)
 	ok(
-			"mm LMB: Ember Cast has no magazine to reload and no slow while firing (the source has neither)",
+			"mm LMB: Hot and Cold has no magazine to reload and no slow while firing (the source has neither)",
 			int(P.wpn["mag"]) >= 99 and float(P.wpn["fire_slow"]) >= 1.0)
 	await _free(m)
 
@@ -1499,7 +1499,7 @@ static func wav_peak_db(path: String) -> float:
 		at += 8 + n + (n % 2)
 	return -99.0
 
-## Owner 11-10: a stuck Burrseed roots only after about 2 s of the foe in her reach (`leash`), with a vine
+## Owner 11-10: a stuck Stick Around roots only after about 2 s of the foe in her reach (`leash`), with a vine
 ## on them that thickens as it builds; out of reach it unwinds (2x) and, empty, the seed falls off.
 ## Called 0.1 s after the throw's seed stuck on T, about 6 m from her.
 func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> void:
@@ -1556,7 +1556,7 @@ func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> v
 			fell and T.root_t <= 0.0,
 			"burrs %d root %.2f" % [K.burrs.size(), T.root_t])
 
-## Burrseed's burst damage on the first foe, with the hunter at level `lvl`.
+## Stick Around's burst damage on the first foe, with the hunter at level `lvl`.
 func _seed_burst(lvl: int) -> float:
 	var r: Array = sc.setup("tender", 6.0)
 	var m: Match = r[0]
@@ -1584,10 +1584,10 @@ func growth() -> void:
 	var d1: float = await _seed_burst(1)
 	var d10: float = await _seed_burst(10)
 	ok(
-			"mm RMB: Burrseed's burst grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
+			"mm RMB: Stick Around burst grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 			d1 > 25.0 and d10 > d1 * 1.15, "L1 %.1f L10 %.1f" % [d1, d10])
 
-## Rank 3 doubles the Burrseed's burst width (the source's detonation-radius upgrade) and adds 0.3 s of root.
+## Rank 3 doubles the Stick Around's burst width (the source's detonation-radius upgrade) and adds 0.3 s of root.
 func burr_ranks() -> void:
 	var r: Array = sc.setup("tender", 6.0)
 	var m: Match = r[0]
@@ -1779,7 +1779,7 @@ func rimewright() -> void:
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
-	# --- Skate: darts fly straight and thick at double damage; she carries on over a ledge; the stride move loops
+	# --- Free Skate: darts fly straight and thick at double damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
 	m = r[0]
 	P = r[1]
@@ -1859,7 +1859,7 @@ func rimewright() -> void:
 	await _skate_ice()
 	await _spear_rank3()
 	await _spear_travel()
-	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
+	# --- Icebreaker: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]
 	P = r[1]
@@ -1943,7 +1943,7 @@ func rimewright() -> void:
 			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
-	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
+	# --- Cold Front: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]
 	P = r[1]

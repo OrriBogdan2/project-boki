@@ -1,7 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Gil's reel (tools/hero_vfx_reel.gd): the generic thrusts, Tide Lunge (hold) and Ground Swim (dash); the bag's
+## Gil's reel (tools/hero_vfx_reel.gd): the generic thrusts, Tide Lunge (hold) and Deep End (dash); the bag's
 ## potions in a fixed order (Thunder held, then Slime, Air, Fire and a Super Zeep tapped onto one dummy: three
-## different marks Beach it); the slime's puddle to its end; the Riptide spin sent off as a spout; the Tidal Wave
+## different marks Beach it); the slime's puddle to its end; the Spin Cycle spin sent off as a spout; the Surf's Up
 ## followed down its line.
 
 const BAG := ["slime", "air", "fire", "zeep"]   # the "bag" part's throws, in order
@@ -67,7 +67,7 @@ func _part_e() -> void:
 		if _at(t, 1.1):
 			P.ak.e_recast()
 		_aim(T.pos)
-	await _go(2.4, cast, _sheet("e", "E, Riptide: a 1 s spin, then E again: the spout down the line",
+	await _go(2.4, cast, _sheet("e", "E, Spin Cycle: a 1 s spin, then E again: the spout down the line",
 		[0.2, 0.45, 0.7, 1.0, 1.15, 1.25, 1.4, 1.7, 2.2]), 2.5)
 	await _go(GAP)
 
@@ -80,6 +80,6 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(down_line)
-	await _go(2.6, cast, _sheet("r", "R, Tidal Wave: the lane, the surf over the dummy, the landing",
+	await _go(2.6, cast, _sheet("r", "R, Surf's Up: the lane, the surf over the dummy, the landing",
 		[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.15, 1.4, 2.0], func(): return P.position + Vector3(2.0, 0.9, 0)), 2.5)
 	await _go(GAP)

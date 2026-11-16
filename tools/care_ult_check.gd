@@ -42,7 +42,7 @@ func _bond_kind(K: ArchKit) -> String:
 	return ""
 
 
-# ================================================================== Pip: Hearth Call
+# ================================================================== Pip: Rise and Shine
 func tender() -> void:
 	var r: Array = sc.setup("tender", 14.0)
 	var m: Match = r[0]
@@ -50,7 +50,7 @@ func tender() -> void:
 	var A: Hunter = r[2]
 	var K: TenderKit = P.ak
 	var xd: Dictionary = K.x_def()
-	ok("mm X: Hearth Call is in the kit data, sounds load", String(xd.get("name", "")) == "Hearth Call"
+	ok("mm X: Rise and Shine is in the kit data, sounds load", String(xd.get("name", "")) == "Rise and Shine"
 		and Sfx.streams.has("tend_call") and Sfx.streams.has("tend_arrive"))
 	sc.aim_at(P, A.pos)
 	# --- the level gate: nothing below level 6
@@ -179,7 +179,7 @@ func _tender_breaks() -> void:
 	var up := not K.hearth_call.is_empty()
 	K.drop_holds()
 	step(m, 0.1)
-	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
+	ok("mm merge: drop_holds ends Rise and Shine (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
 	await _tender_needs_ally()
@@ -281,7 +281,7 @@ func _tender_keeps_going() -> void:
 	await _free(m)
 
 
-# ================================================================== Claire: Rimelock
+# ================================================================== Claire: Freeze Frame
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]
@@ -289,7 +289,7 @@ func rimewright() -> void:
 	var T: Hunter = r[3]
 	var K: RimewrightKit = P.ak
 	var xd: Dictionary = K.x_def()
-	ok("tm X: Rimelock is in the kit data, sounds load", String(xd.get("name", "")) == "Rimelock"
+	ok("tm X: Freeze Frame is in the kit data, sounds load", String(xd.get("name", "")) == "Freeze Frame"
 		and Sfx.streams.has("rime_lock") and Sfx.streams.has("rime_crash"))
 	P.lvl = 5
 	_press(P, m)
@@ -446,7 +446,7 @@ func _rime_recasts() -> void:
 	var up := not K.rime.is_empty()
 	K.drop_holds()
 	step(m, 0.1)
-	ok("tm merge: drop_holds ends Rimelock with no crash and frees her", up and K.rime.is_empty()
+	ok("tm merge: drop_holds ends Freeze Frame with no crash and frees her", up and K.rime.is_empty()
 		and not K.ulk().showing("rink") and P.root_t <= 0.0 and int(K.stats["crashes"]) == 1)
 	await _free(m)
 
@@ -490,7 +490,7 @@ func _dummy(m: Match, team: int, at: Vector3, label: String) -> Hunter:
 
 
 # ================================================================== burst cap
-## One combined check: Rimelock's crash straight into a merge and the merge's ultimate as soon as it
+## One combined check: Freeze Frame's crash straight into a merge and the merge's ultimate as soon as it
 ## unlocks never knocks a full-health medium hunter (no armor, so the margin is the health bar alone).
 func burst_cap() -> void:
 	# pebbit merges into Titan, the hardest-hitting form ultimate
@@ -517,7 +517,7 @@ func burst_cap() -> void:
 	var ulted := KinMerge.press(P)
 	step(m, 2.0)
 	var total := start_hp - T.hp
-	ok("burst: Rimelock straight into a merge and its ultimate does not one-shot a full-health hunter",
+	ok("burst: Freeze Frame straight into a merge and its ultimate does not one-shot a full-health hunter",
 		merged and ulted and int(K.stats["crashes"]) == 1 and not T.downed and T.hp > 0.0,
 		"ult %.0f, ult+merge %.0f of %.0f hp (merge %s, its ult %s)" % [
 				after_ult, total, start_hp, str(merged), str(ulted)])

@@ -128,7 +128,7 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3
 			and hot.g < PinNeedle.SILVER.g - 0.3 and hot.r > hot.b + 0.3,
 		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
-	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
+	ok("114 V: none in the Pin Down hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
 	m.step(DT)
@@ -353,7 +353,7 @@ func _pin_draw_pose(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 			pops = maxf(pops, absf(float(rel.get(ch, 0.0)) - float(held.get(ch, 0.0))))
 	ok("pin draw: each release starts from the pose the draw held (no pop)", pops < 0.02, "worst %.3f" % pops)
 
-## #6: the Heavy Shot is a big, unmistakable arrow with its own release and impact.
+## #6: the Pin Down is a big, unmistakable arrow with its own release and impact.
 func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv: int) -> void:
 	var arrow_look: Array = PinFx.LOOK["arrow"]
 	var heavy_look: Array = PinFx.LOOK["heavy"]
@@ -615,7 +615,7 @@ func _glove_q(P: Hunter) -> void:
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
 
-## #29: the Faultline's trail keeps drawing over the abyss, at his height.
+## #29: the Groundswell's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
@@ -721,7 +721,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
-## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
+## into_dash.x for Mossy: Shift while planted for Groundswell isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 	step(m, 1.5)
 	P.lvl = 6

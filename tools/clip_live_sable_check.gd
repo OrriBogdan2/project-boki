@@ -1,7 +1,7 @@
 extends RefCounted
 ## --clip-live-sable-check: Sable's clips through the real match code, as --clip-live-check does for Kael: a Match, the
 ## kit's own keys and the render path. She wears her clips with no procedural weapon drawn; her shots, the Vault's
-## routine of flips, the Encore and its dance play their clips, the dance loops, the wing flare reaches the model,
+## routine of flips, the Last Dance and its dance play their clips, the dance loops, the wing flare reaches the model,
 ## and a knock-out plays the death clip on screen.
 ## Never touches the save.
 
@@ -106,16 +106,16 @@ func run(main: Node) -> void:
 	ok(flips.size() >= 2, "the Vault's routine plays its flips (%s)" % str(flips.keys()))
 	ok(bend < 1.0, "the wings stay untwisted through the flips (worst bend %.2f rad)" % bend)
 	_run(m, P, 40, seen)
-	# Encore: the dance holds over her and loops
+	# Last Dance: the dance holds over her and loops
 	var K: ThiefKit = P.ak
 	var started: bool = K._start_encore()
-	ok(started, "Encore starts")
+	ok(started, "Last Dance starts")
 	var s3 := {}
 	var flared := false
 	for f in 110:
 		_run(m, P, 1, s3)
 		flared = flared or float(P.model.get_meta(WardenGlb.WING_FOLD, 0.0)) < -0.3
-	ok(s3.has("encore") and s3.has("encore_dance"), "Encore plays the opening and the dance (%s)" % str(s3.keys()))
+	ok(s3.has("encore") and s3.has("encore_dance"), "Last Dance plays the opening and the dance (%s)" % str(s3.keys()))
 	ok(flared, "the dance flares the wings")
 	_run(m, P, 60, seen)
 	P.lives = 1

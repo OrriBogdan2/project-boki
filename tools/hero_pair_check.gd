@@ -89,7 +89,7 @@ func hold(m: Match, P: Hunter, t: float) -> void:
 func rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.get("rock", false))
 
-## Tarek's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
+## Tarek's Backbone laid along the aim across the abyss strip: X held at a centre over the gap, the
 ## cursor dragged on along the aim, let go; returns once the cracks are done.
 func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
 	P.ak.cd["x"] = 0.0
@@ -129,7 +129,7 @@ func done(m: Match) -> void:
 
 # ------------------------------------------------------------------ zones
 func _zones() -> void:
-	# ---- Stone Row on open ground: three legal rocks that stop bodies
+	# ---- Foothold on open ground: three legal rocks that stop bodies
 	var r := setup("dolm", 9.0)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var home: Vector3 = r[3]
 	var K: DolmKit = P.ak
@@ -170,7 +170,7 @@ func _zones() -> void:
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- the Basalt Spine over the abyss: the rocks are laid on the gap as ground, no bridge tiles or event
+	# ---- the Backbone over the abyss: the rocks are laid on the gap as ground, no bridge tiles or event
 	var before := void_tiles(m)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
 	HeroZones.capture = true

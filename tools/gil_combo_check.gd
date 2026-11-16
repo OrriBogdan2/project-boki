@@ -2,9 +2,9 @@ extends "res://tools/hero_pair_check.gd"
 ## --gil-combo-check (old name --gil-kit-check): Gil, the Novice Mage (content/archetypes/gil.json,
 ## scripts/arch/kits/gil_kit.gd, docs/heroes/gil.md), on a training dummy through the real match code: the Fencer
 ## chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish
-## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
-## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
-## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
+## Out of Water (three marks Beach), Deep End (hittable, surfacing knocks up), Spin Cycle (spin damage, the spout's
+## knockup, longer spin = wider spout) and Surf's Up (untargetable, knockup then slow, lands with a shield). Then
+## gil.md's tables: each slot's numbers, the cancels, the Spin Cycle recast window, the clips, and the dash-flow rows
 ## (tools/dash_flow_check.gd), and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
 
 var m: Match
@@ -100,7 +100,7 @@ func _data() -> void:
 		["loop", "rmb", "e", "dash", "passive", "x"].all(func(k): return String(card.get(k, "")).length() > 10))
 	ok("class: Light, signature swordfish", Arch.weight("gil") == "light" and Arch.signature("gil") == "swordfish")
 	ok("roster: Gil is in the hunter order (Training Area picker)", "gil" in Arch.ORDER)
-	ok("ultimate: Tidal Wave on X, 90 s", float(K.x_def().get("cooldown", 0)) == 90.0)
+	ok("ultimate: Surf's Up on X, 90 s", float(K.x_def().get("cooldown", 0)) == 90.0)
 
 func _bag() -> void:
 	K._refill()
@@ -291,14 +291,14 @@ func _swim() -> void:
 	m.step(DT)
 	var under := K.swim_t > 0.0
 	var hit_on := float(K.incoming(T, 10.0, {})[0]) == 10.0
-	ok("Ground Swim: the dive and its wake play, no shared dash pill over the ground",
+	ok("Deep End: the dive and its wake play, no shared dash pill over the ground",
 		int(HeroVfx.of(m).plays.get("dive", 0)) == dives + 1 and K.own_dash_trail())
 	step(m, 0.15)
 	# owner 11-11: the swim didn't take him under. Mid-swim the dive pose has the whole body (hat and all,
 	# plate_offset up from the feet) below the surface.
 	var age := m.time - K.anim_at
 	var lift := float(HunterAnim.km_sample(K.anim_id, age).get("lift", 0.0))
-	ok("Ground Swim: mid-swim his whole body is under the ground",
+	ok("Deep End: mid-swim his whole body is under the ground",
 		K.anim_id == "gil_dive" and lift + float(K.d["plate_offset"]) < 0.0, "%s lift %.2f" % [K.anim_id, lift])
 	var top := {"stun": 0.0, "y": 0.0, "out": false}
 	var y0 := T.pos.y
@@ -306,31 +306,31 @@ func _swim() -> void:
 		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
-	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
-	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
+	ok("Deep End: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Deep End: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
-	ok("Ground Swim: he stays hittable underground", under and hit_on)
-	ok("Ground Swim: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
+	ok("Deep End: he stays hittable underground", under and hit_on)
+	ok("Deep End: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])
-	ok("Ground Swim: 8 s cooldown", float(K.dash_def()["cd"]) == 8.0)
+	ok("Deep End: 8 s cooldown", float(K.dash_def()["cd"]) == 8.0)
 
 func _riptide() -> void:
 	_reset(1.6)
 	K.use_e()
-	ok("Riptide: E starts the spin (the spin pose)", K.spin_t >= 0.0 and K.anim_id == "gil_spin")
+	ok("Spin Cycle: E starts the spin (the spin pose)", K.spin_t >= 0.0 and K.anim_id == "gil_spin")
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
-	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
+	ok("Spin Cycle: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
 	_reset(7.0)
 	K.use_e()
 	step(m, 0.3)
 	K.e_recast()
-	ok("Riptide recast: the spin stops on the spout thrust, the spout's look plays",
+	ok("Spin Cycle recast: the spin stops on the spout thrust, the spout's look plays",
 		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
-	ok("Riptide recast: the waterspout runs down the line and knocks up 1 s", top["stun"] >= 0.9 and dmg(T) > 0.0,
+	ok("Spin Cycle recast: the waterspout runs down the line and knocks up 1 s", top["stun"] >= 0.9 and dmg(T) > 0.0,
 		"stun %.2f" % top["stun"])
 	_reset(7.0)
 	K.use_e()
@@ -339,18 +339,18 @@ func _riptide() -> void:
 	var auto := not K.spouts.is_empty() and K.spin_t < 0.0
 	if not K.spouts.is_empty(): w_long = K.spouts[0]["w"]
 	if K.spouts.is_empty() and dmg(T) > 0.0: auto = true
-	ok("Riptide: at 2 s the spout goes on its own", auto or K.spin_t < 0.0)
-	ok("Riptide: a longer spin makes a wider spout",
+	ok("Spin Cycle: at 2 s the spout goes on its own", auto or K.spin_t < 0.0)
+	ok("Spin Cycle: a longer spin makes a wider spout",
 		w_long > w_short + 0.3 or (w_long == 0.0 and w_short > 0.0 and K.spin_t < 0.0),
 		"%.2f vs %.2f" % [w_long, w_short])
-	ok("Riptide: 12 s cooldown", float(K.e_def()["cooldown"]) == 12.0)
+	ok("Spin Cycle: 12 s cooldown", float(K.e_def()["cooldown"]) == 12.0)
 
 func _wave() -> void:
 	_reset(6.0)
 	P.lvl = 6
-	ok("Tidal Wave: casts", K.cast_ult())
+	ok("Surf's Up: casts", K.cast_ult())
 	m.step(DT)
-	ok("Tidal Wave: Gil is untargetable while he surfs (the surf pose, the wave's look)",
+	ok("Surf's Up: Gil is untargetable while he surfs (the surf pose, the wave's look)",
 		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0 and K.anim_id == "gil_surf"
 		and int(HeroVfx.of(m).plays.get("wave", 0)) > 0)
 	var top := {"stun": 0.0, "slow": 0.0, "k": 0.0}
@@ -358,14 +358,14 @@ func _wave() -> void:
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["slow"] = maxf(top["slow"], T.slow_t)
 		top["k"] = maxf(top["k"], T.slow_k))
-	ok("Tidal Wave: knocks up 1 s, then slows 50% for 2 s",
+	ok("Surf's Up: knocks up 1 s, then slows 50% for 2 s",
 		top["stun"] >= 0.9 and top["slow"] >= 2.5 and absf(top["k"] - 0.5) < 0.05,
 		"stun %.2f slow %.2f k %.2f" % [top["stun"], top["slow"], top["k"]])
-	ok("Tidal Wave: lands with a shield and is hittable again",
+	ok("Surf's Up: lands with a shield and is hittable again",
 		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0
 		and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
-	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+	ok("Surf's Up: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
 	_wave_way(Vector2(-1, 0))
 	_wave_way(Vector2(0, 1))
 
@@ -384,9 +384,9 @@ func _wave_way(run: Vector2) -> void:
 	var moved := P.pos - p0
 	var along := Vector2(moved.x, moved.z).dot(aim)
 	var off := absf(Vector2(moved.x, moved.z).cross(aim))
-	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
+	ok("Surf's Up: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
 		"along %.2f off-line %.2f" % [along, off])
-	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
+	ok("Surf's Up: he rides with the crest (within 2 m of it at the end)",
 		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
 
 # ------------------------------------------------------------------ gil.md: numbers per slot
@@ -453,7 +453,7 @@ func _rmb_numbers() -> void:
 	ok("numbers RMB: a charge comes back 5 s after the first throw", absf(m.time - t0 - 5.0) < 0.1,
 		"%.2f s" % (m.time - t0))
 
-## Ground Swim: under for 0.4 s, 4 damage and the 0.5 s knockup on surfacing, a charge back after 8 s.
+## Deep End: under for 0.4 s, 4 damage and the 0.5 s knockup on surfacing, a charge back after 8 s.
 func _dash_numbers() -> void:
 	_reset(5.0)
 	var d0 := P.dashes
@@ -473,7 +473,7 @@ func _dash_numbers() -> void:
 	ok("numbers Shift: a charge back in 8 s at rank 1", absf(back + under + 0.1 - 8.0) < 0.3,
 		"%.2f s" % (back + under + 0.1))
 
-## Riptide: ticks every 0.25 s rising 2 -> 5, he walks at 70% while spinning, the full-spin spout is 11 m long,
+## Spin Cycle: ticks every 0.25 s rising 2 -> 5, he walks at 70% while spinning, the full-spin spout is 11 m long,
 ## 2.2 m wide, 22 m/s, and does 10.
 func _e_numbers() -> void:
 	_reset(1.6)
@@ -500,7 +500,7 @@ func _e_numbers() -> void:
 	step(m, 0.6)
 	ok("numbers E: the spout does 10 (nothing else reaches 5 m)", absf(dmg(T) - 10.0) < 0.2, "%.1f" % dmg(T))
 
-## Tidal Wave: locked below level 6, 14 m in 1 s, 18 damage, a 40 shield for 3 s.
+## Surf's Up: locked below level 6, 14 m in 1 s, 18 damage, a 40 shield for 3 s.
 func _x_numbers() -> void:
 	_reset(6.0)
 	P.lvl = 5
@@ -561,7 +561,7 @@ func _cancels() -> void:
 	_wave_cancels()
 	_cc_cancels()
 
-## During the Riptide spin: LMB and RMB go with it, Shift is locked (dash_flow into_dash.e), X sends the spout first.
+## During the Spin Cycle spin: LMB and RMB go with it, Shift is locked (dash_flow into_dash.e), X sends the spout first.
 func _spin_cancels() -> void:
 	_reset(1.6)
 	_press("sig")
@@ -590,7 +590,7 @@ func _spin_cancels() -> void:
 	ok("cancel E spin + X: the spout goes first, then the wave", K.spin_t < 0.0 and K.spouts.size() == 1
 		and not K.wave.is_empty())
 
-## During the Tidal Wave (an Effects dash, so DashFlow's default rows): E, RMB and LMB wait for the landing and go
+## During the Surf's Up (an Effects dash, so DashFlow's default rows): E, RMB and LMB wait for the landing and go
 ## then; Shift is dropped (into_dash.x lock: no charge, no swim, not replayed); X does nothing (no early landing).
 func _wave_cancels() -> void:
 	_reset(6.0)
@@ -635,7 +635,7 @@ func _cc_cancels() -> void:
 	ok("cancel E spin + Boki merge (drop_holds): it ends, no spout", K.spin_t < 0.0 and K.spouts.is_empty(),
 		"spin %.2f spouts %d" % [K.spin_t, K.spouts.size()])
 
-# ------------------------------------------------------------------ gil.md: the Riptide recast window
+# ------------------------------------------------------------------ gil.md: the Spin Cycle recast window
 func _recast() -> void:
 	_reset(7.0)
 	_press("sig")
@@ -659,7 +659,7 @@ func _recast() -> void:
 	_reset(6.0)
 	HunterKeys.ult_pressed(P)
 	m.step(DT)
-	ok("recast X: Tidal Wave opens no recast window", not K.wave.is_empty() and K.recast_window().is_empty())
+	ok("recast X: Surf's Up opens no recast window", not K.wave.is_empty() and K.recast_window().is_empty())
 	K.drop_holds()
 
 # ------------------------------------------------------------------ gil.md: the Relic screen clips
@@ -719,7 +719,7 @@ func _telegraphs() -> void:
 	K.cast_ult()
 	m.step(DT)
 	var w0 := AimKit.entry(P, "x")
-	ok("telegraph: Tidal Wave's lane (an outline, the full range) for everyone while he surfs",
+	ok("telegraph: Surf's Up's lane (an outline, the full range) for everyone while he surfs",
 		w0.get("kind", "") == "lane" and bool(w0["all"]) and float(w0["fill"]) < 0.0
 		and absf(float(w0["len"]) - float(K.x_def()["range"])) < 0.01)
 	step(m, float(K.x_def()["time"]) + 0.3)

@@ -78,7 +78,7 @@ func _cast(arch: String, slot: String, feet: bool, glove: String) -> void:
 	var label := "%s %s %s" % [what, slot, "feet" if feet else "foe"]
 	_press(m, P, slot, glove)
 	ac.step(m, RECAST_S, func(): _keep(P, slot))
-	if slot == "e":         # (a recast pops Brimseed, detonates a Sigil)
+	if slot == "e":         # (a recast pops Gag Gift, detonates a Sigil)
 		P.ak.use_e()
 	elif slot == "ult":
 		P.ak.cast_ult()
@@ -137,7 +137,7 @@ func _press(m: Match, P: Hunter, slot: String, glove: String) -> void:
 			m.use_gear(P, 0)
 
 func _keep(P: Hunter, slot: String) -> void:
-	if slot == "lmb" or slot == "ult":      # (an X that arms the weapon: Starpiercer)
+	if slot == "lmb" or slot == "ult":      # (an X that arms the weapon: Finishing Touch)
 		P.inp["fire"] = true
 	elif slot == "rmb_hold":
 		P.inp["sec_hold"] = true

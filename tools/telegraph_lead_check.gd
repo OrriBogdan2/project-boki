@@ -38,22 +38,22 @@ func _cases() -> Array:
 		if t >= 0.9 and t < 0.95:
 			HunterKeys.ult_pressed(P)
 	return [
-		{"arch": "dolm", "name": "Quakefall", "lead": 1.0, "kept": 0.8, "start": rmb.call(2.0)},
-		{"arch": "dolm", "name": "Basalt Spine", "lead": 0.2, "start": ult},
-		{"arch": "bulwark", "name": "Faultline", "lead": 0.4, "start": ult},
-		{"arch": "mage", "name": "Skycall", "lead": 0.8, "start": e},
+		{"arch": "dolm", "name": "Rock Bottom", "lead": 1.0, "kept": 0.8, "start": rmb.call(2.0)},
+		{"arch": "dolm", "name": "Backbone", "lead": 0.2, "start": ult},
+		{"arch": "bulwark", "name": "Groundswell", "lead": 0.4, "start": ult},
+		{"arch": "mage", "name": "Undercurrent", "lead": 0.8, "start": e},
 		{"arch": "mage", "name": "Eye of the Storm", "lead": 0.15, "id": "x_land", "start": ult, "each": second_x},
-		{"arch": "rimewright", "name": "Ice Spear", "lead": 1.8, "min": 40.0, "dist": 8.0, "start": rmb.call(0.2)},
-		{"arch": "tender", "name": "Burrseed", "lead": 0.6, "min": 30.0, "start": rmb.call(0.0)},
-		{"arch": "ostra", "name": "Brimseed pop", "lead": 0.3, "start": e, "each": recast_e},
-		{"arch": "ostra", "name": "Nightwell", "lead": 0.8, "start": ult},
+		{"arch": "rimewright", "name": "Icebreaker", "lead": 1.8, "min": 40.0, "dist": 8.0, "start": rmb.call(0.2)},
+		{"arch": "tender", "name": "Stick Around", "lead": 0.6, "min": 30.0, "start": rmb.call(0.0)},
+		{"arch": "ostra", "name": "Gag Gift pop", "lead": 0.3, "start": e, "each": recast_e},
+		{"arch": "ostra", "name": "Main Attraction", "lead": 0.8, "start": ult},
 		{"arch": "juggernaut", "name": "Finishing Slam", "lead": 0.6, "dist": 3.0, "start": rmb.call(0.0)},
-		{"arch": "juggernaut", "name": "Meteor Drop", "lead": 0.85, "kept": 0.2, "dist": 2.0, "start": air_rmb},
-		{"arch": "gunslinger", "name": "Burr Charge", "lead": 0.8, "prep": beside, "start": rmb.call(0.0)},
+		{"arch": "juggernaut", "name": "Hit the Deck", "lead": 0.85, "kept": 0.2, "dist": 2.0, "start": air_rmb},
+		{"arch": "gunslinger", "name": "Coin Blast", "lead": 0.8, "prep": beside, "start": rmb.call(0.0)},
 		{"arch": "gunslinger", "name": "Nuke", "lead": 1.5, "start": ult},
 		{"arch": "dredge", "name": "Anchor slam", "lead": 0.4, "dist": 2.5, "start": e},
 		{"arch": "thief", "name": "Shiv ult", "lead": 0.4, "dist": 3.0, "start": ult},
-		{"arch": "archer", "name": "Hail Wall", "lead": 0.35, "start": e},
+		{"arch": "archer", "name": "Hemline", "lead": 0.35, "start": e},
 	]
 
 

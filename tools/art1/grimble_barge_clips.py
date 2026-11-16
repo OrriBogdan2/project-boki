@@ -1,4 +1,4 @@
-"""Grimble's Barge as one burst: re-keys the glb's `lunge` clip and adds `lunge_out`, with no Blender (the clips are
+"""Grimble's Mad Dash as one burst: re-keys the glb's `lunge` clip and adds `lunge_out`, with no Blender (the clips are
 baked tracks on the finished rig, so any build of the model takes them; the .blend is not needed).
 Before: each shove folded into the junk ball, rolled, popped open standing and folded again 0.1 s later (a stutter).
 Now: `lunge` folds in (0.033 s), the shove rolls the ball (to 0.167 s, the measured 0.16 s shove), the ball keeps

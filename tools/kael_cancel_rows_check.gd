@@ -98,7 +98,7 @@ func slam_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	)
 
 
-# ------------------------------------------------------------------ the Lunge's fling and the Meteor Drop
+# ------------------------------------------------------------------ the Lunge's fling and the Hit the Deck
 func move_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	var K: JuggernautKit = P.ak
 	# the fling's length, then an LMB press in its last 0.06 s swings as it ends
@@ -116,7 +116,7 @@ func move_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	_slash_tap(m, P)
 	A.step(m, 0.2)
 	var late_lunge := in_fling and K.slash_at > t0
-	# the Meteor Drop: a press in the dive is dropped (the 0.5 s recovery follows), one late in the recovery goes
+	# the Hit the Deck: a press in the dive is dropped (the 0.5 s recovery follows), one late in the recovery goes
 	_fresh(m, P, home)
 	P.teleport(home + Vector3(0, 1.8, 0))
 	P.grounded = false
@@ -146,7 +146,7 @@ func move_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	A.step(m, 0.2)
 	A.ok(
 		(
-			"jug cancel: LMB in a Lunge or a Meteor Drop waits: its last 0.12 s swings as it ends, a press in the dive "
+			"jug cancel: LMB in a Lunge or Hit the Deck waits: its last 0.12 s swings as it ends, a press in the dive "
 			+ "is dropped"
 		),
 		late_lunge and dive_dropped and K.slash_at > t0,
@@ -154,7 +154,7 @@ func move_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	)
 
 
-# ------------------------------------------------------------------ the Gilded Riposte's guard and cleave
+# ------------------------------------------------------------------ the Blow for Blow's guard and cleave
 func riposte_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	var K: JuggernautKit = P.ak
 	var lock := float(K.x_def()["guard"]) + float(K.x_def()["strike_t"])

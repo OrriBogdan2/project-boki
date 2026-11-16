@@ -1,6 +1,6 @@
 extends RefCounted
 ## Cinder's Cancels table (docs/heroes/ashwick.md, "Cancels"), one assert per row the 11-09 pass left unsettled.
-## No data, frame or wiki line shows these pairs. The flight rows follow the owner (DECISIONS Nov 5: in Flue Flight
+## No data, frame or wiki line shows these pairs. The flight rows follow the owner (DECISIONS Nov 5: in Red Carpet
 ## only E works); the rest follow DECISIONS 11-07 "every interaction is chainable": the second press goes now and
 ## the first runs on. Run inside --ashwick-combo-check.
 const LIFT := 4.0            # m he is lifted before opening a glider, so it stays open through a row
@@ -129,7 +129,7 @@ func _cloak_row() -> void:
 			went.all(func(w: bool) -> bool: return w), "lmb, rmb, x %s" % str(went))
 
 
-## Owner Nov 5: in Flue Flight only E works. LMB is ignored (a deny tick) and the glider stays shut.
+## Owner Nov 5: in Red Carpet only E works. LMB is ignored (a deny tick) and the glider stays shut.
 func _flight_rows() -> void:
 	_ready_all()
 	HunterKeys.ult_pressed(P)

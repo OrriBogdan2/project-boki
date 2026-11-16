@@ -40,11 +40,11 @@ func _text() -> void:
 	ok(KitDrill.how("juggernaut", "lmb") == "", "LMB is a plain press unless the JSON says hold")
 	_vex_lines()
 	var holds := KitDrill.how("archer", "lmb") == "hold" and KitDrill.how("archer", "rmb") == "hold"
-	ok(holds, "Lace: the draw and the Heavy Shot are holds")
+	ok(holds, "Lace: the draw and the Pin Down are holds")
 	var draw: String = KitDrill.line("archer", "lmb").to_lower()
 	var wall: String = KitDrill.line("archer", "rmb").to_lower()
 	ok(draw.contains("hold") and draw.contains("gold"), "Lace's draw line: hold, then let go on the gold flash")
-	ok(wall.contains("hold") and wall.contains("wall"), "Lace's Heavy Shot line: hold, and the wall pin")
+	ok(wall.contains("hold") and wall.contains("wall"), "Lace's Pin Down line: hold, and the wall pin")
 	var cue := KitDrill.callout(KitDrill.steps("archer")[0], 0)
 	ok(cue == "HOLD %s, not just a tap" % Settings.key_cap("fire"), "Lace's draw call-out names the key")
 	var jug: Dictionary = KitDrill.steps("juggernaut")[2]

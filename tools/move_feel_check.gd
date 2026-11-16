@@ -82,7 +82,7 @@ const T := {
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
-	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
+	# Red Carpet: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Red Carpet lift-off"
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
 	"flue_turn_deg_s":         ["~", [85.0, 95.0], "deg/s", "[footage] peaks ~85-100 deg/s (cast 1: 52-67)"],
@@ -1037,7 +1037,7 @@ func _plain_dash() -> void:
 ## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air
 ## ("hold": the key kept down on the ground, for a kit whose held dash goes further).
 ## A sourced kit runs its source numbers as-is (no dash feel); the owner's x0.85 / x1.15 stays only on the
-## kits with no source dash (content/rules/dash_feel.json). Claire's Skate and Ostra's Lantern Trade never
+## kits with no source dash (content/rules/dash_feel.json). Claire's Free Skate and Ostra's Musical Chairs never
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
@@ -1059,7 +1059,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
+	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Deep End 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -1087,7 +1087,7 @@ func _kit_dashes() -> void:
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
 ## `hold` keeps the dash key down to the end.
 func _felt_dash(air: bool, hold := false) -> Array:
-	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
+	_steps(30)          # past any chain gap from the dash before (Grimble's Mad Dash refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
@@ -1109,7 +1109,7 @@ func _felt_dash(air: bool, hold := false) -> Array:
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
 
-## Cinder's Flue Flight (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
+## Cinder's Red Carpet (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
 ## ring, rising to her low hover, before the flight moves; then, the cursor swung a right angle, the heading turns
 ## at its capped rate.
 func _flue_flight() -> void:
@@ -1140,7 +1140,7 @@ func _flue_flight() -> void:
 	P.lvl = was[2]
 	P.reclass(was[0], was[1])
 
-## Tarek's Rock Hop is an arc off a rock: its reach and flight as the hop reads them.
+## Tarek's Leap of Faith is an arc off a rock: its reach and flight as the hop reads them.
 func _dolm_hop() -> Array:
 	var dd := P.ak.dash_def()
 	var feel: Dictionary = P.ak.dash_feel()
@@ -1151,7 +1151,7 @@ func _dolm_hop() -> Array:
 ## body faces: the cursor-aimed sources (Oath, Tetra, Kingpin, Brall, Felix, Void, Joule; Myth tested in
 ## supervive_kits.md) do; the move-direction ones (Shiv, Elluna, Celeste, Ghost) were never filmed standing
 ## (briefs/hero-ref, rows marked [?]), so they keep the shared rule (ArchKit.dash_dir). Shift is held
-## STAND_HOLD so the hold kits (Swap, Wirerun, Skate, Slide) release too.
+## STAND_HOLD so the hold kits (Swap, Wirerun, Free Skate, Slide) release too.
 const STAND_HOLD := 18           # frames (0.3 s) Shift is held down
 const STAND_AIM := Vector2(0.6, -0.8)   # the cursor's direction from the hunter
 const STAND_DEG := 20.0          # widest allowed miss of the cursor, degrees
@@ -1166,7 +1166,7 @@ func _standing_dash() -> void:
 		P.inp["aim"] = flat + Vector3(STAND_AIM.x, 0, STAND_AIM.y) * 5.0
 		P.inp["dash"] = true
 		P.inp["dash_down"] = true
-		for i in 150:             # 2.5 s: Lantern Trade's 1.8 s lob lands after the hold
+		for i in 150:             # 2.5 s: Musical Chairs's 1.8 s lob lands after the hold
 			m.step(DT)
 			P.inp["dash"] = false
 			P.inp["dash_down"] = i < STAND_HOLD

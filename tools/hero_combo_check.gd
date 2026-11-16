@@ -29,7 +29,7 @@ func run(main_node: Node, who: String) -> void:
 		await _growth()
 		await ults.mage()
 		var before: Array = [ac.n, ac.fails]
-		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
+		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Undercurrent drag ends
 		n += ac.n - before[0]
 		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
@@ -86,7 +86,7 @@ func _pool(looks: Array, r: float, band := 1.0) -> Dictionary:
 			return l
 	return {}
 
-## Vex's Burr Charge cast from `up` m over the ground along an empty lane, a foe standing just past the lane's
+## Vex's Coin Blast cast from `up` m over the ground along an empty lane, a foe standing just past the lane's
 ## end off to the side: a dud there (gone, no cone, no blast, the foe untouched), never a stick or a cone.
 func _burr_dud(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, up: float, how: String) -> void:
 	ac.fresh(T)
@@ -326,7 +326,7 @@ func _mage() -> void:
 	ok("Wirerun through Live: double the pass plus the Blowout",
 			ac.dmg(T) >= plain * 2.0 + 15.0,
 			"%.0f vs plain %.0f" % [ac.dmg(T), plain])
-	# 6. Storm Rod: the rod summoned, a fixed lane to full range, the full flash, the knock ~1 bh, the orb at once
+	# 6. Pink Spear: the rod summoned, a fixed lane to full range, the full flash, the knock ~1 bh, the orb at once
 	ac.fresh(T)
 	K.sparks.clear()
 	K.motes.clear()
@@ -344,11 +344,11 @@ func _mage() -> void:
 	var mv0 := K.anim_id
 	ac.step(m, 0.85, func(): P.inp["sec_hold"] = true; ac.aim_at(P, T.pos))
 	var l2: float = float(AimKit.entry(P, "rmb").get("len", 0.0))
-	ok("Storm Rod held: the rod is in the hand", rod_up and mv0 == "mage_rmb_hold", mv0)
-	ok("Storm Rod held: a fixed 13m double-rail lane (no growth)",
+	ok("Pink Spear held: the rod is in the hand", rod_up and mv0 == "mage_rmb_hold", mv0)
+	ok("Pink Spear held: a fixed 13m double-rail lane (no growth)",
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
-	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
+	ok("Pink Spear full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -356,10 +356,10 @@ func _mage() -> void:
 	var orb_fast := K.motes.size() >= 1
 	ac.step(m, 0.9)
 	var kb := T.pos.x - x0
-	ok("Storm Rod: damage + Static on the first foe", ac.dmg(T) >= 25.0 and K.spark_n(T) >= 1, "took %.0f" % ac.dmg(T))
-	ok("Storm Rod: a standard-mass foe is knocked about 1.8 m (source)",
+	ok("Pink Spear: damage + Static on the first foe", ac.dmg(T) >= 25.0 and K.spark_n(T) >= 1, "took %.0f" % ac.dmg(T))
+	ok("Pink Spear: a standard-mass foe is knocked about 1.8 m (source)",
 			absf(kb - 1.8) < 0.3, "%.2f m" % kb)
-	ok("Storm Rod: an orb at the impact the moment it hits",
+	ok("Pink Spear: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
 	P.slot_lv["dash"] = 3
 	ok("Rank 3: Wirerun's own hit doubles (rank 1: 1.0)", is_equal_approx(K.run_rank_k(), 2.0), "%.2f" % K.run_rank_k())
@@ -378,13 +378,13 @@ func _mage() -> void:
 		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 				K.e_def()["cooldown"] * K.cd_k("kin"),
 				K.power("sec") / pb1, K.power("dash"), K.power("kin") / pk1])
-	ok("upgrade parity: Storm Rod cooldown 8 -> 7.2 -> 6.4 and damage +20% / +90%",
+	ok("upgrade parity: Pink Spear cooldown 8 -> 7.2 -> 6.4 and damage +20% / +90%",
 			near.call(up[1][0], 7.2) and near.call(up[2][0], 6.4)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.9), str(up))
 	ok("upgrade parity: Wirerun recharge 8 -> 7.33 -> 6.67, no shared damage step",
 			near.call(up[1][1], 7.33) and near.call(up[2][1], 6.67)
 			and near.call(up[1][4], up[0][4]) and near.call(up[2][4], up[0][4]), str(up))
-	ok("upgrade parity: Skycall cooldown 10.5 -> 10.5 -> 7.9 and damage +25% / +50%",
+	ok("upgrade parity: Undercurrent cooldown 10.5 -> 10.5 -> 7.9 and damage +25% / +50%",
 			near.call(up[1][2], 10.5) and near.call(up[2][2], 7.875)
 			and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.5), str(up))
 	P.slot_lv["sec"] = 1
@@ -423,7 +423,7 @@ func _mage() -> void:
 	ok("Walking over an orb: picked up, the dash is back",
 			K.orb_bursts == ob0 + 1 and K.motes.is_empty() and P.dashes >= P.max_dashes(),
 			"picked %d orbs %d dashes %.2f" % [K.orb_bursts - ob0, K.motes.size(), P.dashes])
-	# 8. Storm Rod into a wall: stun; into another foe: both stunned
+	# 8. Pink Spear into a wall: stun; into another foe: both stunned
 	ac.fresh(T)
 	K.sparks.clear()
 	P.teleport(home)
@@ -436,7 +436,7 @@ func _mage() -> void:
 	var s0 := K.slams
 	ac.hold(m, P, 1.0)
 	ac.step(m, 0.3)
-	ok("Storm Rod into a wall: stun", K.slams == s0 + 1 and T.stun_t > 0.0, "stun %.2f" % T.stun_t)
+	ok("Pink Spear into a wall: stun", K.slams == s0 + 1 and T.stun_t > 0.0, "stun %.2f" % T.stun_t)
 	_unwall(m, home + Vector3(5.6, 0, 0))
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -451,10 +451,10 @@ func _mage() -> void:
 	K.ch_rmb = 1.0
 	ac.hold(m, P, 1.0)
 	ac.step(m, 0.3)
-	ok("Storm Rod into another foe: both stunned",
+	ok("Pink Spear into another foe: both stunned",
 			T.stun_t > 0.0 and T2.stun_t > 0.0,
 			"%.2f / %.2f" % [T.stun_t, T2.stun_t])
-	# 9. Skycall: placed at the cursor, held and dragged (toward you pulls in), committed on release, 0.8s
+	# 9. Undercurrent: placed at the cursor, held and dragged (toward you pulls in), committed on release, 0.8s
 	# countdown, 1 Static, Grounded
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -469,17 +469,18 @@ func _mage() -> void:
 	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	P.inp["e_down"] = true
 	P.ak.use_e()
-	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
+	ok("Undercurrent: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"],
+		T.pos) < 0.3)
 	ac.step(m, 0.05)
 	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Sparkle
 	ac.step(m, 0.55)
 	var ce := AimKit.entry(P, "e0")
-	ok("Skycall held 0.6s (data: hold and drag, release): still dragging, the arrow + a rim chevron on the circle",
+	ok("Undercurrent held 0.6s (data: hold and drag, release): still dragging, the arrow + a rim chevron on the circle",
 			AimKit.shown(P, "e_drag") and not ce.is_empty() and (ce["pointer"] as Vector2).x < -0.9
 			and String(K.strikes[0]["phase"]) == "flick", str(ce.get("pointer", "")))
 	P.inp["e_down"] = false
 	m.step(ac.DT)
-	ok("Skycall: the release commits the drag and starts the countdown", String(K.strikes[0]["phase"]) == "count")
+	ok("Undercurrent: the release commits the drag and starts the countdown", String(K.strikes[0]["phase"]) == "count")
 	var sky := _looks_at(m, K.strikes[0]["at"])
 	var sky_r := float(K.e_def()["radius"])
 	var delay := float(K.e_def()["delay"])
@@ -490,37 +491,37 @@ func _mage() -> void:
 		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and pink:
 			pillars += 1
 	ce = AimKit.entry(P, "e0")
-	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short pink-white pillar, the chevron",
+	ok("Undercurrent look (footage): a dark disc on its radius (full to the strike), a short pink-white pillar, the chevron",
 			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
 			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
 			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
 	ac.step(m, 0.75)
-	ok("Skycall: nothing lands before the 0.8s countdown", ac.dmg(T) < 0.5)
+	ok("Undercurrent: nothing lands before the 0.8s countdown", ac.dmg(T) < 0.5)
 	var tx0 := T.pos.x
 	ac.step(m, 0.3)
-	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
+	ok("Undercurrent: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
 	ac.step(m, 0.9)
-	ok("Skycall: the drag is a modest slide (about 3.4 m)",
+	ok("Undercurrent: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
 	var e_d: Dictionary = K.e_def()
 	# radius: the footage circle about 2 bh across (vireo.md 0184, 0190); slide 3.4 m is owner item 9b (footage ~4 bh)
-	ok("Skycall: radius 1.8 m, the drawn ring at it; slide 3.4 m over 1.1 s",
+	ok("Undercurrent: radius 1.8 m, the drawn ring at it; slide 3.4 m over 1.1 s",
 			absf(float(e_d["radius"]) - 1.8) < 0.001 and absf(float(ce["r"]) - float(e_d["radius"])) < 0.001
 			and absf(float(e_d["slide_dist"]) - 3.4) < 0.001 and absf(float(e_d["slide_t"]) - 1.1) < 0.001,
 			str(ce["r"]))
 	var sl_d := float(e_d["slide_dist"])
 	var sl_t := float(e_d["slide_t"])
-	ok("Skycall: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
+	ok("Undercurrent: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
 			absf(Displace.slide_speed(sl_d, sl_t, 0.0) - 6.18) < 0.05 and absf(Displace.slide_speed(sl_d, sl_t, sl_t * 0.5) - 3.09) < 0.05
 			and Displace.slide_speed(sl_d, sl_t, sl_t) == 0.0 and Displace.slide_speed(sl_d, sl_t, 0.0) < 8.0,
 			"%.2f" % Displace.slide_speed(sl_d, sl_t, 0.0))
-	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
+	ok("Undercurrent: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
 	# source rows (briefs/hero-ref/vireo.md "E: Lightning Javelin": 0.8 s = 4 frames at 5 fps; briefs/supervive-data/
 	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown kept at our 8 : 8 : 10.5 pace, E / rod = 9.2 / 7)
 	var rod_cd := float(K.rmb_def()["cooldown"])
-	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 10.5 at the source's E : rod ratio",
+	ok("Undercurrent data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 10.5 at the source's E : rod ratio",
 			absf(float(e_d["delay"]) - 0.8) < 0.001 and int(e_d["stacks"]) == 1
 			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 10.5) < 0.001
 			and absf(float(e_d["cooldown"]) / rod_cd - 9.2 / 7.0) < 0.05,
@@ -534,7 +535,7 @@ func _mage() -> void:
 	ac.step(m, float(e_d["drag_max"]) - 0.1)
 	var held_open: bool = String(K.strikes[0]["phase"]) == "flick"
 	ac.step(m, 0.2)
-	ok("Skycall held with no release: open until 1 s (drag_max), then the countdown starts on its own",
+	ok("Undercurrent held with no release: open until 1 s (drag_max), then the countdown starts on its own",
 			held_open and String(K.strikes[0]["phase"]) == "count" and absf(float(K.strikes[0]["t"]) - 0.7) < 0.15,
 			str(K.strikes[0]["t"]))
 	P.inp["e_down"] = false
@@ -552,9 +553,9 @@ func _mage() -> void:
 	tx0 = T.pos.x
 	P.ak.use_e()
 	ac.step(m, 2.2)
-	ok("Skycall without a flick: thrown away from you, within 3.9 m",
+	ok("Undercurrent without a flick: thrown away from you, within 3.9 m",
 			T.pos.x > tx0 + 2.5 and T.pos.x < tx0 + 3.9, "%.1f" % (T.pos.x - tx0))
-	ok("Skycall: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
+	ok("Undercurrent: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
 	# a rival Wisp (downed hunter) is launched along the strike too, with no Static and no Grounded
 	ac.fresh(T)
 	K.sparks.clear()
@@ -568,7 +569,7 @@ func _mage() -> void:
 	tx0 = T.pos.x
 	P.ak.use_e()
 	ac.step(m, 2.2)
-	ok("Skycall launches a rival Wisp (no Static, no Grounded)",
+	ok("Undercurrent launches a rival Wisp (no Static, no Grounded)",
 			T.pos.x > tx0 + 2.5 and K.spark_n(T) == 0 and not KitStatus.grounded(T), "%.1f" % (T.pos.x - tx0))
 	m.revive_hunter(T, null)
 	# 9c. dash -> ability (content/dash_flow/mage.json): a bolt tapped inside Wirerun
@@ -675,7 +676,7 @@ func _mage() -> void:
 	ac.step(m, 0.2)
 	var early_r: float = ac.dmg(T)
 	ac.step(m, 0.4)
-	ok("small: Storm Rod's 0.33s minimum cast (a tap still winds)",
+	ok("small: Pink Spear's 0.33s minimum cast (a tap still winds)",
 			early_r < 0.5 and ac.dmg(T) >= 15.0,
 			"%.0f then %.0f" % [early_r, ac.dmg(T)])
 	# 10. Grounded: no Wirerun
@@ -687,7 +688,7 @@ func _mage() -> void:
 	ok("Grounded: no Wirerun", K.wire.is_empty())
 	P.inp["dash_down"] = false
 	P.set_meta("gnd_until", 0.0)
-	# 11. a Boki merge mid-hold: the Wirerun (refunded), the Storm Rod and a Skycall flick go, nothing fires
+	# 11. a Boki merge mid-hold: the Wirerun (refunded), the Pink Spear and an Undercurrent flick go, nothing fires
 	ac.fresh(T)
 	P.teleport(home)
 	T.teleport(home + Vector3(4, 0, 0))
@@ -707,7 +708,7 @@ func _mage() -> void:
 	P.ak.press_rmb()
 	ac.step(m, 0.1, func(): P.inp["dash_down"] = true; P.inp["sec_hold"] = true; ac.aim_at(P, T.pos))
 	P.ak.use_e()
-	ok("merge hold: Wirerun, Rod and a Skycall flick are up before the merge",
+	ok("merge hold: Wirerun, Rod and an Undercurrent flick are up before the merge",
 			wire_before and K.rmb_down and not K.strikes.is_empty())
 	var bl0 := K.blowouts
 	ok("merge hold: a merge is under way", ac.merge_now(P))
@@ -724,7 +725,7 @@ func _mage() -> void:
 	fails += ac.fails
 
 # ------------------------------------------------------------------ Vex
-## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
+## Items 144 and 144b: the Palm Spear's aim locks at the press and turns at a capped rate, so a flick across the
 ## screen moves the beam at most cap x charge time while a small adjustment still lands; the camera push-out
 ## scales with the aim distance (none close in, the full 25% at the 18 m range).
 func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
@@ -747,13 +748,13 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		return [held, cursor]
 	var mid_deg: float = float(charge.call(Vector3(8, 0, 0), Vector3(-8, 0, 0), 0.2)[0])
 	var flick_deg := rad_to_deg(absf(K.needle_dir.angle_to(east)))
-	ok("Longneedle: the line shows the lagging aim, not the cursor, through the charge",
+	ok("Palm Spear: the line shows the lagging aim, not the cursor, through the charge",
 			mid_deg > 5.0 and mid_deg < cap_deg * 0.6, "%.1f deg after 0.2 s" % mid_deg)
-	ok("Longneedle: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
+	ok("Palm Spear: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
 			K.needle.is_empty() and flick_deg <= cap_deg + 2.0 and flick_deg >= cap_deg * 0.7, "%.1f deg" % flick_deg)
 	var cursor: Vector2 = charge.call(Vector3(8, 0, 0), Vector3(8, 0, 2), 0.2)[1]
 	var nudge_deg := rad_to_deg(absf(K.needle_dir.angle_to(cursor)))
-	ok("Longneedle: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
+	ok("Palm Spear: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
 			"%.2f deg off" % nudge_deg)
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
@@ -768,11 +769,11 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		ac.step(m, 0.4)
 		return out
 	var near: Array = push.call(3.0)
-	ok("Longneedle: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
+	ok("Palm Spear: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
 			"zoom %.3f, pan %.2f m" % near)
 	var mid: Array = push.call(11.0)
 	var far: Array = push.call(18.0)
-	ok("Longneedle: the push-out ramps with the aim distance, the full 25% at 18 m",
+	ok("Palm Spear: the push-out ramps with the aim distance, the full 25% at 18 m",
 			float(mid[0]) > 0.05 and float(mid[0]) < 0.2 and absf(float(far[0]) - float(ed["view_zoom"])) < 0.005
 			and float(far[1]) > 1.0,
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
@@ -820,15 +821,15 @@ func _gunslinger_beam_look(V: HeroVfx, K: GunslingerKit) -> void:
 		strip = maxf(strip, w)
 		body = maxf(body, float((e["mat"] as ShaderMaterial).get_shader_parameter("core_w")) * w)
 		lasts = maxf(lasts, float(e["dur"]))
-	ok("Longneedle look: the beam's body is %.2f m across (0.5 bh = 0.9 m) on the %.2f m hit width" % [body, strip],
+	ok("Palm Spear look: the beam's body is %.2f m across (0.5 bh = 0.9 m) on the %.2f m hit width" % [body, strip],
 			body >= 0.9 and absf(strip - K.beam_width()) < 0.01)
-	ok("Longneedle look: the beam fades out over about 0.8 s", lasts >= 0.7 and lasts <= 0.9, "%.2f s" % lasts)
+	ok("Palm Spear look: the beam fades out over about 0.8 s", lasts >= 0.7 and lasts <= 0.9, "%.2f s" % lasts)
 	var fire: Array = HeroVfx.data("gunslinger")["moves"]["e_fire"]["fx"]
 	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring" and l.get("at") == "palm")
 	var palm: Dictionary = HeroVfx.data("gunslinger")["anchors"]["palm"]
 	var ring_nodes: Array = V.pools.get("ring", [])
 	var ring_live := V.live.any(func(e: Dictionary) -> bool: return ring_nodes.has(e["node"]))
-	ok("Longneedle look: a smoke ring opens at the open palm of her cyborg (left) hand on release",
+	ok("Palm Spear look: a smoke ring opens at the open palm of her cyborg (left) hand on release",
 			ring and ring_live and palm["bone"] == "hand.L")
 
 func _gunslinger() -> void:
@@ -955,7 +956,7 @@ func _gunslinger() -> void:
 		_unwall(m, home + Vector3(9.5, 0, z))
 	for z in [1, 2]:
 		_unwall(m, home + Vector3(5.5, 0, z))
-	# 5. Longneedle: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
+	# 5. Palm Spear: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	T.teleport(home + Vector3(8, 0, 0))
@@ -966,21 +967,21 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.05)
 	var w1: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: you stand still to charge", K.move_k() <= 0.001)
+	ok("Palm Spear: you stand still to charge", K.move_k() <= 0.001)
 	ac.step(m, 0.45)
 	var w2: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: the line narrows over the cast (18m)",
+	ok("Palm Spear: the line narrows over the cast (18m)",
 			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
 			"%.2f -> %.2f" % [w1, w2])
-	ok("Longneedle: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
+	ok("Palm Spear: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
 			w1 <= K.beam_width() + 0.001 and w1 > K.beam_width() * 0.85, "%.2f" % w1)
-	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
+	ok("Palm Spear: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)
-	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 20.0, "took %.0f" % ac.dmg(T))
-	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	ok("Palm Spear: fires at 0.6s", ac.dmg(T) >= 20.0, "took %.0f" % ac.dmg(T))
+	ok("Palm Spear: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	_gunslinger_beam_look(HeroVfx.of(m), K)
-	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
+	ok("Palm Spear hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
@@ -992,7 +993,7 @@ func _gunslinger() -> void:
 	var sk0 := K.skewers
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
+	ok("Palm Spear on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -1003,7 +1004,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle passes through a wall", ac.dmg(T) >= 20.0)
+	ok("Palm Spear passes through a wall", ac.dmg(T) >= 20.0)
 	for zz in [-1, 0, 1]: _unwall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.fresh(T)
@@ -1014,7 +1015,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.3)
 	P.stun_t = 0.5
 	ac.step(m, 0.2)
-	ok("Longneedle: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
+	ok("Palm Spear: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
 	P.stun_t = 0.0
 	_gunslinger_needle_aim(m, P, K, home)
 	# 6. Slipstep: goes where you move (not the aim), you fire through a tap too
@@ -1080,7 +1081,7 @@ func _gunslinger() -> void:
 	ok("dash table: a shot tapped mid-slide fires at once", P.shot_n == n_gd + 1, "%d -> %d" % [n_gd, P.shot_n])
 	ac.fresh(T)
 	P.ak.use_e()
-	ok("dash table: E (Longneedle) starts mid-slide", not K.needle.is_empty())
+	ok("dash table: E (Palm Spear) starts mid-slide", not K.needle.is_empty())
 	P.inp["move"] = Vector2.ZERO
 	ac.step(m, 0.8)
 	var gk: Array = (HunterAnim.km_def("gunslinger_dash")["keys"] as Array)
@@ -1107,7 +1108,7 @@ func _gunslinger() -> void:
 		P.dashes = P.max_dashes()
 		P.inp["move"] = Vector2(0, 1)
 		P.do_dash())
-	ac.air_steers(m, P, home, "Longneedle's recoil", func():
+	ac.air_steers(m, P, home, "Palm Spear's recoil", func():
 		K.cd["e"] = 0.0
 		P.ak.use_e()
 		ac.step(m, 0.7))
@@ -1139,9 +1140,9 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 20.0 and ac.dmg(T2) >= 20.0)
+	ok("small: Palm Spear hits everyone in its line (two)", ac.dmg(T) >= 20.0 and ac.dmg(T2) >= 20.0)
 	var cd_two := float(K.cd["e"])
-	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
+	ok("small: Palm Spear at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
 	P.slot_lv["kin"] = 3
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -1155,7 +1156,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
+	ok("small: Palm Spear at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
 			float(K.cd["e"]) < 11.5 * 0.5, "%.2f" % float(K.cd["e"]))
 	P.slot_lv["kin"] = 1
 	# upgrade parity (docs/heroes/gunslinger.md): the source's tier II / III+IV numbers per slot
@@ -1169,11 +1170,11 @@ func _gunslinger() -> void:
 			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
 		])
-	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
+	ok("upgrade parity: Coin Blast cooldown 6.5 -> 5.4 -> 4.3",
 			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
 	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
 			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
-	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
+	ok("upgrade parity: Palm Spear cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
 	var speeds: Array = []
@@ -1188,7 +1189,7 @@ func _gunslinger() -> void:
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
+	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Coin Blast
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -1199,14 +1200,14 @@ func _gunslinger() -> void:
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
 	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
 			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
-	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
+	ok("Knock at rank 3: Coin Blast resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
 	VSTICK.new(self).run(m, P, K, T, home)
 	VTIME.new(self).run(m, P, K, T, home)
-	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
+	# 8. a Boki merge mid-hold: the Palm Spear charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)
 	T.teleport(home + Vector3(5, 0, 0))
@@ -1216,13 +1217,13 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.2)
 	var needle_before: bool = not K.needle.is_empty()
-	ok("merge hold: the Longneedle is charging before the merge", needle_before)
+	ok("merge hold: the Palm Spear is charging before the merge", needle_before)
 	var sk1 := K.skewers
 	ok("merge hold: a merge is under way", ac.merge_now(P))
 	ac.step(m, 0.1)
 	var took1: float = ac.dmg(T)
 	ac.step(m, 1.3)
-	ok("merge hold: the Longneedle charge is dropped, no shot mid-merge",
+	ok("merge hold: the Palm Spear charge is dropped, no shot mid-merge",
 			K.needle.is_empty() and K.e_t == 0.0 and K.skewers == sk1 and ac.dmg(T) == took1)
 	await ac.done(m)
 	fails += ac.fails

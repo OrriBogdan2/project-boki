@@ -619,7 +619,7 @@ func _sliders(id: String, sync: Node) -> void:
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
 ## Rooted (a foe's Root, the state's "rooted"), the legs stay planted while the body casts: through every kit move the
-## feet move under ROOT_FOOT_M over the idle's sway, though the velocity says he runs (Rimelock's statue is frozen).
+## feet move under ROOT_FOOT_M over the idle's sway, though the velocity says he runs (Freeze Frame's statue is frozen).
 func _rooted(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var feet: Array = []

@@ -211,7 +211,7 @@ def clips():
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd)))
 
-    # Ember Cast, her lantern hand: pulled to the hip, the torso turned away; a straight push at the cursor on 0.08, the torso unwound past square
+    # Hot and Cold, her lantern hand: pulled to the hip, the torso turned away; a straight push at the cursor on 0.08, the torso unwound past square
     r_w = {"pel": (0.0, -0.02, -0.05), "prt": (0.05, -0.28, 0), "tor": (0.08, -0.32, 0.03), "hed": (-0.08, 0.5, 0), "G": (SH + 0.08, -0.06, 0.76), "BE": be(),
            "LP": (-0.16, 0.26, 0.88), "Lh": (-1.2, 0.2, 0), "FL": (-0.12, 0.10, A), "FR": (0.13, -0.10, A), "brow": 0.4, "lid": -0.05, "ear": 0.15, "fing": 0.4, "skirt": 0.1}
     r_h = {"pel": (0.0, 0.05, -0.07), "prt": (0.16, 0.34, 0), "tor": (0.16, 0.42, -0.04), "hed": (-0.26, -0.62, 0.02), "G": (0.12, 0.52, 1.02), "BE": be((0, 0.5, -0.87), (0, 0.87, 0.5)),
@@ -233,7 +233,7 @@ def clips():
     e2 = dict(e1)
     e2.update({"pel": (0.0, 0.07, 0.015), "G": (0.12, 0.50, 1.05), "LP": (-0.10, 0.50, 1.05)})
     out.append(C("shot_emp", 0.55, [(0.0, END), (0.09, e0), (0.14, e1, "out"), (0.3, e2, "lin"), (0.55, END)]))
-    # Burrseed wind-up (item 118b, Elluna's read): a graceful 1.0 s channel the enemy sees coming. A small scoop down, the arms sweep up and out, she
+    # Stick Around wind-up (item 118b, Elluna's read): a graceful 1.0 s channel the enemy sees coming. A small scoop down, the arms sweep up and out, she
     # rises onto her toes with the wings opening, gathering the light into the lantern overhead; cocked back at the very top, then the throw
     s_d = {"pel": (0.0, 0.0, -0.075), "prt": (0.16, 0, 0), "tor": (0.2, 0, 0), "hed": (0.12, 0, 0), "G": (0.2, 0.2, 0.74), "BE": be(), "LP": (-0.17, 0.2, 0.72), "Lh": (-1.1, 0.6, 0),
            "FL": (-0.13, 0.05, A), "FR": (0.13, -0.05, A), "FLy": 0.16, "FRy": -0.16, "ear": 0.3, "fing": 0.7, "wing": -0.14, "wfl": 0.03, "wfq": 2.0}
@@ -264,7 +264,7 @@ def clips():
     t2 = dict(t1)
     t2.update({"LP": (-0.09, 0.42, 1.10), "tor": (0.0, -0.32, 0)})
     out.append(C("toss", 0.5, [(0.0, END), (0.06, t0, "out"), (0.12, t1, "out"), (0.26, t2), (0.5, END)]))
-    # Relay Step: a skip: a quick squash, off one foot with the lead knee up, wings snapping back
+    # Foxtrot: a skip: a quick squash, off one foot with the lead knee up, wings snapping back
     k0 = {"pel": (0.0, -0.02, -0.09), "prt": (0.25, 0, 0), "tor": (0.1, 0, 0), "hed": (-0.2, 0, 0), "brow": 0.3, "ear": 0.3, "wing": -0.14}
     k1 = {"pel": (0.0, 0.08, 0.10), "prt": (0.42, 0, 0.0), "tor": (0.1, 0.1, 0), "hed": (-0.4, 0, 0), "G": (SH + 0.1, -0.03, 0.86), "LP": (-0.26, 0.22, 0.90), "FL": (-0.12, 0.2, A + 0.17), "FR": (0.13, -0.2, A + 0.02), "FLp": -0.4, "FRp": 0.8, "ear": 0.7, "skirt": -0.3, "wing": 0.28, "wb": 0.4, "wfq": 8.0, "wfl": 0.25, "jaw": 0.2, "lid": -0.1}
     out.append(C("skip", 0.24, [(0.0, k0), (0.04, k0), (0.11, k1, "out"), (0.17, dict(k1, pel=(0.0, 0.05, 0.03), FL=(-0.12, 0.14, A), FR=(0.13, -0.12, A + 0.06))), (0.24, END)]))
@@ -276,18 +276,18 @@ def clips():
     f2 = dict(f0)
     f2.update({"pel": (-0.012, 0.0, 0.015), "prt": (0.3, -0.1, -0.09), "FR": (0.13, -0.11, A + 0.12), "FL": (-0.12, -0.11, A + 0.13)})
     out.append(C("float", 1.05, [(0.0, k0), (0.06, f0, "out"), (0.26, f1), (0.46, f2), (0.66, f1), (0.85, f0), (0.95, {"pel": (0, 0, -0.1), "prt": (0.2, 0, 0), "FL": (-0.12, 0.05, A), "FR": (0.13, -0.05, A), "FLp": 0, "FRp": 0, "wfl": 0.08, "wfq": 4.0, "wing": 0.05}, "out"), (1.05, END)]))
-    # Carrier: she ducks, gets her shoulder under them, and heaves up, staggering a little: small and stubborn
+    # Carry the Day: she ducks, gets her shoulder under them, and heaves up, staggering a little: small and stubborn
     p0 = {"pel": (0.0, 0.03, -0.17), "prt": (0.72, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.7, 0, 0), "G": (SH + 0.05, 0.24, 0.42), "LP": (-0.14, 0.40, 0.40), "Lh": (-1.2, 0, 0), "FL": (-0.15, 0.14, A), "FR": (0.15, -0.14, A), "brow": 0.8, "ear": 0.5, "fing": 0.9}
     p1 = {"pel": (0.0, 0.0, -0.02), "prt": (0.0, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (SH + 0.14, 0.14, 0.84), "LP": (-0.2, 0.04, 1.08), "Lh": (0.6, 0, 0), "FL": (-0.13, 0.06, A), "FR": (0.13, -0.06, A), "jaw": 0.6, "brow": 1.0, "lid": 0.3, "ear": 0.3, "fing": 0.8}
     out.append(C("pickup", 0.55, [(0.0, END), (0.12, p0), (0.3, p1, "out"), (0.55, END)]))
     # the Hearthlight's bloom: both arms up and out, up on the toes
     fl = {"pel": (0.0, 0.0, 0.05), "prt": (-0.08, 0, 0), "tor": (-0.2, 0, 0), "hed": (-0.26, 0, 0), "G": (SH + 0.22, 0.05, 1.32), "BE": be((0.3, 0, -0.95)), "LP": (-0.42, 0.05, 1.32), "Lh": (0.0, 0, 2.2), "FL": (-0.13, 0.02, A + 0.04), "FR": (0.13, -0.02, A + 0.04), "FLp": 0.5, "FRp": 0.5, "fing": 0, "jaw": 0.8, "brow": 0.3, "wing": 0.4, "skirt": -0.2}
     out.append(C("flare", 0.6, [(0.0, END), (0.07, dict(END, pel=(0, 0, -0.08), prt=(0.15, 0, 0))), (0.15, fl, "out"), (0.32, dict(fl, pel=(0, 0, 0.03), jaw=0.5)), (0.6, END)]))
-    # the Burrseed's root going off: a tug on the thread: upper body only
+    # the Stick Around's root going off: a tug on the thread: upper body only
     out.append(C("tug", 0.36, [(0.0, END), (0.05, {"LP": (-0.14, 0.42, 0.98), "Lh": LHAND_PUSH, "fing": 0.2, "tor": (0.0, 0.1, 0)}), (0.11, {"LP": (-0.24, -0.04, 0.96), "Lh": (0.2, 0, 0), "fing": 1.0, "tor": (0.22, -0.2, 0), "hed": (-0.2, 0.2, 0), "brow": 0.9, "jaw": 0.3}, "out"), (0.36, END)]))
     # a foe Kindled to 5: a snap of the fingers by her shoulder
     out.append(C("kindled", 0.34, [(0.0, END), (0.06, {"LP": (-0.22, 0.12, 1.06), "Lh": (-0.2, 0, 2.6), "fing": 0.5}), (0.12, {"LP": (-0.24, 0.1, 1.2), "Lh": (0, 0, 3.0), "fing": 1.0, "ear": -0.0, "hed": (-0.14, 0.14, 0), "brow": 0.8}, "out"), (0.34, END)]))
-    # Hearth Call: the lantern pulled low, then thrust high and out over the tether; it holds there walking; swept down at the end
+    # Rise and Shine: the lantern pulled low, then thrust high and out over the tether; it holds there walking; swept down at the end
     c0 = {"G": (SH + 0.1, -0.04, 0.72), "tor": (0.14, -0.2, 0), "hed": (-0.1, 0.2, 0), "brow": 0.6}
     c1 = {"G": (0.26, 0.26, 1.42), "BE": be((0.1, 0.1, -1.0)), "tor": (-0.14, 0.14, 0), "hed": (-0.3, -0.14, 0), "LP": (-0.36, 0.06, 0.92), "Lh": (0, 0, -0.9), "brow": 0.9, "jaw": 0.6, "fing": 0.0, "wing": 0.3, "ear": 0.0}
     c2 = dict(c1)

@@ -1,5 +1,5 @@
 """Grimble's sounds (id dredge, the Scrap King): a skinny, wiry, greedy junk-hoarder monster with a towering
-hoard on his back, a gaff hook on a chain (the Deep Reach), a scrap fist and a junk blunderbuss.
+hoard on his back, a gaff hook on a chain (the Sticky Fingers), a scrap fist and a junk blunderbuss.
 
     cd tools && python3 gen_sfx_grimble.py      (then: godot --headless --import)
 
@@ -123,7 +123,7 @@ def shot(i):
     return mix(boom, tube, at(scrap, 0.01), tail)
 
 
-# ------------------------------------------------------------------ RMB: Deep Reach
+# ------------------------------------------------------------------ RMB: Sticky Fingers
 def throw():
     """The gaff hook flung out: a heave, the chain paying out, the abyss moaning behind it."""
     d = 0.6
@@ -155,7 +155,7 @@ def reel():
     return mix(out, drum, links)
 
 
-# ------------------------------------------------------------------ E: Anchor Drop (the scrap fist)
+# ------------------------------------------------------------------ E: Lump Sum (the scrap fist)
 def anchor_wind():
     """The scrap fist hauled up: grinding scrap, the hoard shifting, a low rising swell."""
     d = 0.7
@@ -195,7 +195,7 @@ def quake():
     return mix(slam, debris, clang, junk)
 
 
-# ------------------------------------------------------------------ Shift: Barge
+# ------------------------------------------------------------------ Shift: Mad Dash
 def scrabble(d, n_claws=4):
     """Claws raking the ground in quick strokes."""
     out = np.zeros(N(d))
@@ -234,7 +234,7 @@ def dash(i):
     return mix(air, scrabble(0.28, 3) * 0.7, at(clatter(0.35, 3, 0.08) * 0.35, 0.03))
 
 
-# ------------------------------------------------------------------ X: Brass Broadside
+# ------------------------------------------------------------------ X: Both Barrels
 def blast_charge():
     """Loading the broadside: junk crammed down the barrel, a crank ratcheting, a whine and rumble rising."""
     d = 1.2

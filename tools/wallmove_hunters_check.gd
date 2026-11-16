@@ -26,7 +26,7 @@ const WALK_ANGLES := [25.0, 35.0]  # degrees off the wall's normal
 ## Cases a kit move is allowed to own (the move commits), per Hunter: case-name prefixes, with the cite.
 const COMMITS := {}
 ## Placed casts (not moves), tapped or held, per Hunter: the bounce sweep aims them back the way she came (at a
-## chaser), not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as
+## chaser), not at the wall. Neve's Cold Front (E) rises at her height `reach` ahead and its blocks stand as
 ## columns: aimed at the wall it stood just in front of it, and she met her own ice head-on (within 16 degrees
 ## of its face) instead of the wall at an angle.
 const CAST_BACK := {"rimewright": ["sig", "sig/hold"]}
@@ -88,7 +88,7 @@ func _hunter(a: String) -> void:
 
 
 func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
-	# a Spirit Walk from the last case ends here: set_arch builds a new kit, but Hunter.spirit_t
+	# a Slip Stitch from the last case ends here: set_arch builds a new kit, but Hunter.spirit_t
 	# would outlive it and let her climb the wall face (fbf2e50d0) in every case after it
 	if me.ak and me.ak.get("spirit") != null:
 		me.ak.spirit.end("merge")
@@ -136,7 +136,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	for w in m.verbs.walls.duplicate():  # (an earlier case's Rink Wall would stand in this path)
+	for w in m.verbs.walls.duplicate():  # (an earlier case's Cold Front would stand in this path)
 		m.verbs._break_wall(w)
 
 
@@ -177,7 +177,7 @@ func _kick_case(what: String) -> void:
 
 ## In the air with the wall within the hop's reach.
 func _at_wall() -> bool:
-	# beside the face: not through it (a Spirit Walk ghosts terrain) and not up over its top
+	# beside the face: not through it (a Slip Stitch ghosts terrain) and not up over its top
 	var gap: float = face - me.pos.x - me.r
 	return (
 		not me.grounded

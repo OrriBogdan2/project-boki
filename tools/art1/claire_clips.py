@@ -294,7 +294,7 @@ def clips():
     fz1 = dict(fz0, pel=(0, 0.03, -0.09), tor=(0.12, 0, 0), hed=(0.2, 0, 0), FL=(-0.09, 0.2, A_Z - 0.01), FLp=0.0, LP=(-0.2, 0.16, 0.98), fing=1.0, skirt=0.3)
     out.append(C("freeze", 0.42, [(0.0, END), (0.07, fz0, "out"), (0.13, fz1, "out"), (0.42, END)]))
 
-    # Shift, the Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
+    # Shift, the Free Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
     sg0 = {"pel": (0, -0.04, -0.12), "prt": (0.3, 0, 0), "tor": (0.16, -0.1, 0), "hed": (-0.26, 0, 0), "FR": (0.1, -0.26, A_Z), "FL": (-0.08, 0.14, A_Z), "FRy": -0.75, "FLy": 0.05, "LP": (-0.36, 0.0, 1.0), "LH": (0.3, 0, 0), "skirt": -0.3, "smile": 0.7, "lid": 0.1}
     sg0.update(LOWS)
     sg1 = dict(sg0, pel=(0.04, 0.09, -0.13), prt=(0.42, 0, 0.1), FR=(0.14, -0.36, A_Z + 0.02), FL=(-0.09, 0.2, A_Z), skirt=-0.4, G=(0.31, -0.04, 0.98), LP=(-0.36, 0.24, 1.07))
@@ -324,7 +324,7 @@ def clips():
     # the detonation (tm_clench, 0.34): the left hand closes, a small gesture to her chest
     out.append(C("clench", 0.34, [(0.0, END), (0.05, {"LP": (-0.2, 0.2, 1.12), "LH": (-0.2, 0, 0), "fing": 0.1}), (0.1, {"LP": (-0.14, 0.2, 1.16), "LH": (-0.3, 0, 0.2), "fing": 1.0, "tor": (0.05, 0, 0), "brow": 0.25}, "out"), (0.34, END)]))
 
-    # X, Rimelock (tm_rime, 0.2): she folds in, both hands to the spear before her heart, eyes closing: a statue at prayer, not a crouch
+    # X, Freeze Frame (tm_rime, 0.2): she folds in, both hands to the spear before her heart, eyes closing: a statue at prayer, not a crouch
     still = dict(PRAY, pel=(0.0, 0.0, -0.04), prt=(0.04, 0, 0), tor=(0.05, 0, 0), hed=(0.26, 0, 0), LP=(-0.1, 0.2, 1.2), fing=1.0, lid=0.95, brow=-0.35, smile=0.3,
                  FL=(-0.08, -0.02, A_Z), FR=(0.08, 0.05, A_Z), FLy=0.2, FRy=-0.1, skirt=0.0, skirtz=0.0)
     out.append(C("rime", 0.2, [(0.0, END), (0.12, dict(still, hed=(0.1, 0, 0), lid=0.5), "out"), (0.2, still)]))

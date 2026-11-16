@@ -59,7 +59,7 @@ func _fits(kind: String, want: Array) -> bool:
 	return want.is_empty() or kind in want or (kind == "" and not want[0] in STRICT)
 
 ## Numbers the card works out from fields (a product, a quotient) or a code constant, per hero:
-## extra numbers its card may state, and the pair of the pinned Heavy Shot.
+## extra numbers its card may state, and the pair of the pinned Pin Down.
 func _derived(a: String, d: Dictionary) -> Dictionary:
 	var dash: Dictionary = d.get("dash", {})
 	var e: Dictionary = d.get("e", {})
@@ -76,7 +76,7 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 		"bulwark":      # the dash's time over its distance; the lane is cells x cell_len
 			var lane := float(x["cells"]) * float(x["cell_len"])
 			return {"nums": [float(dash["whirl"]) / float(dash["whirl_speed"]), lane]}
-		"dolm":         # Stone Row: three rocks gap apart span twice the gap
+		"dolm":         # Foothold: three rocks gap apart span twice the gap
 			return {"nums": [float(e["gap"]) * 2.0]}
 		"gunslinger":   # an air tap slides air_k of the slide; the beam is twice its half-width
 			return {"nums": [float(dash["slide"]) * float(dash["air_k"]), float(e["width"]) * 2.0]}

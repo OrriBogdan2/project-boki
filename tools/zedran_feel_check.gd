@@ -1,7 +1,7 @@
 extends RefCounted
-## Kael's feel: the Warchain, the RMB variants, the Meteor Drop and his dash moves. Runs inside
+## Kael's feel: the Short Leash, the RMB variants, the Hit the Deck and his dash moves. Runs inside
 ## --juggernaut-combo-check (tools/dancer_jug_check.gd). One assert per row of docs/heroes/juggernaut.md
-## "Warchain: the state machine" and "RMB: the interaction table", the Meteor Drop's phases and timings
+## "Short Leash: the state machine" and "RMB: the interaction table", the Hit the Deck's phases and timings
 ## against the footage, and his two dash moves. A is tools/archetype_check.gd.
 
 const AKCheck := preload("res://tools/archetype_check.gd")
@@ -25,7 +25,7 @@ func run(a) -> void:
 			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)
 
-# ------------------------------------------------------------------ item 21: the Meteor Drop
+# ------------------------------------------------------------------ item 21: the Hit the Deck
 func meteor() -> void:
 	var r := A.setup("juggernaut", 5.0, "", true)
 	var m: Match = r[0]
@@ -100,9 +100,9 @@ func meteor() -> void:
 	A.ok("jug meteor: the recovery rises over the source's ~0.5s",
 			D.last_recover >= 0.45 and D.last_recover <= 0.6, "%.2fs" % D.last_recover)
 	A.step(m, 0.05)
-	A.ok("jug meteor: a Smash pressed early in the recovery is dropped (not fired late)",
+	A.ok("jug meteor: a Final Swing pressed early in the recovery is dropped (not fired late)",
 			K.slam_w.is_empty() and K.ch_rmb >= 1.0)
-	# a second drop: a Smash pressed in the last 0.1s of the recovery goes off when it ends; Shift after 0.25s
+	# a second drop: a Final Swing pressed in the last 0.1s of the recovery goes off when it ends; Shift after 0.25s
 	K.cd["air"] = 0.0
 	P.teleport(home + Vector3(0, 1.8, 0))
 	P.grounded = false
@@ -115,7 +115,7 @@ func meteor() -> void:
 	A.step(m, float(dd["recover"]) - 0.08)
 	A.tap(m, P)
 	A.step(m, 0.12)
-	A.ok("jug meteor: a Smash pressed just before the recovery ends goes off as it ends (buffered, once)",
+	A.ok("jug meteor: a Final Swing pressed just before the recovery ends goes off as it ends (buffered, once)",
 			not K.slam_w.is_empty() and K.last_variant == "tap" and K.ch_rmb < 1.0)
 	A.step(m, 1.0)
 	K.cd["air"] = 0.0
@@ -160,7 +160,7 @@ func meteor() -> void:
 			"went %s phase %s carried %.2fm, %.2fm off in the drop" % [went, D.phase, carried, off])
 	await A.done(m)
 
-# ------------------------------------------------------------------ item 22: the Warchain's states
+# ------------------------------------------------------------------ item 22: the Short Leash's states
 func _hook(m: Match, P: Hunter, K: JuggernautKit, at: Vector3, secs := 0.5) -> void:
 	K.cd["e"] = 0.0
 	A.aim_at(P, at)
@@ -318,7 +318,7 @@ func chain_pull() -> void:
 			W.exits == "dash" and W.state == "ready" and P.roll_t > 0.0 and P.move_kind == "dash"
 			and K.rampage_wind <= 0.0,
 			"exit %s roll %.2f kind %s" % [W.exits, P.roll_t, P.move_kind])
-	# a jump in the pull: a chain launch that keeps most of the speed; RMB then is the Meteor Drop
+	# a jump in the pull: a chain launch that keeps most of the speed; RMB then is the Hit the Deck
 	_settle(m, P, K, home)
 	_hook(m, P, K, T.pos, 0.4)
 	K.use_e()
@@ -332,7 +332,7 @@ func chain_pull() -> void:
 	K.cd["air"] = 0.0
 	A.step(m, 0.1)
 	P.ak.press_rmb()
-	A.ok("jug RMB row: airborne after a chain launch = Meteor Drop", K.meteor.running() and K.last_variant == "air",
+	A.ok("jug RMB row: airborne after a chain launch = Hit the Deck", K.meteor.running() and K.last_variant == "air",
 			"variant %s" % K.last_variant)
 	A.step(m, 1.4)
 	# a pull started in the air (hooked, then a jump, then E) holds his height to the anchor
@@ -439,7 +439,7 @@ func rmb_rows() -> void:
 	A.step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	A.step(m, 0.1)
-	A.ok("jug RMB row: pulling + press = Cinder Spin on the press, nothing on the release",
+	A.ok("jug RMB row: pulling + press = Full Circle on the press, nothing on the release",
 			at_once and K.spins == spins0 + 1 and K.lunge.is_empty() and K.slam_w.is_empty())
 	# Arriving + press: still the spin; after the window: the Slam (a body hit beside them, no sweet spot)
 	_settle(m, P, K, home)
@@ -451,7 +451,7 @@ func rmb_rows() -> void:
 		m.step(A.DT)
 		t += A.DT
 	A.tap(m, P)
-	A.ok("jug RMB row: arriving (0.25s) + tap = Cinder Spin", K.spins == spins0 + 2 and K.last_variant == "during_e",
+	A.ok("jug RMB row: arriving (0.25s) + tap = Full Circle", K.spins == spins0 + 2 and K.last_variant == "during_e",
 			"spins %d" % (K.spins - spins0))
 	A.step(m, 0.4)
 	ready_smash.call()
@@ -531,7 +531,7 @@ func rmb_rows() -> void:
 	A.step(m, 0.3)
 	A.ok("jug buffer: a slash pressed late in the pull swings on arrival (not lost)", K.slash_n == n0 + 1,
 			"slashes %d" % (K.slash_n - n0))
-	# a Smash pressed in the last 0.1s of the Slam's wind-up goes off after it, once
+	# a Final Swing pressed in the last 0.1s of the Slam's wind-up goes off after it, once
 	_settle(m, P, K, home)
 	ready_smash.call()
 	A.tap(m, P)
@@ -540,7 +540,7 @@ func rmb_rows() -> void:
 	A.tap(m, P)
 	var queued := K.slam_w.is_empty() == false
 	A.step(m, 0.15)
-	A.ok("jug buffer: a Smash pressed late in the Slam's wind-up winds up the next one after it (once)",
+	A.ok("jug buffer: a Final Swing pressed late in the Slam's wind-up winds up the next one after it (once)",
 			queued and not K.slam_w.is_empty() and K.ch_rmb < 1.0)
 	await A.done(m)
 
@@ -927,7 +927,7 @@ func chain_swing() -> void:
 
 # ------------------------------------------------------------------ the pull model (steer, curve, slingshot)
 ## The pull is an impulse toward the anchor that his movement input and facing curve, and backing away first
-## slingshots (docs/heroes/juggernaut.md "Warchain: the state machine"). Pulled to a wall 9 m east each time.
+## slingshots (docs/heroes/juggernaut.md "Short Leash: the state machine"). Pulled to a wall 9 m east each time.
 func chain_steer() -> void:
 	var r := A.setup("juggernaut", 8.0)
 	var m: Match = r[0]

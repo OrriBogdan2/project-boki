@@ -13,12 +13,12 @@ cheeky rubbery pop. Her voice is a young woman's, bright and brash.
   vv_static_full             the 4th stack: a sky bolt onto them
   vv_surge_charge / _go      Wirerun: the charge building / the streak
   mage_dash                  the body of the streak (the shared dash slot)
-  vv_rod_summon/_full/_throw Storm Rod: appears, fully charged, thrown
-  mage_rod_hit               Storm Rod striking a foe
+  vv_rod_summon/_full/_throw Pink Spear: appears, fully charged, thrown
+  mage_rod_hit               Pink Spear striking a foe
   vv_orb                     a charge orb appearing or bursting
-  vv_sky_place/_count/_strike  Skycall: placed, counting down, the strike
+  vv_sky_place/_count/_strike  Undercurrent: placed, counting down, the strike
   vv_ult_charge/_rise/_hum/_crack/_slam
-                             Kitefall by beat: the crouch gathering, the lift-off, the hover (a loop, stops on the
+                             Stormfall by beat: the crouch gathering, the lift-off, the hover (a loop, stops on the
                              drop), the bolt leaving the sky as she drops, the landing boom
   mage_step_<surface>        light boots, bangles, a static tick (3 takes each)
   mage_hurt/down/death       wordless voice
@@ -165,7 +165,7 @@ def dash():
     return mix(air, hum, crackle(d, 80, fall=0.15) * 0.4)
 
 
-# ------------------------------------------------------------------ RMB: Storm Rod
+# ------------------------------------------------------------------ RMB: Pink Spear
 def rod_summon():
     """The copper rod arrives in her hand: a shimmer-pop and a crackle off its tip."""
     d = 0.5
@@ -211,7 +211,7 @@ def orb():
     return pad(mix(soft(pop, 1), hum, glint, crackle(0.5, 70, fall=0.18) * 0.5), d)
 
 
-# ------------------------------------------------------------------ E: Skycall
+# ------------------------------------------------------------------ E: Undercurrent
 def sky_place():
     """The circle dropped: a low tick, a breath of static."""
     d = 0.45
@@ -242,7 +242,7 @@ def sky_strike(i):
     return lpf(mix(crk, tear * 0.8, body, roll, sparks, sub(56, 32, d, 0.25) * 0.5), 10000)
 
 
-# ------------------------------------------------------------------ X: Kitefall
+# ------------------------------------------------------------------ X: Stormfall
 def ult_rise():
     """Launching up out of reach: a whoosh climbing, a crackle pulled along under her."""
     d = 0.65

@@ -220,7 +220,7 @@ const SWEEP_OPEN := 1                   # steps from the fresh press to the glid
 ## teleport: a jump out of it is not a dash to cancel, so only his air rows (the sling and drift) are swept.
 const SWEEP_SKIP := {"ostra": "ground"}
 ## A dash that ends in an attack keeps the glider shut for that attack's wind-down (the no-glider-in-an-attack
-## rule): Albert's 360 Smash spin lands as his dash ends.
+## rule): Albert's Tideturner spin lands as his dash ends.
 const SWEEP_WINDDOWN := {"bulwark": BulwarkKit.WINDDOWN}
 ## One probe of a Shift pattern moving east, the player's press on step `press` (-1: none). Returns {busy: steps
 ## the move kept a roll running or the glider shut, open: steps from the fresh press to the open glider (1 = the

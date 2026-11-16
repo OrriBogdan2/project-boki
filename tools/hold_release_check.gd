@@ -1,6 +1,6 @@
 extends RefCounted
 ## How a hold ends, for the five holds that matter (docs/heroes/hold_release_rules.md): Kael's RMB Lunge, Lace's
-## Heavy Shot and bow draw, Sparkle's Skycall drag, Albert's Crushing Blow whirl and Tenzo's Basalt Spine drag.
+## Pin Down and bow draw, Sparkle's Undercurrent drag, Albert's Crushing Blow whirl and Tenzo's Backbone drag.
 ## Each is driven through its endings (let go, stunned mid-hold, downed, another key) and asserted. The kits'
 ## --<hero>-combo-checks call their hero's function; A is the archetype check that carries the helpers.
 
@@ -24,7 +24,7 @@ static func _press_key(P: Hunter, which: String) -> void:
 		"rmb": P.ak.press_rmb()
 		"e": P.ak.use_e()
 
-## The RMB hold of `arch` (Kael's Lunge, Lace's Heavy Shot): whether the charge was spent, and the pose left behind.
+## The RMB hold of `arch` (Kael's Lunge, Lace's Pin Down): whether the charge was spent, and the pose left behind.
 static func _rmb_hold(A, arch: String, ev: String, which := "") -> Dictionary:
 	var r = A.setup(arch, 14.0)
 	var m: Match = r[0]
@@ -78,13 +78,13 @@ static func _draw(A, ev: String, which := "") -> Dictionary:
 
 static func lace(A) -> void:
 	var rel := await _rmb_hold(A, "archer", "release")
-	A.ok("hold lace Heavy Shot: let go looses it", rel["spent"], str(rel))
+	A.ok("hold lace Pin Down: let go looses it", rel["spent"], str(rel))
 	for ev in ["stun", "down"]:
 		var d := await _rmb_hold(A, "archer", ev)
-		A.ok("hold lace Heavy Shot: %s mid-hold drops it, no arrow, nothing spent" % ev,
+		A.ok("hold lace Pin Down: %s mid-hold drops it, no arrow, nothing spent" % ev,
 				not d["spent"] and not d["held"] and d["anim"] != "arc_heavy_wind", str(d))
 	var key := await _rmb_hold(A, "archer", "key", "e")
-	A.ok("hold lace Heavy Shot: E mid-hold [?]: the draw goes on, looses at let go",
+	A.ok("hold lace Pin Down: E mid-hold [?]: the draw goes on, looses at let go",
 			key["held"] and key["spent"], str(key))
 	var dr := await _draw(A, "release")
 	A.ok("hold lace draw: let go looses the arrow", dr["dmg"] > 0.0, str(dr))
@@ -128,7 +128,7 @@ static func albert(A) -> void:
 		A.ok("hold albert whirl: %s mid-hold [?] ends it, no swing" % which,
 				k["slams"] == 0 and not k["whirling"] and k["anim"] != "bul_smash_wind", str(k))
 
-## Sparkle's Skycall (E held to drag): the drag phase right after the ending, and what the strike did to the dummy.
+## Sparkle's Undercurrent (E held to drag): the drag phase right after the ending, and what the strike did to the dummy.
 static func _skycall(A, ev: String, which := "") -> Dictionary:
 	var r = A.setup("mage", 8.0)
 	var m: Match = r[0]
@@ -156,7 +156,7 @@ static func sparkle(A) -> void:
 	var k := await _skycall(A, "key", "rmb")
 	A.ok("hold sparkle E: RMB mid-drag [?]: both go, the strike lands", k["hurt"] > 0.0, str(k))
 
-## Tenzo's Basalt Spine (X held to drag): the aim after the ending, what X cost, and the ridge after let go.
+## Tenzo's Backbone (X held to drag): the aim after the ending, what X cost, and the ridge after let go.
 static func _spine(A, ev: String, which := "") -> Dictionary:
 	var r = A.setup("dolm", 9.0)
 	var m: Match = r[0]

@@ -7,7 +7,7 @@ extends "res://tools/remote_anim_check.gd"
 
 ## [arch, key, s held, the telegraph id, its shape kind, caption]
 const SHOTS := [
-	["archer", "e", 0.0, "e", "arc_wall", "Lace's Hail Wall arc, cast on the other game"],
+	["archer", "e", 0.0, "e", "arc_wall", "Lace's Hemline arc, cast on the other game"],
 	["dolm", "rmb", 1.2, "rmb", "circle", "Tenzo's held slam circle, cast on the other game"],
 	["dolm", "e", 0.0, "e_tell0", "circle", "Tenzo's three E tells, cast on the other game"],
 	["bulwark", "e", 0.0, "e", "circle", "Albert's E zone, cast on the other game"],

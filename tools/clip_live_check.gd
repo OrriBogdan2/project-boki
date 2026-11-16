@@ -1,6 +1,6 @@
 extends RefCounted
 ## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render
-## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play
+## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Short Leash's throw and haul play
 ## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
 ## then he is gone; a stun, a root and Grounded each show on his clips. Every Hunter, each key pressed on the way up
 ## a jump and in a fall: a move seen in the air plays over airborne legs ("air_legs", or clips on the upper body
@@ -12,7 +12,7 @@ const LEAN_OFF := 0.5          # rad: how far the haul's lean may sit off his he
 const AIR_KEYS := ["fire", "sec", "sig", "ult"]
 const AIR_HOLDS := [6, 40]      # frames a key is held: a tap and a hold
 const NO_LEGS := ["ostra"]      # rides his box: no legs to plant, his clips key from the box up
-## Moves whose clip is the legs' own air pose (a leap, a dive, a jump, the Quakefall's tuck) and the merge's fusion (a
+## Moves whose clip is the legs' own air pose (a leap, a dive, a jump, the Rock Bottom's tuck) and the merge's fusion (a
 ## whole-body show): full-body in the air.
 const LEGS_MOVES := ["jug_meteor", "lw_jump", "breah_dive", "breah_crouch", "dr_jump", "dr_dive", "mf_xform"]
 
@@ -68,7 +68,7 @@ func run(main: Node) -> void:
 	for f in 4:
 		_frame(m, [P])
 	ok(_shown(P) == 0, "one weapon after an equip (%d procedural pieces)" % _shown(P))
-	# the Warchain, thrown at a foe off to the side, then hauled while he looks and steers past it
+	# the Short Leash, thrown at a foe off to the side, then hauled while he looks and steers past it
 	var K: JuggernautKit = P.ak
 	T.teleport(home + Vector3(10.0, 0, 0))
 	A.aim_at(P, T.pos)

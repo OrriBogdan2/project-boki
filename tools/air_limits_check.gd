@@ -4,7 +4,7 @@ extends RefCounted
 ##     shot. Once landed, a dash goes off again.
 ##  2. A held ability (each kit's RMB and LMB hold, started on the ground, then carried off a ledge): the glider
 ##     never opens while it's held, and opens on its own once the move has ended with glide still held (or the
-##     kit's move runs to the landing, as Tarek's Quakefall does).
+##     kit's move runs to the landing, as Tarek's Rock Bottom does).
 ##  3. A free fall with Shift mashed: no chain of dashes, never more than the hero's ground charges in FALL_S
 ##     (a kit's own air version, like Vex's air taps, spends those charges; item 183 audits each air dash).
 ##  4. The "In the air" tables of Vex, Kael, Lace, Cinder, Meeko and Tenzo (docs/heroes/*.md): LMB, RMB tap, RMB
@@ -21,7 +21,7 @@ const KEEP := 0.7                # of the speed on the step before the glider op
 ## Vex, Kael, Lace, Cinder, Meeko, Tenzo
 const SIX := ["gunslinger", "juggernaut", "archer", "ashwick", "tender", "dolm"]
 const CAST_KEYS := ["fire", "sec", "sec_hold", "sig"]      # LMB, RMB tap, RMB hold, E
-const CAST_S := 1.6              # s a cast is watched for (Meeko's Burrseed winds up for 1 s)
+const CAST_S := 1.6              # s a cast is watched for (Meeko's Stick Around winds up for 1 s)
 const CAST_HEIGHT := 40.0        # m above the pad: a fall or a glide that lasts the whole cast
 const DROP_KEYS := ["dash", "sec", "sig", "ult", "jump", "throw", "fire"]
 
@@ -155,7 +155,7 @@ func _hold(m: Match, home: Vector3, arch: String, slot: String) -> void:
 		h.inp[k] = false
 	var t := 0.0
 	var locked_at_open := false
-	var kit_move := false            # a kit's own move that runs to the landing (DolmKit's Quakefall)
+	var kit_move := false            # a kit's own move that runs to the landing (DolmKit's Rock Bottom)
 	var before := 0.0
 	while t < OPEN_WAIT_S and not h.gliding and not h.grounded:
 		kit_move = h.ak.locks_glide()
@@ -261,7 +261,7 @@ func _cast_table(m: Match, home: Vector3, arch: String) -> void:
 					continue              # ground-only rocks: a jump's first inch fits, its apex may not
 				want = false
 			elif arch == "tender" and key.begins_with("sec") and state != "rise":
-				continue                      # Burrseed's press is held for the landing (--dash-flow-check)
+				continue                      # Stick Around's press is held for the landing (--dash-flow-check)
 			ok(got["acted"] == want, "%s: %s as on the ground (ground %s, here %s %s)" % [
 				what, "acts" if want else "does nothing", ground["acted"], got["acted"], got["cd"]])
 			if arch == "juggernaut" and key.begins_with("sec") and want:

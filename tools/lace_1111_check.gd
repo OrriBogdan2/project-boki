@@ -1,11 +1,11 @@
 extends "res://tools/pin_bjorn_owner_check.gd"
 ## --lace-1111-check: the owner's 11-11 playtest on Lace, on the training strip of --archer-combo-check.
-## RMB: the Heavy Shot's needle rides her nock point, its bar and the shot leave the bow's mouth (the model's
+## RMB: the Pin Down's needle rides her nock point, its bar and the shot leave the bow's mouth (the model's
 ## bow anchor in the draw pose, not her middle), toward the cursor, and the copy other players' games spawn
 ## (the Net "s" event) starts there too. Shift: the roll goes 12.5% further in the same time (the felt
 ## distance is --move-feel-check's KIT_DASH row). E and her aim lines: her crimson, no pink anywhere in her
-## kit's colours, and laced: the Hail Wall is red thread criss-crossing between its needle posts and across
-## its ground (no glowing panels or band), the draw reticle, the Heavy Shot bar and the E arc are AimKit
+## kit's colours, and laced: the Hemline is red thread criss-crossing between its needle posts and across
+## its ground (no glowing panels or band), the draw reticle, the Pin Down bar and the E arc are AimKit
 ## "lace" lines. Prints AKCHECK lines like --archetype-check.
 
 const ROLL_WAS := 3.0          # m: the roll before the owner's note (the footage's 3 m)

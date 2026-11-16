@@ -4,9 +4,9 @@ extends "res://tools/breah_shots.gd"
 ## renderer: archer|mage|dolm (Lisette, Sparkle, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
-## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
-## "item66" (LMB held through Flue Flight), "queen" (LMB from her hands, Flue Flight's fire) or "cloak" (the
-## Furnace Cloak's pose against its blast), or "acc" (Kael's
+## "chain" (the Short Leash's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
+## "item66" (LMB held through Red Carpet), "queen" (LMB from her hands, Red Carpet's fire) or "cloak" (the
+## Molten Hug's pose against its blast), or "acc" (Kael's
 ## accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
@@ -64,7 +64,7 @@ func _archer() -> void:
 	)
 	await _go(1.4, air, air_marks)
 
-## Sparkle: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
+## Sparkle: Stormfall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
 func _mage() -> void:
 	P.lvl = 6
 	await _reset(9.0)
@@ -75,7 +75,7 @@ func _mage() -> void:
 		P.inp["dash_down"] = t >= 0.05 and t < 0.35
 	var marks := _strip(
 		"combo_kitefall_shift_strip",
-		"Sparkle (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
+		"Sparkle (item 51): Stormfall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
 			+ " crouch starts over; she launches from where the run ended; up, the ring round the new spot",
 		[0.03, 0.2, 0.42, 0.62, 0.8, 1.0]
 	)
@@ -87,14 +87,14 @@ func _mage() -> void:
 	var jump := func(t: float): P.inp["jump"] = t >= 0.05 and t < 0.05 + DT
 	var jmarks := _strip(
 		"combo_kitefall_jump_strip",
-		"Sparkle (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
+		"Sparkle (item 51): Stormfall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
 			+ " from that height (no drop first); climbing; hanging",
 		[0.03, 0.12, 0.25, 0.36, 0.5, 0.75]
 	)
 	await _go(0.8, jump, jmarks)
 	await _go(2.2)
 
-## Sparkle items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
+## Sparkle items 71-73: the committed Undercurrent arrow, an orb pulled to her (the flash), Stormfall's Static arcs.
 func _mage_items() -> void:
 	var K: MageKit = P.ak
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
@@ -105,7 +105,7 @@ func _mage_items() -> void:
 	var drag := func(t: float):
 		_aim(T.pos + Vector3(-2.2, 0, 2.6))
 		P.inp["e_down"] = t < 0.4
-	var caption := "Item 73: Skycall committed to a diagonal drag: the arrow in the circle is the exact push"
+	var caption := "Item 73: Undercurrent committed to a diagonal drag: the arrow in the circle is the exact push"
 	await _go(1.3, drag, [[0.9, "full", "items_skycall_arrow", caption, at_t]])
 	await _reset(25.0)
 	P.dashes = 0.0
@@ -134,7 +134,7 @@ func _mage_items() -> void:
 		_aim(T.pos)
 		if t >= 0.9 and t < 0.9 + DT:
 			HunterKeys.ult_pressed(P)
-	var arcs := "Item 72: Kitefall on a foe with 3 Static: lightning arcs to the other, both raised to 4"
+	var arcs := "Item 72: Stormfall on a foe with 3 Static: lightning arcs to the other, both raised to 4"
 	await _go(1.6, ult, [[1.13, "full", "items_ult_spread", arcs, at_t]])
 	T2 = null
 	T2b.queue_free()
@@ -210,7 +210,7 @@ func _run_flat(W, x: int, z: int) -> bool:
 func _at(t: float, when: float) -> bool:
 	return absf(t - when) < DT * 0.5
 
-## Kael: the Searing Wave held through the Rampage; the Slam Drive; an air dash in the Meteor Drop's hang.
+## Kael: the Searing Wave held through the Rampage; the Slam Drive; an air dash in the Hit the Deck's hang.
 func _juggernaut() -> void:
 	var K: JuggernautKit = P.ak
 	await _reset(10.0)
@@ -253,7 +253,7 @@ func _juggernaut() -> void:
 			P.inp["move"] = Vector2.ZERO
 	var dmarks := _strip(
 		"combo_meteor_airdash_strip",
-		"Kael (item 51): the Meteor Drop's hang over its marker; Shift, the air dash goes in the gather pose;"
+		"Kael (item 51): the Hit the Deck's hang over its marker; Shift, the air dash goes in the gather pose;"
 			+ " the dash's end, off to the side; the dive back onto the marker; the impact; the recovery",
 		[0.34, 0.42, 0.55, 0.64, 0.76, 1.0]
 	)
@@ -293,7 +293,7 @@ func _dredge() -> void:
 	)
 	await _go(2.3, blast, bmarks)
 
-## Grimble's Barge run (--combo51-part=barge): three shoves 0.42 s apart (the 0.22 s gap and a frame), one burst.
+## Grimble's Mad Dash run (--combo51-part=barge): three shoves 0.42 s apart (the 0.22 s gap and a frame), one burst.
 func _dredge_barge() -> void:
 	await _reset(9.0)
 	P.dashes = 3.0
@@ -303,7 +303,7 @@ func _dredge_barge() -> void:
 				P.do_dash()
 	var marks := _strip(
 		"barge_run_strip",
-		"Grimble's Barge, three chained shoves: the first, the ball rolling in the gap, the second, rolling, the third,"
+		"Grimble's Mad Dash, three chained shoves: the first, the ball rolling in the gap, the second, rolling, third,"
 			+ " the ball still closed as it ends, opening, standing",
 		[0.14, 0.3, 0.48, 0.6, 0.74, 1.02, 1.16, 1.22, 1.45]
 	)
@@ -379,7 +379,7 @@ func _ashwick_item66() -> void:
 	)
 	await _go(3.1, held, marks)
 
-## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight
+## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Red Carpet
 ## with fire from her heels
 ## and tail (briefs DECISIONS "Cinder the Flame Queen", retitled the Ashen Kiss).
 func _ashwick_queen() -> void:
@@ -403,13 +403,13 @@ func _ashwick_queen() -> void:
 			HunterKeys.ult_pressed(P)
 	var umarks := _strip(
 		"queen_flue_flight_strip",
-		"Cinder the Ashen Kiss, Flue Flight: standing; X, the lift-off, fire from her heels and tail; rising;"
+		"Cinder the Ashen Kiss, Red Carpet: standing; X, the lift-off, fire from her heels and tail; rising;"
 			+ " flying; flying on; the landing",
 		[0.05, 0.3, 0.6, 1.0, 1.6, 2.4]
 	)
 	await _go(2.6, lift, umarks)
 
-## Cinder's Furnace Cloak (--combo51-part=cloak): E pressed at 0.1 s, then the frames 0, 0.03, 0.07, 0.13, 0.2 and 0.3 s
+## Cinder's Molten Hug (--combo51-part=cloak): E pressed at 0.1 s, then the frames 0, 0.03, 0.07, 0.13, 0.2 and 0.3 s
 ## after it; the arms-wide peak should stand on the blast (0.0-0.05 s), not at 0.13 s.
 func _ashwick_cloak() -> void:
 	var K: AshwickKit = P.ak
@@ -421,13 +421,13 @@ func _ashwick_cloak() -> void:
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	var marks := _strip(
 		"cloak_peak_strip",
-		"Cinder, Furnace Cloak: the press frame; the arms flung wide with the blast; the peak held; the arms"
+		"Cinder, Molten Hug: the press frame; the arms flung wide with the blast; the peak held; the arms"
 			+ " coming down; settling; standing",
 		[0.1, 0.13, 0.17, 0.23, 0.3, 0.4]
 	)
 	await _go(0.5, press, marks)
 
-## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
+## Kael's Short Leash, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.
 func _juggernaut_chain() -> void:
 	var K: JuggernautKit = P.ak
@@ -439,9 +439,9 @@ func _juggernaut_chain() -> void:
 		P.inp["move"] = Vector2(1, 0) if t > 0.4 else Vector2.ZERO
 		_aim(T.pos)
 	await _go(4.9, taut, [
-		[0.45, "full", "warchain_taut_1", "Kael Warchain: hooked on the dummy 8 m away, he starts backing off"],
-		[2.6, "full", "warchain_taut_2", "Kael Warchain: ~17 m, the chain paying out after him"],
-		[4.6, "full", "warchain_taut_3", "Kael Warchain: at 24 m it is taut and hot and holds: he keeps walking but"
+		[0.45, "full", "warchain_taut_1", "Kael Short Leash: hooked on the dummy 8 m away, he starts backing off"],
+		[2.6, "full", "warchain_taut_2", "Kael Short Leash: ~17 m, the chain paying out after him"],
+		[4.6, "full", "warchain_taut_3", "Kael Short Leash: at 24 m it is taut and hot and holds: he keeps walking but"
 				+ " stays at its end"]], -9.0)
 	K.warchain.snap(true)
 	await _reset(9.0)
@@ -454,9 +454,9 @@ func _juggernaut_chain() -> void:
 			K.use_e()
 		_aim(T.pos)
 	await _go(1.5, sling, [
-		[0.9, "full", "warchain_sling_1", "Kael Warchain: hooked, backing away"],
-		[1.07, "full", "warchain_sling_2", "Kael Warchain: E while backing away: the slingshot, flying in faster"],
-		[1.25, "full", "warchain_sling_3", "Kael Warchain: arrived on the dummy, still moving"]], 4.5)
+		[0.9, "full", "warchain_sling_1", "Kael Short Leash: hooked, backing away"],
+		[1.07, "full", "warchain_sling_2", "Kael Short Leash: E while backing away: the slingshot, flying in faster"],
+		[1.25, "full", "warchain_sling_3", "Kael Short Leash: arrived on the dummy, still moving"]], 4.5)
 	cam_at = home + Vector3(6.5, 0, -2.0)      # item 57: both hauls under one still camera, to lay over each other
 	for run in [["straight", Vector3(13, 0, 0)], ["curved", Vector3(0, 0, -13)]]:
 		await _haul_strip(String(run[0]), run[1])
@@ -478,7 +478,7 @@ func _haul_strip(name_of_run: String, look: Vector3) -> void:
 	for i in 7:
 		var when := 0.75 + 0.12 * i
 		marks.append([when, "full", "haul_%s_%d" % [name_of_run, i],
-				"Kael Warchain, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
+				"Kael Short Leash, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
 	await _go(1.65, haul, marks)
 	K.warchain.snap(true)
 
@@ -534,7 +534,7 @@ func _acc(run_name: String, td: float, secs: float, each: Callable) -> void:
 	await _go(secs, each, marks)
 	cam_at = Vector3.ZERO
 
-## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
+## The audit (Nov 3): Undercurrent held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:
 	await _reset(7.0)
 	P.ak.cd["e"] = 0.0
@@ -546,7 +546,8 @@ func _mage_audit() -> void:
 		P.inp["e_down"] = t < 0.6
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
 	var marks := [
-		[0.45, "full", "audit_skycall_held", "Sparkle Skycall held (audit: the data's hold, drag, release): the drag"
+		[0.45, "full", "audit_skycall_held",
+			"Sparkle Undercurrent held (audit: the data's hold, drag, release): the drag"
 			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
 			at_t],
 		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",
