@@ -30,7 +30,9 @@ static func attach(home) -> void:
 
 func _init() -> void:
 	name = "BaseCard"
-	add_theme_stylebox_override("panel", (UI.glass(8, 12)).get_theme_stylebox("panel"))
+	var glass := UI.glass(8, 12)      # only its stylebox: free the panel (it leaked one node per farm visit)
+	add_theme_stylebox_override("panel", glass.get_theme_stylebox("panel"))
+	glass.free()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	position = Vector2(16, 62)      # under the top chips
 	custom_minimum_size.x = WIDTH
@@ -39,7 +41,10 @@ func _init() -> void:
 	visible = false
 
 func _process(dt: float) -> void:
-	visible = FarmUnlocks.base_mode() and h.visit.is_empty()
+	# day 1 in a garden zone: the Goals line carries the first-day step, so the card stays in the hub
+	# (DAY1_MAX HUD groups, --garden-first-day-check)
+	var zone_day1: bool = h.zone not in ["", "hub"] and GardenFirstDay.active()
+	visible = FarmUnlocks.base_mode() and h.visit.is_empty() and not zone_day1
 	t += dt
 	if visible and t >= REFRESH_S:
 		t = 0.0
