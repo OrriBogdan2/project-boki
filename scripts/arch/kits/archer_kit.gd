@@ -1,30 +1,30 @@
 class_name ArcherKit
 extends ArchKit
-## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), the Heavy Shot
-## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
-## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
+## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Slip Stitch (Shift), the Pin Down
+## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hemline (E, a curved arc of rain at the cursor distance), and on X
+## Finishing Touch (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Red Thread (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
-var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
+var rain := {}                 # the live Hemline: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
-var spirit: PinSpirit          # Shift: Spirit Walk
-const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
+var spirit: PinSpirit          # Shift: Slip Stitch
+const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Pin Down's release burst sits
 
 var fx: PinFx                  # Hem's pooled effects
-var ult: PinUlt                # X: Starpiercer
+var ult: PinUlt                # X: Finishing Touch
 var perfects: int:
 	get: return draw.perfects if draw else 0
-var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
-var needle: PinNeedle          # the Heavy Shot's needle while it's held
+var pin_aim := false           # the Pin Down is being held (the needle on the bow and its growing bar show)
+var needle: PinNeedle          # the Pin Down's needle while it's held
 var sense: HawkSense         # the passive: hurt rivals revealed and outlined through cover
-var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
-var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
+var heavy_full_cued := false   # this Pin Down hold already played its full-draw cue
+var lmb_was := false           # LMB was held last frame (a fresh press drops a held Pin Down)
 var pins := 0                  # wall pins landed (tests)
-var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
-var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
+var heavy_kicks := 0           # Pin Down releases that kicked the screen (tests)
+var cremations := 0            # Heavy Shots that knocked a foe burning in the Hemline (tests)
 
 func _setup() -> void:
 	fx = PinFx.new(h)
@@ -93,7 +93,7 @@ func _tick_bow() -> void:
 		vfx_on.hold(h, "ult_armed")
 
 ## The player's own draw shows only on the filling line: no shared wind-up ring at her feet, ticks or ping.
-## Anyone else still sees the ring (the wind-up tell), and the Heavy Shot keeps it.
+## Anyone else still sees the ring (the wind-up tell), and the Pin Down keeps it.
 func charge_now() -> Array:
 	var cn := super.charge_now()
 	return ["", -1.0] if h.is_local() and String(cn[0]) == "draw" else cn
@@ -115,15 +115,15 @@ func dash_afterimage() -> bool:
 	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
 	return true
 
-## X: Starpiercer, the next shots empowered.
+## X: Finishing Touch, the next shots empowered.
 func cast_ult() -> bool: return HeroUlt.press(self, ult.cast)
 func has_ult() -> bool: return true
 
 func ult_running() -> bool:
 	return ult.active()
 
-## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb). Otherwise one bow holds one
-## arrow: a fresh LMB press drops a held Heavy Shot with no shot, and the bow rests while RMB holds one.
+## While Finishing Touch is up the bow is the ult's: nock, then a beam (PinUlt.lmb). Otherwise one bow holds one
+## arrow: a fresh LMB press drops a held Pin Down with no shot, and the bow rests while RMB holds one.
 func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
@@ -136,7 +136,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			anim_id = ""
 	return rmb_down
 
-## A bow draw under way ends with no arrow (a Heavy Shot or Starpiercer press takes the bow).
+## A bow draw under way ends with no arrow (a Pin Down or Finishing Touch press takes the bow).
 func drop_draw() -> void:
 	h.draw_t = -1.0
 	draw.drop()
@@ -152,7 +152,7 @@ func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
-## loosed, the Heavy Shot's big red arrow.
+## loosed, the Pin Down's big red arrow.
 func _tag_shots() -> void:
 	if not is_instance_valid(h):
 		return
@@ -192,9 +192,9 @@ func _arrow_hit(t: Ent) -> void:
 	elif kind in ["arrow", "tap"]:
 		vfx("arrow_hit", t.pos, h.dir_to(t))
 
-# ------------------------------------------------------------------ dash: Spirit Walk
+# ------------------------------------------------------------------ dash: Slip Stitch
 func on_dash(use_ex: bool) -> bool:
-	var ex := use_ex and h.dashes < 1.0 and not h.gliding       # a charge in the air is the same Spirit Walk (item 183)
+	var ex := use_ex and h.dashes < 1.0 and not h.gliding       # a charge in the air is the same Slip Stitch (item 183)
 	if not spend_dash(ex):
 		return true
 	if ex:
@@ -211,7 +211,7 @@ func on_dash(use_ex: bool) -> bool:
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
-## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
+## the self-slow). Holding the Pin Down slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
 	if spirit and spirit.active():
@@ -222,9 +222,9 @@ func move_k() -> float:
 		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
 
-# ------------------------------------------------------------------ RMB: Heavy Shot
-## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
-## bow draw under way with no arrow (one bow; the newer press wins, as with Starpiercer).
+# ------------------------------------------------------------------ RMB: Pin Down
+## The press always starts a draw (in the air too): the Pin Down has no tap and no air variant. It drops a
+## bow draw under way with no arrow (one bow; the newer press wins, as with Finishing Touch).
 func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
@@ -239,7 +239,7 @@ func press_rmb() -> void:
 	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check)
 
 func rmb_hold_tick(t: float) -> void:
-	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
+	# the Pin Down's draw, from the press (the source's charge shows at once; the hold threshold only decides
 	# whether the release looses), or from the threshold while the bow is drawn for the LMB, so a quick tap leaves
 	# that draw alone: the needle on the bow, an red bar growing from it (its own creak)
 	if not pin_aim and (h.draw_t < 0.0 or t > float(rmb_def()["hold"])):
@@ -249,11 +249,11 @@ func rmb_hold_tick(t: float) -> void:
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
-## [est] down_hp a rival Wisp loses per point of Hail Wall tick damage. The source drain is unknown; this is the
+## [est] down_hp a rival Wisp loses per point of Hemline tick damage. The source drain is unknown; this is the
 ## same multiplier a stomp puts on the bleed (Life.R stomp_mult), so a wall tick (5) takes 12.5 of the 100 pool.
 const WISP_DRAIN_K := 2.5
 
-## The Heavy Shot held: a thick red bar out of the bow that
+## The Pin Down held: a thick red bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
 ## plays the taut-thread cue once.
 func _heavy_tele() -> void:
@@ -266,7 +266,7 @@ func _heavy_tele() -> void:
 		heavy_full_cued = true
 		vfx("heavy_full")
 
-## The Heavy Shot charges from the hold threshold to full.
+## The Pin Down charges from the hold threshold to full.
 func rmb_charge_full() -> float:
 	return float(rmb_def()["pin"]["full"])
 
@@ -275,17 +275,17 @@ func heavy_k() -> float:
 	var hold_t := float(rmb_def()["hold"])
 	return clampf((rmb_t - hold_t) / maxf(0.05, float(pd["full"]) - hold_t), 0.0, 1.0)
 
-## How far the Heavy Shot flies uncharged; rank 3 adds "range_rank3" metres.
+## How far the Pin Down flies uncharged; rank 3 adds "range_rank3" metres.
 func heavy_reach() -> float:
 	var pd: Dictionary = rmb_def()["pin"]
 	return float(pd["range"]) + (float(pd["range_rank3"]) if rank("sec") >= 3 else 0.0)
 
-## The Heavy Shot can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
+## The Pin Down can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
 func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"].get("max_hold", 3.0))
 
 ## A Boki merge ends every hold and channel of this kit with no shot: the bow draw (Hunter.draw_t, cleared by
-## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its red telegraph, and Spirit Walk
+## MergeKit.drop_class_holds; its reticle here), the Pin Down's hold and its red telegraph, and Slip Stitch
 ## (Hunter.spirit_t; ending inside something still puts her back where she entered).
 func _drop_holds() -> void:
 	rmb_down = false
@@ -304,7 +304,7 @@ func _drop_tele() -> void:
 	needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
-## Stunned or downed holding the Heavy Shot: the needle goes back and the draw pose ends, no arrow.
+## Stunned or downed holding the Pin Down: the needle goes back and the draw pose ends, no arrow.
 func _rmb_dropped() -> void:
 	_drop_tele()
 	if anim_id == "arc_heavy_wind":
@@ -322,7 +322,7 @@ func fire_rmb(c: Dictionary) -> void:
 	play("arc_heavy")
 	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))
 
-## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that stops on the first foe, knocks it back by
+## The Pin Down: a held, charged arrow (0.5s -> full at 1.1s) that stops on the first foe, knocks it back by
 ## its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
@@ -345,7 +345,7 @@ func _pin(a: Vector3, k: float) -> void:
 		fx.note_hit(f.pos)
 		vfx("heavy_hit", f.pos, dir, {"k": k})
 		f.flash_t = 0.2                      # a hit flash on the body
-		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
+		# knocked while burning in the Hemline: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
@@ -374,12 +374,12 @@ func _pin(a: Vector3, k: float) -> void:
 	fx.fletch_burst(bow + Vector3(dir.x, 0, dir.y) * HEAVY_BURST_AHEAD, 1.2 + 0.4 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
 
-## Where the Heavy Shot leaves: the bow's mouth on the model (HeroVfx "bow_root", riding the bow bone in the
+## Where the Pin Down leaves: the bow's mouth on the model (HeroVfx "bow_root", riding the bow bone in the
 ## draw pose), so the shot, its bar and its bursts come off the bow, not her middle.
 func bow_mouth() -> Vector3:
 	return HeroVfx.of(m).anchor_pos(h, "bow_root")
 
-# ------------------------------------------------------------------ E: Hail Wall
+# ------------------------------------------------------------------ E: Hemline
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at
 ## the cursor distance (clamped to rmin..reach), "deg" wide and "width" deep. Lobbed up first ("tell" s,
 ## everyone sees the arc), then it rains for "time" s: damage over time, a slow and a blight (healing
@@ -387,7 +387,7 @@ func bow_mouth() -> Vector3:
 func in_e() -> bool:
 	return not rain.is_empty()
 
-## The Hail Wall's arc; rank 3 (the source's tier IV) widens it by "deg_r3_k".
+## The Hemline's arc; rank 3 (the source's tier IV) widens it by "deg_r3_k".
 func arc_deg() -> float:
 	return float(e_def()["deg"]) * (float(e_def()["deg_r3_k"]) if rank("kin") >= 3 else 1.0)
 
@@ -464,15 +464,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		HunterKeys.ult_pressed(h)
 		return
-	# Hail Wall across their path (lead them a little), from mid range
+	# Hemline across their path (lead them a little), from mid range
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return
-	# a full Heavy Shot first, unless they are already pinned
+	# a full Pin Down first, unless they are already pinned
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and tgt.stun_t <= 0.0:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 		bot_hold["rmb"] = float(rmb_def()["pin"]["full"]) + 0.1
-	# Spirit Walk away from a brawler
+	# Slip Stitch away from a brawler
 	if dist < 3.0 and h.dashes >= 1.0 and randf() < 0.2:
 		h.inp["aim"] = h.pos - Vector3(h.dir_to(tgt).x, 0, h.dir_to(tgt).y) * 4.0
 		h.inp["dash"] = true

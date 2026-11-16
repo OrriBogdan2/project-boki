@@ -3,7 +3,7 @@ extends RefCounted
 ## Where a missed projectile ended, so a miss teaches range and leading: a small puff in the Hunter's ability colour
 ## where a shot struck terrain or a wall, and a wider, fainter one fading out where it ran out of range.
 ## Drawn by DJFx's pooled puffs (made at load, at most POOL_CAP alive, the oldest taken back): nothing is made
-## in a fight. Every LMB and RMB shot ends through Match._shot_end; Sable's Bola, flown by her kit, calls it too.
+## in a fight. Every LMB and RMB shot ends through Match._shot_end; Sable's Dark Bola, flown by her kit, calls it too.
 
 const WALL_SIZE := 0.55       # m across a puff on terrain or a wall
 const WALL_S := 0.22          # s it lasts

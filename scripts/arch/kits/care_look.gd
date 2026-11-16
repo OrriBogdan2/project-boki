@@ -2,11 +2,11 @@ class_name CareLook
 extends RefCounted
 ## Pooled looks of the support pair (docs/heroes/tender.md, docs/heroes/rimewright.md): every node is
 ## built once per kind and kept hidden when free, so a held LMB never creates nodes per shot.
-##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
+##   Pip: the starlit comet, the burr orb, the Stick Around root disc, light column and root beam, the lantern
 ##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
 ##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, her air dash's
-##   frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
+##   frost streaks and the Cold Front's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -144,7 +144,7 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("30d8ff", 0.95)), Vector3.ZERO, Vector3(1, 1, 4)))
 			_tail(n, 0.3, 2.8, Color("4fd0f0", 0.85))
 		"spear":
-			# the Ice Spear: an ice-blue shaft and four-point star head with dark teal edges, so it reads blue
+			# the Icebreaker: an ice-blue shaft and four-point star head with dark teal edges, so it reads blue
 			# on grass at gameplay zoom; white is kept to the tip glint and a short frost streak
 			var spear_ice := ice_mat(Color("9af0ff"), 0.95, 0.2, Color("1f8a96"))
 			var sh := _off(Models.part(n, Models.crystal(0.12, 1.7, 4), spear_ice, Vector3(0, 0, 0.35)))
@@ -237,7 +237,7 @@ func _build_lamp(n: Node3D) -> void:
 	_off(Models.part(lamp, Models.cyl(0.0, 0.2, 0.12, 8), cage, Vector3(0, 0.26, 0)))
 	_off(Models.part(lamp, Models.cyl(0.18, 0.14, 0.05, 8), cage, Vector3(0, -0.22, 0)))
 
-## The Rink Wall: a row of leaning ice pillars on a frosted footing, each its own height.
+## The Cold Front: a row of leaning ice pillars on a frosted footing, each its own height.
 func _build_wall(n: Node3D) -> void:
 	for i in 9:
 		var hh := 1.6 + 0.7 * absf(sin(float(i) * 2.3)) + (0.4 if i == 4 else 0.0)
@@ -530,7 +530,7 @@ func _tick_held() -> void:
 		if m.time - float(e["last"]) > KEEP:
 			drop(key)
 
-## The Rink Wall's pillars spread over the wall's current span, hit flashes whitening them.
+## The Cold Front's pillars spread over the wall's current span, hit flashes whitening them.
 func _place_wall(n: Node3D, p: Dictionary) -> void:
 	var a: Vector2 = p["a"]
 	var b: Vector2 = p["b"]

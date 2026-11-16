@@ -7,7 +7,7 @@ extends ArchKit
 ##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
-## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
+## - X, Last Dance (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
@@ -15,10 +15,10 @@ extends ArchKit
 ##   keeps fast Shift presses (ThiefChain). A bolt soon after it starts a quick run of bolts (ThiefQuick). No ring
 ##   or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
-## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
+## - RMB, Dark Bola: a 0.4s wind-up with the lane showing, then a kit-run Dark Bola that grounds the first foe and
 ##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
 ##   foe caught and both are stunned with bonus damage.
-## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
+## - E, White Flash: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
@@ -32,7 +32,7 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
+const BOLA_HOT := Color("ffb02a")      # the Dark Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
@@ -47,9 +47,9 @@ var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
-var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
-var bola_cast := {}            # the Bola winding up, lane showing: {t}
-var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
+var knife := {}                # the stuck White Flash: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
+var bola_cast := {}            # the Dark Bola winding up, lane showing: {t}
+var bola := {}                 # the Dark Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
 var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
@@ -85,13 +85,13 @@ func _setup() -> void:
 func fx() -> DJFx:
 	return DJFx.of(m)
 
-## A Boki merge starting drops the Bola's wind-up and a running Encore (nothing fires, nothing is left
+## A Boki merge starting drops the Dark Bola's wind-up and a running Last Dance (nothing fires, nothing is left
 ## for after the merge). Hold fields: bola_cast, encore.st.
 func _drop_holds() -> void:
 	bola_cast = {}
 	encore.drop()
 
-# ------------------------------------------------------------------ X: Encore (ThiefUlt)
+# ------------------------------------------------------------------ X: Last Dance (ThiefUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
 func cast_ult() -> bool:
 	return HeroUlt.press(self, _start_encore)
@@ -161,7 +161,7 @@ func clear_marks(t: Ent) -> void:
 func pip_count() -> int:
 	return int(res_def().get("max", 8))
 
-## Sets a target's Marks outright (the Bola pooling two foes' Marks at rank 3).
+## Sets a target's Marks outright (the Dark Bola pooling two foes' Marks at rank 3).
 func set_marks(t: Ent, n: int) -> void:
 	if t == null or not is_instance_valid(t) or t.dead:
 		return
@@ -174,7 +174,7 @@ func set_marks(t: Ent, n: int) -> void:
 	_on_marks(t, had, n)
 	sync_marks(t)
 
-## Every Mark we have on anyone back to its full time (each Encore blade).
+## Every Mark we have on anyone back to its full time (each Last Dance blade).
 func refresh_marks() -> void:
 	for f in m.foes_of(h.team):
 		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
@@ -509,7 +509,7 @@ func _tick_landing() -> void:
 	if anim_id == "thf_exdash":
 		play("thf_land")
 
-## A move another press starts mid-cartwheel (a bolt, the Bola, the dagger) waits out the flip: the ability
+## A move another press starts mid-cartwheel (a bolt, the Dark Bola, the dagger) waits out the flip: the ability
 ## goes off, the cartwheel isn't cut short.
 func play(move: String) -> void:
 	if not vault.is_empty() and anim_id in CARTWHEELS and move not in CARTWHEELS:
@@ -623,7 +623,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
-# ------------------------------------------------------------------ RMB: Bola
+# ------------------------------------------------------------------ RMB: Dark Bola
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not bola_cast.is_empty() or not spend_rmb(): return
@@ -644,7 +644,7 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Dark Bola's violet (the source's is white); the gold fill front runs to the throw
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
@@ -683,7 +683,7 @@ func _throw_bola() -> void:
 func _ground_t() -> float:
 	return float(rmb_def()["bola"]["ground"])
 
-## The Bola in flight (it's ours, not a stage shot, so it can fly on through its first foe and bounce
+## The Dark Bola in flight (it's ours, not a stage shot, so it can fly on through its first foe and bounce
 ## once off a wall): it grounds the first foe it wraps, flies on, and tangles the second.
 func _tick_bola(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -711,7 +711,7 @@ func _tick_bola(dt: float) -> void:
 		bola["left"] = float(bola["left"]) - step
 		var first = bola["first"]
 		if first == null and not bola.get("broke", false):
-			# a crate or barrel counts as the first catch: the Bola breaks on it and flies on
+			# a crate or barrel counts as the first catch: the Dark Bola breaks on it and flies on
 			for b in m.breaks:
 				if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.7:
 					m.brk.hit(b, h)
@@ -748,7 +748,7 @@ func _end_bola(at: Vector3) -> void:
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
-## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
+## The Dark Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
 	var stg: StageSpec = bola["stg"]
 	KinExec.apply_foe(stg.effects, f, cx("rmb", "bola", f.pos, {"at": f.pos}), f.pos, stg)
@@ -774,7 +774,7 @@ func _tick_wrapped(dt: float) -> void:
 		AimKit.circle(h, "gnd2%d" % key,
 				{"at": e.pos, "r": r * 0.7, "col": BOLA_HOT, "all": true, "dashed": true})
 
-## Two foes in one Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
+## Two foes in one Dark Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
 func _tangle(f, other: Ent) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var col := col_of(rmb_def())
@@ -799,7 +799,7 @@ func _tangle(f, other: Ent) -> void:
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
-# ------------------------------------------------------------------ E: Shadow Knife
+# ------------------------------------------------------------------ E: White Flash
 func in_e() -> bool:
 	return not knife.is_empty()
 
@@ -876,7 +876,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("kin") >= 3:
-		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
+		h.dashes = h.max_dashes()           # White Flash rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
@@ -992,7 +992,7 @@ func _blink(to: Vector3) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	# Encore once a foe is well inside the ring's reach (it rides with her, so she can chase them)
+	# Last Dance once a foe is well inside the ring's reach (it rides with her, so she can chase them)
 	if HeroUlt.ready(self) and los and dist < float(x_def()["reach"]) * 0.7:
 		HunterKeys.ult_pressed(h)
 	# the dagger is stuck in them: step to them
@@ -1004,7 +1004,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and bola_cast.is_empty() and los and dist < lane_len() - 1.0:
-		# best when someone stands behind them along the throw (the Bola flies on and catches both)
+		# best when someone stands behind them along the throw (the Dark Bola flies on and catches both)
 		var pair := false
 		var dv := h.dir_to(tgt)
 		for o in m.foes_of(h.team):

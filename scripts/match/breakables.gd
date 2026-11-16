@@ -117,7 +117,7 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 		_explode(at, sp["explosive"], by, from_net)
 
 ## Hits every unbroken prop a blast at `c` reaches (Explosive hits: a keg's blast, Ostra's Empowered
-## Nightwell ticks). `chain`: the blast is a keg's, so kegs it lights burn the short chain fuse.
+## Main Attraction ticks). `chain`: the blast is a keg's, so kegs it lights burn the short chain fuse.
 func hit_around(c: Vector3, radius: float, by: Ent, chain := false) -> void:
 	for b in _m.breaks:
 		var reach := Vector2(b["pos"].x - c.x, b["pos"].z - c.z).length() < radius + CHAIN_SLACK

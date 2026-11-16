@@ -1,10 +1,10 @@
 class_name DolmKit
 extends ArchKit
-## Tarek (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rock Hop, Quakefall,
-## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
+## Tarek (id dolm, medium): Sight Unseen, Stone's Throw (tap boulder / hold punch), Leap of Faith, Rock Bottom,
+## Foothold, and Backbone on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Foothold),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
-## Shardskin: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
+## Jade Ward: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
@@ -15,19 +15,19 @@ extends ArchKit
 
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
-const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
+const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Foothold measures from the ground this far ahead
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
 var rid_n := 0
-var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
+var dive := false              # a Rock Bottom in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
 var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
-var shield_stacks := 0         # Shardskin stacks
+var shield_stacks := 0         # Jade Ward stacks
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
@@ -41,11 +41,11 @@ var launches := 0
 var slams := 0
 var dunks := 0
 var wall_stuns := 0
-var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
+var guard_punches := 0         # punches that launched a rock of ours and gave a Jade Ward stack
 var rocks_made := 0
 var sight_pings := 0
-var landslides := 0            # Rock Hop's last rocks that rolled on
-var leap_lands := 0            # Rock Hop chains that ended in a crash
+var landslides := 0            # Leap of Faith's last rocks that rolled on
+var leap_lands := 0            # Leap of Faith chains that ended in a crash
 var leap_hits := 0             # foes the crash caught
 var sweeps := 0                # punches that launched 2+ rocks in a stream
 var last_sweep := 0            # rocks the last punch launched
@@ -63,7 +63,7 @@ func _setup() -> void:
 	spine = BreahSpine.new(self)
 	hop = BreahHop.new(self)
 
-# ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
+# ------------------------------------------------------------------ X: Backbone (BreahSpine)
 func cast_ult() -> bool: return HeroUlt.press(self, spine.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return spine.running()
@@ -73,7 +73,7 @@ func rid_owner() -> String:
 	return h.nid if h.nid != "" else str(h.get_instance_id())
 
 # ------------------------------------------------------------------ rocks
-## Her Stone Row rocks (the pips and the cap); the Basalt Spine's ridge stands apart from both.
+## Her Foothold rocks (the pips and the cap); the Backbone's ridge stands apart from both.
 func my_rocks() -> Array:
 	var out: Array = []
 	for w in m.verbs.walls:
@@ -93,13 +93,13 @@ func rock_mid(w: Dictionary) -> Vector3:
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	return Vector3(mid.x, float(w["y"]), mid.y)
 
-## A rock of her team a punch or slam can send flying (a Rock Hop rock only crumbles: the dash's damage stays on
+## A rock of her team a punch or slam can send flying (a Leap of Faith rock only crumbles: the dash's damage stays on
 ## its last landing).
 func launchable(w: Dictionary) -> bool:
 	return w.get("rock", false) and int(w["team"]) == h.team and not w.has("hop")
 
 ## The ground her rocks rise from: the terrain under her while she stands (on one of her rocks too), else
-## her own height (in the air nothing fits: Stone Row is ground-only).
+## her own height (in the air nothing fits: Foothold is ground-only).
 func _floor_y() -> float:
 	return m.world.ground_at(h.pos.x, h.pos.z) if h.grounded else h.pos.y
 
@@ -182,7 +182,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
 
-## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
+## A Backbone rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
 ## a knock or kill from this very hit counts as one).
 func _ult_rock_landed(f: Ent, ult_cast: int) -> void:
 	if f is Hunter and spine.bond_open(ult_cast):
@@ -209,7 +209,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if shield_stacks > 0 and h.shield > 0.0:
-		HeroVfx.of(m).hold(h, "guard")      # Shardskin: embers rising round her while it holds
+		HeroVfx.of(m).hold(h, "guard")      # Jade Ward: embers rising round her while it holds
 	if dive:
 		_tick_dive()
 	hop.tick(dt)
@@ -259,13 +259,13 @@ func _end_plunge() -> void:
 	h.vel.y = maxf(h.vel.y, -HunterMove.fall_cap(h))
 	play("")
 
-## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
+## The air Rock Bottom's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
 	if not dive or not dive_fall:
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
-## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
+## Sight Unseen: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
 ## it through walls and fog.
 func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
@@ -294,8 +294,8 @@ func sight_len() -> float:
 	var pd: Dictionary = d["passive"]
 	return lerpf(float(pd["len"]), float(pd["len_max"]), sight_grow())
 
-## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
-## Rock Hop (AimKit's telegraphs go with them through drop_holds).
+## A Boki merge cancels the air Rock Bottom's dive, the Quake Fist's charge, the charge leap and
+## Leap of Faith (AimKit's telegraphs go with them through drop_holds).
 func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
@@ -351,7 +351,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			h.mel_hold = 0.0
 		return true
 	if slam.charging():
-		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
+		if pressed: slam.extend()            # a punch in the Rock Bottom charge carries her and the circle on
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
@@ -505,7 +505,7 @@ func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
-## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
+## further along the aim with no gap wider than `sweep_gap` (punching along a Foothold sweeps it).
 func sweep_rocks(dir: Vector2) -> Array:
 	var pd: Dictionary = lmb_def()["punch"]
 	var half := float(pd["width"]) * 0.5 + float(pd["sweep_pad"])
@@ -543,12 +543,12 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 	h.roll_t = t
 	h.move_kind = "rush"
 
-# ------------------------------------------------------------------ dash: Rock Hop (BreahHop)
+# ------------------------------------------------------------------ dash: Leap of Faith (BreahHop)
 ## A second charge at rank 3.
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
-## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
+## Shift on the ground starts a Leap of Faith chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
 ## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
 func recast_window() -> Dictionary:
@@ -560,7 +560,7 @@ func on_dash(use_ex: bool) -> bool:
 	if hop.chaining():
 		hop.press()
 		return true
-	if use_ex and h.dashes < 1.0:          # a charge in the air is the same Rock Hop (item 183)
+	if use_ex and h.dashes < 1.0:          # a charge in the air is the same Leap of Faith (item 183)
 		if not spend_dash(true): return true
 		play("breah_exdash")
 		travel(
@@ -577,8 +577,9 @@ func on_dash(use_ex: bool) -> bool:
 func charge_orb() -> bool:
 	return false
 
-## A Rock Hop chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is not).
-## The Quakefall runs to its landing: no glider mid-move (item 162b), except over the abyss (a rescue).
+## A Leap of Faith chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is
+## not).
+## The Rock Bottom runs to its landing: no glider mid-move (item 162b), except over the abyss (a rescue).
 func locks_glide() -> bool:
 	return dive and not h.over_void()
 
@@ -607,7 +608,7 @@ func dodge_anim() -> String:
 func dash_afterimage() -> bool:
 	return true
 
-# ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)
+# ------------------------------------------------------------------ RMB: Rock Bottom (BreahSlam)
 func rmb_charge_full() -> float:
 	return float(rmb_def()["hold"]) + float(slam_def()["time"])
 
@@ -626,7 +627,7 @@ func fire_rmb(c: Dictionary) -> void:
 func _slam(k: float, at_feet: bool) -> void:
 	slam.slam(k, at_feet)
 
-## Shardskin: one more stack (each is a shield, up to the cap, all expiring together).
+## Jade Ward: one more stack (each is a shield, up to the cap, all expiring together).
 func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
@@ -636,7 +637,7 @@ func guard_stack() -> void:
 	h.shield_kind = "molten"
 	vfx("guard_up")
 
-# ------------------------------------------------------------------ E: Stone Row
+# ------------------------------------------------------------------ E: Foothold
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
 ## extra row behind. Every spot is judged before the first rock goes up (rocks block sight and walking).
 func row_spots(dir: Vector2) -> Array:

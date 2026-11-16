@@ -41,14 +41,14 @@ const MOVES := {
 		[0.09, {"y": -0.62, "p": 0.12, "gp": 0.27, "wo": Vector3(0.0, 0.12, 0.02), "legs": LUNGE_R, "lw": 0.8}],
 		[0.2, {"y": -0.45, "gp": 0.1, "wo": Vector3(0.0, 0.05, 0.0), "legs": LUNGE_R, "lw": 0.6}],
 		[0.35, {}]]},
-	# Storm Rod held: side-on, the rod hand raised high by the right shoulder, the left arm out ahead to aim
+	# Pink Spear held: side-on, the rod hand raised high by the right shoulder, the left arm out ahead to aim
 	"mage_rmb_hold": {"hold": true, "keys": [
 		[0.00, {"lift": 0.04, "sq": -0.2, "wo": Vector3(0.05, 0.3, 0.2)}],
 		[0.12, {"y": -0.75, "p": 0.12, "wo": Vector3(0.08, 0.55, 0.36), "gp": -0.6,
 			"fl": Vector3(0.05, 0.14, -0.44), "hw": 1.0, "legs": [0.35, -0.55, 0.05, -0.35], "lw": 1.0, "sq": 0.12}],
 		[0.8, {"y": -0.85, "p": 0.18, "wo": Vector3(0.08, 0.58, 0.4), "gp": -0.6,
 			"fl": Vector3(0.05, 0.16, -0.46), "hw": 1.0, "legs": [0.4, -0.6, 0.05, -0.4], "lw": 1.0, "sq": 0.18}]]},
-	# Storm Rod thrown: an overarm throw (the arm whips over and down past the hip), a stretch into the
+	# Pink Spear thrown: an overarm throw (the arm whips over and down past the hip), a stretch into the
 	# release, the follow-through bent over the front leg, ~0.4 s to recover
 	"mage_rmb": {"keys": [
 		[0.00, {"y": -0.85, "p": 0.25, "wo": Vector3(0.08, 0.58, 0.4), "gp": -0.6, "legs": [0.4, -0.6, 0.05, -0.4],
@@ -87,7 +87,7 @@ const MOVES := {
 		[0.2, {"fx": -6.283, "legs": TUCK, "lw": 1.0, "fl": Vector3(0.1, -0.2, -0.25), "hw": 1.0}],
 		[0.36, {"fx": -6.283, "sq": 0.3, "lift": -0.08}],
 		[0.5, {"fx": -6.283}]]},
-	# Skycall: the left arm sweeps out toward the spot, then flicks up high through the 0.3 s flick window
+	# Undercurrent: the left arm sweeps out toward the spot, then flicks up high through the 0.3 s flick window
 	# (the drag is being picked) and stays raised through the 0.8 s countdown (mage_e_snap brings it down)
 	"mage_e": {"keys": [
 		[0.00, {}],
@@ -99,7 +99,7 @@ const MOVES := {
 		[0.5, {"p": 0.2, "fl": Vector3(0.05, 0.58, -0.15), "hw": 1.0, "legs": [0.2, -0.35, 0.1, -0.25], "lw": 0.6}],
 		[1.15, {"p": 0.2, "fl": Vector3(0.05, 0.58, -0.15), "hw": 1.0}],
 		[1.4, {}]]},
-	# Skycall strike: the raised hand snapped down to the ground as the bolt lands, a squash, the settle
+	# Undercurrent strike: the raised hand snapped down to the ground as the bolt lands, a squash, the settle
 	"mage_e_snap": {"keys": [
 		[0.00, {"p": 0.2, "fl": Vector3(0.05, 0.58, -0.15), "hw": 1.0}],
 		[0.06, {"p": -0.45, "fl": Vector3(0.1, -0.25, -0.5), "hw": 1.0, "legs": BRACE, "lw": 1.0, "sq": 0.35,
@@ -114,7 +114,7 @@ const MOVES := {
 		[0.55, {}]]},
 	# the gum (MageGum): head and bubble only, the keyed clip does the work; the rig just waits it out
 	"mage_gum": {"keys": [[0.0, {}], [1.2, {}]]},
-	# Kitefall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
+	# Stormfall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
 	# back, a squash that loads the launch
 	"mage_x": {"hold": true, "keys": [
 		[0.00, {"sq": -0.1}],
@@ -158,7 +158,7 @@ const MOVES := {
 		[0.09, SHOULDER],
 		[0.3, SHOULDER],
 		[0.55, {}]]},
-	# Burr Charge: fired from the cannon's launcher, no throw. A hard kick up the arm and the chest driven back, her
+	# Coin Blast: fired from the cannon's launcher, no throw. A hard kick up the arm and the chest driven back, her
 	# free hand staying out of it, then back on the aim by 0.3
 	"gunslinger_rmb": {"stance": true, "keys": [
 		[0.00, SHOULDER],
@@ -192,7 +192,7 @@ const MOVES := {
 			"legs": [0.1, -0.25, 0.3, -0.5], "lw": 1.0, "sq": -0.3}],
 		[0.8, {"p": 0.35, "gp": 0.25, "sq": 0.1, "legs": [0.15, -0.3, 0.2, -0.4], "lw": 0.8}],
 		[1.05, {}]]},
-	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
+	# Penny Drop (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
 	# and squashes her a little, held up a beat, then back down into her aim by 0.6 s
 	"gunslinger_x": {"keys": [
 		[0.00, {"sq": -0.1}],

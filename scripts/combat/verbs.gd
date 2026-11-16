@@ -99,7 +99,7 @@ static func blocks_sight(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
-## crosser class (Blockers): "phase" for a Spirit Walk.
+## crosser class (Blockers): "phase" for a Slip Stitch.
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
 		var top := wall_top(w, y)

@@ -88,7 +88,7 @@ func over_void() -> bool:
 	var st = m.get("skytrain")
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
-	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
+	# a standable rock under the feet is ground (Tarek's Backbone over the abyss)
 	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
@@ -373,9 +373,9 @@ var _flash_set := -1.0
 var _flash_col := Color.WHITE
 const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
 var _flash_n := -1
-var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Slip Stitch); a hit's white flash wins
 var wash_col := Color.WHITE
-## Tints the body: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
+## Tints the body: the hit flash (white), else the wash (Slip Stitch), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
 	var fc := Color.WHITE

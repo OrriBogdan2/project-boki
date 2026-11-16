@@ -2,8 +2,8 @@ class_name GilKit
 extends ArchKit
 ## Gil, the Novice Mage (content/archetypes/gil.json). A pet fish a spell stood up on two legs: everything out
 ## here is new to him. A control mage: Fencer (three rapier thrusts, every one steps in, the third slows),
-## Grab Bag (a shuffled bag of potions, the next one always shown), Ground Swim (a dash under the ground that
-## knocks up where he surfaces), Riptide (a spin that sends a waterspout down a line) and Tidal Wave (X: he
+## Grab Bag (a shuffled bag of potions, the next one always shown), Deep End (a dash under the ground that
+## knocks up where he surfaces), Spin Cycle (a spin that sends a waterspout down a line) and Surf's Up (X: he
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
@@ -16,11 +16,11 @@ var beach_at := {}                  # foe instance id -> time it can be Beached 
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
-var swim_t := 0.0                   # Ground Swim under way
-var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
+var swim_t := 0.0                   # Deep End under way
+var spin_t := -1.0                  # Spin Cycle spin time (-1: not spinning)
 var spin_tick := 0.0
 var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, spd, hit, id, from, len}
-var wave := {}                      # the Tidal Wave under way
+var wave := {}                      # the Surf's Up under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var aim_t := 0.0
@@ -345,7 +345,7 @@ func marks_on(f: Ent) -> int:
 		if m.time - float(marks[f.get_instance_id()][k]) <= float(pd.get("window", 5.0)): n += 1
 	return n
 
-# ------------------------------------------------------------------ dash: Ground Swim
+# ------------------------------------------------------------------ dash: Deep End
 func on_dash(use_ex: bool) -> bool:
 	if spin_t >= 0.0 or not wave.is_empty():
 		return true             # the spin and the wave hold him (content/dash_flow/gil.json: lock)
@@ -377,7 +377,7 @@ func _surface() -> void:
 		o["tags"] = ["dodge", "surface"]
 		f.hurt(float(dd["dmg"]) * power("dash"), h, o)
 
-# ------------------------------------------------------------------ E: Riptide
+# ------------------------------------------------------------------ E: Spin Cycle
 func cast_e() -> bool:
 	if spin_t >= 0.0 or not wave.is_empty():
 		return false
@@ -481,7 +481,7 @@ func _line_look(s: Dictionary, at: Vector3, dt: float) -> void:
 	if s["ab"] == "ult": vfx("wave_crest", at, s["dir"], {"w": s["w"]})
 	else: vfx("spout_col", at, s["dir"], {"w": s["w"]})
 
-# ------------------------------------------------------------------ X: Tidal Wave
+# ------------------------------------------------------------------ X: Surf's Up
 func cast_ult() -> bool:
 	return HeroUlt.press(self, _start_wave)
 

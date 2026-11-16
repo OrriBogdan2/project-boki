@@ -236,7 +236,7 @@ void fragment() {
 	float a = (0.18 + rim * 0.75 + chev * 0.55) * fade * power;
 	vec3 col = mix(color.rgb, vec3(1.0), chev * 0.4 + rim * 0.2);
 """ + _TAIL
-		# a swirling ring band flat on the ground (Breaker's 360 Smash, Purify's rings): uv.x round, uv.y across
+		# a swirling ring band flat on the ground (Breaker's Tideturner, Purify's rings): uv.x round, uv.y across
 		"swirl":
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
@@ -286,7 +286,7 @@ void fragment() {
 	col = mix(col, vec3(1.0, 0.55, 0.08), sigil * 0.9);
 	col = mix(col, vec3(1.0, 0.42, 0.12), armed * 0.3 + crack * 0.6);
 """ + _TAIL
-		# the screen tint while Spirit Walk carries you through something: a dark blue wash, darker at the edges
+		# the screen tint while Slip Stitch carries you through something: a dark blue wash, darker at the edges
 		"tint":
 			return """shader_type canvas_item;
 uniform vec4 color : source_color = vec4(0.04, 0.08, 0.3, 1.0);

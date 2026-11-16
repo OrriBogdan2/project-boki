@@ -109,7 +109,7 @@ static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
-## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
+## plunge (ArchKit.dive_speed, like Breah's air Rock Bottom) outruns it.
 static func fall_cap(h: Hunter) -> float:
 	if h.ak and h.ak.dive_speed() > 0.0:
 		return h.ak.dive_speed()

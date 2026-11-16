@@ -2,13 +2,13 @@ class_name RimewrightKit
 extends ArchKit
 ## Claire, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
-## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
+## Passive Cold Snap: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
 ## LMB Ice Dart: a hold is one burst, a steady stream of slow homing shards that ends on three large ones at
 ## the let-go; they bow out and curve onto the foe nearest the cursor; while skating they fly as thick beams
-## that home the same way. RMB Ice Spear: hold to see the landing ring, let go: it lands at the
+## that home the same way. RMB Icebreaker: hold to see the landing ring, let go: it lands at the
 ## cursor, leaves a slow zone and detonates 1.8s later.
-## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
-## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
+## Shift Free Skate (hold). E Cold Front: a 0.2s tell, then a narrow block of ice that slides toward the
+## cursor, widening, shoving foes; E again freezes it. X Freeze Frame (level 6): sealed in ice, invulnerable,
 ## inside a slowing rink that cracks open into a stun. R is the Boki Merge. Looks: content/vfx/rimewright.json
 ## (HeroVfx) for the moments, CareLook and UltLook for the bodies (darts, spear, wall, zone, rink, shells);
 ## moves: KMovesCare "tm_".
@@ -22,12 +22,12 @@ var seq_next := 0.0            # when the next dart may leave
 var burst_i := 0               # darts so far in this burst (one hold); the let-go ends it on wpn.heavy.n large ones
 var tail := 0                  # large darts still owed to the burst's end (they fly after the let-go)
 var burst_open := 0.0          # when the next burst may start (wpn.barrage_cd after the last large dart)
-var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
-var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
-var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
-var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
+var rinkrun := {}              # the running Free Skate: {t, dir, loop, slab}
+var ice_t := 0.0               # s until the rank-3 Free Skate may lay its next span of ice
+var wall := {}                 # the Cold Front: {w, dir, sliding, t, slide_t, hp0, hit}
+var carried := {}              # foe id -> its Displace tow: bodies the sliding Cold Front carries
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
-var ice: IceBody = null        # her body as ice while sealed in Rimelock
+var ice: IceBody = null        # her body as ice while sealed in Freeze Frame
 var spear_aim := false         # RMB held: the landing ring and the raised spear are up
 var throw_t := -1.0            # s left of the push before the spear leaves her palms (-1: none)
 var zones: Array = []          # landed spears: {at, left, total, id}
@@ -37,9 +37,9 @@ var look: CareLook
 var stats := {      # counters for the checks
 	"darts": 0, "heavies": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0,
 }
-var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
-var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
-var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
+var rime := {}                 # Freeze Frame running: {t, at, slow: {instance id: seconds in the rink}, creak}
+var last_stunned := 0          # foes the last Freeze Frame crash stunned (tests)
+var glide_held := false        # the glide key was down last step (Freeze Frame refuses each new press once)
 var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
 var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
 var ult_look: UltLook
@@ -57,8 +57,8 @@ const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full 
 ## The presses the crash's recovery holds back, and the HUD slot each one's refusal pulses.
 const RECOVER_KEYS := {
 	"fire": "", "sec": "sec", "sig": "k1", "jump": "", "gear1": "gear0", "gear2": "gear1", "kin_ab": ""}
-const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
-const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
+const RINK_BAND := 0.25        # m: the width of the Freeze Frame ring, its outer edge on the hit radius
+const CARRY_T := 0.5           # s a skate out of Freeze Frame holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
 	res = 0.0
@@ -203,7 +203,7 @@ func own_aim_line() -> bool:
 ## The source's burst (docs/heroes/rimewright.md, LMB): one hold is one burst, plain darts every wpn.rate for as
 ## long as the button stays down; the let-go ends it on wpn.heavy.n larger darts (double damage, faster, longer
 ## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
-## A stun or the Rimelock drops the owed large darts and ends the burst.
+## A stun or the Freeze Frame drops the owed large darts and ends the burst.
 func lmb_override(held: bool, _dt: float) -> bool:
 	if not h.can_fire() or not rime.is_empty():
 		if burst_i > 0:
@@ -348,9 +348,9 @@ func _homing_k(s: Dictionary, left: float) -> float:
 	var way := flown / maxf(0.01, flown + left)
 	return smoothstep(float(wd.get("home_from", 0.35)), float(wd.get("home_full", 0.7)), way)
 
-# ------------------------------------------------------------------ Shift: Skate
+# ------------------------------------------------------------------ Shift: Free Skate
 ## The skate is her dash (DashFlow sees it); its rows (content/dash_flow/rimewright.json) say what fires from it.
-## Skating into Rimelock the dash goes on as the statue's slide (item 64), so the X press reads as a "fire".
+## Skating into Freeze Frame the dash goes on as the statue's slide (item 64), so the X press reads as a "fire".
 func in_dash() -> bool:
 	return not rinkrun.is_empty() or _rime_carrying()
 
@@ -362,7 +362,7 @@ func dash_vy(dt: float) -> float:
 		return 0.0
 	return maxf(h.vel.y - Hunter.H_GRAV * dt, -float(dash_def().get("air_fall", 1.5)))
 
-## Sealed in Rimelock she is a statue: her facing stays as it was on the cast frame (item 65).
+## Sealed in Freeze Frame she is a statue: her facing stays as it was on the cast frame (item 65).
 func face_locked() -> bool:
 	return not rime.is_empty()
 
@@ -446,7 +446,7 @@ func _tick_rinkrun(dt: float) -> void:
 	rinkrun["dir"] = cur
 	_edge_spray(cur, turn / maxf(dt, 0.001), dt)
 	h.roll_dir = cur
-	# full speed within `ramp` s of the push-off; out of Rimelock it starts at full speed (or the speed she
+	# full speed within `ramp` s of the push-off; out of Freeze Frame it starts at full speed (or the speed she
 	# had) and holds it CARRY_T before easing to the skate's own
 	var spd := float(dd.get("speed", 11.5)) * lerpf(0.45, 1.0, clampf(t / float(dd.get("ramp", 0.2)), 0.0, 1.0))
 	if bool(rinkrun.get("air", false)):
@@ -495,7 +495,7 @@ func _lay_ice(dir: Vector2, dt: float) -> void:
 	if laid > 0:
 		vfx("ice_bridge")
 
-## A Boki merge ends the Skate (its refund is the same as letting go), drops the spear aim and a wall
+## A Boki merge ends the Free Skate (its refund is the same as letting go), drops the spear aim and a wall
 ## still in its tell (no wall comes up).
 func _drop_holds() -> void:
 	if not rime.is_empty():
@@ -513,7 +513,7 @@ func _drop_holds() -> void:
 		_drop_throw()
 	wall_cast = {}
 
-## Ends the skate; `into_rime` hands it straight to the Rimelock statue's slide (no stop, no spray).
+## Ends the skate; `into_rime` hands it straight to the Freeze Frame statue's slide (no stop, no spray).
 func _rinkrun_end(into_rime := false) -> void:
 	var dd := dash_def()
 	var t := float(rinkrun.get("t", 0.0))
@@ -570,7 +570,7 @@ func _lay_slabs(dt: float) -> void:
 	lk().ice_strip(SLAB_CAP).lay(
 			under, randf_range(0.9, 1.3), h.roll_dir.rotated(randf_range(-0.25, 0.25)), m.time, SLAB_LIFE)
 
-# ------------------------------------------------------------------ RMB: Ice Spear
+# ------------------------------------------------------------------ RMB: Icebreaker
 func rmb_charge_full() -> float: return 0.0
 
 ## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
@@ -727,7 +727,7 @@ func _detonate(at: Vector3) -> void:
 					"payoff": true})
 		lk().burst("shell", f.pos, {"dur": float(ld["encase_t"]), "ent": f})
 
-# ------------------------------------------------------------------ E: Rink Wall
+# ------------------------------------------------------------------ E: Cold Front
 ## E: a 0.2 s tell (a sparkle at her feet, and everyone sees the path), then the wall erupts.
 func cast_e() -> bool:
 	if not rime.is_empty():
@@ -786,7 +786,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 func e_recastable() -> bool:
 	return not wall.is_empty() and bool(wall.get("sliding", false))
 
-## RecastCue: E while the wall slides (it stops by itself at the end), then X in Rimelock's late crack window
+## RecastCue: E while the wall slides (it stops by itself at the end), then X in Freeze Frame's late crack window
 ## (earlier, X only breaks the shell, so the cue shows from the window on; left alone it cracks at full).
 func recast_window() -> Dictionary:
 	if e_recastable():
@@ -926,7 +926,7 @@ func teardown() -> void:
 		ice.restore()
 		ice = null
 
-# ------------------------------------------------------------------ X: Rimelock
+# ------------------------------------------------------------------ X: Freeze Frame
 func ulk() -> UltLook:
 	if ult_look == null:
 		ult_look = UltLook.new(m, h)
@@ -1031,7 +1031,7 @@ func _tick_rime(dt: float) -> void:
 		_rime_crash(1.0)
 
 
-## No glide while sealed: over the abyss she falls, and only ending Rimelock (X or Shift) frees the glider.
+## No glide while sealed: over the abyss she falls, and only ending Freeze Frame (X or Shift) frees the glider.
 ## Each glide press is refused out loud.
 func _rime_no_glide() -> void:
 	h.glide_cd = maxf(h.glide_cd, 0.1)
@@ -1042,7 +1042,7 @@ func _rime_no_glide() -> void:
 	glide_held = glide_now
 
 
-## Shift while sealed: Rimelock ends as X again would (a late press still cracks it open) and she skates
+## Shift while sealed: Freeze Frame ends as X again would (a late press still cracks it open) and she skates
 ## straight out at full speed, keeping any speed she had for CARRY_T; in the air the skate starts at once.
 func _rime_skate_out() -> void:
 	var had := Vector2(h.vel.x, h.vel.z).length()

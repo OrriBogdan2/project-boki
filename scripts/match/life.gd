@@ -133,7 +133,7 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
 ## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
-## abilities the source lets reach it (opts "src": "wisp", e.g. Hail Wall), which drain `down_hp` by `dmg`.
+## abilities the source lets reach it (opts "src": "wisp", e.g. Hemline), which drain `down_hp` by `dmg`.
 ## Always 0: the wisp has no health to take. It runs on the wisp's own game (remote hits arrive by "hit").
 static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
 	if opts.get("src", "") == "wisp":
@@ -162,7 +162,7 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
 ## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
-## (Nightwell, a reel, a drag). Slows and Daze never do; your own input never does. "" = still going.
+## (Main Attraction, a reel, a drag). Slows and Daze never do; your own input never does. "" = still going.
 static func cc_break(m: Match, h: Hunter) -> String:
 	if h.downed or h.out: return "down"
 	if h.stun_t > 0.0: return "stun"

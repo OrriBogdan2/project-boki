@@ -1,6 +1,6 @@
 extends RefCounted
 ## Sparkle's bubblegum: she blows the bubble up and pops it (kit move mage_gum, clip "gum"), as an idle fidget, on a
-## knock and after Kitefall. The bubble itself is on the model (bone "gum"); the pop is the sound mage_bubble_pop.
+## knock and after Stormfall. The bubble itself is on the model (bone "gum"); the pop is the sound mage_bubble_pop.
 
 const IDLE_EVERY := 9.0  # s standing around between fidgets
 const RETRY := 2.0  # s before trying again when she's busy

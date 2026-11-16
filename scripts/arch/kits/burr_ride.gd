@@ -1,6 +1,6 @@
 class_name BurrRide
 extends RefCounted
-## A Coin Blast stuck to a placed wall (a raised aegis, a Rink Wall, a rock): it keeps its place on the wall as
+## A Coin Blast stuck to a placed wall (a raised aegis, a Cold Front, a rock): it keeps its place on the wall as
 ## the wall moves and turns, and when the wall breaks or runs out the coin drops to the ground with its fuse
 ## still running, so it still blasts. The wall is a Verbs wall (`Verbs.walls`), so every placed barrier counts.
 

@@ -1,10 +1,10 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; cords round the legs (StatusLooks)
-##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
+##   gnd  Grounded (the Thief's Dark Bola): no dash, jump or glide; cords round the legs (StatusLooks)
+##   blt  Blight (the Juggernaut's Short Leash, Sable's Last Dance rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
+##   rat  Dazed (Vex's Coin Blast; "Rattled" in code): her rifle and Palm Spear hit harder (no slow: the
 ##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; the slow's body look (StatusLooks)
 ##   ign chl sta mrk  Ignite level (Cinder), Chill (Neve), Static (Sparkle), Marks (Sable): the caster's kit

@@ -1,6 +1,6 @@
 class_name ThiefUlt
 extends RefCounted
-## Sable's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
+## Sable's ultimate on X, Last Dance (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
 ## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
 ## then rides with her for 2s while she dances (thf_encore_dance, upper body over her walking legs) and on every
 ## beat a blade leaves one hand or the other at every foe inside it (0.2s apart, up to 10 each), the ring pulsing.
@@ -89,7 +89,7 @@ func tick(dt: float) -> void:
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
-## From the first beat on the dance runs, on the beat: back in time after a flip, a Bola or anything else she did.
+## From the first beat on the dance runs, on the beat: back in time after a flip, a Dark Bola or anything else she did.
 func _keep_dancing(d: Dictionary) -> void:
 	var into := float(st["t"]) - float(d["grow"])
 	if into < 0.0 or k.anim_id == DANCE or not k.vault.is_empty() or k.landing_due:

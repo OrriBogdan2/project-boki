@@ -181,7 +181,7 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# the Heavy Shot's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
+	# the Pin Down's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
 	"arc_heavy_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
@@ -241,7 +241,7 @@ const MOVES := {
 		],
 		[0.28, {"p": 0.25, "lift": -0.05, "lw": 0.8, "legs": [0.6, -0.8, -0.3, -0.4]}],
 		[0.6, {}]]},
-	# Hail Wall: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
+	# Hemline: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
 	"arc_hail": {"keys": [
 		[0.0, {"p": 0.1}],
 		[
@@ -269,7 +269,7 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# Spirit Walk's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
+	# Slip Stitch's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
 	"pin_roll": {"keys": [
 		[0.0, {"p": -0.35, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, 0.9, -1.3]}],
 		[
@@ -508,7 +508,7 @@ const MOVES := {
 				"fl": Vector3(0.0, 0.15, -0.48)
 			}
 		]]},
-	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
+	# Tideturner: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
 	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
 	# recovery to 0.58 s
 	"bul_whirl": {"keys": [
@@ -554,7 +554,7 @@ const MOVES := {
 		],
 		[0.58, {"p": -0.08, "fy": 6.28, "sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.3, -0.35, -0.8]}],
 		[0.75, {"fy": 6.28}]]},
-	# the Shield Charge: head down behind the shield, a ram (on top of the dash's own forward lean)
+	# the Full Ahead: head down behind the shield, a ram (on top of the dash's own forward lean)
 	"bul_charge": {"keys": [
 		[0.0, {"p": -0.1, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
 		[0.16, {"p": -0.2, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.1, -0.8, -0.3]}],
@@ -565,7 +565,7 @@ const MOVES := {
 		[0.0, {"y": 0.75, "p": 0.12, "lift": -0.06, "gp": 0.25, "lw": 1.0, "legs": [0.55, -0.85, -0.45, -0.5]}],
 		[0.1, {"y": 0.6, "p": 0.05, "lift": 0.05, "gp": 0.25, "lw": 1.0, "legs": [0.7, -0.6, -0.5, -0.3]}],
 		[0.25, {"y": 0.75, "p": 0.12, "lift": -0.06, "gp": 0.25, "lw": 1.0, "legs": [0.55, -0.85, -0.45, -0.5]}]]},
-	# Mending Ground (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
+	# Safe Harbour (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
 	# as the light comes down; overshoot into a deep crouch, settle
 	"bul_mend": {"keys": [
 		[0.0, {}],
@@ -772,7 +772,7 @@ const MOVES := {
 		[0.06, {"p": -0.18, "y": 0.4, "sq": 0.14, "lw": 0.9, "hw": 1.0, "fl": Vector3(0.1, -0.05, 0.2), "gp": -0.5}],
 		[0.3, {"p": -0.1, "y": 0.15, "r": 0.08, "sq": 0.06, "gp": -0.3}],
 		[0.55, {}]]},
-	# Spirit Walk after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
+	# Slip Stitch after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
 	"pin_walk": {"hold": true, "keys": [
 		[0.0, {"p": -0.15, "fx": 6.28, "lw": 0.5, "legs": [0.4, -0.5, -0.2, -0.3]}],
 		[
@@ -787,7 +787,7 @@ const MOVES := {
 				"fr": Vector3(0.15, -0.1, 0.35)
 			}
 		]]},
-	# the base long dash (in the air, or out of Spirit Walk charges): a quick flick and a sideways tumble
+	# the base long dash (in the air, or out of Slip Stitch charges): a quick flick and a sideways tumble
 	"pin_flick": {"keys": [
 		[0.0, {"p": -0.2, "sq": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.2, -0.4]}],
 		[
@@ -890,13 +890,13 @@ const MOVES := {
 		[0.5, {"sq": -0.05}],
 		[0.6, {}]]},
 	# ---------------------------------------------------------------- the ultimates on X (10 fps beats: 0.1 s each)
-	# Starpiercer cast: one frame of flash, the bow swept up and across the chest, the chest thrown open
+	# Finishing Touch cast: one frame of flash, the bow swept up and across the chest, the chest thrown open
 	"pin_ult_cast": {"keys": [
 		[0.0, {}],
 		[0.1, {"p": -0.2, "lift": 0.1, "sq": -0.18, "y": -0.3, "hw": 1.0, "fl": Vector3(-0.1, 0.5, 0.15), "gp": 0.6}],
 		[0.25, {"p": 0.1, "sq": 0.12, "y": 0.2, "hw": 0.8, "fl": Vector3(0.1, 0.3, 0.1), "lw": 0.6}],
 		[0.45, {}]]},
-	# a Starpiercer nock (0.3 s, held): side-on, low, the string hand pulled straight to the cheek
+	# a Finishing Touch nock (0.3 s, held): side-on, low, the string hand pulled straight to the cheek
 	"pin_ult_nock": {"hold": true, "keys": [
 		[0.0, {"y": 0.4, "hw": 0.8, "fl": Vector3(0.12, 0.15, 0.12)}],
 		[
@@ -963,7 +963,7 @@ const MOVES := {
 		],
 		[0.25, {"p": 0.05, "lift": -0.12, "sq": 0.3, "lw": 1.0, "legs": [0.9, -1.3, -0.4, -0.8], "hw": 0.6}],
 		[0.65, {}]]},
-	# Faultline wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
+	# Groundswell wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
 	"bul_ult_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
@@ -996,7 +996,7 @@ const MOVES := {
 				"legs": [0.7, -0.9, -0.55, -0.7]
 			}
 		]]},
-	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it through the plant
+	# the Groundswell slam: one frame from overhead down into the ground, a deep crouch over it through the plant
 	# (0.2 s), then the legs free to walk while the back comes up over the hammer as the lane erupts
 	"bul_ult_slam": {"keys": [
 		[

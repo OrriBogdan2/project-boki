@@ -11,7 +11,7 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
+const SPIRIT_CLIMB := 14.0       # m/s a Slip Stitch rises up a ledge face (Phase Walk goes through raised terrain)
 # one-step presses, cleared after each sim step
 const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill",
 		"swap"]
@@ -260,7 +260,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range multiplier (1 unless a kit sets it)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
+var spirit_t := 0.0           # Slip Stitch (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -970,7 +970,7 @@ const DASH_BUFFER := 0.18
 func do_dash() -> void:
 	if downed or out:
 		return
-	# stunned, rooted or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
+	# stunned, rooted or Grounded (a Thief's Dark Bola: no dash, jump or glide; a reeling Dredge still barges)
 	if stun_t > 0.0 or root_t > 0.0 or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
 		_ab_feedback("dash", "deny")
 		return
@@ -1475,7 +1475,7 @@ func _emit_shot() -> void:
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
 	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
-	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
+	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Comic Timing: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
 		extra["decel"] = float(wpn["decel"])
@@ -1881,7 +1881,7 @@ func sim(dt: float) -> void:
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
-	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
+	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Red Carpet: only E)
 	# gloves need no point: Gloves
 	for gk in SLOT_GATES:
 		_gate(gk[0], gk[1], gk[2])

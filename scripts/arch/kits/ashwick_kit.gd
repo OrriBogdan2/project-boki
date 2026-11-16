@@ -3,23 +3,23 @@ extends ArchKit
 ## Cinder (id ashwick, heavy). Gameplay follows the "everything builds toward a burn" brief and the
 ## reference sheet (docs/heroes/ashwick.md); names, art, sounds and text are ours.
 ##
-## - Passive, Flashover: every hit builds Char on a foe (31 = Ablaze: 3s of burning for a share of their
+## - Passive, Boiling Point: every hit builds Char on a foe (31 = Ablaze: 3s of burning for a share of their
 ##   health). Stoking a foe that already burns Flashes it over (fiercer). One flame pip over a foe
 ##   Ablaze, three and a glow over one that Flashed over. Char falls off after 5s. A knock heals, and resets the cloak.
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
-## - LMB, Torch Lance: hold for a stream of fire from her hand (a gold pilot flame first); the stream keeps its own
+## - LMB, Open Flame: hold for a stream of fire from her hand (a gold pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the palm and billowing at the end.
-## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
+## - RMB, Spitfire: hold to aim down a lane, release: a cinder that always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
-## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
+## - Shift, Lock Horns: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
-## - E, Furnace Cloak: on the press, a blast round Cinder (a ring at its exact radius): scorch, Char,
+## - E, Molten Hug: on the press, a blast round Cinder (a ring at its exact radius): scorch, Char,
 ##   Anti-Heal, drag foes in (walls block), and a swirling shield for what it hit.
-## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
+## - X, Red Carpet (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
 ##   in it.
 
 const PILOT_COL := Color("ffd23a")     # the pilot flame: a hot gold spark in her palm, only while the lance spools up
-const BOLT_CORE := Color("fff4c8")     # Cinder Shot's white-hot core (its body is the RMB slot's flame orange)
+const BOLT_CORE := Color("fff4c8")     # Spitfire's white-hot core (its body is the RMB slot's flame orange)
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("fff4c8")
@@ -33,7 +33,7 @@ const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Molten Hug flare holds her hand up off the aim (as_cloak)
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -45,22 +45,22 @@ const PALM_AHEAD := 0.12
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
-var hose := AshwickHose.new()   # the Torch Lance stream
+var hose := AshwickHose.new()   # the Open Flame stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
 var after_t := 0.0              # the slow after letting go
-var boost_until := -9.0         # the Soot Ram's rank-3 speed boost runs until then
+var boost_until := -9.0         # the Lock Horns's rank-3 speed boost runs until then
 var relight_t := 0.0            # the lance can't relight until this runs out (0.35s after a release)
 var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
-var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
-var aiming := false             # hold: Cinder Shot held (the lane shows)
+var bash := {}                  # hold: the Lock Horns under way {t, dir, hit}
+var aiming := false             # hold: Spitfire held (the lane shows)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
-var lmb_denied := 0              # (tests) presses refused during Flue Flight
-var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
+var lmb_denied := 0              # (tests) presses refused during Red Carpet
+var jet: AshwickJet             # X, Red Carpet (its flight is a hold: jet.flight)
 var ignitions := 0              # (tests)
 var upgrades := 0
 var spreads := 0
@@ -72,7 +72,7 @@ var flame_ticks := 0
 var hose_hits := 0              # (tests) foe-ticks the stream landed on
 var bash_hits := 0
 var fizzles := 0
-var bolt_ends: Array = []       # (tests) where each Cinder Shot ended: [at, expired]
+var bolt_ends: Array = []       # (tests) where each Spitfire ended: [at, expired]
 
 func rd() -> Dictionary: return res_def()
 func lmbd() -> Dictionary: return d.get("lmb", {})
@@ -240,7 +240,7 @@ func _shield_swirls() -> void:
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
-	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
+	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Red Carpet
 	# never spools (the lance is out), so the pilot is out with it
 	var spooling := was_held and spool < float(lmbd()["spool"])
 	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
@@ -286,7 +286,7 @@ func pips_on(f: Ent) -> int:
 		if fx.shown("pip%d_%d" % [key, i]): n += 1
 	return n
 
-## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
+## A Boki merge ends the hose, a bash mid-flight and the Spitfire lane, with nothing fired.
 func _drop_holds() -> void:
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
@@ -303,7 +303,7 @@ func move_k() -> float:
 	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
 	return (0.6 if after_t > 0.0 else 1.0) * boost
 
-## Rank 3 Cinder Shot holds a second charge.
+## Rank 3 Spitfire holds a second charge.
 func rmb_charges() -> int:
 	return int(rmb_def().get("rank3_charges", 2)) if rank("sec") >= 3 else 1
 
@@ -317,7 +317,7 @@ func ignite_pct(f: Ent) -> float:
 	var lvl := burning(f)
 	return 0.0 if lvl == 0 else float(d["ignite_bonus"]["tick_pct"][lvl - 1])
 
-# ------------------------------------------------------------------ LMB: Torch Lance
+# ------------------------------------------------------------------ LMB: Open Flame
 func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_key_was
 	lmb_key_was = held
@@ -375,7 +375,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_flame_tick(tick)
 	return true
 
-## Flue Flight: LMB does nothing for the whole flight, whatever is in her hand. The key is ignored,
+## Red Carpet: LMB does nothing for the whole flight, whatever is in her hand. The key is ignored,
 ## not buffered, and a press answers with the soft "can't" tick. A stream running at lift-off goes out with no
 ## relight gap, so a held key lights the lance the step the flight ends (its usual pilot, then the roar).
 func _lance_off(pressed: bool) -> void:
@@ -434,7 +434,7 @@ func _stream_looks() -> void:
 	if flame_ticks % LICK_EVERY == 0:
 		vfx("lance_lick", ground(live[0]["p"]))
 
-# ------------------------------------------------------------------ RMB: Cinder Shot
+# ------------------------------------------------------------------ RMB: Spitfire
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
 ## drawn back.
 func rmb_hold_tick(t: float) -> void:
@@ -526,7 +526,7 @@ func _pause_hose() -> void:
 		hose.snuff()
 		flame_acc = 0.0
 
-# ------------------------------------------------------------------ Shift: Soot Ram
+# ------------------------------------------------------------------ Shift: Lock Horns
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var dir := dash_dir()
@@ -650,7 +650,7 @@ func _ram_reward() -> void:
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
 	h.shield_kind = "cloak"
 
-# ------------------------------------------------------------------ E: Furnace Cloak
+# ------------------------------------------------------------------ E: Molten Hug
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
 ## and a thin ring at the blast's exact radius that everyone sees.
 func cast_e() -> bool:
@@ -697,7 +697,7 @@ func _cloak_blast() -> void:
 		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)
 
-# ------------------------------------------------------------------ X: Flue Flight
+# ------------------------------------------------------------------ X: Red Carpet
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
@@ -730,7 +730,7 @@ func gate_kin_tap() -> bool: return jet.swallow_kin_tap()
 func fires_in_glide() -> bool: return true
 
 # ------------------------------------------------------------------ bots
-## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.
+## The Open Flame only reaches its stream's length: a bot walks in to it before holding LMB.
 func bot_reach() -> float: return float(lmbd()["range"]) - 0.4
 
 

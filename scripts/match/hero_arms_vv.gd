@@ -1,7 +1,7 @@
 class_name HeroArmsVV
 extends RefCounted
-## The signature weapons of Sparkle (Coilcaster: no gun, a copper wrist coil and a pointed, lit finger)
-## and Vex (Quill Rifle: a long-shrouded auto rifle with a drum), built on the gun node (HeroArms
+## The signature weapons of Sparkle (Finger Guns: no gun, a copper wrist coil and a pointed, lit finger)
+## and Vex (Brass Tacks: a long-shrouded auto rifle with a drum), built on the gun node (HeroArms
 ## asks first). The barrel runs along -Z, the hand holds near the origin.
 
 const X_AXIS := Vector3(PI / 2, 0, 0)

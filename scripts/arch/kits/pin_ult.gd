@@ -1,11 +1,11 @@
 class_name PinUlt
 extends Node3D
-## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
+## Hem's ultimate on X, Finishing Touch (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
 ## cast lock empowers her next shots ("shots", 3) for "window" seconds. While empowered the bow needs no
 ## draw: each LMB press nocks for "nock" s (the bow glows, the cursor ring fills), then looses a big
 ## arrow that flies "speed" m/s (the source's beam crosses its 18 m in about 0.2 s), pierces every foe out
 ## to "range" (1.5x her Empowered range), knocks back and strips "shred" armor. The last arrow hits harder
-## and finishes a hunter it leaves under "execute" of their health. She can walk, roll and Spirit Walk
+## and finishes a hunter it leaves under "execute" of their health. She can walk, roll and Slip Stitch
 ## between shots. The window ends after the last arrow or on time.
 ##
 ## Telegraphs (AimKit, own player): the arrow's lane out to its range and a ticked crosshair ring at her

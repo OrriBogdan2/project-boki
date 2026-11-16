@@ -8,8 +8,8 @@ extends Node3D
 ##   ride     a tracer riding on a match shot until it ends, then its impact (the rifle round)
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
-##   disc     a lit crackling rim on the area's radius, a see-through dark falloff, veins (Skycall, the scrape)
-##   ring     an expanding ring with spark needles (the slide's start ring, the Cinderfall impact)
+##   disc     a lit crackling rim on the area's radius, a see-through dark falloff, veins (Undercurrent, the scrape)
+##   ring     an expanding ring with spark needles (the slide's start ring, the Penny Drop impact)
 ##   star     a camera-facing 4-point crackle (fingertip, muzzle)
 ##   trail    immediate style: a swoosh following a moving point (a hand through its move)
 ##   echo     a fading after-image in the hunter's own pose and silhouette, flat in one colour

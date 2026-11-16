@@ -1,6 +1,6 @@
 class_name MageSky
 extends RefCounted
-## Sparkle's Skycall (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
+## Sparkle's Undercurrent (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
 ##
 ## Press drops the circle at the cursor; while E is held the drag follows the cursor from the circle; the
 ## release commits ONE vector (the drag, or the away-from-her default when it is tiny) and every foe and orb
@@ -37,7 +37,7 @@ func cast() -> bool:
 	kit.play("mage_e")
 	return true
 
-## Skycall is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
+## Undercurrent is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
 ## player, inp["e_down"] for tests and scripted demos. Bots never hold (a tap: the default drag).
 func _held() -> bool:
 	if bool(kit.h.inp.get("e_down", false)):

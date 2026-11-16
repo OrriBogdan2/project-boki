@@ -1,6 +1,6 @@
 class_name IceBody
 extends RefCounted
-## A hunter's body turned to ice (Rimelock): every visible mesh of her model trades its material for
+## A hunter's body turned to ice (Freeze Frame): every visible mesh of her model trades its material for
 ## shaders/hero_ice.gdshader, keeping its own colour and atlas, so the body itself is ice, not a shell.
 ## freeze(t) swaps the materials and runs a frost front from the feet up over t seconds; thaw() runs it
 ## back down and then gives the original materials back. Works on the procedural model (one

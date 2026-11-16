@@ -2,7 +2,7 @@ class_name KMovesGil
 extends RefCounted
 ## Keyed full-body moves of Gil (content/archetypes/gil.json, scripts/arch/kits/gil_kit.gd), in the
 ## HunterAnim.KMOVES format: a fencer's thrusts on the swordfish (right foot leading, the back hand up behind),
-## the held Tide Lunge, the dive under the ground and the burst back out, the potion toss, the Riptide spin and
+## the held Tide Lunge, the dive under the ground and the burst back out, the potion toss, the Spin Cycle spin and
 ## the wave ride. Gil's .glb carries no clips, so these keyed poses are his animation. Signs as KMovesDJ: p < 0
 ## leans in, y < 0 brings the right (sword) shoulder forward, lift is metres up from the feet.
 
@@ -58,7 +58,7 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.95, "p": -0.55, "y": -0.6, "sq": -0.1,
 				"lift": -0.16, "fl": Vector3(-0.2, 0.5, 0.5), "hw": 1.0, "lw": 1.0, "legs": [-0.9, -0.1, 1.25, -1.2]}],
 		[0.6, {}]]},
-	# Ground Swim: a quick crouch, then head first into the ground like a dive into water; held under
+	# Deep End: a quick crouch, then head first into the ground like a dive into water; held under
 	# (the body fully below the surface) until gil_surface replaces it
 	"gil_dive": {"hold": true, "keys": [
 		[0.0, {"p": 0.15, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.9, -1.4],
@@ -85,7 +85,7 @@ const MOVES := {
 		[0.16, {"fl": Vector3(-0.15, 0.3, -0.6), "hw": 1.0, "y": -0.35, "p": -0.25, "sq": -0.06, "lw": 0.6,
 				"legs": [0.5, -0.5, -0.3, -0.3]}],
 		[0.42, {}]]},
-	# Riptide: the swordfish held straight out to the side, the free arm out for balance, turning on the spot
+	# Spin Cycle: the swordfish held straight out to the side, the free arm out for balance, turning on the spot
 	# once every 0.25s (looped: a turn ends where it began)
 	"gil_spin": {"hold": true, "loop": 0.1, "keys": [
 		[0.0, {}],
@@ -100,7 +100,7 @@ const MOVES := {
 		[0.07, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.95, "p": -0.5, "y": -0.55, "sq": -0.2,
 				"fl": Vector3(-0.3, 0.5, 0.4), "hw": 1.0, "lw": 1.0, "legs": [-0.8, -0.1, 1.1, -1.0]}],
 		[0.45, {}]]},
-	# Tidal Wave: up on the crest in a low surfer's crouch, side on, the arms out, rocking with the water
+	# Surf's Up: up on the crest in a low surfer's crouch, side on, the arms out, rocking with the water
 	"gil_surf": {"hold": true, "loop": 0.15, "keys": [
 		[0.0, {"sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.9, -1.4]}],
 		[0.15, {"y": 1.1, "r": 0.12, "p": -0.25, "sq": 0.18, "lift": 0.7, "fl": Vector3(-0.8, 0.25, 0.0), "hw": 1.0,

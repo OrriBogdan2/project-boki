@@ -1,12 +1,12 @@
 class_name JuggernautChain
 extends RefCounted
-## Kael's E, the Warchain (his "e" data in content/archetypes/juggernaut.json; the source's tether chain).
-## The states and every transition are in docs/heroes/juggernaut.md "Warchain: the state machine":
+## Kael's E, the Short Leash (his "e" data in content/archetypes/juggernaut.json; the source's tether chain).
+## The states and every transition are in docs/heroes/juggernaut.md "Short Leash: the state machine":
 ## ready -> throwing (the hook flies at the cursor) -> hooked (a foe or a wall: the link chain stays on while
 ## you move, paying out to its full length and holding there, 5s) -> pulling (E again: an impulse toward the
 ## anchor that where he looks and his movement input swing into an arc, and backing away first slingshots;
 ## Shift or a jump exits) ->
-## arriving (a short window that keeps some of the pull's speed and still takes the Cinder Spin) -> ready.
+## arriving (a short window that keeps some of the pull's speed and still takes the Full Circle) -> ready.
 ## A miss, a stun or the time running out breaks it. Owned by JuggernautKit.
 
 const ORANGE := Color("ff8a2a")     # the bright links (and the zig-zag in flight)
@@ -72,7 +72,7 @@ func hooked() -> bool:
 func pulling() -> bool:
 	return state == "pulling"
 
-## The pull and the short window after it: a Smash here is the Cinder Spin.
+## The pull and the short window after it: a Final Swing here is the Full Circle.
 func spin_window() -> bool:
 	return state == "pulling" or state == "arriving"
 
@@ -118,7 +118,7 @@ func _throw() -> void:
 	if k.m.shots.size() > shots0 and k.m.shots[-1]["by"] == h:
 		var sd: Dictionary = k.m.shots[-1]
 		k.fx().ride(sd, "hook", ORANGE, Color("ffcf6a"), 0.6, 0.15)
-		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
+		# the shared hook look and its thin pale rope would draw over the Short Leash's own chain
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
 	k.vfx("chain_throw")

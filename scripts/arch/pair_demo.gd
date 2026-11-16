@@ -153,7 +153,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["move"] = Vector2(-1, 0) if t > 1.6 and t < 2.6 else Vector2.ZERO
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 
-## Basalt Spine: X held from 0.4s at the dummy, the cursor dragged to swing the ridge, let go at 0.72s.
+## Backbone: X held from 0.4s at the dummy, the cursor dragged to swing the ridge, let go at 0.72s.
 static func _spine_input(P: Hunter, D: Hunter, t: float, dt: float) -> void:
 	P.lvl = maxi(P.lvl, 6)
 	P.inp["x_down"] = t > 0.38 and t < 0.72

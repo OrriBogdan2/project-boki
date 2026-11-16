@@ -9,7 +9,7 @@ extends Node3D
 ##   his ivory (Arch.color) behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while
 ##   the perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the
 ##   release
-## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
+## - the dash's gold chevron wake (his own after-image); the Tideturner's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it

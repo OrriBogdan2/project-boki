@@ -79,7 +79,7 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
+## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
@@ -916,7 +916,7 @@ func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)
-# The Thief (Cash In) and the Juggernaut (Rage Smash) set the bar: a kit builds a resource, the
+# The Thief (Cash In) and the Juggernaut (Final Swing) set the bar: a kit builds a resource, the
 # hunter visibly changes when its payoff is armed, and the payoff lands with a named word, T4
 # hitstop (the hit carries payoff: true), a T4 shake, its own sound, VFX and a camera punch. The
 # helpers below give the Archer, Mage, Gunslinger and Bulwark the same language.

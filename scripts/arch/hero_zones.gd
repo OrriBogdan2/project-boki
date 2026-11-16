@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## Net (Net.VERSION 0.14.0): ["zone", kind, ...] events through the existing "ev" topic. The caster's
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
-##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp, top?]   (top: a low Rock Hop rock's height)
+##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp, top?]   (top: a low Leap of Faith rock's height)
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
@@ -174,7 +174,7 @@ static func bridge(
 ## teal rim ring. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
 
-## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
+## A Gag Gift's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:
 	return rmax * clampf(t / grow, SEED_R0, 1.0)
 

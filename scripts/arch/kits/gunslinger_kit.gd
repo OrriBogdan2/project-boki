@@ -3,7 +3,7 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the green-fire rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
+## Loop: tap RMB and the Coin Blast fires from the arm-cannon's launcher along the aim. A direct hit on a foe
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or on a placed wall or shield (it rides it, and drops if it goes): a cone shows
@@ -11,7 +11,7 @@ extends ArchKit
 ## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
 ## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
-## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
+## shooting. Palm Spear: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
@@ -19,8 +19,8 @@ extends ArchKit
 const LIME := Color("b8f03c")        # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")         # palette "hot"
 const DEEP := Color("4f8a12")        # palette "deep"
-const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
-const DUD_DUST := Color("6b4a2e")    # a dud Burr Charge's dull dust puff where its lane ended
+const BRONZE := Color("b9732f")      # the Coin Blast's metal shell (a material, not an effect)
+const DUD_DUST := Color("6b4a2e")    # a dud Coin Blast's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
@@ -48,16 +48,16 @@ const E_RECOVER := 0.6               # s she is held after the beam: the source'
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
-var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
+var needle := {}               # Palm Spear's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
 var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
-var skewers := 0               # Longneedle payoffs
+var skewers := 0               # Palm Spear payoffs
 var needle_hits := 0
-var needle_dir := Vector2.ZERO # tests: the line the last Longneedle fired along
+var needle_dir := Vector2.ZERO # tests: the line the last Palm Spear fired along
 var wall_slams := 0
 var last_dash_kind := ""
 var last_shot := 0
@@ -66,7 +66,7 @@ var last_puff := Vector3.ZERO  # tests: where the last one went off
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
-var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var ult: GunslingerUlt         # Penny Drop, her ultimate on X
 var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
 
 func _setup() -> void:
@@ -124,7 +124,7 @@ func fires_in_glide() -> bool:
 	return true
 
 func shows_charge_ball() -> bool:
-	return false                   # the Longneedle charges an ember orb at the muzzle instead
+	return false                   # the Palm Spear charges an ember orb at the muzzle instead
 
 const SLIDE_LOOP_FROM := 0.367       # s: the dash clip's slide loop (three keys): a held slide replays it from here,
 const SLIDE_LOOP_T := 0.133          # s: one period at a time, so she stands up as the skid ends
@@ -212,7 +212,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
 		_on_knock(t)
 
-## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
+## Hot Streak: rank 3 resets the Coin Blast on a knock (Slipstep comes back by the game-wide DashReset rule).
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
 	if rank("sec") >= 3:
@@ -371,7 +371,7 @@ func _tick_slide(dt: float) -> void:
 	h.roll_speed = float(slide["left"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 
-# ------------------------------------------------------------------ RMB: Burr Charge
+# ------------------------------------------------------------------ RMB: Coin Blast
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not spend_rmb():
@@ -399,7 +399,7 @@ func fire_rmb(c: Dictionary) -> void:
 	_launcher_puff(at, d)
 	m.sfx("gunslinger_grenade_thunk", h.pos, -2.0)
 
-## Where the Burr Charge leaves: the cannon's firing spot, read live so it follows the aim, else above the muzzle.
+## Where the Coin Blast leaves: the cannon's firing spot, read live so it follows the aim, else above the muzzle.
 func _launcher_at(d: Vector2) -> Vector3:
 	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
 	if spot != null:
@@ -559,7 +559,7 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 		m.hud.hitmarker(true)
 		m.sfx("crit", at, -2.0, 0.8)
 
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
+## RecastCue's badge: Dazed foes (her rifle and Palm Spear hit harder; a Palm Spear on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
 	super(out)
 	for key in daze_for.keys():
@@ -570,7 +570,7 @@ func combo_marks(out: Array) -> void:
 		elif not f.dead:
 			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
 
-## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
+## Dazed: the foe takes more from the rifle and Palm Spear (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
@@ -631,7 +631,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary) -> void:
 			f.hurt(0.1, h, slam)
 			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
 
-# ------------------------------------------------------------------ E: Longneedle
+# ------------------------------------------------------------------ E: Palm Spear
 func cast_e() -> bool:
 	if not needle.is_empty(): return false
 	var ed := e_def()
@@ -641,7 +641,7 @@ func cast_e() -> bool:
 	play("gunslinger_e")
 	return true
 
-## A Boki merge ends the Longneedle's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
+## A Boki merge ends the Palm Spear's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
 func _drop_holds() -> void:
 	_end_needle()
 	if not slide.is_empty():
@@ -657,7 +657,7 @@ func _end_needle() -> void:
 	e_t = 0.0
 	AimKit.hide(h, "e")
 
-## While the Longneedle charges she aims along the capped line, not the cursor (ZERO otherwise: free).
+## While the Palm Spear charges she aims along the capped line, not the cursor (ZERO otherwise: free).
 func aim_lock() -> Vector2:
 	return needle.get("dir", Vector2.ZERO)
 
@@ -703,7 +703,7 @@ func _push_want() -> float:
 	var ed := e_def()
 	return smoothstep(float(ed["view_near_m"]), float(ed["range"]), _cursor().length())
 
-## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
+## Where the Palm Spear leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
 	return h.pos + Vector3(d.x * 0.9, 1.1, d.y * 0.9)
 

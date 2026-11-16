@@ -4,8 +4,8 @@ extends Node3D
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
 ## the see-through arm shader (shaders/ld_arm.gdshader).
 ##
-## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
-## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun)
+## - flame(id, parts)      the Open Flame hose: pooled camera-facing puffs the kit simulates (immediate style)
+## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Spitfire), "slug" (scattergun)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
 ##                         and they hide
@@ -45,9 +45,9 @@ const VOLLEY_HEAD := 0.34
 const VOLLEY_HALO := 0.8
 const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
-const CINDER_GLOW := Color("d8281a")     # Cinder Shot's glow round its flame: her palette's deep red
+const CINDER_GLOW := Color("d8281a")     # Spitfire's glow round its flame: her palette's deep red
 const CINDER_SMOKE := Color(Color("2a100a"), 0.7)   # ... and the char its comet tail burns down to
-# Cinder Shot's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
+# Spitfire's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
 # of r: the soft glow's cover (strength 0.5) ends at r, the body's (strength 1.6) at 0.8 r (ld_fx.gdshaderinc mode 1).
 const ORB_GLOW_K := 1.35
 const ORB_BODY_K := 0.92
@@ -264,7 +264,7 @@ func _hook_node(_col: Color) -> Node3D:
 	return n
 
 # ------------------------------------------------------------------ the hose
-## The Torch Lance stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
+## The Open Flame stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
 ## (FLAME_CAP at most), reused every step; stop calling and they hide.
 func flame(id: String, parts: Array) -> void:
 	var e: Dictionary = flames.get(id, {})
@@ -329,7 +329,7 @@ func _flat(
 	n.rotation = Vector3(0, yaw, 0)
 	return _play(n, kind, col, col2, dur, Vector3(r, 1, r), n.material_override)
 
-## A spiky sunburst lying on the ground (the Furnace Cloak's blast), or standing up facing the camera.
+## A spiky sunburst lying on the ground (the Molten Hug's blast), or standing up facing the camera.
 func sunburst(at: Vector3, r: float, col: Color, col2: Color, dur := 0.4, upright := false) -> void:
 	if upright:
 		var n := _fx("sunburst_bb", M_SUNBURST, _quad_mesh(), true)
@@ -446,7 +446,7 @@ func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	_param(n.material_override, "progress", ln)
 	e["keep_progress"] = true
 
-## The Anchor Drop's giant anchor falling onto `at` over `fall` seconds (0: already down), planted for
+## The Lump Sum's giant anchor falling onto `at` over `fall` seconds (0: already down), planted for
 ## ANCHOR_HOLD, then fading. Returns its entry; the kit may move entry["at"] while it falls.
 func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
 	var n := _take("anchor", _anchor_node)
@@ -461,7 +461,7 @@ func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
 	live.append(e)
 	return e
 
-## Ends a one-shot early (an Anchor Drop whose wind-up was stunned out); it hides on the next frame.
+## Ends a one-shot early (a Lump Sum whose wind-up was stunned out); it hides on the next frame.
 func stop(e: Dictionary) -> void:
 	if not e.is_empty(): e["t"] = float(e["dur"])
 
@@ -544,7 +544,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var tail_col := col2
 	match kind:
 		"cinder":
-			# Cinder Shot: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
+			# Spitfire: a flame-orange fireball with a white-hot core inside a deep-red glow, its tail burning
 			# down to char (ride() sizes it to the shot's hit; the flicker is the orb and comet shader's own)
 			n.add_child(_rider_part("Halo", CINDER_GLOW, CINDER_GLOW, 1.0, 0.5))
 			n.add_child(_rider_part("Head", col, col2, 1.0, 1.6))

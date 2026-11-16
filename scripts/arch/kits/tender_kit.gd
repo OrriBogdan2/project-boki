@@ -3,29 +3,29 @@ extends ArchKit
 ## Pip, the Tender (a small support on medium stats). docs/heroes/tender.md. Her moments are starlight from her
 ## lantern (content/vfx/tender.json, HeroVfx); the bodies (the comet, the burr, the Hearthlight disc, the tether)
 ## are pooled in CareLook and UltLook; the moves are KMovesCare "mm_" entries.
-## Passive Carrier: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
+## Passive Carry the Day: run into a downed teammate to carry them. LMB Hot and Cold: embers pushed from
 ## alternating hands Kindle foes.
-## RMB Burrseed sticks and vines a foe to her; 2 s in reach roots them. Shift Relay Step.
+## RMB Stick Around sticks and vines a foe to her; 2 s in reach roots them. Shift Foxtrot.
 ## E Hearthlight heals; press again to toss it.
-## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
+## X Rise and Shine (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
-const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
+const CALL_LOOP_DB := -2.0         # dB: the Rise and Shine channel loop on her
 const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
 # Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
 # (1 step of its 4 cel bands = 0.25), so a foe standing in the middle stays readable.
 const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1 (the seed's field fill is tender.json's)
-const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
-const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
+const STICK_FLASH := 0.5       # s the light column falls over a foe as a Stick Around sticks
+const SEED_OUT := 0.8          # m ahead of her Stick Around leaves: past her pushing hands, its halo clear of her body
 const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
 var burr_n := 0
-var field_look := {}           # the Burrseed field's look from content/vfx/tender.json "field", colours resolved
+var field_look := {}           # the Stick Around field's look from content/vfx/tender.json "field", colours resolved
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
 var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
@@ -35,15 +35,15 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
-const BOT_CALL_SAFE := 3.0      # m: a bot starts Hearth Call on a teammate only with no rival Hunter this close
-const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Hearth Call on herself below this HP share
+const BOT_CALL_SAFE := 3.0      # m: a bot starts Rise and Shine on a teammate only with no rival Hunter this close
+const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Rise and Shine on herself below this HP share
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
-var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
+var seed_aim := false          # the Stick Around wind-up is running (item 118; a merge start drops it)
 var seed_wind := 0.0           # s of it left
 var glide := {}                # the air dash's long glide: {t, top (m/s)} (a dash: dropped on merge)
 var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
-var hearth_call := {}          # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
+var hearth_call := {}          # Rise and Shine running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
 var ult_look: UltLook          # the tether (pooled, made on first use)
 
 func _setup() -> void:
@@ -191,7 +191,7 @@ func own_dash_trail() -> bool: return true
 ## The kit's moves are the whole dash pose (mm_skip, mm_float): no shared roll under them.
 func dodge_anim() -> String: return "kit"
 
-## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
+## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Stick Around aim (no throw),
 ## and keeps the key from picking anyone up meanwhile.
 func _drop_holds() -> void:
 	glide = {}
@@ -272,7 +272,7 @@ func drop_all(broken: bool) -> void:
 		lock_t = float(d["passive"].get("lock", 4.0))
 		m.sfx("knock", h.pos, -4.0, 1.2)
 
-# ------------------------------------------------------------------ dash: Relay Step
+# ------------------------------------------------------------------ dash: Foxtrot
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	# the glide is Elluna's Lunar Air Dash: airborne only. On the ground with the hop spent, Shift is refused
@@ -332,7 +332,7 @@ func _tick_glide(dt: float) -> void:
 	if float(glide["time"]) - t > 0.15:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
-# ------------------------------------------------------------------ RMB: Burrseed
+# ------------------------------------------------------------------ RMB: Stick Around
 ## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
 ## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
@@ -405,7 +405,7 @@ func _throw_seed() -> void:
 	vfx("seed_cast", start, dir)         # the cast flare where the seed leaves her hands, not on her
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
-## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
+## The Stick Around's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
 func burst_radius() -> float:
 	var seed_def: Dictionary = rmb_def()["seed"]
 	var r3_k := float(seed_def.get("r3_k", 2.0))
@@ -690,7 +690,7 @@ func teardown() -> void:
 		ult_look.teardown()
 		ult_look = null
 
-# ------------------------------------------------------------------ X: Hearth Call
+# ------------------------------------------------------------------ X: Rise and Shine
 func ulk() -> UltLook:
 	if ult_look == null:
 		ult_look = UltLook.new(m, h)
@@ -706,7 +706,7 @@ func ult_recast() -> bool:
 	return true
 
 
-## The aim telegraph (local only): while Hearth Call is ready and the cursor rests on a teammate in
+## The aim telegraph (local only): while Rise and Shine is ready and the cursor rests on a teammate in
 ## reach, the gold reach ring round her, a line onto them and a pick ring under them. X casts on it.
 func _call_preview() -> void:
 	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():

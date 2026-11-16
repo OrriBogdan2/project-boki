@@ -1,6 +1,6 @@
 class_name PinSpirit
 extends RefCounted
-## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
+## Hem's Shift, Slip Stitch (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
 ## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
 ## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
@@ -10,7 +10,7 @@ extends RefCounted
 
 var k: ArcherKit
 var h: Hunter
-var t := 0.0                   # s of Spirit Walk left (0: not walking)
+var t := 0.0                   # s of Slip Stitch left (0: not walking)
 var total := 0.0               # the length of this walk (the inside boost fades over it)
 var entry := Vector3.ZERO      # the last spot she stood clear of everything
 var inside := false
@@ -18,7 +18,7 @@ var walks := 0                 # (checks)
 var snap_backs := 0               # times it ended inside something and put her back (checks)
 var passed := 0                # steps spent inside something (checks)
 var orbs: Array = []           # spirit orbs left where she walked into something: {pos, t, node}
-var granted: Array = []        # others the orbs gave a Spirit Walk to: [hunter, seconds left]
+var granted: Array = []        # others the orbs gave a Slip Stitch to: [hunter, seconds left]
 const ORB_T := 4.0             # s an orb stays
 const ORB_R := 0.9             # m touch radius
 
@@ -56,7 +56,7 @@ func start() -> void:
 		_share_with_allies()
 	k.vfx("spirit_go", h.pos, dir)  # no ring or burst on a dash; the shell shows the walk
 
-## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".
+## Seconds of Slip Stitch after the roll: rank 3 adds "time_rank3".
 func walk_time() -> float:
 	var dd := k.dash_def()
 	return float(dd.get("time", 2.8)) + (float(dd.get("time_rank3", 0.5)) if k.rank("dash") >= 3 else 0.0)

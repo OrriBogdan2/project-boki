@@ -1,7 +1,7 @@
 class_name OstraKit
 extends ArchKit
-## Motley (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
-## Brimseed, and Nightwell on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on
+## Motley (medium): Swell, Comic Timing (the wait between shots charges the next orb), Musical Chairs, Stage Fright,
+## Gag Gift, and Main Attraction on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on
 ## hunters) fill Swell; Swollen, the seed grows bigger and quicker, Trade lands sooner and Snap hits harder.
 ## Snap to stun at range, drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe
 ## (and everyone else in its circle) in it.
@@ -43,7 +43,7 @@ var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where he is
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
 var snap: Dictionary = {}      # the Snap's wind-up: {t, T}
 var snap_rec := 0.0            # s of recovery left after a release (still slowed)
-var well: OstraWell            # X: Nightwell
+var well: OstraWell            # X: Main Attraction
 # counters for the checks
 var swells := 0
 var settled_shots := 0
@@ -68,12 +68,12 @@ func is_swollen() -> bool: return swollen_t > 0.0
 func _setup() -> void:
 	well = OstraWell.new(self)
 
-# ------------------------------------------------------------------ X: Nightwell (OstraWell)
+# ------------------------------------------------------------------ X: Main Attraction (OstraWell)
 func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
 
-## Nightwell holds him in the cast pose: no walking, jumping, dashing, other abilities or attacks, no turning.
+## Main Attraction holds him in the cast pose: no walking, jumping, dashing, other abilities or attacks, no turning.
 func cast_locked() -> bool: return well.locked
 func aim_lock() -> Vector2: return well.aim_lock
 func busy() -> bool: return super.busy() or well.locked
@@ -285,7 +285,7 @@ func teardown() -> void:
 		h.wpn = base_wpn
 	super.teardown()
 
-# ------------------------------------------------------------------ dash: Lantern Trade
+# ------------------------------------------------------------------ dash: Musical Chairs
 func swap_time() -> float:
 	var dd := dash_def()
 	return float(dd["time_swollen"]) if is_swollen() else float(dd["time"])
@@ -485,7 +485,7 @@ func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	vfx("trade_fold", land)      # both ends fold in on themselves: no ring or blast (the dash rule)
 	vfx("trade_arrive", land)
 
-# ------------------------------------------------------------------ RMB: Shard Snap
+# ------------------------------------------------------------------ RMB: Stage Fright
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not snap.is_empty():
@@ -543,7 +543,7 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	_boost(float(sn["boost"]["hit"]))
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
-# ------------------------------------------------------------------ E: Brimseed
+# ------------------------------------------------------------------ E: Gag Gift
 ## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
 ## glide. The source gives Void's E and R no ground-only rule (Tetra's wall has one), so height changes nothing.
 func cast_from() -> Vector3:

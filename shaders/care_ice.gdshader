@@ -1,7 +1,7 @@
 shader_type spatial;
 // Claire's ice (CareLook): faceted, see-through crystal with a bright cold rim, a pale core and a
 // slow glint that sweeps across the screen-space facets, all in the shared cel steps (cel.gdshaderinc): flat bands
-// from the core to the rim, a hard-edged glint. Used by the shards, the spear, the Rink Wall, Shatter spikes and
+// from the core to the rim, a hard-edged glint. Used by the shards, the spear, the Cold Front, Shatter spikes and
 // the frost shell. glow lifts it toward white (a fresh or hit crystal).
 render_mode unshaded, cull_disabled, depth_draw_opaque, shadows_disabled, blend_mix;
 #include "res://shaders/cel.gdshaderinc"
