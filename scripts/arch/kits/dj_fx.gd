@@ -35,7 +35,7 @@ var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
-## Look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from.
+# look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
 var rng := RandomNumberGenerator.new()
 
 static func of(match_node: Node) -> DJFx:
