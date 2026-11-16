@@ -139,6 +139,7 @@ func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
+	if not _visiting(): GardenSfx.zone_in(zone, GardenZones.here)
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -2142,10 +2143,10 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
+		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], ["Hold " + Settings.key_cap("interact"), "to pick up"]]
 		if life: pairs = life.hand.pairs(pairs)
 	else:
-		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
+		pairs = [hg.prompt_pair(best) if best["kind"] == "wild" else [Settings.key_cap("interact"), _label_for(best)]]
 		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
 	# the prompt is keycaps and words, rebuilt only when what it says changes
 	var sig := str(pairs)
@@ -2154,7 +2155,7 @@ func _find_interact() -> void:
 		prompt_lbl.visible = false
 		var old_row := prompt_box.get_node_or_null("Keys")
 		if old_row: old_row.free()
-		var row := UI.key_hints(pairs, 14, UI.INK)
+		var row := HoldPrompt.key_hints(pairs, 14, UI.INK, hg.ring_fill, hg.ring_action)      # the hold key: the ring
 		row.name = "Keys"
 		row.add_theme_constant_override("separation", 22)
 		for one in row.get_children():
@@ -3666,7 +3667,7 @@ func _play_evolutions() -> void:
 	for e in evs:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
-	Sfx.play("skill")
+	Sfx.play("boki_evolve")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
 	var tw := create_tween()
@@ -3683,6 +3684,7 @@ func _play_evolutions() -> void:
 		fx.body_glow(at, tint)
 		Sfx.play("garden_trait")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
+		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
 		cam.zoom_to = HOME_ZOOM

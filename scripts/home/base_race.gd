@@ -34,9 +34,9 @@ const STRETCH_COL := {
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
 
-## Weeks since 1970 by the real clock.
-static func week_now() -> int:
-	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
+## Weeks since 1970 by the device clock (default now), or at `now` in unix seconds.
+static func week_now(now := -1.0) -> int:
+	return int((now if now >= 0.0 else Time.get_unix_time_from_system()) / float(rules()["week_s"]))
 
 ## The weekly event format for a week number (default this week): {id, game, name, note, plus its tweak:
 ## mult?, wobble?, swap?, night?, to_win?}.
@@ -44,10 +44,11 @@ static func twist(week := -1) -> Dictionary:
 	var list: Array = rules()["twists"]
 	return list[(week if week >= 0 else week_now()) % list.size()]
 
-## This week's format when it is for this game ("dash", "seek", "volley"), else {}: the game plays as usual.
-static func tweak(game: String) -> Dictionary:
-	var f := twist()
-	return f if String(f["game"]) == game else {}
+## The week's format (default this week) when it is for this game ("dash", "seek", "volley", "shove"),
+## else the in-season zone's twist when the season is this game's (GardenSeasons), else {}: plays as usual.
+static func tweak(game: String, week := -1) -> Dictionary:
+	var f := twist(week)
+	return f if String(f["game"]) == game else GardenSeasons.twist(game, week)
 
 ## A zone's course: its four stretches {kind, mult, pts, len}, `pts` the points after the previous stretch's end
 ## (the first starts at the line, [0, 0]) and `len` their length in m, worked out here. A zone with none
@@ -398,11 +399,13 @@ func _post_model() -> void:
 	flag.position = Vector3(0.32, ground(post.position) + 1.4, 0)
 	post.add_child(flag)
 	var sign_t := Label3D.new()
-	sign_t.text = "This week, %s: %s\n%s" % [String(twist()["game"]).capitalize(), twist()["name"], twist()["note"]]
+	var season := GardenSeasons.season()
+	sign_t.text = "This week, %s: %s\n%s\nIn season: %s, %s" % [String(twist()["game"]).capitalize(),
+			twist()["name"], twist()["note"], season["name"], GardenSeasons.twist(season["game"])["name"]]
 	sign_t.font_size = 28
 	sign_t.pixel_size = 0.004
 	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign_t.position = Vector3(0.3, ground(post.position) + 1.85, 0)
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.92, 0)
 	post.add_child(sign_t)
 
 static func mat(c: Color) -> StandardMaterial3D:
@@ -623,8 +626,8 @@ func _end(finished: bool) -> void:
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.
 func pin(win: Dictionary, game: String) -> bool:
-	var fmt := tweak(game)
-	if fmt.is_empty():
+	var fmt := twist()
+	if String(fmt["game"]) != game:
 		return false
 	var node: Node3D = h._kin_entry(win)["node"]
 	BaseShowcase.add(win, fmt, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
