@@ -2,8 +2,8 @@ extends RefCounted
 ## --shrink-zone-check: the closing zone (scripts/match/shrink_zone.gd). On the Hollow Crown each
 ## seed gives 3-5 closes, each circle inside the one before and smaller, all done before the clock
 ## runs out, round a final area with an exit in it; the same seed gives the same zone and seeds vary;
-## outside hurts (more each close, through armor), inside doesn't; the islands outside the last circle
-## fall; the zone is heard (ZoneSfx); bots come in and stay in. Never touches the save.
+## the docks close as the edge passes them; outside hurts (more each close, through armor), inside
+## doesn't; the islands outside the last circle fall; bots come in and stay in. Never touches the save.
 
 const SEEDS := [3, 5, 9, 12, 21, 33, 47, 58]
 const DT := 1.0 / 60.0

@@ -5,6 +5,7 @@
  "sounds": {
   "gunslinger_charge_tick": "cast",
   "gunslinger_charge_full": "cast",
+  "gunslinger_hit": "heavy_impact",
   "vn_rifle": "fire",
   "gunslinger_grenade_thunk": "signature",
   "vn_cock": "cast",

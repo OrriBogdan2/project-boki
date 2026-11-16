@@ -14,20 +14,22 @@ extends RefCounted
 ## The stings are flat and play once per event; the shared pool's MIN_GAP and stacking cap are the voice limits
 ## (at most two seat loops and one sting per seat change, docs/AUDIO.md).
 
-const RIVAL_AT := 0.75      # progress share (0-1) of a rival's seat that sounds the tense cue
-const REARM_AT := 0.5       # it sounds again only after that progress falls back under this
-const STING_DB := -2.0      # the flat stings, level with the Ways Out calls (HeartSfx.CALL_DB)
-const SITE_DB := -8.0       # the site loop sits quietly under the match
+const RIVAL_AT := 0.75  # progress share (0-1) of a rival's seat that sounds the tense cue
+const REARM_AT := 0.5  # it sounds again only after that progress falls back under this
+const STING_DB := -2.0  # the flat stings, level with the Ways Out calls (HeartSfx.CALL_DB)
+const SITE_DB := -8.0  # the site loop sits quietly under the match
 const SITE_KEY := "quest_site_"
 
-var cues: Array = []        # every one-shot cue in order, for the check
+var cues: Array = []  # every one-shot cue in order, for the check
 var _seats: QuestSeats
-var _on := {}               # seat kind -> true while your squad is on it (holds it, or contests a rival there)
-var _last := {}             # seat kind -> Vector2i(state, team) last tick (a client joining late hears nothing old)
-var _risen := {}            # seat kind -> true once the rival cue sounded for its current hold
+var _on := {}  # seat kind -> true while your squad is on it (holds it, or contests a rival there)
+var _last := {}  # seat kind -> Vector2i(state, team) last tick (a client joining late hears nothing old)
+var _risen := {}  # seat kind -> true once the rival cue sounded for its current hold
+
 
 func _init(seats: QuestSeats) -> void:
 	_seats = seats
+
 
 func update() -> void:
 	var p: Hunter = _seats.m.player
@@ -40,6 +42,7 @@ func update() -> void:
 		_watch(s, p.team, holds)
 		if s.state in [QuestSeat.S.OPEN, QuestSeat.S.IN_USE]:
 			Sfx.loop_hold(SITE_KEY + s.kind, "quest_site", s.site(), SITE_DB)
+
 
 func _watch(s: QuestSeat, me: int, holds: bool) -> void:
 	var last: Vector2i = _last.get(s.kind, Vector2i(s.state, s.team))
@@ -63,6 +66,7 @@ func _watch(s: QuestSeat, me: int, holds: bool) -> void:
 		_risen[s.kind] = true
 		_cue("quest_rival_rise")
 
+
 ## Is one of this squad standing at the seat (in the uplink's yard, inside the lair)?
 func _at_site(s: QuestSeat, team: int) -> bool:
 	var m := _seats.m
@@ -74,6 +78,7 @@ func _at_site(s: QuestSeat, team: int) -> bool:
 		if s.kind == "lair" and m.lairs and m.lairs.inside(s.ref, h.pos, 0.5):
 			return true
 	return false
+
 
 func _cue(sname: String) -> void:
 	cues.append(sname)

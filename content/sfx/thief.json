@@ -6,6 +6,7 @@
   "pay_cashin": "impact",
   "thief_charge_tick": "cast",
   "thief_charge_full": "cast",
+  "thief_hit": "impact",
   "dj_bolt": "fire",
   "thief_flintlock_crack": "signature",
   "thief_cock": "cast",

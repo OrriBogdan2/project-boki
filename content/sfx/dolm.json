@@ -5,6 +5,7 @@
  "sounds": {
   "dolm_charge_tick": "cast",
   "dolm_charge_full": "cast",
+  "dolm_hit": "impact",
   "br_throw": "fire",
   "br_boulder_hit": "impact",
   "br_wind": "cast",

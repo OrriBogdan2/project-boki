@@ -81,7 +81,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 
 ## The sound of a Fusion ending: afterglow after a release, a tired sigh after a timeout, else a soft recall.
 static func end_cue(why: String) -> String:
-	return {"ult": "boki_fuse_end", "time": "boki_fuse_tired"}.get(why, "recall")
+	return {"ult": "boki_fuse_end", "time": "boki_fuse_tired"}.get(why, "boki_unfuse")
 
 ## The ultimate's cracking tell (Shatter): the shell splits along bright seams for `secs` before the burst.
 static func crack(h: Hunter, form: Dictionary, secs: float) -> void:
@@ -196,11 +196,8 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 		"rmb":
 			m.fx.ring(h.pos, 1.4, Color(col, 0.7), 0.3)
 		"dash":
-			MergeSfx.play(h, "travel")
 			var look := h.get_node_or_null(MergeLook.NODE_NAME) as MergeLook
 			var d: Dictionary = MergeForm.aug_of(look.form).get("dash", {}) if look != null else {}
 			if String(d.get("kind", "")) == "reflect":
 				m.verbs.add_mirror(h, MergeAugment.mirror_spec(d, col))
-		"blink":
-			m.fx.bolt(h.pos + Vector3(0, 1.0, 0), tgt + Vector3(0, 1.0, 0), col)
-			m.sfx("zap", tgt, -4.0, 1.5)
+			MergeSfx.play(h, "travel")

@@ -6,7 +6,8 @@
 		"default_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Default (wider lens)"},
 		"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 		"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
-		"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"}
+		"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"},
+		"source_scale": {"pitch": 66.0, "dist": 36.3, "fov": 32.0, "rise": 1.9, "hunter_scale": 2.1, "name": "Far view, big Hunters (test)"}
 	},
 	"follow": {
 		"lean": [1.4, 0.42, 7.5, 6.0, false],

@@ -98,6 +98,7 @@ def tell_foe():
     buzz = bpf(S.rattle(d, rate=36, lo=600, hi=2400), 500, 2600) * u ** 2 * 0.4
     return mix(kick(200, 90, 0.12, drop=0.02, decay=0.04) * 0.7, swell * 0.8, buzz)
 
+
 def hostile():
     """Two detuned saws beating against each other, falling a little under a gritty tick: uneasy, low, short."""
     d = 0.26; n = N(d)

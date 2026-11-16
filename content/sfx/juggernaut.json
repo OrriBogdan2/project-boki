@@ -5,6 +5,7 @@
  "sounds": {
   "juggernaut_charge_tick": "cast",
   "juggernaut_charge_full": "cast",
+  "juggernaut_hit": "heavy_impact",
   "jug_slash": "fire",
   "juggernaut_blade_hiss": "signature",
   "jug_wave": "cast",

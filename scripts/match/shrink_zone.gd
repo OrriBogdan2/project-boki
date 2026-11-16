@@ -2,15 +2,14 @@ class_name ShrinkZone
 extends RefCounted
 ## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
-## the same one: an outpost, and the circle round it leaning into its island, so that outpost is
-## inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
+## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
+## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
 ## holds for a phase's wait, then closes to the phase's radius, each circle inside the one before.
 ## Outside the edge hurts, more each phase; when the last close ends, the islands wholly outside the
 ## final circle fall. The fall at the end of the clock (Match._update_rules) stays.
 ## Shown on the drop/full map, the minimap, a row under the match clock, and in the world as a glowing
-## wall; the kin warns before each close; bots keep inside (bot_goal); heard through ZoneSfx (audio).
-## Nothing goes over Net: the circles come from the seed and the match clock alone, and each game hurts
-## only its own bodies.
+## wall; the kin warns before each close; bots keep inside (bot_goal). Nothing goes over Net: the
+## circles come from the seed and the match clock alone, and each game hurts only its own bodies.
 
 const RULES_PATH := "res://content/rules/shrink_zone.json"
 const COL := Color("5cc8ff")  # the edge, on the maps and in the world
@@ -77,7 +76,7 @@ static func make(match_node: Match) -> ShrinkZone:
 		return null
 	if ["tutorial", "training", "duel", "arena"].any(func(x): return o.get(x, false)):
 		return null
-	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) == "outpost"):
+	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) in ["dock", "outpost"]):
 		return null
 	return ShrinkZone.new(match_node)
 
@@ -91,7 +90,7 @@ func _init(match_node: Match) -> void:
 	var n := ph.size()
 	for arr in [cs, rs, t0, t1, dps]:
 		arr.resize(n + 1)
-	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) == "outpost")
+	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) in ["dock", "outpost"])
 	exit_at = picks[posmod(hash([m.seed_val, "shrink_zone"]), picks.size())]["at"]
 	rs[n] = float(ph[n - 1]["r"]) * mk
 	cs[n] = exit_at

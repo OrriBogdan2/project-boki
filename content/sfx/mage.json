@@ -6,6 +6,7 @@
   "hero_blowout": "impact",
   "mage_charge_tick": "cast",
   "mage_charge_full": "cast",
+  "mage_hit": "impact",
   "vv_bolt": "fire",
   "mage_zap": "signature",
   "mage_bubble_pop": "signature",

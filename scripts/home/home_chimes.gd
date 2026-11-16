@@ -1,10 +1,10 @@
 class_name HomeChimes
 extends RefCounted
 ## A Boki's own chime at home when it gains a stat, a lean that shows one more fleck (Lean.flecks), a level
-## (garden_xp.json pays it in the garden) or a new form or part (docs/AUDIO.md). It watches each Boki's
-## record rather than every place that raises them, so a new source needs no wiring. Events on one Boki that
-## land within MERGE_S share one chime: the biggest one. A sleeping Boki makes no sound (the card and the
-## evolution scene still show it).
+## (garden_xp.json pays it in the garden) or a new form or part (docs/AUDIO.md). It watches each Boki's record
+## rather than every place that raises them, so a new source needs no wiring. Events on one Boki that land
+## within MERGE_S share one chime: the biggest one.
+## A sleeping Boki makes no sound (the card and the evolution scene still show it).
 
 const KINDS := ["stat", "part", "level", "ready", "evolve"]     # smallest first: a merged chime plays the last one here
 const MERGE_S := 0.5     # s: an event this soon after a Boki's chime joins it instead of playing again
@@ -34,7 +34,7 @@ func _watch(k: Dictionary) -> void:
 	_seen[uid] = vals
 	if rec.get("aura", "") == "chimegrass" and float(vals.back()) - float(was.back()) >= JOY_RISE and not asleep(k):
 		GardenAura.chime(k["node"])
-		GardenSfx.cue("garden_chime_level", k["pos"], AURA_PITCH * PITCH[GardenSfx.SIZE[Unique.size_tag(rec)]])
+		GardenSfx.cue("garden_chime_level", k["pos"], AURA_PITCH * pitch(rec))
 	var top := -1
 	for i in KINDS.size():
 		if int(vals[i]) > int(was[i]):

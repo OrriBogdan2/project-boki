@@ -69,6 +69,7 @@ func _ult_duck(caster: Node, _ability: String, slot: String, m: Match) -> void:
 ## you near an edge (or glide over it), the creak and grit of the old ruins among their walls, and now
 ## and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
+var beds := AmbBeds.new()
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
@@ -97,7 +98,8 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping: abyss = 1.0
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
-	_region_bed(m, p)
+	_region_bed(m, p)       # the region's own main bed (a layout's "bed"), crossfaded
+	beds.tick(m, p)         # place and weather beds layered on top of it (AmbBeds)
 	call_t -= 0.25
 	if call_t <= 0.0:
 		call_t = rng.randf_range(16.0, 34.0)

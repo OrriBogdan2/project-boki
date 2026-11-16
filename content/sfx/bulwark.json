@@ -5,6 +5,7 @@
 	"sounds": {
 		"bulwark_charge_tick": "cast",
 		"bulwark_charge_full": "cast",
+		"bulwark_hit": "heavy_impact",
 		"bjorn_throw": "fire",
 		"bulwark_hammer_clang": "signature",
 		"bulwark_hull_creak": "signature",

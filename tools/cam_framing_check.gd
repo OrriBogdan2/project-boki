@@ -83,6 +83,23 @@ func _lean(cam: CamRig) -> void:
 				% [z, worst])
 	cam.zoom = 1.0
 
+func _source_style(cam: CamRig) -> void:
+	var src: Dictionary = CamRig.RULES["source"]
+	ok(Settings.DEFAULTS["cam_style"] != "source_scale", "source_scale is off by default (the Settings camera is %s)"
+			% Settings.DEFAULTS["cam_style"])
+	cam.use_style("source_scale")
+	var across := CamRig.style_across("source_scale")
+	ok(_inside(across, src["across_m"]), "source_scale shows %.1f m across, inside the source's %s"
+			% [across, str(src["across_m"])])
+	ok(cam.hunter_scale > 1.5, "source_scale draws Hunters %.2fx bigger" % cam.hunter_scale)
+	var was = Settings.get_v("cam_style")
+	Settings.set_v("cam_style", "source_scale", false)
+	cam.apply_settings()
+	ok(cam.style_id == "default" and is_equal_approx(cam.hunter_scale, 1.0),
+			"the home keeps the Supervive view under source_scale")
+	Settings.set_v("cam_style", was, false)
+	cam.use_style("default")
+
 func _garden(cam: CamRig) -> void:
 	cam.use_style(HOME_STYLE)
 	var node := Node3D.new()

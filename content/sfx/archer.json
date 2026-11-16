@@ -6,6 +6,7 @@
   "pay_called": "impact",
   "archer_charge_tick": "cast",
   "archer_charge_full": "cast",
+  "archer_hit": "impact",
   "archer_thread_twang": "signature",
   "pin_loose": "fire",
   "pin_loose_super": "fire",

@@ -6,6 +6,7 @@
   "pay_collapse": "impact",
 		"ostra_charge_tick": "cast",
 		"ostra_charge_full": "cast",
+		"ostra_hit": "impact",
 		"os_orb": "fire",
 		"os_orb_hot": "fire",
 		"os_prime": "cast",

@@ -9,8 +9,8 @@ extends RefCounted
 ## state, team, out]; clients mirror it. What a state does to the world (a shut lair's gate sealed
 ## again, a shut uplink gone dark, the finishing squad leaving) each game does for itself.
 
-const HOW_LAIR := "lair"       # the `how` of a Hunter who left by the Sealed Lair's updraft
-const UP_REACH := 0.5          # past Lairs.UP_R: standing in the updraft's column
+const HOW_LAIR := "lair"  # the `how` of a Hunter who left by the Sealed Lair's updraft
+const UP_REACH := 0.5  # past Lairs.UP_R: standing in the updraft's column
 
 var m: Match
 var lair: QuestSeat = null
@@ -19,18 +19,23 @@ var built := false
 var audio: QuestSfx
 var _warned := {}
 
+
 func _init(match_node: Match) -> void:
 	m = match_node
 	audio = QuestSfx.new(self)
 
+
 static func q(k: String) -> float:
 	return float((Heart.rules().get("quest", {}) as Dictionary).get(k, 0.0))
+
 
 func host() -> bool:
 	return not m.net_on or m.is_host
 
+
 func seats() -> Array:
 	return [lair, uplink].filter(func(s): return s != null)
+
 
 ## Picks the two seats. On the first tick, not in Exits.setup: the lairs are built after the exits.
 ## The pick is the match seed's alone (every game makes the same one): the Sealed Lair is one of all
@@ -47,7 +52,7 @@ func build() -> void:
 		var L: Dictionary = m.lairs.list[rng.randi_range(0, m.lairs.list.size() - 1)]
 		m.lairs.activate(L)
 		L["seat"] = true
-		L["seat_open"] = q("lair_open_s") - m.sess_t0      # (match times WaysOutLook reads)
+		L["seat_open"] = q("lair_open_s") - m.sess_t0  # (match times WaysOutLook reads)
 		L["shut_at"] = q("lair_shut_s") - m.sess_t0
 		at = L["c"]
 		lair = QuestSeat.new(m, "lair", L, q("lair_open_s"), q("lair_shut_s"))
@@ -66,17 +71,21 @@ func build() -> void:
 	x["shut_at"] = q("uplink_shut_s") - m.sess_t0
 	uplink = QuestSeat.new(m, "uplink", x, q("uplink_open_s"), q("uplink_shut_s"))
 
+
 ## The outpost the Uplink runs on (before the pick: the first outpost, the old rule).
 func uplink_x() -> Dictionary:
 	build()
 	return uplink.ref if uplink else {}
 
+
 func tick(_dt: float) -> void:
 	build()
 	var t := m.sess_time()
 	if host():
-		if lair: _host_lair(lair, t)
-		if uplink: _host_uplink(uplink, t)
+		if lair:
+			_host_lair(lair, t)
+		if uplink:
+			_host_uplink(uplink, t)
 	for s: QuestSeat in seats():
 		_apply(s)
 		var warn: float = s.shut_s - q("warn_before_shut_s")
@@ -88,15 +97,18 @@ func tick(_dt: float) -> void:
 				m.hud.toast_small("%s shuts in %ds" % [s.title().capitalize(), int(s.shut_s - t)], col)
 	audio.update()
 
+
 # ------------------------------------------------------------------ the host's moves
 func _move(s: QuestSeat, to: QuestSeat.S, why: String, team := -1) -> void:
 	if s.go(to, why, team):
 		_send(s)
 
+
 ## Opening time, or past the shut while still LOCKED (a session joined late): the clock's move.
 func _clock(s: QuestSeat, t: float) -> void:
 	if t >= s.open_s:
 		_move(s, QuestSeat.S.OPEN if t < s.shut_s else QuestSeat.S.SHUT, "clock")
+
 
 func _host_lair(s: QuestSeat, t: float) -> void:
 	var L: Dictionary = s.ref
@@ -121,6 +133,7 @@ func _host_lair(s: QuestSeat, t: float) -> void:
 				s.out = true
 				_send(s)
 
+
 func _host_uplink(s: QuestSeat, t: float) -> void:
 	var x: Dictionary = s.ref
 	var st := String(x["state"])
@@ -135,13 +148,14 @@ func _host_uplink(s: QuestSeat, t: float) -> void:
 			elif st == "charging" and s.state == QuestSeat.S.OPEN:
 				_move(s, QuestSeat.S.IN_USE, "start", int(x["team"]))
 			elif st == "charging" and s.team != int(x["team"]):
-				s.team = int(x["team"])      # a rival held the yard alone and took it over
+				s.team = int(x["team"])  # a rival held the yard alone and took it over
 				s.trail.append("%7.2f IN_USE team %d steal" % [m.time, s.team])
 				_send(s)
 			elif st != "charging" and s.state == QuestSeat.S.IN_USE:
 				_move(s, QuestSeat.S.OPEN if t < s.shut_s else QuestSeat.S.SHUT, "fizzle")
 			elif s.state == QuestSeat.S.OPEN and t >= s.shut_s:
 				_move(s, QuestSeat.S.SHUT, "clock")
+
 
 ## Is one of this squad in the lair's updraft column (any Hunter, a client's too: by where it is)?
 func _riding(L: Dictionary, team: int) -> bool:
@@ -156,10 +170,12 @@ func _riding(L: Dictionary, team: int) -> bool:
 			return true
 	return false
 
+
 # ------------------------------------------------------------------ net
 func _send(s: QuestSeat) -> void:
 	if m.net_on and m.is_host:
 		m.net_event(["xc", "seat", s.kind, int(s.state), s.team, s.out])
+
 
 ## ["xc", "seat", kind, state, team, out] from the host.
 func net_in(e: Array) -> void:
@@ -175,8 +191,10 @@ func net_in(e: Array) -> void:
 	s.team = int(e[4])
 	s.out = bool(e[5])
 
+
 # ------------------------------------------------------------------ what a state does (each game)
 var _left := {}
+
 
 func _apply(s: QuestSeat) -> void:
 	if s.kind == "lair":
@@ -201,6 +219,7 @@ func _apply(s: QuestSeat) -> void:
 		if s.state == QuestSeat.S.SHUT and String(x["state"]) in ["idle", "charging", "fizzling", "spent"]:
 			m.exits.close_outpost(x)
 
+
 ## The finishing squad leaves by the Sealed Lair: this game's own Hunters of it that are in the lair,
 ## on the updraft or just thrown out over the wall by it (downed ones too).
 func _leave_lair(s: QuestSeat) -> void:
@@ -212,6 +231,7 @@ func _leave_lair(s: QuestSeat) -> void:
 		if up or m.lairs.inside(L, h.pos, 0.5):
 			m._extract(h, HOW_LAIR, String(L["name"]))
 
+
 ## The Sealed Lair shut unused: its gate closes again (Lairs._tick_seal walks anyone inside out).
 func _reseal(L: Dictionary) -> void:
 	L["state"] = "sealed"
@@ -221,6 +241,7 @@ func _reseal(L: Dictionary) -> void:
 		w.kind[w.idx(qq.x, qq.y)] = World.T_BLOCK
 	(L["nodes"]["label"] as Label3D).text = "%s\nShut" % L["name"]
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
+
 
 # ------------------------------------------------------------------ asked by lairs.gd and exits.gd
 ## Why this lair's gate can't open now ("" when it can): the Sealed Lair before 2:00 or after it shut.
@@ -234,6 +255,7 @@ func lair_wait(L: Dictionary) -> String:
 			return "The Sealed Lair has shut"
 	return ""
 
+
 ## Lairs.open asks: false keeps the gate shut (a locked seat remembers who cracked it, for 2:00).
 func lair_may_open(L: Dictionary, by: Hunter, how: String) -> bool:
 	var why := lair_wait(L)
@@ -242,6 +264,7 @@ func lair_may_open(L: Dictionary, by: Hunter, how: String) -> bool:
 	if lair.state == QuestSeat.S.LOCKED:
 		L["open_wait"] = [by, how]
 	return false
+
 
 ## Why this outpost can't be started ("" when the old rules decide): a dark one, or the Uplink shut.
 func uplink_wait(x: Dictionary) -> String:
@@ -253,11 +276,13 @@ func uplink_wait(x: Dictionary) -> String:
 		return "The Uplink has shut"
 	return ""
 
+
 ## The admin menu's "exits ready now" (Exits.admin_ready; the loop tour uses it too): a LOCKED Uplink
 ## opens now, with its outpost's open_at.
 func open_now(x: Dictionary) -> void:
 	if uplink and is_same(x, uplink.ref) and uplink.state == QuestSeat.S.LOCKED:
 		uplink.open_s = minf(uplink.open_s, m.sess_time())
+
 
 ## The uplink may be started: in its window and not taken or shut (by the clock, so a client's mirror
 ## a moment behind the host doesn't refuse a start the host allowed).
@@ -268,6 +293,7 @@ func may_start(x: Dictionary) -> bool:
 		return true
 	var t := m.sess_time()
 	return t >= uplink.open_s and t < uplink.shut_s
+
 
 func _cap(s: float) -> String:
 	s = maxf(0.0, s)

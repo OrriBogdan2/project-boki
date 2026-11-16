@@ -11,7 +11,7 @@
   "k_poison": "boki", "k_bug": "boki", "k_steel": "boki", "k_fairy": "boki",
   "k_crystal": "boki", "k_sound": "boki",
   "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "loop", "boki_work": "boki",
-  "boki_yawn": "boki",
+  "boki_yawn": "boki", "boki_unfuse": "boki",
   "boki_fuse_normal": "boki", "boki_fuse_fire": "boki", "boki_fuse_water": "boki", "boki_fuse_grass": "boki",
   "boki_fuse_spore": "boki", "boki_fuse_electric": "boki", "boki_fuse_ice": "boki", "boki_fuse_rock": "boki",
   "boki_fuse_psychic": "boki", "boki_fuse_flying": "boki", "boki_fuse_dragon": "boki", "boki_fuse_dark": "boki",
@@ -26,8 +26,7 @@
   "boki_step_medium_grass": "step", "boki_step_medium_stone": "step", "boki_step_medium_wood": "step", "boki_step_medium_snow": "step",
   "boki_step_heavy_grass": "step", "boki_step_heavy_stone": "step", "boki_step_heavy_wood": "step", "boki_step_heavy_snow": "step"
  },
- "reach": {"boki_sleep": 7, "boki_yawn": 9, "boki_form_titan_cast": 30, "boki_form_stormwing_cast": 30,
-  "boki_form_tidal_shell_cast": 30},
+ "reach": {"boki_sleep": 7, "boki_yawn": 9, "boki_form_titan_cast": 30, "boki_form_stormwing_cast": 30, "boki_form_tidal_shell_cast": 30},
  "loops": ["boki_sleep"],
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
