@@ -134,6 +134,11 @@ def pick_worker():
             continue
         lines = out.split()
         load = float(lines[0]) / max(1, int(lines[5]))
+        # 11-16: every worker was at load 2-3x its cores (6 gates + job suites at once) and every check timed out
+        # -> "ENV-BROKEN mass red". Never start a gate on a box that is already over REGATE_MAX_LOAD per core.
+        if load > float(os.environ.get("REGATE_MAX_LOAD", "1.0")):
+            log("busy", "-", f"{name} load/core {load:.1f} > limit, skipped")
+            continue
         if best is None or load < best[0]:
             best = (load, name, ip)
     return (best[1], best[2]) if best else (None, None)
@@ -202,8 +207,8 @@ def step_inflight(gh, st):
             log("lag", n, f"main {f['main'][:10]} landed -> GATE GREEN {res.split()[1][:10]}: {(now() - f['main_time']) / 60:.0f} min")
             f.update(phase="awaiting_merge", posted=now(), new=res.split()[1])
             return True
-        if word == "ERROR":
-            st.setdefault("cooldown", {})[n] = now() + 3600
+        if word == "ERROR":  # an overloaded box is not the PR's fault: retry in 10 min, not 60
+            st.setdefault("cooldown", {})[n] = now() + (600 if "HOST-OVERLOADED" in res else 3600)
         st.pop("inflight")
         return False
     # awaiting_merge: one PR at a time, so wait for merge-ready-watch to take it before re-gating the next on new main
