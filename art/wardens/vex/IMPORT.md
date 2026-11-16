@@ -61,3 +61,5 @@ gridded front render); the scan's braid is cut and rebuilt on the spring chain. 
 walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/vex/vex.glb OUT.glb 2.1 4.55`,
 then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
 (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+Merge note (11-16): main's `v95_to_game.py` (own-paint 60k, e3038a4866) rebuilt vex.glb from the OLD 11-12 master; this branch's 11-15 master (13k tris, one 2048 atlas, `v95_swap.py`) is kept because the new master only exists in ~/meshy on hetzner. To get the own-paint 60k build from it, run `v95_to_game.py Vex` there once CURRENT_OVERRIDES points at hunter3d1115.
