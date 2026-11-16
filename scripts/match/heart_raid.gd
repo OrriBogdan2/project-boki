@@ -91,7 +91,7 @@ var difficulty := "normal"  # rules "difficulty" key
 var gates: HeartRaidGates  # where and when each wave comes out, and its marks
 var boss_nid := ""  # a client: the host's boss id, until its Mob arrives
 var audio: RaidSfx  # the raid's cues (waves, boss, gate ticks)
-var boss: Mob = null  # the boss (a Boss; a client's is BossNet's copy, or a plain Mob)
+var boss: Mob = null  # the boss (a Boss on the host; a client mirrors a plain Mob)
 var lair := {}  # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []  # wave monsters alive
 var sent := 0  # wave monsters spawned

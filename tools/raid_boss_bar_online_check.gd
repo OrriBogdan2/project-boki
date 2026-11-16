@@ -8,6 +8,7 @@ extends "res://tools/displace_net_check.gd"
 ## outside the square, and nothing once it is dead. No Net field: Net.VERSION is unchanged.
 ## Lines: RBAR ok|FAIL <what>.
 
+## The bar is judged against the host's live hp: the raid squad hits the boss meanwhile.
 const HP_TOL := 0.02  # of max health: the guest's hp is up to one snapshot (0.1 s) old
 var home_at := Vector3.ZERO
 
