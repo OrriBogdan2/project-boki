@@ -623,7 +623,7 @@ static func rare_ivs(rng: RandomNumberGenerator) -> Dictionary:
 static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp := "", inherit_n := IV_INHERIT) -> Dictionary:
 	if sp == "" or not Data.KIN.has(sp):
 		sp = a["species"] if rng.randf() < 0.5 else b["species"]
-	var baby := Save.new_kin(sp)
+	var baby := Save.new_kin(Data.egg_species(sp, rng))      # eggs hatch the first form, even an old save's
 	for t in baby["traits"]:
 		var mix := (float(a["traits"].get(t, 0.5)) + float(b["traits"].get(t, 0.5))) * 0.5
 		baby["traits"][t] = clampf(mix + rng.randf_range(-0.12, 0.12), 0.05, 0.95)
@@ -693,13 +693,10 @@ static func settle_rare_egg() -> bool:
 	Incubator.ensure()
 	return Incubator.settle() > 0
 
-## What hatches from a Rare Egg: a kin of the rare species its boss guarded, a little grown already,
+## What hatches from a Rare Egg: the first form of its line (never a legendary), a little grown already,
 ## glad to see you, now and then shimmering too.
 static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
-	var sp := String(egg.get("sp", ""))
-	if not Data.KIN.has(sp):
-		sp = String(Data.common_kin()[0])
-	var baby := Save.new_kin(sp)
+	var baby := Save.new_kin(Data.egg_species(String(egg.get("sp", "")), rng))      # always the line's first form
 	baby["rare"] = true
 	baby["level"] = 3
 	baby["trust"] = 50.0

@@ -24,6 +24,26 @@ const PART_NAMES := {"horns": "horns", "spikes": "back spikes", "fangs": "fangs"
 	"spots": "glowing spots", "third_eye": "a third eye", "crest": "a crest", "wings": "little wings",
 	"tail_long": "a long tail", "fins": "side fins"}
 
+static var _parent := {}     # species id -> the species it evolves from (evolve.json)
+
+## The first form of a species' line that the game has data for: itself when nothing it evolves from has data.
+## Eggs only ever hatch this (Data.egg_species).
+static func base_form(sp: String) -> String:
+	if _parent.is_empty():
+		var lines: Dictionary = rules()["lines"]
+		for from in lines:
+			for o in lines[from]["into"]:
+				_parent[String(o["id"])] = String(from)
+	var base := sp
+	var cur := sp
+	for _hop in _parent.size():      # a line is a chain: this only stops a loop in the data
+		if not _parent.has(cur):
+			break
+		cur = String(_parent[cur])
+		if Data.KIN.has(cur):
+			base = cur
+	return base
+
 ## Makes sure an older record has the fields evolution needs.
 static func ensure(rec: Dictionary) -> void:
 	if not rec.has("aff"):
