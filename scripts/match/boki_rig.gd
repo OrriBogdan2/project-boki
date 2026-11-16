@@ -125,6 +125,14 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
+	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
+	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
+		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
@@ -478,7 +486,7 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var asleep := _lying()
 	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
 		_asleep = asleep
@@ -576,6 +584,10 @@ func _twitch_ears() -> void:
 	for b in _ears:
 		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
 
+## Asleep at home (kstate) or fainted in a match (kdown): no clip of its own, so it settles down, naps and wakes.
+func _lying() -> bool:
+	return String(root.get_meta("kstate", "")) == "sleep" or bool(root.get_meta("kdown", false))
+
 func _state_clip() -> String:
 	if _aloft:
 		return "glide" if _speed >= WALK_SPEED else "hover"
@@ -584,7 +596,7 @@ func _state_clip() -> String:
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _lying():
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
