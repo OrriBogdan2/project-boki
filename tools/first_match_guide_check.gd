@@ -113,6 +113,11 @@ func _walk(hunter: String) -> void:
 	_tick(0.2)
 	ok(g.line == "", "they are gone: it clears")
 	ok(g.bottom(hd) == 0.0, "with no line up the message column keeps its place")
+	var fnt := ThemeDB.fallback_font
+	var long_line := "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves"
+	var cut := TextCache.fit(fnt, long_line, 13, 300.0)
+	var fits := TextCache.width(fnt, cut, 13) <= 300.0 and cut.ends_with("…")
+	ok(fits and TextCache.fit(fnt, "short", 13, 300.0) == "short", "a long feed line is cut at a word (%s)" % cut)
 	foe.pos = p.pos + Vector3(10, 0, 0)
 	_tick(2.0)
 	ok(g.line == "", "a line shows only once a match")

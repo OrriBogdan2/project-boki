@@ -611,13 +611,14 @@ var feed_top := 18.0
 ## loss you caused, blue for your own side, gold for everything else.
 func _draw_feed(sz: Vector2) -> void:
 	var y := maxf(feed_top, HudStyle.safe_pad(sz).y)
+	var max_w := sz.x * (0.5 - TutorialStrip.WIDTH_FRAC * 0.5) - HudStyle.safe_pad(sz).x - 38.0
 	var mine: Array = []
 	if m.player:
 		for h in m.hunters:
 			if h.team == m.player.team: mine.append(h.pname)
 	for f in m.feed:
 		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = f["text"]
+		var s: String = TextCache.fit(big, f["text"], 13, max_w)      # ends short of the top-centre strips
 		var w := TextCache.width(big, s, 13)
 		var ours := false; var first := ""
 		for nm in mine:
