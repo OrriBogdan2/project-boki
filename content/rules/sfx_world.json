@@ -41,16 +41,6 @@
    ],
    "gloves": true,
    "holes": [
-    "match use_gear:skill",
-    "match use_gear/gust_fan:glide",
-    "match use_gear/platform:shield",
-    "match use_gear/rocket:glide",
-    "match use_gear/skyhook:throw",
-    "match use_gear/hover:jump",
-    "glove blink area:boom",
-    "glove grapple projectile:throw",
-    "glove shock projectile:throw",
-    "glove ward cloak:cloak"
    ]
   },
   "utilities": {
