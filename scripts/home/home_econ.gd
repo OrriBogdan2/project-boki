@@ -133,6 +133,8 @@ func tick(d: float) -> void:
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
+			if st == "" and Care.STARVE_INFO.has(was) and not h._kin_entry(rec).is_empty():
+				KinAiling.perk_up(h, h._kin_entry(rec))
 			if st != "":
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
@@ -272,6 +274,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = sp
 			if Vector2(sp.x - pos.x, sp.z - pos.z).length() < 0.4:
 				e["phase"] = "eat"; e["t"] = 2.6
+				HomeVoice.say(k["rec"], "boki_eat", pos)
 				k["hold_t"] = 0.3
 				(k["node"] as Node3D).rotation.y = atan2(-(c.x - pos.x), -(c.z - pos.z))
 		"eat":
