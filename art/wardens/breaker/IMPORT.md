@@ -1,5 +1,7 @@
 # Mossy, the Breaker (Albert, bulwark): v95 master with the appeal3 face (owner pick 11-10)
 
+**11-16 superseded:** main's e3038a4866 (v95_to_game, all 13 hunters) re-made breaker.glb from the same i1 master with its own embedded paint, so the i1 swap below is history; the loose breaker_atlas/emit jpgs are main's. That glb has no `glow-lure` material, so --warden-clips-check's lure item is red on main and here (open).
+
 **11-14 i1 (live master):** the master is now `~/meshy/v95/Albert/r3/meshy1112/candidates/i1/glb.glb` (current.json since 11-12
 20:35Z: angry porthole eyes, no drum or shield over the front; the scan has no hammer, shield or lure ball, so the whole glb is the
 master). It starts from main's breaker.glb (the clean1 swap plus the x1.205 hammer): every moved point in the spec (`to`, the
