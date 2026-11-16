@@ -1433,6 +1433,21 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 func _draw_ship_prompt(sz: Vector2) -> void:
 	var left := maxf(0.0, float(m.ship.get("ride", 0.0)) - m.time)
 	var w := 460.0
+	var cam := m.cam
+	# where you'd come down if you jumped now: a ring on the ground under the ship
+	var sp: Vector3 = m.ship_pos()
+	if not m.world.is_void(sp.x, sp.z):
+		var g := Vector3(sp.x, m.world.ground_at(sp.x, sp.z), sp.z)
+		var gp := cam.unproject_position(g)
+		var top := cam.unproject_position(sp)
+		var dash := 0.0
+		var L := gp.distance_to(top)
+		while dash < L:
+			c.draw_line(top.lerp(gp, dash / L), top.lerp(gp, minf(1.0, (dash + 6.0) / L)), Color(1, 0.85, 0.4, 0.55), 2.0)
+			dash += 12.0
+		var pul := 1.0 + sin(m.time * 5.0) * 0.08
+		c.draw_arc(gp, 22.0 * pul, 0, TAU, 40, GOLD, 3.0, true)
+		c.draw_arc(gp, 8.0, 0, TAU, 20, Color(GOLD, 0.6), 2.0, true)
 	var p: Hunter = m.player
 	var dr: DropSquad = m.skydrop
 	var lead: Hunter = dr.leader(p.team) if dr else null

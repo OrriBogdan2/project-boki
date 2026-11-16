@@ -12,7 +12,8 @@ extends RefCounted
 ##     (no squad_intro) never sees it.
 ##  6. Nothing of the ship sticks up through the deck where the squad stands (a ray down each rider's slot
 ##     meets the deck, not the hull), and the ride has no looping sound.
-##  7. A press on a locked ability while aboard (in the plan, and on the ride) spends the skill point.
+##  7. A press on a locked ability while aboard (in the plan, and on the ride) spends the skill point,
+##     and the Boki ride on the shoulder without hopping off the deck and back (ring + sound each beat).
 
 const MAX_MESHES := 14         # mesh instances in a whole ship (one per material after the bake, plus props)
 const MAX_TRIS := 60000        # triangles in a whole ship (low preset: a few % of the 1.5M budget)
@@ -86,6 +87,16 @@ func _ranks_aboard() -> void:
 	m.pending_input["dash"] = true
 	_tick(m, 0.1)
 	ok(int(p.slot_lv["dash"]) == 1 and p.skill_pts == 0 and p.riding, "a key press on the ride spends a point on it")
+	# the Boki stay on their riders' shoulders: no hop off the deck and back (a ring and a sound every beat)
+	Sfx.cue_log = []
+	_tick(m, 2.0)
+	var hops: Array = Sfx.cue_log.filter(func(e: Array) -> bool: return e[0] == "recall")
+	Sfx.cue_log = null
+	var kins := m.hunters.filter(func(h: Hunter) -> bool: return h.riding and h.kin is Kin)
+	var off := kins.filter(func(h: Hunter) -> bool: return (h.kin as Kin).state != "shoulder")
+	var on_txt := "every rider's Boki stays on the shoulder (%d of %d off)" % [off.size(), kins.size()]
+	ok(not kins.is_empty() and off.is_empty(), on_txt)
+	ok(hops.is_empty(), "no Boki hop sound on the ride (%d in 2 s)" % hops.size())
 	m.queue_free()
 	await main.get_tree().process_frame
 
