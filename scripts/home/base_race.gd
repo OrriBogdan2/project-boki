@@ -504,6 +504,10 @@ func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
 	bar.lbl.text = "Cheer for %s  ·  mark %d of 3%s" % [who, mini(run.cheered + 1, 3), last]
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null or relay.run != null
+
 ## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
 	if relay.input(event):

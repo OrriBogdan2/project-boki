@@ -400,9 +400,9 @@ func _armor_up_rival(m: Match, P: Hunter, B: Hunter) -> void:
 	m._armor_up(B)
 	ok(int(Sfx.last_played.get("armor_up", -1000)) == far0, "a tier-up out of earshot is not played")
 
-## The pitch the pool voice playing `sname` was started at (0 if none).
+## The pitch the voice (pool or placed) playing `sname` was started at (0 if none).
 func _cue_pitch(sname: String) -> float:
-	for p in Sfx.players:
+	for p in Sfx.voice_all:
 		if p.playing and p.stream == Sfx.streams.get(sname):
 			return p.pitch_scale
 	return 0.0

@@ -4,6 +4,7 @@ One line per region: fight type · landmark (what you name it by from afar) · t
 The design and the reasons behind each fight type: docs/MAP_V2.md. Built by `tools/make_hollowcrown.py`
 (purposes, loot leans, `fight`, `hazard` and `finals` in its `regions` list); checked by `--hot-zone-check`.
 Each match also picks one region (not the Crown) as the **hot drop zone**: loot there rolls a rarity step better, it's ringed on the drop map and minimap, and one bot squad usually heads there (`scripts/match/hot_zone.gd`).
+Each region also has its own low ambience bed (`bed` in that list: heights wind, shore water, woods insects, the Heart's hum; docs/AUDIO.md).
 
 - **The Crown** (gloom) · siege · rune ring over the vault · a walled citadel on the Hollow's north rim: bailey lv 4, keep lv 8, Throne lv 12; three gates (Gate Span, Lark Span, Shard Stair) · the vault, the richest chests, the Stormcrown Eyrie on its Gaol rock off Frostgate.
 - **Frostgate** (frost) · sniping · hooded ice statue · a 260 m bare ice shelf (lv 10) with the walled Keep, the Rimefield (lv 4) under it · best armor (×1.6), uplink A in the Rimefield.

@@ -336,6 +336,45 @@ def step(surface, i):
     return mix(hit(1.0), at(hit(0.4), 0.05 + 0.006 * i), shackle)
 
 
+# ------------------------------------------------------------------ kit cues (the moves that played shared sounds)
+def ready():
+    """The Riposte coming back: a warm gold ring over a short upward sweep."""
+    return mix(ring([392, 784, 1176], 0.6, [0.3, 0.2, 0.15], [0.5, 0.3, 0.2]), S.sweep(300, 700, 0.18, 'sin') * env(N(0.18), 0.02, 0.07) * 0.4)
+
+
+def sweet():
+    """Sweet Spot: a fat ring of steel struck at its best point, over a crack and a low thud."""
+    return mix(ring([523, 1047, 1568], 0.55, [0.2, 0.14, 0.1], [0.5, 0.35, 0.25]), crack(0.06, 1500, 7000, 0.02) * 0.7,
+               kick(140, 48, 0.4, 0.04, 0.12))
+
+
+def spin():
+    """The blade turning on the spot: a swirl of air through a band that pulses with each pass."""
+    t = T(0.5)
+    return bpf(noise(0.5), 600, 3500) * (0.6 + 0.4 * np.sin(2 * np.pi * 14 * t)) * env(N(0.5), 0.05, 0.22)
+
+
+def lunge_go():
+    """Leaving the ground on a lunge: a quick gust that rises with a low pull under it."""
+    return mix(bpf(noise(0.3), 400, 2800) * env(N(0.3), 0.12, 0.12), lpf(S.sweep(180, 420, 0.25, 'saw'), 900) * env(N(0.25), 0.1, 0.1) * 0.5)
+
+
+def haul_slam():
+    """The hauled foe slammed into the ground: a deep thud, a crack and the chain's rattle dying away."""
+    return mix(kick(130, 38, 0.55, 0.04, 0.18) * 1.1, crack(0.1, 500, 4500, 0.04) * 0.8, at(S.rattle(0.3, 60, 1800, 6000, 0.5, 0.08) * 0.5, 0.05))
+
+
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """An iron heartbeat: a low thump with a ring of steel over it, quickening as the charge fills."""
+    return mix(kick(115, 58, 0.1, 0.02, 0.05) * 0.9, S.ring([620, 1480], 0.1, [0.04, 0.03], [0.3, 0.2]))
+
+
+def charge_full():
+    """The forge at full heat: a deep strike and a long low ring of iron."""
+    return mix(kick(95, 44, 0.3, 0.03, 0.12) * 0.8, S.ring([220, 440, 660], 0.55, [0.25, 0.18, 0.12], [0.5, 0.4, 0.3]), crack(0.05, 700, 4500, 0.02) * 0.5)
+
+
 def build():
     takes('jug_slash', slash, 3, 'fire')
     takes('juggernaut_blade_hiss', blade_hiss, 2, 'signature')
@@ -363,7 +402,13 @@ def build():
     save('juggernaut_death', death(0), 'grunt')
     for s in ('grass', 'stone', 'wood', 'snow'):
         takes('juggernaut_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
-
+    save('juggernaut_ready', ready(), 'cast')
+    save('juggernaut_sweet', sweet(), 'impact')
+    save('jug_spin', spin(), 'cast')
+    save('jug_lunge_go', lunge_go(), 'cast')
+    save('jug_haul_slam', haul_slam(), 'impact')
+    save('juggernaut_charge_tick', charge_tick(), 'cast')
+    save('juggernaut_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

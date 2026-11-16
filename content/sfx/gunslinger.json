@@ -3,6 +3,8 @@
  "name": "Vex",
  "script": "tools/gen_sfx_vex.py",
  "sounds": {
+  "gunslinger_charge_tick": "cast",
+  "gunslinger_charge_full": "cast",
   "vn_rifle": "fire",
   "gunslinger_grenade_thunk": "signature",
   "vn_cock": "cast",
@@ -23,7 +25,9 @@
   "gunslinger_step_snow": "step",
   "gunslinger_hurt": "grunt",
   "gunslinger_down": "grunt",
-  "gunslinger_death": "grunt"
+  "gunslinger_death": "grunt",
+  "gunslinger_skewer": "impact",
+  "gunslinger_crit": "impact"
  },
  "reach": {"vn_nuke_fall": 40},
  "signature": [

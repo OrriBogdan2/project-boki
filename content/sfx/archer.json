@@ -3,6 +3,9 @@
  "name": "Lace",
  "script": "tools/gen_sfx_lisette.py",
  "sounds": {
+  "pay_called": "impact",
+  "archer_charge_tick": "cast",
+  "archer_charge_full": "cast",
   "archer_thread_twang": "signature",
   "pin_loose": "fire",
   "pin_loose_super": "fire",
@@ -34,7 +37,8 @@
   "archer_step_snow": "step",
   "archer_hurt": "grunt",
   "archer_down": "grunt",
-  "archer_death": "grunt"
+  "archer_death": "grunt",
+  "archer_deadeye": "impact"
  },
  "signature": [
   "archer_thread_twang"

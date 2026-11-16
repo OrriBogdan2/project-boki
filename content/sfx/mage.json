@@ -3,6 +3,9 @@
  "name": "Sparkle",
  "script": "tools/gen_sfx_ryzz.py",
  "sounds": {
+  "hero_blowout": "impact",
+  "mage_charge_tick": "cast",
+  "mage_charge_full": "cast",
   "vv_bolt": "fire",
   "mage_zap": "signature",
   "mage_bubble_pop": "signature",
@@ -29,7 +32,9 @@
   "mage_step_snow": "step",
   "mage_hurt": "grunt",
   "mage_down": "grunt",
-  "mage_death": "grunt"
+  "mage_death": "grunt",
+  "mage_rod_slam": "impact",
+  "mage_blowout": "impact"
  },
  "loops": ["vv_ult_hum"],
  "signature": [
@@ -55,6 +60,7 @@
   "vv_ult_slam"
  ],
  "kit_files": [
+  "mage_gum.gd",
   "mage_sky.gd",
   "mage_ult.gd"
  ]

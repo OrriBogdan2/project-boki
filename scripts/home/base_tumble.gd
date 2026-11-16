@@ -274,6 +274,10 @@ func use() -> void:
 	_place_pair(0.0)
 	GardenSfx.countdown(h, ring.position)
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A key or press: true when the bout took it.
 func input(event: InputEvent) -> bool:
 	if run == null:

@@ -112,7 +112,7 @@ func add_guard(v: float) -> void:
 		if was < step and res >= step:
 			if anim_id == "": play("bul_armed")
 	if was < float(res_def().get("slam", 50.0)) and full_ready():
-		armed_fx("sec")
+		armed_fx("sec", "bulwark_ready")
 
 func on_block(dmg: float, by) -> void:
 	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
@@ -300,7 +300,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		var crush_stun := float(rd.get("crush_stun", 0.8))
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
-		payoff_fx(tgt.pos, res_col(), "pay_slam", dir, tgt)
+		payoff_fx(tgt.pos, res_col(), "bulwark_crush", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		vfx("crush", tgt.pos, dir))
 
@@ -427,7 +427,7 @@ func _hold_tell() -> void:
 		vfx("full", h.pos, h.aim_dir())
 		AimKit.flare(h, {"col2": Color("fff1c0")})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
-		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
+		m.sfx("bulwark_ready", h.pos, -2.0 if h.is_local() else -9.0)
 
 ## Charge 0..1 of the Crushing Blow being held.
 func smash_k() -> float:

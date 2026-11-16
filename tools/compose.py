@@ -310,6 +310,58 @@ def lullaby():
     melody(s, 0, [(4, 2), (2, 1), (3, 2), (1, 1), (2, 1), (4, 1), (5, 1), (4, 3), (4, 2), (5, 1), (7, 2), (5, 1), (4, 1), (2, 1), (1, 1), (0, 3)], 0, 80)
     return s
 
+# ------------------------------------------------------------------ the garden's zones (GARDEN.md 10)
+# Each zone plays its own track (garden_zones.json "music"); these three are the zones no older track fits.
+def glasswater():
+    # Glasswater Shallows: still water and crystal, the calm zone. A lydian, celesta and harp ripples, glass pad.
+    s = Song('glasswater', 84, 16, beats=4, root=69, mode='lydian', seed=41)
+    s.inst(0, 'celesta', 88); s.inst(1, 'harp', 72); s.inst(2, 'glock', 50); s.inst(3, 'fretless', 70)
+    s.inst(4, 'pad_warm', 54); s.inst(5, 'flute', 78)
+    prog = [0, 0, 1, 1, 4, 4, 0, 0, 3, 3, 1, 1, 4, 4, 0, 0]
+    pad(s, 4, prog, vel=50)
+    arp(s, 1, prog, [0, 1, 2, 3, 2, 1], step=0.75, vel=58, octave=-1, ring=2.5)
+    bass(s, 3, prog, [(0, 4.0)], vel=66, fifths=False)
+    ph = phrase_gen(s, prog[:8], [[2, 1, 1], [3, -1], [1, 1, 1, 1], [4]], start_deg=4, leap=0.3)
+    melody(s, 0, ph, 0, 84)
+    melody(s, 5, phrase_gen(s, prog[8:], [[1.5, 0.5, 2], [4], [1, 1, 2], [3, -1]], start_deg=7, leap=0.2), 8, 76)
+    for bar in range(0, 16, 2):
+        s.note(2, bar * 4 + 3.5, s.deg(prog[bar] + 4, 1), 1.0, 40)       # a drop on the water
+    return s
+
+def cinderstep():
+    # Cinderstep: warm stone and embers, the fiery zone. D dorian, marimba and low brass over taiko.
+    s = Song('cinderstep', 108, 16, beats=4, root=62, mode='dorian', seed=43)
+    s.inst(0, 'oboe', 92); s.inst(1, 'marimba', 78); s.inst(2, 'brass', 58); s.inst(3, 'ac_bass', 92)
+    s.inst(5, 'horn', 80); s.inst(6, 'taiko', 96)
+    prog = [0, 0, 6, 6, 3, 3, 4, 4, 0, 0, 6, 3, 4, 4, 0, 0]
+    pad(s, 2, prog, vel=46)
+    arp(s, 1, prog, [0, 2, 1, 3], step=0.5, vel=70, octave=-1, ring=0.5)
+    bass(s, 3, prog, [(0, 1), (1.5, 0.5), (2, 1), (3, 1)], vel=88)
+    for bar in range(16):
+        s.note(6, bar * 4, s.deg(0, -2), 1.0, 96)
+        s.note(6, bar * 4 + 2.5, s.deg(0, -2), 0.5, 70)
+    drums(s, [(1, 'side', 0.4), (3, 'side', 0.5), (3.5, 'shaker', 0.3)], start=4)
+    rh = [[1, 0.5, 0.5, 2], [0.5, 0.5, 1, 1, 1], [1.5, 0.5, 1, 1], [3, -1]]
+    melody(s, 0, phrase_gen(s, prog[:8], rh, start_deg=4, leap=0.3), 0, 94)
+    melody(s, 5, phrase_gen(s, prog[8:], rh, start_deg=2, leap=0.25), 8, 86, octave=-1)
+    return s
+
+def hushwood():
+    # Hushwood: a curious wood kept at dusk. E minor, clarinet over a music box, soft voices, a slow 3/4.
+    s = Song('hushwood', 76, 16, beats=3, root=64, mode='minor', seed=47)
+    s.inst(0, 'clarinet', 90); s.inst(1, 'music_box', 58); s.inst(4, 'oohs', 46); s.inst(3, 'pizz', 76)
+    s.inst(5, 'bassoon', 70)
+    prog = [0, 0, 5, 5, 3, 3, 4, 4, 0, 0, 5, 3, 6, 4, 0, 0]
+    pad(s, 4, prog, vel=44)
+    arp(s, 1, prog, [0, 2, 3, 1, 2, 3], step=0.5, vel=50, octave=1, ring=1.5)
+    for bar, d in enumerate(prog):
+        s.note(3, bar * 3, s.deg(d, -2), 1.0, 76); s.note(3, bar * 3 + 2, s.deg(d + 4, -2), 1.0, 60)
+    rh = [[1, 0.5, 0.5, 1], [2, 1], [0.5, 0.5, 0.5, 0.5, 1], [3]]
+    melody(s, 0, phrase_gen(s, prog[:8], rh, start_deg=2, leap=0.35), 0, 86)
+    melody(s, 5, phrase_gen(s, prog[8:], rh, start_deg=4, leap=0.3), 8, 80, octave=-1)
+    drums(s, [(0, 'wood_lo', 0.35), (2, 'triangle', 0.25)], start=8)
+    return s
+
 # ------------------------------------------------------------------ the expedition's layered score
 # Four stems of one piece (A minor, 132 bpm, 16 bars), all the same length so they loop in step and
 # the game fades them in and out by what's happening (Sfx.play_layers / MusicDir):
@@ -463,7 +515,8 @@ def sting_home():
 
 STINGS = {f.__name__: f for f in [sting_extract, sting_out, sting_last, sting_home]}
 
-TRACKS = {f.__name__: f for f in [home_day, home_night, orchard, meadow, summit, match, hollow, title, hub, guild, lullaby]}
+TRACKS = {f.__name__: f for f in [home_day, home_night, orchard, meadow, summit, match, hollow, title, hub, guild, lullaby,
+                                   glasswater, cinderstep, hushwood]}
 
 
 # ------------------------------------------------------------------ rendering

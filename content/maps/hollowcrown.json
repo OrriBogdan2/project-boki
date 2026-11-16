@@ -10,6 +10,7 @@
    "id": "crown",
    "name": "The Crown",
    "biome": "gloom",
+   "bed": "heart",
    "islands": [
     "crown",
     "gaol_ne"
@@ -32,6 +33,7 @@
    "id": "frostgate",
    "name": "Frostgate",
    "biome": "frost",
+   "bed": "heights",
    "islands": [
     "frostgate"
    ],
@@ -58,6 +60,7 @@
    "id": "cinder",
    "name": "Cinder Steps",
    "biome": "ember",
+   "bed": "heights",
    "islands": [
     "cinder"
    ],
@@ -124,6 +127,7 @@
    "id": "storm",
    "name": "Stormbreak",
    "biome": "storm",
+   "bed": "heights",
    "islands": [
     "storm",
     "storm_n",
@@ -145,6 +149,7 @@
    "id": "thorn",
    "name": "Thornwood",
    "biome": "bloom",
+   "bed": "woods",
    "islands": [
     "thorn"
    ],
@@ -166,6 +171,7 @@
    "id": "lark",
    "name": "Larkhollow",
    "biome": "meadow",
+   "bed": "shore",
    "islands": [
     "lark"
    ],
@@ -187,6 +193,7 @@
    "id": "highwatch",
    "name": "Highwatch",
    "biome": "frost",
+   "bed": "heights",
    "islands": [
     "highwatch"
    ],
@@ -209,6 +216,7 @@
    "id": "duskmoor",
    "name": "Duskmoor",
    "biome": "storm",
+   "bed": "shore",
    "islands": [
     "duskmoor"
    ],
@@ -231,6 +239,7 @@
    "id": "saltmere",
    "name": "Saltmere",
    "biome": "bloom",
+   "bed": "shore",
    "islands": [
     "saltmere"
    ],

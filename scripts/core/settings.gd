@@ -30,8 +30,9 @@ const DEFAULTS := {
 	"reticle_outline": true,
 	# camera
 	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
+	"cam_zoom": 1.0,       # the match wheel zoom (CamWheel), kept between matches
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true, "low_hp_pulse": true,
+	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	"colour_vision": "default",      # SideColor.ORDER

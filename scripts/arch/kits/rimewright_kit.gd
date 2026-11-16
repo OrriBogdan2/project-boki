@@ -90,6 +90,7 @@ func add_chill(t: Ent) -> void:
 	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
+		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
@@ -267,7 +268,10 @@ func _throw_dart(heavy: bool) -> void:
 	vfx("dart")
 	var pitch := (1.0 + 0.06 * side) * (0.8 if heavy else 1.0)
 	var loud := 0.0 if heavy else -2.0
-	m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, loud, pitch)
+	if skating or heavy:
+		m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, loud, pitch)
+	else:
+		FireSfx.shot(h.get_instance_id(), String(wd["sfx"]), h.pos, loud, float(wd["rate"]))
 	if heavy:
 		stats["heavies"] += 1
 	if skating:

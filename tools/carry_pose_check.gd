@@ -8,7 +8,7 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const SETTLE_S := 1.2      # s: the layer eases in (WardenCarry.FADE) and the run gets going
-const STRIDE_MIN := 0.05   # m: under this his own run does not step (Motley hovers); else keep 3/4 of it
+const STRIDE_MIN := 0.05   # m at model scale 1 (times the drawn scale, as HAND_NEAR): under this his own run does not step (Motley hovers); else keep 3/4 of it
 const HAND_NEAR := 0.3     # of the Hunter's height: the held hand lies this near the mote
 const FIRE_S := 0.8        # s: LMB held, and the same again after the release (a bow looses on the release)
 const SPARK_LAG := 0.3     # m: the spark follows the hand a frame late, at a run
@@ -85,7 +85,7 @@ func _hero(id: String) -> void:
 	var hand := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
 	ok(hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y), "%s: the %s hand holds the mote (%.2f m)"
 			% [id, side, hand.distance_to(mote)])
-	ok(clips.proc_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
+	ok(clips.proc_w <= 0.0 and (plain < STRIDE_MIN * absf(P.model.scale.y) or z[1] - z[0] >= 0.75 * plain),
 			"%s: the legs play the run under it (%.2f m of stride, %.2f m without)" % [id, z[1] - z[0], plain])
 	var spark: Node3D = H._spark
 	ok(spark.position.distance_to(mote) < SPARK_LAG and spark.scale.x < 0.5, "%s: the Heartspark rides the hand" % id)

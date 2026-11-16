@@ -374,6 +374,10 @@ func use() -> void:
 func _shown() -> Dictionary:
 	return pair[run.backed]
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press: true when the show took it.
 func input(event: InputEvent) -> bool:
 	if run == null:

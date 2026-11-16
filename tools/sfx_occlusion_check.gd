@@ -41,16 +41,18 @@ func run(main: Node) -> void:
 	print("SFXOCCLUSION %d checks, %d fail" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## The pool voice's bus: muffled behind the cliff and at the plain bus in sight; UI sounds (no position) too.
+## The pool voice's bus: muffled behind the cliff and the plain world bus in sight; UI sounds (no position) too.
 func _buses(occ: SfxOcclusion, low: Vector3, high: Vector3, floor_mate: Vector3) -> void:
 	var was := Sfx.occlusion
 	var heard := Sfx.listener
 	Sfx.occlusion = occ
 	Sfx.listener = low
 	ok(Sfx._bus_for(high) == "SFXMuffled", "the voice behind the cliff plays on the muffled bus")
-	ok(Sfx._bus_for(floor_mate) == "SFX", "the voice in sight stays on the SFX bus")
-	ok(Sfx._bus_for(null) == "SFX", "a UI sound (no position) stays on the SFX bus")
+	ok(Sfx._bus_for(floor_mate) == "SFXWorld", "the voice in sight stays on the plain world bus")
+	ok(Sfx._bus_for(null) == "SFXWorld", "a UI sound (no position) stays on the plain world bus")
 	var bus := AudioServer.get_bus_index("SFXMuffled")
+	ok(AudioServer.get_bus_send(bus) == "SFXWorld",
+		"the muffled bus feeds the world bus (the downed muffle dulls it too)")
 	var lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(bus, 0)
 	var far_lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("SFXFar"), 0)
 	ok(lp.cutoff_hz < far_lp.cutoff_hz, "the muffled bus is duller than the far bus (%.0f < %.0f Hz)"

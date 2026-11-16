@@ -213,6 +213,8 @@ func _float(m: Match, P: Hunter, K: OstraKit, home: Vector3) -> void:
 		wl = [minf(wl[0], g), maxf(wl[1], g)]
 	P.inp["move"] = Vector2.ZERO
 	print("TIME float walk gap %.3f..%.3f" % [wl[0], wl[1]])
+	var drawn := P.vis_k / Hunter.VIS_SCALE      # (the gap grows with the size a match draws him at)
+	lo = [lo[0] / drawn, lo[1] / drawn]
 	var mid: float = (lo[0] + lo[1]) * 0.5
 	C.ok("he floats about 0.3 m over his ground point (source 0.25-0.35 m), the bob +-0.03 m",
 		mid > 0.25 and mid < 0.35 and (lo[1] - lo[0]) < 0.08, "%.3f..%.3f" % [lo[0], lo[1]])

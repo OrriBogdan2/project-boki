@@ -51,11 +51,11 @@
 		"turn_s": 0.33,
 		"wait_s": 0.6,
 		"give_up_s": 9.0,
-		"happy_at": 0.5,
 		"hint_far_m": 25.0,
 		"hint_away_s": 10.0,
 		"hint_lift_px": 52.0,
-		"hint_text": "Whistle to call your partner"
+		"hint_text": "Whistle to call your partner",
+		"happy_at": 0.5
 	},
 	"hand": {
 		"slot_m": 0.9,

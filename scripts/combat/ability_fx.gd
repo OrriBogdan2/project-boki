@@ -3,7 +3,7 @@ extends RefCounted
 ## How abilities look and sound, keyed by how they're delivered (the tell) and by what they do (the
 ## impact category), so any ability gets the same language without its data naming a sound or an
 ## effect: a gun's right click (content/hunter_abilities), a Boki's ability, and the archetype kits (their
-## Feel module can take its tell and impact rows from tell_row / impact_row). Presentation only:
+## Feel module takes its tell rows from tell_row). Presentation only:
 ## nothing in the simulation reads anything here.
 ##
 ## Categories and colours follow docs/DASHES_AND_ABILITY_FEEL.md §5.1 (damage, control, sustain,
@@ -40,14 +40,9 @@ static func tell_row(delivery: String) -> Array:
 static func impact_row(cat: String) -> Array:
 	return IMPACT.get(cat, IMPACT["damage"])
 
-## The same rows in the archetype Feel module's [sound, pitch] shape (Feel.DELIVERY_TELL and
-## Feel.CATEGORY_IMPACT can read these, so archetype kits sound like the weapon kits).
+## The tell rows in the Feel module's [sound, pitch] shape (Feel.tell plays them for grammar casts).
 static func feel_tell(delivery: String) -> Array:
 	var r := tell_row(delivery)
-	return [r[0], r[2]]
-
-static func feel_impact(cat: String) -> Array:
-	var r := impact_row(cat)
 	return [r[0], r[2]]
 
 static func cat_color(cat: String) -> Color:
@@ -141,7 +136,8 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 
 ## An area landing (a slam, a mine going off, an ability's burst): a shockwave the size of what it
 ## covers, rubble and dust, and a shake that fades with distance (§5.5 leap landing / big area).
-static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> void:
+## `sound` false: the caller plays its own (a Fusion form's hit, MergeSfx).
+static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color, sound := true) -> void:
 	if m == null or m.get("fx") == null or _far(m, at):
 		return
 	var fx: Fx = m.fx
@@ -152,7 +148,8 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 	fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, int(10 + r * 6), 6.0 + r * 2.0, 65.0, 0.35, 14.0, 1.0 + r * 0.15)
 	fx.dust(at, int(8 + r * 4))
 	if r >= 1.5:
-		m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
+		if sound:
+			m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
 		if r >= 3.0 and caster is Ent and not _mine(m, caster):
 			Shake.incoming_big(m, at, 0.5, caster as Ent)
 

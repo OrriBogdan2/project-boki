@@ -29,8 +29,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   hand (+)            true: nothing is placed by dice. No auto stairs, no random rocks, no random
                       chests/camps/breakables/spawns: only what the layout lists. The match seed only
                       rolls spawn plan picks, live lairs, loot, the Blight and the weather.
-  regions (+)         [{id, name, purpose, biome, islands: [ids], fight, hazard, hazard_areas, finals}]
-                      named regions (map legend, docs). fight: the fight type; hazard / hazard_areas
+  regions (+)         [{id, name, purpose, biome, bed, islands: [ids], fight, hazard, hazard_areas, finals}]
+                      named regions (map legend, docs). bed: its ambience; fight: the fight type; hazard / hazard_areas
                       [{kind, poly}]: where a region hazard goes (ext/region-hazards); finals: candidate
                       final-zone centres on fightable ground (ext/br-zone). The engine reads none of these
                       four yet.
@@ -244,35 +244,37 @@ BY = {d["id"]: d for d in islands}
 # One line each in docs/MAP_REGIONS.md (fight types: docs/MAP_V2.md). "loot" leans chests on top of the
 # biome's lean (BiomeRun): slot weights multiply, rarity steps add. Every region but the Crown can be the
 # match's hot drop zone (HotZone).
+# "bed" is its own low ambience (audio/amb_<bed>.ogg, MusicDir): heights wind, shore water, woods insects,
+# the Heart's hum.
 regions = [
-    dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne"], fight="siege", hazard="",
+    dict(id="crown", bed="heart", name="The Crown", biome="gloom", islands=["crown", "gaol_ne"], fight="siege", hazard="",
          purpose="The vault on the Throne, the Stormcrown Eyrie and the richest chests, behind walls and gates, under the most Blight.",
          finals=[[262, 190], [318, 252]]),
-    dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}}, fight="snipe", hazard="ice",
+    dict(id="frostgate", bed="heights", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}}, fight="snipe", hazard="ice",
          purpose="The best armor on the map and the long shelf to shoot from; uplink A in the Rimefield below it.",
          finals=[[300, 58], [228, 70]]),
-    dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}}, fight="cliffs", hazard="lava",
+    dict(id="cinder", bed="heights", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}}, fight="cliffs", hazard="lava",
          hazard_areas=[dict(kind="lava", poly=[[398, 172], [420, 168], [424, 186], [402, 190]]),
                        dict(kind="lava", poly=[[418, 346], [438, 358], [432, 368], [414, 358]])],
          purpose="Forge country: gloves and weapon tunings up the cliff tiers, the Sunken Forge and uplink B at the foot.",
          finals=[[470, 250]]),
-    dict(id="storm", name="Stormbreak", biome="storm", islands=["storm", "storm_n", "storm_w", "storm_e", "storm_s"],
+    dict(id="storm", bed="heights", name="Stormbreak", biome="storm", islands=["storm", "storm_n", "storm_w", "storm_e", "storm_s"],
          fight="chokepoint", hazard="",
          purpose="The shrine on the Shrine Table, in the middle of the Hollow: every way across is a bridge.",
          finals=[[300, 370]]),
-    dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"], fight="forest", hazard="",
+    dict(id="thorn", bed="woods", name="Thornwood", biome="bloom", islands=["thorn"], fight="forest", hazard="",
          purpose="The Boki nest and the Thornhive lair; ambushes in the trees and tall grass.",
          finals=[[110, 420], [180, 412]]),
-    dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"], fight="open", hazard="",
+    dict(id="lark", bed="shore", name="Larkhollow", biome="meadow", islands=["lark"], fight="open", hazard="",
          purpose="Wild Boki graze on the open plain; the most landings, the widest flanks.",
          finals=[[110, 262], [60, 280]]),
-    dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], loot={"slots": {"boots": 1.8}}, fight="towers", hazard="ice",
+    dict(id="highwatch", bed="heights", name="Highwatch", biome="frost", islands=["highwatch"], loot={"slots": {"boots": 1.8}}, fight="towers", hazard="ice",
          purpose="Boots, and the towers: the Lantern is the highest ground on the map.",
          finals=[[96, 130]]),
-    dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}}, fight="maze", hazard="",
+    dict(id="duskmoor", bed="shore", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}}, fight="maze", hazard="",
          purpose="Relics in the Moor Chapel and its ruin maze: the closest fights on the map.",
          finals=[[418, 430]]),
-    dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"], fight="causeway", hazard="water",
+    dict(id="saltmere", bed="shore", name="Saltmere", biome="bloom", islands=["saltmere"], fight="causeway", hazard="water",
          hazard_areas=[dict(kind="water", poly=[[250, 478], [285, 472], [285, 508], [252, 508]]),
                        dict(kind="water", poly=[[295, 472], [332, 476], [334, 508], [295, 508]])],
          purpose="Salt caches round the lagoon and on its islet; fights on the rim and the one causeway.",

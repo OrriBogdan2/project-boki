@@ -67,6 +67,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
+			_show(e, kind, secs)
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
@@ -98,6 +99,7 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 ## length, and a word as it lands (no ground ring: that means gameplay).
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
+	StatusSfx.kit(e, kind, secs)
 	if kind in TAG_COL:
 		return
 	match kind:

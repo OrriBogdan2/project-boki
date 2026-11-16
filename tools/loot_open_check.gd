@@ -143,7 +143,8 @@ func _live(main: Node) -> void:
 			continue
 		on += 1 if op.w > 0.0 else 0
 		off += 1 if op.w <= 0.0 else 0
-		if op.t > WardenOpen.REACH_S + DT:
+		# (the frame the hold ends the layer is already easing out: a Hunter drawn 2.6x moves the hand metres in it)
+		if op.t > WardenOpen.REACH_S + DT and op.w >= 1.0:
 			worst = maxf(worst, maxf(_miss(op, "hand.L", lid), _miss(op, "hand.R", lid)))
 	var want := int(float(ChestLoot.R()["hold_s"]) / DT) - 1
 	ok(c["open"] and off == 0 and on >= want, "live: the pose is on the whole chest hold (%d on, %d off, want %d)"

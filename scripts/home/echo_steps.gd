@@ -425,6 +425,10 @@ func _clock() -> float:
 	clock = maxf(clock, now)
 	return clock
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press: true when the dance took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
