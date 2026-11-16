@@ -20,9 +20,9 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
 
 - **C** is its own ability, cast from wherever your Boki is: on you (Return) it casts through you, out in the world it casts where it stands. It also has an **auto ability** it uses
   on its own when the moment is right (Settings can turn that off).
-- **G**: with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
+- **C**: with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
   landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
-  anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
+  anything along the path (only within a set range; farther out it comes back on its own). **Hold C** for the
   order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),
   **Return** (back onto you: shoulder or pack; a big Boki guards at your side, never under you) or **Follow** (the default: beside you). A Boki you are
   carrying only gives its carried bonuses on **Return**, so choose between a fighting partner and a perk.

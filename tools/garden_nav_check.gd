@@ -58,6 +58,8 @@ func _open_home() -> Node:
 	main.current = hm
 	for i in 2:
 		await main.get_tree().process_frame
+	while hm.building:      # a farm built in slices (as main._hb_home waits): its Boki and fx come at the end
+		await main.get_tree().process_frame
 	return hm
 
 ## Every plaything and the house on the built farm, round the landing.
