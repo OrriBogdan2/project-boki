@@ -1,9 +1,9 @@
 class_name GardenSfx
 extends RefCounted
 ## The sounds of the garden minigames (the Dash, Stump Shove, Seek, Spark Volley, Tumble, Echo Steps, the Show
-## Ring and the Relay Cup) and of the shaping items (docs/AUDIO.md). Every cue goes through cue(), which plays it
-## through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the checks can assert each
-## cue fires once per event.
+## Ring and the Relay Cup), its cup rounds, wild visitors and seasons (docs/AUDIO.md). Every cue goes through
+## cue(), which plays it through Sfx at the Boki, quiet under the garden ambience, and counts it in `heard` so the
+## checks can assert each cue fires once per event.
 
 const DB := -6.0                      # dB: the garden sounds sit under the Boki voices
 const BEAT_S := 0.45                  # s between the three countdown beats
@@ -21,12 +21,13 @@ const ITEM := {"stat": "garden_item_bite", "stat_all": "garden_item_bite", "xp":
 		"token": "garden_item_token", "stay": "garden_item_lock", "sweet": "garden_item_snack",
 		"rinse": "garden_item_wash", "aura": "garden_item_aura", "loose": "garden_item_unwind",
 		"trait": "garden_item_nudge", "twin": "garden_item_nudge", "down": "garden_item_nudge"}
+const CUPS := ["garden_cup_sprout", "garden_cup_bloom", "garden_cup_crown"]      # by cup round, garden_prizes.json
 
 static var heard := {}                # cue name -> times played, for the checks
 
-static func cue(sname: String, pos, pitch := 1.0) -> void:
+static func cue(sname: String, pos, pitch := 1.0, db := DB) -> void:
 	heard[sname] = int(heard.get(sname, 0)) + 1
-	Sfx.play(sname, pos, DB, 0.04, pitch)
+	Sfx.play(sname, pos, db, 0.04, pitch)
 
 ## Three beats as a game starts: tick, tick, go.
 static func countdown(home, pos) -> void:
@@ -45,9 +46,13 @@ static func result(home, res: Dictionary) -> void:
 
 ## result() for two entries that need not be yours ({rec, pos}: a visitor, a rival team's runner).
 static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
-	cue("garden_win_" + _size(win["rec"]), win["pos"])
-	var huff := func(): cue("garden_sulk_" + _size(lose["rec"]), lose["pos"])
+	cue("garden_win_" + size_word(win["rec"]), win["pos"])
+	var huff := func(): cue("garden_sulk_" + size_word(lose["rec"]), lose["pos"])
 	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
+
+## A rival's huff as it passes another (BaseRival): the loser's sulk in the Boki's size.
+static func huff(rec: Dictionary, pos) -> void:
+	cue("garden_sulk_" + size_word(rec), pos)
 
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
 static func clash(home, move: String, pos, pushed: bool) -> void:
@@ -60,7 +65,23 @@ static func reveal(home, pos) -> void:
 	cue("show_reveal", pos)
 	home.get_tree().create_timer(REVEAL_S).timeout.connect(func(): cue("show_crowd", pos))
 
-static func _size(rec: Dictionary) -> String:
+## A cup round won (garden_prizes.json cup rounds, by name): its fanfare, bigger each step up to the Crown.
+static func cup(round_name: String) -> void:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	cue(CUPS[rounds.map(func(r): return r["name"]).find(round_name)], null)
+
+## A Home opening in `zone` ("" the start zone, GardenZones.here before it opens is `from`): when that is a
+## new zone and the one in season (GardenSeasons), its short sting.
+static func zone_in(zone: String, from: String) -> void:
+	if not FarmUnlocks.base_mode() or zone == GardenZones.HUB or _zone(zone) == _zone(from):
+		return
+	if String(GardenSeasons.season()["zone"]) == _zone(zone):
+		cue("garden_season", null)
+
+static func _zone(id: String) -> String:
+	return id if id != "" else GardenZones.start()
+
+static func size_word(rec: Dictionary) -> String:
 	return SIZE[Unique.size_tag(rec)]
 
 ## A shaping item given to a Boki at pos: its family's cue, and for a path token its pip clicking into the meter

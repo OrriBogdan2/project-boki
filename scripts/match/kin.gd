@@ -173,6 +173,8 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)
+	if owner_h == null:
+		WildTypeCue.paint(self)
 
 func t(k: String) -> float:
 	return float(traits.get(k, 0.5))
@@ -433,10 +435,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
-	# each kin has its own cue: a warm whoomp (venom), a puff (spore), a stone rumble (gravity),
-	# a glassy chime (prism), a swirl of wind (lunar), a low crackle of storm (echo)
-	var cue := "k_%s" % String(sp.get("type", ""))
-	m.sfx(cue if Sfx.has(cue) else "skill", pos, -2.0 if not auto else -7.0)
+	m.sfx(KinLib.cue_of(String(sp.get("type", ""))), pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
 
 ## An event trigger (KinParts.TRIGGERS): on_throw, on_hit, on_recall, on_bond_full, on_low_hp.
@@ -1045,7 +1044,8 @@ func render(delta: float, alpha: float) -> void:
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
 	var out_now := state in ["active", "flying", "returning", "flying_home", "downed"]
 	if ring:
-		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
+		var cue := WildTypeCue.tick(self, delta) if owner_h == null else false
+		ring.visible = visible and (out_now or has_meta("lineup") or cue) and not unseen
 		if ring.visible:
 			var rs := r * 2.6 + 0.3
 			ring.global_position = Vector3(global_position.x, m.world.ground_at(global_position.x, global_position.z) + 0.06, global_position.z)

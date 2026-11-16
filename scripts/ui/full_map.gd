@@ -24,7 +24,7 @@ var _press := Vector2.INF
 var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
-var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var hover := MapHover.new()    # the tooltip under the resting cursor
 var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
@@ -163,7 +163,7 @@ func draw(sz: Vector2) -> void:
 	var v := view()
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
-	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.76))
+	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
 	# the header: the planning countdown, or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
 	if planning:
@@ -182,6 +182,7 @@ func draw(sz: Vector2) -> void:
 	if tex_view.size.x > 0.0:
 		c.draw_texture_rect_region(hud.map_tex(), Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk), hud.map_region(tex_view))
 	_grid(c, v, kk)
+	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
@@ -190,14 +191,7 @@ func draw(sz: Vector2) -> void:
 	if m.skytrain:
 		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:
-		var ek := clampf(0.9 + kk * 0.12, 1.0, 1.8)
-		for x in m.exits.list:
-			var pv := to_screen(x["pos"])
-			if rect.grow(-4.0).has_point(pv):
-				hud._draw_exit_icon(pv, x, ek)
-				var st := _exit_word(x)
-				if st != "":
-					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
+		ExitMark.full_map(self)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
@@ -223,6 +217,7 @@ func draw(sz: Vector2) -> void:
 		MapKey.draw(self)
 		_legend(c, sz, team)
 		_side(c, sz)
+	hover.draw(self)
 	if hot_line != "":
 		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
@@ -256,12 +251,6 @@ func _map_title() -> String:
 	if m.world.layout_id == "skyreach": return "SKYREACH"
 	if m.world.layout_id == "hollowcrown": return "THE HOLLOW CROWN"
 	return "THE ISLANDS"
-
-func _exit_word(x: Dictionary) -> String:
-	match String(x["state"]):
-		"charging": return "Uplink %d%%" % int(float(x["prog"]) * 100.0)
-		"open": return "OPEN"
-	return ""
 
 ## A faint grid with letters and numbers along the edges, for callouts ("dropping C4").
 func _grid(c: Control, v: Rect2, kk: float) -> void:
@@ -300,7 +289,7 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		var kind := String(lb["kind"])
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
-			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var col := Heart.gate_col().lightened(0.3) if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
 		else:
@@ -346,11 +335,9 @@ func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force 
 	return true
 
 func _spawns(c: Control, team: int, kk: float) -> void:
-	_hover = {}
 	var sp: SpawnPlan = m.spawn_plan
 	if sp == null:
 		return
-	var mp := c.get_local_mouse_position()
 	var s := clampf(6.0 + kk * 0.6, 7.0, 12.0)
 	for cnd in sp.cands:
 		var pv := to_screen(cnd["pos"])
@@ -360,21 +347,6 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var st := sp.state_for(cnd, team)
 		var col: Color = def.get("col", Color.WHITE)
 		marker(c, String(def.get("shape", "star")), pv, s, col, st)
-		if pv.distance_to(mp) < s + 4.0:
-			_hover = cnd
-	if not _hover.is_empty():
-		var def: Dictionary = sp.cats.get(_hover["cat"], {})
-		var st := sp.state_for(_hover, team)
-		var line := String(def.get("name", "?"))
-		if String(_hover["name"]) != "": line += "  ·  " + String(_hover["name"])
-		var what: String = {"unknown": "Might be here: scout it to find out", "active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
-		var pv := to_screen(_hover["pos"])
-		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
-		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
-		if r.end.x > rect.end.x: r.position.x = pv.x - 14 - wv
-		hud._rounded(r, Color(0.04, 0.05, 0.08, 0.92), 8, Color(def.get("col", Color.WHITE), 0.5), 1)
-		hud._text(r.position + Vector2(10, 19), line, 14, def.get("col", Color.WHITE), hud.big)
-		hud._text(r.position + Vector2(10, 36), what, 12, INK)
 
 ## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
 ## "taken" (a tick). Shared with the legend.
@@ -543,7 +515,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:
@@ -645,8 +617,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
-		OutpostGlyph.draw(c, Vector2(r2.position.x + 26, r2.position.y + 42), 1.0, ExitModels.UPLINK, Color(0.55, 0.58, 0.64, 0.9), 0.0)
-		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost", 12, INK)
+		ExitMark.glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42), 8.0, ExitMark.SAMPLE, 0.0)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (green: open)", 12, INK)
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)

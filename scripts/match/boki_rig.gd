@@ -124,6 +124,14 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
+	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
+	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
+		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
@@ -176,6 +184,7 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+const EAR_TWITCH := 0.3       # rad an ear flicks asleep
 ## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
 ## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
 const SWIM_LINE := 0.5
@@ -184,6 +193,9 @@ const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "mu
 	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
+const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
+## The nap clips (BokiHomeClips), played slower by a bigger Boki (KinNap.slow).
+const NAP_CLIPS := ["settle", "nap", "wake"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
 const STRUT_CADENCE := 1.25
@@ -257,6 +269,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _land := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -278,6 +291,8 @@ var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
 var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
 var _swimmer := false          # a Water type: swims level rather than paddling
+var _nap: KinNap
+var _ears := PackedInt32Array()     # ear bones the sleep clip keys, twitched on top of it asleep
 var _plants := {}              # gait clip -> BokiPlant
 var _gait := ""                # the gait whose paws are planted: it eases out after the clip moves on
 var _gait_at := 0.0            # s into it
@@ -304,6 +319,7 @@ static func fetch_common() -> void:
 				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			BackgroundWork.request(p)
 
+static var _ear_bones := {}    # species -> its ear bones keyed in the sleep clip
 static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
@@ -358,6 +374,10 @@ func _ready() -> void:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
+	_nap = KinNap.new(species)
+	if not _ear_bones.has(species):
+		_ear_bones[species] = _keyed_ears()
+	_ears = _ear_bones[species]
 	_swimmer = swimmer(species)
 	_copy_coat()
 	_skel = skeleton()
@@ -368,6 +388,7 @@ func _ready() -> void:
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
 func advance(dt: float) -> void:
 	player.advance(dt)
+	_twitch_ears()         # (over the clip's pose, before the skeleton takes it)
 	_plant_feet(dt)
 	_skel.advance(dt)
 
@@ -407,7 +428,7 @@ func _process(dt: float) -> void:
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
 		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	var t := pace.step(dt)
@@ -415,17 +436,20 @@ func _process(dt: float) -> void:
 		_face_step(t)
 		advance(t)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll, the jolt
+## of a hit (KinFlinch) and a landing's squash with a lean as it starts and stops (LandLean) stay.
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
+	_land.step(dt, root.global_position)
+	var sq := _land.squash * LAND_SQUASH
 	var squat: float = _layer["squat"]
 	var swing := _layer_t * SWAY_RATE
 	var sway := float(_layer["sway"])
-	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) + cos(swing) * sway * 0.4, 0.0,
+	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) - _land.lean + cos(swing) * sway * 0.4, 0.0,
 		sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
 	var wide := _flinch.wide * (1.0 + squat * 0.5)
-	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
+	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide) \
+		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -464,7 +488,8 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var asleep := _lying()
+	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
@@ -483,6 +508,8 @@ func _pick_clip(dt: float) -> void:
 		want = feel["clip"]
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
+	if want in NAP_CLIPS:
+		player.speed_scale /= _nap.slow
 	if feel.has("rate"):
 		player.speed_scale = float(feel["rate"])
 		return
@@ -533,7 +560,35 @@ func _step_layer(feel: Dictionary, dt: float) -> void:
 func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
 	_shot_rate = rate
-	_shot_left = player.get_animation(which).length / rate
+	_shot_left = player.get_animation(which).length / rate * (_nap.slow if which in NAP_CLIPS else 1.0)
+
+## The root ear bones the nap clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
+## sets them every frame, so a twitch on top never builds up.
+func _keyed_ears() -> PackedInt32Array:
+	var out := PackedInt32Array()
+	var anim := player.get_animation("nap")
+	for i in anim.get_track_count():
+		var bone := _skel.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
+		if bone >= 0 and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D and _is_ear(bone) \
+				and not _is_ear(_skel.get_bone_parent(bone)):
+			out.append(bone)
+	return out
+
+func _is_ear(bone: int) -> bool:
+	var bone_name := _skel.get_bone_name(bone) if bone >= 0 else ""
+	return bone_name.begins_with("ear") and not bone_name.begins_with("ear_")
+
+## Asleep, an ear flicks now and then (KinNap.twitch), on top of the nap clip's pose.
+func _twitch_ears() -> void:
+	if _nap.twitch <= 0.0 or clip != "nap":
+		return
+	var turn := Quaternion(Vector3.BACK, sin(_nap.twitch * TAU) * EAR_TWITCH)
+	for b in _ears:
+		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
+
+## Asleep at home (kstate) or fainted in a match (kdown): no clip of its own, so it settles down, naps and wakes.
+func _lying() -> bool:
+	return String(root.get_meta("kstate", "")) == "sleep" or bool(root.get_meta("kdown", false))
 
 func _state_clip() -> String:
 	if _aloft:
@@ -543,7 +598,7 @@ func _state_clip() -> String:
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _lying():
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":

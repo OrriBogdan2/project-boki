@@ -4,28 +4,31 @@ extends RefCounted
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, a
 ## feeding bowl, or a snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki, stares at a rival or comes to look at a newcomer or a toy you just placed (the most curious
-## one plays at it first, and each looker keeps the day in its memory). A retired mentor (Mentor) only strolls slowly
+## another Boki, stares at a rival, comes to look at a newcomer, a toy you just placed (the most curious
+## one plays at it first, and each looker keeps the day in its memory) or to eat from your hand (BaseHandFeed). A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
-## nap in a pile; rivals stare and huff. A Boki about to nap walks to a free nap spot of its zone
-## (garden_zones.json nap: a sunny rock, under a tree, by the water); a friend lies down beside its friend's spot.
-## A Boki that would thrive in another open zone sometimes goes and waits at the return pad with a bubble:
-## it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer, and E on it sends it
-## (HubWaystone.answer); ignored, it wanders off.
+## nap in a pile; rivals stare and huff, and turn and huff when they pass (BaseRival).
+## A Boki that would thrive in another open zone sometimes goes and waits at the return pad
+## with a bubble: it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer,
+## and E on it sends it (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead",
+	"Approach", "HandEat", "Done"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH],
+	S.APPROACH: [S.HAND_EAT, S.DONE],      # your hand (BaseHandFeed): walks over, then eats or sniffs and leaves
+	S.HAND_EAT: [S.DONE],
+	S.DONE: [S.ROAM],
 	S.LEAD: [S.ROAM, S.NAP],
-	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
+	S.MENTOR: [S.ROAM, S.EAT, S.NAP, S.APPROACH],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
 	S.PLAY: [S.ROAM, S.NAP, S.WATCH, S.REACT],
@@ -53,11 +56,14 @@ var _seen := {}            # uid -> true: every Boki this base has met (a new ui
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 var _trying := {}          # toy uid -> the Boki that tries a new toy first (nobody else picks it till then, saved)
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
+static var befriended: Array = []   # [uid, uid] pairs whose bond just reached friend_at; step() cheers them
+var hand: BaseHandFeed     # the selected snack, and feeding from your hand
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
 	whistle = BaseWhistle.new(home, R)
+	hand = BaseHandFeed.new(home, R)
 
 static func nocturnal(rec: Dictionary) -> bool:
 	return Work.NOCTURNAL.has(String(rec["species"]))
@@ -76,14 +82,18 @@ static func note_parent(k: Dictionary, o: Dictionary, what: String) -> void:
 		if m["kind"] == "parent": return
 	Save.remember(k["rec"], "parent", "%s %s, its parent" % [what, o["rec"]["name"]], 0.5)
 
-## Moves both Boki's bond with each other by `by`, kept in -1..1.
+## Moves both Boki's bond with each other by `by`, kept in -1..1. Reaching friend_at queues the pair in befriended.
 static func add_bond(a: Dictionary, b: Dictionary, by: float) -> void:
+	var was := bond(a, b)
 	for pair in [[a, b], [b, a]]:
 		var rec: Dictionary = pair[0]
 		if not rec.has("bonds"):
 			rec["bonds"] = {}
 		var uid := String(pair[1]["uid"])
 		rec["bonds"][uid] = clampf(float(rec["bonds"].get(uid, 0.0)) + by, -1.0, 1.0)
+	var friend_at := float(Content.rules("base_life")["friend_at"])
+	if was < friend_at and bond(a, b) >= friend_at:
+		befriended.append([String(a["uid"]), String(b["uid"])])
 
 ## Where the base's toys stand (HomeToys, toys.json), for the chores that borrow one (BaseChore fetch).
 func toy_spots() -> Array:
@@ -96,6 +106,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.PLAY, func(_from: int) -> bool: return k.has("play"))
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
+		m.guard(S.APPROACH, func(_from: int) -> bool: return _awake(k) and not _taken(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
@@ -106,6 +117,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: FeedBowl.end(k))
 		m.on_exit(S.REACT, func(_to: int) -> void: _done_looking(k))
+		m.on_exit(S.DONE, func(_to: int) -> void: BaseHandFeed.clear(k))
 		k["life"] = m
 	return k["life"]
 
@@ -139,6 +151,7 @@ func step(d: float) -> void:
 	for k in h.kins:
 		BaseShy.tick(h, k, dt)
 		_tick(k, dt)
+	_cheer_friends()
 	GardenVisitor.step(h, dt)
 	if h.hway:
 		h.hway.step(dt)
@@ -222,6 +235,7 @@ func _tick(k: Dictionary, dt: float) -> void:
 	if _taken(k):
 		return
 	m.tick(dt)
+	BaseRival.cool(k, dt)
 	if not _awake(k) and not m.is_in(S.NAP):
 		_nap(k, "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
@@ -234,6 +248,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
+			elif m.is_in(S.ROAM):
+				BaseRival.pass_by(self, k)
 		S.EAT:
 			if k.has("life_eat"):
 				if not BaseFeed.tick(h, k, m.since) or m.since >= float(R["max"]["eat"]):
@@ -254,6 +270,12 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.LEAD:
 			if not BaseTutLead.tick(h, k):
 				m.go(S.ROAM, "led")
+		S.APPROACH:
+			hand.approach(k, m)
+		S.HAND_EAT:
+			hand.eat(k, m)
+		S.DONE:
+			hand.done(m)
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
@@ -318,7 +340,8 @@ func _tag_tick(k: Dictionary, m: Fsm) -> void:
 func _look_tick(k: Dictionary, m: Fsm) -> void:
 	var at: Dictionary = k["life_at"]
 	var to := Vector2(at["pos"].x - k["pos"].x, at["pos"].z - k["pos"].z)
-	if m.is_in(S.REACT) and to.length() > 2.0:
+	var rival: bool = k.get("life_rival", false)
+	if m.is_in(S.REACT) and to.length() > 2.0 and not rival:
 		k["goal"] = at["pos"] - Vector3(to.x, 0, to.y).normalized() * 1.8       # comes over for a look
 	else:
 		k["goal"] = k["pos"]
@@ -336,6 +359,8 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 			return
 		k.erase("play")
 	m.go(S.ROAM, "looked")
+	if rival:
+		BaseRival.walk_on(self, k, at)
 
 # ------------------------------------------------------------------ entering states
 func _nap(k: Dictionary, why: String) -> void:
@@ -451,8 +476,8 @@ func _chore(k: Dictionary) -> bool:
 func _tag(k: Dictionary, o: Dictionary) -> void:
 	var m := machine(k)
 	var om := machine(o)
-	if not m.can(S.PLAY_WITH) or not om.can(S.PLAY_WITH):
-		return
+	if not m.can(S.PLAY_WITH) or not om.can(S.PLAY_WITH) or bond(k["rec"], o["rec"]) <= float(R["rival_at"]):
+		return      # rivals never play together
 	m.go(S.PLAY_WITH, "tag")
 	om.go(S.PLAY_WITH, "tagged")
 	var secs := randf_range(R["play_with"][0], R["play_with"][1])
@@ -542,6 +567,7 @@ func saved(u: int, k: Dictionary) -> bool:
 	return false
 
 func _done_looking(k: Dictionary) -> void:
+	k.erase("life_rival")
 	k.erase("life_say")
 	k.erase("life_toy")
 
@@ -610,6 +636,14 @@ func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))
 	_huff(a)
 	_huff(b)
+
+## Two Boki that just became friends chime together between them, unless one of them is asleep.
+func _cheer_friends() -> void:
+	for pair in befriended:
+		var two: Array = h.kins.filter(func(k): return pair.has(String(k["rec"]["uid"])))
+		if two.size() == 2 and not (HomeChimes.asleep(two[0]) or HomeChimes.asleep(two[1])):
+			GardenSfx.cue("garden_friends", (two[0]["pos"] + two[1]["pos"]) * 0.5)
+	befriended.clear()
 
 func _huff(k: Dictionary) -> void:
 	h._emote(k, "!", true)

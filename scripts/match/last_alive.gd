@@ -55,7 +55,7 @@ static func _sound(m: Match, h: Hunter, on: bool, was: bool) -> void:
 	if on and not was:
 		_cue(m, "last_alive_start", START_DB)
 		if m.hud:
-			m.hud.toast_small("LAST ONE UP  ·  quicker, mending", SideColor.YOU)
+			m.hud.toast_small("LAST ONE UP  ·  quicker, mending", SideColor.you())
 	if on:
 		if not Sfx.loop_on(BED_KEY):
 			heard[BED_KEY] = int(heard.get(BED_KEY, 0)) + 1

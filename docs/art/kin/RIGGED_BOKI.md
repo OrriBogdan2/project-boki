@@ -67,6 +67,8 @@ same name wins over the built one. `--boki-rig-check` has the 1 m and puddle row
 across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
+The clips own the body, but a landing off a leap or a drop squashes Flex and it leans into a run start and back as it
+stops (`LandLean`, read off its own path; KinPuppet does the same for primitive bodies). Visual only.
 
 Wild Boki in a match (`KinWildPose` sets the `pose` meta, `BokiRig.LAYER` answers it with a layer on Flex over the clip,
 bent per body plan by `BODY_FEEL`; no clip is baked, the same for every species): wandering is the walk clip; the first
@@ -244,4 +246,62 @@ itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
+
+## State coverage
+
+`--boki-anim-audit` also drives all 22 rigged Boki through every state the game plays (`tools/boki_state_cover.gd`)
+with the metas and speeds the game sets, and fails if a state does not resolve to the clip its row names, to a clip
+the Boki lacks, or to one that never leaves the bind pose or holds a single pose. Every Boki lands on the same clip
+in every state, so the table is per state (22 Boki x 36 states, 0 gaps). Kinds: **authored** (baked in the glb by the
+species' `*_anim.py`), **retargeted** (`BokiHomeClips`: the species' own idle or sleep with body-plan deltas),
+**fallback** (the state has no clip of its own: the best existing one of the same rig plays), **proc** (a spring layer
+on top, no clip).
+
+| State | Where | Clip | Kind |
+|---|---|---|---|
+| idle, perch (on a shoulder) | home, garden, match | idle | authored |
+| walk / run / summon recall / Relay run | home, match, garden | walk / run (rate from speed) | authored |
+| joy (cheer) | home, match | hop | authored |
+| attack, ability | match | attack, ability | authored |
+| chop, mine, carry, tend | home jobs | same name | authored |
+| hit | match | whatever plays + `KinFlinch` | proc |
+| stun | match | idle (sad face, spins) | fallback, authored |
+| summon throw (in the air) | match | run | fallback, authored |
+| faint, then held, then revive | match | settle, nap, wake | fallback, retargeted |
+| settle, nap, wake | home | same name | retargeted |
+| munch, ball (nudge), post (climb), tub / wade (splash) | home, garden | same name | retargeted |
+| Tumble rush, brace, dodge; Echo hop (stonehop), spin | garden | same name | retargeted |
+| Relay bump (nudge), brace, duo tap (stonehop) | garden | same name | retargeted |
+| Relay win | garden | hop | fallback, authored |
+| Relay sulk | garden | sulk (the Dash's huff; idle with the head drop on a rig without it) | retargeted |
+
+Gaps found and filled without new art: a **fainted** Boki (a match `downed` state) lay on its side but kept playing
+idle (or the walk, sliding); `Kin.render` now sets the `kdown` meta and `BokiRig` treats it like home sleep: settle
+down, nap (curled, slow breathing), wake on revive. The Relay's **win** name has no clip on any rig, so it
+played a happy `stonehop`; the data in `content/rules/base_relay.json` "beats"."fallback" now gives win its
+hop (and sulk its idle with the head drop, on a rig without the retargeted Dash `sulk`). `eat` and `pet` are baked but no game state plays them.
+
+Shared base: where a species did not write its own clip, it plays the shared one from `boki_clips.py` with only
+its sway layer on top. Those are, per species, cindle, puddlet, burrlet, glintmole, rimeshrew, nettlynx: idle, walk,
+run, hop, pet, carry, tend; pebbit: idle, run, hop, pet, carry, tend; cairnback: idle, hop, pet, carry, tend; hivara:
+idle, walk, hop, pet, carry, tend; mossgrade: idle, hop, tend; gloamshell: pet, tend; glomwort: tend. The other
+twelve Boki write all of theirs.
+
+### States that truly need authored clips
+
+None of these is a gap (each resolves to a real clip); each is a stand-in an animator should replace:
+1. **faint / downed** (fall, lie, get up): today settle then nap; a fall onto the side and a get-up on revive.
+2. **hit** (stagger): a spring layer only; a short flinch clip per body plan would read better.
+3. **stun / dazed**: idle with a sad face and a spin; a woozy sway.
+4. **summon throw** (flying): the run clip; a tucked tumble or glide (`ext/anim-boki-hop-air` plays hop in the air).
+5. **Relay win** and **sulk**: a hop and a stand; a cheer jump and a slump.
+6. The shared idle, walk, run, hop, pet, carry and tend of the species listed above under "Shared base".
+
+Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile). The rigged
+body plays the `settle`, `nap` and `wake` clips (`BokiHomeClips`; wake has the stretch). On top of them, `KinNap`
+(`scripts/match/kin_nap.gd`) adds an ear flick every 3-8 s on the root ear bones the nap clip keys, so the flick never
+builds up, and slows all three clips for a bigger Boki (scale times the root of its mass, x0.85 to x1.4). The primitive
+body (`KinPuppet`) gets the whole nap from `KinNap`: it lies down over 0.6 s, breathes once every 3.6 s, flicks an ear,
+and on waking gets up in 0.4 s and stretches long and low with the front down, done by 1.1 s. Checks:
+`--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).
 | caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |

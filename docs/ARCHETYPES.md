@@ -23,7 +23,7 @@ and passive build-ups.
 | **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
-| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
+| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
 | **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
@@ -908,7 +908,7 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
-| E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| E | **Hail Wall**: lob a volley up to 10.8m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
 | R | (removed in the accuracy pass, see docs/heroes/archer.md) **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
 
 Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
@@ -1129,7 +1129,9 @@ the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola l
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
 hunter's own game and bots, and since Net 0.15.0 on remote players too: the move id and its age ride the
-hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`).
+hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`). Since Net 0.24.12 a move the kit clears
+(a lowered shield, a cancelled draw) is sent as `-` and ends the copy's, and each play bumps the re-time count, so
+a quick restart of the same move restarts the copy too.
 
 Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
 rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).
@@ -1242,8 +1244,13 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns we scale on purpose (one taken from the data 1:1, the PARITY FIRST default in DECISIONS 2026-11-07, can be pinned).
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - `"field": "weapon.primary.<key>"` reads the hero's signature weapon (`content/weapons/<signature>.json` `primary`). A number only the footage gives takes `F` evidence from `briefs/hero-ref` and a tolerance that covers the measurement (Meeko's crook range and speed).
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+## Kit card text rules (11-11)
+
+Owner: "kit card is also very annoying to read, like a giant text block". Each row of the kit card (`KitCard`: Select, the L page, K in a match) is icon, key, name, key-number chips and one line of at most `KitCard.MAX_WORDS` (12) words; the rules show on hover and on the Details page. The line is authored per hunter in `content/archetypes/<id>.json` under `card` (`dash`, `passive`, `rmb`, `e`, `x`, and `weapons.<id>` for LMB). Chips: cooldown, charges, level and the weapon's damage come from the kit data; damage chips for abilities are authored in `card.chips.<slot>` and `--arena-check` fails if a number on a chip is not a number in that slot's data. Before/after: `docs/shots/kit-card-1111/`.
+- Card text: `godot --headless -- --card-numbers-check` reads each Hunter's kit card (`KitCard.slot_text`) and fails any number it states (range, damage, cooldown, duration, slow, `A -> B` pair) that is not a field of that Hunter's JSON of the kind it names ("push N" a push/kb field, "stuns N" a stun field, "slowed N%" a slow field, "Ns" a time field, "Nm" a distance field; kinds come from the key path, a key of no kind passes for all but push, stun and slow); numbers a card works out from fields go in its `_derived`.

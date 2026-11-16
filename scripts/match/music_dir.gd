@@ -20,6 +20,7 @@ var heat := 0.0               # 0..1, how much of a fight is going on
 var goal := 0.0               # where heat is heading: 1 fight, 0.65 rival close, 0 calm
 var goal_at := -99.0          # match time the goal last changed
 var rival_close := false
+var stings := RaritySting.new()   # rare Boki coming into sight
 var last_fight := -99.0
 var last_done := 0.0
 var started := false
@@ -56,12 +57,14 @@ func start(m: Match) -> void:
 		Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
 ## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
-## glide over it), the creak and grit of the old ruins among their walls, and now and then a
-## creature calling from somewhere out of sight.
+## glide over it), the creak and grit of the old ruins among their walls, the meadow, rock and shore
+## beds and the weather (AmbBeds), and now and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
+var beds := AmbBeds.new()
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
+var training := TrainingSfx.new()   # the Training Grounds' beds, in place of these
 
 func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t -= dt
@@ -70,6 +73,9 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t = 0.25
 	var w: World = m.world
 	if w == null:
+		return
+	if m.opts.get("training", false):
+		training.ambience(w, p)
 		return
 	var voids := 0; var walls := 0; var n := 0
 	for r: float in [3.0, 6.0, 9.5]:
@@ -83,6 +89,7 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping: abyss = 1.0
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
+	beds.tick(m, p)
 	call_t -= 0.25
 	if call_t <= 0.0:
 		call_t = rng.randf_range(16.0, 34.0)
@@ -108,10 +115,17 @@ func last_squad() -> void:
 		if single:
 			Sfx.duck(STING_DUCK)
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> SfxMix.Muffle:
+	if p.downed or p.out:
+		return SfxMix.Muffle.DOWN
+	return SfxMix.Muffle.LOW_HP if LowHpCue.under_line(p) else SfxMix.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.mix.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true
@@ -122,6 +136,7 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		stings.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0

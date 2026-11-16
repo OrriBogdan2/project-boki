@@ -22,6 +22,7 @@ with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (
 ride her hands (HunterAnim's "fist" hold), so every move's arm reach shows. Body (content "body"): 0.97 tall, 1.2 wide (big
 forearms and fists, a short wide read); the medium hitbox 0.40 is kept (the fists are not body). Palette ochre stone `#d9a35b`
 with molten orange `#ff7a2a`. Payoff: the rock stream (no word). Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
+with molten orange `#ff7a2a`. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
 looks in `kit_looks.gd`, standing on rocks in `scripts/arch/stone_stand.gd`, moves in `scripts/match/kmoves_stone.gd`,
 sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
 
@@ -299,7 +300,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built (owner 23:55): an ally jumping against the rock is lifted over (`StoneStand` `_ally_hop`); walking, allies are stopped; foes are stopped either way; only the caster climbs by walking (item 25) |
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built (StoneStand._ally_hop, owner 23:55 and DECISIONS 2026-11-07): an ally in the air against his rock is lifted over; walking, allies are stopped; foes are stopped either way |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
-| Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
+| Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.8s rise (source: wall done by ~1.0s), 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built as rocks, not tiles (owner, Nov 2026, reversing item 15): over the abyss the ridge's rocks are ground you can stand on while they last |
 | Tetraform can't be used to leave the arena bounds | patch 1.04 notes | no | built by placement: rocks only on legal ground (HeroZones.fits) |
 | Punched Tetraform rocks launch like any rock (Rocksweeping) | card, guide | yes | built (the punch sweep takes ult rocks); asserted |
@@ -331,6 +332,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
 - The KNOCK beam on the dunk is a vertical light (no word) (a generic knock look in the source, it seems).
+- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems).
 - Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rock Hop's landing spots: the cursor clamped to a hop's reach, pulled back to the nearest ground a body fits on (never into
   a wall). In the air Shift stays the class long dash. See Rock Hop below.

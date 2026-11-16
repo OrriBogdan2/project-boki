@@ -1,7 +1,9 @@
 """Motley's clips (ART-1; id ostra): blender -b ostra.blend --python tools/art1/ostra_anim.py -- [only,clips] [--export out.glb]
+Since the appeal swap there is no ostra.blend with the game mesh: `--from art/wardens/ostra/ostra.glb` keys on the game model's own rig
+(blender -b --factory-startup ...), and tools/art1/glb_add_clips.py puts the re-keyed clips into the game .glb.
 Hand-keyed on poses (ostra_pose.py), sampled at 30 fps from frame 0, one action per clip. Times are the kit's: each action clip runs on the kit
 move's own clock (scripts/match/kmoves_stone.gd) and WardenClips seeks it from there. His character: a jack-in-the-box. Still and grinning on
-his spring, then sudden: everything is compress, release, overshoot, wobble. The box goes first, the body follows late."""
+his spring, then sudden: everything is compress, release, overshoot, wobble. Gliding, the body leads and the box trails on the spring."""
 import math, os, sys
 import bpy
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -64,6 +66,11 @@ def write_action(arm, rig, name, spec):
 def main():
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     only = a[0].split(",") if a and a[0] != "all" and not a[0].startswith("--") else None
+    if "--from" in a:
+        bpy.ops.import_scene.gltf(filepath=a[a.index("--from") + 1])
+        next(o for o in bpy.data.objects if o.type == "ARMATURE").name = "Armature"
+        for act in list(bpy.data.actions):
+            bpy.data.actions.remove(act)
     arm = bpy.data.objects["Armature"]
     for pb in arm.pose.bones:
         pb.rotation_mode = "QUATERNION"

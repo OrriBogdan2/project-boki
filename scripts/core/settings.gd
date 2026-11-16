@@ -23,6 +23,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
+	"hold_done": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
@@ -31,13 +33,14 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true,
+	"reset_cue": "a", "ult_ready_cue": true, "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
+	"colour_vision": "default",      # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0, "keys7_v": 0,
 }
 ## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
 const TEXT_SIZES := [1.0, 1.25, 1.5]
@@ -66,34 +69,35 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
-##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   (x)  ·  fx_life: particle lifetime (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this
+##   far from the camera (m, 0: their own)
 ##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "occ": false},
+		"shafts": false, "fx": 0.25, "fx_life": 0.5, "volfog": false, "light_m": 40.0, "occ": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "occ": false},
+		"shafts": false, "fx": 0.45, "fx_life": 0.7, "volfog": false, "light_m": 50.0, "occ": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "occ": true},
+		"shafts": true, "fx": 0.7, "fx_life": 1.0, "volfog": false, "light_m": 70.0, "occ": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
+		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
+		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -258,6 +262,8 @@ func load_file() -> ConfigFile:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
+		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	if not cf.has_section_key("s", "voices"):
 		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
@@ -595,7 +601,7 @@ const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_l
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
 ## training-only actions, the lobby's push to talk).
 const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
-		["goals", "throw"], ["fold_guide", "whistle"]]
+		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"]]
 
 ## Two actions may share a key only when they never run in the same place: one at home, the other in a match
 ## (or a pair listed in SHARED_OK).
@@ -638,14 +644,22 @@ func binding_text(action: String) -> String:
 		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
 
+## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
+## so a row of caps (UI.key_hints) never splits one into two.
+const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
+
+## One saved binding ("key:70", "mouse:8") as a cap: "F", "SPACE", "M4", "WHEEL-UP".
+func cap_text(code: String) -> String:
+	var parts := code.split(":")
+	if parts.size() != 2: return "?"
+	if parts[0] == "key": return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
+	return MOUSE_CAPS.get(int(parts[1]), "M%s" % parts[1])
+
 ## Both bindings, short ("R / X"), where a prompt has room for them.
 func key_caps(action: String) -> String:
 	var out: Array = []
 	for c in slots(action):
-		if c == "": continue
-		var t := code_text(c)
-		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
-		out.append(t.to_upper() if c.begins_with("key:") else t)
+		if c != "": out.append(cap_text(c))
 	return " / ".join(out) if out.size() > 0 else "?"
 
 ## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
@@ -654,14 +668,7 @@ func fill_keys(text: String) -> String:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB").
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
-	if evs.is_empty():
-		return "?"
-	var e: InputEvent = evs[0]
-	if e is InputEventKey:
-		return OS.get_keycode_string((e as InputEventKey).physical_keycode).to_upper()
-	if e is InputEventMouseButton:
-		return {1: "LMB", 2: "RMB", 3: "MMB", 8: "M4", 9: "M5"}.get((e as InputEventMouseButton).button_index, "M%d" % (e as InputEventMouseButton).button_index)
-	return "?"
+	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"

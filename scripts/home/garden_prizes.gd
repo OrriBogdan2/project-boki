@@ -144,6 +144,7 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
 
 ## The lines a result card adds under the gems: the prizes won and the cup step. font 0 leaves it out.
+## Each cup round sounds its fanfare as the card shows it.
 static func rows(res: Dictionary, font := 0) -> Array:
 	var out: Array = []
 	var names: Array = []
@@ -151,6 +152,8 @@ static func rows(res: Dictionary, font := 0) -> Array:
 		names.append(entry_name(e))
 	if not names.is_empty():
 		out.append(["Prize: " + ", ".join(names) + (" (first win today)" if res["first"] else ""), UI.GOLD])
+	if res["round"] != "":
+		GardenSfx.cup(res["round"])
 	if res["ribbon"]:
 		out.append(["Crown! The %s is yours" % game(res["game"])["ribbon"], UI.ACCENT_HI])
 		if res["keepsake"] != "":

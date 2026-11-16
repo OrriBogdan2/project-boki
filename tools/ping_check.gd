@@ -39,13 +39,13 @@ func _has_mouse(action: String, b: int) -> bool:
 # ------------------------------------------------------------------ 1. keys
 func _keys() -> void:
 	ok(_has_mouse("ping", MOUSE_BUTTON_MIDDLE), "middle mouse pings")
-	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "G", "G alone sends the Boki")
+	ok(not _has_mouse("throw", MOUSE_BUTTON_MIDDLE) and Settings.key_cap("throw") == "C", "C alone sends the Boki")
 	ok(Settings.ACTIONS.any(func(a): return a[0] == "ping"), "ping is in the rebindable list")
 
 func _migration() -> void:
 	var g := "key:%d" % KEY_G
 	var mmb := "mouse:%d" % MOUSE_BUTTON_MIDDLE
-	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1}
+	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys7_v": 1}
 	var both := {"keys": {"throw": [g, mmb]}}
 	both.merge(steps)
 	KeyMigrate.run(both)
@@ -53,7 +53,7 @@ func _migration() -> void:
 	var only := {"keys": {"throw": [mmb]}}
 	only.merge(steps)
 	KeyMigrate.run(only)
-	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to G")
+	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to its default")
 	var taken := {"keys": {"emote": [mmb]}}
 	taken.merge(steps)
 	KeyMigrate.run(taken)
@@ -104,7 +104,7 @@ func _world() -> void:
 	var kind := PingInput.place_world(m, _screen(foe.pos + Vector3(0, 0.9, 0)))
 	var pg := _my_ping()
 	ok(kind == "enemy" and pg.get("kind") == "enemy", "on an enemy: an enemy ping (%s)" % kind)
-	ok((pg["col"] as Color).is_equal_approx(PingInput.ENEMY_COL), "it is red")
+	ok((pg["col"] as Color).is_equal_approx(SideColor.foe()), "it is red")
 	ok(PingInput.label(pg, P) == "Enemy", "one word over it: %s" % PingInput.label(pg, P))
 	ok(_goal_is(mate, pg), "the bot teammate takes it as its ping goal")
 	# loot: a deathbox, its owner moved away
