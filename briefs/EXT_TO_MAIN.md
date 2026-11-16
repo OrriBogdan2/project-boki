@@ -9926,3 +9926,4 @@ READY ext/merge-lane-vfx4-1114-b 89f0cf413b (re-merged origin/main 88c671a67a, 5
 READY ext/merge-lane-feelcombat-1115 83643011c2 (PR #113 merged with origin/main 88c671a67a, GATE GREEN text in answer.md, no gh on rpc4)
 READY ext/merge-lane-integ-1115 ef54a4ad8656a090af6b600032ee91d773ab3494 (integration lane bundle: 22 branches re-fitted to main 88c671a67a; reds = main's except tutorial-dead-air 1, wisp-hit-rules 3 rows; export dry-run OK 453 MB; see gh-outbox/new-pr.md)
 READY ext/gil-motley-v95-1116 4c0ac413528d8bfab0e9461f486719e3a33bd6e7 (Gil v10 + Motley R4_9 v95 upgrades, 60k/4k; GATE GREEN run on w2: NEW-RED 0, compile 0 vs 0, export dry-run OK 588 MB; no gh on w2, PR still to open; proof docs/shots/gil-motley-v95-1116/)
+READY ext/perf-lane-p2-1116 45b6a2d61a34b721dd9860a131544a403373c53b (perf lane P2: draw joins, low-fps tap, fight-hitch parts, bench warms up like play; PR #158 GATE GREEN)
