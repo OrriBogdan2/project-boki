@@ -23,16 +23,17 @@ static var shown := {}
 
 ## The numbers the slot draws: charges (fractional, the recharging one partly full), the cap, seconds per
 ## charge, and the air dash's cooldown left and full length (air_max 0 = this dash has no air dash).
+## pips false: a plain cooldown, no charge pips (a one-dash kit).
 static func src(charges: float, cap: int, regen: float, air_cd: float, air_max: float, icon: String,
-		col: Color, airborne := false) -> Dictionary:
+		col: Color, airborne := false, pips := true) -> Dictionary:
 	return {"charges": charges, "cap": cap, "regen": maxf(0.01, regen), "air_cd": air_cd, "air_max": air_max,
-		"icon": icon, "col": col, "airborne": airborne}
+		"icon": icon, "col": col, "airborne": airborne, "pips": pips}
 
 static func of_hunter(h: Hunter) -> Dictionary:
 	var di := h.slot_info("dash")
 	var air_max := air_cd_of(h) if h.ak == null or h.ak.has_long_dash() else 0.0
 	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"],
-		not h.grounded)
+		not h.grounded, not h.ak or not h.ak.single_dash())
 
 ## How long the air dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func air_cd_of(h: Hunter) -> float:
@@ -66,7 +67,7 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	var pw := minf(12.0, (r.size.x - 12.0) / float(cap) - 2.0)
 	var px := r.get_center().x - (pw * cap + 2.0 * (cap - 1)) * 0.5
 	var fills: Array = []
-	for i in cap:
+	for i in cap if bool(s["pips"]) else 0:
 		var pr := Rect2(Vector2(px + i * (pw + 2.0), r.end.y - PIP_Y), Vector2(pw, PIP_H))
 		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
 		c.draw_rect(pr, Color(1, 1, 1, 0.18))
