@@ -29,6 +29,7 @@ const HEAVY := {
 	"archer": ["lmb", 20, 5.0],
 	"tender": ["lmb", 1, 4.0],
 	"thief": ["lmb", 1, 2.0],
+	"gil": ["lmb", 1, 2.0],            # a Fencer thrust (a held LMB is the Tide Lunge, not a chain)
 }
 const KEYS := {"dash": "dash", "lmb": "fire", "e": "signature", "jump": "jump"}      # tapped -> its input action
 const FWD := Vector3(0, 0, -1)       # the dummy stands where ready-up aims the hunter
@@ -50,6 +51,9 @@ func run(main: Node) -> void:
 	flow = load("res://tools/dash_flow_check.gd").new()
 	CombatBus.ability_used.connect(flow._on_used)
 	for hero in _heroes():
+		if not HEAVY.has(hero):
+			ok(false, "%s: no HEAVY row (add its top hit to the table)" % hero)
+			continue
 		for key in KEYS:
 			var inside: Array = await _trial(main, hero, key, true)
 			var after: Array = await _trial(main, hero, key, false)
