@@ -155,3 +155,18 @@ a first run before the buffers port showed 3 knock_* fails that did not repeat),
 Spin, free again 0.8 s later); --dredge-combo-check 1 fail (hand brace speed), the same 1 on a fresh origin/main worktree;
 --cc-exit-buffer-check 1 fail (rimewright dash 0.10 s before a stun's end), the same 1 on main; --recast-cue-check the known
 2 ostra rows (pass 2). NEW-RED 0. health --strict OK (style ratchet: the added long lines wrapped).
+
+## Pass 7 (ext/stuck-integ-38a28c4e, worker w2, main 0e26231988 already in the branch via stuck-integ-1324d019, 2026-11-16)
+
+The brief's list (~610 names) is a subset of the 786. Matched against passes 2-6, 1833c7c4 and every stuck-integ READY
+supersedes list, 23 rows were still unread. Each was read against main (READY sha an ancestor of main = already in):
+
+| branch | result |
+|---|---|
+| ult-ready-glow, tree-fade-1111, vfx-heal-shield-read, vfx-breakables, combat-gil-ttk, tut-gil-howto, anim-nook-moment, vfx-sparkle-bolt-origin, ui-sfx-set, sfx-training-grounds, sfx-lobby-pick, sfx-gil-kit, sfx-type-cues-19, sfx-gil-set | already in main (READY sha is an ancestor of origin/main); the CONFLICT class was stale |
+| vfx-stomp | gameplay superseded: main's Life has the owner 11-11 stomp lock (stomp_commit 0.2 s, stomp_time 2.4 s locked, STOMP_ROOT, stun cancels). Left: StompFx looks (pin ring, pressed-flat wisp, death box held under the collapse): needs a vfx job |
+| ui-base-hud | competing design (owner call): main covers the base-mode farm card's parts with ArrivalQueue (what changed), FarmSpotlight (one next thing) and TopChips; its class name BaseHud is taken on main by the basing ring |
+| anim-stomp-drink-1/2/3, anim-hand-albert, anim-key-pose-read, anim-result-poses, anim-dash-travel | glb / warden_anim rows (80-317 lines each): anim jobs from the owner's picks, not an integ port |
+
+After this pass no row of the list is unread. What stays open is listed per pass above as "needs a <area> job" or
+"owner call"; merge-candidate can stop retrying the whole list.
