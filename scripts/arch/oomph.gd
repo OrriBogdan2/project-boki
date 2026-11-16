@@ -43,8 +43,6 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
 	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
-	# a visual hold scaled by the hit (the Feel tier sets it too; take the larger)
-	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
 	if target is Hunter:
 		var h := target as Hunter
 		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
