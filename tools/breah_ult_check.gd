@@ -1,7 +1,7 @@
 extends "res://tools/hero_pair_check.gd"
 ## Tenzo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
-## held, the 0.2s cracks everyone sees, the centre-out rise over 0.4s, the slow beside it, bodies shoved off
+## held, the 0.2s cracks everyone sees, the centre-out rise over the data's rise, the slow beside it, bodies shoved off
 ## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on
 ## a land (and inside its window), the merge drop while aiming, the cooldown and the burst cap; the arc and
 ## width of the ridge, and the rocks standing as ground over the abyss.
@@ -166,7 +166,8 @@ func _punch_and_bond() -> void:
 	var K: DolmKit = P.ak
 	_ridge_along(m, P, home)
 	var spread := K.spine.last_rise_t - K.spine.first_rise_t
-	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
+	var rise := float(K.spine.xd()["rise"])
+	ok("ult beats: the rocks rise from the centre outward over the data's rise (%.1fs)" % rise, absf(spread - rise) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 15 rocks over 21m on open ground", n_up == 15, "rocks %d" % n_up)
 	var rd := K.rock_def()
@@ -229,7 +230,7 @@ func _ridge_along(m: Match, P: Hunter, home: Vector3) -> void:
 	aim_at(P, home + Vector3(8, 0, 0))
 	step(m, 0.05)
 	P.inp["x_down"] = false
-	step(m, 0.75)
+	step(m, float(P.ak.spine.xd()["rise"]) + 0.35)  # the cracks (0.2s) and the rise, plus slack
 
 func _punch(m: Match, P: Hunter, T: Hunter) -> void:
 	aim_at(P, T.pos)
@@ -308,7 +309,7 @@ func _walkway() -> void:
 	T.teleport(home + Vector3(0, 0, 5))
 	P.lvl = 6
 	_press(m, P, home + Vector3(7, 0, 0), false)
-	step(m, 1.0)
+	step(m, float(K.spine.xd()["rise"]) + 0.6)  # the rise, plus the cracks and slack
 	var gap := rocks(m).filter(func(w): return m.world.is_void(K.rock_mid(w).x, K.rock_mid(w).z))
 	ok(
 		"spine walkway: the whole ridge is laid over the abyss, none refused",
