@@ -8,6 +8,8 @@ extends RefCounted
 ##   4. the glider and height never push the view past the cap;
 ##   5. at the Ctrl view every ground corner is inside the pose LOD's pose_far_m and the camera's far plane.
 ## Prints "CAMZOOM ok|FAIL <what>" and "CAM ZOOM CHECK DONE, failures: N".
+## --cam-zoom-shots --shots-dir=<dir> (GPU): the old view, the new start, the wheel in and Ctrl held, one PNG each, with
+## the frame's draw calls and objects printed ("CAMZOOM shot ...").
 
 const DT := 1.0 / 60.0
 const EASE_FRAMES := 240
@@ -16,6 +18,7 @@ const MAX_STEP := 0.05          # a camera frame may change the zoom by at most 
 var bad := 0
 var m: Match
 var P: Hunter
+var shot_dir := "user://shots"
 
 
 func ok(cond: bool, what: String) -> void:
@@ -24,7 +27,10 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(main: Node) -> void:
+func run(main: Node, what: String) -> void:
+	if what == "shots":
+		await _shots(main)
+		return
 	Save.no_write = true
 	Save.d = Save.fresh()
 	m = Match.new()
@@ -135,3 +141,45 @@ func _notch(button: int) -> void:
 	ev.button_index = button
 	ev.pressed = true
 	m._unhandled_input(ev)
+
+
+func _shots(main: Node) -> void:
+	Save.no_write = true
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			shot_dir = String(a).substr(12)
+	DirAccess.make_dir_recursive_absolute(shot_dir)
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)      # (the screen fade from start-up still covers the view)
+	Settings.set_v("tips", false)
+	for h in m.hunters:
+		if h != m.player:
+			h.ctrl = "idle"
+	var tree := main.get_tree()
+	var vp := main.get_viewport()
+	vp.warp_mouse(vp.get_visible_rect().size * 0.5)
+	m.cam.user_zoom = 1.0      # the view before this change: the style's own distance
+	await _shot(tree, "before_old_view")
+	m._start_drop(m.player, m.player.pos)
+	await _shot(tree, "after_start")
+	for i in 3:
+		_notch(MOUSE_BUTTON_WHEEL_UP)
+	await _shot(tree, "after_wheel_in_3")
+	Input.action_press("crouch")
+	await _shot(tree, "after_ctrl_held")
+	Input.action_release("crouch")
+	tree.quit(0)
+
+
+func _shot(tree: SceneTree, name: String) -> void:
+	for i in 120:
+		await tree.process_frame
+	var img := tree.root.get_viewport().get_texture().get_image()
+	img.save_png(shot_dir.path_join(name + ".png"))
+	var calls := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	var objs := Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)
+	print("CAMZOOM shot %s: zoom %.2f, %d draw calls, %d objects" % [name, m.cam.zoom, calls, objs])

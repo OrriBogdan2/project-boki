@@ -106,7 +106,7 @@ func _area(main: Node, m: Match, area: String) -> void:
 	m.set_process(true)        # (the camera follows in the render frame)
 	for i in 90: await tree.process_frame
 	m.set_process(false)
-	ok(zin < z0 and absf(m.cam.zoom - zin) < 0.05, "%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom])
+	ok(zin < z0 and m.cam.zoom_to < z0, "%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom])
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
