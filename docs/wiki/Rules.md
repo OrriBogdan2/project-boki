@@ -1616,6 +1616,19 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
 | foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric", "chimebun": "sound", "frostdrop": "ice", "pebblenut": "rock", "scalepepper": "dragon", "duskplum": "dark", "pricklepear": "poison", "sapjelly": "bug", "ironcrisp": "steel", "geodecandy": "crystal"} |
 
+## legendary (`content/rules/legendary.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Legendary Boki (owner decision 2026-11-09, briefs/DECISIONS.md). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster'). It turns up delay_s seconds into the match (never at the start), at a Rare Boki point that isn't live, at least min_hunter_dist from every hunter. The roster also orders the Bokidex: legendaries sit last. |
+| chance | 0.2 |
+| roster | ["cairnback", "hivara", "zephyrak"] |
+| delay_s | 90 |
+| min_hunter_dist | 40 |
+| level_bonus | 6 |
+
 ## level_growth (`content/rules/level_growth.json`)
 
 
@@ -1974,6 +1987,23 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 |---|---|
 | statuses | {"stun": {"look": "stars", "col": "#fff27a", "dark": "#6a5410", "y": 2.25, "size": 1.0, "pace": 1.0, "why": "any stun: bright stars spinning fast round the head"}, "daze": {"look": "halo", "col": "#ffb36a", "dark": "#6a3410", "y": 2.55, "size": 1.0, "pace": 1.0, "why": "Vex's Daze: a tilted ring of crystals wobbling high over the head"}, "root": {"look": "stakes", "col": "#9a6aff", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "any root (Meeko's violet): thorns driven in round the feet, leaning over them, straining; no ring on the ground"}, "gnd": {"look": "cords", "col": "#e0a03a", "dark": "#5a3a10", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Grounded (the Bola, Warchain reel): cords wound round the legs and a down arrow stamping over the head"}, "slow": {"look": "anklets", "col": "#b8a8ff", "dark": "#2a2460", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "any slow: weighted rings sliding down the legs to the ankles (never onto the ground: a ground ring means gameplay)"}, "chill": {"look": "frost", "col": "#7fd0ff", "dark": "#2f6ac0", "hot": "#effcff", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Neve's Chill: an ice shell round the body with crystals jutting from it"}, "burn": {"look": "flames", "col": "#ff6a1a", "dark": "#2a100a", "hot": "#ffd23a", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "burning (Cinder's Ignite and Ablaze, any burn): flame tongues licking up the body"}, "static": {"look": "arcs", "col": "#1fc6dc", "dark": "#0a3a44", "hot": "#ff3fb4", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Sparkle's Static: teal bolts with a pink core jumping across the body"}, "antiheal": {"look": "streaks", "col": "#ff3df0", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Anti-Heal (Kael's Warchain, Sable's Encore): magenta streaks draining up out of the body"}, "sick": {"look": "wisps", "col": "#f0ecff", "dark": "#4a4458", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "resurrection sickness: pale wisps sinking round the body"}} |
 
+## status_sfx (`content/rules/status_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | StatusSfx (scripts/match/status_sfx.gd): a short start cue on the affected body for each status, a quiet loop for the long ones. Sounds from tools/gen_status_sfx.py, Cinder's as_ignite and Sparkle's mage_zap. Dbs are call-site volumes under the sound's own level; 'mine' (on your body, or put there by you or your Boki) adds mine_db. pitch_step: the cue climbs this much per stack (static). Voice caps: at most cue_cap cues start within cue_window_ms across all statuses, and at most loop_cap loops run at once. |
+| cue_db | -9 |
+| mine_db | 3 |
+| loop_db | -16 |
+| loop_reach_m | 14 |
+| cue_cap | 4 |
+| cue_window_ms | 200 |
+| loop_cap | 3 |
+| cues | {"ignite": {"sound": "as_ignite", "db": -6.0}, "chill": {"sound": "st_chill"}, "static": {"sound": "mage_zap", "db": -6.0, "pitch_base": 0.9, "pitch_step": 0.08}, "slow": {"sound": "st_slow"}, "stun": {"sound": "st_stun"}, "root": {"sound": "st_root"}, "ground": {"sound": "st_ground"}, "daze": {"sound": "st_daze"}, "antiheal": {"sound": "st_antiheal"}} |
+| loops | {"ignite": {"sound": "st_ignite_loop", "pitch_step": 0.0}, "static": {"sound": "st_static_loop", "pitch_step": 0.1}} |
+
 ## steal_window (`content/rules/steal_window.json`)
 
 
@@ -2064,23 +2094,6 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | dash_glide | {"ease_t": 0.07, "grace": {"default": 0.15, "juggernaut": 0.0}} |
 | dash_speed | {"archer": 0.7} |
 | sources | {"doc": "Where each glide/air number comes from (SUPERVIVE_FEEL.md 'Footage pass', Nov 12 2026). Notes only, nothing here is read as a number. Trust order: owner > game data > wiki > footage.", "glide_cruise": "SETTLED 5.0 m/s (Hunter.GLIDE_SPEED): [game data] MaxGlide 500 uu/s; [footage] ~5 m/s, run pace. Agree.", "glide_base_speeds": "Not determinable (GlideInitial*/TargetXY* encrypted): glide.drag/drag_steer/max are ours. No player glide start in the hero-ref clips; Elluna 706.8 s dash-into-glide still decaying (11 -> 8 m/s) when the track ends.", "glide_gravity": "Not determinable (GlideGravityFactor encrypted): Hunter.GLIDE_SINK 1.4 m/s is ours; footage shows only the height hold (Tom Kick ~14 s level) and lift (Zik ~1 s back up).", "glide_braking": "Not determinable (GlideBraking* encrypted): glide.coast and glide.brake/brake_deg are ours. Tetra guide 300 s and showcase 1174 s frame-stepped: no player let-go or back-key brake.", "hoop_boost": "Not determinable (GlideBoost* encrypted): no hoop or jetstream in any hero-ref clip.", "jump_hold": "Not determinable: a key hold is not visible on screen. Owner: fixed jump, Space held never opens the glider.", "air_dash": "Per Hunter (AirDashSpeedMultiplier/Clamp encrypted): Shiv ~1.7x ground (8.4 m / 0.95 s, dancer.md 303.8-304.5 s, 0129-0134), carried to the landing; Elluna 11-15 m / 0.8-1.1 s (mooshmoosh.md 731.1/706.8/735.9/745.1 s) = tender dash.air; Kingpin card 'further', air_k 1.35 est; the other nine: Not determinable, no air dash in their clips."} |
-
-## status_sfx (`content/rules/status_sfx.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | StatusSfx (scripts/match/status_sfx.gd): a short start cue on the affected body for each status, a quiet loop for the long ones. Sounds from tools/gen_status_sfx.py, Cinder's as_ignite and Sparkle's mage_zap. Dbs are call-site volumes under the sound's own level; 'mine' (on your body, or put there by you or your Boki) adds mine_db. pitch_step: the cue climbs this much per stack (static). Voice caps: at most cue_cap cues start within cue_window_ms across all statuses, and at most loop_cap loops run at once. |
-| cue_db | -9 |
-| mine_db | 3 |
-| loop_db | -16 |
-| loop_reach_m | 14 |
-| cue_cap | 4 |
-| cue_window_ms | 200 |
-| loop_cap | 3 |
-| cues | {"ignite": {"sound": "as_ignite", "db": -6.0}, "chill": {"sound": "st_chill"}, "static": {"sound": "mage_zap", "db": -6.0, "pitch_base": 0.9, "pitch_step": 0.08}, "slow": {"sound": "st_slow"}, "stun": {"sound": "st_stun"}, "root": {"sound": "st_root"}, "ground": {"sound": "st_ground"}, "daze": {"sound": "st_daze"}, "antiheal": {"sound": "st_antiheal"}} |
-| loops | {"ignite": {"sound": "st_ignite_loop", "pitch_step": 0.0}, "static": {"sound": "st_static_loop", "pitch_step": 0.1}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
