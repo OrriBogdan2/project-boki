@@ -54,11 +54,13 @@ onto its side (`Kin.render`).
    and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
    the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
-   (`lunge`, `pounce`), Motley (`swap`, `swap_air`, the Trade's flight) and Meeko (`skip`, `float`) already play a
-   hand-keyed clip for their dash, timed to it (Meeko's skip 0.233 s against the 0.23 s dash, Grimble's lunge 0.4 s
-   = the 0.16 s shove and its gap, Albert's whirl 0.733 s = the 0.17 s dash and the spin); their cells read `proc` only
-   because the move names do not say dash, so `warden_anim/*.json` marks them `"dash": true`. Cinder's ram and poof
-   (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are clips, re-keyed to their felt dashes (KIT_PARITY
-   'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key theirs too.
+   (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
+   hand-keyed clip on their v95 .glb for the whole dash, with none of the procedural pose under it (`--dash-frames-check
+   --dash-only=<archetype>` logs the clip, its weight and the rig's: 0 every frame). Measured at 60 fps: Albert's whirl
+   owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
+   lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
+   aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
+   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
+   theirs too.
 4. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
-5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

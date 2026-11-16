@@ -33,7 +33,7 @@ const SEQ := {
 const POSE_NODES := ["Rig", "Rig/Torso", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Legs/LegL", "Rig/Legs/LegR"]
 const POSE_BONES := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 const CSV_HEAD := "arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove," \
-		+ "model_vis,pose_rig,pose_bones,step_m"
+		+ "model_vis,pose_rig,pose_bones,step_m,clip,act_w,proc_w"
 
 class Tail extends Node:
 	var d
@@ -192,8 +192,20 @@ func _log(wall: float) -> void:
 	was = P.position
 	(uses[use] as Array).append(e)
 	var row: Array = [arch, use, seq[use][0], e["f"], wall, script_ms, e["render"], e["comp"], e["t"],
-		e["x"], e["z"], scr.x, scr.y, e["roll"], e["move"], int(e["vis"]), e["rig"], e["bones"], step]
+		e["x"], e["z"], scr.x, scr.y, e["roll"], e["move"], int(e["vis"]), e["rig"], e["bones"], step] + _clip()
 	rows.append(",".join(row.map(func(v): return str(v))))
+
+## A Hero's .glb: the clip on its live action channel, how much that action owns the body and how much of the
+## procedural rig shows (["", -1, -1] on a model with no hand-keyed clips).
+func _clip() -> Array:
+	var c: WardenClips = null
+	for n: Node in P.model.find_children("*", "Node", true, false):
+		if n is WardenSync:
+			c = (n as WardenSync).clips
+			break
+	if c == null:
+		return ["", -1, -1]
+	return [c.cur, snappedf(c.act_w, 0.01), snappedf(c.proc_w, 0.01)]
 
 func tail() -> void:
 	var now := Time.get_ticks_usec()
