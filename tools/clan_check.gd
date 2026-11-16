@@ -6,6 +6,7 @@ extends RefCounted
 ##   4. leaving deletes the roster doc and clears the clan
 ##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan
 ##   6. clean_clanbase: one showcase Boki per current member, a 13th is dropped, forged numbers are clamped
+##   (ranks, removal and founder hand-off are --clan-roles-check, which reuses this fake store)
 ##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
 ##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
 ##      exit leak of HomeBuild/HomeMarket/HomeTrade)
@@ -66,7 +67,7 @@ func _cleaning() -> void:
 		_row("g1_a", {"guild": "g1", "role": "officer"}),
 		_row("g1_g", {"guild": "g1", "role": 4}),
 	]
-	var out := Social.clean_roster(rows, "g1", "f")
+	var out := Social.clean_roster(rows, "g1", Social.clean_guild({"founder": "f"}))
 	var ids: Array = out.map(func(r): return r["id"])
 	ok(ids == ["a", "e", "f"], "bad rank, other clan, wrong doc id, repeat and non-text rank are dropped (%s)" % [ids])
 	var roles: Array = out.map(func(r): return r["role"])
@@ -75,7 +76,7 @@ func _cleaning() -> void:
 	var many := []
 	for i in 40:
 		many.append(_row("g1_m%d" % i, {"guild": "g1", "role": "member"}))
-	ok(Social.clean_roster(many, "g1", "").size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
+	ok(Social.clean_roster(many, "g1", {}).size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
 
 
 func _joining() -> void:
@@ -89,7 +90,8 @@ func _joining() -> void:
 	ok(mine.get("role") == "member" and mine.get("guild") == "g1", "a roster doc is written on join")
 	docs["clanroster/g1_bob"] = {"guild": "g1", "role": "founder"}
 	var got := []
-	Social.clan_roster("g1", "bob", func(r): got.append_array(r.map(func(x): return x["id"])))
+	Social.clan_roster("g1", Social.clean_guild(docs["guilds/g1"]), func(r, _gone):
+		got.append_array(r.map(func(x): return x["id"])))
 	ok(got == ["alice", "bob"], "the roster reads back both members")
 	ok(not Social.busy("guild"), "the join finished")
 

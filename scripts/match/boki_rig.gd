@@ -209,6 +209,14 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.0367, 0.167, 0.0125), "right flank": Vector3(0.0367, 0.167, 0.0125),
 			"back": Vector3(0, 0.228, 0.0125), "chest": Vector3(0, 0.204, -0.0622)}},
+	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
+	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
+		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
@@ -270,6 +278,7 @@ const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "mu
 	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
+const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
 ## The nap clips (BokiHomeClips), played slower by a bigger Boki (KinNap.slow).
 const NAP_CLIPS := ["settle", "nap", "wake"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
@@ -345,6 +354,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _land := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -503,7 +513,7 @@ func _process(dt: float) -> void:
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
 		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	var t := pace.step(dt)
@@ -511,17 +521,20 @@ func _process(dt: float) -> void:
 		_face_step(t)
 		advance(t)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll, the jolt
+## of a hit (KinFlinch) and a landing's squash with a lean as it starts and stops (LandLean) stay.
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
+	_land.step(dt, root.global_position)
+	var sq := _land.squash * LAND_SQUASH
 	var squat: float = _layer["squat"]
 	var swing := _layer_t * SWAY_RATE
 	var sway := float(_layer["sway"])
-	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) + cos(swing) * sway * 0.4, 0.0,
+	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) - _land.lean + cos(swing) * sway * 0.4, 0.0,
 		sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
 	var wide := _flinch.wide * (1.0 + squat * 0.5)
-	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
+	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide) \
+		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -560,7 +573,7 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var asleep := _lying()
 	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
 		_asleep = asleep
@@ -658,6 +671,10 @@ func _twitch_ears() -> void:
 	for b in _ears:
 		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
 
+## Asleep at home (kstate) or fainted in a match (kdown): no clip of its own, so it settles down, naps and wakes.
+func _lying() -> bool:
+	return String(root.get_meta("kstate", "")) == "sleep" or bool(root.get_meta("kdown", false))
+
 func _state_clip() -> String:
 	if _aloft:
 		return "glide" if _speed >= WALK_SPEED else "hover"
@@ -666,7 +683,7 @@ func _state_clip() -> String:
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _lying():
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":

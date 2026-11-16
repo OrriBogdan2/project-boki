@@ -72,7 +72,8 @@ func _ostra() -> void:
 	var card: Dictionary = K.d["card"]
 	ok(
 		"card: a role line and one line each for LMB, RMB, E, Shift and the passive",
-		["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		["role", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		and not (card.get("weapons", {}) as Dictionary).is_empty()   # the LMB line is the weapon's (kit card rewrite)
 	)
 	# ---- the reticle: a thin line to the cursor all the time
 	reset.call()
@@ -859,7 +860,7 @@ func _ranks(P: Hunter, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))
