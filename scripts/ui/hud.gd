@@ -291,7 +291,8 @@ func _draw_all() -> void:
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	HurtWash.draw(c, sz, p, dmg_dir.hits, m.time)      # low health: the red edge, heavier where the hits came from
-	lowhp.draw_edge(c, sz)
+	if HurtWash.strength(p) <= 0.0:      # one red edge at a time: the wash replaces the heartbeat's glow (the beat still sounds)
+		lowhp.draw_edge(c, sz)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
