@@ -62,6 +62,7 @@ func _draw_panels() -> void:
 		if p and not p.out and not p.extracted:
 			HudScale.begin(hud, "vitals", sz)
 			HudVitals.draw(hud, sz, p)
+			RankMarks.watch(hud)
 			HudScale.begin(hud, "abilities", sz)
 			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
