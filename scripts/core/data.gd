@@ -208,7 +208,7 @@ const PERKS := {
 	"quickhands":
 	{"name": "Quick Hands", "desc": "Reload 30% faster.", "icon": "medkit", "col": Color("ffd27a"), "max": 1},
 	"secondwind":
-	{"name": "Second Wind", "desc": "One extra dash charge.", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
+	{"name": "Second Wind", "desc": "Dropping below 30% health instantly refreshes your dash (once every 45s).", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
 	"featherfall":
 	{
 		"name": "Featherfall",
