@@ -317,20 +317,20 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 # ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
 const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes
 const FAR_S := 0.2              # s early: outside it, so the press is dropped
-## A press held through a dash is replayed into the stun, and 0022-cc-exit-buffer holds a press made in a CC's last
-## window again, so past a dash the drop takes more than two windows (main's rule: every interaction chains).
-const FAR_PAST_DASH_S := 0.35
 
-## Loco.press_buffer by its three uses: Gil's E held past a dash's end while a stun still runs, Gil's E made before
-## a stun ends, and Ostra's early recast before her seed arms. NEAR_S early goes, FAR_S early doesn't.
+## Loco.press_buffer by its three uses: Gil's E made before a stun ends, Ashwick's E held past a dash's end while a
+## stun still runs (the replay meets a stun with more than the window left: refused), and Ostra's early recast before
+## her seed arms. NEAR_S early goes, FAR_S early doesn't.
 func _one_window(main: Node) -> void:
 	CombatBus.ability_used.connect(_on_used)
 	var went := {}
 	var m := _match(main, "gil")
 	for lead in [NEAR_S, FAR_S]:
 		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
-	for lead in [NEAR_S, FAR_PAST_DASH_S]:
-		went[[lead, "gil e held past a dash's end"]] = _past_dash(m, lead)
+	m.queue_free()
+	m = _match(main, "ashwick")       # (his ground row buffers E; Gil's fires it in the dash)
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ashwick e held past a dash's end"]] = _past_dash(m, lead)
 	m.queue_free()
 	m = _match(main, "ostra")
 	for lead in [NEAR_S, FAR_S]:
