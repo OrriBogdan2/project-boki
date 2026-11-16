@@ -79,7 +79,8 @@ All names and multipliers are placeholders.
 
 **Other kin rules in every tier:**
 - **Knocked out while you're alive:** a kin comes back to you after `kin_recall_time` (25s).
-- **While you're downed:** your kin rides round your wisp as a Boki wisp and pulls you up (`KinWispForm`).
+- **While you're downed:** a Boki that was summoned (out, alive) when you went down rides round your wisp as its guardian and pulls you up (`KinWispForm`). One still on your shoulder, or summoned after you fell, never does.
+- **Team out:** when the last standing teammate goes down, the team stays in only while a downed teammate's guardian Boki is alive and pulling (at most `GUARD_CAP`, 10s; an enemy on the Wisp or the Boki going down ends it). Otherwise everyone is out at once ("team wiped", `Match._check_team`).
 - **However you come back:** a kin that's still loose returns to you, so kin don't need beacons of their own.
 
 **Worth deciding before launch:**
