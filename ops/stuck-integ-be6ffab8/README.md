@@ -46,3 +46,21 @@ Numbers (this job, main e2bc08e889): 205 of 697 stuck branches have commits in t
   old code; the split has to be redone on the current file (health --strict passes on main, so no budget forces it now).
 - The rest of the list keeps the pass-1 triage (`triage_cd1e658f.tsv`): 176 INFLIGHT (open PRs), 487 PORT.
   Read PORT rows against `dropped_members.tsv` first: a PORT row that is also a dropped member is a replay, not a merge.
+
+## Pass 3 (job 20261116-233033-a5, rpc6): main c5fb9f06c2 merged, the branch's own reds fixed
+
+- origin/main c5fb9f06c2 (PR #116, vfxsfx1 lane) merged in clean. `godot --headless --import`: 0 errors.
+- The merge left match.gd 1 line over its budget (5726/5725): `FireTap.stepped` moved from Match's step loop into
+  Hunter.sim, next to the PRESS_KEYS clear it belongs with (nothing after the hunters' sim reads `inp["fire"]`,
+  and the local player steps every fixed step). match.gd back to 5725, hunter.gd 3260/3500.
+- `--dash-flow-check` was red on its own one-window row: pass 2 tested "E held past a dash's end" on Gil, whose
+  ground row fires E inside the dash (content/dash_flow/gil.json, since 11-11), so the row never held a press and
+  read "went off" at any lead; the 0.35 s far lead of 10546e5b16 was a wrong fix. The row now uses Ashwick (ground
+  E row: buffer). A debug trace shows the rule works as 0022 says: lead 0.1 -> the held press replays at the stun's
+  end and casts; lead 0.2 -> the replay meets a stun with 0.03 s left and `use_e` refuses it (busy), dropped.
+- Lint on the touched files: fire_tap.gd gdformat clean, dash_flow_check gdlint 14 = main, juggernaut_kit's one
+  long line split. health --strict: only main's chore_check.gd / remote_anim_check.gd long lines (NEW-RED 0).
+- Checks on the final tree (all green): --last-hit-colour-check 0 fails, --cast-lock-buffer-check 0, --low-fps-input-check 0,
+  --dash-flow-check 0 fails / 6 skips (same rimewright/dolm/tender rows as before).
+- Not run (box at load 50, no gh on rpc6): full suite, export dry-run. The regate bot gates the PR.
+- Left for the next pass: the 43 cheap replays in `dropped_members.tsv` (<= 3 own commits), each by the recipe above.
