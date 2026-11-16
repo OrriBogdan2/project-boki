@@ -396,6 +396,10 @@ def work(i):
     return soft(room(mix(h(620, 0.0), h(700, 0.13), scuff), 0.3), 4000)
 
 
+def unfuse(i):
+    d = 0.5; n = N(d); u = np.arange(n) / n
+    fall = S.sweep(1400, 380, d) * np.sin(np.pi * u ** 0.4) * (1 - u) * 0.6
+    return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
 
 
 
@@ -551,6 +555,7 @@ def main():
     S.save_loop('boki_sleep', sleep_loop(), 'loop')
     S.takes_cat('boki_yawn', yawn, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
+    S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
     voice_sets()
 
 

@@ -81,6 +81,7 @@ const WIRED := {
 	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_fuse_end": ["match/merge_xform.gd"], "boki_fuse_tired": ["match/merge_xform.gd"],
+	"boki_unfuse": ["match/merge_xform.gd"],
 	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
 }
 
