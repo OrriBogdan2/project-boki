@@ -459,4 +459,5 @@ def main():
     graft(a.head, a.body, a.out, a.cut, a.keep_node, a.compact, a.ramp, fit, boxes, a.min_island, a.hair_zone)
 
 
-main()
+if __name__ == "__main__":
+    main()
