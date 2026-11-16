@@ -334,6 +334,7 @@ const CHECKS := {
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--kit-sweep-check": ["res://tools/kit_sweep_check.gd", "kit_sweep_check", null],  # no log errors
 	"--buff-stack-check": ["res://tools/buff_stack_check.gd", "buff_stack_check", null],
 	"--buff-stack-shots": ["res://tools/buff_stack_check.gd", "buff_stack_check", "shots"],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
@@ -389,6 +390,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
+	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],  # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
@@ -416,6 +418,7 @@ const CHECKS := {
 	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
 	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],      # ways down, match camera
 	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],      # slip sweep
+	"--land-lean-shots": ["res://tools/land_lean_shots.gd", "land_lean_shots", null],      # landing squash, run lean
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # every Hunter in a row, true scale
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
