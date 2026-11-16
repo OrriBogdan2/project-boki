@@ -103,9 +103,9 @@ on 32 cores, the host (drawn, opengl3) ran at 11 fps and the headless guest at 5
 fifth of the guest's. The guest's timers ran out while the host was still waiting, and both checks went red (the
 0.24.4 gate's `online-displace` and `displace-net` reds, "same on both trees"):
 
-- **Meeko Hearth Call pull, guest**: the guest bled out on its own game during the host's 5.4 s channel and got up
+- **Meeko Rise and Shine pull, guest**: the guest bled out on its own game during the host's 5.4 s channel and got up
   at its respawn, 52 m in one frame and 37 m from the offline end (x5.6, "double move").
-- **Kael's Warchain** (displace-net): he lands 3.6 m from the player (bar 2.6).
+- **Kael's Short Leash** (displace-net): he lands 3.6 m from the player (bar 2.6).
 - **A hit's burn** (displace-net): 3.0 s left on the player's game when the host asked (bar 3.3).
 - The other game also drew Kael's pull with 5 to 11 m steps a frame (NetSmooth with the owner's clock at a fifth
   of ours). Nothing asserted on it, and it is not a NetSmooth fault: the real game cannot run that slow above
@@ -124,17 +124,17 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 | Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |
 |---|---|---|---|---|---|---|---|---|---|
-| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
-| Kael Warchain sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
-| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
-| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
-| Kael Warchain sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
-| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Kael Short Leash self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
+| Kael Short Leash sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
+| Grimble Sticky Fingers reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Kael Short Leash self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
+| Kael Short Leash sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
+| Grimble Sticky Fingers reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Motley swap dash | moved Hunter | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Motley swap dash | caster | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
-| Meeko Hearth Call pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
-| Sparkle Kitefall launch and crash | caster | 1.08 (1.09) | 4.97 | 4.97 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
-| Sparkle Kitefall launch and crash | moved Hunter | 0.13 (0.13) | 0.13 | 0.88 | 0.00 | 0.00 | 0.00 | 2.5 vs 2.5 m (x1.00) |  |
+| Meeko Rise and Shine pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
+| Sparkle Stormfall launch and crash | caster | 1.08 (1.09) | 4.97 | 4.97 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Sparkle Stormfall launch and crash | moved Hunter | 0.13 (0.13) | 0.13 | 0.88 | 0.00 | 0.00 | 0.00 | 2.5 vs 2.5 m (x1.00) |  |
 | Knock into a wall | moved Hunter | 0.26 (0.26) | 0.34 | 1.82 | 0.00 | 0.00 | 0.00 | 3.9 vs 3.7 m (x1.07) |  |
 
 The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows the same Sparkle crash step
@@ -147,14 +147,14 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   distances match offline (x0.90 to x1.07).
 - **Ends agree.** The other game and the server end exactly where the mover's own game ends (0.00 m). Against
   offline: Kael's pull ends 0.0 to 0.3 m short, everything else 0.00 m. Kael's rows were red on main (0.77 to
-  0.84 m, 3 of 3 runs; the 0.24.4 gate triage put the 2 reds on Meeko's Hearth Call, which passes at 0.00 m) and
+  0.84 m, 3 of 3 runs; the 0.24.4 gate triage put the 2 reds on Meeko's Rise and Shine, which passes at 0.00 m) and
   it was the check, not the game: the offline run leaves the bot right where the guest is placed next (Kael's
   arrival shoves it to 48.75 m), and the guest's game still draws the bot's copy there for ~0.5 s (delay plus the
   snapshot buffer), so the two bodies separate and the guest starts 0.55 m nearer Kael, who then stops 0.8 m
   short. The check now waits SETTLE_VIEW after moving the bot away before placing the guest.
-- **Teleports are teleports, on every game.** Motley's swap and Meeko's Hearth Call pull are one 8 m jump by
+- **Teleports are teleports, on every game.** Motley's swap and Meeko's Rise and Shine pull are one 8 m jump by
   design (`Displace.teleport`, scripts/combat/displace.gd:44) and look the same on the other game and the server.
-- **Gap, not fixed: Sparkle's Kitefall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
+- **Gap, not fixed: Sparkle's Stormfall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
   with and without delay; the own game's largest step is 1.06 m). Cause: the crash is a scripted 0.15 s lerp
   (`MageUlt._fall_tick`, scripts/arch/kits/mage_ult.gd:280, sets `h.vel = ZERO`), so the snapshot reports no
   velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:229), so the other game sees one or two
@@ -164,7 +164,7 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   hunter step still does not integrate it: a double move on the own game if it does) or a cast event for the
   other game to play the dive locally (a Net shape change, so not done here).
 - **Fixed: a guessed run-on shoved the other player.** `--displace-net-check` failed under xvfb (0 headless):
-  Kael's Warchain left a 3.4 to 4.7 m gap instead of 0.9, and the burn row read 3.3 s of 4. Logged per step on
+  Kael's Short Leash left a 3.4 to 4.7 m gap instead of 0.9, and the burn row read 3.3 s of 4. Logged per step on
   both games: the host's hook (+0.30 s) and pull (+0.48 s) land at the same sim times headless and under xvfb,
   and the guest sees the pull start on time (`NetSmooth.DELAY` behind). The pull's end reaches the guest late.
   Its copy of Kael runs on at 22 m/s past the arrival (`NetSmooth.RUN_ON`, up to 0.25 s), and `Match._separate`
@@ -181,7 +181,7 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   40/0 in 3 runs at 100 ms and Kael's ends 0.03 to 0.27 m from offline.
 - Under xvfb run the check with `--rendering-driver opengl3`, as the suite does. On Vulkan (llvmpipe) on a
   loaded box the guest's answers never reached the host (every row red from the first, the same in 3 runs).
-- **Sparkle's Kitefall crash is a drop on the other game too** (ext/feel-kitefall-net; it stepped 4 to 5.7 m
+- **Sparkle's Stormfall crash is a drop on the other game too** (ext/feel-kitefall-net; it stepped 4 to 5.7 m
   in one frame there in 4 of 5 runs before, while the own game's largest step is 1.06 m). The crash is a
   scripted 0.2 s lerp (`MageUlt._fall_tick` holds `h.vel` at zero so the hunter step does not move her twice),
   and the owner sends about 10 snapshots a second, so the other game saw one or two snapshots of the fall with
@@ -190,12 +190,12 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   bump), and `NetSmooth` only takes a move faster than `SNAP_SPEED` for a teleport when the two snapshots'
   velocities along the move don't account for it (up to twice the faster of them). A teleport reports the
   speed it goes on with, not one along the jump, so it still snaps. `--remote-smooth-check`'s "fall" row casts
-  Kitefall on the host 12 m out and asserts the guest's biggest step in a frame stays under 4 m (1.6 to 1.8 m
+  Stormfall on the host 12 m out and asserts the guest's biggest step in a frame stays under 4 m (1.6 to 1.8 m
   measured). Left: the cubic between the last snapshot of the fall (full speed) and the first after the
   landing (still) can carry the drawn body up to about 0.15 of the fall past the landing for a few frames
   when that snapshot falls in the fall's last 0.03 s (not seen in the check's runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
-  the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).
+  the guest is the one moved); Kael's Short Leash on a bot (that is the offline reference).
 
 ## Remote smoothing: the 0.24.4 gate's 5 reds (`--remote-smooth-check`)
 
@@ -253,14 +253,14 @@ scripts/match/net_smooth.gd). A steady line still draws 0.15 s behind. No sync s
 
 | Move | Mover | Step/frame other: before / after | Rubber band other (m): before / after | Late start own / other (ms), after | Moved vs offline, after |
 |---|---|---|---|---|---|
-| Kael Warchain self-pull | caster | 0.37 / 0.49 | 0.09 / 0.05 | -1 / 454 | x1.00 |
-| Kael Warchain sling | caster | 1.60 / 2.86 | 0.14 / 0.42 | 1 / 440 | x1.00 |
-| Grimble Deep Reach reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
+| Kael Short Leash self-pull | caster | 0.37 / 0.49 | 0.09 / 0.05 | -1 / 454 | x1.00 |
+| Kael Short Leash sling | caster | 1.60 / 2.86 | 0.14 / 0.42 | 1 / 440 | x1.00 |
+| Grimble Sticky Fingers reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
 | Motley swap dash | moved Hunter | 8.00 / 0.90 | 0.00 / 0.00 | 401 / 768 | x1.00, a teleport |
 | Motley swap dash | caster | 8.00 / 8.00 | 0.00 / 0.00 | 0 / 411 | x1.00, a teleport |
-| Meeko Hearth Call pull | moved Hunter | 8.05 / 8.05 | 0.00 / 0.00 | 532 / 895 | x1.00, a teleport |
-| Sparkle Kitefall launch and crash | caster | 5.65 / 5.55 | 0.00 / 0.01 | 0 / 412 | x1.00 |
-| Sparkle Kitefall launch and crash | moved Hunter | 0.13 / 0.14 | 0.00 / 0.05 | 461 / 924 | x1.00 |
+| Meeko Rise and Shine pull | moved Hunter | 8.05 / 8.05 | 0.00 / 0.00 | 532 / 895 | x1.00, a teleport |
+| Sparkle Stormfall launch and crash | caster | 5.65 / 5.55 | 0.00 / 0.01 | 0 / 412 | x1.00 |
+| Sparkle Stormfall launch and crash | moved Hunter | 0.13 / 0.14 | 0.00 / 0.05 | 461 / 924 | x1.00 |
 | Knock into a wall | moved Hunter | 0.29 / 0.29 | 0.23 / 0.00 | 344 / 766 | x1.07 |
 | Kael Rampage dash | caster | 1.53 / 0.52 | **1.33 / 0.44** | 6 / 427 | x1.00 |
 | Grimble Barge dash | caster | 0.25 / 0.26 | 0.25 / 0.25 | 1 / 433 | x1.00 |
@@ -278,10 +278,10 @@ game went from about 418 to 427 ms with the bigger margin.
    (Displace, decision 0016), and the snapshots come back (300 ms) plus the buffer. The owner's own game starts
    0.34 to 0.53 s late. Only prediction on the caster's copy (draw the pull at once, hand back to the owner's
    snapshots) would cut it. That changes decision 0016 and needs a parity look at the source first.
-2. **Kael's Warchain sling steps 1.6 to 2.9 m in one frame on the other game** (0.57 at 100 ms, 0.43 on its own
+2. **Kael's Short Leash sling steps 1.6 to 2.9 m in one frame on the other game** (0.57 at 100 ms, 0.43 on its own
    game). Not traced. A lost or overtaken snapshot at the sling's speed probably clears the buffer. 0.47 m after
    the eased clock below (one run).
-3. **Sparkle's Kitefall crash steps about 5.6 m on the other game**: the known gap above. The model is hidden from
+3. **Sparkle's Stormfall crash steps about 5.6 m on the other game**: the known gap above. The model is hidden from
    30% of the fall (`MageUlt._fall_tick`), so it reads as the streak. The fix is still a cast event or the fall's
    velocity in the snapshot (a Net shape change).
 4. **A teleport can be drawn as a glide** (Motley's 8 m swap, the moved Hunter on the host, 0.90 m a frame in the

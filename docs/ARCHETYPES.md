@@ -941,7 +941,7 @@ The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
 | Passive | **Runes and Heat**: your next spell on a Runed foe (a Bolt, a Hex, an echo) **detonates** it: a **Runeburst**, 16 + root 0.5, T4. Casting builds Heat (Bolt 15, Hex 25); Overcharged (70+) a detonation is a **Flashpoint**: 30 + 14 to everyone within 2.6m, root 0.8, all the Heat spent with no Vent, the Bolt back. 100 Vents (the risk stays) |
 | E | **Hex**: a dodgeable bolt (20 m/s, 11m; a projectile, so it can be sidestepped or blocked) that turns a hunter into a harmless critter for 1.3s: half speed, no attacks, casts, dashes, gloves or glides; the model swaps for a hopping critter with a rune over it. Monsters are stunned 1s. On a Runed foe it detonates the Rune too (no root on top of the Hex) |
 | Dash | **Blink**: a 0.12s windup (the landing sigil shows), up to 5.5m through walls; the sigil left behind slows foes 0.6s later and for 3s a second dash **snaps you back** to it (free) |
-| R | **Encore** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
+| R | **Last Dance** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
 
 - Loop: Guided Bolt round a pillar (Rune) -> Hex them (detonates: Runeburst, then they're a critter)
   -> Blink in, Bolt again; Overcharged, the detonation is a Flashpoint -> snap back out.
@@ -952,7 +952,7 @@ The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
 - Hex online: `Hex.apply` sends a Net event `["hex", nid, seconds]`; every game shows the critter,
   the body's own game runs the rules. **Net.VERSION 0.4.0 -> 0.5.0** (a new event kind).
 - Bots: Guided Bolts steered onto the target (their aim follows it while they hold), Hex rival
-  hunters (always on a Runed one), Encore in range, Blink away when hurt and snap back once safe;
+  hunters (always on a Runed one), Last Dance in range, Blink away when hurt and snap back once safe;
   a hexed bot scurries away from its target.
 - Retired: Lance, Sigil (and the Sigil-based Flashpoint), Meteor.
 
@@ -1002,7 +1002,7 @@ above is superseded by this:
 
 | Archetype | Input | Shape | Sound | Payoff |
 |---|---|---|---|---|
-| Thief | tap | a spinning Bola; the first foe it wraps is Grounded and it flies on; a second foe caught and both are stunned | a whirr, a cord snap, a stun clang | Marks |
+| Thief | tap | a spinning Dark Bola; the first foe it wraps is Grounded and it flies on; a second foe caught and both are stunned | a whirr, a cord snap, a stun clang | Marks |
 | Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: a stun; feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
@@ -1052,21 +1052,21 @@ step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 
 | Slot | Input | Shiv (wiki) | Ours |
 |---|---|---|---|
-| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, eight shown, no cap; 4s, refreshed): a flat +1.3 on your weapon hits per Mark (the data's +16 on a 160 shot). Primed hit +2, Bola +1. A knock heals 20% on top of the takedown's 5% (25%); an assist heals 25% |
+| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Dark Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, eight shown, no cap; 4s, refreshed): a flat +1.3 on your weapon hits per Mark (the data's +16 on a 160 shot). Primed hit +2, Dark Bola +1. A knock heals 20% on top of the takedown's 5% (25%); an assist heals 25% |
 | LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
 | Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
-| RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 |
+| RMB | tap | **Chain Dark Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Dark Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Dark Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 |
 | E (their Q) | tap, recast | **Farstep Dagger**: a dagger that sticks to surfaces or characters (slows 50% 4s); recast to teleport to it; after 6s you teleport anyway | **White Flash**: 12m, sticks in the first foe (8, slow 50% for 2.5s) or where it stops; recast to step to it; after 5s you step anyway |
 | R | tap | **Fusillade**: after a short delay, up to 5 shots at each nearby enemy over 2s, each resetting all stacks' duration; the outer ring takes bonus damage and anti-heal; 2 charges of a weaker dash; LMB usable | **No R (kits2-nor).** **Jackpot** is a Mark trigger: the fifth Mark on a foe releases 4 knives at it over 0.45s (4.5 each, in sight within 14m); each knife refreshes every Mark; one free Vault (2.8m, it Primes too) for 4s; it rests 8s. R is the Boki Merge |
 
-Ranks (wiki levels 2-4 -> our ranks): Bola rank 3 flies 1m further after the first foe and two foes
+Ranks (wiki levels 2-4 -> our ranks): Dark Bola rank 3 flies 1m further after the first foe and two foes
 caught pool their Marks (level 3 travel, level 3-4 stack combining); Vault rank 3: Primed hits +20% and
 a White Flash sticking in a foe resets Vault (levels 2-4); White Flash rank 3: sticking refunds 25% of
 the cooldown, 50% in a foe (level 3). (Jackpot used to have its own rank 2; as a Mark trigger it has no
 ranks.)
 
 - Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
-  Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
+  Vault again. Dark Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
 - Tells: gold diamonds over the target for everyone else (spinning faster as they stack, a jingle at 5; she reads her MARKS badge); a gold glint and
   light at the hand while Primed; crosshair "PRIMED · land it to reset Vault"; the dash slot's gold dot.
@@ -1109,8 +1109,8 @@ pose, sound and VFX.
 | Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks; Vault resets; the speed boost ends | wiki |
 | Thief | White Flash in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
 | Thief | White Flash -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
-| Thief | Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
-| Thief | Bola -> Grounded foe | can't dash, jump or glide | wiki |
+| Thief | Dark Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
+| Thief | Dark Bola -> Grounded foe | can't dash, jump or glide | wiki |
 | Thief | fifth Mark on a foe | **Jackpot**: 4 knives at it, every knife refreshes all Marks; it rests 8s | wiki (Fusillade, made a trigger) |
 | Thief | Jackpot -> Vault | one free Vault (no charge) that Primes; its Primed hit resets Vault too | wiki (the Prime on the free Vault is ours: the wiki doesn't say) |
 | Thief | knock / assist | heal (25% in all) | wiki |
@@ -1125,7 +1125,7 @@ alternate (no heavier third, as Brall's), `jug_wave` (the raised charge carving 
 `jug_dash` (shoulder-down, the tip thrust at the end), `jug_chain` / `jug_reel`, `jug_spin`,
 `jug_chainlunge`, `jug_haul_wind` / `jug_haulslam` (`jug_doom` went with the R; the rank-3 crash
 uses `jug_slam`). Thief: SMG recoil and the twin blades' arcs as before, `thf_vault_f/b/l/r` (a tucked flip by
-the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola leaves the hand 0.14s
+the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Dark Bola leaves the hand 0.14s
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
 hunter's own game and bots, and since Net 0.15.0 on remote players too: the move id and its age ride the
@@ -1171,7 +1171,7 @@ rank 3 a third charge (level 2); Short Leash rank 3 refunds 33% when it hooks a 
 - Brall: climbing double-height walls is now **built** (`climb_tall` for Kael `juggernaut` and the Archer in `content/rules/hunter_move.json`). Still missing (see docs/KIT_PARITY.md, Kael): dodging shots building Blazing Spirit (his level-4 dash
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
   knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
-- Shiv (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
+- Shiv (Sable): the Dark Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Dark Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
@@ -1182,7 +1182,7 @@ rank 3 a third charge (level 2); Short Leash rank 3 refunds 33% when it hooks a 
 
 Shiv's scale: LMB 58, a stack ~9 (15% of a shot), empowered 50, bolas 23 (+53 with two), R shot 25
 (+17 rim). Ours keeps those ratios on our weapons: blades 7 / SMG 4.6 a hit, +8% a Mark (capped at 5
-for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of them). Brall's: slash 20
+for the SMG's rate), Primed +10, Dark Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of them). Brall's: slash 20
 (tip +20), Execution Slam 70 (3.5 slashes), Lunge 45, Obsidian 52, Spin 54, Flame Step 18 / tip 36, R
 130 -> ours slash 8 (tip 16), Slam 26, Lunge 14 -> 22, Meteor 18, Spin 18, Rampage 7 / tip 14,
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the

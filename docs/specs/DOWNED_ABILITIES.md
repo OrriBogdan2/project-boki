@@ -11,8 +11,8 @@ in the refs: nobody has measured them.
 | # | Rule (source) | Evidence | Ours now | Proposed | Net impact |
 |---|---|---|---|---|---|
 | 1 | Sparkle's Lightning Strike launches Wisps like any body in its circle | [W] Joule; mage.md row 114 | **Built here**: rival Wisps in the circle get the same slide tow (no Static, no Grounded: a Wisp can't be shot or grounded) | done | none: `Displace.tow` already mirrors to the owner's game |
-| 2 | Lace's Hail Wall affects Wisps | [W] Myth; archer.md row 112 | no (foes_of skips downed) | **waits on rule 2 decision**: proposal below (bleed x2 and slow 35% inside the wall, no hit on the pool), draft docs/decisions/0098 | none: `down_hp` is owner-side and already in the `"st"` row |
-| 2 | Lace's Hail Wall affects Wisps | [W] Myth; archer.md row 112 | **Built here**: rival Wisps inside the wall lose `down_hp` each wall tick: tick damage (5) x `ArcherKit.WISP_DRAIN_K` 2.5 (the stomp multiplier) = 12.5 of the 100 pool, [est]. No slow, no burn. Allies' Wisps untouched | done; owner to confirm the magnitude and whether the source slows Wisps | none: the hit rides the existing `"hit"` topic (`src` `wisp`) and `Life.wisp_hit` drains `down_hp` in the Wisp's own game; `down_hp` already replicates in the `"st"` hunter row (`match.gd` index 12), so every game sees the bar fall |
+| 2 | Lace's Hemline affects Wisps | [W] Myth; archer.md row 112 | no (foes_of skips downed) | **waits on rule 2 decision**: proposal below (bleed x2 and slow 35% inside the wall, no hit on the pool), draft docs/decisions/0098 | none: `down_hp` is owner-side and already in the `"st"` row |
+| 2 | Lace's Hemline affects Wisps | [W] Myth; archer.md row 112 | **Built here**: rival Wisps inside the wall lose `down_hp` each wall tick: tick damage (5) x `ArcherKit.WISP_DRAIN_K` 2.5 (the stomp multiplier) = 12.5 of the 100 pool, [est]. No slow, no burn. Allies' Wisps untouched | done; owner to confirm the magnitude and whether the source slows Wisps | none: the hit rides the existing `"hit"` topic (`src` `wisp`) and `Life.wisp_hit` drains `down_hp` in the Wisp's own game; `down_hp` already replicates in the `"st"` hunter row (`match.gd` index 12), so every game sees the bar fall |
 | 3 | Grimble's Abyssal Grasp scoops Wisps on its path and reels them in | [D] kits:57, [F] dredge.md f-9 | **Built** (dredge_kit `scoop`, dredge.md rows 101/162) | none | tow `haul`, already Net-safe |
 | 4 | Elluna's Soulpack: walk over an ally Wisp to carry (2), carried Wisps don't bleed, can't be stomped; damage or stun drops them, 4 s lockout | [D] kits:7, [F] mooshmoosh.md | **Built** (tender_kit, `CareUtil`); "which hits drop" not traced | trace the drop list against footage | none |
 | 5 | Elluna's Divine Intervention heals an ally Wisp, resurrects it and teleports it to her at the end; continues if the ally is knocked | [D] kits:13, [F] mooshmoosh.md 244-257 | **Built** (tender.md rows 48/75, `_call_home`) | none | `Displace.teleport` plus the `"rev"` event, already used |
@@ -35,14 +35,14 @@ Every kit row that mentions downed Hunters, in our names. "Source" is the effect
 
 | Hero | Ability | Source effect on Wisps | Ours | Rule 2 status |
 |---|---|---|---|---|
-| Lace | Hail Wall (E) | the rain zone "affects" Wisps; no number, no clip | nothing | waits on rule 2 decision |
-| Motley | Lantern Trade, rank 3 shield | allies and Wisps entering the zone get a shield | allies only | waits on rule 2 decision |
-| Sparkle | Skycall | launches Wisps in the circle | rival Wisps slide (rule 1) | not affected: a move, no drain |
-| Grimble | Deep Reach (RMB) | scoops Wisps on its path, reels them in | built | not affected |
+| Lace | Hemline (E) | the rain zone "affects" Wisps; no number, no clip | nothing | waits on rule 2 decision |
+| Motley | Musical Chairs, rank 3 shield | allies and Wisps entering the zone get a shield | allies only | waits on rule 2 decision |
+| Sparkle | Undercurrent | launches Wisps in the circle | rival Wisps slide (rule 1) | not affected: a move, no drain |
+| Grimble | Sticky Fingers (RMB) | scoops Wisps on its path, reels them in | built | not affected |
 | Meeko | Bearer (passive) | carries ally Wisps; carried ones don't bleed, can't be stomped | built | carried Wisps take no ability drain either |
-| Meeko | Hearthlight / Hearth Call | heals ally Wisps (x5), the ult revives and pulls one home | built | not affected |
-| Albert | Mending Ground burst | ally Wisps hit start to revive | built (+0.35 bar) | not affected |
-| Kael | Gilded Riposte (X) | no reset on a Wisp finish (so the ult could hit one) | hunters only | not affected: no ability hits a Wisp |
+| Meeko | Hearthlight / Rise and Shine | heals ally Wisps (x5), the ult revives and pulls one home | built | not affected |
+| Albert | Safe Harbour burst | ally Wisps hit start to revive | built (+0.35 bar) | not affected |
+| Kael | Blow for Blow (X) | no reset on a Wisp finish (so the ult could hit one) | hunters only | not affected: no ability hits a Wisp |
 | everyone | the stomp | the only finisher; stun or knock on the stomper breaks it | built (DECISIONS 2026-11-11) | unchanged |
 
 Base numbers (life.gd): the pool is 100 and bleeds in 15 s (6.7 a second); a stander drains x2.5 (16.7/s);
@@ -52,7 +52,7 @@ the stomp is 2.4 s, three feet of 12 each, then the finish.
 1. Wisps still take no ability damage (attacks pass through the source Wisp). There is no downed branch in
    `Hunter.hurt`; no ability hits the pool and none finishes a Wisp. The finish stays the stomp, or the bleed.
 2. Rule 2 is an **ability drain** for abilities whose source row names Wisps and that hold an area: today only
-   Hail Wall. A rival Wisp inside the wall bleeds **x2.0** (13.3/s: the wall adds 6.7/s, 3.3 a 0.5 s tick) and drifts
+   Hemline. A rival Wisp inside the wall bleeds **x2.0** (13.3/s: the wall adds 6.7/s, 3.3 a 0.5 s tick) and drifts
    at **x0.65** (the wall's 35% slow). A full wall (4.4 s) takes 29 of the pool on top of the base 29: it can't finish
    a fresh Wisp alone (58 of 100), only one already low.
 3. It never stacks with standing on the Wisp or the stomp: the higher drain counts (x2.5 beats x2.0) and the lower

@@ -36,7 +36,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
   like Kael's ~14 m one, are longer than the 24 m island). `REEL_TRAVEL` lines say where each part ends.
 - The first-time kit drill is marked done for the reel (in memory, the save is never written), so its card does
   not sit under the title.
-- Motley's E part waits for the Brimseed to grow full (6.5 s, her `e.grow`) before the recast, so it runs
+- Motley's E part waits for the Gag Gift to grow full (6.5 s, her `e.grow`) before the recast, so it runs
   about 5 s longer than the other Hunters' E parts and her later parts start that much later.
 - Every MP4 here is re-rendered on main fb360f614 (no drill card, travel parts on the island); see the reel-tool
   fixes note below. The juggernaut and tender line above describes an earlier render.
@@ -51,7 +51,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - The R segment of the first six MP4s is spliced from a second render of just that part (the first render pressed R
   through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels and Meeko's and
   Tenzo's are one render each.
-- R stands for the ultimate in every reel; in the game it is on X (Hearth Call, Basalt Spine and the rest).
+- R stands for the ultimate in every reel; in the game it is on X (Rise and Shine, Backbone and the rest).
 
 ## Shared by all twelve
 
@@ -66,15 +66,15 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 [dredge.mp4](dredge.mp4)
 
 Still differs:
-- Cooldowns: Deep Reach 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
+- Cooldowns: Sticky Fingers 12 s vs 18, Lump Sum 7 vs 12, Both Barrels 21 vs 36 [D].
 - Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
   Nov 7).
-- Anchor Drop: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
+- Lump Sum: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
   cone shows to everyone (matches the source [F]). Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
 - The Barge has no red burst at its start point [F]; the owner forbids bursts on dashes.
-- Brass Broadside turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
+- Both Barrels turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
   the press [F]. He walks at 30% then 20% through it (owner).
 - Backstab +50% and a 16% heal on a knock are ours (wiki), not in [D].
 
@@ -86,12 +86,12 @@ footage's is a pale rounded fan [F]; the hero is smaller in frame than the sourc
 [rimewright.mp4](rimewright.mp4)
 
 Still differs:
-- Ice Spear is pushed out of her palms and travels to the cursor, with a 2.2 m 35% slow zone and a burst at 1.8 s;
+- Icebreaker is pushed out of her palms and travels to the cursor, with a 2.2 m 35% slow zone and a burst at 1.8 s;
   the source throws a spear with a slow cone and a delayed blast (owner, Nov 5). Cooldown 10.2 s vs 12.
-- Rink Wall: slides up to 50% further than the footage (owner item 13); cooldown 17 s vs 20.
+- Cold Front: slides up to 50% further than the footage (owner item 13); cooldown 17 s vs 20.
 - Skate: 10.5 m/s, the footage mean; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
-- Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
+- Freeze Frame: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
   40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
   stacking slow ramp is ours.
 - Darts now match the source burst: a hold is one even stream of plain darts, the let-go ends it on the three
@@ -100,7 +100,7 @@ Still differs:
 - Body 1.014 vs the footage's 1.1 to 1.15 (owner height chart).
 
 Seen in the reel: the spear's burst ring and the wall's tall pale-blue slab match the footage in shape; the ground
-dash leaves an ice slab behind instead of the footage's streaking crystal ribbon; Rimelock is one big cyan disc
+dash leaves an ice slab behind instead of the footage's streaking crystal ribbon; Freeze Frame is one big cyan disc
 with a swirl, the footage's a smaller frost bud with the zone ring [F].
 
 ## Sparkle the Storm Chaser (`mage`, source Joule)
@@ -111,12 +111,12 @@ Still differs:
   running to maximum range [F] (owner items 70 and 116).
 - Wirerun (Shift) at 40 m/s vs about 32 (owner), a 7.5 to 13 m lane, a 20 damage pass hit, Blowout reset; cooldown 8
   vs 9.
-- Cooldowns: Storm Rod 8 vs 10, Skycall 10.5 vs 12, Kitefall 42 vs 60.
+- Cooldowns: Pink Spear 8 vs 10, Undercurrent 10.5 vs 12, Stormfall 42 vs 60.
 - The dash flow row into R is unsourced `[?]`.
-- Skycall's cast is a small ring in our reel; the footage's is a dark disc with a gold pillar and a direction
+- Undercurrent's cast is a small ring in our reel; the footage's is a dark disc with a gold pillar and a direction
   chevron [F]; the drag-aim for it exists but is not shown here.
 
-Seen in the reel: the Storm Rod's pink burst reads like the footage's spear impact; Kitefall is a wide pink
+Seen in the reel: the Pink Spear's pink burst reads like the footage's spear impact; Stormfall is a wide pink
 storm field over the arena, where the footage zooms out to a dark ring with a gold marker at the cursor [F].
 
 ## Mossy the Barnacle Knight (`bulwark`, source Oath)
@@ -127,48 +127,48 @@ Still differs:
   b2e942eb4 removes them and is not merged.
 - LMB hold walks at 55% while charging, with a 1.5 to 1.8 m step and a 4 m perfect-release launch (owner items 30,
   49, 59); the source stands still [F].
-- Aegis: a 160 HP shield with Shield Charge on Shift; the source's is regenerating shield energy and the routing is
+- Aegis: a 160 HP shield with Full Ahead on Shift; the source's is regenerating shield energy and the routing is
   `[?]`.
-- Faultline: four cells, 0.5 s stun, cooldown 40 vs 50. Mending Ground matches the data: 12 s, 8 s at rank 3 (the
+- Groundswell: four cells, 0.5 s stun, cooldown 40 vs 50. Safe Harbour matches the data: 12 s, 8 s at rank 3 (the
   reel's rank), as the source's 8 s at tier IV.
 - The hammer has no auto-return (matches); the recall is a second press.
 
 Seen in the reel: the throw's dotted line, the flame-arc swing and the green zone match the footage's beats; the
-Faultline telegraph is an amber rectangle with rubble where the footage's is a cyan one with a gold eruption
-[F]; the 360 Smash's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
+Groundswell telegraph is an amber rectangle with rubble where the footage's is a cyan one with a gold eruption
+[F]; the Tideturner's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
 damage number, as in the footage (it was an orange swirl inside the radius).
 
 ## Sable the Silver Thief (`thief`, source Shiv)
 [thief.mp4](thief.mp4)
 
 Still differs:
-- Cooldowns: Bola 7 s vs 13, Encore 24 vs 50, Shadow Knife 15 vs 20 at the top rank, Vault 4.5 vs 5.
-- Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
+- Cooldowns: Dark Bola 7 s vs 13, Last Dance 24 vs 50, White Flash 15 vs 20 at the top rank, Vault 4.5 vs 5.
+- Dark Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
 - Marks: a flat +1.3 per hit (the source's +16 on its 160 shot) with no cap, as the data; the 4 s fade is ours (the
-  data gives none). A knock heals 25% in all (the data's). The Bola and the Knife still add a Mark, the empowered
+  data gives none). A knock heals 25% in all (the data's). The Dark Bola and the Knife still add a Mark, the empowered
   shot 2 (the owner's call); the source stacks only on Arcslinger hits.
 - LMB: 12 m to the cursor (the footage's bolt also stops at the cursor); damage is the scaled 13.
-- Encore's look (violet ring, gold outer band) is ours; the source's is a cyan ring about 3.5 body heights wide.
+- Last Dance's look (violet ring, gold outer band) is ours; the source's is a cyan ring about 3.5 body heights wide.
 
-Seen in the reel: the Vault flip reads like the footage; the Encore is a wide pale-violet disc where the footage's
+Seen in the reel: the Vault flip reads like the footage; the Last Dance is a wide pale-violet disc where the footage's
 is a thin cyan ring [F].
 
 ## Motley the Void Jester (`ostra`, source Void)
 [ostra.mp4](ostra.mp4)
 
 Still differs:
-- LMB: Tether Lantern, 9 damage every 0.6 s up to 14 m, with a waiting charge that adds 34% and a Slow; every orb
+- LMB: Comic Timing, 9 damage every 0.6 s up to 14 m, with a waiting charge that adds 34% and a Slow; every orb
   pierces terrain (owner items 60 and 117). The source fires one orb, stronger after idling, through terrain only
   when empowered.
-- Shard Snap: 0.32 s wind-up vs 0.2 (owner item 40); stun 0.8 to 1.8 s by flight distance.
-- Brimseed: peaks at 3.5x like the source, but fizzles after 10 s unpopped (ours); cooldown 10 vs 8 at the top rank.
-- Nightwell: about a 1 s cast lock (owner); the radius 3.6 m and a 12 m pull.
-- Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
+- Stage Fright: 0.32 s wind-up vs 0.2 (owner item 40); stun 0.8 to 1.8 s by flight distance.
+- Gag Gift: peaks at 3.5x like the source, but fizzles after 10 s unpopped (ours); cooldown 10 vs 8 at the top rank.
+- Main Attraction: about a 1 s cast lock (owner); the radius 3.6 m and a 12 m pull.
+- Musical Chairs: 12 m lob; faster (1.25 s) only while Swollen.
 - He floats silently (matches): no step sounds, his and a remote Motley's (source passive [D], --ostra-combo-check).
 
-Seen in the reel: re-rendered on main with `ext/parity-reel-tool`, so the Brimseed now grows to full size before the
+Seen in the reel: re-rendered on main with `ext/parity-reel-tool`, so the Gag Gift now grows to full size before the
 recast and shows as a big violet-and-cyan globe (the footage's room-sized violet one, fixed on main; the reel's R part
-starts at frame 672); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
+starts at frame 672); the Main Attraction tell is a pale-cyan disc where the footage's vortex is a
 violet swirl [F].
 
 # The four slice Wardens (main 88b06b9e7, 2026-11-11)
@@ -181,11 +181,11 @@ footage was checked through the key-frame captions in `briefs/hero-ref/{venator,
 the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on rpc5.
 
 **Owner-direct 11-11 branches not in main** (none of the four is merged, so these reels show the kits before them):
-- `ext/vex-rmb-1111` a796f3a38: the Burr Charge lane's end is a dud on the ground or in the air; only a wall cone.
+- `ext/vex-rmb-1111` a796f3a38: the Coin Blast lane's end is a dud on the ground or in the air; only a wall cone.
 - `ext/kael-owner-1111` 4cb48148d: tap RMB is a locked 4.3 x 0.72 lane, no Chain Lunge, hold has no lane or ring,
   Meteor Drop centred under him. Based on ext/release-integ-0245, not main.
-- `ext/lace-1111` cf1adae16: Heavy Shot from the bow mouth, no feet crescent, roll 3.375 m, crimson kit colours,
-  red laces for Hail Wall. Based on ext/release-integ-0245, not main.
+- `ext/lace-1111` cf1adae16: Pin Down from the bow mouth, no feet crescent, roll 3.375 m, crimson kit colours,
+  red laces for Hemline. Based on ext/release-integ-0245, not main.
 - `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
 
 **Reel-tool fixes** (`ext/parity-reel-tool`, rows now fixed on main): the old reels showed the kit drill card
@@ -193,16 +193,16 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
 island rim. The tool now skips the drill and keeps the travel parts on the island. All twelve MP4s are re-rendered
 with it (`ext/parity-reels-rerender`, from main fb360f614; GPU jobs 20261112-124742-*, ashwick 20261112-145556-25476).
 In every run log the three travel parts end on the island (`on ground true`) except Meeko's air dash, a kit property:
-it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Motley's Brimseed full growth is now
+it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Motley's Gag Gift full growth is now
 shown. The rest of the "Seen in the reel" lines match the new renders.
 
 **KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
-  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot
+  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Pin Down
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
   and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
-  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Pin Down wall
   payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
   stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
@@ -210,18 +210,18 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
 [gunslinger.mp4](gunslinger.mp4)
 
 Still differs:
-- RMB Burr Charge: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
+- RMB Coin Blast: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
   112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
   still sticks and blows the cone (the "always procs in the air" bug); `ext/vex-rmb-1111` makes it a dud.
-- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Longneedle 11.5 vs 12 / 10,
-  Cinderfall 42 vs 55 (gap 10, owner call).
-- Cinderfall's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
+- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Palm Spear 11.5 vs 12 / 10,
+  Penny Drop 42 vs 55 (gap 10, owner call).
+- Penny Drop's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
 - The Coin Blast rename and coin look (DECISIONS 11-08) are not built.
 - Her light is ember orange (our palette); the source's is green and cyan with a purple slide trail [F 0118].
 
 Seen in the reel: the rifle hits the dummy from 7 m; RMB is a red tracer to the dummy, which reads DAZED with a gold
-pip; Longneedle is a long orange line through the rock and past the frame, like the footage's beam through terrain
-[F 0182] but thin, with none of its green-white thickness or smoke ring [F 0170]; Cinderfall shoots a light column
+pip; Palm Spear is a long orange line through the rock and past the frame, like the footage's beam through terrain
+[F 0182] but thin, with none of its green-white thickness or smoke ring [F 0170]; Penny Drop shoots a light column
 up, then a ticked orange disc and a burning patch with SLOWED, the footage's beats [F 0197, 0203]; the slide shows
 a pale ring at her feet for a few frames at the start, which the owner's "no rings on dashes" rule (gunslinger.md row 10)
 says should not be there: worth a look.
@@ -236,7 +236,7 @@ Still differs:
 - Dash: 4.5 m raw, felt 3.8 m / 0.2 s with a 0.07 s dip, 2 charges, cd 10.4 vs 13 (owner 113.8); the source has 3
   Quick Dash charges [F summary_screen].
 - Dash to LMB: ground and air rows `buffer` (gap 9, item 51 says combine).
-- Warchain: tether 24 m is ours; the source's throw is about 12.6 m and the leash is unknown `[?]`. Cd 12.8 vs 16.
+- Short Leash: tether 24 m is ours; the source's throw is about 12.6 m and the leash is unknown `[?]`. Cd 12.8 vs 16.
 - Riposte: the kill reset is `[?]`; cd 36 vs 45. RMB cd 2.0 vs 2.5, air drop 7.2 vs 9.
 - His glow is white-hot (owner); the source's is hot red.
 
@@ -254,20 +254,20 @@ orange-gold arc into a gold cloud), where the footage's is a huge red vertical c
 [archer.mp4](archer.mp4)
 
 Still differs:
-- Heavy Shot: on main a magenta ring sits at her feet while she draws; `ext/lace-1111` starts the shot at the bow
+- Pin Down: on main a magenta ring sits at her feet while she draws; `ext/lace-1111` starts the shot at the bow
   mouth and drops the ring. Wall x4.94, 1.2 s stun. Her card says push 6 to 12 but the data's `push` is 8 to 12
   (card text to fix).
-- Shift: a 3.0 m / 0.27 s roll, then Spirit Walk through rocks, trees and barriers; raised walls and ledge faces
+- Shift: a 3.0 m / 0.27 s roll, then Slip Stitch through rocks, trees and barriers; raised walls and ledge faces
   are still on unmerged `ext/lace-phasewalk-verify` (gap 8). `ext/lace-1111` makes the roll 3.375 m.
-- Passive: Hawk Sense 22 m only; the source's tall-ledge climb is not built.
+- Passive: Red Thread 22 m only; the source's tall-ledge climb is not built.
 - Her kit colours on main are violet/magenta; the owner's 11-11 crimson (d41e2e) is on `ext/lace-1111`.
 - 8 of her 17 dash flow rows are unsourced `[?]`.
 
-Seen in the reel: the draw's white line runs to the cursor ring like the footage [F 0102 to 0105]; Heavy Shot
-shoves the dummy most of the way to the rim, with no big white impact burst [F 0270, 0273]; Hail Wall is a pale
+Seen in the reel: the draw's white line runs to the cursor ring like the footage [F 0102 to 0105]; Pin Down
+shoves the dummy most of the way to the rim, with no big white impact burst [F 0270, 0273]; Hemline is a pale
 curved band with violet panels at the cursor distance, the footage's curved arc [F 0457] but where the owner now
 wants red laces; R's shots are long violet lines past the dummy, like Supercharged running to max range [F 0168];
-the roll shows no dark-blue Spirit Walk tint [F 0360].
+the roll shows no dark-blue Slip Stitch tint [F 0360].
 
 ## Cinder the Flame Queen (`ashwick`, source Felix)
 [ashwick.mp4](ashwick.mp4)
@@ -275,33 +275,33 @@ the roll shows no dark-blue Spirit Walk tint [F 0360].
 Still differs:
 - The cyan pilot (#6fe8ff) burns in her palm all the time, idle too: a footage carry-over [F 0021, one frame
   before the fire]; `ext/albert-hold-cinder-orb` shows it gold/white only in the 0.2 s spool-up.
-- Furnace Cloak (E): instant pull, r 4.5, 14 m/s, no 0.2 s arm-fling ring (owner item 11); cd 10.5 vs 13.
-- Cooldowns: Cinder Shot 7 vs 9, Flue Flight 36 vs 45 (0.78x to 0.8x).
-- During Flue Flight only E works (owner, Nov 5); the source allows more.
+- Molten Hug (E): instant pull, r 4.5, 14 m/s, no 0.2 s arm-fling ring (owner item 11); cd 10.5 vs 13.
+- Cooldowns: Spitfire 7 vs 9, Red Carpet 36 vs 45 (0.78x to 0.8x).
+- During Red Carpet only E works (owner, Nov 5); the source allows more.
 
 Seen in the reel: the cyan orb is in her palm from the first frame; the hose is a narrow-then-billowing orange stream
 like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the bolt hits with FLASHOVER and an
 orange sunburst [F 0077]; the Cloak (re-rendered with the dummy inside the 4.5 m pull, `ext/vfx-cinder-cloak-swirl`) is a thin lit swirl
 running in from the 4.5 m edge with the pull, then a lit shield swirl on her per foe caught, like the footage's
-swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
+swirling shield ring [F 0186]; Red Carpet lays a thick orange fire carpet and carries the dummy with her to the
 island rim, close to the footage's wide magma band [F 0226].
 
 ## Meeko the Dawnfox (`tender`, source Elluna)
 [tender.mp4](tender.mp4)
 
 Still differs:
-- Burrseed: a fixed 1 s wind-up with a 6 m dotted lane (owner item 118), then a seed that sticks to the first foe
+- Stick Around: a fixed 1 s wind-up with a 6 m dotted lane (owner item 118), then a seed that sticks to the first foe
   and roots after 2 s of them staying within 15 m of her, unwinding twice as fast outside it (owner 11-10). The
   source's is a tap shot down a lane to maximum range that roots about 0.6 s after the hit [F] (2 s on the wiki).
   Cooldown 10.5 s vs 11.5 [D] (the footage card reads about 7.2 s).
 - Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
   passes (owner call), where the source's lands on the cursor and no latch was seen [F].
-- Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
+- Rise and Shine: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
   (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
   stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches. Range, past-the-cursor flight,
   speed and comet size now match (13.5 m, ext/meeko-crook-range); this reel predates it and its cursor sits on the dummy.
-- Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
+- Foxtrot: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
   "Ally-pass refund").
@@ -312,10 +312,10 @@ Still differs:
 - Body 0.66 of a medium (owner item 108).
 
 Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, where the footage's are a blue comet
-flying on past the cursor [F]; the Burrseed disc is violet like the footage's but wider for her size and ringed
+flying on past the cursor [F]; the Stick Around disc is violet like the footage's but wider for her size and ringed
 with thorns, and the root shows as a white swirl where the footage has a smaller disc and a purple beam [F]; the
 thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
-throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
+throw barely shows and there is no green plus on the summon [F]; Rise and Shine on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
 cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
 ours showed no plus sparkles there (since the reel: two small mint pluses rise off the ally on each 0.5 s heal tick,
@@ -326,20 +326,20 @@ side in a gold ring, like the footage's ally appearing next to the hunter [F 027
 [dolm.mp4](dolm.mp4)
 
 Still differs:
-- Stone Row (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
+- Foothold (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
   them by jumping as in the source (owner 23:55, `StoneStand`); KIT_PARITY gap 14 and dolm.md's ally-hop row say so too.
 - Rock Hop (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
   Landslide's short dash with a rock riding ahead [F]; the rolling rock at the end keeps the source's slow and knock.
-- Basalt Spine (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
+- Backbone (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
   cooldown 45 s [D]. The source's Tetraform is one spiked ridge about 18 to 22 m long [F]; ours was shortened from
   19.8 m on purpose with no owner line either way (KIT_PARITY ranges, `[?]`).
 - Tremor Sense: the cone is a fixed 16 m, widening 25 to 40 degrees over 2 s; the source's also lengthens, to about
   18 to 25 m [F] (dolm.md gap 9). `ext/tenzo-cone-length` c557c270d grows it to 25 m and is not on main. Not in the
   reel (it needs a sneak).
-- Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
-- Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
+- Rock Bottom (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
+- Punch hold: he walks at 85% while charging and at 55% through the Rock Bottom hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Shardskin: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+- Jade Ward: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
   a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
   damage and knockback only.
 
@@ -347,8 +347,8 @@ Seen in the reel (before `ext/tenzo-hit-impact`): the boulder trails an orange d
 the footage's bursts in a big fire flash with the damage number [F]; the punch shows its pale chevron lane but little
 impact, the footage a bright streak and rocks bursting in fire. Both hits now play a blue flash and short debris
 (`content/vfx/dolm.json`, sized by the 0.9 m splash and the lane's half width), no fire and no explosion (GPU
-before/after: `docs/shots/tenzo-hit-impact/before_after_gpu.jpg`); the Quakefall hold circle is pale blue-white where
-the footage's is red, while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
-spiked rocks; Basalt Spine is a row of separate rocks where the footage's is one continuous orange spiked ridge
+before/after: `docs/shots/tenzo-hit-impact/before_after_gpu.jpg`); the Rock Bottom hold circle is pale blue-white where
+the footage's is red, while the dark red crater with orange cracks matches; Foothold's molten basalt columns read like the footage's
+spiked rocks; Backbone is a row of separate rocks where the footage's is one continuous orange spiked ridge
 with fire [F]; the Rock Hop shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
 footage's Landslide.
