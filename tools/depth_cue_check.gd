@@ -95,10 +95,10 @@ func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var ground := m.world.ground_at(P.pos.x, P.pos.z)
 	for i in SHOTS:
 		m.spawn_shot(P, Vector3(P.pos.x, ground + SHOT_LIFT, P.pos.z), Vector2(1, 0), 1.0, 5.0, 0.1, Color.WHITE)
-	var t0 := Time.get_ticks_usec()
+	var t0 := CheckClock.own_usec()
 	for f in FRAMES:
 		dc._process(0.0)
-	var per_frame := float(Time.get_ticks_usec() - t0) / FRAMES
+	var per_frame := float(CheckClock.own_usec() - t0) / FRAMES
 	var shown := dc._shot_discs.filter(func(d): return d.visible)
 	ok(shown.size() == SHOTS, "one visible disc per flying shot (%d of %d)" % [shown.size(), SHOTS])
 	ok(shown.all(func(d): return _on_ground(d, ground)), "every shot's disc lies on the ground (y %.2f)" % ground)

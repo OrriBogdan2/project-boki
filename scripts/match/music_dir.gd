@@ -63,6 +63,7 @@ var amb_t := 0.0
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
+var training := TrainingSfx.new()   # the Training Grounds' beds, in place of these
 
 func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t -= dt
@@ -71,6 +72,9 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t = 0.25
 	var w: World = m.world
 	if w == null:
+		return
+	if m.opts.get("training", false):
+		training.ambience(w, p)
 		return
 	var voids := 0; var walls := 0; var n := 0
 	for r: float in [3.0, 6.0, 9.5]:
@@ -109,10 +113,17 @@ func last_squad() -> void:
 		if single:
 			Sfx.duck(STING_DUCK)
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> SfxMix.Muffle:
+	if p.downed or p.out:
+		return SfxMix.Muffle.DOWN
+	return SfxMix.Muffle.LOW_HP if LowHpCue.under_line(p) else SfxMix.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.mix.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true

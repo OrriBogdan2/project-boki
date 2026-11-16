@@ -81,8 +81,7 @@ func _skate_feel() -> void:
 	ok(
 			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2
-				and int(K.skate_snd.stats["carve"]) >= 2,
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
 			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
@@ -524,7 +523,7 @@ func _rime_skate_in() -> void:
 			"fastest %.3f m/s" % fastest)
 	var yaw0 := P.model.global_transform.basis.get_euler().y
 	var yaw_dev := 0.0
-	for i in 85:
+	for i in 64:     # 6.4 rad: one full turn, inside the 3.3 s hold after the 0.9 s slide and 1 s rooted
 		P.inp["aim"] = P.pos + Vector3(cos(i * 0.1), 0.0, sin(i * 0.1)) * 6.0
 		step(m, 1.0 / 60.0)
 		face_dev = maxf(face_dev, absf(angle_difference(P.face, face0)))
