@@ -504,7 +504,7 @@ func load_kin_content() -> void:
 
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
-## kin (content/kin/*.json "rare": true), which only ever hatch from a boss's Rare Egg.
+## kin (content/kin/*.json "rare": true), the legendaries that guard the lairs.
 ## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
 const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
 
