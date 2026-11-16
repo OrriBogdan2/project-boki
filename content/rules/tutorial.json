@@ -35,7 +35,7 @@
   ],
   [
    "glide",
-   "Jump, press %J again to glide"
+   "Jump, then HOLD %J to glide"
   ],
   [
    "wallkick",
@@ -98,6 +98,7 @@
   "points": "Monsters give XP; every level earns one more point.",
   "pick_sec": "%L",
   "pick_dash": "%L",
+  "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
   "pick_ult": "Merge with %s: one body, with both your powers, for a while.",
   "shoot": "%L",
