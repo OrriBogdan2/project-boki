@@ -2,23 +2,25 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bpxmn4778gnk2"
-path="res://.godot/imported/tarek_slate.jpg-3230732867f6a4d2dad79b2e03a74edb.ctex"
+uid="uid://d0cwpfon8pnpa"
+path.s3tc="res://.godot/imported/kael_v95b.jpg-ec87f977e2cae71b68953d7fa0b7a5e2.s3tc.ctex"
+path.etc2="res://.godot/imported/kael_v95b.jpg-ec87f977e2cae71b68953d7fa0b7a5e2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "26382382efeb3e969ca811c58d278520"
+"md5": "edea884c54117f7f4eaab98991c1311b"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_slate.jpg"
-dest_files=["res://.godot/imported/tarek_slate.jpg-3230732867f6a4d2dad79b2e03a74edb.ctex"]
+source_file="res://art/wardens/kael/kael_v95b.jpg"
+dest_files=["res://.godot/imported/kael_v95b.jpg-ec87f977e2cae71b68953d7fa0b7a5e2.s3tc.ctex", "res://.godot/imported/kael_v95b.jpg-ec87f977e2cae71b68953d7fa0b7a5e2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1
