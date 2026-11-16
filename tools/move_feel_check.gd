@@ -79,6 +79,12 @@ const T := {
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
 	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
 	"dash_curve_thief_exit_k":        ["~", [0.5, 0.7], "x", "[footage] Shiv ends 140 px/s, mean 235: hasted run"],
+	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push: full speed at once"],
+	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s, mean 9.8 (fit 1.42)"],
+	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
+	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
+	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
+	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix fit 1.88 (a step misses the tip)"],
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
@@ -957,21 +963,24 @@ func _run_up() -> float:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var x0 := 0.0
-		for i in 90:
-			var x_was := P.pos.x
+		var p0 := Vector3.ZERO
+		var mage_m := 0.0
+		for i in 120:
+			var pos_was := P.pos
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				p0 = pos_was
+				if id == "mage": mage_m = float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
@@ -983,8 +992,9 @@ func _dash_curves() -> void:
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
-		rec("dash_curve_dist", (P.pos.x - x0) / want)
+		# Sparkle's Wirerun is a lane length from the charge, along the aim: the length its run took
+		var want := mage_m if id == "mage" else float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
+		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		# against her run, a kit haste in it (Sable hands over at her hasted run)
 		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
 		if id in ["bulwark", "thief"]:
