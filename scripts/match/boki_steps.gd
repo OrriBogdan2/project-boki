@@ -30,6 +30,8 @@ const TOUCH := {
 	"goliathite": {"walk": [1, 12], "run": [2, 16]},
 	"hoarheron": {"walk": [1, 12], "run": [2, 16]},
 	"floenatee": {"walk": [1, 12], "run": [2, 16]},
+	"lilybara": {"walk": [2, 13, 25, 35], "run": [0, 8, 16]},
+	"umbrathere": {"walk": [1, 14, 37], "run": [1, 15, 38]},
 }
 ## Weight (kg, base weight times the size roll cubed) below which a Boki steps as that family; heavier is "heavy".
 const FAMILY_KG := [["tiny", 2.2], ["small", 8.0], ["medium", 35.0]]
