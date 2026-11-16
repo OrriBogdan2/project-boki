@@ -23,7 +23,7 @@ var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom: float = CamWheel.far()   # the mouse wheel (CamWheel), widest at the start; times the match's zoom
 var lead := 1.0
-var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
+var pull := 0.0               # a quick pull-back (a dash into a glide)
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
