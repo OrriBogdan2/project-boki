@@ -21,11 +21,11 @@ extends RefCounted
 ##   9. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
 ##      slot and arrow on screen, in the bottom row, the same rect as the slot's hover spot
 
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+
 var bad := 0
 var m: Match
 var main: Node
-
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])

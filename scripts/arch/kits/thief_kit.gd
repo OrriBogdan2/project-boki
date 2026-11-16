@@ -496,6 +496,23 @@ func _tick_vault(dt: float) -> void:
 	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
 
+## On the ground the fitted curve's tail (past its peak) never drops under her (hasted) run, so the hand-over is at
+## run speed: the source runs down into the faster run with no dip (dancer.md: 154 -> 140 px/s into the 127-136 px/s
+## hasted run; the fit's 0.25 end knot is its straight line's, docs/heroes/thief.md "Cartwheel exit"). The crouch
+## ramp before the peak is the fit's. Only the Cartwheel runs on a curve here, and its last step comes after
+## _tick_vault has let it go, so this keys off `curved`.
+func _tick_curve(dt: float) -> void:
+	var curve: Array = curved["curve"]
+	var t0 := float(curved["t0"])
+	super._tick_curve(dt)
+	if curved.is_empty() or not h.grounded:
+		return
+	var peak: Array = curve[0]
+	for knot in curve:
+		if float(knot[1]) > float(peak[1]): peak = knot
+	if 1.0 - h.roll_t / t0 > float(peak[0]):
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * move_k() / Loco.dash_speed(h.arch))
+
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
 func _vault_over() -> void:
