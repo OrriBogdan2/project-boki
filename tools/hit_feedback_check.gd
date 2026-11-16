@@ -84,5 +84,5 @@ func _empowered() -> void:
 			hold = maxf(hold, T.freeze_t)
 		P.inp["fire"] = false
 		ok("%s empowered hit: the heavy thud" % arch, heard.has("hit_heavy"), str(heard))
-		ok("%s empowered hit: holds the target" % arch, hold >= Feel.HITSTOP[3][1] - 0.001, "%.3f" % hold)
+		ok("%s empowered hit: holds the target" % arch, hold >= ImpactWeight.hold_s("solid") - 0.001, "%.3f" % hold)
 		await done(m)
