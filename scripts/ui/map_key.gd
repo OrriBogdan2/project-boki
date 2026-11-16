@@ -2,10 +2,12 @@ class_name MapKey
 extends RefCounted
 ## The key in the corner of the full map: one icon and one word for each kind of marker the map is showing
 ## right now (nothing it isn't). The icons are the ones the maps draw. The minimap never calls this.
-## tools/minimap_check.gd asserts that kinds() is exactly what is on the map.
+## tools/minimap_check.gd asserts that kinds() is exactly what is on the map. Terrain hazards add a row per
+## kind on this map ("hz:<kind>", its HazardMap swatch and rules name), then "safe" (a shield) when your
+## Boki counters one of them: the same shield HazardMap puts on those areas.
 
 const ROW_H := 20.0
-const KEY_W := 78.0       # px: icon column, gap and the word
+const KEY_W := 78.0       # px: icon column, gap and the word (at least; a longer word widens it)
 const PAD := 10.0
 const WORD_PX := 13
 const MARGIN := 14.0      # px from the map's corner
@@ -20,6 +22,17 @@ static func kinds(m: Match, tm: TrainMap) -> Array:
 	for k in KINDS:
 		if _shown(m, String(k[0]), tm):
 			out.append(String(k[0]))
+	var tz := TerrainHazards.of(m)
+	if tz == null:
+		return out
+	var guarded := false
+	for a in tz.areas:
+		var id := "hz:" + String(a["kind"])
+		if not id in out:
+			out.append(id)
+			guarded = guarded or (m.player != null and tz.guards(m.player, String(a["kind"])))
+	if guarded:
+		out.append("safe")
 	return out
 
 static func _mate(m: Match) -> Hunter:
@@ -45,7 +58,10 @@ static func draw(fm: FullMap) -> void:
 	var ids := kinds(m, hud.train_map)
 	if ids.is_empty():
 		return
-	var r := Rect2(Vector2.ZERO, Vector2(KEY_W + PAD, PAD + ids.size() * ROW_H))
+	var w := KEY_W
+	for id in ids:
+		w = maxf(w, ICON_X + 14.0 + TextCache.width(hud.big, _word(id), WORD_PX) + 6.0)
+	var r := Rect2(Vector2.ZERO, Vector2(w + PAD, PAD + ids.size() * ROW_H))
 	r.position = Vector2(fm.rect.position.x + MARGIN, fm.rect.end.y - MARGIN - r.size.y)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 8)
 	for i in ids.size():
@@ -54,6 +70,10 @@ static func draw(fm: FullMap) -> void:
 		hud._text(at + Vector2(14.0, 5.0), _word(ids[i]), WORD_PX, fm.INK, hud.big)
 
 static func _word(id: String) -> String:
+	if id.begins_with("hz:"):
+		return String(TerrainHazards.kind_def(id.substr(3))["name"])
+	if id == "safe":
+		return "Safe"
 	for k in KINDS:
 		if k[0] == id:
 			return String(k[1])
@@ -62,6 +82,11 @@ static func _word(id: String) -> String:
 static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 	var m: Match = fm.m
 	var c: Control = fm.hud.c
+	if id.begins_with("hz:"):
+		var sw := Rect2(at - Vector2(6.0, 6.0), Vector2(12.0, 12.0))
+		c.draw_rect(sw, HazardMap.fill(id.substr(3)).lightened(0.15))
+		c.draw_rect(sw, HazardMap.edge(id.substr(3)), false, 1.5)
+		return
 	match id:
 		"squad":
 			c.draw_circle(at, 6.5, Color(0, 0, 0, 0.6))
@@ -76,3 +101,5 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			c.draw_arc(at, 6.0, 0.0, TAU, 24, Color(HotZone.COL, 0.85), 2.5)
 		"stop":
 			TrainMap.halt_glyph(c, at)
+		"safe":
+			Icons.draw(c, "brightshield", at, 13.0, HazardMap.SAFE)
