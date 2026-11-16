@@ -57,6 +57,7 @@ const LORE := [
 const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
 const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
 const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
+const FILL_T := 0.05        # s the bar takes to run full once the match is ready (inside COVER_T)
 const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
@@ -68,6 +69,7 @@ var c: Control
 var t := 0.0
 var prog := 0.0          # what the bar shows
 var want := 0.0          # where the bar is heading
+var fill_speed := 0.0    # bar share per second once the match is ready: the rest of the bar while the screen goes
 var fade := 0.0
 var leaving := false
 var tier := 0
@@ -147,7 +149,7 @@ func _process(delta: float) -> void:
 		fade = minf(1.0, fade + delta / FADE_IN_T)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
-	prog = move_toward(prog, want, delta * maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP))
+	prog = move_toward(prog, want, delta * maxf(fill_speed, maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP)))
 	c.queue_redraw()
 
 ## A real load stage reached (0..1 of the whole load): the bar's target only ever moves forward, so a
@@ -161,14 +163,15 @@ func step(frac: float) -> void:
 	while prog < want - 0.01 and is_inside_tree():
 		await get_tree().process_frame
 
-## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
-## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
+## The match is built and drawn: the screen goes at once, with nothing to wait out (playtest 11-09:
+## players were held on a full bar). The bar runs the rest of the way while the ink covers it, so it
+## never leaps in one frame, then the ink sweeps off the match.
 func finish() -> void:
 	want = 1.0
-	prog = 1.0
 	# gone before the map shows: fading this out over the planning map blended the two, so the
 	# screen's ink sweeps over first, this goes, and the ink sweeps off the map
 	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
+	fill_speed = (1.0 - prog) / FILL_T
 	if sf and is_inside_tree() and not sf.covered:
 		await sf.cover(COVER_T)
 		queue_free()
