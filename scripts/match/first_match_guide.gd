@@ -180,7 +180,15 @@ func _done(lid: String, p: Hunter) -> bool:
 func draw(h, sz: Vector2) -> void:
 	if line == "":
 		return
-	var below := WaysOutHud.bottom(h.m)
-	if h.m.skydrop and h.m.skydrop.planning:
+	var r := TutorialStrip.shown(sz, _t, _below())
+	TutorialStrip.paint(h.c, h.big, r, {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
+
+## Where the line's strip ends (0 with no line up): the message column starts under it, never behind it.
+func bottom(sz: Vector2) -> float:
+	return TutorialStrip.rect(sz, _below()).end.y + MsgLane.GAP if line != "" else 0.0
+
+func _below() -> float:
+	var below := WaysOutHud.bottom(m)
+	if m.skydrop and m.skydrop.planning:
 		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
+	return below
