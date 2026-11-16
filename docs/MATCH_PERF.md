@@ -70,3 +70,32 @@ Main and candidate swing between two levels on the same worker (match script avg
 19-26 or 42-49 ms) with no code pattern behind the swing (11-08 11:09: main 47.4 ms, candidate 22.9 ms), so
 the history shows no regression since 0.24.2 that it can separate from worker noise. It could not have shown
 this one: 6 hunters, not 30, and the doubled sim step.
+
+## 2026-11-16 pass (owner: "still getting very low fps for my card")
+`--match-profile` had stopped parsing on main (its `run()` no longer matched hitch-check's `run(main, mode)`), so
+no GPU profile could run; fixed first. Same tool, 30 hunters, 1920x1080, auto quality, origin/main e2bc08e889.
+Frame ms p50 / p95, then the split (sim, visuals, other scripts, render submit, rest = swap/driver), the HUD
+canvas draw and draws:
+
+| phase | rp1-3 RTX 4090 Forward+ (job 185453-32553) | Mac M5 Compatibility (job 183556-07394) |
+|---|---|---|
+| ride | 60.1 / 77; sim 12.5, vis 9.1, other 10.0, render 19.5, rest 5.9; hud 2.5; 1303 draws | 28.8 / 39; render 15.8; 1340 draws |
+| drop | 69.2 / 89; sim 20.2, vis 9.6, other 12.7, render 16.6, rest 8.6; hud 4.3; 968 | 35.3 / 45; render 17.8; 977 |
+| land | 68.9 / 83; sim 26.0, other 9.5, render 14.3; 617 | 32.0 / 42; render 15.5; 588 |
+| fight | 96.0 / 130; sim 32.5, vis 14.5, other 18.6, render 16.4, rest 14.8; hud 9.4; 841 | 69.2 / 94; sim 10.5, render 43.0; hud 2.8; 1680 |
+| extract | 80.2 / 103 (that run's tail was slow) | 24.8 / 35; render 8.7; 607 |
+
+Every phase is CPU bound (GPU 2-6 ms). The fight's biggest costs on rp1: render submit (16-22 ms, 840-1480
+draws), other scripts (18-21 ms), hunters' sim (12 ms: kits and hunter physics), the HUD canvas (9-11 ms, of
+which the world labels over other hunters are 8.4 ms and the nameplates alone 3.6 ms), bots (7.4 ms), the
+hunters' visuals (7.3 ms). On Compatibility (GL) the render submit is the largest single cost (43 ms at 1680
+draws). rp1 workers are shared: two runs of the same tree differ by up to 10 ms at the fight's p50 and its draw
+count swings 780-1480, so a change of a few ms only shows in a same-run A/B.
+
+- **MobGlb** (each skinned monster's pivots copied onto its bones) ran every frame for every monster (119 in
+  the match) through `set_bone_global_pose`, though Match poses far monsters only every 4th frame. It now copies
+  on the frames the monster was posed, one local pose per bone. Same-run A/B on rp1-2 (job 195806-25417, old
+  and new code alternating every 30 frames): 1.15-1.36 -> 0.57-0.78 ms a frame.
+- PR #158 (perf lane P2: WardenMerge draw joins, gear-stat sums kept for a step, Bot._clear_line, Truce sight
+  asks) on the same worker: fight p50 106 vs 96 ms for main, inside that worker's run-to-run spread; its own
+  check numbers (draws per 12 Hunters 227 -> 154) are the measured part.
