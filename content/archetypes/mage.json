@@ -140,7 +140,7 @@
 		"after": 0.5,
 		"range": 14.4,
 		"radius": 2.7,
-		"dmg": 22.0,
+		"dmg": 9.0,
 		"push": 8.0,
 		"lift": 0.4,
 		"stacks": 1,
