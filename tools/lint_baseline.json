@@ -2288,6 +2288,8 @@
   "tools/zone_bounce_check.gd": 1
  },
  "private-ref": {
+  "ops/merge-numbers-1114/waiting_1114.txt": 1,
+  "ops/merge-triage-1113/classes.txt": 1,
   "scripts/arch/kits/juggernaut_kit.gd": 1,
   "scripts/arch/kits/thief_kit.gd": 1,
   "scripts/core/game.gd": 1,
@@ -2311,6 +2313,7 @@
   "scripts/match/world.gd": 2,
   "scripts/ui/full_map.gd": 1,
   "scripts/ui/hud.gd": 4,
+  "tests/fixtures/saves/settings.cfg": 2,
   "tools/archer_bulwark_combo_check.gd": 1,
   "tools/archetype_check.gd": 1,
   "tools/cliff_mantle_check.gd": 1,
