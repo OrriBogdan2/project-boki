@@ -1462,6 +1462,17 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | dredge | {"line": "Grimble: greedy, hunched, a smug squint. He holds a coin to his loupe, then bites it.", "dur": 2.8, "tracks": [{"bone": "upper_arm.R", "rot": [0.55, 0, -0.1], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.1, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.15, -0.25, 0.2], "in": 0.25, "out": 0.25}, {"bone": "hips", "rot": [-0.05, 0, 0]}, {"bone": "head", "rot": [-0.2, 0, 0], "from": 0.55, "to": 0.85, "beats": 2}]} |
 | gil | {"line": "Gil: a fish out of water, twitchy and proud. He flicks his swordfish up, peers along the point, and looks pleased.", "dur": 2.6, "tracks": [{"bone": "upper_arm.R", "rot": [0.6, 0, -0.15], "in": 0.25, "out": 0.25}, {"bone": "forearm.R", "rot": [1.0, 0, 0], "in": 0.25, "out": 0.25}, {"bone": "head", "rot": [-0.1, -0.2, 0.15], "in": 0.25, "out": 0.25}, {"bone": "upper_arm.R", "rot": [0.2, 0, 0], "from": 0.5, "to": 0.8, "beats": 2}]} |
 
+## impact_weight (`content/rules/impact_weight.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Hit weight (docs/DASHES_AND_ABILITY_FEEL.md §5.4): three tiers with a fixed hit-stop and shake, the tier of every Hunter ability, and the stacking caps that keep a team fight readable. hitstop_ms: how long the struck body holds (and the attacker too on a melee hit when attacker is true). shake: Shake.incoming_big power (0-1) on the struck player's camera only, never the attacker's; only heavy shakes (owner rule, §5.5: only big things that happen to you shake). Hunters: arch id -> ability key (lmb, rmb, dash, e, x, or a kit's own hit tag such as rock or fan) -> tier. --impact-weight-check asserts every damaging ability has one. |
+| tiers | {"light": {"hitstop_ms": 25, "attacker": false, "shake": 0.0}, "solid": {"hitstop_ms": 50, "attacker": true, "shake": 0.0}, "heavy": {"hitstop_ms": 90, "attacker": true, "shake": 0.6}} |
+| cap | {"hitstop_ms": 110, "hitstop_window_s": 0.5, "repeat_s": 0.25, "repeat_k": 0.33, "shake_gap_s": 0.5} |
+| hunters | {"archer": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "juggernaut": {"lmb": "light", "rmb": "heavy", "dash": "solid", "e": "solid", "x": "heavy"}, "gunslinger": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "bulwark": {"lmb": "light", "rmb": "solid", "dash": "solid", "x": "heavy"}, "ashwick": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "tender": {"lmb": "light", "rmb": "solid", "x": "heavy"}, "dolm": {"lmb": "light", "rock": "solid", "rmb": "heavy", "dash": "solid", "x": "heavy"}, "dredge": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "rimewright": {"lmb": "light", "fan": "light", "passive": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "mage": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}, "thief": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "ostra": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"}, "gil": {"lmb": "light", "passive": "solid", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"}} |
+
 ## ink_drops (`content/rules/ink_drops.json`)
 
 

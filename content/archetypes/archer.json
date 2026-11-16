@@ -20,7 +20,7 @@
 	"signature": "longbow",
 	"resource": {
 		"id": "hawk",
-		"name": "Hawk Sense",
+		"name": "Red Thread",
 		"max": 1,
 		"kind": "none",
 		"col": "#d8ffb0",
@@ -29,7 +29,7 @@
 		"sense_r": 22.0
 	},
 	"passive": {
-		"name": "Hawk Sense",
+		"name": "Red Thread",
 		"desc": "Rivals under half health are seen through cover within 22m."
 	},
 	"dash": {

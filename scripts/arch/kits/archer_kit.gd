@@ -6,7 +6,7 @@ extends ArchKit
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Red Thread (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
