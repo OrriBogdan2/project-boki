@@ -44,6 +44,7 @@ var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
+var ktip: KnockTip = null           # the first-knock card, in the same two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
@@ -289,6 +290,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	ktip = KnockTip.for_match(self, guide)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1778,6 +1780,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
+		if ktip: ktip.note(by, d, o)
 		if src != "zone": sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)    # (the zone ticks instead: ZoneSfx)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
@@ -1808,6 +1811,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
+		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
 		Sfx.duck(0.6)
