@@ -13,5 +13,8 @@
  "launch": {
   "reach_m": 9.0,
   "rise_m": 8.0
+ },
+ "sfx": {
+  "cast": "gl_skyhook"
  }
 }

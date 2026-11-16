@@ -130,10 +130,10 @@ static func floors_apply(m: Node, team: int) -> bool:
 	return p != null and int(p.team) != team
 
 # ---- §5.4 hitstop ----
+const POINT_BLANK := 0.7      # this share of a shotgun volley's slugs on one body makes it an empowered hit
 ## A hit's weight (ImpactWeight: light, solid or heavy) sets a fixed hold. Projectiles never hold the
 ## attacker. Every hold a body takes is capped per window (the team-fight cap); a hit no heavier than the
 ## last on the same pair inside repeat_s holds for a share of its tier.
-const POINT_BLANK := 0.7      # share of a volley on one body that makes an empowered (heavy-flag) hit
 static var _pair := {}         # "a|b" -> [last time, its tier index]
 static var _budget := {}       # body instance id -> [window start, spent]
 
@@ -157,7 +157,7 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> S
 	var rank := ImpactWeight.TIERS.find(w)
 	var last: Array = _pair.get(key, [-9.0, 0])
 	var k := 1.0
-	if now - float(last[0]) < ImpactWeight.cap("repeat_s") and rank <= int(last[1]):
+	if now - float(last[0]) < ImpactWeight.cap("repeat_s") and rank <= int(last[1]) and not o.get("heavy", false):
 		k = ImpactWeight.cap("repeat_k")
 	if o.get("echo", false):
 		k = minf(k, 0.5)
