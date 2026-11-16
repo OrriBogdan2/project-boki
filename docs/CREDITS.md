@@ -52,3 +52,5 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-egg-progress (eggs nearing their hatch)
 - Synthesised, no samples (`tools/gen_sfx_egg.py`: egg_knock, egg_crack, egg_ready).
+### ext/sfx-breakables
+- Synthesised, no samples.
