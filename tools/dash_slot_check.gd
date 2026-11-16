@@ -50,14 +50,15 @@ func run(main_node: Node) -> void:
 	print("DASH SLOT CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## 1 + 2: pips == charges for every archetype, the recharging pip and the countdown follow the timer.
+## 1 + 2: pips == charges for every archetype (a one-dash kit draws none), the recharging pip and the countdown
+## follow the timer.
 func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 	for a in Arch.ORDER:
 		P.reclass(Arch.weight(a), a, Arch.signature(a))
 		P.unlock_all()
 		P.dashes = P.max_dashes()
 		await _drawn(m.hud)
-		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes() if P.ak else 0.0)
+		var want := 0 if P.ak.single_dash() else int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes())
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
