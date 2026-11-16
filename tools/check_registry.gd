@@ -221,6 +221,7 @@ const CHECKS := {
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],  # 6 Hunters, 4 Boki
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],  # map regions, hot drop zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],  # --shots-dir=<dir>, GPU
+	"--model-draws": ["res://tools/model_draws.gd", "model_draws", null],  # surfaces per .glb
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
 	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
@@ -378,6 +379,7 @@ const CHECKS := {
 	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
+	"--low-fps-input-check": ["res://tools/low_fps_input_check.gd", "low_fps_input_check", null],
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--squad-intro-check": ["res://tools/squad_intro_check.gd", "squad_intro_check", null],      # 0.24.4
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
