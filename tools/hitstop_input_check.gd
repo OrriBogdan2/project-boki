@@ -10,6 +10,7 @@ extends RefCounted
 ## T4 freeze injected at its hit and the row says so. --hitstop-input-check=<id>,<id> runs only those heroes.
 ## Never touches the save.
 
+const INJECT_HOLD := 0.07         # s: the stand-in freeze when the hit never landed (the old tier-4 attacker hold)
 const LAND_WAIT := 150          # steps: the heavy hit lands within this (holds included)
 const WATCH_F := 90             # frames: the freeze and the tapped action both fit in this
 const SETTLE := 40              # steps before the hit: the fresh match's own hit-stop budget and pair window clear
@@ -157,10 +158,10 @@ func _land(m: Match, how: Array) -> String:
 			return "real"
 		if dummy.hp < hp0 - 0.01:
 			injected += 1
-			m.freeze_frame(float(ImpactWeight.hold_s("heavy")))
+			m.freeze_frame(float(INJECT_HOLD))
 			return "injected"
 	unlanded += 1
-	m.freeze_frame(float(ImpactWeight.hold_s("heavy")))
+	m.freeze_frame(float(INJECT_HOLD))
 	return "no hit"
 
 func _acted(before: Dictionary, key: String, dashes0: float, roll0: float, jump0: float) -> bool:
