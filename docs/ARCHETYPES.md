@@ -23,7 +23,7 @@ and passive build-ups.
 | **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
-| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
+| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
 | **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
@@ -1268,4 +1268,8 @@ Each hero's height and breadth against the source hero's footage sheet (`briefs/
 | tender | Elluna (mooshmoosh) | 0.70 / 1.0 | 0.60 | 0.340 | 0.340 | at the floor; model 0.6 vs 0.70 is item 108's owner shrink |
 
 `--hitbox-size-check` asserts each `hit_r` equals the value above (Breaker's band top is 1.25 by DECISIONS); `--warden-model-check` freezes the same radii.
+
+## Kit card text rules (11-11)
+
+Owner: "kit card is also very annoying to read, like a giant text block". Each row of the kit card (`KitCard`: Select, the L page, K in a match) is icon, key, name, key-number chips and one line of at most `KitCard.MAX_WORDS` (12) words; the rules show on hover and on the Details page. The line is authored per hunter in `content/archetypes/<id>.json` under `card` (`dash`, `passive`, `rmb`, `e`, `x`, and `weapons.<id>` for LMB). Chips: cooldown, charges, level and the weapon's damage come from the kit data; damage chips for abilities are authored in `card.chips.<slot>` and `--arena-check` fails if a number on a chip is not a number in that slot's data. Before/after: `docs/shots/kit-card-1111/`.
 - Card text: `godot --headless -- --card-numbers-check` reads each Hunter's kit card (`KitCard.slot_text`) and fails any number it states (range, damage, cooldown, duration, slow, `A -> B` pair) that is not a field of that Hunter's JSON of the kind it names ("push N" a push/kb field, "stuns N" a stun field, "slowed N%" a slow field, "Ns" a time field, "Nm" a distance field; kinds come from the key path, a key of no kind passes for all but push, stun and slow); numbers a card works out from fields go in its `_derived`.
