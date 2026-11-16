@@ -9978,3 +9978,4 @@ READY ext/team-wipe-rule-1116 d23a69e041 (team wipe rule: only a Boki summoned a
 READY ext/egg-rules-1116 6dfe12c838 (eggs hatch first form only; no_egg list cairnback/zephyrak/hivara; egg-rules-check 12/12; subset NEW-RED 0; export dry-run OOM-killed on rpc7, needs rerun; no gh on rpc7: PR body at /tmp/egg_pr.md on rpc7)
 READY ext/charges-sv-1116 a867daf5f5 (charges vs SV: Albert dash 1, Second Wind = refresh under 30% HP, SV dash discs; PR #168, gate NOT run: rpc7 OOM + hetzner import timeouts)
 READY ext/regate-overload-guard 5b41c02e2a (regate-bot: timeouts not mass-red, skip overloaded workers, cap jobs by free cores)
+READY ext/merge-lane-anim-1115-b 2e864831ab0a2c3ad15f277224e5108e0f8b04c9 (PR #115 clean merge of main e2bc08e889; targeted 25 checks NEW-RED 0; full gate env-broken on rpc8; PR comment text at rpc8:/home/boki/cj/20261116-172020-a5/pr115_comment.md, needs gh host)
