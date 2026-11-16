@@ -1,0 +1,258 @@
+PACE start seed 3 map hollowcrown teams 10 hunters 30 raid clear
+PACE ev 0.00 lair Stormcrown Eyrie sealed
+PACE ev 0.00 lair The Sunken Forge sealed
+PACE ev 0.00 lair The Thornhive sealed
+PACE ev 0.00 squads_alive 10
+PACE ev 3.35 camps 19 groups, 57 mobs
+PACE ev 14.97 land b19 t6
+PACE ev 14.97 land b20 t6
+PACE ev 15.02 land b18 t6
+PACE ev 16.72 land b1 t0
+PACE ev 16.72 land b2 t0
+PACE ev 16.77 land p0 t0
+PACE ev 23.05 hit p0 t0 dmg 9
+PACE ev 23.17 hit b1 t0 dmg 11
+PACE ev 23.67 land b25 t8
+PACE ev 23.67 land b26 t8
+PACE ev 23.72 land b24 t8
+PACE ev 24.27 land b10 t3
+PACE ev 24.27 land b11 t3
+PACE ev 24.32 land b9 t3
+PACE ev 25.25 hit b9 t3 dmg 4
+PACE ev 25.50 hit b10 t3 dmg 11
+PACE ev 25.78 hit b11 t3 dmg 31
+PACE ev 26.08 camp_clear 229,147 size 2 light
+PACE ev 26.37 land b22 t7
+PACE ev 26.37 land b23 t7
+PACE ev 26.42 land b21 t7
+PACE ev 26.53 lvl p0 t0 L2
+PACE ev 28.30 lvl b11 t3 L2
+PACE ev 29.02 hit b23 t7 dmg 94
+PACE ev 29.23 hit b22 t7 dmg 43
+PACE ev 29.38 hit b26 t8 dmg 14
+PACE ev 29.52 lvl b10 t3 L2
+PACE snap 30 tide 0 levels 1.3,1.0,1.0,1.7,1.0,1.0,1.0,1.0,1.0,1.0 out 0 extracted 0
+PACE ev 30.37 land b28 t9
+PACE ev 30.37 land b29 t9
+PACE ev 30.42 land b27 t9
+PACE ev 30.65 land b6 t2
+PACE ev 30.67 land b7 t2
+PACE ev 30.83 land b4 t1
+PACE ev 30.83 land b5 t1
+PACE ev 30.83 land b13 t4
+PACE ev 30.83 land b14 t4
+PACE ev 30.83 land b16 t5
+PACE ev 30.83 land b17 t5
+PACE ev 30.88 land b12 t4
+PACE ev 30.88 land b15 t5
+PACE ev 31.25 lvl b1 t0 L2
+PACE ev 31.32 land b3 t1
+PACE ev 31.57 hit b13 t4 dmg 8
+PACE ev 31.72 hit b29 t9 dmg 9
+PACE ev 31.88 lvl b23 t7 L2
+PACE ev 31.92 hit b5 t1 dmg 12
+PACE ev 32.13 hit b15 t5 dmg 8
+PACE ev 32.23 land b8 t2
+PACE ev 32.32 hit b6 t2 dmg 9
+PACE ev 32.37 hit b28 t9 dmg 10
+PACE ev 32.38 hit b17 t5 dmg 4
+PACE ev 32.62 hit b14 t4 dmg 7
+PACE ev 32.70 hit b16 t5 dmg 4
+PACE ev 32.90 hit b4 t1 dmg 74
+PACE ev 32.93 hit b3 t1 dmg 3
+PACE ev 32.93 hit b12 t4 dmg 2
+PACE ev 33.13 hit b7 t2 dmg 4
+PACE ev 33.15 hit b27 t9 dmg 9
+PACE ev 33.62 hit b21 t7 dmg 17
+PACE ev 33.67 lvl b11 t3 L3
+PACE ev 34.28 hit b8 t2 dmg 30
+PACE ev 34.45 lvl b15 t5 L2
+PACE ev 34.47 lvl b22 t7 L2
+PACE ev 34.77 lvl b16 t5 L2
+PACE ev 35.10 lvl b6 t2 L2
+PACE ev 35.30 lvl b15 t5 L3
+PACE ev 35.38 camp_clear 164,223 size 4 heavy
+PACE ev 35.48 lvl b17 t5 L2
+PACE ev 35.80 lvl b13 t4 L2
+PACE ev 36.23 hit b24 t8 dmg 44
+PACE ev 36.33 hit b2 t0 dmg 68
+PACE ev 36.55 lvl b29 t9 L2
+PACE ev 36.57 lvl b2 t0 L2
+PACE ev 36.58 lvl b26 t8 L2
+PACE ev 37.35 lvl b23 t7 L3
+PACE ev 37.45 camp_clear 138,226 size 2 light
+PACE ev 37.97 camp_clear 185,62 size 3 normal
+PACE ev 39.35 lvl b24 t8 L2
+PACE ev 39.45 lvl b23 t7 L4
+PACE ev 39.62 lvl b29 t9 L3
+PACE ev 39.87 lvl b27 t9 L2
+PACE ev 42.17 lvl b7 t2 L2
+PACE ev 44.17 camp_clear 133,124 size 4 heavy
+PACE ev 44.38 lvl b12 t4 L2
+PACE ev 44.68 lvl b3 t1 L2
+PACE ev 44.87 lvl b5 t1 L2
+PACE ev 44.93 lvl b22 t7 L3
+PACE ev 45.72 lvl b21 t7 L2
+PACE ev 47.52 lvl b5 t1 L3
+PACE ev 49.28 lvl b8 t2 L2
+PACE ev 49.58 hit b25 t8 dmg 0
+PACE ev 49.67 lvl b14 t4 L2
+PACE ev 49.95 lvl b11 t3 L4
+PACE ev 50.10 lvl b23 t7 L5
+PACE ev 50.37 squads_alive 9
+PACE ev 50.97 lvl b9 t3 L2
+PACE ev 51.92 camp_clear 59,141 size 1 light
+PACE ev 52.55 lvl b12 t4 L3
+PACE ev 52.78 lvl b25 t8 L2
+PACE ev 53.42 lvl b21 t7 L3
+PACE ev 53.88 lvl b28 t9 L2
+PACE ev 54.40 lvl b17 t5 L3
+PACE ev 55.28 lvl b23 t7 L6
+PACE ev 57.87 lvl b12 t4 L4
+PACE ev 59.00 lvl b17 t5 L4
+PACE ev 59.18 lvl b26 t8 L3
+PACE ev 59.53 lvl b24 t8 L3
+PACE snap 60 tide 0 levels 2.0,2.0,2.7,2.7,3.0,1.0,4.0,2.7,2.3 out 5 extracted 0
+PACE ev 60.43 lvl b26 t8 L4
+PACE ev 61.68 lvl b27 t9 L3
+PACE ev 61.73 camp_clear 121,167 size 4 heavy
+PACE ev 63.02 lvl b8 t2 L3
+PACE ev 63.43 lvl b7 t2 L3
+PACE ev 64.32 squads_alive 8
+PACE ev 66.57 lvl b21 t7 L4
+PACE ev 67.42 lvl b15 t5 L4
+PACE ev 70.73 lvl b15 t5 L5
+PACE ev 73.23 hit b18 t6 dmg 11
+PACE ev 73.23 lvl b18 t6 L2
+PACE ev 73.25 hit b20 t6 dmg 29
+PACE ev 73.25 lvl b20 t6 L2
+PACE ev 73.30 lvl b19 t6 L2
+PACE ev 73.53 lvl b6 t2 L3
+PACE ev 73.75 hit b19 t6 dmg 8
+PACE ev 74.65 camp_clear 130,62 size 2 light
+PACE ev 75.58 lvl b16 t5 L3
+PACE ev 76.08 lvl b27 t9 L4
+PACE ev 76.87 lvl b29 t9 L4
+PACE ev 79.52 lvl b17 t5 L5
+PACE ev 79.83 lvl b15 t5 L6
+PACE ev 81.35 lvl b13 t4 L3
+PACE ev 81.62 lvl b8 t2 L4
+PACE ev 81.88 camp_clear 113,68 size 4 heavy
+PACE ev 82.82 lvl b22 t7 L4
+PACE ev 83.62 lvl b28 t9 L3
+PACE ev 84.03 lvl b23 t7 L7
+PACE ev 86.53 lvl b5 t1 L4
+PACE ev 86.53 camp_clear 65,107 size 3 normal
+PACE ev 87.38 lvl b20 t6 L3
+PACE ev 87.72 lvl b4 t1 L2
+PACE ev 89.12 camp_clear 226,164 size 4 heavy
+PACE ev 89.93 lvl b18 t6 L3
+PACE snap 90 tide 184 levels 2.7,3.3,3.0,4.7,2.7,5.0,3.0,3.7 out 9 extracted 0
+PACE ev 95.02 lvl b17 t5 L6
+PACE ev 95.02 lvl b22 t7 L5
+PACE ev 97.90 camp_clear 48,155 size 4 heavy
+PACE ev 98.83 lvl b14 t4 L3
+PACE ev 99.45 camp_clear 172,181 size 4 heavy
+PACE ev 100.23 lvl b25 t8 L3
+PACE ev 100.75 lvl b15 t5 L7
+PACE ev 104.50 lvl b27 t9 L5
+PACE ev 104.58 lvl b3 t1 L3
+PACE ev 105.42 lvl b26 t8 L5
+PACE ev 108.58 lvl b29 t9 L5
+PACE ev 108.93 lvl b5 t1 L5
+PACE ev 109.53 lvl b13 t4 L4
+PACE ev 110.03 lvl b6 t2 L4
+PACE ev 110.32 lvl b8 t2 L5
+PACE ev 113.82 lvl b28 t9 L4
+PACE ev 113.93 lvl b12 t4 L5
+PACE ev 116.22 lvl b21 t7 L5
+PACE ev 118.63 lvl b17 t5 L7
+PACE ev 118.92 lvl b15 t5 L8
+PACE snap 120 tide 176 levels 3.3,4.0,4.0,6.0,2.7,5.7,3.7,4.7 out 7 extracted 0
+PACE ev 121.77 lvl b24 t8 L4
+PACE ev 123.22 lair The Sunken Forge open
+PACE ev 124.25 lair The Sunken Forge awake
+PACE ev 124.82 lvl b20 t6 L4
+PACE ev 126.68 lvl b16 t5 L4
+PACE ev 128.75 lvl b16 t5 L5
+PACE ev 131.10 lvl b29 t9 L6
+PACE ev 132.30 lvl b4 t1 L3
+PACE ev 133.08 lvl b27 t9 L6
+PACE ev 134.37 lvl b19 t6 L3
+PACE ev 135.57 lvl b8 t2 L6
+PACE ev 136.63 lvl b15 t5 L9
+PACE ev 138.20 squads_alive 7
+PACE ev 144.40 squads_alive 6
+PACE ev 145.62 lvl b28 t9 L5
+PACE ev 146.40 lvl b29 t9 L7
+PACE ev 149.02 lvl b23 t7 L8
+PACE snap 150 tide 168 levels 3.7,7.0,3.3,6.0,4.0,6.0 out 13 extracted 0
+PACE ev 152.72 lvl b22 t7 L6
+PACE ev 155.82 lvl b20 t6 L5
+PACE ev 161.10 lvl b3 t1 L4
+PACE ev 161.47 lvl b23 t7 L9
+PACE ev 162.45 lvl b26 t8 L6
+PACE ev 163.52 lvl b27 t9 L7
+PACE ev 164.95 lvl b29 t9 L8
+PACE ev 166.60 lvl b29 t9 L9
+PACE ev 166.62 lair The Sunken Forge cleared
+PACE ev 168.63 lvl b19 t6 L4
+PACE ev 170.17 lvl b15 t5 L10
+PACE ev 178.70 lvl b24 t8 L5
+PACE ev 179.40 lvl b25 t8 L4
+PACE snap 180 tide 160 levels 4.0,7.3,4.0,6.7,5.0,7.0 out 16 extracted 0
+PACE ev 193.48 lair The Thornhive open
+PACE ev 195.70 lvl b4 t1 L4
+PACE ev 196.75 lvl b27 t9 L8
+PACE ev 199.60 lvl b25 t8 L5
+PACE ev 207.62 lvl b17 t5 L8
+PACE snap 210 tide 152 levels 4.3,7.7,4.0,6.7,5.3,7.3 out 15 extracted 0
+PACE ev 212.45 lvl b5 t1 L6
+PACE ev 212.52 lvl b22 t7 L7
+PACE ev 213.43 lvl b27 t9 L9
+PACE ev 218.05 lvl b29 t9 L10
+PACE ev 218.28 squads_alive 4
+PACE ev 220.38 lvl b16 t5 L6
+PACE ev 227.07 squads_alive 3
+PACE snap 240 tide 144 levels 8.0,7.0,8.0 out 22 extracted 0
+PACE ev 250.22 lvl b22 t7 L8
+PACE ev 267.38 lvl b21 t7 L6
+PACE snap 270 tide 136 levels 8.0,7.7,8.0 out 22 extracted 0
+PACE ev 285.15 lvl b27 t9 L10
+PACE snap 300 tide 128 levels 8.0,7.7,8.3 out 22 extracted 0
+PACE ev 318.57 lvl b23 t7 L10
+PACE snap 330 tide 120 levels 8.0,8.0,8.3 out 22 extracted 0
+PACE ev 350.97 lvl b17 t5 L9
+PACE snap 360 tide 112 levels 8.3,8.0,8.3 out 22 extracted 0
+PACE ev 360.73 lvl b21 t7 L7
+PACE ev 368.47 lvl b16 t5 L7
+PACE snap 390 tide 104 levels 8.7,8.3,8.3 out 22 extracted 0
+PACE ev 390.72 lvl b22 t7 L9
+PACE ev 402.15 lvl b22 t7 L10
+PACE snap 420 tide 96 levels 8.7,9.0,8.3 out 22 extracted 0
+PACE snap 450 tide 88 levels 8.7,9.0,8.3 out 22 extracted 0
+PACE ev 455.53 lvl b21 t7 L8
+PACE ev 456.02 lvl b17 t5 L10
+PACE snap 480 tide 80 levels 9.0,9.3,8.3 out 22 extracted 0
+PACE snap 510 tide 72 levels 9.0,9.3,8.3 out 22 extracted 0
+PACE snap 540 tide 64 levels 9.0,9.3,8.3 out 23 extracted 0
+PACE ev 564.62 lvl b21 t7 L9
+PACE snap 570 tide 56 levels 9.0,9.7,8.3 out 23 extracted 0
+PACE ev 581.12 lvl b16 t5 L8
+PACE snap 600 tide 48 levels 9.3,9.7,8.3 out 23 extracted 0
+PACE ev 619.22 squads_alive 2
+PACE snap 630 tide 48 levels 9.3,9.7 out 26 extracted 0
+PACE snap 660 tide 48 levels 9.3,9.7 out 26 extracted 0
+PACE snap 690 tide 48 levels 9.3,9.7 out 26 extracted 0
+PACE snap 720 tide 48 levels  out 30 extracted 0
+PACE ev 720.48 squads_alive 0
+PACE snap 720 tide 48 levels  out 30 extracted 0
+PACE heart  240.00 ASLEEP>CHARGING wake
+PACE heart  315.00 CHARGING>READY charged
+PACE heart  600.02 READY>FINAL time
+PACE seat_lair  120.02 LOCKED>OPEN clock
+PACE seat_lair  330.00 OPEN>SHUT clock
+PACE seat_uplink  360.00 LOCKED>OPEN clock
+PACE seat_uplink  480.02 OPEN>SHUT clock
+PACE first_knock 28 tinyvolt knocked Hunter
+PACE end t 720.5 result { "extracted": false, "why": "finished", "ending": true } knocks 40 camps_cleared 13/19 extracted 0

@@ -9,8 +9,8 @@ extends RefCounted
 ## and debris, a shake for those nearby and a deep boom. Then a recovery rising from the crouch. Owned by
 ## JuggernautKit.
 
-const PURPLE := Color("b06aff")       # the hit circle (the damage area)
-const CORE := Color("ff5ad8")         # its centre ring: the stun area
+const AREA := Color("ff3a2a")         # the hit circle (the damage area): his crimson, as his Smash telegraphs
+const CORE := Color("fff1dc")         # its centre ring: the stun area, white-hot
 const SPIKE_OVER := 0.3               # m over the landing a foe counts as airborne (spiked down, not only knocked down)
 
 var k: JuggernautKit
@@ -80,7 +80,7 @@ func start() -> void:
 ## The hit circle (everyone sees it): the damage area, and the stun core inside it.
 func _marker(at: Vector3, fill: float) -> void:
 	var dd := data()
-	AimKit.circle(k.h, "drop", {"at": at, "r": float(dd["radius"]), "col": PURPLE, "all": true, "ticks": true,
+	AimKit.circle(k.h, "drop", {"at": at, "r": float(dd["radius"]), "col": AREA, "all": true, "ticks": true,
 			"fill": fill, "dur": 0.12})
 	AimKit.circle(k.h, "drop_core", {"at": at, "r": float(dd["core"]), "col": CORE, "all": true, "hot": fill,
 			"dur": 0.12})

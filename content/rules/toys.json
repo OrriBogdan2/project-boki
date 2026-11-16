@@ -4,7 +4,7 @@
 	"pick_chance": 0.5,
 	"play_secs": [8.0, 12.0],
 	"go_timeout": 20.0,
-	"joy_gain": 10.0,
+	"joy_gain": 14.0,
 	"stat_gain": 1,
 	"max_players": 2,
 	"fav_after": 3,

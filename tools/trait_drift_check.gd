@@ -1,8 +1,8 @@
 extends RefCounted
 ## --trait-drift-check (GARDEN.md section 3, lever 3): a timid Boki living 7 in-game days with three brave
-## friends moves toward them by the capped weekly amount and no more, brave rivals do not pull, the next week
-## allows more, crossing a band writes one journal line, and on the real farm (base_mode on, the day clock
-## wrapping) the same drift happens once a day. Never touches the real save.
+## friends moves toward them by the capped weekly amount and no more, a Grown one barely moves, brave rivals do
+## not pull, the next week allows more, crossing a band writes one journal line, and on the real farm
+## (base_mode on, the day clock wrapping) the same drift happens once a day. Never touches the real save.
 
 var bad := 0
 var main: Node
@@ -49,6 +49,17 @@ func run(m: Node) -> void:
 	ok(is_equal_approx(timid["traits"]["loyalty"], 0.5), "traits the friends share with it do not move")
 	_days(group, 1)
 	ok(_brave(timid) - 0.1 > cap + 0.001, "the next week allows more (%.3f)" % _brave(timid))
+
+	ok(Care.stage_name(timid) in R["young_stages"], "a fresh Boki is young (%s)" % Care.stage_name(timid))
+	var elder := _rec("zapple", "Old", 0.1)
+	elder["level"] = 10
+	var elder_pals := [_rec("cindle", "E1", 0.9), _rec("burrlet", "E2", 0.9), _rec("basaltoad", "E3", 0.9)]
+	_bond_all(elder, elder_pals, friend + 0.2)
+	_days([elder] + elder_pals, 7)
+	var old_moved := _brave(elder) - 0.1
+	ok(old_moved > 0.0, "a Grown Boki still drifts the same way (+%.3f)" % old_moved)
+	ok(old_moved <= cap * float(R["adult_share"]) + 0.0001 and old_moved < moved * 0.25,
+		"a Grown Boki barely moves in a week: +%.3f vs young +%.3f" % [old_moved, moved])
 
 	var shy := _rec("zapple", "Wren", 0.1)
 	var foes := [_rec("cindle", "Rex", 0.9), _rec("burrlet", "Bo", 0.9), _rec("basaltoad", "Gus", 0.9)]

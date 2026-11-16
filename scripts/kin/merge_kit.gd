@@ -87,11 +87,9 @@ func press_ult() -> bool:
 	h.cast_at = m.time
 	h.cast_slot = "ult"
 	h.used["r"] = int(h.used.get("r", 0)) + 1
-	var col: Color = form["glow"]
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), String(r["name"]).to_upper(), col, true)
 	m.sfx("charge", h.pos, 0.0, 0.6)
 	m.sfx("warn", h.pos, -4.0, 0.7)
-	play(MergeMoves.ult_move(String(form["id"])))
+	play("mf_ult")
 	var tx: Vector3 = _ult_target(r)
 	announce("ult", tx, _tell_radius(r), float(r.get("end", 1.0)))
 	CombatBus.ability_used.emit(h, "%s_r" % form["id"], "ult")
@@ -152,7 +150,6 @@ func _strike_all(b: Dictionary) -> void:
 			continue
 		m.fx.bolt(f.pos + Vector3(0, 8.0, 0), f.pos + Vector3(0, 0.8, 0), col)
 		m.fx.flash(f.pos + Vector3(0, 0.9, 0), Color.WHITE, 1.3, 0.12)
-		m.fx.ring(f.pos, 1.5, col, 0.3)
 		f.hurt(float(b.get("dmg", 40.0)) * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "strike"], "stun": float(b.get("stun", 0.0)), "dr": true})
 	m.sfx("boom", h.pos, -1.0, 0.8)
 	m.sfx("zap", h.pos, 0.0, 0.7)
@@ -193,13 +190,11 @@ func info() -> Dictionary:
 		"ready": lock_left() <= 0.0 and not ulting(), "form": form, "plan": "ult", "timer": float(h.merge_st.get("t", 0.0)), "timer_max": float(h.merge_st.get("T", 1.0)), "ulting": ulting(),
 		"col": form["glow"], "charges": 0, "max_charges": 0, "verb": "", "level": 1}
 
-## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel), and
-## for a beat after the merge ends the release. A form move that has played out leaves the hero's own moves showing.
+## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel).
 ## Other games read the pose id the owner syncs (KinNet) from the hunter's meta.
 static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	var id := ""
 	var at := 0.0
-	var now: float = hunter.m.time
 	var k := of(hunter)
 	if k != null:
 		id = k.anim_id
@@ -207,19 +202,9 @@ static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	elif hunter.remote:
 		id = String(hunter.get_meta("kpose", ""))
 		at = float(hunter.get_meta("kpose_at", -9.0))
-	if not MergeMoves.playing(id, now - at):
-		id = ""
-	var out_at := float(hunter.get_meta(MergeMoves.OUT_AT, -9.0))
-	# (the release gives way to a move the hero starts after the merge ended)
-	var since_out := now - out_at
-	var shown := String(s.get("kmove", ""))
-	var hero_move: bool = not shown.begins_with("mf_") and float(s.get("kmove_t", 99.0)) < since_out
-	if id == "" and k == null and not hero_move and MergeMoves.playing(MergeMoves.RELEASE, since_out):
-		id = MergeMoves.RELEASE
-		at = out_at
-	if id != "":
+	if id.begins_with("mf_"):
 		s["kmove"] = id
-		s["kmove_t"] = now - at
+		s["kmove_t"] = hunter.m.time - at
 	elif String(s.get("kmove", "")).begins_with("mf_"):
 		s.erase("kmove")
 		s.erase("kmove_t")

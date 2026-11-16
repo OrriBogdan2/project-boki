@@ -5,7 +5,7 @@ extends RefCounted
 ## Prints one DASHDIR_SHOT line a frame: the dash's way, the body's facing off the aim, the move and the clip playing.
 ## Needs a renderer.
 
-const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0     # m: the match camera's distance
 const MATCH_FOV := 9.0     # degrees: the match angle, cropped to the Hunter
 const EVERY := 3           # sim steps (60 Hz) per frame: 20 fps

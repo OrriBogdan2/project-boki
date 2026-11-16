@@ -1,7 +1,9 @@
 class_name Shelter
 ## The Shelter (docs/decisions/0013-market.md), at the market stall from L2. Boki are never sold for
 ## gems: they're given a new home here. Strays (ordinary commons, restocked daily) and Boki that
-## players put up wait for a keeper.
+## players put up wait for a keeper. The shelter never runs out of Boki to adopt: it always holds at
+## least shelter.strays strays (commons that aren't the usual starters, one low flat shelter.stray_fee),
+## and adopting a stray brings a new one at once.
 ##   - Putting a Boki up pays the giver nothing. Not your last Boki, not a pinned one (partner, first
 ##     Boki), not an egg's parent, not one under shelter.min_age_days old (no breed-and-dump), and each
 ##     Boki at most once a day. You can never adopt back one you gave away.
@@ -16,9 +18,10 @@ static func _st() -> Dictionary:
 static func _rules() -> Dictionary:
 	return Goods.rules()["shelter"]
 
-## What adopting this Boki costs (the gems are destroyed).
-static func price(rec: Dictionary) -> int:
+## What adopting this Boki costs (the gems are destroyed). A stray (no giver) is the flat stray_fee.
+static func price(rec: Dictionary, stray := false) -> int:
 	var r := _rules()
+	if stray: return int(r["stray_fee"])
 	var p := int(r["base"]) + int(r["per_level"]) * (int(rec.get("level", 1)) - 1)
 	if Data.is_rare(String(rec.get("species", ""))): p += int(r["rare"])
 	if bool(rec.get("shimmer", false)): p += int(r["shimmer"])
@@ -29,7 +32,7 @@ static func price(rec: Dictionary) -> int:
 static func cheapest() -> int:
 	var cs := cards()
 	if cs.is_empty():
-		return int(_rules()["base"])
+		return int(_rules()["stray_fee"])
 	var best := 1 << 30
 	for c in cs:
 		best = mini(best, int(c["price"]))
@@ -40,22 +43,27 @@ static func cards() -> Array:
 	var st := _st()
 	if MarketSave.new_day(st):
 		var kept: Array = (st["stock"] as Array).filter(func(c): return String(c.get("from", "")) != "")
-		st["stock"] = kept + _strays(String(st["day"]))
-	return st["stock"]
+		st["stock"] = kept
+	return _top_up(st)
 
-static func _strays(day: String) -> Array:
-	var out: Array = []
+## Tops the stock up to the stray floor (a new day, or a stray just adopted).
+static func _top_up(st: Dictionary) -> Array:
+	var stock: Array = st["stock"]
+	while stock.filter(func(c): return String(c.get("from", "")) == "").size() < int(_rules()["strays"]):
+		stock.append(_stray(String(st["day"])))
+	return stock
+
+## One stray: a level-1 common that isn't a usual starter (Data.LAUNCH_KIN), at the flat stray fee.
+static func _stray(day: String) -> Dictionary:
+	var id := MarketSave.next_id()
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash("shelter|" + day + "|" + String(Save.profile().get("id", "")))
-	var pool: Array = Data.common_kin()
-	for i in int(_rules()["strays"]):
-		var rec := Save.new_kin(String(pool[rng.randi_range(0, pool.size() - 1)]), "", int(rng.randi() & 0x7fffffff))
-		rec["level"] = rng.randi_range(1, 2)
-		rec["trust"] = 25.0
-		rec["shimmer"] = false
-		rec.erase("mutations")
-		out.append({"id": MarketSave.next_id(), "rec": rec, "price": price(rec), "from": "", "t": MarketSave.now()})
-	return out
+	rng.seed = hash("shelter|" + day + "|" + id + "|" + String(Save.profile().get("id", "")))
+	var pool: Array = Data.common_kin().filter(func(k): return not Data.LAUNCH_KIN.has(k))
+	var rec := Save.new_kin(String(pool[rng.randi_range(0, pool.size() - 1)]), "", int(rng.randi() & 0x7fffffff))
+	rec["trust"] = 25.0
+	rec["shimmer"] = false
+	rec.erase("mutations")
+	return {"id": id, "rec": rec, "price": price(rec, true), "from": "", "t": MarketSave.now()}
 
 ## Did you give this Boki up? (Then you can never adopt it back.)
 static func gave(uid: String) -> bool:
@@ -84,6 +92,7 @@ static func adopt(id: String) -> Dictionary:
 		return {"ok": false, "why": "The farm and the Boki Burrow are full"}
 	Save.d["gems"] = int(Save.d["gems"]) - cost
 	cards().erase(c)
+	_top_up(_st())
 	var giver := String(c.get("from", ""))
 	rec["trust"] = float(rec.get("trust", 25.0)) * float(_rules()["trust_keep"])
 	rec["origin"] = {"how": "shelter", "where": {"place": "shelter"}, "from": giver, "t": MarketSave.now()}
@@ -94,6 +103,7 @@ static func adopt(id: String) -> Dictionary:
 	else:
 		Save.remember(rec, "adopted", "was raised by %s, then found a new home with you" % giver, 1.0)
 	Care.ensure(rec)
+	BaseShy.start(rec)
 	Save.d["roster"].append(rec)
 	if Save.kin(str(Save.d.get("active", ""))).is_empty():
 		Save.d["active"] = rec["uid"]
@@ -102,6 +112,17 @@ static func adopt(id: String) -> Dictionary:
 	Care.dex_got(rec)
 	Save.save_game()
 	return {"ok": true, "why": "", "rec": rec}
+
+## What the player reads when `rec` has just come home: on the farm, or asleep in the Burrow and why.
+static func arrival_line(rec: Dictionary) -> String:
+	var nm := String(rec.get("name", "It"))
+	if not KinBox.is_boxed(rec):
+		return "%s is coming home with you" % nm
+	var z := GardenZones.zone_of(rec)
+	var why := "you have one like it out already"
+	if GardenZones.room(z) <= 0:
+		why = "%s is full (%d out)" % [GardenZones.info(z).get("name", z), KinBox.farm_cap()]
+	return "%s is asleep in the Burrow (%s): %s" % [nm, KinBox.page_name(KinBox.page_of(rec)), why]
 
 # ------------------------------------------------------------------ giving one up
 ## Why this Boki can't be put up ("" if it can).

@@ -1,5 +1,13 @@
 # Sable (thief): import note
 
+## LIVE tilt1112 master in game (2026-11-14, ext/ingame-sync-sable)
+`~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb` (current.json 11-12 22:27Z: the low4 body with the braid long down the back,
+the prop1111/cand_B head with its solid grey-black moth eyes, the mouth repainted level and calm) swapped onto the current
+sable.glb (its 53 clips incl. the first-pose ones, anchors and wing films on the hips region kept). The new pistols hang
+along her thighs and coat, so the spec `detach`es each hand from the hips and its thigh: fused, hand.L stretched 21.9x
+(11 clips over the 18.5 ceiling); cut, the worst clip is bola at 15.3 (main 18.4). 13.1k tris, one 2048 atlas.
+Proof: `~/meshy/ingame-model-sync-1114/compare.jpg` (game close-up and match camera beside the master render).
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Sable/r2/prop1111/cand_B.glb` (CURRENT_OVERRIDES 11-12: solid grey-black eyes, up-pitched moth wings) swapped onto the 11-12 owner-fix sable.glb below, so its narrower idle and stance clips stay. The fix's wing reweight is not re-run: it picks fur below the waist for the old hanging wings and would hang these wings on the thighs and shins; instead the spec's last region gives the wing films (x ±0.36, behind y -0.215, z 0.3-0.84) to the hips whole. 13.0k tris, one 2048 atlas, 47 clips.
 Spec `art/wardens/src/sable_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
@@ -28,6 +36,17 @@ feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trouser
 Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
 hip knives, the procedural pistols and the wing alpha cards.
 
+## Clip re-keys on the shipped model (2026-11-12, ext/anim-sable-first-pose)
+
+`sable_clips.py` also bakes onto the shipped sable.glb's own rig (imported with Blender's bone axes, so the rest
+re-exports unchanged; a no-change rebake matches the shipped clips to 0.04 degrees), and `glb_add_clips.py` puts the
+named clips back on it, every other byte the same. The quick moves' first poses at 0.0 (docs/heroes/thief.md,
+"Animation timing") went on this way:
+
+    B=~/tools/blender-4.5.15-linux-x64/blender; CL=vault_r,vault_l,vault_f,vault_b,vault_twist,exdash,knife,reset
+    $B -b --python tools/art1/sable_clips.py -- art/wardens/sable/sable.glb /tmp/sable_clips.glb $CL
+    python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb /tmp/sable_clips.glb $CL
+
 ## Previous build: v2 (2026-11-06)
 
 The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-briefs; its index.md and "Notes for 3D" win). Built by script from sable_v2_turnaround.jpg, with sable_v2_master_sheet.jpg for detail; nothing is hand-edited in Blender.
@@ -43,3 +62,17 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 - **Weapons:** twin flintlocks skinned to hand.R / hand.L, procedural silver and maroon wood with violet runes and a crystal, scaled up from v1 to the sheet (not projected from it). The silver and wood ramps sit a step under the sheet because the engine's toon light lifts them; the muzzle halos are small so the barrels keep their grey. Two moth-curved knives on each hip, from the turnaround's side view (the master shows two on her right). `anchor_bola` keeps its name on the hips; the kit needs the name.
 - **Face and skin:** the scan's stitched mouth was removed in three places: the low mesh's crease smoothed (`sable_finish.py`), the normal bake flattened there, and a thin smile painted (`face_fix` in `sable_paint.py`). The same pass grades the skin toward the sheet's grey-lilac (tuned in the engine: a step below the hair, not the Blender preview), redraws the beauty mark, cleans collar violet off the neck and paints the cut buns back to hair.
 - **The back of the skull:** the buns the scan grew are cut in `sable_source.py`; `hairback()` closes the hole with a fitted ellipsoid down to the nape.
+
+walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl, run_br, run_r (2026-11-11; the judge kept only these): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/sable/sable.glb OUT.glb 1.39 2.9`
+(the speed / 1.4, the game's rate cap her `loco.foot_mps` hits, / 1.13, what her `loco.stride` 1.5 adds to a planted sole), then
+`python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb OUT.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl,run_br,run_r` (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+walk_b, run_b, run_l (2026-11-11, second pass; the judge kept only these): the hand-keyed loops re-strided,
+`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- sable.glb B.glb 1.39 2.9 b+,l+`, then
+`glb_add_clips.py sable.glb B.glb walk_b,run_b,run_l` and the diagonals walk_bl, walk_br, run_bl, run_br copied back
+after it (prefix match: walk_b replaces walk_bl/walk_br too).
+
+Merge of main's v95 cand_B swap (2026-11-13): `sable.glb` = main's model and clips byte for byte (incl. its walk_f/l/r and
+run_f, the owner-fix idle and stance), plus the branch's walk_b, run_b/l/r and the eight diagonals by `glb_add_clips.py`
+(same 57 joints, rest pose equal; main's walk_f/run_f keep the branch loop's length and hips track, legs within a few
+degrees, so the ring stays in step). Alternative not taken: the branch's whole ring incl. its older walk_f/run_f.

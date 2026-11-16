@@ -261,7 +261,15 @@ C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 
                       (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.14, 0.3), rot=(80, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.14, 0.34), rot=(86, 8, 10)))])
 
 # ---------------------------------------------------------------------- one-shots
-C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.06), rot=(-12, 0, 0), head=(10, 0, 0), sh=sl(0.1, 0.12, -0.34), gr=sp(0.1, 0.2, -0.32), fr=(AX + 0.02, -0.02, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.36, CARRY)])
+# the landing (the drop's deep tier; the hop shows part of it, warden_anim breaker.json "land"): the hull comes down on
+# its stubs like a moored hull settling, feet splayed for the width, the door arm out for balance; the hull bottoms out
+# at 0.08 s and the drum and helmet arrive late (0.14 s), then a small bob up before he is carrying again
+LAND_LOW = merged(CARRY, pos=(0, 0.02, -0.1), rot=(-14, 0, 0), hips=(4, 0, 0), head=(14, 0, 0), sh=sl(0.2, 0.12, -0.36), sn=(-0.9, 0.4, 0.0),
+                  gr=sp(0.12, 0.22, -0.4), fr=(AX + 0.04, -0.03, AZ), fl=(-AX - 0.04, 0.05, AZ), fra=-6.0, fla=-6.0)
+C.bake("land", 0.44, [(0, merged(CARRY, pos=(0, 0.01, -0.03), rot=(-6, 0, 0), sh=sl(0.14, 0.08, -0.26), gr=sp(0.12, 0.14, -0.3), fr=(AX + 0.03, -0.02, AZ), fl=(-AX - 0.03, 0.04, AZ))),
+                      (0.08, merged(LAND_LOW, e="out")), (0.14, dict(pos=(0, 0.02, -0.095), head=(18, 0, 0), gr=sp(0.14, 0.24, -0.47))),
+                      (0.3, dict(pos=(0, 0, 0.012), rot=(3, 0, 0), hips=(-2, 0, -2), head=(-3, 0, 2), sh=sl(0.1, 0.05, -0.39), gr=sp(0.07, 0.11, -0.29), fr=FR, fl=FL, fra=0.0, fla=0.0)),
+                      (0.44, CARRY)])
 C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.04, 0.0), rot=(10, 5, 6), head=(-10, 0, -6), e="snap")), (0.36, CARRY)])
 C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.04, -0.01), rot=(-10, -4, -5), head=(8, 0, 5), e="snap")), (0.36, CARRY)])
 # the emote: he rocks with laughter, the door hand patting his hull
