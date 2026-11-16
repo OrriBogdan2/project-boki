@@ -9961,3 +9961,4 @@ READY ext/anim-key-pose-read 143de967f9f9cda1cf32370cdba0af70a9154ada (key-pose 
 READY ext/idle-mage-rebased 8c4ae677d782e1e17f61889d9788c09df24397c7 (Sparkle idle tools+audit notes; ryzz glb/json = main; gate green, export ok)
 READY ext/anim-dirloops-lace-kael eebe095a8755082fd7644ae92774c672efbf82ca (dirloop tools/checks/docs; main's hem/kael/vex/tarek glbs+json kept; gate green, export ok)
 READY ext/stretch-reds-1115 4d8856e264f45ef0e21c92af6b8b98cbea4aee23 (glb_relax on 7 v95 glbs; NEW-RED 0, export ok)
+READY ext/docs-kit-parity-names 6394b3498ea17f281636fe43c3c52c0732459dc6 (private-ref lint gate + sv/ pointers on current main; NEW-RED 0 after save-compat fix, export ok)
