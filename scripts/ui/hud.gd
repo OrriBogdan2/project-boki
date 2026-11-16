@@ -138,6 +138,7 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudStyle.safe_pad(c.size).y + 72.0      # under the timer / Ways Out strip
@@ -1380,9 +1381,7 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		return
 	plates.draw(self, sp, h, _np_show_name(sp, h))
 	if m.rolling and h.has_meta("bounty"):
-		# a bounty: a target over the plate and what knocking them is worth
-		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
-		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
+		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)      # a target over the plate, no words
 	if not h.downed:
 		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 

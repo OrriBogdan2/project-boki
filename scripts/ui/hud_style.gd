@@ -46,7 +46,7 @@ const PLATE_W_SELF := 108.0    # your own overhead bar
 const PLATE_HP_H := 9.0        # overhead health bar height
 const PLATE_AR_H := 3.0        # overhead armour strip under it
 const PLATE_PAD := 2.0         # frame around the bars
-const PLATE_NAME_FS := 13
+const PLATE_NAME_FS := 11
 ## Where the row of small icons under a plate starts, below the plate's anchor point (the
 ## loadout icons go here): the bars end at +PLATE_HP_H + PLATE_AR_H + pads, then the dash pips.
 const PLATE_ICON_ROW := 22.0

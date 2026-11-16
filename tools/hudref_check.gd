@@ -137,8 +137,8 @@ func run(main_node: Node) -> void:
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
 	await _knock_banners(m, hud, P)
 	await _channel(m, hud, P)
-	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
-	var lv_ok := true
+	# ---------------------------------------------------------------- 4b. a plate is a name and a bar
+	var plain_ok := true
 	var seen := 0
 	for f in foes:
 		var fh: Hunter = f
@@ -146,26 +146,18 @@ func run(main_node: Node) -> void:
 			continue     # hidden in grass, or eliminated: no plate for anyone, by design
 		seen += 1
 		var fs := _shown(hud, fh)
-		if fs.is_empty() or int(fs.get("lvl", -1)) != fh.lvl:
-			lv_ok = false
-			print("  level not shown for %s: shown %d, is %d" % [fh.pname, int(fs.get("lvl", -1)), fh.lvl])
-	ok(lv_ok and seen >= 5, "every visible plate (%d), rivals and the downed included, shows the level" % seen)
-	# a hunter from another machine: their level comes in the snapshot, the badge updates and pulses
+		if fs.is_empty() or fs.has("lvl") or fs.has("lvl_pop"):
+			plain_ok = false
+			print("  plate of %s is missing or carries a level: %s" % [fh.pname, str(fs.keys())])
+	ok(plain_ok and seen >= 5, "every visible plate (%d), the downed too, has no level" % seen)
+	# a hunter from another machine: their level still comes in the snapshot (bounties use it)
 	var R: Hunter = foes[2]
 	R.lvl = 9
 	var row: Array = m._ser(R)
 	R.lvl = 4
 	R.remote = true
-	await main.get_tree().process_frame
-	ok(int(_shown(hud, R).get("lvl", -1)) == 4, "a remote rival's plate shows level 4")
 	m._net_apply(R, row)
 	ok(R.lvl == 9, "their snapshot carries the run level (now %d)" % R.lvl)
-	await main.get_tree().process_frame
-	var rs := _shown(hud, R)
-	var lvl_pop := float(rs.get("lvl_pop", 0.0))
-	ok(int(rs.get("lvl", -1)) == 9 and lvl_pop > 0.0, "the plate updates to 9 and the badge pulses (%.2fs)" % lvl_pop)
-	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
-	ok(float(_shown(hud, R).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 4c. plate height per hunter
 	var arch_was := P.arch
 	P.arch = "gunslinger"
