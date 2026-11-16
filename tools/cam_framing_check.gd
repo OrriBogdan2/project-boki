@@ -7,7 +7,7 @@ extends RefCounted
 ##      Hunter size; the wheel runs from about the old 23 m view to well past the new one, and reach() follows
 ##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
-##   3. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
+##   4. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
 ##      at every wheel zoom up to its reach, and eased back when you walk off, it's too far or the card closes
 ## --cam-framing-shots (GPU, --shots-dir=<dir>): a live match at the default view, then the cursor held at
 ## the screen's top and bottom edge while sneaking (the widest grounded zoom), one PNG each.
