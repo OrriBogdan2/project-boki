@@ -67,3 +67,4 @@ Rejected: one 4K sheet run that came out square and dropped the bubblegum head (
 
 ## Splash v2 (owner, Nov 7, 15:02 ET)
 `ryzz_v2_splash.jpg` is the main splash. A fourth electrocuted knight, smoking and scorched, now lies on the left, so she walks out from between the two groups she zapped. The previous shock edit is `ryzz_v2_splash_alt_shock.jpg`.
+- 11-16: master sheet = turn9-1116/Sparkle/m1 B (owner pick: bust at base size; matte top, shorts, brown boots, 3 rods, splash face). Old sheet in explorations/ryzz_v2_master_sheet_pre1116.jpg
