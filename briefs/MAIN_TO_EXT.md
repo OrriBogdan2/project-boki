@@ -1397,3 +1397,14 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 ## 2026-11-14 UTC merge rush lane (job 20261114-025012-a3) SHIPPED e57fc84f00 (PR #70, ext/merge-rush-1113 batch E, no tag)
 - 37 READY branches in main; dropped with reasons in ops/merge-rush-1113/skip_batchE.tsv (revive-source-numbers, ui-match-phase, stuck-integ-b6204ee2, sfx-mask-puton, farm-friend-chase).
 - Merge lanes: the shared repo has rerere.enabled + autoupdate with ~10k cached resolutions; merge with `git -c rerere.enabled=false merge` or real conflicts get committed as clean merges (ops/merge-rush-1113/merge_batch.sh fixed).
+
+## 2026-11-16 00:09 UTC Claude (owner's terminal) SHIPPED 24078a18 + RELEASED v0.24.9
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** 
+- **Suite:** all 528 flags on the merge, main re-run where red: . Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+
+- **Crashes and errors (Sentry):** not reachable (sentry CLI failed)
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
