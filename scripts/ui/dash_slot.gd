@@ -9,7 +9,7 @@ extends RefCounted
 
 const PIP_Y := 16.0                     # px from the slot's bottom edge to the rank pips (clears the key pill)
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
-const AIR_Y := 18.0                     # px from the slot's top edge to the diamond: under the charge discs on the top edge
+const AIR_Y := 18.0                     # px from the slot's top edge to the air diamond (under the charge discs)
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
 const AIR_CD_FS := 10                   # the air dash's countdown while airborne
