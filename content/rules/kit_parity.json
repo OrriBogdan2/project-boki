@@ -49,7 +49,7 @@
 		{"hero": "rimewright", "slot": "E", "field": "e.slide", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall slides about 6 h in 2.4 s = 2.5 h/s (hero-ref/tamsin.md)"},
 		{"hero": "rimewright", "slot": "E", "field": "e.length", "value": 1.8, "tol": 0.18, "evidence": "F Ice Wall erupts about 1 h wide (hero-ref/tamsin.md)"},
 		{"hero": "rimewright", "slot": "E", "field": "e.length_max", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall widens to about 2.5 h (hero-ref/tamsin.md)"},
-		{"hero": "thief", "slot": "E", "field": "e.range", "value": 16.2, "tol": 0.9, "evidence": "F Phantom Dagger with no target landed about 9 bh out (hero-ref/dancer.md); 14 could not reach it"},
+		{"hero": "thief", "slot": "E", "field": "e.range", "value": 15.0, "tol": 0.5, "evidence": "F Phantom Dagger no-target throw 0222 -> landed 0226: 284 px at 720 wide over a 34 px body height in the same camera (0236), 8.3 bh x 1.8 = 15.0 m; it flew past the cursor (7.0 bh), so this is the end of its path (docs/KIT_PARITY.md ranges)"},
 		{"hero": "mage", "slot": "LMB", "field": "weapon.primary.dmg", "value": 8.74, "tol": 0.3, "evidence": "D Jolt 90 every 0.8s = 8.75% of the target a second (90 of 1285); at our 0.648s (owner items 70, 116) 8.74 of 154 a bolt; --ttk-check LMB 1.00"},
 		{"hero": "mage", "slot": "RMB", "field": "rmb.coil.dmg.0", "value": 15.94, "tol": 0.3, "evidence": "D Voltaic Spear 133 of 1285 = 10.4% of the target = 15.9 of 154 (tooltip read as the uncharged throw)"},
 		{"hero": "mage", "slot": "dash", "field": "dash.dmg", "value": 18.34, "tol": 0.3, "evidence": "D Surge 153 of 1285 = 11.9% of the target = 18.3 of 154"},

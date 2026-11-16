@@ -137,7 +137,7 @@ Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none t
 | Field | Source | Ours | Verdict |
 |---|---|---|---|
 | Throw: sticks in the first foe, else lands at the end of its path | [F] 0222-0258; [D] "throw a dagger" | same, to the cursor | match |
-| `range` | [D] none. [F] a throw with no target landed about 9 bh (16.2 m) away, at the cursor or the end of range; the max is not seen | 14 m | [?] 14 is shorter than the one throw seen; the max is unknown |
+| `range` | [D] none. [F] a throw with no target (0222, landed 0226) flew 284 px over a 34 px body height = 8.3 bh (15.0 m), past the cursor, so the end of its path | 15 m | match; locked in kit_parity (tol 0.5), docs/KIT_PARITY.md |
 | `speed` | [F] about 25 bh/s (45 m/s), read at 5 fps | 40 m/s | match within footage error (16.2 m in 0.41 s against 0.36 s, a quarter of a frame); locked 45 +-5 |
 | `dmg` | [D] the card gives no damage (every other Shiv row has one); [F] no number read on the stick (0255-0258) | 8 (0.62 of a bolt) | [?] |
 | `slow` | [D] none; [F] the panel says "Slows", the dummy slowed (0258); wiki Q: 50% | 0.5 | match (wiki); locked |
