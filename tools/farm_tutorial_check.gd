@@ -27,6 +27,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
+		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -401,6 +402,11 @@ func _tutorial_rules() -> void:
 	ok(FarmTutorial.stage("crop") == "pick" and FarmTutorial.current() == "crop", "grown: pick it, and it takes the prompt back")
 	_stats(0, 0, 0, 1)
 	FarmTutorial.detect()
+	var timer_text := false
+	for st in FarmTutorial.steps():
+		for t in (st["hints"] as Dictionary).values():
+			timer_text = timer_text or String(t).to_lower().contains("ripe in")
+	ok(not timer_text, "no tutorial hint says 'ripe in' (the first crop is quick)")
 	ok(FarmTutorial.did("crop") and FarmTutorial.current() == "buy", "a harvest finishes the crop step; the market is next")
 	# the market: gems enough for a seed, the buy and the sell
 	ok(FarmTutorial.stage("buy") == "bar" and not FarmTutorial.hint_text("buy").contains("{"), "no stall yet: the hint points at the Market on the bar")
@@ -662,8 +668,8 @@ func _home(kin_count: int):
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := Time.get_ticks_msec()
-	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()
 	return home
@@ -676,6 +682,12 @@ func _world() -> void:
 			"Hob waits by the market stall from the start")
 	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
 			"the first prompt is on screen: %s" % home.guide.hint_text())
+	var seed_save: Dictionary = Save.d["plots"][0].duplicate()
+	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": Time.get_unix_time_from_system()}
+	home.guide.refresh()
+	ok(not FarmCropGuide.growing().is_empty() and not home.guide.hint_text().to_lower().contains("ripe in"),
+			"a seed growing adds no 'ripe in' timer to the line: %s" % home.guide.hint_text())
+	Save.d["plots"][0] = seed_save
 	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])

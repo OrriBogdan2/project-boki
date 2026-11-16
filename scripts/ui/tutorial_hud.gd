@@ -15,7 +15,6 @@ const PANEL := TutorialStrip.PANEL
 
 const FIGHT_PROMPTS := ["revive", "finish", "stomping", "boxrev"]     # Match.interact kinds that never wait
 
-static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
 
 ## The lanes: the strip, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
@@ -74,20 +73,15 @@ static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 			h._bar(br, clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
 
 ## A pick step: a pulsing gold ring on the one skill slot that can take the point, an arrow dropping onto it.
-## (The slot's rect is the gold "+" HudPanels drew; the last one is kept, so the ring holds between redraws.)
+## The slot's rect is the one the HUD drew it at (RankMarks.face), so the ring follows the row wherever it sits.
 static func _pick_ring(h, tu: Tutorial) -> void:
 	var slot := TutorialCamps.pick_slot(tu.id())
-	if slot == "":
-		_ring_at = Rect2()
-		return
-	var got: Array = RankMarks.plus_spots.get(slot, [])
-	if not got.is_empty() and int(got[1]) >= HudPanels.draws - 1:
-		_ring_at = got[0]          # (this draws inside the panel pass, before it marks the slots: last pass's)
-	if _ring_at.size == Vector2.ZERO:
+	var face := RankMarks.face(slot) if slot != "" else Rect2()
+	if face.size == Vector2.ZERO:
 		return
 	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 6.0)
-	var c := _ring_at.get_center()
-	var rad := maxf(_ring_at.size.x, _ring_at.size.y) * (0.78 + 0.1 * pulse)
+	var c := face.get_center()
+	var rad := maxf(face.size.x, face.size.y) * (0.78 + 0.1 * pulse)
 	h.c.draw_circle(c, rad, Color(GOLD, 0.12 + 0.1 * pulse))
 	h.c.draw_arc(c, rad, 0.0, TAU, 40, Color(GOLD, 0.7 + 0.3 * pulse), 4.0, true)
 	var tip := c - Vector2(0, rad + 6.0 + 10.0 * pulse)
