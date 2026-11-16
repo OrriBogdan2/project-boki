@@ -63,6 +63,8 @@ const CHECKS := {
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
 	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
+	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
+	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
