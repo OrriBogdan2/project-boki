@@ -10,7 +10,7 @@ extends RefCounted
 ## each care move (pet, feed, lift) for a small and a big Boki (--home-verbs-check's reach()).
 ## Each walk and run ring's loops are one length, so the blended diagonals stay in step. Never touches the save.
 
-const TRI_BUDGET := 15000
+const TRI_BUDGET := 80000      # triangles a Warden, weapon included (RIG_CONTRACT "Budget")
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
