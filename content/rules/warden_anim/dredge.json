@@ -84,14 +84,14 @@
 		"dr_quake": {
 			"clip": "quake"
 		},
-		"dr_lunge": {
+		"dr_lunge": {"dash": true, 
 			"clip": "lunge",
 			"hold_from": 0.39
 		},
 		"dr_lunge_out": {
 			"clip": "lunge_out"
 		},
-		"dr_pounce": {
+		"dr_pounce": {"dash": true, 
 			"clip": "pounce"
 		},
 		"dr_flex": {

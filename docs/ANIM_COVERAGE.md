@@ -9,7 +9,7 @@ the new table.
 
 How a cell is read (Hunters): idle, walk, run, jump (`air.rise`), glide, land and the hit pair are the json's `loco`,
 `air`, `land` and `states.hit` clips found in the .glb; attack is any kit move mapped to a clip; dash and cast are a
-mapped kit move whose key names a dash/skate/vault or an ability (words in the check); death is `states.dead` (none
+mapped kit move whose key names a dash/skate/vault (or has `"dash": true`) or an ability (words in the check); death is `states.dead` (none
 procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is always `proc`
 (`HunterAnim.stomp_k`, no clip anywhere). strafe, crouch and upper are the blends: the 4-way walk and run rings, the
 crouch layer, and kit moves that play on the upper body over the legs. Boki: the .glb clips idle, walk, run, attack,
@@ -22,16 +22,16 @@ onto its side (`Kin.render`).
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
@@ -53,8 +53,14 @@ onto its side (`Kin.render`).
 2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
    and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
    the move and the landing squash settles it.
-3. **Hunter dash is `proc` for 5 Hunters** (breaker, dredge, ostra, pip, and gil): the procedural roll, phase and charge
-   poses stand in. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are clips, re-keyed to
-   their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key theirs too.
+3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
+   (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
+   hand-keyed clip on their v95 .glb for the whole dash, with none of the procedural pose under it (`--dash-frames-check
+   --dash-only=<archetype>` logs the clip, its weight and the rig's: 0 every frame). Measured at 60 fps: Albert's whirl
+   owns the body through the 0.17 s dash and its spin (0.73 s); Meeko's skip (0.233 s) spans her 0.22 s hop; Grimble's
+   lunge holds through the 0.18 s shove and its gap, then `lunge_out`; Motley's Trade is no travel dash (no roll), the
+   aim then the lob. Their cells read `proc` only because the move names do not say dash, so `warden_anim/*.json`
+   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
+   clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
+   theirs too.
 4. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
-5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
