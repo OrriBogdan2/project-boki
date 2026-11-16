@@ -494,6 +494,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 	for p in players:
 		p.stop()
 	voices.friends.resize(0)
+	mix.set_muffle(SfxMix.Muffle.OFF)
 
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
@@ -608,6 +609,14 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
+
+## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	return n
 
 ## The pool voice for a sound of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
 ## null when it gets none.
