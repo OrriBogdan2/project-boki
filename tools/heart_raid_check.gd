@@ -12,12 +12,12 @@ extends RefCounted
 ##   4. the boss: Nightmare's has one more attack (the Colossus's rockfall, telegraphed), Normal's not.
 ##   5. the win: the boss down opens the Heart's final seat, the squad holds the ring and leaves with the
 ##      raid's reward (an egg of the raid's Boki at its difficulty), and the results line says so.
-##   7. first-time hints (HeartRaidHints): the raid-only Boki line, the first wave's marks, the boss rising and
-##      the Heart's final seat each show once and are saved as seen; the difficulty pick's is seen once too.
 ##   6. its sounds (scripts/match/raid_sfx.gd): a wave opens once per wave sent, the boss rises once, each wave's
 ##      gates tick in the last RaidSfx.TICK_S s, the Nightmare boss's rockfall warns and a phase change cues;
 ##      every cue has its sound file and Normal's boss has no rockfall warn.
-## --heart-raid-check=sim runs only part 3, =hints only part 7 (and --seed=N picks the raids' seed).
+##   7. first-time hints (HeartRaidHints): the raid-only Boki line, the first wave's marks, the boss rising and
+##      the Heart's final seat each show once and are saved as seen; the difficulty pick's is seen once too.
+## --heart-raid-check=hints runs only part 7, =sim only part 3 (and --seed=N picks the raids' seed).
 ## Each whole raid is 1.5-3 min of wall time, so the suite runs part 3's four raids as their own flags
 ## (--heart-raid-solo-check, -squad-, -hard-, -nightmare-; the registry passes the SIMS index) and
 ## --heart-raid-check runs the rest, with part 3's cross-raid rows (wave 1's size and gates) on short
@@ -53,6 +53,12 @@ func run(main: Node, part := -1) -> void:
 		main.get_tree().quit(0 if bad == 0 else 1)
 		return
 	var sim_only := args.has("--heart-raid-check=sim")
+	for a in args:
+		if String(a).begins_with("--sweep="):  # --sweep=SQUAD:diff:arch: one raid, one HRSWEEP line
+			var p := String(a).substr(8).split(":")
+			await _sim(main, int(p[0]), p[1], seed_v, p[2], true)
+			main.get_tree().quit(0)
+			return
 	if args.has("--heart-raid-check=hints"):
 		await _hints(main)
 		print("HRAID DONE, failures: ", bad)
@@ -164,9 +170,13 @@ func _first_wave(main: Node, sq: int, diff: String, seed_v: int) -> void:
 	await _drop(main, m)
 
 
-func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
+func _sim(main: Node, sq: int, diff: String, seed_v: int, arch := "", sweep := false) -> void:
 	var tag := "%d %s" % [sq, diff]
 	var o := _sim_opts(sq, diff, seed_v)
+	if arch != "":
+		o["arch"] = arch
+		o["cls"] = Arch.weight(arch)
+		o["weapon"] = Arch.signature(arch)
 	var tb := Time.get_ticks_msec()
 	var m := _match(main, o)
 	var rd: HeartRaid = m.heart_raid
@@ -192,11 +202,17 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 	var marked_at := {}  # wave index -> session time its gates were marked
 	var late: Array = []  # "wave: what" for a wave that broke the clarity rule
 	var sent_n := 0
+	var downs := 0
+	var was_down := {}
 	while m.time < m.length + 2.0 and (ended_at < 0.0 or m.time < ended_at + 1.5):
 		m.step(Match.DT)
 		n_step += 1
 		if n_step % 120 == 0:
 			await main.get_tree().process_frame
+		for h in m.hunters:
+			if h.downed and not was_down.get(h, false):
+				downs += 1
+			was_down[h] = h.downed
 		if ended_at < 0.0 and not m.result.is_empty():
 			ended_at = m.time
 		if not marked_at.has(rd.gates.marked_wave):
@@ -234,6 +250,25 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 				)
 			)
 	var wall_s := (Time.get_ticks_msec() - t_wall) / 1000.0
+	print(
+		(
+			"HRSWEEP %s %s seed %d arch %s: %s at %d s, downs %d, wave %d, boss %s"
+			% [
+				sq,
+				diff,
+				seed_v,
+				arch,
+				HeartRaid.P.keys()[rd.phase],
+				int(ended_at),
+				downs,
+				rd.wave,
+				"yes" if rd.boss != null or rd.boss_down else "no"
+			]
+		)
+	)
+	if sweep:
+		await _drop(main, m)
+		return
 	for line in rd.trail:
 		print("HRAID squad %s   %s" % [tag, line])
 	var w1: Array = rd.trail.filter(func(l): return String(l).contains("wave 1:"))
@@ -393,6 +428,7 @@ func _win(main: Node) -> void:
 	ok(said.begins_with("Heart Raid (Normal) won"), "the results line: %s" % said)
 	await _drop(main, m)
 
+
 ## 7. Each hint is unseen until its moment, shown once at it (the lane gets the line), then seen in the save.
 func _hints(main: Node) -> void:
 	Save.d = Save.fresh()
@@ -425,9 +461,11 @@ func _hints(main: Node) -> void:
 	ui.queue_free()
 	await _drop(main, m)
 
+
 func _run_to(m: Match, t: float) -> void:
 	while m.sess_time() < t:
 		m.step(Match.DT)
+
 
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
