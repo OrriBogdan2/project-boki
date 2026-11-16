@@ -83,10 +83,7 @@ func _keys_part() -> void:
 	ok(GardenZones.keys_for("glasswater") == {"seed": false, "lean": false}, "no keys yet")
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
-	var seed := "Find its Wayseed in a run's lair or at Old Pell's (%d gems)" % int(BlackMarket.seed_terms()[1])
-	var key := int(GardenZones.rules()["lean_key"])
-	var near := " (closest: %s, Ice %d of %d)" % [rec["name"], int(rec["lean"]["ice"]), key]
-	var both := seed + ", and feed a Boki Water, Ice or Crystal meals" + near + "."
+	var both := "Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals."
 	ok(ZoneCards.lock_line("glasswater") == both,
 		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
 	rec["lean"]["ice"] = float(GardenZones.rules()["lean_key"])
@@ -95,7 +92,7 @@ func _keys_part() -> void:
 		"a Wayseed and a Boki leaning Ice tick both keys")
 	ok(ZoneCards.lock_line("glasswater") == "Ready to wake.", "with both keys its line says it is ready")
 	Save.d["items"].erase(GardenZones.wayseed("glasswater"))
-	ok(ZoneCards.lock_line("glasswater") == seed + ".",
+	ok(ZoneCards.lock_line("glasswater") == "Find its Wayseed in a run's lair or at the trader.",
 		"with the lean but no Wayseed it asks only for the Wayseed")
 
 ## The first day's tutorial runs in the start zone; once it is done or skipped, a plain goto lands in the hub.
@@ -258,12 +255,6 @@ func _cards_part(m: Node, hub) -> void:
 	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
 	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
 		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
-	var terms := BlackMarket.seed_terms()
-	var near := GardenZones.closest("glasswater")
-	var lock := String(gw_lines[-1].text)
-	ok(("%d gems" % terms[1]) in lock and "Old Pell" in lock, "the line names Old Pell and his %d gems" % terms[1])
-	ok(near.is_empty() or GardenZones.keys_for("glasswater")["lean"] or String(near["rec"]["name"]) in lock,
-		"the line names the closest Boki when the lean key is missing")
 	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
 
 ## The text lines on an open zone's card.
@@ -314,7 +305,6 @@ func _move_part(m: Node) -> void:
 	ok(bb != null and bb.life != null, "Bramblebank loads with base life")
 	if bb == null or bb.life == null:
 		return
-	_nap_spots_row(bb, "Bramblebank")
 	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
 	var rec: Dictionary = k["rec"]
 	ZoneCards.move_to(bb, k)
@@ -433,18 +423,6 @@ func _texts(n: Node) -> String:
 		out += "\n" + _texts(c)
 	return out
 
-## The open panel as it shows now, saved in --shots-dir when one is given.
-func _grab(m: Node, file: String) -> void:
-	var dir := ""
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): dir = a.substr(12)
-	if dir == "" or DisplayServer.get_name() == "headless":
-		return
-	DirAccess.make_dir_recursive_absolute(dir)
-	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
-	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
-	print("ZONES shot %s" % dir.path_join(file))
-
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
 func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
 	var dir := ""
@@ -489,7 +467,6 @@ func _glasswater_part(m: Node) -> void:
 	ok(gw.hway.node != null and gw.player.position.distance_to(gw.hway.node.position) < 0.5,
 		"you arrive on its return pad")
 	ok(not gw.hb.can_build(), "build mode is off in the zone")
-	_nap_spots_row(gw, "Glasswater")
 	var batches: Array = gw.find_children("*", "MultiMeshInstance3D", false, false)
 	var mats := {}
 	var n := 0
@@ -506,21 +483,6 @@ func _glasswater_part(m: Node) -> void:
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
 	Content.rules("farm_build")["base_mode"] = false
 
-## Every nap spot of the open zone is a free place a Boki of it can walk to (BaseLife._free_spot).
-func _nap_spots_row(home, zone: String) -> void:
-	var k: Dictionary = home.kins[0]
-	var spots := BaseLife.nap_spots()
-	var found := {}
-	for i in spots.size():
-		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
-		k["pos"] = home.world.free_spot_near(tile, [], 0.8, 0.45, 5.0)       # stands near the spot, on its island
-		var spot: Dictionary = home.life._free_spot(k, {})
-		if not spot.is_empty():
-			found[int(spot["i"])] = true
-	ok(spots.size() >= 3 and found.size() == spots.size(),
-		"%s: its %d nap spots (%s) are open ground (%d found)" % [zone, spots.size(),
-			", ".join(spots.map(func(s): return s[0])), found.size()])
-
 func _cinderstep_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	_new_save()
@@ -531,7 +493,6 @@ func _cinderstep_part(m: Node) -> void:
 	if cs == null or cs.hshove == null:
 		return
 	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
-	_nap_spots_row(cs, "Cinderstep")
 	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
 	ok(ids.has("toy_stone") and ids.has("toy_post"), "a warm stone and a climbing post (%s)" % ", ".join(ids))
 	var snacks := SnackPatch.snacks(Save.d)
@@ -762,8 +723,4 @@ func _visit_part(m: Node) -> void:
 	var zone = await _arrived(m, hub)
 	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
 		"and finds only Ash there, still a visit")
-	var egg := Incubator.add(String(Data.common_kin()[0]))
-	for _f in 20: await m.get_tree().process_frame
-	ok(zone != null and zone.hinc == null and float(Incubator.find(String(egg["id"])).get("heat", 0.0)) > 0.0,
-		"your own Rare Egg keeps warming while you visit (play time; decision 0080)")
 	Content.rules("farm_build")["base_mode"] = false

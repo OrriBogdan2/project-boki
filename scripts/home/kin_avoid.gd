@@ -21,8 +21,7 @@ static func lying(o: Dictionary) -> bool:
 
 ## Lying, or busy at its toy or bowl: it stays where it is, so the others make room (separation) and go round.
 static func parked(o: Dictionary) -> bool:
-	return lying(o) or o.get("play", {}).get("phase", "") == "play" or o.get("eat", {}).get("phase", "") == "eat" \
-		or FeedBowl.phase(o) == "eat"
+	return lying(o) or o.get("play", {}).get("phase", "") == "play" or o.get("eat", {}).get("phase", "") == "eat"
 
 ## Has k been boxed in so often that its errand should be dropped?
 static func shut(k: Dictionary) -> bool:

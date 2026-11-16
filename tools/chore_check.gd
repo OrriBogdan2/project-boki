@@ -37,7 +37,6 @@ func _new_save() -> Dictionary:
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
-	HomeLayout.new_fs(d, 7)      # one island every run (a new save rolls its own)
 	HomeLayout.ensure(d)
 	return d
 
@@ -156,9 +155,7 @@ func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
 	var ended := begun - (1 if s["last_chore"].get(who, false) else 0)
 	ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, kind, ended, begun])
 	var writes := int(s["writes"].get(who, 0))
-	# (a cheer whose friend got glad on its own before it arrived ends with no line: BaseChore._cheer)
-	var lines_ok := writes >= 1 and writes <= ended if kind == "cheer" else writes == ended
-	ok(lines_ok, "%s wrote one journal line per chore (%d lines)" % [who, writes])
+	ok(writes == ended, "%s wrote one journal line per chore (%d lines)" % [who, writes])
 	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
 
 func _no_refusals(home) -> void:

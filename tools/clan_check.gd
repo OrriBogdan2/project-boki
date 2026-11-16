@@ -1,24 +1,15 @@
 extends RefCounted
-## --clan-check: clans, slices 1 to 3 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
+## --clan-check: clans, slices 1 and 2 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
 ##   1. clean_roster drops other clans' rows, unknown ranks and repeats, doubts a forged founder, clamps, caps at 24
 ##   2. founding a clan makes you its founder; joining makes you a member with a roster doc; both round-trip
 ##   3. only the founder can close the clan to newcomers; the flag reads back
 ##   4. leaving deletes the roster doc and clears the clan
 ##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan
 ##   6. clean_clanbase: one showcase Boki per current member, a 13th is dropped, forged numbers are clamped
-##   7. the weekly board (docs/decisions/0087-clan-board.md): clean_rows drops other clans', other weeks',
-##      non-members' and repeated rows, clamps counts to the caps, ignores a stored score; your adds land in
-##      your own row only (a last-week row starts over); the goal pays once; leaving deletes the row
-##   8. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall and
-##      the board with the bar and the top three
-##   9. clan tags (ClanInfo): 2-4 letters A-Z, blocked words refused, a clan without one takes its name's
-##      initials; founding stores it, your clan and profile carry it, a forged one reads as none
-##  10. last deeds: the newest extraction, raise or breed in the event log rides the profile; forged ones are
-##      dropped or clamped; the member roll and an island visit show them
-##  11. (ranks, removal and founder hand-off are --clan-roles-check, which reuses this fake store)
+##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
 ##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
 ##      exit leak of HomeBuild/HomeMarket/HomeTrade)
-##  12. breeding loans (section 7): only a clan member lends, not the lead, one at a time; the Boki leaves the
+##   8. breeding loans (section 7): only a clan member lends, not the lead, one at a time; the Boki leaves the
 ##      roster but not the save; the clanmate sees the offer (forged ones dropped), takes it in, and the
 ##      Nook's side panel shows it; after the day it comes home with a memory line and the offer is gone
 
@@ -75,7 +66,7 @@ func _cleaning() -> void:
 		_row("g1_a", {"guild": "g1", "role": "officer"}),
 		_row("g1_g", {"guild": "g1", "role": 4}),
 	]
-	var out := Social.clean_roster(rows, "g1", Social.clean_guild({"founder": "f"}))
+	var out := Social.clean_roster(rows, "g1", "f")
 	var ids: Array = out.map(func(r): return r["id"])
 	ok(ids == ["a", "e", "f"], "bad rank, other clan, wrong doc id, repeat and non-text rank are dropped (%s)" % [ids])
 	var roles: Array = out.map(func(r): return r["role"])
@@ -84,7 +75,7 @@ func _cleaning() -> void:
 	var many := []
 	for i in 40:
 		many.append(_row("g1_m%d" % i, {"guild": "g1", "role": "member"}))
-	ok(Social.clean_roster(many, "g1", {}).size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
+	ok(Social.clean_roster(many, "g1", "").size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
 
 
 func _joining() -> void:
@@ -98,14 +89,13 @@ func _joining() -> void:
 	ok(mine.get("role") == "member" and mine.get("guild") == "g1", "a roster doc is written on join")
 	docs["clanroster/g1_bob"] = {"guild": "g1", "role": "founder"}
 	var got := []
-	Social.clan_roster("g1", Social.clean_guild(docs["guilds/g1"]), func(r, _gone):
-		got.append_array(r.map(func(x): return x["id"])))
+	Social.clan_roster("g1", "bob", func(r): got.append_array(r.map(func(x): return x["id"])))
 	ok(got == ["alice", "bob"], "the roster reads back both members")
 	ok(not Social.busy("guild"), "the join finished")
 
 
 func _founding() -> void:
-	Social.create_guild("Pond Two", "", "", func(_okk): pass)
+	Social.create_guild("Pond Two", "", func(_okk): pass)
 	var gid: String = Save.d["guild_id"]
 	ok(Save.d["clan"]["id"] == gid and Save.d["clan"]["role"] == "founder", "founding a clan makes you its founder")
 	var mine: String = docs["clanroster/%s_alice" % gid]["role"]
@@ -150,92 +140,7 @@ func _old_saves() -> void:
 	ok(Save.fresh()["clan"] == {}, "a new save starts with no clan")
 	DirAccess.remove_absolute(OLD_SAVE)
 
-func _tags() -> void:
-	var cases := {"wren": "WREN", "AB": "AB", "A": "", "ABCDE": "", "A1": "", "<b>": "", "NAZI": "", "BASS": "BASS",
-		"MOD": "", 7: ""}
-	var got := {}
-	for k in cases: got[k] = ClanInfo.clean_tag(k)
-	ok(got == cases, "tags: 2-4 letters, A-Z, blocked words out (%s)" % [got])
-	ok(ClanInfo.tag_from_name("Reed Bank Rovers") == "RBR" and ClanInfo.tag_from_name("Moss") == "MOSS",
-		"a clan with no tag takes its initials, or its first letters")
-	var forged_tag: String = Social.clean_guild({"name": "Old Pond", "tag": "<script>"})["tag"]
-	ok(forged_tag == "OP", "a forged tag falls back to the initials")
-	Save.d = Save.fresh()
-	Social.create_guild("Fern Hollow", "", "fh", func(_okk): pass)
-	var gid: String = Save.d["guild_id"]
-	ok(docs["guilds/" + gid]["tag"] == "FH" and Save.d["clan"]["tag"] == "FH",
-		"founding stores the tag; your clan carries it")
-	ok(ClanInfo.my_tag() == "FH" and Social.profile_doc()["tag"] == "FH", "...and so does your island snapshot")
-	ok(Social.clean_island({"name": "x", "tag": "S H"})["tag"] == "", "a forged snapshot tag reads as none")
-	ok(ClanInfo.tagged("Ivy", "FH") == "[FH] Ivy" and ClanInfo.tagged("Ivy", "") == "Ivy",
-		"the tag goes before the name")
-	Social.leave_guild(func(): pass)
-	ok(ClanInfo.my_tag() == "", "leaving drops the tag")
 
-func _deeds() -> void:
-	Save.d = Save.fresh()
-	var sp: String = Data.common_kin()[0]
-	var egg := Save.new_kin(sp)
-	egg["parents"] = ["Mum", "Dad"]
-	egg["origin"] = {"how": "egg"}       # as Care makes a bred egg
-	Save.register(egg)
-	ok(ClanInfo.last_deed(Save.d["log"]).get("did") == "bred", "an egg of two parents hatching is a breed")
-	Save.register(Save.new_kin(sp), "wild")
-	ok(ClanInfo.last_deed(Save.d["log"]).get("did") == "bred", "a catch is not a deed: the breed stays last")
-	Game.apply_result({"extracted": true, "gems": 0})
-	ok(ClanInfo.last_deed(Save.d["log"]).get("did") == "extracted", "an extraction is logged and is newest")
-	Save.log_event("evolved", egg, {"kind": "mutation"})
-	Save.log_event("evolved", egg, {"kind": "form"})
-	var last := ClanInfo.last_deed(Save.d["log"])
-	ok(last.get("did") == "raised" and last.get("sp") == sp, "a new form is a raise (a mutation is not)")
-	var now_s := int(Time.get_unix_time_from_system())
-	var snap := Social.clean_island(JSON.parse_string(JSON.stringify(Social.profile_doc())))
-	ok(snap["last"].get("did") == "raised", "the last deed rides the island snapshot")
-	var forged: Dictionary = Social.clean_island({"last": {"did": "raised", "t": now_s + 1e9, "sp": "dragon"}})["last"]
-	ok(forged == {"did": "raised", "t": now_s, "sp": ""}, "a forged deed is clamped to now, an unknown kind dropped")
-	ok(Social.clean_island({"last": {"did": "won the lottery"}})["last"] == {}, "an unknown deed reads as none")
-	var kin := String(Data.KIN[sp]["name"])
-	var txt := ClanInfo.deed_text({"did": "bred", "t": now_s - 3 * 3600, "sp": sp}, now_s)
-	ok(txt == "bred a %s, 3 h ago" % kin, "the roll line reads '%s'" % txt)
-
-## The member roll on the clan's isle and a visit to a member's island, both from the fake store.
-func _roll_and_visit(main: Node) -> void:
-	var now_ms := Time.get_unix_time_from_system() * 1000.0
-	docs["guilds/g5"] = {"name": "Reed Bank", "founder": "ann", "tag": "REED"}
-	docs["profiles/ann"]["last"] = {"did": "extracted", "t": int(now_ms / 1000.0) - 120}
-	docs["profiles/ann"]["tag"] = "REED"
-	Game.goto("town", {"mode": "guild", "gid": "g5"})
-	var tree := main.get_tree()
-	var town: Node = null
-	for i in 600:
-		await tree.process_frame
-		town = main.get("current")
-		if town != null and town.get("members") != null and town.get("members").size() == 3:
-			break
-	var loaded: bool = town != null and town.get("members") != null and town.get("members").size() == 3
-	ok(loaded, "the clan isle loads its 3 members")
-	if not loaded:
-		return
-	town.call("_open_roster")
-	for i in 5:
-		await tree.process_frame
-	var lines: Array = town.get("panel_host").find_children("*", "Label", true, false).map(func(l): return l.text)
-	ok(lines.has("    made it out of a match, 2 min ago") and lines.count("    nothing yet") == 2,
-		"the roll shows what each member did last (%s)" % [lines])
-	var visit := Social.clean_island(docs["profiles/ann"])
-	Game.goto("home", {"visit": visit, "visit_id": "ann"})
-	var bar := ""
-	for i in 600:
-		await tree.process_frame
-		var home: Node = main.get("current")
-		var tb = home.get("topbar") if home != null else null
-		if tb is Label and String(tb.text).begins_with("Visiting"):
-			bar = tb.text
-			break
-	ok(bar.begins_with("Visiting [REED] Ann's island"), "an island visit shows the tag ('%s')" % bar.substr(0, 40))
-	Game.goto("title")
-	for i in 30:
-		await tree.process_frame
 func _write(d: Dictionary) -> void:
 	var f := FileAccess.open(OLD_SAVE, FileAccess.WRITE)
 	f.store_string(JSON.stringify(d))
@@ -264,63 +169,6 @@ func _showcase() -> void:
 	ok(Social.clean_clanbase({"showcase": "lots"}, ids)["showcase"] == [], "a broken doc reads as an empty wall")
 
 
-func _board_rows() -> void:
-	var wk := ClanBoard.week_now()
-	var cap: Dictionary = ClanBoard.rules()["cap"]
-	var pts: Dictionary = ClanBoard.rules()["points"]
-	var rows := [
-		_row("g1_a", {"guild": "g1", "week": wk, "extract": 2, "pts": 9999}),
-		_row("g1_b", {"guild": "g1", "week": wk - 1, "cup": 3}),
-		_row("g1_c", {"guild": "g2", "week": wk, "cup": 3}),
-		_row("g2_d", {"guild": "g1", "week": wk, "cup": 3}),
-		_row("g1_e", {"guild": "g1", "week": wk, "cup": 1e15, "final": -4, "extract": "lots"}),
-		_row("g1_a", {"guild": "g1", "week": wk, "extract": 9}),
-		_row("g1_x", {"guild": "g1", "week": wk, "cup": 1}),
-	]
-	var shares := ClanBoard.clean_rows(rows, "g1", wk, ["a", "b", "c", "d", "e"])
-	var ids: Array = shares.map(func(s): return s["id"])
-	ok(ids == ["e", "a"], "other clan, last week, wrong doc id, repeat and non-member rows are dropped (%s)" % [ids])
-	var e: Dictionary = shares[0]
-	ok(e["cup"] == cap["cup"] and e["final"] == 0 and e["extract"] == 0, "counts are clamped to the weekly caps")
-	ok(shares[1]["pts"] == 2 * int(pts["extract"]), "points are worked out, a stored score is ignored")
-	var b := ClanBoard.board(shares, 5)
-	ok(
-		b["goal"] == maxi(int(ClanBoard.rules()["goal_min"]), 5 * int(ClanBoard.rules()["goal_per_member"])),
-		"the goal grows with the clan (%d)" % b["goal"]
-	)
-
-	Save.d["guild_id"] = "g7"
-	var mine := "clanboard/g7_alice"
-	docs[mine] = {"guild": "g7", "week": wk - 1, "cup": 4, "paid": true}
-	docs["clanboard/g7_bob"] = {"guild": "g7", "week": wk, "final": 3}
-	ClanBoard.add("extract")
-	ClanBoard.add("extract")
-	ClanBoard.add("cup")
-	ClanBoard.add("hats")
-	var d: Dictionary = docs[mine]
-	var fresh: bool = d["cup"] == 1 and d["extract"] == 2 and d["final"] == 0 and d["paid"] == false
-	ok(fresh and d["week"] == wk, "adds go to your row; a last-week row starts over (%s)" % [d])
-	ok(docs["clanboard/g7_bob"]["final"] == 3, "...and never touch another member's row")
-	var got := []
-	ClanBoard.read("g7", ["alice", "bob"], func(r): got.append(r))
-	var total: int = 2 * int(pts["extract"]) + int(pts["cup"]) + 3 * int(pts["final"])
-	ok(got.size() == 1 and got[0]["total"] == total and got[0]["shares"][0]["id"] == "bob", "the board reads back")
-	var reached := ClanBoard.board(got[0]["shares"], 1)
-	reached["done"] = true
-	var gems := int(Save.d["gems"])
-	var paid := []
-	ClanBoard.claim("g7", reached, func(n): paid.append(n))
-	ClanBoard.read("g7", ["alice", "bob"], func(r): ClanBoard.claim("g7", r, func(n): paid.append(n)))
-	var reward := int(ClanBoard.rules()["reward_gems"])
-	ok(paid == [reward, 0] and int(Save.d["gems"]) == gems + reward, "the goal pays once a week (%s)" % [paid])
-	ok(docs[mine]["paid"] == true and docs[mine]["extract"] == 2, "...marked in your row, counts kept")
-	ok(Evo.is_final("flarmink") and not Evo.is_final("ermink"), "a form with no next form is a final")
-	Social.leave_guild(func(): pass)
-	ok(not docs.has(mine) and docs.has("clanboard/g7_bob"), "leaving deletes only your board row")
-	ClanBoard.add("cup")
-	ok(not docs.has(mine), "outside a clan nothing is counted")
-
-
 func _base(main: Node) -> void:
 	var furn: String = Data.FURN.keys()[0]
 	for who in ["ann", "ben", "cat"]:
@@ -330,10 +178,6 @@ func _base(main: Node) -> void:
 	docs["profiles/dan"] = {"name": "Dan", "guild": "g6", "roster": [_kin("dan")]}
 	docs["clanroster/g5_ann"] = {"guild": "g5", "role": "founder", "corner_seed": 1e15}
 	docs["clanbase/g5"] = {"showcase": [_kin("ben", 1e15), _kin("dan")]}
-	var wk := ClanBoard.week_now()
-	docs["clanboard/g5_ann"] = {"guild": "g5", "week": wk, "extract": 3}
-	docs["clanboard/g5_ben"] = {"guild": "g5", "week": wk, "final": 1}
-	docs["clanboard/g5_dan"] = {"guild": "g5", "week": wk, "final": 3}
 	var gdoc := Social.clean_guild({"name": "Reed Bank", "founder": "ann"})
 	ClanBase.open("g5", gdoc)
 	var tree := main.get_tree()
@@ -357,13 +201,6 @@ func _base(main: Node) -> void:
 	var wall: Node = root.get_node("ShowcaseWall")
 	var shown: Array = home.get("visit")["clan_base"]["showcase"]
 	ok(shown.size() == 1 and shown[0]["level"] == 999 and wall != null, "the wall shows members only, clamped")
-	var board: Dictionary = home.get("visit")["clan_base"]["board"]
-	var pts: Dictionary = ClanBoard.rules()["points"]
-	var sum: int = 3 * int(pts["extract"]) + int(pts["final"])
-	ok(board["total"] == sum and board["goal"] == ClanBoard.goal(3), "the board counts members only (%d)" % sum)
-	var lines: Label3D = wall.get_node_or_null("ClanBoard/Top")
-	var top: String = lines.text if lines != null else ""
-	ok(top.begins_with("1. Ann") and top.contains("2. Ben") and not top.contains("Dan"), "the top three: %s" % [top])
 	Game.goto("title")  # leave the farm before quitting, so it frees cleanly
 	for i in 30:
 		await tree.process_frame
@@ -443,12 +280,8 @@ func run(main: Node) -> void:
 	_leaving()
 	_old_saves()
 	_showcase()
-	_board_rows()
-	_tags()
-	_deeds()
 	Save.d = Save.fresh()
 	await _base(main)
-	await _roll_and_visit(main)
 	_loans(main)
 	print("CLAN DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -2,7 +2,7 @@ extends RefCounted
 ## --showcase-check: the Dash's showcase wall (scripts/home/base_showcase.gd, GARDEN.md 5.1).
 ##   1. a win pins an entry (name, species, date, twist); the 7th win drops the oldest, 6 stay
 ##   2. the weekly twist follows the week number and wraps round the list
-##   2b. the week maps to a format for one game; only that game gets the format
+##   2b. the week maps to a format for one game; only that game gets the tweak
 ##   3. the visit snapshot carries the wall and a visitor's copy is cleaned (bad image dropped, capped at 6)
 ##   4. the wall builds one frame per entry
 ##   5. a settled Dash on the base pins its winner (image-less headless)
@@ -57,8 +57,7 @@ func _twists() -> void:
 	ok(seen.size() == list.size(), "consecutive weeks rotate through every twist")
 	ok(BaseRace.week_now() > 2900, "week_now is a real week number (%d)" % BaseRace.week_now())
 
-## The week maps to a format for a known game, and only that game gets this week's format (another game may
-## get the season's twist, GardenSeasons: --seasons-check).
+## The week maps to a format for a known game, and only that game gets this week's tweak.
 func _formats() -> void:
 	var list: Array = BaseRace.rules()["twists"]
 	var games := {}
@@ -70,8 +69,8 @@ func _formats() -> void:
 	ok(games.size() == 3, "the rotation visits Dash, Seek and Volley")
 	var now := BaseRace.twist()
 	ok(now == list[BaseRace.week_now() % list.size()], "this week's format is %s" % now["id"])
-	var tweaked := ["dash", "seek", "volley"].filter(func(g): return BaseRace.tweak(g) == now)
-	ok(tweaked == [now["game"]], "only %s gets this week's format" % now["game"])
+	var tweaked := ["dash", "seek", "volley"].filter(func(g): return not BaseRace.tweak(g).is_empty())
+	ok(tweaked == [now["game"]], "only %s gets this week's tweak" % now["game"])
 
 func _visit() -> void:
 	var mine := Social.profile_doc()

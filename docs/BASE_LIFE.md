@@ -6,7 +6,7 @@ check: `--base-life-check`.
 
 - One explicit machine per farm Boki (`Fsm`, briefs/STATE_MACHINES.md), kept on the kin entry as `k["life"]`:
   Roam, Eat, Nap, Play (a toy), PlayWith (tag with another Boki), Watch (a rival, or whoever took its toy),
-  React (a newcomer), Greet (you arrived). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
+  React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
 - home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
@@ -18,19 +18,6 @@ check: `--base-life-check`.
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
   Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
 - Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
-- Nap spots: each zone lists a few in `garden_zones.json` `nap` ([kind, tile x, tile z]: a sunny rock, under a tree,
-  by the water). A Boki about to nap walks to the nearest free one within `spot_reach` (one Boki on it), giving up
-  after `spot_walk` s; a friend (`friend_at`, a parent weighs in) prefers the place beside its friend's spot, then a
-  napping friend nearby (the pile), then a free spot; with none it naps where it stands. A spot moves up to 3 m to
-  open ground, so Bramblebank's per-save island keeps its spots. Claims live on the runtime Boki (`life_spot`),
-  nothing is saved. Checks: `--base-life-check` (walk, beside, a third spot), `--garden-zones-check` (spots on
-  open ground in each built zone).
-- Greeting you (`scripts/home/base_greet.gd`, base_life.json `greet`): when you arrive in a zone (the teleporter,
-  or KinWelcome's long absence handed over in base_mode), every awake, free Boki within `radius_m` m enters the
-  Greet state once, the most trusting first (`notice_s` + `stagger_s` each). Close (trust 50+) or Soulbound runs to
-  you at the whistle's run speed and hops; sulky (the whistle's `sulky_joy`) turns its back and walks off; shy (the
-  whistle's `shy_trust`) peeks and waves; Friendly runs with chance cling x `cling_run`, else peeks. Napping Boki
-  sleep on, and the player is never held. Checked in `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
@@ -39,15 +26,9 @@ check: `--base-life-check`.
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
-  goes to a feeder with food first (HomeEcon), then a feeding bowl you filled, else picks the ripe snack patch and
-  eats one snack (the rest go to the pantry), else fetches a snack from the pantry (Save.d crops) at the house door
-  or the landing. The walk is the Eat state (k["life_eat"]); every meal is `BaseFeed.meal` (`Care.feed`, the lean
-  through `Evo.eat`), so the journal and lean see it.
-- Feeding bowl (`feed_bowl`, the Base tab, `scripts/home/feed_bowl.gd`): walk up and drop a pantry snack in (3 at
-  most, kept on the piece as `snacks`); hungry Boki within 9 m come. It is a place of the Eat state, not a machine
-  of its own: k["life_eat"] carries `from: "bowl"` and a phase, go (to a 2 m ring), wait, huff (a rival,
-  base_life.json `rival_at`, already there: a stare-down and a `huff` line), eat (one at a time). Bold and hungry
-  Boki go first; a timid one (bravery under 0.4) waits for every bolder one. `--feed-check` covers it.
+  goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
+  the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
+  the Eat state (k["life_eat"]); the meal is `Care.feed`, so the journal and lean see it.
 - Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
@@ -109,7 +90,7 @@ check: `--base-life-check`.
   state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
   `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and
   the shake is a Body wobble): `wade` (a slow knee-high walk loop), `shake` (a shake-off, 0.6 s).
-- A garden day (`--garden-day-check`, under 60 s): 1200 s of game time (a 20-minute day) in every zone (Bramblebank, Glasswater, Cinderstep, Hushwood, Kitewind; `--day-zone=<id>` for one) with six residents, the zone's toys, the snack patch and its game, then the hub with the partner (table in GARDEN.md). Fails on a Boki that visits under 4 states, stays 90 s in one non-Nap state, stands still 20 s off a nav point (its goal, or a place it rests by design), leaves the island, never plays at a toy, misses a night's nap (nocturnal species excepted), a toy nobody plays at, a zone game that does not finish a match, or a part over GARDEN.md 10.6's nodes, emitters, script ms a frame or base-life ms a step (draws and the GPU frame stay with `--perf-bench`). A Chore that gets no nearer its goal for `BaseChore.STALL_S` gives up (a walker wobbling beside a napper and a toy never trips KinAvoid's pin test).
+- A garden day (`--garden-day-check`, under 60 s): 1200 s of game time (a 20-minute day) in Bramblebank with six Boki, the three toys and the snack patch, then the hub with the partner. Fails on a Boki that visits under 4 states, stays 90 s in one non-Nap state, stands still 20 s off a nav point (its goal, or a place it rests by design), leaves the island, or a part over GARDEN.md 10.6's nodes, emitters, script ms a frame or base-life ms a step (draws and the GPU frame stay with `--perf-bench`). A Chore that gets no nearer its goal for `BaseChore.STALL_S` gives up (a walker wobbling beside a napper and a toy never trips KinAvoid's pin test).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the

@@ -141,7 +141,6 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
-	Incubator.tick(float(r.get("time", 0.0)))      # a match is play time for the eggs too
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
@@ -152,7 +151,6 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if won: Progress.add("caught", r.get("caught", []).size())
 	if won:
 		d["extracts"] = int(d.get("extracts", 0)) + 1
-		Save.log_event("extracted", {})     # the clan's member roll shows it (ClanInfo.last_deed)
 		out["gems"] = int(r.get("gems", 0))
 		if d.get("guild_perks", []).has("hall"):
 			out["gems"] = int(round(out["gems"] * 1.1))
@@ -386,10 +384,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 		return
 	ev["text"] = Evo.describe(ev, k)
 	CareJournal.evolved(k, ev)
-	if ev["kind"] == "form":
-		Care.dex_mark(k["species"], "caught")  # it evolved into a new species
-		if Evo.is_final(String(k["species"])):
-			ClanBoard.add("final")
+	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []

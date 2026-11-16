@@ -19,10 +19,6 @@ static func rules() -> Dictionary:
 	return Content.rules("garden_visitor")
 
 ## The wild Boki here now ({} for none).
-## The chance a look brings a visitor in the zone you are in (higher with a Wild welcome, DecorComfort).
-static func chance() -> float:
-	return float(rules()["chance"]) * DecorComfort.value("wild", "visit", 1.0)
-
 static func rec() -> Dictionary:
 	return Save.d.get("visitor", {}).get("rec", {})
 
@@ -37,8 +33,7 @@ static func group(zone: String) -> Array:
 	return rules()["groups"].get(zone, [])
 
 ## True when `zone` suits a wild `species`: its theme is one of the zone's group, one of `toy_ids` (what stands
-## in the zone) is a toy it likes, and the zone has enough residents of the group (none while you have
-## one Boki: the first friend must be able to come).
+## in the zone) is a toy it likes, and the zone has enough residents of the group.
 static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 	var theme := theme_of(species)
 	var themes := group(zone)
@@ -47,9 +42,8 @@ static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 	var toys: Dictionary = Content.rules("toys")["toys"]
 	if not toy_ids.any(func(id): return (toys.get(String(id), {}).get("likes", []) as Array).has(theme)):
 		return false
-	var need := int(rules()["lone_residents"]) if (Save.d["roster"] as Array).size() <= 1 else int(rules()["residents"])
 	var kin := GardenZones.residents(zone).filter(func(r): return themes.has(theme_of(String(r["species"]))))
-	return kin.size() >= need
+	return kin.size() >= int(rules()["residents"])
 
 ## A species that could visit `zone` now and has a rigged model, or "".
 static func pick(zone: String, toy_ids: Array) -> String:
@@ -116,7 +110,7 @@ static func _look(h, dt: float, now: float) -> void:
 	if _look_t < float(rules()["check_s"]) or now < float(Save.d.get("visitor", {}).get("next", 0.0)):
 		return
 	_look_t = 0.0
-	if _rng.randf() >= chance():
+	if _rng.randf() >= float(rules()["chance"]):
 		return
 	var zone := GardenZones.current()
 	var sp := pick(zone, h.toys.toys().map(func(t): return t["id"]))

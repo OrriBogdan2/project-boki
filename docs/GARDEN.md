@@ -94,18 +94,6 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
 
-## Ghost laps on the Dash (no live netcode)
-
-Every Dash lap at home is taped (`RaceGhost.Tape`: each runner's distance every 0.1 s). The fastest
-lap on each course is kept in `Save.d["ghosts"]` (`RaceGhost.keep_best`); a course is the lap's
-stretch layout, so the weekly "Two streams" loop has its own. A lap is about 0.5 KB of save (cm moved
-per tick as base64 bytes; the longest kept, 120 s, is 1.7 KB). The visit snapshot carries the laps
-(`Social.profile_doc`, cleaned by `RaceGhost.clean`). A visitor at the friend's race post runs their
-partner against the faded ghost, the owner's name over it, cheering at the marks as in any Dash; a win
-sends a `race` gift (`RaceGhost.beat_gift`) and the friend finds the winner pinned to their showcase
-wall when they come home (`RaceGhost.take_gift`). Old saves and older snapshots have no key: no laps.
-`--race-check` holds it: a replayed lap stays within 0.05 s of the real runner all the way round.
-
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
@@ -210,27 +198,3 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
-
-## A garden day in every zone
-
-`--garden-day-check` plays 20 minutes of game time (four in-game days, about 6 s of wall time a zone) in
-Bramblebank, Glasswater, Cinderstep, Hushwood and Kitewind with six residents each, leaning toward the zone's
-types (so they thrive there), the zone's toys and the snack patch, then the hub with the partner. `--day-zone=<id>`
-runs one. It fails on a Boki with under 4 base-life states, 90 s in one non-Nap state, 20 s still off a nav point,
-falling out of the zone, never playing at a toy, or (unless nocturnal) missing a night's nap; on a toy nobody
-played at; on the zone's game not finishing a match (Dash, Spark Volley, Stump Shove, Seek, the ridge's Dash) with
-two residents; and on a zone part over its nodes, emitters or script ms (GARDEN.md 10.6).
-
-| Zone | Toys | States seen | Fewest by one Boki | Toys used | Night naps (4 nights) | Game match |
-|---|---|---|---|---|---|---|
-| Bramblebank | ball, post, tub | Roam, Play, PlayWith, Watch, Chore, Nap | 4 | 3 of 3 | 20 | The Dash, 18 s |
-| Glasswater Shallows | tub | Roam, Play, PlayWith, Watch, Chore, Nap | 4 | 1 of 1 | 20 | Spark Volley, 24 s |
-| Cinderstep | stone, post | Roam, Play, PlayWith, Watch, Chore, Nap | 4 | 2 of 2 | 24 | Stump Shove, 4 s |
-| Hushwood | ball, post, tub | Roam, Play, PlayWith, Watch, Chore, Nap | 5 | 3 of 3 | 20 | Seek, 17 s |
-| Kitewind Ridge | ball, post, tub | Roam, Play, PlayWith, Watch, Chore, Nap | 4 | 3 of 3 | 20 | The Dash (ridge track), 19 s |
-| Hub | none | nobody lives here | | | | |
-
-Eat shows when a Boki gets hungry in the day (the five-zone run does not always hit it, so it is not a bar).
-Night naps are the nights a Boki that is not nocturnal (Work.NOCTURNAL: wisplet, zapple) napped in, summed over
-its residents. Hushwood and Kitewind have no island of their own on this line (no `build` in garden_zones.json),
-so they run on the Bramblebank island with the three demo toys; a Boki there leans to their types all the same.

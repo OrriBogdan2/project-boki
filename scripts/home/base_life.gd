@@ -1,8 +1,8 @@
 class_name BaseLife
 extends RefCounted
 ## Base life (briefs/design/GARDEN.md section 4), on only with farm_build.json base_mode: each farm Boki lives on
-## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, a
-## feeding bowl, or a snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
+## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
+## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
 ## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
@@ -10,21 +10,18 @@ extends RefCounted
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
 ## nap in a pile; rivals stare and huff, and turn and huff when they pass (BaseRival).
-## A Boki about to nap walks to a free nap spot of its zone
-## (garden_zones.json nap: a sunny rock, under a tree, by the water); a friend lies down beside its friend's spot.
-## A Boki that would thrive in another open zone sometimes goes and waits at the return pad with a bubble:
-## it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer, and E on it sends it
-## (HubWaystone.answer); ignored, it wanders off. When you arrive in
-## the zone, the awake Boki near you greet you once each, by trust and mood (BaseGreet).
+## A Boki that would thrive in another open zone sometimes goes and waits at the return pad
+## with a bubble: it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer,
+## and E on it sends it (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, GREET }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Greet"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.GREET],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD],
 	S.LEAD: [S.ROAM, S.NAP],
 	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
@@ -34,7 +31,6 @@ const TABLE := {
 	S.WATCH: [S.ROAM, S.NAP, S.REACT],
 	S.REACT: [S.ROAM, S.NAP, S.WATCH],
 	S.CHORE: [S.ROAM, S.NAP, S.REACT],
-	S.GREET: [S.ROAM, S.NAP],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
 const CATCH := 0.8         # m: a tag lands this close
@@ -42,14 +38,10 @@ const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
-const SPOT_AT := 0.5       # m: close enough to its nap spot to lie down
-const SPOT_SNAP := 3.0     # m a nap spot may move to the nearest open ground (a farm island is the save's own)
-const BESIDE := 0.8        # m: the least gap between a spot and the place beside it
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
 var night := false
-var arrival := false       # you just arrived in this zone: the first tick greets you (BaseGreet)
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
@@ -59,7 +51,6 @@ var whistle: BaseWhistle   # the whistle: your partner comes, hold for the neare
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
-	arrival = Game.match_opts.has("zone")      # the teleporter brought you (HubWaystone._go)
 	whistle = BaseWhistle.new(home, R)
 
 static func nocturnal(rec: Dictionary) -> bool:
@@ -104,14 +95,10 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void:
 			k.erase("life_pile")
-			k.erase("life_spot")
 			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.REACT, func(_to: int) -> void: k.erase("life_rival"))
-		m.on_exit(S.EAT, func(_to: int) -> void: FeedBowl.end(k))
-		m.on_exit(S.GREET, func(_to: int) -> void:
-			k.erase("life_greet")
-			k.erase("greet_run"))
+		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
 	return k["life"]
 
@@ -142,9 +129,6 @@ func step(d: float) -> void:
 			if not first_look:
 				_arrived(k)
 			_seen[uid] = true
-	if arrival:
-		arrival = false
-		BaseGreet.arrive(self)
 	for k in h.kins:
 		BaseShy.tick(h, k, dt)
 		_tick(k, dt)
@@ -263,25 +247,12 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_look_tick(k, m)
 		S.CHORE:
 			BaseChore.tick(self, k, m, dt)
-		S.GREET:
-			BaseGreet.tick(self, k, m)
 		S.LEAD:
 			if not BaseTutLead.tick(h, k):
 				m.go(S.ROAM, "led")
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
-	if k.has("life_spot") and not k["life_spot"].has("on") and nap <= 0.0:
-		var at: Vector3 = k["life_spot"]["pos"]
-		k["goal"] = at
-		var there := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() < SPOT_AT
-		if there or m.since >= float(R["spot_walk"]):
-			if there:
-				k["life_spot"]["on"] = true      # lying on it: the spot stays its own until it wakes
-			else:
-				k.erase("life_spot")      # did not get there: naps where it is and leaves the spot free
-			_lie_down(k)
-		return
 	if k.has("life_pile") and nap <= 0.0:
 		var to: Dictionary = k["life_pile"]
 		k["goal"] = to["pos"]
@@ -294,7 +265,6 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		return
 	if not _awake(k):
 		k["nap_t"] = maxf(nap, 2.0)      # night: it sleeps on till dawn
-	Care.change(k["rec"], "joy", DecorComfort.value("cosy", "nap_joy", 0.0) * dt / 60.0)
 	for o in h.kins:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
@@ -355,10 +325,7 @@ func _nap(k: Dictionary, why: String) -> void:
 	if not m.go(S.NAP, why):
 		return
 	k.erase("eat")
-	var social := Care.need(k["rec"], "joy") >= GRUMPY
-	var claims := _spot_claims() if social else {}
-	var spot := _beside_friend(k, claims)
-	if spot.is_empty() and social:
+	if Care.need(k["rec"], "joy") >= GRUMPY:
 		var best := {}
 		var top := float(R["friend_at"]) * 0.5
 		for o in _near(k, true):
@@ -371,62 +338,7 @@ func _nap(k: Dictionary, why: String) -> void:
 			k["t"] = PILE_WALK
 			note_parent(k, best, "napped beside")
 			return
-	if spot.is_empty():
-		spot = _free_spot(k, _spot_claims())
-	if spot.is_empty():
-		_lie_down(k)
-		return
-	k["life_spot"] = spot
-	k["t"] = float(R["spot_walk"])
-
-## The open zone's nap spots, [kind, tile x, tile z] (garden_zones.json nap); none at the hub.
-static func nap_spots() -> Array:
-	return [] if GardenZones.here == GardenZones.HUB else GardenZones.info(GardenZones.current()).get("nap", [])
-
-## Who holds which place: Vector2i(spot, 0 on it or 1 beside it) -> the Boki walking to or napping there.
-func _spot_claims() -> Dictionary:
-	var out := {}
-	for o in h.kins:
-		if o.has("life_spot"):
-			out[Vector2i(int(o["life_spot"]["i"]), int(o["life_spot"]["slot"]))] = o
-	return out
-
-## The place beside the spot of the friend (bond friend_at or more, a parent weighs in) it likes most, or {}.
-func _beside_friend(k: Dictionary, claims: Dictionary) -> Dictionary:
-	var best := {}
-	var top := float(R["friend_at"])
-	for at: Vector2i in claims:
-		var o: Dictionary = claims[at]
-		var liking := regard(k, o, float(R["parent_weight"]))
-		if at.y == 0 and not claims.has(Vector2i(at.x, 1)) and liking >= top and _reach(k, o["life_spot"]["pos"]):
-			top = liking
-			best = o
-	if best.is_empty():
-		return {}
-	note_parent(k, best, "napped beside")
-	var on: Vector3 = best["life_spot"]["pos"]
-	return {"i": best["life_spot"]["i"], "slot": 1, "pos": h.world.free_spot_near(on, [on], BESIDE, 0.45, SPOT_SNAP)}
-
-## The nearest free nap spot within reach on its island, or {}.
-func _free_spot(k: Dictionary, claims: Dictionary) -> Dictionary:
-	var spots := nap_spots()
-	var best := {}
-	var top := INF
-	for i in spots.size():
-		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
-		var at: Vector3 = h.world.free_spot_near(tile, [], 1.0, 0.45, SPOT_SNAP)
-		var d := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length()
-		if not claims.has(Vector2i(i, 0)) and _reach(k, at) and d < top:
-			top = d
-			best = {"i": i, "slot": 0, "pos": at}
-	return best
-
-## Open ground on its island within spot_reach.
-func _reach(k: Dictionary, at: Vector3) -> bool:
-	var w = h.world
-	return not w.is_void(at.x, at.z) and not w.is_block(at.x, at.z) \
-		and w.island_of(at.x, at.z) == w.island_of(k["pos"].x, k["pos"].z) \
-		and Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() <= float(R["spot_reach"])
+	_lie_down(k)
 
 func _lie_down(k: Dictionary) -> void:
 	k["nap_t"] = randf_range(R["nap"][0], R["nap"][1])
@@ -515,10 +427,6 @@ func _arrived(k: Dictionary) -> void:
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
 
-## Awake, not napping and free of the farm's drivers: it can notice you (BaseGreet).
-func awake_free(k: Dictionary) -> bool:
-	return _awake(k) and not _taken(k) and float(k.get("nap_t", 0.0)) <= 0.0 and not machine(k).is_in(S.NAP)
-
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
 ## news with ComeLook).
 static func _taken(k: Dictionary) -> bool:
@@ -568,7 +476,7 @@ func _greet(k: Dictionary, near: Array) -> void:
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
 func _clash(a: Dictionary, b: Dictionary) -> bool:
 	var over := float(a["traits"].get("temper", 0.5)) + float(b["traits"].get("temper", 0.5)) - 1.0
-	return randf() < maxf(0.0, over) * float(R["clash"]) * DecorComfort.value("quiet", "clash", 1.0)
+	return randf() < maxf(0.0, over) * float(R["clash"])
 
 func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))

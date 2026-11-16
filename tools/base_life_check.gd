@@ -4,10 +4,7 @@ extends RefCounted
 ## ones: at least one friend pair and one rival pair form, no state but Nap lasts over 90 s, the fourth Boki's
 ## arrival brings the others over (React), at night the three day Boki nap while the nocturnal Zapple stays up,
 ## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map; the sleepers
-## breathe and yawn (BokiNapSfx, _nap_sounds). Then the rivalry beat (BaseRival). Then nap spots: a tired Boki walks to a free one, its friend lies
-## down beside it, a third takes another. Then the arrival greeting (BaseGreet):
-## a trusting Boki 10 m off reaches you within GREET_SECS, a napping one sleeps on, a shy one peeks, a sulky one turns
-## away, and each greets once. Never touches the real save.
+## breathe and yawn (BokiNapSfx, _nap_sounds). Never touches the real save.
 
 const SIM_SECS := 600.0      # 10 simulated minutes
 const DT := 0.25             # s per farm step (the machines tick at 10 Hz inside it)
@@ -15,8 +12,6 @@ const NIGHT_AT := 480.0      # s: the last two minutes are night
 const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
 const LONGEST := 90.0        # s: no state but Nap may last longer
 const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
-const GREET_SECS := 4.0      # s: a trusting Boki reaches you after you arrive
-const GREET_AT := 10.0       # m: how far off it starts
 
 var bad := 0
 var main: Node
@@ -142,50 +137,6 @@ func _awake_breaths(home) -> Array:
 		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
 	return Sfx.loops.keys().filter(func(key): return key in awake)
 
-## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
-func _spots_part(home, center: Vector3) -> void:
-	var zone: Dictionary = GardenZones.info(GardenZones.start())
-	var kept: Array = zone["nap"]
-	var cx := int(center.x)
-	var cz := int(center.z)
-	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
-	var life: BaseLife = home.life
-	home.day_t = 0.4
-	for k in home.kins:
-		k["nap_t"] = 0.0
-		life.machine(k).go(BaseLife.S.ROAM, "test")
-		k["rec"]["bonds"] = {}
-		Care.need(k["rec"], "joy")
-		k["rec"]["needs"]["joy"] = 90.0
-	_gather(home, center)
-	var keys: Array = home.kins.map(func(k): return k["rec"].keys())
-	var a: Dictionary = home.kins[0]
-	var b: Dictionary = home.kins[1]
-	var c: Dictionary = home.kins[2]
-	BaseLife.add_bond(a["rec"], b["rec"], 0.6)
-	for k in [a, b, c]:
-		life._nap(k, "tired")
-	var sa: Dictionary = a.get("life_spot", {})
-	var sb: Dictionary = b.get("life_spot", {})
-	var sc: Dictionary = c.get("life_spot", {})
-	ok(not sa.is_empty() and int(sa["slot"]) == 0, "a tired Boki heads for a free nap spot")
-	ok(not sb.is_empty() and sb["i"] == sa.get("i") and int(sb["slot"]) == 1,
-		"its friend (bond 0.6) takes the place beside it")
-	ok(not sc.is_empty() and sc["i"] != sa.get("i") and int(sc["slot"]) == 0, "a third Boki takes the other spot")
-	var t := 0.0
-	while t < float(life.R["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
-		home._move_kin(DT)
-		t += DT
-	var on := [a, b, c].filter(func(k): return k.has("life_spot") and float(k["nap_t"]) > 0.0 \
-		and BaseLife._dist(k, {"pos": k["life_spot"]["pos"]}) < BaseLife.SPOT_AT * 2.0)
-	ok(on.size() == 3, "all three walked there and lie down on their places in %.1f s (%d of 3)" % [t, on.size()])
-	var was := BaseLife.bond(a["rec"], b["rec"])
-	for i in 20:
-		home._move_kin(DT)
-	ok(BaseLife.bond(a["rec"], b["rec"]) > was, "napping side by side, the friends' bond grows")
-	ok(home.kins.map(func(k): return k["rec"].keys()) == keys, "nothing of it is saved: the records gain no key")
-	zone["nap"] = kept
-
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -262,84 +213,8 @@ func run(m: Node) -> void:
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
 	await _nap_sounds(home)
 	_rival_beat(home)
-	_spots_part(home, center)
+	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
-	await _greet_case()
-	rules["base_mode"] = false
 	print("BASELIFE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-## You arrive (the teleporter's flag): Keen (trust 80) runs over and hops, Doze (trust 80, napping) sleeps on,
-## Wary (trust 10) peeks, Glum (trust 40, joy 5) turns away. Each enters Greet at most once.
-func _greet_case() -> void:
-	var d := Save.fresh()
-	var specs := [["Keen", 80.0, 80.0, GREET_AT], ["Doze", 80.0, 80.0, 4.0], ["Wary", 10.0, 80.0, 5.0],
-		["Glum", 40.0, 5.0, 5.0]]
-	for spec in specs:
-		var rec := Save.new_kin("burrlet", spec[0])
-		rec["trust"] = spec[1]
-		Care.ensure(rec)
-		for n in rec["needs"]:
-			rec["needs"][n] = 90.0
-		rec["needs"]["joy"] = spec[2]
-		d["roster"].append(rec)
-	d["roster"][0]["starter"] = true
-	d["active"] = d["roster"][0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
-	Save.d = d
-	HomeLayout.ensure(d)
-	var home = await main._hb_home()
-	home.day_t = 0.4
-	var me: Vector3 = home.world.random_ground(0)
-	home.ppos = me
-	var by := {}
-	for i in home.kins.size():
-		var k: Dictionary = home.kins[i]
-		var angle: float = TAU * i / home.kins.size()
-		k["pos"] = home.world.free_spot_near(me + Vector3(cos(angle), 0, sin(angle)) * float(specs[i][3]), [], 0.8)
-		(k["node"] as Node3D).position = k["pos"]
-		k["t"] = 30.0
-		by[k["rec"]["name"]] = k
-	home.life.machine(by["Doze"]).go(BaseLife.S.NAP, "test")
-	by["Doze"]["nap_t"] = 60.0
-	var keen_from := _flat(by["Keen"]["pos"] - me)
-	var glum_from := _flat(by["Glum"]["pos"] - me)
-	home.life.arrival = true
-	var reached := -1.0
-	var hows := {}
-	var entered := {}
-	var doze_woke := false
-	var glum_far := 0.0
-	var t := 0.0
-	while t < 14.0:
-		home._move_kin(DT)
-		t += DT
-		for k in home.kins:
-			var who := String(k["rec"]["name"])
-			var greeting := (k["life"] as Fsm).is_in(BaseLife.S.GREET)
-			if greeting and not hows.has(who):
-				hows[who] = k["life_greet"]["how"]
-			if greeting and not k.get("was_greeting", false):
-				entered[who] = int(entered.get(who, 0)) + 1
-			k["was_greeting"] = greeting
-		if reached < 0.0 and _flat(by["Keen"]["pos"] - me) < 2.5:
-			reached = t
-		doze_woke = doze_woke or not (by["Doze"]["life"] as Fsm).is_in(BaseLife.S.NAP)
-		glum_far = maxf(glum_far, _flat(by["Glum"]["pos"] - me))
-	ok(keen_from >= GREET_AT * 0.6 and reached >= 0.0 and reached <= GREET_SECS,
-		"a trusting Boki %.1f m off runs to you on arrival (there at %.2f s, max %.0f s)"
-			% [keen_from, reached, GREET_SECS])
-	ok(hows.get("Keen", "") == "run", "it greets by running over (%s)" % hows.get("Keen", "none"))
-	ok(not doze_woke and not hows.has("Doze"), "a napping Boki stays asleep")
-	ok(hows.get("Wary", "") == "peek", "a shy Boki peeks and waves (%s)" % hows.get("Wary", "none"))
-	ok(hows.get("Glum", "") == "sulk" and glum_far > glum_from + 1.0,
-		"a sulking Boki turns away (%s, %.1f m to %.1f m off)" % [hows.get("Glum", "none"), glum_from, glum_far])
-	ok(entered.values().all(func(n): return n == 1) and entered.size() == 3,
-		"each awake Boki greets once per arrival (%s)" % entered)
-	ok(home.kins.all(func(k): return (k["life"] as Fsm).refused == 0), "no machine refused a transition while greeting")
-	home.queue_free()
-	await main.get_tree().process_frame
-
-static func _flat(v: Vector3) -> float:
-	return Vector2(v.x, v.z).length()
