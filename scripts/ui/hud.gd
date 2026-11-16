@@ -11,6 +11,7 @@ var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
+var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
@@ -102,6 +103,7 @@ func _process(delta: float) -> void:
 	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
 	plates.tick(delta)
+	lowhp.tick(m.player, delta)
 	panels.tick(delta)
 	flash_t = maxf(0.0, flash_t - delta * 4.0)
 	hurt_t = maxf(0.0, hurt_t - delta)
@@ -289,6 +291,7 @@ func _draw_all() -> void:
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	HurtWash.draw(c, sz, p, dmg_dir.hits, m.time)      # low health: the red edge, heavier where the hits came from
+	lowhp.draw_edge(c, sz)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
