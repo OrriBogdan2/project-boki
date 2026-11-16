@@ -921,11 +921,8 @@ func _glide_boost_fx() -> void:
 
 ## The glider's open/close sound for this hunter's glider skin (quieter, and positional, for everyone else).
 func glider_sfx(which: String) -> void:
-	var skin := "classic"
-	if model and model.has_node("Rig/Torso/Glider"):
-		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
-	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
+	Sfx.play_stream(Gliders.sound(Gliders.skin_of(self), which), pos, vol)
 
 ## Shift, as in Supervive: the long dash (its own cooldown) in the air or with no short one ready.
 var ex_cd: float:
