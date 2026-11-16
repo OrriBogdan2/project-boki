@@ -117,6 +117,11 @@ func _match() -> Array:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
+	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
+	# screen, so without this the run's tail was shader compiles a player never sees mid-match
+	var warm0 := Time.get_ticks_msec()
+	await m.warm_up()
+	print("BENCH match warm-up: %d ms" % (Time.get_ticks_msec() - warm0))
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
