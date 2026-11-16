@@ -48,7 +48,7 @@ Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source (Kingpin) vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/dredge.md,
+Source (ref-dredge) vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/dredge.md,
 5 fps), [O] owner notes. The parity asserts are `_parity_gun` in `tools/dredge_combo_check.gd` ("parity gun ...");
 the rest are the existing asserts named in "Combinations".
 
@@ -65,7 +65,7 @@ the rest are the existing asserts named in "Combinations".
 
 ## Scattergun by range (parity: pellets, spread, damage, falloff)
 
-Source: [D] 7 slugs, bloom (supervive_kits.md); [F] ~30 degrees firing, ~20 rested, a fixed stop of ~3.5 bh, a point-blank volley
+Source: [D] 7 slugs, bloom (sv/briefs/kits.md); [F] ~30 degrees firing, ~20 rested, a fixed stop of ~3.5 bh, a point-blank volley
 about 0.55x the Anchor (193 against 349), one slug landing still does 46% (KINFALL_CLASSES). The source gives no damage falloff
 with range, only the fixed stop range, so ours has none either (no `close_mult`/`far_mult` on the shotgun). The burst's aimed first
 volley (all 7 slugs on the aim line, owner 11-10) and a fully bloomed 30 degree volley at a dummy, asserted in
@@ -110,8 +110,8 @@ ext/scrapking-lmb rewrites the gun (a `DredgeGun` spread whose edge lines follow
 ## Reel parity (Deep Reach, Nov 10)
 
 Each row is asserted in `tools/dredge_reel_check.gd` (run by `--dredge-combo-check`, rows "reel parity: ..." and
-"miss: ..."). Trust order: [O] owner note > [D] data (supervive_kits.md, tooltips) > [W] the
-[wiki](https://supervive.wiki.gg/wiki/Kingpin) > [F] footage (hero-ref/dredge.md, 5 fps, 1 bh = 1.8 m). The data
+"miss: ..."). Trust order: [O] owner note > [D] data (sv/briefs/kits.md, tooltips) > [W] the
+wiki > [F] footage (hero-ref/dredge.md, 5 fps, 1 bh = 1.8 m). The data
 gives no reel numbers, so the speeds come from the footage.
 
 | Beat | Source | Ours (was) | Assert |
@@ -176,36 +176,36 @@ Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never fo
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
 |---|---|---|---|
-| The grab pierces terrain and drags the target over it | built for rocks, props and cliff faces (a placed wall still stops it) | owner data, [wiki](https://supervive.wiki.gg/wiki/Kingpin), owner | yes (0141, 0147) |
-| The grab takes the first target, enemy or ally; an ally is pulled to safety | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin), [guide](https://deltiasgaming.com/?p=298298) | no |
-| The pull follows physics: a target you don't let reach you swings round you | built (weighted reel; his braced shuffle still swings it) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | partly (0147: the pull follows the hunter) |
-| The pull lasts until arrival or 3s | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
-| It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Only the dash and the air dash can be used while pulling | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| The grab pierces terrain and drags the target over it | built for rocks, props and cliff faces (a placed wall still stops it) | owner data, wiki, owner | yes (0141, 0147) |
+| The grab takes the first target, enemy or ally; an ally is pulled to safety | built | wiki, [guide](https://deltiasgaming.com/?p=298298) | no |
+| The pull follows physics: a target you don't let reach you swings round you | built (weighted reel; his braced shuffle still swings it) | wiki | partly (0147: the pull follows the hunter) |
+| The pull lasts until arrival or 3s | built | wiki | yes |
+| It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | wiki | no |
+| Only the dash and the air dash can be used while pulling | built | wiki | no |
 | He holds his height from the throw to the end of the reel; slow walk while the hook flies out | built (20%, `CastHold`); thrown mid-jump (owner playtest 11-10) the air steers and the speed he brought carries, up to his run (a dash's extra bleeds under the air drag as without the hand); from a standstill in the air the same 20% drift. Jump back + hand at the top: 3.84 m/s at the miss (a plain jump 3.84; was 0.93), 5.46 m to the landing (plain jump 3.86); asserted `hand mid-jump` | owner item 31 | no |
 | The caster is Grounded while reeling; the target is stunned for the pull | built | footage | yes (0127) |
-| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; nor does the Anchor ground a foe: ours-only riders are cut, DECISIONS 11-07) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
-| The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
-| The dash goes further in the air and has its own cooldown there | built (x1.35, its own 12.5s slot) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | [wiki](https://supervive.wiki.gg/wiki/Kingpin), patch 05.02.25 | no |
-| The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (0040 vs 0112) |
-| Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Backstab +50% | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (ult 0034, 0040) |
-| Every slug applies Anti-Heal | built (3s, as the cloak's) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (green streaks) |
+| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; nor does the Anchor ground a foe: ours-only riders are cut, DECISIONS 11-07) | wiki | yes |
+| The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | wiki | no |
+| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | wiki | yes |
+| The dash goes further in the air and has its own cooldown there | built (x1.35, its own 12.5s slot) | wiki | no |
+| The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | wiki, patch 05.02.25 | no |
+| The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | wiki | no |
+| Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | wiki | no |
+| The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | wiki | yes (0040 vs 0112) |
+| Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | wiki | no |
+| Backstab +50% | built | wiki | no |
+| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | wiki | no |
+| The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | wiki | yes (ult 0034, 0040) |
+| Every slug applies Anti-Heal | built (3s, as the cloak's) | wiki | yes (green streaks) |
 | A fan grows on the ground over the 1.1s charge and is the exact hit area | built (AimKit cone, everyone sees it) | footage | yes (ult 0026, 0033) |
 | He stands planted through the charge | replaced (owner item 36): a slow walk (30% charging, 20% firing) and the aim follows the cursor; still no gun, Deep Reach, Anchor or barge until it ends | footage | yes (ult 0022-0041) |
 | Up close every slug of both waves connects | built (slugs leave his fists, so at 1.6m all six hit) | footage | yes (ult 0034, 0040) |
 | Best after a stun (the reel or the slam covers the charge) | built (the reel combo is asserted) | [guide](https://deltiasgaming.com/?p=298298) | yes |
-| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | wiki | no |
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -303,7 +303,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours was read in
 the code and probed headless (cancel-matrix pass, 11-09, on d255acbee; the arm-out rows settled 11-11 on 0.24.4 and
 asserted by `tools/dredge_cancel_check.gd`, the `arm out:` lines of `--dredge-combo-check`). **Unsettled** means no frame, card line
@@ -348,7 +348,7 @@ could refuse the gun if a clip shows him firing mid-slam (the sheet's frames 022
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
 or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
