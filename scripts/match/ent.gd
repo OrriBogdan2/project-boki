@@ -116,6 +116,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
+		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
