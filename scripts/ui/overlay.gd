@@ -47,6 +47,8 @@ func _ready() -> void:
 	fps_lbl.position.y = 4
 	fps_lbl.offset_right = -8
 	root.add_child(fps_lbl)
+	Social.clan_removed.connect(func(clan_name: String):
+		UI.toast(root, "You're no longer in %s: its founder or an officer removed you." % clan_name, UI.MUTED))
 
 func _process(_d: float) -> void:
 	Record.tick(get_tree(), _d)
@@ -419,6 +421,7 @@ func _tab_audio(v: VBoxContainer) -> void:
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
 	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")
 	_toggle(v, "Ultimate ready", "ult_ready_cue", "A chime when your ultimate (%s) is back" % Settings.key_cap("hunter_ult"))
+	_toggle(v, "Low-health heartbeat", "low_hp_pulse", "A soft heartbeat, faster as you near down")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
 

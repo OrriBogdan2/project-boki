@@ -45,9 +45,11 @@ static func key(h: Node, id: String) -> String:
 	return "%d:%s" % [h.get_instance_id(), id]
 
 func put(h: Hunter, id: String, e: Dictionary) -> void:
+	var k := key(h, id)
+	if e["all"] and not (entries.has(k) and live(entries[k])):
+		TellCue.aim(m, h, id, e)        # a rival's area starting: its wind-up where it lands
 	e["h"] = h
 	e["t"] = float(m.time)
-	var k := key(h, id)
 	if e.has("ease"):
 		# the drawn width carries over from the last refresh and glides on from there (track)
 		e["deg_at"] = float((entries[k] as Dictionary).get("deg_at", e["deg"])) if entries.has(k) else float(e["deg"])

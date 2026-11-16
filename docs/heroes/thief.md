@@ -48,6 +48,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel distance | 105-144 px, about 4.5m (3.9-5.4) [footage] | 4.5m x the global dash feel = 3.8m | 4.5m (taken off the global dash feel, content/rules/dash_feel.json) |
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
+| Cartwheel exit | upright and moving by about 0.5s; the speed runs down into the hasted run with no dip (415 -> 315 -> 211 -> 154 -> 140 px/s, then 127-136); the shot can leave mid-flip (0193) [footage] | the fitted curve (decision 0025, dash_feel.json "thief") ended at 0.25 of its mean, 2.6 m/s under the 5.5 m/s hasted run: four steps under it past the peak, the hand-over at 0.47x, then the walk back up | on the ground the curve's tail past its peak never drops under her hasted run (`ThiefKit._tick_curve`; the crouch ramp and the peak are the fit's): hand-over at 1.0x, no step under it, a bolt on the step the flip ends (`--move-feel-check` vault_exit_run, vault_slow_frames, vault_shot_gap_frames); the air cartwheel's carry (owner 11-09) unchanged |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
 | Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | 5s, 1 charge (the data wins over the card, as for the LMB range; `--kit-parity-check` row `thief Shift dash.cd`; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
@@ -366,6 +367,19 @@ in the middle and just out of reach, then one dummy the ring passes over while s
 
 No data row was changed: nothing in `x` contradicts a single sourced value; the two gaps are the cap and the damage, both owner balance calls
 filed above. The old `--dj-ult-check` and `--dancer-parity-check` names are sections of `--dancer-combo-check`.
+
+## Telegraphs (drawn = hit, ported from telegraph-audit-c onto the 0.24.5 tells)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--dancer-combo-check` (`tools/dancer_jug_check.gd`, `tools/dj_ult_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Bola (RMB) | a chevron lane `lane_len()` (10.8 m) long, `bola.lane_w` 1.8 m wide (the parity row, footage: about 1 bh) | the flight catches a foe whose body comes within `lane_w / 2 - her radius` (0.516 m) of it: a 1.8 m corridor for a foe her size | caster | the hit reached a magic 0.45 m past the body (a 1.67 m corridor); now it reads the reach off the drawn lane (+0.066 m a side). Asserted at the lane's edge both ways |
+| Grounded | two yellow binding rings round the foe | status marker, no area | all | kept (the source shows the rings) |
+| Knife (E) | the dagger's arrival circle, 1.6 m | the blink's arrival point | caster | kept (source arrival marker), no hit area |
+| Encore (X) | a thin ring (`RING_W` 0.25 m band) whose outer edge grows from `x.r0` 2.3 to `x.reach` 5.4 m over `x.grow`, and a dashed outer band at `x.rim` 0.75 of it | a blade at every foe inside `radius()`; past the band hits harder | all | already true on 0.24.5 (no beat swell); now asserted on every beat |
+
+Suggestion, not built: the source's knife ring is about 1.5 bh (2.7 m) across; ours is 1.6 m.
 
 ## Combinations
 

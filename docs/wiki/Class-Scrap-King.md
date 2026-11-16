@@ -48,8 +48,8 @@ grows with every knock.
 |---|---|
 | Body | 193 health, 5.39 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
-| Silhouette | the round brass helm and the rope drum on one shoulder |
+| Fantasy | The Scrap King. Hooks you in with his bone-hook arm, drops a hoard on you, and grows with every knock. |
+| Silhouette | the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back |
 | Resource | Salvage (max 10) |
 
 ### Kit card
@@ -59,12 +59,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
-| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
-| Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
-| RMB: Deep Reach | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
-| E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
-| Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
-| Weapon: Shotgun | Seven slugs that stop 6m out, a shot every half second: wait for it and they fly in a tight pack, fire at once and they fan wide. Hits from behind hurt more. |
+| Passive: Salvage | Knocks and assists add health, up to 10 stacks. |
+| Dash: Barge | A short low lunge where you move; a pounce in the air. |
+| RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
+| E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
+| Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
+| Weapon: Shotgun | Seven slugs, 6m out: wait and they fly in a tight pack, fire at once and they fan wide; rear hits hurt more. |
 
 ### Abilities in full
 

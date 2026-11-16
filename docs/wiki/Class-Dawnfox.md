@@ -66,13 +66,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
-| Passive: Carrier | Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
-| Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
-| LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
-| RMB: Burrseed | Burrseed: a 0.6s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them. |
-| E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
-| Hunter ultimate: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate within 12.6m for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. Nobody in reach: nothing happens. |
-| Weapon: Ember Cast | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
+| Passive: Carrier | Run into a downed teammate to carry up to 2. |
+| Dash: Relay Step | Quick hop where you move; a long floaty glide in the air. |
+| RMB: Burrseed | Seed sticks to a foe; after 2s in reach it roots them. |
+| E: Hearthlight | Healing ring on you; press again to throw it to the cursor. |
+| Hunter ultimate: Hearth Call | Tether a teammate for 5s of healing; a downed one stands up. |
+| Weapon: Ember Cast | Hold to push embers past the cursor; hits add Kindle. |
 
 ### Abilities in full
 

@@ -2,7 +2,9 @@ extends RefCounted
 ## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
-## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
 ##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
@@ -23,7 +25,9 @@ extends RefCounted
 ##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
 ##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
-##  14 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
+##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##                   (the see-through canopies: SeeThrough)
+##  15 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
 ##                   following: the walk speed for a before/after cut (decision 0061)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
@@ -51,6 +55,7 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
 var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
@@ -75,6 +80,8 @@ func run(main_node: Node) -> void:
 			fight = arg.substr(14)
 		if arg.begins_with("--media-zoom="):
 			fight_zoom = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -84,6 +91,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
@@ -98,7 +107,8 @@ func run(main_node: Node) -> void:
 		11: await _shift_glide(secs)
 		12: await _dive_feather(secs)
 		13: await _boss_focus(secs)
-		14: await _walk(secs)
+		14: await _forest(secs)
+		15: await _walk(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -160,6 +170,8 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 
 ## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
 func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
 	m.cam.zoom = z
 	m.cam.zoom_to = z
 
@@ -179,6 +191,8 @@ func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void
 	var t := 0.0
 	while t < secs:
 		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
@@ -257,7 +271,7 @@ func _fight(secs: float) -> void:
 		_assist(t, squad_b, squad_a),
 		func(_t: float): return _centre(squad_a + squad_b))
 
-# ------------------------------------------------------------------ 9: walk
+# ------------------------------------------------------------------ 15: walk
 const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
 const WALK_LANE := 22.0         # m of the cleared lane the walk crosses (the match screen is ~23 m across)
 
@@ -343,6 +357,56 @@ func _hatch(secs: float) -> void:
 			still_at = -1.0
 		t += FRAME
 		frame += 1
+
+# ------------------------------------------------------------------ 9: forest walk
+const WOOD_R := 11.0             # m: how near trees count as one wood
+const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
+const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
+const WALK := 0.6                # share of full speed the Hunter strolls at
+
+## The thickest wood on the map, thickened with planted trees of its own style; the Hunter strolls from
+## tree to tree, there and back, passing just behind each one.
+func _forest(secs: float) -> void:
+	await _start("gunslinger", "")
+	var P := m.player
+	var w := m.world
+	var trees: Array = w.tree_spots.duplicate()
+	var heart: Vector3 = trees[0]
+	var most := 0
+	for t in trees:
+		var n := trees.filter(func(u: Vector3) -> bool: return u.distance_to(t) < WOOD_R).size()
+		if n > most:
+			most = n
+			heart = t
+	var path: Array = trees.filter(func(t: Vector3) -> bool: return t.distance_to(heart) < WOOD_R)
+	var style := Flora.style_ok(w.style_at(w.idx(int(heart.x), int(heart.z))))
+	for k in 8:
+		for row in [-1.0, 1.0]:
+			var at := heart + Vector3((k - 3.5) * GROVE_STEP, 0, row * 2.2 + (k % 2) * 0.6)
+			at.y = w.ground_at(at.x, at.z)
+			if w.is_void(at.x, at.z) or w.is_block(at.x, at.z) or absf(at.y - heart.y) > 0.3:
+				continue
+			if path.any(func(t: Vector3) -> bool: return t.distance_to(at) < 2.0):
+				continue
+			var tree := Flora.node("tree", style, k % 3, 1.1)
+			tree.position = at
+			w.add_child(tree)
+			path.append(at)
+	path.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	var back := path.duplicate()
+	back.reverse()
+	path.append_array(back)
+	P.teleport(_ground(path[0] + BEHIND))
+	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	var next := [0]
+	await _go(secs, func(_t: float) -> void:
+		var goal: Vector3 = path[next[0] % path.size()] + BEHIND
+		var d := Vector2(goal.x - P.pos.x, goal.z - P.pos.z)
+		if d.length() < 0.6:
+			next[0] += 1
+		P.inp["move"] = d.normalized() * WALK
+		SeeThrough.for_match(m),
+		func(_t: float) -> Vector3: return P.pos)
 
 # ------------------------------------------------------------------ the Boki base
 ## A fresh base with `n` rested level-6 Boki out (Ember, Ripple, Moss), `stats` per Boki when given, and the player

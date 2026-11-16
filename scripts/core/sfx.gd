@@ -63,12 +63,25 @@ const NAMES := [
 	"swipe",
 	"cleave",
 	"charge",
-	"k_venom",
+	"k_normal",
+	"k_fire",
+	"k_water",
+	"k_grass",
 	"k_spore",
-	"k_gravity",
-	"k_prism",
-	"k_lunar",
-	"k_echo",
+	"k_electric",
+	"k_ice",
+	"k_rock",
+	"k_psychic",
+	"k_flying",
+	"k_dragon",
+	"k_dark",
+	"k_ghost",
+	"k_poison",
+	"k_bug",
+	"k_steel",
+	"k_fairy",
+	"k_crystal",
+	"k_sound",
 	"shotgun",
 	"sniper",
 	"hit_heavy",
@@ -121,13 +134,14 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss",
 	"axe_bite",
 	"trunk_creak",
 	"tree_down",
 	"pick_strike",
 	"rock_crack",
-	"rock_break"
+	"rock_break",
+	"keg_fuse",
+	"keg_blast",
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -161,7 +175,9 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
-	"fuse_hiss": 80,
+	"tell_foe": 120,
+	"keg_fuse": 80,
+	"keg_blast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
@@ -196,6 +212,7 @@ const MIN_GAP := {
 	"xp_tick": 60,
 	"steal_won": 400,
 	"steal_lost": 400,
+	"training_dummy_hit": 70,
 	"hostile_cast": 100,
 	"armor_up": 120
 }
@@ -463,9 +480,9 @@ func set_layers(want: Dictionary) -> void:
 
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
-## is already the current ambience, an early return, so it would never clear them), every keyed loop
-## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
+## stops. The layered score and the place beds (abyss, ruins, AmbBeds) fade out (a screen asking for the
+## "match" wind while it is already the current ambience returns early, so it would never clear them),
+## every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()
@@ -479,6 +496,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 	for p in players:
 		p.stop()
 	voices.friends.resize(0)
+	mix.set_muffle(SfxMix.Muffle.OFF)
 
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
@@ -593,6 +611,14 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
+
+## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	return n
 
 ## The pool voice for a sound of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
 ## null when it gets none.
