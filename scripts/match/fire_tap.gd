@@ -5,7 +5,8 @@ extends RefCounted
 ## "went down this frame", which keeps a tap; the held fire key latches that the same way: the tap stays down for
 ## the next fixed step, once, and the weapon sees one press (docs/MOVEMENT_FEEL.md "Low frame rates").
 
-const TAP := "fire_tap"      # h.inp key: a tap waits for its fixed step
+const TAP := "fire_tap"  # h.inp key: a tap waits for its fixed step
+
 
 ## Per frame from Match._gather_input: is the attack key down this step (held, or tapped and not stepped yet)?
 static func down(h: Hunter, allowed: bool) -> bool:
@@ -15,6 +16,7 @@ static func down(h: Hunter, allowed: bool) -> bool:
 	elif not allowed:
 		h.inp[TAP] = false
 	return allowed and (held or bool(h.inp.get(TAP, false)))
+
 
 ## From Hunter.sim, as it clears the other press keys: a tap was down for that one step only.
 static func stepped(h: Hunter) -> void:

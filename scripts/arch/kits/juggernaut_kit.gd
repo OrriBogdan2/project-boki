@@ -782,7 +782,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
-	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a solid hold)
+	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a
+	# solid hold)
 	var strike := {"no_floor": true, "lane_w": float(sl["width"]), "hit_extra": {"heavy": true}}
 	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return

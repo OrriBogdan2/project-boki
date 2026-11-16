@@ -33,6 +33,8 @@ const SOURCE_ROWS := [
 ## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
 ## and one the source can't settle ("Not determinable: <why>") runs the default.
 const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes (the one press window)
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -315,9 +317,6 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 	return false
 
 # ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
-const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes
-const FAR_S := 0.2              # s early: outside it, so the press is dropped
-
 ## Loco.press_buffer by its three uses: Gil's E made before a stun ends, Ashwick's E held past a dash's end while a
 ## stun still runs (the replay meets a stun with more than the window left: refused), and Ostra's early recast before
 ## her seed arms. NEAR_S early goes, FAR_S early doesn't.
