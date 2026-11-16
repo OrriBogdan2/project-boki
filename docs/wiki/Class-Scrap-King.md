@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
-| Weapon: Shotgun | Seven slugs, 6m out: wait for a tight pack, fire at once for a wide fan; rear hits hurt more. |
+| Weapon: Shotgun | Seven slugs, 6m out: wait and they fly in a tight pack, fire at once and they fan wide; rear hits hurt more. |
 
 ### Abilities in full
 

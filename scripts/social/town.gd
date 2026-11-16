@@ -699,9 +699,8 @@ func _open_guilds() -> void:
 							_toast("Welcome to %s" % g["name"])
 						if panel_open == "Guild registry": _open_guilds()), 90)))
 
-## Who is in this clan, what rank they hold and the last thing each did (from their island snapshot).
-## Members who joined before ranks existed show the guild doc's rank; removed members don't show. In your own
-## clan, the rank buttons sit on each row you may act on.
+## Who is in this clan and what rank they hold. Members who joined before ranks existed show the guild doc's
+## rank (and the last deed of each, from their island snapshot); removed members don't show. In your own clan, the rank buttons sit on each row you may act on.
 func _open_roster() -> void:
 	var v := _new_panel("Member roll", 640)
 	var list := _loading(v)
@@ -718,8 +717,8 @@ func _open_roster() -> void:
 			if not ranks.has(id) and not gone.has(id): ranks[id] = Social.rank_of(guild_doc, id)
 		var ids: Array = ranks.keys()
 		ids.sort_custom(func(a, b): return _rank_key(ranks, a) < _rank_key(ranks, b))
-		var now_s := int(Time.get_unix_time_from_system())
 		var mine := Social.rank_of(guild_doc, Social.me) if gid == Social.my_guild_id() else ""
+		var now_s := int(Time.get_unix_time_from_system())
 		for id in ids:
 			var rank: String = ranks[id]
 			var col := UI.INK if rank == "member" else UI.GOLD

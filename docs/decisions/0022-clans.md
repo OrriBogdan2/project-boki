@@ -34,6 +34,13 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
 - Slice 2 (the shared base): the ferry on the guild isle opens `ClanBase` (scripts/home/clan_base.gd), a visit to
   an island built from the members' published snapshots plus `clanbase/<gid>` (read only, cleaned by
   `Social.clean_clanbase`: one showcase Boki per current member, 12 at most). No new writes, no save change.
+- Slice 3b (tag and member roll, `ClanInfo` in scripts/social/clan_info.gd): the guild doc gains `tag` (2-4
+  letters A-Z, blocked list in content/rules/clan_tag.json; a clan without one shows its name's initials).
+  `Save.d["clan"]["tag"]` is refreshed from the guild doc on every guild refresh (no migration: a missing key
+  reads as no tag). The profile snapshot carries `tag` and `last` (the newest extraction, raise or breed in the
+  event log, which now logs "extracted" and marks a hatched egg of two parents `bred`). The tag rides the lobby
+  presence and roster to in-match nameplates (an optional key: an older peer just shows no tag, so Net.VERSION
+  is left to the batch bump) and the island-visit top bar; the member roll shows each member's last deed.
 - Slice 3 (ranks): a rank is what the guild doc says (`Social.rank_of`): its `founder`, and a new `officers`
   list (cleaned by `clean_guild`); a member's own roster row no longer decides its rank, so a forged "officer"
   reads as member. Only the founder writes the guild doc (`_founder_edit`): make an officer or a member again,
@@ -53,10 +60,3 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
   self-reported, so a member can claim the most seniority; at worst they inherit a founder who leaves.
   Alternative not taken: every client derives a successor when the founder's row is gone (a founder whose
   game never comes back); it trusts row absence, which any forged delete could fake.
-- Slice 4 (tag and member roll, `ClanInfo` in scripts/social/clan_info.gd): the guild doc gains `tag` (2-4
-  letters A-Z, blocked list in content/rules/clan_tag.json; a clan without one shows its name's initials).
-  `Save.d["clan"]["tag"]` is refreshed from the guild doc on every guild refresh (no migration: a missing key
-  reads as no tag). The profile snapshot carries `tag` and `last` (the newest extraction, raise or breed in the
-  event log, which now logs "extracted" and marks a hatched egg of two parents `bred`). The tag rides the lobby
-  presence and roster to in-match nameplates (an optional key: an older peer just shows no tag, so Net.VERSION
-  is left to the batch bump) and the island-visit top bar; the member roll shows each member's last deed.
