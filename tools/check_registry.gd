@@ -33,6 +33,8 @@ const CHECKS := {
 	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],      # movie writer: a level-up mid-fight
 	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],      # a dead check run ends
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
+	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
+	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
@@ -655,11 +657,13 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
+	# 2 games, relay: a raid client's boss top bar
+	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
+	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
+	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
-	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
-	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
 	"--net-leave-check": ["res://tools/net_leave_check.gd", "net_leave_check", null],      # 0061 dropped players
 	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
@@ -739,6 +743,7 @@ const CHECKS := {
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],  # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
+	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--card-numbers-check": ["res://tools/card_numbers_check.gd", "card_numbers_check", null],
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
