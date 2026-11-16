@@ -659,6 +659,9 @@ func end_telegraph(mi: Node3D) -> void:
 	mi.queue_free()
 
 func _process(delta: float) -> void:
+	var m := get_parent() as Match      # (the zone is empty off a match: home and interiors)
+	var zone := HunterZone.rect(m) if m != null and not nums.is_empty() else Rect2()
+	var cam: Camera3D = m.cam if m != null else null
 	for n in nums.duplicate():
 		n["t"] += delta
 		var l: Label3D = n["node"]
@@ -674,6 +677,7 @@ func _process(delta: float) -> void:
 				n["vel"].y -= 5.0 * delta
 				l.global_position += n["vel"] * delta
 			l.scale = Vector3.ONE * lerpf(l.scale.x, 1.0, minf(1.0, delta * 14.0))
+			HunterZone.clear_label(l, cam, zone)
 			var fade := lt - STICK_T
 			l.modulate.a = clampf(1.0 - fade * 2.4, 0.0, 1.0)
 			if fade > 0.45:
@@ -684,6 +688,7 @@ func _process(delta: float) -> void:
 		l.global_position += n["vel"] * delta
 		var k: float = n["t"]
 		l.scale = Vector3.ONE * lerpf(l.scale.x, 1.0, minf(1.0, delta * 12.0))
+		HunterZone.clear_label(l, cam, zone)
 		l.modulate.a = clampf(1.6 - k * 2.2, 0.0, 1.0)
 		if k > 0.75:
 			l.visible = false
