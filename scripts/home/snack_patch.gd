@@ -1,8 +1,9 @@
 class_name SnackPatch
 extends RefCounted
 ## The garden's one snack patch (briefs/design/GARDEN.md section 10 question 1, default). With base_mode on, a save has
-## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens four element snacks
-## on a timer (content/rules/snack_patch.json) and walking over it picks them up for the pantry, to feed the lean
+## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens its zone's snacks
+## (or the start garden's four and a rotating extra) and the season's snack (GardenSeasons) when that list lacks it,
+## on a timer (content/rules/snack_patch.json), and walking over it picks them up for the pantry, to feed the lean
 ## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
 
 const ID := "snack_patch"
@@ -48,7 +49,7 @@ static func entry(d: Dictionary) -> Dictionary:
 static func ripe(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and now - float(e.get("t", now)) >= float(rules()["grow_secs"])
 
-## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
+## Picks the ripe snacks (and the season's) into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
 	var e := entry(d)
 	if not ripe(e, now):
@@ -59,6 +60,9 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if more != "":
 		got.append(more)
 		e["rot"] = int(e.get("rot", 0)) + 1
+	var season := GardenSeasons.snack(now)
+	if not got.has(season):
+		got.append(season)
 	for s in got:
 		shelve(d, String(s))
 	return got
