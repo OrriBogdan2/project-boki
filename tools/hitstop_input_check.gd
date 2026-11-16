@@ -157,10 +157,10 @@ func _land(m: Match, how: Array) -> String:
 			return "real"
 		if dummy.hp < hp0 - 0.01:
 			injected += 1
-			m.freeze_frame(float(Feel.HITSTOP[4][0]))
+			m.freeze_frame(float(ImpactWeight.hold_s("heavy")))
 			return "injected"
 	unlanded += 1
-	m.freeze_frame(float(Feel.HITSTOP[4][0]))
+	m.freeze_frame(float(ImpactWeight.hold_s("heavy")))
 	return "no hit"
 
 func _acted(before: Dictionary, key: String, dashes0: float, roll0: float, jump0: float) -> bool:
