@@ -71,7 +71,7 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
-var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
 var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
@@ -472,7 +472,7 @@ func on_dash(use_ex: bool) -> bool:
 	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air, "aloft": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -484,7 +484,7 @@ func _empowers(use_ex: bool) -> bool:
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
-## it ends where she lands.
+## it ends where she lands (not the long dash on the ground: cutting that one leaves its full speed unhanded).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -493,7 +493,7 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+	if bool(vault["aloft"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
