@@ -13,6 +13,8 @@ def tile(h, tag, ppm_t, meta):
         im = Image.open(f"{BA}/{h['id']}/{h['id']}_{tag}_{v}.png").convert("RGBA")
         k = ppm_t / (m["res_h"] / m["H_view"])
         im = im.resize((max(1, int(im.width * k)), max(1, int(im.height * k))), Image.LANCZOS)
+        bb = im.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox()
+        if bb: im = im.crop((max(0, bb[0] - 24), 0, min(im.width, bb[2] + 24), im.height))
         ims.append(im)
     foot = (m["H_view"] - m["dims"][2]) / 2 * ppm_t        # px under the feet inside the image
     w = sum(i.width for i in ims)
@@ -24,6 +26,7 @@ def label(t, txt, sub=None):
     d = ImageDraw.Draw(t); d.text((10, 8), txt, fill=(20, 20, 20), font=F(24))
     if sub: d.text((10, 38), sub, fill=(60, 60, 60), font=F(17))
 for h in HUNT:
+    if not os.path.exists(f"{BA}/{h['id']}/{h['id']}_meta.json"): continue
     meta = json.load(open(f"{BA}/{h['id']}/{h['id']}_meta.json"))
     ppm = lambda m: m["res_h"] / m["H_view"]
     hmax = max(m["dims"][2] for m in meta.values())

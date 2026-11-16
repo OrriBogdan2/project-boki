@@ -1,0 +1,12 @@
+[
+ {"id":"gil","name":"Gil","splash":"gill","old_lbl":"to 11-15 23:23 EST","new_lbl":"11-15 23:27 EST","better":true},
+ {"id":"motley","name":"Motley","splash":"motley","old_lbl":"to 11-15 23:18 EST","new_lbl":"11-15 23:27 EST","better":true},
+ {"id":"sable","name":"Sable","splash":"sable","old_lbl":"to 11-16 03:02 EST","new_lbl":"11-16 03:08 EST","better":true},
+ {"id":"kael","name":"Kael","splash":"kael","old_lbl":"to 11-15 13:00 EST","new_lbl":"11-15 21:29 EST","better":true},
+ {"id":"lace","name":"Lace","splash":"lisette","old_lbl":"to 11-15 13:01 EST","new_lbl":"11-15 21:35 EST","better":true},
+ {"id":"tarek","name":"Tenzo","splash":"tarek","old_lbl":"to 11-15 13:03 EST","new_lbl":"11-15 13:04 EST","better":true},
+ {"id":"vex","name":"Vex","splash":"vex","old_lbl":"to 11-15 13:15 EST","new_lbl":"11-15 13:17 EST","better":true},
+ {"id":"sparkle","name":"Sparkle","splash":"ryzz","old_lbl":"to 11-15 13:14 EST","new_lbl":"11-15 13:15 EST","better":true},
+ {"id":"cinder","name":"Cinder","splash":"cinder","old_lbl":"to 11-15 14:21 EST","new_lbl":"11-15 15:41 EST","better":true},
+ {"id":"grimble","name":"Grimble","splash":"grimble","old_lbl":"to 11-15 14:22 EST","new_lbl":"11-15 16:12 EST","better":true}
+]
