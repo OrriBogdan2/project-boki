@@ -2975,7 +2975,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
+	# pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx plays a hit on you from there)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -2988,8 +2989,6 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		dmg = total * float(x["pf"]) if n == 0 else total * (1.0 - float(x["pf"])) / maxf(1.0, float(x["pn"]) - 1.0)
 		if n + 1 == ceili(float(x["pn"]) * Feel.POINT_BLANK): o["heavy"] = true
 	var dir: Vector2 = (s["vel"] as Vector2).normalized()
-	# pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx plays a hit on you from there)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "from": s["start"]}
 	if float(x.get("kb", 0.0)) > 0.0:
 		o["kb"] = dir * float(x["kb"])
 	if x.has("burn"): o["burn"] = x["burn"]
