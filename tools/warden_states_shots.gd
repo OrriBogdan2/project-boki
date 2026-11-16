@@ -24,6 +24,7 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
+		main.fade.visible = false     # (the boot's cover and logo can come back over a late frame)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
