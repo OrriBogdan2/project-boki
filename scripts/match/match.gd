@@ -24,6 +24,7 @@ var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
 var heart_raid: HeartRaid = null # Heart Raid's waves and boss (null outside the PvE mode)
+var belt_tips := BeltTips.new()  # the local player's one-time belt item tips
 var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
@@ -304,7 +305,7 @@ func _start(o: Dictionary) -> void:
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
-	Sfx.play_ambience("match")
+	Sfx.play_ambience("" if o.get("training", false) else "match")     # the grounds have their own beds (TrainingSfx)
 	world = World.new()
 	world.name = "World"
 	world.biome = T["biome"].duplicate()
@@ -2104,10 +2105,10 @@ func on_fell(e: Ent) -> void:
 		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
-			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
-			e.teleport(back)
 			if tut:
-				hud.toast("Back to your last stop. Try again", Color("f3eee2"))
+				tut.retry()      # (the beat starts again, back at the last stop)
+				return
+			e.teleport(e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground()))
 			e.vel = Vector3.ZERO
 			return
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
@@ -5089,6 +5090,7 @@ func _flags(h: Hunter) -> int:
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
 	if GliderHeat.burning(h): f |= 1 << 24
+	if UltGlow.kit_ready(h): f |= UltGlow.READY_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5250,6 +5252,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			h.glide_fuel = GliderHeat.fuel_of((f >> 20) & 15) if h.gliding else 1.0
 			h.below_lip = f & (1 << 24) != 0
+			h.ult_ready = f & UltGlow.READY_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			h.net_cc = (f >> StatusLooks.FLAG_SHIFT) & 7
@@ -5645,6 +5648,8 @@ func _tips() -> void:
 	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
+	var belt_tip := belt_tips.next(player)
+	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
@@ -5659,6 +5664,10 @@ func _tips() -> void:
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+	var heart_tip := heart.tip_for(player) if heart else []
+	if heart_tip: _tip(heart_tip[0], heart_tip[1])
+	var ex := ExpeditionTips.next(self)
+	if ex: _tip(ex[0], ex[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
