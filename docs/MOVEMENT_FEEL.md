@@ -1093,6 +1093,24 @@ distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight 
 no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
 the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
 
+## Brake under a cast: let go and cast RMB the same frame (`--move-feel-check` `brake_cast` rows)
+
+The source brakes a let-go the same whatever the walk's cap is: UE's CalcVelocity applies the walking brake (22.2 m/s² plus friction 2/s) whenever the keys are off, and a cast's move scale only caps the walk while keys are held. The first version of this fix found Meeko's Burrseed (x0.5) and Motley's Shard Snap (x0.75) dead-stopping, because the cast-scaled walk cap was used as the run speed in the brake and everything over it shed at the 110 m/s² kit-step rate. Main's one brake (`HunterMove.brake(hv, grip, dt)`, decision 0026) takes no walk cap, so a slow, a crouch or a cast's wind-up brakes like the plain stop by construction; this section keeps the `brake_cast` rows as the regression guard. Kit rows are untouched (the walk caps still apply while you hold a key). No kit's RMB cast lock zeroes the speed; Motley's well lock and Neve's Rimelock (X, the statue slides on its ice on purpose, item 65) only block other keys.
+
+Run at full speed on flat ground, keys off and RMB pressed the same frame (a tap on hold kits goes on the release, one frame later), 60 fps:
+
+| Hunter | Plain stop | Cast stop before | Cast stop after | Gap after |
+|---|---|---|---|---|
+| Meeko (tender) | 0.325 m / 0.183 s | 0.166 m / 0.133 s | 0.325 m / 0.183 s | 0.000 m |
+| Motley (ostra) | 0.339 m / 0.183 s | 0.253 m / 0.150 s | 0.339 m / 0.183 s | 0.000 m |
+| gunslinger, juggernaut, archer | 0.325 m / 0.183 s | 0.325 m / 0.183 s | 0.325 m / 0.183 s | 0.000 m |
+| ashwick, dolm, dredge, mage, thief | 0.339 m / 0.183 s | 0.339 m / 0.183 s | 0.339 m / 0.183 s | 0.000 m |
+| rimewright | 0.311 m / 0.167 s | 0.311 m / 0.167 s | 0.311 m / 0.167 s | 0.000 m |
+| bulwark | 0.367 m / 0.183 s | 0.367 m / 0.183 s | 0.367 m / 0.183 s | 0.000 m |
+| gil (added 11-16, no "before") | 0.332 m / 0.183 s | - | 0.332 m / 0.183 s | 0.000 m |
+
+`brake_cast_gap_m` (the widest gap over the 12) must stay <= 0.05 m; each Hunter has its own ok line. Dredge's Abyssal Hand on the ground is a CastHold hover that steers like the ground (decision 0020), so it is compared too. The "before" column is the branch's pre-fix brake (the cast walk cap as run speed); only Meeko and Motley differed.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

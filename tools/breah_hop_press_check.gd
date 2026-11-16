@@ -54,7 +54,7 @@ func _chain_end() -> void:
 ## In hop n's flight, its landing less than BUFFER_S away.
 func _near_landing(n_at: int) -> bool:
 	var to_land := K.hop._flight() - float(K.hop.st.get("t", 0.0))
-	return _phase() == "air" and int(K.hop.st["n"]) == n_at and to_land < DashFlow.BUFFER_S - DT
+	return _phase() == "air" and int(K.hop.st["n"]) == n_at and to_land < Loco.buf_ability_hold - DT
 
 func _in_window() -> void:
 	var cases := {

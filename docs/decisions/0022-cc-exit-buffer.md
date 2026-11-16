@@ -12,14 +12,14 @@ reeling, is followed by Iron Smash, which Grounded doesn't forbid. At 5 fps no w
 
 ## Options
 1. A new CC-exit timer per slot in Hunter: a second buffer next to DashFlow's.
-2. DashFlow (0010) holds the press: the same `held` slots, the same `BUFFER_S`, the same replay path.
+2. DashFlow (0010) holds the press: the same `held` slots, the same window (tuning.json `buffers.ability_hold`), the same replay path.
 
 ## Decision
-Option 2. A press the CC still forbids, made within `DashFlow.BUFFER_S` (0.15 s) of its end, is held and
+Option 2. A press the CC still forbids, made within tuning.json `buffers.ability_hold` (0.15 s) of its end, is held and
 replayed on the first step the CC allows it. A stun forbids LMB, RMB, E, R (not an ult's recast) and Shift
 and jump; a root, Shift; Grounded, Shift and jump (not a reeling Dredge's Shift). Q's glove goes through a stun
 and is never held. An earlier press is refused as before. A held press that is still forbidden after
-`BUFFER_S` (a fresh stun) goes through its own path, which refuses it. While the hunter's own cast holds them
+`buffers.ability_hold` (a fresh stun) goes through its own path, which refuses it. While the hunter's own cast holds them
 (`cast_locked`: Rimelock's statue roots its caster) the kit reads the presses, as before.
 
 ## Consequences

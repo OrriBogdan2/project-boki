@@ -14,7 +14,7 @@ The owner read these straight from the installed game (config files, curve table
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
-| Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run (a kit step, a knock) sheds under the same brake, keys held or not, as UE does (`HunterMove.brake_rate`): a 10 m/s shove slides ~1.4 m (decision 0026) |
+| Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m, the same under a cast's wind-up slow (`--move-feel-check` brake_cast rows). Speed over a run (a kit step, a knock) sheds under the same brake, keys held or not, as UE does (`HunterMove.brake_rate`): a 10 m/s shove slides ~1.4 m (decision 0026) |
 | Dash end | no hard stop (DashCurves not decoded; three heroes fitted from footage, below) | | **Yes**: a dash hands over at no more than run speed (`physics.dash_exit_run`), then the walk, brake or air carry; Ghost, Brall and Myth slow through their fitted curve first |
 | Walkable floor | 50° | | n/a (heightmap) |
 | Walk off ledges | off | you need a jump or dash to leave a platform | No, on purpose: the owner wants walking off ledges allowed everywhere |

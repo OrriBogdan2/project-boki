@@ -7,11 +7,10 @@ extends RefCounted
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press during a mantle (the ledge rise) goes by the one table every hero shares, content/rules/mantle_press.json:
 ## "fire" goes mid-climb, "buffer" (the default) waits for the top.
-## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
+## A press that crowd control still forbids, made in its last Loco.buf_ability_hold, is held the same way and goes on the first
 ## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
@@ -257,7 +256,7 @@ func cc_left(slot: String) -> float:
 		return maxf(stop, KitStatus.grounded_left(h))
 	return stop
 
-## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them; true when an LMB tap
+## Presses the CC forbids now, in its last Loco.buf_ability_hold: held for the first step it allows them; true when an LMB tap
 ## was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
 ## hunter still with no end in sight (Rimelock's statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> bool:
@@ -273,14 +272,14 @@ func _route_cc(fire_pressed: bool) -> bool:
 
 func _hold_for_cc(slot: String) -> bool:
 	var left := cc_left(slot)
-	if left <= 0.0 or left > BUFFER_S:
+	if left <= 0.0 or left > Loco.buf_ability_hold:
 		return false
 	held[slot] = 0.0
 	return true
 
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < BUFFER_S:
+		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < Loco.buf_ability_hold:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)

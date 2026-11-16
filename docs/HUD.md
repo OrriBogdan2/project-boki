@@ -243,7 +243,7 @@ no kit draws its own recast HUD.
 - **First-time hint.** The first time a Hunter's window opens in a real match (not training, tutorial, arena),
   `RecastCue._first_hint` shows one hint "<KEY> again to <verb>" through `Hud.tip`, once per Hunter
   (`tutorial.recast_<id>`). The verb is the archetype's own `recast_hint` per slot, in that Hunter's words.
-- **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
+- **Buffer.** A press up to tuning.json `buffers.recast` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),

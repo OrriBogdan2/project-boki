@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
@@ -174,7 +173,7 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.buf_ability_hold.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -256,7 +255,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.buf_recast for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -272,7 +271,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.buf_recast
 
 func held(which: String) -> bool:
 	match which:
@@ -287,7 +286,7 @@ func _r_end() -> void: pass
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
-## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+## its last Loco.buf_ability_hold for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
@@ -553,6 +552,21 @@ func dash_dir() -> Vector2:
 	if move.length() < 0.1 or (h.is_local() and Settings.get_v("dash_to_cursor")):
 		return h.aim_dir()
 	return move.normalized()
+
+var turn_lock_until := -9.0    # a dash until then turns at most dash.lock_deg from where he faces
+
+## Starts the turn lock after a heavy move (the source's patch 05.02.25, "turning restricted after RMB into Shift"):
+## for dash.lock_t s a dash can't turn far from where the hunter faces.
+func lock_turn() -> void:
+	turn_lock_until = m.time + float(dash_def()["lock_t"])
+
+## `dir` held to within dash.lock_deg of where he faces while the turn lock runs.
+func turn_limited(dir: Vector2) -> Vector2:
+	if m.time >= turn_lock_until:
+		return dir
+	var fwd := Vector2(-sin(h.face), -cos(h.face))
+	var lim := deg_to_rad(float(dash_def()["lock_deg"]))
+	return fwd.rotated(clampf(fwd.angle_to(dir), -lim, lim))
 
 static var _dash_feel := {}
 var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
