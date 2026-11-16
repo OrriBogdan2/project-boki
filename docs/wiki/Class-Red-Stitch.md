@@ -70,13 +70,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
-| LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
-| RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
-| E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
-| Hunter ultimate: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe. |
-| Weapon: Longbow | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
+| Passive: Hawk Sense | Rivals under half health show through cover. |
+| Dash: Spirit Walk | Roll, then 2.8s walking through rocks, trees and barriers. |
+| RMB: Heavy Shot | Hold, release: a heavy arrow that knocks back and pins to walls. |
+| E: Hail Wall | Rain arrows on a wall at the cursor: damage, slow, anti-heal burn. |
+| Hunter ultimate: Starpiercer | Your next 3 shots skip the draw and pierce; the third finishes. |
+| Weapon: Longbow | Hold to draw; release on the flash for a faster next draw. |
 
 ### Abilities in full
 
