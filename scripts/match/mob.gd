@@ -73,6 +73,12 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_cancel_tele()
 	m.on_mob_dead(self, by, opts)
 
+## Gone without a kill: no XP, no drops, no feed and no Net event (the offline tutorial's retry clears its
+## camp this way).
+func vanish() -> void:
+	die()
+	_cancel_tele()
+
 func _cancel_tele() -> void:
 	if tele:
 		m.fx.end_telegraph(tele)
@@ -398,7 +404,7 @@ func _strike() -> void:
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)
-			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
+			m.sfx("k_rock", atk_at, -2.0, 0.9)  # a heavy stone slam
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
 				if to.length() < float(md.get("slam_r", 2.3)) + e.r and absf(e.pos.y - pos.y) < 1.5:

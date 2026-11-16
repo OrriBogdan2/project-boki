@@ -396,7 +396,9 @@ func _tutorial() -> void:
 		steps_seen[id] = true
 		if id == "glove" and fell_t < 0.0:
 			fell_t = t
-			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
+			# under the abyss line (Ent: y < -40 falls out anywhere): a fall that no glide or updraft can save
+			m.player.teleport(Vector3(70.0, -41.0, 30.0))
+			m.player.vel = Vector3.ZERO
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
