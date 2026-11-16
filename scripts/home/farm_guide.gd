@@ -147,7 +147,7 @@ func toast_top() -> float:
 
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "" or FarmUnlocks.base_mode():      # base mode: BaseCard holds the next step
+	if id == "":      # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):
