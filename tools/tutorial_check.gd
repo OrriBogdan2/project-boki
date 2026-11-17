@@ -102,7 +102,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
 	var sh: Dictionary = seen.get("shoot", {})
 	var melee: bool = p.wpn.get("melee", false)
-	var want := "Hold to draw" if p.wpn.has("draw") else "Now shoot"
+	var want := "Hold to draw" if p.wpn.has("draw") else "Shoot"
 	if melee:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))

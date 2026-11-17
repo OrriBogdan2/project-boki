@@ -13,8 +13,8 @@ extends RefCounted
 const FIGHTS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
 const GAPS := ["dash", "exdash", "glide"]
 const BOKI_BEATS := ["gkey", "ult"]
-## The beats that finish a camp, and the camp whose level they pay (shoot finishes the sec step's camp).
-const PAYS := {"shoot": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
+## The beats that finish a camp that pays a level (the shoot camp pays none), and that camp.
+const PAYS := {"sec": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
 ## The fights knocked down: by then their camp has nothing left to pay, so a kill while down changes nothing.
 const DOWNS := ["gkey", "kin", "hook", "ult"]
 const XP_EPS := 0.05          # XP: rounding slack (the last kill of a camp adds 0.01 to tip the level)

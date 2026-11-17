@@ -5,8 +5,8 @@ extends RefCounted
 ## Files are <dir>/<WxH>_<what>.png.
 
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080)]
-const EDGE_R := 3.3       # m from the lookout's middle: its far edge
-const GUARD := 6000       # ticks of 2 sim steps before a step counts as never reached
+const EDGE_R := 3.3  # m from the lookout's middle: its far edge
+const GUARD := 6000  # ticks of 2 sim steps before a step counts as never reached
 
 var main: Node
 var m: Match

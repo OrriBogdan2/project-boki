@@ -106,7 +106,12 @@ func _extent(it: Dictionary, s: float) -> float:
 	var w := _half.x * 2.0
 	var flat := _radius <= 0.0 and (s < w or (s >= w + _half.y * 2.0 and s < 2.0 * w + _half.y * 2.0))
 	var off := _label_at(it, Vector2.ZERO)
-	return maxf(arrow, (_label_w(it) if flat else LABEL_H) * 0.5 + absf(off.x if flat else off.y))
+	var half := _label_w(it) * 0.5
+	var shift := absf(off.x)
+	if not flat:
+		half = LABEL_H * 0.5
+		shift = absf(off.y)
+	return maxf(arrow, half + shift)
 
 func _label_w(it: Dictionary) -> float:
 	return TextCache.width(HudStyle.BIG, it["text"], LABEL_PX)

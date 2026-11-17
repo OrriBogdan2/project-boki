@@ -28,7 +28,7 @@ var m: Match
 var main: Node
 
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
-const MAX_LINE := 40  # chars of a banner line: it names its key too now (--tutorial-playtest-check measures the real fit)
+const MAX_LINE := 40  # chars of a banner line (it names its key too; --tutorial-playtest-check measures the fit)
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])

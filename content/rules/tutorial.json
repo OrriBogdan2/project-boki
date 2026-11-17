@@ -11,6 +11,10 @@
    "Walk down to the meadow (%K)"
   ],
   [
+   "shoot",
+   "Shoot the monsters down (%K)"
+  ],
+  [
    "points",
    "You have 1 ability point to spend"
   ],
@@ -21,10 +25,6 @@
   [
    "sec",
    "Use %A (%K) on the monsters"
-  ],
-  [
-   "shoot",
-   "Now shoot them down (%K)"
   ],
   [
    "pick_dash",
@@ -161,6 +161,13 @@
   "extract": "Lift"
  },
  "camps": {
+  "shoot": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 0
+  },
   "sec": {
    "foes": [
     "skitter",

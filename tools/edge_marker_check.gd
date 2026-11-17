@@ -57,7 +57,8 @@ func _labels_clear(e: EdgeMarker, sz: Vector2, label: String) -> void:
 		var d: Vector2 = it["d"]
 		var w := e._label_w(it)
 		var box := Rect2(e._label_at(it, at) - Vector2(w, EdgeMarker.LABEL_H) * 0.5, Vector2(w, EdgeMarker.LABEL_H))
-		var boxp := PackedVector2Array([box.position, Vector2(box.end.x, box.position.y), box.end, Vector2(box.position.x, box.end.y)])
+		var boxp := PackedVector2Array(
+				[box.position, Vector2(box.end.x, box.position.y), box.end, Vector2(box.position.x, box.end.y)])
 		for k in [16.0, 20.0]:        # (the arrow, and the shadow drawn under it)
 			worst += 1 if not Geometry2D.intersect_polygons(boxp, e._arrow(at, d, k)).is_empty() else 0
 		off += 0 if Rect2(Vector2.ZERO, sz).encloses(box) else 1

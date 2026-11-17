@@ -12,21 +12,21 @@ extends RefCounted
 ##      counter, at a readable size
 ## It prints every step (TUTSTEP lines) so a reader sees what the player sees. Never touches the save.
 
-const MIN_TEXT_PX := 15              # px: the smallest type the strip may shrink a line to, at 720 p and up
-const EDGE_R := 3.3                  # m from the lookout's middle: its far edge (the top is 3.6 m in radius)
-const IDLE_S := 3.0                  # s the camp must stay put while nobody touches it
-const SEND_S := 9.0                  # s a real tap has to register
-const CROUCH_S := 3.2                # s to hold crouch at the edge (the step wants 1.5)
-const LINE_STEP := 0.25              # m between the samples of a throw line
-const OPEN_R := 2.0                  # m of level open ground round each post
-const NO_KEY := ["points", "wayout", "defend", "extract"]       # steps with nothing to press
+const MIN_TEXT_PX := 15  # px: the smallest type the strip may shrink a line to, at 720 p and up
+const EDGE_R := 3.3  # m from the lookout's middle: its far edge (the top is 3.6 m in radius)
+const IDLE_S := 3.0  # s the camp must stay put while nobody touches it
+const SEND_S := 9.0  # s a real tap has to register
+const CROUCH_S := 3.2  # s to hold crouch at the edge (the step wants 1.5)
+const LINE_STEP := 0.25  # m between the samples of a throw line
+const OPEN_R := 2.0  # m of level open ground round each post
+const NO_KEY := ["points", "wayout", "defend", "extract"]  # steps with nothing to press
 const OLD_WORDS := ["Hit the line", "big move", "Merge with"]
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
 
 var bad := 0
 var arch := "gunslinger"
-var order: Array = []                # step ids, first seen first
-var seen := {}                       # id -> {text, detail, cap, lvl, pts, ult_open}
+var order: Array = []  # step ids, first seen first
+var seen := {}  # id -> {text, detail, cap, lvl, pts, ult_open}
 
 
 func ok(cond: bool, what: String) -> void:
@@ -42,12 +42,24 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle",
-			"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch), "tut_test": true})
+	m.start(
+		{
+			"tutorial": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle",
+			"cls": Arch.weight(arch),
+			"arch": arch,
+			"weapon": Arch.signature(arch),
+			"tut_test": true
+		}
+	)
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	_play_to(m, "gkey")
-	m.opts["tut_test"] = false          # (the driver stops: the player's keys are this check's own)
+	m.opts["tut_test"] = false  # (the driver stops: the player's keys are this check's own)
 	_send(m)
 	_crouch(m)
 	m.opts["tut_test"] = true
@@ -139,7 +151,7 @@ func _send(m: Match) -> void:
 	var drift := 0.0
 	for i in posts.size():
 		drift = maxf(drift, ((tu.camps.ledger[i]["mb"] as Mob).pos - (posts[i] as Vector3)).length())
-	ok(drift < 0.6, "the camp holds its posts while untouched (moved %.2f m in %.0f s, the player on the lookout)" % [drift, IDLE_S])
+	ok(drift < 0.6, "the camp holds its posts while untouched (moved %.2f m in %.0f s)" % [drift, IDLE_S])
 	ok(not tu.flag and p.pos.distance_to(start) < 1.0, "nothing is registered before a send")
 	k.trust = 0.0
 	k.hp = k.max_hp * 0.4
@@ -153,12 +165,13 @@ func _send(m: Match) -> void:
 			break
 		p.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 		if fmod(t, 1.2) < Match.DT:
-			KinCommand.tap(p)       # (the G key: it sends the Boki at the cursor, or calls it back when it is out)
+			KinCommand.tap(p)  # (the G key: it sends the Boki at the cursor, or calls it back when it is out)
 			tapped += 1
 		_note(m)
 		m.step(Match.DT)
 		t += Match.DT
-	ok(tu.flag or tu.id() != "gkey", "a real G tap at a monster registers the Boki send (%d taps, %.1f s)" % [tapped, t])
+	var done := tu.flag or tu.id() != "gkey"
+	ok(done, "a real G tap at a monster registers the Boki send (%d taps, %.1f s)" % [tapped, t])
 
 
 ## Each post: level open ground round it, and a clear line from the lookout (no block, nothing above the top).
@@ -175,13 +188,13 @@ func _open_ground(m: Match, tu: Tutorial, posts: Array) -> void:
 				var q := Vector2(post.x + dx, post.z + dz)
 				flat = flat and not w.is_void(q.x, q.y) and not w.is_block(q.x, q.y)
 				flat = flat and absf(w.ground_at(q.x, q.y) - post.y) < 0.01 and w.island_of(q.x, q.y) == isl
-		ok(flat, "post (%.1f, %.1f): level open ground %.0f m round it, on the lookout's island" % [post.x, post.z, OPEN_R])
+		ok(flat, "post (%.1f, %.1f): level open ground %.0f m round it, on its island" % [post.x, post.z, OPEN_R])
 		var gap := Vector2(post.x - top.x, post.z - top.z)
 		var clear := true
 		for i in int(gap.length() / LINE_STEP):
 			var q := Vector2(top.x, top.z) + gap.normalized() * LINE_STEP * i
 			clear = clear and not w.is_block(q.x, q.y) and w.ground_at(q.x, q.y) <= top.y + 0.01
-		ok(clear, "the line from the lookout to post (%.1f, %.1f) has no wall in it (%.1f m)" % [post.x, post.z, gap.length()])
+		ok(clear, "the line from the lookout to post (%.1f, %.1f) has no wall (%.1fm)" % [post.x, post.z, gap.length()])
 		ok(gap.length() < float(KinCommand.rules()["throw_range"]), "and the post is within a send's reach")
 
 
@@ -196,27 +209,40 @@ func _words(m: Match) -> void:
 		if not NO_KEY.has(sid):
 			ok(want != "" and String(s["text"]).contains(want), "%s names its key %s: '%s'" % [sid, want, s["text"]])
 		if sid.begins_with("pick_"):
-			ok(String(s["text"]).begins_with("Press ") and String(s["text"]).contains(" to unlock "),
-					"%s says what to press to unlock: '%s'" % [sid, s["text"]])
+			ok(
+				String(s["text"]).begins_with("Press ") and String(s["text"]).contains(" to unlock "),
+				"%s says what to press to unlock: '%s'" % [sid, s["text"]]
+			)
 		for w in OLD_WORDS:
 			ok(not String(s["text"]).contains(w), "%s has no '%s'" % [sid, w])
 	var fuse: String = Settings.key_cap("ultimate")
 	var ulti: String = Settings.key_cap("hunter_ult")
 	ok(fuse != ulti, "the Fusion key (%s) and the Ultimate key (%s) are two keys" % [fuse, ulti])
-	ok(String(seen["pick_ult"]["text"]).contains("Fusion") and String(seen["pick_ult"]["text"]).contains(fuse),
-			"pick_ult unlocks the Fusion with its own key: '%s'" % seen["pick_ult"]["text"])
+	ok(
+		String(seen["pick_ult"]["text"]).contains("Fusion") and String(seen["pick_ult"]["text"]).contains(fuse),
+		"pick_ult unlocks the Fusion with its own key: '%s'" % seen["pick_ult"]["text"]
+	)
 	var name: String = p.kin.rec.get("name", "")
-	ok(String(seen["ult"]["text"]).contains("fuse with " + name) and String(seen["ult"]["text"]).contains(fuse),
-			"ult tells you to fuse with %s: '%s'" % [name, seen["ult"]["text"]])
+	ok(
+		String(seen["ult"]["text"]).contains("fuse with " + name) and String(seen["ult"]["text"]).contains(fuse),
+		"ult tells you to fuse with %s: '%s'" % [name, seen["ult"]["text"]]
+	)
 	var xname: String = p.ak.x_def().get("name", "")
 	var dt: String = seen["ult"]["detail"]
-	ok(xname != "" and dt.contains(ulti) and dt.contains(xname) and dt.contains("Ultimate") and dt.contains(fuse),
-			"and its second line names the Ultimate (%s, %s) and the Fusion (%s) as two things: '%s'" % [ulti, xname, fuse, dt])
+	ok(
+		xname != "" and dt.contains(ulti) and dt.contains(xname) and dt.contains("Ultimate") and dt.contains(fuse),
+		"and its second line names the Ultimate (%s, %s) and the Fusion (%s): '%s'" % [ulti, xname, fuse, dt]
+	)
 	var pu: int = order.find("pick_ult")
-	ok(pu >= 0 and pu < order.find("ult"), "the Fusion unlock (step %d) comes before the Fusion step (%d)" % [pu, order.find("ult")])
-	ok(not bool(seen["hook"]["ult_open"]) and bool(seen["pick_ult"]["ult_open"]),
-			"X can't take the point before level %d, and can at pick_ult (lvl %d, %d points)" % [
-					Hunter.ULT_AT[0], seen["pick_ult"]["lvl"], seen["pick_ult"]["pts"]])
+	var fuse_at := order.find("ult")
+	ok(pu >= 0 and pu < fuse_at, "the Fusion unlock (step %d) comes before the Fusion step (%d)" % [pu, fuse_at])
+	ok(
+		not bool(seen["hook"]["ult_open"]) and bool(seen["pick_ult"]["ult_open"]),
+		(
+			"X can't take the point before level %d, and can at pick_ult (lvl %d, %d points)"
+			% [Hunter.ULT_AT[0], seen["pick_ult"]["lvl"], seen["pick_ult"]["pts"]]
+		)
+	)
 
 
 func _wasd() -> String:
@@ -231,14 +257,22 @@ func _fit() -> void:
 		var worst := 99
 		var who := ""
 		for sid in order:
-			var line := {"text": seen[sid]["text"], "key_cap": seen[sid]["cap"], "count": "3/3", "dist": "999m",
-					"dir": Vector2.RIGHT}
+			var line := {
+				"text": seen[sid]["text"],
+				"key_cap": seen[sid]["cap"],
+				"count": "3/3",
+				"dist": "999m",
+				"dir": Vector2.RIGHT
+			}
 			var lay := TutorialStrip.layout(font, r, line)
 			if int(lay["text_px"]) < worst:
 				worst = int(lay["text_px"])
 				who = sid
 			var text_end: float = (lay["text_at"] as Vector2).x + float(lay["text_w"])
 			var cap_end: float = (lay["cap_rect"] as Rect2).end.x if lay.has("cap_rect") else -1.0
-			ok(text_end <= float(lay["arrow_end"]) + 0.5 and (lay["text_at"] as Vector2).x >= cap_end,
-					"%s: '%s' sits between its key cap and its arrow" % [sz, sid])
-		ok(worst >= MIN_TEXT_PX, "%s: the tightest line (%s) still gets %d px (at least %d)" % [sz, who, worst, MIN_TEXT_PX])
+			ok(
+				text_end <= float(lay["arrow_end"]) + 0.5 and (lay["text_at"] as Vector2).x >= cap_end,
+				"%s: '%s' sits between its key cap and its arrow" % [sz, sid]
+			)
+		var tight := "%s: the tightest line (%s) still gets %d px (at least %d)" % [sz, who, worst, MIN_TEXT_PX]
+		ok(worst >= MIN_TEXT_PX, tight)
