@@ -8,6 +8,7 @@
   out by ARM_FAR, and given back to the bones the vertex already had (or the skirt below the hips, the hips above).
 - the satchel: its leather in the hip box rides the hips only (it stretched out with the arm into a flat disc).
 Run: blender -b --factory-startup --python tools/art1/gil_sword_bag.py -- GAME.glb MASTER.glb OUT.glb"""
+
 import os
 import sys
 
@@ -73,7 +74,7 @@ def uv_affine(src_ob, dst_ob):
 
 
 def main():
-    game_path, master_path, out = sys.argv[sys.argv.index("--") + 1:][:3]
+    game_path, master_path, out = sys.argv[sys.argv.index("--") + 1 :][:3]
     bpy.ops.wm.read_factory_settings(use_empty=True)
     new = import_game(game_path)
     arm = next(o for o in new if o.type == "ARMATURE")
@@ -85,8 +86,11 @@ def main():
 
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=master_path)
-    src = next(o for o in bpy.data.objects if o not in before and o.type == "MESH" and o.data.materials
-               and o.data.materials[0].name.startswith(SWORD_MAT))
+    src = next(
+        o
+        for o in bpy.data.objects
+        if o not in before and o.type == "MESH" and o.data.materials and o.data.materials[0].name.startswith(SWORD_MAT)
+    )
     for o in [o for o in bpy.data.objects if o not in before and o != src]:
         bpy.data.objects.remove(o)
     M = uv_affine(src, old)
@@ -171,11 +175,25 @@ def main():
     for o in bpy.data.objects:
         o.select_set(o.type != "MESH" or o in (body, src))
     bpy.context.view_layer.objects.active = arm
-    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
-                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False,
-                              export_def_bones=False)
+    bpy.ops.export_scene.gltf(
+        filepath=out,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=False,
+        export_animations=True,
+        export_animation_mode="ACTIONS",
+        export_skins=True,
+        export_yup=True,
+        export_materials="EXPORT",
+        export_image_format="JPEG",
+        export_jpeg_quality=92,
+        export_extras=False,
+        export_vertex_color="ACTIVE",
+        export_force_sampling=True,
+        export_frame_step=1,
+        export_optimize_animation_size=False,
+        export_def_bones=False,
+    )
     print("GIL exported", out, flush=True)
 
 

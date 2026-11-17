@@ -6,6 +6,7 @@ The spring_scarftail_tail chain's rest is laid along the tail's centre line (its
 the tail is weighted along that chain, so warden_springs.gd swings it as before. Rig and export only: no vertex of the
 body or of the tail is moved off its master shape.
 Run: blender -b --factory-startup --python tools/art1/cinder_tail.py -- GAME.glb MASTER.glb OUT.glb"""
+
 import heapq
 import os
 import sys
@@ -24,9 +25,13 @@ CHAIN = ["spring_scarftail_tail_%d" % i for i in range(9)]  # root -> tip; the t
 OLD_TAIL = set(CHAIN) | {"tail"}  # the kept tail's bones: faces fully on them are the old tail
 ROOT_BONE = "tail"  # the chain's parent: the root ring blends onto it (it rides the hips)
 SLOTS = ("skin", "hair", "metal")  # toon slots a tail triangle can take (<slot>-<atlas> game materials)
-CAPS = [((0.0, 0.05, 0.97), (0.0, 0.05, 1.54), 0.17),  # cut_tail_A.py's body capsules (fit frame, x squeezed 0.8)
-        ((0.12, 0.05, 0.93), (0.14, 0.05, 0.57), 0.115), ((-0.12, 0.05, 0.93), (-0.14, 0.05, 0.57), 0.115),
-        ((0.14, 0.05, 0.57), (0.13, 0.04, 0.13), 0.085), ((-0.14, 0.05, 0.57), (-0.13, 0.04, 0.13), 0.085)]
+CAPS = [
+    ((0.0, 0.05, 0.97), (0.0, 0.05, 1.54), 0.17),  # cut_tail_A.py's body capsules (fit frame, x squeezed 0.8)
+    ((0.12, 0.05, 0.93), (0.14, 0.05, 0.57), 0.115),
+    ((-0.12, 0.05, 0.93), (-0.14, 0.05, 0.57), 0.115),
+    ((0.14, 0.05, 0.57), (0.13, 0.04, 0.13), 0.085),
+    ((-0.14, 0.05, 0.57), (-0.13, 0.04, 0.13), 0.085),
+]
 BINS = 48  # centre-line samples along the tail (geodesic distance from the root ring)
 TAIL_TRIS = 3000  # the tail's share of the game budget (the old kept tail was 616; 1.5k smeared the flame tip)
 FLOATER_VERTS = 60  # loose crumbs under this many vertices are dropped (v95_swap.py's default)
@@ -39,7 +44,9 @@ def import_game(path):
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="BLENDER")
     new = [o for o in bpy.data.objects if o not in before]
-    return next(o for o in new if o.type == "ARMATURE"), max((o for o in new if o.type == "MESH"), key=lambda o: len(o.data.vertices))
+    return next(o for o in new if o.type == "ARMATURE"), max(
+        (o for o in new if o.type == "MESH"), key=lambda o: len(o.data.vertices)
+    )
 
 
 def select(obs, active):
@@ -82,8 +89,10 @@ def tail_mask(ob, co):
     for p0, p1, r in CAPS:
         body |= seg_d(S, np.array(p0) * (0.8, 1, 1), np.array(p1) * (0.8, 1, 1)) < r
     body |= (F[:, 2] > 1.05) | (F[:, 2] < 0.13)
-    seeds = (~body) & ((((F[:, 1] < -0.17) & (F[:, 2] < 0.95)) | ((F[:, 1] < -0.11) & (F[:, 2] < 1.05)))
-                       | ((F[:, 0] < -0.33) & (F[:, 2] < 0.82)))
+    seeds = (~body) & (
+        (((F[:, 1] < -0.17) & (F[:, 2] < 0.95)) | ((F[:, 1] < -0.11) & (F[:, 2] < 1.05)))
+        | ((F[:, 0] < -0.33) & (F[:, 2] < 0.82))
+    )
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     bm.verts.ensure_lookup_table()
@@ -144,7 +153,16 @@ def centre_line(ob, body_pts):
                 heapq.heappush(h, (nd, o))
     bm.free()
     ok = np.isfinite(dist)
-    print("TAIL root ring", len(root), "reached", int(ok.sum()), "of", len(co), "length %.3f m" % dist[ok].max(), flush=True)
+    print(
+        "TAIL root ring",
+        len(root),
+        "reached",
+        int(ok.sum()),
+        "of",
+        len(co),
+        "length %.3f m" % dist[ok].max(),
+        flush=True,
+    )
     edges = np.linspace(0, dist[ok].max() + 1e-6, BINS + 1)
     pts = [co[root].mean(0)]
     for lo, hi in zip(edges[:-1], edges[1:]):
@@ -164,7 +182,9 @@ def slot_of(rgb, z_fit, y_fit):
     hh = 0.0
     if mx > mn:
         r, g, b = rgb
-        hh = ((g - b) / (mx - mn) % 6 if mx == r else (b - r) / (mx - mn) + 2 if mx == g else (r - g) / (mx - mn) + 4) / 6
+        hh = (
+            (g - b) / (mx - mn) % 6 if mx == r else (b - r) / (mx - mn) + 2 if mx == g else (r - g) / (mx - mn) + 4
+        ) / 6
     if v < 0.3:
         return "hair" if (y_fit < -0.02 and 0.95 <= z_fit <= 1.55) else "metal"
     if s >= 0.5 and v >= 0.6 and (hh <= 0.12 or hh >= 0.95):
@@ -173,7 +193,7 @@ def slot_of(rgb, z_fit, y_fit):
 
 
 def main():
-    game_path, master_path, out = sys.argv[sys.argv.index("--") + 1:][:3]
+    game_path, master_path, out = sys.argv[sys.argv.index("--") + 1 :][:3]
     bpy.ops.wm.read_factory_settings(use_empty=True)
     arm, body = import_game(game_path)
     gco, guv = mesh_arrays(body)
@@ -243,8 +263,7 @@ def main():
     tco = np.c_[tco, np.ones(len(tco))] @ X
     mob.data.vertices.foreach_set("co", tco.ravel())
     mob.data.update()
-    print("TAIL tris", len(mob.data.polygons), "of", tail_tris_hi, "joints", np.round(J, 3).tolist(),
-          flush=True)
+    print("TAIL tris", len(mob.data.polygons), "of", tail_tris_hi, "joints", np.round(J, 3).tolist(), flush=True)
 
     # 4. the chain's rest along the centre line
     select([arm], arm)
@@ -304,12 +323,19 @@ def main():
         fz, fy = c.z, c.y  # game frame = the fit frame: soles on z 0, she faces +Y
         rgb = px[int(np.clip(u[1], 0, 1) * (px.shape[0] - 1)), int(np.clip(u[0], 0, 1) * (px.shape[1] - 1)), :3]
         p.material_index = base + names.index(slot_of(rgb, fz, fy))
-    print("TAIL atlas", atlas, "slots", {k: sum(1 for p in mob.data.polygons if p.material_index == base + i)
-                                         for i, k in enumerate(names)}, flush=True)
+    print(
+        "TAIL atlas",
+        atlas,
+        "slots",
+        {k: sum(1 for p in mob.data.polygons if p.material_index == base + i) for i, k in enumerate(names)},
+        flush=True,
+    )
     for a in body.data.color_attributes:  # the port's vertex colours are all 1 on the body (COLOR_0, COLOR_1)
         if a.name not in mob.data.color_attributes:
             mob.data.color_attributes.new(a.name, a.data_type, a.domain)
-        mob.data.color_attributes[a.name].data.foreach_set("color", [1.0] * 4 * len(mob.data.color_attributes[a.name].data))
+        mob.data.color_attributes[a.name].data.foreach_set(
+            "color", [1.0] * 4 * len(mob.data.color_attributes[a.name].data)
+        )
     select([body, mob], body)
     bpy.ops.object.join()
     bpy.ops.object.mode_set(mode="OBJECT")
@@ -317,12 +343,33 @@ def main():
     for o in bpy.data.objects:
         o.select_set(o.type != "MESH" or o == body)
     bpy.context.view_layer.objects.active = arm
-    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
-                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False,
-                              export_def_bones=False)
-    print("TAIL exported", out, os.path.getsize(out), "tris", sum(len(p.vertices) - 2 for p in body.data.polygons), flush=True)
+    bpy.ops.export_scene.gltf(
+        filepath=out,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=False,
+        export_animations=True,
+        export_animation_mode="ACTIONS",
+        export_skins=True,
+        export_yup=True,
+        export_materials="EXPORT",
+        export_image_format="JPEG",
+        export_jpeg_quality=92,
+        export_extras=False,
+        export_vertex_color="ACTIVE",
+        export_force_sampling=True,
+        export_frame_step=1,
+        export_optimize_animation_size=False,
+        export_def_bones=False,
+    )
+    print(
+        "TAIL exported",
+        out,
+        os.path.getsize(out),
+        "tris",
+        sum(len(p.vertices) - 2 for p in body.data.polygons),
+        flush=True,
+    )
 
 
 main()
