@@ -42,6 +42,29 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Meshy's skin weights, 2026-11-17 (ext/rig-bakeoff-meshy-1117): `--weights meshy`
+The owner (11-17): the picked masters are in the game, but they break when they move. The breaks are the skin weights
+(bone heat plus the spec's `regions` boxes: fins round the hands, a hand webbed to the hip, torn sashes), and the
+`relax` pass over them punches holes. `python3 tools/art1/v95_to_game.py <Name> --weights meshy` takes the weights
+from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, rig, clips and bone names unchanged):
+- v95_swap.py's `meshy_rig` sends the 60k body to Meshy's rigging API (`tools/meshy/meshy_task.py rig`, about 5
+  credits, 1-2 min) and keeps the answer in `WORK/meshy/` (a rerun of the swap step alone reuses it).
+- `meshy_weights` gives each vertex the weights of its nearest rigged vertex and puts Meshy's 24 bones on ours
+  (`MESHY`: spine and shoulders on `hips`, the neck half `hips` half `head`, arm, leg and foot bones one to one).
+- Three fixes for what Meshy's rig and ours do not share. A patch of arm weights not joined to the arm (the sash under
+  a resting hand) goes to the bones under it. Our thighs hang from `root`, not `hips`, so a thigh's weight above its
+  hip joint goes to `hips`, fading out over `PELVIS_RAMP` below it; without it the waist pinches when the game turns
+  the hips. (Tried and dropped: also moving weight shared by both thighs to `hips`; the layer under Tenzo's apron
+  pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
+  bone whole.
+- A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
+  bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  rig but carry no body weight in this mode.
+Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
+report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
+coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
+wide in her bow stance; Kael's master sword and the game's sword both show in his hand.
+
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
 were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
