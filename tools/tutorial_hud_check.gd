@@ -524,8 +524,8 @@ func _pointer_rows(pm: Match, slot: String, sz: Vector2) -> void:
 ## Plays the course as one starter, the camera on the hunter (the default view, no cursor lean), and
 ## judges each step's thing to act on at 1280x720: how often it is on screen and how tall it is drawn.
 func _framing(arch: String) -> void:
-	seed(11)
-	Save.d["tutorial"].erase("tut_beat")      # (an earlier run finished the course: a start would resume past it)       # (the run --tutorial-fight-check plays, the same each time)
+	seed(11)       # (the run --tutorial-fight-check plays, the same each time)
+	Save.d["tutorial"].erase("tut_beat")      # (an earlier run finished the course: it would resume past it)
 	var fm := Match.new()
 	main.add_child(fm)
 	fm.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
