@@ -3506,22 +3506,7 @@ func _confirm_start() -> void:
 	if not KinLoss.at_risk(exp_tier):
 		_start_match()
 		return
-	var v := _new_panel("Your Boki can be lost", 640)
-	var names: Array = []
-	for rec in Save.d.get("roster", []):
-		if rec.get("uid", "") in [Save.d.get("active", ""), Save.d.get("active2", "")]:
-			names.append(String(rec.get("name", "your Boki")))
-	var who := " and ".join(names) if not names.is_empty() else "the Boki you bring"
-	var lines := ["In %s, if you die, %s drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up. A rival can scan it and take it." % [td["name"], who]]
-	lines.append("If a rival takes your Boki you feel its pull: an arrow points at them and their spot pings on your map. Knock them out and it drops, and you can pick it up. If they get out with it, or nobody picks it up, it ends up at the Black Market.")
-	for ln in lines:
-		var l := UI.label(ln, 15, UI.INK)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(l)
-	var row := UI.hbox(10)
-	row.add_child(UI.primary("I understand, go", _start_match, 220))
-	row.add_child(UI.button("Back", _open_expedition, 140))
-	v.add_child(row)
+	ExpeditionPanel.confirm_risk(self, td)
 
 func _start_match() -> void:
 	# kin picked from the Kin Burrow come out to go with you

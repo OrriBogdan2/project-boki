@@ -2,14 +2,18 @@ extends RefCounted
 ## --expedition-arrows-check: the expedition panel's pickers never close it.
 ##   1. with one Boki the Boki card's arrows are greyed and a grey line says there is no other Boki
 ##   2. pressing them anyway (or the Right key on a focused one) keeps the panel open
-##   3. with two Boki the arrows work, the panel stays open and a fold you opened (Details) stays open
+##   3. the "Your Boki can be lost" sheet is one short line with its rules behind Details
+##   4. with two Boki the arrows work, the panel stays open and a fold you opened (Details) stays open
 ## Reads the real panel on the farm. Never touches the save.
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("EXPARROWS %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()
@@ -26,8 +30,10 @@ func run(main: Node) -> void:
 		var tip: String = _arrows(hm.panel_host)[i].tooltip_text
 		_arrows(hm.panel_host)[i].pressed.emit()
 		await _frames(tree)
-		ok(hm.panel_open == "Expedition" and hm.panel_host.get_child_count() > 0,
-				"pressing %s keeps the panel open" % tip)
+		ok(
+			hm.panel_open == "Expedition" and hm.panel_host.get_child_count() > 0,
+			"pressing %s keeps the panel open" % tip
+		)
 	var key := InputEventKey.new()
 	key.keycode = KEY_RIGHT
 	key.pressed = true
@@ -44,19 +50,40 @@ func run(main: Node) -> void:
 	details.pressed.emit()
 	_arrows(hm.panel_host)[1].pressed.emit()
 	await _frames(tree)
-	ok(hm.panel_open == "Expedition" and Save.d["active"] == other["uid"],
-			"two Boki: next picks the other one, panel open")
+	ok(
+		hm.panel_open == "Expedition" and Save.d["active"] == other["uid"],
+		"two Boki: next picks the other one, panel open"
+	)
 	ok(_button(hm.panel_host, "Fewer details") != null, "and Details is still open after the pick")
 	hm._close_panel()
 	hm._open_expedition()
 	await _frames(tree)
 	ok(_button(hm.panel_host, "Details") != null, "a fresh open starts with Details shut")
+	var risky := 0
+	while not KinLoss.at_risk(risky):
+		risky += 1
+	Save.d["extracts"] = int(Data.TIERS[risky]["unlock"])
+	hm.exp_tier = risky
+	hm._confirm_start()
+	await _frames(tree)
+	var longest := 0
+	for n in _walk(hm.panel_host, []):
+		if n is Label and n.is_visible_in_tree():
+			longest = maxi(longest, n.text.length())
+	ok(
+		hm.panel_open == "Your Boki can be lost" and _button(hm.panel_host, "Details") != null,
+		"the loss sheet opens with its rules behind Details"
+	)
+	ok(longest <= 100, "and shows one short line (longest %d characters)" % longest)
 	hm.queue_free()
 	print("EXPARROWS DONE, failures: %d" % bad)
 	tree.quit()
 
+
 func _frames(tree: SceneTree, n := 12) -> void:
-	for i in n: await tree.process_frame
+	for i in n:
+		await tree.process_frame
+
 
 func _farm(main: Node) -> Node:
 	var d := Save.fresh()
@@ -72,19 +99,25 @@ func _farm(main: Node) -> Node:
 	await _frames(main.get_tree(), 30)
 	return hm
 
+
 func _walk(n: Node, out: Array) -> Array:
 	out.append(n)
-	for c in n.get_children(): _walk(c, out)
+	for c in n.get_children():
+		_walk(c, out)
 	return out
+
 
 ## The Boki card's previous and next buttons (the ones with the "Boki" tips).
 func _arrows(host: Node) -> Array:
 	return _walk(host, []).filter(func(n): return n is Button and n.tooltip_text.ends_with(" Boki"))
 
+
 func _has_text(host: Node, text: String) -> bool:
 	return _walk(host, []).any(func(n): return n is Label and n.text == text and n.is_visible_in_tree())
 
+
 func _button(host: Node, text: String) -> Button:
 	for n in _walk(host, []):
-		if n is Button and n.text.begins_with(text): return n
+		if n is Button and n.text.begins_with(text):
+			return n
 	return null
