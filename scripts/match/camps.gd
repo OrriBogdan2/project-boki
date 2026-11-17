@@ -18,8 +18,8 @@ enum State { LIVE, CLEARED, RETURNING, SPENT }
 static var _rules: Dictionary = {}
 
 var m: Match
-var camps: Array = []        # {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp}}
-var comebacks := 0           # (tests)
+var camps: Array = []  # {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp}}
+var comebacks := 0  # (tests)
 var _tick_t := 0.0
 
 
@@ -54,9 +54,18 @@ func spawn_all() -> void:
 		var si := sizes.map(func(s): return s["id"]).find(want)
 		var region := m.biomes.hot.region_at(spot["pos"]) if m.biomes else -1
 		if m.biomes and region >= 0 and region == m.biomes.hot.hot:
-			si = mini(si + 1, sizes.size() - 1)       # the hot zone's camps are one size up
-		var c := {"id": camps.size(), "pos": spot["pos"], "island": spot.get("island", -1), "size": si,
-			"state": State.LIVE, "mobs": [], "back_t": -1.0, "region": region, "paid": {}}
+			si = mini(si + 1, sizes.size() - 1)  # the hot zone's camps are one size up
+		var c := {
+			"id": camps.size(),
+			"pos": spot["pos"],
+			"island": spot.get("island", -1),
+			"size": si,
+			"state": State.LIVE,
+			"mobs": [],
+			"back_t": -1.0,
+			"region": region,
+			"paid": {}
+		}
 		camps.append(c)
 		_populate(c)
 
@@ -172,8 +181,17 @@ func alive() -> int:
 
 
 func list() -> Array:
-	return camps.map(func(c): return {"id": c["id"], "pos": c["pos"], "size": size_def(int(c["size"]))["id"],
-		"state": c["state"], "back_t": c["back_t"], "region": c["region"]})
+	return camps.map(
+		func(c):
+			return {
+				"id": c["id"],
+				"pos": c["pos"],
+				"size": size_def(int(c["size"]))["id"],
+				"state": c["state"],
+				"back_t": c["back_t"],
+				"region": c["region"]
+			}
+	)
 
 
 ## A rolling session's late start (Rolling.after_setup): about frac of the camps were cleared some

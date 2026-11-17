@@ -18,7 +18,8 @@ static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
 	if not is_instance_valid(credit):
 		credit = null      # (whoever landed it left during the dissolve)
 	KeyCarry.on_mob_dead(m, mb)
-	var big_one: bool = mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote
+	var big_one: bool = mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote \
+			and not Camps.is_camp(mb)      # (a camp's one perk orb comes in its bundle)
 	if big_one and (mb.mkind == "warden" or m.rng.randf() < 0.5):
 		var tier_s := "boss" if mb.mkind == "warden" else "brute"
 		PerkOrbs.drop(m, tier_s, mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
