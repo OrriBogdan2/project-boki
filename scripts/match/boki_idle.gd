@@ -9,23 +9,25 @@ extends RefCounted
 
 const PATH := "res://content/rules/boki_idle.json"
 const FIDGET := "idle_fidget"
-const KEY_STEP := 1.0 / 30.0          # s between the keys a fidget writes
+const KEY_STEP := 1.0 / 30.0  # s between the keys a fidget writes
 ## The bones a breath deepens: the torso, not the head (which already sways) or the limbs.
 const TORSO := ["root", "hips", "spine", "neck"]
-const TICKS := ["ear", "nip"]          # bone prefixes a calm idle stops flicking every loop
-const TICK_KEEP := 0.2                 # share of a flick that stays (the ear still rides the breath)
-const CHAIN_LAG := 0.07                # cycles each next bone of a swinging chain trails the one before
+const TICKS := ["ear", "nip"]  # bone prefixes a calm idle stops flicking every loop
+const TICK_KEEP := 0.2  # share of a flick that stays (the ear still rides the breath)
+const CHAIN_LAG := 0.07  # cycles each next bone of a swinging chain trails the one before
 const AXES := {"x": Vector3.RIGHT, "y": Vector3.UP, "z": Vector3.BACK}
 
 static var _cfg := {}
 
 var _gap := 0.0
 
+
 static func config() -> Dictionary:
 	if _cfg.is_empty():
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 		_cfg = parsed if parsed is Dictionary else {}
 	return _cfg
+
 
 ## Gives the player this species' breathing "idle" and its "idle_fidget" (once per model: the clips are shared).
 static func build(player: AnimationPlayer, skel: Skeleton3D, species: String) -> void:
@@ -39,6 +41,7 @@ static func build(player: AnimationPlayer, skel: Skeleton3D, species: String) ->
 	lib.remove_animation("idle")
 	lib.add_animation("idle", idle)
 	lib.add_animation(FIDGET, _fidget(idle, spec["fidget"], skel))
+
 
 ## Re-times the loop to `len` s and deepens the torso; `calm` takes the tick out of the ears.
 static func _breathe(idle: Animation, breath: Dictionary) -> void:
@@ -60,18 +63,25 @@ static func _breathe(idle: Animation, breath: Dictionary) -> void:
 			_insert(idle, t, float(times[k]), _scaled(values[0], values[k], gain) if gain != 1.0 else values[k])
 	idle.length = float(breath["len"])
 
+
 static func _insert(anim: Animation, track: int, at: float, v: Variant) -> void:
 	match anim.track_get_type(track):
-		Animation.TYPE_ROTATION_3D: anim.rotation_track_insert_key(track, at, v)
-		Animation.TYPE_POSITION_3D: anim.position_track_insert_key(track, at, v)
-		Animation.TYPE_SCALE_3D: anim.scale_track_insert_key(track, at, v)
-		_: anim.track_insert_key(track, at, v)
+		Animation.TYPE_ROTATION_3D:
+			anim.rotation_track_insert_key(track, at, v)
+		Animation.TYPE_POSITION_3D:
+			anim.position_track_insert_key(track, at, v)
+		Animation.TYPE_SCALE_3D:
+			anim.scale_track_insert_key(track, at, v)
+		_:
+			anim.track_insert_key(track, at, v)
+
 
 static func _is_tick(bone: String) -> bool:
 	for p in TICKS:
 		if bone.begins_with(p):
 			return true
 	return false
+
 
 static func _scaled(first: Variant, v: Variant, gain: float) -> Variant:
 	if v is Quaternion:
@@ -80,13 +90,14 @@ static func _scaled(first: Variant, v: Variant, gain: float) -> Variant:
 		return (first as Vector3).lerp(v as Vector3, gain)
 	return v
 
+
 ## The idle again with the fidget's rows added over its window; it ends where the idle ends.
 static func _fidget(idle: Animation, spec: Dictionary, skel: Skeleton3D) -> Animation:
 	var fid := idle.duplicate() as Animation
 	fid.loop_mode = Animation.LOOP_NONE
 	_tile(fid, ceili((float(spec["at"]) + float(spec["dur"]) + 0.05) / idle.length))
 	var base := _skeleton_path(idle)
-	var samples := {}                        # track -> its local rotation every KEY_STEP
+	var samples := {}  # track -> its local rotation every KEY_STEP
 	for row in spec["rows"]:
 		for hit in _bones(skel, String(row[0])):
 			var bone := String(hit[0])
@@ -104,6 +115,7 @@ static func _fidget(idle: Animation, spec: Dictionary, skel: Skeleton3D) -> Anim
 		_write(fid, track, samples[track])
 	return fid
 
+
 ## Repeats the clip `n` times over (so it ends on its first pose again, however short the idle).
 static func _tile(anim: Animation, n: int) -> void:
 	var one := anim.length
@@ -119,8 +131,10 @@ static func _tile(anim: Animation, n: int) -> void:
 				_insert(anim, t, float(times[k]) + rep * one, values[k])
 	anim.length = one * n
 
+
 static func _skeleton_path(anim: Animation) -> String:
 	return String(anim.track_get_path(0)).get_slice(":", 0)
+
 
 ## [bone, lag (cycles), share of the row's swing, side sign] for every bone a row names: "tail*" swings as a chain,
 ## "name*" is a cluster, "name.*" is both sides.
@@ -141,6 +155,7 @@ static func _bones(skel: Skeleton3D, pattern: String) -> Array:
 		found.append([names[i], CHAIN_LAG * i if trails else 0.0, share, side])
 	return found
 
+
 ## A rotation track's local value every KEY_STEP (`rest` where the clip has none).
 static func _sample(anim: Animation, track: int, rest: Quaternion) -> Array:
 	var out := []
@@ -148,6 +163,7 @@ static func _sample(anim: Animation, track: int, rest: Quaternion) -> Array:
 		var at := minf(s * KEY_STEP, anim.length)
 		out.append(anim.rotation_track_interpolate(track, at) if anim.track_get_key_count(track) > 0 else rest)
 	return out
+
 
 ## Rotates the samples inside the fidget's window about the row's game axis, set in the bone's rest frame
 ## (`frame`) like the clips' own keys. y and z swing mirrored on the right side.
@@ -164,11 +180,13 @@ static func _add_row(samples: Array, row: Array, hit: Array, spec: Dictionary, f
 		var angle := peak * hump * (hump if cycles == 0.0 else sin(TAU * (cycles * u + phase)))
 		samples[s] = (samples[s] as Quaternion) * (frame.inverse() * Quaternion(AXES[axis_name], angle) * frame)
 
+
 static func _write(anim: Animation, track: int, samples: Array) -> void:
 	for k in range(anim.track_get_key_count(track) - 1, -1, -1):
 		anim.track_remove_key(track, k)
 	for s in samples.size():
 		anim.rotation_track_insert_key(track, minf(s * KEY_STEP, anim.length), samples[s])
+
 
 ## Called every frame the Boki would stand idle: "idle", or FIDGET when one is due. `clip` is the one now playing.
 func step(dt: float, player: AnimationPlayer, clip: String, rng: RandomNumberGenerator) -> String:
@@ -180,6 +198,7 @@ func step(dt: float, player: AnimationPlayer, clip: String, rng: RandomNumberGen
 	var gap: Array = config()["gap_s"]
 	_gap = rng.randf_range(float(gap[0]), float(gap[1]))
 	return FIDGET
+
 
 ## Called when it isn't idle: the next fidget is a fresh few seconds off.
 func rest(rng: RandomNumberGenerator) -> void:
