@@ -84,7 +84,7 @@ Lace clips do worse than Albert's: the same prompts retargeted to the hem rig st
 
 **How the clips were rendered**
 
-- Camera: `cam.gd` "supervive" (pitch 66°, 23 m back, 32° lens, the body leaned back 20°).
+- Camera: `cam.gd` "reference" (pitch 66°, 23 m back, 32° lens, the body leaned back 20°).
 - Panel: a 480 px crop of a 1440p screen, with the current in-game clip on the left and the raw Uthana clip on the right.
 - Videos: `/home/boki/art-review/uthana-rank-1110/rank_*.mp4`.
 

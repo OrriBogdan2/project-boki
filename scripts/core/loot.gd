@@ -6,7 +6,7 @@ class_name Loot
 ##   ink     {t:"val", id:"ink", ink:"ember", uid}    a vial of Ink (InkDrops): goes to your goods at home (Goods)
 ## Weapons are not loot any more: every hunter carries one fixed signature weapon and grows it with
 ## upgrades (WeaponUps). Their worth drives smart loot and what the backpack keeps. The element
-## riders of a Brand upgrade run on the weapon's own hits (Hunter._emit_shot / _strike call rider()).
+## riders of a Brand upgrade run on the weapon's own hits (HunterAttack.emit_shot / strike call rider()).
 
 ## Elements a Brand upgrade puts on your weapon (WeaponUps), one per biome style (the Greenreach meadow has none of its own).
 const ELEMENTS := {
