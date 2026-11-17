@@ -11,6 +11,9 @@ extends RefCounted
 ##   - mid-dash and the step after, the glider opens with at least KEEP of the dash's exit speed.
 ## A hunter whose dash tuning gives no grace (Loco.dash_glide_grace 0: the source's wind-down) is only pressed
 ## mid-dash; one whose air Shift is not a dash (a hop, a skate, Joule's Wirerun streak) is skipped.
+## Brall's chains (the owner: "not fluent, ground RMB + glide or dash + glide"), with a second Space and
+## with the glide button: Rampage on the ground or Smash's Lunge, a jump, a glide press; and an air Rampage pressed
+## inside his wind-down. The press is never dropped: it opens on the press step, or as the wind-down ends.
 
 const KEEP := 0.7
 const STEP_DV := 4.0
@@ -19,6 +22,9 @@ const STEP_DV_OWN := {"mage": 8.5}
 const STEADY_F := 30
 const LATE := 6
 const HEIGHT := 40.0
+const LUNGE_HOLD := 24  # steps of a held Smash: past its 0.3 s hold, a Lunge on release
+const WIND_LATE := 18  # steps after an air Rampage: past Brall's press grace, inside his 0.35 s wind-down
+const LUNGE_OPEN_V := 10.0  # m/s the glider must open at after a Lunge (17.7 at its end, air drag between)
 
 var bad := 0
 
@@ -125,5 +131,61 @@ func run(main: Node) -> void:
 				var exit_v := float(r["exit"])
 				ok(float(r["open_v"]) >= exit_v * KEEP, "%s at %.1f m/s, dash exit %.1f m/s (%.0f%%)" % [tag,
 						float(r["open_v"]), exit_v, 100.0 * float(r["open_v"]) / maxf(0.01, exit_v)])
+	await _rage_rows(main)
 	print("AIRGLIDE DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
+
+## Brall: a move (Rampage, or a held Smash's Lunge when `rmb`), then a jump `jump_after` steps after it ends (-1: no
+## jump, in the air) and a glide press `press_after` steps after that, by second Space or the glide button (`btn`).
+## Returns [press step, open step (-1 never), open speed].
+func _rage_chain(main: Node, rmb: bool, jump_after: int, press_after: int, btn: bool) -> Array:
+	var m := _match(main, "juggernaut")
+	var hunter: Hunter = m.player
+	hunter.inp["glide_press_only"] = true
+	if jump_after < 0:
+		hunter.teleport(hunter.pos + Vector3(0, HEIGHT, 0))
+	var dir := Vector2(1, 0) if jump_after < 0 else Vector2(-1, 0)  # (west on the ground: a training dummy is east)
+	var ran := false
+	var jump := 9999
+	var press := 9999
+	var out := [press, -1, 0.0]
+	for f in 150:
+		hunter.inp["move"] = dir
+		hunter.inp["aim"] = hunter.pos + Vector3(dir.x * 8.0, 0.9, 0.0)
+		hunter.inp["sec"] = rmb and f == 5
+		hunter.inp["sec_hold"] = rmb and f >= 5 and f < 5 + LUNGE_HOLD
+		if not rmb and f == 5:
+			hunter.dashes = hunter.max_dashes()
+			hunter.do_dash()
+		hunter.inp["jump"] = f == jump or (f == press and not btn)
+		hunter.inp["glide"] = f >= press
+		hunter.inp["glide_btn"] = btn and f >= press
+		var p0 := hunter.pos
+		m.step(Match.DT)
+		ran = ran or hunter.roll_t > 0.0
+		if ran and hunter.roll_t <= 0.0 and press == 9999:
+			jump = f + jump_after if jump_after >= 0 else 9999
+			press = (jump if jump_after >= 0 else f) + press_after
+			out[0] = press
+		if hunter.gliding:
+			out[1] = f
+			out[2] = Vector2(hunter.pos.x - p0.x, hunter.pos.z - p0.z).length() / Match.DT
+			break
+	m.queue_free()
+	await main.get_tree().process_frame
+	return out
+
+
+func _rage_rows(main: Node) -> void:
+	var wait := ceili((0.35 - WIND_LATE * Match.DT) / Match.DT) + 1  # the rest of the wind-down, in steps
+	for btn in [false, true]:
+		var by := "glide button" if btn else "second Space"
+		var r: Array = await _rage_chain(main, false, 1, 8, btn)
+		ok(int(r[1]) == int(r[0]), "Brall Rampage, jump, %s: press @%d opens @%d" % [by, r[0], r[1]])
+		r = await _rage_chain(main, true, 4, 8, btn)
+		ok(int(r[1]) == int(r[0]) and float(r[2]) >= LUNGE_OPEN_V,
+				"Brall Smash Lunge, jump, %s: press @%d opens @%d at %.1f m/s" % [by, r[0], r[1], r[2]])
+		r = await _rage_chain(main, false, -1, WIND_LATE, btn)
+		ok(int(r[1]) >= int(r[0]) and int(r[1]) - int(r[0]) <= wait,
+				"Brall air Rampage, %s in the wind-down: press @%d opens @%d (<= %d)" % [by, r[0], r[1], wait])

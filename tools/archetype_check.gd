@@ -366,12 +366,12 @@ func _archer() -> void:
 	# no Focus meter (KIT_PARITY 5, cut by the owner): standing still builds nothing
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.6)
-	ok("archer passive: no Focus meter (Hawk Sense only)",
+	ok("archer passive: no Focus meter (Red Thread only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
+	# Red Thread stays: a rival under half health is seen through cover within 22m
 	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Red Thread: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
@@ -609,7 +609,7 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.atk.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())

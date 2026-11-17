@@ -1,6 +1,9 @@
 extends RefCounted
 ## --ui-sfx-check: every slider, toggle and dropdown on the title, the settings tabs and the pause
 ## menu makes a sound (UiSfx), sliders tick throttled, and tab buttons carry the tab sound.
+## It drives the real Settings widgets (Effects slider to 0, "Ultimate ready" off), and Settings writes each change
+## to user://settings.cfg, so it runs itself again in a child game on a throwaway XDG_DATA_HOME: the player's (or a
+## gate box's) settings file is never touched (rpc6, 11-16: sfx=0.0 and ult_ready_cue=false left behind).
 
 var main: Node
 var fails := 0
@@ -12,8 +15,13 @@ func ok(what: String, cond: bool, info := "") -> void:
 	if not cond:
 		fails += 1
 
+const CHILD := "--ui-sfx-child"
+
 func run(main_node: Node) -> void:
 	main = main_node
+	if not Array(OS.get_cmdline_user_args()).has(CHILD):
+		main.get_tree().quit(await _in_temp_user_dir())
+		return
 	Game.goto("title")
 	for i in 10:
 		await main.get_tree().process_frame
@@ -31,6 +39,18 @@ func run(main_node: Node) -> void:
 	_tabs_and_throttle()
 	print("UISFX DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Runs this same check again as a child game with its own user dir (CheckChild), shows its output, and returns
+## its exit code. The child ends with this game, however it ends.
+func _in_temp_user_dir() -> int:
+	var log_path := "/tmp/ui_sfx_check_%d.log" % OS.get_process_id()
+	var pid := CheckChild.start("--ui-sfx-check %s" % CHILD, log_path)
+	while OS.is_process_running(pid):
+		await main.get_tree().create_timer(0.5).timeout
+	printerr(FileAccess.get_file_as_string(log_path).strip_edges())
+	var rc := OS.get_process_exit_code(pid)
+	OS.execute("/bin/rm", ["-rf", log_path, log_path.get_basename() + "_data"])
+	return rc
 
 func _heard(trigger: Callable) -> bool:
 	Sfx.last_played.clear()

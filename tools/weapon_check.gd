@@ -82,7 +82,7 @@ func run(main: Node) -> void:
 						P.inp["fire"] = int(t / 0.05) % 2 == 0
 					elif mode == "charge":
 						# hold until the charge is full, then let go for a moment
-						if P.inp["fire"] and P.charge_k() >= 1.0:
+						if P.inp["fire"] and P.atk.charge_k() >= 1.0:
 							P.inp["fire"] = false
 							P.set_meta("rel", 0.5)
 						elif not P.inp["fire"]:
