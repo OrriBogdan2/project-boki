@@ -1,6 +1,6 @@
 extends RefCounted
 ## --cloth-shots --warden=<id> --shots-dir=<dir> [--scene=idle|run|dash|lmb] [--cam=game|orbit|side|back]
-## [--fps=30] [--size=540] [--dash=pin_roll] [--lmb=arc_loose]: a Warden MOVING through the world (position advanced each frame, so a
+## [--fps=30] [--size=540] [--mp4] [--dash=pin_roll] [--lmb=arc_loose]: a Warden MOVING through the world (position advanced each frame, so a
 ## cloth chain feels the motion) in the game's renderer: <dir>/<scene>_<cam>/f000.png... (ffmpeg makes the MP4).
 ## --bench[=<n>] [--secs=<s>]: n copies (default 8) running in a ring, prints the mean frame time and the engine's
 ## mean process time (needs a real GPU for the frame time; compare a tree with the cloth bones against one without).
@@ -114,6 +114,15 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 		_camera(model, cam_kind, t / length)
 		await shots._grab(dir.path_join("f%03d.png" % i))
 	model.queue_free()
+	if OS.get_cmdline_user_args().has("--mp4"):      # (the frames become <dir>.mp4 and go: a GPU host keeps no PNGs)
+		var rc := OS.execute("ffmpeg", ["-y", "-loglevel", "error", "-framerate", str(int(fps)), "-i",
+				dir.path_join("f%03d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "17", dir + ".mp4"])
+		if rc == 0:
+			for f in DirAccess.get_files_at(dir):
+				DirAccess.remove_absolute(dir.path_join(f))
+			DirAccess.remove_absolute(dir)
+		else:
+			print("CLOTH_SHOTS_FFMPEG_FAILED ", rc)
 
 func _spawn(id: String) -> Node3D:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
