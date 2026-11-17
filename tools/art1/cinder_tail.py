@@ -9,7 +9,7 @@ Run: blender -b --factory-startup --python tools/art1/cinder_tail.py -- GAME.glb
 import heapq
 import os
 import sys
-from collections import deque
+from collections import Counter, deque
 
 import bmesh
 import bpy
@@ -23,7 +23,7 @@ import bake_warden as BW  # noqa: E402
 CHAIN = ["spring_scarftail_tail_%d" % i for i in range(9)]  # root -> tip; the tip bone has no skin of its own
 OLD_TAIL = set(CHAIN) | {"tail"}  # the kept tail's bones: faces fully on them are the old tail
 ROOT_BONE = "tail"  # the chain's parent: the root ring blends onto it (it rides the hips)
-TAIL_MAT = {"skin": "skin-v95", "hair": "hair-v95", "metal": "metal-v95"}  # the master's body paint ("v95") per toon slot
+SLOTS = ("skin", "hair", "metal")  # toon slots a tail triangle can take (<slot>-<atlas> game materials)
 CAPS = [((0.0, 0.05, 0.97), (0.0, 0.05, 1.54), 0.17),  # cut_tail_A.py's body capsules (fit frame, x squeezed 0.8)
         ((0.12, 0.05, 0.93), (0.14, 0.05, 0.57), 0.115), ((-0.12, 0.05, 0.93), (-0.14, 0.05, 0.57), 0.115),
         ((0.14, 0.05, 0.57), (0.13, 0.04, 0.13), 0.085), ((-0.14, 0.05, 0.57), (-0.13, 0.04, 0.13), 0.085)]
@@ -177,8 +177,10 @@ def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     arm, body = import_game(game_path)
     gco, guv = mesh_arrays(body)
-    gmat = np.empty(len(body.data.polygons), int)
-    body.data.polygons.foreach_get("material_index", gmat)
+    vmat = np.zeros(len(gco), int)  # a material of each game vertex (before the old tail goes)
+    for p in body.data.polygons:
+        vmat[list(p.vertices)] = p.material_index
+    gmats = [m.name for m in body.data.materials]
 
     # 1. the old kept tail: faces whose every vertex rides the tail bones only
     on_tail = np.zeros(len(gco), bool)
@@ -213,12 +215,13 @@ def main():
     for k, i in enumerate(gbody):
         kd.insert((guv[i, 0], guv[i, 1], 0.0), k)
     kd.balance()
-    src, dst = [], []
+    src, dst, hit = [], [], []
     for i in near:
         _, k, d = kd.find((muv[i, 0], muv[i, 1], 0.0))
         if d < 2e-4:
             src.append(mco[i])
             dst.append(gco[gbody[k]])
+            hit.append(gbody[k])
     X = affine(np.array(src), np.array(dst))
 
     # 3. tail-only mesh (faces fully inside the cut), decimated, mapped into the game frame
@@ -283,26 +286,26 @@ def main():
         for n, w in pairs:
             if w > 1e-4:
                 groups[n].add([k], w, "REPLACE")
-    img = None
-    for n in mob.material_slots[0].material.node_tree.nodes if mob.material_slots else []:
-        if n.type == "TEX_IMAGE" and n.image and n.image.size[0] > 4096:
-            img = n.image
-    want = [m.name for m in body.data.materials]
-    slots = {k: want.index(v) for k, v in TAIL_MAT.items()}
-    for v in TAIL_MAT.values():
-        mob.data.materials.append(body.data.materials[v])
-    base = len(mob.data.materials) - len(TAIL_MAT)
-    names = list(TAIL_MAT)
-    px = np.array(img.pixels[:], np.float32).reshape(img.size[1], img.size[0], 4) if img else None
+    # the tail's paint is the atlas the body round its root wears (v95_swap names the master's images by face count,
+    # so its body paint can be "v95" or "v95c"): the majority atlas of the root-ring vertices the map paired
+    atlas = Counter(gmats[vmat[i]].split("-", 1)[1] for i in hit).most_common(1)[0][0]
+    names = [n for n in SLOTS if "%s-%s" % (n, atlas) in gmats]
+    for n in names:
+        mob.data.materials.append(body.data.materials["%s-%s" % (n, atlas)])
+    base = len(mob.data.materials) - len(names)
+    img = bpy.data.images[atlas]
+    px = np.empty(img.size[0] * img.size[1] * 4, np.float32)
+    img.pixels.foreach_get(px)
+    px = px.reshape(img.size[1], img.size[0], 4)
     uvl = mob.data.uv_layers.active.data
     for p in mob.data.polygons:
         u = np.mean([uvl[li].uv[:] for li in p.loop_indices], axis=0)
         c = mob.data.polygons[p.index].center
         fz, fy = c.z, c.y  # game frame = the fit frame: soles on z 0, she faces +Y
-        rgb = px[int(np.clip(u[1], 0, 1) * (px.shape[0] - 1)), int(np.clip(u[0], 0, 1) * (px.shape[1] - 1)), :3] if px is not None else np.ones(3)
+        rgb = px[int(np.clip(u[1], 0, 1) * (px.shape[0] - 1)), int(np.clip(u[0], 0, 1) * (px.shape[1] - 1)), :3]
         p.material_index = base + names.index(slot_of(rgb, fz, fy))
-    print("TAIL slots", {k: sum(1 for p in mob.data.polygons if p.material_index == base + i) for i, k in enumerate(names)},
-          "game slots", slots, flush=True)
+    print("TAIL atlas", atlas, "slots", {k: sum(1 for p in mob.data.polygons if p.material_index == base + i)
+                                         for i, k in enumerate(names)}, flush=True)
     for a in body.data.color_attributes:  # the port's vertex colours are all 1 on the body (COLOR_0, COLOR_1)
         if a.name not in mob.data.color_attributes:
             mob.data.color_attributes.new(a.name, a.data_type, a.domain)
