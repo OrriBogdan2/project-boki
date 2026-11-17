@@ -56,9 +56,22 @@ func _add_variant(spec: String) -> void:
 ## The overrides on every toon material of the player's model.
 func _apply(over: Dictionary) -> void:
 	for mt in (m.player.model.get_meta("mats", []) as Array):
-		if mt is ShaderMaterial:
+		if mt is ShaderMaterial and (not over.has("skin_only") or int((mt as ShaderMaterial).get_shader_parameter("surface")) == 4):
 			for k in over:
-				(mt as ShaderMaterial).set_shader_parameter(k, over[k])
+				if k == "skin_only":
+					continue
+				if k == "rawtex":      # debug: the albedo atlas straight to the screen (unshaded)
+					var sh := Shader.new()
+					sh.code = "shader_type spatial; render_mode unshaded; uniform sampler2D albedo_tex : source_color, filter_linear_mipmap; void fragment() { ALBEDO = texture(albedo_tex, UV).rgb; }"
+					(mt as ShaderMaterial).shader = sh
+				elif k == "nomips":      # the albedo atlas sampled without its mip chain (texel-true, shimmers)
+					var tex = (mt as ShaderMaterial).get_shader_parameter("albedo_tex")
+					if tex is Texture2D:
+						var img := (tex as Texture2D).get_image()
+						img.clear_mipmaps()
+						(mt as ShaderMaterial).set_shader_parameter("albedo_tex", ImageTexture.create_from_image(img))
+				else:
+					(mt as ShaderMaterial).set_shader_parameter(k, over[k])
 
 ## Steps `secs` of the match as Match runs a frame (the player holds `move`), then saves the shot.
 func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
