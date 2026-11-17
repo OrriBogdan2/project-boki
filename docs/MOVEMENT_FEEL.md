@@ -749,7 +749,7 @@ two steps, found by halving (a press later in the recovery is taken as never les
 and 75 percent of that window records **now** (acted within two steps), **end +t** (acted, t seconds after the
 press) or **never** (not within 1.5 s). On the ground Space is a jump. In the air it is the glider: Space is held
 from the press, as a player holds it, and "acted" is the glider opening. `n/a`: the ability does not go off there
-without a target or the ground. The check fails a press in a window's last `DashFlow.BUFFER_S` (0.15 s) that never
+without a target or the ground. The check fails a press in a window's last `Loco.press_buffer` (0.15 s) that never
 acts, unless the hero's `into_jump` row is a documented lock.
 
 Source tags as above; `[?]` marks rows the source does not settle (the footage shows no jump out of that
@@ -826,7 +826,7 @@ What the table says:
 - **Suggestions, not built (PARITY FIRST):** Albert's Faultline is planted about 0.6 s in the source but our
   jump goes at once in the wind-up; Grimble's Kaiju Blast charge is planted in the source and ours walks and
   jumps (owner item 36 keeps the walk). If the owner wants the air tap chainable too, a 0.15 s hold of a Space
-  tap made in a move's last `BUFFER_S` would fit DashFlow's held slots.
+  tap made in a move's last `Loco.press_buffer` would fit DashFlow's held slots.
 ## Press to picture: key to first visible frame (`--press-latency-check`)
 
 How many frames pass between a key going down and the first frame its result is on screen, for every hero's LMB, RMB, E, R (the Merge), dash and jump, at 60 and 144 Hz. Budget: 2 frames at 60 Hz, and the same 33 ms at 144 Hz (4 frames); the check fails above it. For Vex, Kael, Lace and Cinder it also holds LMB, RMB, E and dash to the source footage ("against the source", below).
@@ -987,6 +987,14 @@ The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt
 - **Not a snag:** the other Tenzo stall was a sealed lair's ward bouncing the glider back out (`Lairs._push_out`, 2 m/s away from it) while the keys held into it. That is the ward working; the check now treats a sealed or dormant lair within 2 m as a wall by design.
 
 After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
+## Low frame rates: taps and dashes survive 30 fps and 100 ms stalls (`--low-fps-input-check`, 2026-11-12)
+
+DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on the frame rate. `tools/low_fps_input_check.gd` runs headless on the real `Match._process`: `Engine.max_fps = 30` caps the frames (the check measures it holds), and a stall hook (`OS.delay_msec(100)` one frame before the tap, so the tap's frame has delta 0.1 s and `Match` runs 6 steps) loses a frame's time. Per hero (gunslinger, mage, juggernaut; `=<id>,<id>` picks others), each of Shift, Space, LMB, E and R is pressed and released between two reads, six times per round, and must go off every time.
+
+- **Found and fixed: LMB.** It was read as `is_action_pressed`, "down now", so a click that came and went inside one frame was lost: 6/6 taps lost at 30 fps and after a stall. Shift, Space, E and R were already safe: they read `is_action_just_pressed`, which stays true for the frame in which the key went down and up, and queue the press in `Match.pending_input` until the next fixed step. `FireTap` (`scripts/match/fire_tap.gd`) now latches an LMB tap the same way: down for the next fixed step, once, then cleared (a held button is unchanged, a tap in a hitstop frame waits for its step, a paused or over-UI tap is dropped). After the fix: 0 lost in 180 taps (3 heroes x 5 keys x 2 rounds x 6).
+- **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
+- `--move-feel-check`: 0 failures on this branch.
+
 
 ## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
 

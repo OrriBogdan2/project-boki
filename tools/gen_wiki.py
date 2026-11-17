@@ -862,7 +862,12 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n"
             "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
-            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n")
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n"
+            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte "
+            "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): "
+            "it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; "
+            "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
+            "(`--cast-lock-buffer-check`).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
