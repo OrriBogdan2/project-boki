@@ -37,7 +37,14 @@ func run(host: Node) -> void:
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
-## Steps the match; the rival stays on its spot (a bot walks off a telegraph, and this check wants it standing in the blast).
+## The most seconds any field on the map has left (a fire patch or a blight patch is the longest one standing).
+func _longest(m: Match) -> float:
+	var best := 0.0
+	for f in m.fields.list:
+		best = maxf(best, float(f.get("t", 0.0)))
+	return best
+
+## Steps the match; the rival stays on its spot (a bot walks off a telegraph, and the blast must find it).
 func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
 	var at := stay.pos if stay else Vector3.ZERO
 	for i in int(secs / Match.DT):
@@ -85,8 +92,8 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 1.0, foe)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
 	ok(m.fields.list.size() > hazards, "then the ground burns (a fire patch)")
-	_steps(m, 3.5)
-	ok(m.fields.list.size() <= hazards, "...for 3 s")
+	var left := _longest(m)
+	ok(left > 2.0 and left <= 3.0, "...for 3 s (%.1f s left a beat in)" % left)
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.out = false
@@ -103,7 +110,5 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 2.5, foe)
 	ok(foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,
 			"a rival in the patch is blighted and hurt")
-	_steps(m, 35.0)
-	ok(m.fields.list.size() > hazards, "the patch is still there after 37 s")
-	_steps(m, 4.0)
-	ok(m.fields.list.size() <= hazards, "...and gone after 40 s")
+	var left := _longest(m)
+	ok(left > 36.0 and left <= 38.0, "the patch lasts 40 s (%.1f s left 2.5 s in)" % left)
