@@ -57,19 +57,19 @@ The random part the owner remembers is most likely its powers, which are a separ
 Questions for the owner: build 1 and 2? Is 3 wanted? Should bots get the same growth? (Yes, if it's fair.)
 
 **Sources:**
-- Level page, SUPERVIVE Wiki: https://supervive.wiki.gg/wiki/Level
-- Leveling Rework + Big Balance Patch: https://supervive.wiki.gg/wiki/Leveling_Rework_%2B_Big_Balance_Patch
-- List of Hunter Base Stats: https://supervive.wiki.gg/wiki/List_of_Hunter_Base_Stats
-- Glossary (Powers, Relic Shops): https://supervive.wiki.gg/wiki/Glossary
+- Level page, the reference Wiki: reference notes
+- Leveling Rework + Big Balance Patch: reference notes
+- List of Hunter Base Stats: reference notes
+- Glossary (Powers, Relic Shops): reference notes
 - Players on per-level gains ("~6% base hp increase and +10 ability power per level"): https://steamcommunity.com/app/1283700/discussions/0/603021563739010834/
 - Steam announcements (rank-4 upgrades, level 15 caps): https://steamcommunity.com/app/1283700/announcements/
-- Powers by rarity, area-specific: https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction
+- Powers by rarity, area-specific: https://dignitas.gg/articles/how-to-thrive-in-the reference-a-general-introduction
 
 ## Weapon tier-up (shards)
 Research only, nothing built. The owner corrected the memory above: the random choice was on weapon tier-ups, not level-ups.
 
 **What the original did:**
-- **Name.** The random fourth option is a **Warped evolution** ("Warped equipment"). It arrived in the Season Zero update ("Beebo's Warped Tour").
+- **Name.** The random fourth option is a **Warped evolution** ("Warped equipment"). It arrived in the Season Zero update ("ref-hunter's Warped Tour").
 - **Currency.** Equipment, including the weapon slot, is upgraded with gold or with shards ("Power Shards" or "Upgrade Shards"; the wiki uses both names for one page).
   - Shards are loot from hunter deaths. One guide also says they come from killing creeps.
   - The wiki says a shard can "fully upgrade a piece of Equipment without having to visit a shop and spend gold".
@@ -120,11 +120,11 @@ Cons:
 Not built. The owner and the main session decide.
 
 **Sources (tier-up):**
-- Weapons, SUPERVIVE Wiki (Common and Rare evolutions, the Warped fourth option and its odds): https://supervive.wiki.gg/wiki/Weapons and https://supervive.wiki.gg/wiki/Weapon
-- Season Zero Arc 1 "Beebo's Warped Tour" patch (Warped as the 4th Blue choice, ALT + 1-4 upgrades anywhere): https://supervive.wiki.gg/wiki/Season_Zero_Arc_1_Beebos_Warped_Tour
-- PCGamesN on the Season Zero update (why Warped exists, the odds): https://www.pcgamesn.com/supervive/season-zero-launch
-- Power Shard, SUPERVIVE Wiki (loot from player deaths, upgrade without a shop): https://supervive.wiki.gg/wiki/Power_Shard
-- Items, SUPERVIVE Wiki (duplicates and power shards upgrade equipment): https://supervive.wiki.gg/wiki/Items
-- Equipment, SUPERVIVE Wiki (gold prices by rarity): https://supervive.wiki.gg/wiki/Equipment
-- GameLeap equipment list (Upgrade Shards from creeps and hunters, three evolutions per weapon): https://www.gameleap.com/articles/all-supervive-equipment-in-the-open-beta
-- Dignitas intro (a Blue-tier evolution gives a passive of your choosing; shards from killed players): https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction
+- Weapons, the reference Wiki (Common and Rare evolutions, the Warped fourth option and its odds): reference notes and reference notes
+- Season Zero Arc 1 "ref-hunter's Warped Tour" patch (Warped as the 4th Blue choice, ALT + 1-4 upgrades anywhere): reference notes
+- PCGamesN on the Season Zero update (why Warped exists, the odds): https://www.pcgamesn.com/the reference/season-zero-launch
+- Power Shard, the reference Wiki (loot from player deaths, upgrade without a shop): reference notes
+- Items, the reference Wiki (duplicates and power shards upgrade equipment): reference notes
+- Equipment, the reference Wiki (gold prices by rarity): reference notes
+- GameLeap equipment list (Upgrade Shards from creeps and hunters, three evolutions per weapon): https://www.gameleap.com/articles/all-the reference-equipment-in-the-open-beta
+- Dignitas intro (a Blue-tier evolution gives a passive of your choosing; shards from killed players): https://dignitas.gg/articles/how-to-thrive-in-the reference-a-general-introduction

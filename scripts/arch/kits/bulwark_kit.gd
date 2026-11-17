@@ -51,7 +51,6 @@ var kickstarts := 0             # (checks) downed teammates Mending Ground start
 var ticks_healed := 0           # (checks) heals the zone's ticks gave
 var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
-var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
 var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
@@ -321,6 +320,8 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
+func lmb_holding() -> bool: return lmb_t >= 0.0
+
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "tower_shield":
 		return false
@@ -333,22 +334,18 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if KinMerge.transforming(h):
 		drop_holds()
 		return true
-	if not held:
-		hold_blocked = false
 	if _hold_interrupted():
 		if lmb_t >= 0.0:
 			cancel_hold()
 		elif pressed:
 			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
 		return true
-	if hold_blocked:
-		return true
 	if not wall.is_empty():
 		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
-	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):
+	if not rides_dash and (not h.atk.can_fire() or h.fire_cd > 0.0):
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -405,7 +402,7 @@ func _hold_interrupted() -> bool:
 		or not h.grap.is_empty() or m.time - maxf(h.kb_time, h.kb_t) < 0.12
 
 ## Ends the Crushing Blow's hold with no swing (another ability started, or he was moved): the spin and its
-## tell stop at once and the held button is ignored until it is released.
+## tell stop at once; a button still down starts a fresh hold the step he is free (LMB is a held input).
 func cancel_hold() -> void:
 	if lmb_t >= 0.0 or h.mel_hold > 0.0:
 		lmb_t = -1.0
@@ -414,7 +411,6 @@ func cancel_hold() -> void:
 		fx.hold_end()
 		if anim_id == "bul_smash_wind":
 			anim_id = ""
-	hold_blocked = bool(h.inp.get("fire", false))
 
 ## The swing held: the hammer whirls round him (BjornFx draws it; the angle is counted here on match time, the
 ## rate is lmb.spin_turns from no charge to full, a whoosh each turn), the glint from 0.6 s; at full the perfect
@@ -467,7 +463,7 @@ func _smash() -> void:
 	slams += 1
 	slam_k = k
 	knock_until = m.time + 0.25
-	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
+	h.atk.strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
 		{"heavy": true, "charged": true})
 	var dv := h.aim_dir()
 	if perfect:
@@ -860,7 +856,7 @@ func _spin_hit(wd: Vector2) -> void:
 	# a spin off a ledge ends in the air (the glider is free); a glide pressed in the dash already took over
 	if h.grounded and not h.gliding:
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
+	h.atk.strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	vfx("spin", h.pos, null, {"r": r})
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)

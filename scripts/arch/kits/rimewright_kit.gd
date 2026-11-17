@@ -258,7 +258,7 @@ func own_aim_line() -> bool:
 ## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
 ## A stun or the Rimelock drops the owed large darts and ends the burst.
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not h.can_fire() or not rime.is_empty():
+	if not h.atk.can_fire() or not rime.is_empty():
 		if burst_i > 0:
 			_end_burst()
 		return true

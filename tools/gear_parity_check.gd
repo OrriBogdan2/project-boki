@@ -1,6 +1,6 @@
 extends RefCounted
 ## --gear-parity-check: boots and charms against the source (DECISIONS 2026-11-07 PARITY FIRST; audit in
-## docs/KIT_PARITY.md "Boots and charms"). briefs/supervive-data and briefs/hero-ref hold no boots or
+## docs/KIT_PARITY.md "Boots and charms"). sv/briefs and briefs/hero-ref hold no boots or
 ## charm items (no actives, cooldowns or move-speed numbers), so every piece is "no source match": the
 ## check pins today's numbers so a change has to go through the owner list, and checks each boots
 ## slot on the HUD (GearPanel) has no key and no cooldown, the way a passive piece should.

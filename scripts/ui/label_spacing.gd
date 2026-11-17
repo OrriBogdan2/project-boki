@@ -1,8 +1,8 @@
 class_name LabelSpacing
 extends RefCounted
 ## Keeps the world's Label3Ds from printing over each other. Every frame the labels on screen are
-## taken in priority order (damage numbers, monster plates, lair boards; perk orb names are LabelClash's)
-## and each one yields to what is above it:
+## taken in priority order (your hunter's zone, damage numbers, monster plates, lair boards; perk orb
+## names are LabelClash's) and each one yields to what is above it:
 ##   LabelSpacing.update(m, cards, delta)   cards: the message lane's rects (they cover the lair boards only)
 
 ## A label whose fade is past this has already given way, so it no longer covers what is under it.
@@ -13,6 +13,9 @@ static func update(m, cards: Array[Rect2], delta: float) -> void:
 	if m == null or m.cam == null:
 		return
 	var covers: Array[Rect2] = []
+	var zone := HunterZone.rect(m)      # your own hunter is covered by nothing
+	if zone.has_area():
+		covers.append(zone)
 	_add_numbers(m, covers)
 	var plates: Array[Label3D] = []
 	for mb in m.mobs:

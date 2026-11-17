@@ -4,7 +4,7 @@ class_name StepReach
 ## far but MATE_DB quieter, so a rival's step stands out; your own play at one steady level wherever the
 ## camera is. Sneaking (crouch walking) cuts the distance to SNEAK_K of it.
 ## Source: the data has no footstep distance and no sneak cut, only SneakSpeedMultiplier 0.5
-## (briefs/supervive-data/supervive_physics.md) and Void's "floats: no footstep noise" (supervive_kits.md),
+## (sv/briefs/physics.md) and Void's "floats: no footstep noise" (sv/briefs/kits.md),
 ## so both numbers here are ours ([?]).
 
 const RIVAL_M := 20.0       # m: how far a Hunter's step carries [?] (just under Sfx.hear_range, 22 m)

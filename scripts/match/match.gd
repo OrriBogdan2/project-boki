@@ -903,8 +903,6 @@ func ship_jump(h: Hunter, force := false) -> void:
 	if not h.riding or h.rocket != null:
 		return
 	if not force and skydrop.waits(h):
-		if h == player and hud:
-			hud.toast_small("%s leads the drop" % skydrop.leader(h.team).pname, Color("ffd27a"))
 		return
 	skydrop.launch(h if force or skydrop.is_lead(h) else skydrop.leader(h.team))
 
@@ -2428,10 +2426,6 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
-	if credit == player and hud:
-		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
-	elif h == player and hud:
-		hud.toast_small("Armor down", Color("7ac8ff"))
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
 func on_wall_slam(e: Ent, dir: Vector2) -> void:
@@ -2440,7 +2434,6 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h
 	if sc is Hunter and sc != e: (sc as Hunter).add_stat("slams")
-	if hud and player and (e == player or e.last_hit_by == player): hud.toast_small("WALL SLAM", Color("fff27a"))
 
 ## Sight. Each hunter sees a cone in front of them (where they aim) out to VIEW_RANGE, plus a
 ## small circle all around; a team shares what its members see. Walls and high ground block
@@ -2468,7 +2461,9 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		if d < near:
 			return true
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
-		if d > rng * (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight")) or (in_grass and not revealed):
+		var far: float = (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight"))
+		far *= ScoutLook.sight_mul(h, rel / maxf(d, 0.001))
+		if d > rng * far or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
@@ -2491,6 +2486,7 @@ func _update_vision() -> void:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
 		RenderingServer.global_shader_parameter_set("vis_range", view_range() * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_scout", ScoutLook.shader_arg(cam.scout_k))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3135,6 +3131,11 @@ func _process(delta: float) -> void:
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
+	_vprof("pre")
+	Prof.begin("camera")
+	MatchCam.update(self, delta, acc / DT)      # before the cursor is read: shots leave on the drawn reticle
+	Prof.end()
+	_vprof("camera")
 	_gather_input()
 	acc += d
 	var steps := 0
@@ -3189,61 +3190,6 @@ func _process(delta: float) -> void:
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	Prof.end()
-	Prof.begin("camera")
-	cam.follow_mode = String(Settings.get_v("cam_follow"))
-	var sty := String(Settings.get_v("cam_style"))
-	if sty != cam_style:
-		cam_style = sty
-		cam.use_style(sty)
-	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
-	if player and player.riding and player.rocket == null:
-		# aboard the skyship: a low view from just behind and above it, looking ahead along its
-		# course over the islands, like riding the bus in a battle royale
-		var ps := ship_of(player)
-		var sd: Vector3 = ps.get("dir", Vector3.FORWARD)
-		cam.yaw_to = atan2(-sd.x, -sd.z)
-		cam.chase_to = 1.0
-		cam.top_to = 0.0
-		cam.zoom_to = RIDE_CAM_DIST / cam.dist
-		if time < 0.5:
-			# boarding: start already behind the ship rather than swinging through it
-			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
-		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
-		var fp := ship_pos_of(ps) + sd * 3.0
-		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
-		if intro: intro.frame(delta)       # the squad intro takes the view, then hands it over
-	elif player and (player.rocket != null or player.dropping):
-		cam.skydive(player.render_pos(alpha), skydrop.drop_yaw(player), player_altitude(), delta)
-	elif player and not player.out and not player.downed:
-		cam.chase_to = 0.0
-		cam.yaw_to = 0.0
-		cam.zoom_to = cam.air_zoom(player, player_altitude())
-		if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
-		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-		cam.top_to = 0.0
-		cam.lead_vel = cam_lead_vel()
-		var peek := mate_look.focus(StepSmooth.view(player, alpha), alpha)
-		cam.follow(peek, delta, mate_look.looking == null)
-	elif player and (player.downed or player.out):
-		# death camera: frame you and whoever got you
-		var foc := player.prev.lerp(player.pos, alpha)
-		if player.pos.y < -2.0:
-			foc = cam.focus
-		var killer: Ent = player.last_hit_by
-		if killer is Kin and killer.owner_h: killer = killer.owner_h
-		if killer is Hunter and killer != player and not killer.out and killer.flat_dist(player) < 16.0:
-			foc = foc.lerp(killer.pos, 0.5 if player.downed else 0.85)
-		cam.zoom_to = 0.8
-		# dead and waiting on your team: after a moment, watch a teammate who's still in it
-		var mate := spectating()
-		if mate:
-			foc = mate.prev.lerp(mate.pos, alpha)
-			cam.zoom_to = 1.0
-		cam.follow(foc, delta, false)
-	elif player:
-		cam.follow(cam.focus, delta, false)
-	Prof.end()
-	_vprof("camera")
 	_update_aim(alpha)
 	_vprof("aim")
 	for pd in world.pads:
@@ -3322,6 +3268,7 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
+	player.inp["scout"] = Input.is_action_pressed("scout") and not paused
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
 	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
@@ -4870,6 +4817,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 	return true
 
 const OVERHEAT_BIT := 1 << 19      # hunter flags: the glider is burning (the hold kind uses bits 15-18)
+const GLIDE_DIVE_BIT := 1 << 28    # hunter flags: plunging under the glider (GlideDive), drawn in the dive pose
 func _flags(h: Hunter) -> int:
 	var f := 0
 	if h.downed: f |= 1
@@ -4884,10 +4832,12 @@ func _flags(h: Hunter) -> int:
 	if h.riding: f |= 1024
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
+	if h.scout: f |= ScoutLook.BIT
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
 	if GliderHeat.burning(h): f |= 1 << 24
+	if h.glide_dive.on: f |= GLIDE_DIVE_BIT
 	if UltGlow.kit_ready(h): f |= UltGlow.READY_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
@@ -5050,9 +5000,11 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			h.glide_fuel = GliderHeat.fuel_of((f >> 20) & 15) if h.gliding else 1.0
 			h.below_lip = f & (1 << 24) != 0
+			h.glide_dive.on = f & GLIDE_DIVE_BIT != 0       # remote copies don't tick their GlideDive
 			h.ult_ready = f & UltGlow.READY_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			h.scout = f & ScoutLook.BIT != 0
 			h.net_cc = (f >> StatusLooks.FLAG_SHIFT) & 7
 			if f & 2048 != 0:
 				var hk := ((f >> 15) & 15) - 1
