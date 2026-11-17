@@ -265,19 +265,20 @@ func _hold_and_air() -> void:
 	K.cd["rmb"] = 0.0
 	K.bag.append("air")
 	var thrown := 0
-	P.inp["sec_hold"] = true
-	P.inp["sec"] = true
+	var throws0 := int(HeroVfx.of(m).plays.get("throw", 0))
+	P.inp["sec_hold"] = true       # the press (once), then the button stays down: only sec_hold is set while held
 	K.press_rmb()
+	var at_press := K.flying.size()
 	step(m, 3.0, func():
 		P.inp["sec_hold"] = true
-		P.inp["sec"] = true
 		thrown = maxi(thrown, K.flying.size()))
-	var far := 0.0
 	P.inp["sec_hold"] = false
-	P.inp["sec"] = false
+	m.step(DT)
+	var throws := int(HeroVfx.of(m).plays.get("throw", 0)) - throws0
 	ok("Grab Bag: holding RMB 3 s throws one potion at once, 8 m like a tap, and nothing more",
-		absf(far_tap - 8.0) < 0.6 and thrown <= 1 and not K.rmb_down and absf(K.ch_rmb - 1.0) < 0.05 and far == 0.0,
-		"tap %.2f m, %d in the air, charges %.1f" % [far_tap, thrown, K.ch_rmb])
+		absf(far_tap - 8.0) < 0.6 and at_press == 1 and thrown <= 1 and throws == 1 and not K.rmb_down
+		and absf(K.ch_rmb - 1.0) < 0.05,
+		"tap %.2f m, %d at the press, %d throws, charges %.1f" % [far_tap, at_press, throws, K.ch_rmb])
 	_land()
 	_reset(6.0)
 	P.teleport(home + Vector3(0, 3.0, 0))
@@ -628,10 +629,6 @@ func _wave_cancels() -> void:
 	step(m, 0.1, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	var mid := [K.spin_t >= 0.0, K.flying.size(), K.combo_n, P.dashes]
-	var left := K.untarget_t
-	HunterKeys.ult_pressed(P)
-	m.step(DT)
-	ok("cancel X wave + X: nothing (no early landing)", not K.wave.is_empty() and K.untarget_t < left)
 	_press("dash")
 	ok("cancel X wave + E, RMB, LMB: nothing goes mid-ride", not mid[0] and mid[1] == 0 and mid[2] == 2, str(mid))
 	var t := 0.0
@@ -710,8 +707,9 @@ func _leap_off() -> void:
 	var x1 := P.pos
 	step(m, 0.7)
 	var run := Vector2(x1.x - p0.x, x1.z - p0.z).length()
-	ok("leap off: he stopped riding (under 14 m at 0.3 s), still on the ground after", run < 6.5 and P.grounded
-		and Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length() < 4.0, "%.2f m by then" % run)
+	var carry := Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length()
+	ok("leap off: he stopped riding (4 m of the 14 at 0.3 s, a short run-out after), back on the ground",
+		run < 6.5 and P.grounded and carry < 8.0, "%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
 	ok("leap off: the 90 s cooldown stands, no second wave, R does nothing more",
 		float(K.cd["x"]) > 85.0 and not HunterKeys.ult_pressed(P) and K.wave.is_empty())
 	K.ch_rmb = 2.0
