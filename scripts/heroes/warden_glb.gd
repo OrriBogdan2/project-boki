@@ -633,7 +633,6 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			if src and src.emission_enabled and src.emission_texture:
 				m.set_shader_parameter("emit_tex", src.emission_texture)
 				m.set_shader_parameter("use_emit", true)
-				m.set_shader_parameter("emit", EMIT)
 				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 				_emit_colour(m, arch)
 			if tag == GUM_TAG:
@@ -687,11 +686,12 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 		m.set_shader_parameter("glow", float(g["strength"]))
 
 ## The emission layer in the archetype's "model_glow" core colour (Sparkle's pink scar, charm, piping and veins): the
-## layer is a mask then, so the colour can change without a rebake.
+## layer is a mask then, so the colour can change without a rebake. "emit" its strength (EMIT).
 static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
+	m.set_shader_parameter("emit", float(g.get("emit", EMIT)))
 
 static func _gloss() -> ShaderMaterial:
 	if _gloss_m == null:
