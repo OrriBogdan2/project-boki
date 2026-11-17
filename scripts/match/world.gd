@@ -98,6 +98,12 @@ func block_top_of(i: int) -> float:
 func is_stand_block(x: float, z: float) -> bool:
 	return is_block(x, z) and block_top.has(idx(int(floor(x)), int(floor(z))))
 
+## The tile under a point: T_GROUND, T_BLOCK or T_VOID (off the map counts as the void).
+func tile_kind(x: float, z: float) -> int:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return kind[idx(ix, iz)] if inb(ix, iz) else T_VOID
+
 func is_block(x: float, z: float) -> bool:
 	var ix := int(floor(x))
 	var iz := int(floor(z))
