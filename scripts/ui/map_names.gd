@@ -56,19 +56,33 @@ static func _draw(c: CanvasItem, e: Array) -> void:
 	HudStyle.ctext(c, at + d, e[0], size, e[3], e[5], font)
 
 
-## The nearest free offset for a forced word's box inside the map (none free: it stays put).
+## The nearest free offset for a forced word's box inside the map; none free: the least covered one.
 static func _spot(r: Rect2) -> Vector2:
+	var best := Vector2.ZERO
+	var best_cover := INF
 	for ny: float in NUDGE_LINES:
 		for nx: float in NUDGE_SIDE:
 			var d := Vector2(nx * r.size.x, ny * r.size.y)
 			var moved := Rect2(r.position + d, r.size)
-			if _free(moved) and (d == Vector2.ZERO or _room.encloses(moved)):
+			if d != Vector2.ZERO and not _room.encloses(moved):
+				continue
+			var cover := _cover(moved)
+			if cover <= 0.0:
 				return d
-	return Vector2.ZERO
+			if cover < best_cover:
+				best_cover = cover
+				best = d
+	return best
 
 
 static func _free(r: Rect2) -> bool:
+	return _cover(r) <= 0.0
+
+
+## Area of `r` under words already drawn.
+static func _cover(r: Rect2) -> float:
+	var a := 0.0
 	for q in _taken:
 		if q.intersects(r):
-			return false
-	return true
+			a += q.intersection(r).get_area()
+	return a
