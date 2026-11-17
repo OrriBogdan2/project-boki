@@ -1016,7 +1016,6 @@ func tender() -> void:
 			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false
@@ -1844,9 +1843,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
-				and _no_disc(m), "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
+				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()

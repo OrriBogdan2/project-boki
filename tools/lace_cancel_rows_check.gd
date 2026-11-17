@@ -42,7 +42,6 @@ func _ready_all() -> void:
 	C.aim_at(P, home + Vector3(5.0, 0, 0))
 	P.ammo = maxi(P.ammo, 3)
 	P.fire_cd = 0.0
-	P.reload_t = 0.0
 	for sl in ["rmb", "e", "x"]:
 		K.cd[sl] = 0.0
 	K.ch_rmb = 1.0
