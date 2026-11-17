@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "rippmink",
+	"name": "Rippmink",
+	"theme": "tide",
+	"flavor": "Otter-sleek, wave strokes, webbed paws.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "tide"
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "geodemole",
+	"name": "Geodemole",
+	"theme": "stone",
+	"type2": "prism",
+	"flavor": "Bigger mole, cracked-geode back.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "glintmole",
+		"stage": 2,
+		"from": "glintmole"
+	}
+}
