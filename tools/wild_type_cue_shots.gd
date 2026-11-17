@@ -1,6 +1,7 @@
 extends RefCounted
-## --wild-type-cue-shots --shots-dir=<dir> [--species=a,b,...]: wild_type_cue.png, six wild Boki of six types (or
-## the listed species) standing round the player at the match camera. Needs a renderer (jobq --needs gpu). Never touches the save.
+## --wild-type-cue-shots --shots-dir=<dir> [--species=a,b,...]: wild_type_cue.png, six wild Boki of six types
+## (or the listed species) standing round the player at the match camera. Needs a renderer (jobq --needs gpu).
+## Never touches the save.
 
 const TYPES := ["fire", "grass", "electric", "ice", "poison", "psychic"]
 const RADIUS := 6.0       # m from the player
