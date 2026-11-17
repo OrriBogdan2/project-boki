@@ -26,6 +26,7 @@ const CHECKS := {
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
+	"--pit-egg-check": ["res://tools/pit_egg_check.gd", "pit_egg_check", null],      # one boss egg, one winner
 	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
@@ -141,13 +142,16 @@ const CHECKS := {
 	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
-	"--aim-latency-check": ["res://tools/aim_latency_check.gd", "aim_latency_check", null],  # reticle/aim under a scripted mouse move
+	"--aim-latency-check": ["res://tools/aim_latency_check.gd", "aim_latency_check", null],  # aim under a mouse move
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
+	"--chain-sweep-check": ["res://tools/chain_sweep_check.gd", "chain_sweep_check", null],  # advisory
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
 	"--glide-bank-check": ["res://tools/glide_bank_check.gd", "glide_bank_check", null],
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
+	# the owner's movement rules in DECISIONS, every Hunter
+	"--move-rule-guard-check": ["res://tools/move_rule_guard_check.gd", "move_rule_guard_check", null],
 	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],
@@ -289,6 +293,7 @@ const CHECKS := {
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],  # choose what to rank: + and pips
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],  # --shots-dir=<dir>
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],  # sound sets, loudness
+	"--sfx-picks-check": ["res://tools/sfx_picks_check.gd", "sfx_picks_check", null],  # library picks, sound tester
 	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
@@ -304,6 +309,7 @@ const CHECKS := {
 	"--blight-nest-check": ["res://tools/blight_nest_check.gd", "blight_nest_check", null],      # docs/decisions/0061
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
+	"--tg-swap-dash-check": ["res://tools/tg_swap_dash_check.gd", "tg_swap_dash_check", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	# frames the reticle and aim trail the cursor (GPU)
@@ -329,6 +335,8 @@ const CHECKS := {
 	# a tap inside a hit-stop goes when it ends
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
 	"--mantle-press-check": ["res://tools/mantle_press_check.gd", "mantle_press_check", null],
+	"--cd-indicator-check": ["res://tools/cd_indicator_check.gd", "cd_indicator_check", null],      # HUD slot vs timers
+	"--cd-gate-check": ["res://tools/cd_gate_check.gd", "cd_gate_check", null],      # no cast on cooldown
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],  # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],  # Sparkle 11-10
@@ -364,6 +372,8 @@ const CHECKS := {
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--mob-death-check": ["res://tools/mob_death_check.gd", "mob_death_check", null],  # dissolve, stagger, drops
 	"--mob-death-shots": ["res://tools/mob_death_shots.gd", "mob_death_shots", null],      # death strips (GPU)
+	"--cam-zoom-check": ["res://tools/cam_zoom_check.gd", "cam_zoom_check", "check"],
+	"--cam-zoom-shots": ["res://tools/cam_zoom_check.gd", "cam_zoom_check", "shots"],      # --shots-dir=<dir> (GPU)    
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
@@ -450,6 +460,7 @@ const CHECKS := {
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
 	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
+	"--warden-states-shots": ["res://tools/warden_states_shots.gd", "warden_states_shots", null],  # 15 states, GPU
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	# a Boki taking a hit, strips
@@ -477,6 +488,7 @@ const CHECKS := {
 	"--loot-window-check": ["res://tools/loot_window_check.gd", "loot_window_check", null],      # the deathbox window
 	"--lpage-drag-check": ["res://tools/lpage_drag_check.gd", "lpage_drag_check", null],      # L panel glove drag
 	"--loot-nudge-shots": ["res://tools/loot_nudge_shots.gd", "loot_nudge_shots", null],      # --shots-dir=<dir>
+	"--level-gap-check": ["res://tools/level_gap_check.gd", "level_gap_check", null],      # rival level badge gap
 	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
 	"--ability-bar-shots": ["res://tools/ability_bar_shots.gd", "ability_bar_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
@@ -746,6 +758,7 @@ const CHECKS := {
 	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],      # the Boki box tags, bond %
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
+	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
 	"--summon-leash-check": ["res://tools/summon_check.gd", "summon_check", null],  # (same check: the leash rows)
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],  # stolen wisps, stacking
@@ -845,6 +858,7 @@ const CHECKS := {
 	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
 	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
+	"--egg-rules-check": ["res://tools/egg_rules_check.gd", "egg_rules_check", null],
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
