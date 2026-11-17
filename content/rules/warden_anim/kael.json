@@ -79,7 +79,7 @@
 		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
-			"fade": 0.3,
+			"fade": 0.1,
 			"fade_out": 0.4
 		},
 		"jug_lunge_wind": {
