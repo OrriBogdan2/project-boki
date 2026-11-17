@@ -45,6 +45,7 @@ var meteors: Array = []     # {at, t, tele}
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
+var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
@@ -218,6 +219,8 @@ func _progress(label: String) -> void:
 
 ## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -290,6 +293,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	ktip = KnockTip.for_match(self, guide)
 	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -1693,7 +1697,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var mood := "happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: mood = "unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover", "hazard_risk"]: mood = "alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "hazard_risk"]: mood = "alert"
 		sfx(KinVoice.cue(k.species, mood), null, -3.0, Unique.voice(k.rec))     # its own voice, over the fight
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx(KinVoice.cue(k.species, "alert"), k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling out
@@ -1769,11 +1773,11 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
-		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
+		if ktip: ktip.note(by, d, o)
 		if src != "zone": sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)    # (the zone ticks instead: ZoneSfx)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
@@ -1800,12 +1804,12 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
-	h.reload_t = 0.0
 	h.grap = {}
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
+		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
 		Sfx.duck(0.6)
@@ -2428,7 +2432,6 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
-		hud.hitmarker(true, true)
 	elif h == player and hud:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
@@ -4864,7 +4867,6 @@ func _flags(h: Hunter) -> int:
 	if h.roll_t > 0.0: f |= 16
 	if h.grounded: f |= 32
 	if h.fortify_t > 0.0: f |= 64
-	if h.reload_t > 0.0: f |= 128
 	if h.gliding: f |= 256
 	if h.dropping: f |= 512
 	if h.riding: f |= 1024
@@ -5418,6 +5420,8 @@ func tip_once(key: String) -> bool:
 	seen[key] = true
 	return true
 
+var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+
 func _tips() -> void:
 	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
@@ -5427,6 +5431,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	ult_hint.tick(self)
 	tips_live = true
 	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
@@ -5434,15 +5439,12 @@ func _tips() -> void:
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
-		if player.ak:
-			_tip("ability", TipText.ability(true))
-		else:
-			_tip("ability", TipText.ability(false))
+		_tip("ability", TipText.ability(player.ak != null))
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
-		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
+	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
@@ -5456,14 +5458,11 @@ func _tips() -> void:
 		return
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
-	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", TipText.scan())
+	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
-	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
+	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
