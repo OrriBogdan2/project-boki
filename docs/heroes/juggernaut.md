@@ -408,7 +408,7 @@ line shows it either, so DECISIONS "every interaction is chainable" decides: the
 buffered (waits), never dropped by a lock; the owner's Kael notes (RMB a straight thrust, LMB no knockback, the
 113.2 glide rows) don't touch these pairs. One assert per settled row: `jug cancel:` (tools/kael_cancel_rows_check.gd). Any pair not in the table: both
 (ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|

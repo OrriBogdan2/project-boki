@@ -111,7 +111,7 @@ static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m

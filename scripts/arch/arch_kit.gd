@@ -182,7 +182,7 @@ func hovering() -> bool: return false         # a CastHold holds him aloft: the 
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true
-## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
+## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
 ## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
 ## own hold set it.
@@ -1195,7 +1195,7 @@ func charge_now() -> Array:
 		return ["rmb", clampf(rmb_t / rf, 0.0, 1.0)]
 	if h.draw_t >= 0.0 and h.draw_t < 5.0:
 		return ["draw", clampf(h.draw_t / 0.9, 0.0, 1.0)]
-	var ck := h.charge_k()
+	var ck := h.atk.charge_k()
 	if ck > 0.0:
 		return ["melee", ck]
 	var dk := dash_charge()
