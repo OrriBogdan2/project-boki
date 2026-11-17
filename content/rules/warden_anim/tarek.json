@@ -60,6 +60,10 @@
 			"clip": "rmb_gather",
 			"hold_from": 0.16
 		},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
 		"breah_leap": {
 			"clip": "rmb_leap",
 			"hold_from": 0.3
@@ -78,7 +82,8 @@
 			"clip": "rmb_lunge"
 		},
 		"breah_leap_land": {
-			"clip": "dash_land"
+			"clip": "dash_land",
+			"upper": "moving"
 		},
 		"breah_exdash": {
 			"clip": "dash_air",

@@ -49,9 +49,10 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var at := "%d" % int(ceil(p.armor))
 		var aw := TextCache.width(HudStyle.BIG, at, 15)
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
-		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-		var tw := TextCache.width(HudStyle.BIG, tn, 10)
-		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
+		if p.armor_tier > 0:          # the tier's name waits until the first tier-up (TermHints says what it is)
+			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
+			var tw := TextCache.width(HudStyle.BIG, tn, 10)
+			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
 	ArmorHud.note(H, Vector2(x0, y0 - 26))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
@@ -75,7 +76,8 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		if p.max_armor > 0.5:
 			c.draw_rect(ar.grow(1.0), HudStyle.SHADE)
 			HudStyle.strip(c, ar, H.armor_lerp, HudStyle.CHIP)
-			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
+			var acol: Color = p.armor_col().lerp(Color.WHITE, H.plates.armor_flash_of(p))
+			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	ArmorHud.bar(H, x0, ar.end.y + 2, w, p)    # progress to the next armour tier, under the strip
 	var cc_y := ar.end.y + 4
 	if p.ak and p.ak.has_meter():

@@ -195,7 +195,7 @@ func _off_checks(id: String) -> int:
 	ok(_shown() == Vector2.ZERO, "%s: off under the full-body clip of %s" % [id, move])
 	return 1
 
-## A kit move of this Hero keyed as a full-body clip at least CLIP_MIN long ("" none).
+## A kit move of this Hero keyed as a full-body clip that plays at least CLIP_MIN (its length over its rate; "" none).
 func _full_body_move() -> String:
 	if sync.clips == null:
 		return ""
@@ -204,6 +204,6 @@ func _full_body_move() -> String:
 		var mv: Dictionary = moves[id]
 		if mv.has("upper") or mv.has("hold_from") or mv.has("lead") or mv.has("fade"):
 			continue
-		if sync.clips.lib.get_animation(String(mv["clip"])).length >= CLIP_MIN:
+		if sync.clips.lib.get_animation(String(mv["clip"])).length / float(mv.get("rate", 1.0)) >= CLIP_MIN:
 			return String(id)
 	return ""

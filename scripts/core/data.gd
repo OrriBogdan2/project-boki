@@ -127,7 +127,7 @@ const WEAPONS := {
 		"kb": 0.8,
 		"spread": 0.035,
 		"range": 9.5,
-		"sfx": "rifle",
+		"sfx": "gun_rifle",
 		"color": Color("d9ff66"),
 		"size": 0.12
 	},
