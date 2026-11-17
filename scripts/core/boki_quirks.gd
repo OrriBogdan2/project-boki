@@ -18,8 +18,11 @@ static func data() -> Dictionary:
 		_data = parsed if parsed is Dictionary else {}
 	return _data
 
-## The Bokidex id for a species: its display name in lower case (Rampartoad -> "rampartoad").
+## The Bokidex id for a species: its display name in lower case (Rampartoad -> "rampartoad"). A renamed one
+## keeps its id (Cairnhorn is still "cairnback").
 static func key(species: String) -> String:
+	if species == "cairnback":
+		return species
 	return String(Data.KIN.get(species, {}).get("name", species)).to_lower()
 
 static func _value(section: String, species: String, fallback: Variant) -> Variant:

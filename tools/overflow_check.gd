@@ -76,7 +76,7 @@ func _eggs() -> void:
 		var boss: String = bosses[i % bosses.size()]
 		Incubator.add(String(Data.MOBS[boss]["egg"]), boss)
 	for e in Incubator.eggs():
-		e["heat"] = Incubator.HEAT_NEED * (1.0 - 0.2 * float(int(e["slot"]) % 5))
+		e["heat"] = Incubator.need() * (1.0 - 0.2 * float(int(e["slot"]) % 5))
 
 ## [panel name, where it opens: "home" (the farm's panel) or "overlay"]. _open() builds each by its name.
 func _panels() -> Array:
@@ -180,11 +180,22 @@ static func trimmed(root: Node) -> Array:
 		var l := n as Label
 		if not l.is_visible_in_tree() or l.autowrap_mode != TextServer.AUTOWRAP_OFF or l.size.x <= 0.0:
 			continue
-		if l.tooltip_text == l.text:
+		if l.tooltip_text == l.text or _row_tip_has(l, root):
 			continue
 		if l.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING and SafeArea.wider(l, l.text, l.size.x):
 			out.append("trimmed '%s'" % l.text.left(24))
 	return out
+
+## True when a parent row's hover tooltip holds the label's whole text (the burrow's mutation perk line
+## trims by design and its row tooltip spells it out). Which perk the demo Boki rolls is random, so
+## without this the check failed on some runs only.
+static func _row_tip_has(l: Label, root: Node) -> bool:
+	var p := l.get_parent()
+	while p != null and p != root:
+		if p is Control and (p as Control).tooltip_text.contains(l.text):
+			return true
+		p = p.get_parent()
+	return false
 
 static func _scrolled(c: Control, root: Node) -> bool:
 	var p := c.get_parent()

@@ -53,7 +53,6 @@ var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
-var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
@@ -77,6 +76,13 @@ func _setup() -> void:
 func screen_up() -> Vector3:
 	var cam := m.get_viewport().get_camera_3d()
 	return cam.global_basis.y if cam != null else Vector3.UP
+
+## The rehearsal builds the burr's ball: the first Burr Charge built it mid-fight (11 meshes, 8 shader compiles).
+func warm_fx(_at: Vector3) -> void:
+	if burr_pool.is_empty():
+		var n := _burr_mesh()
+		n.visible = false
+		burr_pool.append(n)
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
@@ -293,7 +299,8 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true):
 			return true
-		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)),
+				{"invuln": 0.08, "feel": "long"})
 		play("gunslinger_dash_ex")
 		vfx("slide_air", null, null, {"ex": true})
 		last_dash_kind = "air"
@@ -551,31 +558,24 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	_confirm_hit(victim, at, b["dir"])
 
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
-## with a dust puff): a flare and a ring round the foe, its body held lit, and for the thrower a gold hitmarker
-## and a ping.
+## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
-		m.hud.hitmarker(true)
 		m.sfx("crit", at, -2.0, 0.8)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
 	super(out)
-	for key in daze_for.keys():
-		var f := instance_from_id(key) as Ent
-		var left: float = KitStatus.rattled_left(f) if f != null else 0.0
-		if left <= 0.0:
-			daze_for.erase(key)
-		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
+	for f in m.foes_of(h.team):
+		if KitStatus.rattled(f):
+			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
-	daze_for[foe.get_instance_id()] = seconds
 
 ## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides
 ## that wall (BurrRide).
@@ -685,14 +685,9 @@ func _tick_needle(dt: float) -> void:
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
 
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
+## The locked aim turns toward the cursor at the "turn" e row's capped deg/s: a flick can't drag it.
 func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
+	needle["dir"] = turn_lock(needle["dir"], turn_deg_s("e", "early"), dt).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:

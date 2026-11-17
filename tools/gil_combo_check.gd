@@ -40,8 +40,15 @@ func run(main_node: Node) -> void:
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "gil")
 	ok("dash flow: every row in content/dash_flow/gil.json holds, every slot casts mid-jump, holds through moves",
 		rows_bad == 0, "%d failures" % rows_bad)
+	await _combo_tag()
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd): the splash marks show, count down, Beach flashes.
+func _combo_tag() -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gil")
 
 func _reset(dist := 6.0) -> void:
 	K._drop_holds()

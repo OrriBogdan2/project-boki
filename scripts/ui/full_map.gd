@@ -7,6 +7,7 @@ extends RefCounted
 ## the drop, with the countdown and the squad's drop order. The match keeps going behind it.
 
 const SIDE_W := 268.0
+const NOTE_H := 14.0             # px a legend row grows by for its first-time line (Glossary)
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const GOLD := Color("f2c84a")
@@ -164,14 +165,14 @@ func draw(sz: Vector2) -> void:
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
-	# the header: the planning countdown, or just the map
+	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
 	if planning:
-		var left := maxf(0.0, m.skydrop.plan_t)
+		var hint := "Click the map to ping where you want to land"
+		if m.player != null and m.player.skill_pts > 0:
+			hint += "  ·  press an ability key to unlock it"
 		hud._ctext(Vector2(sz.x * 0.5, 40), "PLAN YOUR DROP", 30, GOLD, hud.big)
-		hud._ctext(Vector2(sz.x * 0.5, 64), "The ship sets off in %ds  ·  click the map to ping where you want to land" % int(ceil(left)), 15, INK)
-		c.draw_rect(Rect2(Vector2(rect.position.x, 70), Vector2(rect.size.x, 3)), Color(1, 1, 1, 0.12))
-		c.draw_rect(Rect2(Vector2(rect.position.x, 70), Vector2(rect.size.x * clampf(left / maxf(0.1, m.skydrop.plan_len), 0.0, 1.0), 3)), GOLD)
+		hud._ctext(Vector2(sz.x * 0.5, 64), hint, 15, INK)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
 		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
@@ -580,12 +581,15 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var sp: SpawnPlan = m.spawn_plan
 	var cats: Array = sp.shown_cats() if sp else []
 	var rows := cats.size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 94))
+	var notes: Array = cats.map(func(cat): return Glossary.first_line(String(sp.cats[cat].get("name", cat))))
+	var note_rows := notes.filter(func(note): return note != "").size()
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + note_rows * NOTE_H + 94))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
 	var y := r.position.y + 72.0
-	for cat in cats:
+	for ci in cats.size():
+		var cat: String = cats[ci]
 		var def: Dictionary = sp.cats[cat]
 		var col: Color = def.get("col", Color.WHITE)
 		var all: Array = sp.of(cat)
@@ -600,6 +604,9 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
 		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
+		if notes[ci] != "":
+			hud._text(Vector2(r.position.x + 48, y + 29), String(notes[ci]), 11, MUTED)
+			y += NOTE_H
 		y += 46.0
 	# what the marks mean
 	y += 4.0
@@ -658,7 +665,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		var sub := ""
 		if h.out: sub = "Out"
 		elif h.extracted: sub = "Extracted"
-		elif lead and in_drop: sub = "Drop leader"
+		elif lead and in_drop: sub = "Leads the drop"
 		elif h.rocket != null: sub = "Riding the rocket"
 		elif h.riding: sub = "Aboard the ship"
 		elif h.dropping: sub = "Falling" if h.diving else "Gliding"
@@ -684,7 +691,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		elif p.diving:
 			keys = [["jump", "Open your glider"]]
 		if i_lead and p.riding:
-			keys.append(["pass_lead", "Pass the lead"])
+			keys.append(["pass_lead", "Let a squadmate lead"])
 		for kk in keys:
 			var cap := Settings.key_cap(String(kk[0]))
 			var kr := Rect2(Vector2(r.position.x + 14, y), Vector2(maxf(28.0, hud.big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0), 24))

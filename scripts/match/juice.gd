@@ -15,6 +15,8 @@ const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
 const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
 const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
+const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
@@ -82,6 +84,11 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	if ability:
 		power = maxf(power, 1.3)  # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)
+	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
+	if armor:
+		target.shell_t = maxf(target.shell_t, SHELL_FLASH_T)
+	elif target.shell_t < SHELL_FLASH_T:
+		target.shell_t = 0.0
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
@@ -104,7 +111,7 @@ static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m
@@ -158,21 +165,37 @@ static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: fl
 	Sfx.play(cue, null, vol_db, 0.0)
 	return true
 
-## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
-## freeze for whoever broke it (Feel tier 3: 0.045s).
+## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
+## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
+## (Feel tier 3: 0.045s).
 static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
-	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
-	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
+	h.shell_t = BREAK_FLASH_T
+	h.flash_t = maxf(h.flash_t, BREAK_FLASH_T)
+	m.fx.spark(Vector3(h.pos.x, h.hit_y() + 0.6, h.pos.z), Vector3.UP, Ent.SHELL_FLASH, 14, 3.0, 120.0, 0.5, 18.0, 1.3)
 	m.sfx("armor_break", h.pos, ARMOR_BREAK_DB_VICTIM if h == m.player else ARMOR_BREAK_DB)
 	if credit == m.player and h != m.player:
 		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)  # the "push now" tick, only for whoever broke it
 		m.freeze_frame(0.045)
 
 
-## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
+## The flash colour of a kill: the colour of the side that got it (your squad or a rival squad), as
+## the player sees it, so a steal reads on the spot. `credit` is the same Hunter Match.on_mob_dead pays.
+## The dissolving body glows in it too. No credit (a fall, the Blight) or no player to be relative to:
+## the monster's own colour, body untouched.
+static func kill_col(m: Match, mb: Mob, credit: Ent, own: Color) -> Color:
+	if not credit is Hunter or m.player == null:
+		return own
+	var col := SideColor.of_team(m.player.team, credit.team)
+	for mt in mb.mats:
+		if mt is ShaderMaterial:
+			mt.set_shader_parameter("flash_color", col)
+	return col
+
+
+## A monster dying (Match.on_mob_dead): a flash in the killer side's colour, a spray in its own,
+## a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	if m == null or m.fx == null:
 		return
@@ -184,7 +207,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,
@@ -209,7 +233,7 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 		return
 	var col: Color = b.md.get("color", Color("ffb070"))
 	var c := b.pos + Vector3(0, 1.4, 0)
-	m.fx.flash(c, Color(1, 0.96, 0.88), 2.4, 0.3)
+	m.fx.flash(c, kill_col(m, b, credit, Color(1, 0.96, 0.88)), 2.4, 0.3)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.35), 40, 15.0, 70.0, 0.7, 12.0, 2.0)
 	m.fx.spark(c, Vector3.UP, Color(1, 0.95, 0.8), 24, 9.0, 180.0, 0.5, 6.0, 1.4)
 	m.fx.ring(b.pos, 7.5, Color(col, 0.9), 0.6)
@@ -251,7 +275,7 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.flash(c + Vector3(0, 0.8, 0), col.lerp(Color.WHITE, 0.6), 1.6, 0.3)
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
-		m.sfx("extract_ok", null, -3.0)
+		UiSfx.extract_success()
 		Sfx.duck(1.6)
 		if m.hud:
 			m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)

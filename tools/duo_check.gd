@@ -82,6 +82,9 @@ func _nap_check() -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)
 	var center: Vector3 = home.world.random_ground(0)
+	var zone: Dictionary = GardenZones.info(GardenZones.start())
+	var spots: Array = zone.get("nap", [])
+	zone["nap"] = []      # no nap spots: they nap where they stand (the walk to a spot is --base-life-check's)
 	for k in home.kins:
 		var side := -12.0 if k["rec"] in [recs[0], recs[1]] else 12.0
 		k["pos"] = home.world.free_spot_near(center + Vector3(side, 0, 0), [], 0.8)
@@ -92,6 +95,7 @@ func _nap_check() -> void:
 	while t < WAKE_S:
 		home._move_kin(DT)
 		t += DT
+	zone["nap"] = spots
 	var friends_gain := (Care.need(recs[0], "joy") + Care.need(recs[1], "joy")) * 0.5
 	var others_gain := (Care.need(recs[2], "joy") + Care.need(recs[3], "joy")) * 0.5
 	var extra := friends_gain - others_gain
