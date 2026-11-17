@@ -1,0 +1,739 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+WARNING: Detected another project.godot at res://launcher. The folder will be ignored.
+     at: _should_skip_directory (editor/file_system/editor_file_system.cpp:3458)
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+SCRIPT ERROR: Parse Error: Could not resolve class "Ent".
+          at: GDScript::reload (res://scripts/match/hunter.gd:1)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/hunter.gd:634)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/hunter.gd:645)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/hunter.gd:785)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/hunter.gd:785)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "charging".
+          at: GDScript::reload (res://scripts/match/hunter.gd:1172)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "flow".
+          at: GDScript::reload (res://scripts/match/hunter.gd:1515)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "tall".
+          at: GDScript::reload (res://scripts/match/hunter.gd:1860)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "level_up".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2392)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "say".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2393)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "rank".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2425)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2722)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "lid_near".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2722)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "pose_every".
+          at: GDScript::reload (res://scripts/match/hunter.gd:2831)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/ent.gd:120)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/ent.gd:121)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "mt" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/ent.gd:121)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/ent.gd:359)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "mt" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/ent.gd:359)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "event".
+          at: GDScript::reload (res://scripts/match/kin.gd:352)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/hunter_zone.gd:16)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "head" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/ui/hunter_zone.gd:22)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "top" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/ui/hunter_zone.gd:25)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "bottom" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/ui/hunter_zone.gd:26)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "mid" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/ui/hunter_zone.gd:30)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/ui/msg_lane.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "DashFlow" from "res://scripts/arch/dash_flow.gd".
+          at: GDScript::reload (res://scripts/arch/arch_kit.gd:42)
+SCRIPT ERROR: Parse Error: Could not resolve class "DashFlow", because of a parser error.
+          at: GDScript::reload (res://scripts/arch/arch_kit.gd:67)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/combat/blockers.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/combat/verbs.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/arch/stone_stand.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/foot_plant.gd:0)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/aim/aim_pitch.gd:21)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_aim.gd:0)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "of".
+          at: GDScript::reload (res://scripts/match/utility_belt.gd:210)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/key_chest.gd:48)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/key_chest.gd:101)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/key_chest.gd:116)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/belt_keys.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/utility_use.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/utility_pose.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/hunter_anim.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_turn.gd:0)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "tall".
+          at: GDScript::reload (res://scripts/match/mob.gd:336)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/mob.gd:392)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/arch/oomph.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_clips.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/wall_moves.gd:83)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/wall_moves.gd:78)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/wall_moves.gd:78)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/match/wall_moves.gd:78)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_wall.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/heroes/warden_open.gd:84)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/cam_wheel.gd:28)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/cam_wheel.gd:43)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "of".
+          at: GDScript::reload (res://scripts/match/cam_wheel.gd:44)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/cam.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/perf/rig_pace.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_sync.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:143)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "of".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:143)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:169)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:186)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "leave".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:242)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:265)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:283)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "m".
+          at: GDScript::reload (res://scripts/ui/overlay.gd:286)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/kin_steal.gd:115)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/kin_steal.gd:193)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/kin_steal.gd:228)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "event".
+          at: GDScript::reload (res://scripts/match/kin_steal.gd:137)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "event".
+          at: GDScript::reload (res://scripts/kin/kin_track.gd:63)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "event".
+          at: GDScript::reload (res://scripts/match/capture.gd:244)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "claim".
+          at: GDScript::reload (res://scripts/match/capture.gd:341)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/kin_downed.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/kin_loss.gd:0)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "flash_only".
+          at: GDScript::reload (res://scripts/kin/kin_merge.gd:111)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "event".
+          at: GDScript::reload (res://scripts/match/kin_follow.gd:137)
+SCRIPT ERROR: Parse Error: Could not resolve class "Mob".
+          at: GDScript::reload (res://scripts/match/shrubling.gd:1)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/kin_command.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/kin_keys.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/fx.gd:279)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/fx.gd:279)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/fx.gd:752)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/fx.gd:752)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "rect".
+          at: GDScript::reload (res://scripts/match/fx.gd:753)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/kin_regen.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/stat_glint.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/ui/game_result_card.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/base_tumble.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/boki_home_clips.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/boki_rig.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/garden_visitor.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/incubator.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:69)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:81)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:89)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:95)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:102)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:121)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/heart.gd:150)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "t" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/heart.gd:103)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "w" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/heart.gd:160)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "t" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/heart.gd:249)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/heart.gd:654)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "near" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/heart.gd:669)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/game.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/progress.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/gliders.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/player_look.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/mantle_look.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/heroes/warden_glb.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/npc_model.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/hob_model.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/farm_hob.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/farm_tutorial.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/whistle_hint.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/base_whistle.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/base_life.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/care.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/shiny.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/mutations.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/unique.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/ui/ui.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/ui/timing_bar.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/base_race.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/garden_seasons.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/snack_patch.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/hub_layout.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/home_layout.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/home/farm_unlocks.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/lean.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/evo.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/data.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/sfx.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/settings.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/perf/shadow_policy.gd:0)
+SCRIPT ERROR: Parse Error: Could not resolve class "ArchKit".
+          at: GDScript::reload (res://scripts/arch/kits/ostra_kit.gd:1)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "spot".
+          at: GDScript::reload (res://scripts/arch/kits/ostra_kit.gd:373)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "settle".
+          at: GDScript::reload (res://scripts/arch/kits/ostra_kit.gd:427)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "hit".
+          at: GDScript::reload (res://scripts/arch/kits/dolm_kit.gd:513)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/arch/kits/kit_looks.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/hero_arms.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/exits.gd:31)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/exits.gd:37)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "_init".
+          at: GDScript::reload (res://scripts/match/exits.gd:42)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "spots_n" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:54)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "ii" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:58)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "at" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:69)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "n" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:401)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "W" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:439)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "ii" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:441)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/exits.gd:578)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/exit_models.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/current_fx.gd:135)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "mt" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/current_fx.gd:135)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/boss_models.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/models.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/assets.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/flora.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/ruin_walls.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/depth_cues.gd:16)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/depth_cues.gd:32)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "y" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/depth_cues.gd:62)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/sky_deco.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/breakables.gd:25)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/breakables.gd:28)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/breakables.gd:213)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "on_break".
+          at: GDScript::reload (res://scripts/match/breakables.gd:118)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "gems".
+          at: GDScript::reload (res://scripts/match/breakables.gd:186)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/world.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/combat/ability_fx.gd:168)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/combat/ability_fx.gd:196)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/combat/ability_fx.gd:211)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/combat/ability_fx.gd:224)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/combat/ability_fx.gd:232)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/combat/effects.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/kin_exec.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/kin_fence.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/ability_spec.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/kin/kin_spec.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/arch/arch.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/class_unlock.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/tutorial.gd:75)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/tutorial.gd:117)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:203)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:336)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:369)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "chime".
+          at: GDScript::reload (res://scripts/match/tutorial.gd:373)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "w" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:435)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:436)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "isl" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:437)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:449)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:542)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:554)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "outs" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:576)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/tutorial.gd:745)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/match/tutorial_resume.gd:0)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/xp_hints.gd:18)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:22)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:36)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:60)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "chime".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:107)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "target".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:121)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "mates".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:123)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "bottom".
+          at: GDScript::reload (res://scripts/match/first_match_guide.gd:170)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/crouch_hint.gd:15)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/match/crouch_hint.gd:21)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "p" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/match/crouch_hint.gd:39)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/save.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/party.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/net.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://scripts/core/crash_report.gd:0)
+ERROR: Failed to load script "res://scripts/core/crash_report.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+ERROR: Failed to create an autoload, script 'res://scripts/ui/overlay.gd' is not compiling.
+   at: _create_autoload (editor/settings/editor_autoload_settings.cpp:409)
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (92 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | ArcherKit[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | DashFlow[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | HeroTitle[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | ClassUnlock[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | Fsm[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | Loco[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | ArrivalQueue[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | FarmBuilder[39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | FarmChatter[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | FarmGuide[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | FarmHob[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | FarmSpotlight[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | FarmStep[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | FarmWater[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | GardenZones[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | HobTalk[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | Home[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | HomeBuild[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | HomeClasses[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | HomeDashSlot[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | HomeGather[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | HomeWork[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | HubHints[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | HubLayout[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | HunterPickRow[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | KinBondMoment[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | StatGlint[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | VisitZones[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | ZoneLayout[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | KinMerge[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | MergeAugment[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | MergeForm[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MergeKit[39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | Arena[39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | GlideSpike[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | Hunter[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | Kin[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | KinCommand[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | Match[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | Prematch[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | SimLod[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | SummonPad[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | Tutorial[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | TutorialDrive[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | ClassReveal[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | FullMap[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | HoldUnlock[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | HudVitals[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | HunterViewer[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | CheckRegistry[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (3 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | caecilith_caecilith_atlas.webp[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | caecilith_caecilith_eye.webp[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | caecilith_caecilith_face.webp[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:214)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "sm" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:214)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "at" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:221)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:439)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "dm" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:439)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:446)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:533)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:533)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:549)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:549)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:577)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:596)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:608)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:654)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:654)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:695)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:695)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:718)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "nxt" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:718)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "t0" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:725)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:729)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:748)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "tq" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:750)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:752)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "nxt" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:752)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:757)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:759)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "pings0" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:761)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "feed0" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:762)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:764)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:765)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:777)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "tr" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:778)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:783)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:804)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:804)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:807)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "walked_in" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:832)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:853)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:853)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "tl" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:860)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:861)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "w0" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:916)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "kill_t" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:929)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:958)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:958)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:963)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:976)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:976)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "bring_back".
+          at: GDScript::reload (res://scripts/main.gd:984)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:992)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:992)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "ta" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1001)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1002)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1018)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1018)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1026)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1033)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1033)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "box_of".
+          at: GDScript::reload (res://scripts/main.gd:1060)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "smart_loot".
+          at: GDScript::reload (res://scripts/main.gd:1066)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1091)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m2" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1091)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "W2" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1109)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "tb" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1116)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1126)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1133)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m4" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1133)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1151)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1151)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "pings4" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1176)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "feed4" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1177)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1183)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1183)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "feed4b" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1214)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1231)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1231)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1240)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1240)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1245)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m3" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1245)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1265)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1265)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "t0" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1291)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1295)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1307)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "m" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1307)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1320)
+SCRIPT ERROR: Parse Error: Could not resolve class "Match", because of a parser error.
+          at: GDScript::reload (res://scripts/main.gd:1331)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "alive" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1334)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "down" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1335)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "isl" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/main.gd:1363)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/main.gd:1400)
+SCRIPT ERROR: Parse Error: Could not parse global class "Match" from "res://scripts/match/match.gd".
+          at: GDScript::reload (res://scripts/main.gd:1401)
+ERROR: Failed to load script "res://scripts/main.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)

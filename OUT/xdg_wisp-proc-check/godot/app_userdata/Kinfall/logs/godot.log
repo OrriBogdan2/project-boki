@@ -1,0 +1,123 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/wisp_proc_check.gd:44)
+       [13] run (res://tools/wisp_proc_check.gd:23)
+       [14] run (res://tools/check_registry.gd:946)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/wisp_proc_check.gd:44)
+       [13] run (res://tools/wisp_proc_check.gd:23)
+       [14] run (res://tools/check_registry.gd:946)
+       [15] _ready (res://scripts/main.gd:270)
+WISPPROC ok   heal: no cue without the passive
+WISPPROC ok   heal: one cue (1)
+WISPPROC ok   heal: a flash and a streak show
+WISPPROC ok   heal: another passive's wisp does not cue it
+WISPPROC ok   shield: no cue without the passive
+WISPPROC ok   shield: one cue (1)
+WISPPROC ok   shield: a flash and a streak show
+WISPPROC ok   shield: another passive's wisp does not cue it
+WISPPROC ok   damage: no cue without the passive
+WISPPROC ok   damage: one cue (1)
+WISPPROC ok   damage: a flash and a streak show
+WISPPROC ok   damage: another passive's wisp does not cue it
+WISPPROC ok   speed: no cue without the passive
+WISPPROC ok   speed: one cue (1)
+WISPPROC ok   speed: a flash and a streak show
+WISPPROC ok   speed: another passive's wisp does not cue it
+WISPPROC ok   rate: a flood inside 0.5 s plays no second cue
+WISPPROC ok   rate: one more once 0.5 s have passed
+WISPPROC ok   rate: 60 triggers over 4.2 s give 7 cues (at most 10)
+WISPPROC ok   pooled: no node added by cues
+WISPPROC ok   no burst: the cue adds no particles (1 on the wisp)
+WISPPROC ok   rival heal: no cue without the passive
+WISPPROC ok   rival heal: one cue (1)
+WISPPROC ok   rival heal: a flash and a streak show
+WISPPROC ok   rival heal: another passive's wisp does not cue it
+WISPPROC ok   shiny: the species has a different shiny glow
+WISPPROC ok   shiny: the flash wears the shiny glow
+WISPPROC ok   shiny: and not the plain one
+WISPPROC ok   tip: a rival's cue tells you nothing
+WISPPROC ok   tip: a cue older than TIP_KEEP_S is not told
+WISPPROC ok   tip: none in the tutorial match
+WISPPROC ok   tip: 'Vespyx's Toxin: 0.1 hp/s regen' (["Vespyx\'s Toxin: 0.1 hp/s regen"])
+WISPPROC ok   tip: marked seen, the wisp flashes again
+WISPPROC ok   tip: a later cue says nothing
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/wisp_proc_check.gd:44)
+       [13] run (res://tools/wisp_proc_check.gd:33)
+       [14] run (res://tools/check_registry.gd:946)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:29)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _start (res://tools/wisp_proc_check.gd:44)
+       [13] run (res://tools/wisp_proc_check.gd:33)
+       [14] run (res://tools/check_registry.gd:946)
+       [15] _ready (res://scripts/main.gd:270)
+WISPPROC ok   wisps off: the Boki walks beside you
+WISPPROC ok   wisps off, not carried: no cue, no tip
+WISPPROC ok   wisps off: stowed, carried by order
+WISPPROC ok   wisps off, carried: 'Vespyx's Toxin: +10% damage' (["Vespyx\'s Toxin: +10% damage"])
+WISPPROC PASS (0 fail)
+ERROR: 2 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 22 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

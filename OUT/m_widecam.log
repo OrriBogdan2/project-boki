@@ -1,0 +1,20 @@
+Auto-merging docs/DEBT.md
+Auto-merging docs/DEBT.md
+CONFLICT (content): Merge conflict in docs/DEBT.md
+Auto-merging docs/MOVEMENT_FEEL.md
+Auto-merging docs/wiki/Rules.md
+Auto-merging scripts/arch/kits/ashwick_kit.gd
+Auto-merging scripts/match/hunter.gd
+Auto-merging scripts/match/match.gd
+Auto-merging scripts/match/tutorial.gd
+CONFLICT (content): Merge conflict in scripts/match/tutorial.gd
+Auto-merging scripts/match/tutorial_drive.gd
+Auto-merging scripts/ui/hud.gd
+Auto-merging scripts/ui/results.gd
+Auto-merging tools/care_combo_check.gd
+Auto-merging tools/check_registry.gd
+Auto-merging tools/hero_vfx_check.gd
+Auto-merging tools/perf_bench.gd
+Auto-merging tools/tutorial_hud_check.gd
+CONFLICT (content): Merge conflict in tools/tutorial_hud_check.gd
+Automatic merge failed; fix conflicts and then commit the result.

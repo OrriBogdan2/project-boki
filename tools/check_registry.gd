@@ -766,6 +766,9 @@ const CHECKS := {
 	"--look-tour": ["res://tools/look_locker_check.gd", "look_locker_check", "tour"],      # --shots-dir=<dir>, GPU
 	"--glider-skin-shots": ["res://tools/glider_skin_shots.gd", "glider_skin_shots", null],
 	"--shroud-check": ["res://tools/shroud_check.gd", "shroud_check", null],
+	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],      # WispProc cues
+	"--wisp-proc-shots": ["res://tools/wisp_proc_shots.gd", "wisp_proc_shots", null],      # --shots-dir=<dir>, GPU
+	"--tutorial-wisp-check": ["res://tools/tutorial_wisp_check.gd", "tutorial_wisp_check", null],      # Boki-wisp beats
 	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
@@ -783,6 +786,8 @@ const CHECKS := {
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
+	# the Training Grounds' Summon pad; --shots-dir= (GPU) saves the card
+	"--summon-pad-check": ["res://tools/summon_pad_check.gd", "summon_pad_check", null],
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
 	"--summon-ring-check": ["res://tools/summon_ring_check.gd", "summon_ring_check", null],  # time-left ring
 	"--summon-leash-check": ["res://tools/summon_check.gd", "summon_check", null],  # (same check: the leash rows)

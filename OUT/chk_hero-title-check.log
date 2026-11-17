@@ -1,0 +1,249 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+HEROTITLE ok   thirteen classes (twelve ported + Gil) (13)
+HEROTITLE ok   Arch.ORDER is the canonical Hunter order
+HEROTITLE ok   a title on its own carries 'the' (The Snowglide, the Unbroken)
+HEROTITLE ok   archer has a title, base name, gender and personality
+HEROTITLE ok   archer gender is female
+HEROTITLE ok   archer personality is three lines at most
+HEROTITLE ok   archer: unnamed reads 'The Red Stitch'
+HEROTITLE ok   archer stores its title without 'the'
+HEROTITLE ok   archer label reads 'Orri the Red Stitch'
+HEROTITLE ok   archer: no old name in a player-facing label ()
+HEROTITLE ok   archer: no old name in a player-facing label ()
+HEROTITLE ok   archer: no old name in a player-facing label ()
+HEROTITLE ok   archer: no old name in a player-facing label ()
+HEROTITLE ok   archer: no retired term in its text ()
+HEROTITLE ok   archer shows as 'Lace the Red Stitch', with no gender line
+HEROTITLE ok   archer has three how-to lines
+HEROTITLE ok   archer how-to lines are at most 64 chars
+HEROTITLE ok   archer how-to keys go through key_cap, none typed
+HEROTITLE ok   archer how-to reads Play, Combo, Avoid
+HEROTITLE ok   juggernaut has a title, base name, gender and personality
+HEROTITLE ok   juggernaut gender is male
+HEROTITLE ok   juggernaut personality is three lines at most
+HEROTITLE ok   juggernaut: unnamed reads 'The Unbroken'
+HEROTITLE ok   juggernaut stores its title without 'the'
+HEROTITLE ok   juggernaut label reads 'Orri the Unbroken'
+HEROTITLE ok   juggernaut: no old name in a player-facing label ()
+HEROTITLE ok   juggernaut: no old name in a player-facing label ()
+HEROTITLE ok   juggernaut: no old name in a player-facing label ()
+HEROTITLE ok   juggernaut: no old name in a player-facing label ()
+HEROTITLE ok   juggernaut: no retired term in its text ()
+HEROTITLE ok   juggernaut shows as 'Kael the Unbroken', with no gender line
+HEROTITLE ok   juggernaut has three how-to lines
+HEROTITLE ok   juggernaut how-to lines are at most 64 chars
+HEROTITLE ok   juggernaut how-to keys go through key_cap, none typed
+HEROTITLE ok   juggernaut how-to reads Play, Combo, Avoid
+HEROTITLE ok   gunslinger has a title, base name, gender and personality
+HEROTITLE ok   gunslinger gender is female
+HEROTITLE ok   gunslinger personality is three lines at most
+HEROTITLE ok   gunslinger: unnamed reads 'The Hired Gun'
+HEROTITLE ok   gunslinger stores its title without 'the'
+HEROTITLE ok   gunslinger label reads 'Orri the Hired Gun'
+HEROTITLE ok   gunslinger: no old name in a player-facing label ()
+HEROTITLE ok   gunslinger: no old name in a player-facing label ()
+HEROTITLE ok   gunslinger: no old name in a player-facing label ()
+HEROTITLE ok   gunslinger: no old name in a player-facing label ()
+HEROTITLE ok   gunslinger: no retired term in its text ()
+HEROTITLE ok   gunslinger shows as 'Vex the Hired Gun', with no gender line
+HEROTITLE ok   gunslinger has three how-to lines
+HEROTITLE ok   gunslinger how-to lines are at most 64 chars
+HEROTITLE ok   gunslinger how-to keys go through key_cap, none typed
+HEROTITLE ok   gunslinger how-to reads Play, Combo, Avoid
+HEROTITLE ok   bulwark has a title, base name, gender and personality
+HEROTITLE ok   bulwark gender is male
+HEROTITLE ok   bulwark personality is three lines at most
+HEROTITLE ok   bulwark: unnamed reads 'The Barnacle Knight'
+HEROTITLE ok   bulwark stores its title without 'the'
+HEROTITLE ok   bulwark label reads 'Orri the Barnacle Knight'
+HEROTITLE ok   bulwark: no old name in a player-facing label ()
+HEROTITLE ok   bulwark: no old name in a player-facing label ()
+HEROTITLE ok   bulwark: no old name in a player-facing label ()
+HEROTITLE ok   bulwark: no old name in a player-facing label ()
+HEROTITLE ok   bulwark: no retired term in its text ()
+HEROTITLE ok   bulwark shows as 'Albert the Barnacle Knight', with no gender line
+HEROTITLE ok   bulwark has three how-to lines
+HEROTITLE ok   bulwark how-to lines are at most 64 chars
+HEROTITLE ok   bulwark how-to keys go through key_cap, none typed
+HEROTITLE ok   bulwark how-to reads Play, Combo, Avoid
+HEROTITLE ok   rimewright has a title, base name, gender and personality
+HEROTITLE ok   rimewright gender is female
+HEROTITLE ok   rimewright personality is three lines at most
+HEROTITLE ok   rimewright: unnamed reads 'The Snowglide'
+HEROTITLE ok   rimewright stores its title without 'the'
+HEROTITLE ok   rimewright label reads 'Orri the Snowglide'
+HEROTITLE ok   rimewright: no old name in a player-facing label ()
+HEROTITLE ok   rimewright: no old name in a player-facing label ()
+HEROTITLE ok   rimewright: no old name in a player-facing label ()
+HEROTITLE ok   rimewright: no old name in a player-facing label ()
+HEROTITLE ok   rimewright: no retired term in its text ()
+HEROTITLE ok   rimewright shows as 'Neve the Snowglide', with no gender line
+HEROTITLE ok   rimewright has three how-to lines
+HEROTITLE ok   rimewright how-to lines are at most 64 chars
+HEROTITLE ok   rimewright how-to keys go through key_cap, none typed
+HEROTITLE ok   rimewright how-to reads Play, Combo, Avoid
+HEROTITLE ok   ashwick has a title, base name, gender and personality
+HEROTITLE ok   ashwick gender is female
+HEROTITLE ok   ashwick personality is three lines at most
+HEROTITLE ok   ashwick: unnamed reads 'The Ashen Kiss'
+HEROTITLE ok   ashwick stores its title without 'the'
+HEROTITLE ok   ashwick label reads 'Orri the Ashen Kiss'
+HEROTITLE ok   ashwick: no old name in a player-facing label ()
+HEROTITLE ok   ashwick: no old name in a player-facing label ()
+HEROTITLE ok   ashwick: no old name in a player-facing label ()
+HEROTITLE ok   ashwick: no old name in a player-facing label ()
+HEROTITLE ok   ashwick: no retired term in its text ()
+HEROTITLE ok   ashwick shows as 'Cinder the Ashen Kiss', with no gender line
+HEROTITLE ok   ashwick has three how-to lines
+HEROTITLE ok   ashwick how-to lines are at most 64 chars
+HEROTITLE ok   ashwick how-to keys go through key_cap, none typed
+HEROTITLE ok   ashwick how-to reads Play, Combo, Avoid
+HEROTITLE ok   dolm has a title, base name, gender and personality
+HEROTITLE ok   dolm gender is male
+HEROTITLE ok   dolm personality is three lines at most
+HEROTITLE ok   dolm: unnamed reads 'The Stone Seer'
+HEROTITLE ok   dolm stores its title without 'the'
+HEROTITLE ok   dolm label reads 'Orri the Stone Seer'
+HEROTITLE ok   dolm: no old name in a player-facing label ()
+HEROTITLE ok   dolm: no old name in a player-facing label ()
+HEROTITLE ok   dolm: no old name in a player-facing label ()
+HEROTITLE ok   dolm: no old name in a player-facing label ()
+HEROTITLE ok   dolm: no retired term in its text ()
+HEROTITLE ok   dolm shows as 'Tenzo the Stone Seer', with no gender line
+HEROTITLE ok   dolm has three how-to lines
+HEROTITLE ok   dolm how-to lines are at most 64 chars
+HEROTITLE ok   dolm how-to keys go through key_cap, none typed
+HEROTITLE ok   dolm how-to reads Play, Combo, Avoid
+HEROTITLE ok   mage has a title, base name, gender and personality
+HEROTITLE ok   mage gender is female
+HEROTITLE ok   mage personality is three lines at most
+HEROTITLE ok   mage: unnamed reads 'The Storm Chaser'
+HEROTITLE ok   mage stores its title without 'the'
+HEROTITLE ok   mage label reads 'Orri the Storm Chaser'
+HEROTITLE ok   mage: no old name in a player-facing label ()
+HEROTITLE ok   mage: no old name in a player-facing label ()
+HEROTITLE ok   mage: no old name in a player-facing label ()
+HEROTITLE ok   mage: no old name in a player-facing label ()
+HEROTITLE ok   mage: no retired term in its text ()
+HEROTITLE ok   mage shows as 'Sparkle the Storm Chaser', with no gender line
+HEROTITLE ok   mage has three how-to lines
+HEROTITLE ok   mage how-to lines are at most 64 chars
+HEROTITLE ok   mage how-to keys go through key_cap, none typed
+HEROTITLE ok   mage how-to reads Play, Combo, Avoid
+HEROTITLE ok   dredge has a title, base name, gender and personality
+HEROTITLE ok   dredge gender is male
+HEROTITLE ok   dredge personality is three lines at most
+HEROTITLE ok   dredge: unnamed reads 'The Scrap King'
+HEROTITLE ok   dredge stores its title without 'the'
+HEROTITLE ok   dredge label reads 'Orri the Scrap King'
+HEROTITLE ok   dredge: no old name in a player-facing label ()
+HEROTITLE ok   dredge: no old name in a player-facing label ()
+HEROTITLE ok   dredge: no old name in a player-facing label ()
+HEROTITLE ok   dredge: no old name in a player-facing label ()
+HEROTITLE ok   dredge: no retired term in its text ()
+HEROTITLE ok   dredge shows as 'Grimble the Scrap King', with no gender line
+HEROTITLE ok   dredge has three how-to lines
+HEROTITLE ok   dredge how-to lines are at most 64 chars
+HEROTITLE ok   dredge how-to keys go through key_cap, none typed
+HEROTITLE ok   dredge how-to reads Play, Combo, Avoid
+HEROTITLE ok   tender has a title, base name, gender and personality
+HEROTITLE ok   tender gender is female
+HEROTITLE ok   tender personality is three lines at most
+HEROTITLE ok   tender: unnamed reads 'The Dawnfox'
+HEROTITLE ok   tender stores its title without 'the'
+HEROTITLE ok   tender label reads 'Orri the Dawnfox'
+HEROTITLE ok   tender: no old name in a player-facing label ()
+HEROTITLE ok   tender: no old name in a player-facing label ()
+HEROTITLE ok   tender: no old name in a player-facing label ()
+HEROTITLE ok   tender: no old name in a player-facing label ()
+HEROTITLE ok   tender: no retired term in its text ()
+HEROTITLE ok   tender shows as 'Meeko the Dawnfox', with no gender line
+HEROTITLE ok   tender has three how-to lines
+HEROTITLE ok   tender how-to lines are at most 64 chars
+HEROTITLE ok   tender how-to keys go through key_cap, none typed
+HEROTITLE ok   tender how-to reads Play, Combo, Avoid
+HEROTITLE ok   thief has a title, base name, gender and personality
+HEROTITLE ok   thief gender is female
+HEROTITLE ok   thief personality is three lines at most
+HEROTITLE ok   thief: unnamed reads 'The Silver Thief'
+HEROTITLE ok   thief stores its title without 'the'
+HEROTITLE ok   thief label reads 'Orri the Silver Thief'
+HEROTITLE ok   thief: no old name in a player-facing label ()
+HEROTITLE ok   thief: no old name in a player-facing label ()
+HEROTITLE ok   thief: no old name in a player-facing label ()
+HEROTITLE ok   thief: no old name in a player-facing label ()
+HEROTITLE ok   thief: no retired term in its text ()
+HEROTITLE ok   thief shows as 'Sable the Silver Thief', with no gender line
+HEROTITLE ok   thief has three how-to lines
+HEROTITLE ok   thief how-to lines are at most 64 chars
+HEROTITLE ok   thief how-to keys go through key_cap, none typed
+HEROTITLE ok   thief how-to reads Play, Combo, Avoid
+HEROTITLE ok   ostra has a title, base name, gender and personality
+HEROTITLE ok   ostra gender is male
+HEROTITLE ok   ostra personality is three lines at most
+HEROTITLE ok   ostra: unnamed reads 'The Void Jester'
+HEROTITLE ok   ostra stores its title without 'the'
+HEROTITLE ok   ostra label reads 'Orri the Void Jester'
+HEROTITLE ok   ostra: no old name in a player-facing label ()
+HEROTITLE ok   ostra: no old name in a player-facing label ()
+HEROTITLE ok   ostra: no old name in a player-facing label ()
+HEROTITLE ok   ostra: no old name in a player-facing label ()
+HEROTITLE ok   ostra: no retired term in its text ()
+HEROTITLE ok   ostra shows as 'Motley the Void Jester', with no gender line
+HEROTITLE ok   ostra has three how-to lines
+HEROTITLE ok   ostra how-to lines are at most 64 chars
+HEROTITLE ok   ostra how-to keys go through key_cap, none typed
+HEROTITLE ok   ostra how-to reads Play, Combo, Avoid
+HEROTITLE ok   gil has a title, base name, gender and personality
+HEROTITLE ok   gil gender is male
+HEROTITLE ok   gil personality is three lines at most
+HEROTITLE ok   gil: unnamed reads 'The Novice Mage'
+HEROTITLE ok   gil stores its title without 'the'
+HEROTITLE ok   gil label reads 'Orri the Novice Mage'
+HEROTITLE ok   gil: no old name in a player-facing label ()
+HEROTITLE ok   gil: no old name in a player-facing label ()
+HEROTITLE ok   gil: no old name in a player-facing label ()
+HEROTITLE ok   gil: no old name in a player-facing label ()
+HEROTITLE ok   gil: no retired term in its text ()
+HEROTITLE ok   gil shows as 'Gil the Novice Mage', with no gender line
+HEROTITLE ok   gil has three how-to lines
+HEROTITLE ok   gil how-to lines are at most 64 chars
+HEROTITLE ok   gil how-to keys go through key_cap, none typed
+HEROTITLE ok   gil how-to reads Play, Combo, Avoid
+HEROTITLE ok   lore.json parses
+HEROTITLE ok   five factions
+HEROTITLE ok   archer sits in exactly one faction (1)
+HEROTITLE ok   archer has a relic with a status
+HEROTITLE ok   juggernaut sits in exactly one faction (1)
+HEROTITLE ok   juggernaut has a relic with a status
+HEROTITLE ok   gunslinger sits in exactly one faction (1)
+HEROTITLE ok   gunslinger has a relic with a status
+HEROTITLE ok   bulwark sits in exactly one faction (1)
+HEROTITLE ok   bulwark has a relic with a status
+HEROTITLE ok   rimewright sits in exactly one faction (1)
+HEROTITLE ok   rimewright has a relic with a status
+HEROTITLE ok   ashwick sits in exactly one faction (1)
+HEROTITLE ok   ashwick has a relic with a status
+HEROTITLE ok   dolm sits in exactly one faction (1)
+HEROTITLE ok   dolm has a relic with a status
+HEROTITLE ok   mage sits in exactly one faction (1)
+HEROTITLE ok   mage has a relic with a status
+HEROTITLE ok   dredge sits in exactly one faction (1)
+HEROTITLE ok   dredge has a relic with a status
+HEROTITLE ok   tender sits in exactly one faction (1)
+HEROTITLE ok   tender has a relic with a status
+HEROTITLE ok   thief sits in exactly one faction (1)
+HEROTITLE ok   thief has a relic with a status
+HEROTITLE ok   ostra sits in exactly one faction (1)
+HEROTITLE ok   ostra has a relic with a status
+HEROTITLE ok   gil sits in exactly one faction (1)
+HEROTITLE ok   gil has a relic with a status
+HEROTITLE ok   lore.json: no old name ()
+HEROTITLE ok   lore.json: no retired term
+HEROTITLE ok   Cinder: no goggles, tank or hose
+HEROTITLE ok   Meeko: no lantern (her weapon id aside)
+HEROTITLE ok   results: the headline carries the name 'Hunter'
+HEROTITLE ok   results: no 'Name the Title' line
+HEROTITLE ok   results: the strip says Hunters downed (main's wording)
+HEROTITLE CHECK DONE, failures: 0
