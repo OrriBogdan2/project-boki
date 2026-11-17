@@ -326,7 +326,7 @@ const FACES := {
 }
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "cast": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
@@ -481,6 +481,7 @@ func _ready() -> void:
 	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
 	pace = RigPace.new(get_instance_id())
 	BokiHomeClips.install(species, player, _skel)
+	BokiSwing.add_clip(player)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -595,7 +596,7 @@ func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
 	if p != _pulse:
 		_pulse = p
-		_start_shot("ability")
+		_start_shot("cast")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
 	if attacking and not _attacking:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
