@@ -160,6 +160,7 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
+		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
