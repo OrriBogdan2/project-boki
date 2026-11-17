@@ -4,8 +4,9 @@
   the affine map that takes the master rapier onto the game one (vertices paired through their shared UVs), on the same
   bone as before, a separate mesh with the game's material.
 - the robe: the port's weight smoothing spread arm weight over the whole robe (hem and chest centre included), so it
-  webbed out to his wrists whenever the arms rose. Arm weight is kept in full within ARM_NEAR of the arm bones, faded
-  out by ARM_FAR, and given back to the bones the vertex already had (or the skirt below the hips, the hips above).
+  webbed out to his wrists whenever the arms rose. On the robe and leather, arm weight is kept in full within ARM_NEAR
+  of the upper arm and forearm (the sleeves; not the hand, which hangs against the robe's front), faded out by ARM_FAR,
+  and given back to the bones the vertex already had (or the skirt below the hips, the hips above). Skin keeps its own.
 - the satchel: its leather in the hip box rides the hips only (it stretched out with the arm into a flat disc).
 Run: blender -b --factory-startup --python tools/art1/gil_sword_bag.py -- GAME.glb MASTER.glb OUT.glb"""
 
@@ -25,7 +26,9 @@ SWORD_MAT = "Material_0.001"  # the master's rapier material (gil_v95.json drop_
 BAG_MAT = "leather-v95"
 BAG_BONE = "hips"
 ARM_BONES = ("upper_arm", "forearm", "hand")  # .L/.R
-ARM_NEAR, ARM_FAR = 0.10, 0.18  # m from an arm bone's segment: full arm weight inside, none past (sleeves keep theirs)
+SLEEVE_BONES = ("upper_arm", "forearm")  # the segments a sleeve hangs on
+ARM_NEAR, ARM_FAR = 0.07, 0.13  # m from a sleeve bone's segment: full arm weight inside, none past
+CLOTH_MATS = ("cloth-v95", "leather-v95")  # the surfaces eased (skin: the hands and arms keep their weights)
 BAG_BOX = ((0.10, 0.45), (-9.0, 9.0), (0.40, 0.85))  # m, Blender frame x, y, z: the satchel at his right hip
 FLOATER_VERTS = 60  # loose crumbs under this many vertices are dropped (v95_swap.py's default)
 
@@ -118,7 +121,7 @@ def main():
     # the robe off the arms
     segs = []
     for b in arm.data.bones:
-        if b.name.split(".")[0] in ARM_BONES:
+        if b.name.split(".")[0] in SLEEVE_BONES:
             segs.append((np.array(arm.matrix_world @ b.head_local), np.array(arm.matrix_world @ b.tail_local)))
     names = [g.name for g in body.vertex_groups]
     is_arm = [n.split(".")[0] in ARM_BONES for n in names]
@@ -130,6 +133,12 @@ def main():
         u = np.clip(((co - h) @ d) / (d @ d), 0, 1)
         dist = np.minimum(dist, np.linalg.norm(co - (h + u[:, None] * d), axis=1))
     keep = np.clip((ARM_FAR - dist) / (ARM_FAR - ARM_NEAR), 0, 1)
+    cloth_idx = [i for i, m in enumerate(body.data.materials) if m.name in CLOTH_MATS]
+    on_cloth = np.zeros(len(co), bool)
+    for p in body.data.polygons:
+        if p.material_index in cloth_idx:
+            on_cloth[list(p.vertices)] = True
+    keep[~on_cloth] = 1.0
     eased = 0
     for v in body.data.vertices:
         ws = {g.group: g.weight for g in v.groups}
