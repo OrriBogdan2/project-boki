@@ -3,15 +3,15 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the green-fire rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
-## damages and Dazes it ("rat" Rattled in code) on the spot.
+## Loop: tap RMB and she flicks a gold coin off her free hand along the aim (Coin Blast; "burr" in the code).
+## A direct hit on a foe damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or on a placed wall or shield (it rides it, and drops if it goes): a cone shows
 ## back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
 ## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
-## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
+## shooting. Palm Lance: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
@@ -19,7 +19,9 @@ extends ArchKit
 const LIME := Color("b8f03c")  # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")  # palette "hot"
 const DEEP := Color("4f8a12")  # palette "deep"
-const BRONZE := Color("b9732f")  # the Burr Charge's metal shell (a material, not an effect)
+const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
+const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
+const GOLD_DARK := Color("d99a1e")  # its struck faces
 const DUD_DUST := Color("6b4a2e")  # a dud Burr Charge's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")  # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
@@ -32,10 +34,9 @@ const BURR_WALL_DEG := 50.0  # deg: a rise steeper than this (stairs are 39) and
 const PUSH_EASE := 10.0  # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const HIT_HOLD := 0.3  # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9  # m up the screen the Fever pips sit, clear of her cap and face
-const TUBE_UP := 0.16  # m above the gun's muzzle: the launcher tube, on a model without its empties
-const TUBE_FIRE := "launcher_fire"  # fixed on the cannon at the bell's firing spot: the charge leaves from here
-const TUBE_BELL := "launcher_muzzle"  # on the swinging launcher: over and forward only after TUBE_SWING
-const TUBE_SWING := 0.1  # s from the press to the bell coming forward
+const PALM := "palm"  # the FX anchor on her free (left) hand: the coin and the beam leave from it
+const COIN_FLIP := 22.0  # rad/s: the coin turns end over end in flight
+const COIN_LOB := 0.35  # m: how much higher the coin is drawn at mid flight than it flies (a toss's arc)
 const BRACKET_R := 1.25  # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0  # each bracket's arc
 ## The drum's reload cue, once as it runs dry. A stand-in for now: the rifle-cock take from her set; a library
@@ -60,8 +61,9 @@ var needle_dir := Vector2.ZERO  # tests: the line the last Longneedle fired alon
 var wall_slams := 0
 var last_dash_kind := ""
 var last_shot := 0
-var puffs := 0  # tests: launcher puffs
-var last_puff := Vector3.ZERO  # tests: where the last one went off
+var flicks := 0  # tests: coins flicked from her hand
+var last_flick := Vector3.ZERO  # tests: where the last one left
+var last_beam := Vector3.ZERO  # tests: where the last beam was drawn from
 var refill_part := 0.0  # rounds the resting drum has part-refilled
 var dry := false  # the drum ran dry: no round until it is full again
 var round_at := -9.0  # match time of her last rifle round (the firing brackets)
@@ -80,10 +82,10 @@ func screen_up() -> Vector3:
 	return cam.global_basis.y if cam != null else Vector3.UP
 
 
-## The rehearsal builds the burr's ball: the first Burr Charge built it mid-fight (11 meshes, 8 shader compiles).
+## The rehearsal builds the coin: the first one thrown built it mid-fight (meshes and shader compiles).
 func warm_fx(_at: Vector3) -> void:
 	if burr_pool.is_empty():
-		var n := _burr_mesh()
+		var n := _coin_mesh()
 		n.visible = false
 		burr_pool.append(n)
 
@@ -145,7 +147,7 @@ func fires_in_glide() -> bool:
 
 
 func shows_charge_ball() -> bool:
-	return false  # the Longneedle charges an ember orb at the muzzle instead
+	return false  # the Palm Lance charges an ember orb at her open palm instead
 
 
 const SLIDE_LOOP_FROM := 0.367  # s: the dash clip's slide loop (three keys): a held slide replays it from here,
@@ -426,7 +428,7 @@ func _tick_slide(dt: float) -> void:
 	h.inv_t = 0.0
 
 
-# ------------------------------------------------------------------ RMB: Burr Charge
+# ------------------------------------------------------------------ RMB: Coin Blast ("burr" in the code)
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not spend_rmb():
@@ -439,29 +441,27 @@ func fire_rmb(c: Dictionary) -> void:
 			n = p
 			break
 	if n == null:
-		n = _burr_mesh()
+		n = _coin_mesh()
 		burr_pool.append(n)
 	n.visible = true
 	n.scale = Vector3.ONE
-	var at := _launcher_at(d)
+	var at := palm_at()
 	n.global_position = at
-	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "fuse": -1.0, "fuse0": float(bd["fuse"])}
+	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "fuse": -1.0, "fuse0": float(bd["fuse"]), "spin": 0.0}
 	burr["range"] = float(bd["range"])
 	burr["y0"] = at.y
 	burrs.append(burr)
 	HeroVfx.of(m).trail(h, "rmb_trail", n)  # its green-fire streak, until it sticks or strikes
 	play("gunslinger_rmb")
-	_launcher_puff(at, d)
-	m.sfx("gunslinger_grenade_thunk", h.pos, -2.0)
+	flicks += 1
+	last_flick = at
+	vfx("rmb_flick", at, d)  # a gold glint off her thumb as the coin leaves
+	m.sfx("vn_coin_flip", h.pos, -1.0)
 
 
-## Where the Burr Charge leaves: the cannon's firing spot, read live so it follows the aim, else above the muzzle.
-func _launcher_at(d: Vector2) -> Vector3:
-	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
-	if spot != null:
-		return spot.global_position
-	var muzzle := _gun_muzzle()
-	return (muzzle.global_position if muzzle else _muzzle(d)) + Vector3.UP * TUBE_UP
+## The open palm of her free (left) hand, read live: where the coin leaves and where the beam starts.
+func palm_at() -> Vector3:
+	return HeroVfx.of(m).anchor_pos(h, PALM)
 
 
 ## The Gun's Muzzle on her model (the rifle's mouth), or null with no model.
@@ -469,28 +469,7 @@ func _gun_muzzle() -> Node3D:
 	return h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
 
 
-## The launcher's puff: at the bell once it has swung forward, or at once where there is no swinging bell.
-func _launcher_puff(at: Vector3, d: Vector2) -> void:
-	var bell := WardenGlb.anchor(h.model, TUBE_BELL)
-	if bell == null:
-		_puff(at, d)
-		return
-	m.later(
-		TUBE_SWING,
-		func():
-			if is_instance_valid(bell) and is_instance_valid(h):
-				_puff(bell.global_position, h.aim_dir())
-	)
-
-
-func _puff(at: Vector3, d: Vector2) -> void:
-	puffs += 1
-	last_puff = at
-	vfx("rmb_puff", at, d)
-
-
-## The charge: a bronze ball about 0.3 m across, a dark band round it, a lime heart showing through
-## and eight hot spikes. Solid colours, so it reads bronze and green fire on any ground.
+## Cinderfall's shell (gunslinger_ult): a bronze ball with its spikes out.
 func _burr_mesh() -> Node3D:
 	var n := own_node()
 	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
@@ -505,6 +484,28 @@ func _burr_mesh() -> Node3D:
 		var up := Vector3.UP if absf(out.y) < 0.95 else Vector3.RIGHT
 		spike.look_at_from_position(spike.position, spike.position * 2.0, up)
 	for ch in n.get_children():
+		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return n
+
+
+## The coin: a gold disc about 0.45 m across with darker struck faces and a lime rim of her green fire, on a
+## "Spin" node that turns it end over end. Solid colours, so it reads gold on any ground.
+func _coin_mesh() -> Node3D:
+	var n := own_node()
+	var spin := Node3D.new()
+	spin.name = "Spin"
+	n.add_child(spin)
+	var body := Models.part(spin, Models.cyl(0.22, 0.22, 0.07, 20), solid_mat(GOLD))
+	body.rotation.x = PI * 0.5  # face on along the travel, so the flip shows its faces
+	for side in [-1.0, 1.0]:
+		var face := Models.part(
+			spin, Models.cyl(0.15, 0.15, 0.012, 16), solid_mat(GOLD_DARK), Vector3(0, 0, side * 0.035)
+		)
+		face.rotation.x = PI * 0.5
+	var rim := Models.part(spin, Models.cyl(0.245, 0.245, 0.04, 20), solid_mat(LIME))
+	rim.rotation.x = PI * 0.5
+	rim.name = "Glow"
+	for ch in spin.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
 
@@ -530,8 +531,18 @@ func _tick_burrs(dt: float) -> void:
 			continue
 		_fly_burr(b, bd, dt)
 		if is_instance_valid(n):
-			n.global_position = b["pos"]
-			n.rotation.y += dt * 14.0
+			_draw_coin(b, n, bd, dt)
+
+
+## The coin in flight: nose along its travel, turning end over end, and drawn a little higher at mid flight
+## than it flies (COIN_LOB), so it reads as a tossed coin. What it hits is its flown path, not the drawn one.
+func _draw_coin(b: Dictionary, n: Node3D, bd: Dictionary, dt: float) -> void:
+	var dir: Vector2 = b["dir"]
+	var u := clampf(float(b["t"]) * float(bd["speed"]) / float(b["range"]), 0.0, 1.0)
+	b["spin"] = float(b.get("spin", 0.0)) + dt * COIN_FLIP
+	n.global_position = (b["pos"] as Vector3) + Vector3.UP * COIN_LOB * sin(PI * u)
+	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
+	(n.get_node("Spin") as Node3D).rotation.x = float(b["spin"])
 
 
 ## One frame of flight, read every BURR_SAMPLE m so no tile is skipped: a slight lob that rides up ramps,
@@ -703,7 +714,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary) -> void:
 			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))  # the data: walled, "Dazed longer"
 
 
-# ------------------------------------------------------------------ E: Longneedle
+# ------------------------------------------------------------------ E: Palm Lance ("needle" in the code)
 func cast_e() -> bool:
 	if not needle.is_empty():
 		return false
@@ -756,7 +767,7 @@ func _tick_needle(dt: float) -> void:
 		var push := float(needle["push"])
 		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * push, float(ed["range"]) * push)  # (the caster's camera)
 	AimKit.charge(h, k, {"col": LIME, "col2": HOT})
-	HeroVfx.of(m).hold(h, "e_charge", k)  # green fire drawn into the muzzle through the cast
+	HeroVfx.of(m).hold(h, "e_charge", k)  # green fire drawn into her open palm through the cast
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:  # (a beat at full so the full tick plays)
 		_fire_needle()  # along the capped aim, so before the lock lifts
 		_end_needle()
@@ -779,7 +790,8 @@ func _push_want() -> float:
 	return smoothstep(float(ed["view_near_m"]), float(ed["range"]), _cursor().length())
 
 
-## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
+## Where the beam's reach is measured from (what a placed wall cuts): ahead of her at chest height. It is drawn
+## from her palm (`palm_at`).
 func _muzzle(d: Vector2) -> Vector3:
 	return h.pos + Vector3(d.x * 0.9, 1.1, d.y * 0.9)
 
@@ -806,8 +818,12 @@ func _fire_needle() -> void:
 	var L := float(ed["range"])
 	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))  # placed walls stop it
 	needle_dir = d
-	# a taut needle of light (deep body, white-hot core, sparks shed along it), a muzzle bloom, recoil smoke round her
-	vfx("e_fire", a, d, {"len": L, "r": beam_width()})
+	# a taut needle of light (deep body, white-hot core, sparks shed along it) out of her open palm to where the
+	# measured line ends, a bloom on the palm, recoil smoke round her
+	var palm := palm_at()
+	var to := a + Vector3(d.x, 0, d.y) * L - palm
+	last_beam = palm
+	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
 	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
