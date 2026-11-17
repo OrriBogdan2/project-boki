@@ -3,7 +3,7 @@
 Status: built (`scripts/match/scout_look.gd`, `CamRig` in `scripts/match/cam.gd`). Numbers: `content/rules/camera.json` "scout".
 
 ## What it does
-Hold **Look ahead** (action `scout`, C by default; rebind in Settings > Controls > Moving):
+Hold **Look ahead** (action `scout`, G by default; rebind in Settings > Controls > Moving):
 - **Camera:** the view widens 25% and eases out the cursor's way on screen: with the cursor at the screen's edge, as far as the
   screen has room for with you (feet and head) still `lean_edge_m` inside it (`CamRig.scout_to`, the same room the
   cursor lean and an aimed cast use), less the nearer the centre the cursor is (none inside 10%). Across a 1080p
@@ -24,7 +24,7 @@ Hold **Look ahead** (action `scout`, C by default; rebind in Settings > Controls
 | Walking speed | unchanged | the data gives no slow for it |
 | Ease out (90%) | 0.35 s | our estimate: no reference footage of the hold was available to measure |
 | Ease back (90%) | 0.25 s | our estimate, as above |
-| Key | C | the data names no key; Mouse 4 is taken (a second glide button), C is free in a match (Details is home only) |
+| Key | G | the data names no key; Mouse 4 is taken (a second glide button), C is the Boki throw (moved there on main), G is free in a match (the Goals list is home only) |
 
 ## Checks
 `--scout-cam-check` (distance, ease, cone, walk, key); `--scout-cam-shots --shots-dir=<dir>` (GPU: off, held, just released).

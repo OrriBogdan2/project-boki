@@ -52,7 +52,6 @@ const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
-const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 # itself near the ground (or earlier on jump) for a slower, floatier last stretch.
 const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
@@ -220,7 +219,7 @@ var wall_hit_v := Vector2.ZERO  # this step's speed into an island side that sto
 var lip_y := 0.0               # that edge's height: where your balloon floats
 var heat_burn := 0.0
 var in_current := false        # riding a wind road or an updraft: the glider doesn't heat up
-var glide_max := GLIDE_TIME
+var glide_max: float = HunterMove.glide_heat_s
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
 var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
@@ -294,7 +293,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	# the belt issue and the equal pack size (Equal.pack_slots)
 	UtilityBelt.issue(self)
 	pack_cap = Equal.base_pack()
-	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
+	glide_max = HunterMove.glide_heat_s * float(cdat.get("glide_cap", 1.0))
 	runner = AbilityRunner.new(self)
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)
@@ -331,7 +330,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	max_hp = float(cdat["hp"]) + kin_hp_added; hp = max_hp
 	LevelGrowth.reset(self)      # your levels' health comes along to the new class
 	max_armor = float(ARMOR_TIERS[armor_tier][4]); armor = max_armor
-	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
+	glide_max = HunterMove.glide_heat_s * float(cdat.get("glide_cap", 1.0))
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
 	Arch.apply_body(self)
@@ -843,11 +842,6 @@ func do_jump() -> void:
 			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = HunterMove.jump_buffer_s
-
-## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
-const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
-static func glide_fall(_speed: float) -> float:
-	return GLIDE_SINK
 
 ## Feathering [est] (SUPERVIVE players tap the glider on and off instead of holding it): opening and
 ## closing are instant with no penalty for quick toggles; only the ground cools the glider ([footage]
@@ -1740,7 +1734,7 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else HunterMove.glide_sink)
 		if dropping:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 		elif glide_dive.on:

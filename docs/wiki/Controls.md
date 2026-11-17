@@ -74,13 +74,14 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
+| G | Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone) | `scout` | yes |
 | C | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
-| Space | Jump (press again in the air to glide) | `jump` | yes |
-| Mouse 5 | Open glider (in the air) | `glide` | yes |
+| Space | Jump (hold to glide) | `jump` | yes |
+| Mouse 5 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |

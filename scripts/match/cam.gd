@@ -14,6 +14,7 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+## The held far look's ease and sight (ScoutLook).
 static var SCOUT: Dictionary = RULES["scout"]
 ## Width / height of the screen the styles' lenses are measured at. Every screen shows that frame's width of
 ## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
@@ -330,7 +331,8 @@ func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull) * cast_wide()
+	var scout_wide := 1.0 + float(SCOUT["zoom"]) * scout_k
+	var z := zoom * (1.0 + pull) * cast_wide() * scout_wide
 	fov = frame_fov()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)

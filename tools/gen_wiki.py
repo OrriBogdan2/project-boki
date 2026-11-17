@@ -718,6 +718,8 @@ def _combo_ours(row, modes, default):
         return modes[mode] + ("" if row else " (default)")
     return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
 
+HELD_FIRE_SLOTS = dict(DASH_SLOTS, dash="a dash", all="any slot")      # held_fire keys -> the pair's label
+
 def _combo_rows(hero, f):
     """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
     rows = []
@@ -736,6 +738,9 @@ def _combo_rows(hero, f):
             if move in held:
                 rows.append([hero, "hold %s through %s" % (label, name), _src(held[move]),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
+    for slot, row in f.get("held_fire", {}).items():
+        label = HELD_FIRE_SLOTS.get(slot, slot)
+        rows.append([hero, "hold LMB through %s" % label, row.get("source", ""), row.get("ours", "")])
     return rows
 
 MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
@@ -760,6 +765,27 @@ def _dash_ours(row, modes):
     if row.get("reason"):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
+
+AIR_CAST_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)")]
+AIR_CAST_H = {"keep": "keeps the jump's speed (steers as in any jump)", "slow": "slows below the jump's speed",
+              "zero": "stops", "push": "driven faster than the jump"}
+AIR_CAST_V = {"fall": "falls as from the jump", "hover": "holds the height", "rise": "rises",
+              "slow": "falls slower than the jump", "drop": "drops faster (lands early)"}
+AIR_CAST_WHEN = {"landing": "waits for the landing; in the air the jump goes on", "no": "not cast in the air (the press is dropped)"}
+
+def _air_cast_rows(hero, f):
+    """LMB, RMB, E and R cast at the top of a running jump (air_cast rows, --air-cast-check)."""
+    rows = []
+    for slot, label in AIR_CAST_SLOTS:
+        row = f.get("air_cast", {}).get(slot, {})
+        cast = row.get("cast", "air")
+        h = AIR_CAST_H.get(row.get("h"), "no row")
+        v = AIR_CAST_V.get(row.get("v"), "no row")
+        ours = AIR_CAST_WHEN[cast] if cast in AIR_CAST_WHEN else "horizontal: %s; vertical: %s" % (h, v)
+        if row.get("ours"):
+            ours += " (%s)" % row["ours"]
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
 
 TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
               ("x_recast", "ult (X) recast")]
@@ -865,7 +891,11 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n"
             "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
-            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n")
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n"
+            "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
+            "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
+            "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
@@ -875,6 +905,15 @@ def gen_dash_flow():
              "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
     body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
                   [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## Cast at the top of a jump\n\nOne row per hero and slot, from `air_cast` in the same files: running, "
+             "jumping and pressing the slot at the jump's top, keys held forward. \"Ours\" is what the next 0.4 s do to the "
+             "horizontal and vertical speed against the same jump with no cast, measured headless by `--air-cast-check`, "
+             "which fails when the game stops doing it. The source's falling physics (AirControl 0.015, "
+             "sv/briefs/physics.md:46) is what \"steers as in any jump\" copies. Verdict: match "
+             "(the source settles it and ours does the same), owner (an owner call), or [?] (the source doesn't settle "
+             "it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _air_cast_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
     body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
