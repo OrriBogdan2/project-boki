@@ -165,14 +165,14 @@ func draw(sz: Vector2) -> void:
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
-	# the header: the planning countdown, or just the map
+	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
 	if planning:
-		var left := maxf(0.0, m.skydrop.plan_t)
+		var hint := "Click the map to ping where you want to land"
+		if m.player != null and m.player.skill_pts > 0:
+			hint += "  ·  press an ability key to unlock it"
 		hud._ctext(Vector2(sz.x * 0.5, 40), "PLAN YOUR DROP", 30, GOLD, hud.big)
-		hud._ctext(Vector2(sz.x * 0.5, 64), "The ship sets off in %ds  ·  click the map to ping where you want to land" % int(ceil(left)), 15, INK)
-		c.draw_rect(Rect2(Vector2(rect.position.x, 70), Vector2(rect.size.x, 3)), Color(1, 1, 1, 0.12))
-		c.draw_rect(Rect2(Vector2(rect.position.x, 70), Vector2(rect.size.x * clampf(left / maxf(0.1, m.skydrop.plan_len), 0.0, 1.0), 3)), GOLD)
+		hud._ctext(Vector2(sz.x * 0.5, 64), hint, 15, INK)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
 		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)

@@ -818,6 +818,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
+	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:
@@ -1801,6 +1802,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
+	KinWispForm.mark(self, h)
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
@@ -1886,18 +1888,16 @@ func _check_team(team: int) -> void:
 	if members.is_empty():
 		return
 	for x in members:
-		if not x.downed:
+		if not x.downed or KinWispForm.guarding(self, x):
 			return
-		if x.kin and not x.kin.dead and x.kin.state not in ["downed"] and x.kin.hp > 0.0:
-			return
-		if x.kin2 and not x.kin2.dead and x.kin2.hp > 0.0:
-			return
+		if x.remote and x.kin and not x.kin.dead and x.kin.state == KinWispForm.STATE and x.kin.hp > 0.0:
+			return           # a guardian riding its Wisp (its owner's game decides: we only see the Boki's state)
 	for x in members:
 		if not x.remote:
 			eliminate(x, x.last_hit_by, "team wiped")
 	_team_gone(team)
 
-## The whole team is down or dead with nobody to bring them back: everyone's dead for good.
+## The whole team is out (_check_team): everyone's dead for good.
 func _team_gone(team: int) -> void:
 	if Life.team_alive(self, team):
 		return
@@ -2720,8 +2720,7 @@ func _update_shots(dt: float) -> void:
 			if _dome_blocks(s, p):
 				_shot_end(s, p, null)
 				hit = true; break
-			# terrain and rocks
-			var gp := world.ground_at(p.x, p.z)
+			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
 			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
@@ -2879,8 +2878,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	shots.erase(s)
 	if s.has("deco") and is_instance_valid(s["deco"]):
 		(s["deco"] as Node3D).queue_free()
-	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
-	# that stopped it
+	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall that stopped it
 	var fxx: Dictionary = s["x"]
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
@@ -3375,8 +3373,11 @@ func _gather_input() -> void:
 	if aim_hold == "hunter_ult" and not Input.is_action_pressed("hunter_ult"):
 		aim_hold = ""
 		HunterKeys.ult_pressed(player)
+	if Input.is_action_just_pressed("summon") and not paused:
+		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event): return
 	if intro and intro.skip(event):
 		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -3427,6 +3428,7 @@ func step(dt: float) -> void:
 	if skydrop and skydrop.planning:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
+		SkyDeck.plan_ranks(self)
 		for k in pending_input: pending_input[k] = false
 		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)
@@ -3842,6 +3844,9 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
+		if pending_input.get("summon", false):
+			pending_input["summon"] = false
+			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
@@ -4265,6 +4270,7 @@ func _update_interact(dt: float) -> void:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
+		best = KinSteal.interact_for(self, h, want, dt, best)      # 2b. grab a loose Boki wisp
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var wp := PickupReach.under_cursor(self, h)
@@ -4724,6 +4730,7 @@ func _finish() -> void:
 	if over:
 		return
 	over = true
+	KinSteal.match_end(self)
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)

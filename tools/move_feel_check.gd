@@ -136,8 +136,9 @@ const T := {
 	"swoop_left":              ["<=", 0.05, "m/s", "over cruise 1.5 s after the level-out"],
 	"swoop_hot_x":             ["~", [1.2, 1.3], "x", "overheated: the swoop at half strength"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
-	"dashglide_1s_speed":      ["<=", 9.0, "m/s", "[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
-	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
+	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[owner 11-13] the glide carries the dash"],
+	"dashglide_2s_speed":      ["~", [7.0, 9.0], "m/s", "[owner 11-13] still fast, bleeding back"],
+	"dashglide_3s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] back toward cruise"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
@@ -892,8 +893,8 @@ func _dash_glide() -> void:
 	P.ex_cd = 0.0; P.dashes = P.max_dashes()
 	P.inp["dash"] = true
 	var dash_end := -1; var reopen := -1; var open_v := 0.0
-	var v1 := 0.0; var v2 := 0.0
-	for i in 200:
+	var v1 := 0.0; var v2 := 0.0; var v3 := 0.0
+	for i in 240:
 		P.inp["glide"] = true; P.inp["move"] = Vector2(1, 0)
 		var was_rolling := P.roll_t > 0.0 or i == 0
 		m.step(DT)
@@ -905,10 +906,12 @@ func _dash_glide() -> void:
 			var since := (i - (dash_end + reopen - 1)) * DT
 			if absf(since - 1.0) < DT * 0.5: v1 = _hv(P).length()
 			if absf(since - 2.0) < DT * 0.5: v2 = _hv(P).length()
+			if absf(since - 3.0) < DT * 0.5: v3 = _hv(P).length()
 	rec("dashglide_reopen_frames", reopen)
 	rec("dashglide_open_speed", open_v)
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
+	rec("dashglide_3s_speed", v3)
 	P.set_arch(kit_was)
 
 # ---------------------------------------------------------------- the walking brake against UE's own
@@ -1961,6 +1964,33 @@ func _landing() -> void:
 		if P.vel.x > 0.5: dead = i + 1; break
 	rec("land_dead_frames", dead)
 	rec("land_squash", sq)
+	_landing_quiet()
+
+## No landing draws a ring or a burst (DECISIONS: none on landings): the hop, a fall, a glide's end, a glide dive,
+## the opening drop's touchdown. Each is [m/s down, under the glider, in the drop, the HunterAnim.land_tier it plays].
+const LANDINGS := [[6.8, false, false, 1], [12.0, false, false, 2], [2.5, true, false, 2], [25.0, true, false, 3],
+		[2.2, true, true, 2]]
+func _landing_quiet() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for way: Array in LANDINGS:
+		_reset(flat + Vector3(0, 0.01, 0), false)
+		m.fields.clear()
+		P.xp = 0.0
+		P.vel.y = -float(way[0])
+		P.gliding = way[1]
+		P.dropping = way[2]
+		var radial0: int = m.fx.radial
+		for i in 30:
+			m.step(DT)
+		var tier := HunterAnim.land_tier(float(way[0]), way[1])
+		ok(tier == int(way[3]), "a landing at %.1f m/s plays land tier %d (want %d)" % [float(way[0]), tier, way[3]])
+		var off := " off the glider" if way[1] else ""
+		if way[2]:
+			off = " out of the drop"
+		ok(P.grounded and m.fx.radial == radial0, "a landing at %.1f m/s%s spawns no ring or burst (%d)"
+				% [float(way[0]), off, m.fx.radial - radial0])
+	m.biomes = biomes
 
 # ---------------------------------------------------------------- camera
 func _render_pos() -> Vector3:
@@ -2021,6 +2051,7 @@ func _glide_cam(cam: CamRig) -> void:
 	_reset(flat)
 	cam.snap(P.pos)
 	cam.zoom = 1.0
+	cam.user_zoom = 1.0      # the style's own framing: the rows below are the glide's widening on top of it
 	P.inp["jump"] = true
 	_cam_step(cam)
 	P.inp["jump"] = false
