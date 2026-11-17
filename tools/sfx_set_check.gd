@@ -1325,6 +1325,7 @@ func _menus(main: Node) -> void:
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
+	Overlay.more_tabs = true          # (every tab, not just Main and Controls)
 	Overlay.open_settings()
 	for t in Overlay.SETTINGS_TABS:
 		await _settle(main)
