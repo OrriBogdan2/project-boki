@@ -647,6 +647,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+func rmb_open() -> bool:
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
 ## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Warchain's pull (and just
 ## after) it spins at once.
@@ -925,8 +929,8 @@ func _haul_land(k: float) -> void:
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
-## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
-## body while the Searing Wave charges.
+## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
+## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy() or KinMerge.active(h):
 		return
@@ -938,7 +942,9 @@ func _tick_tells() -> void:
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
 	# the Meteor Drop's own slot (not while a Lunge charges through a jump: that release is the Lunge)
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
-	if not h.grounded and air_ready and not h.gliding and not rmb_down:
+	if h.roll_t > 0.0:
+		AimKit.hide(h, "drop_aim")          # no disc on a dash: it comes back when the dash ends
+	elif not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
