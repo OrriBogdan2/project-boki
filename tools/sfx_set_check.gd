@@ -72,9 +72,11 @@ extends RefCounted
 ##      the Ambience bus, and the grounds never play the match's beds
 ##  16. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ##  17. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
-##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
+##  18. the pick-one panels' take sound (UI.pick_taken): the confirm family, not the hover tick, once per take;
+##      the egg pick and the Relic pick each call it (the ability rank-up has its own LevelSfx.rank)
+##  19. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
-##  19. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
+##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
 ## Reads the files only; never touches the save.
 
@@ -152,6 +154,7 @@ func run(main: Node) -> void:
 	_fusion_cues()
 	_training()
 	_boki_cues()
+	_pick_taken()
 	_ui_cues()
 	_low_hp()
 	_voices()
@@ -1195,6 +1198,17 @@ func _training() -> void:
 	h.free()
 	w.free()
 	Sfx.clear_amb_layers(0.0)
+
+## 18. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
+func _pick_taken() -> void:
+	ok(Sfx.ensure("ui_confirm") and not _takes("ui_confirm").is_empty(), "pick taken: the confirm family has takes")
+	ok(_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
+			"pick taken: UI.pick_taken plays ui_confirm, not the hover tick")
+	var unwired := []
+	for f in ["ui/hatch.gd", "home/hob_offer.gd"]:
+		if not FileAccess.get_file_as_string("res://scripts/" + f).contains("UI.pick_taken("):
+			unwired.append(f)
+	ok(unwired.is_empty(), "pick taken: egg pick and Relic pick call it (missing %s)" % [unwired])
 
 ## 6. Every sound UiSfx plays by name (Sfx.play) has a file, so a typo never plays silence.
 func _ui_cues() -> void:
