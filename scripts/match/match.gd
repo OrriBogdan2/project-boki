@@ -3428,6 +3428,7 @@ func step(dt: float) -> void:
 	if skydrop and skydrop.planning:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
+		SkyDeck.plan_ranks(self)
 		for k in pending_input: pending_input[k] = false
 		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)
