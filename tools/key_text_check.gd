@@ -4,7 +4,7 @@ extends RefCounted
 ## is filled the way the game fills it and must not show any action's default key or a mouse button name:
 ##   - the first-match tutorial (content/rules/tutorial.json: steps, details, alt lines, labels)
 ##   - the Boki's tutorial hints (BokiChatter.TUT_HINT) and the scout hint
-##   - the Training Grounds checklist (Match.train_rows)
+##   - the Training Grounds checklist (Match.training.rows)
 ##   - the first-time hints a match shows (Match._tips) and every _tip line in match.gd as written
 ##   - the farm tutorial (content/rules/farm_tutorial.json, through FarmTutorial.fill)
 ## and a few lines must show the new keys, so the rebind really reaches the text.
@@ -123,7 +123,7 @@ func _tutorial() -> void:
 			"the tutorial's key tokens follow the rebind")
 
 func _training() -> void:
-	var rows := m.train_rows()
+	var rows: Array = m.training.rows()
 	for r: Array in rows: _line("training " + String(r[0]), String(r[1]))
 	var glide := rows.filter(func(r): return r[0] == "glide")
 	ok(not glide.is_empty() and String(glide[0][1]).contains(Settings.key_cap("jump")),
