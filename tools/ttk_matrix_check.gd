@@ -21,7 +21,7 @@ func run(main_node: Node) -> void:
 	for d in order:
 		var h: Hunter = (probe[0] as Match).make_hunter("D", 5, Arch.weight(d), d, "idle", {}, probe[4], {"arch": d})
 		var hp := float(Data.CLASSES[Arch.weight(d)]["hp"])
-		var armour := float(Hunter.ARMOR_TIERS[0][4])      # Common tier durability
+		var armour: float = float(Hunter.ARMOR_TIERS[0][4])
 		var own: bool = h.max_hp == hp and h.max_armor == armour
 		var what: String = "%s dummy: base health %d and armour %d are the Hunter's own" % [d, hp, armour]
 		ok(what, own, "%s/%s" % [h.max_hp, h.max_armor])

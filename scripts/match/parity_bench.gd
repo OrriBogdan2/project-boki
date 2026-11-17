@@ -157,8 +157,7 @@ static func dealt_in(hits: Array, now: float, win: float) -> float:
 static func time_to_down(dps: float) -> float:
 	if dps <= 0.0:
 		return 0.0
-	var block := float(Hunter.ARMOR_TIERS[0][3])      # the Common armour tier's damage block
-	return float(Data.CLASSES["medium"]["hp"]) / (1.0 - block) / dps
+	return float(Data.CLASSES["medium"]["hp"]) / (1.0 - float(Hunter.ARMOR_TIERS[0][3])) / dps
 
 ## Clears the readouts and sends the player, dummies and bot back to their marks.
 func reset() -> void:

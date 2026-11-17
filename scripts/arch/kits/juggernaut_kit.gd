@@ -338,7 +338,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if riposte.move_k() <= 0.0:
 		# planted in the guard or the cleave: a slash press is kept for BUFFER and swings as the cleave lands
-		# (merged you keep your own attack, docs/decisions/0004)
 		if held and not lmb_was: lmb_buf = BUFFER
 		lmb_was = held
 		return true

@@ -359,6 +359,7 @@ func _back() -> void:
 	if id() == "shoot":
 		camps.spawn("sec")
 
+
 func _enter() -> void:
 	var p := m.player
 	var sid := id()

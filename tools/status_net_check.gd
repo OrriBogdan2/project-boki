@@ -6,7 +6,7 @@ extends "res://tools/displace_net_check.gd"
 ## LEFT_TOL) and the look on the body. Cinder's Ignite levels and burn, Neve's Chill and Shatter, Sparkle's
 ## Static, Sable's Marks (and two Sables' Marks on one body, each kept per caster), Vex's Daze, Disoriented,
 ## Shred and Blight (stacks, seconds and strength), hit slows, Grounded.
-## Lines: STATNET ok|FAIL <what>. The relay, the guest process and both matches come from the base class's _host_up.
+## Lines: STATNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid> (the base class reads it).
 
 const LEFT_TOL := 0.1            # s: the seconds a status has left may differ by this between the two games
 const CLEAR_S := 0.3            # s: a clear rides the next Net flush, and the question may overtake it
@@ -26,7 +26,6 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
-	guest_flag = GUEST_ARG
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == GUEST_ARG: guest = true
