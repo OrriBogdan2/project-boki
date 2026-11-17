@@ -1,6 +1,7 @@
 extends RefCounted
 ## --clip-cadence-check: a warden clip must fit the kit's cadence. Per Hunter and move listed in
 ## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "scale" speeds it up,
+## "rate" (main's, clip seconds per kit second) too,
 ## "fit" plays it over that many seconds, "cut" ends it early, "lead" skips its start; a "hold_from" move loops and
 ## is exempt) lasts no longer than the move's cadence (else it restarts mid-swing or pops into the next move), and
 ## its strike (the frame its hand moves fastest in the .glb) lands no more than the slack after the kit's hit time.
@@ -70,10 +71,11 @@ func _hero(id: String, art_name: String) -> int:
 		var cut := float(mv.get("cut", length))
 		var rate := float(mv.get("scale", 1.0)) * (minf(length, cut) / float(mv["fit"]) if mv.has("fit") else 1.0)
 		var lead := float(mv.get("lead", 0.0))  # the move starts this far into the clip (move seconds)
-		var played := minf(length, cut) / rate - lead
+		var played := clips.move_len(mv)  # "rate" (clip s per kit s) too
+		var kit_rate := float(mv.get("rate", 1.0))
 		var cadence := _val(spec["cadence"])
 		var hand := m.get_node(String(WardenGlb.BONES[spec.get("hand", "hand.R")])) as Node3D
-		var strike := await _strike(sync, clips, hand, String(mv["clip"]), length) / rate - lead
+		var strike := (await _strike(sync, clips, hand, String(mv["clip"]), length) / rate - lead) / kit_rate
 		var hit := float(spec.get("hit", -1.0))
 		var slack := float(table["strike_slack"])
 		var what := "%s/%s" % [art_name, km]

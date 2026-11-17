@@ -20,7 +20,7 @@
 		"arc_perfect": {"cadence": "weapons/longbow.json:primary.rate"},
 		"arc_super": {"cadence": "weapons/longbow.json:primary.rate"},
 		"arc_over_loose": {"cadence": "weapons/longbow.json:primary.rate"},
-		"pin_ult_loose": {"cadence": "archetypes/archer.json:x.nock"},
+		"pin_ult_loose": {"cadence": "archetypes/archer.json:x.recover"},
 		"pin_ult_final": {"cadence": "archetypes/archer.json:x.recover"}
 	},
 	"kael": {
