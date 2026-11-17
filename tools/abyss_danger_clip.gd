@@ -4,6 +4,9 @@ extends RefCounted
 ## under the movie writer on a GPU worker (docs/PITCH_REEL.md has the pattern): `godot --rendering-driver vulkan
 ## --write-movie out.avi --fixed-fps 60 -- --abyss-danger-clip`. A small readout (depth, danger, warning dB)
 ## sits top-left. Prints ADCLIP lines; quits when the run has ended.
+## The movie writer's flags are engine arguments and the jobq workers only pass user arguments, so a plain
+## `-- --abyss-danger-clip --clip-dir=abyss_clip` runs this scene again as a child Godot under the writer
+## (the child gets --abyss-child) and the movie lands in <tree>/<clip-dir>/abyss_danger.avi.
 
 const FPS := 60
 const LEAD_S := 1.5          # s above the lip before the drop
@@ -16,6 +19,9 @@ var label: Label
 
 func run(main_node: Node) -> void:
 	main = main_node
+	if "--abyss-child" not in OS.get_cmdline_user_args():
+		_record()
+		return
 	var sink := 1.4
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--sink="):
@@ -79,3 +85,29 @@ func _step_off(w: World) -> Vector3:
 			if w.is_void(far.x, far.y) and w.is_void(far.x + d.y * 3.0, far.y + d.x * 3.0):
 				return Vector3(far.x, g.y, far.y)
 	return Vector3.ZERO
+
+
+func _record() -> void:
+	var dir := "abyss_clip"
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--clip-dir="):
+			dir = String(a).substr(11)
+	var root := ProjectSettings.globalize_path("res://")
+	DirAccess.make_dir_recursive_absolute(root.path_join(dir))
+	var cfg := root.path_join("override.cfg")
+	var f := FileAccess.open(cfg, FileAccess.WRITE)
+	f.store_string("[display]\n\nwindow/size/viewport_width=1920\nwindow/size/viewport_height=1080\n\n")
+	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.9\n")
+	f.close()
+	var args := ["--path", root, "--rendering-driver", "vulkan", "--audio-driver", "Dummy", "--resolution",
+		"1920x1080", "--fixed-fps", str(FPS), "--write-movie", root.path_join(dir).path_join("abyss_danger.avi"), "--"]
+	args.append_array(OS.get_cmdline_user_args())
+	args.append("--abyss-child")
+	var out: Array = []
+	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	DirAccess.remove_absolute(cfg)
+	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		if line.begins_with("ADCLIP") or line.contains("ERROR"):
+			print(line)
+	print("ADCLIP child rc=%d" % rc)
+	main.get_tree().quit(rc)
