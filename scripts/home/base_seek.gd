@@ -44,6 +44,12 @@ static func speed(rec: Dictionary) -> float:
 	var R := rules()
 	return float(R["speed"]) * (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["speed_per_focus"]))
 
+
+## Does the hunt run by the night rules: it is night, or this zone's sky never leaves dusk?
+static func is_dark(day_t: float) -> bool:
+	return HomeWork.is_night(day_t) or rules()["night_zones"].has(GardenZones.here)
+
+
 ## The chance a sniff points the right way: Focus, curiosity, and the night for night types.
 static func right_p(rec: Dictionary, night: bool) -> float:
 	var R := rules()
@@ -156,6 +162,7 @@ var scent: MeshInstance3D = null
 var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
+var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
 var practice := false          # the first practice hunt: short (practice_s), no gain, no cost
 
 func _init(home) -> void:
@@ -248,12 +255,13 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	var night: bool = BaseRace.tweak("seek").get("night", HomeWork.is_night(h.day_t))
+	var night: bool = BaseRace.tweak("seek").get("night", is_dark(h.day_t))
 	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, night, RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
 	GardenSfx.countdown(h, scent.position)
+	cue = GardenCues.SeekCue.new(h)
 
 func _walkable(p: Vector2) -> bool:
 	return h._ground_h(p.x, p.y) > -50.0
@@ -282,6 +290,7 @@ func tick(d: float) -> void:
 			_move_pair(d)
 			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
 			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
+			_lay_trails(d)
 			if hunt.over() or (practice and hunt.t >= float(rules()["practice_s"])):
 				_end(true)
 		S.RESULT:
@@ -299,6 +308,11 @@ func _move_pair(d: float) -> void:
 		n.rotation.y = lerp_angle(n.rotation.y, want, minf(1.0, TURN * d))
 		pair[i]["pos"] = n.position
 
+## Each hunter's trail runs from the scent toward it, brighter the better its nose (best for night types at night).
+func _lay_trails(d: float) -> void:
+	for i in 2:
+		cue.update(i, hunt.item, hunt.pos[i], right_p(hunt.recs[i], hunt.night), _ground, d)
+
 func _end(finished: bool) -> void:
 	if practice and finished:
 		h._toast("That's a hunt: the brighter trail is the better nose. " + FirstRound.DONE)
@@ -310,6 +324,8 @@ func _end(finished: bool) -> void:
 	if is_instance_valid(scent):
 		scent.queue_free()
 	GardenSfx.sniff_stop()
+	cue.clear()
+	cue = null
 	if finished:
 		go(S.RESULT)
 		_card(res, h.hrace.pin(res["win"], "seek"))
