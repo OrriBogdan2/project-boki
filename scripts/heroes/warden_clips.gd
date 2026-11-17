@@ -174,7 +174,8 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
 func move_len(mv: Dictionary) -> float:
 	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
-	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	var rate := (float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0))
+			* (length / float(mv["fit"]) if mv.has("fit") else 1.0))
 	return length / rate - float(mv.get("lead", 0.0))
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:

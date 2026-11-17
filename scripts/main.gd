@@ -42,7 +42,8 @@ func _ready() -> void:
 			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
-		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
+		# tooling: a camera style for one run (camcal)
+		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
 		if a.begins_with("--heart-raid="): opts.merge(HeartRaid.from_arg(a.substr(13)), true)    # N[:hard], --match
