@@ -757,12 +757,13 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 
 ## class_unlock (`content/rules/class_unlock.json`)
 
-Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it. `looks` are features a Hunter leaves on your own character at home once its mastery reaches `level` (shape `eyes` or `scar`, colour `col`); the creator keeps or fades each (MasteryLook).
+Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it; the Hunter pickers tag the three `starters` with a "Start here" chip until the save has played `start_here_matches` matches. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it. `looks` are features a Hunter leaves on your own character at home once its mastery reaches `level` (shape `eyes` or `scar`, colour `col`); the creator keeps or fades each (MasteryLook).
 
 | Setting | Value |
 |---|---|
 | starters | ["archer", "juggernaut", "gunslinger"] |
 | starter_picks | 1 |
+| start_here_matches | 1 |
 | second_picks | ["juggernaut", "ashwick", "tender"] |
 | hold_s | 1.6 |
 | tiers | {"easy": "about 1-2 expeditions", "medium": "a handful of expeditions", "hard": "real effort, once other Hunters are open"} |
@@ -1287,6 +1288,14 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | wait | {"look": "tight", "size": 0.7, "rest": 0.95, "close": 0.3, "rings": 3, "c": "bff4ff", "c2": "ffffff", "doc": "Waiting: faint rings hold wide round the bobber. When the ears go up they close in over the warning and meet at the bite, so the rings carry the same timing the ears do (Focus sets how long)."} |
 | bite | {"look": "splash", "size": 0.55, "life": 0.3, "c": "bff4ff", "c2": "ffffff", "doc": "The bite, the moment to press: one sharp crown of water."} |
 | catch | {"look": "glint", "life": 0.65, "c": "bff4ff", "c2": "ffffff", "rare_c": "ffd24a", "rare_c2": "fff3c0", "size": {"snack": 0.2, "item": 0.3, "rare": 0.5}, "rise": 0.35, "doc": "A catch is landed: one four-point glint above the water, sized by what came up (snack, item, rare; a rare is gold) and floating up by rise m."} |
+
+## glossary (`content/rules/glossary.json`)
+
+First-time lines (Glossary, docs/UI_FIRST15.md 4): a word a new player meets on a screen before anything explains it, keyed by the word as shown, and its one line. The line shows under the word for the whole session it is first seen in, then never again. Keep each line short: the drop map's legend gives it about 34 characters.
+
+| Setting | Value |
+|---|---|
+| lines | {"Mastery": "Goals played as this Hunter: each one done gives a new look.", "Glider": "What you glide on after a jump: they all fly the same.", "Boss lair": "A boss: beat it for the best loot", "Vault": "A big chest of loot", "Rare Boki": "A rare wild Boki you can catch", "Item cache": "A chest with good gear beside it"} |
 
 ## heart (`content/rules/heart.json`)
 
