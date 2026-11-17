@@ -680,10 +680,12 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
 		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
+	MapNames.begin(inner)      # (place names give way to each other and to the train's line)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
 		train_map.draw(self, m.skytrain, inner, view, k, false)
+	MapNames.flush(c)
 	# your view cone, faintly
 	if vh and not riding:
 		var pp: Vector2 = to_map.call(vh.pos)
@@ -1835,11 +1837,11 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
+				MapNames.put("%dm" % int(round(float(lb.get("height", 0.0)))), pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
-				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
+				MapNames.put(nm, pv + Vector2(0, 18), 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
 			continue      # (the halts are TrainMap's, gated as the "train" kind)
@@ -1851,7 +1853,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			if overview and not _region_names(w).has(nm):
 				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
+			MapNames.put(nm, pv + Vector2(0, 4), 13 if overview else 11, col, big)
 
 # ------------------------------------------------------------------ the deathbox loot window
 ## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact

@@ -188,6 +188,9 @@ func draw(sz: Vector2) -> void:
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
+	MapNames.begin(rect)
+	if plain_plan():
+		MapNames.claim(_plain_pill(sz))
 	_labels(c, kk)
 	if m.skytrain:
 		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
@@ -201,6 +204,7 @@ func draw(sz: Vector2) -> void:
 	HeartHud.full_map(self)
 	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
+	MapNames.flush(c)
 	if m.zone:
 		m.zone.full_map(self, kk)
 	_lair_alerts(c)
@@ -217,7 +221,7 @@ func draw(sz: Vector2) -> void:
 	else:
 		MapKey.draw(self)
 		_legend(c, sz, team)
-		_side(c, sz)
+		_side(c)
 	hover.draw(self)
 	if hot_line != "":
 		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
@@ -225,12 +229,18 @@ func draw(sz: Vector2) -> void:
 
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
 func _plain_hint(sz: Vector2) -> void:
+	hud._rounded(_plain_pill(sz), Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
+
+
+func _plain_line() -> String:
 	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
-	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
-	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
-	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
-	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
-	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
+	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+
+
+func _plain_pill(sz: Vector2) -> Rect2:
+	var w: float = TextCache.width(hud.big, _plain_line(), 16) + 32.0
+	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -279,7 +289,6 @@ func _labels(c: Control, kk: float) -> void:
 	var w := m.world
 	var big_k := clampf(kk / (rect.size.x / w.w), 1.0, 2.0)
 	var zoomed := big_k >= 1.45
-	var taken: Array = []      # Rect2s of names already drawn
 	var regions := {}
 	for isl in w.islands: regions[String(isl.get("name", ""))] = true
 	var later: Array = []
@@ -292,7 +301,7 @@ func _labels(c: Control, kk: float) -> void:
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
 			var col := Heart.gate_col().lightened(0.3) if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
-			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
+			MapNames.put(nm.to_upper(), pv + Vector2(0, 5), sz, col, hud.big, true)
 		else:
 			later.append([lb, pv])
 	for e in later:
@@ -304,36 +313,22 @@ func _labels(c: Control, kk: float) -> void:
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
 				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
-				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
-					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
+				MapNames.put("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), hud.big, zoomed)
 			"rail":
 				pass      # (the halts are TrainMap's)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
 				if zoomed:
-					_name(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), taken)
+					MapNames.put(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), hud.big)
 			_:
-				_name(nm, pv + Vector2(0, 21), int(11 * big_k), Color(INK, 0.85), taken, zoomed)
+				MapNames.put(nm, pv + Vector2(0, 21), int(11 * big_k), Color(INK, 0.85), hud.big, zoomed)
 	if w.labels.is_empty():
 		for isl in w.islands:
 			var cc: Vector2 = isl["c"]
 			var pv2 := to_screen(Vector3(cc.x, 0, cc.y))
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
-
-## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
-## Returns whether it drew.
-func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force := false) -> bool:
-	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-	var r := Rect2(at + Vector2(-tw * 0.5 - 3.0, -size * 0.95), Vector2(tw + 6.0, size * 1.25))
-	if not force:
-		for q in taken:
-			if (q as Rect2).intersects(r):
-				return false
-	taken.append(r)
-	hud._ctext(at, txt, size, col, hud.big)
-	return true
 
 func _spawns(c: Control, team: int, kk: float) -> void:
 	var sp: SpawnPlan = m.spawn_plan
@@ -637,7 +632,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, sz: Vector2) -> void:
+func _side(c: Control) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return

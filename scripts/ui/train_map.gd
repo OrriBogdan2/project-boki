@@ -101,11 +101,11 @@ func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bo
 		halt_glyph(hud.c, pv)
 		var y := 15.0
 		if named:
-			hud._ctext(pv + Vector2(0, y), _halts[i]["name"], 10, HALT_NAME, hud.big)
+			MapNames.put(_halts[i]["name"], pv + Vector2(0, y), 10, HALT_NAME, hud.big, true)
 			y += 12.0
 		if i == mine:
 			var secs := st.halt_eta(_halts[i]["s"])
-			hud._ctext(pv + Vector2(0, y), eta_text(secs), 10, GOLD, hud.big)
+			MapNames.put(eta_text(secs), pv + Vector2(0, y), 10, GOLD, hud.big, true)
 
 ## One marker for the train (a chevron on its heading) and a dot for each car behind it.
 func _draw_train(hud, st: SkyTrain, inner: Rect2, to_screen: Callable) -> void:

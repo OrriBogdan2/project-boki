@@ -139,8 +139,8 @@ static func full_map(fm) -> void:
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
 			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
-			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
-			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
+			var dy := -r - 16.0 if i == 1 else r + 30.0    # (the Gate's word sits over its glyph)
+			MapNames.put(word(i, sd[i]), pv + Vector2(0, dy), 11, color_of(sd[i]), HudStyle.BIG, true, 3)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
 # ------------------------------------------------------------------ the dead and the watching

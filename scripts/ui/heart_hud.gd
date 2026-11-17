@@ -102,17 +102,17 @@ static func full_map(fm) -> void:
 	_tide(c, m, fm.to_screen, func(pv: Vector2, pad: float) -> bool: return area.grow(-pad).has_point(pv), 2.5)
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
-		gate_glyph(c, gv, 7.0, ht.carrier != null)
-		fm.hud._ctext(gv + Vector2(0, 18), "Heart Gate", 11, Heart.gate_col(), fm.hud.big)
+		gate_glyph(c, gv, 7.0, ht.carrier != null)      # (named by WaysOutMap's "Heart Gate <state>" over it)
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
-		fm.hud._ctext(hv + Vector2(0, -20), _word(ht), 12, Heart.col(), fm.hud.big)
+		MapNames.put(_word(ht), hv + Vector2(0, -20), 12, Heart.col(), fm.hud.big, true)
 	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
-			fm.hud._ctext(cv + Vector2(0, -16), "%s  ·  Heartspark" % ht.carrier.pname, 12, Heart.col(), fm.hud.big)
+			var who := "%s  ·  Heartspark" % ht.carrier.pname
+			MapNames.put(who, cv + Vector2(0, -16), 12, Heart.col(), fm.hud.big, true)
 
 static func _word(ht: Heart) -> String:
 	match ht.state:
