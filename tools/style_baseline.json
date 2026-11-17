@@ -434,7 +434,7 @@
 "scripts/match/flora.gd": {
 "long_line": 59,
 "nested_ternary": 2,
-"semicolon": 52
+"semicolon": 54
 },
 "scripts/match/fx.gd": {
 "long_line": 10,

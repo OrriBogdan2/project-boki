@@ -142,7 +142,7 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
 | Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
-| Level-up gold wash | full screen at 16% | ~0.3 s | unchanged (brief; `--level-hud-check` holds it); the line goes through the lane |
+| Level-up | was a lane line top centre (3.2 s) and a gold full-screen wash on even levels | was 3.2 s | **one moment, by you:** the chime, a gold column over your hero (0.8 s), a card over the vitals naming what improved (2.6 s); no lane line, no wash (`--level-hud-check`) |
 | Kill / knock flashes (`Juice.kill`, you knocked) | full screen, 14-30% | 0.2-0.3 s | unchanged: brief, and about you |
 | "You're down" panel, killcam line | centre, 34 px | while you're down | unchanged: you can't fight then |
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
