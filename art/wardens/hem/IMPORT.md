@@ -45,3 +45,5 @@ forward. The blind Fable judge kept the old walk_r, run_l (tie or loss), so thos
 the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+Idle and stance rework (11-09, ported 11-17): `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --skip-missing`; the old glb's `x_breath` track has no bone here and is dropped (docs/art/IDLE_AUDIT.md).
