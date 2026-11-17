@@ -1,10 +1,11 @@
 class_name BaseFeed
 extends RefCounted
 ## A hungry base Boki feeds itself (briefs/design/GARDEN.md section 2: bowls and snacks, never a penalty). A
-## feeder with food comes first (HomeEcon.feed_goal, k["eat"]); with none to eat from it picks the ripe snack
-## patch and eats one snack (the rest go to your pantry), or fetches a snack from the pantry at the house door.
-## BaseLife runs the walk in its Eat state through tick() (k["life_eat"] = {from, food, at}); the meal goes
-## through Care.feed, so the journal, the lean and the care day see it like any other.
+## feeder with food comes first (HomeEcon.feed_goal, k["eat"]), then a feeding bowl you filled (FeedBowl);
+## with none to eat from it picks the ripe snack patch and eats one snack (the rest go to your pantry), or
+## fetches a snack from the pantry at the house door. BaseLife runs the walk in its Eat state through tick()
+## (k["life_eat"] = {from, food, at}, a bowl's own fields on top); every meal goes through meal() (Care.feed),
+## so the journal, the lean (Evo.eat) and the care day see it like any other.
 
 const AT := 1.2            # m: close enough to the patch or the door to eat
 const WALK := 35.0         # s it walks for a snack before it gives up (Eat's cap in base_life.json is 40)
@@ -17,6 +18,8 @@ static func pick(h, k: Dictionary) -> bool:
 	if Care.need(rec, "food") >= Econ.HUNGRY_AT:
 		return false
 	if h.hecon and h.hecon.feed_goal(k):
+		return true
+	if FeedBowl.want(h, k):
 		return true
 	var e := SnackPatch.entry(Save.d)
 	if SnackPatch.ripe(e, Time.get_unix_time_from_system()):
@@ -52,6 +55,8 @@ static func door(h) -> Vector3:
 static func tick(h, k: Dictionary, since: float) -> bool:
 	if not k.has("life_eat"):
 		return false
+	if FeedBowl.phase(k) != "":
+		return FeedBowl.tick(h, k, since)
 	var e: Dictionary = k["life_eat"]
 	var at: Vector3 = e["at"]
 	k["goal"] = at
@@ -71,17 +76,24 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 	if food == "" or not Econ._take_pantry(food):
 		h._emote(k, "?")
 		return false
-	var res := Care.feed(rec, food)
-	if not res.get("ok", false):
+	if not meal(h, k, food).get("ok", false):
 		SnackPatch.shelve(Save.d, food)      # it would not eat it: back on the shelf
-		h._emote(k, "?")
 		return false
-	h._emote(k, "♥" if res.get("love", false) else "♪")
-	GardenFirstDay.mark("feed", h)
 	if String(e["from"]) == "patch":
 		h._toast("%s picked the patch and ate a %s; the rest went to the pantry"
 				% [rec["name"], Care.food_name(food).to_lower()])
 	return false
+
+## It eats `food` (already out of the pantry or the bowl): Care.feed (the lean through Evo.eat), its emote and
+## the first day's mark. Care.feed's result.
+static func meal(h, k: Dictionary, food: String) -> Dictionary:
+	var res := Care.feed(k["rec"], food)
+	if not res.get("ok", false):
+		h._emote(k, "?")
+		return res
+	h._emote(k, "♥" if res.get("love", false) else "♪")
+	GardenFirstDay.mark("feed", h)
+	return res
 
 ## Which of the snacks it just picked it eats: its favourite, else the first it does not hate.
 static func _choose(rec: Dictionary, got: Array) -> String:

@@ -67,11 +67,15 @@ func _hold_fire(m: Match) -> void:
 func _unreachable(m: Match, sid: String) -> String:
 	var out := ""
 	var p := m.player
+	var reach := REACH_FLAT
+	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
+	if c.get("row", false):     # a row starts past an idle monster's notice by design: its far end may lie past 12 m
+		reach = maxf(reach, TutorialCamps.ROW_FROM + TutorialCamps.ROW_STEP * (c.get("foes", []).size() - 1) + 1.0)
 	for mb in m.mobs:
 		if mb.dead:
 			continue
 		var off: bool = m.world.island_of(mb.pos.x, mb.pos.z) != m.world.island_of(p.pos.x, p.pos.z)
-		if off or p.flat_dist(mb) > REACH_FLAT:
+		if off or p.flat_dist(mb) > reach:
 			out += " %s %s@%.1f" % [sid, mb.kind, p.flat_dist(mb)]
 	return out
 
