@@ -161,7 +161,7 @@ const T := {
 	"abyss_kill_depth":        ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
 	"abyss_recover_depth":     [">=", 15.0, "m", "deepest a terminal fall can still glide out"],
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
-	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
+	"abyss_tint_half":         [">=", 0.1, "", "owner 11-17: the tint builds with depth (nothing for the first start_depth m, a hint at half way)"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
 	"abyss_tint_rising":       ["<=", 0.02, "", "[footage D1] off while the glider lifts you back up, even below the lip"],
 	"feather_toggle_frames":   ["<=", 1.0, "frames", "feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
