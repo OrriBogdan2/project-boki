@@ -160,8 +160,11 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
 	for mk in cue.get("marks", []):
-		var e: Ent = mk["e"]
-		if is_instance_valid(e) and e.visible and not cam.is_position_behind(e.position):
+		var o: Variant = mk["e"]              # untyped first: a typed Ent var errors on a freed foe
+		if not is_instance_valid(o):
+			continue
+		var e := o as Ent
+		if e != null and e.visible and not cam.is_position_behind(e.position):
 			var n := int(seen.get(e, 0))
 			seen[e] = n + 1
 			var sp := cam.unproject_position(e.position + Vector3(0, BADGE_UP, 0)) + Vector2(BADGE_GAP * n, 0)
