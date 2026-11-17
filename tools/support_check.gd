@@ -92,8 +92,8 @@ func run(mn: Node, md := "all") -> void:
 		await _tender_support()
 		await _ranks("tender")
 		await combos.tender()
-		await _combo_tag("tender")
 		await carry.tender()
+		await _combo_tag("tender")
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()

@@ -25,15 +25,12 @@ const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("fff4c8")
 const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
 const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
-const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
-const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
-const RAM_BACK_K := 0.85
 # s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
 const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds her hand up off the aim (as_cloak: wide to 0.26)
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -58,7 +55,6 @@ var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
-var repress := false             # a hold dropped (a merge): the key is let go before the lance lights again
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -84,6 +80,9 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 func _setup() -> void:
 	fx = LDFx.of(m)
 	jet = AshwickJet.new(self)
+
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [])
 
 func _best_char() -> float:
 	var b := 0.0
@@ -246,7 +245,7 @@ func _tick_tells(dt: float) -> void:
 	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
 	# never spools (the lance is out), so the pilot is out with it
 	var spooling := was_held and spool < float(lmbd()["spool"])
-	if vis and spooling and not h.downed and not KinMerge.transforming(h) and not flamer_up:
+	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
 	else:
@@ -300,7 +299,6 @@ func pips_on(f: Ent) -> int:
 
 ## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
 func _drop_holds() -> void:
-	repress = true
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
 	spool = 0.0
@@ -313,8 +311,11 @@ func _drop_holds() -> void:
 	jet.drop()
 
 func move_k() -> float:
-	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	return (0.6 if after_t > 0.0 else 1.0) * boost
+	return 0.6 if after_t > 0.0 else 1.0
+
+## Rank 3 Pyro Pounce: a burst of speed after a hit ([game data] +75 move speed).
+func speed_bonus() -> float:
+	return float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 0.0
 
 ## Rank 3 Cinder Shot holds a second charge.
 func rmb_charges() -> int:
@@ -339,9 +340,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if h.wid != "flamethrower":
 		return false
-	# a merge ends the roar: holding the key on must not relight it (a new press does, in the live form)
-	repress = repress and held
-	var merging := KinMerge.transforming(h) or repress
+	# a merge ends the roar: holding the key on must not relight it
+	var merging := KinMerge.transforming(h) or KinMerge.active(h)
 	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
@@ -516,7 +516,6 @@ func _cinder_hit(f: Ent) -> void:
 	# the impact: a white-hot flash, an ember shower and a rising ember puff (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
-	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
 	if cur > 0:
 		# a burning foe: upgrade, and the burn the foe had spreads to the ones around
 		spreads += 1
@@ -557,13 +556,14 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir})
+	# on Felix's fitted ram curve (content/rules/dash_feel.json, docs/SUPERVIVE_FEEL.md "Dash speed curves")
+	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir, "curved": true})
 	st["last_dash"] = "soot_ram"
 	play("as_leap")
 	vfx("ram", null, dir)
 	h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
+	bash = {"t": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
 ## The air dash, Cinder's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
@@ -584,10 +584,10 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
+	if bash.get("hop", false) and h.gliding:
+		bash = {}      # a glide press cancelled the poof (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dir: Vector2 = bash["dir"]
-	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
-		var into := float(bash["t0"]) - float(bash["t"])
-		h.roll_speed = float(bash["speed"]) * (RAM_FRONT_K if into < RAM_FRONT * float(bash["t0"]) else RAM_BACK_K)
 	bash["t"] = float(bash["t"]) - dt
 	if tells_visible():
 		_ram_looks(dir)
@@ -656,7 +656,6 @@ func _bash_impact(f: Ent) -> void:
 		_ram_reward()
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:

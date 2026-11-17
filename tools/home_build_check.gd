@@ -258,4 +258,3 @@ func run(main_node: Node) -> void:
 	ok.call(sigs[0] != sigs[1], "the two seeds made different islands")
 	print("HOMEBUILD done, failures: %d" % bad[0])
 	main.get_tree().quit(1 if bad[0] > 0 else 0)
-

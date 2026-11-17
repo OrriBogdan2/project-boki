@@ -166,16 +166,6 @@ func _ready() -> void:
 		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
 		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
 		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
-	if "--check" in args:
-		var CheckT = load("res://tools/check.gd")
-		var bad := 0
-		for f in CheckT.new()._scan("res://scripts"):
-			var sc = load(f)
-			if sc == null or not sc.can_instantiate():
-				print("FAIL ", f); bad += 1
-		print("CHECK DONE, failures: ", bad)
-		get_tree().quit()
-		return
 	if Array(args).any(func(a): return String(a).begins_with("--grammar-check")):
 		# tooling: parse every kin grammar file (docs/KIN_GRAMMAR.md) and print structural errors;
 		# --grammar-check=<root> checks another folder (e.g. res://tests/grammar_fixtures/broken)
@@ -235,30 +225,6 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
-	if "--biome-check" in args:
-		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
-		var bm := Match.new()
-		add_child(bm)
-		bm.start({"teams": 4, "squad": 1, "tier": int(opts.get("tier", 1)), "seed": int(opts.get("seed", 9)), "no_drop": true, "autoplay": true})
-		bm.set_process(false)
-		var by := {}
-		var rar := [0, 0, 0, 0]; var nm := 0
-		for mb in bm.mobs:
-			var b := bm.world.biome_at(mb.pos.x, mb.pos.z)
-			if not by.has(b): by[b] = []
-			by[b].append(String(mb.md["name"]))
-			rar[int(mb.get_meta("rarity", 0))] += 1
-			if not (mb.get_meta("muts", []) as Array).is_empty(): nm += 1
-		for b in by:
-			print("BIOME %s: %d mobs, e.g. %s" % [b, by[b].size(), ", ".join((by[b] as Array).slice(0, 6))])
-		var hk := {}
-		for hz in bm.biomes.hazards: hk[hz["kind"]] = int(hk.get(hz["kind"], 0)) + 1
-		print("BIOME rarity common/uncommon/rare/elite %s, mutated %d of %d; hazards %s" % [str(rar), nm, bm.mobs.size(), str(hk)])
-		for i in int(60.0 / Match.DT):
-			bm.step(Match.DT)
-		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
-		get_tree().quit()
-		return
 	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
@@ -267,11 +233,6 @@ func _ready() -> void:
 		return
 	if "--art-stats" in args:
 		load("res://tests/art_stats.gd").stats()
-		get_tree().quit()
-		return
-	if "--hair-check" in args:
-		var hb: int = load("res://tests/hair_gallery.gd").check()
-		print("HAIR CHECK DONE, failures: ", hb)
 		get_tree().quit()
 		return
 	if "--pack-gallery" in args:
@@ -306,112 +267,10 @@ func _ready() -> void:
 		load("res://tools/speaktest.gd").new().run()
 		get_tree().quit()
 		return
-	if "--kinbox-check" in args:
-		var kbc = load("res://tools/kinbox_check.gd").new()      # the farm cap, the Kin Burrow and rare mutations
-		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
-		kbc.run(self)
-		return
 	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
-		return
-	if "--revive-check" in args:
-		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
-		set_meta("revive_check", rvc)
-		rvc.run(self)
-		return
-	if "--weapon-clip-check" in args:
-		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
-		set_meta("weapon_clip_check", wcc)
-		wcc.run(self)
-		return
-	if "--farm-start-check" in args:
-		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
-	if "--work-check" in args:
-		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
-		set_meta("work_check", wkc)
-		wkc.run(self)
-		return
-	if "--polish-check" in args:
-		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
-		return
-	if "--boki-system-check" in args:
-		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
-		return
-	if "--merge-form-check" in args:
-		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
-		return
-	if "--boki-follow-check" in args:
-		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
-		return
-	if "--capture-check" in args:
-		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
-		return
-	if "--teammate-check" in args:
-		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
-		return
-	if "--unique-check" in args:
-		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
-		return
-	if "--iv-check" in args:
-		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
-		return
-	if "--incubator-check" in args:
-		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
-		set_meta("incubator_check", icc)
-		icc.run(self)
-		return
-	if "--gear-check" in args:
-		load("res://tools/gear_check.gd").new().run(self)      # signature weapons, gear, tunings, drop tables, save migration
-		return
-	if "--lair-lock-check" in args:
-		load("res://tools/lair_lock_check.gd").new().run(self)      # boss loot and the egg's own spot; locked in 20 s after the kill
-		return
-	if "--pack-ui-check" in args:
-		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
-		set_meta("pack_ui_check", puc)
-		puc.run(self)
-		return
-	if "--life-check" in args:
-		_life_check()
-		return
-	if "--swim-check" in args:
-		set_meta("swim_check", load("res://tools/swim_check.gd").new())     # wading and swimming in the farm's pond
-		get_meta("swim_check").run(self)
-		return
-	if "--hero-check" in args:
-		set_meta("hero_check", load("res://tools/hero_check.gd").new())     # change hero on the farm
-		get_meta("hero_check").run(self)
-		return
-	if "--keybind-check" in args:
-		set_meta("keybind_check", load("res://tools/keybind_check.gd").new())     # two keys per action, the ult on R and X, clashes
-		get_meta("keybind_check").run(self)
-		return
-	if "--mantle-check" in args:
-		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return
 	if "--glide-reach" in args:
 		load("res://tools/glide_reach.gd").new().run(self)    # how far a glide carries over open void (sizes map gaps)
-		return
-	if "--abyss-check" in args:
-		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
-		get_meta("abyss_check").run(self)
-		return
-	if "--wallhug-check" in args:
-		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
-		return
-	if "--obstacle-check" in args:
-		load("res://tools/obstacle_slide_check.gd").new().run(self)    # walking past and around trees and rocks: no sticking, no pull
-		return
-	if "--airheal-check" in args:
-		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
-		return
-	if "--train-check" in args:
-		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
-		return
-	if "--balloon-check" in args:
-		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
-		return
-	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
-		_weapon_check()
 		return
 	if "--arena-check" in args:
 		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
@@ -422,18 +281,6 @@ func _ready() -> void:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
-		return
-	if "--hold-check" in args:
-		_hold_check()
-		return
-	if "--record-check" in args:
-		_record_check()
-		return
-	if "--blight-check" in args:
-		load("res://tools/blight_check.gd").new().run(self)      # the Blight: spawns, scaling, noise, early weakness
-		return
-	if "--raid-check" in args:
-		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
 		return
 	if "--simtest" in args:
 		_simtest(opts)
@@ -780,242 +627,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("gid", String(opts.get("gid", "")))
 			add_child(current)
 
-## Headless check: a whole match with the player on autopilot, stepped as fast as possible.
-## Test: the down / death / revive rules, step by step, with idle hunters placed by hand.
-## Headless: drops a hunter (and a wisp) just off island edges, holds toward the cliff, and checks
-## every mantle: it happens, it ends on top, and the body never sinks into the cliff on the way.
-func _life_check() -> void:
-	var m := Match.new()
-	add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
-	m.set_process(false)
-	var mine: Array = m.hunters.filter(func(x): return x.team == 0)
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != 0)[0]
-	for h in m.hunters:
-		h.ctrl = "idle"
-		h.inp["move"] = Vector2.ZERO
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
-	var A: Hunter = mine[0]; var B: Hunter = mine[1]; var C: Hunter = mine[2]
-	var home: Vector3 = A.pos
-	# the test steps up to 8m in every direction, so start from open ground (spawns can be small landings)
-	for k in 2000:
-		var g := m.world.random_ground()
-		var roomy := true
-		for dx in range(-10, 11, 2):
-			for dz in range(-6, 7, 2):
-				if m.world.is_void(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - m.world.ground_at(g.x, g.z)) > 0.3: roomy = false
-		if roomy:
-			home = g; break
-	var far := home + Vector3(0, 0, 0)
-	var spot := func(h: Hunter, at: Vector3): h.teleport(at); h.vel = Vector3.ZERO
-	var run := func(sec: float):
-		var t := 0.0
-		while t < sec:
-			m.step(Match.DT); t += Match.DT
-	# park everyone else far apart
-	for h in m.hunters:
-		if h.team != 0 and h != foe: spot.call(h, m.world.random_ground())
-	var away := m.world.random_ground()
-	for k in 200:
-		if away.distance_to(home) > 40.0: break
-		away = m.world.random_ground()
-	spot.call(foe, away)
-	# 1. ally revive
-	spot.call(B, home + Vector3(2, 0, 0)); spot.call(C, home + Vector3(2, 0, 0.5)); spot.call(A, home)
-	m.knock(B, foe, {})
-	var t0 := m.time
-	while B.downed and m.time - t0 < 10.0: run.call(Match.DT)
-	print("LCHECK ally revive: back=%s after %.1fs hp %.0f%%" % [not B.downed, m.time - t0, B.hp / B.max_hp * 100.0])
-	# 2. bleed out alone (with the kin knocked out, so it can't pull them up)
-	for kk in [B.kin, B.kin2]:
-		if kk: kk.dead = true
-	spot.call(C, home + Vector3(-8, 0, 0)); spot.call(A, home + Vector3(-8, 0, 1))
-	B.gems = 20
-	m.knock(B, foe, {})
-	t0 = m.time
-	print("LCHECK  knocked: downed=%s hp=%s" % [B.downed, B.down_hp])
-	while not B.out and m.time - t0 < 30.0:
-		run.call(Match.DT)
-		if int((m.time - t0) * 60.0) % 120 == 0: print("LCHECK   t=%.1f downed=%s down_hp=%.1f revive=%.2f out=%s" % [m.time - t0, B.downed, B.down_hp, B.revive, B.out])
-	var bx := Life.box_of(m, B)
-	print("LCHECK bleed: dead=%s after %.1fs box=%s gems in box=%d" % [B.out, m.time - t0, not bx.is_empty(), int(bx.get("gems", -1))])
-	# 3. box revive: --box-revive-check (tools/box_revive_check.gd) times the channel; here it just brings B back
-	Life.box_revive(m, bx, C)
-	print("LCHECK box revive: back=%s hp %.0f%% gems %d" % [not B.out, B.hp / B.max_hp * 100.0, B.gems])
-	# 4. stomp drain
-	for kk in [B.kin, B.kin2]:
-		if kk: kk.dead = true
-	spot.call(C, home + Vector3(-8, 0, 0))
-	spot.call(foe, B.pos)
-	m.knock(B, foe, {})
-	t0 = m.time
-	run.call(Match.DT); run.call(Match.DT)
-	var pinned: bool = B.get_meta("stomped", false)
-	var stood: bool = foe.get_meta("standing_on", null) == B
-	while not B.out and m.time - t0 < 30.0: run.call(Match.DT)
-	print("LCHECK stomp: dead=%s after %.1fs (expect ~%.1fs at %.1fx) pinned=%s stomper flagged=%s slow=%.2f" % [B.out, m.time - t0, Life.R["bleed_out"] / Life.R["stomp_mult"], Life.R["stomp_mult"], pinned, stood, Life.R["stomp_slow"]])
-	spot.call(foe, m.world.random_ground())
-	# 5. beacon
-	var bc: Dictionary = m.beacons[0]
-	spot.call(C, bc["pos"])
-	t0 = m.time
-	while B.out and m.time - t0 < 12.0: run.call(Match.DT)
-	print("LCHECK beacon: back=%s after %.1fs hp %.0f%% sick %.1fs used=%s" % [not B.out, m.time - t0, B.hp / B.max_hp * 100.0, B.sick_t, bc["used"]])
-	# 6. execute
-	for kk in [B.kin, B.kin2]:
-		if kk: kk.dead = true
-	spot.call(C, home + Vector3(-8, 0, 0)); spot.call(B, home + Vector3(6, 0, 0))
-	m.knock(B, foe, {})
-	spot.call(foe, B.pos + Vector3(0.5, 0, 0)); foe.inp["interact"] = true
-	t0 = m.time
-	while not B.out and m.time - t0 < 10.0:
-		foe.inp["interact"] = true
-		run.call(Match.DT)
-	print("LCHECK execute: dead=%s after %.1fs (stomp drains too)" % [B.out, m.time - t0])
-	# 6b. a committed stomp can't be cancelled by its owner, but a knockback breaks it
-	var W2: Hunter = C
-	for kk in [W2.kin, W2.kin2]:
-		if kk: kk.dead = true
-	spot.call(W2, home + Vector3(2, 0, 3))
-	m.knock(W2, foe, {})
-	spot.call(foe, W2.pos + Vector3(0.5, 0, 0))
-	t0 = m.time
-	while foe.stomp.is_empty() and m.time - t0 < 2.0:
-		foe.inp["interact"] = true
-		run.call(Match.DT)
-	var committed := not foe.stomp.is_empty()
-	for i in 30:
-		foe.inp["interact"] = false      # letting go does nothing once committed
-		foe.inp["move"] = Vector2(1, 0)
-		run.call(Match.DT)
-	var still := not foe.stomp.is_empty()
-	foe.kb_t = m.time
-	run.call(Match.DT)
-	print("LCHECK stomp lock: committed=%s still after letting go=%s broken by knock=%s wisp alive=%s" % [committed, still, foe.stomp.is_empty(), not W2.out])
-	print("LCHECK beacons=%d boxes=%d" % [m.beacons.size(), m.boxes.size()])
-	# 7. Hollow rules: the Boki on you drops dazed beside the box and guards it; an enemy looting the box takes none of it
-	m.tier = 2
-	m.T = Data.TIERS[2]
-	var rec := Save.new_kin("zapple")
-	A.kin = null; A.kin2 = null
-	m.give_kin(A, rec)
-	spot.call(A, home); spot.call(B, home + Vector3(-8, 0, 0)); spot.call(C, home + Vector3(-8, 0, 1))
-	m.eliminate(A, foe, "knocked out")
-	var ab := Life.box_of(m, A)
-	print("LCHECK hollow: kin guarding=%s" % KinLoss.guarding(A.kin))
-	spot.call(foe, ab["pos"])
-	t0 = m.time
-	while not ab["empty"] and m.time - t0 < 4.0:
-		foe.inp["interact"] = true
-		run.call(Match.DT)
-	print("LCHECK hollow loot: foe caught=%d guard still dazed=%s" % [foe.caught.size(), KinLoss.guarding(A.kin)])
-	# 8. Meadow: kin stay safe (hidden) on death and come back on revive
-	m.tier = 0
-	m.T = Data.TIERS[0]
-	spot.call(foe, m.world.random_ground())
-	var B2: Hunter = B
-	B2.kin = null; B2.kin2 = null
-	m.give_kin(B2, Save.new_kin("zapple"))
-	spot.call(B2, home + Vector3(-6, 0, 0))
-	m.eliminate(B2, foe, "knocked out")
-	print("LCHECK meadow: kin state=%s lost=%d" % [B2.kin.state, m.player_lost.size()])
-	# 9. the deathbox loot window: a box with a rare glove and some gems; take one by hand, smart loot the rest
-	var lb: Dictionary = {}
-	for b0 in m.boxes:
-		if not b0.get("empty", true):
-			lb = b0
-	if not lb.is_empty():
-		var gid: String = String(Gear.ALL.keys()[0]) if not Gear.ALL.is_empty() else ""
-		if gid != "": (lb["gear"] as Array).append({"id": gid, "rar": 3})
-		lb["gems"] = int(lb.get("gems", 0)) + 15
-		var looter: Hunter = C
-		looter.gear = Gear.empty_slots(); looter.refresh_gear()
-		var its: Array = Life.box_items(m, looter, lb)
-		var g0 := looter.gems
-		var first: Dictionary = its[0]
-		Life.take_item(m, looter, lb, first)
-		var got := Life.smart_loot(m, looter, lb)
-		print("LCHECK loot window: items=%d took first=%s smart=%d gems +%d gear=%s left=%d empty=%s" % [its.size(), first["name"], got, looter.gems - g0, str(looter.gear), Life.box_items(m, looter, lb).size(), lb["empty"]])
-	get_tree().quit()
-
-## Test: every weapon against a standing target at a couple of ranges, tapping and (for swords)
-## charging, and prints the damage per second it actually lands.
-func _weapon_check() -> void:
-	var only := ""
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--weapon-check="): only = a.substr(15)
-	for ad in Arch.ids():
-		var wid := Arch.signature(String(ad))
-		if only != "" and wid != only:
-			continue
-		var cls := Arch.weight(String(ad))
-		var wd: Dictionary = Data.weapon_stats(wid)
-		var modes: Array = ["tap", "charge"] if wd.has("charge_time") else ["hold"]
-		for mode in modes:
-			for dist in ([1.6] if wd.get("melee", false) else ([1.5, 3.0] if wd.has("pellets") else [3.0, float(wd["range"]) * 0.8])):
-				var m := Match.new()
-				add_child(m)
-				m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": wid, "cls": cls, "arch": ad})
-				m.set_process(false)
-				var P: Hunter = m.player
-				var T: Hunter = null
-				var home := Vector3.ZERO
-				# find flat open ground for both
-				for tries in 400:
-					# the training island first; long sightlines may need the open ground elsewhere
-					var at: Vector3 = m.world.random_ground(m.world.island_of(P.pos.x, P.pos.z)) if tries < 200 else m.world.random_ground()
-					var to := at + Vector3(dist, 0, 0)
-					var ok := true
-					for k in 9:
-						var q := at.lerp(to, k / 8.0)
-						if m.world.is_block(q.x, q.z) or absf(m.world.ground_at(q.x, q.z) - at.y) > 0.01: ok = false
-					if ok:
-						home = at
-						P.teleport(at)
-						T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, to)
-						break
-				if T == null:
-					print("WCHECK %s: no spot" % wid); m.queue_free(); continue
-				T.max_hp = 100000.0; T.hp = T.max_hp; T.armor = 0.0; T.max_armor = 0.0
-				for mb in m.mobs: mb.queue_free()
-				m.mobs.clear()
-				var t := 0.0
-				var dur := 6.0
-				while t < dur:
-					T.teleport(P.pos + Vector3(dist, 0, 0)); T.vel = Vector3.ZERO
-					P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
-					if mode == "tap": P.inp["fire"] = int(t / 0.05) % 2 == 0
-					elif mode == "charge":
-						# hold until the charge is full, then let go for a moment
-						if P.inp["fire"] and P.charge_k() >= 1.0: P.inp["fire"] = false; P.set_meta("rel", 0.5)
-						elif not P.inp["fire"]:
-							P.set_meta("rel", float(P.get_meta("rel", 0.0)) - Match.DT)
-							if float(P.get_meta("rel", 0.0)) <= 0.0:
-								P.inp["fire"] = true
-								P.teleport(home); P.vel = Vector3.ZERO     # lunges carry you off the test strip
-					else: P.inp["fire"] = true
-					m.mobs.clear()
-					m.step(Match.DT)
-					t += Match.DT
-				var dealt := T.max_hp - T.hp
-				print("WCHECK %-12s %-6s dist %4.1f  dps %6.1f  (%d in %ds)" % [wid, mode, dist, dealt / dur, int(dealt), int(dur)])
-				m.queue_free()
-				await get_tree().process_frame
-	get_tree().quit()
-
-## A farm (Home) for headless checks: built, waited for until every slice is in, and set as the current screen.
-func _hb_home():
-	var H = load("res://scripts/home/home.gd")
-	var hm = H.new()
-	add_child(hm)
-	current = hm
-	await get_tree().process_frame
-	await get_tree().process_frame
-	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
-		await get_tree().process_frame
-	return hm
-
+# ------------------------------------------------------------------ kin grammar runtime check
 ## Headless check for boss lairs: every map has them; the dial opens a gate when every arc is hit and
 ## a miss resets the lock, chimes and calls guards; runes and ward stones open theirs; the ward keeps
 ## people out until then; each boss wakes, changes phase at 66% and 33%, enrages, and drops a Rare Egg;
@@ -1310,8 +922,9 @@ func _boss_check() -> void:
 		b.hurt(5.0, P, {"src": "shot"})
 		run.call(0.2)
 		var ew = L.get("egg_wp")
-		var egg_shown: bool = m.lairs.egg_pings.size() > 0
-		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
+		var egg_shown: bool = m.feed_all.any(func(t): return " got the " in String(t) and String(t).ends_with(" Egg"))
+		var egg_n: int = m.hunters.reduce(func(n, h): return n + h.pack.filter(func(it): return Loot.is_rare_egg(it)).size(), 0) + m.wpicks.slice(w0).filter(func(wp): return wp.has("egg")).size()
+		var egg_ok: bool = egg_n == 1 and m.hunters.all(func(h): return h.pack.all(func(it): return not Loot.is_rare_egg(it) or not Data.no_egg(String(it["sp"]))))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
@@ -1326,15 +939,12 @@ func _boss_check() -> void:
 		walk.call(P, Vector2(L["out"].x, L["out"].y), 1.2)
 		ok.call(m.lairs.inside(L, P.pos, 0.0) and gate_shut.call(L), "after the kill: walking at the shut gate keeps you in")
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
-		# a small pile, all of it good, and the egg on its own spot a few steps away
+		# a small pile, all of it good
 		var pile: Array = pile_now.filter(func(wp): return not wp.get("egg", false))
 		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and (pile.any(func(wp): return wp.has("tune")) or P.perks.filter(func(k): return String(k).begins_with("brand_")).size() > brands0)
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
-		var apart := 99.0
-		if ew != null:
-			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
-		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
-			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp))))), apart])
+		ok.call(pile.size() <= 4 and usable and good,
+			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp)))))])
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
@@ -1424,8 +1034,13 @@ func _boss_check() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ok.call(not m.lairs.inside(L, P.pos, 1.0), "after the kill you walk out through the gate (%.1fs)" % tw)
 		ok.call(L["state"] == "cleared" and egg_ok and strong and P.xp > xp0 + 100.0 and egg_shown,
-			"%s falls: a Rare %s on the ground (on everyone's map), an Epic+ weapon, +%d XP" % [b.md["name"], Data.egg_name(String(Pack.ground_item(ew)["sp"])) if ew != null else "?", int(P.xp - xp0)])
-		if ew != null: egg_items.append(ew)
+			"%s falls: exactly one Rare Egg, to one hunter in the pit (told in the feed), an Epic+ weapon, +%d XP" % [b.md["name"], int(P.xp - xp0)])
+		var holder: Array = [P, C].filter(func(h): return h.pack.any(func(it): return Loot.is_rare_egg(it)))
+		if holder.size() == 1:      # (the later steps use it lying on the ground)
+			var egg: Dictionary = holder[0].pack.filter(func(it): return Loot.is_rare_egg(it))[0]
+			holder[0].pack.erase(egg)
+			egg_items.append(m.lairs.drop_egg(L, egg, L["c"]))
+		elif ew != null: egg_items.append(ew)
 	# 6. the egg takes a pack slot: a full pack asks what to leave
 	var ew0: Dictionary = egg_items[0]
 	spot.call(P, ew0["pos"])
@@ -1456,14 +1071,14 @@ func _boss_check() -> void:
 	Save.d["incubator"] = {}; Save.d["rare_eggs"] = []; Save.d["egg"] = {}
 	var out := Game.apply_result({"extracted": true, "haul": Pack.haul(C), "tier": 0, "gems": 0, "kin_runs": []})
 	var q: Array = [Incubator.eggs()[0]] if not Incubator.eggs().is_empty() else []
-	ok.call(q.size() == 1 and Data.is_rare(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
+	ok.call(q.size() == 1 and not Data.no_egg(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
 		"extract: a %s goes to the Incubator %s" % [Data.egg_name(String(q[0]["sp"])) if not q.is_empty() else "?", str(q)])
 	ok.call(not Incubator.eggs().is_empty() and Save.d.get("egg", {}).is_empty() and Save.d.get("rare_eggs", []).is_empty(), "home: it goes straight into the Incubator's cradle (the breeding nest stays free)")
 	var rr := RandomNumberGenerator.new(); rr.seed = 3
 	var inc_egg: Dictionary = Incubator.eggs()[0].duplicate()
 	var baby := Care.hatch_rare(inc_egg, rr)
-	ok.call(Data.is_rare(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(Data.MOBS[String(inc_egg["boss"])]["egg"]),
-		"hatch: a rare %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
+	ok.call(not Data.no_egg(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(inc_egg["sp"]),
+		"hatch: a rare-egg %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
 	# 9. rare kin never turn up wild, on rivals or as a starter
 	var any_rare := false
 	for i in 60:
@@ -1635,114 +1250,6 @@ func _boss_check() -> void:
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
-## Hold animations: a hold keeps its pose while it's refreshed and lets go cleanly when it stops;
-## every kind rides the snapshot flags (bits 11 and 15-18) and decodes back to itself.
-func _hold_check() -> void:
-	Save.no_write = true
-	Save.d = Save.fresh()
-	Econ.ensure()
-	var bad := 0
-	var m := Match.new()
-	add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
-	for i in 5: await get_tree().process_frame
-	var h: Hunter = m.player
-	for k in Hunter.HOLD_KINDS:
-		h.set_hold(String(k))
-		var f: int = m._flags(h)
-		var back := ((f >> 15) & 15) - 1
-		if f & 2048 == 0 or back < 0 or String(Hunter.HOLD_KINDS[back]) != String(k):
-			bad += 1; print("HOLDCHECK FAIL flags for %s: %d" % [k, f])
-	# (the flags never reach the bits other state uses)
-	h.hold_until = 0.0
-	if m._flags(h) & (2048 | (15 << 15)) != 0: bad += 1; print("HOLDCHECK FAIL flags set with no hold")
-	var t := 0.0
-	var peak := 0.0
-	while t < 0.8:
-		h.set_hold("chest")
-		m.step(Match.DT); t += Match.DT
-		await get_tree().process_frame
-		if h.anim: peak = maxf(peak, h.anim.act_k)
-	var held_kind: String = h.anim.act_kind if h.anim else ""
-	t = 0.0
-	while t < 1.0:
-		m.step(Match.DT); t += Match.DT
-		await get_tree().process_frame
-	var after: float = h.anim.act_k if h.anim else 0.0
-	print("HOLDCHECK chest hold: pose %.2f while held (%s), %.2f a second after letting go, holding '%s'" % [peak, held_kind, after, h.holding()])
-	if h.anim and (peak < 0.6 or held_kind != "chest" or after > 0.1): bad += 1; print("HOLDCHECK FAIL pose")
-	if h.holding() != "": bad += 1; print("HOLDCHECK FAIL the hold didn't lapse")
-	print("HOLDCHECK done, failures: %d" % bad)
-	get_tree().quit(1 if bad > 0 else 0)
-
-## Recording mode: F10 cycles off / clean / no HUD, Shift+F10 goes straight to no HUD; the debug and
-## hint nodes hide in clean mode, the HUDs in no-HUD mode, the fps counter goes, tips stop, the camera
-## softens and orbits only with the HUD hidden; turning it off puts everything back as it was.
-func _record_check() -> void:
-	Save.no_write = true
-	Save.d = Save.fresh()
-	Econ.ensure()
-	var bad := [0]
-	var ok := func(cond: bool, what: String) -> void:
-		print("RECCHECK %s %s" % ["ok  " if cond else "FAIL", what])
-		if not cond: bad[0] += 1
-	var press := func(shift: bool) -> void:
-		var e := InputEventKey.new()
-		e.physical_keycode = KEY_F10; e.keycode = KEY_F10; e.pressed = true; e.shift_pressed = shift
-		Overlay._input(e)
-	Settings.set_v("show_fps", true, false)
-	var m := Match.new()
-	add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
-	for i in 5: await get_tree().process_frame
-	var dbg := Label.new(); dbg.text = "debug"; add_child(dbg); Record.hide_in_clean(dbg)
-	var hint_hidden := Label.new(); hint_hidden.visible = false; add_child(hint_hidden); Record.hide_in_clean(hint_hidden)
-	await get_tree().process_frame
-	ok.call(Record.level == 0 and dbg.visible and m.hud.visible and Overlay.fps_lbl.visible, "off: debug label, HUD and fps shown")
-	var cam_off: Array = Record.cam_rates()
-	press.call(false)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	ok.call(Record.level == 1, "F10: clean (level %d)" % Record.level)
-	ok.call(not dbg.visible and m.hud.visible and not Overlay.fps_lbl.visible, "clean: debug label and fps hidden, the HUD stays")
-	ok.call(float(Record.cam_rates()[0]) < float(cam_off[0]) and float(Record.cam_rates()[4]) < 1.0, "clean: the camera follows softer, less shake")
-	m.hud.tip("a tip"); m._tip_t = 99.0
-	var tips_before: int = m.hud.msgs.count()
-	m._tips()
-	ok.call(m.hud.msgs.count() == tips_before, "clean: no new tips queued")
-	press.call(false)
-	await get_tree().process_frame
-	ok.call(Record.level == 2 and not m.hud.visible, "F10 again: no HUD (level %d, hud visible %s)" % [Record.level, m.hud.visible])
-	var y0 := Record.orbit_yaw
-	var e9 := InputEventKey.new(); e9.physical_keycode = KEY_F9; e9.keycode = KEY_F9; e9.pressed = true
-	Overlay._input(e9)
-	for i in 10: await get_tree().process_frame
-	ok.call(Record.orbit and absf(Record.orbit_yaw - y0) > 0.0001, "F9: the camera orbits (%.3f rad)" % Record.orbit_yaw)
-	press.call(false)
-	for i in 3: await get_tree().process_frame
-	ok.call(Record.level == 0 and dbg.visible and not hint_hidden.visible and m.hud.visible and Overlay.fps_lbl.visible and not Record.orbit, "F10 a third time: off, all back as it was (a hidden one stays hidden)")
-	press.call(true)
-	await get_tree().process_frame
-	ok.call(Record.level == 2 and not m.hud.visible and not dbg.visible, "Shift+F10: straight to no HUD")
-	press.call(true)
-	await get_tree().process_frame
-	ok.call(Record.level == 1 and m.hud.visible, "Shift+F10 again: back to the clean HUD")
-	Record.set_level(0)
-	await get_tree().process_frame
-	ok.call(InputMap.has_action("record") and Settings.ACTIONS.any(func(a): return a[0] == "record"), "F10 is a rebindable action (%s)" % Settings.key_cap("record"))
-	# Settings > Demo: clear weather, no Blight, bots hold off fresh landers longer (offline matches)
-	var o0 := Settings.demo_opts({})
-	ok.call(not o0.has("raid") and not o0.has("blight") and not o0.has("fresh_t") and RaidLook.rolls({"big": true}), "demo settings at their defaults change nothing")
-	Settings.set_v("demo_weather", "clear", false); Settings.set_v("demo_blight", false, false); Settings.set_v("demo_fresh", "long", false)
-	var o1 := Settings.demo_opts({"teams": 10})
-	ok.call(RaidLook.pick(o1, 12345) == "clear" and not BlightDir.enabled(o1) and float(o1.get("fresh_t", 0.0)) == Settings.DEMO_FRESH_T, "demo settings: clear weather, no Blight, %ds for fresh landers" % int(Settings.DEMO_FRESH_T))
-	var seen := {}
-	for sd in 40: seen[RaidLook.pick(Settings.demo_opts({}), sd + 1)] = true
-	ok.call(seen.keys() == ["clear"], "always clear over 40 seeds (%s)" % ", ".join(seen.keys()))
-	Settings.set_v("demo_weather", "random", false); Settings.set_v("demo_blight", true, false); Settings.set_v("demo_fresh", "normal", false)
-	print("RECCHECK done, failures: %d" % bad[0])
-	get_tree().quit(1 if bad[0] > 0 else 0)
-
 ## Balance probe for the 90 s seal: a squad of three bots (skill 0.6) walks into each boss's lair and
 ## fights it for real; prints how long the kill takes (or that the seal would have failed).
 func _boss_ttk() -> void:
@@ -1952,7 +1459,7 @@ func _social_cmd(c: String, current) -> void:
 			if p.size() > 3: Save.add_seed(p[3], 3)
 			_soc_reply(true)
 		"soc:publish": Social.publish_profile(true); _soc_reply(true)
-		"soc:create": Social.create_guild(p[2], "We test things", func(okk): _soc_reply(okk))
+		"soc:create": Social.create_guild(p[2], "We test things", "", func(okk): _soc_reply(okk))
 		"soc:join": Social.join_guild(p[2], func(okk): _soc_reply(okk))
 		"soc:leave": Social.leave_guild(func(): _soc_reply(true))
 		"soc:guilds": Social.list_guilds(func(rows): _soc_reply(rows))
@@ -1978,3 +1485,13 @@ func _social_cmd(c: String, current) -> void:
 				current.ppos = Vector3(float(p[2]), 0, float(p[3]))
 			_soc_reply(true)
 
+func _hb_home():      # the farm for the checks that build one (tools/*_check.gd call main._hb_home())
+	var H = load("res://scripts/home/home.gd")
+	var hm = H.new()
+	add_child(hm)
+	current = hm
+	await get_tree().process_frame
+	await get_tree().process_frame
+	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
+		await get_tree().process_frame
+	return hm

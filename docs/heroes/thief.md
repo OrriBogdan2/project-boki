@@ -48,6 +48,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel distance | 105-144 px, about 4.5m (3.9-5.4) [footage] | 4.5m x the global dash feel = 3.8m | 4.5m (taken off the global dash feel, content/rules/dash_feel.json) |
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
+| Cartwheel exit | upright and moving by about 0.5s; the speed runs down into the hasted run with no dip (415 -> 315 -> 211 -> 154 -> 140 px/s, then 127-136); the shot can leave mid-flip (0193) [footage] | the fitted curve (decision 0025, dash_feel.json "thief") ended at 0.25 of its mean, 2.6 m/s under the 5.5 m/s hasted run: four steps under it past the peak, the hand-over at 0.47x, then the walk back up | on the ground the curve's tail past its peak never drops under her hasted run (`ThiefKit._tick_curve`; the crouch ramp and the peak are the fit's): hand-over at 1.0x, no step under it, a bolt on the step the flip ends (`--move-feel-check` vault_exit_run, vault_slow_frames, vault_shot_gap_frames); the air cartwheel's carry (owner 11-09) unchanged |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
 | Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | 5s, 1 charge (the data wins over the card, as for the LMB range; `--kit-parity-check` row `thief Shift dash.cd`; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
@@ -137,7 +138,7 @@ Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none t
 | Field | Source | Ours | Verdict |
 |---|---|---|---|
 | Throw: sticks in the first foe, else lands at the end of its path | [F] 0222-0258; [D] "throw a dagger" | same, to the cursor | match |
-| `range` | [D] none. [F] a throw with no target landed about 9 bh (16.2 m) away, at the cursor or the end of range; the max is not seen | 14 m | [?] 14 is shorter than the one throw seen; the max is unknown |
+| `range` | [D] none. [F] a throw with no target (0222, landed 0226) flew 284 px over a 34 px body height = 8.3 bh (15.0 m), past the cursor, so the end of its path | 15 m | match; locked in kit_parity (tol 0.5), docs/KIT_PARITY.md |
 | `speed` | [F] about 25 bh/s (45 m/s), read at 5 fps | 40 m/s | match within footage error (16.2 m in 0.41 s against 0.36 s, a quarter of a frame); locked 45 +-5 |
 | `dmg` | [D] the card gives no damage (every other Shiv row has one); [F] no number read on the stick (0255-0258) | 8 (0.62 of a bolt) | [?] |
 | `slow` | [D] none; [F] the panel says "Slows", the dummy slowed (0258); wiki Q: 50% | 0.5 | match (wiki); locked |
@@ -205,7 +206,7 @@ pass above.
 | LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
 | LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
 | LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
-| LMB | move while firing | 77-86 px/s firing against 113 in three stretches: 68-76% [footage] | 90% of the run | 72% (`fire_slow`, cast-move pass 2026-11-11, docs/KIT_PARITY.md); asserted 66-78% |
+| LMB | move while firing | 92.5 px/s over 1.4 s of held fire against 128-130 on plain runs: 0.71 [footage 0008-0015; docs/MOVEMENT_FEEL.md] | 90% of the run | 71% (arc_bolts `fire_slow`); asserted 0.67-0.75 |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, R | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
@@ -367,6 +368,19 @@ in the middle and just out of reach, then one dummy the ring passes over while s
 No data row was changed: nothing in `x` contradicts a single sourced value; the two gaps are the cap and the damage, both owner balance calls
 filed above. The old `--dj-ult-check` and `--dancer-parity-check` names are sections of `--dancer-combo-check`.
 
+## Telegraphs (drawn = hit, ported from telegraph-audit-c onto the 0.24.5 tells)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--dancer-combo-check` (`tools/dancer_jug_check.gd`, `tools/dj_ult_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Bola (RMB) | a chevron lane `lane_len()` (10.8 m) long, `bola.lane_w` 1.8 m wide (the parity row, footage: about 1 bh) | the flight catches a foe whose body comes within `lane_w / 2 - her radius` (0.516 m) of it: a 1.8 m corridor for a foe her size | caster | the hit reached a magic 0.45 m past the body (a 1.67 m corridor); now it reads the reach off the drawn lane (+0.066 m a side). Asserted at the lane's edge both ways |
+| Grounded | two yellow binding rings round the foe | status marker, no area | all | kept (the source shows the rings) |
+| Knife (E) | the dagger's arrival circle, 1.6 m | the blink's arrival point | caster | kept (source arrival marker), no hit area |
+| Encore (X) | a thin ring (`RING_W` 0.25 m band) whose outer edge grows from `x.r0` 2.3 to `x.reach` 5.4 m over `x.grow`, and a dashed outer band at `x.rim` 0.75 of it | a blade at every foe inside `radius()`; past the band hits harder | all | already true on 0.24.5 (no beat swell); now asserted on every beat |
+
+Suggestion, not built: the source's knife ring is about 1.5 bh (2.7 m) across; ours is 1.6 m.
+
 ## Combinations
 
 All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `--dancer-combo-check`
@@ -522,6 +536,6 @@ dagger is lost; holding the step until she is free would read better.
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); R reaches it through
   `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared R base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
-  Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
+  Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

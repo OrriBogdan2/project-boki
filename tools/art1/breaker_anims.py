@@ -1,8 +1,8 @@
 """Breaker the Barnacle Knight's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
-(content/archetypes/bulwark.json, KMovesPinBjorn), then the .glb export:
+(content/archetypes/bulwark.json, KMovesBjorn), then the .glb export:
   blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
 He is a walking hull: everything starts from the ball of his body rocking on two stubby legs, and the drum's weight
-arrives late."""
+arrives late. After the export run tools/art1/breaker_retime.sh: it spreads the throw's and the slam's hand travel evenly."""
 import json
 import math
 import os
@@ -14,6 +14,7 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import anim_kit as A
+import fine_export
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
@@ -127,7 +128,7 @@ TH_OUT = dict(pos=(0, 0.06, -0.03), rot=(-20, 4, 20), head=(12, 0, -14), gr=sp(-
               fing_r=0.05, thumb_r=0.1, fra=-14.0, fr=(AX, -0.08, AZ + 0.01), fl=(-AX, 0.09, AZ), e="io")
 C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(TH_BACK, e="io")), (0.11, TH_TOP), (0.19, TH_OUT),
                           (0.3, dict(rot=(-14, 2, 16), gr=sp(0.04, 0.34, -0.2), fing_r=0.25)),
-                          (0.5, merged(CARRY, FREE, rot=(0, 0, 0), fra=0.0))])
+                          (0.5, merged(CARRY, FREE, rot=(0, 0, 0), fra=0.0))], fps=60)
 # the recall: the empty hand goes out for it, the catch rocks him back on his heels
 C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
                              (0.176, dict(rot=(-8, 0, 12), head=(4, 0, -10), gr=sp(-0.03, 0.42, 0.02), gd=(0, 0.9, 0.4), ga=(0, -0.4, 0.9), er=(1, 0, -0.3), fing_r=0.0, thumb_r=0.0)),
@@ -155,11 +156,11 @@ def whirl_over(t, p):
 
 
 C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.58, 0.0, 1.02), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
-# the release (0.5 s): up behind him, the impact at 0.08: the hull slams forward onto its toes, a shudder, then he hauls it up
+# the release (0.5 s): up behind him, the impact at 0.08 (kept by breaker_retime.sh, which evens out the arc before it): the hull slams forward onto its toes, a shudder, then he hauls it up
 UP = merged(WIND, OVER, rot=(9, 0, -8))
 IMP = dict(pos=(0, 0.1, -0.05), rot=(-24, 3, 8), hips=(-6, 0, 6), head=(12, 0, -6), gr=sp(-0.1, 0.44, -0.3), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
            fr=(AX, -0.11, AZ + 0.02), fl=(-AX, 0.12, AZ), fra=-20.0, e="io")
-C.bake("lmb_slam", 0.5, [(0, UP), (0.08, IMP), (0.16, dict(pos=(0, 0.1, -0.06), rot=(-26, 3, 8), e="io")), (0.5, merged(STANCE, fra=0.0))])
+C.bake("lmb_slam", 0.5, [(0, UP), (0.08, merged(IMP, e="lin")), (0.16, dict(pos=(0, 0.1, -0.06), rot=(-26, 3, 8), e="io")), (0.5, merged(STANCE, fra=0.0))], fps=60)
 # the perfect launch (0.85 s): the ball leaves the ground, feet tucked under, and lands drum-first
 C.bake("lmb_launch", 0.85, [(0, UP),
                             (0.09, dict(pos=(0, 0.06, 0.08), rot=(-8, 0, 6), gr=sp(0.0, 0.2, 0.42), gd=(0.05, 0.3, 0.95), ga=(0, 0.95, -0.3), fr=(AX, -0.08, AZ + 0.02), fl=(-AX, 0.1, AZ + 0.05), e="io")),
@@ -183,6 +184,11 @@ def guard_over(t, p):
 C.bake("rmb_guard", 0.72, [(0, CARRY), (0.1, merged(GUARD, e="out")), (0.72, {})], over=guard_over)
 C.bake("guard_break", 0.65, [(0, GUARD), (0.06, dict(pos=(0, -0.06, 0.0), rot=(14, -5, 6), head=(-10, 0, 0), sh=sl(0.06, 0.24, 0.0), sn=(-0.6, 0.6, 0.5), e="snap")),
                              (0.3, dict(rot=(4, 0, 2), sh=sl(0.06, 0.12, -0.38), sn=(-0.86, 0.5, 0))), (0.65, CARRY)])
+# the boop (0.36 s, BjornBoop): LMB behind the aegis. A small draw back, the door punched out at 0.13, settled home by 0.3
+C.bake("shield_boop", 0.36, [(0, GUARD), (0.07, merged(GUARD, pos=(0, -0.03, -0.07), rot=(-2, 0, -7), sh=sl(-0.26, 0.3, -0.34), e="out")),
+                             (0.13, merged(GUARD, pos=(0, 0.09, -0.05), rot=(-20, 0, 5), sh=sl(-0.32, 0.64, -0.31), sn=(-0.05, 1, 0.08),
+                                           fr=(AX, -0.1, AZ), fl=(-AX, 0.1, AZ), fra=-12.0, e="snap")),
+                             (0.3, merged(GUARD, e="out")), (0.36, GUARD)])
 C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(rot=(-5, 0, -8), head=(6, 0, 8), sh=sl(-0.04, 0.22, -0.3), e="out")), (0.35, CARRY)])
 
 # ---------------------------------------------------------------------- Shift
@@ -216,8 +222,14 @@ C.bake("e_mend", 0.95, [(0, CARRY),
 # ---------------------------------------------------------------------- X, Faultline
 UW = merged(WIND, pos=(0, 0, -0.04), rot=(12, 0, 0), head=(-10, 0, 0), gr=sp(-0.04, -0.06, 0.43), gd=(-0.1, -0.5, 0.85), ga=(0, 0.85, 0.5), er=(1, 0, 0.1),
             sh=sl(0.06, 0.06, -0.32), fr=(AX + 0.03, -0.05, AZ), fl=(-AX - 0.02, 0.06, AZ))
-C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.05), e="out")), (0.4, UW), (0.5, dict(pos=(0, 0, -0.035)))])
-C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.06), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
+# the hop (BjornUlt.leap_y; the game lifts him 1.2 m): a crouch, legs tucked with the hammer high overhead, a hang
+# arching back, then the drive down into the slam
+TUCK = dict(fr=(AX + 0.03, -0.02, AZ + 0.12), fl=(-AX - 0.02, 0.08, AZ + 0.16))
+C.bake("x_wind", 0.5, [(0, CARRY), (0.06, merged(CARRY, pos=(0, 0.02, -0.12), rot=(-10, 0, 0), e="out")),
+                       (0.2, merged(UW, TUCK, pos=(0, 0, 0.02), e="out")),
+                       (0.32, merged(UW, TUCK, rot=(20, 0, 0), head=(-16, 0, 0), gr=sp(-0.04, -0.12, 0.46))),
+                       (0.4, merged(UW, rot=(-4, 0, 0), e="snap")), (0.5, dict(pos=(0, 0, -0.035)))])
+C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.12), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
                        (0.2, dict(pos=(0, 0.1, -0.07), rot=(-32, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.06), rot=(-24, 0, 2))), (0.6, merged(STANCE, fra=0.0))])
 
 # ---------------------------------------------------------------------- crouch (item 143): a hammer-brace. The hull sinks and tips
@@ -256,7 +268,26 @@ DOWN = merged(CARRY, pos=(0, -0.08, 0.05), rot=(38, 8, 6), hips=(0, 0, 4), head=
               fr=(AX + 0.03, 0.12, AZ + 0.04), fl=(-AX - 0.03, 0.1, AZ + 0.06))
 C.bake("downed", 1.6, [(0, DOWN), (1.6, {})], over=breathe(1.6, 0.8))
 C.bake("stun", 0.9, [(0, merged(CARRY, rot=(-4, 5, 0), head=(-4, 0, 0))), (0.45, dict(rot=(-4, -5, 6), head=(-4, -10, -8))), (0.9, dict(rot=(-4, 5, 0), head=(-4, 0, 0)))])
-C.bake("revive", 1.0, [(0, merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)), (0.5, dict(rot=(-27, 0, 0))), (1.0, dict(rot=(-24, 0, 0)))])
+# Finishing a downed foe (Hunter.stomp: one stomp = 0.7 s, the hit lands at 0.49 s), reviving a friend, a sip (1.1 s, upper body only).
+# He can't lunge: the hull rocks back onto the left foot, the right comes up late and slowly, and the whole weight drops on the beat.
+REST = merged(CARRY, rot=(0, 0, 0))
+ST_UP = merged(CARRY, pos=(0, -0.02, 0.0), rot=(12, 0, -8), hips=(2, 0, -6), head=(-8, 0, 6), fr=(AX + 0.02, 0.1, AZ + 0.15), fra=-22.0, fl=(-AX, 0.04, AZ),
+               gr=sp(0.12, 0.1, -0.26), sh=sl(0.14, 0.08, -0.34), sn=(-0.9, 0.4, 0.0))
+ST_HIT = merged(CARRY, pos=(0, 0.1, -0.07), rot=(-18, 0, 7), hips=(-3, 0, 4), head=(10, 0, -4), fr=(AX + 0.03, 0.11, AZ), fra=0.0, fl=(-AX, 0.02, AZ),
+                gr=sp(0.04, 0.22, -0.44), gd=(0.1, 0.5, -0.9), sh=sl(0.0, 0.22, -0.44), sn=(-0.7, 0.6, 0.0), e="snap")
+C.bake("stomp", 0.7, [(0, REST), (0.3, merged(ST_UP, e="out")), (0.4, dict(pos=(0, -0.02, 0.012), rot=(15, 0, -9), fr=(AX + 0.02, 0.1, AZ + 0.17), e="in")), (0.49, ST_HIT),
+                      (0.56, dict(pos=(0, 0.1, -0.095), rot=(-21, 0, 7), e="out")), (0.7, REST)])
+# the kneel: no knees to kneel on, so he sinks into the hull, tips over his friend and presses with both hands, hammer hand and door hand alternating
+REV = merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)
+C.bake("revive", 1.2, [(0, REV), (0.3, dict(rot=(-29, 0, 0), pos=(0, 0.05, -0.1), gr=sp(-0.1, 0.4, -0.48), sh=sl(-0.2, 0.42, -0.4), e="out")),
+                       (0.6, dict(rot=(-24, 0, 0), pos=(0, 0.04, -0.07), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.42))),
+                       (0.9, dict(rot=(-29, 0, 0), pos=(0, 0.05, -0.1), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.5), e="out")),
+                       (1.2, dict(rot=(-24, 0, 0), pos=(0, 0.04, -0.07), gr=sp(-0.1, 0.4, -0.4), sh=sl(-0.2, 0.42, -0.42)))], loop=True)
+# the sip: the door hand lifts to the helmet (the door itself stays put), the whole hull leans back, the head tips, he swallows
+SIP = dict(rot=(8, 0, 0), head=(-18, 0, 0), sh=sl(0.02, 0.2, -0.12))
+C.bake("drink", 1.1, [(0, merged(CARRY, rot=(0, 0, 0))), (0.25, dict(sh=sl(0.06, 0.12, -0.28), rot=(3, 0, 0), e="out")), (0.45, dict(SIP, e="out")),
+                      (0.65, dict(SIP, head=(-22, 0, 0), rot=(7, 0, 0))), (0.85, dict(SIP, sh=sl(0.04, 0.18, -0.2), head=(-6, 0, 0), rot=(3, 0, 0))),
+                      (1.1, merged(CARRY, rot=(0, 0, 0)))])
 C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 0), head=(-14, 0, 0))),
                       (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.14, 0.3), rot=(80, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.14, 0.34), rot=(86, 8, 10)))])
 
@@ -307,10 +338,10 @@ if OUT_GLB != "-":
         st = tr.strips.new(act.name, 0, act)
         ad.action = None
     bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.export_scene.gltf(filepath=OUT_GLB, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="NLA_TRACKS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=93, export_extras=False, export_force_sampling=True,
-                              export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False,
-                              export_vertex_color="MATERIAL")
+    fine_export.export(arm, C.rates, OUT_GLB, dict(
+        export_format="GLB", use_selection=True, export_apply=False, export_animations=True, export_animation_mode="NLA_TRACKS",
+        export_skins=True, export_yup=True, export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=93,
+        export_extras=False, export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False,
+        export_def_bones=False, export_vertex_color="MATERIAL"))
     print("exported", os.path.getsize(OUT_GLB))
 print("clips", json.dumps(C.lengths))

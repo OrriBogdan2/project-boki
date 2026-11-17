@@ -16,6 +16,7 @@ var beach_at := {}                  # foe instance id -> time it can be Beached 
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
+var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
 var swim_t := 0.0                   # Ground Swim under way
 var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
 var spin_tick := 0.0
@@ -366,7 +367,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class long dash in the air: no ground to swim through, so no dive and no surfacing
 		if spend_dash(true):
-			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
+			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust", "feel": "long"})
 		return true
 	if not spend_dash(false):
 		return true
@@ -402,6 +403,12 @@ func cast_e() -> bool:
 
 func e_recastable() -> bool:
 	return spin_t >= 0.0
+
+## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+func recast_window() -> Dictionary:
+	if spin_t < 0.0:
+		return {}
+	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
 
 func e_recast() -> bool:
 	if spin_t < 0.0:
@@ -584,7 +591,7 @@ func _tick(dt: float) -> void:
 	glow_t -= dt
 	if glow_t <= 0.0 and not h.unseen and h.visible and not h.out:
 		glow_t = 0.3
-		m.fx.burst(HeroVfx.of(m).anchor_pos(h, "hand_l"), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
+		m.fx.debris(HeroVfx.of(m).anchor_pos(h, "hand_l"), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
 
 func _drop_holds() -> void:
 	spin_t = -1.0

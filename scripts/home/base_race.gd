@@ -34,9 +34,9 @@ const STRETCH_COL := {
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
 
-## Weeks since 1970 by the real clock.
-static func week_now() -> int:
-	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
+## Weeks since 1970 by the device clock (default now), or at `now` in unix seconds.
+static func week_now(now := -1.0) -> int:
+	return int((now if now >= 0.0 else Time.get_unix_time_from_system()) / float(rules()["week_s"]))
 
 ## The weekly event format for a week number (default this week): {id, game, name, note, plus its tweak:
 ## mult?, wobble?, swap?, night?, to_win?}.
@@ -44,10 +44,11 @@ static func twist(week := -1) -> Dictionary:
 	var list: Array = rules()["twists"]
 	return list[(week if week >= 0 else week_now()) % list.size()]
 
-## This week's format when it is for this game ("dash", "seek", "volley"), else {}: the game plays as usual.
-static func tweak(game: String) -> Dictionary:
-	var f := twist()
-	return f if String(f["game"]) == game else {}
+## The week's format (default this week) when it is for this game ("dash", "seek", "volley", "shove"),
+## else the in-season zone's twist when the season is this game's (GardenSeasons), else {}: plays as usual.
+static func tweak(game: String, week := -1) -> Dictionary:
+	var f := twist(week)
+	return f if String(f["game"]) == game else GardenSeasons.twist(game, week)
 
 ## A zone's course: its four stretches {kind, mult, pts, len}, `pts` the points after the previous stretch's end
 ## (the first starts at the line, [0, 0]) and `len` their length in m, worked out here. A zone with none
@@ -299,6 +300,7 @@ static func settle(run: Run) -> Dictionary:
 	for i in run.duo:
 		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
 	var backed_won: bool = order[0] == run.backed
+	if backed_won: ClanBoard.add("cup")       # the garden cup for the clan board (until cups land)
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
@@ -338,6 +340,7 @@ var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
 var beats: RaceBeats = null    # the runners' crouch, burst and finish clips (kept on after the race until played)
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
+var cue: GardenCues.DashCue = null   # the cheer marks and finish line while a lap runs
 
 func _init(home) -> void:
 	h = home
@@ -398,11 +401,13 @@ func _post_model() -> void:
 	flag.position = Vector3(0.32, ground(post.position) + 1.4, 0)
 	post.add_child(flag)
 	var sign_t := Label3D.new()
-	sign_t.text = "This week, %s: %s\n%s" % [String(twist()["game"]).capitalize(), twist()["name"], twist()["note"]]
+	var season := GardenSeasons.season()
+	sign_t.text = "This week, %s: %s\n%s\nIn season: %s, %s" % [String(twist()["game"]).capitalize(),
+			twist()["name"], twist()["note"], season["name"], GardenSeasons.twist(season["game"])["name"]]
 	sign_t.font_size = 28
 	sign_t.pixel_size = 0.004
 	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign_t.position = Vector3(0.3, ground(post.position) + 1.85, 0)
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.92, 0)
 	post.add_child(sign_t)
 
 static func mat(c: Color) -> StandardMaterial3D:
@@ -413,6 +418,13 @@ static func mat(c: Color) -> StandardMaterial3D:
 func ground(p: Vector3) -> float:
 	var g: float = h._ground_h(p.x, p.z)
 	return g if g > -50.0 else 0.0
+
+## Corner i of the loop in the world: the line, then the end of each stretch (the last one closes back on it).
+func _corner(i: int) -> Vector3:
+	if i % 4 == 0:
+		return start
+	var q: Array = course(GardenZones.here)[i % 4 - 1]["pts"][-1]
+	return start + Vector3(q[0], 0.0, q[1])
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or relay.run != null or not is_instance_valid(post):
@@ -495,6 +507,10 @@ func _begin(ks: Array) -> void:
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
+	var marks: Array = []
+	for i in range(1, 4):
+		marks.append(_corner(i) + Vector3(0, ground(_corner(i)), 0))
+	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, ground(_corner(0)), 0), TRACK_W)
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
@@ -541,6 +557,8 @@ func tick(d: float) -> void:
 		return
 	bar.step(d)
 	_place_runners()
+	var home_done: bool = float(run.done_t[run.backed]) >= 0.0
+	cue.update(3 if home_done else int(run.stretch[run.backed]), run.can_cheer(), d)
 	_hear_laps()
 	if run.over():
 		_end(true)
@@ -605,6 +623,8 @@ func _end(finished: bool) -> void:
 	else:
 		beats.stop()
 	bar.close()
+	cue.clear()
+	cue = null
 	if finished:
 		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
@@ -623,8 +643,8 @@ func _end(finished: bool) -> void:
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.
 func pin(win: Dictionary, game: String) -> bool:
-	var fmt := tweak(game)
-	if fmt.is_empty():
+	var fmt := twist()
+	if String(fmt["game"]) != game:
 		return false
 	var node: Node3D = h._kin_entry(win)["node"]
 	BaseShowcase.add(win, fmt, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))

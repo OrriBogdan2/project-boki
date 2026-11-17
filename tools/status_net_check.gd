@@ -39,7 +39,36 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
+	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
+	dir = ProjectSettings.globalize_path("user://status_net")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var relay := RelayServer.new()
+	main.add_child(relay)
+	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
+	ok(await _connect(), "the host is on the relay as %s" % Net.me)
+	guest_pid = CheckChild.start("%s --dn-port=%d" % [GUEST_ARG, port], dir.path_join("guest.log"))
+	var other := ""
+	var t0 := Time.get_ticks_msec()
+	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
+		await main.get_tree().create_timer(0.5).timeout
+		for id in Net.peers:
+			if String(id) != Net.me: other = String(id)
+	ok(other != "", "the guest joins the relay", other)
+	if other == "":
+		return _end()
+	var d := {"mid": "sn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
+		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
+		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
+	Net.lobby_emit("dn", {"c": "start", "d": d})
+	await _build(d)
+	var G: Hunter = m.ents_by_id.get("P" + other, null)
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
+		await _run(0.2)
+		G = m.ents_by_id.get("P" + other, null)
+	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
 	if G == null:
 		return _end()
 	await _cinder(G)

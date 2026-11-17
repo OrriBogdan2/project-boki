@@ -87,9 +87,10 @@ func press_ult() -> bool:
 	h.cast_at = m.time
 	h.cast_slot = "ult"
 	h.used["r"] = int(h.used.get("r", 0)) + 1
-	m.sfx("charge", h.pos, 0.0, 0.6)
-	m.sfx("warn", h.pos, -4.0, 0.7)
-	play(MergeMoves.ult_move(String(form["id"])))
+	if not MergeSfx.play(h, "cast"):
+		m.sfx("charge", h.pos, 0.0, 0.6)
+		m.sfx("warn", h.pos, -4.0, 0.7)
+	play("mf_ult")
 	var tx: Vector3 = _ult_target(r)
 	announce("ult", tx, _tell_radius(r), float(r.get("end", 1.0)))
 	CombatBus.ability_used.emit(h, "%s_r" % form["id"], "ult")
@@ -139,7 +140,9 @@ func _run_beats() -> void:
 			"strike_all":
 				_strike_all(b)
 		if b.has("effects"):
-			Effects.run(b["effects"], h, {"slot": "ult", "ability": "%s_ult" % form["id"], "level": 1, "reach": float(r.get("range", 0.0))})
+			var ctx := {"slot": "ult", "ability": "%s_ult" % form["id"], "level": 1, "reach": float(r.get("range", 0.0)),
+				"hit_snd": MergeSfx.hit_ctx(h)}
+			Effects.run(b["effects"], h, ctx)
 
 ## Thunderhead: one bolt from above on every foe in range.
 func _strike_all(b: Dictionary) -> void:
@@ -151,9 +154,8 @@ func _strike_all(b: Dictionary) -> void:
 		m.fx.bolt(f.pos + Vector3(0, 8.0, 0), f.pos + Vector3(0, 0.8, 0), col)
 		m.fx.flash(f.pos + Vector3(0, 0.9, 0), Color.WHITE, 1.3, 0.12)
 		f.hurt(float(b.get("dmg", 40.0)) * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "strike"], "stun": float(b.get("stun", 0.0)), "dr": true})
-	m.sfx("boom", h.pos, -1.0, 0.8)
-	m.sfx("zap", h.pos, 0.0, 0.7)
-	m.shake(0.6, h.pos)
+	MergeSfx.play(h, "hit")
+	Shake.incoming_big(m, h.pos, 0.6, h)
 	if h.is_local() and m.cam:
 		m.cam.punch(0.1)
 
@@ -190,14 +192,11 @@ func info() -> Dictionary:
 		"ready": lock_left() <= 0.0 and not ulting(), "form": form, "plan": "ult", "timer": float(h.merge_st.get("t", 0.0)), "timer_max": float(h.merge_st.get("T", 1.0)), "ulting": ulting(),
 		"col": form["glow"], "charges": 0, "max_charges": 0, "verb": "", "level": 1}
 
-## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel), and
-## for a beat after the merge ends the release. A form move that has played out leaves the hero's own moves showing.
-## Other games read the pose id the owner syncs (KinNet) from the hunter's meta, the release too: the owner sends it
-## only while no newer move of the hero's shows, in the snapshot that carries the kit's move id.
+## Hunter._anim_state: the keyed pose the form is playing (MergeMoves, through HunterAnim's kit-move channel).
+## Other games read the pose id the owner syncs (KinNet) from the hunter's meta.
 static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	var id := ""
 	var at := 0.0
-	var now: float = hunter.m.time
 	var k := of(hunter)
 	if k != null:
 		id = k.anim_id
@@ -205,29 +204,12 @@ static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	elif hunter.remote:
 		id = String(hunter.get_meta("kpose", ""))
 		at = float(hunter.get_meta("kpose_at", -9.0))
-	elif releasing(hunter):
-		id = MergeMoves.RELEASE
-		at = float(hunter.get_meta(MergeMoves.OUT_AT))
-	# (the release gives way to a move the hero starts after it: a wall move too, not only the kit's)
-	var shown := String(s.get("kmove", ""))
-	var hero_move: bool = not shown.begins_with("mf_") and float(s.get("kmove_t", 99.0)) < now - at
-	if not MergeMoves.playing(id, now - at) or (id == MergeMoves.RELEASE and hero_move):
-		id = ""
-	if id != "":
+	if id.begins_with("mf_"):
 		s["kmove"] = id
-		s["kmove_t"] = now - at
+		s["kmove_t"] = hunter.m.time - at
 	elif String(s.get("kmove", "")).begins_with("mf_"):
 		s.erase("kmove")
 		s.erase("kmove_t")
-
-## The owner's release shows: its merge ended under the move's length ago and the hero's kit started no move since.
-static func releasing(hunter: Hunter) -> bool:
-	if KinMerge.active(hunter) or not hunter.has_meta(MergeMoves.OUT_AT):
-		return false
-	var out_at := float(hunter.get_meta(MergeMoves.OUT_AT))
-	if hunter.ak != null and hunter.ak.anim_id != "" and hunter.ak.anim_at >= out_at:
-		return false
-	return MergeMoves.playing(MergeMoves.RELEASE, hunter.m.time - out_at)
 
 # ------------------------------------------------------------------ bots
 ## How a bot plays the window: the ultimate when foes are in its range or the window is about to close (its hero kit is the bot's usual play).

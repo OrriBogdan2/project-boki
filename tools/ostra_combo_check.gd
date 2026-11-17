@@ -72,7 +72,8 @@ func _ostra() -> void:
 	var card: Dictionary = K.d["card"]
 	ok(
 		"card: a role line and one line each for LMB, RMB, E, Shift and the passive",
-		["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		["role", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		and not (card.get("weapons", {}) as Dictionary).is_empty()   # the LMB line is the weapon's (kit card rewrite)
 	)
 	# ---- the reticle: a thin line to the cursor all the time
 	reset.call()
@@ -255,7 +256,7 @@ func _ostra() -> void:
 		"data: a full orb slows 6% for 1.5s (the in-game card; the wiki's 10% is outranked)",
 		absf(slow_k - 0.06) < 0.001 and absf(slow_t - 1.5) < 0.001, "%.3f for %.2fs" % [slow_k, slow_t]
 	)
-	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -537,11 +538,11 @@ func _ostra() -> void:
 			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
 	ok(
 		"data rank 3: Snap speeds him up 11% on the cast and 22% on a hit",
-		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
-		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
+		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.speed_bonus() - 0.215) < 0.01,
+		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.speed_bonus()]
 	)
 	step(m, 2.2)
-	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	P.slot_lv["sec"] = 1
 	# ---- data pass, Trade rank 3 (the source's tier IV): allies in his 1.5m ring as he leaves get 375 of Void's 1150
 	# health as a shield for 3s, so 32.6% of his 145 (docs/heroes/ostra.md); none at the landing or past the ring
@@ -859,7 +860,7 @@ func _ranks(P: Hunter, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))

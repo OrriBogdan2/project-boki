@@ -71,7 +71,7 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
-var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
 var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
@@ -298,7 +298,7 @@ func _tick(dt: float) -> void:
 ## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
-	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.transforming(h):
+	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
 		AimKit.hide(h, "aim_glow")
 		return
 	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
@@ -346,8 +346,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func move_k() -> float:
-	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+func speed_bonus() -> float:
+	return vault_haste() if haste_t > 0.0 else 0.0
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
@@ -368,7 +368,7 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.transforming(h):
+	if KinMerge.active(h):
 		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
@@ -430,6 +430,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
+		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
@@ -469,10 +470,10 @@ func on_dash(use_ex: bool) -> bool:
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
-	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	var extra := {"invuln": 0.1, "feel": "long"} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air, "aloft": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -484,7 +485,7 @@ func _empowers(use_ex: bool) -> bool:
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
-## it ends where she lands.
+## it ends where she lands (not the long dash on the ground: cutting that one leaves its full speed unhanded).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -493,8 +494,25 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+	if bool(vault["aloft"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
+
+## On the ground the fitted curve's tail (past its peak) never drops under her (hasted) run, so the hand-over is at
+## run speed: the source runs down into the faster run with no dip (dancer.md: 154 -> 140 px/s into the 127-136 px/s
+## hasted run; the fit's 0.25 end knot is its straight line's, docs/heroes/thief.md "Cartwheel exit"). The crouch
+## ramp before the peak is the fit's. Only the Cartwheel runs on a curve here, and its last step comes after
+## _tick_vault has let it go, so this keys off `curved`.
+func _tick_curve(dt: float) -> void:
+	var curve: Array = curved["curve"]
+	var t0 := float(curved["t0"])
+	super._tick_curve(dt)
+	if curved.is_empty() or not h.grounded:
+		return
+	var peak: Array = curve[0]
+	for knot in curve:
+		if float(knot[1]) > float(peak[1]): peak = knot
+	if 1.0 - h.roll_t / t0 > float(peak[0]):
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * (move_k() + speed_bonus()) / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -644,7 +662,8 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
@@ -688,6 +707,7 @@ func _ground_t() -> float:
 func _tick_bola(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var spd := float(bd["speed"])
+	var reach := float(bd["lane_w"]) * 0.5 - h.r      # m past a foe's body: a foe her size is caught inside the lane
 	var p: Vector3 = bola["pos"]
 	var dir: Vector2 = bola["dir"]
 	var steps := maxi(1, int(ceil(spd * dt / 0.25)))
@@ -721,7 +741,7 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + reach and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o

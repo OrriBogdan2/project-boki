@@ -58,6 +58,10 @@ func init_boss(match_node: Node, id: String, k: String, at: Vector3, tier_k: flo
 func mass() -> float:
 	return 80.0
 
+## The phase a boss with this health is in (0, 1 at 66%, 2 at 33%); a client works it out from the synced hp.
+static func phase_at(hp_now: float, hp_max: float) -> int:
+	return 0 if hp_now > hp_max * PHASE_HP[0] else (1 if hp_now > hp_max * PHASE_HP[1] else 2)
+
 func col() -> Color:
 	return COL.get(mkind, Color("ff6a4a"))
 
@@ -126,12 +130,12 @@ func _pick_target() -> Ent:
 
 # ------------------------------------------------------------------ telegraphs and hits on match time
 func _tele_c(at: Vector3, rad: float, c: Color, dur: float) -> Node3D:
-	var n: Node3D = m.fx.telegraph_circle(at, rad, c)
+	var n: Node3D = m.fx.telegraph_circle(at, rad, c, SideColor.ORDER_FOE)
 	teles.append({"n": n, "t": 0.0, "dur": dur})
 	return n
 
 func _tele_r(at: Vector3, d: Vector2, length: float, width: float, c: Color, dur: float) -> Node3D:
-	var n: Node3D = m.fx.telegraph_rect(at, d, length, width, c)
+	var n: Node3D = m.fx.telegraph_rect(at, d, length, width, c, SideColor.ORDER_FOE)
 	teles.append({"n": n, "t": 0.0, "dur": dur})
 	return n
 
@@ -202,7 +206,7 @@ func sim(dt: float) -> void:
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
 		_tick_stagger(dt)
-	var want := 0 if hp > max_hp * PHASE_HP[0] else (1 if hp > max_hp * PHASE_HP[1] else 2)
+	var want := phase_at(hp, max_hp)
 	if want > phase:
 		_phase_up(want)
 	if not enraged and awake_t >= float(md.get("enrage", 75.0)):

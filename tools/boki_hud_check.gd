@@ -31,6 +31,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d.erase("hud_reveal")      # the full HUD (staging is --hud-reveal-check's)
 	Econ.ensure()
 	main.get_window().size = Vector2i(SIZE)
 	var m := Match.new()

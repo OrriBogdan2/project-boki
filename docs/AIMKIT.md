@@ -115,9 +115,14 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 # Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
 # Grimble Buckshot: just the two edge lines
-AimKit.cone(h, "spread", {"len": 6.3, "deg": 30.0 + h.wbloom, "edges": true})
+AimKit.cone(h, "spread", {"len": 6.3, "deg": 10.0 + h.wbloom, "edges": true, "follow": true, "ease": 35.0})
 ```
-Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`.
+Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`, `ease` (1/s, 0 = off: the drawn width
+glides toward `deg` each drawn frame, exponentially, so a changing spread never steps or snaps).
+
+Every ray shape (lane, dotted, V, cone) also takes `follow`: with no `from` or `dir` given, AimDraw redraws it each
+drawn frame from the hunter's drawn body toward that frame's aim, so it stays on the model and the cursor between
+the 60 Hz steps. Scrap King's spread uses both.
 
 ### Landing circle
 ```gdscript
@@ -211,6 +216,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
 ## 4. Guide for kit agents
 - **Call per step from your kit's tick or hold callbacks** (`rmb_hold_tick`, `lmb_override`, `_tick`).
   Use a stable id per ability (`"rmb"`, `"e_drag"`). Don't call from `_process`.
+  An ultimate's ids start with `x` or `ult` (`"x_aim"`, `"ult_rim"`) and no other ability's do: a rival's
+  `all` area plays the TellCue wind-up where it lands when it first shows (docs/AUDIO.md), and ultimates are
+  left to UltCue by that prefix.
 - **Hold telegraphs need no cleanup code.** When the hold ends, stop calling and it goes within 0.1 s.
   Call `AimKit.hide` if it must vanish on the release frame.
 - **Merge start is handled.** Whatever starts a merge, a merged or transforming hunter

@@ -115,7 +115,7 @@ func _host() -> void:
 	for f in ["stop", "server.csv", "guest.csv", "host.csv", "server.ready"]:
 		DirAccess.remove_absolute(dir.path_join(f))
 	var common := "--od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [dir, relay_port, port, delay_ms]
-	pids.append(CheckChild.start(common + " %s=server" % flag, dir.path_join("server.log")))
+	pids.append(CheckChild.start("%s %s=server" % [common, flag], dir.path_join("server.log")))
 	var t0 := Time.get_ticks_msec()
 	while not FileAccess.file_exists(dir.path_join("server.ready")) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
@@ -125,7 +125,7 @@ func _host() -> void:
 			"res://tools/udp_delay.py"), port, relay_port, delay_ms, jitter_ms], dir.path_join("proxy.log")))
 		await main.get_tree().create_timer(0.5).timeout
 	ok(await _connect(), "the host is on the server as %s (%d ms each way, jitter %d)" % [Net.me, delay_ms, jitter_ms])
-	guest_pid = CheckChild.start(common + " %s=guest" % flag, dir.path_join("guest.log"))
+	guest_pid = CheckChild.start("%s %s=guest" % [common, flag], dir.path_join("guest.log"))
 	pids.append(guest_pid)
 	t0 = Time.get_ticks_msec()
 	while peer_id == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:

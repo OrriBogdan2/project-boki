@@ -97,8 +97,7 @@ func _host_up() -> Hunter:
 			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-		# (a slow guest may not have heard the first start: say it again)
-		if CheckClock.own_msec(guest_pid) - said > 3000:
+		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may have missed it: say again
 			said = CheckClock.own_msec(guest_pid)
 			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
@@ -484,7 +483,7 @@ func _guest() -> void:
 			"still building" if building else "no start heard", Net.peers.keys()])
 	else:
 		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
 		await _run(0.1)
 	main.get_tree().quit(0)
 
@@ -548,12 +547,16 @@ func _connect() -> bool:
 	return Net.mode == "server"
 
 ## The same match on both games: the training island with the same seed, one hunter each, a flat strip
-## at its first spawn, no Boki, monsters or crates in the way.
+## at its first spawn, no Boki, monsters or crates in the way. An empty `d` builds it offline
+## (--cast-predict-check's baseline).
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
-		"cls": "medium", "net": d})
+	var o := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+		"cls": "medium"}
+	if not d.is_empty():
+		o["net"] = d
+	await nm.start(o)
 	nm.set_process(false)
 	var W: World = nm.world
 	var sp: Vector3 = W.spawns[0]

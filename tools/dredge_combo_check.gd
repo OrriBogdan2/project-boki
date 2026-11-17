@@ -5,6 +5,9 @@ extends RefCounted
 ## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
 ## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
 
+## s from Brute Dash's arrival to aiming and walking (briefs/hero-ref/dredge.md:306, 493.32 -> 493.6 s)
+const SRC_RECOVER_S := 0.28
+
 var main: Node
 var fails := 0
 var n := 0
@@ -214,7 +217,8 @@ func _slam_tell() -> void:
 	await ak.done(m)
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
-## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.
+## hero; each lands by the end of its 0.18 s dash and recovers no slower than the source, aiming and walking
+## 0.28 s after it arrives (briefs/hero-ref/dredge.md:306). A chained shove cuts the recovery and restarts it.
 func _dash_moves() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", false)
 	var m: Match = r[0]
@@ -239,7 +243,6 @@ func _dash_moves() -> void:
 		if hero != "dredge":
 			for mv in (viewer[hero] as Dictionary).get("dash", []):
 				others[mv] = hero
-	var gap := float(K.dash_def()["gap"])
 	var fits := true
 	for mv in [ground_move, air_move]:
 		var keys: Array = KMovesPair.MOVES.get(mv, {"keys": [[99.0, {}]]})["keys"]
@@ -248,7 +251,7 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + SRC_RECOVER_S
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
@@ -405,7 +408,7 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
+	# --- the scattergun: a shot every 0.5s, the spread's edge lines wide while firing, tight idle
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
@@ -427,14 +430,16 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 34.0 and float(cone.get("deg", 0.0)) <= 45.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
-	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	ok(
+		"gun: idle, the edge lines close in on the tight cluster",
+		AimKit.shown(P, "spread") and float(AimKit.entry(P, "spread")["deg"]) == float(P.wpn["fan_deg"])
+	)
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
 	var wear := []
 	var armor0: float = T.armor
@@ -475,7 +480,12 @@ func _all() -> void:
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
-	ok("reel: the stretched arm is drawn (through rocks)", K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
+	ok(
+		"reel: his own arm reaches to the foe (the model's reach tip on it)",
+		reach_to.distance_to(T.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, T.pos]
+	)
+	ok("reel: in the open no through-rock silhouette is drawn", not K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -559,6 +569,7 @@ func _all() -> void:
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
 		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
+	ok("cliff: the stretch of arm inside the cliff is drawn through it", K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
 	# a cliff face in the reel's path: the foe is hauled over it
@@ -793,7 +804,8 @@ func _all() -> void:
 		half_d > one * 0.3 and half_d < one * 0.8 and absf(ground_d - one) < 0.6 and dash_t < 0.25,
 		"at %.2fs %.1f, settled %.1f of %.1f" % [dash_t * 0.5, half_d, ground_d, one]
 	)
-	# a run of barges: three charges, a short gap between them
+	# a run of barges: three charges, a short gap between them; a press inside a shove is held, never dropped,
+	# and goes by itself the step the gap ends
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
@@ -801,16 +813,15 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.05)
 	P.ak.on_dash(false)
-	var in_gap := charges0 - P.dashes
+	var held := charges0 - P.dashes
 	ak.step(m, dash_t + float(K.dash_def()["gap"]))
-	P.ak.on_dash(false)
-	ak.step(m, dash_t + float(K.dash_def()["gap"]))
+	var went_on := charges0 - P.dashes
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
 	ok(
-		"barge: three in a row, a short gap between (a press inside the gap does nothing)",
-		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
-		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
+		"barge: three in a row, a short gap between (a press inside a shove waits for the gap's end, then goes)",
+		absf(held - 1.0) < 0.1 and absf(went_on - 2.0) < 0.1 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
+		"spent while held %.1f, after the gap %.1f, left %.2f went %.1f" % [held, went_on, P.dashes, P.pos.x - home.x]
 	)
 	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
 	reset.call()
@@ -973,6 +984,34 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun, air pounce cd]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), cd_e, K.power("kin") / pk, K._stun_t(),
+				K.long_dash_cd()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
+	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
+	ok("upgrade parity: air pounce 12.5 -> 10.5 -> 8.5 (-2s twice, the source's own numbers)",
+			near.call(up[1][5], 10.5) and near.call(up[2][5], 8.5), str(up))
+	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	await ak.done(m)
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
