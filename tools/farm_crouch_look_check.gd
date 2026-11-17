@@ -6,8 +6,9 @@ extends RefCounted
 ##      much further back; released, it eases back to the zoom it had
 ##   2. the wheel turned while it is held changes the zoom it comes back to, not the look
 ##   3. a panel open while it is held (the camera is the panel's) is left alone on release
-## --farm-crouch-look-shots --shots-dir=<dir> (GPU): the farm at the landing and by the house, at the old arrival zoom
-## (1.2), the wheel's closest and its widest (the arrival now), and with Ctrl held: one PNG each.
+## --farm-crouch-look-shots --shots-dir=<dir> (GPU): the farm at the landing, by the house (when the farm holds it)
+## and the portal, at the old arrival zoom (1.2), the wheel's closest and its widest (the arrival now), and with Ctrl
+## held: one PNG each.
 
 const FRAMES := 600
 var bad := 0
@@ -166,6 +167,7 @@ func _shots() -> void:
 	var house: Vector3 = home.spots.get("house", home.FAR)
 	if house != home.FAR:
 		at["house"] = house + Vector3(0, 0, 4)
+	at["portal"] = home.spots["portal"] + Vector3(0, 0, 3)  # the way out
 	# zoom 1.2: where the farm used to open, before it opened at the wheel's widest
 	var views := [["old_default", 1.2], ["closest", CamWheel.near()], ["widest_default", CamWheel.far()]]
 	for spot in at:
