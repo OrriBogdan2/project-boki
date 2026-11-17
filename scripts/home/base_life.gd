@@ -5,7 +5,8 @@ extends RefCounted
 ## feeding bowl, or a snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
 ## another Boki, stares at a rival, comes to look at a newcomer, a toy you just placed (the most curious
-## one plays at it first, and each looker keeps the day in its memory) or to eat from your hand (BaseHandFeed). A retired mentor (Mentor) only strolls slowly
+## one plays at it first, and each looker keeps the day in its memory) or to eat from your hand (BaseHandFeed).
+## A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
