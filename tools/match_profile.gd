@@ -1,7 +1,8 @@
 extends "res://tools/hitch_check.gd"
 ## --match-profile: a real 30-hunter expedition (ten squads of three, as the queue builds one) timed frame by
-## frame at 1920x1080 for owner perf passes: the skyship ride and the drop, landing, a fight with every hunter
-## brought round you, then an uplink charged and the lift taken. One sim step per frame (hitch-check
+## frame at 1920x1080 for owner perf passes: the skyship ride and the drop, landing, a watch (every other hunter
+## stood in view 8-12 m off, not engaged: the common match frame), a fight with every hunter brought round you,
+## then an uplink charged and the lift taken. One sim step per frame (hitch-check
 ## fast-forwards the ride and the drop). Per phase: frame ms p50/p95/p99/max, the split (sim, visuals,
 ## other scripts, render submit, physics, rest = swap/driver/GPU wait), GPU ms, draws, CPU or GPU bound; then
 ## every frame over HITCH_MS with what it was spent on (shader compiles, first draws, sim sections, nodes
@@ -15,13 +16,15 @@ extends "res://tools/hitch_check.gd"
 const VIEW := Vector2i(1920, 1080)
 const HITCH_MS := 33.0  # ms: a frame past two vsyncs at 60 Hz is a visible hitch
 const LAND_WAIT_S := 12.0  # s on the ground at most waiting for the last bots to land before the fight
+const WATCH_S := 8.0  # s of game time with the other hunters stood in view, not engaged
 const FIGHT_S := 15.0  # s of game time with all 30 hunters on top of you
 const EXTRACT_S := 25.0  # s the uplink and the lift may take before the run gives up
 const CHARGE_S := 6.0  # s the uplink charges (monster waves, a contested yard) before its lift opens
 const AFTER_S := 3.0  # s run on after you rode the lift, unless the match ends first (1.6 s real time)
 const FIGHT_R := Vector2(5.0, 14.0)  # m: the ring the other hunters are put on
+const WATCH_X := Vector2(7.5, 12.0)  # m: how far to each side of you (across the view) the watched hunters stand
 const FAR_M := 60.0  # m from the camera: an emitter this far off is out of any view the match uses
-const PHASES := ["ride", "drop", "land", "fight", "extract"]
+const PHASES := ["ride", "drop", "land", "watch", "fight", "extract"]
 const AB_FRAMES := 30  # frames a side of --profile-ab runs before the other
 
 var _added := {}  # "Control"/"VFX"/"3D"/"other" -> nodes that entered the tree this frame
@@ -30,7 +33,9 @@ var _bench = preload("res://tools/perf_bench.gd").new()  # its HUD draw hook (hu
 var _uplink := {}
 var _rode_at := -1.0
 var _hunters := 0
+var _watchers: Array = []  # the hunters stood still for the watch (bots again for the fight)
 var _ab := false  # --profile-ab: SimLod.force_slow 0 and 1 in turns
+var _had_match := false  # the match has been made (before it, no match is not a match that ended)
 var _rates := {}  # --profile-ab: phase/side -> {frames per pose -> hunters so posed, summed over its frames}
 
 
@@ -68,7 +73,8 @@ func _on_added(n: Node) -> void:
 
 
 func _process(delta: float) -> void:
-	if not _end and (not is_instance_valid(m) or m.over):
+	_had_match = _had_match or m != null
+	if not _end and _had_match and (not is_instance_valid(m) or m.over):
 		_finish()  # the match ended (behind the lift, or a wipe before it): what came before it is the report
 		return
 	if m != null and not frames.is_empty() and not _end:
@@ -115,6 +121,10 @@ func _next_phase() -> void:
 				_bring_pack()
 			var up := m.hunters.any(func(h): return h.riding or h.dropping)
 			if phase_t >= 3.0 and (not up or phase_t >= LAND_WAIT_S):
+				_set_phase("watch")
+				_bring_watch()
+		"watch":
+			if phase_t >= WATCH_S:
 				_set_phase("fight")
 				_bring_hunters()
 		"fight":
@@ -151,12 +161,40 @@ func _tally_rates(key: String) -> void:
 	_rates[key] = r
 
 
+func _others() -> Array:
+	var P: Hunter = m.player
+	return m.hunters.filter(
+		func(h): return h != P and not h.out and not h.extracted and not h.riding and not h.dropping
+	)
+
+
+## Every other hunter stood across the view, WATCH_X m to your left and right, not after anyone (no bot think, no
+## target): rivals in view that are not fighting you, as most of a match frame has them.
+func _bring_watch() -> void:
+	var P: Hunter = m.player
+	var side: Vector3 = m.cam.global_transform.basis.x
+	var fwd := Vector3(side.z, 0.0, -side.x)
+	var others := _others()
+	for i in others.size():
+		var h: Hunter = others[i]
+		var x := lerpf(WATCH_X.x, WATCH_X.y, float(i / 2) / maxf(1.0, others.size() / 2.0 - 1.0))
+		var want: Vector3 = P.pos + side * (x if i % 2 == 0 else -x) + fwd * float(i % 3 - 1) * 2.0
+		var at: Vector3 = m.world.free_spot_near(want, [], 0.6, 0.5, 6.0)
+		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO
+		h.ai["tgt"] = null
+		_watchers.append(h)
+	print("HITCH watch: %d hunters stood in view at t=%.2f" % [others.size(), m.time])
+
+
 ## Every other hunter still in the match is put on a ring round you: a 30-hunter brawl.
 func _bring_hunters() -> void:
 	var P: Hunter = m.player
-	var others: Array = m.hunters.filter(
-		func(h): return h != P and not h.out and not h.extracted and not h.riding and not h.dropping
-	)
+	for h in _watchers:
+		h.ctrl = "bot"
+	_watchers.clear()
+	var others := _others()
 	for i in others.size():
 		var a := TAU * i / maxf(1.0, others.size())
 		var r := lerpf(FIGHT_R.x, FIGHT_R.y, float(i % 3) / 2.0)
