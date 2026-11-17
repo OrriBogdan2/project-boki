@@ -1065,6 +1065,8 @@ func render(delta: float, alpha: float) -> void:
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
+	if model:
+		SummonRing.tick(self)
 	trail_t = KinTypeTrail.of(m.fx).tick(self, trail_t, delta, m.fx.particles / Fx.PARTICLES)
 	if not model or KinWispForm.render(self, model) or KinWisp.render(self):
 		return
