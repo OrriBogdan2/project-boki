@@ -1,9 +1,0 @@
-UU art/wardens/claire/claire.glb
-UU art/wardens/hem/hem.glb
-UU art/wardens/ryzz/ryzz.glb
-UU art/wardens/sable/sable.glb
-UU art/wardens/tarek/tarek.glb
-UU docs/DEBT.md
-DU docs/art/REACT_AUDIT.md
-UU docs/wiki/Rules.md
-DU tools/art1/glb_react.py

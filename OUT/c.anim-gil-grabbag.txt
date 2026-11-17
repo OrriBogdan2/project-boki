@@ -1,4 +1,0 @@
-UU content/archetypes/gil.json
-UU content/rules/warden_anim/gil.json
-UU tools/clip_check.gd
-UU tools/gil_combo_check.gd
