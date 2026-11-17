@@ -79,6 +79,9 @@ check: `--base-life-check`.
   (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
+- Next form (Growth tab): the Boki card's Growth tab opens with a Next form block (`scripts/ui/evo_next_form.gd`): one
+  plain line from the evolution data ("Evolves at Lv N" with an XP bar, "Needs a Tide Ink", "Evolves when traded", "Its next
+  form is coming soon" while the form has no art, "Fully grown"). Check: `--evo-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge, Echo Steps' stonehop and spin, and the Dash's crouch, burst and sulk (`scripts/home/race_beats.gd`) play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
