@@ -1,0 +1,1442 @@
+{
+ "approved_by_claude": [
+  {
+   "id": "chuggamus_r2",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "iron-plate hide, piston legs, no band; only 3 views"
+  },
+  {
+   "id": "vespox_mid",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "lanky middle form, between Vespyx and Glaivyx"
+  },
+  {
+   "id": "lanternmit",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "glowing lantern shell, brass claw"
+  },
+  {
+   "id": "stormit",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "storm bottle, copper coils, jittery face"
+  },
+  {
+   "id": "bubblisk_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "soap-film baby, rainbow eyes, bubble; re-laid from 5 views"
+  },
+  {
+   "id": "lunowl_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "crater moon face, crescent brow, moth wings"
+  },
+  {
+   "id": "murmurling_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "pipe tail fused, iridescent"
+  },
+  {
+   "id": "oarlet_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "on all fours, paddle tail"
+  },
+  {
+   "id": "amanitusk_r",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "tusked war-boar, toxic caps"
+  },
+  {
+   "id": "anvilbrock_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "anvil body, hammer feet"
+  },
+  {
+   "id": "blossmink_r",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "blossom ink plus line stance"
+  },
+  {
+   "id": "prismink_r",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "rainbow swirl, glass tail"
+  },
+  {
+   "id": "skidlet",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "wobbly chick on skates"
+  },
+  {
+   "id": "lanceron",
+   "pick": 1,
+   "grade": 9.0,
+   "note": "blade wings, ice lance"
+  },
+  {
+   "id": "seamwyrm",
+   "pick": 1,
+   "grade": 9.0,
+   "note": "zipper jaws, axe-tag tail"
+  },
+  {
+   "id": "cairnback",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "crofthorn",
+   "pick": 2,
+   "grade": 9.0
+  },
+  {
+   "id": "geodelotl",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "gloamshell",
+   "pick": 2,
+   "grade": 9.0
+  },
+  {
+   "id": "glomwort",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "hivara",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "marchleaf",
+   "pick": 2,
+   "grade": 9.0
+  },
+  {
+   "id": "nettlynx",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "rampartoad",
+   "pick": 2,
+   "grade": 9.0
+  },
+  {
+   "id": "terrarimit",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "thrumbird",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "vaultara",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "voltalon",
+   "pick": 2,
+   "grade": 9.0
+  },
+  {
+   "id": "zephyrak",
+   "pick": 1,
+   "grade": 9.0
+  },
+  {
+   "id": "boltstrich",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "passes at the 8.5 bar"
+  },
+  {
+   "id": "echolop",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "passes at the 8.5 bar"
+  },
+  {
+   "id": "snuffapi",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "passes at the 8.5 bar"
+  },
+  {
+   "id": "spirevark",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "passes at the 8.5 bar"
+  },
+  {
+   "id": "barrelmander",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "passes at the 8.5 bar"
+  },
+  {
+   "id": "anchorbill_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "arcestrel_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "bellowary_r2",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "buckleron_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "canvastross_r2",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "chandelotl_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "dragonkite_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "eclipsowl",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "forgebrock",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "frothisk",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "galleotter",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "geysirbara",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "glintmole",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "gravadillo_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "kindlewren",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "knotwyrm_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "latchling_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "mossgrade_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "parasolth",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "pipewurm_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "prowyak",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "rimeshrew_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "selenfin",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "tidalisk",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "tinbrock",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "zipling_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "dribbara_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "frigatee_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "glassolotl_r2",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "lanterloris_r",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "ribbonwyrm_r2",
+   "pick": 3,
+   "grade": 8.5,
+   "note": "lean kite serpent on four legs; relaid from 6 views to 4 -> evolutions/Ribbonwyrm.jpg"
+  },
+  {
+   "id": "ringrove_r3",
+   "pick": 1,
+   "grade": 8.6,
+   "note": "majestic fungal tortoise, spear-quill palisade; relaid 5->4 views -> turnarounds/Ringrove.jpg"
+  },
+  {
+   "id": "teapotamus_r2b",
+   "pick": 3,
+   "grade": 8.5,
+   "panel": {
+    "A": 8.5,
+    "B": 8.5,
+    "C": 8.6
+   },
+   "note": "owner redo (was 7.1): kettle IS the body; relaid -> evolutions/Teapotamus.jpg (old kept as Teapotamus_old_7.1.jpg)"
+  },
+  {
+   "id": "ta_vespyx",
+   "pick": 3,
+   "grade": 8.8,
+   "note": "turnaround of the owner-approved Vespyx 2D shot; matches it closely -> turnarounds/Vespyx.jpg"
+  },
+  {
+   "id": "wyrmink_x",
+   "pick": 1,
+   "grade": 8.6,
+   "panel": {
+    "A": 8.6,
+    "B": 8.8,
+    "C": 8.4
+   },
+   "note": "fundamental redesign: coiling ink-brushstroke dragon -> evolutions/Wyrmink.jpg"
+  },
+  {
+   "id": "ta_bathilus",
+   "grade": 8.57
+  },
+  {
+   "id": "ta_cubbat",
+   "grade": 8.53
+  },
+  {
+   "id": "teapotamus_4k",
+   "grade": 8.5
+  },
+  {
+   "id": "wyrmink_4k",
+   "grade": 8.83
+  },
+  {
+   "id": "relic_vex",
+   "grade": 8.6
+  },
+  {
+   "id": "relic_motley",
+   "grade": 8.5
+  },
+  {
+   "id": "relic_sable",
+   "grade": 8.6
+  },
+  {
+   "id": "skidlet_card_w28",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "relic_albert_w28",
+   "pick": 2,
+   "grade": 8.53
+  },
+  {
+   "id": "relic_tenzo_w28",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "ta_gilabacus",
+   "pick": 2,
+   "grade": 8.53
+  },
+  {
+   "id": "ta_olmlet",
+   "pick": 2,
+   "grade": 8.57
+  },
+  {
+   "id": "ta_pawnfry",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "ta_polyshroom",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "ta_proofhop",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "relic_sparkle_w29",
+   "pick": 4,
+   "grade": 8.53
+  },
+  {
+   "id": "stance_kerchick",
+   "pick": 2,
+   "grade": 8.3
+  },
+  {
+   "id": "stance_mycroll",
+   "pick": 3,
+   "grade": 8.5
+  },
+  {
+   "id": "stance_vespyx",
+   "pick": 3,
+   "grade": 8.43
+  },
+  {
+   "id": "ta_foldbat",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "ta_rattlebub",
+   "pick": 1,
+   "grade": 8.6
+  },
+  {
+   "id": "stance_bubblisk",
+   "pick": 3,
+   "grade": 8.67
+  },
+  {
+   "id": "stance_nettlynx",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "stance_oarlet",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "stance_tinbrock",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "barrelmander_card",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "bathilus_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "cairnback_card",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "crofthorn_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "gilabacus_card",
+   "pick": 2,
+   "grade": 8.37
+  },
+  {
+   "id": "kindlewren_card",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "zipling_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "knotwyrm_card",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "mirrolin_card",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "mycroll_card",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "olmlet_card",
+   "pick": 1,
+   "grade": 8.63
+  },
+  {
+   "id": "proofhop_card",
+   "pick": 2,
+   "grade": 8.67
+  },
+  {
+   "id": "rampartoad_card",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "spirevark_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "zippelith_card",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "jarmit_card",
+   "pick": 2,
+   "grade": 8.63
+  },
+  {
+   "id": "latchling_card",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "ribbonwyrm_card",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "nettlynx_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "pipewurm_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "polyshroom_card2",
+   "pick": 1,
+   "grade": 8.43
+  },
+  {
+   "id": "rimeshrew_card2",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "ringrove_card2",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "soakybara_card2",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "thrumbird_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "zephyrak_card2",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "anvilbrock_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "bubblisk_card2",
+   "pick": 1,
+   "grade": 8.63
+  },
+  {
+   "id": "cubbat_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "echolop_card2",
+   "pick": 2,
+   "grade": 8.43
+  },
+  {
+   "id": "effigeetle_card2",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "glintmole_card2",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "kestrike_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "lanterloris_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "marchleaf_card2",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "mossgrade_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "tinbrock_card2",
+   "pick": 2,
+   "grade": 8.47
+  },
+  {
+   "id": "umbrink_card2",
+   "pick": 2,
+   "grade": 8.43
+  },
+  {
+   "id": "wyrmink_card2",
+   "pick": 1,
+   "grade": 8.6
+  },
+  {
+   "id": "arcestrel_card2",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "dribbara_card2",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "ermink_card2",
+   "pick": 1,
+   "grade": 8.57
+  },
+  {
+   "id": "frothisk_card2",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "geysirbara_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "kerchick_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "lunink_card2",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "oarlet_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "parasolth_card2",
+   "pick": 2,
+   "grade": 8.57
+  },
+  {
+   "id": "rimink_card2",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "rippmink_card2",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "stance_dribbara_w31",
+   "pick": 4,
+   "grade": 8.33
+  },
+  {
+   "id": "stance_ermink_w31",
+   "pick": 1,
+   "grade": 8.57
+  },
+  {
+   "id": "stance_geysirbara_w31",
+   "pick": 4,
+   "grade": 8.3
+  },
+  {
+   "id": "stance_teapotamus_w31",
+   "pick": 2,
+   "grade": 8.43
+  },
+  {
+   "id": "ta_prismander_female",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "zippelith_fix",
+   "pick": 3,
+   "grade": 8.47
+  }
+ ],
+ "rerolled": [
+  {
+   "id": "ringrove",
+   "grade": 8.0,
+   "why": "reads as Sporcupine with more mushrooms, not a final form",
+   "new": "ringrove_r2"
+  },
+  {
+   "id": "bellowary_r",
+   "grade": 8.0,
+   "why": "chest strap and saddle still appear",
+   "new": "bellowary_r2"
+  },
+  {
+   "id": "canvastross_r",
+   "grade": 7.5,
+   "why": "wings stiff and vertical again, keel reads as a strap",
+   "new": "canvastross_r2"
+  },
+  {
+   "id": "glassolotl",
+   "grade": 7.5,
+   "why": "copy of Prismander"
+  },
+  {
+   "id": "chandelotl",
+   "grade": 8.0,
+   "why": "upright / chandelier sits on head"
+  },
+  {
+   "id": "zipling",
+   "grade": 7.5,
+   "why": "copy of Zippelith, blush"
+  },
+  {
+   "id": "anchorbill",
+   "why": "anchor reads as a pendant"
+  },
+  {
+   "id": "arcestrel",
+   "why": "copy of Kestrike"
+  },
+  {
+   "id": "buckleron",
+   "why": "weak face, shield reads as worn"
+  },
+  {
+   "id": "dragonkite",
+   "why": "not a final form, copy of Kitlet"
+  },
+  {
+   "id": "gravadillo",
+   "why": "ghost copies, upright"
+  },
+  {
+   "id": "knotwyrm",
+   "why": "rears upright, weak face"
+  },
+  {
+   "id": "latchling",
+   "why": "copy of Lockatara"
+  },
+  {
+   "id": "lodestick",
+   "why": "humanoid"
+  },
+  {
+   "id": "mossgrade",
+   "why": "upright, ghost row"
+  },
+  {
+   "id": "pipewurm",
+   "why": "upright, 2x2"
+  },
+  {
+   "id": "ribbonwyrm",
+   "why": "copy of Kitlet"
+  },
+  {
+   "id": "rimeshrew",
+   "why": "sits up, rat-like"
+  },
+  {
+   "id": "vespox_f",
+   "why": "upright front, weak difference"
+  },
+  {
+   "id": "portrait_chuggamus",
+   "why": "came out as a turnaround"
+  },
+  {
+   "id": "dribbara",
+   "why": "copy of Soakybara"
+  },
+  {
+   "id": "frigatee",
+   "why": "stands upright"
+  },
+  {
+   "id": "glassolotl_r",
+   "why": "still a copy of Prismander"
+  },
+  {
+   "id": "lanterloris",
+   "why": "stands upright"
+  },
+  {
+   "id": "lodestick_r",
+   "why": "body vertical, humanoid stance"
+  },
+  {
+   "id": "mothlet",
+   "why": "copy of Lunowl"
+  },
+  {
+   "id": "oarter",
+   "why": "copy of Oarlet"
+  },
+  {
+   "id": "puffamus_r",
+   "why": "copy of Chuggamus"
+  },
+  {
+   "id": "ribbonwyrm_r",
+   "why": "copy of Kitlet"
+  },
+  {
+   "id": "ringrove_r2",
+   "why": "still reads as Sporcupine"
+  },
+  {
+   "id": "terrasloth",
+   "why": "stands upright"
+  },
+  {
+   "id": "druzemole",
+   "why": "upright biped, copies Glintmole -> druzemole_r"
+  },
+  {
+   "id": "geodemole",
+   "why": "copies Glintmole, upright -> geodemole_r"
+  },
+  {
+   "id": "embrook",
+   "why": "near-realistic crow + lava, 8.0 -> embrook_r"
+  },
+  {
+   "id": "pyrraven",
+   "why": "semi-realistic raven/phoenix, 8.0 -> pyrraven_r"
+  },
+  {
+   "id": "mothlet_r",
+   "why": "copies Lunowl, not a baby -> mothlet_r2"
+  },
+  {
+   "id": "oarter_r",
+   "why": "copies Oarlet, chubby -> oarter_r2"
+  },
+  {
+   "id": "fizzlet",
+   "why": "B close (8.4): copper ankle cuffs read worn -> edit fizzlet_e"
+  },
+  {
+   "id": "chimelop",
+   "why": "copies Echolop, hanging bells -> chimelop_r"
+  },
+  {
+   "id": "cisternmander",
+   "why": "bucket worn on back / copies Barrelmander -> cisternmander_r"
+  },
+  {
+   "id": "dreadnoyak",
+   "why": "copies Prowyak, ghost rows -> dreadnoyak_r"
+  },
+  {
+   "id": "howlop",
+   "why": "copies Echolop -> howlop_r"
+  },
+  {
+   "id": "kayak",
+   "why": "ghost duplicate row, dark helmet prow -> kayak_r"
+  },
+  {
+   "id": "thunderstrich",
+   "why": "copies Boltstrich, neck rings -> thunderstrich_r"
+  },
+  {
+   "id": "wickapi",
+   "why": "realistic okapi + candle prop -> wickapi_r"
+  },
+  {
+   "id": "puffamus_r2",
+   "why": "strapped iron band, top-hat pipe -> puffamus_r3"
+  }
+ ],
+ "sent_to_owner": [],
+ "portraits": [
+  {
+   "id": "portrait_lanternmit",
+   "pick": 1
+  },
+  {
+   "id": "portrait_stormit",
+   "pick": 1
+  },
+  {
+   "id": "portrait_vespox",
+   "pick": 1
+  },
+  {
+   "id": "portrait_amanitusk",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_anvilbrock",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_blossmink",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_bubblisk",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_cairnback",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_chuggamus_r",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_crofthorn",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_geodelotl",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_gloamshell",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_glomwort",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_hivara",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_lanceron",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_lunowl",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_marchleaf",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_murmurling",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_nettlynx",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_oarlet",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_prismink",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_rampartoad",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_seamwyrm",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_skidlet",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_terrarimit",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_thrumbird",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_vaultara",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_voltalon",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_zephyrak",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_anvilbrock_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_barrelmander_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_bubblisk_p",
+   "pick": 1,
+   "grade": 8.53,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_chuggamus_p",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_glassolotl_p",
+   "pick": 1,
+   "grade": 8.6,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_jarmit_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_mycroll_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_skidlet_p",
+   "pick": 1,
+   "grade": 8.53,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_thrumbird_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_zippelith_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_mycroll_light",
+   "grade": 8.63
+  },
+  {
+   "id": "portrait_vespyx_light",
+   "grade": 8.53
+  },
+  {
+   "id": "portrait_mirrolin_pe",
+   "grade": 8.6
+  },
+  {
+   "id": "portrait_prismander_pe_w28",
+   "grade": 8.53
+  },
+  {
+   "id": "portrait_kestrike_pe_w29",
+   "grade": 8.5
+  },
+  {
+   "id": "portrait_knotwyrm_pe_w29",
+   "grade": 8.53
+  },
+  {
+   "id": "portrait_bathilus",
+   "grade": 8.37
+  },
+  {
+   "id": "portrait_cubbat",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_gilabacus",
+   "grade": 8.4
+  },
+  {
+   "id": "portrait_olmlet",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_pawnfry",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_polyshroom",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_proofhop",
+   "grade": 8.4
+  },
+  {
+   "id": "portrait_seamwyrm_bite",
+   "grade": 8.37
+  },
+  {
+   "id": "portrait_zippelith_fix",
+   "grade": 8.4
+  }
+ ],
+ "retired": [
+  {
+   "id": "vespox_f_r",
+   "why": "owner 20:18: branching lines get no female looks"
+  }
+ ],
+ "redesign_lookalike": [
+  {
+   "name": "Lockatara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Latchling",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Vaultara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Buckleron",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Frothisk",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Tidalisk",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Blossmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Voltmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Prismink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Rippmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Dragonkite",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Voltalon",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Lanceron",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Geysirbara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Chandelapi",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Glaivyx",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Anchorbill",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Forgebrock",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Geodelotl",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Chandelotl",
+   "why": "owner-approved look-alike audit 21:38"
+  }
+ ],
+ "redesign_evolution": [
+  {
+   "name": "Sporcupine",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Amanitusk",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Vespox",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Lashyx",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Puffamus",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Seamwyrm",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Galleotter",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Dribbara",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Tinbrock",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Arcestrel",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Eclipsowl",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Gongrowl",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Lanternmit",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Stormit",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Terrarimit",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Flarmink",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Rimink",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Umbrink",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Lunink",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  },
+  {
+   "name": "Wyrmink",
+   "why": "not a fundamental change from its parent (owner rule 21:48)"
+  }
+ ],
+ "concepts": [
+  {
+   "id": "c_bathilus",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.6/8.2/8.7"
+  },
+  {
+   "id": "c_cubbat",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.5/8.3/8.7"
+  },
+  {
+   "id": "c_scoopsy_e",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.6/8.4/8.5"
+  },
+  {
+   "id": "c_pavonazar_r_w28",
+   "pick": 1,
+   "grade": 8.6
+  },
+  {
+   "id": "c_narfoil_e_w29",
+   "pick": 3,
+   "grade": 8.53
+  }
+ ]
+}

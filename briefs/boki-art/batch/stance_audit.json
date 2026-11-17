@@ -1,0 +1,709 @@
+[
+ {
+  "line": "Ermink",
+  "stage": "Ermink",
+  "current": "stands upright on hind legs like a sentinel, tail hanging",
+  "redo": true,
+  "new_stance": "Sits curled low on its haunches, forepaws tucked together, head tilted up, ink-tipped tail wrapped around its feet."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Flarmink",
+  "current": "upright on hind legs, flame tail raised",
+  "redo": true,
+  "new_stance": "Rears high on hind legs mid-lunge, forepaws clawing the air, back arched, flame tail flung straight up behind like a torch."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Rippmink",
+  "current": "upright on hind legs, wave tail curling",
+  "redo": true,
+  "new_stance": "Braced wide on all fours with chest low and head thrust forward, wave tail cresting up and over its back like a breaking wave."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Blossmink",
+  "current": "OLD DESIGN: upright on hind legs, leafy tail beside",
+  "redo": true,
+  "new_stance": "Rooted four-square with feet planted wide and back arched, head raised, leafy tail fanned up behind as a tall canopy."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Voltmink",
+  "current": "upright on hind legs, spiky ruff",
+  "redo": true,
+  "new_stance": "Side-on bristling arch: all four legs stiff and wide, back humped high with fur on end, head low snarling, tail pointed straight up crackling."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Rimink",
+  "current": "standing four-square, ice-crystal tail up",
+  "redo": true,
+  "new_stance": "Proud looming stance on a raised forepaw: one front leg lifted, chest out, head held high, ice tail swept high behind."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Umbrink",
+  "current": "low crouched prowl on all fours, ink tail up",
+  "redo": false,
+  "new_stance": "Keep: low looming hunch, shoulders high, head down, ink tail rising over the back like a hood."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Lunink",
+  "current": "sitting upright like a cat, tail curled",
+  "redo": true,
+  "new_stance": "Long arched stretch: forelegs extended forward and planted, hindquarters high, head raised toward the sky, tail curled into a crescent overhead."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Prismink",
+  "current": "OLD DESIGN: upright on hind legs, rainbow tail up",
+  "redo": true,
+  "new_stance": "Braced wide side-on, head turned back over its shoulder, rainbow tail fanned in a high arc over the body."
+ },
+ {
+  "line": "Ermink",
+  "stage": "Wyrmink",
+  "current": "towering upright serpent S-coil",
+  "redo": false,
+  "new_stance": "Keep: towering coiled S with head raised high and tail curling below."
+ },
+ {
+  "line": "Mycroll",
+  "stage": "Mycroll",
+  "current": "standing on four legs, round",
+  "redo": true,
+  "new_stance": "Sits plopped on its rump like a ball, little forepaws on its belly, head tilted, mushroom caps upright."
+ },
+ {
+  "line": "Mycroll",
+  "stage": "Sporcupine",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Low waddling stride: one forepaw forward, body slung low, head pushed ahead, mushroom quills swept back."
+ },
+ {
+  "line": "Mycroll",
+  "stage": "Amanitusk",
+  "current": "OLD DESIGN: standing four-square",
+  "redo": true,
+  "new_stance": "Braced wide with forelegs splayed, head lowered and tusks forward ready to charge, red caps bristling upright."
+ },
+ {
+  "line": "Mycroll",
+  "stage": "Ringrove",
+  "current": "tortoise standing on four legs, flat",
+  "redo": true,
+  "new_stance": "Looming: front legs planted on a raised rock, neck stretched high, head lifted, mushroom grove on its shell tilting skyward."
+ },
+ {
+  "line": "Vespyx",
+  "stage": "Vespyx",
+  "current": "standing on four legs, tail curled up",
+  "redo": true,
+  "new_stance": "Sits upright on its haunches, front paws together, ears perked, segmented tail curled forward over its head so the slime orb dangles in front."
+ },
+ {
+  "line": "Vespyx",
+  "stage": "Vespox",
+  "current": "OLD DESIGN: standing on four legs, tail curled up",
+  "redo": true,
+  "new_stance": "Low stalking prowl: belly near the ground, one forepaw lifted mid-step, head level and forward, stinger tail arched forward ready."
+ },
+ {
+  "line": "Vespyx",
+  "stage": "Glaivyx",
+  "current": "crouched on four legs, claw-blades out, tail curled up",
+  "redo": true,
+  "new_stance": "Rears up on hind legs, blade-forelimbs raised wide overhead, head thrown back, stinger tail lashing forward past its side."
+ },
+ {
+  "line": "Vespyx",
+  "stage": "Lashyx",
+  "current": "standing on four legs, tail curled up",
+  "redo": true,
+  "new_stance": "Braced wide and low, forelegs splayed with claws dug in, head lowered snarling, whip tail cocked high and forward over the head mid-strike."
+ },
+ {
+  "line": "Prismander",
+  "stage": "Prismander",
+  "current": "standing on four legs, small",
+  "redo": true,
+  "new_stance": "Sits up on its haunches, forelegs straight and close, head tilted up, gills fanned, tail curled to one side."
+ },
+ {
+  "line": "Prismander",
+  "stage": "Glassolotl",
+  "current": "standing tall on four long legs, upright",
+  "redo": true,
+  "new_stance": "Low gliding swim-stride: body horizontal and close to the ground, legs mid-paddle, head forward, fin-tail rippling behind."
+ },
+ {
+  "line": "Prismander",
+  "stage": "Chandelotl",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Rears up with forelegs lifted off the ground, chest high, crystal gills flared wide like a chandelier, tail braced behind."
+ },
+ {
+  "line": "Prismander",
+  "stage": "Geodelotl",
+  "current": "OLD DESIGN: standing four-square",
+  "redo": true,
+  "new_stance": "Braced wide and heavy, forelegs splayed, head lowered and jaw open, crystal-crusted back hunched high."
+ },
+ {
+  "line": "Teapotamus",
+  "stage": "Teapotamus",
+  "current": "standing on four legs",
+  "redo": true,
+  "new_stance": "Sits on its round rump with stubby forelegs forward, head tipped up, spout tail steaming."
+ },
+ {
+  "line": "Teapotamus",
+  "stage": "Puffamus",
+  "current": "standing on four legs, upright-ish",
+  "redo": true,
+  "new_stance": "Mid-trot stride: one foreleg and opposite hind leg lifted, head pushed forward, chimney puffing a trailing plume."
+ },
+ {
+  "line": "Teapotamus",
+  "stage": "Chuggamus",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Braced wide like a locomotive: legs splayed, head lowered with tusks forward, stack belching a tall column of steam."
+ },
+ {
+  "line": "Kerchick",
+  "stage": "Kerchick",
+  "current": "standing upright on webbed feet",
+  "redo": true,
+  "new_stance": "Plopped belly-down like a nesting chick, feet tucked under, sail-wings resting at its sides, head tilted up."
+ },
+ {
+  "line": "Kerchick",
+  "stage": "Jibbatross",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Running take-off across water: body tilted forward, wings half-open and swept back, feet slapping mid-stride, neck stretched out."
+ },
+ {
+  "line": "Kerchick",
+  "stage": "Canvastross",
+  "current": "wings spread wide, hovering",
+  "redo": false,
+  "new_stance": "Keep: wings spread fully wide, looming display."
+ },
+ {
+  "line": "Skidlet",
+  "stage": "Skidlet",
+  "current": "standing upright on one skate leg, wings out",
+  "redo": true,
+  "new_stance": "Squats down on its belly with skate feet poking out in front, wings folded, head bobbing up."
+ },
+ {
+  "line": "Skidlet",
+  "stage": "Skateron",
+  "current": "standing upright heron, neck tall",
+  "redo": true,
+  "new_stance": "Gliding skate stride: body horizontal, neck stretched forward, one leg pushing back, wings swept back."
+ },
+ {
+  "line": "Skidlet",
+  "stage": "Lanceron",
+  "current": "OLD DESIGN: standing tall, wings flared",
+  "redo": true,
+  "new_stance": "Mantled and planted wide on both legs, wings raised high, neck drawn back in a tight S ready to spear, crest flared."
+ },
+ {
+  "line": "Zipling",
+  "stage": "Zipling",
+  "current": "round blob sitting",
+  "redo": false,
+  "new_stance": "Keep: round blob sitting, zipper tail curled."
+ },
+ {
+  "line": "Zipling",
+  "stage": "Zippelith",
+  "current": "standing straight up like a column",
+  "redo": true,
+  "new_stance": "Inching forward low: body arched in an inchworm hump, head low and forward, zipper seam visible along the arched back."
+ },
+ {
+  "line": "Zipling",
+  "stage": "Seamwyrm",
+  "current": "OLD DESIGN: rearing S-coil, mouth open",
+  "redo": false,
+  "new_stance": "Keep: towering rear with coils stacked, head high, maw split open along the seam."
+ },
+ {
+  "line": "Glintmole",
+  "stage": "Glintmole",
+  "current": "standing upright on hind legs, claws at sides",
+  "redo": true,
+  "new_stance": "Sits plump on its rump with big claws resting on its belly, snout star tilted up."
+ },
+ {
+  "line": "Glintmole",
+  "stage": "Geodemole",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Mid-dig dash: body low and long, front claws thrusting forward through soil, rear legs kicking back, snout forward."
+ },
+ {
+  "line": "Glintmole",
+  "stage": "Druzemole",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Rears up out of the ground, huge claws spread wide overhead, crystal back towering, snout star flared."
+ },
+ {
+  "line": "Kindlewren",
+  "stage": "Kindlewren",
+  "current": "round perched bird",
+  "redo": false,
+  "new_stance": "Keep: round perched puff, ember tail cocked."
+ },
+ {
+  "line": "Kindlewren",
+  "stage": "Embrook",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Low gliding hop: wings half-open, body tilted forward, flame trail streaming behind."
+ },
+ {
+  "line": "Kindlewren",
+  "stage": "Pyrraven",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Planted wide on talons with wings mantled high and wide, head raised cawing, flame tail fanned."
+ },
+ {
+  "line": "Oarlet",
+  "stage": "Oarlet",
+  "current": "standing on four legs, compact",
+  "redo": true,
+  "new_stance": "Sits up on its haunches, forepaws together on its chest, oar tail flat on the ground in front."
+ },
+ {
+  "line": "Oarlet",
+  "stage": "Oarter",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Swimming glide: body long and horizontal, legs swept back, oar tail mid-stroke to one side."
+ },
+ {
+  "line": "Oarlet",
+  "stage": "Galleotter",
+  "current": "standing four-square, oars at sides",
+  "redo": true,
+  "new_stance": "Rears up on hind legs and tail like a tripod, forepaws raised, oar fins spread wide, head roaring."
+ },
+ {
+  "line": "Kitlet",
+  "stage": "Kitlet",
+  "current": "floating upright, wings open, tail hanging",
+  "redo": true,
+  "new_stance": "Tucked into a bobbing ball, wings folded close, tail curled around its body, head peeking up."
+ },
+ {
+  "line": "Kitlet",
+  "stage": "Ribbonwyrm",
+  "current": "low crawl, long body",
+  "redo": false,
+  "new_stance": "Keep: low undulating glide, body in waves."
+ },
+ {
+  "line": "Kitlet",
+  "stage": "Dragonkite",
+  "current": "floating upright, wings spread, tail hanging",
+  "redo": false,
+  "new_stance": "Keep: towering airborne with wings spread wide, tail sweeping below."
+ },
+ {
+  "line": "Bellowlet",
+  "stage": "Bellowlet",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Plopped down on its belly like a fluffy chick, legs tucked, casque tilted up puffing smoke."
+ },
+ {
+  "line": "Bellowlet",
+  "stage": "Bellowary",
+  "current": "standing upright on two legs",
+  "redo": true,
+  "new_stance": "Long striding run: body horizontal, neck forward, one leg pushing back, smoke trailing."
+ },
+ {
+  "line": "Bellowlet",
+  "stage": "Furnacowary",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide on both legs, chest puffed out, neck raised tall, wings flared, casque belching fire."
+ },
+ {
+  "line": "Dribbara",
+  "stage": "Dribbara",
+  "current": "standing on four legs",
+  "redo": true,
+  "new_stance": "Sits on its rump like a resting capybara, forelegs straight, head tilted up, pond on its back."
+ },
+ {
+  "line": "Dribbara",
+  "stage": "Soakybara",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Wading stride: one foreleg lifted mid-step, head low and forward, back pool sloshing."
+ },
+ {
+  "line": "Dribbara",
+  "stage": "Geysirbara",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Braced wide with forelegs splayed, head raised bellowing, geyser blasting straight up."
+ },
+ {
+  "line": "Parasolth",
+  "stage": "Parasolth",
+  "current": "curled ball, wings wrapped",
+  "redo": false,
+  "new_stance": "Keep: curled ball wrapped in its wing-bones."
+ },
+ {
+  "line": "Parasolth",
+  "stage": "Umbrathere",
+  "current": "standing upright on two legs, arms raised (person-like)",
+  "redo": true,
+  "new_stance": "Looming crouch on all fours on hooked knuckle-claws, long arms planted wide, wing membranes stretched up like an open umbrella, head low."
+ },
+ {
+  "line": "Kayak",
+  "stage": "Kayak",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Sits tucked with legs folded under, prow head resting, fur fluffed round."
+ },
+ {
+  "line": "Kayak",
+  "stage": "Prowyak",
+  "current": "standing four-square, head lowered",
+  "redo": true,
+  "new_stance": "Charging trot: forelegs reaching, body low, prow head pushed forward like a ship's bow."
+ },
+ {
+  "line": "Kayak",
+  "stage": "Dreadnoyak",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide, forelegs splayed, head tossed up with horns raised, icy mane bristling."
+ },
+ {
+  "line": "Coolatee",
+  "stage": "Coolatee",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Bobbing upright on its tail like a sitting seal pup, flippers on belly."
+ },
+ {
+  "line": "Coolatee",
+  "stage": "Frigatee",
+  "current": "lying prone on belly, flippers out",
+  "redo": true,
+  "new_stance": "Gliding swim: body arched in a curve, fore-flippers swept back, tail flukes lifted."
+ },
+ {
+  "line": "Coolatee",
+  "stage": "Glaciatee",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Rears up on its tail, chest high, flippers spread wide, ice shelf back tilted."
+ },
+ {
+  "line": "Fizzlet",
+  "stage": "Fizzlet",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Squat fluffy chick plopped on the ground, legs tucked, sparks puffing from its down."
+ },
+ {
+  "line": "Fizzlet",
+  "stage": "Boltstrich",
+  "current": "standing upright on two legs",
+  "redo": true,
+  "new_stance": "Full sprint stride: one leg extended, body horizontal, neck stretched forward, lightning trailing."
+ },
+ {
+  "line": "Fizzlet",
+  "stage": "Thunderstrich",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide, wings flared up and out, neck reared high, storm plumage crackling."
+ },
+ {
+  "line": "Wickapi",
+  "stage": "Wickapi",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Lies like a fawn with legs folded under, head up, little candle nubs glowing."
+ },
+ {
+  "line": "Wickapi",
+  "stage": "Snuffapi",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Mid-stride walk: one foreleg lifted, head low and forward, smoke trailing from its candles."
+ },
+ {
+  "line": "Wickapi",
+  "stage": "Chandelapi",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Rears up on hind legs, forelegs tucked, head high, candelabra antlers blazing."
+ },
+ {
+  "line": "Bucketmander",
+  "stage": "Bucketmander",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Sits upright on its haunches, forelegs straight, head tilted up, bucket rim on its back."
+ },
+ {
+  "line": "Bucketmander",
+  "stage": "Barrelmander",
+  "current": "standing on four legs, low",
+  "redo": true,
+  "new_stance": "Low waddle stride: legs mid-step, body slung low, head forward, storm cloud trailing."
+ },
+ {
+  "line": "Bucketmander",
+  "stage": "Cisternmander",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide on splayed legs, head raised, cistern back tilted forward, storm cloud rumbling high."
+ },
+ {
+  "line": "Tinbrock",
+  "stage": "Tinbrock",
+  "current": "standing on four legs, compact",
+  "redo": true,
+  "new_stance": "Sits on its rump like a badger cub, forepaws resting on belly, head tilted up."
+ },
+ {
+  "line": "Tinbrock",
+  "stage": "Anvilbrock",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Low trundling charge: legs mid-stride, head down, anvil leading."
+ },
+ {
+  "line": "Tinbrock",
+  "stage": "Forgebrock",
+  "current": "standing four-square",
+  "redo": true,
+  "new_stance": "Rears up on hind legs bear-like, forepaws raised, stacks belching, chest furnace glowing."
+ },
+ {
+  "line": "Bubblisk",
+  "stage": "Bubblisk",
+  "current": "standing on four legs, low",
+  "redo": true,
+  "new_stance": "Sits on its haunches, forelegs straight, curled tail wrapped around its feet."
+ },
+ {
+  "line": "Bubblisk",
+  "stage": "Frothisk",
+  "current": "standing tall on four legs, tail loop up",
+  "redo": true,
+  "new_stance": "Low scurrying dash: body flat to the ground, legs splayed mid-stride, tail streaming behind."
+ },
+ {
+  "line": "Bubblisk",
+  "stage": "Tidalisk",
+  "current": "braced crouch on four legs",
+  "redo": false,
+  "new_stance": "Keep: braced wide crouch, crest raised high like a wave."
+ },
+ {
+  "line": "Kestrike",
+  "stage": "Kestrike",
+  "current": "perched compact",
+  "redo": false,
+  "new_stance": "Keep: perched compact, feathers puffed."
+ },
+ {
+  "line": "Kestrike",
+  "stage": "Arcestrel",
+  "current": "standing with wings raised",
+  "redo": true,
+  "new_stance": "Stooping dive: wings swept back, talons forward, head down."
+ },
+ {
+  "line": "Kestrike",
+  "stage": "Voltalon",
+  "current": "OLD DESIGN: standing with wings raised",
+  "redo": true,
+  "new_stance": "Planted wide on talons, wings spread wide and horizontal, crest raised high, looming."
+ },
+ {
+  "line": "Marchleaf",
+  "stage": "Marchleaf",
+  "current": "standing on six legs",
+  "redo": false,
+  "new_stance": "Keep: standing on six legs, antennae up."
+ },
+ {
+  "line": "Marchleaf",
+  "stage": "Scythant",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Fast scuttling stride: body low, scythes tucked, antennae swept back."
+ },
+ {
+  "line": "Marchleaf",
+  "stage": "Reapant",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Rears up on hind legs, scythe forelimbs raised high, antennae spread."
+ },
+ {
+  "line": "Nettlynx",
+  "stage": "Nettlynx",
+  "current": "standing on four legs, tail up",
+  "redo": true,
+  "new_stance": "Sits on its haunches, tail wrapped around its paws, ears perked."
+ },
+ {
+  "line": "Nettlynx",
+  "stage": "Thistlynx",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Low stalking prowl: belly near the ground, one forepaw lifted, head level, tail low."
+ },
+ {
+  "line": "Nettlynx",
+  "stage": "Briarlynx",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide and snarling, forelegs splayed, head low, thorny mane bristling."
+ },
+ {
+  "line": "Thrumbird",
+  "stage": "Thrumbird",
+  "current": "hovering, wings blurred",
+  "redo": false,
+  "new_stance": "Keep: hovering bob, wings blurred."
+ },
+ {
+  "line": "Thrumbird",
+  "stage": "Lyrewing",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Perched planted, lyre tail fanned up, wings mantled."
+ },
+ {
+  "line": "Mothlet",
+  "stage": "Mothlet",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Round fluffy puff perched, wings folded, antennae up."
+ },
+ {
+  "line": "Mothlet",
+  "stage": "Lunowl",
+  "current": "perched upright, wings folded",
+  "redo": true,
+  "new_stance": "Gliding with moth wings spread, body tilted forward, talons tucked."
+ },
+ {
+  "line": "Mothlet",
+  "stage": "Eclipsowl",
+  "current": "perched upright, wings folded",
+  "redo": true,
+  "new_stance": "Looming mantle: wings spread wide high, standing on talons, ear tufts raised."
+ },
+ {
+  "line": "Echolop",
+  "stage": "Echolop",
+  "current": "standing on four legs, alert",
+  "redo": true,
+  "new_stance": "Sits upright on haunches, ears up, wings folded."
+ },
+ {
+  "line": "Echolop",
+  "stage": "Howlop",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Rears on hind legs, wings open, head tilted back howling."
+ },
+ {
+  "line": "Echolop",
+  "stage": "Chimelop",
+  "current": "no art",
+  "redo": true,
+  "new_stance": "Braced wide crouch, ears swept forward ringing, wings half-spread."
+ },
+ {
+  "line": "Gongibbon",
+  "stage": "Gongibbon",
+  "current": "hunched standing, gong on chest",
+  "redo": true,
+  "new_stance": "Squats sitting with knees up, hands drumming on chest gong, mallet tail curled over."
+ },
+ {
+  "line": "Gongibbon",
+  "stage": "Gongrowl",
+  "current": "hunched roaring on knuckles",
+  "redo": false,
+  "new_stance": "Keep: braced wide on knuckles, roaring, mallet tail raised."
+ },
+ {
+  "line": "Latchling",
+  "stage": "Latchling",
+  "current": "crouched on four legs toad",
+  "redo": true,
+  "new_stance": "Mid-hop bounce, legs tucked, key tail flicked up."
+ },
+ {
+  "line": "Latchling",
+  "stage": "Lockatara",
+  "current": "crouched on four legs",
+  "redo": true,
+  "new_stance": "Low crawling stride, one foreleg forward, body low, shackle forward."
+ },
+ {
+  "line": "Latchling",
+  "stage": "Vaultara",
+  "current": "OLD DESIGN: crouched on four legs",
+  "redo": true,
+  "new_stance": "Braced wide, forelegs splayed, chest puffed high, vault door shell tilted forward looming."
+ },
+ {
+  "line": "Jarmit",
+  "stage": "Jarmit",
+  "current": "standing on crab legs, jar on",
+  "redo": true,
+  "new_stance": "Tucked into jar, only eyes and claws peeking, sitting low."
+ },
+ {
+  "line": "Jarmit",
+  "stage": "Lanternmit",
+  "current": "OLD DESIGN: standing",
+  "redo": true,
+  "new_stance": "Raised on tiptoe legs, lantern held high, claws spread wide."
+ },
+ {
+  "line": "Jarmit",
+  "stage": "Stormit",
+  "current": "OLD DESIGN: standing",
+  "redo": true,
+  "new_stance": "Braced wide low, legs splayed, claws thrust forward crackling, bottle angled forward like a cannon."
+ },
+ {
+  "line": "Jarmit",
+  "stage": "Terrarimit",
+  "current": "OLD DESIGN: standing",
+  "redo": true,
+  "new_stance": "Planted hunkered, legs dug in, one huge claw raised overhead, jar tilted back."
+ }
+]
