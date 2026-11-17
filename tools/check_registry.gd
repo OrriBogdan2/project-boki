@@ -118,7 +118,6 @@ const CHECKS := {
 	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],  # no natural death
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
-	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],  # wishes, away gifts
 	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],  # garden snack patch
 	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],  # food lean by type (base_mode)
