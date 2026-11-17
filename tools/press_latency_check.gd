@@ -315,7 +315,7 @@ func _rest(key: String) -> void:
 	P.teleport(flat)
 	P.vel = Vector3.ZERO
 	P.grounded = true
-	for zero in ["roll_t", "knock_t", "stun_t", "root_t", "coyote", "jump_buf", "reload_t", "fire_cd",
+	for zero in ["roll_t", "knock_t", "stun_t", "root_t", "coyote", "jump_buf", "fire_cd",
 			"warm_t", "spin", "mel_hold", "swing_buf", "dash_buf", "ex_cd", "merge_cd"]:
 		P.set(zero, 0.0)
 	for off in ["gliding", "dropping", "diving"]:
