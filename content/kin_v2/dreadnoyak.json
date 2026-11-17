@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "dreadnoyak",
+	"name": "Dreadnoyak",
+	"theme": "frost",
+	"type2": "titan",
+	"flavor": "Colossal icebreaker yak, ice-armour hull.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kayak",
+		"stage": 3,
+		"from": "glaciyak"
+	}
+}

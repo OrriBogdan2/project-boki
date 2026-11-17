@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "dragonkite",
+	"name": "Dragonkite",
+	"theme": "wyrm",
+	"type2": "tempest",
+	"flavor": "Majestic sky dragon, kite-frame wings, crossbar spine.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kitlet",
+		"stage": 3,
+		"from": "ribbonwyrm"
+	}
+}

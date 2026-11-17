@@ -116,5 +116,10 @@
 		"temper": "Bold",
 		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
 		"play": "Darts in, stings hard and poisons. Brave, but quick to anger."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 1
 	}
 }

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "frothisk",
+	"name": "Frothisk",
+	"theme": "prism",
+	"type2": "tide",
+	"flavor": "Sleek water-runner, foam frill, bubble-wand tail blade.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "opalisk",
+		"stage": 2,
+		"from": "opalisk"
+	}
+}

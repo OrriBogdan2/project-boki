@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "stormit",
+	"name": "Stormit",
+	"theme": "tide",
+	"type2": "storm",
+	"flavor": "Moves into a coil-wrapped storm bottle.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "jarmit",
+		"stage": 2,
+		"from": "jarmit",
+		"ink": "storm"
+	}
+}

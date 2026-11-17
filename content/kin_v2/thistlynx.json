@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "thistlynx",
+	"name": "Thistlynx",
+	"theme": "venom",
+	"type2": "bloom",
+	"flavor": "Grown lynx, thistle mane, barbed ear tufts.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "nettlynx",
+		"stage": 2,
+		"from": "nettlynx"
+	}
+}

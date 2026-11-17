@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "ribbonwyrm",
+	"name": "Ribbonwyrm",
+	"theme": "wyrm",
+	"type2": "tempest",
+	"flavor": "Long kite-tail dragon, ribbon streamers.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kitlet",
+		"stage": 2,
+		"from": "kitlet"
+	}
+}
