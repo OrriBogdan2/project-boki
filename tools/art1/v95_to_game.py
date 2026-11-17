@@ -2,7 +2,7 @@
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
-Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--no-import]
+Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
 
 import argparse
@@ -97,6 +97,7 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
+    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
@@ -104,7 +105,7 @@ def main():
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
     tris = a.tris or spec.get("own_tris", TRIS)
     k = tris / float(spec["tris"])
-    spec.update(master=master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
+    spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if spec.get("head_tris"):
         spec["head_tris"] = int(spec["head_tris"] * k)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
