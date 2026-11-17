@@ -10037,3 +10037,4 @@ READY ext/vex-single-dash a67a2b8a80e5232c314ae98d47517d59d5c6d312 (Vex Slipstep
 READY ext/merge-lane-vfx2-1117 511d5b27e6 (merge lane vfx2: 1 branch ported = vfx-summon-ring; 25 HARD, 3 already archived; see coord/merge-week/2026-11-17/lanes/vfx2-RESULT.md)
 READY ext/merge-lane-hunters3-1117 dde694a5c6 (merge lane hunters3: 5 branches (haste stack, cooldown gate, chain-sweep check, no ring under a dash, move-rule guard) + 2 check fixes; regate 566 checks NEW-RED 0, export 838 MB; 21 HARD; SUPERSEDES 76dce7586d)
 READY ext/merge-lane-vfx1-1117 936549fa35 (lane vfx1 train b: carry cues, impact castlock, interrupt cut, Boki state cues + wisp, vfx1-1114; reverts PR #200 listener 3D casts; NEW-RED 0, export OK 839 MB)
+READY ext/merge-lane-hunters8-1117 10e9fdb3b440a12cbe75eaebcdef855c07a45b28 (hunters8 lane: HunterZone clear zone + fewer text popups from ext/ui-clutter-zone-1116; full gate by regate bot)
