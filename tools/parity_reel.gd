@@ -126,7 +126,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 			_keys_update()
 		if close:
 			_close_cam()
-	await super._go(secs, keyed, marks, lead)
+	await super._go(secs, keyed, marks, 0.0 if close else lead)
 
 ## The close camera for this step: orbiting the Hunter's middle, far enough back for the Hunter to fill CLOSE_FILL.
 func _close_cam() -> void:
