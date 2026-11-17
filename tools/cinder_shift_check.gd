@@ -27,6 +27,7 @@ func run(main: Node) -> void:
 		)
 	)
 	print("CINDER SHIFT CHECK DONE, failures: %d" % bad)
+	main.get_tree().quit()
 
 
 ## One Shift from a run (W held): the metres and seconds of the dash itself, and its top speed.

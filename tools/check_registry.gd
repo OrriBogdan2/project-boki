@@ -869,6 +869,7 @@ const CHECKS := {
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
+	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred

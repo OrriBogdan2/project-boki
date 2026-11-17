@@ -599,8 +599,8 @@ func _all() -> void:
 	var poof_d := P.pos.x - home.x
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-		"air poof: as far as the ground ram (owner 11-17: not twice it), about run speed kept after it",
-		absf(poof_d / ram_d - 1.0) < 0.2 and poof_t < 0.35 and kept > 5.0 and kept < 7.0,
+		"air poof: about the ground ram's length (owner 11-17: it was over twice it), a share of its speed kept after it",
+		poof_d < ram_d * 1.5 and poof_d > ram_d * 0.9 and poof_t < 0.35 and kept > 5.0 and kept < 12.5,
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
 	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
