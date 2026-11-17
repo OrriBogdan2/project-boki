@@ -97,7 +97,7 @@ FOOT_R0 = READY_M["shin.R"] @ Vector((0, arm.data.bones["shin.R"].length, 0))
 HL0 = READY_M["hand.L"].translation.copy()
 
 RAISE = {"t": 0.20, "W": Vector((0.07, -0.03, 1.58)), "phi": -35.0, "lean": 9.0, "drop": 0.03, "fwd": -0.03, "yaw": -6.0}
-LOAD = {"t": 0.48, "W": Vector((0.08, -0.10, 1.55)), "phi": -112.0, "lean": 15.0, "drop": 0.07, "fwd": -0.05, "yaw": -10.0}
+LOAD = {"t": 0.48, "W": Vector((0.08, -0.10, 1.55)), "phi": -112.0, "lean": 22.0, "drop": 0.08, "fwd": -0.06, "yaw": -12.0}
 HIT = {"t": IMPACT, "W": Vector((0.04, 0.50, 0.62)), "phi": 116.0, "lean": -38.0, "drop": 0.17, "fwd": 0.10, "yaw": 4.0}
 SETTLE = {"t": 0.70, "dW": Vector((0, 0.01, -0.02)), "lean": -41.0, "drop": 0.20}
 HOLD_END = 0.78
@@ -254,6 +254,8 @@ nf = int(round(LENGTH * FPS))
 prev = {}
 for f in range(nf + 1):
     t = f / FPS
+    if f % 2 and not 0.40 <= t <= 0.72:
+        continue                                          # 30 keys/s, 60 through the arc and the impact
     out, tip = pose(t)
     if f % 6 == 0 or abs(t - IMPACT) < 1e-6:
         print("SMASH t=%.2f tip (%.2f, %.2f, %.2f) grip %s" % (t, tip.x, tip.y, tip.z,
@@ -264,9 +266,9 @@ for f in range(nf + 1):
             rot.negate()                                  # (no flips between keys)
         prev[b.name] = rot
         b.location, b.rotation_quaternion = loc, rot
-        b.keyframe_insert("location", frame=f)
+        if b.name == "root":
+            b.keyframe_insert("location", frame=f)        # (only the root moves; every other head stays put)
         b.keyframe_insert("rotation_quaternion", frame=f)
-        b.keyframe_insert("scale", frame=f)
 for fc in act.fcurves:
     for k in fc.keyframe_points:
         k.interpolation = "LINEAR"
