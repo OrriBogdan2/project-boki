@@ -5,9 +5,10 @@ extends RefCounted
 ## letters or digits, and not use a jargon word before the step that introduces it.
 
 const MAX_WORDS := 12
-## term -> the step id that introduces it ("" = never introduced by the tutorial, so never allowed).
-const JARGON := {"fuse": "", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
-		"uplink": "uplink", "ultimate": ""}
+## term -> the step id that introduces it ("" = never introduced by the tutorial, so never allowed). The Fusion
+## step and its unlock name the Ultimate (R) and the Fusion (X) as two things (owner playtest 11-17).
+const JARGON := {"fuse": "pick_ult", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
+		"uplink": "uplink", "ultimate": "pick_ult"}
 
 var bad := 0
 var main: Node

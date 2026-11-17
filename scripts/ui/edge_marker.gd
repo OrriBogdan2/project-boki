@@ -11,7 +11,8 @@ const PRIO_GOAL := 2     # where to go: uplinks, the Heart, the Gate, beacons, t
 const GAP := 6.0         # px kept clear between two markers along the rim
 const LABEL_PX := 16     # label font size, px
 const LABEL_H := 22.0    # px a label line takes
-const LABEL_GAP := 12.0  # px between an arrow and its label
+const LABEL_GAP := 12.0  # px between an arrow's tail (and its shadow) and its label
+const ARROW_TAIL := 0.6  # how far behind its position an arrow's wings and shadow reach, in arrow sizes
 const BADGE_DY := 18.0   # px a downed Wisp's ring sits above its label
 const BADGE_R := 10.0    # px radius of that ring
 
@@ -96,24 +97,26 @@ func _clear(s: float, ext: float, placed: Array[Dictionary]) -> bool:
 			return false
 	return true
 
-## Half the room the item needs along the rim: its label's width on the top and bottom, else its
-## height, plus how far the label is pushed along the rim by the arrow's slant.
+## Half the room the item needs along the rim: its label's half-width on the top and bottom, else its half-height,
+## plus how far the label sits from the arrow along that axis.
 func _extent(it: Dictionary, s: float) -> float:
 	var arrow := _size * 1.4
 	if it["text"] == "":
 		return arrow
-	var d: Vector2 = it["d"]
 	var w := _half.x * 2.0
 	var flat := _radius <= 0.0 and (s < w or (s >= w + _half.y * 2.0 and s < 2.0 * w + _half.y * 2.0))
-	var along := absf(d.x if flat else d.y) * (arrow + LABEL_GAP)
-	return maxf(arrow, (_label_w(it) if flat else LABEL_H) * 0.5 + along)
+	var off := _label_at(it, Vector2.ZERO)
+	return maxf(arrow, (_label_w(it) if flat else LABEL_H) * 0.5 + absf(off.x if flat else off.y))
 
 func _label_w(it: Dictionary) -> float:
 	return TextCache.width(HudStyle.BIG, it["text"], LABEL_PX)
 
-## The label sits this far inside the arrow, along -d.
+## The label's centre: behind the arrow along -d, its own half-extent in that direction past the arrow's tail plus
+## LABEL_GAP, so the arrow never covers a letter (a wide label beside a sideways arrow used to sit under its point).
 func _label_at(it: Dictionary, p: Vector2) -> Vector2:
-	return p - (it["d"] as Vector2) * (_size * 1.4 + LABEL_GAP)
+	var d: Vector2 = it["d"]
+	var half := Vector2(_label_w(it), LABEL_H) * 0.5
+	return p - d * (_size * ARROW_TAIL + LABEL_GAP + absf(d.x) * half.x + absf(d.y) * half.y)
 
 func _fix(it: Dictionary) -> void:
 	var p := _rim_at(float(it["s"]))

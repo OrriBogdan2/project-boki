@@ -600,6 +600,7 @@ const CHECKS := {
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
 	"--tutorial-playtest-check": ["res://tools/tutorial_playtest_check.gd", "tutorial_playtest_check", null],
+	"--tutorial-playtest-shots": ["res://tools/tutorial_playtest_shots.gd", "tutorial_playtest_shots", null],  # GPU: --shots-dir
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>: any first Relic
 	# Skip on every step
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],
