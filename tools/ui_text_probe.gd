@@ -118,6 +118,8 @@ func _look(name: String) -> void:
 	for h in found:
 		h["path"] = _plain.sub(h["path"], "$1", true)
 		var key := "%s|%s|%s" % [name, h["path"], h["rule"]]
+		if String(h["text"]).begins_with("drawn: "):
+			key += "|" + h["text"]  # (one canvas draws many words: a row each)
 		if not hits.has(key):
 			hits[key] = {"scene": name, "path": h["path"], "rule": h["rule"], "text": h["text"], "detail": {}}
 		hits[key]["detail"]["%dx%d@%d%%" % [size_px.x, size_px.y, text_k * 100]] = h["detail"]
