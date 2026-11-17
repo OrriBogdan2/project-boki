@@ -192,6 +192,7 @@ var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold
 var abyss_snd := AbyssFallSfx.new()    # the abyss fall's wind, warning and lift (or others' cry)
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
+var wallstun_at := -9.0       # s (match time) the hit that set wallstun landed (Displace.knocked keeps it)
 var land_t := 0.0
 var ghost_t := 0.0
 var step_t := 0.0
@@ -509,6 +510,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		BaseRecall.cancel(self, "you took damage", true)
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
+		wallstun_at = m.time
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
 	# and you take normal damage. What it does is drain the glider at triple the usual rate. Only
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
@@ -754,9 +756,9 @@ func _render_balloon(delta: float) -> void:
 		string.position = Vector3(0, len * 0.5, 0)
 		string.scale = Vector3(1, len, 1)
 
-## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
-## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
+## Knockback is a clean, predictable shove: a knock replaces the flight you were in (Displace.knock_speed: a
+## second knock takes over from the first, a pull or a reel), you slide for a fixed moment without control,
+## and it never pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
@@ -774,11 +776,12 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 		return
 	if s > 4.0:
 		kb_t = m.time
-	var hv := HunterMove.push(Vector2(vel.x, vel.z), k / k.length(), s)
+	var hv := Displace.knock_speed(Vector2(vel.x, vel.z), k / k.length(), s)
 	vel.x = hv.x; vel.z = hv.y
-	if s > 2.5:
+	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 		HunterMove.cut_air_dash(self)
+		if m is Match: (m as Match).displace.knocked(self)
 	if lift > 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -881,14 +884,19 @@ func can_glide() -> bool:
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
-## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
+## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled, unless
+## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Rock Hop's launch_to). The dash's own
+## wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
+	if grounded or dropping or downed or shot_down or stun_t > 0.0 or (ak != null and ak.no_glide()) \
+			or not loco.can(Loco.S.GLIDING):
+		return false
+	if ak != null and ak.glide_cancel():
+		return true
 	var in_dash := roll_t > 0.0 and move_kind == "dash"
 	var just_after := roll_t <= 0.0 and dash_glide.fresh(self)
-	if not (in_dash or just_after) or grounded or dropping or downed or shot_down or stun_t > 0.0 \
-			or (ak != null and ak.no_glide()) or not loco.can(Loco.S.GLIDING):
+	if not (in_dash or just_after):
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
