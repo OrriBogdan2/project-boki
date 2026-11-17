@@ -162,7 +162,13 @@ const VOICES := [
 	"step_grass",
 	"step_stone",
 	"step_snow",
-	"step_wood"
+	"step_wood",
+	"step_water_light",
+	"step_water_medium",
+	"step_water_heavy",
+	"step_metal_light",
+	"step_metal_medium",
+	"step_metal_heavy"
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
@@ -661,9 +667,17 @@ func play_sample(bus_name: String) -> void:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
-## keeps it as it keeps your other sounds (SfxVoices).
+## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
+## round-robins them), else a random one that isn't the last.
 func play(
-	sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0, mine := false
+	sname: String,
+	pos = null,
+	vol_db := 0.0,
+	pitch_var := 0.07,
+	pitch := 1.0,
+	reach := 0.0,
+	mine := false,
+	take := -1
 ) -> void:
 	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
@@ -684,8 +698,7 @@ func play(
 		voices.cut.emit(sname, rk, &"gap")
 		return
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r)
-	v += BLAST_DB if sname in BLAST else 0.0
+	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -707,8 +720,8 @@ func play(
 	if st is Array:
 		# a different take from last time
 		var arr: Array = st
-		var i := rng.randi_range(0, arr.size() - 1)
-		if arr.size() > 1 and i == int(last_take.get(sname, -1)):
+		var i := take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
+		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
@@ -717,6 +730,30 @@ func play(
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
 	played.emit(sname, pos, vol_db, pitch)
+
+
+## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
+## Quiet vol_db up close, far_db from far_m metres out (no further): it carries, it doesn't fade away.
+func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
+	if not streams.has(sname) and not _lazy(sname):
+		return
+	var cam := get_viewport().get_camera_3d()
+	var side := Vector2(at.x - listener.x, at.z - listener.z)
+	var pan := 0.0
+	if cam and side.length() > 1.0:
+		var right := Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
+		pan = clampf(side.normalized().dot(right), -1.0, 1.0)
+	var bus := AudioServer.get_bus_index("SFXPan")
+	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
+	var p := _voice(null, voices.rank_of(null, listener), sname)
+	if p == null:
+		return
+	p.bus = "SFXPan"
+	var st = streams[sname]
+	p.stream = _once(st[rng.randi_range(0, st.size() - 1)] if st is Array else st)
+	p.volume_db = lerpf(vol_db, far_db, clampf(side.length() / far_m, 0.0, 1.0))
+	p.pitch_scale = 1.0
+	p.play()
 
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
@@ -766,7 +803,8 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.bus = bus
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(sound_gain.get(sname, 0.0)), "reach": carry, "sound": sname, "bus": bus}
+	var vol := vol_db + float(sound_gain.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol, "reach": carry, "sound": sname, "bus": bus}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -880,6 +918,19 @@ func _lazy(sname: String) -> bool:
 	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
 
+## How many takes a sound has (0 when it has no file).
+func take_count(sname: String) -> int:
+	if not ensure(sname):
+		return 0
+	var st = streams[sname]
+	return (st as Array).size() if st is Array else 1
+
+## Seconds one take of a sound sounds for.
+func take_len(sname: String, take: int) -> float:
+	var st = streams[sname]
+	if st is Array:
+		st = (st as Array)[take % (st as Array).size()]
+	return (st as AudioStream).get_length()
 
 ## Whether a sound exists (loading it on first ask, as play does).
 func ensure(sname: String) -> bool:

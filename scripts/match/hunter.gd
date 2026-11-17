@@ -17,7 +17,6 @@ const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", 
 		"swap"]
 # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
-const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -392,6 +391,7 @@ func _kit_from_weapon() -> void:
 		return
 	var wd := Content.weapon(wid)
 	if ak:
+		wpn["sfx"] = String(ak.lmb_def().get("sfx", wpn["sfx"]))      # a Hunter's own shot over a shared gun's (Dredge)
 		runner.set_slot("utility", null)      # right click is the archetype's
 		return
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
@@ -831,15 +831,13 @@ func do_jump() -> void:
 	if wall_moves.try_kick(self):
 		return
 	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
-	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
-	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
-	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
+	var near_ground := HunterMove.near_landing(vel.y, pos.y - ground()) and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
 		if gliding:
 			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
-	jump_buf = JUMP_BUFFER
+	jump_buf = HunterMove.jump_buffer_s
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
 const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
@@ -903,6 +901,7 @@ func _dash_into_glide() -> bool:
 func _open_glider() -> void:
 	if not moves.open_glider():
 		return
+	add_stat("glide_presses")     # the tutorial's glide step counts only a press
 	_glide_armed = false
 	grounded = false
 	glider_sfx("open")
@@ -963,6 +962,7 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
+var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
@@ -1053,12 +1053,15 @@ func dash_with(e: Dictionary) -> void:
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
+	roll_falls = false
 	dash_is_ex = ex_next
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
 		ex_next = false
+		var k: Array = e.get("ex_feel", [1.0, 1.0])    # a Shift move's own dash_feel row (ArchKit.travel "feel")
 		roll_t = float(cdat.get("ex_time", roll_t * 1.45))
-		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) / roll_t
+		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) * float(k[0]) / (roll_t * float(k[1]))
+		roll_t *= float(k[1])
 		vel.y = maxf(vel.y, 0.0)
 	roll_t /= Loco.dash_speed(arch)      # a hunter whose dash is slowed (tuning.json dash_speed) keeps its distance
 	inv_t = maxf(inv_t, float(e.get("invuln", 0.14)))
@@ -1510,7 +1513,7 @@ func _emit_shot() -> void:
 		m.spawn_shot(self, start, Vector2(cos(a), sin(a)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
-	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
+	FireSfx.shot(get_instance_id(), wpn["sfx"], pos, -2.0 if is_local() else -6.0, float(wpn["rate"]))
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
@@ -2027,6 +2030,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
+	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2117,7 +2121,7 @@ func _physics(dt: float) -> void:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
-	elif roll_t > 0.0 and not grounded and not dropping:
+	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
@@ -2258,7 +2262,8 @@ func _physics(dt: float) -> void:
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
-		coyote = 0.12
+		coyote = HunterMove.coyote_s
+		roll_falls = roll_t > 0.0 and move_kind == "dash"
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt
@@ -2653,11 +2658,10 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		mantle_cd = 0.3
 		return true
 	if not bool(lf["win"]) and left <= LRISE_WINDOW:
-		# the fling window opens: a tick and a quick ring, so the timing reads
+		# the fling window opens: a tick, so the timing reads
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
 	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt), float(lf["dash_vy"]))
 	return true
 
@@ -2721,7 +2725,7 @@ func _grapple(dt: float) -> void:
 	grap["fx"] -= dt
 	if grap["fx"] <= 0.0:
 		grap["fx"] = 0.07
-		m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
+		m.fx.debris(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
 	if (absf(tz - pos.y) < 0.02 and hd.length() < 0.05) or grap["t"] > 2.0:
 		pos = Vector3(grap["ex"], maxf(pos.y, tz), grap["ez"])
 		var land: Vector3 = grap["land"]
@@ -3233,7 +3237,7 @@ func render(delta: float, alpha: float) -> void:
 		boost_fx_t = maxf(0.0, boost_fx_t - delta) if boosted else 0.0
 		if wind_t <= 0.0:
 			wind_t = 0.035 if boosted else 0.09
-			m.fx.burst(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
+			m.fx.debris(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard

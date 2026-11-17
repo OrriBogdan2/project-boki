@@ -485,49 +485,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
-		var mv: Dictionary = moves[km]
-		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
-		var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
-		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
-		if km != alt_km or tt < alt_t:
-			alt_on = not alt_on
-			air_cast = false
-		air_cast = air_cast or not bool(s.get("grounded", true))
-		alt_km = km
-		alt_t = tt
-		if mv.get("owns_land", false):
-			# this move is the landing (it may start in the air): the generic land clip must not follow it
-			land_t = LAND_DONE
-		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		var length := lib.get_animation(clip).length
-		if mv.has("fit"):
-			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
-		# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
-		if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
-			tt = minf(tt, length - 0.001)
-		if mv.has("hold_from") and root.has_meta(PHASE):
-			var start := float(mv["hold_from"])
-			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
-		elif tt >= length:
-			if not mv.has("hold_from"):
-				return {}
-			var from := float(mv["hold_from"])
-			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
-		# ("upper": true, or "moving": the legs keep walking only while he walks)
-		var up = mv.get("upper", false)
-		if planted(s):
-			up = true      # rooted: the legs stay on the standing layer, only the body plays the move
-		elif up is String:
-			var vel: Vector3 = s.get("vel", Vector3.ZERO)
-			up = Vector2(vel.x, vel.z).length() >= STILL
-		# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
-		# to the move's end: no planted stance mid-air, no snap into it on the landing)
-		if bool(mv.get("air_legs", false)) and air_cast:
-			up = true
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
-				"legs_heading": bool(mv.get("legs_heading", false)),
-				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+		return _move_clip(km, moves[km], s)
 	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
@@ -621,6 +579,52 @@ func _lockin_at(t: float) -> Dictionary:
 ## How long a Hero's lock-in pose runs (s); 0 for one that has none.
 static func lockin_dur(art_name: String) -> float:
 	return float(data(art_name).get("lockin", {}).get("dur", 0.0))
+
+## A keyed move's clip and time ({} once a move that does not hold has played out).
+func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
+	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
+	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
+	if km != alt_km or tt < alt_t:
+		alt_on = not alt_on
+		air_cast = false
+	air_cast = air_cast or not bool(s.get("grounded", true))
+	alt_km = km
+	alt_t = tt
+	if mv.get("owns_land", false):
+		# this move is the landing (it may start in the air): the generic land clip must not follow it
+		land_t = LAND_DONE
+	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	var length := lib.get_animation(clip).length
+	if mv.has("fit"):
+		tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
+	# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
+	if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
+		tt = minf(tt, length - 0.001)
+	if mv.has("hold_from") and root.has_meta(PHASE):
+		var start := float(mv["hold_from"])
+		tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+	elif tt >= length:
+		if not mv.has("hold_from"):
+			return {}
+		var from := float(mv["hold_from"])
+		tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
+	# ("upper": true, or "moving": the legs keep walking only while he walks)
+	var up = mv.get("upper", false)
+	if planted(s):
+		up = true      # rooted: the legs stay on the standing layer, only the body plays the move
+	elif up is String:
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		up = Vector2(vel.x, vel.z).length() >= STILL
+	# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
+	# to the move's end: no planted stance mid-air, no snap into it on the landing)
+	if bool(mv.get("air_legs", false)) and air_cast:
+		up = true
+	return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
+			"legs_heading": bool(mv.get("legs_heading", false)),
+			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
