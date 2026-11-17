@@ -95,7 +95,13 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
 everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
+## Armour on the body (every Hunter and bot, not a recipe)
+`Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
+`Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
+The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
+
 ## Rules
+- **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
@@ -113,6 +119,12 @@ everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). No
   ambient motes; 1,847 before the pools); a kit's E and R alone add 0-195 (noisy run to run). Nodes made in the
   camp fight went 5,294 -> 2,351 (Fx 2,830 -> 132). Effects made mid-fight come from pools (Fx's FxPool, HeroVfx,
   VVFx, Thief's Mark pips).
+- **Particle budget per preset:** `Settings.QUALITY` has `fx` (amount x) and `fx_life` (lifetime x: 0.5 very low, 0.7
+  low, 1.0 from medium up). Fx bursts and sparks, the Hero VFX layers and the ambient emitters (`ParticleCount.tune`: island
+  ash, pickup motes, the ash storm, landmark and exit motes) follow them; High and Ultra are untouched. The ash storm
+  follows `fx` instead of `Settings.lite()`. `--particle-budget-check` (~1 min) builds a 30-Hunter match at each preset
+  and adds the worst a fight piles on (the full Fx pools and the Hero VFX cap): each preset under 4,000, each one down
+  draws less, High and Ultra draw the same.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
@@ -127,6 +139,13 @@ at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.
 `s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
 the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
 exactly that size and measures its own look, the core and the rim in pixels across the flight line.
+## Ultimate ready glow
+`UltGlow` (scripts/match/ult_glow.gd): a Hunter whose ultimate (X) is unlocked and off cooldown carries a quiet rim glow in
+their archetype colour (`Arch.color`), visible to everyone; on the cast it flashes to full and fades in ~0.3 s, on top of the
+existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_color` set with it), written to the body's
+materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
+it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
+`--ult-glow-shots --shots-dir=<dir>`.
 
 ## Missed shots
 A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
@@ -134,3 +153,49 @@ puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, w
 range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
 oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
 asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
+
+## Boki type accents
+`KinTypeFx` (`scripts/match/kin_type_fx.gd`) fixes that: one cheap accent per type, played on **every cast by a Boki
+of that type** (active, auto and triggered casts; not while the Boki is out of the local player's sight). It sits at
+the Boki's feet and chest and uses the shared `Fx` pools only (dots, streaks, one ground ring), so it adds no node,
+no shader and no per-frame code. It does not recolour the effect itself, so colour keeps meaning the effect.
+Budget per cast: at most 10 dots, 8 streaks, 3 rings (before the quality preset's `fx` factor). `--kin-type-fx-check`
+asserts coverage of all 18 types, distinct colours and shapes, the budget and a real cast. Sheet:
+`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`). Tuned on grass over GPU sheets 20261109-121559 (too faint),
+20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
+The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
+
+### Movement trail and capture pop
+
+`KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its
+type's colour (`KinTypeFx.LOOKS`): embers and motes rise (Fire, Spore, Psychic, Fairy, Dark, Poison, Dragon), drips fall
+(Water, Ice, Rock), leaves flutter (Grass, Bug, Normal, Flying), Electric/Steel/Crystal/Sound crackle in short streaks.
+Budget: four shared `GPUParticles3D` (one per group, 64 live particles each), fed one particle at a time with
+`emit_particle`, one per 0.07 s per moving Boki at full quality (scaled by the `fx` preset); nothing for a Boki that is
+standing still, parked, knocked out, out of sight or over 45 m from the local player. The capture pop's colour burst
+uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
+(GPU) walks one Boki per type and pops them.
+
+| Type | Species | Colour | Accent | Before |
+|---|---|---|---|---|
+| Normal | 0 | cream | plain short puff | none |
+| Fire | 4 | orange | embers rise slowly | none |
+| Water | 0 | blue | droplets arc up and fall | none |
+| Grass | 4 | green | leaves drift down | none |
+| Spore | 3 | tan | big soft puffs float up | cue only |
+| Electric | 4 | yellow | thin fast zaps, all directions | none |
+| Ice | 4 | cyan | chunky shards fall | none |
+| Rock | 4 | brown | pebbles drop fast | none |
+| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
+| Flying | 2 | sky white | wind streaks along the cast | none |
+| Dragon | 0 | indigo | embers and streaks rising | none |
+| Dark | 4 | deep violet | big slow smoke | none |
+| Poison | 3 | acid green | bubbles rise | cue only |
+| Bug | 4 | amber | many tiny dots, scattered | none |
+| Steel | 2 | silver | short thick glints along the cast | none |
+| Fairy | 3 | pink | small sparkles float up | cue only |
+| Crystal | 3 | teal | facets fan upward | cue only |
+| Sound | 3 | gold | three quick rings | cue only |
+
+Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
+data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.

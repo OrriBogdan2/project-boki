@@ -81,7 +81,7 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
 	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
 	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
-	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"own_ambient": Vector3(0.85, 0.84, 0.83), "light_neutral": 0.9, "light_neutral_warm": 1.0, "dark_lift": 0.07,
 	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
@@ -108,11 +108,12 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
-## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide); a hanging wing (Sable's moth wings)
+## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
-## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air, Grimble's stretched hook
-## arm): the bones the Hero's data lists in "hide_while_chain" shrink away (item 76b.4), so one shows, never two.
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's
+## data lists in "hide_while_chain" shrink away (item 76b.4), so one shows, never two.
 const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
@@ -202,7 +203,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
 	var sync := WardenSync.new()
@@ -217,6 +217,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	WardenMerge.merge_equal(glb)
+	WardenMerge.join_inks(glb)
 	_lights(glb, look(art(arch)))
 	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
@@ -296,11 +298,11 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	var muzzle := gun.get_node_or_null("Muzzle") as Node3D
 	if mouth and muzzle:
 		muzzle.transform = WardenGlb.model_xf(weapon, mouth)
-	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
+	# its magazine (WEAPON_MAG) becomes the Gun's Mag
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
 	if old is MeshInstance3D and mag == null:
-		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole: the reload still moves the Mag node)
+		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole)
 	if mag and old:
 		var at := WardenGlb.model_xf(gun, mag)
 		gun.remove_child(old)
@@ -427,7 +429,7 @@ static func _skinned_weapon(root: Node3D) -> void:
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
-	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	if mag:
 		mag.mesh = null
 		mag.visible = false
@@ -447,15 +449,6 @@ static func measure_rest(arch: String) -> Dictionary:
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
-
-## Hides the procedural body's meshes, leaving the KEEP pieces.
-static func _hide_body(n: Node) -> void:
-	for ch in n.get_children():
-		if String(ch.name) in KEEP:
-			continue
-		if ch is MeshInstance3D:
-			(ch as MeshInstance3D).visible = false
-		_hide_body(ch)
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
 ## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon

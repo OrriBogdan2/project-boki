@@ -39,7 +39,8 @@ const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd",
 ## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
 ## play its sound.
 const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
-		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
+		"Gliders.sound", "Gliders.equipped", "Gliders.LIST", "Gliders.glide_cue", "Gliders.skin_of",
+		"Gliders.DEFAULT_SNAP", "Gliders.DEFAULT_WIND"]
 
 var bad := 0
 var n := 0
@@ -536,8 +537,8 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	var t0 := Time.get_ticks_msec()
-	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+	var t0 := CheckClock.own_msec()
+	while v.model == null and CheckClock.own_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
 		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]

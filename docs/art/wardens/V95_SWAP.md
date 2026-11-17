@@ -33,12 +33,27 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    model before skin_relax, for looking at the weights. It fits the low mesh
    onto the rig (grimble_source.py's segment method), weights it (bone heat on the body bones, on a rig copy whose
    hips bone reaches the neck), detaches and caps, slots it, moves the anchors, runs skin_relax (no edge past 1.3x
-   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`,
+   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`, run
+   `python3 tools/art1/glb_relax.py <glb> <glb>` on it (the swap's heat weights leave hand and forearm weight on the hip
+   and thigh skin a scan's arms hung against; this takes them off, rips the fused contact, relaxes; no Blender),
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
+
+## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
+The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
+were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
+the face and the print and flattens the shape. Now `python3 tools/art1/v95_to_game.py <Name>` (Albert ... tarek, the
+v95 folder names) takes the Hunter's current master (CURRENT_OVERRIDES.txt's last line for it, else current.json), and
+v95_swap.py's `keep_uv` mode decimates the master itself to `tris` (60k) keeping its UVs, materials and Meshy images
+(each scaled to 4096 at most, "v95", "v95b", ... in game), drops `drop_mats` (the master's copies of props the game
+.glb carries: Kael's sword, Lace's bow, Neve's spear, Tarek's eye stones, Meeko's sun and cloud, Gil's staff), and runs
+steps 2-4 unchanged on the Warden's current .glb (rig, clips, anchors and `keep` props as they are; fixed-offset
+`move_bones` are skipped: that .glb has them already). A spec's `own` object holds the keys only this mode uses.
+Then the .glb replaces the game's and Godot re-imports; run the checks as in step 3. A later promote into v95 reaches
+the game with the same command.
 
 ## Sable 2026-11-14 (ext/ingame-sync-sable): tilt1112 master in game
 The 11-13 blocker below (left hand 6.0 -> 21.1x) was the new pistols fused to the thighs and coat, not the joint points:
