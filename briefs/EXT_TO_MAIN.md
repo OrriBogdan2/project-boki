@@ -10064,3 +10064,4 @@ READY ext/merge-lane-hunters8-1117 9c4b31a4da98556de061e2a35553f1ed588febd1 (hun
 READY ext/ui-stolen-wisps-port fb16f804819 (stolen wisp HUD only: rows above the Boki box + count badge on squad rows; mechanic/net already in main as KinSteal; --stolen-hud-check, wisp-steal, boki-hud, hudref green; no screenshot taken)
 READY ext/tut-summon-station-port 31e36f21b6d3d3d724cda75b939492749e2202bf (Training Grounds Boki summon pad; --summon-station-check 40/40)
 READY ext/hunter-first-hints-port ad7872a11d0d392122601ea4b93c10230aa1399a (first-time Hunter hints via Match._tip, save v20->v21 + goldens, --hunter-hint-check; targeted checks green, unique/hub-hints red on main too)
+READY ext/idle-archer-rebased-port e5f13f6492e760a73d631c7d6d00dae589de5183 (Lace idle+stance rework clips on v95 hem.glb via glb_add_clips --skip-missing; x_breath dropped; clip-check/crouch-check no new red vs main)
