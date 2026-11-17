@@ -5412,8 +5412,6 @@ func _tips() -> void:
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
-	var hunter_tip := hunter_hints.next(self)
-	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if _tip_t > 14.0:
 		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
 	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
@@ -5423,6 +5421,8 @@ func _tips() -> void:
 	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
