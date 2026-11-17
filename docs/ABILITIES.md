@@ -78,7 +78,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
@@ -117,11 +117,11 @@ In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets 
 
 Every level past the first adds the same share of a Hunter's level-1 numbers (`content/rules/level_growth.json`, `scripts/match/level_growth.gd`), as in the source. Asserted by `--level-growth-check`.
 
-**What the source does** (settled from briefs/supervive-data):
-- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (docs/SUPERVIVE_DATA.md section 7) and each ability has an AP ratio on it (supervive_kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (supervive_kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
+**What the source does** (settled from sv/briefs):
+- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (sv/DATA.md section 7) and each ability has an AP ratio on it (sv/briefs/kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (sv/briefs/kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
 - **Ability healing** is on the same Power (no heal lists a max-health ratio; heal upgrades are flat percentages: Elluna's Moonlight Blessing, Oath's Regen Field, Brall's Rebuke).
-- **Max health** grows ~6% of base a level, a straight line (docs/SUPERVIVE_DATA.md section 6, all 24 hunters' stats).
-- **Shields**: Oath's Brightshield scales with max health (supervive_kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
+- **Max health** grows ~6% of base a level, a straight line (sv/DATA.md section 6, all 24 hunters' stats).
+- **Shields**: Oath's Brightshield scales with max health (sv/briefs/kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
 - **Weapon (LMB) damage** and knock heals: the data has no level-1/level-15 pair, so it settles nothing. Ours stays flat (weapon) or a share of max health (knock heals).
 
 **The curves** (multiplier on the level-1 number; ratio = ours now / source):

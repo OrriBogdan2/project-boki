@@ -674,7 +674,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var chest_w := bw * (0.92 if fem else 1.12) * float(lk["shoulders"])
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
 	HunterBody.pivots(torso, rid, arch, bw)
-	# the arms and the gun move together from the shoulders ("Aim"), for recoil, reloads and poses
+	# the arms and the gun move together from the shoulders ("Aim"), for recoil and poses
 	var aim := Node3D.new(); aim.name = "Aim"; aim.position = Vector3(0, 0.5, 0.0); torso.add_child(aim)
 	var gun := Node3D.new(); gun.name = "Gun"; gun.position = Vector3(0.22, -0.18, -0.18); aim.add_child(gun)
 	# arms hang from the shoulders with an elbow and a hand on joints of their own: ArmXPivot (shoulder) > Elbow > Hand

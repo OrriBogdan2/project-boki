@@ -156,7 +156,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 	# ---- combat
 	var finishing: bool = tgt is Hunter and tgt.downed and not tgt.out
-	if tgt and not tgt.dead and tgt.hittable() and (finishing or not (tgt is Hunter and not tgt.targetable())):
+	if tgt and not tgt.dead and (finishing or (tgt.hittable() and not (tgt is Hunter and not tgt.targetable()))):
 		var d := h.flat_dist(tgt)
 		var to := h.dir_to(tgt)
 		var pref: float = {"light": 4.5, "medium": 7.0, "heavy": 5.5}[h.cls]
@@ -1159,6 +1159,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 			return false
 		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
+		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
 		if TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true

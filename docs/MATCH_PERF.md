@@ -108,3 +108,32 @@ count swings 780-1480, so a change of a few ms only shows in a same-run A/B.
 - **Next targets**, biggest first: WardenClips' AnimationTree advance for rivals in view (a lower clip rate for
   rivals that are not your squad or your target, as SimLod.pose_every already does off screen); render submit
   (draw count); the hunters' sim (12 ms); the HUD plates and GripOverhead (redraw only what changed).
+
+## 2026-11-17 pass (the 11-16 branch gated, the slow-frame pose rate)
+The 11-16 branch (MobGlb, the profiler fix, PR #158 folded in) merged with main 11-17 and gated as PR ext/perf-gpu-1116.
+The RunPod GPU workers (rp1-0..3) lost libxkbcommon on 11-17 03:30 EST (every Godot start fails before a window, with
+or without --pod-x11) and MRROBOTO was offline, so this pass has no new real-GPU frame numbers; the 11-16 table above
+stands, and the change below is measured headless (CPU scripts only, rpc8, a loaded box) in a same-run A/B.
+
+- **SimLod.pose_every's slow-frame tier**: under 36 fps (Engine.get_frames_per_second, back to normal over 50) a rival
+  on screen past 6 m from the camera's focus that is not your squad's and not in a fight with it is posed every 2nd
+  frame: its HunterAnim, and a Hero's clips (the AnimationTree advance), springs and skeleton copy (WardenGlb.Sync)
+  hold with it and catch the time up, as the far and off-screen tiers already did. A PC that holds 50 fps sees no
+  change. `--perf-throttle-check` asserts the tier (near, after the player, quick again) and the fps hysteresis.
+- `--match-profile --profile-ab`: SimLod.force_slow flipped every 30 frames, each phase's line per side, with the
+  hunters a frame by pose rate (how many each tier reached). The profile has a new **watch** phase between the landing
+  and the fight: every other hunter stood across the view 7.5-12 m to your sides, no bot think and no target (the
+  common match frame: rivals in view that are not fighting you); and it reports when the match ends in a wipe before
+  the lift (it waited for the lift and sat in the results screen).
+- Headless same-run A/B (rpc8, CPU scripts, two runs; frame ms p50 / other scripts / visuals, tier off -> on, and the
+  hunters a frame posed every 1 / 2 / 3 / 6 frames):
+  - watch: 37.2/12.4/7.2 -> 35.0/11.3/6.7 and 28.9/8.9/5.6 -> 27.3/8.2/5.2; rates 10.1/0/10.4/1.6 -> 7.1/2.7/10.0/1.7.
+    The tier reached 2.7-2.8 hunters a frame (the squad's bots engage some, the rest of the 29 are off screen at this
+    camera) and took 1.6-2.2 ms off the frame: about 1 ms a frame per hunter it reaches, the same cost per Hero pose
+    the 11-16 probe found (WardenSync 12-15 ms for 12-14 poses a frame).
+  - fight: 37.8/11.2/6.9 -> 35.8/10.5/6.6 and 38.3/12.8/6.9 -> 37.6/12.5/7.0; rates 7.7/0/5.2/1.6 -> 6.9/0.8/5.1/1.6:
+    in the brawl every rival on screen is after your squad, so the older every-frame rule keeps them (by design).
+  - ride, drop, land, extract: inside the noise; the tier reaches 0-0.5 hunters a frame there (aboard the skyship they
+    stand within 6 m or off screen; on the ground after the drop nearly every rival is unseen).
+  So on a slow PC the saving is about 1 ms a frame per uninvolved rival in view; a wide view over a fight across the
+  field (6-10 of them) is where it pays. The real-GPU number for it needs the rp1 pods back.

@@ -80,6 +80,8 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
 
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
@@ -103,6 +105,13 @@ func add_chill(t: Ent) -> void:
 	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
+
+## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+func combo_read(t: Ent) -> Dictionary:
+	if not chilled(t):
+		return {}
+	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
+			"total": float(d["passive"].get("chill_t", 4.0))}
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t):
@@ -171,6 +180,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.sfx("rime_splinter", at, 0.0, 1.0)
+	if skip != null and is_instance_valid(skip):
+		ComboMark.payoff(m, h, skip)     # the Chill payoff: the Shattered foe flashes
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")
@@ -247,7 +258,7 @@ func own_aim_line() -> bool:
 ## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
 ## A stun or the Rimelock drops the owed large darts and ends the burst.
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not h.can_fire() or not rime.is_empty():
+	if not h.atk.can_fire() or not rime.is_empty():
 		if burst_i > 0:
 			_end_burst()
 		return true
@@ -616,7 +627,7 @@ func _rinkrun_end(into_rime := false) -> void:
 		# ended in the air: she keeps the skate's speed the way any air dash does (Loco's air drag bleeds it)
 		h.vel.x = h.roll_dir.x * h.roll_speed
 		h.vel.z = h.roll_dir.y * h.roll_speed
-	play("tm_skate_stop")
+	play("tm_skate_stop" if h.grounded else "")      # the braced stop is a ground pose
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
@@ -1045,7 +1056,7 @@ func _tick_wall(dt: float) -> void:
 ## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
 func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
+		if not f.hittable() or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
 		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])

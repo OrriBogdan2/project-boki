@@ -363,25 +363,81 @@
   },
   {
    "slot": "dash_ground",
-   "label": "dash_ground",
+   "label": "Dash on the ground (foot scuff or slide, then a short whoosh)",
    "cue": "dash_ground",
    "mode": "oneshot",
    "trim_max": 0.4,
    "rms_db": -21.7,
    "tester": true,
    "pick": "",
-   "candidates": []
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2020/PMSFX - STEPS Dry Grass & Shrubs/PM_SDGS_213 Footstep Step Dry Grass Skid Drag.wav",
+     "start": 11279,
+     "end": 47960
+    },
+    {
+     "letter": "B",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 1of8/Alexander Fokshtein - Snow Steps/Snow Slide Medium .wav",
+     "start": 90168,
+     "end": 101860
+    },
+    {
+     "letter": "C",
+     "src": "2020/Joshua Reinhardt - Ultimate Creature Footstep and Movement Library/TackleHeavy 3_Movement_Scrape-Long.wav",
+     "start": 237053,
+     "end": 258940
+    },
+    {
+     "letter": "D",
+     "src": "2020/Systematic-Sound - Sound Themes - Modern Cloth Foley 01/SFX CLOTH Foley Jacket Synthetic Soft Shell Whoosh Flutter.wav",
+     "start": 356775,
+     "end": 387200
+    }
+   ]
   },
   {
    "slot": "dash_air",
-   "label": "dash_air",
+   "label": "Dash in the air (wind whoosh, no ground)",
    "cue": "dash_air",
    "mode": "oneshot",
    "trim_max": 0.4,
    "rms_db": -21.7,
    "tester": true,
    "pick": "",
-   "candidates": []
+   "candidates": [
+    {
+     "letter": "A",
+     "src": "2020/SoundFxwizard - PARTICLES An Organic & Granular Journey/PARTICLES_WHOOSH_Arrow 01.wav",
+     "start": 11075,
+     "end": 37840
+    },
+    {
+     "letter": "B",
+     "src": "2018/Sonniss.com - GDC 2018 - Game Audio Bundle Part 5of8/Soundrangers - Whooshes And Transitions/texture_whoosh_02_fast_02.wav",
+     "start": 6702,
+     "end": 33220
+    },
+    {
+     "letter": "C",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Airy Whooshes/Whoosh,Sound Design,Airy,Full,Forceful,Soft.wav",
+     "start": 11027,
+     "end": 25300
+    },
+    {
+     "letter": "D",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Organic Whooshes/Whoosh,Organic,Fabric,Glove,Airy,Breathy,Punchy.wav",
+     "start": 1871,
+     "end": 11440
+    },
+    {
+     "letter": "E",
+     "src": "2019/Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Soundholder - Swipes And Whooshes/swipes and whooshes broom long stick slow and long swings stereo ORTF 8040.wav",
+     "start": 311432,
+     "end": 331100
+    }
+   ]
   }
  ]
 }

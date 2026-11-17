@@ -2,7 +2,7 @@ class_name KinRegen
 extends RefCounted
 ## A Boki mends on its own in a match (numbers: content/rules/boki_system.json "regen"):
 ##   - on you by the Return order, settled: carried_pct_s of max health per second
-##   - out beside you: out_pct_s per second, once it has gone out_delay_s without losing health
+##   - out beside you: out_pct_s per second, while it is out of combat (InCombat)
 ##   - downed (or dazed, benched, fused, away): none. A downed Boki has to be rescued (KinDowned).
 ## Every Boki starts a match at full health (Kin._init builds it from its stats), so nothing carries over.
 ## Called from Kin's tick. A little green + mote rises while it mends.
@@ -21,16 +21,14 @@ static func rate(k: Kin) -> float:
 	var r := rules()
 	if k.carried():
 		return float(r["carried_pct_s"])
-	if k.state == "active" and k.regen_quiet >= float(r["out_delay_s"]):
+	if k.state == "active" and not InCombat.is_in(k):
 		return float(r["out_pct_s"])
 	return 0.0
 
-## One step. Losing health (an enemy hit, burn) restarts the out-of-combat wait; healing doesn't.
+## One step. A Boki in combat (InCombat) waits; one that just came round starts its wait again.
 static func tick(k: Kin, dt: float) -> void:
-	if k.hp < k.regen_hp - 0.0001 or k.state in ["downed", "wisp", "dazed", "fused", "shoulder"]:
-		k.regen_quiet = 0.0       # (a Boki that just came round starts its wait again)
-	else:
-		k.regen_quiet += dt
+	if k.state in ["downed", "wisp", "dazed", "fused", "shoulder"]:
+		k.combat_at = k.m.time
 	var pct := rate(k)
 	if pct > 0.0:
 		var heal := k.max_hp * pct * dt
@@ -41,7 +39,6 @@ static func tick(k: Kin, dt: float) -> void:
 		if k.regen_fx <= 0.0:
 			k.regen_fx = MOTE_EVERY
 			motes(k.m.fx, k.pos + Vector3(0, 0.9, 0), MOTE_COL)
-	k.regen_hp = k.hp
 	k.mending = pct > 0.0
 
 ## The little rising motes of mending (also the stat glint at home, StatGlint, in the stat's colour).
@@ -53,9 +50,9 @@ static func pulse(k: Kin, now: float) -> float:
 	return (0.35 + 0.35 * sin(now * 5.0)) if k.mending else 0.0
 
 ## Your Boki's owner_shield points on you: the small shield refills owner_shield_pct_s of its size a
-## second once you have gone owner_shield_delay_s without taking damage (Hunter.regen_wait). Hunter tick.
+## second while you are out of combat (InCombat). Hunter tick.
 static func owner_shield_tick(h: Hunter, dt: float) -> void:
 	var cap := h.kin_pt("owner_shield")
-	if cap <= 0.0 or h.regen_wait > 0.0 or h.kin_shield >= cap:
+	if cap <= 0.0 or InCombat.is_in(h) or h.kin_shield >= cap:
 		return
 	h.kin_shield = minf(cap, h.kin_shield + cap * float(rules()["owner_shield_pct_s"]) * dt)

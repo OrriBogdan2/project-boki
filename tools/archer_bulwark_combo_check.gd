@@ -28,6 +28,10 @@ func run(main_node: Node) -> void:
 	cancels.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
+	var feel = load("res://tools/albert_feel_check.gd").new()
+	feel.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		_wall_climb()
@@ -44,12 +48,15 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		await feel.albert()
+	if both or "--archer-combo-check" in args:
+		await _spirit_look()
 	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
 	hits.main = main_node
 	if both:
 		await hits.audit()
-	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n + hits.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails + hits.fails
+	n += ult.n + own.n + launch.n + tall.n + feel.n + cancels.n + bow.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + feel.fails + cancels.fails + bow.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -179,12 +186,19 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
+
+## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
+func _spirit_look() -> void:
+	var look = load("res://tools/lace_spirit_look_check.gd").new()
+	look.main = main
+	await look.walk()
+	n += look.n
+	fails += look.fails
 
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -293,7 +307,6 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -321,7 +334,6 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -400,7 +412,6 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
@@ -663,7 +674,7 @@ func _archer_combos() -> void:
 		K.fx._process(0.0)
 		wash[0] = maxf(wash[0], P.wash)
 		var slot := 1 if K.spirit.inside else 0
-		mk[slot] = maxf(mk[slot], K.move_k()))
+		mk[slot] = maxf(mk[slot], K.move_k() + K.speed_bonus()))
 	ok(
 		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
 		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
@@ -873,7 +884,6 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
-	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)
@@ -1089,9 +1099,10 @@ func _bulwark_combos() -> void:
 		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
 		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
 	)
-	step(m, 7.0)
+	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
+	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
 	ok(
-		"bjorn: the planted hammer never comes back by itself",
+		"bjorn: the planted hammer stays planted until the rope's time runs out",
 		String(K.mace.get("st", "")) == "ground",
 		str(K.mace.get("st"))
 	)
@@ -1315,20 +1326,20 @@ func _bulwark_combos() -> void:
 		"dashes spent %.2f cd %.1f charges %.1f" % [dashes_spent, charge_cd, K.ch_rmb]
 	)
 	ok("combo bulwark: a Crush no longer heals him", P.hp <= hp_before + 1.0, "hp %.0f -> %.0f" % [hp_before, P.hp])
-	# on cooldown the Shift behind the shield does nothing
+	# on cooldown the RMB press is refused (no aegis), so the Shift is an ordinary Spin Dash, not a Shield Charge
 	P.dashes = P.max_dashes()
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	var spins_before := K.spins
-	var dashes_held := P.dashes
+	var charges_before := K.ch_rmb
+	var aegis_up := K.rmb_down
 	P.do_dash()
 	step(m, 0.2, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	ok(
-		"combo bulwark: the Shield Charge on cooldown denies the dash (no charge spent, no spin)",
-		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
-		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
+		"combo bulwark: the Shield Charge on cooldown: RMB is refused (no aegis), the Shift is no Shield Charge",
+		not aegis_up and K.ch_rmb >= charges_before,
+		"aegis %s charges %.2f -> %.2f" % [aegis_up, charges_before, K.ch_rmb]
 	)
 	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
 	step(m, 1.0)

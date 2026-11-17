@@ -144,11 +144,11 @@ func drop_draw() -> void:
 	if anim_id in ["arc_draw", "arc_over"]:
 		anim_id = ""
 
-## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
+## HunterAttack.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
 	return draw.rate()
 
-## Hunter._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
+## HunterAttack._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
 func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
@@ -201,7 +201,7 @@ func on_dash(use_ex: bool) -> bool:
 	if ex:
 		# the long dash (out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll", "feel": "flick"})
 		play("pin_flick")
 		vfx("flick")
 		st["last_dash"] = "flick"
@@ -210,18 +210,22 @@ func on_dash(use_ex: bool) -> bool:
 	spirit.start()
 	return true
 
-## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
-## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
+## A draw right after a perfect release slows her less (wiki: perfect shots ease
 ## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
-	if spirit and spirit.active():
-		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
 	if pin_aim and rmb_down:
 		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
+
+## Walking as a spirit she moves quicker (walk_k of run speed); at rank 3 inside something she starts
+## faster still and that fades with the walk.
+func speed_bonus() -> float:
+	if not spirit or not spirit.active():
+		return 0.0
+	return float(dash_def().get("walk_k", 1.1)) - 1.0 + spirit.inside_boost()
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
 ## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
@@ -230,7 +234,7 @@ func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	if h.draw_t >= 0.0:
 		drop_draw()
@@ -454,7 +458,7 @@ func _tick_rain(dt: float) -> void:
 		KinExec.apply_foe(stg.effects, f, tick, f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
-		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+		if w.downed and not w.dead and w.team != h.team and _in_rain(w):
 			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots

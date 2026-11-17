@@ -1,5 +1,5 @@
 {
-	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). icon: the menu icon the home cards show beside its \"Walks <noun> safely\" line. look: the surface shader (shaders/terrain_hazard.gdshader).",
+	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). icon: the menu icon the home cards show beside its \"Walks <noun> safely\" line. look: the surface shader (shaders/terrain_hazard.gdshader).",
 	"hint": {
 		"near_m": 8.0,
 		"every_s": 0.5,
@@ -9,6 +9,7 @@
 		"lava": {
 			"icon": "fireball",
 			"name": "Lava Field",
+			"tip": "Lava Field ahead: it burns anyone standing in it.",
 			"noun": "the lava",
 			"hurts": "burning",
 			"effect": {
@@ -31,6 +32,7 @@
 		"deep_water": {
 			"icon": "wave",
 			"name": "Deep Water",
+			"tip": "Deep water ahead: it slows you, weakens your hits and runs you out of breath.",
 			"noun": "deep water",
 			"hurts": "slow, weak hits, short of breath",
 			"effect": {
@@ -56,6 +58,7 @@
 		"ice": {
 			"icon": "gem",
 			"name": "Ice Sheet",
+			"tip": "Ice sheet ahead: there is no grip, so you slide.",
 			"noun": "the ice",
 			"hurts": "no footing",
 			"effect": {
@@ -77,6 +80,7 @@
 		"static": {
 			"icon": "shock",
 			"name": "Static Flats",
+			"tip": "Static Flats ahead: they shock and stun every few seconds.",
 			"noun": "the static",
 			"hurts": "shocks",
 			"effect": {
@@ -101,6 +105,7 @@
 		"bramble": {
 			"icon": "thornwake",
 			"name": "Bramble",
+			"tip": "Bramble ahead: it slows you and scratches.",
 			"noun": "the thorns",
 			"hurts": "slow, scratches",
 			"effect": {

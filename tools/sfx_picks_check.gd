@@ -63,7 +63,7 @@ func _manifest() -> void:
 	)
 	var missing := TESTER_SLOTS.filter(func(k): return not by_slot.has(k) or not by_slot[k].get("tester", false))
 	ok(missing.is_empty(), "manifest: the six tester slots are marked (missing: %s)" % [missing])
-	var thin := ["glide_loop", "glide_start", "ghost_shot", "ghost_reload"].filter(
+	var thin := TESTER_SLOTS.filter(
 		func(k): return (by_slot[k]["candidates"] as Array).size() < 4
 	)
 	ok(thin.is_empty(), "manifest: those tester slots offer at least 4 candidates (thin: %s)" % [thin])

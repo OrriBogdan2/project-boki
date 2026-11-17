@@ -924,7 +924,7 @@ func _boss_check() -> void:
 		var ew = L.get("egg_wp")
 		var egg_shown: bool = m.feed_all.any(func(t): return " got the " in String(t) and String(t).ends_with(" Egg"))
 		var egg_n: int = m.hunters.reduce(func(n, h): return n + h.pack.filter(func(it): return Loot.is_rare_egg(it)).size(), 0) + m.wpicks.slice(w0).filter(func(wp): return wp.has("egg")).size()
-		var egg_ok: bool = egg_n == 1
+		var egg_ok: bool = egg_n == 1 and m.hunters.all(func(h): return h.pack.all(func(it): return not Loot.is_rare_egg(it) or not Data.no_egg(String(it["sp"]))))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
@@ -1071,14 +1071,14 @@ func _boss_check() -> void:
 	Save.d["incubator"] = {}; Save.d["rare_eggs"] = []; Save.d["egg"] = {}
 	var out := Game.apply_result({"extracted": true, "haul": Pack.haul(C), "tier": 0, "gems": 0, "kin_runs": []})
 	var q: Array = [Incubator.eggs()[0]] if not Incubator.eggs().is_empty() else []
-	ok.call(q.size() == 1 and Data.is_rare(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
+	ok.call(q.size() == 1 and not Data.no_egg(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
 		"extract: a %s goes to the Incubator %s" % [Data.egg_name(String(q[0]["sp"])) if not q.is_empty() else "?", str(q)])
 	ok.call(not Incubator.eggs().is_empty() and Save.d.get("egg", {}).is_empty() and Save.d.get("rare_eggs", []).is_empty(), "home: it goes straight into the Incubator's cradle (the breeding nest stays free)")
 	var rr := RandomNumberGenerator.new(); rr.seed = 3
 	var inc_egg: Dictionary = Incubator.eggs()[0].duplicate()
 	var baby := Care.hatch_rare(inc_egg, rr)
-	ok.call(Data.is_rare(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(Data.MOBS[String(inc_egg["boss"])]["egg"]),
-		"hatch: a rare %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
+	ok.call(not Data.no_egg(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(inc_egg["sp"]),
+		"hatch: a rare-egg %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
 	# 9. rare kin never turn up wild, on rivals or as a starter
 	var any_rare := false
 	for i in 60:
@@ -1459,7 +1459,7 @@ func _social_cmd(c: String, current) -> void:
 			if p.size() > 3: Save.add_seed(p[3], 3)
 			_soc_reply(true)
 		"soc:publish": Social.publish_profile(true); _soc_reply(true)
-		"soc:create": Social.create_guild(p[2], "We test things", func(okk): _soc_reply(okk))
+		"soc:create": Social.create_guild(p[2], "We test things", "", func(okk): _soc_reply(okk))
 		"soc:join": Social.join_guild(p[2], func(okk): _soc_reply(okk))
 		"soc:leave": Social.leave_guild(func(): _soc_reply(true))
 		"soc:guilds": Social.list_guilds(func(rows): _soc_reply(rows))
