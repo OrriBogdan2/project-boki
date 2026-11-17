@@ -16,7 +16,10 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+var _tree: SceneTree
+
 func run(m: Node) -> void:
+	_tree = m.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
 	HomeLayout.ensure(Save.d)
@@ -51,7 +54,7 @@ func _set_deco(ids: Array) -> void:
 func _card_has(zone: String, tag: String) -> bool:
 	var title := String(DecorComfort.rules()["effects"][tag]["name"])
 	var found := false
-	for l in ZoneCards.open_lines(zone):
+	for l in ZoneCards._open_lines(zone, _tree):
 		found = found or (l as Label).text.begins_with(title + ":")
 		l.free()
 	return found
