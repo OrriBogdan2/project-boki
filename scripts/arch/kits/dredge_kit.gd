@@ -511,6 +511,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
+			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
@@ -527,8 +529,7 @@ func cast_e() -> bool:
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
-	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
+	vfx("anchor_fist", h.pos, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
@@ -547,25 +548,12 @@ func _tick_wind(dt: float) -> void:
 		AimKit.hide(h, "e_tell")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
-	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if wind <= 0.0:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
 		_anchor()
-
-## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
-## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
-## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
-func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
-		return
-	if not h.grounded or h.roll_t > 0.0:
-		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
-	h.vel.x = v.x
-	h.vel.z = v.y
 
 ## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:

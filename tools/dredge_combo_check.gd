@@ -34,6 +34,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -184,7 +185,7 @@ func _slam_tell() -> void:
 		"len %.1f deg %.0f outline %s fist %s" % [
 			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
 	)
-	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	# the cone stays put with him: wait out the wind-up, then place the foes in the cone
 	while K.wind > 0.03:
 		ak.step(m, ak.DT)
 	T.teleport(P.pos + in_off)
@@ -529,8 +530,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) > 0.8 and P.flat_dist(at0) < 2.0,
+		"anchor: he stays put, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
