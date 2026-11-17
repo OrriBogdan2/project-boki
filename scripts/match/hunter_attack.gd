@@ -337,7 +337,8 @@ func emit_shot() -> void:
 	if h.has_meta("zero_spread_t") and h.m.time < float(h.get_meta("zero_spread_t")):
 		spread = 0.0            # a Thief's SMG right after a Shadow Step
 		a = atan2(dir.y, dir.x)
-	var rng: float = (float(h.wpn["range"]) + rng_add) * h.shot_range_k
+	var mz: Dictionary = h.wpn.get("muzzle", {})      # a skinned gun's mouth: its slugs stop `range` from the body
+	var rng: float = (float(h.wpn["range"]) + rng_add) * h.shot_range_k - float(mz.get("fwd", 0.0))
 	h.shot_range_k = 1.0
 	var life: float = rng / spd
 	var dmg: float = float(h.wpn["dmg"]) * h.m.dmg_mult(h)
@@ -378,9 +379,13 @@ func emit_shot() -> void:
 		extra["pg"] = "%s_%d" % [h.nid, h.shot_n]
 		extra["pn"] = pel
 		extra["pf"] = float(h.wpn.get("pellet_floor", 1.0 / pel))
+		if not mz.is_empty():
+			extra["body_sweep"] = true
 		for i in pel:
 			var pa := a - fan * 0.5 + fan * float(i) / float(pel - 1)
 			var p0 := Vector3(h.pos.x + cos(pa) * 0.6, shot_y, h.pos.z + sin(pa) * 0.6)
+			if not mz.is_empty():
+				p0 = ShotOrigin.muzzle_at(h, mz, dir)
 			h.m.spawn_shot(h, p0, Vector2(cos(pa), sin(pa)) * spd, dmg, life, h.wpn["size"], h.wpn["color"], extra)
 	else:
 		h.m.spawn_shot(h, start, Vector2(cos(a), sin(a)) * spd, dmg, life, h.wpn["size"], h.wpn["color"], extra)
