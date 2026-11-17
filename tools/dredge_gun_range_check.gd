@@ -35,7 +35,7 @@ func run() -> void:
 	ok_fn.call(shape_label, shape_ok, shape)
 	for bloom: float in [0.0, bloom_max]:
 		var spread: float = fan + bloom      # a waited volley is the tight pack, then the bloom
-		for d: float in [2.0, 6.0, stop - 0.1]:
+		for d: float in [2.0, 5.5, stop - 0.5]:
 			_volley(m, P, T, home, d, bloom, spread, full, hit_r)
 	await ak.done(m)
 
@@ -48,7 +48,7 @@ func _volley(
 	var landed := 0                   # the slugs whose line passes within the dummy's reach at this distance
 	for i in pel:
 		var off := deg_to_rad(spread) * (float(i) / float(pel - 1) - 0.5)
-		if absf(d * tan(off)) <= hit_r:
+		if absf((d - float(w["muzzle"]["fwd"])) * tan(off)) <= hit_r:      # the slugs fan out from the muzzle
 			landed += 1
 	var floor_k: float = float(w["pellet_floor"])
 	var want := full * (floor_k + (landed - 1) * (1.0 - floor_k) / float(pel - 1))

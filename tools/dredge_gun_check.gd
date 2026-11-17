@@ -79,7 +79,10 @@ func _muzzle(m: Match, P: Hunter) -> void:
 			same = same and at.distance_to(first) < 0.001 and absf(at.y - P.pos.y - float(mz["up"])) < 0.001
 			var st: Vector3 = sd["start"]
 			ahead = ahead and absf(Vector2(at.x - st.x, at.z - st.z).length() - float(mz["fwd"])) < 0.001
-	ok("gun: all seven slugs leave one muzzle point", n == int(P.wpn["pellets"]) and same, "slugs %d at %s" % [n, first])
+	ok(
+		"gun: all seven slugs leave one muzzle point", n == int(P.wpn["pellets"]) and same,
+		"slugs %d at %s" % [n, first]
+	)
 	ok("gun: the hit sweep starts at his body, the muzzle's reach behind it", ahead)
 
 ## Damage stays the volley's: on a foe straight ahead inside the slug range, the waited cluster lands all seven.
