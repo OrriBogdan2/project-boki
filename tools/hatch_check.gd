@@ -127,6 +127,7 @@ func run(m: Node) -> void:
 	ok(named["go"], "Name it hands over to naming")
 	await _skip_row(tree, waited)
 	await _first_mask(tree)
+	await _name_card(tree)
 	_parents_row(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
@@ -319,6 +320,50 @@ func _first_mask(tree: SceneTree) -> void:
 	ok(moment.go_button.text == MaskMoment.GO, "and goes on: %s" % moment.go_button.text)
 	hx.queue_free()
 	for i in 3: await tree.process_frame
+
+## The naming card (hatch.gd _show_name): no Label may collapse to a sliver (a wrapping label in a row with no
+## width wrapped one letter per line and ran off the top of the screen), and the whole card fits the screen
+## at 1280x720, 1920x1080 and 2560x1440. --shots-dir=<dir> saves each as name_<w>x<h>.png.
+func _name_card(tree: SceneTree) -> void:
+	var dir := ""
+	for arg in OS.get_cmdline_user_args():
+		if String(arg).begins_with("--shots-dir="):
+			dir = String(arg).substr(12)
+	for sz in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		tree.root.size = sz
+		Save.d = Save.fresh()
+		Save.d["tutorial"] = {"intro": true}
+		Save.d["look"] = Unmasked.default_look()
+		var hx = load("res://scripts/ui/hatch.gd").new()
+		main.add_child(hx)
+		for i in 4: await tree.process_frame
+		hx._looks_good()
+		hx.chosen = 0
+		hx.stage = "name"
+		hx._show_name()
+		if main.fade:
+			main.fade.reveal(0.05)
+		for i in 60: await tree.process_frame
+		var screen: Rect2 = hx.get_viewport().get_visible_rect()
+		var bad_l: Array = []
+		var seen_l := 0
+		for l in hx.bottom.find_children("*", "Label", true, false):
+			var lab := l as Label
+			if not lab.is_visible_in_tree() or lab.text.strip_edges() == "":
+				continue
+			seen_l += 1
+			var r := lab.get_global_rect()
+			if r.size.x < 80.0 or lab.get_line_count() >= 6 or not screen.encloses(r):
+				bad_l.append("%s %s x%d" % [lab.text.left(16), r, lab.get_line_count()])
+		ok(seen_l > 6 and bad_l.is_empty(), "name card %s: labels 80+ px wide, under 6 lines, on screen (%d) %s"
+				% [str(sz), seen_l, str(bad_l)])
+		var card: Rect2 = (hx.bottom.get_child(0) as Control).get_global_rect()
+		ok(screen.encloses(card), "name card %s fits the screen (%s in %s)" % [str(sz), str(card), str(screen)])
+		if dir != "":
+			DirAccess.make_dir_recursive_absolute(dir)
+			tree.root.get_texture().get_image().save_png(dir.path_join("name_%dx%d.png" % [sz.x, sz.y]))
+		hx.queue_free()
+		for i in 3: await tree.process_frame
 
 ## A pair's egg appearing in the Nesting Nook (NestReveal): one soft ring, one small sparkle burst in
 ## the egg's type colour, and one wobble that settles back upright.
