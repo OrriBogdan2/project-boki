@@ -34,6 +34,9 @@ ap.add_argument(
     default=4000,
     help="the piece's triangle budget (collapse, UVs kept; body + prop under 80k)",
 )
+ap.add_argument(
+    "--tex", type=int, default=2048, help="px: the largest side of the piece's images (the game's second-image size)"
+)
 ap.add_argument("--front", default="-Y", help="the master's front (Meshy: -Y), laid on --out-dir in the game")
 ap.add_argument("--out-dir", default="+X", help="game direction the prop's front faces (her right: +X)")
 a = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :])
@@ -155,6 +158,9 @@ for i, m in enumerate(new.data.materials):
         ):  # (Godot extracts it as <art>_v95p*.jpg: a 2048 second image)
             if n.type == "TEX_IMAGE" and n.image and not n.image.name.startswith("v95p"):
                 n.image.name = "v95p" if "v95p" not in bpy.data.images else "v95p%d" % len(bpy.data.images)
+                w, h = n.image.size
+                if max(w, h) > a.tex:  # (a master's 8k paint: 22 MB in the .glb)
+                    n.image.scale(max(1, w * a.tex // max(w, h)), max(1, h * a.tex // max(w, h)))
 for p in new.data.polygons:
     p.use_smooth = True
 new_tip = o_g + od * (s * (mt1 - m_grip))
