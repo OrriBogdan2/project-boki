@@ -51,6 +51,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `art1/<hero>_clips.py` (blender) | The hero's animation clips on the rig, exported into the .glb | `blender -b --python tools/art1/cinder_clips.py -- cinder.blend out.glb idle,run` |
 | `art1/anim_kit.py`, `crouchkit.py`, `fistkit.py`, `gardenkit.py` | Shared clip helpers (imported, not run) | |
 | `art1/glb_add_clips.py` | Copy clips from one .glb into another | `python3 tools/art1/glb_add_clips.py target.glb source.glb run_,idle out.glb` |
+| `art1/glb_drop_mats.py` | Drop the mesh parts on named materials (a master's own copy of a prop the game .glb carries), all else byte-identical | `python3 tools/art1/glb_drop_mats.py in.glb out.glb '*-v95c'` |
 | `boki/<species>_anim.py`, `boki_clips.py` (blender) | A Boki species' clips | built by `build_boki.py` |
 
 ## Audio
