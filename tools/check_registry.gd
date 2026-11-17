@@ -461,6 +461,7 @@ const CHECKS := {
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
+	"--cloth-shots": ["res://tools/cloth_shots.gd", "cloth_shots", null],      # a Warden moving, cloth chains; --bench
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],  # every Hunter gliding: turns, dive
 	"--turn-shots": ["res://tools/turn_shots.gd", "turn_shots", null],      # before/after strip of turning on the spot
