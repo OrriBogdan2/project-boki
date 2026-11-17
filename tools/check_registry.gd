@@ -628,6 +628,7 @@ const CHECKS := {
 	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
+	"--hunter-hint-check": ["res://tools/hunter_hint_check.gd", "hunter_hint_check", null],
 	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the XP first-time lines
 	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
 	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
