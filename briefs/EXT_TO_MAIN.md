@@ -9991,3 +9991,4 @@ READY ext/stuck-integ-be6ffab8 d4ec3f8b97bab428f6b9787995835d5b5f5de1f4 (superse
 READY ext/cinder-3d-a-1116 8625a6aa5efaefafd9e247540593421f45876600 (PR #170: Cinder game model from the owner-accepted 3D option A, GATE GREEN)
 READY ext/merge-lane-misc-1115r2 a25f00f207 (PR #130 GATE GREEN at main 42b779be43: NEW-RED 0, export 606 MB; 3 lane reds fixed)
 READY ext/merge-lane-uiboki-1115r2 f783c20ca2 (PR #132 GATE GREEN at main 42b779be43: NEW-RED 0, export 606 MB; 2 check fixes + hud_panels conflict)
+READY ext/hunt4-salvage-port-1115 0ed42c44d4 (bulk-rebase: origin/main merged in mechanically, was 7bbf8841ac; union 1 gen 0 files; the branch's own READY checks still apply)
