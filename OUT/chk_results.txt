@@ -1,2 +1,0 @@
---tutorial-wisp-check rc=0
---tutorial-fight-check rc=1
