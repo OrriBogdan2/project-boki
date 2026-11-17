@@ -516,11 +516,7 @@ func pay(h: Hunter, how: String) -> Dictionary:
 	return out
 
 func _egg_species() -> String:
-	var pool: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
-	pool.sort()
-	if pool.is_empty():
-		return String(Data.common_kin()[0])
-	return pool[_rng.randi() % pool.size()]
+	return Data.egg_species("", _rng)
 
 ## Applies the bundle's home half to the save (Game.apply_result, on an extract).
 static func settle(res: Dictionary, out: Dictionary) -> void:

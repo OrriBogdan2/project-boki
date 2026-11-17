@@ -1802,6 +1802,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
+	KinWispForm.mark(self, h)
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
@@ -1887,18 +1888,16 @@ func _check_team(team: int) -> void:
 	if members.is_empty():
 		return
 	for x in members:
-		if not x.downed:
+		if not x.downed or KinWispForm.guarding(self, x):
 			return
-		if x.kin and not x.kin.dead and x.kin.state not in ["downed"] and x.kin.hp > 0.0:
-			return
-		if x.kin2 and not x.kin2.dead and x.kin2.hp > 0.0:
-			return
+		if x.remote and x.kin and not x.kin.dead and x.kin.state == KinWispForm.STATE and x.kin.hp > 0.0:
+			return           # a guardian riding its Wisp (its owner's game decides: we only see the Boki's state)
 	for x in members:
 		if not x.remote:
 			eliminate(x, x.last_hit_by, "team wiped")
 	_team_gone(team)
 
-## The whole team is down or dead with nobody to bring them back: everyone's dead for good.
+## The whole team is out (_check_team): everyone's dead for good.
 func _team_gone(team: int) -> void:
 	if Life.team_alive(self, team):
 		return
@@ -2721,8 +2720,7 @@ func _update_shots(dt: float) -> void:
 			if _dome_blocks(s, p):
 				_shot_end(s, p, null)
 				hit = true; break
-			# terrain and rocks
-			var gp := world.ground_at(p.x, p.z)
+			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
 			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
@@ -2880,8 +2878,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	shots.erase(s)
 	if s.has("deco") and is_instance_valid(s["deco"]):
 		(s["deco"] as Node3D).queue_free()
-	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
-	# that stopped it
+	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall that stopped it
 	var fxx: Dictionary = s["x"]
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
