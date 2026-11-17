@@ -91,7 +91,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	if lmb_t >= 0.0:
-		if not h.can_fire(): _drop_tide()
+		if not h.atk.can_fire(): _drop_tide()
 		elif held: _tide_tick(dt)
 		else: _tide_lunge()
 		return true
@@ -100,7 +100,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		press_at = m.time
 	lmb_buf -= dt
 	var bot := h.ctrl != "local"
-	if not h.can_fire():
+	if not h.atk.can_fire():
 		return true
 	if h.fire_cd <= 0.0 and (lmb_buf > 0.0 or (bot and held)):
 		lmb_buf = 0.0
@@ -117,10 +117,10 @@ func _thrust() -> void:
 	combo_at = m.time
 	combo_n += 1
 	h.combo_i = i + 1
-	h._lunge(float(ld["step"][i]))
+	h.atk.lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
 	var how := {"heavy": i == 2, "own_look": true}
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
+	h.atk.strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	play(THRUSTS[i])
 	var o := {"len": float(ld["reach"][i])}
