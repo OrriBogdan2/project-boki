@@ -124,10 +124,12 @@ func _breah() -> void:
 	P.inp["fire"] = true
 	step(m, 0.5, func(): P.inp["fire"] = true)
 	k_at[0] = K.punch_k()
+	var glow_at := [_fist_glow(m), 0.0]
 	lane_at = AimKit.entry(P, "punch")
 	var ret := AimKit.reticle(P)
 	step(m, 0.42, func(): P.inp["fire"] = true)
 	k_at[1] = K.punch_k()
+	glow_at[1] = _fist_glow(m)
 	ok(
 		"lmb hold: the punch lane shows from the hold (4.2m by 1.8m, chevrons)",
 		AimKit.shown(P, "punch") and absf(float(lane_at.get("len", 0.0)) - 4.2) < 0.05 and absf(
@@ -143,7 +145,11 @@ func _breah() -> void:
 		"lmb hold: a full punch at 0.9s (0.28s tap window)", k_at[0] > 0.2 and k_at[0] < 0.6 and k_at[1] >= 0.99,
 		"k %.2f -> %.2f" % [k_at[0], k_at[1]]
 	)
-	ok("lmb hold: the fists glow while it charges", KitLooks.of(m).holding("br_fist"))
+	ok(
+		"lmb hold: the fist's charge glow grows with the hold, chips gathering round it",
+		KitLooks.of(m).holding("br_fist") and glow_at[1] > glow_at[0] * 1.5,
+		"halo x%.2f -> x%.2f" % glow_at
+	)
 	ok("anim: the hold plays breah_wind", K.anim_id == "breah_wind")
 	var x0 := P.pos.x
 	P.inp["fire"] = false
@@ -973,6 +979,81 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
 	step(m, 0.8)
 
+<<<<<<< HEAD
+=======
+## The widest blue (ability colour) ring `act` throws inside `secs` of play: the weight of the hit it lands.
+func _blue_ring(m: Match, secs: float, act: Callable) -> float:
+	var seen: Array = m.fx.rings.duplicate()
+	var widest := [0.0]
+	act.call()
+	step(m, secs, func():
+		for e in m.fx.rings:
+			if e["col"] == DolmImpact.BLUE and not seen.any(func(o): return is_same(o, e)):
+				seen.append(e)
+				widest[0] = maxf(widest[0], float(e["r"])))
+	return widest[0]
+
+## A boulder thrown at the foe: the tap of the attack key.
+func _throw_boulder(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	step(m, 0.1)
+	P.inp["fire"] = false
+
+## The size of the charge glow on Tenzo's fist (its halo's scale; 0 when none shows).
+func _fist_glow(m: Match) -> float:
+	var looks := KitLooks.of(m)
+	return (looks.held["br_fist"]["n"].get_node("Halo") as Node3D).scale.x if looks.holding("br_fist") else 0.0
+
+## The punch held `secs` (full by default) and let go.
+func _held_punch(m: Match, P: Hunter, K: DolmKit, secs := -1.0) -> void:
+	P.inp["fire"] = true
+	step(m, secs if secs > 0.0 else float(K.lmb_def()["full"]) + 0.1)
+	P.inp["fire"] = false
+
+## Each hit of his lands with weight sized by its damage: the boulder and the slam throw a blue ring (their hit
+## areas are circles), the boulder's the smaller; the punch, whose hit area is its lane, throws none, and its stone
+## and dust grow with the charge.
+func _impact_weight(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	var boulder := _blue_ring(m, 0.8, func(): _throw_boulder(m, P))
+	reset.call()
+	T.teleport(home + Vector3(2.0, 0, 0))
+	aim_at(P, T.pos)
+	var slam := _blue_ring(m, 0.4, func(): tap(m, P))
+	var info := "boulder %.1f slam %.1f" % [boulder, slam]
+	ok("impact: the boulder and the slam each land with a blue ring", minf(boulder, slam) > 0.0, info)
+	ok("impact: the ring is wider for the heavier hit (boulder 9 dmg < tap slam 14)", boulder < slam, info)
+	var looks := KitLooks.of(m)
+	var full := [0, 0]
+	var short := [0, 0]
+	for run in [[full, -1.0], [short, float(K.lmb_def()["tap"]) + 0.05]]:
+		reset.call()
+		T.teleport(home + Vector3(2.5, 0, 0))
+		aim_at(P, T.pos)
+		var got: Array = run[0]
+		var rings0: Array = m.fx.rings.duplicate()
+		var chips0: Array = looks.timed.duplicate()
+		_held_punch(m, P, K, float(run[1]))
+		step(m, 0.3, func():
+			for e in m.fx.rings:
+				if not rings0.any(func(o): return is_same(o, e)):
+					rings0.append(e)
+					got[0] += 1
+			for e in looks.timed:
+				if e["kind"] == "shard" and not chips0.any(func(o): return is_same(o, e)):
+					chips0.append(e)
+					got[1] += 1)
+	info = "rings full %d short %d, chips full %d short %d" % [full[0], short[0], full[1], short[1]]
+	ok("impact: the punch draws no ground ring (its lane is the hit area)", full[0] + short[0] == 0, info)
+	ok("impact: the punch throws stone chips, more at full charge", short[1] > 0 and full[1] > short[1], info)
+	ok("impact: the charge look is pooled (back in the pool once the punch is thrown)",
+		not looks.holding("br_fist") and looks.pooled("fist_charge") == 1, "pooled %d" % looks.pooled("fist_charge"))
+	reset.call()
+	var rise := _blue_ring(m, 0.9, func(): K.cast_e())
+	ok("impact: each rock of the Stone Row breaks the ground in a blue ring", rise > 0.0, "ring %.1f" % rise)
+	step(m, 0.5)
+
+>>>>>>> origin/ext/vfx-tenzo-punch-hold
 ## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
 ## release in it punches as the dash ends, in the air, keeping most of her speed.
 func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
