@@ -1228,9 +1228,6 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 			c.draw_circle(r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2))
 	elif not p.wpn.get("ammo", true):
 		pass                       # no ammo (Data.weapon_stats): no count to show
-	elif p.reload_t > 0.0:
-		_text(r.position + Vector2(78, 46), "RELOADING", 16, Color("ffe7a8"), big)
-		_bar(Rect2(r.position + Vector2(78, 52), Vector2(170, 4)), 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"))
 	else:
 		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
 		var aw := TextCache.width(big, str(p.ammo), 28)
@@ -1661,8 +1658,6 @@ func _draw_crosshair(p: Hunter) -> void:
 		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
 	elif p.wpn.get("melee", false):
 		pass
-	elif p.reload_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"), 3.0)
 	else:
 		# ammo left, as a thin ring that empties as you fire
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
@@ -1751,26 +1746,18 @@ func _draw_overhead(p: Hunter) -> void:
 	if alt > 6.0 and not p.grounded:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
-	if p.reload_t > 0.0:
-		# reloading: a filling ring beside your head, and the word under your bars
-		var rf := 1.0 - p.reload_t / float(p.wpn["reload"])
-		var rc := sp + Vector2(w * 0.5 + 16, 4)
-		c.draw_circle(rc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
-		c.draw_arc(rc, 8.0, 0, TAU, 24, Color(1, 1, 1, 0.15), 3.0, true)
-		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
-		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
 		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
+		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
 		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "REPAIRING", 11, ARMOR_COL, big)
+		_ctext(sp + Vector2(0, 33), "REPAIRING", 11, ARMOR_COL, big)
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
