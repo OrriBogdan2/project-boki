@@ -104,6 +104,7 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 | ways_taken_other | heart | ui | 1 | -10.7 | -22.0 | -22.0 | -0.0 |
 | ways_taken_own | heart | ui | 1 | -10.3 | -22.0 | -22.0 | -0.0 |
 | ways_warn | heart | ui | 1 | -13.3 | -22.0 | -22.0 | +0.0 |
+SFX_AUDIT row 18 (Tenzo's and Neve's ult tails): by ear is still not done. By measurement (`loudness_report.py --tails`, end level = the last 20 ms against the loudest 50 ms): Tenzo `br_spine` (1.6 s, -48 dB) and `br_crumble` decay cleanly; `br_rumble` was cut off at -23 dB after 0.42 s (an audible stop) and `br_crack` ended at -33 dB; Neve `rime_crash` (2.1 s), `rime_burst`, `rime_lock` and `rime_freeze` end under -45 dB, `rime_creak` takes at -28 to -36 dB. Mended with `tools/sfx_tail.py` (stdlib; `br_rumble` has no generator in tools/ and numpy-based generators do not run on every box): `br_rumble` --extend 0.3 --fade 0.4 (0.72 s, now ends -56 dB), `br_crack` --fade 0.1 (-57 dB), `rime_creak_1` --fade 0.06 (-43 dB). If `gen_sfx_tarek.py` / `gen_sfx_claire.py` regenerate these, give the fade in the generator instead.
 
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
