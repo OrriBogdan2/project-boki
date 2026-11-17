@@ -35,9 +35,9 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	var k: ArchKit = P.ak
 	Sfx.listener = P.pos
 	Sfx.last_played.clear()
-	var voices := Sfx.get_child_count() - Sfx.loops.size()     # (a channel's held loop is its own player on main)
 	await _start(m, P, k, mate, arch, slot)
 	var held: Array = k.windups.get(slot, [])
+	var kids0 := Sfx.get_children()    # (taken after the cast: a channel's held loop is its own player on main)
 	c.ok(held.any(Sfx.sounding), "%s %s: the wind-up's voice plays (%s)" % [arch, slot, held])
 	P.stun_t = 0.6
 	var t := 0.0
@@ -52,7 +52,10 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	var gone := not held.any(Sfx.sounding)
 	c.ok(gone and took <= CUT_MAX, "%s: the wind-up's voice ends %d ms after the break" % [arch, took])
 	c.ok(Sfx.last_played.has(KitWindup.BROKEN), "%s: the caster hears the broken tick" % arch)
-	c.ok(Sfx.get_child_count() - Sfx.loops.size() <= voices, "%s: no new player for the cast or the cut" % arch)
+	var own := Sfx.loops.values().map(func(l): return l["p"])
+	own.append(Sfx.get("_sting_p"))     # (made once, on the first sting, never per cast)
+	var fresh := Sfx.get_children().filter(func(ch): return not ch in kids0 and not ch in own)
+	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d)" % [arch, fresh.size()])
 	P.inp["fire"] = false
 	mate.team = team0
 
