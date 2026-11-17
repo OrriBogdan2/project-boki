@@ -1760,14 +1760,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 			ArmourHint.hit(self, credit, target)
-	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
-	if credit is Hunter and (credit as Hunter).ak and target != player:
-		col = (credit as Hunter).ak.number_col(target, col, o)
-	# only numbers that involve you: other fights nearby don't spray digits over yours
-	if mine:
-		fx.hit_number(target, credit, d, col, crit)
+	fx.damage_number(target, by, d, o, player, armor_hit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
@@ -3152,6 +3146,7 @@ func _process(delta: float) -> void:
 		acc -= DT
 		steps += 1
 		step(DT)
+		FireTap.stepped(player)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):
@@ -3297,7 +3292,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = (hud != null and hud.mouse_on_ui() or PanelInput.panel_up(hud)) and player.draw_t < 0.0
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
+	player.inp["fire"] = FireTap.down(player, not paused and not over_ui)
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
