@@ -36,6 +36,7 @@ func run(main: Node) -> void:
 	var t := 0.0
 	var idle_ok := true
 	var reach := ""
+	var pending := ""
 	while t < MAX_RUN_T and not m.player.extracted:
 		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
@@ -44,11 +45,16 @@ func run(main: Node) -> void:
 			TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		if pending != "":
+			# (one step after the start: a stray left off the island by the last camp is culled on the tick after,
+			# and the camp it held back comes in then, TutorialCamps._cull_strays)
+			reach += _unreachable(m, pending)
+			pending = ""
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
 			if tu.id() in FOE_STEPS:
-				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
+				pending = tu.id()      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
 	_words(m.player, seen)
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)
