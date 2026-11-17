@@ -222,6 +222,18 @@ def relax(arm):
     return left
 
 
+def measure(arm):
+    """Prints the stretch of every mesh skinned to `arm` over its clips and changes nothing (v95_swap.py's `weights` "voxel")."""
+    import bpy
+    poses = pose_matrices(arm)
+    for o in bpy.data.objects:
+        if o.type == "MESH" and any(m.type == "ARMATURE" and m.object == arm for m in o.modifiers):
+            worst, per = Skin(o, arm).stretch(poses)
+            clip = poses[int(np.argmax(per))][0]
+            print("stretch %s: edges over 1.3: %d, over 2: %d, over 5: %d, worst %.2f in %s"
+                  % (o.name, (worst > 1.3).sum(), (worst > 2).sum(), (worst > 5).sum(), max(per), clip), flush=True)
+
+
 def relax_glb(src, out, overrides):
     """Imports a game .glb (bone axes as exported, so the rest re-exports unchanged), relaxes it and exports it again with
     v95_swap.py's export settings."""

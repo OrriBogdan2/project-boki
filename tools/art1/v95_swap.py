@@ -6,7 +6,7 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
  2. Fit (grimble_source.py's method): each limb segment of the master (its `joints`) moves onto the rig's, a length along
     the bone and a girth across it; the limbs take the rig's joint heights and keep the master's spread, or with `spread`
     "rig" sit on the rig's joints; past a segment's ends the master keeps its own scale (a hook, a gauntlet keep their shape).
- 3. Weights: bone heat on the body bones, `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
+ 3. Weights: bone heat on the body bones (`weights` "voxel": voxel_weights.py instead, and no skin_relax), `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
     `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given.
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
@@ -39,6 +39,7 @@ import bake_warden as BW
 import fit_warden as FW
 import glb_add_clips
 import skin_relax
+import voxel_weights
 from glb_relax import accessor
 from meshkit import smooth
 from posekit import FPS
@@ -480,6 +481,12 @@ def heat_weights(low, arm, P):
     weights to its bone) and the `regions`, whole."""
     if SPEC.get("weights") == "capsule":
         return place_weights(capsule_weights(low, arm), P)
+    if SPEC.get("weights") == "voxel":     # (voxel_weights.py: through the master's solid, in its own pose; no skin_relax after)
+        SPEC["detach"] = SPEC.get("detach", []) + voxel_weights.arm_cuts(SPEC["past_wrist"])
+        low.data.calc_loop_triangles()
+        tri = np.array([t.vertices[:] for t in low.data.loop_triangles])
+        names, W = voxel_weights.weights(P, tri, SPEC["joints"], [b for b in BODY if b in arm.data.bones], SPEC)
+        return place_weights(dict(zip(names, W.T)), P)
     tmp = arm.copy()
     tmp.data = arm.data.copy()
     tmp.animation_data_clear()
@@ -875,7 +882,8 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0))).T))
+    W = smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0)))
+    gr = dict(zip(names, (voxel_weights.top4(W) if SPEC.get("weights") == "voxel" else W).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
@@ -947,6 +955,8 @@ def main():
         setattr(skin_relax, k, v)
     if meshy:       # (Meshy's weights stay as they are)
         print("SWAP weights meshy: skin_relax skipped", flush=True)
+    elif bpy.data.actions and SPEC.get("weights") == "voxel":
+        skin_relax.measure(arm)
     elif bpy.data.actions:
         skin_relax.relax(arm)
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
