@@ -13,12 +13,16 @@ var out := ""
 var px := 192
 var only: Array = []
 
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--px="): px = int(a.substr(5))
-		if a.begins_with("--species="): only = Array(a.substr(10).split(","))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--px="):
+			px = int(a.substr(5))
+		if a.begins_with("--species="):
+			only = Array(a.substr(10).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -31,6 +35,7 @@ func run(m: Node) -> void:
 	all.save_png(out.path_join("idle_all.png"))
 	print("BOKI_IDLE_SHOTS_DONE")
 	main.get_tree().quit()
+
 
 func _row(id: String) -> Image:
 	var s := Shots.new()
@@ -53,6 +58,7 @@ func _row(id: String) -> Image:
 		await _tile(vp, rig, s, row, BokiIdle.FIDGET, at, TILES + i)
 	vp.queue_free()
 	return row
+
 
 func _tile(vp: SubViewport, rig: BokiRig, s: Object, row: Image, clip: String, at: float, tile: int) -> void:
 	rig.set_clip(clip, 0.0)
