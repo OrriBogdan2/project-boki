@@ -740,6 +740,7 @@ const CHECKS := {
 	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
 	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
+	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],      # real match, wild Boki models
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
