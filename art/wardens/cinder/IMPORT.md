@@ -90,3 +90,12 @@ the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade
 matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
 6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
 On the v95 swap the `leap` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... leap`.
+
+**v95 master A (11-16, ext/cinder-3d-a-1116):** the owner accepted Cinder 3D option A (job 20261116-200037-a2, Meshy rebuild from the
+owner-picked sheet: glowing amber eyes, clean lips, deeper bust). Master: `~/meshy/v95/Cinder/r8/pick1116/cands/A.glb` (live in
+`CURRENT_OVERRIDES.txt` / `current.json`). A carries a fused tail, so the game swap uses a copy with it cut off
+(`~/meshy/v95/Cinder/r8/pick1116/game/A_notail.glb`, made by `cut_tail_A.py`, an adaptation of `_body5_tools/cut_tail.py`: 115,030 of
+682,993 vertices) and the game keeps its own spring tail (`keep`). Swap:
+`python3 tools/art1/v95_to_game.py Cinder --master <A_notail.glb>` (new `--master` flag) with `art/wardens/src/cinder_v95.json`
+(joints re-read from `v95_grid.py` renders of A). Result: 60,711 tris, same rig, clips, spring tail and jets. Judges disagree:
+the promote judge scored A 53 vs A2 71, the source job's judge 83 vs 65; the owner picked A by eye.
