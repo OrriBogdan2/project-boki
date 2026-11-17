@@ -44,6 +44,11 @@ const T := {
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
+	"haste_two_bonus_x":       ["~", [1.49, 1.51], "x", "haste 0.35 + kin buff 0.15 add (1.55 if stacked)"],
+	"haste_bonus_slow_x":      ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
+	"haste_cap_mps":           ["~", [6.95, 7.0], "m/s", "[game data] MaxMoveSpeed 700 uu/s"],
+	"haste_clip_rate":         ["~", [0.99, 1.01], "x", "clip rate / (speed / clip speed), worst Warden"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
@@ -307,6 +312,7 @@ func _begin(main: Node) -> void:
 func run(main: Node) -> void:
 	_begin(main)
 	_ground()
+	_haste()
 	_face_turn()
 	_jump()
 	_glide()
@@ -402,6 +408,51 @@ func _ground() -> void:
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+# ---------------------------------------------------------------- move-speed bonuses (HunterMove.ground_speed)
+## Top speed after a straight run with the bonuses and slows `setup` puts on.
+func _run_speed(setup: Callable) -> float:
+	_reset(flat + Vector3(-3, 0, 0))
+	_clear_speed()
+	setup.call()
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	return _hv(P).length()
+
+func _haste() -> void:
+	var plain := _run_speed(func() -> void: pass)
+	var two := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.add_buff("move_speed", 0.15, 5.0))
+	rec("haste_two_bonus_x", two / plain)
+	var slowed := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.slow_t = 5.0
+		P.slow_k = 0.4)
+	rec("haste_bonus_slow_x", slowed / plain)
+	var capped := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.add_buff("move_speed", 1.0, 5.0))
+	rec("haste_cap_mps", capped)
+	var worst := 1.0
+	var gait := WardenGait.new(Skeleton3D.new(), {}, 1.0, 1.0)
+	for f in DirAccess.get_files_at("res://content/rules/warden_anim"):
+		var row: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/warden_anim/" + f))
+		var lc: Dictionary = row.get("loco", {})
+		var run := float(lc.get("run_speed", 4.6))
+		var at_run := gait.plan(run, lc, Vector2.UP, 1.0)
+		for spd: float in [two, capped]:
+			var k := (gait.plan(spd, lc, Vector2.UP, 1.0) / at_run) / (spd / run)
+			if absf(k - 1.0) > absf(worst - 1.0): worst = k
+	rec("haste_clip_rate", worst)
+	_reset(flat)
+	_clear_speed()
+
+func _clear_speed() -> void:
+	P.haste_t = 0.0
+	P.slow_t = 0.0
+	P.slow_k = 0.0
+	P.kbuffs.erase("move_speed")
 
 ## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
 func _face_turn() -> void:
@@ -1076,7 +1127,7 @@ func _dash_curves() -> void:
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
 		# against her run, a kit haste in it (Sable hands over at her hasted run)
-		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
+		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * (P.ak.move_k() + P.ak.speed_bonus())))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
