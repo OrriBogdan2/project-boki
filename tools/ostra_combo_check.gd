@@ -652,7 +652,7 @@ func _ostra() -> void:
 	)
 	await done(m)
 
-## Source: Void's passive "floats: no footstep noise" (supervive_kits.md), the footage "no footsteps"
+## Source: Void's passive "floats: no footstep noise" (sv/briefs/kits.md), the footage "no footsteps"
 ## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
 ## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
 func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:

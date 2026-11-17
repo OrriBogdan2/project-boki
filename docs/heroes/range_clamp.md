@@ -2,7 +2,7 @@
 
 This covers every ground-targeted RMB, E and R (our X) of the 12 Hunters, plus Motley's Trade on Shift. When the
 cursor is past the slot's max range, the source can do one of three things: cast on the range edge along the cursor
-line (**clamp**), refuse the cast, or walk you in until you are in range. Sources: `briefs/supervive-data/supervive_kits.md`
+line (**clamp**), refuse the cast, or walk you in until you are in range. Sources: `sv/briefs/kits.md`
 [D], the footage notes in the hero sheets [F], `docs/AIM_PREVIEWS.md` (ext/aim-preview-parity).
 
 **The rule is clamp, for every slot.** Every slot the footage shows with a far cursor clamps: Kitefall's crown stays

@@ -1,6 +1,6 @@
 # Damage ratios: ours vs the source
 
-Parity first (DECISIONS 2026-11-07): absolute damage can't match (our HP is 124/145/193, the source's 1100-1475), so this compares each number as a **share of an average Hunter's health**. Ours: the 12 hunters' class HPs average 154 (scripts/core/data.gd). Source: the 12 base HPs average 1285.4 at level 1 and 2361.7 at level 15 (supervive_physics.md; numbers the kit file marks "@15" use the level-15 average). Source damage is supervive_kits.md. Our side is read from `content/archetypes/*.json` and `content/weapons/*.json` by `python3 tools/damage_ratios.py`, which regenerates this table. Mapping: Vex=Ghost, Mossy=Oath, Sparkle=Joule, Kael=Brall, Lace=Myth, Cinder=Felix, Grimble=Kingpin, Meeko=Elluna, Neve=Celeste, Tenzo=Tetra, Motley=Void, Sable=Shiv.
+Parity first (DECISIONS 2026-11-07): absolute damage can't match (our HP is 124/145/193, the source's 1100-1475), so this compares each number as a **share of an average Hunter's health**. Ours: the 12 hunters' class HPs average 154 (scripts/core/data.gd). Source: the 12 base HPs average 1285.4 at level 1 and 2361.7 at level 15 (sv/physics.md; numbers the kit file marks "@15" use the level-15 average). Source damage is sv/kits.md. Our side is read from `content/archetypes/*.json` and `content/weapons/*.json` by `python3 tools/damage_ratios.py`, which regenerates this table. Mapping: Vex=Ghost, Mossy=Oath, Sparkle=Joule, Kael=Brall, Lace=Myth, Cinder=Felix, Grimble=Kingpin, Meeko=Elluna, Neve=Celeste, Tenzo=Tetra, Motley=Void, Sable=Shiv.
 
 Limits: the source kit text gives a fire rate for no LMB, so "LMB DPS" has a source figure only for Cinder (258/s); the others compare per hit, and the rest show "-". Tenzo's kit text has no damage numbers at all. Heals and shields are not compared. "R" is the kit's ult slot (`x`), not the Boki merge. Ours/source above 1.5 or below 0.67 is flagged **OFF**.
 
@@ -85,5 +85,5 @@ Asserted by `tools/damage_ratio_check.gd`, called from `--hero-combo-check` (arc
 
 ## Suggestions (ours, not the build)
 
-- Add a charge-curve note per hold ability to supervive_kits.md so the hold rows can be compared fairly.
+- Add a charge-curve note per hold ability to sv/kits.md so the hold rows can be compared fairly.
 - Run `tools/damage_ratios.py` after any damage edit.

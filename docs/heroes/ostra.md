@@ -17,7 +17,7 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 
 ## Research summary
 - Sources: the reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
-  (https://supervive.wiki.gg/wiki/Void) and the Steam patch-note text (Nov 2024 - Dec 2025).
+  (the wiki and the Steam patch-note text (Nov 2024 - Dec 2025).
 - Owner notes (sync61) override the footage: spamming Shift must never dash in a random direction; Shift keeps his height; RMB
   has one charge and must visibly stun, the training dummy too.
 - Owner dash note (Nov 2) on the Trade: a target circle at the cursor with a landing marker; while the lantern flies he
@@ -27,7 +27,7 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 ## Design
 Weight Medium (145 hp), floats: body 0.9 (content "body"), hovering about 0.3m over his ground point with a slow
 +-0.03m bob at 0.6 Hz, legs at a tenth of a step (no step cycle, no footsteps), the hem trailing. Silent float: source Void's passive "floats: no
-footstep noise" [D] (supervive_kits.md) and no footsteps in the footage (briefs/hero-ref/ostra.md, Sound); his gait
+footstep noise" [D] (sv/briefs/kits.md) and no footsteps in the footage (briefs/hero-ref/ostra.md, Sound); his gait
 (KMovesStone.HOVER_GAIT 0.1) keeps the Hunter footstep emitter quiet for him and for a Motley another game moves;
 --ostra-combo-check counts zero step sounds over 3 s of floating walk, both ways, against a footed Hunter that steps. The hover is visual
 only: his hitbox and ring stay on the ground, so it never dodges low shots. Fixed weapon Tether Lantern (`content/weapons/tether_lantern.json`): a pale crook with a curled
@@ -101,7 +101,7 @@ to the middle). Now that Black Hole is Nightwell on R, the pull is gone from the
 level-4 bonus.
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
 
 | Slot | Source | Ours | Asserted (`--ostra-combo-check`) |
 |---|---|---|---|
@@ -119,7 +119,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | Shift apex | "climbs well above the field" (0159-0167, key frame 0161); no height read off the frames [footage, not measured] | 4.5m over his hand (`dash.lob`), kept | `dash: a high lob ...` (4m+) |
 | Shift landing recovery | 0168 is the teleport; 0169-0182 are not captioned, so the time before he acts is not read [not measured] | none: he acts on arrival (nothing in the data or footage locks him) | (not asserted) |
 | Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75: 30%; 11-08: 35%; 11-10 playtest: 67.5%, the slow halved from 65% to 32.5%) | `item 17: ...`, `owner: ...` |
-| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast, no timer (the data lists none; Unstable Anomaly: "reactivate to detonate", supervive_kits.md:116) | `combo: ...`, seed rows |
+| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast, no timer (the data lists none; Unstable Anomaly: "reactivate to detonate", sv/briefs/kits.md:116) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
 
 ## Audit (Nov 3 23:40)
@@ -132,7 +132,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | R cd 64 s vs 70 s | LOW | (b) | 8e5c6340: 70 s; `ult cast: ... (70s, data)` |
 | The seed pops by itself (data: reactivate to detonate) | MED | (b) | 8e5c6340: it waits at full size for the recast; left 10 s at full it fizzles with no damage (our cap, so it can't be parked forever); `e: a full seed waits for the recast ...`, `e: left unpopped ... fizzles out harmlessly` |
 | X cd 64 s vs 70 s | LOW | (b) | 8e5c6340: 70 s; `ult cast: ... (70s, data)` |
-| The seed pops by itself (data: reactivate to detonate) | MED | (b) | it waits at full size for the recast and nothing else ends it: the 10 s fizzle (ours) is removed per DECISIONS 2026-11-07 (ours-only riders: keep none). Source: briefs/supervive-data/supervive_kits.md:116 lists no expiry (timed kits there state theirs, e.g. Farstep Dagger 6 s); briefs/hero-ref/ostra.md only asks "does the bomb auto-detonate at 6.5 s?" (open, footage ended ~6.4 s, 1674 pink number). The cooldown starts on the plant (kept, [?]: the source does not say; Vireo's Surge shows SV starts on press). Going down ends the seed with no damage (the source is silent, [?]); a merge leaves it. `e: no fizzle ...`, `e: a merge does not take the waiting seed`, `e: going down ends the seed` |
+| The seed pops by itself (data: reactivate to detonate) | MED | (b) | it waits at full size for the recast and nothing else ends it: the 10 s fizzle (ours) is removed per DECISIONS 2026-11-07 (ours-only riders: keep none). Source: sv/briefs/kits.md:116 lists no expiry (timed kits there state theirs, e.g. Farstep Dagger 6 s); briefs/hero-ref/ostra.md only asks "does the bomb auto-detonate at 6.5 s?" (open, footage ended ~6.4 s, 1674 pink number). The cooldown starts on the plant (kept, [?]: the source does not say; Vireo's Surge shows SV starts on press). Going down ends the seed with no damage (the source is silent, [?]); a merge leaves it. `e: no fizzle ...`, `e: a merge does not take the waiting seed`, `e: going down ends the seed` |
 | The strong orb doesn't go through terrain (data) | MED | (b) | 8e5c6340, widened by item 60: `pierce_terrain` on every orb (owner over the data); `item 60: every orb passes ...`, `walls: ...` (also real maps, point blank and at range: tools/ostra_arena_check.gd), `net: ...` |
 | Orb magazine 12 / 1.5 s reload (not in the source) | MED | (b) | 8e5c6340: mag 99 (no reload in play) |
 | Spam penalty (footage card only) | LOW | (c) | not built: the fixed 0.6 s cadence can't be beaten, so there is nothing to penalise (parity table) |
@@ -189,7 +189,7 @@ The 8 ranked rows of briefs/hero-ref/ostra.md section 4, marked on main d255acbe
 | 5 | Bomb growth and damage curve | closed | grow 6.5s, 3.5x (5b9a528d2), `min_recast` 0.3s, light column from 68%, implosion pop; `e: ...` rows. The 10s fizzle is dropped (the source lists no expiry; ext/motley-globe-full carries 9f521695a) |
 | 6 | Empowered aura | closed | `OstraKit.add_swell`: light-teal sphere (`os_aura`), vortex disc, light-teal flash; `swollen_t` 9s; `passive: full Swell = Swollen for 9s, wrapped in the light-teal sphere` |
 | 7 | Bomb cast is a lob | closed | `e.drop` 0.25s, the `os_drop` mote; `e: a small orb drops from his hand onto the spot` |
-| 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Ostra ult); `ult open`, `lock`, `release` |
+| 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Motley ult); `ult open`, `lock`, `release` |
 
 Nothing is open in the ranked list, so no code was changed. In flight, not touched:
 ext/anim-time-motley-rebased, ext/ostra-gait-rebased, ext/vfx-quality-motley and ext/vfx-ostra-abilities (VFX look),
@@ -207,8 +207,8 @@ Net.VERSION 0.24.5.
 Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, full orb 353 -> +34%, Swollen Snap 399 ->
 +44%, the seed 365 -> 12.5, its damage over time 250 a second -> 8.2. Durations and cooldowns match directly: Snap 10s, Trade
 9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield like Cinder's ram shield
-(docs/heroes/ashwick.md), a share of the source hero's Base HP: 375 of Void's 1150 (supervive_physics.md) = 32.6% of Motley's
-health, 47 of 145 (`dash.ally_shield` 0.326, 3s). Source: supervive_kits.md, Swap tier IV, "allies entering cast radius get a
+(docs/heroes/ashwick.md), a share of the source hero's Base HP: 375 of Void's 1150 (sv/briefs/physics.md) = 32.6% of Motley's
+health, 47 of 145 (`dash.ally_shield` 0.326, 3s). Source: sv/briefs/kits.md, Swap tier IV, "allies entering cast radius get a
 375 HP shield for 3s". The cast radius is the ring round him as he leaves, so nobody is shielded at the landing (that half,
 and its own 3m reach `ally_r`, were ours and are cut, DECISIONS 2026-11-07); it uses the Trade's 1.5m circle.
 Conversions (2026-11-11, `--ttk-check`): damage as a share of a level-15 target (2364 health, 154 on ours): Snap 277 -> 18,
@@ -228,7 +228,7 @@ the ratios are pinned in content/rules/kit_parity.json. Durations and cooldowns 
 
 ## Orb slow (KIT_PARITY Crowd control, 2026-11-11)
 A full orb slows **6% for 1.5s** (`lmb.prime_slow` 0.06, `prime_slow_t` 1.5; was 0.1 from the wiki).
-- Game data (`supervive_kits.md`, Void at lvl 15) only says the charged orb "Slows", with no number; `supervive_physics.md` has none.
+- Game data (`sv/briefs/kits.md`, Void at lvl 15) only says the charged orb "Slows", with no number; `sv/briefs/physics.md` has none.
 - The footage sheet (briefs/hero-ref/ostra.md, LMB row) quotes the Gravity Orb card: "140 (+68) ... A fully charged orb slows 6% for 1.5 s". That is the game's own tooltip text (same card form as the data file, base plus scaling), not a measurement off the frames, so it counts as game data [D]. The same cards give the Snap 0.8 to 1.8s and Black Hole 3.5s that KIT_PARITY already takes as source.
 - Order of trust O > D > wiki > F: the card's 6% beats the wiki's 10% (the wiki also lags patches, e.g. the binary charge). Both agree on 1.5s.
 - Alternative, if the owner counts a card seen in footage as [F]: 0.1 in `content/archetypes/ostra.json` and the `kit_parity.json` row.
@@ -265,7 +265,7 @@ A full orb slows **6% for 1.5s** (`lmb.prime_slow` 0.06, `prime_slow_t` 1.5; was
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -303,7 +303,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
 or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
@@ -408,7 +408,7 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 
 Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.
 ## Parity verify, Nov 9
-Main d255acbee against the sources (docs/KIT_PARITY.md Ostra block, briefs/hero-ref/ostra.md, briefs/supervive-data/supervive_kits.md Void,
+Main d255acbee against the sources (docs/KIT_PARITY.md Ostra block, briefs/hero-ref/ostra.md, sv/briefs/kits.md Void,
 DECISIONS 2026-11-07 and the owner holds: Nightwell locks him about 1 s then he moves freely; Brimseed peaks at 3.5x; LMB and RMB are owner
 items 60 and 40; the floating passive stays `[?]`). Verdicts: match, differ (owner), regressed, open. Paths: K = scripts/arch/kits/ostra_kit.gd,
 W = ostra_well.gd, J = content/archetypes/ostra.json, F = content/dash_flow/ostra.json, T = content/weapons/tether_lantern.json, C = tools/ostra_combo_check.gd,
