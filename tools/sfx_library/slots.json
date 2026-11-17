@@ -141,7 +141,7 @@
      1
     ]
    ],
-   "neg": "ambien|vocal|voice|trailer|cinematic|riser|rise|fall|impact|bullet|jet|car|bomb|explos|metal|sword",
+   "neg": "ambien|vocal|voice|trailer|cinematic|riser|rise|fall|impact|bullet|jet|car|bomb|explos|metal|sword|camera|battery|click|purse|choke|electronic|beep",
    "fit": {
     "len": [
      0.12,
@@ -193,7 +193,7 @@
      1
     ]
    ],
-   "neg": "footstep|step|scuff|slide|skid|drag|ambien|vocal|voice|trailer|cinematic|riser|rise|impact|hit|bullet|jet|car|bomb|explos|metal|sword|gravel",
+   "neg": "footstep|step|scuff|slide|skid|drag|ambien|vocal|voice|trailer|cinematic|riser|rise|impact|hit|bullet|jet|car|bomb|explos|metal|sword|gravel|electronic|beep|chatter|buzz|ghost|female|male|zip|creature|monster|magic",
    "fit": {
     "len": [
      0.15,

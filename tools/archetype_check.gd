@@ -147,6 +147,11 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
+	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	T.armor_tier = 0
+	T.armor_xp = 0.0
+	T.armor = 0.0   # a tier-up from earlier hits left Common armor on the body, taking 20% off the next hit
+	T.max_armor = 0.0
 	T.set_meta("marks", {})
 
 func dmg(T: Hunter) -> float:
@@ -320,6 +325,8 @@ func _data() -> void:
 		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
 			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
 	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
+	ok("weapons: no weapon in the game has a reload time",
+			Data.weapon_ids().all(func(w): return not Data.weapon_stats(w).has("reload")))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
@@ -408,7 +415,7 @@ func _archer() -> void:
 	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
-	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1)
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
@@ -602,7 +609,7 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.atk.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())

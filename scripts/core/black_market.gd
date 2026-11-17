@@ -54,9 +54,8 @@ static func _roll(day: String) -> Array:
 		var key := String(pool.pop_at(rng.randi_range(0, pool.size() - 1)))
 		var k := rng.randf_range(float(_rules()["price_lo"]), float(_rules()["price_hi"]))
 		out.append({"id": MarketSave.next_id(), "key": key, "price": int(ceil(Goods.ref_of(key) * k))})
-	var rares: Array = Data.KIN.keys().filter(func(sp): return Data.is_rare(String(sp)))
-	if not rares.is_empty() and rng.randf() < float(_rules()["egg_chance"]):
-		var species := String(rares[rng.randi_range(0, rares.size() - 1)])
+	if rng.randf() < float(_rules()["egg_chance"]):
+		var species := Data.egg_species("", rng)
 		out.append({"id": MarketSave.next_id(), "key": "egg:" + species, "price": int(_rules()["egg_price"])})
 	return out
 

@@ -395,8 +395,8 @@ def step_one(gh, st, f, main_now):
             log("lag", n, f"main {f['main'][:10]} landed -> GATE GREEN {res.split()[1][:10]}: {(now() - f['main_time']) / 60:.0f} min")
             f.update(phase="awaiting_merge", posted=now(), new=res.split()[1])
             return True
-        if word == "ERROR":
-            st["cooldown"][str(n)] = now() + 3600
+        if word == "ERROR":  # an overloaded box is not the PR's fault: retry in 10 min, not 60
+            st["cooldown"][str(n)] = now() + (600 if "HOST-OVERLOADED" in res else 3600)
         return False
     # awaiting_merge: holds no worker and no longer blocks the queue (11-14b); kept to log merge lag and so the scan
     # does not pick the PR again while merge-ready-watch has it

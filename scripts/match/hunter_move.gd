@@ -31,9 +31,13 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var speed_cap: float = _phys["speed_cap"]
+static var haste: float = _phys["haste"]
+const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
 
 static func rules() -> Dictionary:
 	return _rules
@@ -42,11 +46,42 @@ static func rules() -> Dictionary:
 static func of(arch: String) -> Dictionary:
 	return _rules.get(arch, _rules["default"])
 
+## This archetype's walk speed (m/s): its source MoveSpeed at our body scale. Every mode reads it.
+static func speed(arch: String) -> float:
+	return float(of(arch)["speed"]) * body_scale
+
+## This archetype's ground acceleration (m/s^2), at the same scale so reaching the walk takes the source's time.
+static func accel(arch: String) -> float:
+	return float(of(arch)["accel"]) * body_scale
+
 ## Sets the hunter's run speed and acceleration for its archetype.
 static func apply(h: Hunter) -> void:
-	var row := of(h.arch)
-	h.base_speed = float(row["speed"])
-	h.ground_accel = float(row["accel"])
+	h.base_speed = speed(h.arch)
+	h.ground_accel = accel(h.arch)
+
+## One step of walking on the ground, shared by the match and the farm: toward `want` (m/s) at `acc`, speed over
+## it shed under the walking brake; with no keys, the brake alone. grip < 1 on ice.
+static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float) -> Vector2:
+	if want.length() < 0.001:
+		return brake(hv, grip, dt)
+	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
+
+## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
+## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).
+static func ground_speed(run: float, bonus: float, mult: float) -> float:
+	return clampf(run * maxf(0.0, 1.0 + bonus) * mult, 0.0, speed_cap)
+
+## Every move-speed bonus a hunter has right now, summed: gear, perk orbs, kin carry passives, owner
+## points, merge and kin-ability buffs (gear_stat), the haste status, its kit's own bursts, its mount's
+## gait and the chase after a kin thief.
+static func speed_bonus(h: Hunter, mv: Vector2) -> float:
+	var b := h.gear_stat("speed") + (haste if h.haste_t > 0.0 else 0.0)
+	if h.ak: b += h.ak.speed_bonus()
+	if h.mounted() and h.grounded: b += h.mount_speed() - 1.0
+	var c := h.chase
+	if c and not c.out and not c.extracted and mv.length() > 0.1 and mv.normalized().dot(h.dir_to(c)) > 0.5:
+		b += CHASE_BONUS
+	return b
 
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
@@ -87,6 +122,18 @@ static func cut_air_dash(h: Hunter) -> void:
 		return
 	h.roll_t = 0.0
 	h.shove = {}
+
+## A ground dash that runs off a ledge keeps its own course (distance, speed curve) but falls as it goes: the
+## height hold is an air dash's (Hunter.roll_falls, set as the ground goes). It ends in the air with the usual dash
+## exit, so the glider and the air dash are free as it ends, and the kit's ground pose for it is cut there.
+## Source: a dash is how you leave a platform (bCanWalkOffLedges false) and a falling body only sheds
+## FallingLateralFriction; DECISIONS: walking off ledges is always allowed. Called every step.
+static func dash_off_ledge(h: Hunter) -> void:
+	if not h.roll_falls or h.roll_t > 0.0:
+		return
+	h.roll_falls = false
+	if h.ak and not h.grounded:
+		h.ak.on_dash_off_ledge()
 
 ## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
 ## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An

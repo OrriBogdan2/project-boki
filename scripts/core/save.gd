@@ -256,7 +256,9 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	var n := int(d["serials"].get(sp, 0)) + 1
 	d["serials"][sp] = n
 	rec["serial"] = n
-	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, {"how": String(o["how"]), "serial": n})
+	var extra := {"how": String(o["how"]), "serial": n}
+	if rec.has("parents"): extra["bred"] = true        # an egg of two of your Boki (ClanInfo.last_deed)
+	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, extra)
 
 ## Everyone in the collection has provenance (anything that came in without it gets it now).
 func register_all() -> void:
@@ -513,6 +515,7 @@ func load_from(p: String) -> void:
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

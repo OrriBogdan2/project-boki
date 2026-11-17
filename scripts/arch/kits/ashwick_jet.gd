@@ -45,6 +45,8 @@ func xd() -> Dictionary:
 func running() -> bool:
 	return not flight.is_empty()
 
+const LIFT_LEAD := 0.12         # s of lw_jet skipped on the press: its fly key (0.22) lands at 0.1 s
+
 ## Flue Flight: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
 ## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
@@ -90,6 +92,7 @@ func start() -> bool:
 		"set_v": Vector2.ZERO, "knock": h.knock_t}
 	flights += 1
 	k.play("lw_jet")
+	k.anim_at -= LIFT_LEAD          # [footage] up and flying 0.1 s after the press (f25-f26)
 	_liftoff_fx()
 	return true
 
@@ -140,7 +143,7 @@ func _fly(dt: float) -> void:
 		flight["t"] = float(flight["t"]) - dt
 	_take_boost(x)
 	var dir: Vector2 = flight["dir"]
-	var turn := deg_to_rad(float(x["turn_deg"])) * dt
+	var turn := deg_to_rad(k.turn_deg_s("x", "late")) * dt
 	dir = dir.rotated(clampf(dir.angle_to(h.aim_dir()), -turn, turn))
 	flight["dir"] = dir
 	var speed := float(flight["speed"])

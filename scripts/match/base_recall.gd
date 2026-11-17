@@ -150,8 +150,6 @@ static func _arrive(h: Hunter, o: Hunter) -> void:
 	h.base_cd = CD_S
 	m.fx.ring(at, 1.8, MINT, 0.45)
 	m.sfx("portal", at, -2.0, 1.5)
-	if h.is_local() and m.hud:
-		m.hud.toast_small("Weakened %ds" % int(WEAK_S), Color("ffb36a"))
 
 
 ## Clears the channel and its telegraph (the caller sets the cooldown).
