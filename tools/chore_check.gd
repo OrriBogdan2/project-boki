@@ -11,6 +11,7 @@ const SIM_SECS := 240.0      # simulated seconds
 const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
 const ISLAND_SEED := 7     # the farm-start island (a random one each run moved the toy and the ball)
+const CHORE_WORDS := ["minded the egg", "cheered up ", "fetched the ball back"]      # BaseChore's journal lines
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
 const HUB_FRAMES := 600      # frames to wait for the hub to load
 
@@ -26,7 +27,7 @@ func _new_save() -> Dictionary:
 	var d := Save.fresh()
 	var recs: Array = []
 	for spec in [["kindlewren", "Wren"], ["glomwort", "Glom"], ["glintmole", "Mole"], ["burrlet", "Bur"]]:
-		var rec := Save.new_kin(spec[0], spec[1])
+		var rec := Save.new_kin(spec[0], spec[1], recs.size() + 1)      # a fixed Unique roll: the same body every run
 		rec["uid"] = "chore_%s" % spec[1]      # likes are seeded from the uid: a random one changes what each Boki does
 		rec["mutations"] = []
 		recs.append(rec)
@@ -42,6 +43,10 @@ func _new_save() -> Dictionary:
 	HomeLayout.new_fs(d, ISLAND_SEED)
 	HomeLayout.ensure(d)
 	return d
+
+## A line BaseChore writes at the end of a chore.
+func _chore_line(e: Dictionary) -> bool:
+	return CHORE_WORDS.any(func(w): return String(e["words"]).begins_with(w))
 
 func _lines(rec: Dictionary, words: String) -> int:
 	return (rec.get("journal", []) as Array).filter(func(e): return String(e["words"]).begins_with(words)).size()
@@ -136,7 +141,8 @@ func _sim(home) -> Dictionary:
 			var kind := BaseChore.label(k)
 			var who := String(k["rec"]["name"])
 			var fsm: Fsm = k["life"]
-			var lines: Array = k["rec"].get("journal", [])
+			# a chore's lines only, not a toy's stat gain or a game's ("played tag with Bur")
+			var lines: Array = k["rec"].get("journal", []).filter(func(e): return _chore_line(e))
 			if not lines.is_empty() and not is_same(lines.back(), last_line.get(who, null)):
 				writes[who] = int(writes.get(who, 0)) + 1
 				last_line[who] = lines.back()

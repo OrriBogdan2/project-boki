@@ -1,0 +1,3 @@
+game.png: Sable at the match camera (pitch 66, 23 m, fov 32): folded, raised (3/4 back), folded, raised (3/4 back, the other side); true pixels, then enlarged
+poses.png: folded, raised, run, shoot, shoot raised, flip, from behind
+open_close.png: the open and close, WING_FOLD [0.0, -0.2, -0.45, -0.7, -0.9, -1.0, -0.6, -0.15]
