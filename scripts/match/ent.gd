@@ -153,7 +153,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	last_hit_by = by
 	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	squash = 0.1
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
 			set("knock_steer", float(opts.get("kbi", 0.3)))
