@@ -28,6 +28,7 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
+const SPIN_EARLY := 0.15               # s: a Smash this long before the pull starts is the Cinder Spin
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
@@ -689,7 +690,7 @@ func _rmb_waits() -> bool:
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
-	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
+	return (not slam_w.is_empty() and not _slam_young()) or not lunge.is_empty() or meteor.airborne()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
@@ -903,6 +904,24 @@ func _chain_lunge(k: float) -> void:
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
+
+## A Slam wound up less than SPIN_EARLY ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+func _slam_young() -> bool:
+	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= SPIN_EARLY
+
+## The pull starting with a Smash pressed just before it (a tap still down, or a young Slam): that press is the
+## Cinder Spin (the spin wins over the Slam; a charge held past the tap is the Haul Slam, see arm_haul).
+func spin_early() -> bool:
+	if _slam_young():
+		slam_w = {}                 # (its charge is spent: the spin is that Smash)
+		last_variant = "during_e"
+		_spin()
+		return true
+	if not rmb_down or rmb_ctx.get("air", false) or rmb_t > float(rmb_def()["hold"]):
+		return false
+	rmb_ctx["e"] = true
+	_release_rmb()
+	return true
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
