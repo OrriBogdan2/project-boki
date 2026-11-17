@@ -10030,3 +10030,4 @@ READY ext/hunters-v95-1117 24c78f819f729e16b4f1e754d5b0ec7ee30b22c9 (supersedes 
 READY ext/merge-lane-hunters1-1117 2d78dbe3be (merge lane hunters1: anim-land-beat landing fold + dive land tier ported; 24 of 25 HARD/obsolete; NEW-RED 0 on 62 affected checks, export OK 831.8 MB; PR via gh-outbox new-pr.md)
 READY ext/merge-lane-misc-1117 6f0ccfcf87 (misc lane: tut-hazard-hint first-time hazard hint; 5 branches archived by tag; 27 HARD, see coord/merge-week/2026-11-17/lanes/misc-RESULT.md on rpc5)
 READY ext/merge-lane-hunters4-1117 94a1e006f2 (merge lane hunters4: Gil v95 glb + Boki idles; NEW-RED 0 on focused set, export OK; PR via gh-outbox)
+READY ext/merge-lane-uihud-1117 52026532d2 (uihud lane: rest of PR #104 + loading/title; main d65d37d14a7 merged, NEW-RED 0 on targeted checks)
