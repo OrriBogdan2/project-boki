@@ -347,14 +347,14 @@ const CHECKS := {
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],  # item 184b
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
-	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],  # items 162, 162b
+	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
+	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
+	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
+	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],  # item 151
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--clan-roles-check": ["res://tools/clan_roles_check.gd", "clan_roles_check", null],      # ranks, kick, hand-off
-	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
-	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
-	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--low-fps-input-check": ["res://tools/low_fps_input_check.gd", "low_fps_input_check", null],
@@ -559,6 +559,7 @@ const CHECKS := {
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],     # 2 games, relay
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
+	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],      # one walk speed
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--ult-ready-shots": ["res://tools/ult_ready_shots.gd", "ult_ready_shots", null],      # --shots-dir=<dir> (GPU)
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
