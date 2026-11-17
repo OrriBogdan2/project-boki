@@ -10057,3 +10057,4 @@ READY ext/rimewright-skate-rebased-port 17b64eb0ed2 (glb_add_clips prunes replac
 READY ext/idle-gunslinger-rebased-port 5149267aa6 (Vex idle+stance clips onto v95 glb; x_breath dropped)
 READY ext/glider-heat-parity-port b2800c6221 (port of ext/glider-heat-parity: 6 heat rows to hunter_move.json with tags, live values kept (14 s glide held for owner), --glider-heat-check drives each row)
 READY ext/ui-settings-trim-port 801ebc6ac4e (settings Main page + More tabs + More keys fold + plainer labels; --settings-trim-check; Esc More already in main; title/expedition More skipped: main redesigned both menus)
+READY ext/idle-tender-rebased-port 62a7d2f829 (Meeko idle+stance clips onto v95 glb; x_breath and lantern keys dropped)
