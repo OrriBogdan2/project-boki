@@ -31,6 +31,7 @@ var _uplink := {}
 var _rode_at := -1.0
 var _hunters := 0
 var _ab := false  # --profile-ab: SimLod.force_slow 0 and 1 in turns
+var _rates := {}  # --profile-ab: phase/side -> {frames per pose -> hunters so posed, summed over its frames}
 
 
 func run(main_node: Node, _mode: String = "") -> void:
@@ -67,8 +68,8 @@ func _on_added(n: Node) -> void:
 
 
 func _process(delta: float) -> void:
-	if _rode_at >= 0.0 and not _end and (not is_instance_valid(m) or m.over):
-		_finish()  # the match ended behind the lift (Match._end_soon): what came before it is the report
+	if not _end and (not is_instance_valid(m) or m.over):
+		_finish()  # the match ended (behind the lift, or a wipe before it): what came before it is the report
 		return
 	if m != null and not frames.is_empty() and not _end:
 		var lf: Dictionary = frames[-1]
@@ -90,6 +91,7 @@ func _process(delta: float) -> void:
 		_pipes = p
 		if _ab:
 			lf["ab"] = SimLod.force_slow
+			_tally_rates("%s/%d" % [lf["phase"], SimLod.force_slow])
 			if Engine.get_process_frames() % AB_FRAMES == 0:
 				SimLod.force_slow = 1 - SimLod.force_slow
 	_added.clear()
@@ -137,6 +139,16 @@ func _next_phase() -> void:
 	if m.time > 400.0 and not _end:
 		print("HITCH stuck in phase ", phase)
 		_finish()
+
+
+## How many hunters this frame are posed every 1, 2, 3 or 6 frames (SimLod.pose_every), summed under `key`.
+func _tally_rates(key: String) -> void:
+	var r: Dictionary = _rates.get(key, {})
+	for h in m.hunters:
+		if not h.out and not h.extracted:
+			var e := SimLod.pose_every(m, h)
+			r[e] = int(r.get(e, 0)) + 1
+	_rates[key] = r
 
 
 ## Every other hunter still in the match is put on a ring round you: a 30-hunter brawl.
@@ -242,7 +254,12 @@ func _finish() -> void:
 			for side in [0, 1]:
 				var fl: Array = frames.filter(func(f): return f["phase"] == ph and int(f.get("ab", -1)) == side)
 				if not fl.is_empty():
-					lines.append("PROFILE slow=%d %s" % [side, _phase_line(ph, fl)])
+					var rk := "%s/%d" % [ph, side]
+					var rates: Dictionary = _rates.get(rk, {})
+					var ks := rates.keys()
+					ks.sort()
+					var per := ", ".join(ks.map(func(k): return "every %d: %.1f" % [k, float(rates[k]) / fl.size()]))
+					lines.append("PROFILE slow=%d %s | hunters a frame by pose rate: %s" % [side, _phase_line(ph, fl), per])
 	var tally := {}
 	var hitches: Array = frames.filter(func(f): return float(f["wall"]) > HITCH_MS and f["phase"] in PHASES)
 	for f in hitches:

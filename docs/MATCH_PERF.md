@@ -108,3 +108,23 @@ count swings 780-1480, so a change of a few ms only shows in a same-run A/B.
 - **Next targets**, biggest first: WardenClips' AnimationTree advance for rivals in view (a lower clip rate for
   rivals that are not your squad or your target, as SimLod.pose_every already does off screen); render submit
   (draw count); the hunters' sim (12 ms); the HUD plates and GripOverhead (redraw only what changed).
+
+## 2026-11-17 pass (the 11-16 branch gated, the slow-frame pose rate)
+The 11-16 branch (MobGlb, the profiler fix, PR #158 folded in) merged with main 11-17 and gated as PR ext/perf-gpu-1116.
+The RunPod GPU workers (rp1-0..3) lost libxkbcommon on 11-17 03:30 EST (every Godot start fails before a window, with
+or without --pod-x11) and MRROBOTO was offline, so this pass has no new real-GPU frame numbers; the 11-16 table above
+stands, and the change below is measured headless (CPU scripts only, rpc8, a loaded box) in a same-run A/B.
+
+- **SimLod.pose_every's slow-frame tier**: under 36 fps (Engine.get_frames_per_second, back to normal over 50) a rival
+  on screen past 6 m from the camera's focus that is not your squad's and not in a fight with it is posed every 2nd
+  frame: its HunterAnim, and a Hero's clips (the AnimationTree advance), springs and skeleton copy (WardenGlb.Sync)
+  hold with it and catch the time up, as the far and off-screen tiers already did. A PC that holds 50 fps sees no
+  change. `--perf-throttle-check` asserts the tier (near, after the player, quick again) and the fps hysteresis.
+- `--match-profile --profile-ab`: SimLod.force_slow flipped every 30 frames, each phase's line per side, with the
+  hunters a frame by pose rate (how many the tier reached). The profile also reports now when the match ends in a
+  wipe before the lift (it waited for the lift and sat in the results screen).
+- Headless A/B (rpc8, frame ms p50 / other scripts / visuals, slow off -> on): ride 23.8/7.4/5.0 -> 23.8/7.4/5.2,
+  fight 52.5/16.6/8.8 -> 51.2/16.2/8.4, extract 50.0/16.9/9.1 -> 46.2/14.9/8.5. Inside the box's noise: in the
+  profile's brawl every rival is after your squad (Bot tgt), so pose_every keeps them at every frame by the older
+  rule, and aboard the skyship they stand within 6 m. The tier is for the common match frame (rivals in view across
+  the field, not yet engaged), which this profile has no phase for; a real-GPU number for it needs the pods back.
