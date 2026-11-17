@@ -516,7 +516,7 @@ const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0
 ## a yellower number; it thins with a smaller kind (pooled labels are reused, so every number sets this).
 func _num_look(l: Label3D, crit: bool, kind := Num.HIT) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+	l.outline_size = int((20 if crit else 14) * float(NUM_SCALE[kind]))
 
 ## Big hits read big: the size steps up with the damage tier, a crit is larger again; a number on a
 ## Boki (small) and a Boki's or a tick's number (NUM_SCALE) are smaller.
@@ -758,7 +758,7 @@ func _process(delta: float) -> void:
 			var lt: float = n["last"]
 			var base: Vector3 = n["base"]
 			var rise := minf(float(n["t"]), 0.25) * 1.6
-			if lt < STICK_T:
+			if lt < STICK_T and not _second_up(n):
 				l.global_position = l.global_position.lerp(base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0))
 			else:
 				n["vel"].y -= 5.0 * delta

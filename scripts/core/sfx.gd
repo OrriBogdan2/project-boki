@@ -181,6 +181,7 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
+	"hostile_cast": 100,
 	"tell_foe": 120,
 	"keg_fuse": 80,
 	"keg_blast": 100,
@@ -219,7 +220,6 @@ const MIN_GAP := {
 	"steal_won": 400,
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
-	"hostile_cast": 100,
 	"armor_up": 120
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.

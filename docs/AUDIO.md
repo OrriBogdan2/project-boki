@@ -29,8 +29,6 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 | ui | -22 | menus and HUD |
 | step | -23 | footsteps |
 
-## Monsters
-`content/sfx/mobs.json` (`tools/gen_sfx_mobs.py`): `mdie_<kind>` is each voiced kind's death in its `v_<kind>` family (bosses use the Watcher's, pitched by body; a Shrubling keeps `die_small`), `mstag_open` ticks when a stagger window opens and `mstag_hit` lands the stagger. `MobSfx` (scripts/match/mob_sfx.gd) plays them at the monster and caps a pack dying at once to 3 death cues per 200 ms across kinds. `--mob-sfx-check` asserts the kind -> cue map and the cap.
 ### Loudness audit (`tools/sfx_loudness.py`)
 Measures every sound the game names (the sets in `content/sfx/*.json` and the `Sfx.NAMES`, `Sfx.VOICES`, `SfxKits.NAMES`, `VVSfx.NAMES` tables) and groups them by category; a table sound with no set gets one from `table_cats` in `content/rules/sfx_levels.json`. Its level is the RMS above (averaged over takes) plus the gain the game adds in play (`gain_db` there, and `Sfx.BLAST_DB`). A sound more than 3 dB (`tolerance_db`) from its category's **median** is an outlier: fix it with `gain_db` (data, applied by `Sfx.play` and `loop_start`), never by editing the file, or list it in `outliers_ok` with the reason it stands out on purpose. A positive gain may not push the peak past -1 dBFS. `python3 tools/sfx_loudness.py --check` fails on any other outlier, and `tools/health.py` runs it, so `--strict` fails too. `python3 tools/sfx_loudness.py` prints this table and every outlier.
 
@@ -55,6 +53,82 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 
 | cue | set | category | takes | peak | level before | level after | from median |
 |---|---|---|---|---|---|---|---|
+| echo_hit | garden | ui | 3 | -10.0 | -22.0 | -22.0 | +0.0 |
+| echo_miss | garden | ui | 3 | -9.2 | -22.0 | -22.0 | -0.0 |
+| echo_streak | garden | ui | 2 | -8.0 | -22.0 | -22.0 | -0.0 |
+| garden_bat | garden | ui | 3 | -7.2 | -22.0 | -22.0 | -0.0 |
+| garden_cheer_good | garden | boki | 3 | -7.4 | -19.0 | -19.0 | +0.0 |
+| garden_cheer_miss | garden | boki | 3 | -7.6 | -19.0 | -19.0 | -0.0 |
+| garden_cheer_perfect | garden | boki | 3 | -6.6 | -19.0 | -19.0 | +0.0 |
+| garden_chime_evolve | garden | boki | 2 | -5.6 | -19.0 | -19.0 | -0.0 |
+| garden_chime_level | garden | boki | 3 | -6.2 | -19.0 | -19.0 | -0.0 |
+| garden_chime_stat | garden | boki | 3 | -7.0 | -19.0 | -19.0 | -0.0 |
+| garden_count | garden | boki | 2 | -5.5 | -19.0 | -19.0 | +0.0 |
+| garden_creak | garden | step | 3 | -10.1 | -23.0 | -23.0 | +0.0 |
+| garden_crowd | garden | boki | 3 | -6.6 | -19.0 | -19.0 | -0.0 |
+| garden_finish | garden | boki | 2 | -5.5 | -19.0 | -19.0 | +0.0 |
+| garden_go | garden | boki | 2 | -6.8 | -19.0 | -19.0 | -0.0 |
+| garden_hop | garden | boki | 2 | -6.8 | -19.0 | -19.0 | +0.0 |
+| garden_lap | garden | ui | 3 | -9.3 | -22.0 | -22.0 | -0.0 |
+| garden_sniff | garden | loop | 1 | -8.3 | -21.0 | -21.0 | -0.0 |
+| garden_strain | garden | loop | 1 | -6.6 | -21.0 | -21.0 | -0.0 |
+| garden_sulk_large | garden | boki | 3 | -5.8 | -19.0 | -19.0 | +0.0 |
+| garden_sulk_medium | garden | boki | 3 | -5.6 | -19.0 | -19.0 | +0.0 |
+| garden_sulk_small | garden | boki | 3 | -4.3 | -19.0 | -19.0 | +0.0 |
+| garden_thud | garden | impact | 2 | -4.2 | -16.0 | -16.0 | +0.2 |
+| garden_wake | garden | boki | 1 | -6.0 | -19.0 | -19.0 | -0.0 |
+| garden_win_large | garden | boki | 1 | -8.5 | -19.0 | -19.0 | -0.0 |
+| garden_win_medium | garden | boki | 1 | -8.1 | -19.0 | -19.0 | -0.0 |
+| garden_win_small | garden | boki | 1 | -8.0 | -19.0 | -19.0 | -0.0 |
+| relay_finish | garden | boki | 2 | -6.2 | -19.0 | -19.0 | +0.0 |
+| relay_fumble | garden | boki | 3 | -4.3 | -19.0 | -19.0 | -0.0 |
+| relay_handoff | garden | boki | 3 | -4.6 | -19.0 | -19.0 | -0.0 |
+| show_crowd | garden | boki | 2 | -4.2 | -19.0 | -19.0 | +0.0 |
+| show_reveal | garden | ui | 1 | -8.6 | -22.0 | -22.0 | -0.0 |
+| tumble_clash_brace | garden | impact | 3 | -2.8 | -16.0 | -16.0 | +0.2 |
+| tumble_clash_dodge | garden | boki | 3 | -4.1 | -19.0 | -19.0 | -0.0 |
+| tumble_clash_rush | garden | impact | 3 | -2.9 | -16.0 | -16.0 | +0.2 |
+| tumble_push | garden | step | 3 | -7.1 | -23.0 | -23.0 | -0.0 |
+| tumble_ringout | garden | impact | 2 | -4.5 | -16.0 | -16.0 | +0.2 |
+| heart_beat | heart | loop | 1 | -9.5 | -21.0 | -21.0 | +0.0 |
+| heart_charge | heart | loop | 1 | -12.1 | -21.0 | -21.0 | -0.0 |
+| heart_extract | heart | cast | 1 | -4.7 | -18.0 | -18.0 | -0.0 |
+| heart_gate_open | heart | cast | 1 | -4.6 | -18.0 | -18.0 | +0.0 |
+| heart_reveal | heart | cast | 1 | -6.0 | -18.0 | -18.0 | +0.0 |
+| heart_take | heart | signature | 1 | -5.9 | -17.0 | -17.0 | +0.0 |
+| ways_last | heart | ui | 1 | -6.1 | -22.0 | -22.0 | -0.0 |
+| ways_open | heart | ui | 1 | -10.5 | -22.0 | -22.0 | -0.0 |
+| ways_start | heart | ui | 1 | -9.7 | -22.0 | -22.0 | -0.0 |
+| ways_taken_other | heart | ui | 1 | -10.7 | -22.0 | -22.0 | -0.0 |
+| ways_taken_own | heart | ui | 1 | -10.3 | -22.0 | -22.0 | -0.0 |
+| ways_warn | heart | ui | 1 | -13.3 | -22.0 | -22.0 | +0.0 |
+
+## Monsters
+`content/sfx/mobs.json` (`tools/gen_sfx_mobs.py`): `mdie_<kind>` is each voiced kind's death in its `v_<kind>` family (bosses use the Watcher's, pitched by body; a Shrubling keeps `die_small`), `mstag_open` ticks when a stagger window opens and `mstag_hit` lands the stagger. `MobSfx` (scripts/match/mob_sfx.gd) plays them at the monster and caps a pack dying at once to 3 death cues per 200 ms across kinds. `--mob-sfx-check` asserts the kind -> cue map and the cap.
+SFX_AUDIT row 18 (Tenzo's and Neve's ult tails): by ear is still not done. By measurement (`loudness_report.py --tails`, end level = the last 20 ms against the loudest 50 ms): Tenzo `br_spine` (1.6 s, -48 dB) and `br_crumble` decay cleanly; `br_rumble` was cut off at -23 dB after 0.42 s (an audible stop) and `br_crack` ended at -33 dB; Neve `rime_crash` (2.1 s), `rime_burst`, `rime_lock` and `rime_freeze` end under -45 dB, `rime_creak` takes at -28 to -36 dB. Mended with `tools/sfx_tail.py` (stdlib; `br_rumble` has no generator in tools/ and numpy-based generators do not run on every box): `br_rumble` --extend 0.3 --fade 0.4 (0.72 s, now ends -56 dB), `br_crack` --fade 0.1 (-57 dB), `rime_creak_1` --fade 0.06 (-43 dB). If `gen_sfx_tarek.py` / `gen_sfx_claire.py` regenerate these, give the fade in the generator instead.
+### Loudness audit (`tools/sfx_loudness.py`)
+Measures every sound the game names (the sets in `content/sfx/*.json` and the `Sfx.NAMES`, `Sfx.VOICES`, `SfxKits.NAMES`, `VVSfx.NAMES` tables) and groups them by category; a table sound with no set gets one from `table_cats` in `content/rules/sfx_levels.json`. Its level is the RMS above (averaged over takes) plus the gain the game adds in play (`gain_db` there, and `Sfx.BLAST_DB`). A sound more than 3 dB (`tolerance_db`) from its category's **median** is an outlier: fix it with `gain_db` (data, applied by `Sfx.play` and `loop_start`), never by editing the file, or list it in `outliers_ok` with the reason it stands out on purpose. A positive gain may not push the peak past -1 dBFS. `python3 tools/sfx_loudness.py --check` fails on any other outlier, and `tools/health.py` runs it, so `--strict` fails too. `python3 tools/sfx_loudness.py` prints this table and every outlier.
+
+| category | sounds | median level | target RMS | quietest | loudest | max peak | outliers (accepted) |
+|---|---|---|---|---|---|---|---|
+| impact | 98 | -16.2 | -16.0 | boom -22.9 | train_hit -13.2 | -0.9 | 5 (5) |
+| signature | 36 | -17.0 | -17.0 | archer_thread_twang -17.4 | heart_take -17.0 | -1.0 | 0 (0) |
+| fire | 30 | -17.0 | -17.0 | rail -20.9 | ab_rail -16.4 | -1.0 | 1 (1) |
+| grunt | 46 | -18.0 | -18.0 | v_spitter -21.5 | hurt -16.0 | -1.1 | 1 (1) |
+| cast | 126 | -18.0 | -18.0 | swap -21.8 | pay_rage -14.7 | -1.0 | 5 (5) |
+| boki | 54 | -19.0 | -19.0 | grab -22.6 | scan_pop -18.6 | -1.1 | 1 (1) |
+| dash | 36 | -20.0 | -20.0 | jump -23.7 | fall -18.9 | -1.2 | 1 (1) |
+| loop | 14 | -21.0 | -21.0 | heart_charge -21.0 | revive_hum -16.8 | -1.1 | 1 (1) |
+| ui | 38 | -22.0 | -22.0 | reload -24.2 | kill -15.0 | -1.1 | 4 (4) |
+| step | 59 | -23.0 | -23.0 | step0 -23.4 | swim -20.1 | -4.6 | 0 (0) |
+
+The set sounds all sit at their category (`--sfx-set-check` holds them there). The outliers were older table sounds made before the category standard: eight are brought to their median by `gain_db` (charge, cloak, v_glimmer, v_skitter, v_bomber, br_crumble, fuse_hiss, drip); the blast sounds (kept under on purpose), the kill/knock/extract confirm stings and 14 borderline ones (3-4.5 dB, mixed by ear at their call sites) are listed in `outliers_ok`. None of this has been listened to yet.
+
+
+### 0.24.5 sets, measured (11-12)
+The garden games, home chimes, Ways Out calls and Heartspark sets merged after the first audit were measured with `tools/sfx_loudness.py`: all 49 new cues are already at their category (each generator levels through `tools/sfx_lib.py`), so no `gain_db` was needed; their sets are enforced by the same `--check` (it reads every `content/sfx/*.json`; a cue pushed 3 dB off fails it). Before = RMS over the audible part, after = that plus `gain_db` (none). Peaks are all under -1 dBFS. The one edit: the `train_hit` accepted-outlier entry was dropped, since the new impact cues moved the median and it now sits 2.97 dB above it. The `amb_*` beds (`.ogg`, Ambience bus, levelled by layer in `HomeAmbience`) and `mask_*` are not part of this band: the garden beds read -17.9 to -28.3 LUFS (zone glasswater quietest) against -17 to -20.5 for the older beds, left as designed.
+
+| cue | set | category | takes | peak | level before | level after | from median |
 | echo_hit | garden | ui | 3 | -10.0 | -22.0 | -22.0 | +0.0 |
 | echo_miss | garden | ui | 3 | -9.2 | -22.0 | -22.0 | -0.0 |
 | echo_streak | garden | ui | 2 | -8.0 | -22.0 | -22.0 | -0.0 |
@@ -133,6 +207,7 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 - Mixing Bowl (`content/sfx/bowl.json`, `tools/gen_sfx_bowl.py`, `scripts/home/bowl_sfx.gd`, `--bowl-sfx-check`), through `GardenSfx.cue` with no position, so it sits in front of the bowl screen. A mix plays one plop per ingredient (up to 4, 0.14 s apart) by kind: `bowl_plop_snack` (a pantry crop, wet), `bowl_plop_treat` (a bag nut or pearl, a knock and a tink), `bowl_plop_bun` (a dull thump); then the `bowl_stir` loop for 1 s and a chime by the recipe's `tier` in `garden_recipes.json`: `bowl_done_1` one bell (Twinbun), `_2` two bells (a zone sweet), `_3` three bells and a shimmer (Fourfold Bun). A Boki fed a bowl item (a recipe result, or Dare Pepper, Lullwort Tea, Peekbox) plays `bowl_taste` at itself (three munches and an "mm", higher for a small Boki) from `Home._after_feed`; a Twinbun shared by a pair `UnstableMix` calls clashing also plays `bowl_fizzle` 0.55 s later (the item still works: the bowl never fails).
 - Garden travel (`hub_waystone.gd`): `garden_hop` swells while the Waystone lights up, `garden_depart` (a short whoosh) as the screen goes, `garden_arrive_<zone>` (five, tuned to each zone's bed) on landing, `garden_locked` (a soft thud and a lock click) when a sleeping zone is picked; `--garden-audio-check` covers them.
 - Eggs nearing their hatch: `egg_knock`, `egg_crack`, `egg_ready` (`tools/gen_sfx_egg.py`, set `content/sfx/egg.json`), played through `GardenSfx.cue` at the egg by `scripts/home/egg_sfx.gd` (`EggSfx`), which reads the progress the egg stores, never a clock of its own: a Rare Egg's warmth in its Incubator cradle (`Incubator.progress`, ticked by `HomeIncubator`), and for a pair's egg in the Nook's nest only whether it is ready. Past half a gentle wobble and a faint knock from inside (once), from 90% a small crack every 4 s while you are near, at 100% a ready chime (once); only within 10 m of the egg (`EggSfx.EARSHOT_M`). A step reached while you were away (an expedition, across the garden) plays when you next come near, once a session. These replace the Incubator's "ready to hatch" toast: no pop-ups.
+- Boki footsteps (`scripts/match/boki_steps.gd`, `tools/gen_sfx_boki.py`): `boki_step_<tiny|small|medium|heavy>_<grass|stone|wood|snow>`, one for each planted foot in the walk and run clips (the touchdown poses in `BokiSteps.TOUCH`, measured by `--boki-steps-check`), the family from the Boki's weight (`Unique.base_size` kg times the size roll cubed), the ground from `Juice.ground_surface`. Quiet (-20 dB), 14 m, at most 4 Boki (the nearest) and one step per 0.1 s each; wisps, flyers, serpents and blobs make none, and carrying makes none yet.
 - Home chimes: `garden_chime_stat` / `_part` / `_level` / `_evolve`, same script, played through `GardenSfx.cue` at the Boki by `scripts/home/home_chimes.gd` when a Boki gains a stat, one more fleck of its lean (`Lean.flecks`), a level (garden XP, `content/rules/garden_xp.json`, or a run) or a new form or part. Soft notes over the Boki's chirp, pitched by species size (small x1.3, large x0.78); events on one Boki within 0.5 s share one chime (the biggest); nothing while it sleeps. `--garden-sfx-check` row 6.
 - Garden moments (SFX_AUDIT row 22): each has its own cue in G like the home theme, never the stock `unlock` (kept for real unlocks): `garden_egg` (an egg laid in the Nook, `Home._make_egg`, or ready in the Incubator, `HomeIncubator.tick`), `garden_friends` (two Boki whose bond reaches `friend_at`, queued by `BaseLife.add_bond` and played between them by `BaseLife.step` unless one sleeps; also a Boki's bond rank with you, `KinBondMoment`), `garden_chime_part` (a lean's new fleck, and a part shown in the evolution scene), `garden_cup_sprout` / `_bloom` / `_crown` (each cup round won, bigger each step, as `GardenPrizes.rows` puts the round on the result card, through `GardenSfx.cup`), `garden_visit_in` / `garden_visit_out` (a wild visitor arriving at its spot, `GardenVisitor._look`, and leaving with its model, `GardenVisitor.leave`; a stay that ran out while you were away is silent), `garden_season` (a Home opening in a new zone that is in season, `GardenSfx.zone_in`; not again on coming out of a house), `garden_evolve` (the evolution scene's change to a new form). A minigame win keeps its `garden_win_<size>` fanfare. `--sfx-set-check` row 11.
 - Build and decorate (the farm's build mode and the house's decorating, `scripts/home/build_sfx.gd`, `tools/gen_sfx_build.py`, set `content/sfx/build.json`, all category `ui`, played non-positionally on the SFX bus at `cue_db` from `content/rules/build_sfx.json`): `build_pick` (a piece comes into the hand, from the bar or off the ground), `build_rotate` (one dry tick per quarter turn), `build_place_wood` / `build_place_stone` (a new piece set down: a thunk by material, the stone ids listed in the rules file, wood otherwise), `build_move` (an existing piece set down in a new spot), `build_store` (a pop into the bag) and `build_blocked` (one dull knock). The knock plays once per attempt that can't be done and stays silent for `knock_quiet_s` (1.5 s) on the same spot (cell and turn), so a drummed click or a held key never repeats it. A turn or a store made of "pick it up, put it down" plays only its own cue (`BuildSfx.quiet`). `--sfx-set-check` section 10 asserts the names, the material pick, the knock latch and the wiring.

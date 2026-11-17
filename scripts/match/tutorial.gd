@@ -254,6 +254,7 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
+	m.player.stats.erase("glide_presses")
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)

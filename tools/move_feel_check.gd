@@ -63,6 +63,9 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	"vault_exit_run":          ["~", [0.95, 1.05], "x", "[footage] Sable's Cartwheel runs down into her hasted run"],
+	"vault_slow_frames":       ["<=", 0.0, "frames", "[footage] past the peak, no step under the hasted run (no dip)"],
+	"vault_shot_gap_frames":   ["<=", 0.0, "frames", "[footage 0193] she throws as the flip ends (mid-flip too)"],
 	# Grimble's Barge chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
 	# that arrives with almost no skid and turns back to the aim within ~0.1 s (briefs/hero-ref/dredge.md 296-306)
 	"barge_chain_shoves":      ["~", [3.0, 3.0], "", "[owner 11-03] three charges, a Shift tap inside each shove"],
@@ -352,6 +355,7 @@ func run(main: Node) -> void:
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
+	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -957,8 +961,8 @@ static func ue_band(v0: float) -> Vector2:
 ## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
 static func run_speeds() -> Dictionary:
 	var out := {}
-	for id in HunterMove.rules():
-		var row = HunterMove.rules()[id]
+	for id in MoveRules.data():
+		var row = MoveRules.data()[id]
 		if row is Dictionary and row.has("speed"):
 			var v := float(row["speed"])
 			out[v] = out.get(v, []) + [id]
@@ -2179,7 +2183,7 @@ func _screen_scale() -> void:
 	_source_scale(cam, vh, hfov)
 
 ## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
-## source's ground across and its Hunter size together, then back to the default style. The MFEEL source
+## source's ground across and its Hunter size together, then back to the Supervive style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	cam.use_style("source_scale")

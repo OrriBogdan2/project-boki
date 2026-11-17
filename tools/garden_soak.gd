@@ -89,6 +89,7 @@ func run(m: Node) -> void:
 	print("SOAK %d days (%d steps) in %.0f s of wall time" % [DAYS, steps, secs])
 	await loop.finish()
 	_report()
+	_report_toys()
 	loop.report()
 	_report_toys()
 	ok(size1 <= size_base * SAVE_GROWTH, "save size from day %d: %d -> %d bytes (limit x%.0f)"

@@ -664,6 +664,7 @@ func guard_stack() -> void:
 	h.shield_t = float(gd["t"])
 	h.shield_kind = "molten"
 	vfx("guard_up")
+	h.shield_kind = "molten"
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an

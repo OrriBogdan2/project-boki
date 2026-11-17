@@ -66,6 +66,8 @@ func _map(id: String) -> void:
 		if h != P:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
+	if m.biomes:
+		m.biomes.hazards.clear()      # (a biome trap's stun cancels a Trade in flight: this checks landings only)
 	P.set_arch("ostra")
 	P.unlock_all()
 	var cases := _cases(P.r)
