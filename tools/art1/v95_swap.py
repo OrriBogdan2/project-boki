@@ -60,6 +60,7 @@ for _sd, _side in (("R", "Right"), ("L", "Left")):
     MESHY.update({_side + "Shoulder": "hips", _side + "Arm": "upper_arm." + _sd, _side + "ForeArm": "forearm." + _sd,
                   _side + "Hand": "hand." + _sd, _side + "UpLeg": "thigh." + _sd, _side + "Leg": "shin." + _sd,
                   _side + "Foot": "foot." + _sd, _side + "ToeBase": "foot." + _sd})
+PELVIS_RAMP = 0.4            # of the thigh's length below the hip joint: a thigh's weight above it is the hips', fading out over this
 RIGID_SHARE = 0.7            # a loose piece with this share of its weight on one bone rides that bone whole
 ARM = ("upper_arm", "forearm", "hand")
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
@@ -551,12 +552,13 @@ def pieces(ob, on=None):
         lab = new
 
 
-def meshy_weights(low, arm):
+def meshy_weights(low, arm, P):
     """`weights` "meshy": Meshy's auto-rig of Low on our bones. Each vertex takes the weights of its nearest rigged vertex
     (Meshy returns the same mesh, centred, its vertices split), each Meshy bone's on ours (MESHY; a hand's on its
     `past_wrist` bone, a foot's on the shin of a rig without feet). A patch of arm weights that is not joined to the arm
-    goes to the bones under it. A loose piece of the mesh (a sword, a pistol, a horn) with RIGID_SHARE of its weight on
-    one bone rides that bone whole."""
+    goes to the bones under it, a thigh's weight above its hip joint to the hips (PELVIS_RAMP). A loose piece of the
+    mesh (a sword, a pistol, a horn) with RIGID_SHARE of its weight on one bone rides that bone whole. P: the vertices in
+    the spec's `joints` space."""
 
     def ours(bone):
         if bone.startswith("hand."):
@@ -604,6 +606,12 @@ def meshy_weights(low, arm):
         G[off, hips] += 1e-6
         G[off] /= G[off].sum(1, keepdims=True)
         print("meshy: arm %s weights off %d vertices not joined to it" % (sd, off.sum()), flush=True)
+    for sd in "RL":     # (our thighs hang from the root, not the hips: a pelvis on them stays behind when the hips turn)
+        hip, knee = S_J["hip." + sd][2], S_J["knee." + sd][2]
+        up = np.clip(1 + (P[:, 2] - hip) / (PELVIS_RAMP * (hip - knee)), 0, 1)
+        leg = names.index("thigh." + sd)
+        G[:, hips] += G[:, leg] * up
+        G[:, leg] *= 1 - up
     rigid = 0
     for piece in np.unique(lab):
         m = lab == piece
@@ -856,7 +864,7 @@ def main():
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
     T, K = targets(arm)
     meshy = SPEC.get("weights") == "meshy"
-    gr = meshy_weights(low, arm) if meshy else None
+    gr = meshy_weights(low, arm, P) if meshy else None
     if meshy:       # (a forearm or hand that touches the body in the master's pose is fused to it there)
         for sd, hand in SPEC["past_wrist"].items():
             limb = {"upper_arm." + sd, "forearm." + sd, hand}
