@@ -7,6 +7,7 @@ extends RefCounted
 ##   recall  the Boki out beside the far dummy, G tap at 2.0s (mid-leap ~2.15s)
 ##   downed  the Boki goes down at 1.5s (marker ~2.2s), you run into it at 2.6s (scoop bar ~2.8s)
 ##   merge   R at 1.5s with a full bond meter (the activation ~1.6s, the form ~3.5s); merge:<species>
+##   keeps   the same merge, then your E at 3.4s and your R at 4.4s while merged (docs/decisions/0100)
 
 static func frame(m: Match) -> void:
 	var spec := String(m.opts.get("boki_demo", "")).split(":")
@@ -60,7 +61,7 @@ static func frame(m: Match) -> void:
 			if t >= 2.6 and step == "down":
 				m.set_meta("bdemo_step", "run")
 				P.teleport(k.pos + Vector3(0.4, 0, 0))
-		"merge":
+		"merge", "keeps":
 			if t >= 1.5 and step == "":
 				m.set_meta("bdemo_step", "merge")
 				k.state = "shoulder"; k.fly = {}; k.settle = 1.0; k.cmd = "return"     # on you: the instant merge (Follow would leap it back first)
@@ -68,3 +69,10 @@ static func frame(m: Match) -> void:
 				KinMerge.press(P)
 			if step == "merge":
 				P.ult = 0.0
+			if what == "keeps":      # merged, your own E (3.4s) and R (4.4s) still go off (the shots: 3.8, 4.8)
+				if t >= 3.4 and not m.has_meta("bdemo_e"):
+					m.set_meta("bdemo_e", true)
+					P.inp["sig"] = true
+				if t >= 4.4 and not m.has_meta("bdemo_r"):
+					m.set_meta("bdemo_r", true)
+					HunterKeys.ult_pressed(P)
