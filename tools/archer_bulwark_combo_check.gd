@@ -30,6 +30,8 @@ func run(main_node: Node) -> void:
 	bow.main = main_node
 	var feel = load("res://tools/albert_feel_check.gd").new()
 	feel.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		_wall_climb()
