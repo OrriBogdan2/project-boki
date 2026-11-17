@@ -58,11 +58,13 @@
 	"kmoves": {
 		"jug_slash_r": {
 			"clip": "slash_r",
+			"scale": 1.38,
 			"upper": "moving",
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_slash_l": {
 			"clip": "slash_l",
+			"scale": 1.38,
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_wave_wind": {

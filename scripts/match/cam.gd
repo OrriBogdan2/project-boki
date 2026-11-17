@@ -111,7 +111,7 @@ func use_style(id: String) -> void:
 	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
-## Training Grounds. Cheap enough to call every frame. A style that scales Hunters is the match's
+## Training Area. Cheap enough to call every frame. A style that scales Hunters is the match's
 ## alone: the home has no match Hunters to scale, so it keeps the Supervive view.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
