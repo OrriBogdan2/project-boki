@@ -321,7 +321,8 @@ func run(m: Node) -> void:
 	Save.d["active"] = roster[0]["uid"]
 	Save.d["active2"] = roster[1]["uid"]
 	# a fresh save still owes its starter pick, and the portal shows that pick instead of the cards
-	if ClassUnlock.needs_starters(): ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
+	if ClassUnlock.needs_starters():
+		ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var P = load("res://scripts/home/home.gd").new()
 	main.add_child(P)
 	for _f in 4: await main.get_tree().process_frame
@@ -329,8 +330,10 @@ func run(m: Node) -> void:
 	for _f in 2: await main.get_tree().process_frame
 	var texts: Array = P.panel_host.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	var heads := func(w: String) -> bool: return texts.any(func(t): return String(t).begins_with(w))
-	var tips: Array = P.panel_host.find_children("*", "Control", true, false).map(func(c): return (c as Control).tooltip_text)
-	ok(tips.any(func(t): return String(t).begins_with("Carry: ")), "the portal's Boki cards show a carry passive line (card tooltip)")
+	var tips: Array = P.panel_host.find_children("*", "Control", true, false).map(
+		func(c): return (c as Control).tooltip_text)
+	var carry_tip: bool = tips.any(func(t): return String(t).begins_with("Carry: "))
+	ok(carry_tip, "the portal's Boki cards show a carry passive line (card tooltip)")
 	ok(heads.call("Lead") and heads.call("Second"), "the portal has a lead card and a second card")
 	var any_counter := func(r) -> bool: return not HazardCounter.kinds_of(String(r["species"])).is_empty()
 	var counters: bool = Save.d["roster"].any(any_counter)
