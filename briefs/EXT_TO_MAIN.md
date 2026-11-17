@@ -10099,3 +10099,4 @@ READY ext/boki-models-everywhere-1117 dbe846b9cf8 (Soakybara+Umbrathere glb rest
 READY ext/abyss-danger-ramp-1117 4a1f9bf78bfa9bcf4a01f9dc3e5d44a4b883e0d5 (abyss tint+warning graded by depth, start depth in rules data, headless check + GPU mp4)
 READY ext/merge-lane-hunters1-1117 a632803444 (SUPERSEDES f02f57817c: same bundle plus origin/main d39f69a357; local gate on f02f57817c GREEN, NEW-RED 0, export OK 841 MB)
 READY ext/hunter-glb-restore-1117 c0218cc89d (hunters: picked 3D models restored for Kael, Vex, Sable, Sparkle, Tenzo; glb_relax and Art: guards; GPU sheets in meshy/hunter-glb-restore-1117)
+READY ext/prompt-queue-1117 48fe778a3412 (tutorial/HUD pop-ups never overlap: one hint at a time + banner-first top stack; --prompt-queue-check 12/12)
