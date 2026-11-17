@@ -33,6 +33,7 @@
 	},
 	"lean_edge_m": 1.5,
 	"pose_far_m": 40.0,
+	"scout": {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0},
 	"source": {
 		"pitch_deg": [64.0, 67.0],
 		"fov_deg": [25.0, 34.0],

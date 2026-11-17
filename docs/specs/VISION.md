@@ -34,6 +34,7 @@ facts below come from the written play notes in `supervive_kits.md`.
   everything inside a 2.0 m circle (1.0 m crouched), plus a forward wedge (dot > 0.087, 170 degrees; was 106 until
   2026-11-12, see VISION_LOOK.md) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
+  Holding Look ahead (`scout`, C) adds x1.25 inside a 30 degree cone along the aim (`ScoutLook`, docs/specs/LOOK_AHEAD.md).
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
 - **Grass and smoke** hide a target from anyone outside (`in_bush`, `in_smoke`) unless revealed.
 - **Reveal** is one field, `Hunter.reveal_t`: while above 0 the target ignores cone, grass and crouch (range
