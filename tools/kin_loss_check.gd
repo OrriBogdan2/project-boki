@@ -55,6 +55,11 @@ func _fresh(tier: int) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	# the map's own wild Boki too (three start in this cleared patch on seed 4243): a bot picks fights with
+	# wild Boki near it and the bot rows would never get to their scan. The check spawns the Boki it needs.
+	for k in m.kins.filter(func(x: Kin) -> bool: return x.is_wild()):
+		m.kins.erase(k)
+		k.queue_free()
 	P = m.player
 	var W = m.world
 	var hx := int(floor(P.pos.x))

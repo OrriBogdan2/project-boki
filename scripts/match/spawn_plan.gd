@@ -37,7 +37,15 @@ var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, t
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
-var _t := 0.0
+const REVISIT_S := 0.25       # s between two looks at the same spot
+var _share := 0.0             # spots owed a look this frame (fractional)
+var _next := -1
+var _teams := {}              # squads still in the match, refilled each tick
+var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
+var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
+var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
+var presence := LegendPresence.new()   # its roar, loop and sting, on every game (LegendPresence)
+var _t := 0.0                  # s to the next legend check
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -84,6 +92,7 @@ func shown_cats() -> Array:
 ## Where the candidates are: the layout's own lists on an authored map, else derived from the islands.
 func build(layout: Dictionary) -> void:
 	cands.clear()
+	legend_cfg = Legendary.config(layout)
 	var sp: Dictionary = layout.get("spawn_points", {})
 	if not sp.is_empty():
 		for cat in sp:
@@ -182,6 +191,7 @@ func roll(seed_val: int) -> void:
 			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
 		for i in n:
 			pool[i]["active"] = true
+	legend = Legendary.roll(seed_val, legend_cfg)
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
@@ -213,8 +223,9 @@ func spawn_all() -> void:
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
-	var pool: Array = Data.common_kin()
-	var sp: String = pool[r.randi_range(0, pool.size() - 1)]
+	var sp := ModeBoki.draw(Data.common_kin(), "expedition", m.tier, r)
+	if HeartRaid.on(m.opts):
+		sp = BokiModes.draw(HeartRaid.boki_for(m.opts), r)      # a raid: its own Boki
 	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
 	rec["level"] = int(lv[1]) + r.randi_range(2, 4)
@@ -226,31 +237,41 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	return k
 
 # ------------------------------------------------------------------ what each squad knows
+## Each spot is looked at again every REVISIT_S, a slice of them each frame: all of them at once
+## was a sight check per spot per squad in one frame (a 20-30 ms spike with ten squads out).
 func tick(dt: float) -> void:
 	_t -= dt
-	if _t > 0.0:
+	if _t <= 0.0:
+		_t = 0.25
+		if Legendary.due(self):
+			legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
+		presence.tick(m)
+	if cands.is_empty():
 		return
-	_t = 0.25
-	for c in cands:
-		if not c["taken"] and c["active"]:
-			c["taken"] = _is_taken(c)
-	var teams := {}                  # team -> its hunters on the ground (one pass, not one per spot)
+	_teams.clear()                   # team -> its hunters on the ground (one pass, not one per spot)
 	for h in m.hunters:
 		if h.out or h.extracted or h.riding:
 			continue
-		if not teams.has(h.team): teams[h.team] = []
-		teams[h.team].append(h)
-	for c in cands:
-		var known: Dictionary = c["known"]
-		for t in teams:
-			if known.has(t):
-				continue
-			if _team_sees(int(t), teams[t], c["pos"]):
-				known[t] = true
-				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
-					var def: Dictionary = cats.get(c["cat"], {})
-					if not def.get("announce", false):
-						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
+		if not _teams.has(h.team): _teams[h.team] = []
+		_teams[h.team].append(h)
+	_share += cands.size() * dt / REVISIT_S
+	while _share >= 1.0:
+		_share -= 1.0
+		_next = (_next + 1) % cands.size()
+		_look(cands[_next])
+
+func _look(c: Dictionary) -> void:
+	if not c["taken"] and c["active"]:
+		c["taken"] = _is_taken(c)
+	var known: Dictionary = c["known"]
+	for t in _teams:
+		if known.has(t) or not _team_sees(int(t), _teams[t], c["pos"]):
+			continue
+		known[t] = true
+		if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
+			var def: Dictionary = cats.get(c["cat"], {})
+			if not def.get("announce", false):
+				m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
 
 ## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
 ## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map

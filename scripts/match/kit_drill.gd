@@ -17,7 +17,7 @@ const HOLD_S := 0.4            # s: how long a "hold" step wants the key down
 const DONE_S := 2.0            # s: the closing line stays up
 const GOLD := Color("f2c84a")
 const MINT := Color("8fe3c8")
-static var _again: RegEx       # "press E again" / "recast" in a slot's JSON text, compiled once
+static var _again: RegEx       # "press it again" / "recast" in a slot's JSON text, compiled once
 static var _hold: RegEx        # "hold" / "held"
 
 var m: Match
@@ -72,6 +72,8 @@ static func how(hunter_id: String, slot: String) -> String:
 	if _again == null:
 		_again = RegEx.create_from_string("(?i)\\b(press|tap|hit|use|click)\\b[^.]{0,20}\\bagain\\b|\\brecast")
 		_hold = RegEx.create_from_string("(?i)\\bhold\\b|\\bheld\\b")
+	if slot in (d.get("clip", {}) as Dictionary).get("holds", []):
+		return "hold"      # the Hunter's JSON says this slot is a charged draw (Lace's bow)
 	if slot == "lmb":
 		return ""
 	if _again.search(text) != null:

@@ -13,6 +13,7 @@ from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, fram
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
 import gardenkit
+import actionkit
 
 A_Z = 0.16
 SP = 0.0
@@ -172,11 +173,21 @@ def garden_set():
          "pump": dict(SPRING, pel=(0.0, 0.0, 0.0), FL=(-0.12, 0.08, A_Z), FR=(0.14, -0.1, A_Z), FLp=0.0, FRp=0.0, LP=(-0.3, 0.1, 1.6), BE=aim(-4, 62), hed=(-0.28, 0.1, 0.05))}
     return gardenkit.clips(C, READY, P, {"lead": 0.08, "snap": 0.4})
 
+# ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
+ACT = {
+    "stomp": {"top": {"LP": (-0.42, 0.04, 1.14), "BE": aim(-8, -50)}, "hit": {"LP": (-0.3, 0.1, 0.84), "BE": aim(-6, -42)}},
+    "drink": {"sip": {"LQ": (-1.3, 0.0, 0.0), "BE": aim(-6, -62)}},
+    "revive": {"kneel": {"LP": (-0.12, 0.5, 0.4), "LQ": (0.9, 0.0, 0.0), "BE": aim(-34, -34), "UA": (-30, -50)}},
+}
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("LP",), (-0.045, 0.17, 1.64), ACT)
+
 
 def clips():
     out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
     out += crouch_set()
     out += garden_set()
+    out += action_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))
@@ -197,16 +208,18 @@ def clips():
     kick = dict(base, BE=aim(0, 4.5), UA=(-18, -44), tor=(0.08, -0.14, 0.0), GS=spin * 0.3)
     out.append(C("lmb", 0.55, [(0.0, base), (0.025, kick, "out"), (0.09, dict(base, GS=spin * 0.75)), (0.12, dict(base, GS=spin)), (0.3, dict(base, GS=spin * 3.2)), (0.55, dict(READY, GS=spin * 4), "smooth")]))
 
-    # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home
+    # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home by 0.3 (item 112)
     r0 = dict(BRACE, BE=aim(0, 7), UA=(-20, -36), LN=1.0, LP=(-0.24, 0.24, 1.08), LQ=(0.5, 0, 0), brow=0.6, lid=0.25, FL=(-0.14, 0.24, A_Z))
     r1 = dict(r0, BE=aim(0, 19), UA=(-14, -24), tor=(-0.06, -0.14, 0.0), hed=(-0.1, 0.12, 0.0), pel=(0.0, -0.05, -0.12))
-    out.append(C("rmb", 0.5, [(0.0, r0), (0.05, r1, "out"), (0.13, dict(r1, BE=aim(0, 14))), (0.32, dict(r0, BE=aim(0, 4), LN=0.9)), (0.5, dict(READY, LN=0.0))]))
+    out.append(C("rmb", 0.3, [(0.0, r0), (0.05, r1, "out"), (0.1, dict(r1, BE=aim(0, 14))), (0.2, dict(r0, BE=aim(0, 4), LN=0.9)), (0.3, dict(READY, LN=0.0))]))
 
     # ---- Slipstep: her slide. On the legs' own heading (runtime: legs_heading) she drops feet first, the lead leg out, the back knee folded under, the left hand trailing on the ground; the torso
-    # stays up and the cannon stays on the aim
+    # stays up and the cannon stays on the aim. A held slide loops 0.3667-0.5 (sl_a, sl_b, sl_a: GunslingerKit.SLIDE_LOOP_*), the stand-up from 0.62
     sl = dict(ON_AIM, pel=(0.0, -0.12, -0.52), prt=(-0.42, 0.0, 0.0), tor=(0.3, 0.0, 0.0), hed=(0.2, 0.0, 0.0), FR=(0.1, 0.62, A_Z + 0.02), FL=(-0.16, 0.08, A_Z + 0.02), FRp=0.5, FLp=0.9, FRy=0.0, FLy=0.5,
               LP=(-0.36, -0.28, 0.2), LQ=(-0.3, 0, 0), brow=0.3, lid=0.1, fing=0.0)
-    out.append(C("dash", 0.85, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.45, dict(sl, pel=(0.0, -0.12, -0.5))), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
+    sl_a = dict(sl, pel=(0.0, -0.12, -0.5))
+    sl_b = dict(sl_a, pel=(0.0, -0.12, -0.46), tor=(0.25, 0.0, 0.0), hed=(0.16, 0.0, 0.0), FR=(0.1, 0.68, A_Z + 0.02), FL=(-0.16, 0.14, A_Z + 0.02), LP=(-0.36, -0.3, 0.17))
+    out.append(C("dash", 26 / FPS, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.3667, sl_a), (0.4333, sl_b), (0.5, sl_a), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
     # the air tap's barrel roll, the cannon held on the aim through it
     t0 = dict(ON_AIM, prt=(0.0, 0.0, 0.0), FL=(-0.1, 0.0, A_Z + 0.35), FR=(0.12, 0.05, A_Z + 0.42), FLp=-0.8, FRp=-0.8, LP=(-0.18, 0.1, 1.2), pel=(0, 0, 0.1))
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))
@@ -220,7 +233,7 @@ def clips():
     # ---- Cinderfall: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
     x0 = dict(BRACE, BE=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)
     x1 = dict(x0, pel=(0, -0.05, -0.17), BE=aim(0, 66), tor=(0.0, -0.12, -0.08))
-    out.append(C("x", 0.6, [(0.0, READY), (0.1, x0, "out"), (0.14, x1, "out"), (0.3, x0), (0.6, READY)]))
+    out.append(C("x", 0.6, [(0.0, READY), (0.06, READY), (0.14, x0, "out"), (0.18, x1, "out"), (0.3, x0), (0.6, READY)]))
 
     # ---- a knock: the cannon kicked up to rest on her shoulder, chin up, a grin
     k0 = dict(READY, BE=aim(6, 58), UA=(-6, -6), tor=(-0.08, 0.16, 0.05), hed=(-0.26, -0.14, 0.05), brow=-0.5, lid=0.2, LP=(-0.26, 0.05, 1.0))
@@ -237,7 +250,6 @@ def clips():
     dn = {"pel": (0, -0.08, -0.72), "prt": (-0.32, 0.3, 0.42), "tor": (0.2, 0, 0.0), "hed": (0.24, 0, 0.1), "FL": (-0.28, 0.42, A_Z - 0.03), "FR": (0.1, 0.5, A_Z - 0.03), "FLy": 0.6, "FRy": 0.2, "FLp": 0.5, "FRp": 0.4,
           "BE": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.3, 0, 0), hed=(0.38, 0, 0.1))), (2.4, dn)], loop=True))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), BE=aim(-16, -42))), (1.6, READY)]))
     dead = {"pel": (0, -0.1, -0.86), "prt": (-1.35, 0.1, 0.1), "tor": (0.1, 0.1, -0.1), "hed": (-0.1, 0.4, 0.3), "FL": (-0.2, 0.6, A_Z - 0.04), "FR": (0.16, 0.68, A_Z - 0.04), "FLy": 0.4, "FRy": -0.4, "FLp": 0.6, "FRp": 0.6,
             "BE": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
     out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, BE=aim(-20, -30)), "out"),
@@ -333,6 +345,6 @@ if __name__ == "__main__":
             o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=a[1], export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE", export_tangents=True,
+                              export_image_format="AUTO", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE", export_tangents=True,
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
     print("exported", os.path.getsize(a[1]))

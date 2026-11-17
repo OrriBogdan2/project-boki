@@ -26,7 +26,21 @@ const FULL_RATE_GOALS := ["board", "lift", "yard", "hum", "beacon", "lair_fight"
 const THINK_FAR_M := 90.0  # m from the local player (flat): two camera views off, nobody sees it decide
 const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking goals and targets
 
+## A Hunter's pose (pose_every): frames per pose when unseen, off screen, or on screen but far from the camera's focus
+const POSE_UNSEEN := 6
+const POSE_OFF_SCREEN := 3
+const POSE_FAR := 2
+const POSE_SLOW := 2       # frames per pose of a rival past POSE_SLOW_M while the match runs slow
+const POSE_SLOW_M := 6.0   # m (flat) from the camera's focus: nearer rivals keep every frame however slow it runs
+const SLOW_FPS := 36.0     # fps the match is slow under (two frames of 60 Hz and more a frame)
+const EASE_FPS := 50.0     # fps it is quick again over (the gap keeps the rate from flapping)
+
+static var slow := false       # the match runs slow (SLOW_FPS): rivals in view are posed every POSE_SLOW frames
+static var force_slow := -1    # checks and --match-profile's A/B: 0 never slow, 1 always, -1 the fps decides
+static var _slow_frame := -1   # the frame `slow` was last judged
 static var _n := 0             # sim steps planned (staggers the bots' slots)
+static var _hit_frame := -1    # the frame _hit_squad was filled in
+static var _hit_squad := {}    # Hunter -> true: hit one of the local player's squad (or their Boki) within HIT_CALM_S
 
 ## Once per sim step, before the bots think: sets each bot's step time for this step (0 = skip).
 static func plan(m: Match, dt: float) -> void:
@@ -70,6 +84,59 @@ static func kin_dt(k: Kin, dt: float) -> float:
 		return dt
 	return step_dt(o, dt)
 
+## Frames per pose of a Hunter's model (HunterAnim, and a Hero's clips, springs and skeleton: WardenGlb.Sync): every
+## frame for the local player's squad and anyone in a fight with it; else POSE_UNSEEN when hidden by sight,
+## POSE_OFF_SCREEN off screen and POSE_FAR on screen past CamRig.POSE_FAR_M from the focus (a small figure at the wide
+## camera; at zoom 1 that is off screen). Hunter.render staggers the frames and catches up the skipped time.
+static func pose_every(m: Match, h: Hunter) -> int:
+	var me := m.player
+	if m.cam == null or h.is_local() or (me and (h.team == me.team or _fights_squad(m, h, me))):
+		return 1
+	if h.unseen or not h.visible:
+		return POSE_UNSEEN
+	if not m.cam.on_screen(h.position):
+		return POSE_OFF_SCREEN
+	var cf := m.cam.focus
+	var d2 := Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared()
+	if d2 > CamRig.POSE_FAR_M * CamRig.POSE_FAR_M:
+		return POSE_FAR
+	return POSE_SLOW if _slow() and d2 > POSE_SLOW_M * POSE_SLOW_M else 1
+
+
+## Slow frames (the last second's fps under SLOW_FPS): a rival on screen past POSE_SLOW_M from the focus, not in a fight
+## with your squad, is posed every POSE_SLOW frames until the fps is back over EASE_FPS. A PC that holds 50 fps sees no
+## change; one at 25 fps gets back most of what those rivals' clips, springs and skeletons cost (docs/MATCH_PERF.md).
+static func _slow() -> bool:
+	if force_slow >= 0:
+		return force_slow == 1
+	var f := Engine.get_process_frames()
+	if f != _slow_frame:
+		_slow_frame = f
+		judge(Engine.get_frames_per_second())
+	return slow
+
+
+## Decides `slow` from a second's fps: on under SLOW_FPS, off again over EASE_FPS.
+static func judge(fps: float) -> void:
+	slow = fps < (EASE_FPS if slow else SLOW_FPS)
+
+## In a fight with the local player's squad: hit by one of it (or their Boki) or hit one within HIT_CALM_S, or a bot
+## after one of it.
+static func _fights_squad(m: Match, h: Hunter, me: Hunter) -> bool:
+	if m.time - h.hurt_at < HIT_CALM_S and _squad(h.last_hit_by, me):
+		return true
+	var t = h.ai.get("tgt")
+	if is_instance_valid(t) and t is Ent and (t as Ent).team == me.team:
+		return true
+	if _hit_frame != Engine.get_process_frames():
+		_hit_frame = Engine.get_process_frames()
+		_hit_squad.clear()
+		for mate in m.hunters:
+			var by = mate.last_hit_by
+			if mate.team == me.team and m.time - mate.hurt_at < HIT_CALM_S and is_instance_valid(by):
+				_hit_squad[(by as Kin).owner_h if by is Kin else by] = true
+	return _hit_squad.has(h)
+
 static func _calm(m: Match, h: Hunter, me: Hunter) -> bool:
 	if h.out or h.extracted or h.riding or h.downed or not h.grounded or h.gliding:
 		return false
@@ -86,6 +153,14 @@ static func _calm(m: Match, h: Hunter, me: Hunter) -> bool:
 	if is_instance_valid(t) and t is Ent and (t as Ent).flat_dist(me) <= FAR_M:
 		return false
 	return h.flat_dist(me) > FAR_M
+
+## One of the local player's squad, or their Boki.
+static func _squad(by: Variant, me: Hunter) -> bool:
+	if not is_instance_valid(by) or not by is Ent:
+		return false
+	if by is Kin:
+		by = (by as Kin).owner_h
+	return by != null and (by as Ent).team == me.team
 
 ## The player or their Boki.
 static func _mine(by: Variant, me: Hunter) -> bool:

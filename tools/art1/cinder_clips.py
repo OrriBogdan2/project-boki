@@ -14,10 +14,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
+import actionkit
 import crouchkit
 import gardenkit
 
 A_Z = K.ANKLE_Z
+GAIT_T = 11 / FPS                # s: one walk or run cycle (two steps)
 
 
 READY = {
@@ -266,11 +268,18 @@ def garden_set():
          "peak": PEAK, "pump": dict(PEAK, pel=(0.022, 0.0, 0.0), G=(0.38, 0.05, 1.58), LP=(-0.38, 0.05, 1.58), FL=(-0.085, 0.05, A_Z), FR=(0.135, -0.05, A_Z))}
     return gardenkit.clips(C, READY, P, {"lead": 0.03, "snap": 1.0})
 
+ACT = {"stomp": {"set": {"G": (0.4, 0.0, 0.96), "LP": (-0.4, 0.0, 0.96)}, "top": {"G": (0.5, 0.05, 1.0), "LP": (-0.5, 0.05, 1.0)}},
+       "drink": {"hand": "LP"},
+       "revive": {"kneel": {"G": (0.14, 0.46, 0.34), "LP": (-0.14, 0.46, 0.34), "fing": 0.1, "jaw": 0.3}}}
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("G", "LP"), (-0.04, 0.15, 1.42), ACT)
+
 
 def clips():
     out = [FnClip("idle", 6.0, idle), FnClip("stance", 6.0, stance)]
     out += crouch_set()
     out += garden_set()
+    out += action_set()
     # the run scurries (docs/heroes/ashwick.md, Animation timing: a footfall every 0.15-0.2 s): short low steps, half the
     # cycle on the ground; played at the rate foot_mps gives (WardenGait), the cycle is ~0.38 s in game, the feet planted
     for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.39, 0.5, 0.12)):
@@ -304,11 +313,11 @@ def clips():
     roll = dict(ball, prt=(-3.0, 0, 0))
     spread = {"pel": (0, 0, 0.0), "prt": (-6.283 + 0.35, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.36, 0.02, 1.03), "LP": (-0.42, 0.02, 1.08), "FL": (-0.24, -0.1, 0.32), "FR": (0.24, -0.16, 0.36), "FLp": 0.7, "FRp": 0.7, "jaw": 0.9, "lid": 0.05, "brow": -0.7}
     out.append(C("hop", 0.7, [(0.0, {"pel": (0, 0, -0.08), "FL": (-0.1, 0.1, 0.25), "FR": (0.12, 0.1, 0.26)}), (0.05, ball, "out"), (0.17, roll), (0.25, spread), (0.5, dict(spread, prt=(-6.283 + 0.45, 0, 0))), (0.7, dict(END, prt=(-6.283 + 0.04, -0.14, 0.09)))]))
-    # E, Furnace Cloak (0.24): tuck for a blink, then everything flung wide, chest out, up on her toes, a shriek of joy
+    # E, Furnace Cloak (0.24): tuck for a blink, then everything flung wide on the blast frame (0.03, held to 0.07), chest out, up on her toes, a shriek of joy
     tuck = {"pel": (0, 0, -0.1), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.16, 0.16, 0.96), "LP": (-0.14, 0.14, 0.95), "fing": 1.0, "lid": 0.5, "jaw": 0.05}
     wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "LP": (-0.44, 0.06, 1.14), "cast": 1.0, "castl": 1.0, "fing": 0.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
             "FLp": 0.5, "FRp": 0.5, "FL": (-0.15, 0.05, A_Z + 0.045), "FR": (0.17, -0.05, A_Z + 0.045), "skirt": 0.3}
-    out.append(C("cloak", 0.24, [(0.0, tuck), (0.06, wide), (0.13, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.24, END)]))
+    out.append(C("cloak", 0.24, [(0.0, tuck), (0.03, wide, "out"), (0.07, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.24, END)]))
     # a Flashover or a knock: the left fist punches up, a bounce on her heels, cackling
     pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.2), "LP": (-0.14, 0.08, 1.76), "cast": 1.0, "fistl": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
     out.append(C("stoke", 0.5, [(0.0, END), (0.1, pu, "out"), (0.22, dict(pu, pel=(0, 0, -0.09), LP=(-0.14, 0.08, 1.68))), (0.5, END)]))
@@ -347,8 +356,6 @@ def clips():
     dn = {"pel": (0.05, -0.08, -0.56), "prt": (-0.12, 0.2, -0.18), "tor": (0.42, 0.15, 0.2), "hed": (0.1, 0.1, 0.15), "G": (0.24, 0.3, 0.46), "LP": (-0.32, -0.16, 0.13), "FL": (-0.2, 0.5, 0.1), "FR": (0.2, 0.26, 0.1), "FLp": -0.7, "FRp": 0.2, "FRy": -0.5, "FLy": 0.4,
           "brow": 0.9, "lid": 0.4, "fing": 0.1, "jaw": 0.15, "skirt": 0.5}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.46, 0.15, 0.2), pel=(0.05, -0.08, -0.57), hed=(0.15, 0.1, 0.15))), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.3, 0.1, 0.1), hed=(-0.2, 0, 0), lid=0.1, brow=-0.3, jaw=0.5)),
-                                 (0.95, {"pel": (0, 0.0, -0.26), "prt": (0.34, 0, 0), "tor": (0.34, 0, 0), "hed": (-0.4, 0, 0), "FL": (-0.12, 0.2, A_Z), "FR": (0.14, -0.14, A_Z), "FLp": 0, "FRp": 0.2, "G": (0.26, 0.2, 0.7), "LP": (-0.28, 0.16, 0.56), "lid": 0.1}), (1.6, END)]))
     # death: a last laugh dies in her throat; she staggers back, her knees go, she falls on her side and her hand falls open
     dead = {"pel": (0.05, -0.1, -0.66), "prt": (0.18, 0.2, 1.3), "tor": (0.2, 0.2, 0.2), "hed": (0.2, 0.3, 0.3), "G": (0.62, 0.44, 0.08), "LP": (-0.25, 0.32, 0.16), "FL": (0.3, 0.36, 0.1), "FR": (0.42, 0.1, 0.1), "FLp": 0.4, "FRp": 0.4, "lid": 1.0, "brow": -0.4, "fing": 0.0, "jaw": 0.3, "skirt": 0.3}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.08, -0.06), "prt": (-0.2, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.5, 0, 0), "lid": 0.1, "brow": -1, "jaw": 0.8, "G": (0.34, 0.1, 0.78)}, "out"),
@@ -506,6 +513,6 @@ if __name__ == "__main__":
             o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=a[1], export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_image_format="AUTO", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
     print("exported", os.path.getsize(a[1]))

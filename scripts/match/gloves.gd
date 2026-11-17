@@ -42,14 +42,6 @@ static func cd_frac(h, i: int) -> float:
 	return clampf(float(h.gear_cd[i]) / maxf(0.1, Gear.cd_of(String(g["id"]), int(g.get("rar", 1)))), 0.0, 1.0)
 
 
-## Puts two gloves on at once (bring-in, bots): the first in slot 0, a different one in slot 1.
-static func wear_pair(h, a: Dictionary, b: Dictionary) -> void:
-	if not a.is_empty():
-		h.gear[slot_for(h, String(a["id"]))] = {"id": a["id"], "rar": int(a["rar"])}
-	if not b.is_empty():
-		h.gear[slot_for(h, String(b["id"]))] = {"id": b["id"], "rar": int(b["rar"])}
-
-
 ## A bot's starting gloves: up to two different ACTIVE gloves (bots use both), rolled from the
 ## gear drop table at the bot's bonus. `n` is how many glove slots to fill.
 static func bot_fill(h, rng: RandomNumberGenerator, n: int, bonus: int) -> void:

@@ -2,7 +2,8 @@ class_name HunterPickRow
 extends RefCounted
 ## The expedition panel's Hunter pick: big cards with the portrait, the Hunter's name and its role, nothing
 ## else (the abilities are on the Hunters screen, the codex and the tutorial). A locked Hunter is
-## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover.
+## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover. The three
+## starters wear a "Start here" stamp until the save's first match (ClassCard.add_start_chip).
 ## Picking saves it as your expedition Hunter (its weight and weapon family follow) and turns the farm hunter
 ## into it (docs/decisions/0005: no weight labels).
 
@@ -13,17 +14,23 @@ const COLUMNS := 2            # cards per row
 
 static var _grey: ShaderMaterial
 
-## Adds the section to `parent` and returns the Hunter you are taking.
-static func add(home: Node, parent: Control) -> String:
+## Adds the section to `parent` and returns the Hunter you are taking. `fold`: only that Hunter shows,
+## the rest sit behind "All Relics" (ExpFold).
+static func add(home: Node, parent: Control, fold := false) -> String:
 	var cur := Arch.of_save()
 	parent.add_child(UI.section("Hunter"))
 	var grid := GridContainer.new()
 	grid.columns = COLUMNS
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
+	var rest: Array = []
 	for a in Arch.ids():
-		grid.add_child(_card(home, String(a), cur))
+		var card := _card(home, String(a), cur)
+		grid.add_child(card)
+		if String(a) != cur: rest.append(card)
 	parent.add_child(grid)
+	if fold and not rest.is_empty():
+		ExpFold.add(parent, rest, "All Relics")
 	return cur
 
 static func _card(home: Node, id: String, cur: String) -> PanelContainer:
@@ -44,6 +51,7 @@ static func _card(home: Node, id: String, cur: String) -> PanelContainer:
 	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
 	if not open:
 		card.tooltip_text = ClassUnlock.requirement(id)
+	ClassCard.add_start_chip(card, id)
 	return card
 
 ## The portrait; locked, it is grey with a lock on it.

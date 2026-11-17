@@ -1,0 +1,77 @@
+{
+ "rigs": {
+  "breaker": {
+   "model": "res://glb/breaker.glb",
+   "arm_fix": {
+    "ours": "idle",
+    "calib": "res://glb/albert_idle_v2__albert_anim.glb",
+    "chain": [
+     "upper_arm.L",
+     "forearm.L"
+    ]
+   }
+  },
+  "hem": {
+   "model": "res://glb/hem.glb"
+  }
+ },
+ "clips": {
+  "albert_death3": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_death3__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_death3__tar.glb",
+   "warp": [
+    [
+     0.65,
+     0.0
+    ],
+    [
+     3.53,
+     2.88
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "albert_heavy3": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_heavy3__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_heavy3__tar.glb"
+  },
+  "albert_victory3": {
+   "rig": "breaker",
+   "raw": "res://glb/albert_victory3__breaker.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/albert_victory3__tar.glb"
+  },
+  "lace_death3": {
+   "rig": "hem",
+   "raw": "res://glb/lace_death3__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_death3__tar.glb",
+   "warp": [
+    [
+     0.48,
+     0.0
+    ],
+    [
+     2.07,
+     1.59
+    ]
+   ],
+   "pelvis_xz": 0.35
+  },
+  "lace_victory3": {
+   "rig": "hem",
+   "raw": "res://glb/lace_victory3__hem.glb",
+   "yaw": "auto",
+   "floor": "clamp",
+   "pelvis": "res://glb/lace_victory3__tar.glb"
+  }
+ }
+}
