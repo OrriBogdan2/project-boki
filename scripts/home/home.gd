@@ -3458,7 +3458,6 @@ func _send_chat() -> void:
 				Bridge.refresh_lines(rec), "default")
 
 # ---- expedition
-var exp_cls := ""
 var exp_tier := 0
 var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
 var raid_squad := 0        # Heart Raid: the squad size picked in HeartRaidPick (0: an Expedition)
@@ -3468,92 +3467,10 @@ func _weapon() -> String:
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
-	raid_squad = 0
 	if ClassUnlock.needs_starters():
 		FirstRelic.offer(self, _open_expedition)      # (the garden path's first Relic waits for the portal)
 		return
-	var v := _new_panel("Expedition", 940, true)
-	UI.subtitle(v, "Pick your Hunter and where to drop.")
-	var cols := UI.hbox(UI.GAP_BIG + 8)
-	v.add_child(cols)
-	var first := ExpFold.first_visit()      # (then Boki, match and mode links sit in `more`, folded)
-	var more := UI.vbox(10)
-	# left: who you are (your Hunter, its weapon, your Boki); locked Hunters are greyed (HunterPickRow)
-	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cols.add_child(left)
-	HunterPickRow.add(self, left, first)
-	if first:
-		ExpFold.add(v, [more], "More: Boki, match and modes")
-		v.add_child(more)
-	var lx: Control = more if first else left
-	var ak := Save.active_kin()
-	if not ak.is_empty():
-		lx.add_child(UI.spacer(2))
-		lx.add_child(UI.section("Boki you bring"))
-		CarryPick.add_cards(lx, _open_expedition)
-		lx.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
-		if float(ak["trust"]) < 30.0:
-			lx.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
-	if Save.d.get("treat", "") != "":
-		lx.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
-	hecon.loadout_rows(lx, _open_expedition)
-	# right: where you're going and how
-	var right := UI.vbox(10); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cols.add_child(right)
-	right.add_child(UI.section("Where"))
-	var ex := int(Save.d.get("extracts", 0))
-	if exp_tier >= Data.TIERS.size() or ex < int(Data.TIERS[exp_tier]["unlock"]): exp_tier = 0
-	var locked_tiles: Array = []
-	for i in Data.TIERS.size():
-		var td: Dictionary = Data.TIERS[i]
-		var locked := ex < int(td["unlock"])
-		var ti := i
-		var tc := UI.tile_card(exp_tier == i and not locked, (func(): exp_tier = ti; _open_expedition()) if not locked else Callable(), 12, UI.BAD if KinLoss.at_risk(i) else UI.ACCENT)
-		var th := UI.hbox(12); tc.add_child(th)
-		var tv := UI.vbox(2); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		th.add_child(tv)
-		var nrow := UI.hbox(8)
-		nrow.add_child(UI.label(String(td["name"]), UI.T_HEAD, UI.INK if not locked else UI.MUTED, UI.big))
-		nrow.add_child(UI.tag("Depth %d" % int(td["depth"]), UI.FAINT))
-		if KinLoss.at_risk(i): nrow.add_child(UI.tag("Boki can be lost", UI.BAD))
-		tv.add_child(nrow)
-		if KinLoss.at_risk(i): tc.tooltip_text = "Go down here and the Boki you bring are left behind."
-		if locked:
-			var need := int(td["unlock"]) - ex
-			tv.add_child(UI.label("Make it out %d more time%s to open" % [need, "" if need == 1 else "s"], UI.T_SMALL, UI.FAINT))
-			th.add_child(UI.IconDot.new("lock", UI.FAINT, 18.0))
-			tc.modulate.a = 0.7
-			tc.focus_mode = Control.FOCUS_NONE
-			tc.mouse_default_cursor_shape = Control.CURSOR_ARROW
-		elif exp_tier == i:
-			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
-		right.add_child(tc)
-		if locked: locked_tiles.append(tc)
-	if first and not locked_tiles.is_empty():
-		ExpFold.add(right, locked_tiles, "Locked drops")
-	var rx: Control = more if first else right
-	rx.add_child(UI.spacer(2))
-	rx.add_child(UI.section("Match"))
-	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
-	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
-	if exp_seed == 0: exp_seed = randi() | 1
-	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
-	rx.add_child(UI.spacer(2))
-	rx.add_child(UI.section("Conditions"))
-	rx.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
-	rx.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
-	if not ak.is_empty():
-		rx.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
-	# the way out: practice on the left, go on the right
-	var fl: Container = UI.hbox(10) if first else UI.footer_left(v)
-	if first: more.add_child(fl)
-	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
-	if Net.available():
-		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
-	fl.add_child(UI.ghost("Heart Raid (prototype)", func(): HeartRaidPick.open(self), 0, "heart"))
-	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
-	start_b.grab_focus.call_deferred()
+	ExpeditionPanel.open(self)
 
 ## The full kit card for your archetype and Boki (KitCard), over the expedition panel.
 func _open_kit_card() -> void:
@@ -3589,22 +3506,7 @@ func _confirm_start() -> void:
 	if not KinLoss.at_risk(exp_tier):
 		_start_match()
 		return
-	var v := _new_panel("Your Boki can be lost", 640)
-	var names: Array = []
-	for rec in Save.d.get("roster", []):
-		if rec.get("uid", "") in [Save.d.get("active", ""), Save.d.get("active2", "")]:
-			names.append(String(rec.get("name", "your Boki")))
-	var who := " and ".join(names) if not names.is_empty() else "the Boki you bring"
-	var lines := ["In %s, if you die, %s drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up. A rival can scan it and take it." % [td["name"], who]]
-	lines.append("If a rival takes your Boki you feel its pull: an arrow points at them and their spot pings on your map. Knock them out and it drops, and you can pick it up. If they get out with it, or nobody picks it up, it ends up at the Black Market.")
-	for ln in lines:
-		var l := UI.label(ln, 15, UI.INK)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(l)
-	var row := UI.hbox(10)
-	row.add_child(UI.primary("I understand, go", _start_match, 220))
-	row.add_child(UI.button("Back", _open_expedition, 140))
-	v.add_child(row)
+	ExpeditionPanel.confirm_risk(self, td)
 
 func _start_match() -> void:
 	# kin picked from the Kin Burrow come out to go with you
