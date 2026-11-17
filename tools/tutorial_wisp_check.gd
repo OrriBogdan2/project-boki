@@ -35,6 +35,7 @@ func run(main: Node) -> void:
 
 func _play(main: Node, wisps: bool) -> Dictionary:
 	seed(11)
+	Save.d["tutorial"].erase("tut_beat")      # (the run before finished the course: a start would resume past it)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
