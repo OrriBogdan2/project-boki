@@ -84,8 +84,8 @@ func _host() -> void:
 	var rtt := float(result["rtt"])
 	if rtt < RTT_MIN:
 		bad += 1
-	print("CASTPRED rtt %.0f ms (client, %d pings), relay lost %d packets, weather %s" % [
-		rtt, PINGS, relay.lost, "ok" if rtt >= RTT_MIN else "FAIL (no lag)"])
+	print("CASTPRED rtt %.0f ms (client, %d pings), weather %s" % [
+		rtt, PINGS, "ok" if rtt >= RTT_MIN else "FAIL (no lag)"])
 	_finish("")
 
 func _finish(why: String) -> void:

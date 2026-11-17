@@ -551,8 +551,11 @@ func _connect() -> bool:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
-		"cls": "medium", "net": d})
+	var opts := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+		"cls": "medium"}
+	if not d.is_empty():      # an empty `d` is an offline match (CastPredictCheck's first trials)
+		opts["net"] = d
+	await nm.start(opts)
 	nm.set_process(false)
 	var W: World = nm.world
 	var sp: Vector3 = W.spawns[0]
