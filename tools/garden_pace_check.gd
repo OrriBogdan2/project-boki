@@ -7,7 +7,7 @@ extends RefCounted
 
 const FEED_S := 12.0              # s to walk up and feed
 const PET_S := 8.0
-const PET_GAP := 20.0             # s between pats that count (home.gd pet_ok)
+const PET_GAP := 20.0             # s between pats the model gives (PetReact pays fewer a day: this over-counts)
 const FETCH_S := 22.0
 const DRILL_S := 45.0             # one training round of three marks
 const SLEEP_S := 120.0            # s the kin naps when worn out

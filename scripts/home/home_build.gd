@@ -468,6 +468,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var n: Node3D = null
 	if HomeLayout.CATALOG.get(id, {}).has("toy"):
 		return FarmModels.toy(id)
+	if id == FeedBowl.ID:
+		return FeedBowl.model(e)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
@@ -1868,6 +1870,8 @@ func place_held() -> bool:
 	apply(false)
 	if from < 0 and TOY_CATS.has(String(c["cat"])):
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
+	elif from < 0 and c.get("toy", false) and h.life:
+		h.life.new_toy(popped)      # a base toy: the Boki near it come to look, the most curious tries it (BaseLife)
 	var msg := ""
 	if not site.is_empty():
 		msg = "Site marked out: hold %s to hammer, Boki help. %s" % [Settings.key_cap("interact"), FarmTutorial.site_hint()]

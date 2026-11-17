@@ -64,7 +64,7 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_input_frames | 1 | 1 | <= 1 step | press acts the same step |
 | ground_t95 (to 95% run speed) | 0.083s | 0.067s | <= 0.07s | [spec] 0.05–0.1s |
 | ground_stop_t | 0.067s | 0.167s | 0.12–0.25s | [game data] braking 22.2 m/s² + friction 2/s (SV ~0.18s) |
-| ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
+| ground_stop_dist | 0.10m | 0.31m | 0.27–0.4m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
@@ -975,6 +975,16 @@ DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on
 - **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
 - `--move-feel-check`: 0 failures on this branch.
 
+
+## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
+
+The full table of every movement quantity against the source is [MOVEMENT_PARITY.md](MOVEMENT_PARITY.md). This pass fixed what it found off in the first ten seconds of play:
+
+- **The farm moved on the frame time.** A match steps 60 times a second; the farm's avatar stepped once per drawn frame, so its jump peaked at about 1.46 m at 30 fps and 1.55 m at 144 (1.52 m in a match). `FarmStep` (`scripts/home/farm_step.gd`) now runs the farm's step in `Match.DT` steps, latches a key press for exactly one step, shows the body between its last two steps and plays the pose once a frame.
+- **Coyote time and the jump buffer on the farm.** The farm had neither. Both timers live on `FarmStep` and read the match's rows (`coyote_s` 0.12, `jump_buffer_s` 0.12 in `content/rules/hunter_move.json`); the match and the farm share `HunterMove.near_landing`.
+- **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
+
+`--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
