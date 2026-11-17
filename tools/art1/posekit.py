@@ -198,7 +198,8 @@ class Solver:
             Hp = D_root(H0["thigh." + side])
             A = Vector(P[key])
             yaw = P.get(key + "y", 0.0)
-            pole = Quaternion((0, 0, 1), yaw) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
+            # (key + "k": where the knee points, when not along the foot: a free knee turned in)
+            pole = Quaternion((0, 0, 1), P.get(key + "k", yaw)) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
             qt, qs = self.leg_ik(side, Hp, A, pole, q_root)
             Q["thigh." + side], Q["shin." + side] = qt, qs
             Q["foot." + side] = Quaternion((0, 0, 1), yaw) @ Quaternion((1, 0, 0), P.get(key + "p", 0.0)) \
@@ -278,9 +279,7 @@ def bake(arm, clip, solver, extras):
     pbs = arm.pose.bones
     names = [b for b in ("root", "hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R",
                          "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R") if b in pbs]
-    R0, Par = solver.R0, {}
-    for b in names + list(extras({}).keys() if False else []):
-        pass
+    R0 = solver.R0
     for f in range(n):
         t = clip.dur * f / (n - 1)
         P = clip.sample(t)
