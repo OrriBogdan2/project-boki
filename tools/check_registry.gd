@@ -768,6 +768,7 @@ const CHECKS := {
 	"--shroud-check": ["res://tools/shroud_check.gd", "shroud_check", null],
 	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],      # WispProc cues
 	"--wisp-proc-shots": ["res://tools/wisp_proc_shots.gd", "wisp_proc_shots", null],      # --shots-dir=<dir>, GPU
+	"--tutorial-wisp-check": ["res://tools/tutorial_wisp_check.gd", "tutorial_wisp_check", null],      # Boki-wisp beats
 	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
