@@ -995,7 +995,7 @@ The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt
 After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
 ## Ledge mantle timing (`--move-feel-check` ledge rows)
 
-Settled against the source, PARITY FIRST (briefs/DECISIONS.md 2026-11-07): briefs/supervive-data/MANTLE_185b.md, sv/briefs/physics.md and the owner's clips. [?] marks what neither the data nor the footage settles; nothing there is guessed.
+Settled against the source, PARITY FIRST (briefs/DECISIONS.md 2026-11-07): sv/briefs/MANTLE_185b.md, sv/briefs/physics.md and the owner's clips. [?] marks what neither the data nor the footage settles; nothing there is guessed.
 
 | Question | Source | Ours | Status |
 |---|---|---|---|
