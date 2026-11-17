@@ -68,6 +68,10 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
+| haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054) |
+| haste_bonus_slow_x (haste 0.35 under a 40% slow) | 0.81x | 0.81x | 0.80–0.82x | the slow multiplies the hasted total |
+| haste_cap_mps (+100% and haste) | 10.3 m/s | 7.0 m/s | 6.95–7.0 | [game data] MaxMoveSpeed 700 uu/s |
+| haste_clip_rate (clip rate vs run, over speed vs run, worst Warden, hasted and capped) | 0.94x (rate held at RATE_MAX) | 1.00x | 0.99–1.01x | no foot slide (WardenGait.rate_for) |
 | aim_side / aim_back / aim_back_fire speed_k (run with the keys across or away from the aim, over toward it) | 1.0 | 1.0 | 0.99–1.01 | [game data] no backpedal or strafe slow: one MoveSpeed per hunter, no directional row in the movement data (the only forward/back split decoded is rail grinding, 1300/1050); hero-ref footage has no clean walk-away run to frame (see ext/feel-backpedal-speed) |
 | aim_back_3m_frames (frames to cover 3 m away from the aim, minus toward it) | 0 | 0 | <= 0 | [game data] same; 42 frames both ways at 4.55 m/s |
 | jump_input_frames | 1 | 1 | <= 1 | |
@@ -102,9 +106,10 @@ defaults aren't cited, since the data names no field for these windows.
 | glide_reverse_t | 0.417s | 0.600s | 0.45–0.8s | [reference data] the same force brakes a reversal (item 163) |
 | glide_brake_ratio (10 m/s, 0.4s against vs let go) | 0.60 | 0.00 | <= 0.8 | brake stays |
 | reglide_frames / dashglide_reopen_frames | 1 / 1 | 1 / 1 | <= 1 | |
-| dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 13.8 m/s | >= 12 | [wiki] momentum + speed |
-| dashglide_1s_speed | 5.7 m/s | 12.3 m/s | >= 10.5 | [wiki] preserved |
-| dashglide_2s_speed | 5.0 m/s | 10.8 m/s | >= 9 | [wiki] preserved |
+| dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 23.0 m/s | >= 12 | [wiki] momentum + speed |
+| dashglide_1s_speed | 8.5 m/s (11-15) | 11.6 m/s | >= 10.5 | [wiki] preserved; owner 11-13 "like the reference" (decision 0099) |
+| dashglide_2s_speed | 5.9 m/s (11-15) | 8.0 m/s | 7–9 | still fast, bleeding back |
+| dashglide_3s_speed | 5.2 m/s (11-15) | 6.3 m/s | <= 6.5 | [owner 11-08 item 9] back toward cruise |
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
 | feather_m vs feather_hold_m (distance before overheating, over the abyss) | 113.8m vs 44.6m (11-11) | 165.6m vs 44.6m | | |
 | feather_gain | 2.55x (11-11) | 3.71x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
@@ -257,9 +262,9 @@ Other checks:
   - Not matched: the distance. The source shows ~1.6x more ground across and draws its Hunters ~1.3x bigger: its Hunters are about twice the size of the world ours are, which no camera can match. 36 m back would show the source's ground but shrink tender to ~2.5% of the screen (the owner wants silhouettes that read at gameplay zoom); 18 m would match the Hunters' size on half the source's view. 23 m sits between the two, so it stays. Matching both means drawing Hunters larger (`Hunter.VIS_SCALE`), a model call for the owner (docs/DEBT.md).
   - Abyss zoom: **not determinable** (2026-11-12). The data names a camera zoom for the abyss next to the slow fall, with no value [D]. No reference frame shows the player's own Hunter below an island's lip: the cliff demo cuts to the Hunter standing on the pillar while the target falls, and the walkway demo stays at lip height [F]. So there is no distance or rate to measure, and `CamRig` gets no abyss state. Below the lip the view still sinks with you at the same size (`CamRig.follow`, `p.y < 0`), with the glide's 1.25x when the glider is open. To settle it, use a clip of the player stepping off a lip and falling for 2 s or more before a glide or a mantle brings them back.
   - GPU pair (`--cam-framing-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
-- **Source scale flag (2026-11-12, ext/feel-camera-source-flag, off by default):** the Settings camera style "Far view, big Hunters (test)" (`source_scale` in `content/rules/camera.json`) moves the camera and the Hunters together, for the owner to judge: 36.3 m back (pitch 66°, lens 32°, rise 1.9 m) shows 37.0 m of ground across 16:9, and `hunter_scale` 2.1 draws match Hunters 2.1x bigger on top of `Hunter.VIS_SCALE` (2.35x their model in all), so the plain medium Hunter stands 8.66% of the screen height (the source's 90–100 px of 1080, 8.3–9.3%; Supervive 6.47%). DEBT's estimate was ~1.9x; 2.0x measured 8.20%, under the band. Visual only: hitbox `r`, the TeamRing hit circle, shot heights and every gameplay number are unchanged, so it does not touch Net or saves. `CamRig.hunter_scale` carries it, `Hunter.fit_scale` puts it on the model (also when the style changes mid-match); the home keeps the Supervive view under it (it has no match Hunters to scale). `--cam-framing-check` holds the style inside the source's across band, off by default and home-safe; `--move-feel-check` measures `source_*` rows and prints the bigger body against what keeps its size.
+- **Source scale flag (2026-11-12, ext/feel-camera-source-flag, off by default):** the Settings camera style "Far view, big Hunters (test)" (`source_scale` in `content/rules/camera.json`) moves the camera and the Hunters together, for the owner to judge: 36.3 m back (pitch 66°, lens 32°, rise 1.9 m) shows 37.0 m of ground across 16:9, and `hunter_scale` 2.1 draws match Hunters 2.1x bigger on top of `Hunter.VIS_SCALE` (2.35x their model in all), so the plain medium Hunter stands 8.66% of the screen height (the source's 90–100 px of 1080, 8.3–9.3%; reference 6.47%). DEBT's estimate was ~1.9x; 2.0x measured 8.20%, under the band. Visual only: hitbox `r`, the TeamRing hit circle, shot heights and every gameplay number are unchanged, so it does not touch Net or saves. `CamRig.hunter_scale` carries it, `Hunter.fit_scale` puts it on the model (also when the style changes mid-match); the home keeps the reference view under it (it has no match Hunters to scale). `--cam-framing-check` holds the style inside the source's across band, off by default and home-safe; `--move-feel-check` measures `source_*` rows and prints the bigger body against what keeps its size.
   - What breaks at the new scale (medium body 4.29 m tall; measured by `--move-feel-check`, seen in the A/B clip): (1) hits: the hit circle stays r 0.50 m and shots hit only up to 2.4 m above your stance, so the top ~44% of a drawn body (chest, head) is shot-through, and bodies drawn about twice as wide still collide at their old radius, so Hunters in contact overlap; (2) shots leave at 0.95 m, about a fifth of the way up the body (knee height), well below the drawn gun; (3) overhead UI is pinned in metres: the teammate tag at 2.4 m, the bond line at 2.8 m, and the revive ring at 0.9 m sit inside the body; (4) Boki, mounts and monsters keep their size, so a Boki is knee-high and a riding Hunter dwarfs its mount (`Kin.ride_height` 0.42 m x mount scale); (5) the world keeps its size: a 1.5 m mantle ledge reads as a step, low cover and doorways no longer hide or fit a Hunter, ability rings, lair and exit rings read half as big against the body; (6) the glider and weapon effects tied to the model's bones double, while shots, hit sparks and ground decals stay at sim size. Matching the source fully would mean scaling the world and hit shapes too (a gameplay change), not just the draw.
-  - A/B (same seeded squad fight, `--gameplay-media --media-clip=1 --media-zoom=1.0`, 1920x1080, `--cam-style=supervive` vs `--cam-style=source_scale`): docs/shots/camera-source-flag/ (`ab_still.jpg` side by side at the 4 s still, `a_supervive.jpg`, `b_source_scale.jpg`, `ab_fight.mp4` 12 s side by side). Rendered on rpc3 under xvfb (software GL, opengl3) because the GPU queue was ~70 jobs deep; GPU jobs 20261112-013141-28995 / -013154-32253 are queued for the same takes (an earlier GPU pair, 20261112-003554-07179 / -003609-15210, leaned onto the HUD and caught a stray Esc: `--media-zoom` now locks the follow and the take closes any overlay). The scripted fight is not deterministic run to run (two Supervive takes differ too), so A and B share the setup and seed, not every frame.
+  - A/B (same seeded squad fight, `--gameplay-media --media-clip=1 --media-zoom=1.0`, 1920x1080, `--cam-style=supervive` vs `--cam-style=source_scale`): docs/shots/camera-source-flag/ (`ab_still.jpg` side by side at the 4 s still, `a_supervive.jpg`, `b_source_scale.jpg`, `ab_fight.mp4` 12 s side by side). Rendered on rpc3 under xvfb (software GL, opengl3) because the GPU queue was ~70 jobs deep; GPU jobs 20261112-013141-28995 / -013154-32253 are queued for the same takes (an earlier GPU pair, 20261112-003554-07179 / -003609-15210, leaned onto the HUD and caught a stray Esc: `--media-zoom` now locks the follow and the take closes any overlay). The scripted fight is not deterministic run to run (two reference-style takes differ too), so A and B share the setup and seed, not every frame.
 - **Settings:**
   - "Expedition camera" is now "Camera".
   - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).
@@ -268,6 +273,15 @@ Other checks:
   - It eases back over 0.3 s when you move 2.5 m from where you started, when the Boki is more than 7 m per unit of zoom from you (8.4 m at the arrival zoom 1.2), or, opened by its card, when the card closes.
   - The garden's wheel zoom (0.55-1.6) is unchanged and stacks with it; a match never ticks the frame.
   - The check asserts the ease timing, both of you on screen at the wheel's closest, arrival and widest zooms (169/368/411 px from the nearest edge at full reach), and each way it lets go.
+
+## Camera zoom: start wide, wheel in, Ctrl past the end (`--cam-zoom-check`, owner playtest 11-16)
+
+Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the wheel zooms in; Ctrl extends further than max for scouting." Numbers: `content/rules/camera.json` "zoom"; code: `scripts/match/cam_wheel.gd`, `CamRig.air_zoom`.
+
+  - The match (and the practice areas) start, and every respawn (`Match._start_drop`) restart, at the widest wheel view: 1.6x the style's distance, 36.8 m back, about 37 m of ground across (the source's 35-39 m, which the old 23 m view never showed).
+  - The wheel steps 0.1 per notch between 0.55 (close) and 1.6; it does nothing while paused, in the map / swap / pack panels, with the hero picker open, or if the player bound the wheel to an action.
+  - Holding Ctrl (Sneak, on the ground) eases the view to 1.6 x 1.4 = 2.24x wherever the wheel was left, and back on release, at the camera's usual ease (no pop). The glider and height stack on top but never past the 2.4x cap.
+  - Cost: the pose LOD (`pose_far_m` 40 m) and the far plane (`120 x zoom + 30`) already scale with the view; the check holds the Ctrl view's furthest ground corner inside both. Fog is 0.0015 density (3% at 20 m): the wide view is not fogged out. The sun's shadows reach 60 m from the camera, so at the Ctrl view the top edge of the screen loses its shadows; the wheel's own widest view keeps them.
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
@@ -351,7 +365,8 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 
 ## Shift into the glider, and the dive into the feather (decision 0061, owner playtest 11-11)
 - **No cut at an air dash's end:** a kit that stops its air dash short (Shiv's slide, Kingpin's pounce, Felix's poof) now eases the cut out over `dash_glide.ease_t` (0.07 s) instead of one step, and a glider already open keeps the dash's whole speed (`DashGlide`).
-- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall keeps the source's wind-down). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall's grace is 0.25 s, decision 0099). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **Brall's chains don't drop a press (decision 0099, owner playtest 11-13):** a jump off the ground clears a move's wind-down (Rampage's, the Lunge's), so Rampage or a held Smash, a jump and a glide press opens on the press; the glide button arms through a lock as a second Space does and opens as the lock ends. `--airdash-glide-check` "Brall" rows (both keys); on 11-15 main 5 of the 6 failed (3 presses dropped, 2 opened 0.2 s late).
 - **The dive carries:** opening the glider under the lip turns 0.6 of the fall speed into forward speed (up to the glide max) and the deep spring adds 0.3 of it upward (`GlideLift.open_kick`); the high glide is unchanged (the drop there never turns into speed, 11-08).
 
 ## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
@@ -375,9 +390,9 @@ settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` ch
 | Source value | Ours (`tuning.json` / code) | Status |
 |---|---|---|
 | Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
-| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (14 m/s, Lace 11) the excess bleeds at `carry_drag` 3/s more | `[?]` |
 | Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
-| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 0.8/s with keys, `glide.drag` 1.2/s without; a 10 m/s open is back to 5.5 m/s in 2.88 s / 1.92 s | `[?]` |
 | Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
 | Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
 
@@ -444,9 +459,9 @@ settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` ch
 | Source value | Ours (`tuning.json` / code) | Status |
 |---|---|---|
 | Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
-| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (14 m/s, Lace 11) the excess bleeds at `carry_drag` 3/s more | `[?]` |
 | Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
-| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 0.8/s with keys, `glide.drag` 1.2/s without; a 10 m/s open is back to 5.5 m/s in 2.88 s / 1.92 s | `[?]` |
 | Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
 | Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
 What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate proxies; every hero-ref folder on
@@ -1163,6 +1178,9 @@ no travel of his own) must set him down below the edge.
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
 - The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
 - Landing performance (branch `landhitch`).
+
+## The owner's movement rules, every Hunter (`--move-rule-guard-check`)
+`tools/move_rule_guard_check.gd` drives each of the 13 Hunters with a player's keys through the rules in briefs/DECISIONS.md that kept regressing, one `RULE ok|FAIL <hunter> | <DECISIONS line> | <measured>` row each: walking (and crouched) off a rim falls; Space held from the jump never glides, a second press does; opening the glider (from a jump, a fall, at rest) adds no horizontal speed and no lift; a fresh Space press 0.03 s and 0.15 s into an air Shift has the glider open within 2 steps, and the glide after it never jumps more than 2 m/s in a step; an overheated glider climbs back to the lip from 12 m at 0.4-0.62 of the full lift; no fall (free, glided, a dive, a landing) leaves horizontal speed, and a glide steers the same opened at rest or falling 14 m/s; WASD in the air beats the old farm's exp 6/s, turns a 5 m/s backward drift within 0.2 s and keeps a sideways speed; the farm avatar as each Hunter gives the Training Area's air and glide-open trace. Reds at 0.24.6 (docs/DEBT.md): Cinder's poof, Tenzo's Rock Hop, Sparkle's wire. Rows red on main and not yet fixed print `open` (the `OPEN` list, docs/DEBT.md).
 
 ## Golden traces: nothing changes how a Hunter moves by accident
 

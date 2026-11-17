@@ -25,12 +25,16 @@ static func hit_tick(h: Hunter, o: Dictionary) -> String:
 	var lmb: bool = o.get("src", "") == "shot" or o.get("ab", "") in ["primary", "lmb"]
 	return String(h.wpn.get("hit", "hit")) if lmb else "hit"
 
-## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
-## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.
+## The sound of `h`'s dash starting, chosen by the floor under it: in the air <arch>_dash_air, else the shared
+## dash_air; on the ground <arch>_dash, else the shared dash_ground. A sound picked in the sound tester
+## (SfxPicks) for the shared path wins over every Hunter's own. A remote Hunter's grounded flag isn't sent, so
+## its height over the ground says it.
 static func dash_name(h: Hunter) -> String:
-	var ground_name := of(h, "dash", "dash")
 	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
-	return of(h, "dash_air", ground_name) if in_air else ground_name
+	var shared := "dash_air" if in_air else "dash_ground"
+	if SfxPicks.active(shared):
+		return shared
+	return of(h, "dash_air" if in_air else "dash", shared)
 
 ## Plays `h`'s own sound for `kind` at the hunter (nothing if it has none): the wordless voice lines.
 static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:

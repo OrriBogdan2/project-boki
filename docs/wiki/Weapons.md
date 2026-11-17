@@ -75,7 +75,7 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Hushwood Wayseed | 150 | A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison. |
 | Kitewind Wayseed | 150 | A seed that tugs at the wind. Carry it to the Waystone with a Boki leaning Flying or Electric. |
 | Ink | 60 | A vial of Ink for Boki that evolve by it. |
-| Rare Egg | 400 | A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki. |
+| Rare Egg | 400 | A boss's egg, big and glowing gold. Carry it home and it hatches the baby of a Boki line. |
 
 ## Run perks
 
@@ -84,7 +84,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Perk | Effect | Stacks |
 |---|---|---|
 | Quick Hands | Reload 30% faster. | 1 |
-| Second Wind | One extra dash charge. | 1 |
+| Second Wind | Dropping below 30% health instantly refreshes your dash (once every 45s). | 1 |
 | Featherfall | Your glider lasts 60% longer. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
 | Tough Skin | +15 max health, healed right away. | 3 |
