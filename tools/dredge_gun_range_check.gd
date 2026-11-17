@@ -29,9 +29,9 @@ func run() -> void:
 	var fan: float = float(w["fan_deg"])
 	var shape_ok: bool = pel == 7 and absf(stop - 6.3) < 0.01 and absf(fan - 10.0) < 0.01
 	var bloom_max: float = float(w["bloom_max_deg"])
-	shape_ok = shape_ok and absf(fan + bloom_max - 45.0) < 0.01
+	shape_ok = shape_ok and absf(fan + bloom_max - 30.0) < 0.01
 	var shape := "%d slugs, stop %.1f m, fan %.0f degrees" % [pel, stop, fan]
-	var shape_label := "gun range: 7 slugs, stop 6.3 m, a 10 degree pack when waited, 45 at most"
+	var shape_label := "gun range: 7 slugs, stop 6.3 m, a 10 degree pack when waited, 30 at most"
 	ok_fn.call(shape_label, shape_ok, shape)
 	for bloom: float in [0.0, bloom_max]:
 		var spread: float = fan + bloom      # a waited volley is the tight pack, then the bloom
