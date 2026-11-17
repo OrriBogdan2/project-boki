@@ -84,7 +84,7 @@ func _overheat_glide(e: Dictionary) -> void:
 	var hot: Array = _glide_run(lane, 0.0, dir)
 	var ratio: float = float(hot[0][-1]) / float(cool[0][-1])
 	var want := HunterMove.glide_overheat_speed
-	ok(absf(ratio - want) <= 0.03, "overheated glide speed is %.2f of a cool one after 5 s (wanted %.2f)" % [ratio, want])
+	ok(absf(ratio - want) <= 0.03, "overheated glide speed is %.2f of cool after 5 s (want %.2f)" % [ratio, want])
 	var worst := 0.0
 	var heading := 0.0
 	for i in cool[1].size():
