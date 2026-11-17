@@ -258,8 +258,8 @@ static func icon_button(icon: String, cb: Callable, tip := "", px := 16.0) -> Bu
 	b.tooltip_text = tip
 	b.custom_minimum_size = Vector2(px + 18, px + 18)
 	b.draw.connect(func():
-		var c := b.get_theme_color("font_hover_color" if b.is_hovered() else "font_color")
-		draw_icon(b, icon, b.size * 0.5, px * 0.5, c))
+		var state := "font_disabled_color" if b.disabled else ("font_hover_color" if b.is_hovered() else "font_color")
+		draw_icon(b, icon, b.size * 0.5, px * 0.5, b.get_theme_color(state)))
 	b.mouse_entered.connect(b.queue_redraw); b.mouse_exited.connect(b.queue_redraw)
 	return b
 

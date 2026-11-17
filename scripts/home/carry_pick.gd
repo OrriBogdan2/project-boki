@@ -40,13 +40,18 @@ static func set_lead(uid: String) -> void:
 static func set_second(uid: String) -> void:
 	if uid != str(Save.d.get("active", "")): Save.d["active2"] = uid
 
-## The uid `dir` steps from the current one in the slot's choices (the second also cycles through "none").
-static func step(key: String, dir: int) -> String:
+## The uids a slot can hold (the second also has "" for none).
+static func options(key: String) -> Array:
 	var lead := str(Save.d.get("active", ""))
 	var ids: Array = choices().map(func(r): return String(r["uid"]))
 	if key == "active2":
 		ids = ids.filter(func(u): return u != lead)
 		ids.append("")
+	return ids
+
+## The uid `dir` steps from the current one in the slot's choices.
+static func step(key: String, dir: int) -> String:
+	var ids := options(key)
 	var i := ids.find(str(Save.d.get(key, "")))
 	return ids[(i + dir + ids.size()) % ids.size()] if not ids.is_empty() else ""
 
@@ -61,14 +66,16 @@ static func card(label_t: String, rec: Dictionary, key: String, on_change: Calla
 		else: set_second(uid)
 		Save.save_game()
 		on_change.call()
+	var lone := options(key).size() <= 1      # nobody else to pick: the arrows are greyed
 	var prev_b := UI.icon_button("back", func(): go.call(-1), "Previous Boki", 12.0)
+	prev_b.disabled = lone
 	prev_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(prev_b)
 	var info := UI.vbox(1)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if rec.is_empty():
 		info.add_child(UI.label("%s: none" % label_t, 16, UI.MUTED, UI.big))
-		info.add_child(UI.label("Go with one Boki. Only it is at risk.", 12, UI.MUTED))
+		info.add_child(UI.label("Go with one Boki", 12, UI.MUTED))
 	else:
 		var sp: Dictionary = Data.KIN[rec["species"]]
 		var kcol: Color = Color(sp["color"]).lerp(Color.WHITE, 0.25)
@@ -80,18 +87,16 @@ static func card(label_t: String, rec: Dictionary, key: String, on_change: Calla
 		nl.clip_text = true
 		info.add_child(nl)
 		var boxed := KinBox.is_boxed(rec)
-		var asleep := "  ·  asleep in the Boki Burrow: comes out to go with you" if boxed else ""
-		var stats := "%s  ·  level %d  ·  trust %d" % [label_t, int(rec.get("level", 1)), int(rec["trust"])]
-		var sl := UI.label(stats + asleep, 12, Color("cdb8ff") if boxed else UI.MUTED)
+		var stats := "%s  ·  level %d" % [label_t, int(rec.get("level", 1))]
+		if boxed: stats += "  ·  asleep in the Burrow"
+		var sl := UI.label(stats, 12, Color("cdb8ff") if boxed else UI.MUTED)
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		info.add_child(sl)
-		var pl := UI.label(passive_line(rec), 12, UI.MUTED)
-		pl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		pl.clip_text = true
-		info.add_child(pl)
+		card.tooltip_text = "%s\nTrust %d" % [passive_line(rec), int(rec["trust"])]
 		if note != "": info.add_child(UI.label(note, 12, UI.GOOD))
 	row.add_child(info)
 	var next_b := UI.icon_button("next", func(): go.call(1), "Next Boki", 12.0)
+	next_b.disabled = lone
 	next_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(next_b)
 	return card
@@ -104,6 +109,7 @@ static func add_cards(into: Control, on_change: Callable) -> void:
 	var note := "" if second.is_empty() else _same_note(lead, second)
 	into.add_child(card("Lead", lead, "active", on_change, note))
 	if has_second_slot(): into.add_child(card("Second", second, "active2", on_change, note))
+	else: into.add_child(UI.label("No other Boki yet", UI.T_SMALL, UI.FAINT))
 
 static func _same_note(lead: Dictionary, second: Dictionary) -> String:
 	var same := shared(lead, second)
