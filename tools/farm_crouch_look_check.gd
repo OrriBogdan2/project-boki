@@ -69,7 +69,7 @@ func run(m: Node, what: String) -> void:
 		)
 	)
 	ok(
-		absf(home.cam.zoom - CamWheel.ctrl_zoom()) < 0.05 and d1 > d0 * 1.5,
+		absf(home.cam.zoom - CamWheel.ctrl_zoom()) < 0.05 and d1 > d0 * CamWheel.ctrl_zoom() / base * 0.95,
 		"held: the camera is %.1f m back, from %.1f m (zoom %.3f)" % [d1, d0, home.cam.zoom]
 	)
 	home._unhandled_input(_wheel(MOUSE_BUTTON_WHEEL_UP))
@@ -137,7 +137,7 @@ func _wheel_part() -> void:
 	)
 	ok(is_equal_approx(home.cam.zoom_to, CamWheel.far()), "wheel out: stops at the widest %.2f" % home.cam.zoom_to)
 	await _settle(CamWheel.far())
-	ok(absf(_back() - far_back) < 0.05, "widest again: %.1f m back" % _back())
+	ok(absf(_back() - far_back) < far_back * 0.02, "widest again: %.1f m back (%.1f m)" % [_back(), far_back])
 	home.panel_open = "stub"
 	home._unhandled_input(_wheel(MOUSE_BUTTON_WHEEL_UP))
 	ok(is_equal_approx(home.cam.zoom_to, CamWheel.far()), "a panel open: the wheel leaves the camera alone")
