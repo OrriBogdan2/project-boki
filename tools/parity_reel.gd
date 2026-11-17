@@ -36,6 +36,7 @@ var caps := {}                          # key cap -> its Label
 var title: Label
 var steps := 0
 var close := false                      # --reel-close
+var close_h := 0.0                      # m: the Hunter's height, read once
 var r_down := false                     # R was pressed this step (it goes through HunterKeys, not inp)
 
 func parts() -> Array:
@@ -60,8 +61,8 @@ func run(main_node: Node) -> void:
 	await _setup()
 	_build_keys()
 	if close:
-		title.get_parent().visible = false
-		m.hud.visible = false
+		for layer in main.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
 	frame_dir = dir.path_join("frames")
 	DirAccess.make_dir_recursive_absolute(frame_dir)
 	P.lvl = 6
@@ -129,17 +130,22 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 
 ## The close camera for this step: orbiting the Hunter's middle, far enough back for the Hunter to fill CLOSE_FILL.
 func _close_cam() -> void:
-	var top := -INF
-	var low := INF
-	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
-		var box := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
-		top = maxf(top, box.end.y)
-		low = minf(low, box.position.y)
+	if close_h == 0.0:
+		var top := -INF
+		var low := INF
+		for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).skin == null:
+				continue
+			var box := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+			top = maxf(top, box.end.y)
+			low = minf(low, box.position.y)
+		close_h = top - P.pos.y
+		print("REEL_CLOSE height %.2f m (mesh %.2f to %.2f over the feet)" % [close_h, low - P.pos.y, close_h])
 	var cam := m.cam
 	cam.pitch = deg_to_rad(CLOSE_PITCH)
-	cam.rise = (top - low) * 0.5 + (low - P.pos.y)
+	cam.rise = close_h * 0.5
 	cam.cast_k = 0.0
-	cam.dist = (top - low) / CLOSE_FILL * 0.5 / tan(deg_to_rad(cam.fov) * 0.5)
+	cam.dist = close_h / CLOSE_FILL * 0.5 / tan(deg_to_rad(cam.fov) * 0.5)
 	Record.orbit_yaw = steps * DT * CLOSE_ORBIT
 
 func _save_frame() -> void:
