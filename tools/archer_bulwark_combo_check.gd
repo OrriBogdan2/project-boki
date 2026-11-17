@@ -60,7 +60,7 @@ func _hawk_rock(m: Match, x: int, z: int, kind: int) -> void:
 		wk[m.world.idx(x, z + dz)] = kind
 	m.world.kind = wk
 
-## How many of `f`'s meshes wear Hawk Sense's through-cover outline.
+## How many of `f`'s meshes wear Red Thread's through-cover outline.
 func _hawk_lines(f: Hunter) -> int:
 	if f.model == null:
 		return 0
@@ -604,8 +604,8 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
-	# (a rock between them: only Hawk Sense lets her side see past it)
+	# Red Thread: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
+	# (a rock between them: only Red Thread lets her side see past it)
 	var rock_x := int(home.x) + 4
 	_hawk_rock(m, rock_x, int(home.z), World.T_BLOCK)
 	fresh(T)
@@ -614,14 +614,14 @@ func _archer_combos() -> void:
 	T.hp = T.max_hp * 0.4
 	step(m, 0.5, func(): aim_at(P, T.pos))
 	ok(
-		"combo archer: Hawk Sense: above the line hidden, below it seen past a rock and outlined",
+		"combo archer: Red Thread: above the line hidden, below it seen past a rock and outlined",
 		not healthy_seen and T.reveal_t > 0.0 and m.can_see(P.team, T) and _hawk_lines(T) > 0,
 		"healthy %s injured %.2f seen %s, %d outlined meshes at %.1f m"
 			% [healthy_seen, T.reveal_t, m.can_see(P.team, T), _hawk_lines(T), P.flat_dist(T)]
 	)
 	T.hp = T.max_hp * 0.55
 	step(m, 0.5)
-	ok("combo archer: Hawk Sense: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
+	ok("combo archer: Red Thread: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
 		and not m.can_see(P.team, T) and _hawk_lines(T) == 0, "reveal %.2f, %d outlined" % [T.reveal_t, _hawk_lines(T)])
 	_hawk_rock(m, rock_x, int(home.z), World.T_GROUND)
 	fresh(T)
@@ -629,7 +629,7 @@ func _archer_combos() -> void:
 	P.teleport(home - Vector3(7, 0, 0))
 	T.teleport(home + Vector3(18, 0, 0))
 	step(m, 0.5)
-	ok("combo archer: Hawk Sense: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
+	ok("combo archer: Red Thread: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
 		"reveal %.2f at %.1f m" % [T.reveal_t, P.flat_dist(T)])
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
