@@ -24,7 +24,6 @@ var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, s
 var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
-var aim_t := 0.0
 const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
 const TELE_LW := 0.1                 # m, their rim
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
@@ -212,23 +211,13 @@ func fire_rmb(c: Dictionary) -> void:
 		at = ground(h.pos)
 		ft = 0.25
 	else:
-		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
+		at = AimMode.place(h, float(rd["range"]))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
 	var hand := HeroVfx.of(m).anchor_pos(h, "hand_l")
 	flying.append({"at": at, "from": hand, "t": ft, "left": ft, "v": v, "id": _tele_id()})
 	play("gil_throw")
 	vfx("throw", h.pos)
-
-func rmb_hold_tick(t: float) -> void:
-	# held past the tap: the landing circle follows the cursor, 50% further
-	if t < float(rmb_def().get("hold", 0.25)):
-		return
-	if m.time >= aim_t:
-		aim_t = m.time + 0.1
-		var rd := rmb_def()
-		var vd := vial_def(next_vial())
-		m.fx.ring(AimMode.place(h, float(rd["range"]) * float(rd["hold_range"])), float(vd["radius"]), col_of(vd), 0.12)
 
 func _shatter(it: Dictionary) -> void:
 	var v := String(it["v"])
@@ -530,6 +519,25 @@ func _start_wave() -> bool:
 	vfx("wave", h.pos, dir, {"len": length, "w": float(xd["width"])})
 	return true
 
+## R again while he surfs: he leaps off the crest early (owner 11-17). The wave and the untargetable time end at
+## once; the dash hands over to a run with a small hop, and he lands with the usual shield (and its sound).
+func ult_recast() -> bool:
+	if wave.is_empty():
+		return false
+	_end_wave()
+	h.roll_t = minf(h.roll_t, 0.001)       # the dash's own hand-over to the run, no dead frames
+	h.inv_t = minf(h.inv_t, 0.1)
+	if h.grounded:
+		h.vel.y = maxf(h.vel.y, 5.0)
+		h.grounded = false
+	anim_id = ""
+	return true
+
+func _end_wave() -> void:
+	wave = {}
+	untarget_t = 0.0
+	_land_wave()
+
 func _land_wave() -> void:
 	var xd := x_def()
 	ShieldSrc.give(h, float(xd["shield"]), ShieldSrc.TIDE)
@@ -584,9 +592,7 @@ func _tick(dt: float) -> void:
 		_tick_lines(one, dt)
 		untarget_t -= dt
 		if one.is_empty() or untarget_t <= 0.0:
-			wave = {}
-			untarget_t = 0.0
-			_land_wave()
+			_end_wave()
 	# the next potion glows in his hand
 	glow_t -= dt
 	if glow_t <= 0.0 and not h.unseen and h.visible and not h.out:
@@ -610,7 +616,7 @@ func _end_stale_hold() -> void:
 		anim_id = ""
 
 # ------------------------------------------------------------------ bots
-const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one press throws)
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
