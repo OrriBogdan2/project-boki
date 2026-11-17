@@ -35,7 +35,7 @@ const WARDENS := {
 	"rimewright": {"height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
 	"ashwick": {"height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
-	# (Kael on his long-legged rig; height_3d: the owner's e1 pick on the seam-safe decimate, legs x1.15 and mane: 1.44x)
+	# (Kael on his long-legged rig; height_3d: e1 pick, legs x1.15 and mane, 1.44x measured)
 	"juggernaut": {"height": 1.24, "height_3d": 1.44, "width": [0.95, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
 	"dredge": {"height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
