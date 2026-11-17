@@ -807,6 +807,13 @@ func feel(dt: float, squash: bool) -> void:
 	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * kl)
 	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
 
+## Where the idle clip is (s) while it alone shows (standing still, no move, stance, air or crouch), else -1: the
+## mood keys its once-a-loop fidget to it.
+func idle_at() -> float:
+	if still_t <= 0.0 or act_w > 0.0 or up_w > 0.0 or stance_w > 0.0 or air_w > 0.0 or crouch_w > 0.0:
+		return -1.0
+	return float(tree.get("parameters/loco/0/current_position"))
+
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
 ## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel

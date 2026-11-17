@@ -4,6 +4,7 @@ extends RefCounted
 ## hanging companion that reacts. Cosmetic only; nothing here touches the kit. Data: warden_anim/<art>.json "mood":
 ##   "kmoves": kit move -> mood; "downed", "hit", "emote", "default": moods; "hit_t": s a hit's mood lasts
 ##   "companion": the bone it wiggles and shivers; "lure": the material tag of its glow; "flare_kmoves": its moves
+##   "glance": [from s, to s, mood]: the idle clip's fidget, the mood it wears while the idle alone plays that window
 ##   "faces": {material tag: {mood: atlas cell}}: faces drawn on an atlas (the glb's `eyes-mood_<tag>` texture)
 ##   in place of the glass, one per companion; "blink_cell" is the cell of a blink
 ## Moods: calm, happy, angry, determined, sad (+ sleepy, shy, cry for atlas faces).
@@ -112,7 +113,7 @@ func _flare_glow(glb: Node3D) -> void:
 	at.add_child(follow)
 	follow.remote_path = follow.get_path_to(puff)
 
-func _want(s: Dictionary) -> String:
+func _want(s: Dictionary, idle_at: float) -> String:
 	if bool(s.get("downed", false)) or bool(s.get("dead", false)):
 		return String(d.get("downed", "sad"))
 	if String(s.get("emote", "")) != "":
@@ -123,17 +124,21 @@ func _want(s: Dictionary) -> String:
 		return String(moves[km])
 	if float(s.get("hit_t", 99.0)) < float(d.get("hit_t", 1.2)):
 		return String(d.get("hit", "angry"))
+	var g: Array = d.get("glance", [])
+	if g.size() == 3 and idle_at >= float(g[0]) and idle_at < float(g[1]):
+		return String(g[2])
 	return String(d.get("default", "calm"))
 
 ## The atlas cell of mood id `id` in a face's map (a mood it has no cell for shows its calm one).
 func _cell(map: Dictionary, id: int) -> int:
 	return int(map.get(IDS.find_key(id), map.get("calm", 0)))
 
-func step(dt: float) -> void:
+## idle_at: where the idle clip is (s) while it alone shows, else -1 (WardenClips.idle_at).
+func step(dt: float, idle_at := -1.0) -> void:
 	t += dt
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	var km := String(s.get("kmove", ""))
-	var want := int(IDS.get(_want(s), 0))
+	var want := int(IDS.get(_want(s, idle_at), 0))
 	if want != cur:
 		was = cur
 		cur = want
