@@ -69,6 +69,10 @@ func _camp_near(p: Hunter) -> bool:
 			return true
 	return false
 
+## Seconds the line has been up, -1 when none is.
+func strip_age() -> float:
+	return _t if line != "" else -1.0
+
 func draw(h, sz: Vector2) -> void:
 	if m.guide == null or m.guide.line == "":
 		FirstMatchGuide.draw_line(h, sz, line, _t)
