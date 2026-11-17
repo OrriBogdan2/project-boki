@@ -10001,3 +10001,4 @@ READY ext/stuck-integ-cd1e658f e68400fa076aeccc3cb605ee0de5da8df5e8dd29 (PR #164
 READY ext/hunters-v95-1117 ca32bd972524e933412183ff6a8b4fe9a23f6223 (Art: Vex, Sable, Cinder, Kael, Neve v95 models in game (owner picks 11-16/17); PR NOT opened: no gh on rpc3, open with title/body from /home/boki/meshy/v95/_ingame/hunters-1117/PR_BODY.md)
 READY ext/merge-lane-uihud-1117 115ed1f923 (lane PR from split of #104: ui-start-here-port + ui-glossary-pass on current main f3ac0538bb; needs a PR opened so regate-bot gates it; then comment on #104 with the PR number + coord/merge-week/2026-11-17/SALVAGE-pr104.md and close #104, keep its branch)
 READY ext/merge-lane-split143-1117 5dca361a9d254088d35d20ed69652bceafcbc6db (split of PR #143: gate-hang-1114 watchdog + anim-hymotion glb_swap tool, 2 clean branches; 38 on-main, 57 salvaged)
+READY ext/hunters-v95-1117 6d254408c7 (5 hunters v95 in game, main merged, PR via gh-outbox)
