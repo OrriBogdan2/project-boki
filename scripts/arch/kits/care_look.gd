@@ -28,6 +28,9 @@ var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
 var strip: IceStrip = null    # the skate's ice plates, one MultiMesh (built on the first plate)
+## every look _build makes (prewarm builds one of each at load)
+const KINDS := ["ember", "burr", "shard", "beam", "spear", "plus", "column", "beam_root", "disc", "flare", "zone",
+	"kindle", "hearth", "spikes", "shell", "frost", "slab", "wall"]
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -36,6 +39,12 @@ func _init(match_node: Node, hunter: Hunter) -> void:
 	root.name = "CareLook"
 	root.top_level = true
 	m.add_child(root)
+
+## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every look built and put in its
+## pool, so the first shot makes nothing mid-fight and warm_up's scan draws them all (Pip's first LMB: 220 ms).
+func prewarm() -> void:
+	for kind: String in KINDS:
+		_give(kind, _build(kind))
 
 func teardown() -> void:
 	if is_instance_valid(root):
@@ -169,8 +178,8 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.box(0.32, 1.2, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.box(1.2, 0.32, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.75, 12), orb_mat(Color(gc.lightened(0.3), 0.3)), Vector3.ZERO))
-		"column", "beam_root":
-			# upright light planes (a column falls over a foe; the root beam holds)
+		"column":
+			# upright light planes (a column falls over a foe)
 			for i in 3:
 				var pm2 := PlaneMesh.new()
 				pm2.size = Vector2(1.0, 3.0)
@@ -411,10 +420,9 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * r * pop
 			n.rotation.y = k * 1.2
 			_tint(n, col, fade)
-		"column", "beam_root":
-			var w := r * (1.0 if String(e["fx"]) == "column" else 0.45)
-			n.scale = Vector3(w, lerpf(1.4, 1.0, pop) if String(e["fx"]) == "column" else 1.0, w)
-			_tint(n, col, fade * (0.9 if String(e["fx"]) == "column" else 0.6 + 0.2 * sin(k * 40.0)))
+		"column":
+			n.scale = Vector3(r, lerpf(1.4, 1.0, pop), r)
+			_tint(n, col, fade * 0.9)
 		"flare", "star":
 			n.scale = Vector3.ONE * r * lerpf(0.4, 1.0, sqrt(k))
 			_disc(n, col, p.get("rim", col.lightened(0.5)), fade, float(p.get("pattern", 0.0)), -1.0, k * 2.0)

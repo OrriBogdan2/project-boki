@@ -15,6 +15,9 @@ extends RefCounted
 
 const CMD_IDS := ["guard", "follow", "chase", "return"]       # the index is what goes over the network (KinNet)
 const NAMES := {"guard": "Guard", "follow": "Follow", "chase": "Chase", "return": "Return"}
+## The order in plain words, for the status under the portrait.
+const PLAIN := {"guard": "guarding", "follow": "with you", "chase": "chasing", "return": "with you"}
+const HOP_DB := -8.0        # dB: the leap back to its owner (the recall cue, under the ordered recall)
 const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place Boki closes on its side spot, on top of your pace
 const GUARD_PULL := 14.0   # 1/s: how fast a big Boki on the Return order closes on its guard spot beside you
 
@@ -36,7 +39,7 @@ static func side_spot(k: Kin) -> Vector3:
 ## Is the Boki fighting alongside you right now? Orders are never refused in a fight (Kin.throw_to).
 static func in_combat(k: Kin, p: Vector3) -> bool:
 	var o := k.owner_h
-	if o != null and k.m.time - o.hurt_at < 3.0:
+	if o != null and InCombat.is_in(o):
 		return true
 	var rad := _r("combat_radius")
 	for f in k.m.foes_of(k.team, false):
@@ -92,6 +95,8 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 # ------------------------------------------------------------------ the order
 ## Give the order. Returns false (and says why) if it cannot be done. `target` is for chase.
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
+	if k.wisp:
+		return false          # (a wisp takes no orders: KinWisp)
 	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
@@ -169,6 +174,8 @@ static func leap(k: Kin, to: Vector3, dest: String, cmd_hit := false) -> void:
 	k.vel = Vector3.ZERO
 	k.stuck_t = 0.0
 	k.m.fx.ring(k.pos, 0.9, Color(k.sp["color"], 0.7), 0.2)
+	if not cmd_hit:
+		k.m.sfx("recall", k.pos, HOP_DB)       # (an ordered recall plays its own, louder)
 	KinNet.event(k.m, "hop", k, to)
 
 ## Back to your side: stuck, or beyond the leash.
@@ -196,6 +203,20 @@ static func land_side(k: Kin) -> void:
 	k.vel = Vector3.ZERO
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
+
+## The sound of it coming down: a thrown Boki by its weight class (a light patter, a heavy thump), or the soft
+## settle of one landing back on your shoulder. A rival's is quieter. Cues and sizes: boki_system.json "follow".
+static func land_cue(k: Kin, settle := false) -> void:
+	var kgs: Array = rules()["land_kg"]
+	var kg := float(Unique.size_info(k.rec)["kg"])
+	var kind := "settle"
+	if not settle:
+		kind = "heavy" if kg > float(kgs[1]) else "medium"
+		if kg < float(kgs[0]):
+			kind = "light"
+	var c: Array = rules()["land_cues"][kind]
+	var quiet := 0.0 if k.owner_h != null and k.owner_h.is_local() else _r("land_rival_db")
+	k.m.sfx(String(c[0]), k.pos, float(c[2]) + quiet, float(c[1]))
 
 ## Off you at once, onto your side spot (a carried Boki's own dash or leap starts from there).
 static func drop_beside(k: Kin) -> void:
@@ -295,7 +316,8 @@ static func carry_tick(k: Kin, dt: float) -> void:
 	var o := k.owner_h
 	if o == null or k.cmd == "return" or not k.giant.is_empty() or KinMerge.active(o):
 		return
-	var steady: bool = o.grounded and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty() and not o.downed and not o.dropping
+	# (a rider held on the ship's deck counts as grounded: it stays on, not off and back each beat, ring and sound)
+	var steady: bool = o.grounded and not o.riding and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty() and not o.downed and not o.dropping
 	k.steady_t = k.steady_t + dt if steady else 0.0
 	if k.steady_t >= _r("hop_off_steady_s") and k.settle >= 0.35 and k.hesitate_t <= 0.0:
 		k.steady_t = 0.0

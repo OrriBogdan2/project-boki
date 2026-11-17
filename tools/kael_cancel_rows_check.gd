@@ -62,8 +62,11 @@ func slam_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	var t0 := m.time
 	_slash_tap(m, P)
 	A.step(m, 0.05)
-	A.ok("jug cancel: LMB in the Slam's wind-up slashes at once and the wind-up runs on (both)",
-			K.slash_at > t0 and not K.slam_w.is_empty(), "slashed %s" % (K.slash_at > t0))
+	A.ok(
+		"jug cancel: LMB in the Slam's wind-up slashes at once and the wind-up runs on (both)",
+		K.slash_at > t0 and not K.slam_w.is_empty(),
+		"slashed %s" % (K.slash_at > t0)
+	)
 	# RMB again: early in the wind-up it is dropped, in its last BUFFER it winds up the next Slam as it strikes
 	_fresh(m, P, home)
 	A.tap(m, P)
@@ -78,15 +81,21 @@ func slam_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	_ready_smash(K)
 	A.tap(m, P)
 	A.step(m, 0.15)
-	A.ok("jug cancel: RMB again in the Slam's wind-up waits: early dropped, in the last 0.12 s the next Slam goes",
-			early_dropped and not K.slam_w.is_empty(), "early dropped %s" % early_dropped)
+	A.ok(
+		"jug cancel: RMB again in the Slam's wind-up waits: early dropped, in the last 0.12 s the next Slam goes",
+		early_dropped and not K.slam_w.is_empty(),
+		"early dropped %s" % early_dropped
+	)
 	_fresh(m, P, home)
 	A.tap(m, P)
 	A.step(m, 0.15)
 	P.do_jump()
 	A.step(m, 0.12)
-	A.ok("jug cancel: a jump in the Slam's wind-up goes and the wind-up runs on (both)",
-			not P.grounded and not K.slam_w.is_empty(), "grounded %s" % P.grounded)
+	A.ok(
+		"jug cancel: a jump in the Slam's wind-up goes and the wind-up runs on (both)",
+		not P.grounded and not K.slam_w.is_empty(),
+		"grounded %s" % P.grounded
+	)
 
 
 # ------------------------------------------------------------------ the Lunge's fling and the Meteor Drop
@@ -135,9 +144,14 @@ func move_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	t0 = m.time
 	_slash_tap(m, P)
 	A.step(m, 0.2)
-	A.ok("jug cancel: LMB in a Lunge or a Meteor Drop waits: its last 0.12 s swings as it ends, a press in the dive "
-			+ "is dropped", late_lunge and dive_dropped and K.slash_at > t0,
-			"fling %.2f lunge %s dive dropped %s drop late %s" % [fling, late_lunge, dive_dropped, K.slash_at > t0])
+	A.ok(
+		(
+			"jug cancel: LMB in a Lunge or a Meteor Drop waits: its last 0.12 s swings as it ends, a press in the dive "
+			+ "is dropped"
+		),
+		late_lunge and dive_dropped and K.slash_at > t0,
+		"fling %.2f lunge %s dive dropped %s drop late %s" % [fling, late_lunge, dive_dropped, K.slash_at > t0]
+	)
 
 
 # ------------------------------------------------------------------ the Gilded Riposte's guard and cleave
@@ -168,9 +182,14 @@ func riposte_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	var held := not K.rmb_down
 	A.step(m, 0.15)
 	var slam := not K.slam_w.is_empty()
-	A.ok("jug cancel: LMB or RMB in the Riposte's guard or cleave waits: early dropped, the last 0.12 s goes as it "
-			+ "lands (slash, Slam)", early_dropped and locked and late_slash and held and slam,
-			"early dropped %s slash %s rmb held %s slam %s" % [early_dropped, late_slash, held, slam])
+	A.ok(
+		(
+			"jug cancel: LMB or RMB in the Riposte's guard or cleave waits: early dropped, the last 0.12 s goes as it "
+			+ "lands (slash, Slam)"
+		),
+		early_dropped and locked and late_slash and held and slam,
+		"early dropped %s slash %s rmb held %s slam %s" % [early_dropped, late_slash, held, slam]
+	)
 
 
 # ------------------------------------------------------------------ the slash recovery and the Searing Wave hold
@@ -185,8 +204,11 @@ func slash_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	_slash_tap(m, P)
 	var waits := K.slash_at < t0
 	A.step(m, 0.3)
-	A.ok("jug cancel: LMB in the slash's recovery (its last 0.25 s) waits, then swings the next slash",
-			recovering and waits and K.slash_at > t0, "recovering %s waits %s" % [recovering, waits])
+	A.ok(
+		"jug cancel: LMB in the slash's recovery (its last 0.25 s) waits, then swings the next slash",
+		recovering and waits and K.slash_at > t0,
+		"recovering %s waits %s" % [recovering, waits]
+	)
 	_fresh(m, P, home)
 	_slash_tap(m, P)
 	A.step(m, 0.05)
@@ -195,8 +217,11 @@ func slash_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	var slam := not K.slam_w.is_empty()
 	var th0 := W.throws
 	K.use_e()
-	A.ok("jug cancel: RMB or E in the slash's recovery goes at once (both)",
-			recovering and slam and W.throws == th0 + 1, "recovering %s slam %s" % [recovering, slam])
+	A.ok(
+		"jug cancel: RMB or E in the slash's recovery goes at once (both)",
+		recovering and slam and W.throws == th0 + 1,
+		"recovering %s slam %s" % [recovering, slam]
+	)
 	_fresh(m, P, home)
 	var hold := func(): P.inp["fire"] = true
 	A.step(m, float(K.lmb_def()["tap"]) + 0.1, hold)
@@ -206,6 +231,9 @@ func slash_rows(m: Match, P: Hunter, home: Vector3) -> void:
 	th0 = W.throws
 	K.use_e()
 	A.step(m, 0.05, hold)
-	A.ok("jug cancel: RMB or E with the Searing Wave held goes at once and the charge goes on (both)",
-			charging and slam and W.throws == th0 + 1 and K.lmb_t > 0.0, "charging %s slam %s" % [charging, slam])
+	A.ok(
+		"jug cancel: RMB or E with the Searing Wave held goes at once and the charge goes on (both)",
+		charging and slam and W.throws == th0 + 1 and K.lmb_t > 0.0,
+		"charging %s slam %s" % [charging, slam]
+	)
 	P.inp["fire"] = false

@@ -3,6 +3,7 @@
 	"name": "Albert",
 	"script": "tools/gen_sfx_breaker.py",
 	"sounds": {
+		"bulwark_hit": "heavy_impact",
 		"bjorn_throw": "fire",
 		"bulwark_hammer_clang": "signature",
 		"bulwark_hull_creak": "signature",
@@ -31,7 +32,10 @@
 		"bulwark_step_snow": "step",
 		"bulwark_hurt": "grunt",
 		"bulwark_down": "grunt",
-		"bulwark_death": "grunt"
+		"bulwark_death": "grunt",
+		"bjorn_boop": "impact",
+		"bjorn_reel": "cast",
+		"bjorn_ult_quake": "impact"
 	},
 	"signature": ["bulwark_hammer_clang", "bulwark_hull_creak"],
 	"kit_files": ["bjorn_ult.gd"],

@@ -8,6 +8,7 @@ extends RefCounted
 ## wishes (the first arrival of the day). One card, one close; with nothing new it is the wishes alone.
 static func card(h) -> void:
 	var lines := CareJournal.arrival(Work.catch_up())
+	BaseCard.arrived(lines)
 	var wishes: Array = GardenWishes.card_lines() if FarmUnlocks.base_mode() and h.visit.is_empty() else []
 	if lines.is_empty() and not wishes.is_empty():
 		h._show_when_free(wishes, "Today's wishes")

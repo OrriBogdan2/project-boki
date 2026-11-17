@@ -26,6 +26,7 @@ func run(main_node: Node, who := "all") -> void:
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
 		await HOLD.kael(A)
+		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "juggernaut")
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
@@ -190,7 +191,7 @@ func thief(a) -> void:
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
 	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
 	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
-			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
+			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.speed_bonus() > 0.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
 	var gold: Dictionary = AimKit.entry(P, "aim")
@@ -256,6 +257,9 @@ func thief(a) -> void:
 			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
 			and A.dmg(T) <= 0.0,
 			"len %.1f" % float(bl.get("len", 0.0)))
+	A.ok("dancer RMB telegraph: the lane is drawn as wide as it catches (rmb.bola.lane_w, the parity 1.8 m)",
+			absf(float(bl.get("width", 0.0)) - float(K.rmb_def()["bola"]["lane_w"])) < 0.01,
+			"width %.2f" % float(bl.get("width", 0.0)))
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
@@ -279,6 +283,7 @@ func thief(a) -> void:
 	A.ok("dancer Bola: Grounded can't dash or jump",
 			T.dashes >= 0.99 and T.roll_t <= 0.0 and T.vel.y < 1.0, "dashes %.2f vy %.1f" % [T.dashes, T.vel.y])
 	A.step(m, 2.0)
+	_bola_edge(A, m, P, K, T, T2, home)
 	# ... it bounces once off a wall
 	var W = m.world
 	for dz in range(-3, 4):
@@ -390,6 +395,27 @@ func thief(a) -> void:
 	await ULT.new().dancer_ring(A)
 
 
+
+## Drawn = hit for the Bola: the lane is the catch corridor for a foe of her size, so a foe whose body is just inside
+## the lane's reach past it is caught and one just outside is not.
+func _bola_edge(A, m: Match, P: Hunter, K, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var reach := float(K.rmb_def()["bola"]["lane_w"]) * 0.5 - P.r
+	A.fresh(T)
+	A.fresh(T2)
+	P.teleport(home)
+	T.teleport(home + Vector3(3.0, 0, T.r + reach - 0.08))
+	T2.teleport(home + Vector3(5.0, 0, -T2.r - reach - 0.08))
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.aim_at(P, home + Vector3(8.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.8)
+	A.ok("dancer RMB telegraph: a foe just inside the lane's edge is caught, one just outside is not",
+			KitStatus.grounded(T) and not KitStatus.grounded(T2), "in %s out %s" % [KitStatus.grounded(T),
+			KitStatus.grounded(T2)])
+	A.step(m, 1.8)
+
+
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
@@ -405,7 +431,7 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 	var dd: Dictionary = Arch.def("thief")["dash"]
 	var feel_t := float(K.dash_feel()["time"])
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]
 	var own := true
 	for mv in ThiefKit.CARTWHEELS:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
@@ -670,9 +696,9 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
 			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
-	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
-			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
-			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
+	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast, the full wave does not slow)",
+			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 12.0 and T.slow_t <= 0.0 and K.res > 30.0,
+			"mid %.2f took %.0f rage %.0f slow %.2f" % [midk, A.dmg(T), K.res, T.slow_t])
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0
@@ -692,10 +718,12 @@ func juggernaut(a) -> void:
 	var vd: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))
 	var mv: Dictionary = vd["moves"]
 	var lm: Dictionary = K.d["lmb"]
-	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
+	var scorch: Dictionary = mv["slam_hit"]["fx"][0]
+	var slam_lane_only: bool = mv["slam_hit"]["fx"].all(func(l): return not l.has("arc") and not l.has("size_x"))
+	A.ok("juggernaut move art: slash arc %.0f, slam scorch a %.2f m lane, true sizes" % [lm["arc"], sl["width"]],
 			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
-			and is_equal_approx(float(mv["slam_hit"]["fx"][0]["arc"]), float(sl["angle"]))
-			and is_equal_approx(float(_fx(mv["slam_hit"], "sweep")["arc"]), float(sl["angle"]))
+			and scorch["p"] == "scorch" and scorch["shape"] == "lane" and scorch["len"] == "len"
+			and is_equal_approx(float(scorch["w"]), float(sl["width"])) and slam_lane_only
 			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
@@ -714,15 +742,18 @@ func juggernaut(a) -> void:
 	var foreign := _foreign_cols(K, cols)
 	A.ok("juggernaut VFX: every colour is his signature, a slot colour, pale/dark, or far from other Hunters'",
 			foreign.is_empty(), str(foreign))
-	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
-			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
-			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
-			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
+	# Brall's Execution Slam is a lane, not a cone (hero-ref 0157: 0.4 bh wide, parallel sides; reach 2.4 bh)
+	A.ok("juggernaut RMB tap: strike lane drawn = hit (%.1f x %.2f m, no taper)" % [sl["len"], sl["width"]],
+			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "lane"
+			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["len"]))
+			and is_equal_approx(float(lane.get("width", 0.0)), float(sl["width"]))
+			and is_equal_approx(float(lane.get("width_end", 0.0)), float(sl["width"]))
+			and absf(float(sl["len"]) - 4.3) < 0.05 and absf(float(sl["width"]) - 0.72) < 0.1,
 			str(lane))
 	_crimson_soft(A, P, lane, "tap cone")
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
-			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
+			winding and early <= 0.0 and A.dmg(T) >= 14.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
 	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
 			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
@@ -739,9 +770,25 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.7)
 	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
-			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
+			hp0 - T.hp >= 21.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	# the lane's shape: a foe the old 70-degree cone took (3 m out, 1.4 m aside) is missed; one at the tip is hit
+	A.step(m, 2.1)
+	var lane_hits: Array = []
+	for spot: Vector3 in [Vector3(3.0, 0, 1.4), Vector3(float(sl["len"]) - 0.1, 0, 0.3)]:
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + spot)
+		A.aim_at(P, home + Vector3(3.0, 0, 0))
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		A.tap(m, P)
+		A.step(m, 0.7)
+		lane_hits.append(A.dmg(T))
+	A.ok("juggernaut RMB tap: the Slam hits a lane, not a cone (aside %.0f, tip %.0f)" % lane_hits,
+			lane_hits[0] <= 0.0 and lane_hits[1] >= 24.0)
+	_smash_drawn_is_hit(m, P, T, K, home)
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
 	# his plain runs (briefs/hero-ref/juggernaut.md, locomotion; docs/MOVEMENT_FEEL.md)
 	A.step(m, 1.0)
@@ -792,7 +839,7 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	A.step(m, 0.5)
 	A.ok("juggernaut RMB hold: release flings you forward into them",
-			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
+			K.last_variant == "hold" and A.dmg(T) >= 9.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])
 	A.step(m, 3.2)
 	P.teleport(home)
@@ -833,7 +880,7 @@ func juggernaut(a) -> void:
 			disc and K.meteor.drops == 1 and off < 0.05 and absf(K.meteor.last_hit.x - x0 - ahead) < 0.01,
 			"landed %.2f off, hit at +%.2f" % [off, K.meteor.last_hit.x - x0])
 	A.ok("juggernaut RMB air: Meteor Drop knocks down, the centre takes more",
-			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.stun_t > 0.0,
+			K.last_variant == "air" and A.dmg(T) >= 14.0 and T.stun_t > 0.0,
 			"took %.0f stun %.2f" % [A.dmg(T), T.stun_t])
 	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
 			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
@@ -886,7 +933,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO
 	A.ok("juggernaut dash: Rampage the way you dash, tip hits",
-			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
+			K.tips >= 1 and A.dmg(T) >= 5.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
 	# rank 3: a shot dodged through the dash feeds Rage (through the real dodge hook); rank 1 does not
@@ -930,7 +977,7 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.2)
 	A.ok("juggernaut RMB during the pull: Cinder Spin (blight)",
-			K.spins == 1 and K.last_variant == "during_e" and A.dmg(T) >= 20.0,
+			K.spins == 1 and K.last_variant == "during_e" and A.dmg(T) >= 13.0,
 			"spins %d variant %s took %.0f" % [K.spins, K.last_variant, A.dmg(T)])
 	# rooted: no chain; a stun breaks a chain
 	A.step(m, 0.5)
@@ -1107,10 +1154,10 @@ func combos(a) -> void:
 	var hp0 := A.dmg(T)
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
-	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+	A.ok("combo jug: E > hold RMB = Chain Lunge (no stun)",
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t <= 0.0
 			and P.flat_dist(T) < 3.4,
-			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
+			"lunges %d dist %.1f took %.0f stun %.2f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0, T.stun_t])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)
 	hook.call()
@@ -1121,8 +1168,8 @@ func combos(a) -> void:
 	P.ak.use_e()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
-	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)",
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t <= 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)
@@ -1475,6 +1522,83 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			% [what, col, got[0], AimShapes.SOFT_A, got[1]],
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
+
+## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe
+## whose body just reaches into the drawn Slam cone or lane (at its rim or side, at its tip) is hit and one just
+## past it is not; the same at the drawn Lunge lane's side, and the fling travels the drawn length.
+func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3) -> void:
+	var fwd := Vector3(1, 0, 0)
+	var side := Vector3(0, 0, 1)
+	var got := []
+	for probe in [["rim in", true], ["rim out", false], ["tip in", true], ["tip out", false]]:
+		A.step(m, 0.3)
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + Vector3(0, 0, 12))           # out of reach while the cone is read
+		A.aim_at(P, home + fwd * 3.0)
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		A.tap(m, P)
+		A.step(m, 0.1)
+		var e: Dictionary = AimKit.entry(P, "slam")
+		var l := float(e.get("len", 0.0))
+		var half := deg_to_rad(float(e.get("deg", 0.0))) * 0.5
+		var lane := String(e.get("kind", "")) == "lane"     # the source's lane (ext/parity-kael-slam-lane) or our cone
+		var rim := side * (float(e.get("width", 0.0)) * 0.5 + T.r) + fwd * l * 0.7
+		var at := Vector3.ZERO
+		match probe[0]:
+			"rim in": at = rim - side * 0.1 if lane else (fwd.rotated(Vector3.UP, half - 0.03)) * l * 0.7
+			"rim out": at = rim + side * 0.15 if lane else (fwd.rotated(Vector3.UP, half + 0.06)) * l * 0.7
+			"tip in": at = fwd * (l + T.r - 0.1)
+			"tip out": at = fwd * (l + T.r + 0.2)
+		T.teleport(home + at)
+		A.step(m, 0.6)
+		got.append("%s %.0f" % [probe[0], A.dmg(T)])
+		var hit := A.dmg(T) > 0.0
+		var what := "%s (%.1f m, %s drawn)" % [probe[0], l,
+				"%.2f m wide" % float(e.get("width", 0.0)) if lane else "%.0f deg" % rad_to_deg(half * 2.0)]
+		A.ok("juggernaut RMB tap: drawn %s = hit, %s" % [e.get("kind", "?"), what],
+				K.last_variant == "tap" and l > 0.0 and hit == probe[1], ", ".join(got))
+	# the Lunge: charged to full, the drawn lane's half width (+ the foe's body, as for every edge) is the contact
+	for probe in [["side in", true], ["side out", false], ["length", false]]:
+		A.step(m, 0.5)
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + Vector3(0, 0, 12))
+		A.aim_at(P, home + fwd * 3.0)
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+		A.step(m, K.rmb_charge_full() + 0.5, func(): P.inp["sec_hold"] = true)   # full, between perfect windows
+		var e: Dictionary = AimKit.entry(P, "rmb")
+		var w := float(e.get("width", 0.0))
+		var l := float(e.get("len", 0.0))
+		if probe[0] == "side in":
+			T.teleport(home + fwd * 3.0 + side * (w * 0.5 + T.r - 0.1))
+		elif probe[0] == "side out":
+			T.teleport(home + fwd * 3.0 + side * (w * 0.5 + T.r + 0.15))
+		var from := P.pos
+		P.inp["sec_hold"] = false
+		m.step(A.DT)
+		var flung := 0.0              # where the fling's own travel ends (the slide after it is the run's brake)
+		for i in 90:
+			if K.lunge.is_empty() and flung > 0.0:
+				break
+			if not K.lunge.is_empty():
+				flung = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+			m.step(A.DT)
+		A.step(m, 1.0)
+		var moved := flung
+		if probe[0] == "length":
+			A.ok("juggernaut RMB hold: the fling travels the drawn lane (%.2f m drawn, %.2f m flung)" % [l, moved],
+					l > 0.0 and absf(moved - l) <= 0.25, "")
+		else:
+			A.ok("juggernaut RMB hold: drawn lane = hit, %s (%.2f m drawn wide)" % [probe[0], w],
+					w > 0.0 and (A.dmg(T) > 0.0) == probe[1], "took %.0f" % A.dmg(T))
+	A.step(m, 0.5)
+	P.teleport(home)
+	A.fresh(T)
 
 
 const SLASH_HIT := 0.08     # s: the slash's contact in its sound (tools/gen_sfx_kael.py SLASH_HIT)

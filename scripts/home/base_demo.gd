@@ -41,7 +41,7 @@ static func save() -> Dictionary:
 	Save.d = d
 	Incubator.ensure()
 	var egg := Incubator.add(EGG_SPECIES)
-	Incubator.find(String(egg["id"]))["heat"] = Incubator.HEAT_NEED
+	Incubator.find(String(egg["id"]))["heat"] = Incubator.need()
 	return d
 
 ## Puts the toys and the Nook on the built farm, the Boki beside them, and sets the scene for the camera.

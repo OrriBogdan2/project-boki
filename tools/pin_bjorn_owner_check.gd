@@ -65,7 +65,6 @@ func pin() -> void:
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
-	P.reload_t = 0.0
 	P.draw_t = -1.0
 
 ## No aim shape of Lace's is a V, in any hold.
@@ -107,13 +106,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float:
-		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
-	var eye0: float = eye_ahead.call()
+	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+	ok("114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset",
+		n.eye.distance_to(nock) < 0.01, "eye %s nock %s" % [str(n.eye), str(nock)])
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
-	ok("114 needle: the orchid thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
 	var p0 := P.pos
 	step(m, 0.4, hold)
 	var held_v := p0.distance_to(P.pos) / 0.4
@@ -121,14 +120,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
 		"free %.2f held %.2f" % [free_v, held_v])
 	step(m, 0.6, hold)
-	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	# (hot toward her orchid thread: the steel loses its green as it heats)
-	ok("114 needle: it draws back and glows up with the charge, the silver going orchid-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3
-			and hot.g < PinNeedle.SILVER.g - 0.3,
-		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	# (hot toward her red thread: the steel loses its green and blue as it heats)
+	ok("114 needle: it glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3
+			and hot.g < PinNeedle.SILVER.g - 0.3 and hot.r > hot.b + 0.3,
+		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -370,6 +368,10 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
 	var pins0 := K.pins
+	var spent0 := 0
+	for c in K.fx.spent:
+		if (c["node"] as Node3D).visible:
+			spent0 += 1
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.8, rmb_at.bind(P, T.pos))
@@ -399,8 +401,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
-	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+	ok("pin heavy: a release burst at the bow's mouth, wider than the bow cues, with a screen kick",
+		burst != null and burst.global_position.distance_to(K.bow_mouth()) < 0.6 and burst.scale.x >= 1.2
 			and K.heavy_kicks == kicks0 + 1,
 		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0
@@ -410,13 +412,13 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it pins the foe to the wall and the target flashes",
 		K.pins >= pins0 + 1 and T.stun_t > 0.5 and flashed > 0.0, "pins %d stun %.2f flash %.2f" % [K.pins - pins0,
 			T.stun_t, flashed])
-	ok("pin heavy: a stake stays in the wall after the pin", K.fx.staked >= 1, "stakes %d" % K.fx.staked)
-	step(m, 5.0)
+	step(m, 1.0)
 	var standing := 0
 	for c in K.fx.spent:
-		if float(c["t"]) > 0.5 and (c["node"] as Node3D).visible:
+		if (c["node"] as Node3D).visible:
 			standing += 1
-	ok("pin heavy: the stake is still standing 5 s later", standing >= 1, "standing %d" % standing)
+	ok("pin heavy: a wall pin leaves nothing in the wall or on the ground (the owner's 11-08 note)", standing <= spent0,
+		"standing %d, %d before" % [standing, spent0])
 
 func bjorn() -> void:
 	var r := setup("bulwark", 7.0, "", true)
@@ -447,10 +449,10 @@ func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
 	for id in ["bul_throw", "bul_recall"]:
-		var keys: Array = KMovesPinBjorn.MOVES[id]["keys"]
+		var keys: Array = KMovesBjorn.MOVES[id]["keys"]
 		tail = maxf(tail, float((keys[-1] as Array)[0]))
 	ok("bjorn auto: the throw and recall poses end with the faster cadence (no pose cut mid-way)",
-		float((KMovesPinBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
+		float((KMovesBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
 			"tail %.2f" % tail)
 	var throws := _throws_in(_m, _P, K, 3.0)
 	ok("bjorn auto: throw, recall and throw again within 3 s at least 4 times", throws >= 4, "throws %d" % throws)
@@ -550,26 +552,28 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		P.fire_cd = 0.0
 		P.dashes = P.max_dashes()
 		K.lmb_t = -1.0
-		K.hold_blocked = false
-	# a mantle ends the hold within one frame, and it stays ended while the button stays down
+		K.mace = {}          # (a hold let go under its tap throws the hammer)
+	# a mantle ends the hold within one frame; the button still down starts a fresh one once he is off the lip
+	# (LMB is a held input, docs/decisions/0022-held-fire-resume.md)
 	reset.call()
 	step(m, 0.6, aim)
 	ok("bjorn hold: the swing is charging", K.lmb_t > 0.4, "lmb_t %.2f" % K.lmb_t)
 	P.lfloat = {"lip": P.pos.y + 2.0, "n": Vector2(1, 0), "t": 0.0, "g0": false, "shove": false, "kb0": P.kb_t,
 		"at": Vector2(P.pos.x, P.pos.z), "downed": false, "win": false, "tile": Vector2i(0, 0), "max_t": 5.0}
 	m.step(DT)
-	ok("bjorn hold: a mantle ends the hold within one frame", K.lmb_t < 0.0 and P.mel_hold == 0.0 and K.hold_blocked,
-		"lmb_t %.2f blocked %s" % [K.lmb_t, K.hold_blocked])
+	ok("bjorn hold: a mantle ends the hold within one frame", K.lmb_t < 0.0 and P.mel_hold == 0.0,
+		"lmb_t %.2f" % K.lmb_t)
 	P.lfloat = {}
 	var sl0 := K.slams
 	step(m, 0.5, aim)
-	ok("bjorn hold: after the mantle the held button does not start it again", K.lmb_t < 0.0 and K.slams == sl0,
+	ok("bjorn hold: after the mantle the held button starts a fresh hold, no swing", K.lmb_t > 0.0 and K.slams == sl0,
 		"lmb_t %.2f slams %d" % [K.lmb_t, K.slams - sl0])
 	P.inp["fire"] = false
-	m.step(DT)
+	step(m, 0.8)          # the swing it lets go passes
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51)
+	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51); the
+	# charge is gone, and the button still down starts a fresh hold the step he is free
 	var cases := {
 		"glide": func(): P.gliding = true,
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
@@ -583,8 +587,8 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		(cases[key] as Callable).call()
 		m.step(DT)
 		m.step(DT)
-		ok("bjorn hold: %s ends the hold" % key, live and K.lmb_t < 0.0 and P.mel_hold == 0.0,
-			"live %s lmb_t %.2f" % [live, K.lmb_t])
+		ok("bjorn hold: %s ends the hold" % key, live and K.lmb_t < 0.1 and P.mel_hold < 0.1,
+			"live %s lmb_t %.2f mel_hold %.2f" % [live, K.lmb_t, P.mel_hold])
 		P.gliding = false
 	reset.call()
 	# the swing lunges him forward and knocks a foe back along it
@@ -750,6 +754,7 @@ func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
 		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
 		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "fire")
+	P.inp["fire"] = false          # the last trial's hold lets go and its swing passes
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))

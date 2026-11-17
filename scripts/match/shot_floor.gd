@@ -8,7 +8,7 @@ extends RefCounted
 
 const MIN_CORE_PX := 6.0      # px across the white core, at REF_H, default camera, at the farthest point in view
 const REF_H := 720.0          # px: the screen height the floor is measured at (more pixels read larger)
-const STYLE := "supervive"    # the default camera preset (CamRig.STYLES)
+const STYLE := "default"    # the default camera preset (CamRig.STYLES)
 const RIM_K := 1.8            # the rim's radius as a share of the core's
 const FOE_RIM := Color("ff5a3a", 0.9)      # what can hurt you (the same tint Oomph.shot_look gives a foe's shot)
 const FRIEND_RIM := Color("7fe8ff", 0.6)   # your side's shots: cool and softer, so they never hide an incoming one

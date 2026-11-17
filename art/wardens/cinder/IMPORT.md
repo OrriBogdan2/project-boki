@@ -80,3 +80,22 @@ Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clip
 `python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
 stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
 glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `leap` (Soot Ram) re-keyed to the felt ram (3.4 m / 0.33 s, fastest at
+the start): flat out by 0.12 s, the stop on RAM_IMPACT_KEY 0.36 as before. The source .blend was not on the art worker, so
+the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade_root` (a control bake of `leap` and `hop`
+matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
+6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
+On the v95 swap the `leap` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... leap`.
+
+**v95 master A (11-16, ext/cinder-3d-a-1116):** the owner accepted Cinder 3D option A (job 20261116-200037-a2, Meshy rebuild from the
+owner-picked sheet: glowing amber eyes, clean lips, deeper bust). Master: `~/meshy/v95/Cinder/r8/pick1116/cands/A.glb` (live in
+`CURRENT_OVERRIDES.txt` / `current.json`). A carries a fused tail, so the game swap uses a copy with it cut off
+(`~/meshy/v95/Cinder/r8/pick1116/game/A_notail.glb`, made by `cut_tail_A.py`, an adaptation of `_body5_tools/cut_tail.py`: 115,030 of
+682,993 vertices) and the game keeps its own spring tail (`keep`). Swap:
+`python3 tools/art1/v95_to_game.py Cinder --master <A_notail.glb>` (new `--master` flag) with `art/wardens/src/cinder_v95.json`
+(joints re-read from `v95_grid.py` renders of A). Result: 60,711 tris, same rig, clips, spring tail and jets. Judges disagree:
+the promote judge scored A 53 vs A2 71, the source job's judge 83 vs 65; the owner picked A by eye.

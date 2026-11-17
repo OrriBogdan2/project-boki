@@ -6,16 +6,20 @@ extends RefCounted
 ## picks it as a mate. rec["shy_s"] counts down only while it is on the farm; absent means settled (an old save,
 ## or a Boki that was not adopted), so no save migration. Tuning: base_life.json "shy".
 
+
 static func rules() -> Dictionary:
 	return Content.rules("base_life")["shy"]
+
 
 ## The Shelter calls this when you adopt: the new Boki starts its shy day.
 static func start(rec: Dictionary) -> void:
 	if FarmUnlocks.base_mode():
 		rec["shy_s"] = float(rules()["secs"])
 
+
 static func shy(rec: Dictionary) -> bool:
 	return float(rec.get("shy_s", 0.0)) > 0.0
+
 
 ## A new Boki appeared on the farm: a shy one steps out of the stone and looks around.
 static func arrive(h, k: Dictionary) -> void:
@@ -29,6 +33,7 @@ static func arrive(h, k: Dictionary) -> void:
 	k["goal"] = Vector3.INF
 	h._emote(k, "?")
 
+
 ## Counts the shy day down; when it is over the Boki cheers up and goes to join in.
 static func tick(h, k: Dictionary, dt: float) -> void:
 	var rec: Dictionary = k["rec"]
@@ -39,6 +44,7 @@ static func tick(h, k: Dictionary, dt: float) -> void:
 		rec.erase("shy_s")
 		h._emote(k, "♪")
 		k["t"] = 0.0
+
 
 ## A shy Boki's walk: the farthest from the island's middle of a few open spots. False when it is not shy.
 static func keep_to_edge(h, k: Dictionary) -> bool:

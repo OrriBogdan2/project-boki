@@ -7,13 +7,14 @@ extends RefCounted
 ## shield drops whole when its time runs out (docs/ABILITIES.md, Shields), so it fades over its last
 ## FADE_S seconds as the warning.
 
-const H_PX := 6.0         # px: the strip's height, over the top of the health bar
-const FADE_S := 1.5       # s: a timed shield fades out over this much of its time left
-const FADE_MIN := 0.3     # alpha a timed shield has fallen to when it drops
-const ICON_TILE := 14.0   # px: the source icon's tile
-const TXT := 14           # font size of the amount
+const H_PX := 6.0  # px: the strip's height, over the top of the health bar
+const FADE_S := 1.5  # s: a timed shield fades out over this much of its time left
+const FADE_MIN := 0.3  # alpha a timed shield has fallen to when it drops
+const ICON_TILE := 14.0  # px: the source icon's tile
+const TXT := 14  # font size of the amount
 
-static var shown := {}    # what the last draw showed (checks read it): {amount, icon, alpha, frac}
+static var shown := {}  # what the last draw showed (checks read it): {amount, icon, alpha, frac}
+
 
 ## The pools up now, in the order a hit drains them: [amount, icon, alpha]. Empty with no shield.
 static func pools(p: Hunter) -> Array:
@@ -27,11 +28,13 @@ static func pools(p: Hunter) -> Array:
 		out.append([p.kin_shield, ShieldSrc.BOKI, 1.0])
 	return out
 
+
 ## The timed shield's alpha with `time_left` on it (0: no timer, it stays until broken).
 static func fade(time_left: float) -> float:
 	if time_left <= 0.0 or time_left >= FADE_S:
 		return 1.0
 	return lerpf(FADE_MIN, 1.0, time_left / FADE_S)
+
 
 ## The strip over the top of `hr` (the health bar) and the icon + amount from `label_x` on the numbers'
 ## baseline `base_y`.

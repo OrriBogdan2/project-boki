@@ -12,6 +12,7 @@ extends RefCounted
 ##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small
 ##   wisp_8_revive_b  the hero scaling up
 ##   wisp_9_hero      the hero back at full size
+##   wisp_a_elim_a .. wisp_d_elim_d   the elimination beat: flicker, dim and sink into the box, the box alone
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -62,6 +63,19 @@ func run(main_node: Node) -> void:
 	_take("wisp_8_revive_b", "The hero scaling up, the Wisp fading")
 	await _go(0.6)
 	_take("wisp_9_hero", "The hero back at full size, no Wisp")
+	m.knock(P, foe, {})
+	P.down_hp = 1e6
+	P.last_hit_by = foe
+	await _go(0.6)
+	m.eliminate(P, foe, "finished")
+	await _go(0.05)
+	_take("wisp_a_elim_a", "Elimination beat: the box appears, the core flickers in the killer's colour")
+	await _go(0.2)
+	_take("wisp_b_elim_b", "The Wisp dims and sinks toward the deathbox, no explosion")
+	await _go(0.25)
+	_take("wisp_c_elim_c", "The Wisp, small and dark, at the top of the growing box")
+	await _go(0.3)
+	_take("wisp_d_elim_d", "Beat over: the deathbox stands alone, nothing left behind")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)

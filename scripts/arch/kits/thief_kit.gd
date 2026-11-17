@@ -71,7 +71,7 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
-var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
 var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
@@ -130,12 +130,20 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
+	sync_marks(t)
+
+## A body on another game keeps a copy of our Marks on it (KitStatus tag "mrk").
+func sync_marks(t: Ent) -> void:
+	if t.remote:
+		var e: Array = t.get_meta("marks", {}).get(h.nid, [0, 0.0])
+		KitStatus.apply(t, "mrk", float(e[1]), float(e[0]) if float(e[1]) > 0.0 else 0.0, true, "", h.nid)
 
 func combo_read(t: Ent) -> Dictionary:
 	var n := marks_on(t)
 	if n <= 0:
 		return {}
-	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+	var left := float((t.get_meta("marks") as Dictionary)[h.nid][1])
+	return {"icon": "mark_thief", "n": n, "max": pip_count(), "left": left,
 			"total": float(res_def()["dur"])}
 
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
@@ -147,6 +155,7 @@ func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	mk.erase(h.nid)
 	t.set_meta("marks", mk)
+	sync_marks(t)
 
 ## How many diamonds the readout draws; the Marks themselves are uncapped.
 func pip_count() -> int:
@@ -163,6 +172,7 @@ func set_marks(t: Ent, n: int) -> void:
 	t.set_meta("marks", mk)
 	_pip_pop(t, n)
 	_on_marks(t, had, n)
+	sync_marks(t)
 
 ## Every Mark we have on anyone back to its full time (each Encore blade).
 func refresh_marks() -> void:
@@ -336,8 +346,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func move_k() -> float:
-	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+func speed_bonus() -> float:
+	return vault_haste() if haste_t > 0.0 else 0.0
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
@@ -365,7 +375,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	else:
 		bolt_buf = maxf(0.0, bolt_buf - dt)
 	_fire_was = held
-	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.can_fire():
+	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.atk.can_fire():
 		bolt_buf = 0.0
 		_bolt()
 	return true
@@ -376,7 +386,7 @@ func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
 	h.shot_aim = AimMode.CURSOR
-	h.fire()
+	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
 	var sd: Dictionary = m.shots[-1]
@@ -420,6 +430,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
+		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
@@ -459,10 +470,10 @@ func on_dash(use_ex: bool) -> bool:
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
-	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	var extra := {"invuln": 0.1, "feel": "long"} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air, "aloft": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -474,7 +485,7 @@ func _empowers(use_ex: bool) -> bool:
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
-## it ends where she lands.
+## it ends where she lands (not the long dash on the ground: cutting that one leaves its full speed unhanded).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -483,8 +494,25 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+	if bool(vault["aloft"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
+
+## On the ground the fitted curve's tail (past its peak) never drops under her (hasted) run, so the hand-over is at
+## run speed: the source runs down into the faster run with no dip (dancer.md: 154 -> 140 px/s into the 127-136 px/s
+## hasted run; the fit's 0.25 end knot is its straight line's, docs/heroes/thief.md "Cartwheel exit"). The crouch
+## ramp before the peak is the fit's. Only the Cartwheel runs on a curve here, and its last step comes after
+## _tick_vault has let it go, so this keys off `curved`.
+func _tick_curve(dt: float) -> void:
+	var curve: Array = curved["curve"]
+	var t0 := float(curved["t0"])
+	super._tick_curve(dt)
+	if curved.is_empty() or not h.grounded:
+		return
+	var peak: Array = curve[0]
+	for knot in curve:
+		if float(knot[1]) > float(peak[1]): peak = knot
+	if 1.0 - h.roll_t / t0 > float(peak[0]):
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * (move_k() + speed_bonus()) / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -634,7 +662,8 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
@@ -678,6 +707,7 @@ func _ground_t() -> float:
 func _tick_bola(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var spd := float(bd["speed"])
+	var reach := float(bd["lane_w"]) * 0.5 - h.r      # m past a foe's body: a foe her size is caught inside the lane
 	var p: Vector3 = bola["pos"]
 	var dir: Vector2 = bola["dir"]
 	var steps := maxi(1, int(ceil(spd * dt / 0.25)))
@@ -694,6 +724,7 @@ func _tick_bola(dt: float) -> void:
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
 				m.sfx("click", p, -5.0, 1.4)
 				continue
+			MissFx.puff(m, MissFx.colour_of(h), p, true)
 			_end_bola(p)
 			return
 		p = q
@@ -710,7 +741,7 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + reach and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o
@@ -721,6 +752,8 @@ func _tick_bola(dt: float) -> void:
 					_end_bola(p)
 					return
 		if float(bola["left"]) <= 0.0:
+			if bola["first"] == null:
+				MissFx.puff(m, MissFx.colour_of(h), p, false)
 			_end_bola(p)
 			return
 	bola["pos"] = p

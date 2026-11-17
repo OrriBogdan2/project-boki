@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the carriers: per region the number of key carriers equals the number of chests (a quiet
 ##      region with too few monsters is carried for by its neighbours), they change between seeds,
 ##      and every carrier shows a key glint
-##   2. a chest will not open without a key, and opening one uses exactly one (a single press with a key)
+##   2. a chest will not open without a key, and opening one uses exactly one; its lid creaks by the chest's tier
 ##   3. keys drop in a deathbox, can be looted from it, and lie on the ground to be picked up
 ##   4. a carrier drops its key when it dies
 ##   5. the Shrubling: disguised until approached, flees (faster than a hunter on foot, slower than a
@@ -14,6 +14,7 @@ extends RefCounted
 ##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
 ##   8. the Esc menu's Controls card: every cap is Settings.key_cap (a rebind shows at once), no key
 ##      is written in its script, and every Hunter's five slots have an icon and a name
+##   9. --keys-part=rebind: every drawn key follows a rebind (tools/rebind_keys_check.gd)
 
 var main: Node
 var fails := 0
@@ -24,6 +25,8 @@ func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("KEYCHECK %-58s %s  %s" % [label, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
+
+const SPILL_S := 0.9      # s: a kill dissolves first, then its drops spill (MobDissolve)
 
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
@@ -43,7 +46,7 @@ func build(seed_i: int, extra := {}) -> Match:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer runs one part while iterating
+	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer|rebind runs one part while iterating
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
 	if only in ["", "carriers"]: await _carriers()
@@ -53,6 +56,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "bonus"]: await _bonus()
 	if only in ["", "fewer"]: await _fewer()
 	if only in ["", "card"]: _controls_card()
+	if only in ["", "rebind"]: await load("res://tools/rebind_keys_check.gd").new().run(self, main)
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -157,8 +161,13 @@ func _chest_and_keys() -> void:
 			"with a key: the prompt offers to open it",
 			String(pr["kind"]) == "chest" and String(pr["label"]).contains("1 key"), String(pr["label"]))
 	var gems0 := m.pickups.size()
+	Sfx.listener = c["pos"]
+	Sfx.last_played.clear()
 	m._open_chest(P, c)
 	ok("opening uses exactly one key", c["open"] and P.chest_keys == 1, "keys %d" % P.chest_keys)
+	var lid := ChestLoot.creak(ChestLoot.rarity_bonus(m, c["pos"]))
+	ok("the lid creaks by the chest's tier, not the pickup sound", Sfx.last_played.has(lid) and not Sfx.last_played.has(
+			"pickup"), lid)
 	m._open_chest(P, c)
 	ok("an open chest costs nothing more", P.chest_keys == 1)
 	ok("the chest pays out", m.pickups.size() > gems0)
@@ -212,6 +221,7 @@ func _chest_and_keys() -> void:
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	var bonus0 := K.bonus_given      # (the death may also roll a bonus key: KeyBonus)
 	car.hurt(99999.0, P, {"src": "shot"})
+	step(m, SPILL_S)
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	var bonus := K.bonus_given - bonus0
 	ok(
@@ -401,7 +411,7 @@ func _shrubling() -> void:
 	S.hp = S.max_hp
 	var np := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	S.hurt(S.max_hp + 5.0, P, {"src": "shot"})
-	step(m, 0.2)
+	step(m, 0.3)      # (its key spills as the small body dissolves, before the player is near enough to take it)
 	ok(
 			"it has low health and no attack",
 			S.dead and float(Data.MOBS["shrubling"]["dmg"]) == 0.0 and S.max_hp <= 60.0, "hp %.0f" % S.max_hp)
@@ -544,7 +554,7 @@ func _sources() -> void:
 			if mb == null or mb.dead:
 				break
 			mb.hurt(mb.max_hp * 10.0 + 500.0, m.player, {"src": "shot"})
-			step(m, 0.3)
+			step(m, SPILL_S)
 		var want := 1 if kind_s == "monster" else 2
 		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
 				"%d -> %d" % [k0, m.keys.bonus_given])

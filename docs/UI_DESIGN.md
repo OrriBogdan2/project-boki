@@ -1,7 +1,7 @@
 # Project Boki menu design
 
 How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that build them. The
-in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
+in-match HUD (`scripts/ui/hud.gd`) has its own reference-style layout and isn't covered here; it
 shares the colours and fonts.
 
 **Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026). Panels are
@@ -216,3 +216,11 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
   960x540 window and Interface size at its top (1.1), and fails on anything clipped or outside the window's safe margin.
   Add a new garden panel to its `screens`.
+
+## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip the tutorial / Save
+and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
+Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
+panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
+count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
+720p, 1080p and ultrawide.

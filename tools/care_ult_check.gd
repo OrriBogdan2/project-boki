@@ -130,8 +130,9 @@ func _tender_rescue() -> void:
 	sc.down(m, A)
 	step(m, 0.1)
 	P.hp = P.max_hp * 0.5
-	P.regen_wait = 10.0     # s, as if just hit: with her only teammate down she is the last one up, and LastAlive's
-	# self-mend (1 hp/s once regen_wait runs out) holds off, so any hp she gains below is the tether's
+	# in combat 10 s more, as if just hit: with her only teammate down she is the last one up, and LastAlive's
+	# self-mend (1 hp/s once out of combat) holds off, so any hp she gains below is the tether's
+	P.combat_at = m.time + 10.0 - InCombat.window()
 	var p_hp0 := P.hp
 	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
 	var a_down0 := A.down_hp
@@ -327,17 +328,24 @@ func rimewright() -> void:
 	var slow1 := T.slow_k
 	var hot1 := float(AimKit.entry(P, "x").get("hot", 0.0))
 	step(m, 1.6)
-	ok("tm X: the slow on a foe in the rink stacks the longer they stay (small mechanic)", T.slow_k > slow1 + 0.15
-		and T.slow_k <= float(xd["slow_max"]) + 0.001 and K.chilled(T), "%.2f -> %.2f" % [slow1, T.slow_k])
+	ok("tm X: a foe in the rink is Chilled and slowed a flat 35%, the same at 0.75 s and 2.35 s (source: no ramp)",
+		absf(slow1 - 0.35) < 0.001 and absf(T.slow_k - 0.35) < 0.001 and K.chilled(T),
+		"%.2f -> %.2f" % [slow1, T.slow_k])
 	ok(
 			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
 			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
 	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
 	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
+	# care_disc's body alpha at the centre is fill * 0.18 * 1.6; the zone rule caps it at 0.25 (docs/VFX_QUALITY.md)
+	var rink_max := UltLook.RINK_FILL * 2.0
+	var disc := (K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D
+	var live := float((disc.material_override as ShaderMaterial).get_shader_parameter("fill"))
+	ok("tm X: the rink is a lit rim over a soft inside (no screen-wide cyan), even near the crash",
+			rink_max * 0.18 * 1.6 <= 0.25 and live <= rink_max + 0.001, "fill %.2f (max %.2f)" % [live, rink_max])
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	step(m, 1.3)
-	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
+	step(m, float(xd["hold"]) - 2.2)     # 2.35 s stepped so far: look 0.15 s after the crash
+	ok("tm X: it cracks open by itself at 3.3 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)

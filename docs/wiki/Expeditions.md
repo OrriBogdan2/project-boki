@@ -27,12 +27,14 @@ its engines droning and its shadow sweeping over the islands below.
 - **Jump** jumps out of the rocket early: you free-fall (slower than the rocket, still fast; steer it like any
   jump) and a second **Jump** or the glide key opens your glider at any height to travel further. Holding
   Jump never opens it; never opening it, it opens by itself just above the ground. Anyone still aboard the ship at the far side is launched.
+- Aboard the rocket the screen is bare: the map, the landing ring, and the keys (the leader's
+  "Steer with WASD", everyone's "Jump out"). No health or ability bars until you are out.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
 
-- **Jump and glide.** Hold Space in the air (or press Mouse 5, which opens the glider at once without
-  a jump). Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
+- **Jump and glide.** Press Space again in the air and hold it (or hold Mouse 5, which opens the glider
+  at once without a jump); holding Space from the jump never glides. Speed is what keeps you up: fast gliders barely sink. Steer hard against your heading to
   brake. The glider heats up (about 14 seconds of level gliding); it cools fastest on the ground.
 - **Feathering.** Opening and closing the glider is instant with no penalty. With it closed in the air
   it cools a little, and for a moment after closing you keep the glide's speed and steering, so
@@ -113,23 +115,25 @@ Each map and what it rolls is on [Maps and biomes](Maps.md).
 Walled arenas, each sealed by a ward and holding a boss and the **Rare Egg** it guards. Each match
 rolls which lairs are live (the rest lie dormant).
 
-- **Getting in.** Every lair has a **lock dial** at its gate: a needle sweeps round and you press F as
-  it crosses each lit arc, through three or four locks that get faster and tighter. A miss resets the
-  lock, rings a chime that pings you to everyone nearby, and calls guards. Some lairs have a second way
-  in: three **rune pylons** to light (Stormcrown Eyrie) or three **ward stones** to break (the Thornhive).
+- **Getting in.** Every lair's gate is barred by a **Gate Seal**, a wall of stone you break down with
+  sustained damage (2000 health at tier 0: about two minutes alone, about 20 s for a squad of three).
+  It cracks in four stages; each crack drops blocks out of it, shakes the ground, rings out to everyone
+  nearby and calls two guards. Walk away and nothing resets: after 15 s it knits back slowly, but never
+  past its last crack. Some lairs also have three **rune pylons** to light (Stormcrown Eyrie) or three
+  **ward stones** to break (the Thornhive): each one knocks a fifth off the seal.
 - **The fight.** Step past the threshold and the boss wakes and the gate seals behind you for up to 90
   seconds. Everyone within 150 m hears the roar and gets a ping, a shaft of light rises over the lair,
   and the seal's clock floats over the gate, so a squad outside can camp it. Bosses have phases at 66%
   and 33% and enrage after 75 seconds. They fight everyone inside, rivals included.
-  - **The Stone Colossus:** slams with shockwave rings you jump, thrown boulders, fissures.
-  - **Stormcoil, the Sky Serpent:** telegraphed lunges, lightning circles, a coiled discharge.
-  - **The Brood Mother:** acid spit and puddles, egg sacs that hatch adds, burrowing.
+  - **Siegephant** (a castle-tower elephant): slams with shockwave rings you jump, thrown boulders, fissures.
+  - **Sarcobra** (a winged tomb cobra): telegraphed lunges, lightning circles, a coiled discharge.
+  - **Calderoise** (a volcano-shelled tortoise): acid spit and puddles, egg sacs that hatch adds, burrowing.
 - **After.** The gate stays shut for 15 seconds unless someone inside pulls the lever by it, and an
   updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
   roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
-  your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Colossus), Zephyrak
-  (Stormcoil) or Hivara (Brood Mother).
+  your deathbox if you fall, and hatches at home in the Incubator: Cairnhorn (Siegephant), Zephyrak
+  (Sarcobra) or Hivara (Calderoise).
 
 ## Getting out
 
@@ -147,7 +151,7 @@ you scanned to your farm.
 
 ## Down, dead and back
 
-On SUPERVIVE-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
+On reference-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
 
 - **Downed.** At 0 health you become a **wisp**: you crawl, can't be shot, and bleed out in 15 s.
   A teammate standing on you brings you back in 4 s at a quarter of your health (extra teammates make
@@ -215,5 +219,5 @@ boss lairs and a sky train. Full details on [Maps and biomes](Maps.md).
 quiet outer isles (Highwatch and Saltmere have uplinks), a mid ring of four regions each with one raised plateau reached by stairs (Frostgate,
 Cinder Steps, Stormbreak, Thornwood), and a raised core, **the Crown**, with the vault on the Throne,
 two boss Gaols and the most loot and Blight. Every route into the Crown is a bridge or a glide over
-open air. Lairs: Stormcrown Eyrie (Stormcoil), the Sunken Forge (Stone Colossus) and the Thornhive
-(Brood Mother), two of them live each match.
+open air. Lairs: Stormcrown Eyrie (Sarcobra), the Sunken Forge (Siegephant) and the Thornhive
+(Calderoise), two of them live each match.

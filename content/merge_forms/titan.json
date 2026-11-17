@@ -7,9 +7,12 @@
 		"accent": "#ffd27a"
 	},
 	"sound": {
+		"cast": "boki_form_titan_cast",
+		"travel": "boki_form_titan_travel",
+		"hit": "boki_form_titan_hit",
+		"cue": "steel",
 		"xform": "boom",
-		"pitch": 0.55,
-		"ult": "boom"
+		"pitch": 0.55
 	},
 	"look": {
 		"scale": 1.45,
@@ -98,7 +101,7 @@
 		"rmb": {
 			"name": "Gravity Well",
 			"icon": "anchor",
-			"desc": "Your right click also drags nearby foes in and slows them. Recharges 20% faster.",
+			"desc": "Your ability also drags nearby foes in and slows them. Recharges 20% faster.",
 			"cd_k": 0.8,
 			"effects": [
 				{
