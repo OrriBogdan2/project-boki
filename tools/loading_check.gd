@@ -5,17 +5,21 @@ extends RefCounted
 ## graphics warm-up stages in order, and is full when the screen leaves.
 
 const LOADING := "res://scripts/ui/loading.gd"
-const TIMEOUT_S := 240.0       # a real load that takes longer than this is hung
-const MAX_STEP := 0.25         # the most the bar may move in one frame (of a frame under HITCH_S)
-const HITCH_S := 0.2           # a longer frame may carry the bar further: the load itself stalled
-const REAL_LOAD := {"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true,
-	"god": true, "plan_t": 3.0}
+const TIMEOUT_S := 240.0  # a real load that takes longer than this is hung
+const MAX_STEP := 0.25  # the most the bar may move in one frame (of a frame under HITCH_S)
+const HITCH_S := 0.2  # a longer frame may carry the bar further: the load itself stalled
+const REAL_LOAD := {
+	"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0
+}
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOADING %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -25,9 +29,11 @@ func run(main: Node) -> void:
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
 	_hunters()
+	_layout()
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
@@ -41,11 +47,32 @@ func _hunters() -> void:
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
 		ok(ld.tip != "" and _tip_set().has(ld.tip), "%s: a tip from the tip set" % ak)
 		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(loads and absf(tex.get_width() * 9.0 - tex.get_height() * 16.0) < 16.0, "%s: its splash is 16:9" % ak)
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
 		ok(calm.tip != "" and not calm.tip.contains("Blight"), "%s: no Blight tip when the Blight is off" % ak)
 		calm.free()
+
+
+## The bottom-left stack (title block, tip, bar) and the squad row at three window sizes, with a raid line
+## shown: all inside the window, none on another, the squad above the title block.
+func _layout() -> void:
+	for sz in [Vector2(1024, 640), Vector2(1280, 720), Vector2(1920, 1080)]:
+		var ld: Node = load(LOADING).new()
+		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": "mage", "seed": 7})
+		ld.raid = "fog"
+		var lay: Dictionary = ld.layout(sz)
+		var squad: Rect2 = lay["squad"]
+		var block: Rect2 = lay["block"]
+		var tip: Rect2 = lay["tip"]
+		var bar: Rect2 = lay["bar"]
+		var inside := Rect2(Vector2.ZERO, sz).encloses(block) and Rect2(Vector2.ZERO, sz).encloses(bar)
+		ok(inside and squad.position.y >= 0.0, "%dx%d: the text and bar are inside the window" % [sz.x, sz.y])
+		var apart := squad.end.y < block.position.y and block.end.y < tip.position.y and tip.end.y < bar.position.y
+		ok(apart, "%dx%d: squad, title block, tip and bar are stacked apart (%s)" % [sz.x, sz.y, lay])
+		ld.free()
+
 
 func _screen(main: Node) -> Node:
 	for ch in main.get_children():
@@ -53,6 +80,7 @@ func _screen(main: Node) -> Node:
 		if sc and String(sc.resource_path) == LOADING:
 			return ch
 	return null
+
 
 ## A real load: the bar's target and what it shows, every frame the screen is up.
 func _real_load(main: Node) -> void:
@@ -97,7 +125,8 @@ func _real_load(main: Node) -> void:
 	var order_ok := true
 	for s in stages:
 		var k := names.find(s)
-		if k < at: order_ok = false
+		if k < at:
+			order_ok = false
 		at = maxi(at, k)
 	# headless has nothing to warm up (Match.warm_up returns at once), so its graphics stage never shows
 	var warm_seen := stages.has("Preparing graphics") or DisplayServer.get_name() == "headless"
