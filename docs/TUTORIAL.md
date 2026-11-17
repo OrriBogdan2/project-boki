@@ -233,3 +233,24 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 
 Not changed here: porting the cut is a core change to the tutorial and its checks and collides with the open `ext/tut-*`
 branches above, so it needs the owner's order (merge those hint branches first, then cut the course).
+
+## Playtest fixes, 11-17 (`--tutorial-playtest-check`, `--tutorial-playtest-shots`)
+
+The owner's first-match playtest on the PC build, and what each fix is:
+
+- **Every line names its key.** The token `%K` in a step's line or detail is the step's own key cap (the real bound key,
+  `Settings.key_cap`; the WASD keys on `land`, Alt + E on `ranks`). Unlock steps read "Press RMB to unlock Burr Charge".
+  `%Y` and `%Z` (TutorialText) are the Ultimate's key (R, `hunter_ult`) and its name. The **Fusion** (X, `ultimate`) is a
+  different thing: `pick_ult` unlocks it ("Press X to unlock Fusion"), `ult` uses it, and its second line says the Ultimate
+  is R. The point on `pick_ult` goes to the Fusion; the hunter's Ultimate opens by level alone.
+- **The Boki send (`gkey`).** Its camp has fixed posts in the open (map `course.gkey.foes`, `Tutorial.foe_spot`), level
+  ground with no cliff or wall in the line from the lookout. The monsters are `held` (Mob.held): they stand still, notice
+  nobody and the Boki leaves them alone until the send lands (`TutorialCamps.release`). Before, they spawned at random
+  6 m from the player on the lookout, walked at him and jammed against its cliff, and the Boki fought them on its own
+  first, so a G tap read as "call back" and never counted. A send now registers for any launch, a leap that lands within
+  `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
+- **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
+  check crouches at all four far edges and at the foot of the cliff.
+- **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
+  half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
+  `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
