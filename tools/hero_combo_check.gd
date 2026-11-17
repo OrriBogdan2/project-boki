@@ -1112,8 +1112,8 @@ func _gunslinger() -> void:
 		K.cd["e"] = 0.0
 		P.ak.use_e()
 		ac.step(m, 0.7))
-	ok("small: the rifle loses half its punch over a 10-round string",
-			is_equal_approx(float(P.wpn["sustain_loss"]), 0.5) and int(P.wpn["sustain_rounds"]) == 10)
+	ok("small: the rifle hits for half once the drum is under half (--quill-mag-check holds it)",
+			is_equal_approx(float(P.wpn["low_mag_dmg"]), 0.5) and is_equal_approx(float(P.wpn["low_mag_at"]), 0.5))
 	K.res = 3.0
 	K.res_wait = 0.0
 	ac.step(m, 0.05)

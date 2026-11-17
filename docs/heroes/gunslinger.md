@@ -274,6 +274,9 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
   the drum is full again, whether the trigger is held or not (0.35 s + 0.75 s); that full refill is the only pause a
   long string has. No key, timer or animation reloads it. Data: `refill_after`, `refill_rate` in
   content/weapons/quill_rifle.json; rule: `GunslingerKit._tick_mag`.
+  **Bursts beat holding (owner 11-17 playtest):** a round fired with under half the drum left (`low_mag_at` 0.5)
+  hits for half (`low_mag_dmg` 0.5), replacing the old 10-round `sustain` rule, so a burst of up to half a drum
+  and a pause keeps full damage. The HUD's count and ring turn red under half. Assert: `--quill-mag-check`.
   The firing brackets are a firing tell only; our rifle's spread doesn't bloom, so they don't move.
 - Dazed is our Rattled status (slow plus the damage window); it now applies to the training dummy too.
 - Fever follows the kit data: a flat +6% omnivamp for 3.5s from any ability hit (no stacks). The footage build only had the knock reset.
