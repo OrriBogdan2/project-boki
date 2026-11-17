@@ -8,9 +8,9 @@ const SIZE := Vector2i(1600, 900)   # px of each shot
 const SETTLE := 1.5                 # s of idle before a shot
 const RUN_SECS := 1.2               # s of run before the run shot
 const ZOOM_CLOSE := 0.5             # camera zoom of the closer shots
-const FACE_CAM := Vector3(0, 0.9, 3.0)   # --face: the idle hunter aims this far toward the camera (the cursor below him in play)
+const FACE_CAM := Vector3(0, 0.9, 3.0)   # --face: idle hunter aims toward the camera
 var face := false
-var variants: Array = []    # --set=<name>:<param>=<v>,<param>=<v> (repeatable): shader overrides on the hunter's materials; shots <hero>_<name>_<shot>
+var variants: Array = []    # --set=<name>:<param>=<v>,... shader overrides; shots <hero>_<name>_<shot>
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -65,7 +65,9 @@ func _apply(over: Dictionary) -> void:
 					continue
 				if k == "rawtex":      # debug: the albedo atlas straight to the screen (unshaded)
 					var sh := Shader.new()
-					sh.code = "shader_type spatial; render_mode unshaded; uniform sampler2D albedo_tex : source_color, filter_linear_mipmap; void fragment() { ALBEDO = texture(albedo_tex, UV).rgb; }"
+					sh.code = "shader_type spatial; render_mode unshaded; " \
+						+ "uniform sampler2D albedo_tex : source_color, filter_linear_mipmap; " \
+						+ "void fragment() { ALBEDO = texture(albedo_tex, UV).rgb; }"
 					(mt as ShaderMaterial).shader = sh
 				elif k == "nomips":      # the albedo atlas sampled without its mip chain (texel-true, shimmers)
 					var tex = (mt as ShaderMaterial).get_shader_parameter("albedo_tex")
