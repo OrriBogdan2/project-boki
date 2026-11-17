@@ -10054,3 +10054,4 @@ READY ext/idle-dredge-rebased-port e7747a2a0b (Grimble idle+stance clips onto v9
 READY ext/slam-follow-through-port a612d42273 (time map + blend_out for 8 slams, --slam-follow-check 0 fails)
 READY ext/ostra-gait-rebased-port 0ecded063c7 (Motley snap/snap_wind keep the fan in: T-pose 77% to 13%; bounding gait not ported, main has tread)
 READY ext/rimewright-skate-rebased-port 17b64eb0ed2 (glb_add_clips prunes replaced-clip orphans; skate gait not ported, Neve is on foot on main)
+READY ext/idle-gunslinger-rebased-port 5149267aa6 (Vex idle+stance clips onto v95 glb; x_breath dropped)
