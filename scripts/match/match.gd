@@ -1805,9 +1805,7 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	h.revive = 0.0
 	h.cloak_t = 0.0
 	h.grap = {}
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	var icon := KnockFeed.icon_of(by, credit, o)
 	if h == player:
 		if ktip: ktip.on_knock()
