@@ -51,3 +51,11 @@ func step(hv: Vector2, dt: float, now: float) -> Vector2:
 func hand_over(hv: Vector2, run_v: Vector2) -> Vector2:
 	ramp_t = 0.0
 	return run_v + (hv - run_v) * (1.0 - loss)
+
+## Drops the last move's speed: a kit move that ends in a stop or a slow recovery (Kael's Riposte cleave) has shed
+## it, so a dash out of that recovery is the plain dash.
+func forget() -> void:
+	last_v = Vector2.ZERO
+	last_at = -9.0
+	loss = 0.0
+	ramp_t = 0.0

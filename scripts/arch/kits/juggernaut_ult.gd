@@ -146,6 +146,7 @@ func _land(d: Dictionary) -> void:
 	st["phase"] = "recover"
 	st["t"] = 0.0
 	k.play("jug_ult_recover")
+	h.turn_cost.forget()     # the recovery is a stop: a dash out of it is the plain dash (TurnCost)
 	if not pulled:
 		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
