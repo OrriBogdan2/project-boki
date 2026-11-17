@@ -15,6 +15,8 @@ const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
 const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
 const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
+const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
@@ -82,6 +84,11 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	if ability:
 		power = maxf(power, 1.3)  # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)
+	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
+	if armor:
+		target.shell_t = maxf(target.shell_t, SHELL_FLASH_T)
+	elif target.shell_t < SHELL_FLASH_T:
+		target.shell_t = 0.0
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
@@ -158,14 +165,15 @@ static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: fl
 	Sfx.play(cue, null, vol_db, 0.0)
 	return true
 
-## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
-## freeze for whoever broke it (Feel tier 3: 0.045s).
+## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
+## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
+## (Feel tier 3: 0.045s).
 static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
-	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
-	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
+	h.shell_t = BREAK_FLASH_T
+	h.flash_t = maxf(h.flash_t, BREAK_FLASH_T)
+	m.fx.spark(Vector3(h.pos.x, h.hit_y() + 0.6, h.pos.z), Vector3.UP, Ent.SHELL_FLASH, 14, 3.0, 120.0, 0.5, 18.0, 1.3)
 	m.sfx("armor_break", h.pos, ARMOR_BREAK_DB_VICTIM if h == m.player else ARMOR_BREAK_DB)
 	if credit == m.player and h != m.player:
 		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)  # the "push now" tick, only for whoever broke it
@@ -267,33 +275,21 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.flash(c + Vector3(0, 0.8, 0), col.lerp(Color.WHITE, 0.6), 1.6, 0.3)
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
-		m.sfx("extract_ok", null, -3.0)
+		UiSfx.extract_success()
 		Sfx.duck(1.6)
 		if m.hud:
 			m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
 
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
-## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
+## what's underfoot (StepSurface: grass, stone, wood, snow, the sky train's metal decks) and the Hunter's weight.
+## It carries as far as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
-	var w: World = m.world
-	var ix := int(floorf(h.pos.x))
-	var iz := int(floorf(h.pos.z))
-	if not w.inb(ix, iz):
-		return
-	var i := w.idx(ix, iz)
-	var surf := "grass"
-	if w.bridge.has(i):
-		surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
-		surf = "stone"
-	elif w.style_at(i) == "frost":
-		surf = "snow"
-	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+	var surf := StepSurface.at(m, h.pos)
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
 
 
 const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)

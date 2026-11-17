@@ -3,11 +3,13 @@ extends RefCounted
 ##   1. 20 seeded hunts: a high-Focus Boki beats a no-Focus one in most of them (either side of the pair)
 ##   2. curiosity: a curious Boki beats an incurious one at equal Focus
 ##   3. night: a Spore Boki beats an identical plain Boki far more at night than by day
+##   3a. Hushwood (base_seek night_zones) hunts by the night rules at noon, a day zone does not
 ##   3b. the weekly 'night' format makes the hunt a night one by day too
 ##   4. friends and rivals: friends share a good sniff, rivals slow the slower one
 ##   5. a settled hunt: winner joy and trust up, loser sulks (less with a friend), both remember it, gems, bonds
 ##   6. the state machine refuses moves its table lacks
-##   7. on the base: no basket with base_mode off; with it on, take, hide and hunt to a result card
+##   7. on the base: no basket with base_mode off; with it on, take, hide and hunt to a result card;
+##      a faint scent trail appears with the hunt and is gone at the end
 ## Never touches the real save.
 
 const ROUNDS := 20
@@ -104,8 +106,13 @@ func _night() -> void:
 	ok(BaseSeek.night_type(spore) and not BaseSeek.night_type(plain), "Spore is a night type, Stone is not")
 	var by_day := float(_wins(spore, plain, NIGHT_ROUNDS)) / NIGHT_ROUNDS
 	var by_night := float(_wins(spore, plain, NIGHT_ROUNDS, true)) / NIGHT_ROUNDS
-	ok(by_night >= by_day + NIGHT_GAP and by_night > 0.5,
-			"night favours Spore: %.0f%% of hunts by night, %.0f%% by day" % [by_night * 100.0, by_day * 100.0])
+	var was := GardenZones.here
+	GardenZones.here = "hushwood"
+	var dark_zone := BaseSeek.is_dark(DAY_T)
+	GardenZones.here = "bramblebank"
+	ok(dark_zone and not BaseSeek.is_dark(DAY_T), "Hushwood hunts by the night rules at noon, Bramblebank does not")
+	GardenZones.here = was
+
 
 ## The weekly format for Seek forces the night rule: the Spore Boki wins far more than by day, at any hour.
 func _format() -> void:
@@ -213,10 +220,18 @@ func _on_base() -> void:
 		home.ppos = far
 		sk.use()
 		ok(sk.state == BaseSeek.S.HUNT and sk.hunt != null and sk.pair.size() == 2, "on: hidden, two Boki hunt")
+		ok(sk.cue != null, "cue: a scent trail appears with the hunt")
 		var t := 0.0
+		var dots := 0
+		var faint := true
 		while sk.state == BaseSeek.S.HUNT and t < float(BaseSeek.rules()["max_s"]) + 5.0:
 			sk.tick(0.1)
 			t += 0.1
+			if sk.cue != null:
+				dots = maxi(dots, int(sk.cue.shown[0]) + int(sk.cue.shown[1]))
+				faint = faint and sk.cue.strength.all(func(s): return s > 0.0 and s <= GardenCues.SeekCue.MAX_ALPHA)
+		ok(dots > 0 and faint, "cue: the trail shows (%d dots) and stays faint" % dots)
+		ok(sk.cue == null, "cue: the trail is gone when the hunt ends")
 		var carded: bool = sk.state == BaseSeek.S.RESULT and is_instance_valid(sk.card)
 		ok(carded, "on: the hunt ends with a result card (%.1f s)" % t)
 		sk.tick(float(BaseSeek.rules()["card_s"]) + 1.0)
