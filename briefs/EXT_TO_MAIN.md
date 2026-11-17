@@ -10072,3 +10072,4 @@ READY ext/ostra-gait-rebased-port 0ecded063c7555056c5cf09aeb11843390902a11 (Motl
 READY ext/anim-cancel-blend-port 7a0d78315ed (port of ext/anim-cancel-blend: --clip-cancels-check with 126 cancel rows + WardenClips cancel hand-offs; 12 open rows in CANCEL_OPEN; glide casts of Ashwick/Dolm/Mage fixed)
 READY ext/anim-summon-clips-port 5d83c0bb85d268c3fc213e85b7164704e19aabb6 (port of ext/anim-summon-clips: a teleport is not speed in BokiRig (46/46 species 55 m/s -> 0), garden pet clip; faint/flinch/eat not ported: superseded or in main)
 READY ext/early-camps-bots-a3-port 8906aa9b599443fac1a59cb3faa40619eb50908d (camps own the early game: Camps sizes/bundle/comeback, camps-check green; drop height/bots/layout/XpRules not ported)
+READY ext/idle-ostra-port 4b77519952 (Motley idle+stance rework onto the v95 glb via glb_add_clips; seams 13x/16x -> 0.0x; x_breath dropped; port of old idle-ostra)
