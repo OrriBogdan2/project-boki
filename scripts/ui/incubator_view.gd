@@ -1,7 +1,7 @@
 class_name IncubatorView
 extends RefCounted
 ## The Nesting Nook's Incubator tab: every cradle with its Rare Egg and how warm it is, what's left
-## (expeditions or minutes), what's warming them (an Ember kin, Ember Coals), the cradles you can
+## (minutes of play), what's warming them (an Ember kin, Ember Coals), the cradles you can
 ## still buy, and the eggs on the shelf waiting for one. Built inside the home screen's Nook panel
 ## (home.gd _open_nook), in the game's menu style.
 
@@ -11,7 +11,7 @@ const CARD_W := 222.0
 static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callable) -> void:
 	Incubator.ensure()
 	var q := Incubator.shelf()
-	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches after %d expeditions or about %d minutes warm." % [Incubator.TRIPS, int(Incubator.HEAT_NEED / 60.0)])
+	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches after about %d minutes of play, in the garden or in matches." % int(Incubator.need() / 60.0))
 	var coals := int(Save.d["items"].get("coals", 0))
 	UI.head_extra(v).add_child(UI.chip("dash", "%d Ember Coals" % coals, Color("ff9a4a"), "Stoke them into the brazier: every egg warms faster for %d minutes. The market stall sells them." % int(Incubator.COAL_SECS / 60.0)))
 	if Incubator.count() == 0 and Incubator.slots() == Incubator.SLOTS:
@@ -126,7 +126,7 @@ static func _slot_card(e: Dictionary, hatch: Callable) -> Control:
 	var nm := UI.label(Incubator.egg_name(e), UI.T_SMALL, Color("ffe08a"), UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tv.add_child(nm)
-	tv.add_child(UI.label("%d%%  ·  %d/%d trips" % [int(Incubator.progress(e) * 100.0), mini(Incubator.trips(e), Incubator.TRIPS), Incubator.TRIPS], 12, UI.MUTED))
+	tv.add_child(UI.label("%d%% warm" % int(Incubator.progress(e) * 100.0), 12, UI.MUTED))
 	top.add_child(tv)
 	cv.add_child(top)
 	if rd:
