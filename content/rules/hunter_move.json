@@ -20,6 +20,7 @@
 		"glide_start_vy": 0.85,
 		"glide_sink": 1.4,
 		"glide_heat_s": 9.0,
+		"glide_overheat_speed": 0.7,
 		"turn_rate": 1280.0,
 		"mantle_vy_cap": 2.5,
 		"mantle_pull": 175.0,

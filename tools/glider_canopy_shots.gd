@@ -4,7 +4,7 @@ extends RefCounted
 ##   canopy_cool      no heat: the skin's own colours (reference)
 ##   canopy_warm      60% heat: the cloth warms toward ember
 ##   canopy_overheat  overheated on level air: full ember and a thin smoke trail
-##   canopy_burning   overheated over the abyss, lifting at half strength: the cloth flickers
+##   canopy_burning   overheated over the abyss, lifting like a cool one: the cloth flickers
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -25,7 +25,7 @@ func run(main_node: Node) -> void:
 	await _state("canopy_cool", 1.0, false, "Cool glider (reference): the skin's own colours")
 	await _state("canopy_warm", 0.4, false, "60% heat: the canopy warms toward ember")
 	await _state("canopy_overheat", 0.0, false, "Overheated on level air: full ember and a thin smoke trail behind")
-	await _state("canopy_burning", 0.0, true, "Overheated over the abyss, lifting at half strength: the cloth flickers")
+	await _state("canopy_burning", 0.0, true, "Overheated over the abyss, lifting like a cool one: the cloth flickers")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)

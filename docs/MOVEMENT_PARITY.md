@@ -74,7 +74,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Height hold | 8.5 m over the ground, sinks 3.5 m/s above it | glide_height 8.5, glide_pull_vy 3.5 | [D]; hunter_move.json | match |
 | Drop into speed (swoop) | height trades for speed | never | owner 11-08 item 8 | off (ruling) |
 | Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/the reference_FEEL.md; not on disk to recount); the same footage check as Sink | 9 s from the open to overheat, hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | off (owner) / unknown (coefficients) |
-| Overheat | burns; the glider closes | opens at any heat, burns, lifts at half strength | [W]; owner item 63 | off (ruling) |
+| Overheat | burns; the glider closes | opens at any heat, burns, flies at 0.7x speed, lifts as strongly as a cool one | [W]; owner item 63 | off (ruling) |
 | Dive | −32.5 m/s, force 350,000, steer 0.25, cancel under 3.5 m, 10 s | dive_vy 32.5, dive_accel 35, dive_steer 0.25, dive_cancel_h 3.5, dive_timeout 10 | [D]; hunter_move.json | match |
 | Spike (knocked out of a glide) | stun 0.7 s on landing; slam threshold not decoded | land stun 0.7 s; slam numbers [est] | [W]; hunter_move.json `glide_spike` | match / unknown (slam) |
 

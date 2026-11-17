@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-17> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
@@ -33,6 +33,8 @@ extends RefCounted
 ##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
 ##  16 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
 ##                   following: the walk speed for a before/after cut (decision 0061)
+##  17 overheat glide two Hunters glide side by side on the same keys, cool one (top) and overheated one (bottom):
+##                   the overheated one is 30% slower and flies the same height line
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
@@ -125,6 +127,7 @@ func run(main_node: Node) -> void:
 		14: await _forest(secs)
 		15: await _locomotion(secs)
 		16: await _walk(secs)
+		17: await _overheat_glide(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -310,6 +313,36 @@ func _walk(secs: float) -> void:
 		P.inp["aim"] = P.pos + Vector3(5.0 if t < secs * 0.5 else -5.0, 0.9, 0),
 		func(t: float): return still_cam if t < secs * 0.5 else P.pos)
 	print("MEDIA_WALK speed %.2f m/s" % HunterMove.speed(P.arch))
+
+# ------------------------------------------------------------------ 17: overheat glide
+const GLIDE_LIFT_M := 30.0      # m above the lane both gliders start from
+const GLIDE_GAP := 3.0          # m between the two lanes
+
+func _overheat_glide(secs: float) -> void:
+	await _start("gunslinger", "zapple")
+	var cool := m.player
+	var hot := _hunter("b1", 0, "gunslinger", "zapple", cool.pos)
+	hot.ctrl = "idle"
+	var at := MoveSpeedCheck.flat_lane(m.world, cool.pos, int(WALK_LANE) * 2)
+	var top := m.world.ground_at(at.x, at.z) + GLIDE_LIFT_M
+	var pair := [cool, hot]
+	for i in 2:
+		var h: Hunter = pair[i]
+		h.teleport(Vector3(at.x, top, at.z + (i - 0.5) * GLIDE_GAP))
+		h.grounded = false
+		h.air_t = 1.0
+		h.gliding = true
+		h.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+	_zoom(0.55)
+	still_at = secs * 0.6
+	_mark("glide")
+	await _go(secs, func(_t: float):
+		for i in 2:
+			_keys(pair[i], Vector2(1, 0), false, true)
+		hot.glide_fuel = 0.0
+		cool.glide_fuel = 1.0,
+		func(_t: float): return (cool.pos + hot.pos) * 0.5)
+	print("MEDIA_OVERHEAT cool %.2f m/s, overheated %.2f m/s" % [cool.vel.x, hot.vel.x])
 
 # ------------------------------------------------------------------ 2: Boki combat
 func _boki_combat(secs: float) -> void:

@@ -523,7 +523,7 @@ func _flat_around(x0: int, z0: int, lv: int) -> bool:
 func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictionary:
 	var face := float(cut["x"])
 	var top := float(cut["top"])
-	var gs := Hunter.GLIDE_SPEED * (0.5 if slow else 1.0)
+	var gs := Hunter.GLIDE_SPEED * (HunterMove.glide_overheat_speed if slow else 1.0)
 	_reset(Vector3(face - h.r - 1.0, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
 	h.last_gy = top - 4.8
 	h.glide_fuel = 0.0 if slow else 1.0

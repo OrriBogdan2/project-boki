@@ -23,6 +23,7 @@ static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
+static var glide_overheat_speed: float = _phys["glide_overheat_speed"]     # x the glide speed while overheated
 static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
 static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
