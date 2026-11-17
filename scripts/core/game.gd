@@ -88,6 +88,7 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
+	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -154,6 +155,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if won: Progress.add("caught", r.get("caught", []).size())
 	if won:
 		d["extracts"] = int(d.get("extracts", 0)) + 1
+		Save.log_event("extracted", {})     # the clan's member roll shows it (ClanInfo.last_deed)
 		ClanBoard.add("extract")
 		out["gems"] = int(r.get("gems", 0))
 		if d.get("guild_perks", []).has("hall"):

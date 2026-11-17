@@ -146,7 +146,7 @@ static func _busy(m, P: Hunter) -> void:
 		if h != P and h.team == P.team:
 			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
 			break
-	m.hud.level_up(8, {})
+	m.hud.level_up(8)
 	P.stun_t = 1.5                               # crowd control on you: the line under your vitals
 	P.root_t = 3.0
 	P.slow_t = 4.0

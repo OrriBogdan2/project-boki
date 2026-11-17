@@ -41,7 +41,7 @@ class CatSpy extends Fx:
 		seen.append(col)
 	func word(_at: Vector3, _txt: String, col: Color, _big := false) -> void:
 		seen.append(col)
-	func ring(_at: Vector3, _radius: float, col: Color, _dur := 0.35) -> void:
+	func ring(_at: Vector3, _radius: float, col: Color, _dur := 0.35, _order := 0) -> void:
 		seen.append(col)
 	func slash(_at: Vector3, _a0: float, _arc: float, _reach: float, col: Color, _heavy := false) -> void:
 		seen.append(col)

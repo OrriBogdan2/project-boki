@@ -122,14 +122,14 @@ static func on_event(m: Match, x: Array) -> void:
 		"scan_start", "scan_stop", "scan_done":
 			if e is Hunter:
 				Capture.on_net(m, e, String(x[1]), String(x[6]))
-		"unbond":
-			if e is Hunter:
-				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"wkill":
 			KinSummon.show_reveal(m, at, int(String(x[6])))
 		"wgrab", "wsum":
 			if e is Hunter:
 				KinSteal.on_net(m, e as Hunter, String(x[1]), String(x[6]))
+		"unbond":
+			if e is Hunter:
+				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 			if e is Kin: m.barks.boki_down(m, e as Kin)

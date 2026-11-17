@@ -12,7 +12,8 @@ var kind := ""
 var pos := Vector3.ZERO
 var prev := Vector3.ZERO
 var vel := Vector3.ZERO
-var r := 0.4
+var r := 0.4          # the hurtbox: shots and abilities hit inside it
+var body_r := -1.0    # the body's collision radius against walls and other bodies; -1 = same as r
 var hp := 100.0
 var max_hp := 100.0
 var grounded := true
@@ -45,6 +46,7 @@ var marks := {}             # combo setups on this body: combo id -> {team, owne
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var combat_at := -99.0      # match time it last dealt or took fight damage (InCombat)
 var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var assist_t := -1.0        # m.time of the last takedown here that counted assists: older hits don't count again
 var net_pos := Vector3.ZERO
@@ -77,7 +79,11 @@ func ground() -> float:
 		var d: float = st.deck_y(pos)
 		if d > World.VOID + 1.0 and (g < d or g > pos.y + 0.9):
 			g = d
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, g)
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), g)
+
+## The radius this body takes up against walls, rocks and other bodies (its hurtbox is `r`).
+func hull_r() -> float:
+	return r if body_r < 0.0 else body_r
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)
@@ -91,7 +97,7 @@ func over_void() -> bool:
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
 	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o
@@ -119,6 +125,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		if mt.demo_shielded(self):
 			return 0.0
 		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
+	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
@@ -291,7 +298,7 @@ func slide(dt: float, guard := false) -> bool:
 	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
-	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, hull_r(), pos.y)
 	if po.distance_squared_to(tgt) > 1e-10:
 		var bn := (po - tgt).normalized()
 		var hv := Vector2(vel.x, vel.z)
@@ -302,14 +309,14 @@ func slide(dt: float, guard := false) -> bool:
 		bumped = true
 		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
-	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
+	var b1: float = m.world.occupy(nx, pos.z, hull_r(), pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
 		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
-	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
+	var b2: float = m.world.occupy(pos.x, nz, hull_r(), pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:

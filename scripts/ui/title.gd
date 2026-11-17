@@ -13,7 +13,7 @@ const LOGO_BOOM_DB := -14.0     # dB, the impact under the logo horn
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("title")          # its own slow drone, not the match wind

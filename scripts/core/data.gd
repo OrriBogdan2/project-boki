@@ -61,7 +61,6 @@ const CLASSES := {
 		"name": "Light",
 		"color": Color("c9bcff"),
 		"hp": 124,
-		"speed": 4.4,
 		"dashes": 1,
 		"mass": 0.85,
 		"scale": 0.9,
@@ -79,7 +78,6 @@ const CLASSES := {
 		"name": "Medium",
 		"color": Color("9ee2a0"),
 		"hp": 145,
-		"speed": 4.4,
 		"dashes": 1,
 		"mass": 1.0,
 		"scale": 1.0,
@@ -97,7 +95,6 @@ const CLASSES := {
 		"name": "Heavy",
 		"color": Color("e6dbc4"),
 		"hp": 193,
-		"speed": 4.4,
 		"dashes": 2,
 		"mass": 1.35,
 		"scale": 1.14,
@@ -333,7 +330,7 @@ const PERKS := {
 	},
 	"hotload":
 	{
-		# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
+		# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
 		"name": "Hotload",
 		"desc": "Your weapon hits 10% harder.",
 		"icon": "burst",
