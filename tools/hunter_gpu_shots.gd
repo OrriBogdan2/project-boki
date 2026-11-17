@@ -56,7 +56,10 @@ func _add_variant(spec: String) -> void:
 ## The overrides on every toon material of the player's model.
 func _apply(over: Dictionary) -> void:
 	for mt in (m.player.model.get_meta("mats", []) as Array):
-		if mt is ShaderMaterial and (not over.has("skin_only") or int((mt as ShaderMaterial).get_shader_parameter("surface")) == 4):
+		if not mt is ShaderMaterial:
+			continue
+		var surf = (mt as ShaderMaterial).get_shader_parameter("surface")     # (null on a flame/void/card surface)
+		if not over.has("skin_only") or (surf != null and int(surf) == 4):
 			for k in over:
 				if k == "skin_only":
 					continue
