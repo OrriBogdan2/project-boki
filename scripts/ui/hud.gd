@@ -334,8 +334,8 @@ func _draw_parts() -> void:
 	if map_open():
 		full_map.draw(sz)
 	elif m.skydrop and m.skydrop.planning and p:
-		# the planning map was closed: a reminder of the countdown, and how to get it back
-		_ctext(Vector2(sz.x * 0.5, 40), "The ship sets off in %ds  ·  %s opens the map" % [int(ceil(m.skydrop.plan_t)), Settings.key_cap("map")], 18, GOLD, big)
+		# the planning map was closed: how to get it back
+		_ctext(Vector2(sz.x * 0.5, 40), "%s opens the map to plan your drop" % Settings.key_cap("map"), 18, GOLD, big)
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
@@ -1453,7 +1453,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	else:
 		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to launch" % Settings.key_cap("jump"), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
-	if dr and dr.planning: sub = "The ship sets off in %ds  ·  %s opens the map to ping a spot" % [int(ceil(dr.plan_t)), Settings.key_cap("map")]
+	if dr and dr.planning: sub = "%s opens the map to ping a spot" % Settings.key_cap("map")
 	elif waits: sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))
 	elif i_lead and squad: sub = "Your squad rides your rocket down. %ds left aboard" % int(ceil(left))
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 62), sub, 14, INK)

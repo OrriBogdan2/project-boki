@@ -7,6 +7,8 @@ class_name SkyshipModel
 ## SkyshipFx drives each tick.
 
 const DECK_Y := 0.32           # m above the ship's origin: the plank top the riders stand on
+const HULL_Y := -0.55          # m: the boat body's centre (its top stays under the deck: no hump for feet to sink in)
+const HULL_R := Vector3(2.4, 0.8, 6.4)       # m: the boat body's half extents (a long squashed egg)
 const DECK_W := 4.4            # m across the deck, rail to rail
 const DECK_L := 11.0           # m from the bow post to the stern rail
 const ENVELOPE_Y := 9.0        # m: the envelope's centre over the deck, high enough to stand under
@@ -67,7 +69,7 @@ static func _make() -> Node3D:
 static func _hull(root: Node3D, wood: Material, dark: Material, plank: Material, brass: Material) -> void:
 	var p: SphereMesh = _ball(1.0, 24)
 	# the boat body: a long squashed egg, the deck laid over its open top, a keel under it
-	Models.part(root, p, wood, Vector3(0, -0.25, 0.3), Vector3(2.4, 1.15, 6.4))
+	Models.part(root, p, wood, Vector3(0, HULL_Y, 0.3), HULL_R)
 	Models.part(root, Models.box(DECK_W, 0.22, DECK_L), plank, Vector3(0, DECK_Y - 0.11, 0.2))
 	Models.part(root, Models.box(0.35, 0.5, 10.0), dark, Vector3(0, -1.25, 0.6))
 	# the bow: a beak that rises to a carved post
@@ -90,7 +92,7 @@ static func _hull(root: Node3D, wood: Material, dark: Material, plank: Material,
 			Vector3(PI / 2, 0, 0))
 	Models.part(root, _tube(0.08, 0.08, 1.1, 8), dark, Vector3(0, DECK_Y + 0.55, 3.0))
 	# a band of brass round the waterline (the sky line)
-	Models.part(root, p, brass, Vector3(0, -0.05, 0.3), Vector3(2.45, 0.12, 6.45))
+	Models.part(root, p, brass, Vector3(0, -0.3, 0.3), Vector3(2.45, 0.12, 6.45))
 
 static func _envelope(root: Node3D, cloth: Material, stripe: Material, gold: Material, brass: Material) -> void:
 	var c := Vector3(0, ENVELOPE_Y, 0.4)
