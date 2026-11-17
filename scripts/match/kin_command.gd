@@ -170,7 +170,7 @@ static func chase_pick(h: Hunter) -> Ent:
 ## it stands (range-limited by the ability); on the shoulder (or merged) it is cast through you.
 static func cast_c(h: Hunter) -> bool:
 	var k: Kin = h.kin
-	if k == null or h.downed or h.dropping or h.riding:
+	if k == null or k.owner_h != h or h.downed or h.dropping or h.riding:
 		return false
 	if k.use_ability("k1", h._ground_aim()) or k.pend_slot == "k1":
 		h.used["kin_ab"] = int(h.used.get("kin_ab", 0)) + 1

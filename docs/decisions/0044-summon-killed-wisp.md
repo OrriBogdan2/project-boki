@@ -1,7 +1,7 @@
 # 0044: A killed summon turns back into a wisp
 
 - **Status:** accepted (prototype, behind the boki_wisps setting)
-- **Date:** 2026-11-09
+- **Date:** 2026-11-09 (rebuilt on main 2026-11-15)
 - **Area:** match flow, networking
 
 ## Problem
@@ -24,7 +24,7 @@ Option 2, in `KinSummon.killed(by)` (replaces the old `knocked()`; `Kin.go_down`
 Damage alone never ends the window (unchanged).
 
 ## Consequences
-- Net.VERSION 0.31.0: kcmd "wkill" (owner's id, extra = the killer's team) pings that squad's minimap; the wisp
+- Net.VERSION 0.24.15: kcmd "wkill" (owner's id, extra = the killer's team) pings that squad's minimap; the wisp
   form already rides the kin snapshot. The flight streak draws only in the owner's game (a rival sees the wisp
   already on its owner), the ping and outline are the rival's cue.
-- hud.gd: a sound ping may carry its own `life` (the "wisp" kind lasts 2 s). `--summon-death-check` covers it.
+- hud.gd: a sound ping may carry its own `life` (the "wisp" kind lasts 2 s). `--summon-check` (the killed rows) covers it.

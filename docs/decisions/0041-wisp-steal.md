@@ -1,8 +1,8 @@
 # 0041: Stealing Boki wisps
 
 - **Status:** accepted (prototype, behind the boki_wisps setting)
-- **Date:** 2026-11-09
-- **Area:** match flow, networking, save (Field Book field)
+- **Date:** 2026-11-09 (rebuilt on main 2026-11-15)
+- **Area:** match flow, networking
 
 ## Problem
 DECISIONS 2026-11-09 (Stealing): a downed Hunter's Boki wisps break loose and float; anyone grabs one, the owner
@@ -19,11 +19,14 @@ Option 2, in `KinSteal`. Numbers in `content/rules/boki_summon.json` "steal": lo
 2 m, carry 2, passives at 50 % clamped at the carry cap, one summon at half the window (min 5 s) when your own Boki
 is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt.
 A thief who goes down (not only dies) scatters: the same moment that frees the owner's wisp. Ungrabbed wisps go
-back to their hunter, who keeps them for that down. Soul echo: the dex entry's optional `echo` count (seen = true);
-no save migration (an old entry without it is 0). Left out: guardian interplay (ext/wisp-guardian), killed-summon
-loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-boki-box-summon, ext/vfx-stolen-wisps).
+back to their hunter, who keeps them for that down.
+Carry-passive stacking (Q8): `Hunter._refresh_kin_stats` sums your own Boki at 100 % and each stolen wisp at
+`passive_k` (x its carry_k, like your own), then clamps the one sum per stat at the carry cap (KinParts.OWNER_STATS).
+Soul echo (kept from ext/merge-lane-integ-1115): a grab adds to the dex entry's optional `echo` count (seen = true;
+Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus, HUD icons (backlog: Wisp line UI).
 
 ## Consequences
-- Net.VERSION 0.30.0: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
-  Boki's own game. Clashes with ext/wisp-guardian's index 28 / 0.29.0: renumber on merge.
-- match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it.
+- Net.VERSION 0.24.15: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
+  Boki's own game.
+- match.gd +3 (interact, match end), hunter.gd +2, KinLoss and KinCommand skip a Boki whose wisp is not with its
+  own hunter. `--wisp-steal-check` covers it, including the stacking rows.

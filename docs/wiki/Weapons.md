@@ -84,7 +84,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Perk | Effect | Stacks |
 |---|---|---|
 | Quick Hands | Reload 30% faster. | 1 |
-| Second Wind | One extra dash charge. | 1 |
+| Second Wind | Dropping below 30% health instantly refreshes your dash (once every 45s). | 1 |
 | Featherfall | Your glider lasts 60% longer. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
 | Tough Skin | +15 max health, healed right away. | 3 |

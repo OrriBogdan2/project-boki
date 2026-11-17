@@ -1035,6 +1035,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])
 	opts = bh[1]
+	if summon and d > 0.0:
+		summon.note_hit(by)
 	if is_wild() and by and by is Hunter:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
@@ -1058,7 +1060,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
-	if not model or KinWisp.render(self) or KinWispForm.render(self, model):
+	if not model or KinWispForm.render(self, model) or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")
