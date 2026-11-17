@@ -3,6 +3,7 @@ A Hunter's material name is its toon slot and tag ("<slot>-<tag>", WardenGlb._to
 hands the surface to WardenMood's drawn face. Albert's v95 port kept the master's UVs, so the drawn face (UV-mapped
 on the old glass) never showed and covered his painted eyes: eyes-mood-v95 -> eyes-v95 shows the picked paint.
 Run: python3 tools/art1/glb_mat_rename.py IN.glb OUT.glb OLD=NEW [OLD=NEW ...]"""
+
 import json
 import struct
 import sys

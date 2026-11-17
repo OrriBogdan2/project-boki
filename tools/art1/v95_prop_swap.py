@@ -10,6 +10,7 @@ Blender only re-places and re-exports; no mesh is reshaped. Clips, rig and every
 Run: blender -b --factory-startup --python tools/art1/v95_prop_swap.py -- GAME.glb MASTER.glb OUT.glb
        --prop spear --bone hand.R --old-mats cloth-atlas,ice-atlas --tip weapon_muzzle
        --anchors anchor_blade_root,anchor_blade_mid --mat cloth-spear [--front -Y] [--out-dir +X]"""
+
 import argparse
 import sys
 
@@ -27,7 +28,12 @@ ap.add_argument("--old-mats", required=True)
 ap.add_argument("--tip", required=True)
 ap.add_argument("--anchors", default="")
 ap.add_argument("--mat", required=True)
-ap.add_argument("--prop-tris", type=int, default=4000, help="the piece's triangle budget (collapse, UVs kept; body + prop under 80k)")
+ap.add_argument(
+    "--prop-tris",
+    type=int,
+    default=4000,
+    help="the piece's triangle budget (collapse, UVs kept; body + prop under 80k)",
+)
 ap.add_argument("--front", default="-Y", help="the master's front (Meshy: -Y), laid on --out-dir in the game")
 ap.add_argument("--out-dir", default="+X", help="game direction the prop's front faces (her right: +X)")
 a = ap.parse_args(sys.argv[sys.argv.index("--") + 1 :])
@@ -72,7 +78,7 @@ for o in m_objs:
 SP = world(prop)
 MB = np.concatenate([world(o) for o in m_body])
 mc, md, mt0, mt1 = axis(SP)
-if md[2] < 0:       # (master prop stands upright: its head up)
+if md[2] < 0:  # (master prop stands upright: its head up)
     md = -md
     mt0, mt1 = -mt1, -mt0
 m_grip = grip_t(mc, md, MB)
@@ -85,8 +91,13 @@ bpy.ops.import_scene.gltf(filepath=a.game)
 arm = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE")
 arm.data.pose_position = "REST"
 bpy.context.view_layer.update()
-body = next(o for o in bpy.context.scene.objects if o.type == "MESH" and not o.name.startswith("M_")
-            and any(m and m.name.split(".")[0] in a.old_mats.split(",") for m in o.data.materials))
+body = next(
+    o
+    for o in bpy.context.scene.objects
+    if o.type == "MESH"
+    and not o.name.startswith("M_")
+    and any(m and m.name.split(".")[0] in a.old_mats.split(",") for m in o.data.materials)
+)
 old_mats = {i for i, m in enumerate(body.data.materials) if m and m.name.split(".")[0] in a.old_mats.split(",")}
 old_v = sorted({v for p in body.data.polygons if p.material_index in old_mats for v in p.vertices})
 rest_v = sorted(set(range(len(body.data.vertices))) - set(old_v))
@@ -107,8 +118,11 @@ s = g_h / m_h
 R = basis(od, np.array(AX[a.out_dir], float)) @ basis(md, np.array(AX[a.front], float)).T
 m_g = mc + md * m_grip
 o_g = oc + od * o_grip
-print("PROPSWAP master len %.3f grip %.2f | old len %.3f grip %.2f | body h master %.3f game %.3f s %.3f -> new len %.3f" % (
-    mt1 - mt0, (m_grip - mt0) / (mt1 - mt0), ot1 - ot0, (o_grip - ot0) / (ot1 - ot0), m_h, g_h, s, s * (mt1 - mt0)), flush=True)
+print(
+    "PROPSWAP master len %.3f grip %.2f | old len %.3f grip %.2f | body h master %.3f game %.3f s %.3f -> new len %.3f"
+    % (mt1 - mt0, (m_grip - mt0) / (mt1 - mt0), ot1 - ot0, (o_grip - ot0) / (ot1 - ot0), m_h, g_h, s, s * (mt1 - mt0)),
+    flush=True,
+)
 
 # the new piece: the master's mesh, re-placed (rigid: rotation, uniform scale, move)
 new = prop.copy()
@@ -136,7 +150,9 @@ new.modifiers.new("Armature", "ARMATURE").object = arm
 for i, m in enumerate(new.data.materials):
     if m:
         m.name = a.mat if i == 0 else "%s%d" % (a.mat, i)
-        for n in (m.node_tree.nodes if m.use_nodes else []):     # (Godot extracts it as <art>_v95p*.jpg: a 2048 second image)
+        for n in (
+            m.node_tree.nodes if m.use_nodes else []
+        ):  # (Godot extracts it as <art>_v95p*.jpg: a 2048 second image)
             if n.type == "TEX_IMAGE" and n.image and not n.image.name.startswith("v95p"):
                 n.image.name = "v95p" if "v95p" not in bpy.data.images else "v95p%d" % len(bpy.data.images)
 for p in new.data.polygons:
@@ -156,6 +172,7 @@ for name in [a.tip] + [n for n in a.anchors.split(",") if n]:
 
 # the old prop's faces go
 import bmesh
+
 bm = bmesh.new()
 bm.from_mesh(body.data)
 bm.faces.ensure_lookup_table()
@@ -179,10 +196,32 @@ for o in bpy.data.objects:
         o.select_set(True)
 bpy.context.view_layer.objects.active = arm
 bpy.context.scene.render.fps = 30
-bpy.ops.export_scene.gltf(filepath=a.out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                          export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                          export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
-                          export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False,
-                          export_def_bones=False)
+bpy.ops.export_scene.gltf(
+    filepath=a.out,
+    export_format="GLB",
+    use_selection=True,
+    export_apply=False,
+    export_animations=True,
+    export_animation_mode="ACTIONS",
+    export_skins=True,
+    export_yup=True,
+    export_materials="EXPORT",
+    export_image_format="JPEG",
+    export_jpeg_quality=92,
+    export_extras=False,
+    export_vertex_color="ACTIVE",
+    export_force_sampling=True,
+    export_frame_step=1,
+    export_optimize_animation_size=False,
+    export_def_bones=False,
+)
 tris = sum(len(p.vertices) - 2 for o in bpy.data.objects if o.type == "MESH" for p in o.data.polygons)
-print("PROPSWAP exported", a.out, "tris", tris, "prop tris", sum(len(p.vertices) - 2 for p in new.data.polygons), flush=True)
+print(
+    "PROPSWAP exported",
+    a.out,
+    "tris",
+    tris,
+    "prop tris",
+    sum(len(p.vertices) - 2 for p in new.data.polygons),
+    flush=True,
+)
