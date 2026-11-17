@@ -145,6 +145,7 @@ const CHECKS := {
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
 	"--glide-bank-check": ["res://tools/glide_bank_check.gd", "glide_bank_check", null],
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
+	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
@@ -176,6 +177,7 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
+	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
@@ -212,6 +214,7 @@ const CHECKS := {
 	# Settings > Audio sliders reach the buses
 	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
 	"--loot-open-sfx-check": ["res://tools/loot_open_sfx_check.gd", "loot_open_sfx_check", null],
+	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],  # SFX row 3
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
 	"--hold-teach-check": ["res://tools/hold_teach_check.gd", "hold_teach_check", null],  # taps teach HOLD
@@ -363,6 +366,7 @@ const CHECKS := {
 	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],      # drawn keys follow a rebind
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
+	"--tips-check": ["res://tools/tips_check.gd", "tips_check", null],      # context tips
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--garden-cue-shots": ["res://tools/garden_cue_shots.gd", "garden_cue_shots", null],  # the four games' world cues
 	"--garden-games-vfx-check": ["res://tools/garden_games_vfx_check.gd", "garden_games_vfx_check", null],
@@ -373,10 +377,11 @@ const CHECKS := {
 	"--range-clamp-check": ["res://tools/range_clamp_check.gd", "range_clamp_check", null],      # cursor past max range
 	"--bot-dodge-check": ["res://tools/bot_dodge_check.gd", "bot_dodge_check", null],
 	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
-	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],  # the Warden models
-	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],  # rig for the Blender build
-	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],  # .glb loader
-	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],  # baked rig rests
+	"--lace-playtest-check": ["res://tools/lace_playtest_check.gd", "lace_playtest_check", null],      # Lace 11-08
+	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
+	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
+	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
+	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],      # baked rig rests
 	"--warden-rest-bake": ["res://tools/warden_rest_check.gd", "warden_rest_check", "bake"],
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],  # warm-up kept on disk
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
@@ -492,6 +497,7 @@ const CHECKS := {
 	"--ring-shots": ["res://tools/ring_shots.gd", "ring_shots", null],      # Fx.ring bursts and team markers
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--menu-focus-check": ["res://tools/menu_focus_check.gd", "menu_focus_check", null],   # hover stays in panel
+	"--words-check": ["res://tools/words_check.gd", "words_check", null],      # Help: the Words page, its text budget
 	"--ostra-globe-shots": ["res://tools/ostra_globe_shots.gd", "ostra_globe_shots", null],      # Brimseed growth
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
@@ -607,6 +613,7 @@ const CHECKS := {
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
+	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],      # a pat by personality
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
@@ -632,6 +639,7 @@ const CHECKS := {
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-climb-blocks-check": ["res://tools/farm_climb_blocks_check.gd", "farm_climb_blocks_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
+	"--farm-climb-check": ["res://tools/farm_climb_check.gd", "farm_climb_check", null],  # farm ridges climb
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],  # the Dash, GARDEN.md 9.4
 	"--relay-cup-check": ["res://tools/relay_cup_check.gd", "relay_cup_check", null],  # GARDEN_MODERN 4.2
@@ -643,6 +651,7 @@ const CHECKS := {
 	"--lantern-check": ["res://tools/lantern_check.gd", "lantern_check", null],      # Lantern Match, GARDEN_MODERN 4.2
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],  # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],  # the Dash's showcase wall
+	"--seasons-check": ["res://tools/seasons_check.gd", "seasons_check", null],      # garden seasons
 	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],  # 4.2 game 4
 	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds
@@ -653,7 +662,6 @@ const CHECKS := {
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],  # GARDEN_MODERN 4.2 game 3
 	"--show-ring-shots": ["res://tools/show_ring_shots.gd", "show_ring_shots", null],  # --shots-dir= (GPU)
-	"--seasons-check": ["res://tools/seasons_check.gd", "seasons_check", null],      # garden seasons
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
@@ -803,6 +811,8 @@ const CHECKS := {
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
+	"--tut-rebind-check": ["res://tools/tut_rebind_check.gd", "tut_rebind_check", null],      # text follows rebinds
+	"--fresh-run-log": ["res://tools/fresh_run_log.gd", "fresh_run_log", null],      # --shots-dir=<dir>
 	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
 	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
@@ -816,6 +826,8 @@ const CHECKS := {
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
+	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
+	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake
 	"--boki-nap-shots": ["res://tools/boki_nap_check.gd", "boki_nap_check", "shots"],  # --shots-dir=<dir>
 	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
