@@ -1,0 +1,15 @@
+{
+ "group": "steps",
+ "name": "Footsteps in shallow water and on metal",
+ "script": "tools/gen_sfx_steps.py",
+ "sounds": {
+  "step_water_light": "step",
+  "step_water_medium": "step",
+  "step_water_heavy": "step",
+  "step_metal_light": "step",
+  "step_metal_medium": "step",
+  "step_metal_heavy": "step"
+ },
+ "signature": [],
+ "replaces": []
+}
