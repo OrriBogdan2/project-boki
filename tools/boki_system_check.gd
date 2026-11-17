@@ -112,7 +112,7 @@ func _tally(names: Array) -> void:
 
 ## A fresh count of `names`, heard from where the player stands.
 func _listen(names: Array) -> void:
-	Sfx.move_listener(m.player.pos)
+	Sfx.listener = m.player.pos
 	_tally(names)
 	heard.clear()
 

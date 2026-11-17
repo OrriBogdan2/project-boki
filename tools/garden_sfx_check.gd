@@ -501,7 +501,7 @@ func _wake_all(home) -> void:
 func _hear(k: Dictionary) -> void:
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
-	Sfx.move_listener(k["pos"])
+	Sfx.listener = k["pos"]
 
 ## Synchronous throughout (OS.delay_msec for the real-time gaps), so no frame lets BaseLife move on its own.
 func _life(home) -> void:
@@ -529,7 +529,8 @@ func _life(home) -> void:
 	_started("boki_sleep")
 	life._nap(sleeper, "tired")
 	var naps := _started("boki_sleep")
-	for i in 120:      # 12 s: up to PILE_WALK on the way to a spot away from a rival, then asleep
+	var walk := maxf(float(life.R["spot_walk"]), BaseLife.PILE_WALK) + 3.0     # s: the walk to a nap spot or a pile
+	for i in int(walk / 0.1):
 		_hear(sleeper)
 		life._tick(sleeper, 0.1)
 		naps += _started("boki_sleep")
