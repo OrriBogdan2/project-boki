@@ -116,8 +116,10 @@ func _dive_idle_bot(_f: int) -> void:
 
 
 func _climb_bot(f: int) -> void:
-	P.inp["move"] = Vector2(1, 0)
 	var to_wall := dr.target.x - P.pos.x
+	# over the top, it lets go of the keys to come down on it (a full-speed hop can carry past a 3-tile ledge)
+	var over := not P.grounded and to_wall < -1.5 and P.pos.y > float(dr._flags["top"])
+	P.inp["move"] = Vector2.ZERO if over else Vector2(1, 0)
 	P.inp["jump"] = to_wall > -0.3 and ((to_wall > 0.0 and to_wall < 1.0 and f % 2 == 0) if P.grounded else f % 6 == 0)
 	P.inp["glide"] = P.inp["jump"]
 

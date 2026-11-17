@@ -198,6 +198,7 @@ def flat(p, n, key):
 # ------------------------------------------------------------------ v2's scan paint, fixed where it blurs (canon: grimble_v2/index.md)
 VEIN_KEY = rgb("a648f0")     # the corruption veins' painted colour: warden_look's paint_glow keys on it
 SQUINT_R = (0.030, 0.020)    # (m) the smug squint's lid, half width and half height round his left eye
+NOSE_LIFT = 1.2              # the nose paint's brightness (the body's scan paint takes 1.4; the nose faces the light more)
 MOUTH_TOP = 1.205            # (m) the grin's top on the fitted head (above it: cheeks, pale like the teeth)
 
 
@@ -224,6 +225,17 @@ def scan_face(p, c):
     c[tooth] = mix(C["iron"], C["iron_hi"] * 1.15, smooth(0.45, 0.75, lum[tooth]))
     c[gold] = mix(C["gold_sh"], C["gold_hi"], smooth(0.35, 0.75, lum[gold]))
     c[gum] = mix(c[gum], rgb("6a2a6e"), 0.6)
+    return c
+
+
+def nose(p, n, c):
+    """The snub nose: the face's own skin (c: the scan's paint nearest it), two dark nostrils facing forward and down."""
+    c = np.clip(c * (0.86 + 0.40 * form(n))[:, None] * NOSE_LIFT, 0, 1)
+    x, z, rx, rz = G.NOSTRIL
+    for s in (1, -1):
+        d = ((p[:, 0] - G.NOSE_C[0] - s * x) / rx) ** 2 + ((p[:, 2] - G.NOSE_C[2] - z) / rz) ** 2
+        hole = (d < 1.0) & (n[:, 1] > 0.2)
+        c[hole] = mix(C["throat"], C["skin_sh"], smooth(0.4, 1.0, d[hole]))
     return c
 
 

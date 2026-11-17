@@ -108,7 +108,7 @@ func _front() -> void:
 	hx._show_name()
 	await _wait(1.0)
 	await _shot("hatch_name")
-	hx._finish(String(hx.egg_defs[0]["species"]), "", "", true)
+	hx._finish(String(hx.egg_defs[0]["species"]), "", true)
 	await _wait(2.5)
 	await _shot("first_mask")
 	hx.queue_free()

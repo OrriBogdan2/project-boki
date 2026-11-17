@@ -147,6 +147,12 @@ func _total(prefix: String) -> int:
 			n += int(GardenSfx.heard[k])
 	return n
 
+
+## Boki voice cues heard: the generic kin_ ones and the per-species bk_<species>_<mood> (KinVoice).
+func _voices() -> int:
+	return _total("kin_") + _total("bk_")
+
+
 func _wait() -> void:
 	await main.get_tree().create_timer(WAIT_S).timeout
 
@@ -285,6 +291,7 @@ func _volley(home) -> void:
 func _tumble(home) -> void:
 	var tb: BaseTumble = home.htumble
 	var moves: Array = BaseTumble.rules()["moves"].keys()
+	TumbleTeach.mark()        # the real bout, not the one-time practice exchange (tumble_check)
 	tb.use()
 	var want := {}                # move -> exchanges it should decide
 	var pushes := 0
@@ -316,6 +323,7 @@ func _tumble(home) -> void:
 
 func _echo(home) -> void:
 	var es: EchoSteps = home.hecho
+	Save.d["tutorial"]["echo_practice"] = true        # not the first dance: the full versus, not the slow practice
 	es.use()
 	var r: EchoSteps.Run = es.run
 	var every := int(EchoSteps.rules()["cheer_every"])
@@ -464,19 +472,19 @@ func _whistle(home) -> void:
 	w.release()
 	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
 			% [GardenSfx.heard])
+	var sp := String(home.kins[0]["rec"]["species"])
 	_answer(home, 90.0, 80.0, false)
-	var species: String = home.kins[0]["rec"]["species"]
-	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(species, "happy")) == 1
-			and _total("bk_") == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
+			and _voices() == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 25.0, 40.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(species, "unsure")) == 1
-			and _total("bk_") == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
+			and _voices() == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
 	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
-	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _total("kin_") == 0,
+	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voices() == 0,
 			"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard])
 	for joy in [80.0, 5.0]:
 		_answer(home, 90.0, joy, true)
-		ok(_total("kin_") == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
+		ok(_voices() == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
 				% [joy, GardenSfx.heard])
 	home.kins[0]["nap_t"] = 0.0
