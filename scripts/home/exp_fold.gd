@@ -24,10 +24,11 @@ static func forget(text: String) -> void:
 static func add(parent: Control, items: Array, text: String, open_text := "") -> Button:
 	var label := "%s (%d)" % [text, items.size()] if items.size() > 1 else text
 	var b := UI.ghost(label, Callable())
+	var open_label := open_text if open_text != "" else "Fewer: " + text
 	var set_open := func(on: bool) -> void:
 		for it in items:
 			if is_instance_valid(it): (it as Control).visible = on      # (a swapped tile is gone)
-		b.text = (open_text if open_text != "" else "Fewer: " + text) if on else label
+		b.text = open_label if on else label
 		_opened[text] = on
 	b.pressed.connect(func() -> void: set_open.call(not _opened.get(text, false)))
 	for it in items:
