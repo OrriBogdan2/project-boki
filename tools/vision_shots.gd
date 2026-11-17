@@ -72,7 +72,7 @@ func run(mn: Node) -> void:
 			r.teleport(at[i])      # held where they stand, not firing (firing would reveal them)
 			r.inp["fire"] = false
 			if f < shoot_at: r.reveal_t = 0.0
-			elif i == SHOOTER and f < shoot_at + REVEAL: r.fire()      # (an idle rival leaves the fire key alone)
+			elif i == SHOOTER and f < shoot_at + REVEAL: r.atk.fire()      # (an idle rival leaves the fire key alone)
 		P.inp["aim"] = P.pos + Vector3(cos(t) * AIM_M, 0.9, sin(t) * AIM_M)
 		P.inp["scout"] = f >= scout_at
 		P.inp["crouch"] = f >= SETTLE + STAND + SWEEP and f < shoot_at
