@@ -71,7 +71,7 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
-var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
 var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
@@ -346,8 +346,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func move_k() -> float:
-	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+func speed_bonus() -> float:
+	return vault_haste() if haste_t > 0.0 else 0.0
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
@@ -473,7 +473,7 @@ func on_dash(use_ex: bool) -> bool:
 	var extra := {"invuln": 0.1, "feel": "long"} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air, "aloft": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -485,7 +485,7 @@ func _empowers(use_ex: bool) -> bool:
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
-## it ends where she lands.
+## it ends where she lands (not the long dash on the ground: cutting that one leaves its full speed unhanded).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -494,7 +494,7 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+	if bool(vault["aloft"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
 
 ## On the ground the fitted curve's tail (past its peak) never drops under her (hasted) run, so the hand-over is at
@@ -512,7 +512,7 @@ func _tick_curve(dt: float) -> void:
 	for knot in curve:
 		if float(knot[1]) > float(peak[1]): peak = knot
 	if 1.0 - h.roll_t / t0 > float(peak[0]):
-		h.roll_speed = maxf(h.roll_speed, h.base_speed * move_k() / Loco.dash_speed(h.arch))
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * (move_k() + speed_bonus()) / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.

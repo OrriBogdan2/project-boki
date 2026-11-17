@@ -58,14 +58,13 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		P.unlock_all()
 		P.dashes = P.max_dashes()
 		await _drawn(m.hud)
-		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes())
-		if P.ak.single_dash():
-			want = 0
+		var want := int(P.max_dashes())
+		var discs := want if want > 1 else 0          # a one-charge dash draws no charge discs (the source)
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
-		ok(pips.size() == want and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
-			"%s: %d pips, all full = %d charges, air dash %s" % [a, pips.size(), want, air])
+		ok(pips.size() == discs and pips.all(func(f): return f == 1.0) and (float(sh.get("air", -1.0)) >= 0.0) == air,
+			"%s: %d discs, all full, for %d charges, air dash %s" % [a, pips.size(), want, air])
 	P.reclass(Arch.weight("juggernaut"), "juggernaut", Arch.signature("juggernaut"))
 	P.unlock_all()
 	var regen: float = P.dash_regen()
@@ -168,7 +167,7 @@ func _home_slot() -> void:
 		var pips: Array = sh.get("pips", [])
 		var fl := floorf(float(case[0]))
 		var left: float = 0.0 if int(fl) >= cap else (1.0 - (float(case[0]) - fl)) * regen
-		var right: bool = pips.size() == cap
+		var right: bool = pips.size() == (cap if cap > 1 else 0)
 		for i in pips.size():
 			right = right and absf(float(pips[i]) - clampf(float(case[0]) - float(i), 0.0, 1.0)) < 0.001
 		ok(right and (left == 0.0 or sh["text"] == HudSlot.cd_text(left)),
