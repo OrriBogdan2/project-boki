@@ -4,8 +4,7 @@
 interaction is chainable": for a light (Lace), medium (Vex) and heavy (Albert) Hunter, in each movement state, it presses
 dash, jump, glide, wall kick, mantle, LMB and E on the next step, with a player's keys (`glide_press_only`), and asserts the
 move starts within 1 s (a start later than 2 steps is printed as buffered, with its delay) or that a documented rule in the
-check's `REFUSE` table refuses it. States: ground, air, glide, ground dash, air dash, rocket free fall, glide ring, lift
-ring, Ice Sheet, Deep Water. Wall actions use a carved 1.6 m wall; ring and field states run on the Hollow Crown (seed 5).
+check's `REFUSE` table refuses it. States: ground, air, glide, ground dash, air dash, rocket free fall, glide ring (when the map has one), Ice Sheet, Deep Water. Wall actions use a carved 1.6 m wall; ring and field states run on the Hollow Crown (seed 5).
 A press that does not go off on plain ground in the fixture is `n/a` for that hero.
 
 Result on the merged line (origin/main 0.24.4 + region-hazards-1111 (0.24.5 train) + feel-rocket-fall + air-rings-1111):
