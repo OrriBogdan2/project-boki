@@ -36,6 +36,7 @@ func run(main: Node) -> void:
 	var w4: Dictionary = _carve(4, 1)[0]
 	var w5 := _carve(5, 2)
 	_kick(w4, w5[0], w5[1])
+	_tall(w4)
 	_dance(w5[1])
 	_stand_mantle(_carve(1, 1)[0])
 	_bounce(w4)
