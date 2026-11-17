@@ -398,14 +398,14 @@ func _tab_controls(v: VBoxContainer) -> void:
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
-	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
+	_note(v, "Esc always opens the menu.")
 
 func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")
 	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
-	var follow := [["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
-	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
+	var follow := [["centred", "Centred on you"], ["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Centred on you, or sliding toward where you aim")
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 
 func _tab_audio(v: VBoxContainer) -> void:
@@ -457,6 +457,8 @@ func _tab_access(v: VBoxContainer) -> void:
 	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
 			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
+	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
+	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
 	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),
