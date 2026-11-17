@@ -54,6 +54,7 @@ var m: Node
 var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
+var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the global randf the sim uses
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
@@ -530,7 +531,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
-	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
@@ -629,7 +630,7 @@ func streak(follow: Node3D, col: Color, width: float, tail: float) -> void:
 	mt.set_shader_parameter("col", col)
 	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, STREAK_HOT))
 	mt.set_shader_parameter("col3", col.darkened(STREAK_CHAR))
-	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", 1.0)
 	mi.global_transform = Transform3D.IDENTITY
