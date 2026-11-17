@@ -27,8 +27,6 @@ const DEFAULTS := {
 	"boki_wisps": false,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
-	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
-	"boki_wisps": false,
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline

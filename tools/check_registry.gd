@@ -871,7 +871,6 @@ const CHECKS := {
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],  # docs/decisions/0044
 	"--wisp-hit-rules-check": ["res://tools/wisp_hit_rules_check.gd", "wisp_hit_rules_check", null],
 	"--wisp-rules-check": ["res://tools/wisp_rules_check.gd", "wisp_rules_check", null],      # docs/decisions/0045
-	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
 	"--feed-bowl-shots": ["res://tools/feed_bowl_shots.gd", "feed_bowl_shots", null],      # --shots-dir=<dir> (GPU)
 	"--boki-nap-check": ["res://tools/boki_nap_check.gd", "boki_nap_check", "check"],  # settle, sleep, wake

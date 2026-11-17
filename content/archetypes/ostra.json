@@ -44,8 +44,6 @@
 		"id": "swap",
 		"name": "Lantern Trade",
 		"card_range": "reach",
-		"icon": "shadowstep",
-		"col": "#c65cff",
 		"icon": "ostra_dash",
 		"col": "#7fe0d0",
 		"cd": 9.5,
