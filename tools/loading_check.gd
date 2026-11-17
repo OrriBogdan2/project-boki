@@ -39,7 +39,7 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		ok(ld.tip != "" and ld.TIPS.has(ld.tip), "%s: a tip from the tip set" % ak)
+		ok(ld.tip != "" and _tip_set().has(ld.tip), "%s: a tip from the tip set" % ak)
 		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
 		ld.free()
 		var calm: Node = load(LOADING).new()
@@ -104,3 +104,8 @@ func _real_load(main: Node) -> void:
 	var seen := ", ".join(stages)
 	var complete := order_ok and at == names.size() - 1 and warm_seen
 	ok(complete, "the stages come in order, graphics warm-up included: " + seen)
+
+
+## Every tip in content/rules/tips.json as the loading screen shows it (keys filled in).
+func _tip_set() -> Array:
+	return TipPick.rules()["tips"].map(func(t): return TipPick.render(String(t["text"])))
