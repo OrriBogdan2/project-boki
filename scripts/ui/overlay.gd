@@ -382,7 +382,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	_toggle(v, "Keep cursor in window", "cursor_confine", "In a fight the cursor stays inside the window")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
-	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
+	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch", "scout"]],
 		["Fighting", [
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",

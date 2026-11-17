@@ -3637,6 +3637,7 @@ func _play_evolutions() -> void:
 		if kk["rec"].get("pending_evo", []).size() > 0 and not kk.has("indoors"):
 			k = kk; break
 	if k.is_empty():
+		EvolveCard.tell_waiting(self, kins)
 		return
 	building_now = true
 	var rec: Dictionary = k["rec"]

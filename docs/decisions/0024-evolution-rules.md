@@ -29,3 +29,4 @@ a boss with `ink` in its def gives its Ink to the killer, and an extracted run f
 - No line uses trade yet (the owner named none); the condition works and is tested.
 - Inks have no use button yet (`Evo.use_ink` is the API); it needs Ermink and Jarmit in data.
 - Only the Sky Serpent has an Ink type (Wyrm); the Colossus and Brood Mother drop none.
+- Telling the player (`EvolveCard`): the first form change on a save shows one card (old and new form, why, stat bars, link to the Field Book page; `tutorial.first_evolve`), later ones a toast; a Boki held back by missing art is told once (`wait_told`). Saves that already evolved before this see the card on their next one.
