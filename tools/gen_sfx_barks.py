@@ -36,6 +36,7 @@ VOICES = {
     'rimewright': dict(f0=540, scale=1.2, breath=0.55, rasp=0.0, vib=0.015, cut=7000, double=0.45),  # Neve
     'tender':     dict(f0=620, scale=1.38, breath=0.35, rasp=0.0, vib=0.006, cut=7500),          # Meeko
     'thief':      dict(f0=370, scale=1.13, breath=0.18, rasp=0.12, vib=0.0, cut=6000),           # Sable
+    'gil':        dict(f0=285, scale=1.2, breath=0.25, rasp=0.12, vib=0.0, cut=6000),            # Gil
 }
 TAKES = 3       # name.wav + name_1..3.wav: four takes per bark
 

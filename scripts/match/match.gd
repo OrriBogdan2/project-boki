@@ -219,8 +219,9 @@ func _progress(label: String) -> void:
 
 ## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	await WarmUp.new(self).run(progress)
-
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
@@ -2427,10 +2428,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 		hud.toast("Staggered %s!%s" % [mb.md["name"], ("  " + what) if what != "" else ""], Color("e0b0ff"))
 		train["_stagger"] = true
 
-## Someone's armor just shattered: a clear sound and burst so the attacker knows to push.
+## Someone's armor just shattered: a clear sound and the body cracking so the attacker knows to push.
 func on_armor_break(h: Hunter, by: Ent) -> void:
-	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
-	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
@@ -5462,13 +5461,6 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", TipText.send(String(k.rec.get("name", "your Boki"))))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")

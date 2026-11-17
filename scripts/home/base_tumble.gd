@@ -220,6 +220,7 @@ var buttons: Array = []
 var card: Control = null
 var card_t := 0.0
 var teach: TumbleTeach = null  # the first-time practice exchange while it runs (tumble_teach.gd)
+var cue: GardenCues.TumbleTellCue = null   # the rival's tell over its head while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -281,6 +282,7 @@ func _start() -> void:
 	if teach != null:
 		run.R = TumbleTeach.rules()
 	run.visitor = pair[1].has("visitor")
+	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
@@ -328,6 +330,7 @@ func tick(d: float) -> void:
 	if run.state == "resolve" and bar != null and run.grade == "":
 		bar.step(d)
 	_place_pair(d)
+	cue.step(pair[1]["pos"], pair[0]["pos"], d)
 	if run.over():
 		_end(true)
 
@@ -335,10 +338,12 @@ func tick(d: float) -> void:
 func _enter(s: String) -> void:
 	seen = s
 	var moves: Dictionary = rules()["moves"]
+	cue.hide_tell()
 	match s:
 		"intro":
 			_sync_panel()
 		"tell":
+			cue.show_tell(run.tell, run.honest(0))
 			_clips("", run.tell)
 			_sync_panel()
 		"pick":
@@ -480,6 +485,9 @@ func _end(finished: bool) -> void:
 func _clear() -> void:
 	_clips("", "")
 	_close_bar()
+	if cue != null:
+		cue.clear()
+	cue = null
 	if is_instance_valid(panel):
 		panel.queue_free()
 

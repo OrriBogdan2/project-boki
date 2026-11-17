@@ -391,6 +391,7 @@ func _kit_from_weapon() -> void:
 		return
 	var wd := Content.weapon(wid)
 	if ak:
+		wpn["sfx"] = String(ak.lmb_def().get("sfx", wpn["sfx"]))      # a Hunter's own shot over a shared gun's (Dredge)
 		runner.set_slot("utility", null)      # right click is the archetype's
 		return
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
@@ -963,6 +964,7 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
+var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
@@ -1053,12 +1055,15 @@ func dash_with(e: Dictionary) -> void:
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
+	roll_falls = false
 	dash_is_ex = ex_next
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
 		ex_next = false
+		var k: Array = e.get("ex_feel", [1.0, 1.0])    # a Shift move's own dash_feel row (ArchKit.travel "feel")
 		roll_t = float(cdat.get("ex_time", roll_t * 1.45))
-		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) / roll_t
+		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) * float(k[0]) / (roll_t * float(k[1]))
+		roll_t *= float(k[1])
 		vel.y = maxf(vel.y, 0.0)
 	roll_t /= Loco.dash_speed(arch)      # a hunter whose dash is slowed (tuning.json dash_speed) keeps its distance
 	inv_t = maxf(inv_t, float(e.get("invuln", 0.14)))
@@ -2027,6 +2032,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
+	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2117,7 +2123,7 @@ func _physics(dt: float) -> void:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
-	elif roll_t > 0.0 and not grounded and not dropping:
+	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
@@ -2259,6 +2265,7 @@ func _physics(dt: float) -> void:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = HunterMove.coyote_s
+		roll_falls = roll_t > 0.0 and move_kind == "dash"
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt
@@ -2652,11 +2659,10 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		mantle_cd = 0.3
 		return true
 	if not bool(lf["win"]) and left <= LRISE_WINDOW:
-		# the fling window opens: a tick and a quick ring, so the timing reads
+		# the fling window opens: a tick, so the timing reads
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
 	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt), float(lf["dash_vy"]))
 	return true
 
@@ -2720,7 +2726,7 @@ func _grapple(dt: float) -> void:
 	grap["fx"] -= dt
 	if grap["fx"] <= 0.0:
 		grap["fx"] = 0.07
-		m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
+		m.fx.debris(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
 	if (absf(tz - pos.y) < 0.02 and hd.length() < 0.05) or grap["t"] > 2.0:
 		pos = Vector3(grap["ex"], maxf(pos.y, tz), grap["ez"])
 		var land: Vector3 = grap["land"]
@@ -2880,17 +2886,13 @@ func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
+	_worn.clear()
 	max_armor = float(ARMOR_TIERS[armor_tier][4]) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 
 func gear_stat(k: String) -> float:
-	var t := 0.0
-	for g in gear:
-		if not g.is_empty():
-			t += float(Gear.ALL[g["id"]]["stats"].get(k, 0.0)) * Gear.mult(int(g["rar"]))
-	for pk in perks:
-		t += float((Data.PERKS.get(pk, {}).get("stats", {}) as Dictionary).get(k, 0.0))
+	var t := _worn_stat(k)
 	if kin != null and is_instance_valid(kin) and (k == "armor" or k == "sight"):
 		t += Mutations.owner_stat((kin as Kin).rec, k)      # a Crystal or Glowing kin helps its hunter
 	# your kin: its owner bonus points, carry passives, the merge and short ability buffs
@@ -2899,6 +2901,27 @@ func gear_stat(k: String) -> float:
 		"dmg": t = KinMerge.cap_damage(self, t, owner_stat("damage") + buff("damage"))
 		"heat", "glide_speed": t += owner_stat("glide")
 		"cdr": t += owner_stat("cooldown")
+	return t
+
+var _worn := {}              # stat key -> what the worn gear and the perks add, summed once a step
+var _worn_t := -1.0          # Match.time the sums above are from (gear_stat is asked ~14 times a step)
+
+## What the four gear slots and the perks add to a stat. Summed once a step (and again after
+## refresh_gear or a new perk): with ten squads these sums were a tenth of Hunter.sim.
+func _worn_stat(k: String) -> float:
+	var now: float = m.time if m else 0.0
+	if now != _worn_t:
+		_worn.clear()
+		_worn_t = now
+	if _worn.has(k):
+		return _worn[k]
+	var t := 0.0
+	for g in gear:
+		if not g.is_empty():
+			t += float(Gear.ALL[g["id"]]["stats"].get(k, 0.0)) * Gear.mult(int(g["rar"]))
+	for pk in perks:
+		t += float((Data.PERKS.get(pk, {}).get("stats", {}) as Dictionary).get(k, 0.0))
+	_worn[k] = t
 	return t
 
 ## Ground speed while you ride your mount (its carry.mount speed).
@@ -2920,6 +2943,7 @@ func add_perk(id: String) -> void:
 	if not Data.PERKS.has(id) or not perk_open(id):
 		return
 	perks.append(id)
+	_worn.clear()
 	match id:
 		"toughskin":
 			max_hp += 15.0; hp = minf(max_hp, hp + 15.0)
@@ -3209,7 +3233,7 @@ func render(delta: float, alpha: float) -> void:
 		boost_fx_t = maxf(0.0, boost_fx_t - delta) if boosted else 0.0
 		if wind_t <= 0.0:
 			wind_t = 0.035 if boosted else 0.09
-			m.fx.burst(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
+			m.fx.debris(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard

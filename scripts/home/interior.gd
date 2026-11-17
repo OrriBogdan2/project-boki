@@ -315,6 +315,7 @@ func _use(it: Dictionary) -> void:
 
 ## Petting indoors counts just like outside: its personality's beat, joy, trust, likes and the memory.
 func _pet_kin(k: Dictionary) -> void:
+	HomeVerbs.come_in(k, ppos)      # it steps into your hands' reach first
 	PetReact.pet(self, k, visit.is_empty())
 	if visit.is_empty():
 		Save.save_game()

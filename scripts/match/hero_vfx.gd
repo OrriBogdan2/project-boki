@@ -14,15 +14,15 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8, "sheen": 9, "fist": 10}
+	"ring": 8, "sheen": 9, "fist": 10, "portal": 11}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7, "plus": 8}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 ## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
 ## the tracers riding Vex's rounds (6)
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "sheen": 6, "fist": 3, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
-	"drop": 6, "plus": 4}
+	"ring": 6, "sheen": 6, "fist": 3, "portal": 4, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4,
+	"coin": 4, "star": 6, "drop": 6, "plus": 4}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
 	"plus": 12}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -54,6 +54,7 @@ var m: Node
 var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
+var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the global randf the sim uses
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
@@ -346,7 +347,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare", "sheen":
+		"flare", "sheen", "portal":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -531,7 +532,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
-	mt.set_shader_parameter("seed", rng.randf() * SEED_MAX)
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
@@ -630,7 +631,7 @@ func streak(follow: Node3D, col: Color, width: float, tail: float) -> void:
 	mt.set_shader_parameter("col", col)
 	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, STREAK_HOT))
 	mt.set_shader_parameter("col3", col.darkened(STREAK_CHAR))
-	mt.set_shader_parameter("seed", rng.randf() * SEED_MAX)
+	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", 1.0)
 	mi.global_transform = Transform3D.IDENTITY

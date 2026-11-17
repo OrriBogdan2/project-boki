@@ -36,6 +36,9 @@ static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
 static var step_height: float = _phys["step_height"]     # m: the tallest lip walked straight over (World.STEP)
 
+static func rules() -> Dictionary:
+	return _rules
+
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
 	return _rules.get(arch, _rules["default"])
@@ -85,6 +88,18 @@ static func cut_air_dash(h: Hunter) -> void:
 		return
 	h.roll_t = 0.0
 	h.shove = {}
+
+## A ground dash that runs off a ledge keeps its own course (distance, speed curve) but falls as it goes: the
+## height hold is an air dash's (Hunter.roll_falls, set as the ground goes). It ends in the air with the usual dash
+## exit, so the glider and the air dash are free as it ends, and the kit's ground pose for it is cut there.
+## Source: a dash is how you leave a platform (bCanWalkOffLedges false) and a falling body only sheds
+## FallingLateralFriction; DECISIONS: walking off ledges is always allowed. Called every step.
+static func dash_off_ledge(h: Hunter) -> void:
+	if not h.roll_falls or h.roll_t > 0.0:
+		return
+	h.roll_falls = false
+	if h.ak and not h.grounded:
+		h.ak.on_dash_off_ledge()
 
 ## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
 ## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An

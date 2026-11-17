@@ -180,8 +180,8 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 ## farm, which some kinds love and some hate (BokiQuirks.rain_joy); friend: another Boki close by
 ## (KinAiling.friend_near), which helps a weak or sick one get better; away: time you were gone (catch_up), when
 ## joy wears at Care.DECAY's slow pace because nobody models the toys it played with meanwhile.
-static func tick(
-		rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false, away := false) -> void:
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false,
+		away := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes

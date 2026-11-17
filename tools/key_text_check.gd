@@ -126,8 +126,9 @@ func _training() -> void:
 	var rows: Array = m.training.rows()
 	for r: Array in rows: _line("training " + String(r[0]), String(r[1]))
 	var glide := rows.filter(func(r): return r[0] == "glide")
-	ok(not glide.is_empty() and String(glide[0][1]).contains(Settings.key_cap("jump")),
-			"the Training Grounds glide row names the rebound jump key")
+	# the row text is key-free; the HUD prints the live cap of the row's action in front of it (training_drill.json)
+	ok(not glide.is_empty() and String(glide[0][2]) == "jump" and Settings.key_cap("jump") != "",
+			"the Training Grounds glide row shows the rebound jump key")
 
 ## The first-time hints a fresh save sees at the start of a match.
 func _tips() -> void:

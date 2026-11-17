@@ -499,6 +499,11 @@ func _carry(dv: Vector2, k: float) -> void:
 	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	step_until = m.time + CARRY_T
 
+## The swing's step keeps his body on the cursor as the hold did (source: he turns freely through the swing, sheet
+## 0102-0108; the "turn" lmb row); the perfect launch and a dash face where they go.
+func aims_in_dash() -> bool:
+	return (m.time < step_until and not launch.running()) or super.aims_in_dash()
+
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 	vfx("hit", f.pos, dv)
@@ -770,7 +775,8 @@ func on_dash(use_ex: bool) -> bool:
 		# charge, the swing still charging through it (hold.lmb.ground)
 		if not spend_dash(false): return true
 		var sd2 := float(dd.get("short", 2.6))
-		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
+		var short_go := {"invuln": 0.0, "trail": "dust", "dir": dash_dir(), "feel": "short"}
+		travel(sd2, sd2 / float(dd["whirl_speed"]), short_go)
 		st["last_dash"] = "short"
 		play("bul_short")
 		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
@@ -784,12 +790,13 @@ func on_dash(use_ex: bool) -> bool:
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"])
 		var t := dist / float(dd["charge_speed"])
-		var t_felt := t * float(dash_feel()["time"])
-		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
+		var t_felt := t * float(dash_feel("charge")["time"])
+		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir(), "feel": "charge"})
 		front_t = t_felt + 0.15
 		knock_until = m.time + t_felt + 0.1
 		var armed := full_ready()
-		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": dist, "armed": armed})
+		var lane := dist * float(dash_feel("charge")["dist"])
+		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": lane, "armed": armed})
 		if armed:
 			res -= float(res_def().get("slam", 50.0))
 			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
@@ -803,7 +810,8 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		# the long dash (out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
-		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"})
+		var lumber := {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust", "feel": "lumber"}
+		travel(de, de / float(dd.get("lumber_speed", 14.0)), lumber)
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
@@ -839,7 +847,8 @@ func _spin_hit(wd: Vector2) -> void:
 		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
+	# a spin off a ledge ends in the air (the glider is free); a glide pressed in the dash already took over
+	if h.grounded and not h.gliding:
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	vfx("spin", h.pos, null, {"r": r})

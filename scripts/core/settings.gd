@@ -666,6 +666,10 @@ func key_caps(action: String) -> String:
 func move_caps(sep := "") -> String:
 	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
+## The four walking keys' caps in a row ("WASD"), joined by `sep`.
+func move_caps(sep := "") -> String:
+	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
+
 ## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)

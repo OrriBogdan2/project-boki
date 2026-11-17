@@ -3,6 +3,8 @@ extends RefCounted
 ## The Training Grounds checklist and its practice tools, plus the --balloon-demo and --train-demo test
 ## hooks (moved out of match.gd). Match keeps the shared state (`train`, `train_t`, `duel_pad`).
 
+## The checklist rows: content/rules/training_drill.json (TrainDrill), worded with the player's own keys.
+
 var m: Match = null
 
 
@@ -115,6 +117,7 @@ func rows() -> Array:
 			)
 	)
 	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
+
 
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate

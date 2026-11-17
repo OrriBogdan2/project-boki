@@ -91,6 +91,7 @@ func run(m: Node) -> void:
 	_report()
 	_report_toys()
 	loop.report()
+	_report_toys()
 	ok(size1 <= size_base * SAVE_GROWTH, "save size from day %d: %d -> %d bytes (limit x%.0f)"
 			% [SIZE_DAY, size_base, size1, SAVE_GROWTH])
 	var drifted: int = home.kins.filter(func(k): return k["rec"].has("drift")).size()
