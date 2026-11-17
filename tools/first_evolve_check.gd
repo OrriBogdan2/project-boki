@@ -95,10 +95,11 @@ func _beat() -> void:
 	ok(FirstEvolveBeat.seen(), "it is marked seen as it starts")
 	var want := ["Pim is ready to change.", "Pick what it grows into.", "It keeps its name and memories."]
 	for i in want.size():
-		beat.tick(FirstEvolveBeat.LINE_S)
-		ok(_lines(h).slice(0, i + 1) == want.slice(0, i + 1), "line %d: '%s' (%s)" % [i + 1, want[i], _lines(h)])
+		_tick(beat, h, FirstEvolveBeat.LINE_S)
+		var up := want.slice(maxi(0, i + 1 - MsgLane.MAX_SHOWN), i + 1)  # the lane shows MAX_SHOWN at most
+		ok(_lines(h) == up, "line %d: '%s' shows on time (%s)" % [i + 1, want[i], _lines(h)])
 	ok(h.opened.is_empty(), "no card before the last line has had its time")
-	beat.tick(FirstEvolveBeat.LINE_S)
+	_tick(beat, h, FirstEvolveBeat.LINE_S)
 	ok(h.opened == [["Pim", "Growth"]], "then Pim's card opens on Growth, the Evolve prompt (%s)" % [h.opened])
 	ok(beat.marker == null and beat.rec.is_empty(), "the marker goes with it")
 	h.panel_open = ""
@@ -106,6 +107,13 @@ func _beat() -> void:
 	for i in 5:
 		again.tick(FirstEvolveBeat.SCAN_S)
 	ok(again.rec.is_empty() and h.opened.size() == 1, "once per save: a second ready Boki gets no beat")
+
+## The beat and the lane's own clock together (lines expire and the waiting one moves up, as in play).
+func _tick(beat: FirstEvolveBeat, h: FakeHome, secs: float) -> void:
+	beat.tick(secs)
+	var lane := MsgLane.of(h.root_ui)
+	for k in 12:
+		lane._process(secs / 12.0)
 
 func _skip_and_tips() -> void:
 	Save.d["tutorial"].erase("first_evolve")
