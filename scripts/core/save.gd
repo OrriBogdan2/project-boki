@@ -513,6 +513,7 @@ func load_from(p: String) -> void:
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

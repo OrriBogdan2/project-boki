@@ -140,8 +140,12 @@
 	},
 	"lockin": {"clip": "emote", "from": 0.1, "dur": 1.45, "rate": 1.2},
 	"states": {
+		"mantle": "mantle",
+		"ledge": "ledge",
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"stun": "stun",
 		"emote": "emote",
@@ -158,11 +162,7 @@
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"ledge",
-		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",
