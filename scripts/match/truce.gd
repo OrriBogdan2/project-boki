@@ -160,7 +160,8 @@ func _post(h: Hunter, to: int) -> void:
 	_cool["%d>%d" % [h.team, to]] = m.time + 25.0
 	events.append("offer %d->%d" % [h.team, to])
 	if _mine(to) and m.hud and not m.player.out:
-		m.hud.toast("%s offers a truce. Hold %s and pick Deal." % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
+		var text := "%s offers a truce: no shooting each other. Hold %s, pick Deal"
+		m.hud.toast(text % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
 	elif _mine(h.team) and m.hud:
 		m.hud.toast_small("Truce offered to %s" % squad_name(to), Color("f4f1e6"))
 	# a bot squad answers in a moment (one with a living player in it waits for the player)
@@ -285,17 +286,18 @@ func strength(team: int) -> float:
 		if h.kin and not h.kin.dead and (h.kin as Kin).state != "downed": s += 0.3
 	return s
 
-## The other squads close by that this squad can see.
+## The other squads close by that this squad can see. can_see already asks every member, so each
+## rival is looked at once, from the closest member, and not again once its squad is seen closer.
 func _near_squads(team: int) -> Dictionary:
 	var out := {}
-	for me in _members(team):
-		if me.dropping or me.riding: continue
-		for o in m.hunters:
-			if o.team == team or o.out or o.extracted or o.riding or o.dropping:
-				continue
-			var d: float = me.flat_dist(o)
-			if d < SEE_R and m.can_see(team, o):
-				out[o.team] = minf(float(out.get(o.team, 1e9)), d)
+	var mine := _members(team).filter(func(x): return not (x.dropping or x.riding))
+	for o in m.hunters:
+		if o.team == team or o.out or o.extracted or o.riding or o.dropping:
+			continue
+		var d := 1e9
+		for me in mine: d = minf(d, me.flat_dist(o))
+		if d < SEE_R and d < float(out.get(o.team, 1e9)) and m.can_see(team, o):
+			out[o.team] = d
 	return out
 
 ## Reasons a squad would rather not fight this one: weaker, third-partied, a haul near an exit,

@@ -28,7 +28,8 @@ extends RefCounted
 ##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
 ##                   (the see-through canopies: SeeThrough)
 ##  15 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
-##                   backpedal facing east, on the game camera; <dir>/loco_<id>.tsv logs body and feet per frame
+##                   backpedal facing east, then kite north 4 s with the aim swaying east (KITE_SWAY), on the game
+##                   camera (--media-secs=23 for all of it); <dir>/loco_<id>.tsv logs body and feet per frame
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
@@ -39,7 +40,9 @@ const FRAME := 2.0 * STEP        # s per rendered frame
 const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"], [4.0, Vector2.ZERO, "stop"],
 		[5.0, Vector2(1, 0), "run"], [8.0, Vector2.ZERO, "stop"], [9.0, Vector2(0, -1), "strafe_l"],
 		[11.0, Vector2.ZERO, "stop"], [12.0, Vector2(0, 1), "strafe_r"], [14.0, Vector2.ZERO, "stop"],
-		[15.0, Vector2(-1, 0), "back"], [17.0, Vector2.ZERO, "stop"]]
+		[15.0, Vector2(-1, 0), "back"], [17.0, Vector2.ZERO, "stop"], [18.0, Vector2(0, -1), "kite"],
+		[22.0, Vector2.ZERO, "stop"]]
+const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
 const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
@@ -696,7 +699,8 @@ func _locomotion(secs: float) -> void:
 				move = k[1]
 				label = k[2]
 		pl.inp["move"] = move
-		pl.inp["aim"] = pl.pos + Vector3(8, 0.9, 0)
+		var sway := KITE_SWAY * sin(TAU * 0.7 * t) if label == "kite" else 0.0
+		pl.inp["aim"] = pl.pos + Vector3(8.0 * cos(sway), 0.9, 8.0 * sin(sway))
 		var pts := AUDIT.points(sk)
 		var fl: Vector3 = pts["foot.L"]
 		var fr: Vector3 = pts["foot.R"]
@@ -729,7 +733,8 @@ static func _ankle(sk: Skeleton3D, side: String, rest: bool) -> float:
 		at = gs.origin + gs.basis.y.normalized() * leg
 	return at.y * sk.global_basis.get_scale().y
 
-## The nearest spot to `p` with the plan's whole path (east 21 m, north 10 m, back, west 10 m) on open, level ground.
+## The nearest spot to `p` with the plan's whole path (east 21 m, north 10 m, back, west 10 m, north 18 m) on open,
+## level ground.
 func _loco_start(p: Vector3) -> Vector3:
 	for rad in range(0, 90, 3):
 		for k in maxi(1, int(TAU * rad / 3.0)):
@@ -739,6 +744,7 @@ func _loco_start(p: Vector3) -> Vector3:
 			for i in 23:
 				ok = ok and m.world.call("_fits", at.x + i, at.y, 0.7)
 				ok = ok and m.world.call("_fits", at.x + 22.0, at.y - 0.5 * i, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 12.0, at.y - 0.85 * i, 0.7)
 				ok = ok and absf(m.world.ground_at(at.x + i, at.y) - m.world.ground_at(at.x, at.y)) < 0.3
 				if not ok:
 					break

@@ -17,7 +17,8 @@ const FLOOR_UP := 0.04      # m its joints stay over the model's origin
 const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 const TUCK := 0.8           # and turns in behind the back about the vertical
 const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
-const RAISE := 2.4          # radians a hanging wing (Sable's moth wings) swings back and up when raised
+const RAISE := 2.4          # radians a hanging wing (Sable's moth wings) swings back and up about the side axis
+							# through its root when raised: tip up and leaning back, clear of the coat and braid
 const SPREAD := 0.45        # and then out to her side about the front-back axis (the open V of a moth's wings)
 var skel: Skeleton3D
 var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}

@@ -218,6 +218,8 @@ func _progress(label: String) -> void:
 
 ## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -5468,13 +5470,6 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", TipText.send(String(k.rec.get("name", "your Boki"))))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
