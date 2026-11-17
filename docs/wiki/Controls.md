@@ -14,7 +14,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | Left click | Weapon attack (some weapons charge when held) |
 | Right click | Your class's RMB ability: tap, hold, in the air and other variants (see your class page) |
 | Shift | Your class's dash |
-| Space | Jump; hold it in the air to glide |
+| Space | Jump; press it again in the air to open your glider |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
