@@ -1164,12 +1164,26 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
+## Tiles of slack round the trip a tile path may use: a tight window first, then one wide enough to
+## reach a ramp beside a cliff (The Crown's raised Heart has two, 23 m out east and west).
+const PATH_SLACK := [8, 24]
+
+## A walkable tile path from a to b (tile centres), [] when none: in the tight window, else the wide one. With
 ## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
 func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
+	for slack: int in PATH_SLACK:
+		var p := _grid_path_in(m, a, b, slack, h)
+		if p.is_empty() and h:
+			p = _grid_path_in(m, a, b, slack)
+		if not p.is_empty():
+			return p
+	return []
+
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int, h: Hunter = null) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
+	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
@@ -1195,7 +1209,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
 			prev[nx] = cur
 			q.append(nx)
 	if not found:
-		return _grid_path(m, a, b) if h else []
+		return []
 	var out: Array = []
 	var c := b
 	while c != a:
