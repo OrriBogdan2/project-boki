@@ -269,6 +269,15 @@ Other checks:
   - The garden's wheel zoom (0.55-1.6) is unchanged and stacks with it; a match never ticks the frame.
   - The check asserts the ease timing, both of you on screen at the wheel's closest, arrival and widest zooms (169/368/411 px from the nearest edge at full reach), and each way it lets go.
 
+## Camera zoom: start wide, wheel in, Ctrl past the end (`--cam-zoom-check`, owner playtest 11-16)
+
+Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the wheel zooms in; Ctrl extends further than max for scouting." Numbers: `content/rules/camera.json` "zoom"; code: `scripts/match/cam_wheel.gd`, `CamRig.air_zoom`.
+
+  - The match (and the practice areas) start, and every respawn (`Match._start_drop`) restart, at the widest wheel view: 1.6x the style's distance, 36.8 m back, about 37 m of ground across (the source's 35-39 m, which the old 23 m view never showed).
+  - The wheel steps 0.1 per notch between 0.55 (close) and 1.6; it does nothing while paused, in the map / swap / pack panels, with the hero picker open, or if the player bound the wheel to an action.
+  - Holding Ctrl (Sneak, on the ground) eases the view to 1.6 x 1.4 = 2.24x wherever the wheel was left, and back on release, at the camera's usual ease (no pop). The glider and height stack on top but never past the 2.4x cap.
+  - Cost: the pose LOD (`pose_far_m` 40 m) and the far plane (`120 x zoom + 30`) already scale with the view; the check holds the Ctrl view's furthest ground corner inside both. Fog is 0.0015 density (3% at 20 m): the wide view is not fogged out. The sun's shadows reach 60 m from the camera, so at the Ctrl view the top edge of the screen loses its shadows; the wheel's own widest view keeps them.
+
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
 - **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the SUPERVIVE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends.

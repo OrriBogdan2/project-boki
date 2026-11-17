@@ -1879,6 +1879,7 @@ func _glide_cam(cam: CamRig) -> void:
 	_reset(flat)
 	cam.snap(P.pos)
 	cam.zoom = 1.0
+	cam.user_zoom = 1.0      # the style's own framing: the rows below are the glide's widening on top of it
 	P.inp["jump"] = true
 	_cam_step(cam)
 	P.inp["jump"] = false

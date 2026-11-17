@@ -21,9 +21,9 @@ var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
+var user_zoom: float = CamWheel.far()   # the mouse wheel (CamWheel), widest at the start; times the match's zoom
 var lead := 1.0
-var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
+var pull := 0.0               # a quick pull-back (a dash into a glide)
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -60,17 +60,14 @@ var lead_off := Vector3.ZERO
 ## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
 ## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
 const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
-const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [source]
 const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7     # ...up to +70%
 func air_zoom(h: Hunter, alt: float) -> float:
-	var z := 1.0
-	if h.gliding:
-		z = GLIDE_ZOOM
-	elif h.crouch and h.grounded:
-		z = SNEAK_ZOOM
-	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	var z := GLIDE_ZOOM if h.gliding else 1.0
+	# Ctrl on the ground: a wide look around, past the wheel's range wherever the wheel was left
+	z *= CamWheel.ctrl_zoom() if h.crouch and h.grounded else user_zoom
+	z = minf(z * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX)), CamWheel.cap())
 	return maxf(z, zoom) if h.glide_dive.on else z
 
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
