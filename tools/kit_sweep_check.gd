@@ -99,7 +99,6 @@ func _stage(m: Match, P: Hunter, home: Vector3, st: String, env: String) -> void
 	P.ult = 1.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 12)
-	P.reload_t = 0.0
 	P.glide_cd = 0.0
 	for k in P.ak.cd:      # (a kit may hold more slots than the four)
 		P.ak.cd[k] = 0.0
