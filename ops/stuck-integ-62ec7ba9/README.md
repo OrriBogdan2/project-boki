@@ -86,3 +86,24 @@ Next 22 rows by unlanded_lines, each read against main's current code:
 | grimble-hook-arm-v2-rebased, anim-pilot-slice3, anim-meeko-crouch-stride, grimble-nose-1109 | art/glb rows: need art jobs from the owner's picks |
 | warden-bob-damp-rebased | superseded: `loco.bob` is on main (WardenGait) and Kael was re-tuned to [1.0, 0.6]; leftovers are a Net VERSION line, release.yml comments, audit doc |
 | tut-keycap-audit | partly on main (--key-text-check, Settings.key_cap in hatch/tutorial_text); left: some card/tutorial strings, not re-read this pass |
+
+## Pass 5 (ext/stuck-integ-1324d019, worker rpc6, main 902d43cc1c + stuck-integ-f1f63a7a + stuck-integ-1833c7c4, 2026-11-16)
+
+Same list (786 names). Both open stuck-integ branches merged in (one conflict, hatch_check.gd: same seconds fix on both sides).
+Next 13 rows by unlanded_lines not read by passes 2-4 or stuck-integ-1833c7c4/TRIAGE.md:
+
+| branch | result |
+|---|---|
+| perf-render-presets-1108b | **ported**: drop the physics-steps knob (bb17430207), Very Low stays lit + video_v 5 (Medium's saved 2x MSAA off); --quality-check 0 fails |
+| dash-curves-c | **ported**: Grimble Barge, Sparkle Wirerun, Cinder Soot Ram on fitted 1/15 s curves (mean 1: owner distances/times and Wirerun 40 m/s kept); --move-feel-check 14 -> 9 fails, NEW-RED 0 (main's dash_curve_dist measured x only, -0.51; now planar 1.00-1.03); dredge/ashwick combo checks same 4/2 fails as main |
+| farm-site-paused | **ported**: "Paused while you were away" on a site after a run; --farmbuild-check crashes on main at line 321 (14 fails both ways), so its new row is not reached |
+| feel-cinder-dash-curve | superseded by dash-curves-c (newer fit, same hero) |
+| boki-key-c-main | superseded: SHARED_OK ["details", "throw"] and keys7 on main |
+| tenzo-cone-grow | superseded: main has passive.len -> len_max over `grow` (sight_len) |
+| vex-yawlock-1109-2248 | superseded by a later design: main's Longneedle turn_deg_s is 90 (branch 30) |
+| vfx-kael-kit | superseded: LUNGE_RED etc. removed by main's newer Kael palette (see 1833c7c4 gaps-juggernaut) |
+| feel-jump-forgive | superseded: main's coyote/buffer live in FeelConfig (0.1 s) with their own rows |
+| grimble-parity-verify | owner call: cooldowns 12/7/21 (main, at the card) vs data 18/12/36 (KIT_PARITY line 988) |
+| vfx-motley-data | needs a vfx port job: Swollen pink + seed globe look differ from main's ostra.json/kit_looks |
+| overlay-typed-calls | stale refactor of overlay.gd (79/75 lines), main rewrote the pause menu since; not worth a port |
+| blight-nests, combat-steal-window-tell, tut-xp-share | not read this pass (next by unlanded_lines) |
