@@ -185,18 +185,17 @@ func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.anim = null                    # (the rest of the check runs unposed, as a headless step does)
 	C.ac.step(m, 0.5)
 
-## Run dry with the trigger held: there is no reload (none starts, by hand or by itself), nothing fires while the
+## Run dry with the trigger held: there is no reload, nothing fires while the
 ## drum refills, the count climbs back (the HUD shows it), and once full the held string picks up again.
 func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
-	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0,
+	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG,
 			"dries": 0, "was_dry": K.dry}
 	var heard: Array = []
 	var ear := _ear(heard, home)
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 		P.inp["fire"] = true
-		run["reload"] = maxf(float(run["reload"]), P.reload_t)
 		if K.dry and not run["was_dry"]:
 			run["dries"] = int(run["dries"]) + 1
 		run["was_dry"] = K.dry
@@ -214,13 +213,11 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var dries := int(run["dries"])
 	C.ok("Vex sounds: each time the drum runs dry the reload cue plays once", dries > 0 and cues == dries,
 			"%d reload cues, %d times dry" % [cues, dries])
-	P.start_reload()
 	var gap := float(run["back_at"]) - float(run["dry_at"])
 	C.ok("Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires",
-			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY and float(run["reload"]) == 0.0
-			and P.reload_t == 0.0 and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
-			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
-					run["reload"]])
+			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY
+			and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
+			"dry at %.2f, firing again %.2f s later with %d rounds" % [run["dry_at"], gap, run["low"]])
 	C.ac.step(m, 1.5)
 
 ## Starts noting the kit's own sounds (gunslinger_*, vn_*) into `out`, heard from `at` (Sfx drops a sound out of

@@ -1695,7 +1695,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var mood := "happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: mood = "unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover", "hazard_risk"]: mood = "alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "hazard_risk"]: mood = "alert"
 		sfx(KinVoice.cue(k.species, mood), null, -3.0, Unique.voice(k.rec))     # its own voice, over the fight
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx(KinVoice.cue(k.species, "alert"), k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling out
@@ -1777,7 +1777,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
-		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
@@ -1808,7 +1807,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
-	h.reload_t = 0.0
 	h.grap = {}
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
@@ -2436,7 +2434,6 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
-		hud.hitmarker(true, true)
 	elif h == player and hud:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
@@ -4872,7 +4869,6 @@ func _flags(h: Hunter) -> int:
 	if h.roll_t > 0.0: f |= 16
 	if h.grounded: f |= 32
 	if h.fortify_t > 0.0: f |= 64
-	if h.reload_t > 0.0: f |= 128
 	if h.gliding: f |= 256
 	if h.dropping: f |= 512
 	if h.riding: f |= 1024
