@@ -29,6 +29,7 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs (a move's "fade_out" overrides)
 const CLIMB_FADE := 0.06     # s: into the climb clips (a rise is over in well under a second)
 const AIR_FADE := 0.12
+const DIVE_SLOW := 0.8       # share of the drop's crouch rate for the dive's touchdown (land_tier 3): a heavier settle
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
@@ -911,7 +912,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
-			land = d["land"]["drop" if tier == 2 else "hop"]
+			land = d["land"]["hop" if tier == 1 else "drop"]
+			if tier == 3:
+				land = land.duplicate()
+				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
