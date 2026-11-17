@@ -1,6 +1,6 @@
 extends RefCounted
-## Kael, owner playtest 11-08 item 11: a tap of RMB is always an overhead strike (lighter, on its own cooldown,
-## while the Smash rests), RMB aims anywhere once E has hooked, a Lunge carried past the chain's length breaks it,
+## Kael, owner playtest 11-08 item 11 (the tap strike while the Smash rests is not ported: main's --cd-gate-check
+## keeps a slot on cooldown silent): RMB aims anywhere once E has hooked, a Lunge carried past the chain's length breaks it,
 ## and the Gilded Riposte keeps his momentum (a run carries on, a rise gets a lift, a ledge rise hands over).
 ## Runs inside --juggernaut-combo-check (tools/zedran_feel_check.gd). A is tools/archetype_check.gd.
 
@@ -22,7 +22,6 @@ func run(a) -> void:
 	T2 = r[3]
 	home = r[4]
 	K = P.ak
-	tap_strike()
 	aim_after_hook()
 	ult_momentum()
 	ult_rise()
@@ -37,7 +36,7 @@ func _fresh() -> void:
 	A.step(m, 0.1)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
-	for s in ["e", "rmb", "x", "air", "tap"]:
+	for s in ["e", "rmb", "x", "air"]:
 		K.cd[s] = 0.0
 	K.ch_rmb = float(K.rmb_charges())
 	for f in [T, T2]:
@@ -52,29 +51,6 @@ func _hook(at: Vector3) -> void:
 	A.step(m, 0.4)
 	K.warchain.tether_t = 5.0
 
-func tap_strike() -> void:
-	_fresh()
-	var ts: Dictionary = K.rmb_def()["tap_strike"]
-	var sl: Dictionary = K.rmb_def()["slam"]
-	T.teleport(home + Vector3(1.0, 0, 0))
-	A.aim_at(P, T.pos)
-	K.ch_rmb = 0.0
-	K.cd["rmb"] = 99.0
-	A.tap(m, P)
-	var drawn := float(AimKit.entry(P, "slam").get("len", 0.0))
-	A.ok("jug tap strike: the Smash resting, a tap still winds up an overhead strike, its lane drawn at the reach",
-			not K.slam_w.is_empty() and absf(drawn - float(sl["len"]) * float(ts["reach_k"])) < 0.05,
-			"len %.2f" % drawn)
-	A.step(m, float(ts["windup"]) + 0.1)
-	var full := float(sl["dmg"])
-	A.ok("jug tap strike: it lands lighter than the Slam and spends no charge",
-			A.dmg(T) > 1.0 and A.dmg(T) < full * 0.95 and K.ch_rmb < 1.0, "took %.1f of %.0f" % [A.dmg(T), full])
-	A.tap(m, P)
-	A.step(m, 0.1)
-	A.ok("jug tap strike: its own cooldown holds a second tap", K.slam_w.is_empty() and float(K.cd["tap"]) > 0.0,
-			"tap cd %.2f" % float(K.cd["tap"]))
-
-## The Warchain hooked east, a tap aimed 90 and 180 degrees off it strikes where the cursor is; the chain stays.
 func aim_after_hook() -> void:
 	for off in [Vector3(0, 0, -2.5), Vector3(-2.5, 0, 0)]:
 		_fresh()
