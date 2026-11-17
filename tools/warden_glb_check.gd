@@ -407,8 +407,8 @@ func _orbits(a: String) -> void:
 ## carries that slot's values. (No entry: nothing to check.)
 func _own_look(a: String) -> void:
 	var own := WardenGlb.look(WardenGlb.art(a))
-	if own.is_empty():
-		return
+	if own.is_empty() or (own.get("slots", {}) as Dictionary).is_empty():
+		return      # (a look with only "painted" values has no slot to check: gil's far_lift)
 	var m := _model(a)
 	var slots: Dictionary = own.get("slots", {})
 	var seen := 0
