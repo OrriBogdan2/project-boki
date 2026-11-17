@@ -53,7 +53,8 @@ func _step(m: Match, secs: float) -> void:
 func _chests(m: Match) -> void:
 	var P: Hunter = m.player
 	var list: Array = m.chests.filter(func(x): return not x.get("ride", false) and not x["open"])
-	P.chest_keys = 99
+	P.chest_keys = 0
+	for x in list: x["free"] = true      # a free chest is held open; a locked one needs a key (no hold)
 	var c: Dictionary = list[0]
 	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
 	P.vel = Vector3.ZERO
