@@ -8,7 +8,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 |---|---|
 | `hud_panels.gd` (`HudPanels`, one on `hud.panels`) | nothing of its own: the fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability / weapon slots, gear, Boki card, squad, perks) draw on this canvas under `hud.c`, at most 20 times a second (item 94); world-anchored and mouse-following parts stay on `hud.c`, every frame. `hover_spots` fill here |
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
-| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
@@ -25,6 +25,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
+| `exit_mark.gd` (`ExitMark`) | the way to extract on both maps: one icon (disc and rising arrow) in three states, closed (grey), opening (ring fills, cyan), open (solid green, pulsing); the full map adds a pill with the timer ("OPENS 1:20", "OPENING 40%", "OPEN 0:12"); an opening or open one off the minimap pings on its edge. The same words feed the tooltip and the key |
+| `map_hover.gd` (`MapHover`) | full-map tooltips: rest the cursor 0.6 s on any marker (exits, ways-out seats, hunters, your Boki, spawns, shrines, lairs, beacons, boxes, halts, the train, ships, pings, places, the hot zone) and a card gives its name and one line. `--map-hover-check`; `--map-clear-shots` takes before/after shots |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
@@ -200,6 +202,14 @@ nothing else on screen:
 - Taking, swapping, dragging, dropping into a slot and wearing each play a short, quiet inventory cue (`InvSfx`, docs/AUDIO.md) from the inventory and loot code, in place of the generic click.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## The recast marker (world)
+While a recast is open, a ring and a key cap sit in the world on what the key will trigger, in the ability's
+colour, shrinking and fading as the window closes. `RecastMarker.show_at` (scripts/ui/recast_marker.gd) is
+called every step by the kit; only the caster's game draws it and nothing goes over Net. In: Tenzo's Rock Hop
+(the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall, E freezes it), Sparkle's Kitefall
+(the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
+`--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
+
 ## Steal window (StealTell)
 
 DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
@@ -235,6 +245,9 @@ no kit draws its own recast HUD.
   false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
+- **First-time hint.** The first time a Hunter's window opens in a real match (not training, tutorial, arena),
+  `RecastCue._first_hint` shows one hint "<KEY> again to <verb>" through `Hud.tip`, once per Hunter
+  (`tutorial.recast_<id>`). The verb is the archetype's own `recast_hint` per slot, in that Hunter's words.
 - **Owner and others.** On the owner's screen the cue is the only readout: a kit's world copy of the same state
   hides there and stays for everyone else (Sable's Mark pips, Sparkle's Static marker and its Live pips, Neve's
   frost glow; Sable's knife has no ring of its own). Zones and objects stay for everyone (Motley's seed, Meeko's
@@ -352,9 +365,25 @@ Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh sa
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
-  never again after a dive), `--tutorial-strip-shots`.
 
-## Key caps
-- Every key the UI names comes from `Settings.key_cap(action)` (the live main key) or `key_caps(action)` (main / alternate), both built on `Settings.cap_text`: letters upper-case, mouse buttons `LMB RMB MMB M4 M5 WHEEL-UP WHEEL-DN`, no spaces inside a cap (`UI.key_hints` splits on spaces). Never type a key letter in a label, tooltip or kit text; ability descriptions in `content/` say "press the key again".
-- Fixed keys that are not in `Settings.ACTIONS` (arena Loadout L, duel setup B, Alt+key rank-up) may stay as text.
-- Check: `--key-caps-check` rebinds the ability actions to mouse buttons and reads the kit card, recast badge, class tooltip and Fusion form text.
+## Hold prompts (HoldPrompt, HoldTeach)
+
+Every action that needs the key held reads **"Hold F ..."** / **"Hold Space ..."** and draws one widget,
+`HoldPrompt.ring` (`scripts/ui/hold_prompt.gd`): a dark disc with the key glyph and a ring that fills while
+the key is down. The match prompt bar (`HoldPrompt.row`, any label starting "Hold "), the farm prompt row
+(`HoldPrompt.key_hints`: trees, rocks, kin pick-up) and the glider (`HoldPrompt.air_tap`, beside you) use it.
+
+`HoldTeach` (`scripts/feel/hold_teach.gd`) answers a **tap**, a press let go within `TAP_S` 0.25 s:
+- the ring flashes to `FLASH_FILL` 35% and drains over `FLASH_S` 0.5 s, a small "Hold" pops up (`POP_S`
+  0.8 s) and a soft click plays (`CLICK_DB` -10);
+- after `HINT_AFTER` 2 taps one line says how, once per action per session: "Hold F to chop",
+  "Hold F to mine", "Hold Space to glide", "Hold F until the ring fills" (match Hold prompts). The farm
+  shows it as a toast, the match in the message lane;
+- after `DONE_N` 3 finished holds (Settings `hold_done`, kept for good) that action stops teaching: just
+  the flash, no pop, click or hint. A finished hold is 1 s of F on a tree, rock or Hold prompt (or the tree
+  coming down under a held key), or 0.6 s with the glider open and Space down.
+
+Glide keeps its rule: a fresh press in the air opens it, letting go shuts it. The jump press itself and a
+wall kick are never glide taps. Kin pick-up shows the ring but is never taught (a tap there is a pat).
+The tutorials say HOLD and wait for one: the match glide step needs 0.6 s of gliding in one go, the farm's
+chop step needs one held chop besides the wood. Check: `--hold-teach-check`.

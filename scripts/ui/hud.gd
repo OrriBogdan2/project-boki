@@ -97,6 +97,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	Prof.begin("hud_tick")
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
@@ -111,6 +112,7 @@ func _process(delta: float) -> void:
 	_clear_under_toasts(delta)
 	c.queue_redraw()
 	cursor.queue_redraw()
+	Prof.end()
 
 var hit_armor := false
 var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
@@ -239,8 +241,14 @@ func _fmt(t: float) -> String:
 var hover_spots: Array = []     # [rect, id] for things on the HUD you can point at
 var hover_id := ""
 var hover_t := 0.0
+var hover := HudHover.new(self)      # the hover tips (HUD slots and things in the world)
 
 func _draw_all() -> void:
+	Prof.begin("hud_draw")
+	_draw_parts()
+	Prof.end()
+
+func _draw_parts() -> void:
 	var sz := c.size
 	var p := m.player
 	if m.tut and m.tut.intro:
@@ -300,6 +308,7 @@ func _draw_all() -> void:
 	if p and not p.out and not p.extracted:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
+		HoldPrompt.air_tap(c, m.cam, _head(p, 2.25 * float(p.cdat["scale"])))      # a tapped Space: "Hold"
 	if p:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
@@ -328,9 +337,9 @@ func _draw_all() -> void:
 	if wheel_open:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
-		_draw_hover_tip(sz, p)
+		hover.draw_hud_tip(sz, p)
 		if hover_id == "":
-			_draw_world_hover(sz, p)
+			hover.draw_world_tip(sz, p)
 	if map_open():
 		full_map.draw(sz)
 	elif m.skydrop and m.skydrop.planning and p:
@@ -549,7 +558,7 @@ func _draw_top(sz: Vector2) -> void:
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
 		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
-		var all_rows: Array = m.train_rows()
+		var all_rows: Array = m.training.rows()
 		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
 		var n_done := all_rows.size() - left.size()
 		if guide_hidden:
@@ -575,6 +584,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
+	if m.crouch_hint: m.crouch_hint.draw(self, sz)
 	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
@@ -696,14 +706,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.exits:
 		for x in m.exits.list:
 			var pv: Vector2 = to_map.call(x["pos"])
-			var busy: bool = String(x["state"]) in ["charging", "open"]
-			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
-				continue
-			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
-				if busy: edge_mini.add(pv - inner.get_center(), Exits.color_of(x), EdgeMarker.PRIO_GOAL)
-				continue
-			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
+			var shown := MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x))
+			ExitMark.minimap(self, inner, x, pv, bool(on_map.call(pv, 4.0)), shown)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
@@ -902,21 +906,6 @@ func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.P
 	else:
 		edge_world.add(d, col, prio, label, dist)
 
-## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
-## when not; a pulsing ring while it's going.
-func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
-	var col: Color = Exits.color_of(x)
-	var usable: bool = m.exits.live(x)
-	var st := String(x["state"])
-	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var held := OutpostLook.held(x)
-	var flag: Color = SideColor.of_team(SideColor.viewer(m), int(x["team"])) if held else Color(0.55, 0.58, 0.64, 0.9)
-	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x), held and int(x["team"]) != SideColor.viewer(m))
-	if st == "charging":
-		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["charging", "open"]:
-		var ph := fmod(m.time * 1.2, 1.0)
-		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
 ## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
 ## anywhere on the map.
@@ -1000,6 +989,7 @@ var _h_down := false
 func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
+	TermHints.watch(self, m.player)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# the fold_guide key (H) folds the training guide (G is send / recall your kin) and the kit panel away (and back)
 	var hd := Input.is_action_pressed("fold_guide")
@@ -1231,7 +1221,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
+		"active": st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
 		"returning": st = "coming back"
 		"downed": st = "down"
 		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
@@ -1650,7 +1640,9 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 			"heart": prog = float(it.get("prog", 0.0))
-		if not WaysOutHud.gate_prompt(self, sz, y, it):
+		# "Hold F ...": the ring (HoldPrompt)
+		if not WaysOutHud.gate_prompt(self, sz, y, it) \
+				and not HoldPrompt.row(c, Vector2(sz.x * 0.5, y), it["label"], prog, it.get("col", GOLD)):
 			var s: String = it["label"]
 			var w := TextCache.width(body, s, 16)
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
@@ -1743,6 +1735,10 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
+	if Settings.get_v("tips") and not Record.clean():
+		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
+			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1838,351 +1834,6 @@ func _draw_overhead(p: Hunter) -> void:
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
 		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "REPAIRING", 11, ARMOR_COL, big)
-
-# ------------------------------------------------------------------ hover tips
-## Point at anything on the bottom bar (abilities, health, weapon, kin) to see what it is.
-func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
-	var hit: Array = []
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--hover="):      # test hook: point at a HUD element
-			for hs in hover_spots:
-				if hs[1] == arg.substr(8): mp = (hs[0] as Rect2).get_center()
-	for hs in hover_spots:
-		if (hs[0] as Rect2).has_point(mp):
-			hit = hs
-	var id: String = hit[1] if hit.size() > 0 else ""
-	if id != hover_id:
-		hover_id = id
-		hover_t = 0.0
-	hover_t += get_process_delta_time()
-	if AbilityCard.on_hud(c, id, hit[0] if hit.size() > 0 else Rect2(), p):      # Tab held: the ability card
-		return
-	if id == "" or hover_t < 0.25:
-		return
-	var lines := _tip_lines(id, p)
-	if lines.is_empty():
-		return
-	# [title, colour] then rows of [text, colour, size]
-	var head: Array = lines[0]
-	var w := 340.0
-	var h := 40.0
-	for i in range(1, lines.size()):
-		h += _wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
-	var anchor: Rect2 = hit[0]
-	var pos := HudTip.place(anchor, Vector2(w, h), sz)      # above if it fits, else beside; always on screen, never over the slot
-	var a := clampf((hover_t - 0.25) / 0.12, 0.0, 1.0)
-	var box := Rect2(pos, Vector2(w, h))
-	_rounded(box, Color(0.05, 0.06, 0.09, 0.95 * a), 12, Color(head[1], 0.6 * a), 2)
-	_text(pos + Vector2(14, 26), String(head[0]), 17, Color(head[1], a), big)
-	var y := pos.y + 40
-	for i in range(1, lines.size()):
-		var ln: Array = lines[i]
-		var fs := int(ln[2])
-		var hh := _wrapped_h(String(ln[0]), w - 28, fs)
-		c.draw_multiline_string(body, Vector2(pos.x + 14, y + fs), String(ln[0]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, fs, -1, Color(ln[1], a))
-		y += hh + 4.0
-
-func _wrapped_h(txt: String, w: float, fs: int) -> float:
-	return body.get_multiline_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, w, fs).y
-
-func _secs(x: float) -> String:
-	return ("%ds" % int(x)) if absf(x - round(x)) < 0.05 else ("%.1fs" % x)
-
-## Hover text for an archetype's slots (and the kin's own ability on C, send/recall on G).
-func _arch_tip(id: String, p: Hunter) -> Array:
-	var out: Array = []
-	var k: Kin = p.kin
-	match id:
-		"kin_ab":
-			if k == null or k.runner.def_of("k1") == null: return []
-			var kd: AbilitySpec = k.runner.def_of("k1")
-			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's own ability  ·  it casts it by itself" % k.rec.get("name", "Boki"), MUTED, 12])
-			out.append([KinText.ability(k.effective("k1")), INK, 14])
-			out.append(["Cooldown %s%s" % [_secs(kd.cooldown), ("  ·  ready in %s" % _secs(k.runner.cd_left("k1"))) if not k.runner.is_ready("k1") else "  ·  ready"], MUTED, 13])
-			return out
-		"throw":
-			if k == null: return []
-			out.append(["Send / recall", Color("cfe8ff")])
-			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
-			return out
-	var si := p.slot_info(id)
-	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Ability", "k1": "Utility", "r": r_name, "dash": "Dash"}
-	var slot_name: String = slot_names[id]
-	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
-	out.append([String(si["name"]), si["col"]])
-	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
-	out.append([String(si["desc"]), INK, 13])
-	# what the next rank does, concretely (rank 2 when you're rank 1), then rank 3's special after it
-	var sk: String = {"sec": "sec", "k1": "kin", "r": "ult", "dash": "dash"}[id]
-	var nr := Arch.next_ranks(p.arch, sk, int(p.slot_lv.get(sk, 0)))
-	for i in nr.size():
-		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
-	if id == "r":
-		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
-	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
-	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
-	return out
-
-func _tip_lines(id: String, p: Hunter) -> Array:
-	var hc: Color = p.accent()
-	var out: Array = []
-	if id.begins_with("perk:"):
-		var pd: Dictionary = Data.PERKS.get(id.substr(5), {})
-		if not pd.is_empty():
-			var n := p.perk_n(id.substr(5))
-			out.append([String(pd["name"]) + ("  x%d" % n if n > 1 else ""), pd["col"]])
-			out.append([String(pd["desc"]), INK])
-			out.append(["Found this expedition. Gone when it ends.", MUTED])
-		return out
-	if id.begins_with("gslot:"):
-		return GearPanel.tip(p, int(id.substr(6)))
-	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
-		return _arch_tip(id, p)
-	match id:
-		"sec" when p.runner and p.runner.def_of("utility") != null:
-			var u: AbilityDef = p.runner.def_of("utility")
-			out.append([u.display_name, u.color])
-			out.append(["Weapon utility (%s)  ·  %s" % [String(p.wpn.get("name", "")), Settings.key_cap("secondary")], MUTED, 12])
-			out.append([u.desc, INK, 14])
-			out.append(["Cooldown %s%s" % [_secs(u.cooldown), ("  ·  ready in %s" % _secs(p.runner.cd_left("utility"))) if not p.runner.is_ready("utility") else "  ·  ready"], MUTED, 13])
-		"k1", "k2":
-			var k: Kin = p.kin
-			if k == null: return []
-			var kd: AbilitySpec = k.runner.def_of(id)
-			if kd == null: return []
-			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), "its own" if p.ak or id != "k1" else Settings.key_cap("signature")], MUTED, 12])
-			out.append([KinText.ability(k.effective(id)), INK, 14])
-			var where := "Your Boki casts it; while it rides with you, you do." if kd.from == "kin" else "Works on you wherever your Boki is."
-			out.append(["Cooldown %s%s. %s" % [_secs(kd.cooldown / maxf(0.1, k.runner.rate)), ("  ·  ready in %s" % _secs(k.runner.cd_left(id))) if not k.runner.is_ready(id) else "  ·  ready", where], MUTED, 13])
-			if id == "k1" and kd.cue != null:
-				out.append(["Your Boki can also use it on its own (turn that on in Settings).", Color(KinText.color(kd), 0.85), 12])
-			var ka: AbilitySpec = k.runner.def_of("k2")
-			if id == "k1" and ka:
-				out.append(["%s: %s. %s" % [ka.display_name, KinText.when(ka), KinText.ability(k.effective("k2"))], KinText.color(ka), 12])
-		"r":
-			var ud := KinMerge.def_for(p.kin) if p.kin else null
-			if ud == null: return []
-			var giant: bool = (p.kin as Kin).carry_style() == "mount"
-			out.append([ud.display_name, GOLD])
-			out.append(["Fusion  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
-			for ln in KinText.merge(ud, giant):
-				out.append([String(ln), INK, 13])
-			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? It comes back to you first. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
-		"swap":
-			var b: Kin = p.kin2
-			if b == null: return []
-			out.append(["Swap to %s" % b.rec.get("name", "your other Boki"), Data.KIN[b.species]["color"]])
-			out.append(["Second Boki  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
-			var names := []
-			for sl in ["k1", "k2"]:
-				var bd: AbilitySpec = b.runner.def_of(sl)
-				if bd: names.append(bd.display_name)
-			var bu := KinMerge.def_for(b)
-			out.append(["Brings out %s: %s, and %s as its bond ultimate. The Boki you swap out rests and heals." % [Data.KIN[b.species]["name"], " and ".join(names), bu.display_name if bu else "its ultimate"], INK, 14])
-		"kin":
-			var k: Kin = p.kin
-			if k == null: return []
-			var ai := k.brain
-			out.append([Data.kin_title(String(k.rec.get("name", "")), String(Data.KIN[k.species]["name"])), Data.KIN[k.species]["color"]])
-			out.append(["Level %d  ·  %d / %d health  ·  trust %d" % [int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp), int(k.trust)], MUTED, 12])
-			var traits := []
-			if ai.aggression > 0.6: traits.append("aggressive: chases foes far")
-			if ai.loyalty > 0.65: traits.append("loyal: stays by you and goes after whoever hurts you")
-			if ai.caution > 0.55: traits.append("cautious: backs off when hurt")
-			if traits.is_empty(): traits.append("steady: a bit of everything")
-			out.append(["In a fight it's " + "; ".join(traits) + ".", INK, 14])
-			if k.ks:
-				out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
-				var ob := KinText.owner_bonus(p.kin_bonus)
-				if ob != "":
-					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
-		"gear0", "gear1": out = GripHud.tip(p, int(id.substr(4)))
-		"x": out = HunterUltTile.tip(p)
-		"throw": return BokiHud.order_tip(self, p)
-		"dash":
-			var dd: AbilityDef = p.dodge_def
-			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
-			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
-			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
-			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
-		"armor_level": out = ArmorHud.tip(p)
-		"base":
-			out.append(["Base to a teammate", Color("8fe3c8")])
-			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
-			out.append(["Hold to pick a teammate on the wheel, let go to channel for %ss. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for %ds: half damage, and your crowd control, healing and shields are halved." % [str(BaseRecall.CHANNEL_S), int(BaseRecall.WEAK_S)], INK, 14])
-			out.append(["Cooldown %ds%s" % [int(BaseRecall.CD_S), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
-		"pack":
-			var pack_tip := Backpacks.tip(p)
-			out.append(pack_tip[0])
-			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])
-			out.append(pack_tip[1])
-		"weapon":
-			var wp: Dictionary = p.wpn
-			out.append([wp["name"], Color("e6dccb")])
-			out.append(["Your signature weapon  ·  reloads by itself when empty", MUTED, 12])
-			var ups := WeaponUps.summary(p)
-			if ups != "":
-				out.append([ups, GOOD, 13])
-			var rate := 1.0 / maxf(0.01, float(wp["rate"]))
-			out.append(["%.0f damage a shot  ·  %.1f shots a second  ·  about %d damage a second" % [float(wp["dmg"]), rate, int(float(wp["dmg"]) * rate)], INK, 14])
-			out.append(["Magazine %d  ·  reload %s  ·  range %d tiles" % [int(wp["mag"]), _secs(float(wp["reload"])), int(float(wp.get("range", 10.0)))], MUTED, 13])
-			out.append(["It's the one weapon you carry; level-ups, chests and tunings on the ground make it stronger.", MUTED, 12])
-		"vitals":
-			out.append([Arch.label(p.arch), hc])
-			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
-			out.append(["Health %d / %d   ·   Armor %d / %d" % [int(ceil(p.hp)), int(p.max_hp), int(ceil(p.armor)), int(p.max_armor)], INK, 14])
-			out.append(["Level %d  ·  %s" % [p.lvl, LevelGrowth.tip(p)], GOLD, 13])
-			out.append(["Armor takes 20% off every hit until it wears out. Neither armor nor health comes back on its own: use armor kits and tonics.", MUTED, 13])
-			if p.lives < 50:
-				out.append(["Lives left: %d" % p.lives, Color("ff7a8a"), 13])
-	var rk := p.rank_text(id)
-	if rk != "" and not out.is_empty():
-		out.append([rk, GOLD, 12])
-	return out
-
-## Point the cursor at a monster, a kin or another hunter to see what it is.
-## A rival kin's kit in one or two lines: its ability names and what each does, so you learn the
-## counters by looking (the kin's species always means the same kit).
-## Read from its parts (KinText), coloured by effect category: damage, control, sustain, utility.
-func _kit_lines(lines: Array, k: Kin) -> void:
-	if k == null or k.runner == null:
-		return
-	for slot in ["k1", "k2"]:
-		var d: AbilitySpec = k.runner.def_of(slot)
-		if d == null: continue
-		var tag := Settings.key_cap("signature") if slot == "k1" else "auto"
-		lines.append(["%s  %s: %s" % [tag, d.display_name, KinText.ability(k.effective(slot))], KinText.color(d).lightened(0.2)])
-	var ms := KinMerge.def_for(k)
-	if ms:
-		var ml: Array = KinText.merge(ms, k.carry_style() == "mount")
-		var first := String(ml[0]) if not ml.is_empty() else ""
-		lines.append(["%s  %s: %s" % [Settings.key_cap("ultimate"), ms.display_name, first], Color(GOLD, 0.95)])
-	if k.ks:
-		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
-
-var _wh_mp := Vector2.ZERO
-var _wh_still := 0.0
-func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
-	var cam := m.cam
-	# only once the cursor rests a moment and you aren't fighting: in a fight you aim at things all the
-	# time and a card popped up over every target (and never while recording)
-	if mp.distance_to(_wh_mp) > 6.0 or Input.is_action_pressed("fire") or Input.is_action_pressed("secondary"):
-		_wh_still = 0.0
-	_wh_mp = mp
-	_wh_still += get_process_delta_time()
-	var testing := "--hover-rival" in OS.get_cmdline_user_args() or "--hover" in OS.get_cmdline_user_args()
-	if (Record.clean() or _wh_still < 0.4) and not testing:
-		return
-	if "--hover-rival" in OS.get_cmdline_user_args():
-		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
-		var nb: Ent = null; var nd := 1e9
-		for e0 in (m.kins if "--hover-rival-kin" in OS.get_cmdline_user_args() else m.hunters):
-			if e0 != p and e0.team != p.team and not e0.dead and e0.visible and p.flat_dist(e0) < nd and not (e0 is Kin and (e0 as Kin).state == "shoulder"):
-				nd = p.flat_dist(e0); nb = e0
-		if nb and not cam.is_position_behind((nb as Node3D).position):
-			mp = cam.unproject_position((nb as Node3D).position + Vector3(0, 0.7, 0))
-	var best: Ent = null; var bd := 46.0
-	var cands: Array = []
-	for mb in m.mobs:
-		if not mb.dead and mb.visible: cands.append(mb)
-	for k in m.kins:
-		if not k.dead and k.visible and k.state != "shoulder": cands.append(k)
-	for h in m.hunters:
-		if h != p and not h.out and not h.extracted and not h.unseen and h.visible and not HudPlate.hidden(m, h):
-			cands.append(h)      # (a hiding rival has no card either)
-	for e in cands:
-		var ep: Vector3 = (e as Node3D).position + Vector3(0, 0.7, 0)
-		if cam.is_position_behind(ep):
-			continue
-		var d := cam.unproject_position(ep).distance_to(mp)
-		if d < bd: bd = d; best = e
-	if best == null:
-		return
-	var lines: Array = []
-	if best is Mob:
-		var mb: Mob = best
-		var md: Dictionary = mb.md
-		lines.append([String(md["name"]), Color(md["color"]).lightened(0.35)])
-		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
-		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
-			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
-		if mb is Blight:
-			# the Blight: what it does, and how strong it is right now
-			var bl: Blight = mb
-			lines[1] = ["The Blight  ·  %d / %d health  ·  %s" % [int(ceil(mb.hp)), int(round(mb.max_hp)), "stirring" if bl.lvl < 0.35 else ("hunting" if bl.lvl < 0.8 else "ravenous")], MUTED]
-			how = {"lunge": "Hunts by noise and light. Fast, fragile, comes in packs later on.", "spit": "Sweeps a light. Stay in it and it shrieks, and the Blight nearby comes."}
-		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
-		if md.get("stag", false):
-			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])
-		lines.append(["Drops %d gem%s." % [int(md["gems"]), "" if int(md["gems"]) == 1 else "s"], GOLD])
-	elif best is Kin:
-		var k: Kin = best
-		var sp: Dictionary = Data.KIN[k.species]
-		var nm := String(k.rec.get("name", sp["name"]))
-		lines.append([("%s (lost)" % nm if k.lost_from != "" else "Wild %s" % sp["name"]) if k.is_wild() else nm, sp["color"]])
-		lines.append(["%s type  ·  level %d  ·  %d / %d health" % [String(sp["type"]).capitalize(), int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp)], MUTED])
-		if k.is_wild():
-			if k.state == "dazed":
-				lines.append(["Knocked out. Hold %s next to it to scan it." % Settings.key_cap("interact"), GOLD])
-			else:
-				lines.append(["Knock its health down to knock it out, then hold %s beside it to scan it." % Settings.key_cap("interact"), INK])
-			if k.rec.get("shimmer", false):
-				lines.append(["A shimmering one. Rare.", INK])
-			for mid in Mutations.of(k.rec):
-				lines.append(["%s: %s (%s)" % [Mutations.name_of(mid), String(Mutations.info(mid).get("desc", "")), Mutations.perk_text(mid)], INK])
-			if k.lost_from != "":
-				lines.append(["Guarding where %s fell. Scan it and whoever gets out with it keeps it; its owner can pick it up if revived." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
-		elif k.owner_h == p:
-			var a1: AbilitySpec = k.runner.def_of("k1")
-			var uses := ("it uses %s itself" if p.ak else Settings.key_cap("signature") + " uses %s") % (a1.display_name if a1 else "its ability")
-			lines.append(["Yours. %s sends it out, %s." % [Settings.key_cap("throw"), uses], INK])
-		elif k.lost_from == "you" and k.lost_uid != "":
-			lines.append(["Your lost Boki! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])
-		else:
-			lines.append(["%s's Boki." % (k.owner_h.pname if k.owner_h else "A rival hunter"), BAD])
-			_kit_lines(lines, k)
-	elif best is Hunter:
-		var h: Hunter = best
-		var ally: bool = h.team == p.team
-		lines.append([h.pname, GOOD if ally else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]])
-		lines.append(["%s  ·  %s  ·  %s" % [Arch.label(h.arch), String(h.wpn.get("name", "")), "teammate" if ally else "rival"], MUTED])
-		lines.append(["Health %d / %d   ·   Armor %d / %d (%s)" % [int(ceil(h.hp)), int(h.max_hp), int(ceil(h.armor)), int(h.max_armor), String(Hunter.ARMOR_TIERS[h.armor_tier][0])], INK])
-		if not ally:
-			# know your opponent: their right click, dodge, glove and kin, so you can play around them
-			var util: AbilityDef = h.runner.def_of("utility") if h.runner else null
-			if util: lines.append(["%s: %s" % [Settings.key_cap("secondary"), util.display_name], Color(util.color).lightened(0.2)])
-			if h.dodge_def: lines.append(["Dodge: %s" % h.dodge_def.display_name, Color("bfe6ff")])
-			if not (h.gear[0] as Dictionary).is_empty() and Gear.ALL.has(String(h.gear[0]["id"])):
-				lines.append(["Glove: %s" % String(Gear.ALL[String(h.gear[0]["id"])]["name"]), Gear.ALL[String(h.gear[0]["id"])]["col"]])
-			if h.kin and not (h.kin as Kin).dead:
-				lines.append(["Boki: " + Data.kin_title(String((h.kin as Kin).rec.get("name", "")), String(Data.KIN[(h.kin as Kin).species]["name"])), Data.KIN[(h.kin as Kin).species]["color"]])
-				_kit_lines(lines, h.kin)
-		if h.downed:
-			lines.append(["Down. %s" % ("Hold %s next to them to revive." % Settings.key_cap("interact") if ally else "Finish them before they're revived."), BAD if not ally else GOOD])
-	var w := 300.0
-	var h2 := 36.0
-	for i in range(1, lines.size()):
-		h2 += _wrapped_h(String(lines[i][0]), w - 24, 13) + 3.0
-	var pos := mp + Vector2(22, 18)
-	var safe := HudStyle.safe_rect(sz)
-	if pos.x + w > safe.end.x: pos.x = mp.x - w - 22
-	if pos.y + h2 > safe.end.y - 160.0: pos.y = mp.y - h2 - 18
-	var box := Rect2(pos, Vector2(w, h2))
-	_rounded(box, Color(0.05, 0.06, 0.09, 0.9), 10, Color(lines[0][1], 0.5), 2)
-	_text(pos + Vector2(12, 24), String(lines[0][0]), 16, lines[0][1], big)
-	var y := pos.y + 34
-	for i in range(1, lines.size()):
-		var hh := _wrapped_h(String(lines[i][0]), w - 24, 13)
-		c.draw_multiline_string(body, Vector2(pos.x + 12, y + 13), String(lines[i][0]), HORIZONTAL_ALIGNMENT_LEFT, w - 24, 13, -1, lines[i][1])
-		y += hh + 3.0
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 

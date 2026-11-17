@@ -1159,6 +1159,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 			return false
 		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
+		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
 		if TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
