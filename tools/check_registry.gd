@@ -320,6 +320,7 @@ const CHECKS := {
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],  # --shots-dir=<dir>
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],  # sound sets, loudness
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],  # monster death and stagger sounds
+	"--sfx-picks-check": ["res://tools/sfx_picks_check.gd", "sfx_picks_check", null],  # library picks, sound tester
 	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
