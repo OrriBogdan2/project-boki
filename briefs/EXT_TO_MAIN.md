@@ -10102,3 +10102,4 @@ READY ext/hunter-glb-restore-1117 c0218cc89d (hunters: picked 3D models restored
 READY ext/prompt-queue-1117 48fe778a3412 (tutorial/HUD pop-ups never overlap: one hint at a time + banner-first top stack; --prompt-queue-check 12/12)
 READY ext/neve-ult-label-1117 43573bd8e9 (Neve ult: no stray ROOTED 0.1; no stuck status seconds under 0.5 s; --ult-label-scan 13/13)
 READY ext/vex-coin-palm-1117 aae12ce1f248d624ccfe1c77325dc3802ff6551c (Vex: RMB is a clear coin toss, E casts from her palm)
+READY ext/idle-dredge-rebased-port 57d96c1f7c1 (Grimble idle+stance clips re-added onto main gun-hand dredge.glb after merge conflict; ball held at rest, x_breath dropped. Checks: --check 0 failures, gen_wiki --check 50 unchanged, clip-check no dredge idle/stance fails; dredge budget fails (125k tris, weapon-in-hand 0.59m) come from main gun-hand glb, not this branch; health --strict fails on style ratchet long_line in untouched .gd files, 0 .gd changed)
