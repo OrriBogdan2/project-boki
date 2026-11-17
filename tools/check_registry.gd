@@ -846,6 +846,7 @@ const CHECKS := {
 	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
 	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
+	"--egg-rules-check": ["res://tools/egg_rules_check.gd", "egg_rules_check", null],
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],

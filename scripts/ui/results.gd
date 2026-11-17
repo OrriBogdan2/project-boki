@@ -121,7 +121,7 @@ func show_result(r: Dictionary) -> void:
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch a baby Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
 		var gear_head := "Gear you kept, in the gear shed"
 		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
