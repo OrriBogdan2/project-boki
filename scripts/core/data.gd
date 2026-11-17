@@ -50,10 +50,16 @@ const TEAM_COLORS := [
 ## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
 ## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
 const TEAM_COLOR_GAP := 0.08
-## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
-## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
-## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
+## A trios expedition has this many hunters (10 squads of three). 30 on the 305 m Hollow Crown: 40
+## would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a 40-hunter match was
+## not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
 const MATCH_PLAYERS := 30
+## A solos expedition has this many hunters, each their own squad (decision 0084; bots fill).
+const SOLO_PLAYERS := 20
+## The expedition modes a player can queue for, as shown on the expedition panel and the online lobby.
+const MODES := ["trios", "solos"]
+## The one line each mode's card reads (ModeCards): who is in it and how big the map plays.
+const MODE_LINES := {"trios": "10 squads of 3, bigger map", "solos": "20 Hunters, every one for themself, smaller map"}
 
 const CLASSES := {
 	"light":
@@ -231,7 +237,7 @@ const PERKS := {
 	"overcharge":
 	{
 		"name": "Overcharge",
-		"desc": "Your bond ultimate charges 30% faster.",
+		"desc": "Your bond meter fills 30% faster.",
 		"icon": "bond",
 		"col": Color("ffd23f"),
 		"max": 1
@@ -430,6 +436,20 @@ const BOT_DIFF := {
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
 
+<<<<<<< HEAD
+=======
+## Match opts for an expedition mode (MODES): its squads, squad size and hunter count.
+static func mode_opts(mode: String) -> Dictionary:
+	var solos := mode == "solos"
+	var squad := 1 if solos else 3
+	var n := SOLO_PLAYERS if solos else MATCH_PLAYERS
+	return {"teams": n / squad, "squad": squad, "total": n}
+
+## The mode last picked (Save.d "exp_mode"; trios until you pick another).
+static func saved_mode() -> String:
+	var mode := String(Save.d.get("exp_mode", "trios"))
+	return mode if mode in MODES else "trios"
+>>>>>>> origin/ext/ui-mode-cards
 
 ## Which difficulty "auto" means for a run: the tier sets the base (Meadow easy, Dusk Isles medium,
 ## the Hollow hard) and lots of successful extractions push it up one step. The tutorial is always easy.
@@ -1209,9 +1229,5 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"extract_time": 4.0,  # seconds standing in an exit's circle to leave; a hit from another hunter resets it
-	"revive_time": 3.0,
-	"kin_revive_time": 5.0,
-	"bleed": 2.5,  # downed health lost per second
-	"down_hp": 100.0,  # so about 40 seconds downed before you bleed out
+	"down_hp": 100.0,  # the pool a downed hunter bleeds out of (it drains over 15 seconds)
 }

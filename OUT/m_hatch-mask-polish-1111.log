@@ -1,0 +1,37 @@
+Auto-merging content/rules/boki_lines.json
+CONFLICT (content): Merge conflict in content/rules/boki_lines.json
+Auto-merging docs/BOKI_IDENTITY.md
+Auto-merging docs/wiki/Checks.md
+Auto-merging docs/wiki/Rules.md
+CONFLICT (content): Merge conflict in docs/wiki/Rules.md
+Auto-merging scripts/core/boki_lines.gd
+CONFLICT (content): Merge conflict in scripts/core/boki_lines.gd
+Auto-merging scripts/core/kinbox.gd
+Auto-merging scripts/core/save.gd
+CONFLICT (content): Merge conflict in scripts/core/save.gd
+Auto-merging scripts/core/unique.gd
+Auto-merging scripts/home/home.gd
+Auto-merging scripts/home/kin_bond_moment.gd
+Auto-merging scripts/match/boki_chatter.gd
+Auto-merging scripts/ui/about_view.gd
+Auto-merging scripts/ui/boki_moves.gd
+CONFLICT (content): Merge conflict in scripts/ui/boki_moves.gd
+Auto-merging scripts/ui/hatch.gd
+CONFLICT (content): Merge conflict in scripts/ui/hatch.gd
+Auto-merging scripts/ui/kin_reveal.gd
+CONFLICT (content): Merge conflict in scripts/ui/kin_reveal.gd
+Auto-merging scripts/ui/kinbox_view.gd
+Auto-merging scripts/ui/mask_beat.gd
+Auto-merging tools/hatch_check.gd
+CONFLICT (content): Merge conflict in tools/hatch_check.gd
+Auto-merging tools/hob_check.gd
+Auto-merging tools/unique_check.gd
+Recorded preimage for 'content/rules/boki_lines.json'
+Recorded preimage for 'docs/wiki/Rules.md'
+Recorded preimage for 'scripts/core/boki_lines.gd'
+Recorded preimage for 'scripts/core/save.gd'
+Recorded preimage for 'scripts/ui/boki_moves.gd'
+Recorded preimage for 'scripts/ui/hatch.gd'
+Recorded preimage for 'scripts/ui/kin_reveal.gd'
+Recorded preimage for 'tools/hatch_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.

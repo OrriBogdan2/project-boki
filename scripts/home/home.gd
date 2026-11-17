@@ -503,7 +503,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -3528,6 +3528,7 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
+<<<<<<< HEAD
 		if locked: locked_tiles.append(tc)
 	if first and not locked_tiles.is_empty():
 		ExpFold.add(right, locked_tiles, "Locked drops")
@@ -3536,6 +3537,12 @@ func _open_expedition() -> void:
 	rx.add_child(UI.section("Match"))
 	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
 	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+=======
+	right.add_child(UI.spacer(2))
+	right.add_child(UI.section("Match"))
+	# the queue: trios or solos (Data.MODES), two cards; bots fill the places nobody took
+	right.add_child(ModeCards.make(Data.saved_mode(), func(m): ModeCards.pick(m, _open_expedition)))
+>>>>>>> origin/ext/ui-mode-cards
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3612,11 +3619,15 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
+<<<<<<< HEAD
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
+=======
+	var o := Data.mode_opts(Data.saved_mode())      # its squads and hunters (bots fill the places nobody took)
+>>>>>>> origin/ext/ui-mode-cards
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -4945,22 +4956,15 @@ func _name_baby(baby: Dictionary) -> void:
 		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(bl)
-	var row := UI.hbox(8)
-	var ne := LineEdit.new(); ne.text = String(baby["name"]); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(ne)
-	v.add_child(row)
-	var picks := UI.hbox(6)
-	var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-	for nm in pool.slice(0, 4):
-		var n2: String = nm
-		picks.add_child(UI.button(n2, func(): ne.text = n2))
-	v.add_child(picks)
-	ne.text = String(baby["name"])
-	v.add_child(UI.primary("Welcome home", func():
-		var was_name := String(baby["name"])
-		baby["name"] = ne.text.strip_edges() if ne.text.strip_edges() != "" else String(baby["name"])
-		if String(baby["name"]) != was_name: Save.log_event("renamed", baby, {"from": was_name})
+	var was_name := String(baby["name"])
+	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
+	v.add_child(step)
+	step.named.connect(func(nm: String, kept: bool):
+		baby["name"] = nm
+		if nm != was_name: Save.log_event("renamed", baby, {"from": was_name})
 		Save.save_game()
+		if not kept:
+			return
 		_close_panel()
 		var old := _kin_entry(baby)
 		var spot: Vector3 = old["pos"] if not old.is_empty() else NEST_AT + Vector3(0.8, 0, 0.6)
@@ -4969,7 +4973,7 @@ func _name_baby(baby: Dictionary) -> void:
 		if not ke.is_empty():
 			ke["pos"] = spot
 			(ke["node"] as Node3D).position = ke["pos"]
-			_say(ke, BokiLines.say(baby, "hatched")), 220))
+			_say(ke, BokiLines.say(baby, "hatched")))
 
 # ---- what it wears
 func _open_wear(rec: Dictionary) -> void:

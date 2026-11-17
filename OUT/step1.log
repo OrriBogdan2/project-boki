@@ -1,0 +1,73 @@
++ cd /home/boki/cj/20261117-144652-a4/tree
++ git checkout -f -B ext/merge-lane-uihud-1117 origin/ext/merge-lane-uihud-11Previous HEAD position was 9a269e6b40 Merge pull request #209 from OrriBogdan2/ext/hunter-ports-seamsafe-1117
+Switched to a new branch 'ext/merge-lane-uihud-1117'
+Branch 'ext/merge-lane-uihud-1117' set up to track remote branch 'ext/merge-lane-uihud-1117' from 'origin'.
++ git merge --no-edit origin/main
+Auto-merging README.md
+CONFLICT (content): Merge conflict in README.md
+Auto-merging docs/AUDIO.md
+Auto-merging docs/DEBT.md
+Auto-merging docs/HUD.md
+CONFLICT (content): Merge conflict in docs/HUD.md
+Auto-merging docs/HUD.md
+CONFLICT (content): Merge conflict in docs/HUD.md
+Auto-merging docs/UI_DESIGN.md
+Auto-merging docs/wiki/Controls.md
+Auto-merging docs/wiki/Rules.md
+Auto-merging scripts/core/game.gd
+Auto-merging scripts/core/settings.gd
+Auto-merging scripts/home/home.gd
+Auto-merging scripts/match/hunter.gd
+Auto-merging scripts/match/match.gd
+Auto-merging scripts/ui/dex_view.gd
+CONFLICT (content): Merge conflict in scripts/ui/dex_view.gd
+Auto-merging scripts/ui/dex_view.gd
+CONFLICT (content): Merge conflict in scripts/ui/dex_view.gd
+Auto-merging scripts/ui/hatch.gd
+Auto-merging scripts/ui/hatch.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hudref_demo.gd
+CONFLICT (content): Merge conflict in scripts/ui/hudref_demo.gd
+Auto-merging scripts/ui/hudref_demo.gd
+CONFLICT (content): Merge conflict in scripts/ui/hudref_demo.gd
+CONFLICT (modify/delete): scripts/ui/hurt_wash.gd deleted in origin/main and modified in HEAD.  Version HEAD of scripts/ui/hurt_wash.gd left in tree.
+Auto-merging scripts/ui/msg_lane.gd
+Auto-merging tools/check_registry.gd
+Auto-merging tools/empty_shots.gd
+CONFLICT (content): Merge conflict in tools/empty_shots.gd
+Auto-merging tools/empty_shots.gd
+Auto-merging tools/gen_wiki.py
+Auto-merging tools/hatch_check.gd
+CONFLICT (content): Merge conflict in tools/hatch_check.gd
+Auto-merging tools/hatch_check.gd
+CONFLICT (content): Merge conflict in tools/hatch_check.gd
+Auto-merging tools/hudref_check.gd
+CONFLICT (content): Merge conflict in tools/hudref_check.gd
+Auto-merging tools/hudref_check.gd
+CONFLICT (content): Merge conflict in tools/hudref_check.gd
+Auto-merging tools/msg_queue_check.gd
+Recorded preimage for 'README.md'
+Recorded preimage for 'docs/HUD.md'
+Recorded preimage for 'scripts/ui/dex_view.gd'
+Recorded preimage for 'scripts/ui/hud.gd'
+Recorded preimage for 'scripts/ui/hudref_demo.gd'
+Recorded preimage for 'tools/hatch_check.gd'
+Recorded preimage for 'tools/hudref_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.
++ echo MERGE_RC=1
+MERGE_RC=1
++ git status --short
++ grep -E '^(UU|AA|DU|UD|AU|UA|DD)'
+UU README.md
+UU docs/HUD.md
+UU scripts/ui/dex_view.gd
+UU scripts/ui/hud.gd
+UU scripts/ui/hudref_demo.gd
+UD scripts/ui/hurt_wash.gd
+UU tools/hatch_check.gd
+UU tools/hudref_check.gd
++ echo STEP1_DONE
+STEP1_DONE

@@ -1,0 +1,17 @@
+Auto-merging scripts/ui/armor_hud.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hud_plate.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_plate.gd
+Auto-merging scripts/ui/hud_vitals.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_vitals.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/hudref_check.gd
+CONFLICT (content): Merge conflict in tools/hudref_check.gd
+Recorded preimage for 'scripts/ui/hud.gd'
+Recorded preimage for 'scripts/ui/hud_plate.gd'
+Recorded preimage for 'scripts/ui/hud_vitals.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/hudref_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.

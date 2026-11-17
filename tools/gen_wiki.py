@@ -271,7 +271,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []
@@ -604,7 +604,8 @@ def gen_rules():
     if mt:
         # only the keys the game still reads (the rest of Data.MATCH predates Life.R and the exits)
         live = [k for k in ("length", "down_hp") if k in mt]
-        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in an expedition (solos, duos or trios)"]]
+        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in a trios expedition (squads of three)"],
+                ["solo players", num(gd_const("core/data.gd", "SOLO_PLAYERS") or "?"), "hunters in a solos expedition"]]
         rows += [[k, num(mt[k]), mc.get(k, "")] for k in live]
         body += "\n\n## Match\n\n" + table(["Setting", "Value", "Meaning"], rows)
     lr = gd_const("match/life.gd", "R") or {}

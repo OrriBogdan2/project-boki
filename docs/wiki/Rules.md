@@ -15,8 +15,14 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 
 | Setting | Value | Meaning |
 |---|---|---|
+<<<<<<< HEAD
 | players | 30 | hunters in an expedition (solos, duos or trios) |
+| down_hp | 100 | the pool a downed hunter bleeds out of (it drains over 15 seconds) |
+=======
+| players | 30 | hunters in a trios expedition (squads of three) |
+| solo players | 20 | hunters in a solos expedition |
 | down_hp | 100 | so about 40 seconds downed before you bleed out |
+>>>>>>> origin/ext/ui-mode-cards
 
 ## Down, death and revive
 
@@ -840,7 +846,7 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 
 | Setting | Value |
 |---|---|
-| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
+| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0009-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
 | seed_add | 977 |
 | boss | {"odds": 0.288, "two": 0.25} |
 | elite | {"odds": 0.18, "two": 0.15} |
@@ -1686,7 +1692,7 @@ The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hat
 
 | Setting | Value |
 |---|---|
-| _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
+| _doc | Chests, keys and the bush mimic (docs/decisions/0009-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
 | chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "soul_ember_min_bonus": 2, "soul_ember_odds": 0.3, "creak": ["chest_creak_plain", "chest_creak_rich", "chest_creak_grand"], "creak_doc": "The lid's sound as it opens, by the chest's tier: its rarity bonus (ChestLoot.rarity_bonus: the region's bonus, a dangerous area's step and the match tier's). The last one plays for anything richer."} |
 | keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
 | shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
@@ -1709,6 +1715,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | auto_rate_per_aggression | 0.6 |
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
+
+## kin_names (`content/rules/kin_names.json`)
+
+Naming a new Boki (scripts/core/kin_names.gd, scripts/ui/name_step.gd). The suggested name is a root from the species' own name (its first syllable, from content/kin) plus one of the endings. Typed names are checked against rude: any of these letters inside the name (case and spaces ignored) and the name is not kept.
+
+| Setting | Value |
+|---|---|
+| endings | ["y", "ie", "o", "a", "i", "et", "in", "le", "kin", "bit", "bo", "ly", "ny", "by", "bun", "bean", "dot", "nip", "puff", "let", "pip", "drop", "wick", "bell", "sprout"] |
+| max_len | 14 |
+| max_len_doc | Letters a name may have (the text box stops there). |
+| rude | ["fuck", "fuk", "phuck", "shit", "cunt", "twat", "wank", "slut", "whore", "bitch", "bastard", "nigg", "niga", "fag", "rape", "nazi", "hitler", "kkk", "porn", "dick", "cock", "penis", "vagina", "anal", "anus", "retard", "spic", "kike", "gook", "tits", "boob", "piss", "arse", "asshole", "sex", "dildo", "jizz", "cum"] |
 
 ## kit_parity (`content/rules/kit_parity.json`)
 
@@ -2394,7 +2411,10 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | cinder | {"painted": {"far_lift": 0.0, "rim_far": 0.3, "rim_far_color": [1.0, 0.52, 0.18]}, "slots": {"skin": {"shade": 0.92, "top_light": 0.4, "fres": 0.3, "fres_tint": 0.35, "far_lift": 0.0}, "metal": {"paint": 0.0, "shade": 0.95, "shadow_tint": [0.86, 0.8, 1.0], "ramp": 1.6, "top_light": 0.7, "fres": 0.5, "fres_tint": 0.5, "far_lift": 0.0, "sheen": 0.22}, "flame-jet": {"speed": 2.3, "scale_u": 2.0, "scale_v": 2.6, "lick": 0.9, "sway": 0.022}}, "smoke": {"at": "anchor_tail_tip", "box": 0.03, "from": 0.0, "color": [1.0, 0.55, 0.14, 0.85], "amount": 12, "life": 0.45, "size": 0.1, "rise": 0.7}, "bloom": [{"at": "anchor_tail_tip", "color": [1, 0.5, 0.14, 0.42], "size": 0.34, "depth_test": true}]} |
 | kael | {"painted": {"rim_far": 0.35, "rim_far_color": [1.0, 0.36, 0.4]}, "slots": {"skin": {"top_light": 0.45, "fres": 0.45, "fres_tint": 0.2, "far_lift": 0.25, "shade": 0.95, "shadow_tint": [0.8, 0.84, 0.98]}, "cloth": {"fres": 0.6, "far_lift": 0.3}, "hair": {"far_lift": 0.25, "fres": 0.6, "glow": 0.0, "top_light": 0.4}, "metal": {"top_light": 0.5, "fres": 0.55, "fres_tint": 0.8, "far_lift": 0.25, "sheen": 0.1}, "leather": {"far_lift": 0.3, "fres": 0.5}, "glow": {"glow": 2.8}, "card": {"sheen": 0.0, "glow": 0.08}}, "smoke": {"color": [0.04, 0.035, 0.045, 0.32], "amount": 24, "life": 1.8, "size": 0.26, "rise": 0.35, "from": 0.45}, "bloom": [{"at": "anchor_blade_root", "to": "weapon_muzzle", "color": [1.0, 0.93, 0.78, 0.2], "size": 0.24, "count": 6, "from": 0.3}, {"at": "anchor_blade_root", "to": "weapon_muzzle", "color": [1.0, 0.97, 0.9, 0.24], "size": 0.16, "count": 8, "from": 0.3}, {"at": "anchor_arm_up", "color": [1.0, 0.16, 0.22, 0.2], "size": 0.2}, {"at": "anchor_arm_elbow", "color": [1.0, 0.16, 0.22, 0.16], "size": 0.16}, {"at": "anchor_arm_fore", "color": [1.0, 0.16, 0.22, 0.16], "size": 0.16}]} |
 | dredge | {"painted": {"gloss": 0.0, "sheen": 0.0, "desat": 0.1, "top_light": 0.12, "rim_far": 0.3, "rim_far_color": [0.72, 0.95, 0.72]}, "slots": {"skin": {"top_light": 0.4, "fres": 0.3, "rim_amount": 0.2, "far_lift": 0.15, "sheen": 0.0, "shade": 0.82, "albedo": [0.92, 0.92, 0.96], "light_neutral": 1.0, "rim_far": 0.0, "paint_glow": 0.9, "paint_glow_color": [0.65, 0.28, 0.94], "paint_glow_width": 0.12}, "leather": {"top_light": 0.55, "fres": 0.4, "far_lift": 0.2, "desat": 0.2, "albedo": [1.0, 0.98, 0.95]}, "metal": {"top_light": 0.55, "fres": 0.5, "far_lift": 0.2}, "glow": {"glow": 1.0, "desat": 0.0, "rim_far": 0.0, "shade": 1.0}}, "halos": [{"anchor": "anchor_eye", "color": [0.25, 1.0, 0.5], "strength": 2.4, "px": 3.2, "near_d": 7.0, "far_d": 14.0, "lift": 0.03}, {"anchor": "anchor_lamp_r", "color": [1.0, 0.78, 0.3], "strength": 1.6, "px": 2.6, "near_d": 7.0, "far_d": 14.0}], "closeup": {"fov": 36.0, "up": -0.3}, "no_ink": ["glass"]} |
+<<<<<<< HEAD
 | gil | {"painted": {"far_lift": 0.0}} |
+=======
+>>>>>>> origin/ext/ui-mode-cards
 | pip | {"painted": {"rim_far": 0.12, "rim_far_color": [1.0, 0.72, 0.82], "emit": 0.8, "emit_flicker": 0.0, "far_emit": 0.0}, "slots": {"skin": {"top_light": 0.16, "fres": 0.14, "far_lift": 0.06, "light_tint": [1.0, 0.98, 1.0], "shadow_tint": [0.98, 0.88, 0.9], "shade": 0.9, "ramp": 1.8, "dark_lift": 0.1}, "cloth": {"far_lift": 0.15, "fres": 0.18}, "leather": {"far_lift": 0.15}, "brass": {"fres": 0.5, "fres_tint": 0.8, "far_lift": 0.2}, "glow": {"glow": 1.15}, "card": {"sheen": 0.5, "glow": 0.9, "irid": 0.12, "sheen_color": [1.0, 0.82, 0.7], "albedo": [1.0, 0.86, 0.86], "alpha_k": 1.25, "far_alpha": 1.9, "far_edge": 0.6}, "skin-face": {"fres": 0.03, "top_light": 0.1, "far_lift": 0.1, "sss": 0.1, "shade": 0.93, "albedo": [0.98, 1.0, 1.0], "ramp": 1.5, "dark_lift": 0.12, "rim_amount": 0.15}}, "lights": [{"anchor": "anchor_hang_lantern", "colour": [1.0, 0.74, 0.36], "energy": 1.2, "range": 1.6}], "halos": [{"anchor": "anchor_hang_lantern", "color": [1.0, 0.8, 0.44], "strength": 2.4, "px": 7.0, "near_d": 7.0, "far_d": 14.0}, {"anchor": "anchor_flower", "color": [1.0, 0.86, 0.6], "strength": 1.2, "px": 3.0, "near_d": 7.0, "far_d": 14.0}, {"anchor": "anchor_tail_tip", "color": [1.0, 0.88, 0.6], "strength": 0.8, "px": 3.5, "near_d": 7.0, "far_d": 14.0}], "ink": {"far_thin": 1.0, "color": [0.62, 0.36, 0.42]}} |
 
 ## warden_rest (`content/rules/warden_rest.json`)

@@ -2,7 +2,7 @@ extends RefCounted
 ## --inv-shots --shots-dir=<dir>: the in-match inventory at whatever resolution the window has (run
 ## under xvfb with a renderer, --resolution WxH). inv_pack: the backpack window with a full loadout;
 ## inv_loot: the deathbox window (LootWindow); inv_tip: the compare tooltip on a hovered backpack piece
-## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the height.
+## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the window size.
 ## --inv-drag instead saves <dir>/drag/NNNNN.jpg, a frame each, of the press-and-hold drags (SlotDrag) played
 ## with real input: armor onto its slot, a glove refused by the armor slot, the gloves swapped, then the pad
 ## swapping two belt slots. Encode: ffmpeg -framerate 30 -i <dir>/drag/%05d.jpg -pix_fmt yuv420p drag.mp4
@@ -36,12 +36,13 @@ func run(main_node: Node) -> void:
 	dress(p)
 	m.hud.toggle_pack()
 	await _frames(8)
+	var win := main.get_window().size
+	var tag := "%dx%d" % [win.x, win.y]      # the real window: the UI scales, so the canvas height says 720 at 1440
 	if OS.get_cmdline_user_args().has("--inv-drag"):
 		await _drag_reel(m)
 		print("INVSHOTS drag reel: %d frames in %s" % [reel, dir.path_join("drag")])
 		main.get_tree().quit(0)
 		return
-	var tag := "%dp" % int(main.get_viewport().get_visible_rect().size.y)
 	await _shot("inv_pack_" + tag, "Backpack window with a full loadout")
 	var found: Array = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)
 	if not found.is_empty():
@@ -82,7 +83,10 @@ func _frames(k: int) -> void:
 
 func _shot(file: String, caption: String) -> void:
 	await RenderingServer.frame_post_draw
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
+	var img := main.get_viewport().get_texture().get_image()
+	var err := img.save_png(dir.path_join(file + ".png")) if img else ERR_UNAVAILABLE
+	if err != OK:
+		push_error("INVSHOTS %s not saved: %s" % [file, error_string(err)])
 	captions.append("%s.png: %s" % [file, caption])
 
 # ------------------------------------------------------------------ --inv-drag

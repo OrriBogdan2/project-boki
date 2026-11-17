@@ -1,0 +1,36 @@
+Auto-merging docs/HUD.md
+CONFLICT (content): Merge conflict in docs/HUD.md
+Auto-merging scripts/ui/armor_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/armor_hud.gd
+Auto-merging scripts/ui/gear_panel.gd
+CONFLICT (content): Merge conflict in scripts/ui/gear_panel.gd
+Auto-merging scripts/ui/grip_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/grip_hud.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hud_panels.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_panels.gd
+Auto-merging scripts/ui/hud_slot.gd
+Auto-merging scripts/ui/hud_style.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_style.gd
+Auto-merging scripts/ui/hud_vitals.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_vitals.gd
+Auto-merging scripts/ui/icons.gd
+Auto-merging scripts/ui/rank_marks.gd
+CONFLICT (content): Merge conflict in scripts/ui/rank_marks.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/level_hud_check.gd
+CONFLICT (content): Merge conflict in tools/level_hud_check.gd
+Recorded preimage for 'docs/HUD.md'
+Recorded preimage for 'scripts/ui/armor_hud.gd'
+Recorded preimage for 'scripts/ui/gear_panel.gd'
+Recorded preimage for 'scripts/ui/grip_hud.gd'
+Recorded preimage for 'scripts/ui/hud.gd'
+Recorded preimage for 'scripts/ui/hud_panels.gd'
+Recorded preimage for 'scripts/ui/hud_style.gd'
+Recorded preimage for 'scripts/ui/hud_vitals.gd'
+Recorded preimage for 'scripts/ui/rank_marks.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/level_hud_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.

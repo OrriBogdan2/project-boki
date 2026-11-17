@@ -1,0 +1,32 @@
+Auto-merging docs/SUPERVIVE_FEEL.md
+Auto-merging docs/decisions/0022-one-movement-model.md
+CONFLICT (content): Merge conflict in docs/decisions/0022-one-movement-model.md
+Auto-merging docs/wiki/Checks.md
+CONFLICT (content): Merge conflict in docs/wiki/Checks.md
+Auto-merging docs/wiki/Code-Map.md
+Auto-merging docs/wiki/Controls.md
+CONFLICT (content): Merge conflict in docs/wiki/Controls.md
+Auto-merging docs/wiki/Rules.md
+CONFLICT (content): Merge conflict in docs/wiki/Rules.md
+Auto-merging scripts/core/locomotion.gd
+CONFLICT (modify/delete): scripts/feel/feel_config.gd deleted in origin/ext/fsm-m1 and modified in HEAD.  Version HEAD of scripts/feel/feel_config.gd left in tree.
+CONFLICT (modify/delete): scripts/feel/feel_test_world.gd deleted in origin/ext/fsm-m1 and modified in HEAD.  Version HEAD of scripts/feel/feel_test_world.gd left in tree.
+Auto-merging scripts/home/home.gd
+CONFLICT (content): Merge conflict in scripts/home/home.gd
+Auto-merging scripts/main.gd
+Auto-merging scripts/match/hunter.gd
+CONFLICT (content): Merge conflict in scripts/match/hunter.gd
+Auto-merging scripts/ui/overlay.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/style_baseline.json
+CONFLICT (content): Merge conflict in tools/style_baseline.json
+Recorded preimage for 'docs/decisions/0022-one-movement-model.md'
+Recorded preimage for 'docs/wiki/Checks.md'
+Recorded preimage for 'docs/wiki/Controls.md'
+Recorded preimage for 'docs/wiki/Rules.md'
+Recorded preimage for 'scripts/home/home.gd'
+Recorded preimage for 'scripts/match/hunter.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/style_baseline.json'
+Automatic merge failed; fix conflicts and then commit the result.

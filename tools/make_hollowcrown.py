@@ -60,7 +60,13 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
   pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
+<<<<<<< HEAD
   ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / 216; tools/ways_out_sites.py)
+=======
+  ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / DESIGN; tools/ways_out_sites.py)
+  play_space          {mode: m}: the Blight's ring round the Heart at the start of a match, per mode
+                      ("trios", "solos"; Heart.start_r, docs/decisions/0084)
+>>>>>>> origin/ext/ui-mode-cards
   train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
                       from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
 """
@@ -72,6 +78,9 @@ DESIGN = 540        # the grid every coordinate below is written on; scale_layou
 K = SIZE / DESIGN
 WAYS = SIZE / 216   # the Ways Out rule's scale (its numbers are metres on the 216 m design)
 LEVEL = 0.8
+# m round the Heart still clear of the Blight when a match starts, per mode (Heart.start_r): trios keep
+# about 90% of the land, solos (20 hunters, not 30) about 70%
+PLAY_SPACE = {"trios": 160, "solos": 118}
 
 def poly(pts, lv=0, **k):
     return dict(poly=[list(p) for p in pts], lv=lv, **k)
@@ -1352,7 +1361,11 @@ def main():
                      "each region a different fight. Nothing is placed by dice except what the match rolls: which spawn "
                      "points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
+<<<<<<< HEAD
                winds=[], train=train, heart=heart, ways_scale=round(WAYS, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
+=======
+               winds=[], train=train, heart=heart, ways_scale=round(K, 3), play_space=PLAY_SPACE, outposts=outposts, lairs=lairs, spawn_points=spawn_points)
+>>>>>>> origin/ext/ui-mode-cards
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

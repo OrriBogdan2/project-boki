@@ -9,11 +9,15 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
+<<<<<<< HEAD
 var mode := "ffa"
 var mode_btns := {}
 var duel := false
 var line_key := "lobby"      # the presence key that puts you in this list: "lobby", or "duel" on the duel line
 var started := false
+=======
+var mode_box: VBoxContainer      # the ModeCards stack
+>>>>>>> origin/ext/ui-mode-cards
 
 func setup(o: Dictionary) -> void:
 	opts = o
@@ -37,6 +41,7 @@ func _ready() -> void:
 	list_box.add_child(UI.para("Looking for hunters with the game open...", UI.T_SMALL, UI.FAINT))
 	v.add_child(list_box)
 	v.add_child(UI.spacer(2))
+<<<<<<< HEAD
 	if duel:
 		var how := "Your duel starts as soon as another hunter is in the line. To fight a friend, both of you"
 		v.add_child(UI.para(how + " open Duel online from the Training Grounds duel ring."))
@@ -57,6 +62,13 @@ func _ready() -> void:
 		modes.add_child(b)
 	v.add_child(track)
 	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads (Heart Raid: one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+=======
+	v.add_child(UI.section("Mode"))
+	mode_box = UI.vbox(0)
+	v.add_child(mode_box)
+	v.add_child(UI.para("Bots fill the empty places. "
+		+ "Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+>>>>>>> origin/ext/ui-mode-cards
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
@@ -102,11 +114,17 @@ func _pick_mode(key: String) -> void:
 	_refresh_modes()
 
 func _refresh_modes() -> void:
+<<<<<<< HEAD
 	for k in mode_btns:
 		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
 	var diff := HeartRaid.diff_name(HeartRaidPick.difficulty)
 	var raid_text := "Heart Raid: %s (prototype)" % diff
 	mode_btns["heart_raid"].text = raid_text if mode == "heart_raid" else "Heart Raid (prototype)"
+=======
+	for c in mode_box.get_children():
+		c.queue_free()
+	mode_box.add_child(ModeCards.make(Data.saved_mode(), func(m): ModeCards.pick(m, _refresh_modes)))
+>>>>>>> origin/ext/ui-mode-cards
 
 func _announce() -> void:
 	var k := Save.active_kin()
@@ -163,7 +181,12 @@ func _refresh() -> void:
 func _start() -> void:
 	if Net.mode == "":
 		return
+<<<<<<< HEAD
 	var squad: int = {"ffa": 1, "duo": 2, "trio": 3, "heart_raid": 4}[mode]
+=======
+	var mo := Data.mode_opts(Data.saved_mode())
+	var squad := int(mo["squad"])
+>>>>>>> origin/ext/ui-mode-cards
 	var ids: Array = []
 	for id in Net.peers:
 		var p: Dictionary = Net.peers[id]
@@ -181,6 +204,7 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
+<<<<<<< HEAD
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "tag": ClanInfo.clean_tag(p.get("tag")), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
 	if mode == "heart_raid":
@@ -233,6 +257,12 @@ func _pair() -> void:
 	var theirs: Dictionary = Net.peers[other].duplicate()
 	theirs["peer"] = other
 	var d := duel_start(mine, theirs)
+=======
+		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(mo["teams"]))
+	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster,
+		"teams": mini(teams, int(mo["total"])), "squad": squad, "tier": int(opts.get("tier", 0))}
+>>>>>>> origin/ext/ui-mode-cards
 	Net.lobby_emit("start", d)
 	_go(d)
 

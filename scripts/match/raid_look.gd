@@ -1,7 +1,7 @@
 class_name RaidLook
 extends RefCounted
-## The expedition's light: the raid condition each match is played under (docs/TONE_AND_THREATS.md,
-## "a scarier environment"). Moody and low-saturated, with colour kept for danger and for Boki:
+## The expedition's light: the raid condition each match is played under
+## ("a scarier environment"). Moody and low-saturated, with colour kept for danger and for Boki:
 ## a low sun that throws long shadows, haze that thickens into the abyss, a cool split-toned grade,
 ## glow on what burns. Stylized, never gritty. Home (Look.cozy) is the warm opposite.
 ##
