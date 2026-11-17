@@ -63,7 +63,10 @@ from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, ri
 Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
 report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
 coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
-wide in her bow stance; Kael's master sword and the game's sword both show in his hand.
+wide in her bow stance. Kael is built from the one-sword master (`A_keep_new.glb`, the master's sword faces
+dropped, the game's sword kept). A first run that asks Meshy for the rig can hang after the `meshy:` lines (11-17: twice,
+15 and 100 min); the same swap run again on that WORK dir, with `meshy/rigged_character.glb` already there, ends in
+2 min (run v95_swap.py itself: v95_to_game.py clears `meshy/` and asks again).
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
