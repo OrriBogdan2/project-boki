@@ -17,5 +17,7 @@
  "field": "banner",
  "time": 120.0,
  "reward": 150,
- "src": "docs/SOURCE_UTILITIES.md: 2 min reveal, a knock sends you to the deathbox and the knocker's side gets the bounty, survive for the squad revive"
+ "src": "docs/SOURCE_UTILITIES.md: 2 min reveal, a knock sends you to the deathbox and the knocker's side gets the bounty, survive for the squad revive",
+ "move": "read",
+ "cast": 0.5
 }

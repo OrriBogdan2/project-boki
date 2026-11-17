@@ -30,5 +30,7 @@
    }
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: stack 10"
+ "src": "docs/SOURCE_UTILITIES.md: stack 10",
+ "move": "place",
+ "cast": 2.0
 }

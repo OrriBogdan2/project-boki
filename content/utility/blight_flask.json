@@ -27,5 +27,7 @@
    "blight": 1.5
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: grows 15 s, holds 10 s, shrinks 15 s (40 s here, one size), blocks healing (blight status); damage is ours"
+ "src": "docs/SOURCE_UTILITIES.md: grows 15 s, holds 10 s, shrinks 15 s (40 s here, one size), blocks healing (blight status); damage is ours",
+ "move": "throw",
+ "cast": 0.4
 }

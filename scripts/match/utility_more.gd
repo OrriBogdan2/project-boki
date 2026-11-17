@@ -83,6 +83,7 @@ static func pads(m: Node, dt: float) -> void:
 				var dir: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
 				var sp := maxf(hv.length(), float(gp["push"]))
 				h.vel = Vector3(dir.x * sp, float(gp["lift"]), dir.y * sp)
+				h.roll_t = 0.0      # a dash ends here and its speed carries ([wiki] dashing into a jump pad keeps the momentum)
 				h.grounded = false
 				h.glide_cd = 0.0
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)

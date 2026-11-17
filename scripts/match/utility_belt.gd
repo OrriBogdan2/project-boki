@@ -190,12 +190,7 @@ static func can_take(h, kind: String) -> bool:
 	var id := item_of(kind)
 	return not is_item(id) or has_room(h, id)
 
-<<<<<<< HEAD
-
-## Puts charges on the belt: onto the same item's slot, else the first empty one. `issued` marks them as
-=======
 ## Puts charges on the belt: onto the same item's slot, else the first empty one it may use. `issued` marks them as
->>>>>>> origin/ext/vfx-utility-read
 ## issued (used first, never taken home). Returns how many went on (0 when the belt is full).
 static func grant(h, id: String, n := 1, issued := false) -> int:
 	if BeltKeys.is_key(id):

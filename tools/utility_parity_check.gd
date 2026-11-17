@@ -7,6 +7,7 @@ extends RefCounted
 ## Prints UTIL ok/FAIL lines and "UTIL DONE, failures: N". Never touches the save file.
 
 var bad := 0
+var hazards := 0         # fields on the list before any item is used (the map's hazards)
 var main: Node
 
 func ok(cond: bool, what: String) -> void:
@@ -29,14 +30,21 @@ func run(host: Node) -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	hazards = m.fields.list.size()      # the map's own hazard fields, there from the start
 	_banner(m, P, foe)
 	_skyfall(m, P, foe)
 	_blight(m, P, foe)
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
-func _steps(m: Match, secs: float) -> void:
-	for i in int(secs / Match.DT): m.step(Match.DT)
+## Steps the match; the rival stays on its spot (a bot walks off a telegraph, and this check wants it standing in the blast).
+func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
+	var at := stay.pos if stay else Vector3.ZERO
+	for i in int(secs / Match.DT):
+		if stay:
+			stay.pos = at
+			stay.vel = Vector3.ZERO
+		m.step(Match.DT)
 
 func _banner(m: Match, P: Hunter, foe: Hunter) -> void:
 	P.belt = UtilityBelt.empty()
@@ -72,13 +80,13 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.teleport(P.pos + Vector3(6.0, 0, 0))
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "skyfall_charge"), "a Skyfall Charge is called")
-	_steps(m, 4.5)
+	_steps(m, 4.5, foe)
 	ok(foe.hp >= foe.max_hp - 0.5, "...nothing lands for 5 s")
-	_steps(m, 1.0)
+	_steps(m, 1.0, foe)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
-	ok(m.fields.list.size() >= 1, "then the ground burns (a fire patch)")
+	ok(m.fields.list.size() > hazards, "then the ground burns (a fire patch)")
 	_steps(m, 3.5)
-	ok(m.fields.list.is_empty(), "...for 3 s")
+	ok(m.fields.list.size() <= hazards, "...for 3 s")
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.out = false
@@ -92,10 +100,10 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.teleport(P.pos + Vector3(4.0, 0, 0))
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "blight_flask"), "a Blight Flask is thrown")
-	_steps(m, 2.5)
+	_steps(m, 2.5, foe)
 	ok(foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,
 			"a rival in the patch is blighted and hurt")
 	_steps(m, 35.0)
-	ok(m.fields.list.size() >= 1, "the patch is still there after 37 s")
+	ok(m.fields.list.size() > hazards, "the patch is still there after 37 s")
 	_steps(m, 4.0)
-	ok(m.fields.list.is_empty(), "...and gone after 40 s")
+	ok(m.fields.list.size() <= hazards, "...and gone after 40 s")

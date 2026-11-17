@@ -13,16 +13,12 @@
   2
  ],
  "price": 35,
-<<<<<<< HEAD
- "desc": "Set down a pad. Anyone who steps on it is launched high. Lasts 20s.",
- "move": "place",
- "cast": 0.6
-=======
  "desc": "Set down a pad. After 2s it launches anyone who steps on it, high. It lasts 30s, or 10s after its first use.",
+ "move": "place",
+ "cast": 0.6,
  "arm": 2.0,
  "life": 30.0,
  "after": 10.0,
  "push": 6.0,
  "lift": 17.0
->>>>>>> origin/ext/vfx-utility-read
 }

@@ -225,18 +225,12 @@ func _belt() -> void:
 	P.inp["util1"] = true
 	m.step(Match.DT)
 	ok(P.drink_t > 0.0, "key 1 starts a drink")
-<<<<<<< HEAD
-	for i in int((UtilityUse.channel("tonic", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(P.tonics == 2 and P.hp > P.max_hp * 0.5 + 40.0,
-			"a finished drink spends one tonic and heals (%d left, hp %.0f/%.0f)" % [P.tonics, P.hp, P.max_hp])
-=======
 	ok(is_equal_approx(P.drink_len, 1.0) and is_equal_approx(UtilityUse.channel_move(P), 1.0),
 			"a tonic takes 1 s and does not slow you (source: heals after 1 s, no slow)")
 	for i in int((P.drink_len + 0.3) / Match.DT): m.step(Match.DT)
 	ok(P.tonics == 2 and P.hp >= P.max_hp * 0.5 + 41.0 and P.hp <= P.max_hp * 0.5 + 43.0,
 			"a finished drink spends one tonic and heals a flat 42 (%d left, hp %.0f/%.0f)"
 			% [P.tonics, P.hp, P.max_hp])
->>>>>>> origin/ext/vfx-utility-read
 	P.inp["util2"] = true
 	m.step(Match.DT)
 	ok(P.kit_t > 0.0 and is_equal_approx(UtilityUse.channel_move(P), 0.45),
@@ -247,20 +241,15 @@ func _belt() -> void:
 	P.inv_t = 99.0
 	P.inp["util2"] = true
 	m.step(Match.DT)
-<<<<<<< HEAD
-	for i in int((UtilityUse.channel("armor_kit", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(P.armor_kits == 1 and P.armor >= P.max_armor - 0.5, "a finished repair spends one kit and fills armor")
-=======
 	for i in int((P.kit_len + 0.3) / Match.DT): m.step(Match.DT)
 	ok(P.armor_kits == 1 and absf(P.armor - P.max_armor * 0.8) < 0.5,
 			"a finished repair spends one kit and patches 80%% of a Common armor (%.0f/%.0f)" % [P.armor, P.max_armor])
 	P.armor_tier = 2
 	ok(is_equal_approx(UtilityUse.repair_frac(P), 0.3), "...and 30% of a Rare one (source 80/40/30)")
 	P.armor_tier = 0
-	ok(is_equal_approx(float(UtilityBelt.def("deep_draught").get("move", 1.0)), 0.4)
-			and is_equal_approx(float(UtilityBelt.def("deep_draught").get("time", 0.0)), 5.0),
+	ok(is_equal_approx(UtilityUse.channel("deep_draught", "move"), 0.4)
+			and is_equal_approx(UtilityUse.channel("deep_draught", "time"), 5.0),
 			"the deep draught is a 5 s drink at 40% speed (source: 60% slow)")
->>>>>>> origin/ext/vfx-utility-read
 	P.hp = P.max_hp
 	P.inp["util1"] = true
 	m.step(Match.DT)

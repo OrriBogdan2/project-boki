@@ -78,13 +78,7 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
-<<<<<<< HEAD
 	m.biomes = null          # no map hazards: a spore pod's cloud by the box would break every channel
-=======
-	for k in m.kins.filter(func(x): return x.team == -1):
-		k.queue_free()
-		m.kins.erase(k)
->>>>>>> origin/ext/vfx-utility-read
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO

@@ -43,5 +43,7 @@
    "color": "#ff5a2a"
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: 5 s fuse, 5000 dmg / 7.2, then 720 dmg/s for 3 s (100/s here as 50 every 0.5 s)"
+ "src": "docs/SOURCE_UTILITIES.md: 5 s fuse, 5000 dmg / 7.2, then 720 dmg/s for 3 s (100/s here as 50 every 0.5 s)",
+ "move": "throw",
+ "cast": 0.5
 }
