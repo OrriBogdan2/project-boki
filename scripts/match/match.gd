@@ -43,6 +43,7 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
@@ -289,6 +290,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1427,7 +1429,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				_tip("rings", TipText.rings())
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -1791,7 +1793,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
-	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+	if by is Blight:
+		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -1919,7 +1923,9 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
-	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+	if by is Blight:
+		kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+		h.add_stat("blight_out")      # (TipPick)
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2355,6 +2361,7 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if player == null:
 		return
 	player.chase = thief
+	player.add_stat("wisp_stolen")      # (TipPick)
 	ping(thief.pos, Color("ffd23f"))
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
@@ -2384,7 +2391,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		_tip("stagger", TipText.stagger(String(mb.md["name"])))
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -3951,6 +3958,7 @@ func step(dt: float) -> void:
 		training.update(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
@@ -4739,6 +4747,7 @@ func _finish() -> void:
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		r["stats"] = player.stats.duplicate()
 		r["squad"] = ResultsStage.roster(hunters, player)
+		r["used"] = player.used.duplicate()      # (TipPick: was E used)
 		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
@@ -5419,20 +5428,19 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	var caps: Array = ["fire", "dash", "jump"].map(func(a): return Settings.key_cap(a))
-	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then hold %s in the air to glide" % caps)
+	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(true))
 		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(false))
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
@@ -5446,19 +5454,12 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+		_tip("catch", TipText.scan())
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:

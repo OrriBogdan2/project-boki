@@ -47,6 +47,8 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+	if both or "--archer-combo-check" in args:
+		await _spirit_look()
 	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
 	hits.main = main_node
 	if both:
@@ -208,6 +210,15 @@ func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
+
+
+## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
+func _spirit_look() -> void:
+	var look = load("res://tools/lace_spirit_look_check.gd").new()
+	look.main = main
+	await look.walk()
+	n += look.n
+	fails += look.fails
 
 
 func _archer_combos() -> void:

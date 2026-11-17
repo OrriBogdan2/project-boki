@@ -540,7 +540,6 @@ func _blowout(f: Ent) -> void:
 	vfx("blowout", f.position)
 	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
@@ -788,7 +787,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 			_grab_mote(mt)
 
 ## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
-## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+## usual reset cue (the chime and the Shift icon). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
 	var was_spent := h.dashes < h.max_dashes()
