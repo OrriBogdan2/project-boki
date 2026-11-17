@@ -178,7 +178,6 @@ func _bowl() -> void:
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
-
 const HAND_DT := 0.25      # s per farm step
 const SNACK := "sapjelly"      # a snack of snacks.json: it gives joy and leans (kibble gives neither)
 const HAND_WITHIN := 3.0   # s a trusting Boki takes to eat from your hand

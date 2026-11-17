@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://cpmcwrvnuf4dt"
-path="res://.godot/imported/pin_ult_nock.wav-7c2738e971f4eddfc79a789dd506ee31.sample"
+uid="uid://cdovc1g23ldfd"
+path="res://.godot/imported/leg_roar.wav-8adc108d0b38c733f76067d5b93e6e66.sample"
 
 [deps]
 
-source_file="res://audio/pin_ult_nock.wav"
-dest_files=["res://.godot/imported/pin_ult_nock.wav-7c2738e971f4eddfc79a789dd506ee31.sample"]
+source_file="res://audio/leg_roar.wav"
+dest_files=["res://.godot/imported/leg_roar.wav-8adc108d0b38c733f76067d5b93e6e66.sample"]
 
 [params]
 
