@@ -10093,3 +10093,4 @@ READY ext/vex-ult-move-1117 7e4493b08b (Vex ult no longer roots: 0.25 s wind-up 
 READY ext/hunter-glb-restore-1117 49cf9ccbbe3ea53c248847cf5b9230de275edaea
 READY ext/boki-ingame-batch2-1117 11d3887ca91 (restore lilybara+umbrathere glbs, boki world shot tools, batch-2 finding: nothing else portable)
 READY ext/merge-lane-uihud-1117 5908fac47c (uihud lane 1117 bundle a: rest of PR #104 + loading/title, origin/main 9a269e6b40 merged, 8 hand conflicts kept main wording/structure; import clean, hudref boots 0 script errors; full suite left to the regate bot, worker load 150+; 14 other lane branches HARD or superseded, see lanes/uihud-RESULT.md)
+READY ext/motley-r3a-game 9740278f7e (Motley v95 r3 A tail paint in game ostra.glb, image-only swap; PR via gh-outbox)
