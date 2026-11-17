@@ -42,6 +42,7 @@ SPEC = json.load(open(ARGS[0]))
 WORK = os.path.expanduser(ARGS[1])
 OUT = os.path.abspath(ARGS[2])
 F = np.float32
+SECOND_TEX = 2048  # px: a master's other images (a joined prop's, emission), as v95_to_game.py imports them
 LIMBS = ("upper_arm", "forearm", "thigh", "shin")
 CAGE, RAY, MARGIN_PX = 0.008, 0.03, 16       # (m, m, px) bake_warden's defaults
 CAP_SIDES = 2000             # the longest opening a detach caps (edges round it)
@@ -176,14 +177,18 @@ def lay_kept(old, kept, body, tex, socket="Base Color"):
 
 def own_images(low, tex):
     """`keep_uv`: the master's own images, each material's base colour and emission scaled to `tex` at most and packed
-    ("v95", "v95b", ...); the material keeps their names as "img" and "emit" (none: "")."""
+    ("v95", "v95b", ...); the material keeps their names as "img" and "emit" (none: ""). The material on the most faces
+    names first, so "v95" (full size in game) is the body's paint, not a joined prop's (Grimble's gun in hand); the others
+    are stored at SECOND_TEX at most, the size the game draws them at (v95_to_game.py)."""
     done = {}
-    for m in low.data.materials:
+    faces = np.bincount([p.material_index for p in low.data.polygons], minlength=len(low.data.materials))
+    for i in sorted(range(len(low.data.materials)), key=lambda i: -faces[i]):
+        m = low.data.materials[i]
         for key, socket in (("img", "Base Color"), ("emit", "Emission Color")):
             src = BW.mat_image(m, socket)
             if src is not None and src.name not in done:
                 im = src.copy()
-                n = min(tex, max(im.size))
+                n = min(tex if not done else min(tex, SECOND_TEX), max(im.size))
                 if max(im.size) > n:
                     im.scale(n, n)
                 im.name = "v95" + ("" if not done else chr(ord("a") + len(done)))
@@ -798,6 +803,7 @@ def main():
         skin_relax.relax(arm)
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
         print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
+    BW._unfold(low)     # (the fit folds a few more over: Motley's four 10-17 cm collar shards came from here, not the collapse)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:

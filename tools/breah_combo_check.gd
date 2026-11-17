@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	await _ranks()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
@@ -31,6 +32,32 @@ func run(main_node: Node) -> void:
 	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Upgrade parity (docs/heroes/dolm.md): per rank [RMB cooldown, dash recharge, E cooldown, RMB power, E power, charges]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r := setup("dolm", 5.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DolmKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), K.e_def()["cooldown"] * K.cd_k("kin"),
+				K.power("sec") / ps, K.power("kin") / pk, P.max_dashes()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
+			near.call(up[1][0], 10.0) and near.call(up[2][0], 9.0)
+			and near.call(up[1][3], 1.24) and near.call(up[2][3], 1.48), str(up))
+	ok("upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3",
+			near.call(up[1][1], 10.0) and near.call(up[2][1], 10.0)
+			and up[1][5] == up[0][5] and up[2][5] == up[0][5] + 1.0, str(up))
+	ok("upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage",
+			near.call(up[1][2], 11.5) and near.call(up[2][2], 10.0) and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+	await done(m)
 
 func _breah() -> void:
 	var r := setup("dolm", 5.0)
@@ -677,6 +704,7 @@ func _breah() -> void:
 		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
 		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
 	step(m, 0.8)
+	_hop_let_go(m, P, K, reset)
 	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
@@ -815,7 +843,7 @@ func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary
 	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
 	var dir := (mid - home).normalized()
-	var face := float(w["th"]) + h.r * 0.8
+	var face := float(w["th"]) + h.hull_r() * 0.8
 	h.teleport(home)
 	h.vel = Vector3.ZERO
 	var out := {"t": -1.0, "peak": 0.0, "jumped": false}
@@ -1033,6 +1061,37 @@ func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
+## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
+func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 6.0
+	P.grounded = false
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	step(m, BreahHop.CROUCH + 0.09)
+	var hv0 := Vector2(P.vel.x, P.vel.z).length()
+	var lands0 := K.leap_lands
+	var open_in := 99
+	P.inp["jump"] = true
+	for i in 10:
+		P.inp["glide"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		if P.gliding:
+			open_in = i + 1
+			break
+	var hv1 := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, "
+			+ "at the hop's speed, no crash",
+		open_in <= 2 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05 and K.leap_lands == lands0,
+		"open after %s steps fly_t %.2f chaining %s h %.2f -> %.2f m/s crashes %d -> %d"
+			% [str(open_in), P.fly_t, str(K.hop.chaining()), hv0, hv1, lands0, K.leap_lands]
+	)
+	step(m, 0.3)
+	P.inp["glide"] = false
+
 func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 	if air:
 		P.pos.y += 1.5

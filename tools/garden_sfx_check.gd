@@ -21,7 +21,7 @@ extends RefCounted
 ##  11. Glint Fishing (glint_sfx.gd): a scripted five-cast session; one whip and one plop per cast, one bite tick per
 ##      hook, the water bed once per wait on the Ambience bus and the reel loop on the SFX bus, both at the line,
 ##      and one catch sting per landing in the catch's size; nothing keeps sounding once the session is stopped
-##  11. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
+##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
 ##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
 ##      when sulky, nothing while it sleeps
 ## Never touches the real save.
@@ -176,7 +176,8 @@ func _games() -> void:
 			k["starter"] = true
 			d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
-	for f in ["first_shove", "first_seek", "first_volley"]:      # past the practice rounds (FirstRound)
+	# past the practice rounds (FirstRound, TumbleTeach, EchoSteps)
+	for f in ["first_shove", "first_seek", "first_volley", "first_tumble", "echo_practice"]:
 		d["tutorial"][f] = true
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d

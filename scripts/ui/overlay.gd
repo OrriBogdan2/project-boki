@@ -180,7 +180,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	page = name
 	if not was_open:
 		UI.show_backdrop(dim, true)
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
 		if s is Match:
@@ -321,6 +321,9 @@ func open_practice(h: Hunter) -> void:
 func open_settings() -> void:
 	_show_settings()
 
+func open_sfx_tester() -> void:
+	SfxTesterPage.fill(_page("sfxtest", "Sound tester", 720, true))
+
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
 	UI.hold(v, SETTINGS_H)
@@ -362,6 +365,9 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
+		+ "Off: it walks beside you"
+	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
@@ -374,10 +380,11 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
 	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
+	_toggle(v, "Keep cursor in window", "cursor_confine", "In a fight the cursor stays inside the window")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
-	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
+	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch", "scout"]],
 		["Fighting", [
-			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
@@ -398,14 +405,14 @@ func _tab_controls(v: VBoxContainer) -> void:
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
-	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
+	_note(v, "Esc always opens the menu.")
 
 func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")
 	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
-	var follow := [["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
-	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
+	var follow := [["centred", "Centred on you"], ["lean", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Centred on you, or sliding toward where you aim")
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 
 func _tab_audio(v: VBoxContainer) -> void:
@@ -431,6 +438,9 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_toggle(v, "Low-health heartbeat", "low_hp_pulse", "A soft heartbeat, faster as you near down")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
+	_group(v, "Sound tester")
+	_row(v, "Try other sounds", "Glider, dash and Vex's rifle: hear the candidates, play with them, lock one in") \
+		.add_child(UI.button("Open", open_sfx_tester, 120))
 
 func _tab_video(v: VBoxContainer) -> void:
 	_group(v, "Display")
@@ -457,6 +467,8 @@ func _tab_access(v: VBoxContainer) -> void:
 	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
 			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
+	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
+	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
 	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),

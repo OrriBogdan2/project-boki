@@ -306,7 +306,7 @@ func run(main_node: Node) -> void:
 	k = _grt_kin(m, P, "cindle")
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	_ac_run(m, 0.1)
-	P._emit_shot()
+	P.atk.emit_shot()
 	_ac_run(m, 0.5)
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)

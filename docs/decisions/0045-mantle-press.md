@@ -12,7 +12,7 @@ the source is silent, buffer to the top and mark it [?], never guess a cancel.
 
 ## Options
 1. One rule per kit, in each content/dash_flow/<hero>.json. Cons: 72 rows that all say the same thing, and the source
-   has no per-hero mantle rule (supervive_physics.md: the mantle is one shared suction force).
+   has no per-hero mantle rule (sv/briefs/physics.md: the mantle is one shared suction force).
 2. One shared table that DashFlow, the press router every kit already uses, reads while the hunter mantles.
 3. Wait for the Fsm loco machine (briefs/STATE_MACHINES.md M2b, ext/movement-unify, not on main) and put it there.
 
