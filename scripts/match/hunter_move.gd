@@ -41,10 +41,7 @@ static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
 static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
 
-## Lazy: a script that HunterMove's own load pulls in (Hunter -> GlideSpike) can call this before _rules is set.
 static func rules() -> Dictionary:
-	if _rules.is_empty():
-		_rules = _load()
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
