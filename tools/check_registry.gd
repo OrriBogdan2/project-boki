@@ -746,6 +746,7 @@ const CHECKS := {
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
+	"--summon-ring-check": ["res://tools/summon_ring_check.gd", "summon_ring_check", null],  # time-left ring under a summon
 	"--summon-leash-check": ["res://tools/summon_check.gd", "summon_check", null],  # (same check: the leash rows)
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],  # stolen wisps, stacking
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],  # every species' Boki wisp
