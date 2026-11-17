@@ -125,7 +125,6 @@ var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
-const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1036,7 +1035,7 @@ func _on_new_track(name: String) -> void:
 func _update_sky(d: float) -> void:
 	_update_music(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
-	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
+	var sun_h := sin((HomeAmbience.clock_in(GardenZones.here, day_t) - 0.25) * TAU)  # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d
@@ -1082,7 +1081,7 @@ func _process(delta: float) -> void:
 	if _hub_room_t <= 0.0:
 		_hub_room_t = 0.2
 		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
-	_move_player(d)
+	mover.run(d, player, _move_player)
 	_move_kin(d)
 	if guide: guide.tick(d)
 	if hhints: hhints.tick(d)
@@ -1100,10 +1099,11 @@ func _process(delta: float) -> void:
 	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	else: Incubator.tick(d)      # visiting a friend, your eggs still warm at the plain pace
 	_apply_cam_settings()
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
-	var focus := kin_frame.frame(Vector3(ppos.x, minf(py, 0.0), ppos.z))
+	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
 	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
 	_see_through()
@@ -1129,6 +1129,7 @@ func _process(delta: float) -> void:
 # drop into the sky and the wind sets you back down where you last stood.
 var gliding := false
 var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
+var mover := FarmStep.new()      # its clock: fixed steps, latched presses, the jump's grace timers (farm_step.gd)
 var dash_t := 0.0
 var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
 var dash := DashState.new()    # the dash charges and the long dash cooldown, the same object a match hunter owns
@@ -1253,9 +1254,9 @@ func _move_player(d: float) -> void:
 	var air := py > gh + 0.001 or pvy > 0.0
 	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match
 	if Settings.get_v("crouch_toggle"):
-		if can_act and Input.is_action_just_pressed("crouch"):
+		if can_act and mover.pressed(&"crouch"):
 			crouch_on = not crouch_on
-		if Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("dash"):
+		if mover.pressed(&"jump") or mover.pressed(&"dash"):
 			crouch_on = false
 	else:
 		crouch_on = can_act and Input.is_action_pressed("crouch")
@@ -1264,7 +1265,7 @@ func _move_player(d: float) -> void:
 	water.step(wdep, d, mv, air)
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
-	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
+	if can_act and mover.pressed(&"dash") and dash_t <= 0.0 and not water.swimming:
 		if not try_dash(mv, air) and dash_slot:
 			dash_slot.deny()
 	_mv = mv
@@ -1281,7 +1282,7 @@ func _move_player(d: float) -> void:
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	elif mv.length() > 0.001:
-		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
+		hv = Loco.accel_to(hv, mv * run * (HunterMove.sneak_speed if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 	else:
 		hv = HunterMove.brake(hv, 1.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
@@ -1318,8 +1319,9 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
-	if jump_now and not air:
+	var over := py - gh if gh > World.VOID + 1.0 else INF
+	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump"), air, pvy, over, d)
+	if jump == FarmStep.Jump.JUMP:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
@@ -1328,7 +1330,7 @@ func _move_player(d: float) -> void:
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
-		var press := (jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide")
+		var press := jump == FarmStep.Jump.GLIDE or mover.pressed(&"glide")
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
@@ -1394,14 +1396,12 @@ func _move_player(d: float) -> void:
 	ps.merge(carry.anim_state())
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
-	p_anim.update(d, ps)
+	mover.pose(p_anim, ps, d)
 	if dash_slot == null and ui:
 		dash_slot = HomeDashSlot.new()
 		dash_slot.home = self
 		ui.add_child(dash_slot)
 		ui.move_child(dash_slot, 0)
-	if p_anim.stepped:
-		Sfx.step(null, -20.0)
 
 func _move_kin(d: float) -> void:
 	whistle_cd = maxf(0.0, whistle_cd - d)
@@ -1633,12 +1633,12 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
 	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
-	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
+	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and mover.pressed(&"glide")):
 		lfl = {}
 		return false
 	var left: float = float(lfl["lip"]) + 0.12 - py
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
-	if Input.is_action_just_pressed("jump") and panel_open == "":
+	if mover.pressed(&"jump") and panel_open == "":
 		# the fling: strong in the window near the top, weaker before it
 		var timed := left <= Hunter.LRISE_WINDOW
 		lfl = {}
@@ -2963,32 +2963,16 @@ func _garden_xp(rec: Dictionary, action: String, points := 0) -> void:
 	_play_evolutions.call_deferred()
 
 func _pet_kin(k: Dictionary) -> void:
-	var rec: Dictionary = k["rec"]
-	if float(k.get("nap_t", 0.0)) > 0.0:
-		# a gentle pat wakes it up
-		k["nap_t"] = 0.01
-	var loves_pet: bool = rec["likes"]["play"] == "pet"
-	var now_s := Time.get_ticks_msec() / 1000.0
-	if now_s >= float(k.get("pet_ok", 0.0)):
-		k["pet_ok"] = now_s + 20.0
-		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
-		_garden_xp(rec, "pet")
-	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
-	_care_trust(rec, "pet")
-	k["hold_t"] = 1.0
-	k["joy_t"] = 0.9
-	HomeVerbs.come_in(k, ppos)
-	verbs.play("pat", k["node"])
+	HomeVerbs.come_in(k, ppos)      # it steps into your hands' reach first
+	var r := PetReact.pet(self, k)
 	kin_frame.start(k, ppos)
 	_face(k["pos"])
-	_emote(k, "♥", true)
-	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	HomeVoice.say(rec, "happy", null, -4.0, 0.12)
+	HomeVoice.say(k["rec"], "happy", null, -4.0, 0.12)
 	Sfx.play("garden_pet", null, -6.0)
-	if Care.care_day(rec, "petted"):
-		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
+	if r["paid"]: _garden_xp(k["rec"], "pet")
+	if r["memory"]:
 		Save.save_game()
-		_say(k, BokiLines.say(rec, "petted"))
+		_say(k, BokiLines.say(k["rec"], "petted"))
 
 ## Fetch: you toss a ball toward the cursor, the kin runs it down and brings it back.
 func _play_with_kin(k: Dictionary) -> void:
@@ -4931,7 +4915,7 @@ func _nest_demo(which: String) -> void:
 			var bk: String = bosses[i % bosses.size()] if not bosses.is_empty() else ""
 			Incubator.add(String(Data.MOBS[bk]["egg"]) if bk != "" else String(Data.common_kin()[0]), bk)
 		var heats := [1.0, 0.7, 0.5, 0.3, 0.1]
-		for e in Incubator.eggs(): e["heat"] = Incubator.HEAT_NEED * float(heats[int(e["slot"]) % heats.size()])
+		for e in Incubator.eggs(): e["heat"] = Incubator.need() * float(heats[int(e["slot"]) % heats.size()])
 		Save.d["incubator"]["coal"] = 120.0
 		Save.d["items"]["coals"] = 2
 		if hinc:
