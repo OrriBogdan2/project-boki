@@ -2,7 +2,7 @@ extends RefCounted
 ## --summon-ring-check: the ring under a summoned Boki shows the time left (SummonRing). Three squads, Boki wisps
 ## on. A summon's ring fills to the window left (full at the start, half at half), is steady until the last
 ## 2 s and then flickers, sits under the team ring and every ground mark, and is gone when the window ends (the
-## shrink), when it is killed back into a wisp and when the Boki dies. A stolen summon wears the same ring dimmed, in the
+## shrink), when it is killed back into a wisp and when the Boki dies. A stolen summon wears it dimmed, in the
 ## thief's colour. Prints PASS/FAIL. Never touches the save.
 
 const DT := 1.0 / 60.0
