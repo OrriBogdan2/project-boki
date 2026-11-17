@@ -386,7 +386,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
-| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
+| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted. Owner 11-08 (item 11) over the footage: the cast keeps his speed (80% of a run, easing off at 1.6/s; a rise of 1 m/s or more gets +2.2 m/s, a ledge rise hands over to it; `x.carry_k` and the rest); asserted (`tools/kael_tap_ult_check.gd`) |
 | Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
