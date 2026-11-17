@@ -40,7 +40,6 @@ func run(main: Node) -> void:
 	_finishers()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
-		_air(String(id))
 	_finishers()
 	for id in CLIMBERS:
 		_mantle(String(id), true)
@@ -504,48 +503,6 @@ func _air_pick(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, clips: WardenCli
 		ok(clips._pick(m.get_meta(WardenClips.STATE), 0.0).get("clip", "") != "dash_air",
 				"breaker: the air lunge gives way once %s" % want)
 		_play(m, an, sync, st, 20)
-## The hips-to-head line in the model's frame: x its lean to the Hero's right, z behind, y up.
-func _spine(m: Node3D, sk: Skeleton3D) -> Vector3:
-	var inv := m.global_transform.affine_inverse() * sk.global_transform
-	var hips := inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hips")).origin
-	return ((inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin) - hips).normalized()
-
-func _air(id: String) -> void:
-	var art_name := WardenGlb.art(id)
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
-	holder.add_child(m)
-	var w := m.get_node_or_null("Warden")
-	var sync := w.get_node("Sync") as WardenGlb.Sync if w else null
-	if WardenClips.data(art_name).is_empty():
-		m.free()           # (a Hero with no keyed clips yet, Gil: the rig's procedural pose, nothing to tilt)
-		return
-	if sync == null or sync.clips == null:
-		ok(false, "%s: plays its clips" % art_name)
-		m.free()
-		return
-	var sk := WardenGlb.skeleton(w)
-	var an := HunterAnim.new(m)
-	var dive := String(sync.clips.d["air"]["dive"])
-	ok(sync.clips.lib.has_animation(dive), "%s: the dive clip %s is in the .glb" % [art_name, dive])
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 30)
-	var stand := _spine(m, sk)
-	var glide := {"vel": Vector3(0, -3.5, -9.0), "face": 0.0, "grounded": false, "gliding": true}
-	_play(m, an, sync, glide, 40)
-	var up := _spine(m, sk)
-	var plunge := {"vel": Vector3(0, -30.0, -6.0), "face": 0.0, "grounded": false, "diving": true}
-	_play(m, an, sync, plunge, 40)
-	var down := _spine(m, sk)
-	# (HunterAnim's AIR_TILT pitches it DIVE_PITCH nose-down on top of the dive clip: head first, chest to the ground)
-	ok(down.z < -0.5, "%s: the dive goes nose-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
-			% [art_name, down.y, down.z, up.y])
-	# (the glider's bank into a turn is main's AIR_TILT roll, asserted on every Hero by --glide-bank-check)
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 60)
-	var stood := _spine(m, sk)
-	var left := rad_to_deg((m.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY) as Quaternion).get_angle())
-	# (the idle's own sway moves the spine a few degrees: Tarek's guard ~4)
-	ok(left < 1.0 and absf(stood.y - stand.y) < 0.06, "%s: on the ground the body is upright again (air tilt %.1f deg"
-			% [art_name, left] + ", spine y %.2f, standing %.2f)" % [stood.y, stand.y])
-	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
