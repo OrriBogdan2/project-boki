@@ -43,10 +43,10 @@ plain text: fixed (section 4).
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
 |---|---|---|---|---|---|---|---|
 | land | 3.7 | sim | 5 | 1.9 | WASD | - | Steer down to the meadow |
+| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Shoot the monsters down Full-auto rifle. Dazed foes take 90% more. |
 | points | 3.5 | sim | 19 | 5.9 | - | - | You start with 1 ability point Choose wisely: every level gives one more. Monsters give XP when they fall. |
 | pick_sec | 0.6 | sim | 12 | 3.9 | RMB | - | Unlock Burr Charge Fire the charge from your cannon; its blast Dazes. |
 | sec | 0.6 | sim | 6 | 2.2 | RMB | - | Hit the monsters with Burr Charge |
-| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Now shoot them down Full-auto rifle. Dazed foes take 90% more. |
 | pick_dash | 0.6 | sim | 10 | 3.3 | SHIFT | - | Level 2! Unlock Slipstep Skid or slide, and keep shooting. |
 | dash | 3.8 | sim | 4 | 1.6 | SHIFT | - | Dash across the gap |
 | exdash | 2.2 | sim | 5 | 1.9 | SHIFT | - | Jump, then dash in mid-air |

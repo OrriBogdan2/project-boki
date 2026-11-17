@@ -363,12 +363,9 @@ func retry_tip() -> String:
 	return fill(String(tips.get(id(), tips["default"])))
 
 
-## Back at the last stop, with this beat's camp there (shoot finishes the sec step's camp; the other camp
-## steps bring theirs in _enter).
+## Back at the last stop (the camp steps bring their camp in _enter).
 func _back() -> void:
 	m.player.teleport(respawn())
-	if id() == "shoot":
-		camps.spawn("sec")
 
 
 func _enter() -> void:
@@ -402,7 +399,7 @@ func _enter() -> void:
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
 	match sid:
-		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
+		"shoot", "sec", "gkey", "summon", "pack", "kin", "hook", "ult":
 			camps.spawn(sid)
 		"glove":
 			if ground_item().is_empty():  # (a retry finds the glove still lying there)
@@ -469,7 +466,7 @@ func _is_done(sid: String, dt: float) -> bool:
 				seen["sec"] = true
 			elif camps.alive() == 0:
 				camps.spawn(sid)  # (they fell before it was used: more to use it on)
-			return cast
+			return cast and camps.alive() == 0  # (the camp's kills pay the XP for the next level)
 		"shoot":
 			got = camps.killed()
 			seen["fire"] = seen.get("fire", false) or hits > 0

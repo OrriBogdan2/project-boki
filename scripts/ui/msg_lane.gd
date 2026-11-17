@@ -17,6 +17,7 @@ const STALE := 3.0              # s a LOW line may wait before it's dropped
 const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
 const FADE_IN := 0.15           # s
 const FADE_OUT := 0.35          # s
+const CARD_PAD_X := 12          # px of padding either side of a card's line
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
@@ -25,6 +26,7 @@ const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
+var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
@@ -195,7 +197,7 @@ func _card(e: Dictionary) -> PanelContainer:
 	var c := UI.glass(8, UI.R_CARD)
 	var f := c.get_theme_stylebox("panel") as UiFrame
 	f.edge = Color(e["col"], 0.35)
-	f.padded(12, 3)
+	f.padded(CARD_PAD_X, 3)
 	var l := UI.label(_label_text(e), px, e["col"], UI.big)
 	l.add_theme_constant_override("outline_size", 4)
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
@@ -216,6 +218,8 @@ func _bump(e: Dictionary) -> void:
 func _fit(l: Label, px: int) -> void:
 	var natural := TextCache.width(UI.big, l.text, px)
 	var widest := get_viewport_rect().size.x * WIDE if is_inside_tree() else 600.0
+	if max_w > 0.0:
+		widest = minf(widest, max_w - 2.0 * CARD_PAD_X)
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 
 func _label_text(e: Dictionary) -> String:
