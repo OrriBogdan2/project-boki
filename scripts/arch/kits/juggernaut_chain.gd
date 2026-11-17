@@ -17,6 +17,13 @@ const BOW := 0.3                    # share of the swing the chain bows out by (
 const PREVIEW_MIN := 0.6            # m of swing before the predicted arc shows (looking almost straight: no line)
 const PREVIEW_DT := 0.03            # s per step of the predicted arc
 const PREVIEW_STEPS := 48           # steps at most (the longest pull is under 1.2 s)
+const ROPE_W := 0.4                 # m across the chain at rest (the source's is a thick striped rope)
+const FLIGHT_W := 0.28              # m across the hook's chain in flight
+const HAUL_W := 0.46                # m across it while it hauls him in
+const RING_R := 0.95                # m radius of the marker ring on the hooked foe
+const RING_PTS := 28                # points round the ring
+const RING_W := 0.16                # m wide the ring's band
+const SNAP_T := 0.3                 # s the two broken halves whip back
 const PREVIEW_Y := 0.15             # m over his feet
 
 var k: JuggernautKit
@@ -26,16 +33,19 @@ var anchor := Vector3.ZERO          # where the hook bit (follows a hooked foe)
 var tether_t := 0.0                 # s the hook still holds
 var e_pressed_at := -9.0            # an E pressed while the hook flew (becomes the pull if it bites soon)
 var pull_dir := Vector2.ZERO        # the pull's heading now (it turns toward the anchor, bent by input and facing)
-var pull_speed := 0.0               # m/s of the pull (the reel speed plus the slingshot)
+var pull_speed := 0.0               # m/s of the pull (the reel speed plus his motion along the chain)
 var pull_t := 0.0                   # s left before the pull gives up (a wall in the way)
 var pull_at := -9.0                 # when the pull started (a jump after it breaks off)
-var sling := 0.0                    # (tests) m/s the slingshot added to the last pull
+var sling := 0.0                    # (tests) m/s his motion along the chain added to the last pull
 var line := Vector2.ZERO            # the chain's line when the pull started (the steer is sideways to it)
 var reach := 0.0                    # m of chain when the pull started (the swing is a share of it, so the arc's angle
 									# is the same on a short pull and a long one)
 var steer := 0.0                    # m the arrival point has swung sideways of the anchor
 var preview := PackedVector3Array() # the predicted arc, reused each step
 var stall_t := 0.0
+var snap_t := 0.0                   # s left of the broken halves whipping back
+var snap_end := Vector3.ZERO        # where the chain's far end was when it broke
+var ring := PackedVector3Array()    # the marker ring's points, reused each step
 var arrive_t := 0.0                 # s left of the arrival window
 var strained := false
 var tightened := false              # the chain has hit its full length since it bit (one creak per hold)
@@ -47,7 +57,7 @@ var breaks := 0
 var holds := 0                      # times the chain held at its full length
 var reels := 0
 var arrivals := 0
-var exits := ""                     # how the last pull ended: arrived | dash | jump | stopped
+var exits := ""                     # how the last pull ended: arrived | dash | jump | knocked | stopped
 var last_arrival := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
@@ -146,8 +156,12 @@ func snap(quiet := false) -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
+		if state == "hooked":
+			snap_t = SNAP_T
+			snap_end = anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 		if not quiet:
-			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
+			var at := _chain_from().lerp(snap_end, 0.5) if state == "hooked" else k.h.pos + Vector3(0, 1.0, 0)
+			k.vfx("chain_snap", at)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -192,16 +206,17 @@ func pull() -> void:
 	k.vfx("chain_pull", h.pos, pull_dir)
 	k.last_e = "reel"
 
-## The pull's start along `chain` (him to the anchor): the reel speed, plus a slingshot from his speed away from
-## the anchor at the press (backing away stretches it); the sideways part of his motion carries in, so a strafe
-## swings the pull wide from the start.
+## The pull's start along `chain` (him to the anchor): the reel speed plus his own motion along the chain, up to
+## sling_max (the impulse adds to it: moving in adds his speed, backing away stretches it into a slingshot of sling_k
+## of that speed); the sideways part of his motion carries in, so a strafe swings the pull wide from the start.
 func _launch(chain: Vector2) -> void:
 	var ed := data()
 	var h := k.h
 	var v := Vector2(h.vel.x, h.vel.z)
 	var toward := chain.normalized()
 	var side := Vector2(-toward.y, toward.x)
-	sling = minf(maxf(0.0, -v.dot(toward)) * float(ed["sling_k"]), float(ed["sling_max"]))
+	var along := v.dot(toward)
+	sling = minf(along if along > 0.0 else -along * float(ed["sling_k"]), float(ed["sling_max"]))
 	line = toward
 	reach = chain.length()
 	steer = 0.0
@@ -249,6 +264,8 @@ func tick(dt: float) -> void:
 			arrive_t -= dt
 			if arrive_t <= 0.0:
 				state = "ready"
+	if snap_t > 0.0:
+		_draw_snap(dt)
 	if state == "throwing":
 		if k.h.stun_t > 0.0:
 			snap()                  # a stun breaks the throw too
@@ -298,6 +315,28 @@ func _hold_taut(most: float) -> void:
 		holds += 1
 		k.vfx("chain_tight", h.pos)     # the chain snapping taut at its length
 
+## The broken chain: its two halves whip back to their ends, thinning, a gap opening between them.
+func _draw_snap(dt: float) -> void:
+	snap_t = maxf(0.0, snap_t - dt)
+	var u := 1.0 - snap_t / SNAP_T
+	var a := _chain_from()
+	var w := ROPE_W * (1.0 - 0.6 * u)
+	var gap := 0.5 * (1.0 - u) + 0.1
+	k.fx().chain(_fx_id() + "s0", a, a.lerp(snap_end, gap - 0.1 * u), 1.0 - u, HOT, DARK, w)
+	k.fx().chain(_fx_id() + "s1", a.lerp(snap_end, gap + 0.15 * u + 0.1), snap_end, 1.0 - u, HOT, DARK, w)
+
+## The marker ring on the hooked foe, flat on the ground under it: drawn for both sides (not gated on tells).
+func _draw_ring(tension: float) -> void:
+	if target == null:
+		return
+	var r := RING_R * (1.0 + 0.06 * sin(k.m.time * 9.0))
+	var y := target.pos.y + 0.08
+	ring.resize(RING_PTS + 1)
+	for i in RING_PTS + 1:
+		var a := TAU * float(i) / RING_PTS
+		ring[i] = Vector3(target.pos.x + cos(a) * r, y, target.pos.z + sin(a) * r)
+	k.fx().path_line(_fx_id() + "ring", ring, ORANGE.lerp(HOT, 0.4 + 0.6 * tension), RING_W)
+
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
 	var h := k.h
@@ -305,13 +344,14 @@ func _draw_hooked(stretch: float) -> void:
 	if stretch >= TAUT and not strained:
 		k.vfx("chain_taut", anchor + Vector3(0, 1.0, 0))
 	strained = stretch >= TAUT
+	_draw_ring(tension)
 	if not (k.tells_visible() or target != null):
 		return
 	var a := _chain_from()
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
 	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
-			0.13 + 0.03 * tension, _bow(_aimed()))
+			ROPE_W, _bow(_aimed()))
 	_draw_preview()
 
 ## How far the chain's middle bends out toward a swing of `aside` m (the side of the pull's line).
@@ -352,13 +392,16 @@ func _chain_from() -> Vector3:
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
+			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, FLIGHT_W)
 			return
 
 func _tick_pull(dt: float) -> void:
 	var h := k.h
 	var ed := data()
-	if h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.downed:
+	if h.knock_t > 0.0:
+		_stop("knocked", false)     # the knock's push (added to the pull's speed) takes over
+		return
+	if h.stun_t > 0.0 or h.root_t > 0.0 or h.downed:
 		_stop("stopped", false)
 		return
 	if h.jump_at > pull_at:
@@ -386,7 +429,8 @@ func _tick_pull(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
 	HeroVfx.of(k.m).hold(h, "chain_drag")
 	var a := h.pos + Vector3(0, 1.0, 0)
-	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16, _bow(steer))
+	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, HAUL_W, _bow(steer))
+	_draw_ring(1.0)
 	_draw_preview()
 
 ## Him to the anchor, flat.
@@ -434,7 +478,9 @@ func _stop(how: String, arrived: bool) -> void:
 	state = "ready"
 	if h.move_kind == "rush" and how != "dash":
 		h.roll_t = 0.0
-		if how == "stopped":
+		# a stopped pull halts him on the ground; in the air its speed carries under air drag and the keys
+		# steer (Loco.air_step, DECISIONS 11-08: never overwrite air velocity)
+		if how == "stopped" and h.grounded:
 			h.vel.x = 0.0
 			h.vel.z = 0.0
 	k.fx().unchain(_fx_id())

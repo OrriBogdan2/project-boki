@@ -5,9 +5,18 @@ extends RefCounted
 ## stored. A save that has played keeps what its house had (and the journal and gramophone become pieces
 ## standing where they stood); a save that has not starts with those two in storage.
 
-const OLD_START := [["bed", 1, 1], ["rug", 4, 4], ["table", 6, 1], ["chair", 6, 2], ["lamp", 0, 6], ["stove", 9, 1],
-	["kin_bed", 8, 6], ["plant", 9, 6]]
+const OLD_START := [
+	["bed", 1, 1],
+	["rug", 4, 4],
+	["table", 6, 1],
+	["chair", 6, 2],
+	["lamp", 0, 6],
+	["stove", 9, 1],
+	["kin_bed", 8, 6],
+	["plant", 9, 6]
+]
 const OLD_FIXED := [["journal", 7, 0], ["gramophone", 8, 0]]
+
 
 static func migrate(data: Dictionary) -> void:
 	if typeof(data.get("decor")) != TYPE_DICTIONARY:

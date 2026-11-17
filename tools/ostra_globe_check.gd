@@ -3,8 +3,9 @@ extends "res://tools/hero_pair_check.gd"
 ## globe's radius equals the radius the pop hits at (rmax at that share of its 6.5 s): a hunter just inside the drawn
 ## rim is caught and one just outside is not.
 
-const GROWTH := [0.0, 0.25, 0.5, 1.0]      # share of the grow time
-const EDGE := 0.1                          # m inside / outside a foe's reach, to tell caught from missed
+const GROWTH := [0.0, 0.25, 0.5, 1.0]  # share of the grow time
+const EDGE := 0.1  # m inside / outside a foe's reach, to tell caught from missed
+
 
 ## Every globe assertion; returns when done (the caller prints the totals).
 func globe(main_node: Node) -> void:
@@ -20,7 +21,8 @@ func globe(main_node: Node) -> void:
 	var grow := float(ed["grow"])
 	for g in GROWTH:
 		for side in [-1.0, 1.0]:
-			if not K.seed.is_empty(): K._pop(false)
+			if not K.seed.is_empty():
+				K._pop(false)
 			K.cd["e"] = 0.0
 			T.teleport(home + Vector3(8.0, 0, 0))
 			fresh(T)
@@ -34,8 +36,12 @@ func globe(main_node: Node) -> void:
 				var shown := vis.scale.x
 				ok(
 					"globe %d%%: drawn radius %.2f = hit radius %.2f" % [g * 100.0, shown, K.seed_radius()],
-					absf(shown - K.seed_radius()) < 0.001 and absf(want - K.seed_radius()) < 0.001
-					and is_equal_approx(vis.scale.y, shown) and is_equal_approx(vis.scale.z, shown),
+					(
+						absf(shown - K.seed_radius()) < 0.001
+						and absf(want - K.seed_radius()) < 0.001
+						and is_equal_approx(vis.scale.y, shown)
+						and is_equal_approx(vis.scale.z, shown)
+					),
 					"vis %s" % vis.scale
 				)
 			var reach: float = K.seed_radius() + float(T.r) + EDGE * side
@@ -47,7 +53,8 @@ func globe(main_node: Node) -> void:
 			var verdict := "hit" if inside else "missed"
 			ok(
 				"globe %d%%: a hunter %.1fm %s the rim is %s" % [g * 100.0, EDGE, where, verdict],
-				(dmg(T) > 0.0) == inside, "dmg %.1f" % dmg(T)
+				(dmg(T) > 0.0) == inside,
+				"dmg %.1f" % dmg(T)
 			)
 	ok("globe: full growth is the full rmax", absf(HeroZones.seed_r(rmax, grow, grow) - rmax) < 0.001)
 	ok("globe: a fresh seed is a speck, not nothing", HeroZones.seed_r(rmax, grow, 0.0) > 0.0)

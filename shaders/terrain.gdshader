@@ -313,6 +313,7 @@ void fragment() {
 	ALBEDO = c;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = rim_color.rgb * rim * rim_amount * (1.0 - fog) + gemit * 0.9 * (1.0 - fog * 0.85);
+	EMISSION += vis_edge(wpos);     // your sight wedge's sides
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

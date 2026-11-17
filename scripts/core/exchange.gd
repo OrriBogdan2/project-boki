@@ -23,6 +23,7 @@ class_name Exchange
 ##
 ## Save.d["exchange"] (optional; an old save gets it on first use):
 ##   {day, n, book: {item: [Offer]}, hist: {item: [[t, price, qty]]}, fills: [...]}
+## day is the Exchange's own date (_day_turn), which only follows the system clock forward.
 
 const BACKEND := "local"
 const TAX := 0.04              # of the gems in each fill, paid by the seller: the Exchange's sink
@@ -32,6 +33,10 @@ const WALK := 0.15             # offline, Tradewind's quotes walk at most this f
                                # (so an offer priced further out than this never fills)
 const MAKER_DEPTH := 3         # market maker levels each side
 const PRICE_BAND := [0.4, 2.5] # offers must be within this times the reference price
+const DAYS_AHEAD := 1          # days the Exchange's day may move forward in one run of the game
+
+## The Exchange's day when this run of the game first looked (days since 1970, -1 = not yet).
+static var _run_day := -1
 
 ## item -> {name, ref (gems per unit), store: mats|crops|items|scrap, key}
 const COMMODITIES := {
@@ -131,14 +136,28 @@ static func _makers(item: String, force := false) -> void:
 		book.append({"id": _id(), "side": "buy", "item": item, "qty": 20 + 10 * i, "left": 20 + 10 * i, "price": maxi(b.x, mid - gap), "t": _now() - 100 + i, "who": "tw"})
 		book.append({"id": _id(), "side": "sell", "item": item, "qty": 20 + 10 * i, "left": 20 + 10 * i, "price": mini(b.y, mid + gap), "t": _now() - 100 + i, "who": "tw"})
 
+## The Exchange's day never goes back, and moves forward at most DAYS_AHEAD per run of the game,
+## so setting the system clock can't pick a cheap or dear day. Saved as the day's date ("day").
 static func _day_turn() -> void:
 	var st := _st()
-	var t := Time.get_datetime_dict_from_system()
-	var day := "%d-%02d-%02d" % [t["year"], t["month"], t["day"]]
+	var clock := int(Time.get_unix_time_from_datetime_dict(Time.get_datetime_dict_from_system()) / 86400)
+	var last := -1
+	if String(st["day"]) != "":
+		last = int(Time.get_unix_time_from_datetime_string(String(st["day"])) / 86400)
+	if _run_day < 0:
+		_run_day = last if last >= 0 else clock
+	var day := Time.get_date_string_from_unix_time(anchored_day(last, clock, _run_day) * 86400)
 	if String(st["day"]) == day:
 		return
 	st["day"] = day
 	for item in COMMODITIES: _makers(item, true)
+
+## Today for the Exchange, in days: the clock's day, but never before the last day seen and never
+## more than DAYS_AHEAD past the day this run started on.
+static func anchored_day(last: int, clock: int, run_day: int) -> int:
+	if last < 0:
+		return clock
+	return maxi(last, mini(clock, run_day + DAYS_AHEAD))
 
 ## The book for one item, aggregated by price: best first on each side.
 static func book(item: String) -> Dictionary:

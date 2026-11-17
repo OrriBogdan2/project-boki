@@ -1,13 +1,13 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Cinder's v95 master (appeal4 bust candidate 5, the 11-11 rounded redo of candidate 3: appeal3's cand_b with a full bust rounded in side view (dome displacement, apex lower and soft, fuller lower curve), a slightly narrower waist, a little more hip and half-lidded eyes painted into the appeal3 face, ~/meshy/v95/Cinder/r2/appeal4/cand_5.glb; its unrigged tail cut off: cinder_v95_bust5_body.glb, which keeps candidate 3's painted face) onto cinder.glb's (ashwick's) skeleton, clips and anchors. cinder.glb's own tail (its spring chain, flame tip and tail-tip anchor) and heel jets stay; the old hair cards go (the master's hair rides head and hips). The master's emission map (the lava seams) bakes to the game's emissive texture. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres; the master stands off centre, x 0.07, y 0.08), read on tools/art1/v95_grid.py's renders. The head and hips boxes meet at z 1.53, just under the neck joint and below her chin (z 1.565): a boundary at the lips (z 1.6) fitted and skinned the lower lip with the torso and tore it into spikes.",
- "master": "~/meshy/v95/Cinder/r2/appeal4/cinder_v95_bust5_body.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-16 (owner accepted Cinder 3D option A, job 20261116-200037-a2: the r8/pick1116 Meshy rebuild with the glowing amber eyes, clean lips and a deeper bust). The master's own fused tail is cut off first (game/cut_tail_A.py, same method as the old cut_tail.py) so the game's spring tail stays. Joints read from v95_grid.py renders of A.glb.",
+ "master": "~/meshy/v95/Cinder/r8/pick1116/game/A_notail.glb",
  "game": "art/wardens/cinder/cinder.glb",
  "tris": 13000,
  "head": {
   "centre": [
+   0.0,
    0.07,
-   0.13,
-   1.7
+   1.68
   ],
   "r": 0.17
  },
@@ -32,79 +32,79 @@
  ],
  "joints": {
   "pelvis": [
-   0.07,
-   0.07,
-   0.95
+   0.0,
+   0.05,
+   0.97
   ],
   "neck": [
-   0.07,
-   0.09,
-   1.55
+   0.0,
+   0.06,
+   1.54
   ],
   "crown": [
+   0.0,
    0.07,
-   0.14,
-   1.81
+   1.82
   ],
   "shoulder.R": [
-   0.235,
-   0.07,
-   1.41
+   0.17,
+   0.05,
+   1.43
   ],
   "elbow.R": [
-   0.36,
-   0.1,
-   1.2
+   0.24,
+   0.07,
+   1.25
   ],
   "wrist.R": [
-   0.4,
-   0.175,
-   0.98
+   0.31,
+   0.09,
+   0.97
   ],
   "shoulder.L": [
-   -0.095,
-   0.07,
-   1.41
+   -0.17,
+   0.05,
+   1.43
   ],
   "elbow.L": [
    -0.24,
-   0.1,
-   1.2
+   0.07,
+   1.25
   ],
   "wrist.L": [
-   -0.285,
-   0.175,
-   0.98
+   -0.31,
+   0.09,
+   0.97
   ],
   "hip.R": [
-   0.155,
-   0.09,
-   0.9
+   0.12,
+   0.05,
+   0.93
   ],
   "knee.R": [
-   0.209,
-   0.12,
-   0.56
+   0.14,
+   0.05,
+   0.57
   ],
   "ankle.R": [
-   0.22,
-   0.08,
-   0.13
+   0.13,
+   0.04,
+   0.14
   ],
   "hip.L": [
-   -0.015,
-   0.09,
-   0.9
+   -0.12,
+   0.05,
+   0.93
   ],
   "knee.L": [
-   -0.057,
-   0.12,
-   0.56
+   -0.14,
+   0.05,
+   0.57
   ],
   "ankle.L": [
-   -0.09,
-   0.08,
-   0.13
+   -0.13,
+   0.04,
+   0.14
   ]
  },
  "relax": {
@@ -263,13 +263,13 @@
  },
  "anchors": {
   "anchor_head_top": [
+   0.0,
    0.07,
-   0.14,
-   1.83
+   1.84
   ],
   "anchor_chest": [
-   0.07,
-   0.21,
+   0.0,
+   0.2,
    1.38
   ]
  }

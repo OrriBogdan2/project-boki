@@ -6,12 +6,16 @@ extends RefCounted
 ##      materials leave as the quarters pass; with none the build stops at the step and says what it needs
 ##   3. every Hunter and the Empty: the weapon, off-hand blade, shield and orb are hidden with a tool out, the
 ##      tool is in the hands, and the weapon is back after (but not at home, where the Empty carries none)
+##      and at the top of the swing the axe or pickaxe head stands well above the Hunter's head, so the farm
+##      camera (behind and above) sees it: Albert (the tallest), Kael (the shortest) and the Empty
 ##   4. chopping and mining at home: hits land on the beat, trees and boulders react, hold keeps going
 ## Never touches the real save.
 
 const BEAT_SLACK := 0.08          # s: how far from the strike a hit may land
 const HAND_REACH := 0.3           # m: the tool's butt is this close to the hands at most
 const SETTLE_FRAMES := 90
+const RAISE_CLEAR := 0.65         # m: the raised axe or pickaxe head is at least this far above the head
+const RAISE_HUNTERS := ["bulwark", "juggernaut", "the Empty"]
 
 var bad := 0
 var main: Node
@@ -102,7 +106,7 @@ func _rules() -> void:
 	FarmSites.clean(old)
 	var loaded_paid: bool = int(old["site"]["steps"]) == FarmSites.STEPS and old["site"]["cost"] == old["site"]["paid"]
 	ok(loaded_paid and not FarmSites.stalled(old),
-			
+
 			"a site saved before this loads as fully paid and never asks for more")
 	Work.add_mat("wood", 0)
 	var done := false
@@ -159,15 +163,21 @@ func _rig_cycle(who: String, model: Node3D, tool: String) -> void:
 	var node := model.get_node_or_null("Rig/Torso/Tool") as Node3D
 	var hidden := _weapon_nodes(a).all(func(n): return not (n as Node3D).visible)
 	var near := 9.0
+	var peak := -9.0
 	for i in 12:
 		_frames(a, state, 5, float(i) * 0.07)
 		if node:
+			var top := node.global_transform * Vector3(0.0, float(HunterTool.TOOLS[tool]["haft"]), 0.0)
+			peak = maxf(peak, top.y - a.head.global_position.y)
 			var left := a.arm_l.transform * (a.el_l.transform * a.hand_l.position)
 			var right := a.arm_r.transform * (a.el_r.transform * a.hand_r.position)
 			near = minf(near, minf(node.position.distance_to(left), node.position.distance_to(right)))
 	ok(armed, "%s: carries a weapon before it takes up the %s" % [who, tool])
 	ok(hidden and node != null and node.visible and near < HAND_REACH,
 			"%s with the %s: weapon nodes hidden, tool in the hands (%.2f m from a hand)" % [who, tool, near])
+	if who in RAISE_HUNTERS and HunterTool.TOOLS[tool]["two_hands"]:
+		ok(peak >= RAISE_CLEAR, "%s: the raised %s head stands %.2f m above the head (at least %.2f)"
+				% [who, tool, peak, RAISE_CLEAR])
 	# done: the tool goes. At home the weapon stays away; in a match it comes back
 	_frames(a, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "holster": true}, SETTLE_FRAMES)
 	var tool_gone := node == null or not node.visible

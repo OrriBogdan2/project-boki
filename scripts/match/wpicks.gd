@@ -19,11 +19,9 @@ static func update(m: Match, dt: float) -> void:
 		if h.out or h.downed or h.dropping or h.riding or h.remote:
 			continue
 		for wp in m.wpicks:
-			if wp.has("val") or h.flat_dist(wp["pos"]) >= 1.4 or absf(h.pos.y - float(wp["pos"].y)) >= 1.0:
+			var rule := "bot" if h.ctrl == "bot" else "tune"
+			if wp.has("val") or not PickupReach.near(m, h, wp["pos"], rule):
 				continue
-			if wp.has("tune") and (h.flat_dist(wp["pos"]) < 1.1 or h.ctrl == "bot"):
-				m.take_pick(h, wp)
-				break
-			if wp.has("gear") and h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"])):
+			if wp.has("tune") or (h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"]))):
 				m.take_pick(h, wp)
 				break

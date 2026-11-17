@@ -69,6 +69,24 @@ func _part_bash() -> void:
 		[0.45, 0.52, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.5]), 2.0)
 	await _go(GAP)
 
+## The 360 Smash: the run-up, then the turn frame by frame (the hit lands about a third of the way round, 0.21 s
+## after the press), the ring left at the hit radius running round with the hammer, and the damage number.
+func _part_dash() -> void:
+	await _reset(5.4)
+	_hand()
+	var dash := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	crop_px = Vector2i(620, 420)          # (the 2.2 m ring whole, round him)
+	await _go(1.6, dash, _sheet("dash", "Shift: the run-up, the one turn and its ring at the hit radius, the number",
+		[0.25, 0.33, 0.38, 0.42, 0.46, 0.5, 0.55, 0.7, 1.0], func(): return P.position + Vector3(0, 0.3, 0)), 2.5)
+	crop_px = SHEET_CROP
+	await _go(GAP)
+
 func _part_wall() -> void:
 	var rock := _rock()
 	await _reset(7.0)

@@ -3,8 +3,9 @@ extends Node3D
 ## Five shots, each a little set far apart from the others, with a line of story under letterbox bars:
 ##   1. the land whole  2. the Wyrm wakes  3. the Hollowing  4. the Boki  5. hunters race for the Wyrmheart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
-## light (MOODS) and its own action. Any key, click or pad button skips it all at once, and once it has been
-## seen (or skipped) a new game goes straight past it.
+## light (MOODS) and its own action. A click, key or pad button moves on one shot (or first finishes a line
+## still typing); holding one for a second skips it all (HoldSkip). Once seen (or skipped) a new game goes
+## straight past it.
 
 signal finished
 
@@ -25,7 +26,6 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const SKIP_FADE_T := 0.2       # s of wipe to black when it ends or is skipped
 const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the Crown as Relics
 
 var cam: Camera3D
@@ -67,6 +67,8 @@ var heart_light: OmniLight3D
 var look_mat: ShaderMaterial    # the storybook screen effect
 var chapter_lbl: Label
 var pips: HBoxContainer
+var hold_skip: HoldSkip
+var type_tw: Tween              # the caption typing itself in (a tap finishes it)
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -75,7 +77,7 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		Game.goto.call_deferred(then_go)      # (seen it already: repeat runs skip it by default)
 		return
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	rng.seed = 77
 	var we := WorldEnvironment.new()
@@ -435,12 +437,16 @@ func _build_ui() -> void:
 	pips.position = Vector2(30, 33)
 	pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(pips)
-	# bottom corner: how to skip
-	var hint := UI.key_hints([["Any key", "skip"]], 12, Color(1, 1, 1, 0.5))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hint.offset_right = -24; hint.offset_top = -40; hint.offset_bottom = -16
-	root.add_child(hint)
+	# bottom corner: hold to skip (unseen until a press)
+	hold_skip = HoldSkip.new()
+	hold_skip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	hold_skip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hold_skip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hold_skip.offset_right = -24
+	hold_skip.offset_bottom = -16
+	hold_skip.tapped.connect(_tap)
+	hold_skip.skipped.connect(_finish)
+	root.add_child(hold_skip)
 
 ## One dot per scene: done ones filled, the current one long and bright.
 func _draw_pips() -> void:
@@ -475,7 +481,8 @@ func _next_shot() -> void:
 	tw.tween_property(fade, "color:a", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 	tw.parallel().tween_property(chapter_lbl, "modulate:a", 1.0, 0.8).set_delay(0.3)
 	var type_s := maxf(1.2, caption.text.length() * 0.03)
-	tw.parallel().tween_property(caption, "visible_ratio", 1.0, type_s).set_delay(0.6)
+	type_tw = create_tween()
+	type_tw.tween_property(caption, "visible_ratio", 1.0, type_s).set_delay(0.6)
 	if look_mat:
 		var gt := create_tween().set_parallel()
 		var tint: Color = look_mat.get_shader_parameter("tint")
@@ -544,22 +551,26 @@ func _finish() -> void:
 	if done:
 		return
 	done = true
-	var tw := create_tween()
-	tw.tween_property(fade, "color:a", 1.0, SKIP_FADE_T)
-	tw.tween_callback(func():
-		finished.emit()
-		Save.d["tutorial"]["prologue"] = true
-		# the hatch screen still tells its own three lines: the storm, the shrine, the eggs
-		Game.goto(then_go))
+	finished.emit()
+	Save.d["tutorial"]["prologue"] = true
+	# the screen change covers the picture itself (one wipe, not two); the hatch screen still tells its own three lines
+	Game.goto(then_go)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not done and hold_skip.feed(event):
+		get_viewport().set_input_as_handled()
+
+## A tap: finish the line still typing, else on to the next shot (from the title card, the end).
+func _tap() -> void:
 	if done:
 		return
-	# the first press of anything skips (playtest 11-09: holding to skip, or a scene at a time, was too slow)
-	var pressed := event.is_pressed() and not event.is_echo()
-	if pressed and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
-		get_viewport().set_input_as_handled()
+	if shot >= shots.size():
 		_finish()
+	elif caption.visible_ratio < 1.0:
+		type_tw.kill()
+		caption.visible_ratio = 1.0
+	else:
+		_advance()
 
 # ---------------------------------------------------------------- the show
 func _process(delta: float) -> void:

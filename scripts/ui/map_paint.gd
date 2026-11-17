@@ -3,12 +3,13 @@ extends SubViewport
 ## The painted map: baked once per map, on the GPU, from the world's tiles (shaders/map_paint.gdshader)
 ## into one mipmapped texture that the full map (M) and the minimap draw. Nothing re-renders the
 ## world for the map, and the overlays (pings, squad, spawns, exits) stay crisp vector drawing on top.
-## The same map in a later match reuses the texture. Headless runs never get one (no GPU): the HUD
+## The same map in the next match reuses the texture (only the last one is kept: a new seed is a new map,
+## and each bake is a 2048 px RGBA texture with mipmaps, ~22 MB). Headless runs never get one (no GPU): the HUD
 ## keeps its plain tile texture then.
 
 signal baked(tex: Texture2D)
 
-static var _cache := {}          # data hash -> ImageTexture
+static var _cache := {}          # data hash -> ImageTexture, the last map baked
 const SHADER := preload("res://shaders/map_paint.gdshader")
 
 var _frames := 0
@@ -57,6 +58,7 @@ func _process(_d: float) -> void:
 		img.convert(Image.FORMAT_RGBA8)
 		img.generate_mipmaps()
 		result = ImageTexture.create_from_image(img)
+		_cache.clear()
 		_cache[_key] = result
 		PerfLog.mark("map.bake")
 		baked.emit(result)

@@ -43,58 +43,85 @@ const SHOP_REQ := {
 	"furn:easel": {"extracts": 2},
 }
 
+
 static func stat(k: String) -> int:
 	match k:
-		"extracts": return int(Save.d.get("extracts", 0))
-		"matches": return int(Save.d.get("matches", 0))
+		"extracts":
+			return int(Save.d.get("extracts", 0))
+		"matches":
+			return int(Save.d.get("matches", 0))
 		"max_trust":
 			var best := 0.0
-			for r in Save.d.get("roster", []): best = maxf(best, float(r.get("trust", 0.0)))
+			for r in Save.d.get("roster", []):
+				best = maxf(best, float(r.get("trust", 0.0)))
 			return int(best)
-		"built": return Save.d.get("buildings", []).filter(func(b): return not Data.BUILDINGS.get(b, {}).get("free", false)).size()
+		"built":
+			return (
+				Save
+				. d
+				. get("buildings", [])
+				. filter(func(b): return not Data.BUILDINGS.get(b, {}).get("free", false))
+				. size()
+			)
 	return int(Save.d.get("stats", {}).get(k, 0))
 
+
 static func add(k: String, n: int = 1) -> void:
-	if not Save.d.has("stats"): Save.d["stats"] = {}
+	if not Save.d.has("stats"):
+		Save.d["stats"] = {}
 	Save.d["stats"][k] = int(Save.d["stats"].get(k, 0)) + n
+
 
 static func done(id: String) -> bool:
 	return Save.d.get("challenges", []).has(id)
 
+
 static func challenge(id: String) -> Array:
 	for c in CHALLENGES:
-		if c[0] == id: return c
+		if c[0] == id:
+			return c
 	return []
+
 
 static func ready_to_claim() -> Array:
 	return CHALLENGES.filter(func(c): return not done(c[0]) and stat(c[3]) >= int(c[4]))
+
 
 static func claim(id: String) -> int:
 	var c := challenge(id)
 	if c.is_empty() or done(id) or stat(c[3]) < int(c[4]):
 		return 0
-	if not Save.d.has("challenges"): Save.d["challenges"] = []
+	if not Save.d.has("challenges"):
+		Save.d["challenges"] = []
 	Save.d["challenges"].append(id)
 	Save.d["gems"] = int(Save.d["gems"]) + int(c[5])
 	Save.save_game()
 	return int(c[5])
 
+
 static func unlocked(key: String) -> bool:
 	if Game.modding():
 		return true
 	var req: Dictionary = SHOP_REQ.get(key, {})
-	if req.has("challenge") and not done(req["challenge"]): return false
-	if req.has("extracts") and stat("extracts") < int(req["extracts"]): return false
+	if req.has("challenge") and not done(req["challenge"]):
+		return false
+	if req.has("extracts") and stat("extracts") < int(req["extracts"]):
+		return false
 	return true
+
 
 static func req_text(key: String) -> String:
 	var req: Dictionary = SHOP_REQ.get(key, {})
 	if req.has("challenge"):
 		var c := challenge(req["challenge"])
-		return "Unlocks with the challenge \"%s\"" % c[1] if not c.is_empty() else "Locked"
+		return 'Unlocks with the challenge "%s"' % c[1] if not c.is_empty() else "Locked"
 	if req.has("extracts"):
-		return "Unlocks after %d successful expedition%s" % [int(req["extracts"]), "" if int(req["extracts"]) == 1 else "s"]
+		return (
+			"Unlocks after %d successful expedition%s"
+			% [int(req["extracts"]), "" if int(req["extracts"]) == 1 else "s"]
+		)
 	return ""
+
 
 ## The goods a challenge unlocks, for its card.
 static func unlocks_of(id: String) -> Array:
@@ -104,13 +131,20 @@ static func unlocks_of(id: String) -> Array:
 			out.append(k)
 	return out
 
+
 static func item_name(key: String) -> String:
 	var p := key.split(":")
 	match p[0]:
-		"seed": return "%s seeds" % Data.CROPS[p[1]]["name"]
-		"food": return String(Care.FOODS[p[1]]["name"])
-		"acc": return String(Data.ACCS[p[1]]["name"])
-		"plots": return "More farm plots"
-		"furn": return String(Data.FURN[p[1]]["name"])
-		"feeder": return String(Econ.FEEDERS[p[1]]["name"])
+		"seed":
+			return "%s seeds" % Data.CROPS[p[1]]["name"]
+		"food":
+			return String(Care.FOODS[p[1]]["name"])
+		"acc":
+			return String(Data.ACCS[p[1]]["name"])
+		"plots":
+			return "More farm plots"
+		"furn":
+			return String(Data.FURN[p[1]]["name"])
+		"feeder":
+			return String(Econ.FEEDERS[p[1]]["name"])
 	return key

@@ -31,7 +31,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
 from sfx_lib import (N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, tail,
-                     reflections, ring, grains, pad)
+                     reflections, ring, grains, pad, bubbles)
 
 S.reseed(7411)
 
@@ -86,19 +86,6 @@ def groan(d, f0, f1, wob=0.08, bright=900):
     saw = 2.0 * ((np.cumsum(f) / S.SR) % 1.0) - 1.0
     body = bpf(saw, 70, bright) * 0.5
     return S.sat(body, 1.6)
-
-
-def bubbles(d, per_s, f_lo=250, f_hi=900, size=0.04):
-    """Rising air bubbles: short sines that chirp upward as they pop (water around a drowned thing)."""
-    n = N(d); out = np.zeros(n)
-    for _ in range(max(1, int(per_s * d))):
-        s0 = int(S.rng.uniform(0, max(1, n - N(size * 1.5))))
-        bd = size * S.rng.uniform(0.6, 1.4); bn = N(bd); tt = np.arange(bn) / S.SR
-        f = S.rng.uniform(f_lo, f_hi) * (1 + 2.5 * tt / bd)
-        b = np.sin(2 * np.pi * np.cumsum(f) / S.SR) * np.exp(-tt / (bd * 0.35)) * (1 - tt / bd)
-        b *= np.sin(np.pi * np.minimum(1, tt / 0.003) / 2)
-        out[s0:s0 + bn] += b * S.rng.uniform(0.4, 1.0)
-    return out
 
 
 def swell(d, lp=700, rate=0.8):

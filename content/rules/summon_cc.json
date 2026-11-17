@@ -1,0 +1,4 @@
+{
+	"desc": "What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.",
+	"immune": ["gnd"]
+}

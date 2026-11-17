@@ -14,6 +14,7 @@ extends RefCounted
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
 const CHIP_DRAIN := 1.6        # of the bar per second once it drains (plus an ease-out)
 const FLASH_T := 0.14          # s the frame flashes white when struck
+const ARMOR_FLASH_T := 0.2     # s the armour strip flashes white after it loses some
 const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
@@ -33,6 +34,13 @@ var shown := {}
 static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
+## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
+## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
+static func hidden(m: Match, h: Hunter) -> bool:
+	if m.player == null or h.team == m.player.team or h.downed or h.reveal_t > 0.0:
+		return false
+	return h.crouch or m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)
+
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:
 	now += dt
@@ -46,8 +54,8 @@ func tick(dt: float) -> void:
 func _state(e: Ent) -> Dictionary:
 	var s: Dictionary = st.get(e.nid, {})
 	if s.is_empty():
-		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "brk": 0.0, "down": false,
-			"burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
+		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "aflash": 0.0,
+			"brk": 0.0, "down": false, "burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
 		st[e.nid] = s
 	return s
 
@@ -78,12 +86,19 @@ func chip_of(e: Ent, frac: float, dt: float) -> float:
 func flash_of(e: Ent) -> float:
 	return clampf(float(_state(e)["flash"]) / FLASH_T, 0.0, 1.0)
 
+## 1 as the armour strip loses some (a hit on the shell), fading to 0 over ARMOR_FLASH_T.
+func armor_flash_of(e: Ent) -> float:
+	return clampf(float(_state(e)["aflash"]) / ARMOR_FLASH_T, 0.0, 1.0)
+
 ## Watches armour and the downed state for the crack and the knock burst.
 func _watch(h: Hunter, dt: float) -> Dictionary:
 	var s := _state(h)
 	var ar := h.armor
 	if float(s["armor"]) > 0.5 and ar <= 0.5 and h.max_armor > 0.5:
 		s["brk"] = BREAK_T
+	if ar < float(s["armor"]) - 0.01:
+		s["aflash"] = ARMOR_FLASH_T
+	s["aflash"] = maxf(0.0, float(s["aflash"]) - dt)
 	s["armor"] = ar
 	s["brk"] = maxf(0.0, float(s["brk"]) - dt)
 	if h.downed and not bool(s["down"]):
@@ -100,16 +115,17 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
-	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
-	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
-	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.stun_t > 0.0: out.append(["status_stunned", BodyTell.STUN_COL, "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
+	if KitStatus.grounded(e):
+		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["status_slowed", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
+	if e.burn_t > 0.0: out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
-	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
-	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
-	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
+	if hunter and hunter.weak_t > 0.0: out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.shield > 0.0: out.append(["status_shielded", Color("d8ecff"), "", -1.0])
+	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
 	return out
 
 ## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
@@ -131,6 +147,11 @@ static func shield_frac(h: Hunter) -> float:
 
 ## Another hunter's plate. `show_name`: Hud's rule (allies always; rivals near, hovered or down).
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
+	TextCache.world = true      # plates hang on the world over each head: their text keeps its design size
+	_draw_plate(H, sp, h, show_name)
+	TextCache.world = false
+
+func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0:
 		return
 	sp = sp.round()
@@ -154,7 +175,8 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
-	# the name, or what's being done to them (stunned, rooted ...) in its colour
+	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
+	# body (BodyTell, KitStatus), so no icon tiles beside the plate
 	var sts := statuses(h)
 	var word := ""
 	var word_col := Color("9ae8ff")
@@ -168,12 +190,10 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
-	if not sts.is_empty():
-		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -187,6 +207,11 @@ static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -
 
 ## Your own plate over your head: wider, with your health number.
 func draw_self(H, sp: Vector2, p: Hunter) -> void:
+	TextCache.world = true
+	_draw_self(H, sp, p)
+	TextCache.world = false
+
+func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var dt: float = H.get_process_delta_time()
 	var s := _watch(p, dt)
@@ -196,14 +221,14 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var frac := clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0)
 	var ch := chip_of(p, frac, dt)
 	var fl := flash_of(p)
-	HudStyle.plate_frame(c, frame, Color(HudStyle.SELF, 0.5), fl)
+	HudStyle.plate_frame(c, frame, Color(SideColor.you(), 0.5), fl)
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
-	var fill := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var fill := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, pop)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
@@ -225,7 +250,7 @@ func _armor(c: CanvasItem, h: Hunter, r: Rect2, s: Dictionary) -> bool:
 	if h.max_armor <= 0.5:
 		return false
 	var col: Color = h.armor_col() if h.armor_tier > 0 or h.armor > 0.5 else HudStyle.ARMOR
-	HudStyle.strip(c, r, h.armor / h.max_armor, col)
+	HudStyle.strip(c, r, h.armor / h.max_armor, col.lerp(Color.WHITE, armor_flash_of(h)))
 	var b := float(s["brk"]) / BREAK_T
 	if b > 0.0:
 		var k := 1.0 - b
