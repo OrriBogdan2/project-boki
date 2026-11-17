@@ -517,6 +517,15 @@ white-hot with his crimson, and gold on the Riposte and chain.
 The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
 (`jug_*`, `juggernaut_*`), played from the recipes.
 
+**Black and red (owner pick A, 11-12).** Every red effect of his reads as black with red glowing through it, as on his
+splash and turnaround, never as Cinder's orange-yellow fire: a charred base with crimson cracks, trails a black ink
+ribbon with a red hot edge (the palette's `peak`), sparks dark red into black flecks. The palette carries it (also the
+Warchain's `chain*` colours and the chain moves' `haul*`), with the model's crack colour and strength (archetype
+`model_glow` core `#c80a22`, `emit` 1.4) and his skin slot's char (warden_look `char_k`, `char_reach`, `char_col`: the
+skin round the emission cracks and the red-painted curse skin turn black, so only the cracks glow). Unchanged: the red
+cloth, the white sword, and the Gilded Riposte's gold (its name and the guard's read). tools/hero_vfx_check.gd keeps
+his palette's red keys out of orange and yellow.
+
 ## Originality
 
 Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the

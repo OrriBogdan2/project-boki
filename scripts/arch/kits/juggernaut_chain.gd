@@ -9,9 +9,6 @@ extends RefCounted
 ## arriving (a short window that keeps some of the pull's speed and still takes the Cinder Spin) -> ready.
 ## A miss, a stun or the time running out breaks it. Owned by JuggernautKit.
 
-const ORANGE := Color("ff8a2a")     # the bright links (and the zig-zag in flight)
-const DARK := Color("3a2418")       # the dark iron links
-const HOT := Color("ffd04a")        # the links pulled taut, and while it hauls you in
 const TAUT := 0.85                  # share of its full length where the chain starts to strain (glow and creak)
 const BOW := 0.3                    # share of the swing the chain bows out by (it bends with the pull)
 const PREVIEW_MIN := 0.6            # m of swing before the predicted arc shows (looking almost straight: no line)
@@ -27,6 +24,10 @@ const SNAP_T := 0.3                 # s the two broken halves whip back
 const PREVIEW_Y := 0.15             # m over his feet
 
 var k: JuggernautKit
+var links: Color                    # the bright links (and the zig-zag in flight): his vfx palette's "chain"
+var iron: Color                     # the dark iron links: "chain_iron"
+var hot: Color                      # the links pulled taut, and while it hauls you in: "chain_hot"
+var hook_hot: Color                 # the hook's head in flight: "chain_hook"
 var state := "ready"                # ready | throwing | hooked | pulling | arriving
 var target: Ent = null              # the hooked foe (null on a wall)
 var anchor := Vector3.ZERO          # where the hook bit (follows a hooked foe)
@@ -62,6 +63,11 @@ var last_arrival := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
+	var pal: Dictionary = HeroVfx.data("juggernaut").get("palette", {})
+	links = Color(String(pal["chain"]))
+	iron = Color(String(pal["chain_iron"]))
+	hot = Color(String(pal["chain_hot"]))
+	hook_hot = Color(String(pal["chain_hook"]))
 
 func data() -> Dictionary:
 	return k.e_def()
@@ -117,7 +123,7 @@ func _throw() -> void:
 			else: _miss(at)}))
 	if k.m.shots.size() > shots0 and k.m.shots[-1]["by"] == h:
 		var sd: Dictionary = k.m.shots[-1]
-		k.fx().ride(sd, "hook", ORANGE, Color("ffcf6a"), 0.6, 0.15)
+		k.fx().ride(sd, "hook", links, hook_hot, 0.6, 0.15)
 		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
@@ -324,8 +330,8 @@ func _draw_snap(dt: float) -> void:
 	var a := _chain_from()
 	var w := ROPE_W * (1.0 - 0.6 * u)
 	var gap := 0.5 * (1.0 - u) + 0.1
-	k.fx().chain(_fx_id() + "s0", a, a.lerp(snap_end, gap - 0.1 * u), 1.0 - u, HOT, DARK, w)
-	k.fx().chain(_fx_id() + "s1", a.lerp(snap_end, gap + 0.15 * u + 0.1), snap_end, 1.0 - u, HOT, DARK, w)
+	k.fx().chain(_fx_id() + "s0", a, a.lerp(snap_end, gap - 0.1 * u), 1.0 - u, hot, iron, w)
+	k.fx().chain(_fx_id() + "s1", a.lerp(snap_end, gap + 0.15 * u + 0.1), snap_end, 1.0 - u, hot, iron, w)
 
 ## The marker ring on the hooked foe, flat on the ground under it: drawn for both sides (not gated on tells).
 func _draw_ring(tension: float) -> void:
@@ -337,7 +343,7 @@ func _draw_ring(tension: float) -> void:
 	for i in RING_PTS + 1:
 		var a := TAU * float(i) / RING_PTS
 		ring[i] = Vector3(target.pos.x + cos(a) * r, y, target.pos.z + sin(a) * r)
-	k.fx().path_line(_fx_id() + "ring", ring, ORANGE.lerp(HOT, 0.4 + 0.6 * tension), RING_W)
+	k.fx().path_line(_fx_id() + "ring", ring, links.lerp(hot, 0.4 + 0.6 * tension), RING_W)
 
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
@@ -352,7 +358,7 @@ func _draw_hooked(stretch: float) -> void:
 	var a := _chain_from()
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
-	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
+	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), links.lerp(hot, tension * 0.6), iron,
 			ROPE_W, _bow(_aimed()))
 	_draw_preview()
 
@@ -384,7 +390,7 @@ func _draw_preview() -> void:
 		dir = _arced(dir, to, step, most)
 		pos += dir * step
 		preview.append(Vector3(pos.x, y, pos.y))
-	k.fx().path_line(_fx_id() + "arc", preview, Color(HOT, 0.4), 0.12)
+	k.fx().path_line(_fx_id() + "arc", preview, Color(hot, 0.4), 0.12)
 
 ## Where the chain leaves him: the socket on his wrist on the 3D model, else the chest.
 func _chain_from() -> Vector3:
@@ -394,7 +400,7 @@ func _chain_from() -> Vector3:
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, FLIGHT_W)
+			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, links, links, FLIGHT_W)
 			return
 
 func _tick_pull(dt: float) -> void:
@@ -431,7 +437,7 @@ func _tick_pull(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
 	HeroVfx.of(k.m).hold(h, "chain_drag")
 	var a := h.pos + Vector3(0, 1.0, 0)
-	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, HAUL_W, _bow(steer))
+	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, hot, iron, HAUL_W, _bow(steer))
 	_draw_ring(1.0)
 	_draw_preview()
 
