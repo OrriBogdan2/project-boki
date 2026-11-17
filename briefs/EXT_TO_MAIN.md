@@ -10129,3 +10129,4 @@ READY ext/merge-lane-vfxsfx2-1115 4e8233858f (merge lane vfxsfx2 r2: steal cues,
 READY ext/hunter-glb-restore-1117 22cbfb71bad (SUPERSEDES c0218cc89d: origin/main merged, behind 0, fast-forward push; glb conflicts only: Kael = picked e1 mesh + 54 clips with the master extra swords dropped via glb_drop_mats *-v95c (2440 tris, one sword like main; Art: commit), Vex = main hair-A glb (same mesh as the branch). Checks: import 0 script errors (only 0-byte caecilith webp, same on main), warden_glb_guard 0 without Art:, check.sh/health --strict red only on style ratchet in files this branch does not touch; PR #261)
 READY ext/stuck-integ-be6ffab8 162e669ceab05a4969829021a72ce2e9236d36b3 (#169 conflicts resolved vs main)
 READY ext/mantle-port-a 484da9507699ab5673b54ed6f6c1b35e9c713393 (#135 conflicts resolved vs main)
+READY ext/merge-lane-boki3d-1114 621b1b0bfa (lane boki3d r2: restore Lilybara+Umbrathere rigs #137 dropped; boki-rig-check 3 fail -> 0)
