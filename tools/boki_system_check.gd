@@ -234,15 +234,15 @@ func _cast_c() -> void:
 # ------------------------------------------------------------------ 4b. the wind-up before the release frame
 func _wind_up() -> void:
 	_fresh()
-	var P := m.player
-	var k: Kin = P.kin
-	aim_at(P, P.pos + Vector3(8.0, 0, 0))
-	KinCommand.tap(P)
+	var pl := m.player
+	var k: Kin = pl.kin
+	aim_at(pl, pl.pos + Vector3(8.0, 0, 0))
+	KinCommand.tap(pl)
 	run_for(1.0)
 	ok(BokiRig.has(k.species), "setup: a rigged species (%s)" % k.species)
 	var skills := k.st_skills
-	aim_at(P, k.pos + Vector3(4.0, 0, 0))
-	ok(KinCommand.cast_c(P) and not k.runner.is_ready("k1"), "the cast is paid for at once")
+	aim_at(pl, k.pos + Vector3(4.0, 0, 0))
+	ok(KinCommand.cast_c(pl) and not k.runner.is_ready("k1"), "the cast is paid for at once")
 	ok(k.cast_do.is_valid() and k.st_skills == skills, "...and the skill is held in the wind-up (%.2f s)" % k.cast_t)
 	run_for(BokiSwing.CAST_WIND - 0.05)
 	ok(k.st_skills == skills, "...still held just before the release frame")
