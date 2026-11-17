@@ -228,6 +228,7 @@ var auto_glide := false        # carried by a lair's escape updraft: the glider 
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
+var second_wind_at := -INF      # m.time Second Wind last refreshed the dash (DashReset.second_wind)
 var ult_ready := false        # the hero ultimate is ready (UltGlow: read from the kit, or from the net)
 var ult_glow := 0.0           # its glow on the body, 0..1 (UltGlow)
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
@@ -361,15 +362,16 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 				ch.queue_free()
 		Models.gun_parts(gun, w, Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], true, 0.0))
 
-## Chasing down whoever took your kin: 18% faster heading their way. Carrying a stolen kin: 8% slower.
-func _chase_mod(mv: Vector2) -> float:
-	var k := 0.92 if stolen_carry else 1.0
-	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
-	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
-	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+## Everything that slows your ground speed, multiplied (the bonuses add in HunterMove.speed_bonus): a
+## slow, being downed, reloading, firing, drinking, crouching, the kit's own pace, a stolen kin carried,
+## the Heartspark's weight.
+func _move_mult() -> float:
+	var k := slow_mult(0.65) * _fire_slow() * UtilityUse.channel_move(self) * KinDowned.carry_speed(self)
+	if crouch: k *= HunterMove.sneak_speed
+	if stolen_carry: k *= 0.92
+	if ak: k *= ak.pace()
+	if downed: k *= 0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0)
 	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
-	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
-		k *= 1.18
 	return k
 
 ## The colour that marks this hunter's effects (from their class).
@@ -377,7 +379,8 @@ func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
 func max_dashes() -> float:
-	return DashState.base_charges(dodge_def, cdat) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	var n := DashState.base_charges(dodge_def, cdat)
+	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -815,6 +818,7 @@ func do_jump() -> void:
 		glide_cd = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
+		glide_cd = 0.0      # a jump off the ground is a fresh air phase: a move's wind-down was for its own end
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
 		jump_at = m.time
 		grounded = false
@@ -973,6 +977,7 @@ func _skyfall(drop: float, fall_v: float) -> void:
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
+const DASH_KEEP := 0.5        # s: a press inside a dash this short waits for its end (a longer lock drops it)
 
 func do_dash() -> void:
 	if downed or out:
@@ -986,7 +991,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
+		dash_buf = DASH_BUFFER + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
 		return
 	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1796,6 +1801,7 @@ func sim(dt: float) -> void:
 				pos = rocket.pos
 			else:
 				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
+			gate_ranks()      # a press on a locked ability still spends a point
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
@@ -1871,8 +1877,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in SLOT_GATES:
-		_gate(gk[0], gk[1], gk[2])
+	gate_ranks()
 	BaseRecall.tick(self, dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2010,8 +2015,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * _fire_slow() * UtilityUse.channel_move(self) * (HunterMove.sneak_speed if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
-	spd *= KinDowned.carry_speed(self)
+	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
@@ -2432,7 +2436,8 @@ func _update_glide(dt: float) -> void:
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	var btn_down: bool = inp.get("glide_btn", false)
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens as the lock ends
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and bool(inp.get("glide", false)) and not grounded
 	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
 	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
@@ -2818,6 +2823,11 @@ func unlock_all() -> void:
 		slot_lv[s] = maxi(int(slot_lv[s]), 1)
 	skill_pts = 0
 
+## Every ability key pressed this step: a locked one takes a point if you have one (_gate).
+func gate_ranks() -> void:
+	for gk in SLOT_GATES:
+		_gate(gk[0], gk[1], gk[2])
+
 ## Pressing a locked ability: spend a point on it if you have one, otherwise say it's locked.
 func _gate(key: String, slot: String, fb: String) -> void:
 	if not inp.get(key, false) or int(slot_lv[slot]) > 0:
@@ -2908,10 +2918,13 @@ func _worn_stat(k: String) -> float:
 	_worn[k] = t
 	return t
 
-## Ground speed while you ride your mount (its carry.mount speed).
-func _mount_speed() -> float:
+## Ground speed while you ride your mount (its carry.mount speed), as a share of your own.
+func mount_speed() -> float:
 	var k: Kin = kin
 	return float(k.ks.mount.get("speed", 1.0)) if k and k.ks else 1.0
+
+func _took(d: float, _by: Ent) -> void:
+	DashReset.second_wind(self, hp + d)
 
 ## How many stacks of a perk you've picked up this run.
 func perk_n(id: String) -> int:
@@ -2922,7 +2935,7 @@ func perk_open(id: String) -> bool:
 	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
-## dash charges, armor) are updated on the spot.
+## armor) are updated on the spot.
 func add_perk(id: String) -> void:
 	if not Data.PERKS.has(id) or not perk_open(id):
 		return
@@ -2933,8 +2946,6 @@ func add_perk(id: String) -> void:
 			max_hp += 15.0; hp = minf(max_hp, hp + 15.0)
 		"featherfall":
 			glide_max *= 1.6
-		"secondwind":
-			dashes = minf(max_dashes(), dashes + 1.0)
 	if (Data.PERKS[id] as Dictionary).has("wup"):
 		WeaponUps.apply(self)
 	refresh_gear()
