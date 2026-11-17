@@ -6,7 +6,8 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
  2. Fit (grimble_source.py's method): each limb segment of the master (its `joints`) moves onto the rig's, a length along
     the bone and a girth across it; the limbs take the rig's joint heights and keep the master's spread, or with `spread`
     "rig" sit on the rig's joints; past a segment's ends the master keeps its own scale (a hook, a gauntlet keep their shape).
- 3. Weights: bone heat on the body bones (`weights` "voxel": voxel_weights.py instead, and no skin_relax), `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
+ 3. Weights: bone heat on the body bones (`weights` "voxel": voxel_weights.py instead, and no skin_relax),
+    `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
     `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given.
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
@@ -409,13 +410,15 @@ def seg_of(arm, bone):
 
 def fit_weights(arm, P, gr=None):
     """Each point's share of each segment: by distance, the `regions` whole; or from its skin weights `gr` (each part moves
-    with the bones that will carry it)."""
+    with the bones that will carry it, so a fist resting on the sash moves whole with its arm)."""
+    W = seg_weights(P)
     if gr:
-        W = np.zeros((len(P), len(SEG)))
+        W = np.zeros_like(W)
         for bone, w in gr.items():
             W[:, SEG_NAMES.index(seg_of(arm, bone))] += w
-        return W
-    W = seg_weights(P)
+        if SPEC.get("weights") == "meshy":
+            return W
+        W /= W.sum(1, keepdims=True)
     for bone, m in region_masks(P):
         W[m] = np.eye(len(SEG))[SEG_NAMES.index(seg_of(arm, bone))]
     return W
@@ -481,7 +484,7 @@ def heat_weights(low, arm, P):
     weights to its bone) and the `regions`, whole."""
     if SPEC.get("weights") == "capsule":
         return place_weights(capsule_weights(low, arm), P)
-    if SPEC.get("weights") == "voxel":     # (voxel_weights.py: through the master's solid, in its own pose; no skin_relax after)
+    if SPEC.get("weights") == "voxel":     # (voxel_weights.py: through the master's solid, in its own pose; no relax)
         SPEC["detach"] = SPEC.get("detach", []) + voxel_weights.arm_cuts(SPEC["past_wrist"])
         low.data.calc_loop_triangles()
         tri = np.array([t.vertices[:] for t in low.data.loop_triangles])
@@ -871,7 +874,7 @@ def main():
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
     T, K = targets(arm)
     meshy = SPEC.get("weights") == "meshy"
-    gr = meshy_weights(low, arm, P) if meshy else None
+    gr = meshy_weights(low, arm, P) if meshy else heat_weights(low, arm, P) if SPEC.get("weights") == "voxel" else None
     if meshy:       # (a forearm or hand that touches the body in the master's pose is fused to it there)
         for sd, hand in SPEC["past_wrist"].items():
             limb = {"upper_arm." + sd, "forearm." + sd, hand}
