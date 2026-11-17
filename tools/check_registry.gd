@@ -605,6 +605,7 @@ const CHECKS := {
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],      # walls and corners
+	"--fps-feel-check": ["res://tools/fps_feel_check.gd", "fps_feel_check", null],      # same movement at 30/60/144 fps
 	"--dash-wall-check": ["res://tools/dash_wall_check.gd", "dash_wall_check", null],      # dashes slide along walls
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],      # owner bug 11-11
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
