@@ -1,6 +1,6 @@
 extends RefCounted
 ## --clip-cadence-check: a warden clip must fit the kit's cadence. Per Hunter and move listed in
-## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "scale" speeds it up,
+## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "rate"/"scale" speeds it up,
 ## "fit" plays it over that many seconds, "cut" ends it early, "lead" skips its start; a "hold_from" move loops and
 ## is exempt) lasts no longer than the move's cadence (else it restarts mid-swing or pops into the next move), and
 ## its strike (the frame its hand moves fastest in the .glb) lands no more than the slack after the kit's hit time.
@@ -68,20 +68,27 @@ func _hero(id: String, art_name: String) -> int:
 		var mv: Dictionary = moves[km]
 		var length := clips.lib.get_animation(String(mv["clip"])).length
 		var cut := float(mv.get("cut", length))
-		var rate := float(mv.get("scale", 1.0)) * (minf(length, cut) / float(mv["fit"]) if mv.has("fit") else 1.0)
+		var rate := (
+			float(mv.get("rate", 1.0))
+			* float(mv.get("scale", 1.0))
+			* (minf(length, cut) / float(mv["fit"]) if mv.has("fit") else 1.0)
+		)
 		var lead := float(mv.get("lead", 0.0))  # the move starts this far into the clip (move seconds)
 		var played := minf(length, cut) / rate - lead
 		var cadence := _val(spec["cadence"])
+		# A move with an explicit "fade_out" blends its clip out over that long after the move ends (a dash trimmed by
+		# "rate" alone, --cast-pop-check / --dash-frames-check), so the clip may run that far past the cadence.
+		var tail := float(mv.get("fade_out", 0.0))
 		var hand := m.get_node(String(WardenGlb.BONES[spec.get("hand", "hand.R")])) as Node3D
 		var strike := await _strike(sync, clips, hand, String(mv["clip"]), length) / rate - lead
 		var hit := float(spec.get("hit", -1.0))
 		var slack := float(table["strike_slack"])
 		var what := "%s/%s" % [art_name, km]
 		ok(
-			mv.has("hold_from") or played <= cadence + float(table["tolerance"]),
+			mv.has("hold_from") or played <= cadence + tail + float(table["tolerance"]),
 			(
-				"%s: the clip plays %.3f s, past its %.3f s cadence (scale or cut it in warden_anim)"
-				% [what, played, cadence]
+				"%s: the clip plays %.3f s, past its %.3f s cadence + %.2f s blend-out (rate, scale or cut it in warden_anim)"
+				% [what, played, cadence, tail]
 			)
 		)
 		ok(
