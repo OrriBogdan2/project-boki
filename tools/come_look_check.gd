@@ -73,10 +73,12 @@ func _entry(nm: String) -> Dictionary:
 func _names(came: Array) -> String:
 	return "".join(came.map(func(k): return String(k["rec"]["name"])))
 
-## Runs the farm; returns who spoke, and how far from the spot each stood when it began to look.
+## Runs the farm; returns who spoke, how far from the spot each stood when it began to look, and the pose it was
+## cued (KinHabit).
 func _watch(at: Vector3) -> Dictionary:
 	var spoke := {}
 	var stood := {}
+	var pose := {}
 	for i in int(RUN_S / STEP_S):
 		home._move_kin(STEP_S)
 		ComeLook.tick(home, STEP_S)
@@ -86,7 +88,9 @@ func _watch(at: Vector3) -> Dictionary:
 				stood[nm] = (l["k"]["pos"] as Vector3).distance_to(at)
 			if float(l["k"].get("say_t", 0.0)) > 0.0:
 				spoke[nm] = true
-	return {"spoke": spoke, "stood": stood}
+			if l["k"].has("q_as"):
+				pose[nm] = l["k"]["q_as"]
+	return {"spoke": spoke, "stood": stood, "pose": pose}
 
 func _mem_size(nm: String) -> int:
 	return (_entry(nm)["rec"]["memory"] as Array).size()
@@ -127,6 +131,8 @@ func _newcomer(rare: bool) -> void:
 	var close: float = res["stood"].get("A", 99.0)
 	ok(far > close + 1.0, "%s: D hung back (%.1f m), A stood close (%.1f m)" % [tag, far, close])
 	ok(res["spoke"].has("A"), "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
+	ok(res["pose"].get("A", "") == "sniff" and res["pose"].get("D", "") == "hide",
+		"%s: they react by their traits: curious A sniffs, timid D hides (%s)" % [tag, res["pose"]])
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains(String(who["rec"]["name"])),
 		"%s: A keeps one memory line: '%s'" % [tag, _last_mem("A")])
 	ok(rare == _last_mem("A").contains("Rare Egg"), "%s: the line says it was a Rare Egg only when it was" % tag)
@@ -165,6 +171,20 @@ func run(m: Node) -> void:
 	ok(near < ComeLook.LOOK_DIST, "a new toy: A (most curious) reaches the toy first (%.1f m)" % near)
 	var line := _last_mem("A")
 	ok(_mem_size("A") == before + 1 and line.contains("picnic rug"), "a new toy: A keeps '%s'" % line)
+	# ------------------------------------------------ a base toy (from ext/farm-new-toy): news too
+	at = _open_spot()
+	_gather(at)
+	before = _mem_size("A")
+	tile = Vector2i(int(at.x), int(at.z))
+	home.hb.held = {"id": "toy_ball", "kind": "d", "r": 0, "c": ""}
+	home.hb.cells = [tile]
+	home.hb.ghost_ok = true
+	ok(home.hb.place_held(), "a base toy: you put a play ball down")
+	came = ComeLook._looks.map(func(l): return l["k"])
+	ok(came.size() >= 2 and ComeLook._looks[0]["kind"] == "toy" and came[0] == _entry("A"),
+		"a base toy: %s come, A (most curious) first" % _names(came))
+	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"), "a base toy: A keeps '%s'" % _last_mem("A"))
+	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1

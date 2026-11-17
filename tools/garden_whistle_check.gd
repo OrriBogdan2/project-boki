@@ -4,7 +4,9 @@ extends RefCounted
 ## trusting one reaches you within REACH_SECS on the farm's own steering (HomeBuild.steer, no rendering), a
 ## trusting one is quicker than a lukewarm one, a sulky one turns its head, waits a beat and walks slowly. Every
 ## answer makes a 0.3-0.5 s beat (perk, turn, then run) that costs a Boki already facing you under 0.15 s. In a
-## match the whistle does nothing (match code never reads it). Never touches the real save.
+## match the whistle does nothing (match code never reads it). The one-time whistle hint (WhistleHint): not during
+## the farm tutorial, shown on the HUD after the partner has been 25 m+ away for 10 s, gone and never again once
+## the whistle is used. Never touches the real save.
 
 const DT := 0.25              # s per farm step
 const BEAT_DT := 0.02         # s per step while timing an answer beat
@@ -130,6 +132,38 @@ func _hold_run() -> void:
 	home.life.whistle.release()
 	ok(_until_close(near, REACH_SECS) < INF, "the nearest Boki reaches you")
 
+## Steps the whistle's clock `secs` s with the partner 40 m off; the hint line then (or null).
+func _wait_hint(secs: float) -> Control:
+	home.kins[0]["pos"] = HomeLayout.LANDING + Vector3(40.0, 0, 0)
+	for i in int(secs / DT):
+		home.life.whistle.step(DT)
+	return home.life.whistle.hint.pill
+
+func _hint_run() -> void:
+	_reset()
+	var tut: Dictionary = Save.d["tutorial"]
+	Save.d["tutorial"] = {}
+	ok(FarmTutorial.active() and _wait_hint(15.0) == null, "no whistle hint while the tutorial steps run")
+	tut.erase("whistle_hint")      # the earlier presses used the whistle
+	Save.d["tutorial"] = tut
+	ok(_wait_hint(9.0) == null, "no hint before the partner has been far for 10 s")
+	var pill := _wait_hint(2.0)
+	ok(pill != null and pill.get_parent() == home.root_ui, "a hint line shows on the HUD after 10 s far")
+	var cap := Settings.key_cap("whistle")
+	var said := _text_of(pill) if pill else ""
+	ok(said.contains(cap) and said.contains("Whistle to call your partner"), "it names the key cap (%s)" % cap)
+	ok(bool(Save.d["tutorial"].get("whistle_hint", false)), "the save remembers it was shown")
+	home.life.whistle.press()
+	home.life.whistle.release()
+	ok(home.life.whistle.hint.pill == null, "using the whistle takes the line away")
+	ok(_wait_hint(30.0) == null, "and it does not come back")
+
+func _text_of(c: Node) -> String:
+	var out := ""
+	for n in c.find_children("*", "Label", true, false):
+		out += (n as Label).text
+	return out
+
 func _in_a_match() -> void:
 	var old: Node = home
 	home.queue_free()
@@ -172,6 +206,7 @@ func run(m: Node) -> void:
 	_sulky_run(90.0, 10.0, "a sulky partner (joy low)", lukewarm)
 	_sulky_run(10.0, 80.0, "a partner that does not trust you yet", lukewarm)
 	_hold_run()
+	_hint_run()
 	await _in_a_match()
 	FarmUnlocks.rules()["base_mode"] = false
 	await main.get_tree().process_frame

@@ -31,7 +31,7 @@ The project uses the Compatibility renderer so the same build runs on the web.
 | E | Your Boki's ability (thrown out first if it's on your shoulder) |
 | C or middle mouse | Throw your Boki at the cursor, or recall it |
 | R | Bond ultimate, once the bond meter is full |
-| B | Base to a teammate (squads): a 3s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
+| B | Base to a teammate (squads): hold for a wheel of teammates, let go on one; a 5.5s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
 | 1 | Heal: a tonic when you're hurt, an armor kit when your health is full |
 | F | Catch a dazed Boki, revive a teammate, open a chest, take a found weapon or glove |
 | Ctrl | Sneak (hold; tap to toggle on the web version, since Ctrl+W closes browser tabs) |
@@ -160,7 +160,7 @@ godot --headless --path . -- --unique-check          # every kin its own: rolls,
 godot --headless --path . -- --economy-floor-check   # never stuck: strays, the Drift Pens, the Exchange, saves
 ```
 
-Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). Use a fresh user data dir so the shader cache starts cold:
+Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). It is advisory: a fail exits 0 unless `--timing-strict` is given (docs/CHECKS_TIMING.md). Use a fresh user data dir so the shader cache starts cold:
 
 ```
 XDG_DATA_HOME=/tmp/cold xvfb-run -a godot --path . --rendering-driver opengl3 -- --hitch-check

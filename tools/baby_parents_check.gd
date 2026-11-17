@@ -1,7 +1,8 @@
 extends RefCounted
 ## --baby-parents-check (GARDEN.md section 6): a baby knows its parents. Care.breed saves both parent uids and
-## who gave what (Parentage); the hatch card words the gifts; in base life a young Boki leans toward its
-## parents for greeting and napping (a weight, not a rule) and gets one journal line the first time.
+## who gave what (Parentage); the hatch card marks each gift with its parent (HatchParents); in base life a
+## young Boki leans toward its parents for greeting and napping (a weight, not a rule) and gets one journal
+## line the first time.
 ## Never touches the real save.
 
 var bad := 0
@@ -32,6 +33,22 @@ func _entry(home: StubHome, life: BaseLife, rec: Dictionary, x: float) -> Dictio
 	home.kins.append(k)
 	return k
 
+## The hatch card's trait with this label ({} if the card doesn't list it).
+func _trait(kid: Dictionary, what: String) -> Dictionary:
+	for t in HatchParents.traits(kid):
+		if t["what"] == what: return t
+	return {}
+
+## Which parent gave the baby its highest inherited IV, worked out here on its own.
+func _best_from(kid: Dictionary) -> int:
+	var top := -1
+	var side := -3
+	for k in Care.IV_KEYS:
+		if kid["iv_from"].has(k) and int(kid["ivs"][k]) > top:
+			top = int(kid["ivs"][k])
+			side = int(kid["iv_from"][k])
+	return side
+
 func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -48,33 +65,46 @@ func run(m: Node) -> void:
 	var words := 0
 	var kinds := 0
 	var leans := 0
+	var stats := 0
 	for i in 20:
 		var pa: Dictionary = a if i % 2 == 0 else b
 		var pb: Dictionary = b if i % 2 == 0 else a
 		var kid := Care.breed(pa, pb, rng)
 		var g: Dictionary = kid["gifts"]
 		if kid["lineage"]["parents"] == [pa["uid"], pb["uid"]]: uids += 1
-		var txt := Parentage.gift_text(kid)
-		var named := [txt.contains("kind"), txt.contains("lean"), txt.contains("Favourite food")]
-		if not named.has(false) and txt.contains(kid["parents"][g["lean"]]): words += 1
+		var named := [_trait(kid, "Kind and colour"), _trait(kid, "Lean"), _trait(kid, "Loves"), _trait(kid, "Likes")]
+		if not named.has({}) and int(named[1]["from"]) == int(g["lean"]): words += 1
+		if int(_trait(kid, "Best stat").get("from", -2)) == _best_from(kid): stats += 1
 		var src: Dictionary = pa if g["species"] == 0 else pb
 		if kid["species"] == src["species"]: kinds += 1
 		if g["lean"] == (0 if pa == a else 1): leans += 1
 	ok(uids == 20, "20 of 20 babies save both parent uids (%d)" % uids)
 	ok(kinds == 20, "the kind it hatched as is the kind the gift names (%d of 20)" % kinds)
 	ok(leans == 20, "the lean gift names the parent with the stronger lean (%d of 20)" % leans)
-	ok(words == 20, "the hatch text names the kind, the lean and the habits in words (%d of 20)" % words)
+	ok(words == 20, "the hatch card marks the kind, the lean and both habits with their parent (%d of 20)" % words)
+	ok(stats == 20, "its best inherited stat is marked with the parent it came from (%d of 20)" % stats)
 	var twin := Care.breed(_kin("cindle", "X", 8), _kin("cindle", "Y", 8), rng)
-	var both: bool = twin["gifts"]["species"] == Parentage.BOTH and Parentage.gift_text(twin).contains("both parents")
+	var twin_kind := int(_trait(twin, "Kind and colour")["from"])
+	var both: bool = twin["gifts"]["species"] == Parentage.BOTH and twin_kind == Parentage.BOTH
 	ok(both, "two of one kind give the kind together")
 	ok(not twin["gifts"].has("lean"), "no lean in either parent, no lean gift")
 	var muts := 0
 	for i in 40:
 		var kid := Care.breed(a, b, rng)
 		var got: Dictionary = kid["gifts"].get("muts", {})
-		if got.has("giant") and Parentage.gift_text(kid).contains("Giant") and got["giant"] == 0: muts += 1
+		var mt := _trait(kid, "Mutation")
+		var named_giant := String(mt.get("val", "")) == Mutations.name_of("giant")
+		if got.has("giant") and named_giant and int(mt["from"]) == 0: muts += 1
 	ok(muts > 0, "a mutation a parent carried is credited to that parent (%d of 40)" % muts)
-	ok(Parentage.gift_text(_kin("cindle", "Old", 8)) == "", "an older baby with no gifts recorded gets no text")
+	ok(not HatchParents.has_row(_kin("cindle", "Old", 8)), "an older or wild Boki with no gifts gets no parents row")
+	var rare := _kin("cindle", "Rare", 1)
+	rare["rare"] = true
+	ok(not HatchParents.has_row(rare), "a Rare Egg's Boki gets no parents row")
+	var row := HatchParents.view(Care.breed(a, b, rng), m.get_tree())
+	var dots := row.find_children("*", "Control", true, false).filter(func(c): return c is HatchParents.Dot).size()
+	var lines := row.get_child_count()
+	ok(lines >= 6 and dots >= lines + 1, "parents, then a marker per trait (%d lines, %d dots)" % [lines, dots])
+	row.free()
 	# ---- base life: a young Boki leans toward its parents
 	var home := StubHome.new()
 	var life := BaseLife.new(home)

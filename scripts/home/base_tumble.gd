@@ -1,11 +1,12 @@
 class_name BaseTumble
 extends RefCounted
 ## Tumble (briefs/design/GARDEN_MODERN.md 4.2 game 1), a duel in a ring beside the Stump Shove's stump; only with
-## farm_build.json base_mode on. Your partner meets your next rested Boki, or a garden visitor when it is alone.
+## farm_build.json base_mode on. Your partner meets your next rested Boki; with fewer than two it refuses.
 ## Each exchange the rival shows a tell ("probably Rush"), your Boki shows what it wants, and you pick Rush (Power),
-## Brace (Guard) or Dodge (Speed) with 1, 2, 3 or a click; Rush beats Dodge beats Brace beats Rush. Then one press
-## on the drill bar as they meet. The winner pushes the loser back a step, two on a big lead; out of the ring, or
-## further back after five, loses. Focus makes the tells you see more honest; following your Boki pushes harder.
+## Brace (Guard) or Dodge (Speed) with the belt keys (1, 2, 3) or a click; Rush beats Dodge beats Brace beats Rush.
+## Then one press on the drill bar as they meet. The winner pushes the loser back a step, two on a big lead; out of
+## the ring, or further back after five, loses. Focus makes the tells you see more honest; following your Boki
+## pushes harder. The first bout opens with a practice exchange (tumble_teach.gd).
 ## Tuning: content/rules/base_tumble.json. Run is the bout itself (no nodes), so --tumble-check runs it headless.
 
 static func rules() -> Dictionary:
@@ -141,11 +142,9 @@ class Run:
 					_tell()
 			"result": state = "done"
 
-	## Side i's push for a stat this exchange: base plus the stat, times the type edge, the press and following.
+	## Side i's push for a stat this exchange: base plus the stat, times the press and following.
 	func push(i: int, s: String, press_grade: String) -> float:
 		var p := (float(R["base"]) + BaseTumble.stat(recs[i], s)) * float(R["press"][press_grade])
-		if BaseShove.has_edge(recs[i], recs[1 - i]):
-			p *= float(R["edge"])
 		if i == 0 and pick == want:
 			p *= float(R["follow"])
 		return p
@@ -220,6 +219,8 @@ var score_lbl: Label = null
 var buttons: Array = []
 var card: Control = null
 var card_t := 0.0
+var teach: TumbleTeach = null  # the first-time practice exchange while it runs (tumble_teach.gd)
+var cue: GardenCues.TumbleTellCue = null   # the rival's tell over its head while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -258,46 +259,49 @@ func label() -> String:
 	return "Start a Tumble (%s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
-	var ks: Array = h.hrace.entrants()
-	if ks.is_empty():
-		h._toast("Tumble needs a rested Boki out on the base")
+	if run != null or not is_instance_valid(ring):
 		return
-	pair = [ks[0], ks[1] if ks.size() >= 2 else _visitor(ks[0]["rec"])]
+	var ks: Array = h.hrace.entrants()
+	if ks.size() < 2:
+		h._toast("Tumble needs two rested Boki out on the base")
+		return
+	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
+	if TumbleTeach.due():
+		TumbleTeach.mark()
+		teach = TumbleTeach.new()
+		teach.open(h.root_ui, _skip_teach)
+	_start()
+
+## A run for the pair: the practice exchange while the teach is open, else the bout.
+func _start() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
-	run.visitor = ks.size() < 2
+	if teach != null:
+		run.R = TumbleTeach.rules()
+	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
 	_place_pair(0.0)
 	GardenSfx.countdown(h, ring.position)
 
-## A garden visitor of a random species, its stats near yours; a temporary entry, never saved.
-func _visitor(mine: Dictionary) -> Dictionary:
-	var kinds: Array = Data.common_kin()
-	var rec := Save.new_kin(kinds[randi() % kinds.size()])
-	rec["level"] = int(mine.get("level", 1))
-	var spread := int(rules()["visitor_spread"])
-	for s in rec["stats"]:
-		rec["stats"][s] = clampi(int(stat(mine, s)) + randi_range(-spread, spread), 0, 100)
-	var n := Models.kin(rec["species"], rec)
-	h.add_child(n)
-	return {"rec": rec, "node": n, "pos": ring.position, "visitor": true}
-
 ## A key or press: true when the bout took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
 		return false
 	if event.is_action_pressed("menu"):
-		_end(false)
+		if teach != null:
+			_skip_teach()
+		else:
+			_end(false)
 		return true
-	var key := event as InputEventKey
-	if key != null and key.pressed and not key.echo and key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_3:
-		_choose(int(key.physical_keycode - KEY_1))
-		return true
+	for i in rules()["moves"].size():
+		if event.is_action_pressed("util%d" % (i + 1)):
+			_choose(i)
+			return true
 	if not TimingBar.is_press(event) or run.state != "resolve" or bar == null:
 		return false
 	if run.grade != "":
@@ -325,6 +329,7 @@ func tick(d: float) -> void:
 	if run.state == "resolve" and bar != null and run.grade == "":
 		bar.step(d)
 	_place_pair(d)
+	cue.step(pair[1]["pos"], pair[0]["pos"], d)
 	if run.over():
 		_end(true)
 
@@ -332,10 +337,12 @@ func tick(d: float) -> void:
 func _enter(s: String) -> void:
 	seen = s
 	var moves: Dictionary = rules()["moves"]
+	cue.hide_tell()
 	match s:
 		"intro":
 			_sync_panel()
 		"tell":
+			cue.show_tell(run.tell, run.honest(0))
 			_clips("", run.tell)
 			_sync_panel()
 		"pick":
@@ -343,6 +350,8 @@ func _enter(s: String) -> void:
 		"resolve":
 			bar = TimingBar.new()
 			bar.open(h.root_ui, "Press %s with the marker in the gold for a clean hit" % Settings.key_cap("interact"))
+			if teach != null:
+				bar.speed = float(rules()["teach"]["bar_speed"])
 			bar.lbl.text = "%s goes for a %s!" % [run.recs[0]["name"], moves[run.pick]["name"]]
 			_clips(run.pick, run.plan)
 			_sync_panel()
@@ -357,6 +366,8 @@ func _enter(s: String) -> void:
 			_clips("", "")
 			if run.out():
 				GardenSfx.cue("tumble_ringout", pair[1 - run.winner()]["pos"])
+	if teach != null:
+		teach.sync(run)
 
 ## Rig clips for the two moves ("" for none): Rush lunges, Dodge hops, Brace holds the guard pose.
 func _clips(mine: String, theirs: String) -> void:
@@ -404,7 +415,8 @@ func _open_panel() -> void:
 	var moves: Dictionary = rules()["moves"]
 	for i in moves.size():
 		var m: String = moves.keys()[i]
-		var b := UI.button("%d %s (%s %d)" % [i + 1, moves[m]["name"], String(moves[m]["stat"]).capitalize(),
+		var b := UI.button("%s %s (%s %d)" % [TumbleTeach.pick_key(i), moves[m]["name"],
+				String(moves[m]["stat"]).capitalize(),
 				int(stat(run.recs[0], String(moves[m]["stat"])))], _choose.bind(i))
 		buttons.append(b)
 		row.add_child(b)
@@ -428,7 +440,7 @@ func _sync_panel() -> void:
 	want_lbl.text = "%s wants to %s" % [mine, moves[run.want]["name"]]
 	var ahead := mine if run.pos > 0.0 else theirs
 	var lead := "level" if run.pos == 0.0 else "%s %.1f steps up" % [ahead, absf(run.pos)]
-	var n := int(rules()["exchanges"])
+	var n := int(run.R["exchanges"])
 	score_lbl.text = "Exchange %d of %d, %s" % [mini(run.played + 1, n), n, lead]
 
 func _close_bar() -> void:
@@ -436,17 +448,27 @@ func _close_bar() -> void:
 		bar.close()
 	bar = null
 
+## Ends the practice exchange (done or skipped) and starts the bout with the same pair.
+func _skip_teach() -> void:
+	if teach == null:
+		return
+	teach.close()
+	teach = null
+	_clear()
+	_start()
+
 func _end(finished: bool) -> void:
+	if teach != null:
+		_skip_teach()
+		return
+	var before := GameResultCard.snap([run.recs[0]] if run.visitor else run.recs)
 	var res := settle(run) if finished else {}
-	_clips("", "")
-	_close_bar()
-	if is_instance_valid(panel):
-		panel.queue_free()
+	_clear()
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	if finished:
-		_card(res)
+		_card(res, before)
 		var wi := run.winner()
 		GardenSfx.fanfare(h, pair[wi], pair[1 - wi])
 		for i in 2:
@@ -458,16 +480,19 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+## Clears the screen of a run: rig clips, the drill bar, the rival's tell cue and the panel.
+func _clear() -> void:
+	_clips("", "")
+	_close_bar()
+	if cue != null:
+		cue.clear()
+		cue = null
+	if is_instance_valid(panel):
+		panel.queue_free()
+
+func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
-		card.queue_free()
-	var how := "out of the ring" if run.out() else "back after %d exchanges" % run.played
-	card = BaseRace.result_card(h, [
-		["%s wins the Tumble!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is pushed %s" % [lose["name"], how], 14, UI.INK],
-		["%s went with what it wanted %d of %d times (+trust)" % [run.recs[0]["name"], run.follows, run.played],
-				14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+		card.free()     # now, so the new card keeps the name GameResultCard (the practice's card may still show)
+	card = GameResultCard.open(h, {"game": "Tumble", "before": before, "prize": [["+%d gems" % res["gems"], UI.GOLD]],
+			"place": "%s wins, %s" % [res["win"]["name"], "out of the ring" if run.out() else "on points"]})
 	card_t = float(rules()["card_s"])

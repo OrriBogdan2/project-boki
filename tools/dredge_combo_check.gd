@@ -1,9 +1,12 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
-## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
-## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
-## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
-## Brass Broadside (tools/dredge_ult_check.gd).
+## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Deep Reach
+## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Anchor Drop,
+## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
+## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
+
+## s from Brute Dash's arrival to aiming and walking (briefs/hero-ref/dredge.md:306, 493.32 -> 493.6 s)
+const SRC_RECOVER_S := 0.28
 
 var main: Node
 var fails := 0
@@ -26,16 +29,19 @@ func run(main_node: Node) -> void:
 	await _glide_wins()
 	await _parity_gun()
 	await load("res://tools/dredge_gun_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_gun_range_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Taps the Abyssal Hand and steps through the coil-back and the flight (it grabs, misses or is stopped), then
+## Taps the Deep Reach and steps through the coil-back and the flight (it grabs, misses or is stopped), then
 ## one frame more so a reel's first frame is drawn.
 func _throw(m: Match, P: Hunter) -> void:
 	ak.tap(m, P)
@@ -139,8 +145,8 @@ func _hook_hold() -> void:
 	)
 	await ak.done(m)
 
-## Item 33: through the wind-up the slam's area fills on the ground, for everyone, and it is the exact cone
-## the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
+## Item 33: through the wind-up an outline of the slam's area shows on the ground, for everyone, and it is the
+## exact cone the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
 func _slam_tell() -> void:
 	var r: Array = ak.setup("dredge", 6.0, "", true)
 	var m: Match = r[0]
@@ -165,14 +171,18 @@ func _slam_tell() -> void:
 	ak.step(m, 0.2)
 	var tell: Dictionary = AimKit.entry(P, "e_tell")
 	var tdir: Vector2 = tell.get("dir", Vector2.ZERO)
-	var fill_mid := float(tell.get("fill", 0.0))
+	var fist: Dictionary = (HeroVfx.data("dredge")["moves"] as Dictionary)["anchor_fist"]["fx"][0]
+	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
+	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction",
+		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
 		AimKit.shown(P, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
-		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
+			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and fist_up and ak.dmg(T) == 0.0,
+		"len %.1f deg %.0f outline %s fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while K.wind > 0.03:
@@ -185,10 +195,30 @@ func _slam_tell() -> void:
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
 		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
+	# a stun in the wind-up stops the move: the tell and the falling fist go at once, and no slam
+	var V := HeroVfx.of(m)
+	V._process(1.0)             # (m.step leaves HeroVfx to the frame) the first fist has rested and faded
+	Sfx.listener = P.pos        # the camera on him, so the fist draws
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.1)
+	V._process(0.1)
+	var fists: Array = V.pools.get("fist", [])
+	var up := fists.any(func(n: Node3D) -> bool: return n.visible)
+	P.stun_t = 0.6
+	ak.step(m, 0.05)
+	V._process(0.05)
+	var left := fists.any(func(n: Node3D) -> bool: return n.visible)
+	ok(
+		"anchor tell: a stun in the wind-up takes the outline and the falling fist away, no slam",
+		up and not left and not AimKit.shown(P, "e_tell") and K.anchors == 1,
+		"fist up %s, after the stun %s (anchors %d)" % [up, left, K.anchors]
+	)
 	await ak.done(m)
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
-## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.
+## hero; each lands by the end of its 0.18 s dash and recovers no slower than the source, aiming and walking
+## 0.28 s after it arrives (briefs/hero-ref/dredge.md:306). A chained shove cuts the recovery and restarts it.
 func _dash_moves() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", false)
 	var m: Match = r[0]
@@ -213,7 +243,6 @@ func _dash_moves() -> void:
 		if hero != "dredge":
 			for mv in (viewer[hero] as Dictionary).get("dash", []):
 				others[mv] = hero
-	var gap := float(K.dash_def()["gap"])
 	var fits := true
 	for mv in [ground_move, air_move]:
 		var keys: Array = KMovesPair.MOVES.get(mv, {"keys": [[99.0, {}]]})["keys"]
@@ -222,7 +251,7 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + SRC_RECOVER_S
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
@@ -401,14 +430,13 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
 	var wear := []
 	var armor0: float = T.armor
@@ -435,12 +463,12 @@ func _all() -> void:
 		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
 		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
 	)
-	# --- Abyssal Hand reels a foe in
+	# --- Deep Reach reels a foe in
 	reset.call()
 	_throw(m, P)
 	var d0 := P.flat_dist(T)
 	ok(
-		"abyssal hand: hooks the first foe, reel begins",
+		"deep reach: hooks the first foe, reel begins",
 		K.grapples == 1 and not K.pull.is_empty() and ak.dmg(T) >= 5.0 and float(K.cd["rmb"]) > 8.0,
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
@@ -449,13 +477,18 @@ func _all() -> void:
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
-	ok("reel: the stretched arm is drawn (through rocks)", K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
+	ok(
+		"reel: his own arm reaches to the foe (the model's reach tip on it)",
+		reach_to.distance_to(T.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, T.pos]
+	)
+	ok("reel: in the open no through-rock silhouette is drawn", not K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	ak.tap(m, P)
-	ok("reel: a second Abyssal Hand is denied", K.grapples == 1)
+	ok("reel: a second Deep Reach is denied", K.grapples == 1)
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	ok("reel: E is denied while reeling", K.anchors == 0 and K.wind <= 0.0)
@@ -474,7 +507,7 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"abyssal hand: foe arrives at your feet and does not land Grounded",
+		"deep reach: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
@@ -497,9 +530,9 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage, stun, Grounded",
-		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
+		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (no Ground in the source)",
+		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
 	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
@@ -533,6 +566,7 @@ func _all() -> void:
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
 		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
+	ok("cliff: the stretch of arm inside the cliff is drawn through it", K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
 	# a cliff face in the reel's path: the foe is hauled over it
@@ -556,7 +590,7 @@ func _all() -> void:
 	var gw0 := K.grapples
 	_throw(m, P)
 	ok(
-		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		"placed wall: stops the Deep Reach, no hook and no damage behind it",
 		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
 		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
 	)
@@ -767,7 +801,8 @@ func _all() -> void:
 		half_d > one * 0.3 and half_d < one * 0.8 and absf(ground_d - one) < 0.6 and dash_t < 0.25,
 		"at %.2fs %.1f, settled %.1f of %.1f" % [dash_t * 0.5, half_d, ground_d, one]
 	)
-	# a run of barges: three charges, a short gap between them
+	# a run of barges: three charges, a short gap between them; a press inside a shove is held, never dropped,
+	# and goes by itself the step the gap ends
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
@@ -775,16 +810,15 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.05)
 	P.ak.on_dash(false)
-	var in_gap := charges0 - P.dashes
+	var held := charges0 - P.dashes
 	ak.step(m, dash_t + float(K.dash_def()["gap"]))
-	P.ak.on_dash(false)
-	ak.step(m, dash_t + float(K.dash_def()["gap"]))
+	var went_on := charges0 - P.dashes
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
 	ok(
-		"barge: three in a row, a short gap between (a press inside the gap does nothing)",
-		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
-		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
+		"barge: three in a row, a short gap between (a press inside a shove waits for the gap's end, then goes)",
+		absf(held - 1.0) < 0.1 and absf(went_on - 2.0) < 0.1 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
+		"spent while held %.1f, after the gap %.1f, left %.2f went %.1f" % [held, went_on, P.dashes, P.pos.x - home.x]
 	)
 	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
 	reset.call()
@@ -887,13 +921,13 @@ func _all() -> void:
 		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
-	# --- rank 3: the Abyssal Hand refunds on a hit, pellet hits trim the barge recharge
+	# --- rank 3: the Deep Reach refunds on a hit, pellet hits trim the barge recharge
 	reset.call()
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
 	_throw(m, P)
 	ok(
-		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
+		"deep reach rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0

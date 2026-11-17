@@ -70,13 +70,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
-| LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
-| RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
-| E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
-| Hunter ultimate: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe. |
-| Weapon: Longbow | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
+| Passive: Hawk Sense | Rivals under half health show through cover. |
+| Dash: Spirit Walk | Roll, then 2.8s walking through rocks, trees and barriers. |
+| RMB: Heavy Shot | Hold, release: a heavy arrow that knocks back and pins to walls. |
+| E: Hail Wall | Rain arrows on a wall at the cursor: damage, slow, anti-heal burn. |
+| Hunter ultimate: Starpiercer | Your next 3 shots skip the draw and pierce; the third finishes. |
+| Weapon: Longbow | Hold to draw; release on the flash for a faster next draw. |
 
 ### Abilities in full
 
@@ -88,9 +87,9 @@ What the in-game kit card (K) says.
 
 - *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 8 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
-**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 
-**Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.5s and looses a big arrow to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
+**Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
 ### Ranks
 

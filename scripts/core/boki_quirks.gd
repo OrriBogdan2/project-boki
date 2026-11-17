@@ -6,6 +6,7 @@ extends RefCounted
 ## whether it senses rain coming. A species with no entry behaves like any other Boki.
 
 const PATH := "res://content/rules/boki_quirks.json"
+const RARE_SCALE := 10000      # a rare trait's chance is drawn in 1/10000ths
 const EVEN_SHARE := 0.5      # female share for a species with no sex note: half and half
 
 static var _data := {}
@@ -47,6 +48,44 @@ static func sex_for(species: String, seed: int) -> String:
 ## Writes a new Boki's sex into its rolls (Save.new_kin, and Care.breed after it inherits).
 static func set_sex(rec: Dictionary) -> void:
 	rec["dna"]["sex"] = sex_for(String(rec["species"]), int(rec["dna"]["seed"]))
+
+## The rare trait a species can hatch with (content/rules/boki_quirks.json "rare_trait"): {} if none.
+static func rare_def(species: String) -> Dictionary:
+	return _value("rare_trait", species, {})
+
+## Its rare trait at hatch, from the egg's seed: "" or the trait id. Same seed, same answer.
+static func rare_trait_for(species: String, seed: int) -> String:
+	var def := rare_def(species)
+	if def.is_empty():
+		return ""
+	var odds := roundi(float(def["chance"]) * RARE_SCALE)
+	return String(def["id"]) if posmod(hash("%d|rare" % seed), RARE_SCALE) < odds else ""
+
+## Rolls a new Boki's rare trait into rec["rare"] ("" for none); nothing for a species with no trait.
+static func set_rare_trait(rec: Dictionary) -> void:
+	var seed: Variant = Unique.of(rec).get("seed", null)
+	if seed != null and not rare_def(String(rec["species"])).is_empty():
+		rec["rare"] = rare_trait_for(String(rec["species"]), int(seed))
+
+## Does this Boki carry that rare trait? (Evo's 'trait' branches ask.)
+static func has_trait(rec: Dictionary, id: String) -> bool:
+	return String(rec.get("rare", "")) == id
+
+## The rare trait this Boki carries, as {id, name, note} (the card's badge); {} if none.
+static func rare_of(rec: Dictionary) -> Dictionary:
+	var id := String(rec.get("rare", ""))
+	if id == "":
+		return {}
+	for def in (data().get("rare_trait", {}) as Dictionary).values():
+		if def is Dictionary and def["id"] == id:
+			return def
+	return {}
+
+## An older save's Boki of a species with a rare trait roll for it once on load (kept in the save after).
+static func migrate(save_data: Dictionary) -> void:
+	for rec in save_data.get("roster", []):
+		if typeof(rec) == TYPE_DICTIONARY and not rec.has("rare"):
+			set_rare_trait(rec)
 
 ## How much faster than usual its food need drains.
 static func food_rate(species: String) -> float:

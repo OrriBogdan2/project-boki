@@ -13,9 +13,10 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 12500
-FACE_TRIS = 2300
-HAND_TRIS = 800                   # each: the fingers are the casting read
+# The env knobs build the higher tiers (docs/art/wardens/DETAIL_PILOT.md).
+LOW_TRIS = int(os.environ.get("CINDER_LOW_TRIS", 12500))
+FACE_TRIS = int(os.environ.get("CINDER_FACE_TRIS", 2300))
+HAND_TRIS = int(os.environ.get("CINDER_HAND_TRIS", 800))      # each: the fingers are the casting read
 HORN_TRIS = 300
 SOLE = -0.951
 ANKLE = 0.13                      # the heel holds the ankle up

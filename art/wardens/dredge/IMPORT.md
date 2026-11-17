@@ -1,11 +1,15 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
-**v95 (2026-11-10):** the mesh is now the v95 master (~/meshy/v95/Grimble/v95.glb) put on this same skeleton, clips and anchors by
-tools/art1/v95_swap.py with art/wardens/src/grimble_v95.json (docs/art/wardens/V95_SWAP.md; shots in docs/shots/grimble-v95/).
+**v95 (2026-11-11):** the mesh is the v95 master with the appeal3 face and calves (~/meshy/v95/Grimble/r2/appeal3/cand_b.glb: the face
+repainted from the v2 art, with scrap-metal teeth, the gold tooth, a dark gap, purple lips and the smug squint; the calves 12% slimmer;
+pick.txt beside it) put on this same skeleton, clips and anchors by tools/art1/v95_swap.py with art/wardens/src/grimble_v95.json
+(docs/art/wardens/V95_SWAP.md; shots in docs/shots/grimble-appeal/, the first swap's in docs/shots/grimble-v95/).
 14.9k triangles, one 2048 atlas, 5 slots (skin, leather, metal, brass, glow). No extra hand: the slime arm and bone crescent on
 his right, the gauntlet on his left. What below differs: the hoard is v95's own (height_3d 1.5), the junk ball rides at its back,
 the anchor_lamp_l halo is gone (one lantern), and skin_relax runs without cuts (no holes; worst stretch 2.2x to 5.3x per clip, so the
 1.3x line in the Stretch note no longer holds). The notes below are v2's and still say how the rig, clips and kit work.
+warden_look's `closeup` {fov 36, up -0.3} aims `--warden-shots`' two head shots at his face: the hunch carries it below and ahead of
+HeadPivot, so without it they framed the hoard.
 
 `dredge.glb`: one Meshy scan of the v2 turnaround fitted to the rig (body, head, bone-hook arm, gauntlet), v1's sculpted hoard,
 bells, lanterns, blunderbuss and junk ball on top, the loupe scripted, and 40 clips keyed as targets. Budget: <= 15k triangles
@@ -24,7 +28,7 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
 - **Right arm:** the bone hook IS the arm. Everything past the right wrist rides bone `hook` (hand.R); the crescent, which curls in by his
   right shin, is split from the leg by place (a capsule round the leg's core). It reaches the ground at rest, as on the sheet (the crescent's lowest edge rides the right foot).
-  anchor_claw and anchor_hook_tip sit on its tip: the kit's abyssal arm reaches out from there. While the kit's arm is stretched out, bone `hook` shrinks away (`hide_while_chain`): the kit draws the hook at the arm's end, so anchor_claw
+  anchor_claw and anchor_hook_tip sit on its tip. The Abyssal Hand is this arm: while it is out, `WardenReach` (data `reach`) lays upper_arm.R and forearm.R on the line to the hook and stretches forearm.R, so the hand and everything on `hook` (the slime hand, the crescent) sit at the tip (owner playtest 11-11).
   collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
 - **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
@@ -42,3 +46,4 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   it blends the weights of stretched vertices toward their neighbours' (400 passes), then deletes the triangles still over 1.25x and caps the
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
+**Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".

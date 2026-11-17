@@ -30,6 +30,7 @@ var left_pad := 16.0
 var search_skip: Array = []       # tabs a search does not look into
 var hint: Label
 var page := 0
+var focus_uid := 0                # the building whose row is lit (an entry's "uid"); 0 for none
 
 var _query := ""
 var _tabs_row: HBoxContainer
@@ -84,7 +85,7 @@ func _init() -> void:
 	col.add_child(_foot)
 	hint = UI.label("", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
-	hint.clip_text = true
+	hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_foot.add_child(hint)
 	_extras_row = UI.hbox(6)
@@ -127,6 +128,7 @@ func blur() -> void:
 
 func _pick(tab: String) -> void:
 	page = 0
+	focus_uid = 0
 	pick_fn.call(tab)
 
 func _turn_page(by: int) -> void:
@@ -156,12 +158,22 @@ func _entries() -> Array:
 				out.append(e)
 	return out
 
+## Turns to the page of the open tab that holds the entry with this "uid", and lights it.
+func show_uid(uid: int) -> void:
+	focus_uid = uid
+	var at := _entries().find_custom(func(e: Dictionary) -> bool: return int(e.get("uid", 0)) == uid)
+	page = floori(maxi(0, at) / float(tiles_per_page()))
+	_fill_tiles()
+
+func tiles_per_page() -> int:
+	var width := get_viewport().get_visible_rect().size.x - left_pad - 16.0 - 28.0 - 2.0 * (NAV_W + 8.0)
+	return maxi(2, int(width / (TILE.x + 8.0)))
+
 func _fill_tiles() -> void:
 	for old in _tiles.get_children():
 		old.queue_free()
 	var entries := _entries()
-	var width := get_viewport().get_visible_rect().size.x - left_pad - 16.0 - 28.0 - 2.0 * (NAV_W + 8.0)
-	var per_page := maxi(2, int(width / (TILE.x + 8.0)))
+	var per_page := tiles_per_page()
 	var pages := maxi(1, int(ceil(entries.size() / float(per_page))))
 	page = clampi(page, 0, pages - 1)
 	_prev.disabled = page == 0
@@ -172,6 +184,17 @@ func _fill_tiles() -> void:
 	for e in entries.slice(page * per_page, page * per_page + per_page):
 		_tiles.add_child(_tile(e))
 
+## Where to point at entry `id`: its tile when it is on show and not in hand, else the tab that holds it
+## (the tutorial spotlight lights this). An empty Rect2 once it is in hand.
+func spot_rect(id: String, tab: String) -> Rect2:
+	for t in _tiles.get_children():
+		if t.get_meta("entry", "") == id and not t.is_queued_for_deletion():
+			return Rect2() if bool(t.get_meta("on", false)) else (t as Control).get_global_rect()
+	for b in _tabs_row.find_children("*", "Button", true, false):
+		if b.get_meta("tab", "") == tab and not b.is_queued_for_deletion():
+			return (b as Control).get_global_rect()
+	return Rect2()
+
 func _empty_text() -> String:
 	if _query != "":
 		return "Nothing matches \"%s\"" % _query
@@ -181,8 +204,10 @@ func _empty_text() -> String:
 
 func _tile(e: Dictionary) -> Control:
 	var cb: Callable = e["cb"]
-	var tile := UI.tile_card(bool(e.get("on", false)), cb, 5)
+	var tile := UI.tile_card(bool(e.get("on", false)) or (focus_uid > 0 and int(e.get("uid", 0)) == focus_uid), cb, 5)
 	tile.custom_minimum_size = TILE
+	tile.set_meta("entry", String(e.get("id", "")))
+	tile.set_meta("on", bool(e.get("on", false)))
 	tile.tooltip_text = String(e.get("tip", ""))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -192,7 +217,7 @@ func _tile(e: Dictionary) -> Control:
 	col.add_child(_picture(e))
 	var title := UI.label(String(e["name"]), 13, UI.INK)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.clip_text = true
+	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
 	col.add_child(title)
 	var cost: Dictionary = e.get("cost", {})
@@ -202,7 +227,7 @@ func _tile(e: Dictionary) -> Control:
 	if note != "":
 		var line := UI.label(note, 12, UI.MUTED)
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		line.clip_text = true
+		line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		line.autowrap_mode = TextServer.AUTOWRAP_OFF
 		col.add_child(line)
 	return tile

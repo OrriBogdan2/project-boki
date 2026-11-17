@@ -7,7 +7,9 @@ extends RefCounted
 ## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives; with an
 ## unminded egg in the Nook, a Boki with the Ember knack comes to the hub to mind it. Hub fixtures
 ## (step 3): each one stands and works, the games board shows this week's Dash twist and has the
-## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. Moving
+## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. One set: Bramblebank
+## builds none of the hub's house, Nook, Incubator, stall or Burrow (not an older layout's, not a classic
+## island's) and a plain goto lands in the hub once the first day's tutorial is done or skipped. Moving
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
@@ -16,14 +18,17 @@ extends RefCounted
 ## Cinderstep (step 7b): its theme, a warm stone and a climbing post, a Fire/Rock/Steel/Dragon patch,
 ## the Stump Shove stump on its own spot with no Training post, terraces and glowing cracks in batches.
 ## With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub, and
-## hub_horizon_day.png and _night.png: the hub at arrival zoom with its five zone islands, three lit, two in mist.
+## cards.png, the Waystone's cards, and hub_horizon_day.png and _night.png: the hub at arrival zoom with its
+## five zone islands, three lit, two in mist.
 ## opens its cards. Thrive (step 8): a Boki leaning toward the zone's types (or with its trait over 0.6)
 ## loses joy at half speed and trains +25% at the zone's toys; one that doesn't loses joy as before;
 ## the zone's daily trait pull stops at 0.8 (calm Glasswater pulls temper down to 0.2).
 ## opens its cards. Unlock (step 6): no Wayseed, a Wayseed but no lean, and both: only both wake the zone,
 ## the Wayseed is used up and the Boki that leaned becomes the founder (it lives there, with a memory and a
 ## journal line, and the stone lights); lairs of a matching biome hold a Wayseed only for a locked zone; the
-## trader holds one weekly Wayseed, never for an open zone.
+## trader holds one weekly Wayseed, never for an open zone. The unlock moment (ZoneReveal): the woken stone
+## lights in its colour and drops its lock once per zone per save, at the next hub if woken elsewhere; with
+## --shots-dir it also saves zone_unlock.png mid-reveal.
 ## opens its cards. Visits (step 10): your profile doc carries the hub and each open zone's layout and
 ## each Boki's zone; a visitor lands in the friend's hub and hops to their zones, seeing only that zone's
 ## Boki; an older doc stays one island; a hostile layout is cut down to what the island needs.
@@ -43,7 +48,9 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_save_part()
 	_keys_part()
+	_landing_part()
 	await _travel_part(m)
+	await _one_set_part(m)
 	await _move_part(m)
 	await _glasswater_part(m)
 	await _cinderstep_part(m)
@@ -76,13 +83,70 @@ func _keys_part() -> void:
 	ok(GardenZones.keys_for("glasswater") == {"seed": false, "lean": false}, "no keys yet")
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
+	var both := "Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals."
+	ok(ZoneCards.lock_line("glasswater") == both,
+		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
 	rec["lean"]["ice"] = float(GardenZones.rules()["lean_key"])
 	Save.d["items"][GardenZones.wayseed("glasswater")] = 1
 	ok(GardenZones.keys_for("glasswater") == {"seed": true, "lean": true},
 		"a Wayseed and a Boki leaning Ice tick both keys")
-	var lines := ZoneCards.key_lines("glasswater")
-	ok(lines.size() == 2 and "[x] A Wayseed" in lines[0] and "[x] A Boki leaning Water, Ice or Crystal" in lines[1],
-		"the card lists both keys: %s" % " / ".join(lines))
+	ok(ZoneCards.lock_line("glasswater") == "Ready to wake.", "with both keys its line says it is ready")
+	Save.d["items"].erase(GardenZones.wayseed("glasswater"))
+	ok(ZoneCards.lock_line("glasswater") == "Find its Wayseed in a run's lair or at the trader.",
+		"with the lean but no Wayseed it asks only for the Wayseed")
+
+## The first day's tutorial runs in the start zone; once it is done or skipped, a plain goto lands in the hub.
+func _landing_part() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	ok(GardenZones.landing({}) == "", "a new save lands in the start zone for its first day's tutorial")
+	FarmTutorial.skip()
+	ok(GardenZones.landing({}) == GardenZones.HUB, "with the tutorial done or skipped, home is the hub")
+	Content.rules("farm_build")["base_mode"] = false
+
+## An older start-zone layout's house, Nook, stall and Burrow: kept on the save, built only in the hub.
+func _old_fixtures() -> Array:
+	var lay: Dictionary = Save.d["layout"]
+	var out: Array = []
+	for f in HubLayout.DECO:
+		var e := {"u": HomeLayout._next_uid(lay), "id": f[0], "x": int(f[1]) - 12, "z": int(f[2]) - 6, "r": 0}
+		(lay["deco"] as Array).append(e)
+		out.append(e)
+	return out
+
+## A new save's Bramblebank (a farm-start island, where the first day's tutorial runs) builds none of the hub's
+## fixtures (HubLayout.holds), not even an older layout's, and build mode offers none: the one Nook, Incubator
+## and egg are the hub's.
+func _one_set_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	Save.d["roster"] = [Save.new_kin("zapple", "Pip")]
+	Save.d["active"] = Save.d["roster"][0]["uid"]
+	HomeLayout.ensure(Save.d)
+	var old := _old_fixtures()
+	Game.goto("home", {"zone": GardenZones.start()})
+	var bb = await _arrived(m, Game.main.current)
+	ok(bb != null and HomeLayout.fs(Save.d), "a new save's Bramblebank loads")
+	if bb != null:
+		_start_zone_part(bb, old)
+	_new_save()
+	ok(not HomeLayout.fs(Save.d), "a classic island (a save from before the farm-start update)")
+	Game.goto("home", {"zone": GardenZones.start()})
+	bb = await _arrived(m, bb)
+	ok(bb != null and bb.house_node == null and bb.burrow_node == null and bb.spots["house"].x < -100.0
+		and bb.spots["stall"].x < -100.0 and bb.NEST_AT.x < -100.0, "a classic island builds none of them either")
+	Content.rules("farm_build")["base_mode"] = false
+	ok(not ClassicSet.held(bb), "with the garden off a classic island keeps its own")
+
+func _start_zone_part(bb, old: Array) -> void:
+	ok(old.all(func(e): return (Save.d["layout"]["deco"] as Array).has(e)), "an older layout keeps its entries")
+	ok(not old.any(func(e): return bb.hb.nodes.has(int(e["u"]))), "Bramblebank builds none of them")
+	ok(bb.house_node == null and bb.burrow_node == null and bb.spots["stall"].x < -100.0, "no house, Burrow or stall")
+	ok(bb.NEST_AT.x < -100.0 and not bb.hinc.node.visible, "no Nook or Incubator: the egg shows only in the hub")
+	(Save.d["layout"]["deco"] as Array).erase(old.filter(func(e): return e["id"] == "market_stall")[0])
+	ok(not HomeStall.ensure(bb) and HomeLayout.count_of("market_stall", Save.d) == 0, "no stall is set down there")
+	var ids: Array = bb.hb.entries.tab("Buildings").map(func(e): return String(e.get("id", "")))
+	ok(not HubLayout.DECO.any(func(f): return ids.has(f[0])), "build mode offers none of them there")
 
 func _new_save() -> void:
 	var d := Save.fresh()
@@ -143,8 +207,7 @@ func _travel_part(m: Node) -> void:
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
-	var lines := ZoneCards.key_lines("glasswater")
-	ok(lines.size() == 2 and "Wayseed" in lines[0] and "leaning" in lines[1], "its card lists both keys")
+	await _cards_part(m, hub)
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
@@ -170,6 +233,33 @@ func _travel_part(m: Node) -> void:
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+## The Waystone's cards (open in the hub): Bramblebank shows its colour band, a picture with a mood face
+## for each of its Boki (six at most), its game and your best at it; locked Glasswater is grey with one line.
+func _cards_part(m: Node, hub) -> void:
+	var row: Node = hub.panel_host.find_child("Cards", true, false)
+	var bb: Node = row.get_child(0)
+	var faces := bb.find_children("Mood", "", true, false)
+	var band: ColorRect = bb.find_child("Band", true, false)
+	var colour := Color(String(GardenZones.info("bramblebank")["colour"]))
+	ok(band != null and band.color == colour, "Bramblebank's card has its colour band")
+	ok(faces.size() == mini(GardenZones.residents("bramblebank").size(), ZoneCards.FACES) and faces.size() > 0,
+		"Bramblebank's card shows %d Boki, each with a mood face" % faces.size())
+	ok(faces.all(func(f): return ["happy", "content", "sulky"].has(f.id)), "each face is happy, content or sulky")
+	var text := _texts(bb)
+	ok("Today: The Dash" in text and "Not played yet" in text, "it names its game and that you have no best yet")
+	MinigameHub.record("race", "Pip")
+	ok(_card_texts("bramblebank").has("Your best: Pip"), "after a win it names your best Boki")
+	var gw: Node = row.get_child(1)
+	var hint := String(HubFirstVisit.rules()["line_text"])      # main's first-visit hint rides on top of the one line
+	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
+	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
+		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
+	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
+
+## The text lines on an open zone's card.
+func _card_texts(id: String) -> Array:
+	return ZoneCards._open_lines(id, null).filter(func(l): return l is Label).map(func(l): return l.text)
 
 ## The hub's fixtures: each one is there and E works at it; build mode there offers only the Garden tab.
 func _fixtures_part(hub) -> void:
@@ -215,6 +305,7 @@ func _move_part(m: Node) -> void:
 	ok(bb != null and bb.life != null, "Bramblebank loads with base life")
 	if bb == null or bb.life == null:
 		return
+	_nap_spots_row(bb, "Bramblebank")
 	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
 	var rec: Dictionary = k["rec"]
 	ZoneCards.move_to(bb, k)
@@ -364,7 +455,7 @@ func _glasswater_part(m: Node) -> void:
 		"its layout stands in while it is open; the save's own layout stays Bramblebank's")
 	ok(gw.toys.toys().any(func(t): return t["id"] == "toy_tub"),
 		"the splash tub stands in it")
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var types: Array = GardenZones.info("glasswater")["types"]
 	ok(snacks.size() == 3 and snacks.all(func(f): return types.has(Content.rules("lean")["foods"][f])),
 		"its patch grows Water, Ice and Crystal snacks (%s)" % ", ".join(snacks))
@@ -377,6 +468,7 @@ func _glasswater_part(m: Node) -> void:
 	ok(gw.hway.node != null and gw.player.position.distance_to(gw.hway.node.position) < 0.5,
 		"you arrive on its return pad")
 	ok(not gw.hb.can_build(), "build mode is off in the zone")
+	_nap_spots_row(gw, "Glasswater")
 	var batches: Array = gw.find_children("*", "MultiMeshInstance3D", false, false)
 	var mats := {}
 	var n := 0
@@ -393,6 +485,21 @@ func _glasswater_part(m: Node) -> void:
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
 	Content.rules("farm_build")["base_mode"] = false
 
+## Every nap spot of the open zone is a free place a Boki of it can walk to (BaseLife._free_spot).
+func _nap_spots_row(home, zone: String) -> void:
+	var k: Dictionary = home.kins[0]
+	var spots := BaseLife.nap_spots()
+	var found := {}
+	for i in spots.size():
+		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
+		k["pos"] = home.world.free_spot_near(tile, [], 0.8, 0.45, 5.0)       # stands near the spot, on its island
+		var spot: Dictionary = home.life._free_spot(k, {})
+		if not spot.is_empty():
+			found[int(spot["i"])] = true
+	ok(spots.size() >= 3 and found.size() == spots.size(),
+		"%s: its %d nap spots (%s) are open ground (%d found)" % [zone, spots.size(),
+			", ".join(spots.map(func(s): return s[0])), found.size()])
+
 func _cinderstep_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	_new_save()
@@ -403,9 +510,10 @@ func _cinderstep_part(m: Node) -> void:
 	if cs == null or cs.hshove == null:
 		return
 	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
+	_nap_spots_row(cs, "Cinderstep")
 	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
 	ok(ids.has("toy_stone") and ids.has("toy_post"), "a warm stone and a climbing post (%s)" % ", ".join(ids))
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var grown := {}
 	for f in snacks:
 		grown[Content.rules("lean")["foods"][f]] = true
@@ -446,7 +554,7 @@ func _thrive_part() -> void:
 	for i in 2:
 		var r: Dictionary = [rec, other][i]
 		r["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 90.0}
-		Care.tick(r, 600.0)
+		Care.tick(r, 60.0 * 30.0 / Care.joy_decay())      # a 30-point fall at the usual pace, clear of the sulky floor
 		lost[i] = 90.0 - Care.need(r, "joy")
 	ok(lost[1] > 0.0 and is_equal_approx(lost[0], lost[1] * float(T["joy_rate"])),
 		"thriving joy falls at %.1fx (%.1f vs %.1f)" % [float(T["joy_rate"]), lost[0], lost[1]])
@@ -505,7 +613,7 @@ func _unlock_part(m: Node) -> void:
 	var ash: Dictionary = Save.d["roster"][1]
 	var key := float(GardenZones.rules()["lean_key"])
 	var stone: Node = hub.hway.node.get_node("Stone2")
-	var marks: bool = hub.hway.node.has_node("Key2_0") and hub.hway.node.has_node("Key2_1")
+	var marks: bool = hub.hway.node.has_node("Lock2/Key0") and hub.hway.node.has_node("Lock2/Key1")
 	ok(not stone.get_meta("open") and marks, "the locked Cinderstep stone shows its two keys")
 	ok(not GardenZones.attune("cinderstep")["ok"], "no Wayseed and no lean: Cinderstep stays asleep")
 	ash["lean"] = {"fire": key}
@@ -523,11 +631,41 @@ func _unlock_part(m: Node) -> void:
 	ok(ash["memory"].any(func(e): return "the day I woke Cinderstep" in String(e["text"])), "it remembers the day")
 	ok(ash["journal"].any(func(e): return CareJournal.text(e) == "woke Cinderstep"), "its journal says so")
 	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
+	await _reveal_part(m, hub)
 	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
-	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
-	ok(lines.has("Woken by Ash"), "its card names the founder")
+	ok(_card_texts("cinderstep").has("Woken by Ash"), "its card names the founder")
 	_lair_and_trader_part()
 	Content.rules("farm_build")["base_mode"] = false
+
+## The unlock moment (ZoneReveal): the woken stone starts dark with its lock look on, lights in its zone's
+## colour, drops the lock and pops its cap; once per zone per save. A zone woken away from the hub is shown
+## the next time the hub builds its Waystone.
+func _reveal_part(m: Node, hub) -> void:
+	var way: Node3D = hub.hway.node
+	var cap: Node3D = way.get_node("Cap2")
+	var mat: ShaderMaterial = way.get_node("Stone2").material_override
+	var col := Color(String(GardenZones.info("cinderstep")["colour"]))
+	ok(not ZoneReveal.owed("cinderstep") and way.has_node("Lock2") and cap.scale == Vector3.ZERO
+		and mat.get_shader_parameter("albedo") == Color(FarmModels.STONE_DARK),
+		"the woken stone starts dark with its lock on, the reveal is spent on the save")
+	await _hub_shot(m, hub, "zone_unlock.png", 0.8)
+	var all_s := ZoneReveal.WAIT_S + ZoneReveal.LIGHT_S + ZoneReveal.CAP_S + 0.3
+	await m.get_tree().create_timer(all_s).timeout
+	ok(not way.has_node("Lock2") and cap.scale.is_equal_approx(Vector3.ONE)
+		and (mat.get_shader_parameter("albedo") as Color).is_equal_approx(col),
+		"then it lights in Cinderstep's colour, the lock gone, the cap on")
+	GardenZones.wake("ridge")
+	ok(ZoneReveal.owed("ridge"), "a zone woken away from the hub waits for it")
+	way.free()
+	hub.hway.place()
+	way = hub.hway.node
+	var ridge := GardenZones.ids().find("ridge")
+	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and way.get_node("Cap2").scale == Vector3.ONE,
+		"the next hub plays it for that zone only")
+	way.free()
+	hub.hway.place()
+	ok(not hub.hway.node.has_node("Lock%d" % ridge), "and never again")
+	Save.d["zones"].erase("ridge")      # the parts after this expect Kitewind Ridge asleep
 
 func _lair_and_trader_part() -> void:
 	ok(GardenZones.seed_zone_for("ember") == "" and GardenZones.seed_zone_for("frost") == "glasswater"
@@ -603,4 +741,8 @@ func _visit_part(m: Node) -> void:
 	var zone = await _arrived(m, hub)
 	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
 		"and finds only Ash there, still a visit")
+	var egg := Incubator.add(String(Data.common_kin()[0]))
+	for _f in 20: await m.get_tree().process_frame
+	ok(zone != null and zone.hinc == null and float(Incubator.find(String(egg["id"])).get("heat", 0.0)) > 0.0,
+		"your own Rare Egg keeps warming while you visit (play time; decision 0080)")
 	Content.rules("farm_build")["base_mode"] = false

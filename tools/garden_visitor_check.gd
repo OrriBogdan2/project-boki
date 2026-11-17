@@ -5,6 +5,9 @@ extends RefCounted
 ## visitor comes, only one at a time, it is in the zone's kins and the Dash lineup, it is saved and
 ## reloaded as it was, and it stays one garden day then goes home (one away card line, then a wait).
 ## Three favourite meals make it ask to stay as a new Boki when the zone has room, else leave an egg.
+## The first visitor on a save is led to by your partner with one tip (VisitorIntro), once.
+## Sounds: garden_visit_in once as it comes, garden_visit_out once as it goes from the farm (not when the
+## stay ran out while you were away, nor when it joins).
 ## Never touches the real save.
 
 const DT := 0.25             # s of farm time per step
@@ -95,19 +98,27 @@ func _step(secs: float, until := Callable()) -> void:
 		if int(t / DT) % 400 == 0:
 			await main.get_tree().process_frame
 
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
 func _wild() -> Array:
 	return home.kins.filter(func(k): return k["rec"].has("visitor"))
 
 func _stay_part() -> void:
 	ok(GardenVisitor.rec().is_empty(), "no visitor to begin with")
+	var came := _heard("garden_visit_in")
+	var went := _heard("garden_visit_out")
 	await _step(COME_S, func(): return not GardenVisitor.rec().is_empty())
 	var r := GardenVisitor.rec()
 	ok(not r.is_empty() and _wild().size() == 1, "a visitor wandered into Bramblebank")
+	ok(_heard("garden_visit_in") == came + 1, "it chirps garden_visit_in once as it comes")
 	ok(GardenVisitor.suits("bramblebank", String(r.get("species", "")), ["toy_dig"]),
 		"the one that came suits the zone")
+	await _intro_part()
 	await _step(60.0)
 	ok(_wild().size() == 1 and GardenVisitor.rec() == r, "only one visitor at a time")
 	var k: Dictionary = _wild()[0]
+	await _arrive_part(k)
 	k["rec"]["needs"]["energy"] = 100.0
 	ok(home.hrace.entrants().has(k), "it is in the Dash lineup as one more Boki")
 	var lines := CareJournal.arrival()
@@ -116,6 +127,7 @@ func _stay_part() -> void:
 	Save.d["visitor"]["t"] = float(Save.d["visitor"]["t"]) - DAY_S
 	await _step(10.0, func(): return GardenVisitor.rec().is_empty())
 	ok(GardenVisitor.rec().is_empty() and _wild().is_empty(), "after one garden day it went home")
+	ok(_heard("garden_visit_out") == went + 1, "it says goodbye (garden_visit_out) once as it goes")
 	ok(CareJournal.arrival().any(func(l): return "went home" in l), "the away card says it left")
 	var next := float(Save.d["visitor"]["next"])
 	await _step(60.0)
@@ -123,12 +135,56 @@ func _stay_part() -> void:
 	Save.d["visitor"]["next"] = 0.0
 	await _step(COME_S, func(): return not GardenVisitor.rec().is_empty())
 	ok(not GardenVisitor.rec().is_empty() and next > 0.0, "then another can come")
+	ok(not Save.d["visitor"].has("lead"), "a later visitor gets no lead: once per save")
 	Save.d["visitor"]["t"] = float(Save.d["visitor"]["t"]) - DAY_S
+	went = _heard("garden_visit_out")
 	var away := CareJournal.arrival()      # you were away over the day
 	ok(GardenVisitor.rec().is_empty() and away.any(func(l): return "went home" in l),
 		"a stay that ran out while you were away is told on arrival")
+	ok(_heard("garden_visit_out") == went, "and makes no goodbye sound")
 	Save.d["visitor"]["next"] = 0.0
 	home._spawn_kin()      # the zone loads again: its visitor is not there
+
+## The first visitor on a save: the partner leads to it and one tip names it, once; a later one gets neither.
+func _intro_part() -> void:
+	var wild: Dictionary = _wild()[0]
+	var mine: Dictionary = home.kins.filter(func(k): return k["rec"] == Save.active_kin())[0]
+	ok(Save.d["tutorial"].get("visitor_intro", false) and Save.d["visitor"].has("lead"), "the first visitor starts it")
+	var leading := func(): return (mine["life"] as Fsm).is_in(BaseLife.S.LEAD)
+	var behind := func():      # you stay just behind it and the visitor stands off (it first looks at the newcomer)
+		home.ppos = mine["pos"] + Vector3(-2, 0, 0)
+		wild["pos"] = mine["pos"] + Vector3(9, 0, 0)
+		return leading.call()
+	await _step(40.0, behind)
+	ok(leading.call(), "your partner leads to it")
+	var gap: float = (wild["pos"] - mine["pos"]).length()
+	await _step(4.0)
+	ok((wild["pos"] - mine["pos"]).length() < gap or gap < 3.0, "it runs to the visitor")
+	home.ppos = wild["pos"] + Vector3(1, 0, 0)
+	await _step(1.0)
+	ok(VisitorIntro.lead_at(home, mine).x == INF, "the lead ends when you come over")
+	home.ppos = Vector3(-500, 0, -500)
+
+## Its arrival reads: flat footprints (no rings) that fade in over fade_in_s, and a type-coloured shimmer on it for
+## its first shimmer_s only.
+func _arrive_part(k: Dictionary) -> void:
+	var a: Dictionary = Content.rules("garden_visitor")["arrive"]
+	var prints: Array = []
+	for c in home.get_children():
+		var first = c.get_child(0) if c.get_child_count() > 0 else null
+		if first is MeshInstance3D and (first as MeshInstance3D).mesh is SphereMesh:
+			prints = c.get_children()
+	ok(not prints.is_empty() and prints.size() <= int(a["prints"]), "footprints were laid (%d)" % prints.size())
+	ok(prints.all(func(p): return p.scale.y < 0.2 and p.scale.x < 2.0), "the prints are flat, not rings")
+	var mat: StandardMaterial3D = (prints[0] as MeshInstance3D).mesh.material
+	ok(mat.albedo_color.a < float(a["alpha"]), "they start faint and fade in")
+	await main.get_tree().create_timer(float(a["fade_in_s"]) + 0.3).timeout
+	ok(is_equal_approx(mat.albedo_color.a, float(a["alpha"])), "they are in after fade_in_s")
+	var before: int = home.fx.radial
+	VisitorArrive.shimmer(home, k, k["rec"], 0.0)
+	ok(home.fx.radial == before + 1, "it shimmers on arrival")
+	VisitorArrive.shimmer(home, k, k["rec"], float(a["shimmer_s"]) + 0.01)
+	ok(home.fx.radial == before + 1, "and stops after shimmer_s")
 
 ## Feeds the visitor its favourite three times, as the feed list does.
 func _feed_three() -> void:
@@ -153,8 +209,10 @@ func _join_part() -> void:
 	var dup := KinBox.dup_on_farm(r)
 	ok(not r.is_empty() and GardenZones.room("bramblebank") > 0, "a visitor with room in the zone")
 	ok(String(r["likes"]["food"]) != "" and r["known"].has("food"), "its favourite is shown in the feed list")
+	var went := _heard("garden_visit_out")
 	await _feed_three()
 	await _step(OUT_S, func(): return GardenVisitor.rec().is_empty())
+	ok(_heard("garden_visit_out") == went, "asking to stay is no goodbye")
 	var joined := Save.kin(uid)
 	ok(not joined.is_empty() and Save.d["roster"].size() == roster + 1 and not joined.has("visitor"),
 		"it asked to stay and is a new Boki")
@@ -175,8 +233,10 @@ func _egg_part() -> void:
 	var sp := String(r.get("species", ""))
 	var roster: int = Save.d["roster"].size()
 	var eggs: int = Incubator.count()
+	var went := _heard("garden_visit_out")
 	await _feed_three()
 	await _step(OUT_S, func(): return GardenVisitor.rec().is_empty())
+	ok(_heard("garden_visit_out") == went + 1, "leaving its egg, it says goodbye once")
 	ok(GardenVisitor.rec().is_empty() and _wild().is_empty() and Save.d["roster"].size() == roster,
 		"with no room it left and did not join")
 	var egg: Dictionary = (Incubator.shelf() + Incubator.eggs()).back() if Incubator.count() > eggs else {}
@@ -185,3 +245,8 @@ func _egg_part() -> void:
 	var from: Dictionary = egg.get("visitor", {})
 	var told: bool = from.get("sp") == sp and from.get("zone") == "bramblebank" and int(from.get("day", 0)) >= 1
 	ok(told, "the egg remembers who, where and which day")
+	if home.hinc != null:
+		var flashes: int = home.fx.flashes.size()
+		home.hinc.refresh()
+		VisitorArrive.glint(home.hinc, 99.0)
+		ok(home.fx.flashes.size() > flashes, "the egg glints in the Incubator")

@@ -27,7 +27,6 @@ const CATS := {
 	"hunter": [90, 10.0, "threat"],
 	"low_hp": [85, 22.0, "care"],
 	"collapse": [84, 50.0, "path"],
-	"cover": [75, 25.0, "care"],
 	"boss": [70, 45.0, "threat"],
 	"egg": [66, 30.0, "find"],
 	"pack": [60, 18.0, "threat"],
@@ -45,7 +44,7 @@ const LABELS := {"behind": "Behind you!", "sniper": "Sniper", "hunter": "Hunter"
 	"egg": "Rare Egg", "loot": "Loot", "wild": "Wild Boki", "exit": "Way out", "collapse": "Way out"}
 ## What its body does for each callout (KinPuppet reads the pose).
 const POSES := {"behind": "growl", "sniper": "alert", "hunter": "growl", "pack": "growl", "boss": "alert", "egg": "point",
-	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "cover": "guard", "goad": "cheer"}
+	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "goad": "cheer"}
 
 var k: Kin
 var m
@@ -290,8 +289,6 @@ func _best_callout() -> Dictionary:
 	# looking after you
 	if not o.downed and o.hp < o.max_hp * 0.35:
 		cands.append({"cat": "low_hp", "at": o.pos, "key": ""})
-	if not o.downed and not o.wpn.get("melee", false) and o.reload_t > 0.0 and threat is Hunter:
-		cands.append({"cat": "cover", "at": threat.pos, "key": ""})
 	if nature() == "bold" and threat is Hunter and threat.hp < threat.max_hp * 0.4 and not (threat as Hunter).downed:
 		cands.append({"cat": "goad", "at": threat.pos, "key": ""})
 	# the most important one that's allowed
@@ -409,6 +406,7 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
+		m.sfx(KinVoice.cue(k.species, "hurt"), k.pos, -6.0, Unique.voice(k.rec))
 		var txt := BokiChatter.line(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")
@@ -534,7 +532,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)

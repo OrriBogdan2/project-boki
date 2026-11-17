@@ -49,7 +49,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 		var nm := UI.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14,
 				UtilityBelt.col_of(id) if id != "" else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = String(UtilityBelt.def(id).get("desc",
 				"")) if id != "" else "Leave this slot for something you find"
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS

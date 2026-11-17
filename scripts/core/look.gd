@@ -4,6 +4,7 @@ class_name Look
 
 static var SKY: Shader = preload("res://shaders/sky.gdshader")
 
+
 ## p: top, mid, horizon, below (sky colours), ambient, fog (haze colour), stars (0..1)
 static func environment(p: Dictionary) -> Environment:
 	var e := Environment.new()
@@ -12,10 +13,12 @@ static func environment(p: Dictionary) -> Environment:
 	var sm := ShaderMaterial.new()
 	sm.shader = SKY
 	for k in ["top", "mid", "horizon", "below"]:
-		if p.has(k): sm.set_shader_parameter(k, p[k])
+		if p.has(k):
+			sm.set_shader_parameter(k, p[k])
 	sm.set_shader_parameter("stars", float(p.get("stars", 1.0)))
 	sm.set_shader_parameter("sun_dir", p.get("sun_dir", Vector3(0.45, 0.12, -0.88)))
-	if p.has("sun_col"): sm.set_shader_parameter("sun_col", p["sun_col"])
+	if p.has("sun_col"):
+		sm.set_shader_parameter("sun_col", p["sun_col"])
 	sky.sky_material = sm
 	sky.radiance_size = Sky.RADIANCE_SIZE_32
 	e.sky = sky
@@ -60,11 +63,16 @@ static func environment(p: Dictionary) -> Environment:
 		# back to the same tones.
 		e.adjustment_color_correction = _tone_curve()
 		e.adjustment_saturation *= 1.65
-	if "--nofog" in OS.get_cmdline_user_args(): e.fog_enabled = false
-	if "--nossao" in OS.get_cmdline_user_args(): e.ssao_enabled = false
-	if "--noglow" in OS.get_cmdline_user_args(): e.glow_enabled = false
-	if "--noadj" in OS.get_cmdline_user_args(): e.adjustment_enabled = false
+	if "--nofog" in OS.get_cmdline_user_args():
+		e.fog_enabled = false
+	if "--nossao" in OS.get_cmdline_user_args():
+		e.ssao_enabled = false
+	if "--noglow" in OS.get_cmdline_user_args():
+		e.glow_enabled = false
+	if "--noadj" in OS.get_cmdline_user_args():
+		e.adjustment_enabled = false
 	return e
+
 
 ## Home's grade: warm and soft. A little more bloom so lamps and sunlit edges glow, a light honey
 ## haze for depth, gentle contrast, colour kept rich (the opposite of the expedition's look).
@@ -79,45 +87,61 @@ static func cozy(e: Environment) -> void:
 	if full_renderer():
 		e.adjustment_color_correction = _warm_curve()
 
+
 static var _warm_tex: GradientTexture1D
+
+
 ## The desktop tone curve (see _tone_curve) with a warm lift: reds a touch up in the mids and
 ## highlights, blues a touch down, so whites read as sunlight rather than paper.
 static func _warm_curve() -> GradientTexture1D:
 	if _warm_tex == null:
 		var g := Gradient.new()
-		var offs := PackedFloat32Array(); var cols := PackedColorArray()
+		var offs := PackedFloat32Array()
+		var cols := PackedColorArray()
 		for i in 33:
 			var x := float(i) / 32.0
 			var y := pow(x, 1.45)
 			var warm := sin(PI * minf(1.0, x * 1.2)) * 0.035
-			offs.append(x); cols.append(Color(clampf(y + warm, 0, 1), y + warm * 0.25, clampf(y - warm * 0.8, 0, 1)))
-		g.offsets = offs; g.colors = cols
+			offs.append(x)
+			cols.append(Color(clampf(y + warm, 0, 1), y + warm * 0.25, clampf(y - warm * 0.8, 0, 1)))
+		g.offsets = offs
+		g.colors = cols
 		_warm_tex = GradientTexture1D.new()
 		_warm_tex.gradient = g
 		_warm_tex.width = 256
 	return _warm_tex
 
+
 static var _curve_tex: GradientTexture1D
+
+
 static func _tone_curve() -> GradientTexture1D:
 	if _curve_tex == null:
 		var g := Gradient.new()
-		var offs := PackedFloat32Array(); var cols := PackedColorArray()
+		var offs := PackedFloat32Array()
+		var cols := PackedColorArray()
 		for i in 33:
 			var x := float(i) / 32.0
 			var y := pow(x, 1.45)
-			offs.append(x); cols.append(Color(y, y, y))
-		g.offsets = offs; g.colors = cols
+			offs.append(x)
+			cols.append(Color(y, y, y))
+		g.offsets = offs
+		g.colors = cols
 		_curve_tex = GradientTexture1D.new()
 		_curve_tex.gradient = g
 		_curve_tex.width = 256
 	return _curve_tex
 
+
 ## True on desktop (Forward+): the web build uses the simpler renderer and skips the extras.
 static func full_renderer() -> bool:
 	return RenderingServer.get_current_rendering_method() == "forward_plus"
 
+
 ## A warm key light with shadows and a cool fill from the other side that rims the silhouettes.
-static func lights(parent: Node, key_col: Color, key_energy := 1.0, rot := Vector3(-52, -35, 0), shadow_dist := 60.0) -> DirectionalLight3D:
+static func lights(
+	parent: Node, key_col: Color, key_energy := 1.0, rot := Vector3(-52, -35, 0), shadow_dist := 60.0
+) -> DirectionalLight3D:
 	var sun := DirectionalLight3D.new()
 	sun.name = "Sun"
 	sun.rotation_degrees = rot
@@ -142,6 +166,7 @@ static func lights(parent: Node, key_col: Color, key_energy := 1.0, rot := Vecto
 	parent.add_child(fill)
 	return sun
 
+
 ## Darkens the sky toward night (home's day cycle): k = 0 day, 1 night.
 static func night(e: Environment, k: float) -> void:
 	if e == null or e.sky == null:
@@ -150,11 +175,13 @@ static func night(e: Environment, k: float) -> void:
 	if sm == null:
 		return
 	if not sm.has_meta("day"):
-		sm.set_meta("day", [sm.get_shader_parameter("top"), sm.get_shader_parameter("mid"), sm.get_shader_parameter("horizon")])
+		sm.set_meta(
+			"day", [sm.get_shader_parameter("top"), sm.get_shader_parameter("mid"), sm.get_shader_parameter("horizon")]
+		)
 	var day: Array = sm.get_meta("day")
-	var nite := [Color("161c44"), Color("2a3672"), Color("5a5a9c")]     # a bright, moonlit blue, never pitch black
+	var nite := [Color("161c44"), Color("2a3672"), Color("5a5a9c")]  # a bright, moonlit blue, never pitch black
 	for i in 3:
 		if not (day[i] is Color):
-			continue      # a sky that never set this colour keeps its default
+			continue  # a sky that never set this colour keeps its default
 		sm.set_shader_parameter(["top", "mid", "horizon"][i], (day[i] as Color).lerp(nite[i], k))
 	sm.set_shader_parameter("stars", 0.4 + k)

@@ -109,13 +109,17 @@ Notes on the table:
 
 ## Base to a teammate (B, squads)
 
-- 3s channel toward the teammate nearest your cursor. **Stationary**, like Supervive's recall:
+- Hold B: a wheel opens round the cursor with a slice per teammate (portrait and name, greyed when they
+  can't take you; one teammate still gets the wheel). Point the mouse or right stick at one and let go to
+  start; let go in the middle to cancel (BaseWheel, sharing the G wheel's pick and dead zone).
+- A 5.5s channel (BaseRecall.CHANNEL_S) to that teammate. **Stationary**, like Supervive's recall:
   moving, dashing, jumping, attacking or casting cancels it, and so does any damage (feedback toast,
-  a 4s lockout). Everyone sees a filling ring on you and an "incoming" marker on the teammate.
+  a 4s lockout; no progress kept). A hit breaks it loudly: a red burst, "INTERRUPTED" and its own sound.
+  Everyone, foes too, sees a filling ring on you and a filling circle plus "incoming" on the teammate.
 - You appear beside them with **recall weakness** for 3s: damage dealt ×0.5, the stun/root/slow you
   apply ×0.5, healing and shields you apply ×0.5 (a status icon with a timer on your nameplate).
 - 40s cooldown, shown as a small B slot on the ability bar in squads. Bots far (30m+) from their
-  squad with nothing to fight use it now and then. `--base-check` tests a clean channel and an interrupt.
+  squad with nothing to fight use it now and then. `--base-check` tests the wheel (open, dead zone, slices), a clean 5.5s channel, a hit at 2s and a bot.
 - In the duel room B opens the bot setup instead (there are no teammates there).
 
 ## Vertical play
@@ -128,10 +132,10 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: the view leans toward the cursor in proportion to how far the
-  cursor is from your character (1.4m deadzone, 42% of the distance, capped at 7.5m), eased at 6/s,
-  so you see more where you aim and you never leave the screen. The old presets stay in Settings.
-- Sneaking (Ctrl) zooms the camera out to 1.45x, eased; the cursor lean works the same.
+- Default follow is **Supervive**: centred on you, the cursor never moves the view (measured from the
+  footage: docs/MOVEMENT_FEEL.md "Camera lead"). The Standard and Fully dynamic presets in Settings
+  slide toward the cursor the way the source's own options do.
+- Sneaking (Ctrl) zooms the camera out to 1.45x, eased.
 - Ground-targeted effects land at the cursor, clamped to 10m for hunters (gloves) or the ability's
   reach for kin. When your kin is out with its ability ready, a faint ring shows where it would land.
 - Weapon autos fire toward the cursor; the aim line shows the weapon's range.

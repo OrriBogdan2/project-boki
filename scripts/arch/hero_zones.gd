@@ -12,6 +12,8 @@ extends RefCounted
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
+##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
+##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
@@ -21,6 +23,8 @@ const ROCK_TH := 0.42                # m: half its depth (wider than a barrier s
 const STEP := 0.25                   # the walk along a cast, metres
 const ROCK_RISE_T := 0.22            # s: a rock heaving up out of the ground
 const ROCK_REACH := 0.75             # m: past a rock's top, how far above its base a punch or slam still takes it
+const SEED_A := 0.6                  # the seed globe's glass alpha...
+const SEED_BODY := 0.15              # ...and its core's share of it: 0.15 alpha at the centre, the rim carries it
 
 ## Tests read what would go out over the network without a connection (--zone-check).
 static var capture := false
@@ -98,12 +102,11 @@ static func rock(
 		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
 	)
 	var old: Node3D = w["node"]
-	var n := RockLook.make()
+	var n := RockLook.take(m)
 	var tall := top / ROCK_TOP
 	if tall < 1.0:
 		RockLook.upright(n)
 	n.scale = Vector3(len_ / 1.15, tall, 1.0)
-	m.add_child(n)
 	RockLook.cool(n)
 	w["node"] = n
 	w["rock"] = true
@@ -118,7 +121,7 @@ static func rock(
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
-	RockLook.rise_fx(m, at)
+	RockLook.rumble(m, at)
 	if send and by != null and (m.net_on or capture) and not by.remote:
 		var ev := [
 			"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
@@ -144,29 +147,33 @@ static func rock_in_reach(base_y: float, y: float) -> bool:
 static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 	m.verbs.walls.erase(w)
 	if is_instance_valid(w.get("node")):
-		(w["node"] as Node3D).queue_free()
+		RockLook.park(w["node"] as Node3D)
 	if send:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
+## warn, rise: Verbs.add_bridge's crumble warning and heave-up (s; 0 = none).
 static func bridge(
 	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
-	color := "#d9b27a"
+	color := "#d9b27a", warn := 0.0, rise := 0.0
 ) -> int:
-	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": color})
+	var e := {"length": len_, "width": width, "time": time_, "color": color, "warn": warn, "rise": rise}
+	var n: int = m.verbs.add_bridge(by, from, dir, e)
 	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
 		tx(
 			m,
 			[
 				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color
+				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color,
+				snappedf(warn, 0.01), snappedf(rise, 0.01)
 			]
 		)
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
-## growing to its full width, with a thin teal rim at its edge. Ostra's own shape; no other zone looks like it.
+## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
+## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
+## teal rim ring. Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
@@ -185,12 +192,12 @@ static func seed_visual(
 	var core := MeshInstance3D.new()
 	core.name = "Core"
 	core.mesh = Models.sphere(1.0, 32)
-	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color("7a5cff"), 0.8, 0.55)
+	core.material_override = KitLooks.glass_mat(Color("06221e"), OstraKit.SEA, SEED_A, SEED_BODY)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the violet globe reads
+	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the teal globe reads
 	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
@@ -204,12 +211,12 @@ static func seed_visual(
 	m.set_meta("zone_seeds", seeds)
 	return n
 
-static func seed_pop(m: Node, sid: String, col: Color) -> void:
+## The pop's look is the kit's (content/vfx/ostra.json seed_pop, sent to other games with it).
+static func seed_pop(m: Node, sid: String) -> void:
 	var seeds: Dictionary = m.get_meta("zone_seeds", {})
 	var n: Node3D = seeds.get(sid)
 	seeds.erase(sid)
 	if n != null and is_instance_valid(n):
-		m.fx.ring(n.global_position, n.scale.x, col, 0.3)
 		n.queue_free()
 
 # ------------------------------------------------------------------ Net in
@@ -234,14 +241,24 @@ static func net_in(m: Node, x: Array) -> void:
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
 				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
+				var warn := float(x[12]) if x.size() > 13 else 0.0
+				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(
 					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false, tint
+					false, tint, warn, rise
 				)
 		"seed":
 			if x.size() < 9: return
 			var sid := String(x[3])
 			if not (m.get_meta("zone_seeds", {}) as Dictionary).has(sid):
-				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"), true)
+				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), OstraKit.TEAL, true)
 		"pop":
-			seed_pop(m, String(x[2]), Color("6fd0c6"))
+			seed_pop(m, String(x[2]))
+		"trade":
+			var by3: Ent = m.ents_by_id.get(String(x[2]), null)
+			if by3 is Hunter and x.size() >= 8:
+				var land := Vector3(x[3], x[4], x[5])
+				var key := "trade/" + String(x[2])
+				KitLooks.of(m).timed_sigil(key, by3, land, float(x[6]), float(x[7]), OstraKit.TRADE_EDGE)
+		"tradego":
+			KitLooks.of(m).end_sigil("trade/" + String(x[2]))

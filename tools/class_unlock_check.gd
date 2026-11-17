@@ -499,14 +499,14 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
-	ok(hx.stage == "create" and hx.create_box != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
+	ok(hx.stage == "create" and hx.locker != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
 	hx._looks_good()
 	for i in 6: await tree.process_frame
 	ok(hx.stage == "pick" and ClassUnlock.needs_starters(),
 			"then straight to the egg pick, with no Relic pick before it (stage %s)" % hx.stage)
 	ok(_find_meta(hx, "starter_pick") == null and not _any_text(hx.root_ui, "Choose your first Relic"),
 			"there is no Relic pick screen at all")
-	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
+	ok(hx.locker == null and Unmasked.is_look(Save.d["look"]),
 			"the creator is behind us and the save holds your Empty look")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()
@@ -536,8 +536,8 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	var t0 := Time.get_ticks_msec()
-	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+	var t0 := CheckClock.own_msec()
+	while v.model == null and CheckClock.own_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
 		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
