@@ -1408,3 +1408,4 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - **Crashes and errors (Sentry):** not reachable (sentry CLI failed)
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+SHIPPED 2026-11-17 10:30Z PR #189 (e3274233a4): seam-safe keep_uv decimate in tools/meshy/bake_warden.py (UV-seam verts collapse last, head band 45%) + tools/art1/v95_to_game.py; python tools only, no game diff (gate: 0 NEW-RED, export dry-run 938M/733M pass). Next: re-port every hunter (job 20261117-093357-a2).
