@@ -33,7 +33,6 @@
 		"sneak_speed": 0.5,
 		"speed_cap": 7.0,
 		"haste": 0.35,
-		"step_height": 0.45,
 		"turn_full": 4.0,
 		"turn_window": 0.3,
 		"turn_recover": 0.16

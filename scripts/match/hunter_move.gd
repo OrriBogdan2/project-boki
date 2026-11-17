@@ -37,7 +37,6 @@ const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took you
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
-static var step_height: float = _phys["step_height"]     # m: the tallest lip walked straight over (World.STEP)
 static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
 
 static func rules() -> Dictionary:
