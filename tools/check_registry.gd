@@ -40,6 +40,7 @@ const CHECKS := {
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
+	"--match-flow-check": ["res://tools/match_flow_check.gd", "match_flow_check", null],      # 0061 phases
 	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
 	"--heart-raid-solo-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 0],      # a whole solo raid
 	"--heart-raid-squad-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 1],      # 4, Normal
