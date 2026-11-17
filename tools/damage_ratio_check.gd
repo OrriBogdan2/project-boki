@@ -1,6 +1,6 @@
 extends RefCounted
 ## Damage-ratio parity (docs/specs/DAMAGE_RATIOS.md): the fixed rows must stay within 1.5x of the source's
-## share of an average Hunter's health. Source numbers are supervive_kits.md at level 1; the HP averages
+## share of an average Hunter's health. Source numbers are sv/kits.md at level 1; the HP averages
 ## are the 12 base HPs (1285.4) and our 12 class HPs (154). Called from --hero-combo-check.
 const SRC_HP := 1285.4
 const OUR_HP := 154.0

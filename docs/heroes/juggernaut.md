@@ -8,7 +8,7 @@ docs/wiki/Inspirations.md.
 
 ## Research summary
 
-- **Source hero:** Brall, from SUPERVIVE (supervive.wiki.gg ability text, levels 2-4, patch history).
+- **Source hero:** ref-juggernaut, from the reference (the community wiki ability text, levels 2-4, patch history).
   Version chosen: the wiki's current page as read on Nov 1, with the patch notes' shapes where they differ.
 - **Patches that shaped it:** *Leveling Rework + Big Balance Patch* (LMB hitbox -20%, sweet spot moved to the
   central tip, the 3rd/4th-hit bonus removed, Flame Step charges, R no longer resets on Wisp execution) and
@@ -23,7 +23,7 @@ docs/wiki/Inspirations.md.
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
-bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+bulwark doc does it. [D] = game data (sv/briefs/kits.md, `Upg:` II / III / IV). Our seconds keep
 the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
 no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
@@ -87,7 +87,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/juggernaut.md; its header puts the ability clips at 5 fps,
+Source vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/juggernaut.md; its header puts the ability clips at 5 fps,
 one frame = 0.2 s, and the ult frames at 10 fps), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `tools/zedran_feel_check.gd`
 ("jug parity ...").
 
@@ -146,9 +146,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:
 **[O]** the owner's notes (OWNER_REVIEW items 21/22, the 14:07 ET "small mechanics" note), **[D]** the game data
-(`supervive-data/supervive_kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
+(`sv/briefs/kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
 reactivate to pull yourself to the target. Upg: -2s CD x3"), **[W]** the wiki's ability page and patch notes
-(https://supervive.wiki.gg/wiki/Brall: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
+(reference notes: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
 second press or when the chain breaks; a stun breaks it; no throw while rooted or Grounded), **[F]** the footage
 notes (`hero-ref/juggernaut.md` E and RMB sections, frames 0301-0366).
 
@@ -297,8 +297,8 @@ Differences from the source, and why:
     Never longer than the 0329 throw.
 
   So the longest stretch shown is the throw itself (7 bh, ~12.6 m, our 13 m), and what happens at a limit (break, drag
-  or hold) is never shown. The data has no length either: `supervive_kits.md` Feysteel Chain (16s, 15, 30 dmg; upgrades
-  only -2s CD x3), `kit_comparison.md` (rank paths, cooldowns), `supervive_physics.md` and `PHYSICS_PARITY.md` (no
+  or hold) is never shown. The data has no length either: `sv/briefs/kits.md` Feysteel Chain (16s, 15, 30 dmg; upgrades
+  only -2s CD x3), `kit_comparison.md` (rank paths, cooldowns), `sv/briefs/physics.md` and `PHYSICS_PARITY.md` (no
   chain rows); the wiki patch notes we cite ([W]) change only stun breaks and no throw while rooted or Grounded. Kept:
   24 m, held taut (DECISIONS: extends up to a max). Alternative not taken: leash = throw range would end the
   extend-on-retreat the owner asked for.
@@ -360,14 +360,14 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Brall) and the owner's notes.
+From the wiki's ability page and patch notes (reference notes) and the owner's notes.
 "Built" means it is in the kit and asserted in `--juggernaut-combo-check` / `--kit-combo-check`.
 
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
 | The tether pull can be steered sideways while you're pulled in | owner's playtest note, item 57 | not visible | Built: looking aside or a held key swings the arrival up to 6 m aside; asserted "jug swing: ..." (13 m: 4.6 m, 41 deg, full speed) |
 | Chain cooldown starts on the pull or when the chain breaks, not on the throw | wiki patch 07.01.25 | n/a | Built (kits2), asserted |
-| A stun on Brall breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
+| A stun on ref-juggernaut breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
 | The chain's cooldown drops 2s three times | owner's game data | n/a | Built: 12.5% at rank 2, 37.5% at rank 3 (the hook refund is gone) |
 | The tether stays attached while you walk (about 2.5s+) | footage 0305-0317; wiki 5s | yes | Built (5s), drawn as a link chain |
 | The Fiery Lunge doubles its cooldown if nothing is struck | wiki RMB | n/a | Built, asserted |
@@ -378,7 +378,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
-| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd: a jump into a 4-terrace wall (3.2 m) tops it, 5 terraces not; asserted `combo archer: tall climb, juggernaut ...` (tools/tall_climb_check.gd, run by --archer-combo-check) |
+| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (sv/briefs/physics.md:67) | no | Built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd: a jump into a 4-terrace wall (3.2 m) tops it, 5 terraces not; asserted `combo archer: tall climb, juggernaut ...` (tools/tall_climb_check.gd, run by --archer-combo-check) |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
@@ -400,7 +400,7 @@ Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffe
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. **Settled** (11-12) means no source
@@ -617,7 +617,7 @@ The sword tip is the point that jumps: idle, rest stance and walk carry the blad
 ## Parity verify, Nov 9
 
 Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block, this sheet, hero-ref/juggernaut.md,
-supervive_kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
+sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
 `--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
