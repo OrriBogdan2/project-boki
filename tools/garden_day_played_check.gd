@@ -331,6 +331,9 @@ func _away(cs) -> void:
 		for e in r.get("journal", []):
 			e["t"] = float(e["t"]) - AWAY_S
 	Save.d["away_seen"] = float(Save.d.get("away_seen", Time.get_unix_time_from_system())) - AWAY_S
+	var marks: Dictionary = Save.d.get("away_zone", {})
+	for id in marks:
+		marks[id] = float(marks[id]) - AWAY_S      # each zone's own last-arrival mark goes back too
 	var n: int = (Save.d["roster"] as Array).size()
 	Game.goto("home", {"zone": "bramblebank"})
 	var bb = await _arrived(cs)
@@ -344,6 +347,13 @@ func _away(cs) -> void:
 	print("GDAY card: ", text.substr(maxi(0, text.find("While you were away")), 900))
 	ok("Moss trained" not in text, "Moss lives in Cinderstep: it does not train at Bramblebank's toys while away")
 	ok("starv" not in text.to_lower() and "lost" not in text.to_lower(), "the card never says lost or starved")
+	# row H: two zones open, the lines sit under zone names, and the shared mark does not starve the other zone
+	var head := text.find("Bramblebank")
+	ok(head >= 0 and "Moss saved you" not in text,
+		"the Bramblebank card has its own zone name and no gift from Moss, who lives in Cinderstep")
+	ok(head < 0 or text.find("saved you a snack") < 0 or text.find("saved you a snack") > head,
+		"the gifts sit under the zone name")
+	var bb_trained := "trained" in text.substr(maxi(0, head))
 	ok((Save.d["roster"] as Array).size() == n, "nobody left the roster during the gap")
 	var worst := 100.0
 	for r in Save.d["roster"]:
@@ -352,3 +362,24 @@ func _away(cs) -> void:
 	bb._close_panel()
 	await _wait(1.0)
 	await _grab("back_home")
+	await _away_cinderstep(bb, bb_trained)
+
+
+## Row H: the first arrival in Cinderstep after the gap trains Moss at its toys (the Bramblebank arrival did
+## not use up Cinderstep's own away mark), under the Cinderstep name.
+func _away_cinderstep(bb, bb_trained: bool) -> void:
+	Game.goto("home", {"zone": "cinderstep"})
+	var cs = await _arrived(bb)
+	ok(cs != null and cs.zone == "cinderstep", "back in Cinderstep after the gap")
+	if cs == null:
+		return
+	await _wait(1.5)
+	var text := _labels(cs.root_ui)
+	ok(cs.panel_open == "While you were away", "Cinderstep has its own away card (%s)" % cs.panel_open)
+	print("GDAY cinderstep card: ", text.substr(maxi(0, text.find("While you were away")), 900))
+	var head := text.find("Cinderstep")
+	var trained := text.find("Moss trained")
+	ok(trained >= 0 and head >= 0 and head < trained,
+		"Moss trains at Cinderstep's toys on that zone's first arrival, under its name")
+	note("Bramblebank card trained anyone: %s" % str(bb_trained))
+	cs._close_panel()

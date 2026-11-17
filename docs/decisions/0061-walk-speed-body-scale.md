@@ -6,11 +6,11 @@
 
 ## Problem
 Owner playtest 11-11 (0.24.4): "base movement speed is way too slow, feels like molasses" and "the walking in
-expedition is stupidly slow, it should be same speed as supervive". The owner also asked that the expedition,
+expedition is stupidly slow, it should be same speed as [the reference]". The owner also asked that the expedition,
 the Training Grounds and the farm move the same way.
 
 A headless measure (`--move-speed-check`, run through the real frame) gave these results. Every hunter
-walked at its `hunter_move.json` row (4.45–4.85 m/s) in all three modes. That is SUPERVIVE's MoveSpeed
+walked at its `hunter_move.json` row (4.45–4.85 m/s) in all three modes. That is the reference's MoveSpeed
 (445–485 uu/s) in metres, the same since Nov 2, so nothing regressed. On screen that is 0.19 screen widths
 per second in a match and 0.13 on the farm, because the farm's camera shows 34 m across against the match's 23 m.
 The farm and indoors walked through their own code: home.gd had its own ground step and a stale

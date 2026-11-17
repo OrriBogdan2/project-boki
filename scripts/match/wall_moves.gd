@@ -1,7 +1,7 @@
 class_name WallMoves
 extends RefCounted
 ## A hunter's wall kick and wall bounce (one instance per hunter, hooked from Hunter).
-## Kick (item 149, SUPERVIVE's wall dance): in the air touching or facing a wall, a jump hops you off it,
+## Kick (item 149, the reference's wall dance): in the air touching or facing a wall, a jump hops you off it,
 ## again and again, no glider and no cooldown, with a stone scuff everyone near hears. Keys into the wall or
 ## none add KICK_RISE of height to the jump you are on; keys away push you off it. A hop only starts up to
 ## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
@@ -98,7 +98,7 @@ func _at_wall(h: Hunter) -> bool:
 	return true
 
 ## The speed left along an axis a wall stopped this step (Hunter's axis moves). A glider keeps none of it:
-## [game data] SUPERVIVE's glide runs on UE's CharacterMovementComponent, whose wall hit (HandleImpact,
+## [game data] the reference's glide runs on UE's CharacterMovementComponent, whose wall hit (HandleImpact,
 ## SlideAlongSurface) drops the part of the velocity into the wall and keeps the part along it, so a
 ## glider slides, never rebounds or stops dead, and nothing closes the canopy; the glide force
 ## (Hunter.GLIDE_ACCEL) then settles the slide at cruise x sin(angle off the normal). The source dump has no

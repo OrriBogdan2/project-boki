@@ -6,7 +6,7 @@
 
 ## Problem
 Decision 0020 left every dash at a constant speed that hands over at run speed, because the source's DashCurves
-are encrypted. The hero-ref sheets track Ghost's slide, Brall's Quick Dash and Myth's roll at 1/15 s: all three
+are encrypted. The hero-ref sheets track ref-gunslinger's slide, ref-juggernaut's Quick Dash and ref-archer's roll at 1/15 s: all three
 ramp to ~1.8x their mean in 0.04-0.15 s and bleed off in a straight line through run speed.
 
 ## Options
@@ -19,11 +19,11 @@ ramp to ~1.8x their mean in 0.04-0.15 s and bleed off in a straight line through
 Option 2. `content/rules/dash_feel.json` gives a hero an optional `curve` ([u, k] knots, mean 1); a kit's measured
 ground dash calls `travel(..., {"curved": true})` and `ArchKit._tick_curve` sets the speed each step
 (`HunterMove.dash_k`, which the thief's vault curve now shares). The hand-over stays `HunterMove.dash_exit`
-(at most run speed). Ghost's old straight skid in gunslinger_kit is replaced. Felix has no per-frame samples [?].
+(at most run speed). ref-gunslinger's old straight skid in gunslinger_kit is replaced. ref-ashwick has no per-frame samples [?].
 
 ## Consequences
 Distances and times are unchanged (`--move-feel-check` dash_curve_dist), the peaks move to the source's share
-of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: docs/SUPERVIVE_FEEL.md.
+of the dash. Rampage's short time makes its peak ~34 m/s. Fits and errors: sv/FEEL.md.
 
 ## Addendum (2026-11-09, ext/dash-curves-b)
 The same fit for the second batch: Oath (Albert's 360 Smash) and Shiv (Sable's ground Cartwheel; the kit's
