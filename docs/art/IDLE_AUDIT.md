@@ -349,6 +349,11 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The hook taps his leg.
 - **Target stance (6 s):**
   - The same feet. He pulls a coin, squints at it through the loupe, bites it, and pockets it.
+- **Done (ext/idle-dredge-rebased-port):** tools/art1/grimble_clips.py `idle` and `stance` on READY's feet.
+  - Idle: the weight goes from foot to foot, with the chest, head, hands and hoard trailing it by 0.1 to 0.4 s. Once a loop he taps the hook on his thigh three times with a grin.
+  - Stance: he digs into the hoard over his left shoulder, holds the coin up and turns his loupe to it, bites it, grins, then pockets it at his hip with a pat.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 135 of 138 tracks): the v95 rig has no `x_breath` bone, so the breath is not in the game build (the script still adds it when it bakes a blend).
+  - The scrap hand is rigid on `hand.L` (its fingers have no skin), so the claw tips hold the "coin", and the hand is kept beside the face rather than in front of the snout. Alternative: a coin prop.
 
 ## The check
 
