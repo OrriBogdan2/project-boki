@@ -159,7 +159,7 @@ func _lmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	_settle(m, P, home, 0.8)
 
 
-## RMB (item 112, a launcher tap): the Burr leaves on the press; the launcher swings home by 0.3 s and the legs
+## RMB (item 112, a tap): the coin leaves her free hand on the press; the flick is home by 0.5 s and the legs
 ## keep walking under it ("upper": "moving").
 func _rmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
@@ -169,22 +169,22 @@ func _rmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var walk := {}
 	K.press_rmb()
 	var r := _time(
-		m, P, K, "gunslinger_rmb", 1.0, func() -> bool: return K.burrs.size() > n0, _walk_probe(P, 0.1, 0.29, walk)
+		m, P, K, "gunslinger_rmb", 1.0, func() -> bool: return K.burrs.size() > n0, _walk_probe(P, 0.1, 0.35, walk)
 	)
 	C.ok(
-		"Vex timing RMB: fired on the press, the swing on within a frame, the arm back by 0.3 s + the fade",
+		"Vex timing RMB: fired on the press, the flick on within a frame, the hand back by 0.5 s + the fade",
 		(
 			float(r["hit"]) <= DT
 			and float(r["in"]) <= BLEND_IN
-			and absf(float(r["len"]) - 0.3) < CLIP_TOL
-			and float(r["out"]) < 0.3 + _back(P, "gunslinger_rmb")
+			and absf(float(r["len"]) - 0.5) < CLIP_TOL
+			and float(r["out"]) < 0.5 + _back(P, "gunslinger_rmb")
 		),
 		"in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]]
 	)
 	C.ok(
-		"Vex timing RMB: walking through it, the legs walk (the swing is upper body)",
+		"Vex timing RMB: walking through it, the legs walk (the flick is upper body)",
 		_legs_walk(walk),
-		_walk_line("at 0.29", walk)
+		_walk_line("at 0.35", walk)
 	)
 	_settle(m, P, home, 0.8)
 

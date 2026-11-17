@@ -14,8 +14,7 @@ const EMITTERS := {
 	"gunslinger":
 	[
 		["LMB rounds", "node:weapon_muzzle", "forearm.R"],
-		["RMB Burr Charge", "node:launcher_fire", "forearm.R"],
-		["RMB Burr Charge bell", "node:launcher_muzzle", "forearm.R"]
+		["RMB Coin Blast and E Palm Lance (left palm)", "palm", "hand.L"]
 	],
 	"juggernaut":
 	[

@@ -27,7 +27,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_drum(m, P, K, home)
 	_brackets(m, P, home)
 	_rifle_pose()
-	_launcher(m, P, K, T, home)
+	_coin_throw(m, P, K, T, home)
 	_needle(m, P, K, T, home)
 	_audit(m, P, K, T, home)
 	CANCEL_ROWS.new(C).run(m, P, K, T, home)
@@ -353,19 +353,21 @@ func _rifle_pose() -> void:
 	)
 
 
-## Item 112: the Burr Charge is a tap fired from the cannon's launcher: no throw in the move, a kick on the gun, out
-## within a step of the press, once however long the key stays down, and she keeps walking.
-func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
-	var kick := HunterAnim.km_sample("gunslinger_rmb", 0.04)
+## Item 112 and the 11-17 playtest: the Coin Blast is a tap, a coin flicked off her free hand: a hand flick in the
+## move and no kick on the gun, out within a step of the press, once however long the key stays down, and she keeps
+## walking.
+func _coin_throw(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	var keys := KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array
 	var stance := bool(KMovesVV.MOVES["gunslinger_rmb"].get("stance", false))
-	var no_hand := (KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array).all(
+	var thrown := keys.any(
 		func(key: Array) -> bool:
-			return float((key[1] as Dictionary).get("hw", 0.0)) == 0.0 and not (key[1] as Dictionary).has("fl")
+			return float((key[1] as Dictionary).get("hw", 0.0)) > 0.5 and (key[1] as Dictionary).has("fl")
 	)
+	var gun_still := keys.all(func(key: Array) -> bool: return not (key[1] as Dictionary).has("gp"))
 	C.ok(
-		"Vex item 112: no throw pose, the left hand stays out of it, a recoil kick on the cannon",
-		no_hand and stance and float(kick["gp"]) > 0.3,
-		"gp %.2f" % kick["gp"]
+		"Vex coin: a flick of the free hand throws the coin, the gun arm out of it, legs free to walk",
+		thrown and stance and gun_still,
+		"%d keys" % keys.size()
 	)
 	T.teleport(home + Vector3(30, 0, 8))
 	P.teleport(home)
@@ -374,97 +376,73 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 	var plain := _walk_speed(m, P)
 	var p0 := P.pos
-	var puffs0 := K.puffs
+	var flicks0 := K.flicks
 	var burrs0 := K.burrs.size()
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	m.step(C.DT)
-	# (the charge goes at once; on her model the puff waits for the bell, TUBE_SWING)
 	var out_now := K.burrs.size() == burrs0 + 1 and float(K.cd["rmb"]) > 0.0
 	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
-	var gun := P.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
-	var from_gun := not b.is_empty() and gun != null and (b["pos"] as Vector3).y >= gun.global_position.y
-	var was_at: Vector3 = b.get("y0", 0.0) * Vector3.UP
+	var coin: Node3D = b.get("node")
+	var faces := coin != null and coin.has_node("Spin/Glow")
+	var spin0 := float(b.get("spin", 0.0))
+	m.step(C.DT)
+	var flipping := float(b.get("spin", 0.0)) > spin0
 	C.ac.step(m, 1.0, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
-	var walked: float = P.flat_dist(p0) / (1.0 + C.DT)
+	var walked: float = P.flat_dist(p0) / (1.0 + 2.0 * C.DT)
 	P.inp["move"] = Vector2.ZERO
-	# (her model has the launcher's own firing point, which the empties check below covers)
-	from_gun = from_gun or WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE) != null
 	C.ok(
-		"Vex item 112: a tap fires within one step, from above the gun's muzzle on a model with no launcher",
-		out_now and from_gun,
-		"y %.2f" % was_at.y
+		"Vex coin: a tap throws the coin within one step, a gold coin with a green-fire rim, flipping end over end",
+		out_now and faces and flipping,
+		"spin %.2f -> %.2f" % [spin0, float(b.get("spin", 0.0))]
 	)
 	C.ok(
-		"Vex item 112: a 1s hold fires once, at the press",
-		K.puffs == puffs0 + 1 and not K.rmb_down,
-		"%d puffs" % (K.puffs - puffs0)
+		"Vex item 112: a 1s hold throws once, at the press",
+		K.flicks == flicks0 + 1 and not K.rmb_down,
+		"%d flicks" % (K.flicks - flicks0)
 	)
 	C.ac.step(m, 1.2)
-	_launcher_empties(m, P, K, home)
+	_from_palm(m, P, K, home)
 	C.ok(
-		"Vex item 112: she keeps walking through the shot (85% of her walk or more)",
+		"Vex item 112: she keeps walking through the throw (85% of her walk or more)",
 		walked >= plain * WALK_KEEP,
 		"%.2f of %.2f m/s" % [walked, plain]
 	)
 	C.ac.step(m, 1.5)
 
 
-## On the new model: the charge leaves from launcher_fire at the press, read live, and the flash waits for the bell
-## (launcher_muzzle), which starts the shot behind her shoulder. Her real empties, held at known spots for the shot,
-## or stand-ins on a stand-in Warden node on a model that has none.
-func _launcher_empties(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
-	var w := P.model.get_node_or_null("Warden") as Node3D
-	var made := w == null
-	if made:
-		w = Node3D.new()
-		w.name = "Warden"
-		P.model.add_child(w)
-	var spot := WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE)
-	var bell := WardenGlb.anchor(P.model, GunslingerKit.TUBE_BELL)
-	var stand_in := spot == null or bell == null
-	if stand_in:
-		spot = Node3D.new()
-		spot.name = GunslingerKit.TUBE_FIRE
-		bell = Node3D.new()
-		bell.name = GunslingerKit.TUBE_BELL
-		w.add_child(spot)
-		w.add_child(bell)
-	var spot0 := spot.transform
-	var bell0 := bell.transform
+## 11-17 playtest: the coin leaves her free hand's palm at the press and the Palm Lance's beam starts there too
+## (its charge orb sits there in the data); neither comes out of the gun's muzzle.
+func _from_palm(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.teleport(home)
 	C.ac.step(m, 0.1)
-	spot.global_position = P.pos + Vector3(0.7, 1.4, 0.2)
-	bell.global_position = P.pos + Vector3(-0.5, 1.7, 0.0)
-	var fire_at := spot.global_position
-	var bell_at := bell.global_position
+	var at := HeroVfx.of(m).anchor_pos(P, "palm")
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
-	var puffs0 := K.puffs
 	K.press_rmb()
 	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
-	var from_spot := not b.is_empty() and (b["pos"] as Vector3).distance_to(fire_at) < 0.01
-	var waits := K.puffs == puffs0
-	C.ac.step(m, 0.05)
-	waits = waits and K.puffs == puffs0
-	bell.global_position = bell_at
-	C.ac.step(m, 0.1)
+	var coin := not b.is_empty() and (b["pos"] as Vector3).distance_to(at) < 0.01
+	var flash := K.last_flick.distance_to(at) < 0.01
+	C.ok("Vex coin: the coin and its glint leave her palm", coin and flash, "coin %s, glint %s" % [coin, flash])
+	C.ac.step(m, 1.2)
+	K.cd["e"] = 0.0
+	K.use_e()
+	var t := 0.0
+	var palm := Vector3.INF
+	while not K.needle.is_empty() and t < 1.0:
+		palm = K.palm_at()
+		m.step(C.DT)
+		t += C.DT
+	var gun := K._gun_muzzle()
+	var off_gun := gun == null or K.last_beam.distance_to(gun.global_position) > 0.2
+	var looks: Dictionary = HeroVfx.data("gunslinger")["moves"]
+	var orb := (looks["e_charge"]["fx"] as Array).all(func(l: Dictionary) -> bool: return l.get("at") == "palm")
 	C.ok(
-		"Vex item 112: the charge leaves launcher_fire at the press, the flash launcher_muzzle after 0.1s",
-		from_spot and waits and K.puffs == puffs0 + 1 and K.last_puff.distance_to(bell_at) < 0.01,
-		"from spot %s, waited %s, %d puff" % [from_spot, waits, K.puffs - puffs0]
+		"Vex palm: the Palm Lance charges at her palm and its beam starts there, not at the gun's muzzle",
+		K.last_beam.distance_to(palm) < 0.2 and off_gun and orb,
+		"beam %.2f m off the palm, off the gun %s, orb at the palm %s" % [K.last_beam.distance_to(palm), off_gun, orb]
 	)
-	spot.transform = spot0
-	bell.transform = bell0
-	if stand_in:
-		w.remove_child(spot)
-		w.remove_child(bell)
-		spot.free()
-		bell.free()
-	if made:
-		P.model.remove_child(w)
-		w.free()
 	C.ac.step(m, 1.2)
 
 
