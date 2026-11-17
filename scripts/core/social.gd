@@ -429,6 +429,7 @@ func leave_guild(cb: Callable) -> void:
 func _leave(gid: String, cb: Callable) -> void:
 	if gid != "":
 		del_doc("clanroster/%s_%s" % [gid, me])
+		del_doc("clanboard/%s_%s" % [gid, me])
 	Save.d["guild_id"] = ""
 	Save.d["clan"] = {}
 	guild = {}
