@@ -71,6 +71,13 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Before building any system, search the repo for an existing one** and extend it (§1, §3).
 - Small, clearly labeled commits (§6).
 
+## 7a. Generated files and parallel runs
+- Never hand-write `uid://` values or `.uid`/`.import` files: create the file, run the import, commit what Godot made.
+- A hand-written `.tscn`/`.tres` references by `path=` with no `uid=`.
+- Move a file's `.uid`/`.import` sibling with it in the same commit. Never commit `.godot/`.
+- A SceneTree test does its work in `_initialize()`, not `_init()` (no autoloads exist yet in `_init()`).
+- Never `pkill`/`killall` Godot: other agents' runs share the box.
+
 ## 8. Review before merge
 The integrator (the main session) merges branches into `main`. Before merging any feature branch, a separate reviewer agent reads the diff with fresh eyes against this file, looking for:
 - god-file growth
