@@ -26,12 +26,17 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--sink="):
 			sink = float(String(a).substr(7))
-	Demo.setup("match")
-	var o := Match.demo_opts()
-	o.merge({"no_drop": true, "seed": 77}, true)
-	await main.show_screen("match", o)
-	m = main.current
-	await m.warm_up()
+	var arch := "gunslinger"
+	Save.d["name"] = HeroTitle.base_name(arch)
+	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": 77, "length": 1e9, "no_drop": true,
+		"raid": "clear", "blight": false, "sim_keep": true, "arch": arch, "cls": Arch.weight(arch),
+		"weapon": Arch.signature(arch)}
+	m = Match.new()
+	main.add_child(m)
+	await m.start(o)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	var p: Hunter = m.player
 	var w: World = m.world
 	var spot := _step_off(w)
@@ -42,9 +47,11 @@ func run(main_node: Node) -> void:
 	label.add_theme_font_size_override("font_size", 26)
 	layer.add_child(label)
 	main.add_child(layer)
-	var lip: float = w.abyss_floor(spot.x, spot.z, p.last_gy) + World.ABYSS_DEPTH
+	var lip: float = w.abyss_floor(spot.x, spot.z, p.last_gy) + World.ABYSS_DEPTH - 0.5
 	p.teleport(Vector3(spot.x, lip + 0.3, spot.z))
-	await _wait(LEAD_S)
+	for _i in roundi(LEAD_S * FPS):  # hangs over the void, held, so the viewer sees the calm before the drop
+		p.vel = Vector3.ZERO
+		await main.get_tree().process_frame
 	var AbyssFx = load("res://scripts/match/abyss_fx.gd")
 	var frames := 0
 	var maxk := 0.0
@@ -73,7 +80,7 @@ func _wait(secs: float) -> void:
 func _step_off(w: World) -> Vector3:
 	for _k in 4000:
 		var g := w.random_ground()
-		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
+		for d: Vector2 in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 			var q := Vector2(g.x, g.z)
 			var n := 0
 			while not w.is_void(q.x, q.y) and n < 12:
