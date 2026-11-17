@@ -279,5 +279,6 @@
 	"blade": {
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"
-	}
+	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
 }

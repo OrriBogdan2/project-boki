@@ -213,6 +213,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
+	_beats(id, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -277,8 +278,30 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
+
+
+## The result beats (WardenBeats): win and lose each map to a clip the .glb plays that is its own (no two beats share
+## one), and the state's "beat" picks it.
+func _beats(id: String, clips: WardenClips) -> void:
+	var mapped := 0
+	var picked := 0
+	var used: Array = []
+	for nm in WardenBeats.NAMES:
+		var b: Dictionary = clips.beats.get(nm, {})
+		mapped += 1 if not b.is_empty() else 0
+		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
+		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
+		if not b.is_empty():
+			used.append(b["clip"])
+	ok(mapped == 2 and picked == 2 and used[0] != used[1],
+			"%s: win and lose mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
+
+
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
+	for b in (dd.get("beats", {}) as Dictionary).values():
+		if b.has("clip"):
+			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		out.append(mv["clip"])
 		if mv.has("alt"):
