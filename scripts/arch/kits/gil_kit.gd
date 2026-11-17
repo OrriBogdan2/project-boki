@@ -7,6 +7,22 @@ extends ArchKit
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
+const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const TELE_LW := 0.1                 # m, their rim
+const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
+const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
+const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
+const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
+const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
+const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
+const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
+const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
+## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
+## line for other games).
+const LINE_FX_DT := 0.06
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one press throws)
+
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
@@ -24,8 +40,6 @@ var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, s
 var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
-const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
-const TELE_LW := 0.1                 # m, their rim
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 var lmb_t := -1.0                  # s the Tide Lunge has been charging (-1: not)
 var lmb_was := false
@@ -78,8 +92,6 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 # ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
-const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
-const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
 
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
 ## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
@@ -264,13 +276,6 @@ func _shatter_look(v: String, at: Vector3, r: float) -> void:
 		"fire": vfx("shatter_fire", at, dir, {"r": r})
 		_: vfx("shatter_zeep", at, dir, {"r": r})
 
-const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
-const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
-const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
-const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
-const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
-const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
-const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
 
 ## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
 ## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
@@ -479,9 +484,6 @@ func _tick_lines(list: Array, dt: float) -> void:
 		if float(s["left"]) <= 0.0:
 			list.erase(s)
 
-## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
-## line for other games).
-const LINE_FX_DT := 0.06
 func _line_look(s: Dictionary, at: Vector3, dt: float) -> void:
 	s["fx_t"] = float(s["fx_t"]) - dt
 	if float(s["fx_t"]) > 0.0:
@@ -616,7 +618,6 @@ func _end_stale_hold() -> void:
 		anim_id = ""
 
 # ------------------------------------------------------------------ bots
-const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one press throws)
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
