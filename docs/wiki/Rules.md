@@ -601,6 +601,25 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | storm_sense | {"_doc": "seconds before rain starts that it starts warning about it", "kestrike": 25.0, "barokat": 25.0} |
 | rare_trait | {"_doc": "a rare trait a kind can hatch with, rolled once per Boki from its seed (BokiQuirks.rare_trait_for): id, name, chance (0..1) and a card note. Evo branches can need it ('trait' in evolve.json)", "marchleaf": {"id": "nightmark", "name": "Nightmark", "chance": 0.04, "note": "A dusk-dark stripe along its back. About 1 in 25 Marchleaf carry it, and it decides what they grow into."}} |
 
+## boki_summon (`content/rules/boki_summon.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Boki summon (KinSummon, decisions 0039, 0044, 0045): killed_cd_mult = cooldown x after a rival hunter kills it (a monster's kill counts as a rival's if a rival hurt it in the last rival_window_s s), home_speed = m/s the wisp flies home, reveal_s = s its owner shows to the killer squad; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
+| fallback | [10, 60] |
+| uptime_band | [0.09, 0.2] |
+| killed_cd_mult | 1.25 |
+| rival_window_s | 3 |
+| home_speed | 25 |
+| reveal_s | 2 |
+| leash | 10 |
+| leash_swing | 2 |
+| rebloom_dist | 20 |
+| steal | {"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; passive_k = share of each stolen carry passive (summed with your own, clamped at the carry cap); summon_k = share of its window for the one stolen summon, at least summon_min_s s.", "loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0} |
+
 ## boki_system (`content/rules/boki_system.json`)
 
 The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
@@ -2021,7 +2040,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 | Setting | Value |
 |---|---|
-| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs dps (share of your max health a second). |
+| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
 | length_ref | 612 |
 | map_ref | 305 |
 | final_lean | 0.55 |
@@ -2030,7 +2049,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 | warn_s | 20 |
 | bot_lead_s | 60 |
 | tick_s | 1 |
-| phases | [{"wait": 150.0, "shrink": 50.0, "r": 150.0, "dps": 0.01}, {"wait": 80.0, "shrink": 45.0, "r": 95.0, "dps": 0.02}, {"wait": 70.0, "shrink": 40.0, "r": 58.0, "dps": 0.04}, {"wait": 55.0, "shrink": 30.0, "r": 32.0, "dps": 0.07}] |
+| phases | [{"wait": 150.0, "shrink": 50.0, "r": 150.0, "stage": 0}, {"wait": 80.0, "shrink": 45.0, "r": 95.0, "stage": 1}, {"wait": 70.0, "shrink": 40.0, "r": 58.0, "stage": 2}, {"wait": 55.0, "shrink": 30.0, "r": 32.0, "stage": 10}] |
 
 ## snack_patch (`content/rules/snack_patch.json`)
 
