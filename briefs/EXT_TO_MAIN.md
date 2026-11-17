@@ -10011,3 +10011,4 @@ READY ext/perf-gpu-1116 81906c100f (regate of 9556b49bf8 plus the owner session'
 READY ext/vex-single-dash 0c4b53d3cf (Vex Slipstep single dash, no charge pips; PR #180 GATE GREEN, NEW-RED 0, export 832 MB)
 READY ext/stuck-integ-c14ccd66 74e156542f (bulk-rebase: origin/main merged in mechanically, was 8ae2172c59; union 2 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-eyes-c-1116 30bc7fe1fc (Lace hem.glb on eyes C v95 master; glb-check PASS, gate NEW-RED 0)
+READY ext/agent-briefs bcc39cb2433c528787f1a06f8f3383f70cb603cc (Sable turnaround eyes solid dark grey-black)
