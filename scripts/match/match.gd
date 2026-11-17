@@ -218,6 +218,8 @@ func _progress(label: String) -> void:
 
 ## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -1775,7 +1777,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
-		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
@@ -2433,7 +2434,6 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
-		hud.hitmarker(true, true)
 	elif h == player and hud:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
