@@ -18,7 +18,9 @@ extends RefCounted
 
 const STATE := "wisp"
 const JOINS := ["active", "flying", "flying_home", "returning"]   # summoned states: it leaves them to ride as a wisp
-const GUARD_CAP := 11.0      # s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull once its last standing member is down
+# s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull
+# once its last standing member is down
+const GUARD_CAP := 11.0
 const ZIP_S := 0.3           # s: the flight back to its Hunter
 const ZIP_RANGE := 14.0      # m: farther (or out of walking reach), it blinks there instead
 const ORBIT_R := 0.75        # m from the Hunter Wisp's centre
