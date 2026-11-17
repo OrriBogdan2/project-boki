@@ -10055,3 +10055,4 @@ READY ext/slam-follow-through-port a612d42273 (time map + blend_out for 8 slams,
 READY ext/ostra-gait-rebased-port 0ecded063c7 (Motley snap/snap_wind keep the fan in: T-pose 77% to 13%; bounding gait not ported, main has tread)
 READY ext/rimewright-skate-rebased-port 17b64eb0ed2 (glb_add_clips prunes replaced-clip orphans; skate gait not ported, Neve is on foot on main)
 READY ext/idle-gunslinger-rebased-port 5149267aa6 (Vex idle+stance clips onto v95 glb; x_breath dropped)
+READY ext/glider-heat-parity-port b2800c6221 (port of ext/glider-heat-parity: 6 heat rows to hunter_move.json with tags, live values kept (14 s glide held for owner), --glider-heat-check drives each row)
