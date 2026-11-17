@@ -321,6 +321,20 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - Keep the coin flip and add a follow-through: the head follows the coin, there is a small catch dip, and she pockets
     it.
+- **Done (ext/idle-gunslinger-rebased-port):**
+  - vex_clips.py bakes the idle (5 s) and the stance (6 s) on one set of feet (`FEET`). The left leg stands nearly
+    straight (13 to 16 deg). The right knee is soft (33 to 37 deg) and turned in (the pose key `FRk`), with the heel
+    9 deg up.
+  - The weight shift is lagged across pelvis, torso, head and hand (`LAG`). The cannon's weight leans the torso
+    against it.
+  - Idle: a scan of the horizon runs from 0.8 to 3.7 s (head first, then torso, pelvis and the cannon). Two blinks.
+  - Stance: two flips, with the head following the coin at 0.4 of the gaze. Each catch dips the hand, chest, pelvis
+    and head in turn. At 2.9 s she pockets the coin (its scale is 0 while it is in the pocket), the hand rests on the
+    hip, and the coin comes back out at 4.8 s.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 105 of 108 tracks): the v95 rig has no `x_breath` bone, so the breath is not in the game build (the script still adds it when it bakes a blend).
+  - The script now finds the atlas and normal map next to the blend. Their paths were saved relative to the stage
+    root, so an export from any other directory had no textures.
+  - Alternative, not done: catching the coin on the back of the hand.
 
 ### 11. Lace the Red Stitch (`archer`, art `hem`)
 
@@ -358,7 +372,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     - stance_front: the bow across her with the arrow nocked from f000; f005 to f007 the head scan the bow follows.
     - live: the feet stay planted through f019; the idle hands the stance over between f012 and f013 with no pop.
   - Alternative, not done: a thread between the fingers as its own mesh. The string of the bow is the thread.
-  - Ported onto the v95 model (ext/idle-archer-rebased-port): `glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --skip-missing`
+  - Ported onto the v95 model (ext/idle-archer-rebased-port): `glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`
     (not `--hold-moved-rest`: that held her hips and legs at rest, the feet sank 5 cm and the weight shift was lost).
     The v95 rig has no `x_breath` bone, so its track is dropped; the chest breath is the chest pitch only. `hem_clips.py`
     still adds the bone on the next re-bake from a blend (posekit `add_breath`). The feet slide about 2 cm over the shift
