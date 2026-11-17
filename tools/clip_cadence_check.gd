@@ -1,6 +1,6 @@
 extends RefCounted
 ## --clip-cadence-check: a warden clip must fit the kit's cadence. Per Hunter and move listed in
-## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "rate"/"scale" speeds it up,
+## content/rules/clip_cadence.json: the clip as played (content/rules/warden_anim/<art>.json "scale"/"rate" speed it,
 ## "fit" plays it over that many seconds, "cut" ends it early, "lead" skips its start; a "hold_from" move loops and
 ## is exempt) lasts no longer than the move's cadence (else it restarts mid-swing or pops into the next move), and
 ## its strike (the frame its hand moves fastest in the .glb) lands no more than the slack after the kit's hit time.
@@ -87,7 +87,7 @@ func _hero(id: String, art_name: String) -> int:
 		ok(
 			mv.has("hold_from") or played <= cadence + tail + float(table["tolerance"]),
 			(
-				"%s: the clip plays %.3f s, past its %.3f s cadence + %.2f s blend-out (rate, scale or cut it in warden_anim)"
+				"%s: the clip plays %.3f s, past its %.3f s cadence + %.2f s blend-out (rate/scale/cut in warden_anim)"
 				% [what, played, cadence, tail]
 			)
 		)
