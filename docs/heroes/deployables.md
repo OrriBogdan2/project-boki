@@ -3,7 +3,7 @@
 Parity first (briefs/DECISIONS.md 2026-11-07). Companion to the barrier table (what placed walls *block*, on
 `ext/barrier-block-parity`); this one is how they *die*. Pinned by `--deployable-hp-check`
 (`tools/deployable_hp_check.gd`: one break case per object, through the real path).
-Sources: `briefs/supervive-data/supervive_kits.md` (kit cards, "KITS" below), `briefs/hero-ref/breah.md` (Tetra footage),
+Sources: `sv/briefs/kits.md` (kit cards, "KITS" below), `briefs/hero-ref/breah.md` (Tetra footage),
 `tamsin.md` (Celeste), `bjorn.md` (Oath), `dancer.md` (Shiv), each hero doc's source rows.
 
 ## What the source says (all of it)

@@ -116,11 +116,11 @@ In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets 
 
 Every level past the first adds the same share of a Hunter's level-1 numbers (`content/rules/level_growth.json`, `scripts/match/level_growth.gd`), as in the source. Asserted by `--level-growth-check`.
 
-**What the source does** (settled from briefs/supervive-data):
-- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (docs/SUPERVIVE_DATA.md section 7) and each ability has an AP ratio on it (supervive_kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (supervive_kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
+**What the source does** (settled from sv/briefs):
+- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (sv/DATA.md section 7) and each ability has an AP ratio on it (sv/briefs/kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (sv/briefs/kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
 - **Ability healing** is on the same Power (no heal lists a max-health ratio; heal upgrades are flat percentages: Elluna's Moonlight Blessing, Oath's Regen Field, Brall's Rebuke).
-- **Max health** grows ~6% of base a level, a straight line (docs/SUPERVIVE_DATA.md section 6, all 24 hunters' stats).
-- **Shields**: Oath's Brightshield scales with max health (supervive_kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
+- **Max health** grows ~6% of base a level, a straight line (sv/DATA.md section 6, all 24 hunters' stats).
+- **Shields**: Oath's Brightshield scales with max health (sv/briefs/kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
 - **Weapon (LMB) damage** and knock heals: the data has no level-1/level-15 pair, so it settles nothing. Ours stays flat (weapon) or a share of max health (knock heals).
 
 **The curves** (multiplier on the level-1 number; ratio = ours now / source):

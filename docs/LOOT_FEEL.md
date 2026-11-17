@@ -1,9 +1,9 @@
 # Loot feel: chest, deathbox, take/swap tempo
 
-Measured on `main` (read from code and rules, 2026-11-09). Tags: **[D]** = SUPERVIVE data in
-`briefs/supervive-data`, **[F]** = footage / `briefs/hero-ref`, **[-]** = no source.
+Measured on `main` (read from code and rules, 2026-11-09). Tags: **[D]** = the reference data in
+`sv/briefs`, **[F]** = footage / `briefs/hero-ref`, **[-]** = no source.
 
-**Source search result:** `supervive_kits.md`, `supervive_physics.md`, `PHYSICS_PARITY.md`, every
+**Source search result:** `sv/briefs/kits.md`, `sv/briefs/physics.md`, `PHYSICS_PARITY.md`, every
 `briefs/hero-ref/*.md` sheet and the `ext/hero-ref-footage` READMEs/OCR contain nothing on chests,
 deathboxes, loot windows or loot interrupts (the footage is per-hero ability capture only). So no number
 below can be called wrong against the source, and none was changed. A loot-specific capture is needed
