@@ -5460,13 +5460,6 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", TipText.send(String(k.rec.get("name", "your Boki"))))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
