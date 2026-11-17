@@ -95,6 +95,8 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 # ------------------------------------------------------------------ the order
 ## Give the order. Returns false (and says why) if it cannot be done. `target` is for chase.
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
+	if k.wisp:
+		return false          # (a wisp takes no orders: KinWisp)
 	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
@@ -314,7 +316,8 @@ static func carry_tick(k: Kin, dt: float) -> void:
 	var o := k.owner_h
 	if o == null or k.cmd == "return" or not k.giant.is_empty() or KinMerge.active(o):
 		return
-	var steady: bool = o.grounded and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty() and not o.downed and not o.dropping
+	# (a rider held on the ship's deck counts as grounded: it stays on, not off and back each beat, ring and sound)
+	var steady: bool = o.grounded and not o.riding and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty() and not o.downed and not o.dropping
 	k.steady_t = k.steady_t + dt if steady else 0.0
 	if k.steady_t >= _r("hop_off_steady_s") and k.settle >= 0.35 and k.hesitate_t <= 0.0:
 		k.steady_t = 0.0
