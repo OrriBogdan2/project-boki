@@ -440,7 +440,6 @@ func _all() -> void:
 		AimKit.shown(P, "spread") and float(AimKit.entry(P, "spread")["deg"]) == float(P.wpn["fan_deg"])
 	)
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
 	var wear := []
 	var armor0: float = T.armor

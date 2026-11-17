@@ -8,21 +8,25 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 |---|---|
 | `hud_panels.gd` (`HudPanels`, one on `hud.panels`) | nothing of its own: the fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability / weapon slots, gear, Boki card, squad, perks) draw on this canvas under `hud.c`, at most 20 times a second (item 94); world-anchored and mouse-following parts stay on `hud.c`, every frame. `hover_spots` fill here |
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin (a rival's turns warm with an up triangle 2+ levels above you, cool with a down triangle 2+ below: `LevelGap`), name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
+| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
-| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge discs (2+ charges only: round discs on the top edge, the recharging one fills its ring; a ready charge shows the next one's countdown big in the middle, as Supervive does, charges-sv-1116), key pill, rank pips (bottom edge, over the key pill), lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
 | `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved), and at the row's end the Hunter who finished them in a small red disc (`MateAlerts.killer`, read from `last_hit_by` when the row turns DEAD; none for a monster, the Blight or a fall). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `hunter_ult_tile.gd` (`HunterUltTile`) | the hero ultimate (R) on the ability row, one look for every hero in its ability colour: locked (padlock, LV 6), cooling (dim icon, sweep, countdown), blocked (off cooldown but stunned, downed or merged: a padlock over the dim icon), ready (`HudSlot.lit`: a steady lit rim and halo; a 0.6 s shine, white edge and a band of light, the moment it comes back from cooling or the level lock). Shots: `--ult-ready-shots` (GPU) |
-| `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
+| `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved), and at the row's end the Hunter who finished them in a small red disc (`MateAlerts.killer`, read from `last_hit_by` when the row turns DEAD; none for a monster, the Blight or a fall). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
 | `team_boki.gd` (`TeamBoki`, drawn right after `SquadFrames`) | a teammate's small Boki icon past the end of their row's bars, with a thin health bar, tinted when it is down, resting or its owner is a wisp. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
 | `ability_card.gd` (`AbilityCard`) | the one card that says what an ability does: name, key cap, cooldown, range, one plain sentence, and "Press <key> again to ..." for a two-step one. Every number is read from `content/archetypes/<hunter>.json` (the slot's `cooldown`, the dash's `cd`, the path its `card_range` names, its `again` phrase). Shown on hover in the Hunter pick (`KitCard`), the Relic screen (`HunterViewer`) and, with Tab held, over the HUD's ability row (the kit's live name and cooldown at its current rank). Check: `--ability-card-check` |
-| `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash (its own countdown while airborne: Grimble's pounce); one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
-| `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
+| `dash_slot.gd` | the dash as a normal ability slot (Shift): HudSlot's charge discs (2+ charges), a countdown for the next one, a flash and tick when one returns, a diamond for the air dash (its own countdown while airborne: Grimble's pounce); one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
+| `dash_slot.gd` | the dash as a normal ability slot (Shift): HudSlot's charge discs (2+ charges), a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `map_detail.gd` (`MapDetail`) | what the minimap draws: six default kinds (you, squad, Boki, nearest exit, Blight, pings); the rest (places, train, the hot zone ring, far exits, lairs, caches, beacons, rivals' boxes, ships, bounties, allies) show while Tab or the map key is held, while riding in, or once they matter (awake lair, scouted cache, lit beacon). One icon radius (`ICON_R`). The full map shows everything. `--minimap-check` counts the kinds; `--minimap-shots` takes 720p before/after crops |
 | `exit_mark.gd` (`ExitMark`) | the way to extract on both maps: one icon (disc and rising arrow) in three states, closed (grey), opening (ring fills, cyan), open (solid green, pulsing); the full map adds a pill with the timer ("OPENS 1:20", "OPENING 40%", "OPEN 0:12"); an opening or open one off the minimap pings on its edge. The same words feed the tooltip and the key |
@@ -65,6 +69,23 @@ Check: `--hudref-check` (segments follow max health, the chip holds then drains,
 drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears,
 the ultimate tile goes cooling -> ready with the shine on the redraw it comes back, steady after, padlocked while stunned,
 no second shine).
+
+## Damage numbers
+
+Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
+or your Boki, or taken by you) and picks one of three looks (`Fx.Num` HIT, KIN, TICK) from the hit itself (`Fx.num_kind`),
+never from the kit:
+
+| Look | Source | Size | Colour | Where, and what adds up |
+|---|---|---|---|---|
+| hit | your direct hits (and anyone's hits on you) | full | `HudStyle.HIT`, crit / armour / hurt colours | the hit spot; rapid hits add up |
+| Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
+| tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
+
+Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
+Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
+smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
+the draw cost doesn't grow with the sources. Check: `--number-looks-check`.
 
 ## Boki HUD: decision, state, gaps
 
@@ -128,6 +149,24 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
+
+## HUD size
+
+- Settings > Accessibility > Interface size has "HUD size" beside it (`hud_scale`, 80-130%, default 100%, held to
+  that range when settings load, so saves from before it load at 100%). It scales the match HUD only
+  (`HudScale`); the menus follow Interface size.
+- Each panel group (`SafeArea.begin` in `HudPanels`) is drawn scaled about the corner or edge it hangs from
+  (`HudScale.ANCHOR`), so it stays on its margin and grows inward; groups with one anchor scale together and
+  keep their spacing. Hover spots and the registry's rects follow the scale. A widget that hangs from somewhere
+  else inside a group (the Ways Out strip, the hidden tag) starts its own with `HudScale.begin` and hands back.
+- Growing never takes a corner into the one on its side under or over it: the factor steps down to what the last
+  pass's extents leave room for, never below 100% (on 720p the left column, minimap + squad over the kin card
+  and bars, tops out near 125%, and the big drop map holds it at 100%).
+- What sits clear of the panels gives way by the growth (`HudScale.from_edge`): the message lane's top, the edge
+  markers' left limit and bottom reach, the Blight line (also lifted off the grown vitals block, `HudScale.lift`);
+  the Gate prompt steps right of it (`HudScale.nudge_right`).
+- `--hudref-check` section 9 and `--safe-area-check --hud-scale=<0.8..1.3>`: no group off screen or overlapping at 80%,
+  100% and 130% (the former at 1280x720 and 2560x1080, dropping and on the ground).
 
 ## Safe area
 

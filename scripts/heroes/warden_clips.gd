@@ -477,6 +477,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
 			return {"proc": true}
+	if float(s.get("util", -1.0)) >= 0.0:      # a belt item's throw, place or read (UtilityPose): the rig's free hand
+		return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
 	var xt := float(s.get("extract_t", -1.0))
@@ -494,6 +496,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
+	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
+	for k in ["stomp", "drink"]:
+		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and st.has(k):
+			var clip := String(st[k])
+			var vel: Vector3 = s.get("vel", Vector3.ZERO)
+			var moving := Vector2(vel.x, vel.z).length() >= STILL
+			return {"clip": clip, "t": ph * lib.get_animation(clip).length, "upper": k == "drink" and moving}
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0, "out": FADE}     # (the sway lets go as quickly as it takes hold)
 	var lock := float(s.get("lockin_t", -1.0))

@@ -119,8 +119,6 @@ const WEAPONS := {
 		"dmg": 3.87,
 		"rate": 0.08,
 		"speed": 110.0,
-		"mag": 30,
-		"reload": 1.8,
 		"kb": 0.8,
 		"spread": 0.035,
 		"range": 9.5,
@@ -205,7 +203,7 @@ const PERKS := {
 	"quickhands":
 	{"name": "Quick Hands", "desc": "Reload 30% faster.", "icon": "medkit", "col": Color("ffd27a"), "max": 1},
 	"secondwind":
-	{"name": "Second Wind", "desc": "One extra dash charge.", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
+	{"name": "Second Wind", "desc": "Dropping below 30% health instantly refreshes your dash (once every 45s).", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
 	"featherfall":
 	{
 		"name": "Featherfall",
@@ -343,7 +341,7 @@ const PERKS := {
 	"deepmag":
 	{
 		"name": "Deep Magazine",
-		"desc": "20% more rounds before a reload.",
+		"desc": "20% more rounds in the drum.",
 		"icon": "satchel",
 		"col": Color("ffd27a"),
 		"max": 3,

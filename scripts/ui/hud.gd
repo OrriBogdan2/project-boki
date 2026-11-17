@@ -8,12 +8,11 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var hit_t := 0.0
+var reticle: Reticle        # the hit tick round the cursor (the reticle itself draws statically)
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
-var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
@@ -43,6 +42,7 @@ const GOLD := Color("f2c84a")
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	reticle = Reticle.new(m)
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
@@ -101,7 +101,7 @@ func _process(delta: float) -> void:
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
-	hit_t = maxf(0.0, hit_t - delta)
+	reticle.tick(delta)
 	_hud_tick(delta)
 	plates.tick(delta)
 	lowhp.tick(m.player, delta)
@@ -113,15 +113,6 @@ func _process(delta: float) -> void:
 	c.queue_redraw()
 	cursor.queue_redraw()
 	Prof.end()
-
-var hit_armor := false
-var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
-
-func hitmarker(crit: bool, armor := false) -> void:
-	hit_t = 0.14
-	dealt_at = m.time
-	hit_crit = crit
-	hit_armor = armor
 
 var flash_t := 0.0
 var flash_col := Color.WHITE
@@ -140,7 +131,7 @@ func _place_msgs() -> void:
 	msgs.fight = in_fight()
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
-	msgs.top = HudStyle.safe_pad(c.size).y + 72.0      # under the timer / Ways Out strip
+	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
@@ -169,7 +160,7 @@ const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
 
 ## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
 func in_fight() -> bool:
-	return m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
+	return m.player != null and m.time - maxf(m.player.hurt_at, reticle.dealt_at) < MSG_FIGHT_S
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -343,8 +334,8 @@ func _draw_parts() -> void:
 	if map_open():
 		full_map.draw(sz)
 	elif m.skydrop and m.skydrop.planning and p:
-		# the planning map was closed: a reminder of the countdown, and how to get it back
-		_ctext(Vector2(sz.x * 0.5, 40), "The ship sets off in %ds  ·  %s opens the map" % [int(ceil(m.skydrop.plan_t)), Settings.key_cap("map")], 18, GOLD, big)
+		# the planning map was closed: how to get it back
+		_ctext(Vector2(sz.x * 0.5, 40), "%s opens the map to plan your drop" % Settings.key_cap("map"), 18, GOLD, big)
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
@@ -769,12 +760,14 @@ func _draw_minimap(sz: Vector2) -> void:
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
-		if age > 1.6: continue
+		var life := float(sp.get("life", 1.6))
+		if age > life: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
 		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
 		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
-		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
+		if sp["kind"] == "wisp": col = Color("9fe8ff")      # a rival's killed Boki showing its owner (KinSummon)
+		var a := clampf(1.0 - age / life, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 2.5, Color(col, a))
@@ -851,6 +844,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	if not HudReveal.on(m, "weather"):
+		return
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y
@@ -1263,9 +1258,6 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 			c.draw_circle(r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2))
 	elif not p.wpn.get("ammo", true):
 		pass                       # no ammo (Data.weapon_stats): no count to show
-	elif p.reload_t > 0.0:
-		_text(r.position + Vector2(78, 46), "RELOADING", 16, Color("ffe7a8"), big)
-		_bar(Rect2(r.position + Vector2(78, 52), Vector2(170, 4)), 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"))
 	else:
 		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
 		var aw := TextCache.width(big, str(p.ammo), 28)
@@ -1465,7 +1457,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	else:
 		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to launch" % Settings.key_cap("jump"), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
-	if dr and dr.planning: sub = "The ship sets off in %ds  ·  %s opens the map to ping a spot" % [int(ceil(dr.plan_t)), Settings.key_cap("map")]
+	if dr and dr.planning: sub = "%s opens the map to ping a spot" % Settings.key_cap("map")
 	elif waits: sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))
 	elif i_lead and squad: sub = "Your squad rides your rocket down. %ds left aboard" % int(ceil(left))
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 62), sub, 14, INK)
@@ -1696,24 +1688,12 @@ func _draw_crosshair(p: Hunter) -> void:
 		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
 	elif p.wpn.get("melee", false):
 		pass
-	elif p.reload_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"), 3.0)
 	else:
 		# ammo left, as a thin ring that empties as you fire
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	if hit_t > 0.0:
-		var hc := Color("ffd23f") if hit_crit else Color.WHITE
-		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
-		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
-		# over bright effects
-		var k := hit_t / 0.14
-		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
-		var w := 3.0 if not hit_crit else 4.0
-		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
+	reticle.draw_tick(c, mp)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
@@ -1814,26 +1794,18 @@ func _draw_overhead(p: Hunter) -> void:
 	if alt > 6.0 and not p.grounded:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
-	if p.reload_t > 0.0:
-		# reloading: a filling ring beside your head, and the word under your bars
-		var rf := 1.0 - p.reload_t / float(p.wpn["reload"])
-		var rc := sp + Vector2(w * 0.5 + 16, 4)
-		c.draw_circle(rc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
-		c.draw_arc(rc, 8.0, 0, TAU, 24, Color(1, 1, 1, 0.15), 3.0, true)
-		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
-		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
 		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
+		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
 		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "REPAIRING", 11, ARMOR_COL, big)
+		_ctext(sp + Vector2(0, 33), "REPAIRING", 11, ARMOR_COL, big)
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
@@ -2327,10 +2299,10 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 		var ph := fmod(m.time * 1.8, 1.0)
 		if on_map.call(pv, 4.0):
 			c.draw_arc(pv, 6.0 + ph * 12.0, 0, TAU, 24, Color(GOLD, 1.0 - ph), 2.5, true)
-			c.draw_set_transform(pv, 0.0, Vector2(0.8, 1.05))
+			c.draw_set_transform_matrix(HudScale.xf * Transform2D(0.0, Vector2(0.8, 1.05), 0.0, pv))
 			c.draw_circle(Vector2.ZERO, 6.5, Color(0, 0, 0, 0.75))
 			c.draw_circle(Vector2.ZERO, 5.0, Color("ffd36a"))
-			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			c.draw_set_transform_matrix(HudScale.xf)
 		else:
 			edge_mini.add(pv - inner.get_center(), GOLD)
 
