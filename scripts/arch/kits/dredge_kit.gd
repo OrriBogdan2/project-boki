@@ -43,6 +43,7 @@ const GHOST_STEP := 0.4                # m between the samples that find the str
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const SPREAD_EASE := 35.0              # 1/s: how fast the drawn spread glides to the gun's (95% in ~0.09 s)
+const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -88,6 +89,9 @@ func _setup() -> void:
 	st["base_hp"] = h.max_hp
 	fx = LDFx.of(m)
 	broadside = DredgeBlast.new(self)
+
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [float(e_def()["angle"]), float(broadside.xd()["fan_deg"])])
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
@@ -343,7 +347,7 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
@@ -448,11 +452,16 @@ func _grab(f: Ent, ally := false) -> void:
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
 
+## The Anchor's wind-up holds him on its line (the "turn" e row) and the reel keeps him turned to the catch wherever
+## the cursor goes (footage 0147; the rmb row); the barge faces where it goes.
+func face_locked() -> bool:
+	return (wind > 0.0 or not pull.is_empty()) and h.roll_t <= 0.0
+
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
 ## Displace moves it ("haul"); here the arm follows it and the reel ends with it.
-func _tick_pull(_dt: float) -> void:
+func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
 	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
@@ -460,6 +469,9 @@ func _tick_pull(_dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
+	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
+	if to.length() > 0.05 and face_locked():
+		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
 	_reach(fe.pos + Vector3(0, 0.95, 0))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
@@ -786,6 +798,11 @@ func _tick_stop(dt: float) -> void:
 	h.vel.x = flat.x
 	h.vel.z = flat.y
 
+## A barge off a ledge falls on with the shared dash exit: no planted stop (an air pounce still stops short).
+func on_dash_off_ledge() -> void:
+	super()
+	stop_t = 0.0
+
 ## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
 func _barge_trail(dt: float) -> void:
 	trail_t -= dt
@@ -797,13 +814,13 @@ func _barge_trail(dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
-## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
-## explodes).
+## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (debris, not a burst: a dash
+## never explodes).
 func _clawed_turf(dir: Vector2) -> void:
 	if not h.grounded:
 		return
 	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
-	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
+	m.fx.debris(at, Color("6a5236"), 6, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Not mid-reel, mid-Anchor or mid-dive. While the arm flies out it goes, like E, and the arm flies on: the

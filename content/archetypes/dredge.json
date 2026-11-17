@@ -12,6 +12,7 @@
 	"silhouette": "the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back",
 	"card": {"role_word": "Brawler", "loop": "Brawler who reels you in: hook a foe to your feet, smash them, finish them up close.", "dash": "A short low lunge where you move; a pounce in the air.", "passive": "Knocks and assists add health, up to 10 stacks.", "rmb": "An abyssal arm grabs the first body and reels it in, stunned.", "e": "Slam your fist into the ground ahead: damage and a long stun.", "x": "Charge a fan while walking slowly, then two waves of brass slugs.", "weapons": {"shotgun": "Seven slugs, 6m out: wait and they fly in a tight pack, fire at once and they fan wide; rear hits hurt more."}, "chips": {"e": ["25 dmg"], "x": ["4 per slug"]}},
 	"signature": "shotgun",
+	"lmb": {"sfx": "dr_shot"},
 	"resource": {"id": "salvage", "name": "Salvage", "max": 10, "kind": "stacks", "per_stack": 0.025, "back_k": 0.5, "heal_knock": 0.16, "col": "#e0b040"},
 	"passive": {"name": "Salvage", "desc": "Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health."},
 	"gun": {"armor_k": 0.66, "src": "supervive.wiki.gg/wiki/Kingpin: 66% increased damage to Armor when fired without spread"},
@@ -37,6 +38,12 @@
 	"rank3": {"dash": "pellet hits trim 0.25s off the barge recharge, and a dash resets the gun's spread", "sec": "hitting a foe takes half the cooldown off", "kin": "double damage on a foe over the abyss, and +0.2s stun"},
 	"rank2": {"sec": "Rank 2: cooldown 12s -> 10.8s.", "dash": "Rank 2: recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s.", "kin": "Rank 2: cooldown 7s -> 6.3s, damage +15%, stun +0.1s."},
 	"rank_next": {"sec": "Rank 3: cooldown 12s -> 9.6s; hitting a foe takes half of it off.", "dash": "Rank 3: recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread.", "kin": "Rank 3: cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dredge.md:54 'the hunter turns to the cursor'"},
+		"rmb": {"early": "free", "late": "locked", "source": "briefs/hero-ref/dredge.md:78 and :90 the arm is thrown along the aim; through the pull he is braced side-on, 'turned toward the target', the cursor elsewhere (0147); fixed 11-10: the body followed the cursor"},
+		"e": {"early": "locked", "late": "free", "source": "briefs/hero-ref/dredge.md:119-125 slam 'in the facing/cursor direction', the shoulder turned away in the wind-up; ours: the direction locks at the press for the 0.38 s wind-up (owner item 33, docs/heroes/dredge.md)"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/dredge.md:256-257 the cone is 'locked at cast' and he stands planted; ours: kept turning to the cursor at a slow walk by owner item 36 (OWNER_REVIEW_1103.md:258-261)"}
+	},
 	"tells": {"half": "brass glints along the shoulder drum from 5 stacks", "full": "10 stacks: a brass halo ring at the feet and a bell within 20m", "dash_spent": "dash pips dark"},
 	"src": {
 		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",

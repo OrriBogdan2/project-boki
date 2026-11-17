@@ -42,7 +42,7 @@ func _tables(rules: Dictionary, tune: Dictionary) -> void:
 	mfc.ok(
 		(
 			HunterMove.brake_decel == float(p["brake"])
-			and HunterMove.ground_friction == float(p["ground_friction"])
+			and HunterMove.brake_friction == float(p["ground_friction"]) * float(p["braking_friction_factor"])
 			and HunterMove.glide_accel == float(p["glide_accel"])
 			and HunterMove.dive_vy == float(p["dive_vy"])
 		),
