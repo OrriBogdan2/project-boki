@@ -105,7 +105,7 @@
   "pick_dash": "%L",
   "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
-  "pick_ult": "Fusion joins you and %s for a while.",
+  "pick_ult": "Your Ultimate (%Y, %Z) is open; Fusion joins you and %s.",
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",

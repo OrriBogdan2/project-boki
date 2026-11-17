@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	m.start(
+	await m.start(
 		{
 			"tutorial": true,
 			"teams": 1,
@@ -221,6 +221,11 @@ func _words(m: Match) -> void:
 	ok(
 		String(seen["pick_ult"]["text"]).contains("Fusion") and String(seen["pick_ult"]["text"]).contains(fuse),
 		"pick_ult unlocks the Fusion with its own key: '%s'" % seen["pick_ult"]["text"]
+	)
+	var open_line: String = seen["pick_ult"]["detail"]
+	ok(
+		open_line.contains(ulti) and open_line.contains(String(p.ak.x_def().get("name", "?"))),
+		"pick_ult tells you the Ultimate (%s) is open too: '%s'" % [ulti, open_line]
 	)
 	var name: String = p.kin.rec.get("name", "")
 	ok(
