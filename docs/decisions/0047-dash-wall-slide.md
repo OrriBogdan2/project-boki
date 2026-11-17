@@ -6,8 +6,8 @@
 
 ## Problem
 What does a ground dash do when it meets a cliff, a Tenzo rock, Neve's wall or a prop at 20, 45 or 80 degrees: slide, stop
-or kick? Source, by rank: [game data] SUPERVIVE moves on Unreal's CharacterMovementComponent (its settings are in
-briefs/supervive-data/supervive_physics.md), and its dashes are velocity curves (DashCurves) on it. A blocked move there
+or kick? Source, by rank: [game data] REFERENCE moves on Unreal's CharacterMovementComponent (its settings are in
+sv/briefs/physics.md), and its dashes are velocity curves (DashCurves) on it. A blocked move there
 slides along the surface: the part into the wall is dropped and the tangent part is kept, at any angle, with no stop and
 no rebound. So a dash keeps cos(angle to the wall) of its length along the face: 0.94 at 20 degrees, 0.71 at 45, 0.17
 at 80. [footage] owner_mantle_clip 17.9-18.6 s: a dash into a rim carries on at dash speed (no stop). No source clip of

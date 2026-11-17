@@ -1,7 +1,7 @@
 # Dash poses by direction
 
 Dashes follow WASD (DECISIONS), so a Hunter aiming forward often dashes back or sideways. What the body does then,
-per Hunter, from the source (data `briefs/supervive-data`, footage `briefs/hero-ref`). Read it with
+per Hunter, from the source (data `sv/briefs`, footage `briefs/hero-ref`). Read it with
 `--dash-dir-shots` (a `DASHDIR_SHOT` line per frame: how far the body is off the dash, the clip's own turn, the move).
 
 The body turns to the dash by itself (`Hunter._process`, `roll_dir`) unless the kit keeps the aim through it

@@ -5,7 +5,7 @@
 - **Area:** movement
 
 ## Problem
-Owner playtest 11-13: dash-gliding "doesn't give the speed it should (like Supervive) ... not fluent, especially Brall ground RMB + glide or dash + glide". Measured on main 8ef7d80c02: 1 s into a dash-glide 8.5 m/s (`--move-feel-check` pinned it at <= 9 for the owner's 11-08 "bleeds back within 1-2 s", while MOVEMENT_FEEL.md asked >= 10.5). Brall: his Rampage and Lunge set a 0.35 s glider wind-down at their end; a jump and a glide press inside it waited 0.2 s with Space, and the glide button's press was dropped (it only armed while the glider could open).
+Owner playtest 11-13: dash-gliding "doesn't give the speed it should (like the reference) ... not fluent, especially Brall ground RMB + glide or dash + glide". Measured on main 8ef7d80c02: 1 s into a dash-glide 8.5 m/s (`--move-feel-check` pinned it at <= 9 for the owner's 11-08 "bleeds back within 1-2 s", while MOVEMENT_FEEL.md asked >= 10.5). Brall: his Rampage and Lunge set a 0.35 s glider wind-down at their end; a jump and a glide press inside it waited 0.2 s with Space, and the glide button's press was dropped (it only armed while the glider could open).
 
 ## Options
 1. Tuning only (glide drag), Brall untouched.
