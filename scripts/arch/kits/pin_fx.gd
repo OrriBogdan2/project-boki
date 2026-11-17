@@ -45,6 +45,7 @@ const DEEP := Color("7a0c14")       # her laces in shade: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
+const TINT_WALK := 0.45         # the Spirit Walk wash while she walks clear of everything (1 = inside something)
 const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
 const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
@@ -120,6 +121,8 @@ func _ready() -> void:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
+	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
+	aura.material_override.set_shader_parameter("bands", 3.0)
 
 func _arrow_node() -> Node3D:
 	var n := Node3D.new()
@@ -540,13 +543,10 @@ func _tick_bursts(delta: float) -> void:
 		KitShaders.param(n, "power", 1.6 * (1.0 - u))
 
 # ------------------------------------------------------------------ Spirit Walk aura
-var aura: MeshInstance3D = null
+var aura: MeshInstance3D       # built with the pools above, hidden until she walks
 
 ## A soft red shell over her while she walks as a spirit (k 0 = off).
 func aura_on(k: float) -> void:
-	if aura == null:
-		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
-		aura.material_override.set_shader_parameter("bands", 3.0)
 	aura.visible = k > 0.01
 	if aura.visible:
 		aura.global_position = h.position + Vector3(0, 0.9 * float(h.cdat.get("scale", 1.0)), 0)
