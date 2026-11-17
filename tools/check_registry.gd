@@ -214,7 +214,6 @@ const CHECKS := {
 	"--model-draws": ["res://tools/model_draws.gd", "model_draws", null],  # surfaces per .glb
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--first-cast-check": ["res://tools/first_cast_check.gd", "first_cast_check", null],  # first use of each slot
-	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
 	# draw calls, tris, shadow lights, frame ms
@@ -362,13 +361,9 @@ const CHECKS := {
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],  # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],  # (GPU)
-	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
-	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
-	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--clan-roles-check": ["res://tools/clan_roles_check.gd", "clan_roles_check", null],      # ranks, kick, hand-off
-	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--low-fps-input-check": ["res://tools/low_fps_input_check.gd", "low_fps_input_check", null],
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
@@ -517,8 +512,6 @@ const CHECKS := {
 	"--lpage-drag-check": ["res://tools/lpage_drag_check.gd", "lpage_drag_check", null],      # L panel glove drag
 	"--loot-nudge-shots": ["res://tools/loot_nudge_shots.gd", "loot_nudge_shots", null],      # --shots-dir=<dir>
 	"--level-gap-check": ["res://tools/level_gap_check.gd", "level_gap_check", null],      # rival level badge gap
-	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
-	"--ability-bar-shots": ["res://tools/ability_bar_shots.gd", "ability_bar_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	# --shots-dir=<dir> --res=WxH
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],
@@ -583,9 +576,7 @@ const CHECKS := {
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],     # 2 games, relay
-	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],      # one walk speed
-	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--ult-ready-shots": ["res://tools/ult_ready_shots.gd", "ult_ready_shots", null],      # --shots-dir=<dir> (GPU)
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	"--tutorial-retry-check": ["res://tools/tutorial_retry_check.gd", "tutorial_retry_check", null],  # fall: again
@@ -627,13 +618,10 @@ const CHECKS := {
 	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the XP first-time lines
 	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
 	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
-	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--bus-sliders-check": ["res://tools/bus_sliders_check.gd", "bus_sliders_check", null],      # a volume per bus
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
-	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
-	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
 	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null], # ability cards = data
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
@@ -652,9 +640,6 @@ const CHECKS := {
 	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],  # bots wear gamer tags
 	"--glossary-check": ["res://tools/glossary_check.gd", "glossary_check", null],      # UI_FIRST15 4
-	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],  # bots wear gamer tags
-	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],      # Relics tile grid
-	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],      # no "Arena" in practice text
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
