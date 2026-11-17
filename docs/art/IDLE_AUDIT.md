@@ -242,6 +242,21 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - The same spring height, sinking lower into the box. He shuffles cards hand to hand in an arc.
 - **Seam:** remove both `ostra:*` entries from `STAND_OPEN`.
+- **Done (ext/idle-ostra-port):** tools/art1/ostra_clips.py `settle_on_spring`, `idle_add`, `stance_add` (curves by `loop_curve`,
+  a periodic Catmull-Rom, so every one closes on the seam in value and slope).
+  - Idle 5 s: two bobs (compress, hang, overshoot, settle). The box leads by 2 frames, the hips ride it, the chest 3 and
+    the head 5 frames behind, the hands 7 and 8. With no legs, the weight shift is the hips swaying side to side over
+    the spring. One breath per bob on a new `x_breath` bone (3 %, `posekit.add_breath`; the keys are in the script, but the v95 glb has no
+    such bone, so its track is dropped when the clips go on it: no breath yet).
+  - Hands low and loose; the right hand's fingers drum after each bob settles. The ripple's phase is the pose key `wph`,
+    rounded to whole turns of a loop: that was the 11 to 16 deg finger pop.
+  - Fidget at 2.55 to 3.8 s: the head rolls 43 deg, past natural, then snaps back with the grin pulled wide and the
+    jaw open (idle_front f007).
+  - Stance 6 s: the same spring, slower (one bob per 3 s), 6 cm lower into the box. The hands meet in an arc
+    and the card fan closes and opens between them, once per bob.
+  - Seams 0.0x the limit (`--clip-check`). Ported onto the v95 glb with `glb_add_clips.py ... idle,stance --drop-missing`
+    (the old build's clips; 38 of 39 idle tracks map). Old build's run: before jobq `20261107-200001-02555`, after:
+    `20261108-102654-11251`.
 
 ### 7. Meeko the Dawnfox (`tender`, art `pip`)
 
@@ -358,7 +373,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:stance` (`bulwark:idle` closed by ext/anim-pilot-four), `ostra:idle`, `ostra:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
+`STAND_OPEN` lists what is still open: `bulwark:stance` (`bulwark:idle` closed by ext/anim-pilot-four). Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
 ## Verifying a rework

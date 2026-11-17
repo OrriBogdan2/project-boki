@@ -2,6 +2,8 @@
 with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
 only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--hold-moved-rest]
+--drop-missing: a track of a node the target lacks (a bone the old build added, Motley's x_breath) is dropped, and
+printed, instead of stopping the run.
 --hold-moved-rest: a node whose rest (translation/rotation) differs between the two builds (a spring bone the new model moved)
 gets its target rest held for the whole clip instead of the source's keys; the held names are printed. Use it only when the
 moved nodes are ones the clips hold still anyway (spring chains: the runtime sim moves them).
@@ -44,7 +46,7 @@ def write(path, j, bin_):
         f.write(bin_)
 
 
-def add(tj, tb, sj, sb, wanted, hold=False, held=None):
+def add(tj, tb, sj, sb, wanted, hold=False, held=None, dropped=None):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
     snames = {n.get("name"): n for n in sj["nodes"]}
 
@@ -89,7 +91,10 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
         for ch in a["channels"]:
             nm = sj["nodes"][ch["target"]["node"]].get("name")
             if nm not in names:
-                raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
+                if dropped is None:
+                    raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
+                dropped.add(nm)
+                continue
             sm = a["samplers"][ch["sampler"]]
             if hold and rest_moved(snames[nm], tj["nodes"][names[nm]]):
                 path = ch["target"]["path"]
@@ -112,15 +117,18 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
 
 if __name__ == "__main__":
     hold = "--hold-moved-rest" in sys.argv
-    args = [x for x in sys.argv[1:] if x != "--hold-moved-rest"]
+    args = [x for x in sys.argv[1:] if not x.startswith("--")]
     target, source, keys = args[:3]
     out = args[3] if len(args) > 3 else target
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
     held = set()
-    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held)
+    dropped = set() if "--drop-missing" in sys.argv else None
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held, dropped)
     write(out, tj, tb)
     print("added", len(done), done)
+    if dropped:
+        print("dropped (not in the target):", sorted(dropped))
     if hold:
         print("held at target rest:", sorted(held))
