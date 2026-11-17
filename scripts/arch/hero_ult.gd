@@ -8,14 +8,14 @@ extends RefCounted
 
 static var _casts := 0            # cast ids are "<hero>_<n>", one per cast, unique in the run
 
-## The X press after main's level gate: a recast while it runs (ult_recast), else nothing while busy, merged or
+## The X press after main's level gate: a recast while it runs (ult_recast), else nothing while busy or
 ## cooling down, else `start` (the kit's own cast). True when the press did something; main denies on false.
 static func press(k: ArchKit, start: Callable) -> bool:
 	if k.x_def().is_empty():
 		return false
 	if k.ult_running():
 		return k.ult_recast()
-	if k.busy() or KinMerge.active(k.h) or float(k.cd["x"]) > 0.0:
+	if k.busy() or float(k.cd["x"]) > 0.0:
 		return false
 	if not bool(start.call()):
 		return false
@@ -64,8 +64,8 @@ static func slot_info(k: ArchKit) -> Dictionary:
 	var xd := k.x_def()
 	var cd_left := float(k.cd["x"])
 	var unlock := int(Hunter.ULT_AT[0])
-	# off cooldown and unlocked but press() would refuse it: busy (downed, stunned, riding, hexed) or merged
-	var blocked := cd_left <= 0.0 and k.h.lvl >= unlock and not k.ult_running() and (k.busy() or KinMerge.active(k.h))
+	# off cooldown and unlocked but press() would refuse it: busy (downed, stunned, riding, hexed)
+	var blocked := cd_left <= 0.0 and k.h.lvl >= unlock and not k.ult_running() and k.busy()
 	return {
 		"name": String(xd.get("name", "")), "short": String(xd.get("short", "")), "icon": String(xd.get("icon", "")),
 		"col": k.col_of(xd), "desc": String(xd.get("desc", "")), "cd": cd_left, "cd_max": cooldown(k),

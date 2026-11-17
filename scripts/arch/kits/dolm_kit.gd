@@ -355,9 +355,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
-	if not h.atk.can_fire() or KinMerge.transforming(h):
-		if lmb_t >= 0.0 and flow.pauses_hold("lmb") and not KinMerge.transforming(h):
+	if not h.atk.can_fire():
+		if lmb_t >= 0.0 and flow.pauses_hold("lmb"):
 			# a dash whose hold row keeps the Quake Fist charge: it charges on (short of the auto punch), its
 			# lane stays up, and a release in it punches at the dash's end
 			if held:
@@ -431,7 +430,7 @@ func _boulder() -> void:
 
 ## The boulder leaves the hand on the clip's fling beat (`release`), toward the cursor as it is then.
 func _boulder_fly() -> void:
-	if not is_instance_valid(h) or h.dead or KinMerge.active(h):
+	if not is_instance_valid(h) or h.dead:
 		return
 	var bd: Dictionary = lmb_def()["boulder"]
 	var dir := h.aim_dir()
@@ -717,7 +716,7 @@ func cast_e() -> bool:
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
-		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
+		m.later(tell, func(): if is_instance_valid(h): _raise(p2, dir))
 	m.later(tell, _raise_feel)
 	return true
 

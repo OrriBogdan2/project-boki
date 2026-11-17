@@ -36,10 +36,6 @@ static func layer(m: Node) -> AimDraw:
 		m.add_child(d)
 	return d
 
-## Merged, or mid-transformation, or leaping home to merge: the form owns the buttons, nothing shows.
-static func blocked(h: Hunter) -> bool:
-	return KinMerge.active(h) or KinMerge.transforming(h)
-
 static func hero_col(h: Hunter) -> Color:
 	if h.ak != null:
 		return Color(String(h.ak.d.get("color", "#ffffff")))
@@ -222,8 +218,6 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 ## p: col (hero colour), flare (true: flare on reaching full), at ("cursor", or "body": round the hunter, where a
 ## source kit shows its charge arc on the hero, e.g. Kael's blast)
 static func charge(h: Hunter, k: float, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
@@ -234,16 +228,12 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 
 ## The full-charge flare on the cursor now. p: col (the accent colour)
 static func flare(h: Hunter, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	r["flare"] = AimReticle.FLARE_T
 	r["fcol"] = p.get("col2", p.get("col", accent_col(h)))
 
 ## The perfect-window star flash on the cursor (released on the ready frame). p: col (gold)
 static func perfect(h: Hunter, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
@@ -297,6 +287,6 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 
 static func _put(h: Hunter, id: String, e: Dictionary) -> void:
-	if h == null or h.m == null or blocked(h):
+	if h == null or h.m == null:
 		return
 	layer(h.m).put(h, id, e)

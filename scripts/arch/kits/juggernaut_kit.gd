@@ -333,9 +333,6 @@ func lmb_holding() -> bool: return lmb_t >= 0.0
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h):
-		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
-		return true
 	if riposte.move_k() <= 0.0:
 		# planted in the guard or the cleave: a slash press is kept for BUFFER and swings as the cleave lands
 		if held and not lmb_was: lmb_buf = BUFFER
@@ -344,16 +341,15 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
-	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
-	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
+	# a press while a pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
+	if not h.atk.can_fire() or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
 		# (a press in a dash is DashFlow's to hold)
-		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = BUFFER
+		if pressed and not in_dash(): lmb_buf = BUFFER
 		return true
 	if h.ctrl != "local":
 		# a bot: slashes up close, sometimes a Searing Wave from mid range
@@ -404,7 +400,7 @@ func _wave_preview() -> void:
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
 func _hold_waits() -> bool:
-	return flow.pauses_hold("lmb") and not KinMerge.transforming(h) and not meteor.running()
+	return flow.pauses_hold("lmb") and not meteor.running()
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing); no knockback.
 func _slash() -> void:
@@ -947,7 +943,7 @@ func _haul_land(k: float) -> void:
 ## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
 ## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
-	if not h.is_local() or busy() or KinMerge.active(h):
+	if not h.is_local() or busy():
 		return
 	var sl: Dictionary = rmb_def()["slam"]
 	if rmb_ready():

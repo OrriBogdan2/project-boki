@@ -21,7 +21,7 @@ func tick(m: Match) -> void:
 		_m = m
 		CombatBus.hit_landed.connect(_on_hit)
 	var p := m.player
-	if p.ak == null or p.downed or KinMerge.active(p) or not HeroUlt.ready(p.ak):
+	if p.ak == null or p.downed or not HeroUlt.ready(p.ak):
 		return
 	if m.time - _fight_at < HOLD_S:
 		return
