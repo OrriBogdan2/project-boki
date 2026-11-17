@@ -132,6 +132,7 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	msgs.top = DropHud.lane_top(m, m.player, msgs.top)      # and under the drop lines on the way down
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
