@@ -1387,7 +1387,7 @@ func _status_row(at: Vector2, e: Ent) -> void:
 	for ic in icons:
 		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
 		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if float(ic[3]) > 0.0:
+		if HudPlate.shows_time(float(ic[3])):
 			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
 		x += 16.0
 
