@@ -1,0 +1,56 @@
+== Project Boki health ==
+GDScript: 1878 files, 402102 lines; functions over 60 lines: 613; dynamic calls: 344
+God files (budget = max allowed lines):
+  scripts/match/match.gd: 5684 / 5725  ok
+  scripts/home/home.gd: 5290 / 5950  ok
+  scripts/main.gd: 1498 / 2061  ok
+  scripts/ui/hud.gd: 2447 / 2753  ok
+  scripts/match/models.gd: 3305 / 3500  ok
+  scripts/match/hunter.gd: 2904 / 2915  ok
+  scripts/match/world.gd: 2706 / 2850  ok
+Other files over 800 lines (split candidates):
+  tools/move_feel_check.gd: 2453
+  scripts/home/home_build.gd: 2232
+  scripts/match/hunter_anim.gd: 2204
+  tools/care_combo_check.gd: 2088
+  tools/archer_bulwark_combo_check.gd: 1723
+  scripts/match/lairs.gd: 1684
+  tools/dancer_jug_check.gd: 1634
+  tools/breah_combo_check.gd: 1506
+  tools/sfx_set_check.gd: 1497
+  tools/farm_tutorial_check.gd: 1435
+  tools/hero_vfx_check.gd: 1431
+  scripts/arch/kits/rimewright_kit.gd: 1382
+Duplicate content versions (migrate + delete the old one): kin + kin_v2
+Checks hooked inline in main.gd: 20 (target: a registry in tools/)
+Known debt entries (docs/DEBT.md): 231
+Style (docs/STYLE.md): long_line 4249, semicolon 3871, nested_ternary 286, history_comment 41
+STYLE FAIL: files got worse than tools/style_baseline.json:
+  scripts/arch/kits/juggernaut_kit.gd: long_line 0 -> 1
+  scripts/heroes/warden_clips.gd: long_line 0 -> 1
+  scripts/home/base_life.gd: long_line 0 -> 1
+  scripts/home/home_layout.gd: long_line 42 -> 44
+  scripts/main.gd: long_line 145 -> 146
+  scripts/match/ent.gd: long_line 1 -> 2
+  scripts/match/hero_vfx.gd: long_line 0 -> 1
+  scripts/match/kin_wisp_form.gd: long_line 0 -> 1
+  scripts/match/merge_moves.gd: long_line 0 -> 5
+  scripts/ui/hud_hover.gd: long_line 6 -> 7
+  scripts/ui/results.gd: long_line 25 -> 26
+  scripts/ui/zone_cards.gd: long_line 0 -> 1
+  tools/chore_check.gd: long_line 0 -> 4
+  tools/clarity_check.gd: long_line 0 -> 1
+  tools/come_look_check.gd: long_line 0 -> 1
+  tools/dash_frames.gd: long_line 0 -> 1
+  tools/dash_travel.gd: long_line 0 -> 1
+  tools/dredge_rmb_carry_check.gd: long_line 0 -> 1
+  tools/hero_title_check.gd: long_line 0 -> 1
+  tools/hold_release_check.gd: long_line 0 -> 1
+  tools/hunter_tint_shots.gd: long_line 0 -> 1
+  tools/kin_wisp_form_check.gd: long_line 0 -> 1
+  tools/remote_anim_check.gd: long_line 0 -> 1
+  tools/wisp_hit_rules_check.gd: long_line 0 -> 1
+  (run `python3 tools/style_lint.py --file <path>` for line numbers)
+sfx loudness: 1196 sounds, 12 categories, 19 outliers (19 accepted), OK
+HEALTH FAIL: style ratchet (docs/STYLE.md) (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)
+RC=1
