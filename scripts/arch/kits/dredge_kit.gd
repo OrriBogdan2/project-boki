@@ -66,6 +66,7 @@ var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
+var bloom_seen := 0.0           # the gun's bloom as of the last tick: what the next shot was fired at
 var shot_seen := 0              # the last weapon volley the kit dressed
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
 var armor_shreds := 0           # (tests) hits that shredded armor
@@ -238,10 +239,10 @@ func _tick_gun() -> void:
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
 		volleys += 1
-		# the first shot after the bloom folded back leaves exactly one shot's worth of it
-		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
+		var tight := bloom_seen <= 0.01      # fired with no bloom: the bloom folded back before this shot
 		tight_pg = "%s_%d" % [h.nid, h.shot_n] if tight else ""
 		_dress_volley()
+	bloom_seen = h.wbloom
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
@@ -256,7 +257,7 @@ func _tick_gun() -> void:
 func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
-	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
+	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
 	if not tells_visible():
