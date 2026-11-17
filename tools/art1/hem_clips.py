@@ -363,6 +363,15 @@ def action_set():
     return actionkit.clips(C, READY, A_Z, ("G", "RF"), (-0.06, 0.17, 1.55), ACT)
 
 
+ACT = {"stomp": {"set": {"G": (-0.3, 0.2, 0.78), "RF": (0.3, 0.06, 0.92)}, "top": {"G": (-0.38, 0.12, 0.98), "RF": (0.46, 0.02, 1.0)}, "hit": {"G": (-0.3, 0.2, 0.72), "RF": (0.34, 0.1, 0.9)}},
+       "drink": {"hand": "G", "sip": {"BA": n3((0.0, 0.25, -1.0)), "BS": n3((0.0, -1.0, 0.0))}},
+       "revive": {"kneel": {"G": (-0.14, 0.46, 0.36), "RF": (0.16, 0.46, 0.34), "BA": n3((0.05, 0.95, 0.1)), "BS": n3((0.0, -0.1, 1.0)), "RD": n3((0, 0.2, -1)), "RP": (-1, 0, 0), "fing": 0.3}}}
+
+
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("G", "RF"), (-0.06, 0.17, 1.55), ACT)
+
+
 def clips():
     out = [F("idle", STAND, idle), F("stance", STAND, stance)]
     out += crouch_set()

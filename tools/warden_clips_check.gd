@@ -6,6 +6,8 @@ extends RefCounted
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
 ## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
 ## move ends keeps them on the legs' own layer (no snap into the stance).
+## Every Hero with clips (HunterAnim's AIR_TILT on WardenClips): its dive clip is in the .glb, a plunge tips it
+## nose-down, and on the ground the body is upright again (the glider's bank: --glide-bank-check).
 ## Never touches the save.
 
 const WardenStatesCheck := preload("res://tools/warden_states_check.gd")
@@ -35,6 +37,7 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	_finishers()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
 		_air(String(id))
@@ -76,7 +79,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		want.append(cfg["weapon_out"]["clip"])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
-	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
+	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"], cfg["air"]["dive"]])
 	var sts: Dictionary = cfg["states"]
 	for k in sts:
 		if sts[k] is Dictionary:
@@ -200,8 +203,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
 
-## The shared actions (stomp, drink): a Hunter with a clip for it plays it, timed to the game's clock; one without
-## keeps the procedural pose. Motley, Albert, Sparkle and Sable (ext/anim-stomp-drink-3).
+## The three shared actions (stomp, revive, drink): a Hunter with a clip for it plays it, timed to the game's clock;
+## one without keeps the procedural pose. Motley, Albert, Sparkle and Sable have all three.
 func _finishers() -> void:
 	for id in ["ostra", "bulwark", "mage", "thief"]:
 		var art_name := WardenGlb.art(id)
@@ -220,16 +223,19 @@ func _finishers() -> void:
 				var secs := lib.get_animation(nm).length
 				var fits := absf(secs - float(k[1])) < 0.04
 				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+		var rv := String(sts.get("reviving", ""))
+		var loops := lib.has_animation(rv) and lib.get_animation(rv).loop_mode == Animation.LOOP_LINEAR
+		ok(loops, "%s: the revive kneel loops" % art_name)
 		# the slam is on the beat: the stomp state's phase 0.7 is the clip's 0.49 s
 		m.set_meta(WardenClips.STATE, {"stomp": 0.7, "grounded": true})
 		var pick := clips._pick({"stomp": 0.7}, 0.0)
 		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
 		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
 		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
-		var dk := clips._pick({"drink": 0.5, "vel": Vector3(2.0, 0.0, 0.0)}, 0.0)
+		var dk := clips._pick({"drink": 0.5, "vel": Vector3(3.0, 0.0, 0.0)}, 0.0)
 		var upper := bool(dk.get("upper", false))
 		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
-		ok(is_drink and upper, "%s: the drink rides the upper body on the move" % art_name)
+		ok(is_drink and upper, "%s: drinking on the move plays the drink on the upper body" % art_name)
 		m.free()
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,

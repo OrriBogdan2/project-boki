@@ -323,6 +323,15 @@ def garden_set():
          "pump": dict(SPRING, pel=(0.0, 0.0, 0.0), FL=(-0.12, 0.08, A_Z), FR=(0.14, -0.1, A_Z), FLp=0.0, FRp=0.0, LP=(-0.3, 0.1, 1.6), BE=aim(-4, 62), hed=(-0.28, 0.1, 0.05))}
     return gardenkit.clips(C, READY, P, {"lead": 0.08, "snap": 0.4})
 
+# ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
+ACT = {
+    "stomp": {"top": {"LP": (-0.42, 0.04, 1.14), "BE": aim(-8, -50)}, "hit": {"LP": (-0.3, 0.1, 0.84), "BE": aim(-6, -42)}},
+    "drink": {"sip": {"LQ": (-1.3, 0.0, 0.0), "BE": aim(-6, -62)}},
+    "revive": {"kneel": {"LP": (-0.12, 0.5, 0.4), "LQ": (0.9, 0.0, 0.0), "BE": aim(-34, -34), "UA": (-30, -50)}},
+}
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("LP",), (-0.045, 0.17, 1.64), ACT)
+
 
 # ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
 ACT = {

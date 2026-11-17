@@ -500,6 +500,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
+	# (a move that has played out leaves the states below showing: a hit, a stun, a landing)
 	if moves.has(km):
 		return _move_clip(km, moves[km], s)
 	if km != "" and not WardenCarry.owns(km):
