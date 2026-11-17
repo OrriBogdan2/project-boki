@@ -10130,3 +10130,4 @@ READY ext/hunter-glb-restore-1117 22cbfb71bad (SUPERSEDES c0218cc89d: origin/mai
 READY ext/stuck-integ-be6ffab8 162e669ceab05a4969829021a72ce2e9236d36b3 (#169 conflicts resolved vs main)
 READY ext/mantle-port-a 484da9507699ab5673b54ed6f6c1b35e9c713393 (#135 conflicts resolved vs main)
 READY ext/merge-lane-boki3d-1114 621b1b0bfa (lane boki3d r2: restore Lilybara+Umbrathere rigs #137 dropped; boki-rig-check 3 fail -> 0)
+READY ext/rig-bakeoff-weights-1117 bad56a3ef17 (rig bake-off method B: voxel skin weights on Sable, Tenzo, Kael, Lace; merged with origin/main, Kael glb keeps the voxel rebuild; Kael juggernaut width check 0.96x vs 1.00 floor is red on this branch (main 1.02x); no PR, coord picks)
