@@ -52,7 +52,8 @@ func _stage() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	# the first dance and first Tumble open a practice (echo_steps.gd, tumble_teach.gd): seen here, so the cues measured are the real ones
+	d["tutorial"] = {"hatched": true, "intro": true, "echo_practice": true, "first_tumble": true}
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
