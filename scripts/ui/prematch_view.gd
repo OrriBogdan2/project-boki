@@ -186,13 +186,8 @@ func _tick_label() -> void:
 		note_label.text = "%s locked in. Loading in..." % HunterViewer.display_name(pm.pick)
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
-<<<<<<< HEAD
 		var teach := pm.teach_line()
 		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
-=======
-		var alike := "" if pm.squad.size() == 1 else " No two on a squad can be the same one."
-		note_label.text = "Pick a Hunter." + alike
->>>>>>> origin/ext/ui-mode-cards
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)

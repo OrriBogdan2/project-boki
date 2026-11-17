@@ -503,7 +503,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
+					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -3528,7 +3528,6 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
-<<<<<<< HEAD
 		if locked: locked_tiles.append(tc)
 	if first and not locked_tiles.is_empty():
 		ExpFold.add(right, locked_tiles, "Locked drops")
@@ -3537,12 +3536,6 @@ func _open_expedition() -> void:
 	rx.add_child(UI.section("Match"))
 	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
 	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
-=======
-	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Match"))
-	# the queue: trios or solos (Data.MODES), two cards; bots fill the places nobody took
-	right.add_child(ModeCards.make(Data.saved_mode(), func(m): ModeCards.pick(m, _open_expedition)))
->>>>>>> origin/ext/ui-mode-cards
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3619,15 +3612,11 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-<<<<<<< HEAD
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
-=======
-	var o := Data.mode_opts(Data.saved_mode())      # its squads and hunters (bots fill the places nobody took)
->>>>>>> origin/ext/ui-mode-cards
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked

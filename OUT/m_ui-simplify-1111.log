@@ -1,0 +1,69 @@
+Auto-merging docs/HUD.md
+Auto-merging docs/UI_DESIGN.md
+Auto-merging docs/wiki/Farm-Reference.md
+CONFLICT (content): Merge conflict in docs/wiki/Farm-Reference.md
+Auto-merging scripts/combat/ability_fx.gd
+CONFLICT (content): Merge conflict in scripts/combat/ability_fx.gd
+Auto-merging scripts/core/care.gd
+Auto-merging scripts/core/class_unlock.gd
+Auto-merging scripts/core/work.gd
+Auto-merging scripts/home/home.gd
+CONFLICT (content): Merge conflict in scripts/home/home.gd
+Auto-merging scripts/home/home_black_market.gd
+CONFLICT (content): Merge conflict in scripts/home/home_black_market.gd
+Auto-merging scripts/home/home_classes.gd
+CONFLICT (content): Merge conflict in scripts/home/home_classes.gd
+Auto-merging scripts/home/home_econ.gd
+CONFLICT (content): Merge conflict in scripts/home/home_econ.gd
+Auto-merging scripts/home/home_market.gd
+Auto-merging scripts/match/fx.gd
+CONFLICT (content): Merge conflict in scripts/match/fx.gd
+Auto-merging scripts/ui/boki_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/boki_hud.gd
+Auto-merging scripts/ui/class_card.gd
+CONFLICT (content): Merge conflict in scripts/ui/class_card.gd
+Auto-merging scripts/ui/goal_tracker.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hud_slot.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_slot.gd
+Auto-merging scripts/ui/hud_style.gd
+Auto-merging scripts/ui/hud_vitals.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_vitals.gd
+Auto-merging scripts/ui/kin_reveal.gd
+Auto-merging scripts/ui/kinbox_view.gd
+Auto-merging scripts/ui/prematch_view.gd
+CONFLICT (content): Merge conflict in scripts/ui/prematch_view.gd
+Auto-merging scripts/ui/title.gd
+CONFLICT (content): Merge conflict in scripts/ui/title.gd
+Auto-merging scripts/ui/ui.gd
+Auto-merging scripts/ui/ui_theme.gd
+CONFLICT (content): Merge conflict in scripts/ui/ui_theme.gd
+CONFLICT (modify/delete): scripts/ui/ui_torn.gd deleted in origin/ext/ui-simplify-1111 and modified in HEAD.  Version HEAD of scripts/ui/ui_torn.gd left in tree.
+Auto-merging scripts/ui/work_view.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/class_unlock_check.gd
+Auto-merging tools/style_baseline.json
+CONFLICT (content): Merge conflict in tools/style_baseline.json
+Auto-merging tools/uipolish_check.gd
+CONFLICT (content): Merge conflict in tools/uipolish_check.gd
+Recorded preimage for 'docs/wiki/Farm-Reference.md'
+Recorded preimage for 'scripts/combat/ability_fx.gd'
+Recorded preimage for 'scripts/home/home.gd'
+Recorded preimage for 'scripts/home/home_black_market.gd'
+Recorded preimage for 'scripts/home/home_classes.gd'
+Recorded preimage for 'scripts/home/home_econ.gd'
+Recorded preimage for 'scripts/match/fx.gd'
+Recorded preimage for 'scripts/ui/boki_hud.gd'
+Recorded preimage for 'scripts/ui/class_card.gd'
+Recorded preimage for 'scripts/ui/hud.gd'
+Recorded preimage for 'scripts/ui/hud_slot.gd'
+Recorded preimage for 'scripts/ui/hud_vitals.gd'
+Recorded preimage for 'scripts/ui/prematch_view.gd'
+Recorded preimage for 'scripts/ui/title.gd'
+Recorded preimage for 'scripts/ui/ui_theme.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/style_baseline.json'
+Recorded preimage for 'tools/uipolish_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.

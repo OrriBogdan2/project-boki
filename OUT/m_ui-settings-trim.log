@@ -1,0 +1,28 @@
+Auto-merging docs/SETTINGS_AUDIT.md
+CONFLICT (content): Merge conflict in docs/SETTINGS_AUDIT.md
+Auto-merging docs/UI_DESIGN.md
+Auto-merging docs/wiki/Controls.md
+CONFLICT (content): Merge conflict in docs/wiki/Controls.md
+Auto-merging scripts/core/settings.gd
+Auto-merging scripts/home/home.gd
+CONFLICT (content): Merge conflict in scripts/home/home.gd
+Auto-merging scripts/ui/overlay.gd
+CONFLICT (content): Merge conflict in scripts/ui/overlay.gd
+Auto-merging scripts/ui/title.gd
+CONFLICT (content): Merge conflict in scripts/ui/title.gd
+Auto-merging scripts/ui/ui.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/title_check.gd
+CONFLICT (content): Merge conflict in tools/title_check.gd
+Auto-merging tools/uipolish_check.gd
+CONFLICT (content): Merge conflict in tools/uipolish_check.gd
+Recorded preimage for 'docs/SETTINGS_AUDIT.md'
+Recorded preimage for 'docs/wiki/Controls.md'
+Recorded preimage for 'scripts/home/home.gd'
+Recorded preimage for 'scripts/ui/overlay.gd'
+Recorded preimage for 'scripts/ui/title.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/title_check.gd'
+Recorded preimage for 'tools/uipolish_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.

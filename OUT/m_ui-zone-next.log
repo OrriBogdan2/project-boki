@@ -1,0 +1,54 @@
+Auto-merging content/maps/hollowcrown.json
+CONFLICT (content): Merge conflict in content/maps/hollowcrown.json
+Auto-merging content/maps/skyreach.json
+Auto-merging docs/DEBT.md
+CONFLICT (content): Merge conflict in docs/DEBT.md
+Auto-merging docs/wiki/Expeditions.md
+Auto-merging docs/wiki/Getting-Started.md
+Auto-merging docs/wiki/Rules.md
+CONFLICT (content): Merge conflict in docs/wiki/Rules.md
+Auto-merging scripts/core/data.gd
+CONFLICT (content): Merge conflict in scripts/core/data.gd
+Auto-merging scripts/home/home.gd
+CONFLICT (content): Merge conflict in scripts/home/home.gd
+Auto-merging scripts/match/heart.gd
+CONFLICT (content): Merge conflict in scripts/match/heart.gd
+Auto-merging scripts/match/match.gd
+Auto-merging scripts/ui/heart_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/heart_hud.gd
+Auto-merging scripts/ui/hud.gd
+Auto-merging scripts/ui/lobby.gd
+CONFLICT (content): Merge conflict in scripts/ui/lobby.gd
+Auto-merging scripts/ui/prematch_view.gd
+CONFLICT (content): Merge conflict in scripts/ui/prematch_view.gd
+Auto-merging scripts/ui/ways_out_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/ways_out_hud.gd
+Auto-merging tools/blight_check.gd
+Auto-merging tools/check_registry.gd
+CONFLICT (content): Merge conflict in tools/check_registry.gd
+Auto-merging tools/gen_wiki.py
+Auto-merging tools/heart_check.gd
+Auto-merging tools/make_hollowcrown.py
+CONFLICT (content): Merge conflict in tools/make_hollowcrown.py
+Auto-merging tools/make_skyreach.py
+Auto-merging tools/minimap_check.gd
+CONFLICT (content): Merge conflict in tools/minimap_check.gd
+Auto-merging tools/style_baseline.json
+CONFLICT (content): Merge conflict in tools/style_baseline.json
+Auto-merging tools/ways_out_map_check.gd
+Auto-merging tools/ways_out_map_ui_check.gd
+Recorded preimage for 'content/maps/hollowcrown.json'
+Recorded preimage for 'docs/DEBT.md'
+Recorded preimage for 'docs/wiki/Rules.md'
+Recorded preimage for 'scripts/core/data.gd'
+Recorded preimage for 'scripts/home/home.gd'
+Recorded preimage for 'scripts/match/heart.gd'
+Recorded preimage for 'scripts/ui/heart_hud.gd'
+Recorded preimage for 'scripts/ui/lobby.gd'
+Recorded preimage for 'scripts/ui/prematch_view.gd'
+Recorded preimage for 'scripts/ui/ways_out_hud.gd'
+Recorded preimage for 'tools/check_registry.gd'
+Recorded preimage for 'tools/make_hollowcrown.py'
+Recorded preimage for 'tools/minimap_check.gd'
+Recorded preimage for 'tools/style_baseline.json'
+Automatic merge failed; fix conflicts and then commit the result.

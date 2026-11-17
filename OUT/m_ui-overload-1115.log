@@ -1,0 +1,35 @@
+Auto-merging content/rules/first_match_guide.json
+CONFLICT (content): Merge conflict in content/rules/first_match_guide.json
+Auto-merging docs/DEBT.md
+Auto-merging docs/HUD.md
+Auto-merging scripts/match/first_match_guide.gd
+CONFLICT (content): Merge conflict in scripts/match/first_match_guide.gd
+Auto-merging scripts/ui/alive_counter.gd
+Auto-merging scripts/ui/hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud.gd
+Auto-merging scripts/ui/hud_panels.gd
+CONFLICT (content): Merge conflict in scripts/ui/hud_panels.gd
+Auto-merging scripts/ui/hud_reveal.gd
+CONFLICT (add/add): Merge conflict in scripts/ui/hud_reveal.gd
+Auto-merging scripts/ui/hud_reveal.gd.uid
+CONFLICT (add/add): Merge conflict in scripts/ui/hud_reveal.gd.uid
+Auto-merging scripts/ui/map_key.gd
+CONFLICT (content): Merge conflict in scripts/ui/map_key.gd
+Auto-merging scripts/ui/ways_out_hud.gd
+CONFLICT (content): Merge conflict in scripts/ui/ways_out_hud.gd
+Auto-merging tools/check_registry.gd
+Auto-merging tools/cooldown_text_check.gd
+Auto-merging tools/equal_check.gd
+Auto-merging tools/first_match_guide_check.gd
+CONFLICT (content): Merge conflict in tools/first_match_guide_check.gd
+Auto-merging tools/safe_area_check.gd
+Recorded preimage for 'content/rules/first_match_guide.json'
+Recorded preimage for 'scripts/match/first_match_guide.gd'
+Recorded preimage for 'scripts/ui/hud.gd'
+Recorded preimage for 'scripts/ui/hud_panels.gd'
+Recorded preimage for 'scripts/ui/hud_reveal.gd'
+Recorded preimage for 'scripts/ui/hud_reveal.gd.uid'
+Recorded preimage for 'scripts/ui/map_key.gd'
+Recorded preimage for 'scripts/ui/ways_out_hud.gd'
+Recorded preimage for 'tools/first_match_guide_check.gd'
+Automatic merge failed; fix conflicts and then commit the result.
