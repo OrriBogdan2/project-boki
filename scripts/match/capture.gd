@@ -155,7 +155,7 @@ const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 ## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It
 ## interrupts a scan here and a rescue (KinDowned); plain damage and the small shove most hits carry do not.
 static func controlled(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
+	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
 ## What stops a channel on the hunter (a scan): "jump" or "dash" (your choice), or "cc" (crowd control). "" = none.
 static func hunter_stop(h: Hunter) -> String:
@@ -165,8 +165,7 @@ static func hunter_stop(h: Hunter) -> String:
 		return "dash"
 	return "cc" if controlled(h) else ""
 
-## What stops a scan: "jump" or "dash" (your choice), crowd control, "far" (out of range), or the Boki gone. "" keeps
-## it going.
+## What stops a scan: "jump" or "dash" (your choice), crowd control, "far" (out of range), or the Boki gone. "" keeps it going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if k == null or not is_instance_valid(k) or k.dead or k.state != "dazed":
@@ -193,7 +192,7 @@ static func cancel(m, h: Hunter, why: String) -> void:
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
 		_fizzle(m, k)
-	var told := FirstCapture.fail(m, h, why)  # (the first time it names the cause itself)
+	var told := FirstCapture.fail(m, h, why)     # (the first time it names the cause itself)
 	# (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
 	if why in ["jump", "dash", "cc", "far"]:
 		if h.is_local() and m.hud and not told:
@@ -225,6 +224,8 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
 	m._catch(h, k)
+	if h.is_local():
+		UiSfx.captured()
 
 ## Release a capsule from your box. The Boki goes free (it is not put back in the world).
 static func release(m, h: Hunter, idx: int) -> bool:
@@ -297,7 +298,6 @@ static func _start_fx(m, h: Hunter, k: Kin, st: Dictionary) -> void:
 	st["beam"] = root
 	st["hum"] = "scanhum" + h.nid
 	Sfx.loop_start(st["hum"], "revive_hum", h.pos, 0.0, float(rules()["hear_range"]))
-	m.fx.ring(k.pos, 1.4, Color(beam_col(h), 0.8), 0.4)
 
 static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> void:
 	var root = st.get("beam")
@@ -337,11 +337,13 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var tier := rarity_tier(k)
 	m.sfx(rules()["pop_sounds"][tier], k.pos, 0.0)
 	m.sfx("scan_call", k.pos, -2.0)
+	if h == m.player:
+		RaritySting.claim(m, k)
 	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
 		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
-	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
-	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)
+	m.fx.burst(k.pos + Vector3(0, 0.6, 0), KinTypeTrail.colour(String(k.sp.get("type", "")), col), 16, 3.5, 0.6)
+	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)      # the catch: --capture-read-check (main) keeps this ring
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()
 	sm.radius = 0.16; sm.height = 0.32

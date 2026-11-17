@@ -1,10 +1,11 @@
 class_name ItemHold
 extends RefCounted
 ## Holding a shaping item at home (briefs/design/GARDEN_MODERN.md 1.3). "Hold" on an item in the bag puts it in your
-## hand; walk up to a Boki and its ItemPreviewCard slides in while the model tries the change on for a moment.
-## Press interact there to give it (the feed path, home.gd _care_feed); walk away from that Boki and the hold ends,
-## the item still in the bag. The feed menu shows the same card when a row is hovered (peek()).
-## Distances and times: content/rules/garden_items.json hold. home.gd calls tick() each frame.
+## hand; walk up to a Boki and its ItemPreviewCard slides in while the model tries the change on for a moment, and
+## ticks softly while it is up (GardenSfx.card_tick). Press interact there to give it (the feed path, home.gd
+## _care_feed); walk away from that Boki and the hold ends, the item still in the bag. The feed menu shows the
+## same card when a row is hovered (peek()). Distances and times: content/rules/garden_items.json hold. home.gd
+## calls tick() each frame.
 
 static var wanted := ""        # the item the bag's Hold button picked, taken up by the next tick at home
 
@@ -12,6 +13,7 @@ var h                          # the Home screen
 var card: ItemPreviewCard
 var item := ""                 # the item in your hand ("" = none)
 var near := {}                 # the Boki whose card is showing for the held item
+var tick_in := 0.0             # s until the card's next soft tick (GardenSfx.TICK_S apart while it is up)
 
 func _init(home) -> void:
 	h = home
@@ -54,6 +56,11 @@ func tick(can: bool) -> bool:
 		near = k
 		card.show_for(k["rec"], item)
 		try_on(k, item)
+		tick_in = 0.0
+	tick_in -= h.get_process_delta_time()
+	if tick_in <= 0.0:
+		tick_in = GardenSfx.TICK_S
+		GardenSfx.card_tick()
 	if not Input.is_action_just_pressed("interact"):
 		return false
 	h._care_feed(k["rec"], item)

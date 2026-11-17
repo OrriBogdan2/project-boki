@@ -14,6 +14,8 @@ extends RefCounted
 const READY_FLASH := 0.35      # s: the ring when a slot comes back
 const DENY_T := 0.15           # s: the frame's one red pulse when a press can't go
 const POP_T := 0.3             # s: the pop when a press lands
+const DISC_K := 0.26           # a charge disc's width / the slot's (the source: ~5 px on a ~19 px slot, DASH_UI.md)
+const DISC_GAP := 1.0          # px between two charge discs
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
 static var shown_pips := {}    # slot id -> the fill (0..1) of each charge pip last drawn (checks read it)
@@ -56,29 +58,18 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, icol)
 	H.slot_text.erase(id)
 	if cd_frac > 0.0:
-		# a charge coming back while another is ready (dashes): a light sweep and no number, so it never reads as locked
+		# a charge coming back while another is ready: a light sweep, so it never reads as locked
 		var shade := 0.22 if ready else 0.62
 		sweep(c, rect.grow(-2.0), cd_frac, Color(0.0, 0.0, 0.02, shade))
-		if ready and max_ch > 1 and cd_secs > 0.0:
-			_next_charge_text(H, id, rect, cd_secs)
-		if cooling:
+		# the next charge's countdown shows big in the middle while another is ready, as the source shows it
+		if cooling or (ready and max_ch > 1 and cd_secs > 0.0):
 			var t := cd_text(cd_secs)
 			var fs := int(rect.size.x * (0.46 if t.length() < 3 else 0.38))
 			var tcol := HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING
 			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, tcol, 6)
 			H.slot_text[id] = t
 	if max_ch > 1:
-		var pw := minf(12.0, (rect.size.x - 12.0) / float(max_ch) - 2.0)   # the dash slot's row: clear of the key pill
-		var px := ctr.x - (pw * max_ch + 2.0 * (max_ch - 1)) * 0.5
-		var fills: Array = []
-		for i in max_ch:
-			var pr := Rect2(Vector2(px + i * (pw + 2.0), rect.end.y - DashSlot.PIP_Y), Vector2(pw, DashSlot.PIP_H))
-			var fill := clampf(charges - float(i), 0.0, 1.0)
-			c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
-			c.draw_rect(pr, Color(1, 1, 1, 0.18))
-			c.draw_rect(Rect2(pr.position, Vector2(pw * fill, pr.size.y)), col)
-			fills.append(fill)
-		shown_pips[id] = fills
+		shown_pips[id] = charge_discs(c, rect, charges, max_ch, col)
 	if label != "":
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
 	shown_keys[id] = key
@@ -94,11 +85,24 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if sfx_d.get("kind", "") == "reset":
 		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
 
-## A charge is ready and the next one recharges: its countdown small at the top, the slot not dimmed like a locked one.
-static func _next_charge_text(H, id: String, r: Rect2, secs: float) -> void:
-	var t := cd_text(secs)
-	HudStyle.ctext(H.c, r.position + Vector2(r.size.x * 0.5, 17.0), t, DashSlot.TOP_CD_FS, Color(HudStyle.INK, 0.9), 4)
-	H.slot_text[id] = t
+## The source's charge counter: a row of round discs centred on the slot's top edge, one per charge. A ready
+## charge is a disc in the slot's colour, a spent one dark with a light ring, and the recharging one fills its
+## ring clockwise. Returns each disc's fill (0..1) for the checks.
+static func charge_discs(c: CanvasItem, r: Rect2, charges: float, cap: int, col: Color) -> Array:
+	var d := minf(r.size.x * DISC_K, (r.size.x - 4.0) / float(cap) - DISC_GAP)
+	var x0 := r.get_center().x - (d * cap + DISC_GAP * (cap - 1)) * 0.5 + d * 0.5
+	var fills: Array = []
+	for i in cap:
+		var at := Vector2(x0 + i * (d + DISC_GAP), r.position.y)
+		var fill := clampf(charges - float(i), 0.0, 1.0)
+		c.draw_circle(at, d * 0.5 + 1.0, HudStyle.SHADE_EDGE)
+		c.draw_circle(at, d * 0.5, col if fill >= 1.0 else Color(0.06, 0.06, 0.1))
+		if fill < 1.0:
+			c.draw_arc(at, d * 0.5 - 0.75, 0.0, TAU, 20, Color(1, 1, 1, 0.55), 1.5, true)
+			if fill > 0.0:
+				c.draw_arc(at, d * 0.5 - 1.5, -PI / 2, -PI / 2 + TAU * fill, 20, col, 3.0, true)
+		fills.append(fill)
+	return fills
 
 ## A locked slot: the dimmed icon under a padlock and the key cap; "UNLOCK" in gold when a point can open it
 ## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
@@ -111,19 +115,49 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
 	var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
-	var lc := r.get_center() + Vector2(0, 4)
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
-	c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
-	H._rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
+	padlock(H, r.get_center() + Vector2(0, 4), lcol)
 	if can:
 		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
 	elif tag != "":
-		var tw := HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
-		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
+		var tw := TextCache.width(HudStyle.BIG, tag, 10) + 12.0
+		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))
 		H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
 		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
+
+## The padlock every locked slot shows, its body centred on `at`.
+static func padlock(H, at: Vector2, col: Color) -> void:
+	H.c.draw_arc(at + Vector2(0, -6), 5.0, PI, TAU, 12, col, 2.0, true)
+	H._rounded(Rect2(at + Vector2(-7, -6), Vector2(14, 11)), col, 3)
+
+## Over an ab_slot drawn not ready: off cooldown but it can't be cast now (stunned, downed, merged).
+## A dark veil and the padlock, so it never reads as ready or as cooling.
+static func lock_over(H, r: Rect2) -> void:
+	H._rounded(r.grow(-2.0), Color(0.0, 0.0, 0.02, 0.5), HudStyle.SLOT_RAD - 1)
+	padlock(H, r.get_center() + Vector2(0, 4), Color(HudStyle.INK, 0.9))
+
+## Over an ab_slot drawn ready: the ultimate's lit frame (a bright rim and a soft halo in the slot colour,
+## steady), and while `shine` runs 1 -> 0 after it comes back a white edge, a brightened icon and a band of
+## light crossing the slot left to right.
+static func lit(H, r: Rect2, col: Color, icon: String, shine: float) -> void:
+	var c: CanvasItem = H.c
+	H._rounded(r.grow(5.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3)
+	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col.lightened(0.25), 0.95), 2)
+	if shine <= 0.0:
+		return
+	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3)
+	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.27, Color(1, 1, 1, 0.7 * shine))
+	var w := r.size.x * 0.3
+	var bx := lerpf(r.position.x - w * 2.0, r.end.x + w, 1.0 - shine)
+	var band := PackedVector2Array([Vector2(bx + w, r.position.y), Vector2(bx + w * 2.0, r.position.y),
+			Vector2(bx + w, r.end.y), Vector2(bx, r.end.y)])
+	var inner := r.grow(-3.0)      # (inside the frame's rounded corners)
+	var clip := PackedVector2Array([inner.position, Vector2(inner.end.x, inner.position.y), inner.end,
+			Vector2(inner.position.x, inner.end.y)])
+	for part in Geometry2D.intersect_polygons(band, clip):
+		c.draw_colored_polygon(part, Color(1, 1, 1, 0.4 * shine))
 
 ## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
 static func deny_pulse(H, id: String, r: Rect2) -> void:
@@ -157,6 +191,7 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	var p: Hunter = H.m.player
 	var lv := int(p.slot_lv.get(slot, 1))
 	var can := p.can_level(slot)
+	RankMarks.note_face(slot, r)
 	if lv <= 0:
 		H.hover_spots.append([r, id])
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown

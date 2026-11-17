@@ -375,7 +375,7 @@ Notation:
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak and a "SPIKED" word | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
+| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
 | **Mass Guard** (auto wall 2.4m, follows owner) | the kin rolls into a ball for 0.15s, then the plate rises | the plate slams up: dust, a clunk; enemy shots spark off it | impact: utility thunk; while up, shots hitting it ping | utility (shield) | T0 | 0 | add `then.on_end`: burst 1.5m push 6 ("the plate drops"), so the end is visible and gives a peel moment both sides can play around |
 | **Gravity Wake** (dodge rider) | a purple ring shows at the dash's end for 0.15s before the pull | foes slide in with debris streaks | sweetener: whump | control | T1 | 0.05 | setter for Slam |
 | **Heavy Star** (merge) | 0.35s collapse animation: a purple vortex column, ground cracks radiating out | on_start burst 4.5m: damage 22, push 14, lift 8. Pulses every 1.5s (burst 2.6m) | each pulse has a 0.3s ground ripple tell, a low drone while merged, and footsteps 2× louder | control | T4 on start; pulses T2, T4 on spike | 0.45 start; 0.15 per pulse | add `spike` to the pulses (the setter lifts, the next pulse spikes): a rhythm opponents can learn and dodge between |
@@ -451,6 +451,18 @@ The theme (venom, gravity, prism, ...) only tints particles and picks the sweete
 changes the category colour of a decal or impact flash. This is KIN_GRAMMAR's Phase 4 "colour means
 effect category" made concrete.
 
+**Heals read one way, whatever gives them.** Every heal goes through `Hunter.heal`, which calls
+`Fx.healed`: the healed Hunter gets a soft green-gold glow (`#b8f06a`, the sustain colour) that rises
+over them and moves with them, and a green `+N` (`HudStyle.HEAL`) above the damage numbers. That covers
+Meeko's Hearthlight and Hearth Call, Albert's Mending Ground, Kael's Gilded Riposte, lifesteal (a Void
+weapon, a merge's leech, Fever), tonics and knock heals. A heal number is its own kind: it adds up only
+with heals, never with a hit or a Daze `+N`, and it still shows with damage numbers turned off. A heal
+too small to read (lifesteal on a light hit) waits, hidden, until the heals add up. While the glow is up,
+more heals only grow the number, so fast heals pulse instead of stacking. A Hunter you can't see shows
+nothing. A heal on an online teammate shows on the healer's screen straight away. A kit adds only its
+theme particles (Meeko's stars). No kit draws its own heal pulse or heal number. Checked by
+`--heal-read-check`.
+
 ### 5.2 Allegiance: whose is it
 
 Built (2026-11-11, docs/COMBAT_CLARITY.md): `SideColor.fx` leans other people's areas, telegraphs and shot halos to
@@ -501,7 +513,9 @@ global `freeze_frame()`. Online (it's disabled there today, since `net_on` skips
 while their hurtboxes keep updating (Sakurai's rule), only on the clients of the two players
 involved, plus a softer 50% version for the kin owner.
 
-| Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
+Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/impact_weight.json`):
+
+| Weight | What | Hold (struck body) | Attacker (melee only) | Shake on the struck player |
 |---|---|---|---|---|
 | T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
 | T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
@@ -510,7 +524,13 @@ involved, plus a softer 50% version for the kin owner.
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
 | T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
-Rules:
+- A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
+  or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
+  LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+  is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
+- No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
+- Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
@@ -543,7 +563,8 @@ Your own abilities, dashes, landings and hits never shake or kick your camera: i
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
-never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off).
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
+started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
 `--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
@@ -605,7 +626,7 @@ FeelSpec for one stage =
 | `split` | a fan flash at the muzzle |
 | `pierce` | the projectile keeps its streak through targets; a small tick per target |
 | `return` | a returning streak and rising whirr |
-| `spike` | downward slam streaks, "SPIKED" word, T4 |
+| `spike` | downward slam streaks, T4 |
 | `exploit` (new) | a payoff glyph flashes on the target (the state's icon cracking), T4 |
 
 | Delivery | Automatic tell shape |

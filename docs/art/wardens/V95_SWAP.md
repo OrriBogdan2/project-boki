@@ -40,6 +40,23 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
+The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
+were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
+the face and the print and flattens the shape. Now `python3 tools/art1/v95_to_game.py <Name>` (Albert ... tarek, the
+v95 folder names) takes the Hunter's current master (CURRENT_OVERRIDES.txt's last line for it, else current.json), and
+v95_swap.py's `keep_uv` mode decimates the master itself to `tris` (60k) keeping its UVs, materials and Meshy images
+(each scaled to 4096 at most, "v95", "v95b", ... in game), drops `drop_mats` (the master's copies of props the game
+.glb carries: Kael's sword, Lace's bow, Neve's spear, Tarek's eye stones, Meeko's sun and cloud, Gil's staff), and runs
+steps 2-4 unchanged on the Warden's current .glb (rig, clips, anchors and `keep` props as they are; fixed-offset
+`move_bones` are skipped: that .glb has them already). A spec's `own` object holds the keys only this mode uses.
+Then the .glb replaces the game's and Godot re-imports; run the checks as in step 3. A later promote into v95 reaches
+the game with the same command.
+
+## Sable 2026-11-14 (ext/ingame-sync-sable): tilt1112 master in game
+The 11-13 blocker below (left hand 6.0 -> 21.1x) was the new pistols fused to the thighs and coat, not the joint points:
+`detach` hand.L/hand.R from hips and their thigh brings the worst clip to 15.3 (bola; main 18.4), 0 clips over 18.5.
+
 ## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
 The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
 on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
@@ -94,6 +111,13 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Cinder 2026-11-13 (ext/cinder-ba-promote): B-A body live
+Owner pick B-A (`~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb`, CURRENT_OVERRIDES Cinder line): the curvy1113 B-A body (bust
+about two sizes up, waist and hips unchanged) under the live facekeep head, head_diff `[]`. The live hair is carried down
+past the neck cut at the back, and its dark locks are grown down from the cut at the front, so there is no hair ledge
+(no `--ramp`). Lava kept orange with glow (Meshy lavafix emission). Tail cut, swapped and checked as on 11-12; notes,
+sheets and the unpromoted B-A bust + S-B hips mix in `~/meshy/cinder-body-1113/`.
 
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:

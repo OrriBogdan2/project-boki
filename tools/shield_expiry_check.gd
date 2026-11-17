@@ -1,5 +1,5 @@
 extends RefCounted
-## --shield-expiry-check: the shield shell (ShieldLook) shows the real shield. A Tenzo punch shield (Molten Guard) is
+## --shield-expiry-check: the shield shell (ShieldLook) shows the real shield. A Tenzo punch shield (Shardskin) is
 ## hurt for part of its amount: the shell value follows the share left (within 10%); then it runs out: the shell
 ## pulses once, starting PULSE_S before the end, and nothing of it stays after the shield is gone. Another source
 ## (Effects "shield") reads the same. With --shots-dir=<dir> (under xvfb with a renderer) it writes a strip of the

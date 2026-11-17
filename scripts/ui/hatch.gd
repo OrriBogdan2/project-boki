@@ -60,7 +60,7 @@ var top_box: VBoxContainer    # the title and its line: centred, or over the pre
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
@@ -467,6 +467,7 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
+		UI.pick_taken()
 		_start_hatch()
 		return
 	chosen = i
@@ -515,7 +516,8 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var knock := "Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back."
+	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()

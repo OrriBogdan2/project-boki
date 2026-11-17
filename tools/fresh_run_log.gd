@@ -18,6 +18,8 @@ var shot_n := 0
 var gaps: Array = []
 var walls := {}
 var hidden: Array = []
+var _last_step := ""
+
 
 
 func run(m: Node) -> void:
@@ -123,8 +125,6 @@ func _sim_tick(m: Match, t: float) -> void:
 		gaps.append("match %s at %.0f s: no text or %.0f s stalled with no nag" % [tu.id(), t, tu.stall_t])
 	_fresh_log("match/" + tu.id(), int(tu.t), line, marker, tu.stall_t)
 
-
-var _last_step := ""
 
 
 ## A farm step before it is done: HOLD_S s of looking at the hint line and the world marker.

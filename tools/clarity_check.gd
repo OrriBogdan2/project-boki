@@ -23,7 +23,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -35,11 +35,11 @@ func run(main: Node) -> void:
 		h.ctrl = "idle"
 		if h != P and h.team == P.team: ally = h
 		elif h.team != P.team: foes.append(h)
-	ok(ally != null and foes.size() == 2, "a 2v2: one teammate, two rivals")
+	ok(ally != null and foes.size() == 3, "a 3v3: a teammate, three rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
-	ok(SideColor.of(m, P) == SideColor.YOU and SideColor.of(m, ally) == SideColor.ALLY, "you and your ally")
-	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "both rivals are the foe colour")
+	ok(SideColor.of(m, P) == SideColor.you() and SideColor.of(m, ally) == SideColor.ally(), "you and your ally")
+	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.foe()), "every rival is the foe colour")
 	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)
@@ -54,6 +54,7 @@ func run(main: Node) -> void:
 	_side_fx(m, P, ally, foes[0])
 	_body_tell(m, foes[0])
 	_boki_text(m, P, ally, foes[0])
+	_melee_stack(m, P, ally, foes)
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -67,8 +68,9 @@ func run(main: Node) -> void:
 	var k: Kin = ally.kin
 	ok(k != null, "the downed teammate has a Boki")
 	if k:
-		var riding := k.state == KinWispForm.STATE and BokiMarks.status(k) == ""
-		ok(riding, "its Boki rides on it as a wisp: no icon over it")
+		ok(k.state != KinWispForm.STATE, "a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state)
+		k.state = KinWispForm.STATE            # (a guardian's ride: summoned at the knock)
+		ok(BokiMarks.status(k) == "", "its Boki rides on it as a wisp: no icon over it")
 		k.state = "downed"
 		ok(BokiMarks.status(k) == "knock", "a Boki down too shows the knock")
 		k.state = KinWispForm.STATE
@@ -89,14 +91,14 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	ok(HudPlate.statuses(a).is_empty() and HudPlate.statuses(b).is_empty(), "nothing active: no CC row")
 	a.stun_t = 2.0
 	b.slow_t = 3.0
-	var sa := _icon(a, "concussion")
-	var sb := _icon(b, "snare")
+	var sa := _icon(a, "status_stunned")
+	var sb := _icon(b, "status_slowed")
 	var stun_ok: bool = sa.size() == 1 and absf(float(sa[0][3]) - 2.0) < 0.01 and sa[0][2] == "STUNNED"
 	var slow_ok: bool = sb.size() == 1 and absf(float(sb[0][3]) - 3.0) < 0.01 and sb[0][2] == "SLOWED"
 	ok(stun_ok, "stunned dummy: one STUNNED icon, 2.0 s left")
 	ok(slow_ok, "slowed dummy: one SLOWED icon, 3.0 s left")
 	_run(m, 1.0)
-	var left := float(_icon(a, "concussion")[0][3])
+	var left := float(_icon(a, "status_stunned")[0][3])
 	ok(left > 0.9 and left < 1.1, "the stun timer shrinks (%.2f s left after 1 s)" % left)
 	a.root_t = 1.5
 	KitStatus.apply(a, "gnd", 4.0, 0.0, false, "check")
@@ -104,10 +106,11 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	KitStatus.apply(b, "rat", 2.5, 0.0, false)
 	b.remote = false
 	var kinds: Array = HudPlate.statuses(a).map(func(x): return x[0])
-	ok(kinds == ["concussion", "binding", "bolas"], "stun, root and Ground each get an icon, in order (%s)" % [kinds])
-	var g := float(_icon(a, "bolas")[0][3])
+	var in_order := kinds == ["status_stunned", "status_rooted", "status_grounded"]
+	ok(in_order, "stun, root and Ground each get an icon, in order (%s)" % [kinds])
+	var g := float(_icon(a, "status_grounded")[0][3])
 	ok(g > 3.9 and g <= 4.0, "Ground shows its time left (%.2f s)" % g)
-	var daze := _icon(b, "burst")
+	var daze := _icon(b, "status_dazed")
 	var daze_ok: bool = daze.size() == 1 and float(daze[0][3]) > 2.4 and HudPlate.statuses(b).size() == 2
 	ok(daze_ok, "a remote body's Daze and Slow: two icons, Daze 2.5 s left")
 	a.stun_t = 0.0
@@ -121,7 +124,7 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		mob = m.spawn_mob("skitter", a.pos + Vector3(4, 0, 0))
 	if mob:   # the monster plate draws the same row (hud._status_row)
 		mob.stun_t = 1.2
-		var ms := _icon(mob, "concussion")
+		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
 
@@ -137,29 +140,102 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
 	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
 
-## Crowd control on a body, on the body: the props show while it lasts, the tint pulses its colour, all gone after;
+## A 3v3 melee, every Boki out, all of them piled on one spot: ownership rings are thin and sit under every cast, a
+## rival's telegraph on top of yours on top of a teammate's, one full-strength fill under a body, and the rings
+## fade while a telegraph covers them and come back after (docs/COMBAT_CLARITY.md, "Ground order").
+func _melee_stack(m: Match, P: Hunter, ally: Hunter, foes: Array) -> void:
+	var at := P.pos
+	for h: Hunter in m.hunters:
+		h.teleport(at + Vector3(0.4 * float(m.hunters.find(h) % 3), 0, 0.4 * float(m.hunters.find(h) / 3)))
+		if h.kin:
+			(h.kin as Kin).state = "active"
+			(h.kin as Kin).teleport(h.pos + Vector3(0.3, 0, 0))
+	_run(m, 0.1)
+	m.fx.rings.clear()
+	for n: Node3D in m.fx.teles.duplicate():
+		m.fx.end_telegraph(n)
+	var ground := func() -> void:
+		for h: Hunter in m.hunters:
+			SideRings.tick(h)
+	ground.call()
+	var rings: Array = []
+	for h: Hunter in m.hunters:
+		rings.append(h.model.get_node_or_null("TeamRing"))
+		if h.kin:
+			rings.append((h.kin as Kin).ring)
+	var base := (rings[0] as MeshInstance3D).material_override as ShaderMaterial
+	var full_a := SideRings.YOU_A
+	ok(rings.size() == 12, "a 3v3 melee with every Boki out: 12 ownership rings (%d)" % rings.size())
+	var thin := is_equal_approx(float(base.get_shader_parameter("thickness")), SideRings.THIN)
+	ok(thin, "an ownership ring is the thinnest band")
+	ok(rings.all(func(r): return _prio(r) == SideColor.ORDER_RING), "ownership rings draw under every cast")
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "no telegraph: your ring is full strength")
+	var mine := _tele(m, P, at)
+	var theirs := _tele(m, foes[0], at)
+	var mates := _tele(m, ally, at)
+	m.fx.stack_telegraphs()
+	var ordered := _prio(theirs) > _prio(mine) and _prio(mine) > _prio(mates) and _prio(mates) > SideColor.ORDER_RING
+	ok(ordered, "draw order: rival over yours over a teammate's over the rings")
+	var full := m.fx.teles.filter(func(n): return _alpha(n) > 0.8)
+	ok(full == [theirs], "one full-strength fill under the pile: the rival's (%d)" % full.size())
+	AbilityFx.land(m, foes[1], at, 2.0, Color.ORANGE)
+	var landed: bool = not m.fx.rings.is_empty() and _prio(m.fx.rings[0]["node"]) == SideColor.ORDER_FOE
+	ok(landed, "a rival's landing ring is on the rival tier")
+	ground.call()
+	ok(rings.all(func(r): return SideRings.shown(r).a < 0.3), "every ownership ring is faded under the telegraphs")
+	_aim_order(m, P, foes[0])
+	for n: Node3D in [mine, theirs, mates]:
+		m.fx.end_telegraph(n)
+	m.fx.rings.clear()
+	ground.call()
+	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "the ring is back at full strength with the ground clear")
+
+func _tele(m: Match, by: Hunter, at: Vector3) -> Node3D:
+	var col := Color(SideColor.fx(m, by, Color.CYAN), 0.9)
+	return m.fx.telegraph_circle(at, 3.0, col, SideColor.order(m, by))
+
+func _prio(n: Node3D) -> int:
+	return (n.material_override as ShaderMaterial).render_priority
+
+func _alpha(n: Node3D) -> float:
+	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
+
+## AimKit draws a rival's telegraph in its own surface after yours.
+func _aim_order(m: Match, P: Hunter, foe: Hunter) -> void:
+	AimKit.circle(P, "own", {"all": true, "at": P.pos, "r": 3.0})
+	AimKit.circle(foe, "rival", {"all": true, "at": P.pos, "r": 3.0})
+	var d := AimKit.layer(m)
+	d.rebuild()
+	var n := d.mesh.get_surface_count()
+	ok(n == 2, "AimKit: yours and a rival's draw as two surfaces (%d)" % n)
+	ok(d.mat_foe.render_priority > d.mat.render_priority, "AimKit: the rival's surface draws after yours")
+	ok(d.covers(P.pos), "AimKit: the pile counts as covered")
+	AimKit.clear(P)
+	AimKit.clear(foe)
+
+## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
+## gone after;
 ## a cast glints the caster in their signature colour and fades.
 func _body_tell(m: Match, f: Hunter) -> void:
+	var looks := StatusLooks.of(m)
+	Sfx.listener = f.pos      # (StatusLooks draws near the camera focus only)
 	f.stun_t = 1.0
 	_run(m, 0.1)
-	var props := f.get_node_or_null("BodyTell") as Node3D
-	ok(props != null and (props.get_node("Stun") as Node3D).visible, "a stunned body spins the stars")
+	ok(looks.showing(f, "stun"), "a stunned body spins the stars")
 	ok(_same(BodyTell.tint_of(f), BodyTell.STUN_COL), "... and pulses the stun colour")
 	f.stun_t = 0.0
 	f.root_t = 1.0
 	_run(m, 0.3)
-	var r := props.get_node("Root") as Node3D if props else null
-	ok(r != null and r.visible and r.scale.y > 0.99, "a rooted body grows its tendrils")
+	ok(looks.showing(f, "root"), "a rooted body shows the stakes at its feet")
 	ok(_same(BodyTell.tint_of(f), BodyTell.ROOT_COL), "... and pulses the root colour")
 	f.root_t = 0.0
 	f.slow_t = 1.0
 	f.stagger_t = 0.0
 	_run(m, 0.05)
-	ok(props != null and (props.get_node("Slow") as Node3D).visible, "a slowed body drips frost")
+	ok(looks.showing(f, "slow"), "a slowed body shows the rings down its legs")
 	f.slow_t = 0.0
 	_run(m, 0.05)
-	var none := props != null and not ((props.get_node("Stun") as Node3D).visible
-			or (props.get_node("Root") as Node3D).visible or (props.get_node("Slow") as Node3D).visible)
+	var none := not (looks.showing(f, "stun") or looks.showing(f, "root") or looks.showing(f, "slow"))
 	ok(none and BodyTell.tint_of(f).a == 0.0, "nothing holding it: nothing on the body")
 	var rings0: int = m.fx.radial
 	f.cast_at = m.time
@@ -177,12 +253,12 @@ func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	ok(ally.kin != null and foe.kin != null, "your ally and the rival each have a Boki")
 	if ally.kin == null or foe.kin == null:
 		return
-	m.music_dir.last_fight = -99.0
+	P.combat_at = -99.0
 	ok(BokiChatter.heard(m, foe.kin) and BokiChatter.heard(m, ally.kin), "no fight: every Boki's line is drawn")
-	m.music_dir.last_fight = m.time
+	P.combat_at = m.time
 	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
 	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
-	m.music_dir.last_fight = -99.0
+	P.combat_at = -99.0
 	for k: Kin in [mine, foe.kin]:
 		k.unseen = false
 		k.teleport(P.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))

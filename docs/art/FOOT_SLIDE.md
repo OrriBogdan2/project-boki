@@ -45,7 +45,7 @@ table's after column rounded up to 0.05), or when a Hunter with stepping legs ha
 | Cinder (`ashwick`) | 2.40 (fwd 3.50 m/s) | 2.40 (fwd 3.50 m/s) | 2.40 |
 | Sparkle (`mage`) | 2.08 (back 3.50 m/s) | 2.08 (back 3.50 m/s) | 2.10 |
 | Kael (`juggernaut`) | 1.95 (back 3.00 m/s) | 1.95 (back 3.00 m/s) | 2.00 |
-| Meeko (`tender`) | 1.88 (left 3.50 m/s) | 1.88 (left 3.50 m/s) | 1.90 |
+| Meeko (`tender`) | 2.46 (back 3.50 m/s, main's v95 loops) | 1.80 (fwd 3.00 m/s, re-baked 11-13) | 1.85 |
 | Sable (`thief`) | 1.85 (fwd 3.00 m/s) | 1.85 (fwd 3.00 m/s) | 1.85 |
 | Lace (`archer`) | 1.73 (back 3.50 m/s) | 1.73 (back 3.50 m/s) | 1.75 |
 | Grimble (`dredge`) | 1.72 (back 3.50 m/s) | 1.72 (back 3.50 m/s) | 1.75 |
@@ -65,7 +65,7 @@ Worst slip per Hunter, origin/main ca96e707c5 (with the anim_audit `soles` compi
 
 | Hunter | main | after | Bar |
 |---|---|---|---|
-| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 1.00 |
+| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 0.95 |
 | Vex (`gunslinger`) | 2.03 (left 3.0) | 1.20 (left 4.0) | 1.20 |
 | Albert (`bulwark`) | 1.97 (right 4.0) | 1.34 (right 4.0) | 1.35 |
 | Cinder (`ashwick`) | 2.33 (left 3.5) | 1.40 (left 3.5) | 1.40 |
@@ -82,6 +82,33 @@ re-keyed to 0.667 and 0.583 s, the other directions are 1.033 and 0.667; `foot_m
 them), and Neve steps since ext/anim-neve-stride but has no bar. Albert's right strafe between the rings
 (1.08 to 1.34 m/s at 3.0 to 4.0) is the walk_r and run_r loops out of phase; his other directions stay under 0.8.
 The table below is the Nov 11 sweep.
+
+## Running off a swaying aim: the twist margin (Nov 15, ext/fix-vex-walk-1115)
+
+Owner bug 11-15: "Vex's walk was dragging her legs". The run-and-aim Hunters (`loco.aim_twist`: Vex, Lace, Cinder)
+play the forward run with the legs turned the way they go, and past 90 deg + `TWIST_HYST` (0.1 rad) off the aim the
+legs turn round to the back run, coming back inside 90 deg - 0.1. A gunslinger kiting sideways while the mouse sways
+by a few degrees crosses that margin over and over: each crossing swings the legs 180 deg across her front while the
+blend passes through the idle, and the body keeps moving at 4.55 m/s. `--foot-slide-check` now also runs each twist
+Hunter at its run speed 90 deg off an aim swaying 0.2 rad at 0.7 Hz (`WOBBLE` line):
+
+| Hunter | straight run worst | 90 deg, steady aim | 90 deg, aim sways 0.2 rad |
+|---|---|---|---|
+| Vex, 0.1 rad margin (main) | 0.95 | 1.34 | **3.30** |
+| Vex, `loco.twist_hyst` 0.35 | 0.95 | 1.34 | **0.97** (bar 1.0) |
+| Kael (strafe loops, no twist) | 1.08 | 1.11 | 1.35 |
+| Lace (`archer`), 0.1 margin | 4.50 (forward loop, open) | | 5.10 |
+| Cinder (`ashwick`), 0.1 margin | 1.40 | | 2.59 |
+
+`loco.twist_hyst` (rad, default `TWIST_HYST`) is a Hunter's own margin; at 0.35 the legs turn round at 110 deg off the
+aim and back at 70, so the torso can twist up to 110 deg off the legs. Lace and Cinder keep the default (owner order:
+only Vex changed); giving them the same margin is the open follow-up. The rig clip `--gameplay-media --media-clip=15`
+ends with the same 4 s "kite" on the game camera.
+
+Also on this branch (job 20261115-035206-a3): Vex's walk thigh stretch `stride` 1.5 to 1.2 and `foot_mps` [1.65, 5.0]
+to [1.45, 5.4] (forward run planted drift 0.44 to 0.04 m/s in the rig). Its strafe "slip" of 1.6 to 1.8 m/s in that
+rig was a measuring error: the strafe path is on sloped ground, so the lowest-30 % height band picks the wrong frames;
+the feet move against the body the same as in the forward run.
 
 ## The sweep, m/s of planted-foot slip
 
@@ -112,10 +139,10 @@ Tenzo 3.75 to 3.4.
 |  | back | 0.01 | 0.18 | 0.26 | 0.28 | 0.29 | 1.13 | 0.70 | 1.97 | 1.17 | 0.56 | 0.57 |
 |  | left | 0.00 | 0.34 | 0.52 | 0.61 | 0.25 | 1.31 | 1.93 | 0.73 | 2.13 | 1.10 | 1.12 |
 |  | right | 0.01 | 0.35 | 0.57 | 0.54 | 0.25 | 1.36 | 1.71 | 0.78 | 2.16 | 1.12 | 1.19 |
-| Meeko (`tender`, run 4.55) | fwd | 0.01 | 0.37 | 0.48 | 0.49 | 0.67 | 1.33 | 1.79 | 1.67 | 1.05 | 0.71 | 0.72 |
-|  | back | 0.01 | 0.44 | 0.43 | 0.36 | 0.51 | 1.34 | 1.80 | 1.77 | 0.86 | 0.48 | 0.49 |
-|  | left | 0.01 | 0.42 | 0.54 | 0.62 | 0.82 | 1.49 | 1.74 | 1.88 | 1.41 | 1.10 | 1.10 |
-|  | right | 0.01 | 0.39 | 0.52 | 0.59 | 0.81 | 1.42 | 1.75 | 1.79 | 1.39 | 1.12 | 1.09 |
+| Meeko (`tender`, run 4.55, re-baked 11-13) | fwd | 0.01 | 0.35 | 0.72 | 1.02 | 1.21 | 1.56 | 1.80 | 0.50 | 0.49 | 0.51 | 0.54 |
+|  | back | 0.01 | 0.40 | 0.58 | 0.80 | 1.11 | 1.25 | 1.41 | 1.44 | 1.24 | 0.95 | 0.95 |
+|  | left | 0.01 | 0.44 | 0.33 | 0.37 | 0.46 | 0.97 | 1.48 | 1.49 | 1.06 | 0.83 | 0.78 |
+|  | right | 0.01 | 0.40 | 0.21 | 0.30 | 0.50 | 0.92 | 1.41 | 1.56 | 1.02 | 0.83 | 0.81 |
 | Tenzo (`dolm`, run 4.65) | fwd | 0.01 | 0.39 → **0.27** | 0.67 → **0.40** | 0.49 → **0.40** | 0.49 → **0.51** | 0.92 → **0.45** | 2.30 → **0.50** | 2.34 → **0.70** | 1.96 → **0.85** | 1.02 → **0.89** | 1.00 → **0.89** |
 |  | back | 0.00 | 0.32 → **0.19** | 0.59 → **0.33** | 0.50 → **0.44** | 0.53 → **0.54** | 0.98 → **0.84** | 2.38 → **0.95** | 2.79 → **0.99** | 2.66 → **1.04** | 1.26 → **1.12** | 1.04 → **1.12** |
 |  | left | 0.00 | 0.42 → **0.35** | 0.79 → **0.50** | 0.97 → **0.63** | 1.01 → **0.76** | 1.50 → **0.75** | 2.28 → **0.73** | 2.57 → **0.76** | 2.90 → **0.87** | 3.14 → **2.43** | 3.27 → **2.65** |
@@ -132,3 +159,22 @@ Tenzo 3.75 to 3.4.
 |  | back | 0.01 | 0.52 | 0.84 | 0.71 | 0.89 | 1.55 | 1.82 | 1.75 | 1.54 | 1.35 | 1.39 |
 |  | left | 0.01 | 0.48 | 0.67 | 0.71 | 0.92 | 1.49 | 1.83 | 1.79 | 1.58 | 1.44 | 1.48 |
 |  | right | 0.01 | 0.42 | 0.63 | 0.68 | 0.92 | 1.55 | 1.71 | 1.76 | 1.59 | 1.48 | 1.50 |
+
+## Strafe drift, measured in the game rig (Nov 15, ext/fix-strafe-cadence-1115)
+
+`--gameplay-media --media-clip=15 --media-hunter=<id>` walks, runs, strafes and backpedals a Hunter on the game camera
+and logs the feet (`loco_<id>.tsv`); `--media-log` writes only the TSV, headless at a fixed 1/30 s step (a variable
+step skews the feet). The planted foot is the lowest 30 % of its height. The game leans every model 20 degrees toward
+the camera (`Cam.char_lean`), so a foot's world height mixes in its north-south position: on a strafe toward or
+away from the camera the old log picked the wrong frames as planted and read a strafe that looked ~35 % too slow
+(Vex 1.9 m/s drift, Kael 1.5). The log now reads height in the model's own frame (columns hL hR), and the drift is what the clips
+really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfect strafe still drifts about 0.3 m/s.
+
+| Hunter | Strafe L / R drift before (m/s) | after |
+|---|---|---|
+| Vex (`gunslinger`) | 0.34 / 0.35 | unchanged |
+| Cinder (`ashwick`) | -0.17 / -0.15 | unchanged |
+| Meeko (`tender`) | 0.49 / 0.49 | unchanged |
+| Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
+| Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
+

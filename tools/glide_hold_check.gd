@@ -339,9 +339,8 @@ func _flat_case(arch: String) -> void:
 	var line := "%s: the glider opening from a run-speed jump (%.1f m/s) adds no speed (gain %.2f m/s)"
 	ok(on_ground["seen"] and run >= RUN_MIN and _gain(r) <= SPEED_SLACK, line % [arch, run, _gain(r)])
 	r = _scenario(dash_end, 30.0)
-	if not SWALLOWS.has(arch):       # the wire swallows the press: nothing opens, nothing to measure
-		var end_line := "%s: the glider opening at an air Shift's end adds no speed (gain %.2f m/s)"
-		ok(_gain(r) <= SPEED_SLACK, end_line % [arch, _gain(r)])
+	var end_line := "%s: the glider opening at an air Shift's end adds no speed (gain %.2f m/s)"
+	ok(_gain(r) <= SPEED_SLACK, end_line % [arch, _gain(r)])
 	r = _scenario(fall, 30.0)
 	ok(_gain(r) <= SPEED_SLACK, "%s: the glider opening from a fall adds no speed (gain %.2f m/s)" % [arch, _gain(r)])
 

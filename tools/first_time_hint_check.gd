@@ -57,12 +57,12 @@ func _open_angle(m: Match) -> float:
 
 
 func _spot(m: Match, b: float, d: float) -> Vector3:
-	var P := m.player
-	var q := P.pos + Vector3(cos(b), 0, sin(b)) * d
+	var me := m.player
+	var q := me.pos + Vector3(cos(b), 0, sin(b)) * d
 	if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z) or m.world.in_bush(q.x, q.z) or m.in_smoke(q):
 		return Vector3.INF
 	q.y = m.world.ground_at(q.x, q.z)
-	if absf(q.y - P.pos.y) > 0.5 or not m.world.los(P.pos, q, P.pos.y + 1.1):
+	if absf(q.y - me.pos.y) > 0.5 or not m.world.los(me.pos, q, me.pos.y + 1.1):
 		return Vector3.INF
 	return q
 
@@ -96,15 +96,15 @@ func _turns(m: Match) -> void:
 ## Whether a turn of TURN_TEST degrees spread over `over` seconds (frames of Match.DT) makes the hint due.
 func _turn_due(m: Match, over: float) -> bool:
 	var vh := VisionHint.new()
-	var P := m.player
+	var me := m.player
 	var n := int(over / Match.DT)
 	var total := deg_to_rad(TURN_TEST)
 	var hit := false
 	for i in n + 1:
 		var b := total * i / n
-		P.inp["aim"] = P.pos + Vector3(cos(b), 0, sin(b)) * 6.0
+		me.inp["aim"] = me.pos + Vector3(cos(b), 0, sin(b)) * 6.0
 		m.time += Match.DT
-		hit = vh._turned(P.aim_dir(), m.time) or hit
+		hit = vh._turned(me.aim_dir(), m.time) or hit
 	return hit
 
 

@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	await _ranks()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
@@ -31,6 +32,32 @@ func run(main_node: Node) -> void:
 	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Upgrade parity (docs/heroes/dolm.md): per rank [RMB cooldown, dash recharge, E cooldown, RMB power, E power, charges]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r := setup("dolm", 5.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DolmKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), K.e_def()["cooldown"] * K.cd_k("kin"),
+				K.power("sec") / ps, K.power("kin") / pk, P.max_dashes()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
+			near.call(up[1][0], 10.0) and near.call(up[2][0], 9.0)
+			and near.call(up[1][3], 1.24) and near.call(up[2][3], 1.48), str(up))
+	ok("upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3",
+			near.call(up[1][1], 10.0) and near.call(up[2][1], 10.0)
+			and up[1][5] == up[0][5] and up[2][5] == up[0][5] + 1.0, str(up))
+	ok("upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage",
+			near.call(up[1][2], 11.5) and near.call(up[2][2], 10.0) and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+	await done(m)
 
 func _breah() -> void:
 	var r := setup("dolm", 5.0)
@@ -71,7 +98,8 @@ func _breah() -> void:
 	var card: Dictionary = K.d["card"]
 	ok(
 		"card: a role line and one line each for LMB, RMB, E, Shift and the passive",
-		["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		["role", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		and not (card.get("weapons", {}) as Dictionary).is_empty()   # the LMB line is the weapon's (kit card rewrite)
 	)
 	# ---- LMB tap: a boulder to full range that splashes the foe beside the one it hit
 	reset.call()
@@ -84,7 +112,15 @@ func _breah() -> void:
 	step(m, 0.08, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	m.step(DT)
+	# the source's throw lets go on the whip of the arm (about 0.13s in), not on the press
+	var early := m.shots.filter(func(s): return s["by"] == P).size()
+	step(m, 0.13)
 	var bshot: Array = m.shots.filter(func(s): return s["by"] == P)
+	ok(
+		"lmb: the boulder leaves the hand 0.13s into the throw, not on the press",
+		early == 0 and bshot.size() == 1 and absf(float(K.d["lmb"]["boulder"]["release"]) - 0.13) < 0.001,
+		"at the press %d, 0.13s later %d" % [early, bshot.size()]
+	)
 	var blen := float(bshot[0]["life"]) * (bshot[0]["vel"] as Vector2).length() if not bshot.is_empty() else 0.0
 	ok(
 		"lmb: tap = boulder (one Match shot, molten skin)",
@@ -199,7 +235,7 @@ func _breah() -> void:
 	step(m, 0.5)
 	ok(
 		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		K.wall_stuns >= 1 and T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -399,8 +435,11 @@ func _breah() -> void:
 		longest[0] = maxf(longest[0], K.rmb_t))
 	ok(
 		"item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held",
-		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
-		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
+		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down
+			and (K.slam.hops == 1 or K.slam.wind_t >= 0.0),
+		"cap %.2f longest %.2f down %s hops %d winding %s" % [
+			cap_t, longest[0], str(K.rmb_down), K.slam.hops, str(K.slam.wind_t >= 0.0)
+		]
 	)
 	ok(
 		"item 61: a slam at the cap is the full circle and centre",
@@ -425,15 +464,15 @@ func _breah() -> void:
 			hit_key = float(key[0])
 	ok(
 		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
-		absf(hit_key - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.05,
-		"key %.2f landing %.2f" % [hit_key, K.slam._flight(float(K.slam_def()["hop_up"]))]
+		absf(hit_key - K.slam.flight()) < 0.05,
+		"key %.2f landing %.2f" % [hit_key, K.slam.flight()]
 	)
 	ok(
 		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"stun %.2f" % T.stun_t
 	)
 	ok(
@@ -531,7 +570,7 @@ func _breah() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	hold(m, P, 0.5)
-	step(m, 0.6)
+	step(m, 1.0)
 	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
@@ -580,7 +619,7 @@ func _breah() -> void:
 	)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
-	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
+	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
 	ok(
 		"data: the dash rests 12s per charge and starts with one charge (a second at rank 3)",
 		absf(float(K.dash_def()["cd"]) - 12.0) < 0.01 and P.max_dashes() == 1.0 and absf(P.dash_regen() - 12.0) < 0.01,
@@ -605,7 +644,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Molten Guard shield (one 18 stack a punch, rank 1), named",
+		"data: punching your own rocks gives a Shardskin shield (one 18 stack a punch, rank 1), named",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2
 			and P.shield_src == ShieldSrc.MOLTEN,
 		"punches %d stacks %d shield %.1f swept %d src %s" % [K.guard_punches - gp0, K.shield_stacks, P.shield,
@@ -632,7 +671,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"PARITY: Molten Guard is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
+		"PARITY: Shardskin is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - full_shield) < 0.01
 		and absf(P.shield - float(K.d["passive"]["guard"]["shield"])) < 0.01,
 		"tap %.1f full %.1f stacks %d" % [P.shield, full_shield, K.shield_stacks]
@@ -665,6 +704,7 @@ func _breah() -> void:
 		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
 		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
 	step(m, 0.8)
+	_hop_let_go(m, P, K, reset)
 	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
@@ -688,7 +728,7 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"rank 3: slamming a foe gives a Molten Guard shield", P.shield >= 17.0 and K.shield_stacks >= 1,
+		"rank 3: slamming a foe gives a Shardskin shield", P.shield >= 17.0 and K.shield_stacks >= 1,
 		"shield %.0f" % P.shield
 	)
 	ok(
@@ -803,7 +843,7 @@ func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary
 	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
 	var dir := (mid - home).normalized()
-	var face := float(w["th"]) + h.r * 0.8
+	var face := float(w["th"]) + h.hull_r() * 0.8
 	h.teleport(home)
 	h.vel = Vector3.ZERO
 	var out := {"t": -1.0, "peak": 0.0, "jumped": false}
@@ -862,9 +902,9 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 	aim_at(P, home + Vector3(10, 0, 0))
 	var plain := _hop_run(m, P, K, Vector2.ZERO, Vector2.ZERO)
 	ok(
-		"item 61: the hold carries him at least 2m forward with a rise, then slams on landing",
-		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.0
-			and absf(float(plain["t"]) - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.07,
+		"item 61: after its wind-up the hold carries him at least 2m forward with a rise, then slams on landing",
+		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.3
+			and absf(float(plain["t"]) - float(K.slam.feel()["windup"]) - K.slam.flight()) < 0.07,
 		"forward %.2f up %.2f in %.2fs" % [float(plain["x"]), float(plain["up"]), float(plain["t"])]
 	)
 	reset.call()
@@ -891,6 +931,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		var z0 := P.pos.y
 		if mode == "hop":
 			hold(m, P, 0.25)
+			step(m, float(K.slam.feel()["windup"]))       # (the wind-up: the hop leaves after it)
 		elif mode == "leap":
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()
@@ -1020,6 +1061,37 @@ func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
+## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
+func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 6.0
+	P.grounded = false
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	step(m, BreahHop.CROUCH + 0.09)
+	var hv0 := Vector2(P.vel.x, P.vel.z).length()
+	var lands0 := K.leap_lands
+	var open_in := 99
+	P.inp["jump"] = true
+	for i in 10:
+		P.inp["glide"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		if P.gliding:
+			open_in = i + 1
+			break
+	var hv1 := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, "
+			+ "at the hop's speed, no crash",
+		open_in <= 2 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05 and K.leap_lands == lands0,
+		"open after %s steps fly_t %.2f chaining %s h %.2f -> %.2f m/s crashes %d -> %d"
+			% [str(open_in), P.fly_t, str(K.hop.chaining()), hv0, hv1, lands0, K.leap_lands]
+	)
+	step(m, 0.3)
+	P.inp["glide"] = false
+
 func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 	if air:
 		P.pos.y += 1.5
@@ -1039,7 +1111,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))

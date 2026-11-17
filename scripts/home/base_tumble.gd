@@ -220,6 +220,7 @@ var buttons: Array = []
 var card: Control = null
 var card_t := 0.0
 var teach: TumbleTeach = null  # the first-time practice exchange while it runs (tumble_teach.gd)
+var cue: GardenCues.TumbleTellCue = null   # the rival's tell over its head while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -280,6 +281,7 @@ func _start() -> void:
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
 	if teach != null:
 		run.R = TumbleTeach.rules()
+	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
@@ -327,6 +329,7 @@ func tick(d: float) -> void:
 	if run.state == "resolve" and bar != null and run.grade == "":
 		bar.step(d)
 	_place_pair(d)
+	cue.step(pair[1]["pos"], pair[0]["pos"], d)
 	if run.over():
 		_end(true)
 
@@ -334,10 +337,12 @@ func tick(d: float) -> void:
 func _enter(s: String) -> void:
 	seen = s
 	var moves: Dictionary = rules()["moves"]
+	cue.hide_tell()
 	match s:
 		"intro":
 			_sync_panel()
 		"tell":
+			cue.show_tell(run.tell, run.honest(0))
 			_clips("", run.tell)
 			_sync_panel()
 		"pick":
@@ -456,13 +461,14 @@ func _end(finished: bool) -> void:
 	if teach != null:
 		_skip_teach()
 		return
+	var before := GameResultCard.snap([run.recs[0]] if run.visitor else run.recs)
 	var res := settle(run) if finished else {}
 	_clear()
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	if finished:
-		_card(res)
+		_card(res, before)
 		var wi := run.winner()
 		GardenSfx.fanfare(h, pair[wi], pair[1 - wi])
 		for i in 2:
@@ -474,23 +480,19 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-## Clears the screen of a run: rig clips, the drill bar and the panel.
+## Clears the screen of a run: rig clips, the drill bar, the rival's tell cue and the panel.
 func _clear() -> void:
 	_clips("", "")
 	_close_bar()
+	if cue != null:
+		cue.clear()
+		cue = null
 	if is_instance_valid(panel):
 		panel.queue_free()
 
-func _card(res: Dictionary) -> void:
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
+func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
-		card.queue_free()
-	var how := "out of the ring" if run.out() else "back after %d exchanges" % run.played
-	card = BaseRace.result_card(h, [
-		["%s wins the Tumble!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is pushed %s" % [lose["name"], how], 14, UI.INK],
-		["%s went with what it wanted %d of %d times (+trust)" % [run.recs[0]["name"], run.follows, run.played],
-				14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+		card.free()     # now, so the new card keeps the name GameResultCard (the practice's card may still show)
+	card = GameResultCard.open(h, {"game": "Tumble", "before": before, "prize": [["+%d gems" % res["gems"], UI.GOLD]],
+			"place": "%s wins, %s" % [res["win"]["name"], "out of the ring" if run.out() else "on points"]})
 	card_t = float(rules()["card_s"])

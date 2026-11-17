@@ -13,8 +13,8 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   (`""` → `in` → `on` → `out`) kept in the hunter's meta `wisp`, driven from `Hunter.render`. It reads
   `downed` and `out` only, so nothing new is replicated: remote players and bots get the Wisp from the
   state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
-- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive, the
-  hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
+- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive and the
+  revive UI are all as before. The hitbox is not: shots and areas pass through a Wisp. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Knocked-down beat (`HunterFall`, 0.4-0.5 s by weight) before the Wisp takes over: the hero staggers
@@ -25,6 +25,8 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   `knock` event (the knocker id it already carries), so no Net change.
 - Pop-in (at the down): flash, ring (0.25 s), puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
   scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
+- Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
+  scales from 0.6 to full with a small squash. Death or a bleed-out plays a 0.6 s elimination beat: the core dims, the Wisp sinks into the deathbox as it grows in, and the core flickers once in the killer's side colour (no explosion).
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
   `default`.

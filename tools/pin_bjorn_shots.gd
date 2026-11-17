@@ -313,14 +313,6 @@ const SHOTS := [
 		"Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
 	],
 	[
-		"ult_pin_nock",
-		"archer",
-		"pin_ult",
-		0.98,
-		4.0,
-		"Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling"
-	],
-	[
 		"ult_pin_impact",
 		"archer",
 		"pin_ult",
@@ -458,6 +450,38 @@ const OWNER := [
 		1.5,
 		5.0,
 		"owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it"
+	],
+	[
+		"wall_pin_a_impact",
+		"archer",
+		"heavy_pin",
+		1.36,
+		5.0,
+		"Heavy Shot into a rock at 1.36 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_b_impact",
+		"archer",
+		"heavy_pin",
+		1.42,
+		5.0,
+		"Heavy Shot into a rock at 1.42 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_c_impact",
+		"archer",
+		"heavy_pin",
+		1.52,
+		5.0,
+		"Heavy Shot into a rock at 1.52 s: the burst on the wall face, the stun mark over the foe"
+	],
+	[
+		"wall_pin_d_impact",
+		"archer",
+		"heavy_pin",
+		1.9,
+		5.0,
+		"Heavy Shot into a rock 1.80 s into the hold: the burst on the wall face, the stun mark over the foe"
 	],
 	[
 		"o1103_pin_heavy_stake",
@@ -784,7 +808,6 @@ func _reset(hero: String) -> void:
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO
@@ -906,7 +929,7 @@ func _input(what: String, t: float) -> void:
 		"heavy_pin":
 			if t < DT:
 				crush_rock = _rock_near(home)
-				P.teleport(crush_rock - Vector3(8.0, 0, 0))
+				P.teleport(crush_rock - Vector3(5.0, 0, 0))
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))
 			if t < 1.25:
 				T.teleport(crush_rock - Vector3(1.2, 0, 0))

@@ -152,7 +152,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		pic.add_child(q)
 	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
 	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_l.clip_text = true
+	FitLabel.shrink(name_l)
 	col.add_child(name_l)
 	return t
 
@@ -249,7 +249,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		fc.add_child(fcc)
 		var fn := UI.label(String(fname), 11, UI.MUTED)
 		fn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		fn.clip_text = true
+		fn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		fc.add_child(fn)
 		fr.add_child(fc)
 	if bool(e.get("shimmer", false)):
@@ -322,12 +322,15 @@ static func _kg(x: float) -> String:
 ## caught yours.
 static func _habitat(spk: String) -> String:
 	var out := ""
-	if Data.is_rare(spk):
+	if Data.no_egg(spk):
 		var boss := String(Data.KIN[spk].get("boss", ""))
 		var bn := String(Data.MOBS.get(boss, {}).get("name", "a lair boss"))
-		out = "Never in the wild. It only hatches from a Rare Egg won from %s." % bn
+		out = "Never in the wild, and never from an egg. It keeps the lair of %s." % bn
+	elif Evo.base_form(spk) != spk:
+		var first := String(Data.KIN[Evo.base_form(spk)]["name"])
+		out = "Never from an egg: eggs hatch %s, and it grows from there." % first
 	else:
-		out = "Wild, on any island of the Skylands."
+		out = "Wild, on any island of the Skylands. Eggs hatch this first form."
 	var places: Array = []
 	for r in Save.d.get("roster", []):
 		if String(r.get("species", "")) != spk: continue

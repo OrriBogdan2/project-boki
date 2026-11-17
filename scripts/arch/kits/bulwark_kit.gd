@@ -37,6 +37,8 @@ var crest: Node3D = null       # the gold crest light while a Shield Slam is arm
 var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
+var lunge: BjornLunge          # every other swing's forward pull
+var reels := 0                 # (checks) times the rope hauled the hammer home on its own
 var boop: BjornBoop            # LMB behind the raised aegis: the shield thrust
 var flared := false            # this hold's full-charge flare has gone off
 var spin := 0.0                # the whirled hammer's angle (rad), counted on match time (BjornFx draws it)
@@ -53,6 +55,7 @@ var hold_blocked := false      # the Crushing Blow was cut short: the button mus
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
 var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
+const SIZE_REF := 2.0          # the body size the kit's heights over him (crest, hammer hand, wake) were set at
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
 
@@ -65,7 +68,16 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	launch = BjornLaunch.new(self)
+	lunge = BjornLunge.new(self)
 	boop = BjornBoop.new(self)
+
+## His body size against SIZE_REF: the heights the kit draws at over him follow his model's size.
+func body_k() -> float:
+	return float(Arch.body(id).get("size", SIZE_REF)) / SIZE_REF
+
+## Where the hammer sits in his hand (throw, recall, catch).
+func hand_at() -> Vector3:
+	return h.pos + Vector3(0, body_k(), 0)
 
 ## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
 ## and with the max health levels give (LevelGrowth.hp), as the source's Brightshield scales with max health.
@@ -159,6 +171,7 @@ func _tick(dt: float) -> void:
 	if h.dash_buf > 0.0 and m.time < step_until:
 		h.roll_t = 0.0         # Shift in the swing's step or launch: the dash goes now (item 51), not at its end
 	launch.tick(dt)
+	lunge.tick()
 	boop.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
@@ -196,7 +209,7 @@ func _tick_crest() -> void:
 		crest.add_child(lt)
 	crest.visible = full_ready() and tells_visible()
 	if crest.visible:
-		crest.global_position = h.position + Vector3(0, 2.3 * float(h.cdat.get("scale", 1.0)), 0)
+		crest.global_position = h.position + Vector3(0, 2.3 * float(h.cdat.get("scale", 1.0)) * body_k(), 0)
 
 func move_k() -> float:
 	var k := 1.0
@@ -217,7 +230,7 @@ func charge_orb() -> bool:
 
 ## His dash after-image: a gold chevron wake instead of the shared ghost.
 func dash_afterimage() -> bool:
-	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
+	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)) * body_k())
 	return true
 
 ## Behind the raised shield you can't swing or throw.
@@ -434,10 +447,8 @@ func smash_k() -> float:
 	var md := lmb_def()
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
-const CARRY_T := 0.24          # s the slam's forward step lasts
-
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
-## front and the slam steps him forward ("carry" m); let go in the perfect window it launches him instead
+## front and the slam lunges him forward (BjornLunge, "lunge.d" m); let go in the perfect window it launches him instead
 ## (BjornLaunch), knocks harder ("perfect.kb_k") and lands with a heavier hit-stop. His own swing never shakes his
 ## screen (item 50, the owner's rule): the hit-stop, the crescent, the dust and the sound carry it.
 func _smash() -> void:
@@ -462,29 +473,25 @@ func _smash() -> void:
 	if perfect:
 		launch.start(dv)
 	else:
-		_carry(dv, k)
+		play("bul_smash")
+		if not h.gliding:      # swung under an open glider: it stays open
+			h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+		if h.roll_t > 0.0:
+			lunge.measure("blow")
+		else:
+			lunge.start(dv, lunge.blow_d(k), "blow")
 	vfx("swing", h.pos, dv, {"r": float(md["smash_reach"]), "k": k})
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
 		if perfect:
-			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
+			Feel.hitstop(m, h, f, dmg, {"melee": true, "ab": "primary", "payoff": true})
 	var heavier := 1.0 if perfect else 0.0
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 
-## The normal swing's step: "carry" m in all (more with the charge; the dash over CARRY_T plus its exit
-## slide), on the ground only, then a short wind-down before the glider can open. Let go in the air or in
-## a dash, the swing rides the move he's in.
-func _carry(dv: Vector2, k: float) -> void:
-	play("bul_smash")
-	if not h.gliding:      # swung under an open glider: it stays open
-		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	if not h.grounded or h.roll_t > 0.0:
-		return
-	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
-	var carry := lerpf(float(cr[0]), float(cr[1]), k)
-	carry -= HunterMove.slide(minf(carry / CARRY_T, h.base_speed * HunterMove.dash_exit_run))
-	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
-	step_until = m.time + CARRY_T
+## The swing's step keeps his body on the cursor as the hold did (source: he turns freely through the swing, sheet
+## 0102-0108; the "turn" lmb row); the perfect launch and a dash face where they go.
+func aims_in_dash() -> bool:
+	return (m.time < step_until and not launch.running()) or super.aims_in_dash()
 
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
@@ -522,7 +529,7 @@ func _throw() -> void:
 	h.mel_hold = 0.0
 	fx.hold_end()
 	h.fire_cd = float(md["throw_rate"])
-	var at := h.pos + Vector3(0, 1.0, 0)
+	var at := hand_at()
 	var dist := throw_dist()
 	throw_at = m.time
 	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
@@ -560,6 +567,22 @@ func _recall() -> void:
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
 
+## The rope hauls the hammer home on its own: he got further than "rope.max_len" m from it or it has been out
+## "rope.max_t" s. It flies back along the taut rope at "rope.reel_speed" and the throw stays shut till the catch.
+func _reel() -> void:
+	play("bul_recall")
+	mace["st"] = "back"
+	mace["hit"] = {}
+	mace["reel"] = true
+	reels += 1
+	fx.taut = true
+	m.sfx("bjorn_reel", h.pos, -3.0)
+
+func _rope_snaps(p: Vector3) -> bool:
+	var rd: Dictionary = lmb_def().get("rope", {})
+	var far := Vector2(h.pos.x - p.x, h.pos.z - p.z).length() > float(rd.get("max_len", 14.0))
+	return far or m.time - throw_at > float(rd.get("max_t", 6.0))
+
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
 	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
@@ -573,10 +596,12 @@ func _tick_mace(dt: float) -> void:
 		_catch(true)
 		return
 	var p: Vector3 = mace["pos"]
+	if String(mace["st"]) in ["fly", "ground"] and _rope_snaps(p):
+		_reel()
 	match String(mace["st"]):
 		"wind":
 			# still in his hand while the arm comes through: it leaves THROW_WIND s after the press
-			p = h.pos + Vector3(0, 1.0, 0)
+			p = hand_at()
 			mace["t"] = float(mace["t"]) + dt
 			if float(mace["t"]) >= THROW_WIND:
 				mace["st"] = "fly"
@@ -621,15 +646,22 @@ func _tick_mace(dt: float) -> void:
 				_recall()
 		"back":
 			# it homes on the hand and lands on the recall clip's catch key "recall_t" s after the call, from any range
-			# (sheet: recall flight 0.2-0.4 s)
+			# (sheet: recall flight 0.2-0.4 s); a rope reel hauls it in at "rope.reel_speed" instead
 			mace["t"] = float(mace["t"]) + dt
-			var left := float(md["recall_t"]) - float(mace["t"])
-			if left <= 0.5 * dt:
-				_catch()
-				return
-			var to := h.pos + Vector3(0, 1.0, 0) - p
+			var to := hand_at() - p
 			var dir2 := Vector2(to.x, to.z).normalized()
-			p += to * minf(1.0, dt / left)
+			if mace.get("reel", false):
+				var step := float(md.get("rope", {}).get("reel_speed", 30.0)) * dt
+				if to.length() <= step + 0.6:
+					_catch()
+					return
+				p += to.normalized() * step
+			else:
+				var left := float(md["recall_t"]) - float(mace["t"])
+				if left <= 0.5 * dt:
+					_catch()
+					return
+				p += to * minf(1.0, dt / left)
 			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
@@ -639,6 +671,7 @@ func _tick_mace(dt: float) -> void:
 
 func _catch(quiet := false) -> void:
 	mace = {}
+	fx.taut = false
 	fx.hammer_hide()
 	fx.in_hand(true)
 	if quiet:
@@ -656,7 +689,7 @@ func press_rmb() -> void:
 	if busy() or ult.planted():
 		h._ab_feedback("sec", "deny")
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -683,6 +716,10 @@ func _raise() -> void:
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
+
+## Faultline's hop drives him down faster than a fall.
+func dive_speed() -> float:
+	return ult.dive_cap()
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
 ## shield (it keeps its hit points and starts its regen). The mace in flight and Mending Ground's pending burst are casts, not holds.
@@ -807,15 +844,10 @@ func on_dash(use_ex: bool) -> bool:
 		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
 	return true
 
-## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
-const SPIN_GLIDE := 6.0
-
-## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
-## lies on the hit radius and runs round once with the turn.
+## The 360 Smash's spin on arrival: one hit all round him, lunging on along `wd` ("lunge.spin_d" m, BjornLunge);
+## its ring (HeroVfx "spin") lies on the hit radius and runs round once with the turn.
 func _spin_hit(wd: Vector2) -> void:
-	if h.grounded:
-		h.vel.x += wd.x * SPIN_GLIDE
-		h.vel.z += wd.y * SPIN_GLIDE
+	lunge.start(wd, float(lmb_def().get("lunge", {}).get("spin_d", 1.6)), "spin")
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1
@@ -825,7 +857,8 @@ func _spin_hit(wd: Vector2) -> void:
 		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
+	# a spin off a ledge ends in the air (the glider is free); a glide pressed in the dash already took over
+	if h.grounded and not h.gliding:
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	vfx("spin", h.pos, null, {"r": r})
@@ -894,7 +927,6 @@ func _mend_tick() -> void:
 			continue
 		ticks_healed += 1
 		o.heal(heal)
-		m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 4, 1.5, 0.35, -3.0)
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -910,7 +942,6 @@ func _mend_burst() -> void:
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
 			o.heal(heal)
-			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))

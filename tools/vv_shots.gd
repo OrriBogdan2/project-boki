@@ -26,6 +26,7 @@ var lines: Array = []
 var strips := {}               # strip file -> Array of Image
 var ult_only := false
 var only_part := ""
+var extra_opts := {}           # more match options for a rig built on this one (a Boki on the shoulder: demo_kin)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -62,10 +63,12 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 	o.merge(Match.arena_opts(who), true)
+	o.merge(extra_opts, true)
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
+	HeroVfx.of(m).set_process(false)      # its looks run on the match's steps below, as at a steady 60 fps
 	P = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -150,6 +153,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		m.render_shots(1.0)      # (the stock rounds a kit's trail follows move as in a match)
+		HeroVfx.of(m)._process(DT)
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()

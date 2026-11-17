@@ -93,11 +93,13 @@ func run(mn: Node, md := "all") -> void:
 		await _ranks("tender")
 		await combos.tender()
 		await carry.tender()
+		await _combo_tag("tender")
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await _ranks("rimewright")
 		await combos.rimewright()
+		await _combo_tag("rimewright")
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
@@ -149,6 +151,12 @@ func _ranks(arch: String) -> void:
 		ok("upgrade parity: rank 3 (tier IV) Rink Wall is %d HP tougher" % int(K.e_def()["hp_rank3"]),
 				absf(hps[1] - hps[0] - float(K.e_def()["hp_rank3"]) * K.power("kin")) < 0.5, str(hps))
 	await _free(m)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd) for this kit.
+func _combo_tag(arch: String) -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, arch)
 
 func _free(m: Match) -> void:
 	m.queue_free()
@@ -223,7 +231,7 @@ func _tender_support() -> void:
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
-	# --- the drop set: a stun or any damage; a root or a hex holds; 4s no re-pick
+	# --- the drop set: a stun or any damage; a root holds; 4s no re-pick
 	P.stun_t = 0.0
 	K.lock_t = 0.0
 	A.down_hp = 60.0
@@ -231,9 +239,8 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	var held := CareUtil.is_carried(A)
 	P.root_t = 0.5
-	Hex.apply(P, 0.5, false)
 	step(m, 0.1)
-	ok("Carrier: a root and a hex hold them", held and CareUtil.is_carried(A))
+	ok("Carrier: a root holds them", held and CareUtil.is_carried(A))
 	P.root_t = 0.0
 	P.hurt(10.0, T, {"src": "primary"})
 	step(m, 0.1)

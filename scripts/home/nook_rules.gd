@@ -1,5 +1,5 @@
 class_name NookRules
-## The Nesting Nook's gate (docs: briefs/design/GARDEN.md section 6). A base-only player can
+## The Nesting Nook's gate and preview (docs: briefs/design/GARDEN.md section 6). A base-only player can
 ## meet every gate: both Grown, both friends, both rested since their last egg, one egg in the nest.
 
 const GROWN_LV: int = Care.STAGES[2][0]     # the level a Boki is Grown
@@ -30,4 +30,6 @@ static func pair_why(a: Dictionary, b: Dictionary) -> String:
 	var why := can_pair(a)
 	if why == "": why = can_pair(b)
 	if why == "" and not friends(a, b): why = "%s and %s need to be friends" % [a["name"], b["name"]]
+	if why == "" and Data.no_egg(String(a["species"])) and Data.no_egg(String(b["species"])):
+		why = "%s and %s are legendary: Boki like them never come from an egg" % [a["name"], b["name"]]
 	return why

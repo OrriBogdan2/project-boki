@@ -2,15 +2,17 @@ extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
-## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Burr Charge shows
-## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
-## draw it as long as the host's.
-## Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
-## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
-## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
+## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop, the same
+## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log every change of the
+## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
+## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
+## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## Then the lair bosses (Net 0.24.6's "bat" event): the
+## host wakes a Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a
+## Boss fed by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
+## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
+## (AimNet, Net 0.24.6), asserted once per shape kind.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -28,11 +30,15 @@ const BOSS_AT := Vector3(3.0, 0, 0)      # m from home: where a boss stands (the
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
 
+## Holds a kit cancels by clearing its move id (Albert's raised shield, Lace's Heavy Shot draw, Kael's Lunge
+## wind-up): held CUT_AT s, then cut as a Boki merge cuts them (MergeAugment), the key let go after.
+const CUTS := ["archer rmb", "bulwark rmb", "juggernaut rmb"]
+const CUT_AT := 0.6          # s: past every RMB hold threshold (0.1-0.3 s) plus a snapshot, so the hold move shows
+
 ## Casts whose copy still differs, and why (docs/DEBT.md): printed as GAP, not failures (timing may hide one
-## run to run). Both fixes sit in ArchKit.net_move / apply_net_move, not in Net.
+## run to run).
 const KNOWN := {
-	"bulwark rmb held": "lowering the shield clears the move id; the wire's '' is ignored, the copy keeps guarding",
-	"gunslinger lmb held": "a restart of the same move within 0.3 s of its start is not seen (apply_net_move)",
+	"gunslinger lmb held": "one restart in ten (2.36 s in, rpc5 11-15) still does not show on the copy",
 }
 
 var log_rows: Array = []     # [unix ms, the kit's move id, HunterAnim's move id]; one row per change or restart
@@ -45,6 +51,9 @@ var cone_len := 0.0          # m: the longest ground cone the watched hunter sho
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
+var tele := {}               # the watched hunter's `all` telegraphs this cast: id -> [shape kind, first ms, last ms]
+var tele_kinds := {}         # shape kind -> host telegraphs of that kind over every cast ("arch key: id")
+var tele_miss := {}          # shape kind -> the ones the guest never showed
 var retimes: Array = []      # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
 var last_at := [ "", 0.0 ]   # the watched kit's move id and anim_at at the last frame
 
@@ -68,7 +77,14 @@ func _host() -> void:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
+			if "%s %s" % [arch, key] in CUTS:
+				await _cast(G, arch, key, true, true)
 	_wash_rows_ok()
+	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
+	for kind in tele_kinds:
+		var drawn: int = tele_kinds[kind].size()
+		ok(not tele_miss.has(kind), "telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
+			"missing: %s" % str(tele_miss.get(kind, [])))
 	await _ram_retime()
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
@@ -134,9 +150,11 @@ func _first_k(rows: Array, move_name: String) -> float:
 			return float(r[3])
 	return -1.0
 
-func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
+func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	if cut:
+		what = "%s %s cut" % [arch, key]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
@@ -150,6 +168,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	await _run(0.3)
 	log_rows.clear()
 	wash_rows.clear()
+	tele.clear()
 	last_row = ["?", "?"]
 	cone_len = 0.0
 	Net.lobby_emit("ra", {"c": "mark"})
@@ -157,7 +176,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var rocks := what == "gunslinger rmb"      # only a wall gives the cone
 	if rocks:
 		_rocks(World.T_BLOCK)
-	await _press(key, held)
+	await _press(key, held, cut)
 	var lace_walk: bool = what == "archer dash"
 	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	if rocks:
@@ -171,6 +190,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 		wash_host = wash_rows.duplicate()
 		wash_guest = replies[0].get("wash", []) if not replies.is_empty() else []
 	var cmp := _compare(mine, theirs)
+	_tele_ok(what, replies[0].get("tele", {}) if not replies.is_empty() else {})
 	if what == "gunslinger rmb":
 		var their_cone := float(replies[0].get("cone", 0.0)) if not replies.is_empty() else 0.0
 		ok(cone_len > 0.0 and absf(their_cone - cone_len) < 0.05,
@@ -193,10 +213,13 @@ func _rocks(kind: int) -> void:
 	for dz in [-1, 0, 1]:
 		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
 
-## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
-func _press(key: String, held: bool) -> void:
+## One key for the kit: tapped (one step) or held for HOLD s (CUT_AT, then cut), then let go. E gets a flick of the
+## aim (Sparkle's drag).
+func _press(key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var secs := HOLD if held else DT
+	if cut:
+		secs = CUT_AT
 	var flick := P.pos + Vector3(6.0, 0, 4.0)
 	match key:
 		"lmb": P.inp["fire"] = true
@@ -213,9 +236,27 @@ func _press(key: String, held: bool) -> void:
 		t += DT
 		if key != "lmb" or not held: P.inp["fire"] = false
 		P.inp["sec"] = false
+	if cut:
+		MergeAugment.drop_class_holds(P)
+		P.ak.drop_holds()
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
+
+## Every `all` telegraph the host's hunter drew this cast for MIN_LIFE or more showed on the guest under its
+## copy, same kind (one up for less can show and drop in the same 0.1 s flush).
+func _tele_ok(what: String, theirs: Dictionary) -> void:
+	for id in tele:
+		var kind := String(tele[id][0])
+		if (float(tele[id][2]) - float(tele[id][1])) / 1000.0 < MIN_LIFE:
+			continue
+		tele_kinds[kind] = tele_kinds.get(kind, []) + ["%s: %s" % [what, id]]
+		if String(theirs.get(id, [""])[0]) != kind:
+			tele_miss[kind] = tele_miss.get(kind, []) + ["%s: %s" % [what, id]]
+			print("%s FAIL %s: telegraph %s (%s) not on the guest" % [tag, what, id, kind])
+	if not tele.is_empty():
+		var ids := tele.keys().map(func(id): return "%s %s" % [tele[id][0], id])
+		print("%s %s  telegraphs: %s (guest shows %d)" % [tag, what, ", ".join(ids), theirs.size()])
 
 ## Lace's Spirit Walk darkens her body on both games: on within LAG_TOL of the host's, and off again within
 ## LAG_TOL of the host's (the copy's walk is the base length, so it never outstays the walk).
@@ -277,11 +318,17 @@ func _compare(mine: Array, theirs: Array) -> Dictionary:
 		if not ids.has(String(r[2])) and out["bad"] == "":
 			out["bad"] = "the copy plays '%s', the host never did" % r[2]
 	var at := 0
+	var shown := ""          # the host's last move that lasted a snapshot
 	for i in mine.size():
 		var id := String(mine[i][2])
 		var life: float = (float(mine[i + 1][0]) - float(mine[i][0])) / 1000.0 if i + 1 < mine.size() else 9.0
 		if life < MIN_LIFE or i == 0:
+			if i == 0:
+				shown = id
 			continue
+		if id == "" and shown == "":
+			continue          # (no move again after one no snapshot carried, a tapped shield: the copy never changed)
+		shown = id
 		if id != "": out["moves"] += 1
 		var found := false
 		for j in range(at, theirs.size()):
@@ -311,10 +358,12 @@ func _on_msg(topic: String, data, from: String) -> void:
 				log_rows.clear()
 				retimes.clear()
 				wash_rows.clear()
+				tele.clear()
 				last_row = ["?", "?"]
 				cone_len = 0.0
 			"log":
 				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
+				reply["tele"] = tele
 				Net.lobby_emit("dn_r", reply)
 		return
 	super._on_msg(topic, data, from)
@@ -343,6 +392,7 @@ func _sample() -> void:
 			cone_len = maxf(cone_len, float(e["len"]))
 	if H.ak == null or H.anim == null:
 		return
+	_tele_sample(H)
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
 		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
@@ -356,6 +406,17 @@ func _sample() -> void:
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+
+## The `all` telegraphs up under the watched hunter now (the host's own, the guest's copy's).
+func _tele_sample(h: Hunter) -> void:
+	var d := AimKit.layer(m)
+	var now := int(Time.get_unix_time_from_system() * 1000.0)
+	for k in d.entries:
+		var e: Dictionary = d.entries[k]
+		if e["h"] == h and e["all"] and d.live(e):
+			var id := String(k).substr(String(k).find(":") + 1)
+			if not tele.has(id): tele[id] = [String(e["kind"]), now, now]
+			tele[id][2] = now
 
 ## A boss's frame: note a change of the BossAnim move it plays (the loops count as none).
 func _sample_boss(B: Boss) -> void:

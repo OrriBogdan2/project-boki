@@ -45,7 +45,7 @@ static func under_cursor(m: Match, h: Hunter) -> Dictionary:
 	var best := {}
 	var best_d := INF
 	for wp in m.wpicks:
-		if wp.has("tune") or (wp.has("val") and h != m.player):
+		if wp.has("tune") or (wp.has("val") and h != m.player) or m.lairs.held_from(wp, h):
 			continue
 		if not near(m, h, wp["pos"], "interact"):
 			continue

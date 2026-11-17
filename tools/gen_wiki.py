@@ -196,6 +196,12 @@ def block(name, key, body):
 ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
+MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
+
+
+def walk_speed(aid):
+    """A hunter's walk in m/s, as HunterMove.speed: its row (or the default) times body_scale."""
+    return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
@@ -307,7 +313,7 @@ def gen_classes():
         block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
-            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(walk_speed(aid)), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
@@ -493,10 +499,10 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
-    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
+    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -521,6 +527,19 @@ def gen_gear():
     page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/hunter_abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
+def _terrain_hazards(hz_at):
+    """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
+    which Boki walks it safely."""
+    R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
+    kin = content("kin_v2")
+    rows = []
+    for kind, D in R.items():
+        where = sorted({nm for k, nm in hz_at if k == kind})
+        C = D["counter"]
+        safe = [t.title() + " type" for t in C.get("themes", [])] + [kin.get(k, {}).get("name", k) for k in C.get("kin", [])]
+        rows.append([D["name"], ", ".join(where), D["hurts"].capitalize(), ", ".join(safe)])
+    return "### Terrain hazards\n\nGround that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.\n\n" + table(["Hazard", "Where", "Does", "Safe with"], rows) + "\n\n"
+
 def gen_maps():
     try:
         src = open(os.path.join(ROOT, "scripts", "match", "world.gd"), encoding="utf-8").read()
@@ -541,8 +560,8 @@ def gen_maps():
             dz = {0: "quiet", 1: "contested", 2: "dangerous"}
             body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
-            bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
-            en = {"dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
+            bn = {"colossus": "Siegephant", "serpent": "Sarcobra", "brood": "Calderoise"}
+            en = {"breach": "break the Gate Seal down", "dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
@@ -553,12 +572,18 @@ def gen_maps():
             if m.get(key): trav.append("%d %s" % (len(m[key]), label))
         if m.get("train"): trav.append("a sky train with %d stops (%s)" % (len(m["train"].get("stations", [])), ", ".join(m["train"].get("names", []))))
         if trav: body += "**Getting around:** " + ", ".join(trav) + ".\n\n"
+        hz_at = [(A["kind"], i.get("name", i["id"])) for i in isl for A in i.get("hazard_areas", [])]
+        if hz_at:
+            body += _terrain_hazards(hz_at)
         if m.get("chokepoints"):
             body += "**Chokepoints:** " + ", ".join(c if isinstance(c, str) else c.get("name", "") for c in m["chokepoints"]) + ".\n\n"
         sp = m.get("spawn_points", {})
         if sp:
             cat = {"rare_kin": "Rare Boki", "vault": "Vaults", "cache": "Item caches", "boss": "Live boss lairs"}
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
+        if m.get("legendaries"):
+            chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []
@@ -713,6 +738,19 @@ def _combo_rows(hero, f):
                              _combo_ours(held[move], HOLD_MODE, "keep")])
     return rows
 
+MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
+MANTLE_MODE = {"fire": "fires mid-climb, the rise goes on", "buffer": "buffered to the top"}
+
+def _mantle_rows():
+    """The press-in-a-mantle rows every hero shares (content/rules/mantle_press.json); [?] where the source is silent."""
+    rules = load_json(os.path.join(ROOT, "content", "rules", "mantle_press.json"))
+    rows = []
+    for key, label in MANTLE_INPUTS:
+        row = rules.get(key, {})
+        ours = MANTLE_MODE[row.get("mode", "buffer")] + ("" if row.get("seen") else " [?]")
+        rows.append(["mantle -> %s" % label, row.get("source", ""), ours])
+    return rows
+
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
     if row.get("carry"):
@@ -722,6 +760,28 @@ def _dash_ours(row, modes):
     if row.get("reason"):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
+
+TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
+              ("x_recast", "ult (X) recast")]
+
+def _turn(rule):
+    return rule if isinstance(rule, str) else "slow (%g deg/s)" % rule
+
+def gen_turn_table():
+    """The body-turn rows from each kit JSON's "turn" block (ArchKit.turn_rule, --yaw-lock-check)."""
+    rows = []
+    for aid in ARCH_ORDER:
+        hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in TURN_SLOTS:
+            row = ARCH.get(aid, {}).get("turn", {}).get(slot)
+            if row:
+                rows.append([hero, label, _turn(row["early"]), _turn(row["late"]), row["source"]])
+    return ("\n## Body turning during casts\n\n_Generated from the \"turn\" block in `content/archetypes/<hero>.json`._"
+            "\n\nDoes the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor "
+            "east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it "
+            "follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first "
+            "cast's.\n\n" + table(["Hero", "Slot", "0.1-0.33 s (wind-up, channel)", "0.53-0.77 s (release, after)",
+                                    "Source"], rows))
 
 # Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
 AIR_AUDIT = {
@@ -818,6 +878,11 @@ def gen_dash_flow():
              "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
     body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
                   [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
+             "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
+             "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
+    body += table(["Pair", "Source", "Ours"], _mantle_rows())
+    body += gen_turn_table()
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

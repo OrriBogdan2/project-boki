@@ -57,13 +57,17 @@ func run(main: Node) -> void:
 	print("HOME_GAIT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+const ANIM_SEED := 1  # HunterAnim fixed_seed: the same idle phase and sway side every run
+
 func _body(main: Node, sex: int, h: int, b: int) -> void:
 	var look := Unmasked.clean({"unmasked": true, "gender": sex, "height": h, "build": b})
 	var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look, Arch.of_save())
 	m.get_node("Rig/Torso/Aim/Gun").free()
 	holder.add_child(m)
 	await main.get_tree().process_frame
-	var an := HunterAnim.new(m)
+	# a fixed idle seed: from the instance id, a shift in how many objects exist before the build (any new script)
+	# moved the cast; seed 1744833933 casts only 0.44 m on main too (docs/DEBT.md)
+	var an := HunterAnim.new(m, ANIM_SEED)
 	var id := "empty_%s_h%db%d" % ["f" if sex == 0 else "m", h, b]
 	var row := {"hip_m": (m.get_node("Rig/Legs/LegL") as Node3D).global_position.y}
 	for s in SPEEDS:

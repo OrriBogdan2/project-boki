@@ -141,7 +141,7 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
-	var key := InputEventKey.new()      # any key skips it (the prologue's first-press skip)
+	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
 	pr._unhandled_input(key)
@@ -176,7 +176,7 @@ func _hatch() -> void:
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
 	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
-	await _press(hx, "Learn to fight")
+	_press(hx, "Learn to fight")
 	await _relic(hx)
 
 ## The starter's card on the starter pick (HobOffer), or null before it shows.
@@ -191,7 +191,7 @@ func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
 	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	await _press(hx, "Take " + HeroTitle.base_name(starter))
+	_press(hx, "Take " + HeroTitle.base_name(starter))
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -438,7 +438,7 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	await _press(hx, "Tend the garden")
+	_press(hx, "Tend the garden")
 	_begin("skip paths: farm")
 	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
 	var home = main.current

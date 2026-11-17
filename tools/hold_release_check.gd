@@ -6,6 +6,8 @@ extends RefCounted
 
 const HOLD_T := 0.7      # s a hold runs before its ending (past every tap threshold, short of every auto-release)
 const STUN_T := 0.5      # s the stun lasts
+const DRAW_D := 8.0      # m to Lace's draw dummy: inside the 12 m an Empowered (or tap) arrow lands at, clamped to the
+                         # cursor (content/weapons/longbow.json "draw"); at 14 m the loosed arrow fell short
 
 ## Runs a hold for HOLD_T, applies the ending `ev` ("release" is none: the caller lets go next; "stun" | "down" |
 ## "key") and runs on 0.3 s with the input still down. `key` presses the other key for "key".
@@ -51,9 +53,10 @@ static func kael(A) -> void:
 	A.ok("hold kael RMB: E mid-hold [?]: the charge goes on, lunges at let go",
 			key["held"] and key["spent"], str(key))
 
-## Lace's bow draw (LMB): whether she is still drawing after the ending, and what the dummy took once she let go.
+## Lace's bow draw (LMB): whether she is still drawing after the ending, whether the other key's press dropped the
+## draw ("dropped"), and what the dummy took once she let go.
 static func _draw(A, ev: String, which := "") -> Dictionary:
-	var r = A.setup("archer", 14.0)
+	var r = A.setup("archer", DRAW_D)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -61,8 +64,12 @@ static func _draw(A, ev: String, which := "") -> Dictionary:
 		P.inp["fire"] = true
 		A.aim_at(P, T.pos)
 	P.inp["fire"] = true
-	_ending(A, m, P, ev, func(): _press_key(P, which), held)
-	var out := {"drawing": P.draw_t >= 0.0, "anim": P.ak.anim_id}
+	var seen := {"dropped": false}
+	var key := func():
+		_press_key(P, which)
+		seen["dropped"] = P.draw_t < 0.0
+	_ending(A, m, P, ev, key, held)
+	var out := {"drawing": P.draw_t >= 0.0, "anim": P.ak.anim_id, "dropped": seen["dropped"]}
 	P.inp["fire"] = false
 	A.step(m, 1.2)
 	out["dmg"] = A.dmg(T)
@@ -85,10 +92,11 @@ static func lace(A) -> void:
 		var d := await _draw(A, ev)
 		A.ok("hold lace draw: %s mid-draw drops it, no arrow" % ev,
 				not d["drawing"] and d["dmg"] == 0.0 and d["anim"] != "arc_draw", str(d))
-	for which in ["rmb", "e"]:
-		var k := await _draw(A, "key", which)
-		A.ok("hold lace draw: %s mid-draw [?]: the draw goes on, looses at let go" % which,
-				k["drawing"] and k["dmg"] > 0.0, str(k))
+	var rk := await _draw(A, "key", "rmb")      # one bow (docs/heroes/archer.md Cancels, LMB draw + RMB)
+	A.ok("hold lace draw: rmb mid-draw: the press drops the draw with no arrow (one bow)", rk["dropped"], str(rk))
+	var ek := await _draw(A, "key", "e")
+	A.ok("hold lace draw: e mid-draw [?]: the draw goes on, looses at let go",
+			ek["drawing"] and not ek["dropped"] and ek["dmg"] > 0.0, str(ek))
 
 ## Albert's Crushing Blow whirl (LMB): whether the whirl is up after the ending, and the swings it let go.
 static func _whirl(A, ev: String, which := "") -> Dictionary:

@@ -38,7 +38,7 @@ Every kit row that mentions downed Hunters, in our names. "Source" is the effect
 | Lace | Hail Wall (E) | the rain zone "affects" Wisps; no number, no clip | nothing | waits on rule 2 decision |
 | Motley | Lantern Trade, rank 3 shield | allies and Wisps entering the zone get a shield | allies only | waits on rule 2 decision |
 | Sparkle | Skycall | launches Wisps in the circle | rival Wisps slide (rule 1) | not affected: a move, no drain |
-| Grimble | Abyssal Hand (RMB) | scoops Wisps on its path, reels them in | built | not affected |
+| Grimble | Deep Reach (RMB) | scoops Wisps on its path, reels them in | built | not affected |
 | Meeko | Bearer (passive) | carries ally Wisps; carried ones don't bleed, can't be stomped | built | carried Wisps take no ability drain either |
 | Meeko | Hearthlight / Hearth Call | heals ally Wisps (x5), the ult revives and pulls one home | built | not affected |
 | Albert | Mending Ground burst | ally Wisps hit start to revive | built (+0.35 bar) | not affected |

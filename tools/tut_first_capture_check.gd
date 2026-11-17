@@ -41,8 +41,8 @@ func _fresh(opts := {}) -> void:
 	o.merge(opts, true)
 	m.start(o)
 	m.set_process(false)
-	for mb in m.mobs:
-		mb.queue_free()
+	m.player.riding = false      # landed: a match starts aboard the skyship, where the tips are quiet
+	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		if h.team != m.player.team:
@@ -87,6 +87,7 @@ func _run_for(secs: float) -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
+	Settings.v["tips"] = true      # the host's settings file may have tips off
 	_hint()
 	_marker_and_rebind()
 	_fails()

@@ -6,17 +6,19 @@ extends RefCounted
 ## ModeBoki.mode_of and tier answer what the file says; the "live" flag is off in the file, and ModeBoki.offer
 ## leaves a pool alone while it is off and cuts it to the mode's species (and open tiers) once on.
 
-const LEGENDARY_CAP := 0.3     # owner 2026-11-09: a legendary in under 30% of matches
+const LEGENDARY_CAP := 0.3  # owner 2026-11-09: a legendary in under 30% of matches
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("MODE_BOKI %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(m: Node) -> void:
-	var seen := {}             # species -> ["mode/tier", ...]
+	var seen := {}  # species -> ["mode/tier", ...]
 	for mode_id in ModeBoki.modes():
 		var mode: Dictionary = ModeBoki.modes()[mode_id]
 		var tiers: Dictionary = mode.get("tiers", {})
@@ -49,6 +51,7 @@ func run(m: Node) -> void:
 	print("MODE_BOKI DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _legendary_part() -> void:
 	var leg: Dictionary = ModeBoki.modes()["expedition"].get("legendary", {})
 	var rares: Array = Data.KIN.keys().filter(func(sp): return Data.is_rare(String(sp)))
@@ -59,9 +62,11 @@ func _legendary_part() -> void:
 	var pct := [p * 100.0, LEGENDARY_CAP * 100.0]
 	ok(p > 0.0 and p < LEGENDARY_CAP, "a legendary rolls in %.0f%% of matches (under %.0f%%)" % pct)
 
+
 func _gated(sp: String, mode_id: String, level: int) -> bool:
 	var row: Dictionary = ModeBoki.modes()[mode_id]["tiers"][ModeBoki.tier(sp)]
 	return ModeBoki.mode_of(sp) == mode_id and level >= int(row["gate"])
+
 
 func _live_part() -> void:
 	var rules: Dictionary = Content.rules("mode_boki")
@@ -86,6 +91,7 @@ func _live_part() -> void:
 	ok(drawn.keys().all(func(sp): return meadow.has(sp)), "flag on: draw stays inside the offer")
 	rules["live"] = false
 	ok(ModeBoki.offer(wild, "expedition", 0) == wild, "flag off again: the pool is back as it was")
+
 
 func _visitor_part(wild: Array) -> void:
 	var listed := []
