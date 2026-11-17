@@ -10091,3 +10091,4 @@ READY ext/main-recheck-1117 29c3f963ac (PR #249: fixes 15 of ~30 NEW-RED from th
 READY ext/kael-rmb-smash-1117 0722f8699e (Kael RMB: two-handed overhead smash clip, hit on the 0.6 s tick, dust ring at the blade)
 READY ext/vex-ult-move-1117 7e4493b08b (Vex ult no longer roots: 0.25 s wind-up at 70% walk, upper-body clip; 0.43 -> 2.26 m moved in 0.5 s after R; combo NEW-RED 0, 3 old reds fixed)
 READY ext/hunter-glb-restore-1117 49cf9ccbbe3ea53c248847cf5b9230de275edaea
+READY ext/boki-ingame-batch2-1117 11d3887ca91 (restore lilybara+umbrathere glbs, boki world shot tools, batch-2 finding: nothing else portable)
