@@ -500,6 +500,7 @@ const CHECKS := {
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],  # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],  # fliers hover, glide, flare
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],  # Sparkle / Vex screenshots
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],  # Tarek review screenshots
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],  # full-inventory looting
 	"--drop-merge-check": ["res://tools/drop_merge_check.gd", "drop_merge_check", null],  # merged ground drops
