@@ -218,8 +218,8 @@ func run(main_node: Node) -> void:
 	await _check_ult(P)
 	_check_safe(hud)
 	await _frames(m, hud, P)
-	await _hud_size(m)
 	await _check_wash(P)
+	await _hud_size(m)      # (last: it draws a match of its own)
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,

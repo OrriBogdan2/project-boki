@@ -35,6 +35,7 @@ func ok(cond: bool, what: String) -> void:
 func run(mn: Node, mode: String) -> void:
 	main = mn
 	Save.no_write = true
+	Save.d.erase("hud_reveal")      # the full HUD (staging is --hud-reveal-check's)
 	sizes = SIZES.duplicate() if mode == "check" else SHOT_SIZES.duplicate()
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
