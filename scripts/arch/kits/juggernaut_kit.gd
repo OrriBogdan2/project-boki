@@ -665,6 +665,8 @@ func slot_info(slot: String) -> Dictionary:
 
 ## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
 func rmb_open() -> bool:
+	if h.grounded and ch_rmb < 1.0 and float(cd["tap"]) <= 0.0:
+		return true            # the Smash resting: the press can still be the tap strike (fire_rmb)
 	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
