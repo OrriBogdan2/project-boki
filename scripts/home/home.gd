@@ -125,6 +125,8 @@ var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
+var crouch_look := HomeCrouchLook.new()   # holding crouch pulls the camera out as in a match (crouch_look.gd)
+var crouch_grounded := false    # crouching on the ground this frame (what the camera look asks)
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1102,6 +1104,7 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	else: Incubator.tick(d)      # visiting a friend, your eggs still warm at the plain pace
 	_apply_cam_settings()
+	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
@@ -1270,6 +1273,7 @@ func _move_player(d: float) -> void:
 	water.step(wdep, d, mv, air)
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
+	crouch_grounded = crouching
 	if can_act and mover.pressed(&"dash") and dash_t <= 0.0 and not water.swimming:
 		if not try_dash(mv, air) and dash_slot:
 			dash_slot.deny()
@@ -2387,8 +2391,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_kin(hover_k["rec"])
 			get_viewport().set_input_as_handled()
 			return
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
+		var notch := {MOUSE_BUTTON_WHEEL_UP: -0.08, MOUSE_BUTTON_WHEEL_DOWN: 0.08}.get(event.button_index, 0.0) as float
+		if notch != 0.0 and not crouch_look.wheel(notch):
+			cam.zoom_to = clampf(cam.zoom_to + notch, 0.55, 1.6)
 	if panel_open == HomeClasses.TITLE and event.is_action_pressed("kit_card") and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
