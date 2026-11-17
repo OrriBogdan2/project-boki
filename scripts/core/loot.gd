@@ -51,12 +51,13 @@ const VALUABLES := {
 	# a vial of Ink: the item's "ink" names the type; name and colour come from its goods entry (market.json)
 	"ink": {"name": "Ink", "col": Color("ff6a3a"), "value": 60, "rar": 3,
 		"desc": "A vial of Ink for Boki that evolve by it."},
-	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki."},
+	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches the baby of a Boki line."},
 }
 
-## A lair boss's egg as a backpack item: which rare kin hatches from it, and who guarded it.
+## A lair boss's egg as a backpack item: whose first form hatches from it (a legendary's egg holds another
+## Boki: Data.egg_species), and who guarded it.
 static func rare_egg(sp: String, boss := "") -> Dictionary:
-	return {"t": "val", "id": "rare_egg", "sp": sp, "boss": boss, "uid": _uid()}
+	return {"t": "val", "id": "rare_egg", "sp": Data.egg_species(sp), "boss": boss, "uid": _uid()}
 
 ## A vial of one Ink as a backpack item (ink = "ember", "tide", ...; see content/rules/market.json goods "ink_<type>").
 static func ink(ink_id: String) -> Dictionary:
@@ -137,7 +138,7 @@ static func icon_of(it: Dictionary) -> String:
 ## One line under the name: what it does.
 static func sub_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
-		if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a rare Boki"
+		if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a baby Boki"
 		if is_ink(it): return "Ink  ·  carry it home; some Boki evolve when it is used on them"
 		if is_wayseed(it): return "Wayseed  ·  carry it home: it wakes a garden zone"
 		if is_bag_item(it): return "Garden item  ·  carry it home: a Boki can eat it"

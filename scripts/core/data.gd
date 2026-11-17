@@ -491,13 +491,15 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if bool(home.get("no_egg", false)):
+			sp["no_egg"] = true
 		if home.has("trade_to") and KinLib.kin(String(home["trade_to"])):
 			sp["trade_to"] = String(home["trade_to"])  # evolves when it comes home from a sleepover
 		KIN[id] = sp
 
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
-## kin (content/kin/*.json "rare": true), which only ever hatch from a boss's Rare Egg.
+## kin (content/kin/*.json "rare": true), the legendaries that guard the lairs.
 ## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
 const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
 
@@ -509,6 +511,36 @@ func common_kin() -> Array:
 
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
+
+
+## True when this species' whole line never comes from an egg (content/kin/<first form>.json "no_egg": the
+## legendaries). Judged on the line's first form, so its later forms are out too.
+func no_egg(sp_id: String) -> bool:
+	return bool(KIN.get(Evo.base_form(sp_id), {}).get("no_egg", false))
+
+
+## The first forms an egg can hold, in id order: no later forms, no line that never comes from an egg.
+func egg_pool() -> Array:
+	var ids: Array = KIN.keys().filter(func(k): return Evo.base_form(k) == k and not no_egg(k))
+	ids.sort()
+	return ids
+
+
+## What an egg of `sp_id` really holds (every egg is made and hatched through this): the first form of its
+## line. A line that never comes from an egg, or "", is rerolled from egg_pool by rarity tickets.
+## No rng: a fresh one, so bringing an egg home leaves the game's random stream alone.
+func egg_species(sp_id: String, rng: RandomNumberGenerator = null) -> String:
+	var base := Evo.base_form(sp_id)
+	if KIN.has(base) and not no_egg(base):
+		return base
+	var pool := egg_pool()
+	if pool.is_empty():
+		return String(common_kin()[0])
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
+	var sp := BokiModes.draw(pool, rng)
+	return sp if sp != "" else String(pool[0])
 
 
 ## What a species' egg is called ("Venom Egg"), from content/kin/<id>.json "egg".

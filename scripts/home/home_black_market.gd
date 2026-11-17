@@ -117,7 +117,7 @@ func _rare_card(e: Dictionary) -> Control:
 	if egg:
 		col = Data.KIN[BlackMarket.id_of(key)]["color"]
 		icon = "egg"
-		blurb = "Hatches a rare Boki on the Incubator"
+		blurb = "Hatches the baby of a Boki line on the Incubator"
 	elif wayseed:
 		col = Color(String(GardenZones.info(BlackMarket.id_of(key))["colour"]))
 		icon = "seed"
