@@ -2,23 +2,26 @@ extends RefCounted
 ## --displace-net-check: abilities that move someone else's body move a player on ANOTHER game instance,
 ## on that player's own game, to the same place they move a bot (scripts/combat/displace.gd). Two real
 ## games over the desktop relay: this process is the host (it runs the relay in-process too) and starts a
-## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
+## second headless game, the guest (--displace-net-check=guest), with CheckChild. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
-## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
+## Sparkle's Skycall drag, Mossy's shield boop; Kael's Warchain pulls Kael to the player (not the player).
+## A Boki's pull and spike (KinExec) move the player on their own game the same way, there by the next snapshot.
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
 ## of the air on their own game, with the landing stun a bot gets (GlideSpike).
-## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
+## Lines: DISPNET ok|FAIL <what>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
-const START_S := 240.0       # s for the guest to come up and build its match (the queue may hold it)
-const REPLY_S := 30.0        # s of real time for the guest to answer (a busy box starves it; sim time races ahead)
+const START_S := 240.0       # s for the guest to come up and build its match (a busy box boots it slowly)
+const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
+const STEP_US := 16667       # µs of wall clock per DT step
+const CATCH_UP_US := 100000  # µs the match clock may lag before it skips ahead (Match._process: 0.1 s a frame)
 const PARK := Vector3(0, 0, -9.0)   # m from home: where the guest waits while the bot takes its turn
+const SNAP_S := 0.12         # s: one snapshot send (Net.tick, 0.1 s, which also flushes the "ev" moves) and a frame
 
 var main: Node
 var bad := 0
@@ -30,12 +33,15 @@ var m: Match = null
 var home := Vector3.ZERO
 var replies: Array = []      # what the guest said back: {"c", "pos"}
 var stop := false
+var building := false        # the guest is building its match (the host says start until it hears from it)
 var stun_max := 0.0          # the longest stun seen on the watched body since its last place (guest: its own)
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
+var paced_us := 0            # the wall clock (µs) the match clock has been stepped up to
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
+var early := {}              # the guest's reply one snapshot after a Boki move on it
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
@@ -46,6 +52,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == guest_flag: guest = true
@@ -59,24 +66,22 @@ func run(main_node: Node) -> void:
 # ------------------------------------------------------------------ the host
 ## Brings up the relay, the guest game and both matches; the guest's hunter as the host sees it, or null.
 func _host_up() -> Hunter:
-	port = 7930 + OS.get_process_id() % 60
+	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := RelayServer.new()
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, guest_flag, port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: other = String(id)
-		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return null
@@ -86,12 +91,17 @@ func _host_up() -> Hunter:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	var said := t1
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	return G
+		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may have missed it: say again
+			said = CheckClock.own_msec(guest_pid)
+			Net.lobby_emit("dn", {"c": "start", "d": d})
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	return G if G != null and G.net_t >= 0.0 else null
 
 func _host() -> void:
 	var G := await _host_up()
@@ -106,30 +116,28 @@ func _host() -> void:
 	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Motley's Trade")
 	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag", "slide")
 	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Mossy's shield push", "push")
+	await _case(G, B, "bulwark", Vector3(8.0, 0, 0), _boki_pull, 1.2, "a Boki pull")
+	ok(_v(early.get("pos", [0, 0, 0])).x < home.x + 7.9 or float(early.get("vx", 0.0)) < -1.0,
+		"a Boki pull: the player's own game moves them within one snapshot",
+		"x %.2f vx %.1f" % [_v(early.get("pos", [0, 0, 0])).x - home.x, float(early.get("vx", 0.0))])
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
-	await _glide_spike(G, B)
+	await _glide_spike(G, B, func(t: Hunter): m.displace.spike(t, -16.0, m.player), "a dunk")
+	await _glide_spike(G, B, _boki_spike, "a Boki spike")
+	ok(bool(early.get("shot", false)), "a Boki spike: the player is spiked on their own game within one snapshot",
+		"vy %.1f" % float(early.get("vy", 0.0)))
+	await _meeko_bar(G)
+	await _ally_safe(G)
 	_finish()
 
 func _finish() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("%s DONE, %d checks, failures: %d" % [tag, n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-func _read_pid() -> void:
-	if guest_pid > 0:
-		return
-	var p := dir.path_join("guest.log")
-	if not FileAccess.file_exists(p):
-		return
-	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("%s guest pid=" % tag):
-			guest_pid = int(line.get_slice("=", 1))
 
 ## One ability, on the bot and then on the guest from the same spot: the guest's own game puts it where
 ## the bot went, it really moved there, and the host's copy of it follows.
@@ -208,9 +216,34 @@ func _bjorn(t: Hunter) -> void:
 	P.ak.press_rmb()
 	for i in 30:
 		P.inp["sec_hold"] = true
+		# owner 11-11: touching the aegis pushes nobody; LMB with it up is the boop (BjornBoop)
+		P.inp["fire"] = i >= 10 and i < 13
 		await _run(DT)
+	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	await _run(DT)
+
+## A Boki's pull (KinExec, a pull with no gap) from 8 m, short of the caster (a body in the way stops it); on
+## the guest, what its game says a snapshot later.
+func _boki_pull(t: Hunter) -> void:
+	var st := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": 4.0},
+		"effects": [{"type": "pull", "strength": 8.0, "to": "center"}]}, "", GrammarReport.new())
+	await _boki(st, t)
+
+## A Boki's spike (KinExec's spike modifier) on an airborne body.
+func _boki_spike(t: Hunter) -> void:
+	var st := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": 2.5},
+		"effects": [{"type": "damage", "amount": 1.0}], "modifiers": [{"type": "spike"}]}, "", GrammarReport.new())
+	await _boki(st, t)
+
+func _boki(st: StageSpec, t: Hunter) -> void:
+	var cx := {"m": m, "caster": m.player, "power": 1.0, "k": 1.0, "_radius": 4.0}
+	KinExec.apply_foe(st.effects, t, cx, m.player.pos, st)
+	await _run(DT)
+	if t.remote:
+		await _run(SNAP_S)
+		await _ask()
+		early = replies[0] if not replies.is_empty() else {}
 
 ## Kael's Warchain hooks the player and pulls Kael to them; the player stays put (a self-pull).
 func _zedran(G: Hunter) -> void:
@@ -265,6 +298,32 @@ func _hazard(G: Hunter, B: Hunter) -> void:
 	B.teleport(home + Vector3(-6.0, 0, 9.0))
 	await _place(G, home + PARK)
 
+## Meeko's Hearth Call on the guest: its own game shows the protection bar (her nid, the seconds left from the
+## snapshot) while she channels, and not once she is stunned out of it.
+func _meeko_bar(G: Hunter) -> void:
+	var P := m.player
+	_kit("tender")
+	G.team = P.team
+	Net.lobby_emit("dn", {"c": "team", "team": P.team})
+	await _place(G, home + Vector3(6.0, 0, 0))
+	await _ask()
+	var before: Array = replies[0].get("chan", [0]) if not replies.is_empty() else [0]
+	_aim(G.pos)
+	P.ak.cast_ult()
+	await _run(1.0)
+	await _ask()
+	var chan: Array = replies[0].get("chan", []) if not replies.is_empty() else []
+	var left := float(chan[1]) if chan.size() == 2 else -1.0
+	ok(before.is_empty() and chan.size() == 2 and chan[0] == P.nid and left > 2.5 and left < 4.5,
+		"Meeko's channel on the guest: its game draws her bar, ~4 s of 5 left (before %s, then %s)" % [before, chan])
+	P.stun_t = 1.0
+	await _run(1.0)
+	await _ask()
+	var after: Array = replies[0].get("chan", [0]) if not replies.is_empty() else [0]
+	ok(after.is_empty(), "she is stunned out of it: the bar is gone on the guest's game (%s)" % [after])
+	P.stun_t = 0.0
+	await _place(G, home + PARK)
+
 ## Hit options beyond damage and the impulse travel with a hit on a player: a knock into a wall with a long
 ## wall stun stuns them that long on their own game; a burn's length and a slow's strength hold.
 func _knock_extras(G: Hunter, B: Hunter) -> void:
@@ -296,21 +355,20 @@ func _knock_extras(G: Hunter, B: Hunter) -> void:
 		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
 		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
 
-## A dunk (Displace.spike at 16 m/s) on a glider 10 m up: the bot and the player are both spiked, fall and
-## land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
-func _glide_spike(G: Hunter, B: Hunter) -> void:
-	var P := m.player
+## `spike` (a dunk: Displace.spike at 16 m/s, or a Boki's spike) on a glider 10 m up: the bot and the player
+## are both spiked, fall and land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
+func _glide_spike(G: Hunter, B: Hunter, spike: Callable, what: String) -> void:
 	var at := home + Vector3(4.0, 10.0, -3.0)
 	_fresh(B)
 	_glide(B, at)
 	await _run(0.2)
 	stun_on = B
 	stun_max = 0.0
-	m.displace.spike(B, -16.0, P)
+	await spike.call(B)
 	await _run(1.6)
 	var bot_stun := stun_max
 	stun_on = null
-	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: a dunk spikes a gliding bot",
+	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: %s spikes a gliding bot" % what,
 		"stun %.2f grounded %s" % [bot_stun, B.grounded])
 	B.teleport(home + Vector3(-6.0, 0, 9.0))
 	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z]})
@@ -319,11 +377,11 @@ func _glide_spike(G: Hunter, B: Hunter) -> void:
 		await _run(0.1)
 		t += 0.1
 	ok(G.gliding, "glide spike: the host sees the player gliding")
-	m.displace.spike(G, -16.0, P)
+	await spike.call(G)
 	await _run(1.8)
 	await _ask()
 	ok(_got("air") == 0.0 and absf(_got("stun_max") - bot_stun) < 0.15,
-		"glide spike: the dunk spikes the player out of the air on their own game, like the bot",
+		"glide spike: %s spikes the player out of the air on their own game, like the bot" % what,
 		"player stun %.2f air %.0f, bot %.2f" % [_got("stun_max"), _got("air"), bot_stun])
 	await _place(G, home + PARK)
 
@@ -336,6 +394,31 @@ static func _glide(T: Hunter, at: Vector3) -> void:
 	T.glide_fuel = 1.0
 	T.glide_cd = 0.0
 	T.shot_down = false
+
+## The same moves aimed at a teammate (the host's view of the guest is moved to its own team): no move is sent
+## over the relay and the guest's own game leaves it standing.
+func _ally_safe(G: Hunter) -> void:
+	var P := m.player
+	G.team = P.team
+	var moves := [["ashwick", Vector3(3.8, 0, 0), _cinder, 1.0, "Cinder's cloak pull"],
+		["mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag"],
+		["bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Albert's shield push"]]
+	for c in moves:
+		_kit(c[0])
+		var start: Vector3 = home + c[1]
+		await _place(G, start)
+		Displace.capture = true
+		Displace.sent.clear()
+		await c[2].call(G)
+		await _run(float(c[3]) + 0.6)
+		Displace.capture = false
+		var sent := Displace.sent.filter(func(e): return String(e[2]) == G.nid).size()
+		var own: Vector3 = await _ask()
+		var moved := Vector2(own.x - start.x, own.z - start.z).length()
+		ok(sent == 0 and moved < 0.3, "%s: a teammate on the guest's game is left alone" % c[4],
+			"sent %d, moved %.1f m" % [sent, moved])
+		P.teleport(home)
+		await _place(G, home + PARK)
 
 func _kit(arch: String) -> void:
 	var P := m.player
@@ -374,8 +457,9 @@ func _ask() -> Vector3:
 	return await _reply()
 
 func _reply() -> Vector3:
-	var t0 := Time.get_ticks_msec()
-	while replies.is_empty() and Time.get_ticks_msec() - t0 < REPLY_S * 1000.0:
+	var t0 := CheckClock.own_msec(guest_pid)
+	while (replies.is_empty() and CheckClock.own_msec(guest_pid) - t0 < REPLY_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.1)
 	if replies.is_empty():
 		return Vector3.INF
@@ -387,7 +471,6 @@ func _got(k: String) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("%s guest pid=%d" % [tag, OS.get_process_id()])
 	if not await _connect():
 		print("%s guest: no relay" % tag)
 		main.get_tree().quit(1)
@@ -395,8 +478,13 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
-		await _run(DT)
+	if m == null:        # what the guest lacked (a GPU worker's guest.log is all we see of it)
+		print("%s guest: no match after %.0f s: %s, peers seen %s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0,
+			"still building" if building else "no start heard", Net.peers.keys()])
+	else:
+		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
+	while m != null and not stop:
+		await _run(0.1)
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -408,7 +496,11 @@ func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "dn":
 		return
 	match String(data.get("c", "")):
-		"start": _build(data["d"])
+		"start":
+			if m == null and not building:
+				building = true
+				print("%s guest: start heard" % tag)
+				_build(data["d"])
 		"done": stop = true
 		"place":
 			if m and m.player:
@@ -417,6 +509,12 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
+		"team":
+			if m and m.player:
+				m.player.team = int(data["team"])
+				for h in m.hunters:      # (a lobby roster would name the host's arch; this match only reclasses)
+					if h != m.player:
+						h.reclass(Arch.weight("tender"), "tender")
 		"glide":
 			if m and m.player:
 				_fresh(m.player)
@@ -428,7 +526,13 @@ func _say() -> void:
 		var P := m.player
 		Net.lobby_emit("dn_r", {
 			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k,
-			"air": 0.0 if P.grounded else 1.0})
+			"air": 0.0 if P.grounded else 1.0, "vx": P.vel.x, "vy": P.vel.y, "shot": P.shot_down,
+			"chan": _chan(P)})
+
+## The protection bar this game would draw for its player: [Meeko's nid, seconds left], or [] when none.
+func _chan(P: Hunter) -> Array:
+	var from := ChannelBar.caster_on(m, P)
+	return [] if from == null else [from.nid, ChannelBar.read(from)[1]]
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:
@@ -437,16 +541,22 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
+	if Net.enet:
+		CheckChild.hold(Net.enet.peer, START_S)
 	Net.set_presence({"name": "dn"})
 	return Net.mode == "server"
 
 ## The same match on both games: the training island with the same seed, one hunter each, a flat strip
-## at its first spawn, no Boki, monsters or crates in the way.
+## at its first spawn, no Boki, monsters or crates in the way. An empty `d` builds it offline
+## (--cast-predict-check's baseline).
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
-		"cls": "medium", "net": d})
+	var o := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+		"cls": "medium"}
+	if not d.is_empty():
+		o["net"] = d
+	await nm.start(o)
 	nm.set_process(false)
 	var W: World = nm.world
 	var sp: Vector3 = W.spawns[0]
@@ -493,18 +603,32 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` in real time (one step a frame at 60 fps), with no monsters about.
+## Runs the match `secs` of its own time with no monsters about (a check's lair boss stays), stepped by the wall clock
+## as Match._process
+## steps a game: as many DT steps a frame as real time asks, never more than CATCH_UP behind. (One step a
+## frame ran a host drawing ~35 fps under xvfb at ~0.6x the headless guest's clock, so the guest's copy of
+## a pull ran on past its end and its body shoved the guest's own hunter away: not something two games do.)
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
-		m.step(DT)
-		t += DT
-		if watch and seen.is_empty(): seen = m.displace.towing(watch)
-		var sb: Ent = stun_on if stun_on else m.player
-		if sb: stun_max = maxf(stun_max, sb.stun_t)
+		var now := Time.get_ticks_usec()
+		paced_us = maxi(paced_us, now - CATCH_UP_US)
+		while paced_us + STEP_US <= now and t < secs - 0.0001:
+			paced_us += STEP_US
+			t += DT
+			for mb in m.mobs.duplicate():
+				if not mb is Boss:
+					mb.queue_free()
+					m.mobs.erase(mb)
+			m.step(DT)
+			_stepped()
 		await main.get_tree().process_frame
+
+## After each match step: the host's mirror of the watched tow, and the longest stun seen.
+func _stepped() -> void:
+	if watch and seen.is_empty(): seen = m.displace.towing(watch)
+	var sb: Ent = stun_on if stun_on else m.player
+	if sb: stun_max = maxf(stun_max, sb.stun_t)
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
 func _strike(at: Vector3) -> void:

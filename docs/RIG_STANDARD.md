@@ -1,7 +1,7 @@
 # Hunter rig standard (locked, RIGFIX 2026-11-04)
 
-One skeleton, one set of attachment points and one set of scale rules for all 12 Hunters (Vex, Albert, Neve,
-Kael, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Lace, Motley). Any rebuild of a Hunter's model (the face and texture
+One skeleton, one set of attachment points and one set of scale rules for all 12 Hunters (Lace, Kael, Vex, Albert,
+Neve, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Motley). Any rebuild of a Hunter's model (the face and texture
 accuracy pass included) MUST keep everything below, so the animation work (HunterAnim and the kit moves) carries
 over to the new model unchanged. `--rig-standard-check` asserts it; `docs/art/wardens/RIG_CONTRACT.md` has the
 full bone table and loader details.
@@ -46,6 +46,12 @@ Item 76b (ART-1): a Hero rebuilt with `skinned_weapon` (docs/art/wardens/CLIPS.m
 skinned to its bones in the .glb, its FX points are empties on them (`weapon_muzzle`, the blade's root), and the Gun is
 an invisible reference kept on the blade. `body.shoulder` in the archetype moves the arm pivots in or out (keep the
 Hero's own width there, never by `body.chest`). A Hero's variant bones can sit in its data file (`extra_bones`).
+
+## Draw calls
+Budget: at most 4 draws per model (surfaces plus ink passes); `--model-draws` lists surfaces, materials, bones and
+tris per Hunter and Boki .glb. When a Hunter is dressed, `WardenMerge.merge_equal` joins the surfaces whose toon
+materials come out identical. `WardenMerge.join_inks` then gives each skinned body one ink shell instead of one ink
+pass per surface. Eyes, glow, cards, void and flame stay apart. `--warden-glb-check` asserts the shells.
 
 ## The check
 `--rig-standard-check` (all 12): the armature matches the standard; the attachment points exist; the rest pose has

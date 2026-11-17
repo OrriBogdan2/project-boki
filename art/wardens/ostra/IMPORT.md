@@ -1,5 +1,11 @@
 # Ostra (Motley, the Void Jester): import note (ART-1, 2026-11-05)
 
+## Owner fix 2026-11-12: cards (`tools/art1/warden_fix_1112.py ostra`, on the 11-11 file)
+"He should be having those cards in his hand, and the cards floating around him should be much smaller." The fan of cards
+(on `x_fan`, a child of `hand.L`) floated about 10 cm off the appeal glove: it is turned over and its foot set in the
+glove's palm, so it fans out past the fingertips between thumb and fingers. The eight orbiting cards are 0.42 of their
+size (about one fan card); their orbits, the sway and the clips are unchanged.
+
 `ostra.glb` is the owner's final design, a cursed jack-in-the-box, built by script in Blender on the shared armature; id and files stay `ostra`.
 v2 (2026-11-07) follows briefs/art-refs/motley_v2 (motley_v2_turnaround, motley_v2_master_sheet; the older motley_turnaround is retired): the
 sheet's painted palette (magenta-violet and plum doublet, lilac ruff and gloves, muted bronze spring, mauve box with spades front and back and
@@ -9,6 +15,12 @@ reads at the match camera and he keeps the line-up height), the ruff at 0.80, si
     blender -b --factory-startup --python tools/art1/ostra_build.py            # ~/art1/motley/ostra.blend (OSTRA_WORK moves it)
     blender -b ~/art1/motley/ostra.blend --python tools/art1/ostra_anim.py -- all --export art/wardens/ostra/ostra.glb
     godot --headless --path . --import
+
+Re-keying clips on the swapped model (there is no ostra.blend with its mesh): key on the game .glb's own rig, then copy the clips in
+(every other clip stays byte for byte the same):
+
+    blender -b --factory-startup --python tools/art1/ostra_anim.py -- walk_f,orb --from art/wardens/ostra/ostra.glb --export /tmp/keyed.glb
+    python3 tools/art1/glb_add_clips.py art/wardens/ostra/ostra.glb /tmp/keyed.glb walk_f,orb
 
 **Appeal swap (2026-11-11, owner-approved):** the mesh is now the appeal3 master, body b with the new starry face (`~/meshy/v95/Motley/r2/appeal3/cand_b.glb`),
 put on this rig, its clips and anchors by the v95 swap (`art/wardens/src/ostra_v95.json`, docs/art/wardens/V95_SWAP.md). It replaces the
@@ -26,6 +38,6 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **No weapon (item 136):** the void orb is gone. `anchor_orb`, `anchor_hand_r` (right palm), `anchor_hand_l`, `anchor_cards` (left palm), `weapon_muzzle` (right fingertips, an FX
   point the Gun follows). The fan of cards on `x_fan` is the deck. The flurry's card is `void_card.png`, built by `scripts/heroes/void_card.gd`.
 - **Cards:** `orbit_cards`, `orbit_cardsb` on the hips, tumbled by WardenSway (`sway` in content/rules/warden_anim/ostra.json), some burnt or torn.
-- **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
+- **Clips:** `tools/art1/ostra_clips.py` (keys; gliding, the box swings back on the spring's top, `swing`, and treads), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).

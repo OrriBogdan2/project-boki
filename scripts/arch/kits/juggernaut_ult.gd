@@ -47,6 +47,14 @@ func move_k() -> float:
 		"recover": return 0.5
 	return 1.0
 
+## Seconds until the cleave lands and frees him (0: not planted). A guard held for a hauled foe counts its own length.
+func lock_left() -> float:
+	var d := data()
+	match String(st.get("phase", "")):
+		"guard": return maxf(0.0, float(d["guard"]) - float(st["t"])) + float(d["strike_t"])
+		"strike": return float(d["strike_t"]) - float(st["t"])
+	return 0.0
+
 ## X pressed: the guard goes up at once.
 func start() -> void:
 	var h := k.h
@@ -86,6 +94,8 @@ func pull_through() -> void:
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
+	if String(st.get("phase", "")) == "recover":
+		k.play("")               # (a jump or Shift cuts the recovery clip on the press frame)
 	st = {}
 	_show_glow(false)
 	AimKit.hide(k.h, "ult")
@@ -110,7 +120,6 @@ func tick(dt: float) -> void:
 				drop()
 			elif not h.grounded:
 				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
-				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either; the speed it was cast at carries on), the strip ahead follows the
 ## aim, gold sparks rise off him.
@@ -164,6 +173,7 @@ func _land(d: Dictionary) -> void:
 	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
+	k.play("jug_ult_recover")
 	if not pulled:
 		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
@@ -180,7 +190,7 @@ func _land(d: Dictionary) -> void:
 		if dealt <= 0.0:
 			continue
 		last_dealt += dealt
-		_impact(f, dir, dealt)
+		_impact(f, dir)
 		if HeroUlt.landed(k, f) in ["knock", "kill"]:
 			_reset()
 	if last_dealt > 0.0:
@@ -193,11 +203,10 @@ func _land(d: Dictionary) -> void:
 	if st.get("pull_next", false) and k.warchain.hooked():
 		k.warchain.pull()
 
-## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
-func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
+## On someone hit: the gold impact cloud and a heavy shake for those near (the hit's own weight holds it).
+func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
 ## A hunter who was up and went down to the cleave: it is ready again at once.

@@ -15,6 +15,8 @@ The Ways Out calls (HeartSfx.call_out), one flat UI sting each, heard by everyon
   ways_taken_other  another squad left: one door-shut thud and a falling minor bell pair
   ways_warn         a seat shuts in 30 s: three dry ticks on one pitch
   ways_last         the last way out: a low swell under two bells a semitone apart
+  ways_tick         the last 10 s before a seat you can still reach shuts: one soft wooden tock with a glassy top,
+                    once a second (HeartSfx plays the last 3 louder and a little higher); your own game only
 """
 import numpy as np
 import sfx_lib as S
@@ -96,6 +98,12 @@ def ways_last():
     return mix(swell, at(S.chime(698.0, 1.2, 0.5), 0.5), at(S.chime(740.0, 1.1, 0.5), 0.55))
 
 
+def ways_tick():
+    tock = S.chime(1175.0, 0.16, 0.035, ((1.0, 1.0), (2.0, 0.25), (3.98, 0.08)))
+    body = S.chime(392.0, 0.12, 0.03, ((1.0, 1.0), (1.5, 0.3)))
+    return mix(tock * 0.8, body * 0.6)
+
+
 def main():
     S.save_loop('heart_charge', charge(), 'loop')
     S.save_cat('heart_take', take(), 'signature')
@@ -104,7 +112,8 @@ def main():
     S.save_cat('heart_gate_open', gate_open(), 'cast')
     S.save_cat('heart_extract', extract(), 'cast')
     for name, make in (("ways_open", ways_open), ("ways_start", ways_start), ("ways_taken_own", ways_taken_own),
-            ("ways_taken_other", ways_taken_other), ("ways_warn", ways_warn), ("ways_last", ways_last)):
+            ("ways_taken_other", ways_taken_other), ("ways_warn", ways_warn), ("ways_last", ways_last),
+            ("ways_tick", ways_tick)):
         S.save_cat(name, make(), 'ui')
 
 

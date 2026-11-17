@@ -165,7 +165,8 @@ HUDDLE = {
     "FL": (-0.125, 0.14, A + 0.03), "FR": (0.135, -0.12, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
     "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.3, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
 }
-TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+# stride 0.26: the longest step her crouched leg reaches with the knee still bent; T 0.26 walks it at about the crouch speed (pip.json "speed", measured by --crouch-check)
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.26, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.26, "toe_out": 0.12}
 
 
 def huddle(u):
@@ -243,10 +244,13 @@ def clips():
     s_c = dict(s_t)
     s_c.update({"pel": (0.0, -0.035, 0.06), "tor": (-0.32, 0, 0), "hed": (-0.26, 0, 0), "G": (0.36, -0.08, 1.47), "LP": (-0.36, -0.08, 1.41), "fing": 0.5, "wing": 0.34})
     out.append(C("seed_aim", 1.0, [(0.0, END), (0.16, s_d), (0.5, s_m), (0.82, s_t), (1.0, s_c)]))
-    # ... the snap: the gathered light flung forward with both hands (the seed leaves on the first frame), a small hop down off the toes
-    h1 = {"pel": (0.0, 0.1, 0.06), "prt": (0.26, 0.05, 0), "tor": (0.2, 0.0, 0), "hed": (-0.28, -0.05, 0), "G": (0.14, 0.5, 1.04), "BE": be((0, 0.5, -0.87), (0, 0.87, 0.5)), "LP": (-0.10, 0.52, 1.03), "Lh": LHAND_PUSH,
-          "FL": (-0.12, 0.08, A + 0.06), "FR": (0.13, -0.06, A + 0.03), "FLy": 0.1, "FRy": -0.1, "FLp": -0.2, "FRp": 0.3, "fing": 0.0, "jaw": 0.5, "ear": 0.5, "wing": 0.26, "wfl": 0.05, "wfq": 2.0, "skirt": -0.3, "brow": 0.9, "lid": 0.0}
-    out.append(C("seed", 0.55, [(0.0, s_c), (0.07, h1, "out"), (0.32, dict(h1, pel=(0.0, 0.1, -0.02), FL=(-0.12, 0.1, A), FR=(0.13, -0.08, A), FLp=0, FRp=0, skirt=0.1)), (0.55, END)]))
+    # ... the snap (footage 720.9-722.4 s): the gathered light flung forward with both hands (the seed leaves on the first frame), and a
+    # small hop with the push held, about 0.26 s in the air (the sheet's lift 0.2), the wings catching her into a soft squash on landing
+    h1 = {"pel": (0.0, 0.1, 0.24), "prt": (0.26, 0.05, 0), "tor": (0.2, 0.0, 0), "hed": (-0.28, -0.05, 0), "G": (0.14, 0.5, 1.04), "BE": be((0, 0.5, -0.87), (0, 0.87, 0.5)), "LP": (-0.10, 0.52, 1.03), "Lh": LHAND_PUSH,
+          "FL": (-0.12, 0.08, A + 0.22), "FR": (0.13, -0.06, A + 0.19), "FLy": 0.1, "FRy": -0.1, "FLp": 0.5, "FRp": 0.5, "fing": 0.0, "jaw": 0.5, "ear": 0.5, "wing": 0.26, "wfl": 0.2, "wfq": 8.0, "skirt": -0.3, "brow": 0.9, "lid": 0.0}
+    h2 = dict(h1, pel=(0.0, 0.1, 0.17), FL=(-0.12, 0.1, A + 0.15), FR=(0.13, -0.08, A + 0.12), FLp=0.3, FRp=0.3)
+    h3 = dict(h1, pel=(0.0, 0.1, -0.06), prt=(0.3, 0.05, 0), tor=(0.16, 0.0, 0), FL=(-0.12, 0.1, A), FR=(0.13, -0.08, A), FLp=0, FRp=0, skirt=0.1, wing=0.1, wfl=0.08, wfq=4.0)
+    out.append(C("seed", 0.55, [(0.0, s_c), (0.06, h1, "out"), (0.2, h2, "lin"), (0.32, h3), (0.55, END)]))
     # Hearthlight: a deep gather, then both arms straight up, the lantern high over her head, wings flung open, eyes shut in the light
     g0 = {"pel": (0.0, 0.0, -0.13), "prt": (0.32, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.12, 0.26, 0.60), "BE": be(), "LP": (-0.12, 0.26, 0.60), "Lh": (-1.2, 0, 0), "FL": (-0.15, 0.04, A), "FR": (0.15, -0.04, A), "fing": 0.9, "ear": 0.4, "wing": -0.25, "lid": 0.5, "brow": -0.3}
     g1 = {"pel": (0.0, 0.0, 0.05), "prt": (-0.1, 0, 0), "tor": (-0.18, 0, 0), "hed": (-0.3, 0, 0), "G": (0.20, 0.13, 1.55), "BE": be((0.0, 0.0, -1.0), FRONT), "LP": (-0.16, 0.04, 1.47), "Lh": (0.0, 0.0, 3.0), "FL": (-0.13, 0.03, A + 0.03), "FR": (0.13, -0.03, A + 0.03), "FLp": 0.5, "FRp": 0.5,
@@ -322,7 +326,22 @@ def clips():
     d2 = dict(dn)
     d2.update({"tor": (0.34, 0, 0.05), "pel": (0.0, -0.05, -0.28), "hed": (0.34, 0.2, 0.1), "G": (0.06, 0.30, 0.59)})
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, hed=(-0.1, 0, 0), lid=0.05, brow=-0.5, ear=0.5)), (0.95, {"pel": (0.0, -0.01, -0.12), "prt": (0.26, 0, 0), "tor": (0.2, 0, 0), "hed": (-0.26, 0, 0), "G": (0.2, 0.26, 0.78), "LP": (-0.2, 0.2, 0.62), "FL": (-0.13, 0.08, A), "FR": (0.13, -0.08, A), "FLy": 0.16, "FRy": -0.22, "lid": 0.0, "ear": 0.3, "brow": 0.4}), (1.6, END)]))
+    # revive: down on one knee beside a friend, the lantern held low over them, her free paw pressing their chest in two small pushes; ears forward, brave
+    kn = {"pel": (0.0, 0.05, -0.30), "prt": (0.24, 0, 0), "tor": (0.26, 0, 0), "hed": (0.18, 0.1, 0.0), "G": (SH + 0.1, 0.30, 0.55), "BE": be((0.1, 0.2, -1.0)), "LP": (-0.12, 0.30, 0.56), "Lh": (-1.0, 0.7, 0.0),
+          "FL": (-0.14, 0.17, A), "FR": (0.12, -0.20, A + 0.02), "FLy": 0.2, "FRy": -0.3, "FRp": 1.2, "brow": 0.3, "lid": -0.08, "ear": 0.2, "fing": 0.8, "skirt": 0.2, "wing": -0.1}
+    pr = dict(kn, pel=(0.0, 0.06, -0.33), tor=(0.32, 0, 0), hed=(0.24, 0.1, 0.0), LP=(-0.12, 0.30, 0.47), G=(SH + 0.1, 0.30, 0.52), ear=0.35)
+    out.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (one cycle = Life.R stomp_cycle 0.7 s, the foot lands at 0.7 of it): weight over the left foot, the right comes up behind a lean, hangs, and drops with her whole weight
+    sp0 = {"pel": (-0.03, 0.0, -0.05), "prt": (0.1, 0, 0), "tor": (0.12, 0, 0), "hed": (0.05, 0, 0), "G": (SH + 0.14, 0.2, 0.84), "LP": (-0.3, 0.2, 0.84), "Lh": (-0.4, -0.2, 0.0),
+           "FL": (-0.12, 0.03, A), "FR": (0.13, -0.03, A), "FLy": 0.16, "FRy": -0.22, "brow": -0.9, "lid": -0.1, "jaw": 0.2, "ear": 0.5, "fing": 0.8, "wing": 0.1, "wfl": 0.12, "wfq": 3.0}
+    sp1 = dict(sp0, pel=(-0.05, -0.01, -0.07), prt=(-0.08, 0, 0), tor=(-0.1, 0, 0), FR=(0.13, -0.02, A + 0.1), FRp=-0.4, G=(SH + 0.2, 0.16, 0.96), LP=(-0.4, 0.14, 0.98))
+    sp2 = dict(sp1, pel=(-0.05, 0.0, -0.02), FR=(0.14, 0.12, A + 0.24), FRp=-0.5, hed=(-0.12, 0, 0), G=(SH + 0.22, 0.14, 1.04), LP=(-0.42, 0.12, 1.06), jaw=0.5)
+    sp3 = dict(sp0, pel=(-0.025, 0.02, -0.12), prt=(0.3, 0, 0), tor=(0.3, 0, 0), hed=(0.22, 0, 0), FR=(0.14, 0.12, A), FRp=0.0, G=(SH + 0.16, 0.24, 0.7), LP=(-0.26, 0.24, 0.72), jaw=0.7, ear=0.9, skirt=0.3, wfl=0.2)
+    out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.02, -0.08), prt=(0.2, 0, 0), tor=(0.2, 0, 0)), "out"), (0.7, sp0)], loop=True))
+    # drink (Hunter.DRINK_TIME 1.1 s): the left paw brings the flask up, eyes shut, head back for a long swallow, a satisfied shudder of the ears, and the paw comes down
+    dr1 = {"LP": (-0.06, 0.20, 1.12), "Lh": (-1.6, 0.6, 0.0), "tor": (0.0, 0, 0), "hed": (-0.04, 0.0, 0.0), "fing": 0.9, "ear": 0.1, "brow": 0.1}
+    dr2 = dict(dr1, hed=(-0.36, 0.0, 0.0), tor=(-0.1, 0, 0), lid=0.95, jaw=0.3, ear=0.0, brow=0.4, LP=(-0.05, 0.19, 1.16), pel=(0.0, 0.0, 0.0), prt=(0.0, 0, 0))
+    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.4, 0.0, 0.0), LP=(-0.05, 0.19, 1.18))), (0.9, dict(dr1, hed=(0.1, 0.0, 0.0), lid=0.3, ear=0.5, jaw=0.5, brow=0.5), "out"), (1.1, END)]))
     # death: the lantern arm drops last: she sinks, curls over it and goes still
     dd = {"pel": (0.0, -0.04, -0.27), "prt": (0.72, 0.1, 0.2), "tor": (0.62, 0.1, 0.2), "hed": (0.3, 0.4, 0.2), "G": (0.16, 0.44, 0.12), "BE": be((0.3, 0.3, -0.9)), "LP": (-0.20, 0.50, 0.14), "Lh": (-1.4, 0, 0), "FL": (-0.16, -0.26, 0.11), "FR": (0.18, -0.30, 0.11), "FLp": 1.3, "FRp": 1.3, "FLy": 0.0, "FRy": 0.0, "lid": 1.0, "brow": -0.5, "ear": 1.0, "fing": 0.1, "jaw": 0.15, "skirt": 0.4, "wing": -0.4, "wb": 0.7, "tailw": 1.0}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.07, -0.05), "prt": (-0.22, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.34, 0, 0), "lid": -0.1, "brow": -1, "jaw": 0.8, "ear": 0.8, "G": (SH + 0.2, 0.14, 0.86)}, "out"),

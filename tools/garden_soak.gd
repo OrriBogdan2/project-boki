@@ -3,7 +3,9 @@ extends RefCounted
 ## and a retired elder) plus the three toys and the snack patch lives 30 in-game days on the real farm, stepped at
 ## DT of farm time per call with no frames in between (the high time scale; a day is home.DAY_LEN s). Each day the
 ## player feeds the first FED Boki (the rest must feed themselves: BaseFeed) and picks the patch every other day,
-## every third day the Dash and the Stump Shove are run on the logic classes. Every Boki's state changes are kept
+## day one of the Dash, the Stump Shove, Seek and Spark Volley is run on the logic classes. The Soul Shrine
+## stands, the retired Elder must stay by it, a friends pair lays a Nook egg that hatches wearing the Elder's gift
+## and one away gap lists its gifts on the arrival card (garden_soak_loop.gd). Every Boki's state changes are kept
 ## (user://garden_soak.json). It fails on: a Boki stuck in one state over STUCK_HOURS in-game hours (Nap through
 ## the night excepted), a need outside 0..100 or under its sulky floor (care.json sulky, GARDEN.md 2), a starve
 ## stage at all (never weak or sick), a NaN or out-of-range trait, a bond outside -1..1, a toy held past TOY_HOLD
@@ -15,11 +17,13 @@ const DT := 0.25                # s of farm time per step
 const SPAWN_EVERY := 400        # steps between frames, so deferred frees and timers can run
 const STUCK_HOURS := 6.0        # in-game hours (DAY_LEN / 24 = 12.5 s each) in one state: the rules cap Roam at 45 s
 const TOY_HOLD := 60.0          # s a Boki may keep one toy (go_timeout 20 + play 12 at most, with room)
-const SAVE_GROWTH := 2.0        # the save may grow to this many times its first size
+const SAVE_GROWTH := 2.0        # the save may grow to this many times its size at SIZE_DAY
+const SIZE_DAY := 10            # by then the baby, the journals and the away card's lines are in (journals are capped)
 const DAY_START := 0.3          # the farm clock at the start (morning)
-const MATCH_EVERY := 3          # days between a Dash and a Stump Shove
 const FED := 3                  # Boki the player feeds each day; the others feed themselves (GARDEN.md 2)
+const TOYS_A_DAY := 3.5        # toys a fed Boki plays at least, per in-game day on average (GARDEN.md 4)
 const RACE_MAX_S := 120.0       # s a headless race may run
+const Loop := preload("res://tools/garden_soak_loop.gd")
 const OUT := "user://garden_soak.json"
 
 ## Collects engine errors while the soak runs (warnings do not count).
@@ -35,15 +39,20 @@ class ErrorLog extends Logger:
 var bad := 0
 var main: Node
 var home
+var loop := Loop.new(self)
 var errors := ErrorLog.new()
 var hist := {}              # name -> Array of [t s, state name]
 var longest := {}           # name -> {state name: longest stay in s}
 var play_since := {}        # name -> t its current toy began
 var t := 0.0
-var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "self_fed": 0}      # what the run actually exercised
+var size_base := 0          # bytes of the save at SIZE_DAY
+var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "hunts": 0, "volleys": 0, "self_fed": 0}      # exercised
 var low := {}               # need -> lowest value seen on any Boki
 var snack := {}             # name -> it was off for a snack (life_eat) at the last look
 var food_was := {}          # name -> its food need at the last look
+var toy_use := {}           # name -> {plays: toys picked up, low: plays begun with joy under toys.json joy_below}
+var joy_low := {}           # name -> its lowest joy
+var sulky_s := {}           # name -> s spent sulky (joy under base_life.json whistle sulky_joy)
 
 func ok(cond: bool, what: String) -> void:
 	print("SOAK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -61,26 +70,33 @@ func run(m: Node) -> void:
 	OS.add_logger(errors)
 	var d := BaseDemo.save()
 	_add_young_and_old(d)
+	loop.prepare(d)
 	SnackPatch.grant(d)
 	home = await main._hb_home()
 	_stage()
-	var size0 := JSON.stringify(Save.d).length()
+	loop.stage()
 	var hour: float = home.DAY_LEN / 24.0
 	var steps := int(DAYS * home.DAY_LEN / DT)
 	var wall := Time.get_ticks_msec()
 	for i in steps:
 		_step()
 		_watch(hour * STUCK_HOURS)
+		loop.watch()
 		if i % SPAWN_EVERY == 0:
 			await main.get_tree().process_frame
 	var size1 := JSON.stringify(Save.d).length()
 	var secs := float(Time.get_ticks_msec() - wall) / 1000.0
 	print("SOAK %d days (%d steps) in %.0f s of wall time" % [DAYS, steps, secs])
+	await loop.finish()
 	_report()
-	ok(size1 <= size0 * SAVE_GROWTH, "save size %d -> %d bytes (limit x%.0f)" % [size0, size1, SAVE_GROWTH])
+	loop.report()
+	_report_toys()
+	ok(size1 <= size_base * SAVE_GROWTH, "save size from day %d: %d -> %d bytes (limit x%.0f)"
+			% [SIZE_DAY, size_base, size1, SAVE_GROWTH])
 	var drifted: int = home.kins.filter(func(k): return k["rec"].has("drift")).size()
 	print("SOAK exercised: ", seen, ", trait drift on %d Boki" % drifted)
-	ok(seen.values().all(func(n): return n > 0) and drifted > 0, "toys, patch, Dash, Shove and trait drift all ran")
+	ok(seen.values().all(func(n): return n > 0) and drifted > 0,
+			"toys, patch, Dash, Shove, Seek, Volley and trait drift all ran")
 	var played: bool = hist.values().any(func(h): return h.any(func(e): return e[1] == "Play"))
 	ok(played, "the machine shows Play while a Boki is at a toy (home_toys.gd)")
 	var unfed: Array = home.kins.slice(FED).map(func(k): return String(k["rec"]["name"]))
@@ -152,29 +168,48 @@ func _player_day(day: int) -> void:
 		home.hsp.tick(1.0)
 		seen["picks"] += 1 if int(Save.d["crops"].values().reduce(func(a, b): return a + b, 0)) > crops else 0
 		home.ppos = was
-	if day % MATCH_EVERY == 0:
-		_matches()
+	loop.day(day)
+	if day == SIZE_DAY:
+		size_base = JSON.stringify(Save.d).length()
+	_match(day)
 
-func _matches() -> void:
+## One game a day, round robin: the Dash, the Stump Shove, Seek, Spark Volley, on the logic classes.
+func _match(day: int) -> void:
 	var recs: Array = home.kins.map(func(k): return k["rec"]).filter(func(r): return not Mentor.is_mentor(r))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(t)
-	var race := BaseRace.Run.new(recs, 0, rng)
 	var rt := 0.0
-	while not race.over() and rt < RACE_MAX_S:
-		race.step(DT)
-		rt += DT
-	if race.over():
-		BaseRace.settle(race)
-		seen["races"] += 1
-	var bout := BaseShove.Run.new([recs[2], recs[3]], 0, rng)
-	rt = 0.0
-	while not bout.over() and rt < RACE_MAX_S:
-		bout.step(DT)
-		rt += DT
-	if bout.over():
-		BaseShove.settle(bout)
-		seen["bouts"] += 1
+	match day % 4:
+		0:
+			var race := BaseRace.Run.new(recs, 0, rng)
+			while not race.over() and rt < RACE_MAX_S:
+				race.step(DT)
+				rt += DT
+			if race.over():
+				BaseRace.settle(race)
+				seen["races"] += 1
+		1:
+			var bout := BaseShove.Run.new([recs[2], recs[3]], 0, rng)
+			while not bout.over() and rt < RACE_MAX_S:
+				bout.step(DT)
+				rt += DT
+			if bout.over():
+				BaseShove.settle(bout)
+				seen["bouts"] += 1
+		2:
+			var hunt := BaseSeek.Hunt.new([recs[0], recs[1]], [Vector2.ZERO, Vector2(1, 0)], Vector2(6, 4), false, rng)
+			while not hunt.over():
+				hunt.step(DT)
+			BaseSeek.settle(hunt)
+			seen["hunts"] += 1
+		3:
+			var volley := BaseVolley.Run.new([recs[0], recs[2]], 0, rng)
+			while not volley.over() and rt < RACE_MAX_S:
+				volley.step(DT)
+				rt += DT
+			if volley.over():
+				BaseVolley.settle(volley)
+				seen["volleys"] += 1
 
 ## One look at every Boki: record a state change, and check the stuck limit and every value's range. A Boki the
 ## farm itself has (called, indoors, held) keeps its state and does not count; neither does a night Nap or a
@@ -201,6 +236,7 @@ func _watch(limit_s: float) -> void:
 		food_was[nm] = food
 		_check_values(rec, nm)
 		_check_toy(k, nm)
+		_check_joy(rec, nm)
 
 func _check_values(rec: Dictionary, nm: String) -> void:
 	for n in Care.NEEDS:
@@ -226,8 +262,33 @@ func _check_toy(k: Dictionary, nm: String) -> void:
 	if not play_since.has(nm):
 		play_since[nm] = t
 		seen["plays"] += 1
+		var use: Dictionary = toy_use.get_or_add(nm, {"plays": 0, "low": 0})
+		use["plays"] += 1
+		use["low"] += 1 if Care.need(k["rec"], "joy") < float(HomeToys.rules()["joy_below"]) else 0
 	elif t - float(play_since[nm]) > TOY_HOLD and t - float(play_since[nm]) < TOY_HOLD + DT:
 		_fail("%s holds a toy for over %.0f s" % [nm, TOY_HOLD])
+
+## Joy over the run: the lowest, and the time spent sulky.
+func _check_joy(rec: Dictionary, nm: String) -> void:
+	var joy := Care.need(rec, "joy")
+	joy_low[nm] = minf(float(joy_low.get(nm, 100.0)), joy)
+	if joy < float(home.life.R["whistle"]["sulky_joy"]):
+		sulky_s[nm] = float(sulky_s.get(nm, 0.0)) + DT
+
+## Toy use per Boki per in-game day (the play that trains stats, GARDEN.md 4) and how glum each got. A Boki you
+## feed plays at least TOYS_A_DAY a day and is never sulky; the unfed may sulk (care.json sulky, never sick).
+func _report_toys() -> void:
+	for i in home.kins.size():
+		var nm := String(home.kins[i]["rec"]["name"])
+		var use: Dictionary = toy_use.get(nm, {"plays": 0, "low": 0})
+		var a_day := float(use["plays"]) / DAYS
+		print("SOAK %-6s %s toys %.1f a day (%d from low joy), lowest joy %.0f, sulky %.0f%% of the time"
+				% [nm, "fed  " if i < FED else "unfed", a_day, use["low"], joy_low.get(nm, 100.0),
+				100.0 * float(sulky_s.get(nm, 0.0)) / t])
+		if i < FED:
+			ok(a_day >= TOYS_A_DAY and int(use["low"]) * 2 >= DAYS and float(sulky_s.get(nm, 0.0)) == 0.0,
+					"%s (fed) plays %.1f toys a day (limit %.1f), from low joy every other day or more, never sulky"
+					% [nm, a_day, TOYS_A_DAY])
 
 func _report() -> void:
 	for nm in hist:

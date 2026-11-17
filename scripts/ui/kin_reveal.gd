@@ -14,6 +14,7 @@ extends CanvasLayer
 ##   add_child(rv); rv.proceed.connect(func(): _show_name())
 
 signal proceed
+signal revealed       # it has met you and its card is up (by itself or skipped to)
 
 const RATE := 22050
 
@@ -160,7 +161,8 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	hint = UI.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
+	var turn := "Drag to turn it round  ·  %s / %s" % [Settings.key_cap("left"), Settings.key_cap("right")]
+	hint = UI.label(turn, 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
 	hint.offset_top = -64
@@ -226,6 +228,9 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
 	if rec.get("shimmer", false):
 		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		v.add_child(_note("%s, a rare trait: %s" % [rare["name"], rare["note"]]))
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
 	if rec.has("parents"):
@@ -301,24 +306,42 @@ func _play_intro() -> void:
 	moment.tween_interval(0.3)
 	moment.tween_callback(func():
 		_play(_cry())
-		title_lbl.text = String(sp["name"])
-		sub_lbl.text = "It's looking at you. It knows your face now."
-		var tt := create_tween().set_parallel(true)
-		tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
-		tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2))
+		_show_lines())
 	moment.tween_interval(0.8)
 	if body:
 		moment.tween_property(body, "rotation:x", 0.0, 0.4).set_trans(Tween.TRANS_SINE)
-	moment.tween_callback(func():
-		met = true
-		info.position.x += 30
-		var it := create_tween().set_parallel(true)
-		it.tween_property(info, "modulate:a", 1.0, 0.4)
-		it.tween_property(info, "position:x", info.position.x - 30, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		create_tween().tween_property(hint, "modulate:a", 1.0, 0.5)
-		ready_to_name = true
-		name_btn.disabled = false
-		name_btn.grab_focus())
+	moment.tween_callback(_open_card)
+
+## Jumps to the end of the moment: it has found you, and its card is up. Only the waiting is cut.
+func skip() -> void:
+	if met:
+		return
+	moment.kill()
+	kin.rotation.y = PI
+	var body := kin.get_node_or_null("Body") as Node3D
+	if body:
+		body.rotation.x = 0.0
+	_show_lines()
+	_open_card()
+
+func _show_lines() -> void:
+	title_lbl.text = String(sp["name"])
+	sub_lbl.text = "It's looking at you. It knows your face now."
+	var tt := create_tween().set_parallel(true)
+	tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
+	tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2)
+
+func _open_card() -> void:
+	met = true
+	info.position.x += 30
+	var it := create_tween().set_parallel(true)
+	it.tween_property(info, "modulate:a", 1.0, 0.4)
+	it.tween_property(info, "position:x", info.position.x - 30, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	create_tween().tween_property(hint, "modulate:a", 1.0, 0.5)
+	ready_to_name = true
+	name_btn.disabled = false
+	name_btn.grab_focus()
+	revealed.emit()
 
 func _blink() -> void:
 	for ch in kin.get_children():

@@ -14,7 +14,8 @@
   "ways_taken_own": "ui",
   "ways_taken_other": "ui",
   "ways_warn": "ui",
-  "ways_last": "ui"
+  "ways_last": "ui",
+  "ways_tick": "ui"
  },
  "reach": {
   "heart_charge": 70,

@@ -1,0 +1,4 @@
+tele_net|tele_net_archer_e.jpg|Lace's Hail Wall arc, cast on the other game (seen by a foe on another game)
+tele_net|tele_net_dolm_rmb.jpg|Tenzo's held slam circle, cast on the other game (seen by a foe on another game)
+tele_net|tele_net_dolm_e.jpg|Tenzo's three E tells, cast on the other game (seen by a foe on another game)
+tele_net|tele_net_bulwark_e.jpg|Albert's E zone, cast on the other game (seen by a foe on another game)

@@ -5,7 +5,11 @@
 Each <arch>_dash_air is that Hunter's own ground dash (audio/<arch>_dash*.wav, made by its group script)
 re-voiced for a dash with no floor under it: the foot scrape and ground thump filtered out, wind rushing
 past, and the one thing that Hunter's motion trails: Kael's flame, Grimble's tumbling junk, Neve's ice
-flecks off the blade, Sparkle's crackle. dash_empty is the tick of a Shift press with no charge to spend.
+flecks off the blade, Sparkle's crackle. Gil has no ground dash to re-voice (he swims under the floor), so
+gil_dash_air is made whole here in his water: a wet flick of the tail, bubbles shed off the scales, drops falling
+behind. dash_empty is the tick of a Shift press with no charge to spend.
+dash_ground and dash_air are the shared dashes a Hunter without its own falls back to (HeroSfx.dash_name):
+dash_ground the push-off scuff and slide under a short whoosh, dash_air only wind, no ground contact.
 Run it after the group scripts (it reads their dash files). Original synthesis, no samples.
 """
 import os, sys, wave
@@ -31,6 +35,7 @@ AIR = {
     'thief': (350, 1.06, (3000, 9000), 0.5, None),
     'mage': (500, 1.04, (3000, 10000), 0.4, 'zap'),
     'dolm': (200, 0.97, (500, 3000), 0.6, None),
+    'gil': (350, 1.08, (2500, 8000), 0.4, None),
 }
 
 
@@ -70,9 +75,37 @@ def air(arch, ground, i):
     return mix(x, rush, np.pad(t, (0, max(0, len(x) - len(t))))[:len(x)])
 
 
+def gil_air(i):
+    """Gil's air dash: a wet rush, a burst of bubbles off the scales and a spray of drops behind (take i)."""
+    d = 0.3 + 0.03 * i
+    rush = S.hiss(d, 500, 2600, 0.04, 0.2) * shape(d, 0.04, d * 0.25, d * 0.6)
+    body = lpf(noise(d), 700) * shape(d, 0.02, d * 0.2, d * 0.5) * 0.6
+    shed = S.bubbles(d * 0.5, 50, 500, 1400, 0.03) * 0.4
+    drops = S.bubbles(d * 0.6, 20, 1600, 3200, 0.02) * 0.25
+    return mix(rush, body, shed, S.at(drops, d * 0.35))[:N(d)]
+
+
 def empty():
     """A soft tick: the slot has nothing to give."""
     return mix(click(0.004, 1500, 4500) * 0.8, lpf(noise(0.04), 600) * env(N(0.04), 0.001, 0.012) * 0.5)
+
+
+def ground_shared(i):
+    """The shared ground dash (take i): a push-off thud, a scuff and slide on the floor, a short whoosh over them."""
+    d = 0.3 + 0.02 * i
+    thud = lpf(noise(0.07), 320) * env(N(0.07), 0.002, 0.02) * 1.2
+    scuff = hpf(lpf(noise(d), 4500), 500) * shape(d, 0.01, d * 0.35, d * 0.45) * 0.5
+    grit = S.grains(d, 120, 1500, 6000, 0.001, 0.004) * shape(d, 0.01, d * 0.4, d * 0.4) * 0.8
+    whoosh = S.hiss(d, 700, 4500, 0.05, 0.16) * shape(d, 0.05, d * 0.3, d * 0.45) * 0.7
+    return mix(thud, scuff, grit, whoosh)[:N(d)]
+
+
+def air_shared(i):
+    """The shared air dash (take i): wind only, a soft rush that swells and thins out, nothing touching the ground."""
+    d = 0.34 + 0.02 * i
+    rush = S.hiss(d, 1200, 8000, 0.08, 0.2) * shape(d, 0.08, d * 0.3, d * 0.5)
+    body = lpf(noise(d), 900) * shape(d, 0.06, d * 0.25, d * 0.5) * 0.25
+    return mix(rush, body)[:N(d)]
 
 
 def build():
@@ -80,6 +113,9 @@ def build():
         ground = ground_takes(arch)
         S.takes_cat('%s_dash_air' % arch, lambda i, a=arch, g=ground: air(a, g, i), 2, 'dash')
     S.save_cat('dash_empty', empty(), 'ui')
+    S.takes_cat('gil_dash_air', gil_air, 2, 'dash')
+    S.takes_cat('dash_ground', ground_shared, 2, 'dash')
+    S.takes_cat('dash_air', air_shared, 2, 'dash')
 
 
 if __name__ == '__main__':

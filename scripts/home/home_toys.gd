@@ -86,6 +86,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	var rec: Dictionary = k["rec"]
 	if not FarmUnlocks.base_mode() or not h.visit.is_empty() or k.has("play"):
 		return k.has("play")
+	if BaseShy.shy(rec):
+		return false      # a newly adopted Boki keeps to the edge for its first day
 	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
 		return false
 	if not want and h.life and not h.life.machine(k).is_in(BaseLife.S.ROAM):
@@ -96,7 +98,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
+		var kept: bool = h.life != null and h.life.saved(int(t["u"]), k)      # a new toy waits for its first try
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or kept:
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company
@@ -107,11 +110,15 @@ func pick(k: Dictionary, want := false) -> bool:
 	for u in weights:
 		roll -= float(weights[u])
 		if roll <= 0.0:
-			k["play"] = {"u": u, "phase": "go", "t": 0.0, "slot": _free_slot(u)}
-			k["t"] = 30.0
-			k.erase("stare")
+			take(k, u)
 			return true
 	return false
+
+## Sends the Boki to toy `u` (walk there, then play).
+func take(k: Dictionary, u: int) -> void:
+	k["play"] = {"u": u, "phase": "go", "t": 0.0, "slot": _free_slot(u)}
+	k["t"] = 30.0
+	k.erase("stare")
 
 ## The lowest place round a toy nobody has taken.
 func _free_slot(u: int) -> int:

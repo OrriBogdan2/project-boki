@@ -3,6 +3,7 @@ rune-stone it heaves off the top."""
 import boki_clips
 import cairnback
 from boki_clips import SHARED, add, chop_mouth, ear_pose, eat_ground, mine_mouth, s, seq, tail_wave, trot
+from boki_gait import four_legs, planted
 from cairnback import HORN_PTS, SIDES, STONE_C, TAIL_PTS
 
 boki_clips.TAIL_N = 2
@@ -146,8 +147,10 @@ def tucked(t):
 
 CLIPS = {name: (secs, loop, cairn_rocks(fn)) for name, (secs, loop, fn) in SHARED.items()}
 CLIPS.update({
-    "walk": (0.9, True, cairn_rocks(lumber)),
-    "run": (0.5, True, cairn_rocks(trundle)),
+    "walk": (0.9, True, planted(cairn_rocks(lumber), BONES, four_legs(0.0, 0.5, 0.5), duty=0.45, reach=0.13,
+                                lift=0.03, drop=0.035)),
+    "run": (0.5, True, planted(cairn_rocks(trundle), BONES, four_legs(0.0, 0.5, 0.5), duty=0.3, reach=0.17,
+                               lift=0.05, drop=0.065)),
     "attack": (0.85, False, cairn_rocks(ram)),
     "ability": (1.2, False, cairn_rocks(heave)),
     "sleep": (3.6, True, cairn_rocks(tucked)),

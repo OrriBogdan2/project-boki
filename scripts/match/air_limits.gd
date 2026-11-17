@@ -24,11 +24,20 @@ static func drop_locked(h: Hunter) -> bool:
 static func gate_drop(h: Hunter) -> void:
 	if not drop_locked(h):
 		return
-	DropLaunch.gate(h)               # item 163: locked into the squad launch, no keys at all
 	for key in DROP_KEYS:
 		if key != "jump" or not h.diving:
 			h.inp[key] = false
 	h.dash_buf = 0.0
+
+## The glider folds on the step its fall reaches the ground, before that step's presses are read, so a shot, a cast
+## or a dash pressed as you land goes off that step (docs/decisions/0061): a landing never eats a press.
+static func fold_at_touchdown(h: Hunter, dt: float) -> void:
+	if not h.gliding or h.dropping or h.grounded or h.vel.y > 0.0 or h.over_void():
+		return
+	if h.pos.y + h.vel.y * dt <= h.ground():
+		h.gliding = false
+		h.glide_dive.on = false
+		h.m.fx.dust(h.pos, 5)
 
 ## True while an ability or attack animation runs, so the glider can't open yet.
 static func glide_locked(h: Hunter) -> bool:
@@ -44,12 +53,13 @@ static func glide_locked(h: Hunter) -> bool:
 	return move_running(k, h)
 
 ## A kit move still inside its keys. A held move (a hold pose) counts only through the hold itself above,
-## so a pose left on its last key never blocks the glider.
+## so a pose left on its last key never blocks the glider; nor does a landing or arrival pose ("land": true:
+## a dash's arrival, which a glide press ends like the dash).
 static func move_running(k: ArchKit, h: Hunter) -> bool:
 	if k.anim_id == "" or k.anim_at <= maxf(maxf(h.dash_at, k.dash_press_at) + TRAVEL_JOIN_S, h.jump_at):
 		return false
 	var mv := HunterAnim.km_def(k.anim_id)
-	if mv.is_empty() or mv.get("hold", false):
+	if mv.is_empty() or mv.get("hold", false) or mv.get("land", false):
 		return false
 	var keys: Array = mv["keys"]
 	return k.m.time - k.anim_at < float((keys[-1] as Array)[0])

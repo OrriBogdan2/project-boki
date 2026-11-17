@@ -4,10 +4,9 @@ extends RefCounted
 ## farm_build.json base_mode on. A log lies by the Training post. Press interact at it and two rested
 ## Boki out on the base (your partner and the next one) bat a glowing seed over it, first to 5 points;
 ## a Boki that misses gives the other the point. A Boki returns the seed by chance from its strength:
-## Speed and Focus, mood (joy) and trust, and a 10% type edge from the same element table as the Stump
-## Shove, over the hitter's. You back your partner and call one spike on the Training post's timing
-## bar: its next hit is hard to return. The winner gains joy, trust and you a few gems; the loser
-## sulks and remembers (a memory line). Tuning: content/rules/base_volley.json.
+## Speed and Focus, mood (joy) and trust, over the hitter's. You back your partner and call one
+## spike on the Training post's timing bar: its next hit is hard to return. The winner gains joy,
+## trust and you a few gems; the loser sulks and remembers (a memory line). Tuning: content/rules/base_volley.json.
 ##
 ## The match is one explicit state machine (briefs/STATE_MACHINES.md), Run.state: only Run.go() writes
 ## it, and a move the TABLE lacks is refused and counted (--volley-check asserts none). No Run means
@@ -27,12 +26,13 @@ const ARC := 1.0                             # m the seed rises on a normal hit
 const SPIKE_ARC := 0.35                      # m the seed rises on a spike
 const SEED_R := 0.1                          # m, the seed's radius
 const REACH := 1.8                           # m from the log to start a match
+const FIRST := "first_volley"                # Save.d.tutorial: the practice match ran (FirstRound)
 
 static func rules() -> Dictionary:
 	return Content.rules("base_volley")
 
 ## How well a Boki gets under the seed and reads it, before the hitter's: 1.0 for no points and a plain mood.
-static func strength(rec: Dictionary, foe: Dictionary) -> float:
+static func strength(rec: Dictionary) -> float:
 	var R := rules()
 	var st: Dictionary = rec.get("stats", {})
 	var s := (1.0 + float(st.get("speed", 0)) * float(R["speed_per_point"])) \
@@ -40,12 +40,12 @@ static func strength(rec: Dictionary, foe: Dictionary) -> float:
 	var mood: Array = R["mood"]
 	s *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 	s *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
-	return s * (float(R["edge"]) if BaseShove.has_edge(rec, foe) else 1.0)
+	return s
 
 ## The chance recv returns a seed hit by hitter, before any spike.
 static func p_return(recv: Dictionary, hitter: Dictionary) -> float:
 	var R := rules()
-	return clampf(float(R["base_return"]) * strength(recv, hitter) / strength(hitter, recv),
+	return clampf(float(R["base_return"]) * strength(recv) / strength(hitter),
 			float(R["min_return"]), float(R["max_return"]))
 
 ## a's chance over b's to take a point from a level start: above 0.5 the expected winner is a.
@@ -187,6 +187,8 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var cue: GardenCues.VolleyCue = null   # the landing ring and spike flash while a match runs
+var practice := false          # the first practice match: ends at the first press, no gain, no cost
 
 func _init(home) -> void:
 	h = home
@@ -261,7 +263,12 @@ func use() -> void:
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact"))
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
+	practice = FirstRound.due(FIRST, "volley")
+	if practice:
+		FirstRound.take(FIRST)
+		bar.lbl.text = FirstRound.line("when the marker is in the gold to call a spike")
 	seed_node.visible = true
+	cue = GardenCues.VolleyCue.new(h)
 	_place()
 	GardenSfx.countdown(h, log_node.position)
 
@@ -279,7 +286,11 @@ func input(event: InputEvent) -> bool:
 		run.call_spike(r)
 		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
+		cue.call_flash(pair[run.backed]["pos"])
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
+		if practice:
+			h._toast("That's a spike call: gold hits hardest. " + FirstRound.DONE)
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -301,6 +312,7 @@ func tick(d: float) -> void:
 		_splash(run.last_miss)
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
 	_place()
+	cue.step(d)
 	if run.over():
 		_end(true)
 
@@ -316,6 +328,17 @@ func _place() -> void:
 		n.rotation.y = atan2(0.0, -side)
 		pair[i]["pos"] = p
 	seed_node.position = _seed_at()
+	_aim_cue()
+
+## The ring sits where the seed will land, closing in as it comes; hidden when no seed is in the air.
+func _aim_cue() -> void:
+	if run.state != Run.S.FLIGHT:
+		cue.hide_landing()
+		return
+	var land: Vector3 = log_node.position + Vector3(0, 0, _side_z(run.to, 1.0))
+	var g: float = h._ground_h(land.x, land.z)
+	land.y = g if g > -50.0 else 0.0
+	cue.aim(land, 1.0 - clampf(run.fly_t / run.fly_total, 0.0, 1.0), run.hard < 1.0)
 
 ## m along the court from the log toward a side (side 0 is on -z), k of the way to the player.
 static func _side_z(side: int, k: float) -> float:
@@ -333,12 +356,16 @@ func _seed_at() -> Vector3:
 	return Vector3(0, 0.6, _side_z(run.server, 1.0))
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice match never pays out
+	practice = false
 	var res := settle(run) if finished else {}
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	bar.close()
 	seed_node.visible = false
+	cue.clear()
+	cue = null
 	if finished:
 		_card(res, h.hrace.pin(res["win"], "volley"))
 		GardenSfx.result(h, res)

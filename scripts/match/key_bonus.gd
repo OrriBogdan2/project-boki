@@ -7,17 +7,9 @@ extends RefCounted
 ## A bonus key drops on the ground like a carrier's (KeyCarry.drop_keys) and bots go for it (BotKeys).
 ## Keys are never sold in shops.
 
-const RULES_PATH := "res://content/rules/chest_keys.json"
-
-static var _rules: Dictionary = {}
-
-
-## The bonus odds per source kind, read once from content/rules/chest_keys.json.
+## The bonus odds per source kind (content/rules/chest_keys.json, cached by Content).
 static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
-		_rules = parsed if parsed is Dictionary else {}
-	return _rules
+	return Content.rules("chest_keys")
 
 
 ## What kind of source a monster is: "boss", "elite", "monster", or "" for none. The Shrubling always

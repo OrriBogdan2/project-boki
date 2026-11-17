@@ -31,7 +31,7 @@ func run(a) -> void:
 
 func _fresh() -> void:
 	A.step(m, 0.7)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	K.riposte.drop()
 	K.lunge = {}
 	A.step(m, 0.1)
@@ -62,8 +62,8 @@ func tap_strike() -> void:
 	K.cd["rmb"] = 99.0
 	A.tap(m, P)
 	var drawn := float(AimKit.entry(P, "slam").get("len", 0.0))
-	A.ok("jug tap strike: the Smash resting, a tap still winds up an overhead strike, its cone drawn at the reach",
-			not K.slam_w.is_empty() and absf(drawn - float(sl["radius"]) * float(ts["reach_k"])) < 0.05,
+	A.ok("jug tap strike: the Smash resting, a tap still winds up an overhead strike, its lane drawn at the reach",
+			not K.slam_w.is_empty() and absf(drawn - float(sl["len"]) * float(ts["reach_k"])) < 0.05,
 			"len %.2f" % drawn)
 	A.step(m, float(ts["windup"]) + 0.1)
 	var full := float(sl["dmg"])

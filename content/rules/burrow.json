@@ -1,0 +1,12 @@
+{
+	"desc": "How many Boki are out on the island at once; the rest sleep in the Boki Burrow (scripts/core/kinbox.gd). The owner's garden default is 6 out.",
+	"farm_caps": [6, 8, 10, 12],
+	"farm_caps_unit": "Boki out at once, by Kin Cottage expansion level (index 0 is the start)",
+	"farm_caps_reason": "Six keeps the island inside the 60-character animation budget (GARDEN.md question 3); each cottage expansion adds two. A bigger start needs a real-GPU check with animation LOD first.",
+	"expand_cost": [0, 200, 400, 700],
+	"expand_cost_unit": "gems to buy each expansion level (index 0 is free)",
+	"expand_cost_reason": "Room is a late purchase: the 4th level costs about a day of expedition gems.",
+	"walk_secs": 2.5,
+	"walk_secs_unit": "seconds a swapped Boki takes to walk between the Burrow door and the island",
+	"walk_secs_reason": "Long enough to be seen leaving, short enough that a second swap never waits on it."
+}

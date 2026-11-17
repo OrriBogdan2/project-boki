@@ -123,7 +123,7 @@ func _outline(r: Rect2) -> PackedVector2Array:
 		for k in steps + 1:
 			var d := lerpf(chip_a, length - chip_b, float(k) / steps)
 			var h := _h(seed_i + side * 101 + k * 7)
-			var depth := jag * h
+			var depth := jag * h if k > 0 and k < steps else 0.0      # corner ends stay on the edge
 			if h > 0.94 and k > 0 and k < steps:
 				depth = jag * 2.4
 			if notch and absf(d - length * 0.5) < minf(r.size.y * 0.2, 11.0):

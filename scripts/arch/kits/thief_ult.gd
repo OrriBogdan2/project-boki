@@ -11,12 +11,12 @@ extends RefCounted
 ## _drop_holds).
 
 const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
-const RIM_COL := Color("ffd25a")       # the outer band, where blades hit harder
 const BLADE_TIP := Color("fff2c0")
 const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hits: her violet, run hot
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
+const WHIRR_DB := -6.0                 # dB: the blades' whirr while the ring runs
 const DANCE := "thf_encore_dance"
 const DANCED_OVER := ["thf_lmb_r", "thf_lmb_l"]   # her plain throws don't break the dance (the bolts still fly)
 const PULSE_FADE := 7.0                # per s: how fast a beat's pulse leaves the ring
@@ -38,14 +38,18 @@ func _init(kit: ThiefKit) -> void:
 func data() -> Dictionary:
 	return k.x_def()
 
+## The whirr's loop key, one per Sable (Sfx.loop_start).
+func whirr_key() -> String:
+	return "encore_whirr%d" % k.h.get_instance_id()
+
 func running() -> bool:
 	return not st.is_empty()
 
-## The ring's radius now: it grows from r0 to reach over `grow`, then holds.
+## The ring's radius now: it grows evenly from r0 to reach over `grow` (half-size at half the time), then holds.
 func radius() -> float:
 	var d := data()
 	var gk := clampf(float(st.get("t", 0.0)) / float(d["grow"]), 0.0, 1.0)
-	return lerpf(float(d["r0"]), float(d["reach"]), 1.0 - pow(1.0 - gk, 2.0))
+	return lerpf(float(d["r0"]), float(d["reach"]), gk)
 
 ## X pressed: the ring starts growing (a ring with nobody in it still runs).
 func start() -> void:
@@ -55,8 +59,9 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
+	var cast_db := -2.0 if h.is_local() else -5.0
+	k.m.sfx("dj_encore", h.pos, cast_db, 1.0)
+	k.m.sfx("dj_encore_rise", h.pos, cast_db, 1.0)
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
@@ -64,6 +69,7 @@ func start() -> void:
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
 	st = {}
+	Sfx.loop_stop(whirr_key())
 	if k.anim_id == DANCE:
 		k.play("")
 	AimKit.hide(k.h, "ult")
@@ -84,8 +90,11 @@ func tick(dt: float) -> void:
 		st["n"] = int(st["n"]) - 1
 		st["next"] = float(st["next"]) + float(d["time"]) / float(d["shots"])
 		_volley(d)
-	_draw_ring(d)
-	_orbit(d)
+	var centre := h.pos + h.vel * dt         # where she stands once this step's move lands (the kit ticks before it)
+	_draw_ring(d, centre)
+	_orbit(d, centre)
+	if float(st["t"]) >= float(d["grow"]):
+		Sfx.loop_hold(whirr_key(), "dj_encore_whirr", h.pos, WHIRR_DB)   # her position every tick: it rides with her
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
@@ -102,20 +111,19 @@ func _keep_dancing(d: Dictionary) -> void:
 
 ## The ring everyone sees: a thin line that grows out from her, then rides with her, its outer edge exactly the
 ## radius the blades reach; a finer line marks the outer band. It brightens on every beat.
-func _draw_ring(d: Dictionary) -> void:
+func _draw_ring(d: Dictionary, centre: Vector3) -> void:
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"self": true, "r": r, "band": RING_W, "col": RING_COL, "col2": RIM_COL, "all": true,
-			"alpha": 1.2 + 0.8 * pulse})
-	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "band": RING_W * 0.4,
-			"col": Color(RIM_COL, 0.7), "all": true, "alpha": 0.7})
+	AimKit.circle(k.h, "ult", {"at": centre, "r": r, "band": RING_W, "col": RING_COL,
+			"col2": AimKit.hero_col(k.h), "all": true, "alpha": 1.2 + 0.8 * pulse})
+	AimKit.circle(k.h, "ult_rim", {"at": centre, "r": r * float(d["rim"]), "band": RING_W * 0.4,
+			"col": Color(AimKit.hero_col(k.h), 0.7), "all": true, "alpha": 0.7})
 
 ## The blades circling her while it runs (pooled looks, placed every step).
-func _orbit(d: Dictionary) -> void:
-	var h := k.h
+func _orbit(d: Dictionary, centre: Vector3) -> void:
 	var a0 := float(st["t"]) * 7.0
 	for i in ORBITERS:
 		var a := a0 + TAU * float(i) / float(ORBITERS)
-		var at := h.pos + Vector3(cos(a) * ORBIT_R, 1.1 + 0.15 * sin(a * 2.0), sin(a) * ORBIT_R)
+		var at := centre + Vector3(cos(a) * ORBIT_R, 1.1 + 0.15 * sin(a * 2.0), sin(a) * ORBIT_R)
 		var vel := Vector2(-sin(a), cos(a)) * 6.0
 		k.fx().place("enc_orb%d" % i, "blade", at, vel, RING_COL, BLADE_TIP, 0.5, 0.18)
 	if float(st["t"]) >= float(d["grow"]) + float(d["time"]) - 0.05:
@@ -142,7 +150,7 @@ func _volley(d: Dictionary) -> void:
 		_blade(f, rim, right)
 		thrown = true
 	if thrown:
-		k.fx().star(k.hand_pos(right), RIM_COL, 0.5, 0.1, BLADE_TIP)
+		k.fx().star(k.hand_pos(right), AimKit.hero_col(k.h), 0.5, 0.1, BLADE_TIP)
 		k.m.sfx("dj_blade", h.pos, -8.0, randf_range(0.95, 1.1))
 
 ## A cosmetic blade flies from her hand; the hit lands when it arrives.
@@ -155,8 +163,10 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 	var n0: int = k.m.shots.size()
 	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, RING_COL, {"cos": true})
 	if k.m.shots.size() > n0:
-		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
-	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
+		var trail := AimKit.hero_col(k.h) if rim else RING_COL
+		k.fx().ride(k.m.shots[-1], "blade", trail, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
+	var fid := f.get_instance_id()      # (a lambda that captured a foe freed by then errors when it runs)
+	k.m.later(dist / BLADE_SPEED, func(): _hit(instance_from_id(fid) as Ent, rim))
 
 ## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
 ## and the bond for a rival hunter.
@@ -175,7 +185,7 @@ func _hit(f: Ent, rim: bool) -> void:
 	blades += 1
 	if rim:
 		rim_blades += 1
-		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
+		k.fx().puff(f.pos + Vector3(0, 1.0, 0), AimKit.hero_col(k.h), 0.8, 0.3, HIT_COL)
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()
