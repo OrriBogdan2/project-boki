@@ -259,7 +259,8 @@ func _finish() -> void:
 					var ks := rates.keys()
 					ks.sort()
 					var per := ", ".join(ks.map(func(k): return "every %d: %.1f" % [k, float(rates[k]) / fl.size()]))
-					lines.append("PROFILE slow=%d %s | hunters a frame by pose rate: %s" % [side, _phase_line(ph, fl), per])
+					var head := "PROFILE slow=%d %s" % [side, _phase_line(ph, fl)]
+					lines.append("%s | hunters a frame by pose rate: %s" % [head, per])
 	var tally := {}
 	var hitches: Array = frames.filter(func(f): return float(f["wall"]) > HITCH_MS and f["phase"] in PHASES)
 	for f in hitches:

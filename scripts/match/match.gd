@@ -2725,8 +2725,7 @@ func _update_shots(dt: float) -> void:
 			if _dome_blocks(s, p):
 				_shot_end(s, p, null)
 				hit = true; break
-			# terrain and rocks
-			var gp := world.ground_at(p.x, p.z)
+			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
 			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
@@ -2884,8 +2883,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	shots.erase(s)
 	if s.has("deco") and is_instance_valid(s["deco"]):
 		(s["deco"] as Node3D).queue_free()
-	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
-	# that stopped it
+	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall that stopped it
 	var fxx: Dictionary = s["x"]
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups

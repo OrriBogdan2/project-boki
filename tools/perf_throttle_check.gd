@@ -310,7 +310,8 @@ func _pose_rates() -> void:
 	var off := Vector3(SimLod.POSE_SLOW_M + 1.5, 0, 0)
 	SimLod.force_slow = 1
 	b.teleport(P.pos + off)
-	ok(SimLod.pose_every(m, b) == SimLod.POSE_SLOW, "the match slow: a rival %.1f m off is posed every %d frames" % [off.x, SimLod.POSE_SLOW])
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_SLOW,
+		"the match slow: a rival %.1f m off is posed every %d frames" % [off.x, SimLod.POSE_SLOW])
 	b.teleport(P.pos + Vector3(4.0, 0, 0))
 	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival within %.0f m every frame" % SimLod.POSE_SLOW_M)
 	b.teleport(P.pos + off)
