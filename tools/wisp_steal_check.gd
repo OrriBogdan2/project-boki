@@ -105,6 +105,10 @@ func _steal() -> void:
 		KinSteal.stolen(fk) and fk.owner_h == p and fk.team == p.team and not KinSteal.loose(fk) and fk.wisp,
 		"grab: held 0.6 s, the wisp rides with the thief"
 	)
+	ok(
+		int(Care.dex_entry(fk.species).get("echo", 0)) >= 1 and bool(Care.dex_entry(fk.species).get("seen", false)),
+		"...a soul echo: the species is in the Field Book"
+	)
 	_frames(0.1)
 	var cap := float(KinParts.OWNER_STATS[stat][2])
 	var want := minf(cap, mine + amount * 0.5)
@@ -151,6 +155,8 @@ func _steal() -> void:
 		KinSteal.loose(fk) and KinSteal.loose(f2k) and fk.owner_h == f and f2k.owner_h == f2 and popped,
 		"scatter: the thief goes down, both wisps are loose again where they fell"
 	)
+	if f.downed:  # (a bot may have knocked the owner down again meanwhile: the take-back is the revived owner's)
+		m.revive_hunter(f, null)
 	_hold(f, fk, 0.7, p)
 	ok(
 		not KinSteal.taken(fk) and fk.owner_h == f and fk.carried() and f.kin_carry_on(),

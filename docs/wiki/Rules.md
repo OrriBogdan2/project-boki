@@ -160,6 +160,56 @@ Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN
 | practice | {"bpm": 70, "rounds": [4], "phrases": 1, "score_beats": 1} |
 | practice_doc | The first dance on a save opens with this slow phrase (these keys over the ones above): the lead hops 4 beats at 70 bpm and you answer once; no prize. Skip it with interact; round one follows either way. |
 
+## base_kite (`content/rules/base_kite.json`)
+
+Kite Tow (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_kite.gd). Only with farm_build.json base_mode on, and only on Kitewind Ridge. Your Boki glides on a kite round one loop through twelve rings, steered with A and D; Speed sets the pace and a missed ring costs a second. Space flaps the kite up over the high rings; flaps are limited and updraft vents give one back. A lap is raced against a visiting kite whose stats are yours times the cup round's min_ratio (garden_prizes.json kite), so prizes, the first win of the day and the cup come with it. Units: metres, seconds, metres a second; joy is 0-100 points.
+
+| Setting | Value |
+|---|---|
+| theme | ridge |
+| theme_doc | The island theme (home_layout.gd THEMES) whose garden has the kite stand. |
+| spots | {"ridge": [40.0, 45.0]} |
+| spots_doc | A garden zone's own stand spot (tiles x and z), for a zone with no Training post: Kitewind Ridge. Elsewhere the stand sits by the Training post on a home of the theme above. |
+| rings | 12 |
+| loop_r | 6.5 |
+| glide_h | 3 |
+| loop_doc | The loop is a circle of loop_r round the kite stand, flown counter-clockwise glide_h above the stand; the rings sit evenly round it, the first half a gap after the start, and the lap ends back at the start. |
+| pace | 0.75 |
+| speed_per_point | 0.015 |
+| pace_doc | m/s along the loop for a Boki with no Speed points; each trained Speed point adds this fraction (Speed 40 flies 1.6 times as fast). |
+| steer | 2.2 |
+| steer_accel | 6 |
+| max_off | 2.5 |
+| steer_doc | A and D slide the kite in and out of the loop's middle line at up to steer m/s, reaching it at steer_accel m/s/s, never more than max_off m either way. |
+| ring_off | 2 |
+| ring_r | 0.6 |
+| ring_doc | Each ring sits a seeded random distance within +-ring_off m of the middle line; the kite goes through it when it passes within ring_r m of the ring's centre (across and up). |
+| flaps | 3 |
+| guard_per_flap | 25 |
+| flaps_doc | Flaps a lap starts with: flaps, plus one for every guard_per_flap trained Guard points; a vent never gives more than that. |
+| flap_v | 2.4 |
+| lift_g | 3 |
+| lift_fall | 0.6 |
+| lift_doc | Height above the tow line (m). A flap sets the climb to flap_v m/s; it slows by lift_g m/s/s down to a fall of lift_fall m/s, and the tow line holds the kite at 0 (a flap peaks about 0.96 m up after 0.8 s). |
+| high | 6 |
+| high_lift | 0.9 |
+| high_doc | How many rings sit high_lift m above the tow line (seeded, never the first); the others sit on it. |
+| vents | 2 |
+| vent_r | 0.8 |
+| vent_doc | Updraft vents sit half a gap after the first vents high rings, across between the rings either side, give or take a seeded vent_r m; passing within vent_r m of one gives a flap back. |
+| miss_s | 1 |
+| miss_doc | Seconds added to the finish time for each missed ring. |
+| energy | 8 |
+| energy_doc | Energy the flier spends; who may fly is the Dash's rested rule (base_race.json min_energy). |
+| joy | 8 |
+| gems_clean | 4 |
+| gems | 1 |
+| gems_doc | Gems to you for a lap through all twelve rings, or for any other finished lap. |
+| rival | Gale Kite |
+| rival_misses | 2 |
+| rival_doc | The visiting kite flies the lap at its pace (base_kite pace from its Speed) and misses rival_misses rings; your lap wins when its time is no longer. |
+| card_s | 6 |
+
 ## base_life (`content/rules/base_life.json`)
 
 Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React, Mentor, Chore) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
@@ -1125,7 +1175,7 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_s | 604800 |
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
-| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "echo": {"name": "Echo Steps", "first": "hushpearl", "ribbon": "Echo Steps Cup Ribbon", "colour": "#7ad0e0", "cup_prize": "puzzlenut", "first_crown": "chimegrass", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 20}, {"kind": "item", "id": "glassdew", "w": 15}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}, "lantern": {"name": "Lantern Match", "first": "hush_truffle", "ribbon": "Lantern Match Cup Ribbon", "colour": "#b48cff", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "peekbox", "w": 35}, {"kind": "item", "id": "hush_truffle", "w": 25}, {"kind": "item", "id": "glowmoss_sprig", "w": 15}, {"kind": "snack", "id": "glowcap", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "echo": {"name": "Echo Steps", "first": "hushpearl", "ribbon": "Echo Steps Cup Ribbon", "colour": "#7ad0e0", "cup_prize": "puzzlenut", "first_crown": "chimegrass", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 20}, {"kind": "item", "id": "glassdew", "w": 15}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}, "lantern": {"name": "Lantern Match", "first": "hush_truffle", "ribbon": "Lantern Match Cup Ribbon", "colour": "#b48cff", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "peekbox", "w": 35}, {"kind": "item", "id": "hush_truffle", "w": 25}, {"kind": "item", "id": "glowmoss_sprig", "w": 15}, {"kind": "snack", "id": "glowcap", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "kite": {"name": "Kite Tow", "first": "zipseed", "ribbon": "Kite Tow Cup Ribbon", "colour": "#8fd3f4", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 55}, {"kind": "item", "id": "windfloss", "w": 45}]}} |
 
 ## garden_recipes (`content/rules/garden_recipes.json`)
 
@@ -1256,7 +1306,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | drill_per_point | 1 |
 | breed_options_doc | DATA ONLY, NOT APPLIED (docs/GARDEN.md Breeding pace): what tools/garden_pace_check.gd prints a second table for. xp_mult scales every XP above (care, drill, games), grown_lv is the level the Nook asks for (now Care.STAGES Grown, 8). Pick one by editing the real values. |
 | breed_options | [{"id": "xp_x3", "xp_mult": 3.0, "grown_lv": 8}, {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5}, {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}] |
-| games | ["dash", "shove", "seek", "volley"] |
+| games | ["dash", "shove", "seek", "volley", "kite"] |
 | play | 3 |
 | win | 5 |
 | first_win | 60 |
@@ -2408,16 +2458,6 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | claire | {"lean_deg": 12.0, "settle_deg": 3.5, "step_s": 0.16, "arc_m": 0.13} |
 | sable | {"lean_deg": 12.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.12} |
 | pip | {"lean_deg": 10.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.11} |
-
-## weapon_path (`content/rules/weapon_path.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | The fixed weapon path (scripts/match/weapon_path.gd): on every even level (2, 4, 6, 8, 10) a hunter's signature weapon takes the next step on its hero's path, with no choice to make. Each step is a plain weapon upgrade id from Data.PERKS (WeaponUps: hotload = damage, deepmag = magazine (only Vex: no other hero weapon has ammo), quickfeed = fire rate, longreach = range). One entry per hero in Arch.ORDER. Brands are not on the path: they come from perk orbs. If an orb already maxed a step, the next open plain upgrade is taken instead. default is for a hunter with no hero. |
-| default | ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"] |
-| paths | {"thief": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "gil": ["quickfeed", "longreach", "hotload", "quickfeed", "longreach"], "archer": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "mage": ["hotload", "hotload", "quickfeed", "longreach", "hotload"], "gunslinger": ["quickfeed", "hotload", "deepmag", "hotload", "longreach"], "juggernaut": ["hotload", "longreach", "hotload", "quickfeed", "hotload"], "bulwark": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "dredge": ["hotload", "hotload", "hotload", "quickfeed", "longreach"], "ashwick": ["hotload", "longreach", "hotload", "hotload", "quickfeed"], "tender": ["quickfeed", "hotload", "hotload", "longreach", "hotload"], "rimewright": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "dolm": ["hotload", "quickfeed", "hotload", "longreach", "quickfeed"], "ostra": ["hotload", "longreach", "hotload", "quickfeed", "hotload"]} |
 
 ## wisp_hum (`content/rules/wisp_hum.json`)
 
