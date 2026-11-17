@@ -512,7 +512,7 @@ func _tick_curve(dt: float) -> void:
 	for knot in curve:
 		if float(knot[1]) > float(peak[1]): peak = knot
 	if 1.0 - h.roll_t / t0 > float(peak[0]):
-		h.roll_speed = maxf(h.roll_speed, h.base_speed * move_k() / Loco.dash_speed(h.arch))
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * (move_k() + speed_bonus()) / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
