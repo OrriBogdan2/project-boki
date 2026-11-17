@@ -1505,7 +1505,6 @@ func sim(dt: float) -> void:
 	AirLimits.fold_at_touchdown(self, dt)
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
-	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
 	gate_ranks()

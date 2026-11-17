@@ -245,7 +245,7 @@ func _tick_tells(dt: float) -> void:
 	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
 	# never spools (the lance is out), so the pilot is out with it
 	var spooling := was_held and spool < float(lmbd()["spool"])
-	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
+	if vis and spooling and not h.downed and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
 	else:
@@ -342,12 +342,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if h.wid != "flamethrower":
 		return false
-	# a merge ends the roar: holding the key on must not relight it
-	var merging := KinMerge.transforming(h) or KinMerge.active(h)
-	if held and was_held and not merging and flow.pauses_hold("lmb"):
+	if held and was_held and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
-	if not held or not h.atk.can_fire() or merging or (relight_t > 0.0 and not was_held):
+	if not held or not h.atk.can_fire() or (relight_t > 0.0 and not was_held):
 		if was_held:
 			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
@@ -454,7 +452,7 @@ func _stream_looks() -> void:
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
 ## drawn back.
 func rmb_hold_tick(t: float) -> void:
-	if KinMerge.active(h) or not rmb_ready():
+	if not rmb_ready():
 		return
 	if not aiming:
 		aiming = true

@@ -330,10 +330,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
-	if KinMerge.transforming(h):
-		drop_holds()
-		return true
 	if _hold_interrupted():
 		if lmb_t >= 0.0:
 			cancel_hold()
@@ -810,7 +806,7 @@ func on_dash(use_ex: bool) -> bool:
 		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": lane, "armed": armed})
 		if armed:
 			res -= float(res_def().get("slam", 50.0))
-			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
+			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed: _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.sfx("bulwark_charge", h.pos, -2.0)
@@ -837,7 +833,7 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
+		if is_instance_valid(h) and not h.downed and not ult.planted(): _spin_hit(wd))
 	return true
 
 ## The 360 Smash's spin on arrival: one hit all round him, lunging on along `wd` ("lunge.spin_d" m, BjornLunge);

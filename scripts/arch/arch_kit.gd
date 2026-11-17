@@ -213,8 +213,6 @@ func sound_tick(_dt: float) -> void:
 	pass
 
 func tick(dt: float) -> void:
-	if KinMerge.transforming(h):
-		drop_holds()
 	if not h.wpn.get("ammo", true):
 		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
