@@ -1,0 +1,21 @@
+{
+ "id": "lookout_lantern",
+ "name": "Lookout Lantern",
+ "short": "Lantern",
+ "icon": "scanner",
+ "col": "9ae0ff",
+ "use": "field",
+ "cd": 3.0,
+ "max": 4,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 40,
+ "desc": "Hang a lantern in front of you. For 60s it shows every rival within 14 tiles, grass or not.",
+ "field": "ward",
+ "range": 1.6,
+ "time": 60.0,
+ "r": 14.0
+}

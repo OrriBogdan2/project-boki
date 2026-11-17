@@ -1,0 +1,20 @@
+{
+ "id": "pilfer_pouch",
+ "name": "Pilfer Pouch",
+ "short": "Pilfer",
+ "icon": "paw",
+ "col": "d0b080",
+ "use": "pilfer",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  1,
+  1
+ ],
+ "price": 60,
+ "desc": "Raccoons raid the spot you aim at and carry off half the gems of every rival standing there.",
+ "range": 8.0,
+ "r": 4.0,
+ "take": 0.5
+}

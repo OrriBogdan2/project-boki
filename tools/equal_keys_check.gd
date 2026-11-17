@@ -55,8 +55,13 @@ func _match() -> void:
 	UtilityBelt.grant(P, "tonic", 2)
 	UtilityBelt.grant(P, "smoke", 1)
 	UtilityBelt.grant(P, "scanner", 1)
+<<<<<<< HEAD
 	UtilityBelt.grant(P, "armor_kit", 1)
 	m.drop("ckey", P.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
+=======
+	UtilityBelt.grant(P, "medkit", 1)      # (the four open slots: chest keys, smoke, scanner, medkit)
+	m.drop("key", P.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
+>>>>>>> origin/ext/vfx-utility-read
 	var key_p: Dictionary = m.pickups[m.pickups.size() - 1]
 	key_p["t"] = 1.0
 	ok(not UtilityBelt.can_take(P, "ckey") and BeltKeys.blocked_pickup(P) == key_p,
@@ -94,8 +99,14 @@ func _match() -> void:
 	var bot: Hunter = m.hunters.filter(func(x): return x != P and x.ctrl == "bot")[0]
 	bot.belt = UtilityBelt.empty()
 	bot.belt_free = {}
+<<<<<<< HEAD
 	bot.chest_keys = 0
 	for id in ["tonic", "armor_kit", "smoke", "scanner"]:
+=======
+	bot.rift_keys = 0
+	bot.chest_keys = 1
+	for id in ["tonic", "armor_kit", "smoke", "medkit", "stim"]:
+>>>>>>> origin/ext/vfx-utility-read
 		UtilityBelt.grant(bot, id, 1)
 	BeltKeys.sync(bot)
 	m.drop("ckey", bot.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)

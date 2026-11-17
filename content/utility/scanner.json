@@ -14,6 +14,11 @@
  ],
  "price": 50,
  "desc": "Reveals every rival hunter within 26 tiles for 3s, through walls and grass.",
+<<<<<<< HEAD
  "move": "throw",
  "cast": 0.4
+=======
+ "time": 3.0,
+ "range": 26.0
+>>>>>>> origin/ext/vfx-utility-read
 }

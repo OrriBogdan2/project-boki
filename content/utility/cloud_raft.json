@@ -1,0 +1,26 @@
+{
+ "id": "cloud_raft",
+ "name": "Cloud Raft",
+ "short": "Raft",
+ "icon": "platform",
+ "col": "bfe9ff",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 45,
+ "desc": "Over open air only: a cloud platform you can stand on, there for 30s.",
+ "effects": [
+  {
+   "type": "bridge",
+   "length": 5.0,
+   "width": 5.0,
+   "time": 30.0,
+   "delay": 0.3
+  }
+ ]
+}

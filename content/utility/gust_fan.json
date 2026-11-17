@@ -1,0 +1,20 @@
+{
+ "id": "gust_fan",
+ "name": "Gust Fan",
+ "short": "Fan",
+ "icon": "gust_fan",
+ "col": "9fe8ff",
+ "use": "pad",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 40,
+ "desc": "Set down a fan that launches anyone who touches it forward and up. Lasts 60s.",
+ "life": 60.0,
+ "push": 14.0,
+ "lift": 14.0
+}

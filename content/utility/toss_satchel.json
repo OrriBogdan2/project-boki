@@ -1,0 +1,23 @@
+{
+ "id": "toss_satchel",
+ "name": "Toss Satchel",
+ "short": "Satchel",
+ "icon": "mend",
+ "col": "8fe0a0",
+ "use": "field",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 45,
+ "desc": "Toss a health pack that lies for 30s. Whoever grabs it heals for 60% of their health over 5s.",
+ "field": "pack",
+ "range": 6.0,
+ "time": 30.0,
+ "r": 1.4,
+ "heal": 0.6,
+ "hold": 5.0
+}
