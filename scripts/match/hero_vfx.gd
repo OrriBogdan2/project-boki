@@ -30,6 +30,7 @@ const MAX_LIVE := 420          # GPU particles alive at once across the match
 const LOD_NEAR := 20.0         # m from the camera focus: full detail
 const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
+const PEAK := Color(1.0, 1.0, 1.0, 0.5)  # a fire's hottest part: halfway to white (a palette's "peak" in its place)
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
 const HELD_LIFE := 0.85        # share of its life a held surface waits at (a pool's fade starts here)
@@ -531,6 +532,8 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
+	var peak: Variant = data(h.arch).get("palette", {}).get("peak")
+	mt.set_shader_parameter("peak", Color(String(peak)) if peak != null else PEAK)
 	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
