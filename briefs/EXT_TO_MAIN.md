@@ -10032,3 +10032,4 @@ READY ext/merge-lane-misc-1117 6f0ccfcf87 (misc lane: tut-hazard-hint first-time
 READY ext/merge-lane-hunters4-1117 94a1e006f2 (merge lane hunters4: Gil v95 glb + Boki idles; NEW-RED 0 on focused set, export OK; PR via gh-outbox)
 READY ext/merge-lane-uihud-1117 52026532d2 (uihud lane: rest of PR #104 + loading/title; main d65d37d14a7 merged, NEW-RED 0 on targeted checks)
 READY ext/merge-lane-vfx1-1117 cc6d69ab13 (lane vfx1: kin-type-trail + sfx-listener-hunter ported onto main; suite not run locally, host overloaded)
+READY ext/cinder-emission-fix-1117 1d9f42ee1db (Cinder solid-red fix: skin+metal desat 0.4/albedo lift in warden_look.json, merged with current main; re-gated)
