@@ -2,8 +2,9 @@ extends RefCounted
 ## --evo-check: evolution by species (Evo, content/rules/evolve.json, docs/decisions/0024).
 ## Each condition (level, Ink, trade) evolves the Boki, a branch follows its leading affinity, a Boki
 ## never evolves into a species without art and does once the art exists, levels stop at the cap,
-## a v11 save keeps its levels and forms, bosses and the wild drop Inks, and bred babies are 50/50
-## female and male whatever their parents are. Test lines are put into the loaded rules and taken
+## a v11 save keeps its levels and forms, bosses and the wild drop Inks, bred babies are 50/50
+## female and male whatever their parents are, and the Boki card's Next form block says what evolving
+## takes. Test lines are put into the loaded rules and taken
 ## out again; the save is never written.
 
 const SEX_BABIES := 600           # babies bred per parent pair: enough for a 50/50 split to show
@@ -43,12 +44,14 @@ func run(main: Node) -> void:
 	_level()
 	_item()
 	_trade()
+	_next_form()
 	_art_gate()
 	_cap()
 	_migrate()
 	_inks()
 	_sex()
 	var lines: Dictionary = Evo.rules()["lines"]
+	_added.reverse()      # a species given test lines twice gets its own line back last
 	for a in _added:
 		if a[1] == null: lines.erase(a[0])
 		else: lines[a[0]] = a[1]
@@ -148,16 +151,65 @@ func _trade() -> void:
 	ok(rec["species"] == "thrumbird" and String(ev.get("how", "")) == "trade",
 		"trade: traded, it evolves (%s)" % rec["species"])
 
+## The Boki card's Next form block (EvoView.next_form over Evo.next_way): one line for each way a Boki
+## evolves, only the form it would take counts and only if it has art, and the bar fills toward its level.
+func _next_form() -> void:
+	_line("pebbit", {"level": 5, "into": [{"id": "cindle"}]})
+	var rec := _kin("pebbit", 2)
+	rec["xp"] = 100
+	var nf := EvoView.next_form(rec)
+	var span := 0
+	for lv in range(1, 5):
+		span += Game.xp_need(lv)
+	var share := float(Game.xp_need(1) + 100) / span
+	ok(nf["line"] == "Evolves at Lv 5" and int(nf["goal"]) == 5 and is_equal_approx(float(nf["frac"]), share),
+		"next form: a level line says 'Evolves at Lv 5', the bar counts the XP from Lv 1: %s" % str(nf))
+	rec["level"] = 5
+	ok(float(EvoView.next_form(rec)["frac"]) == 1.0, "next form: at its evolve level the bar is full")
+	_line("zapple", {"into": [{"id": "cindle", "item": "ink_tide"}]})
+	var inked := _kin("zapple", 3)
+	inked["xp"] = Game.xp_need(3) / 2
+	nf = EvoView.next_form(inked)
+	ok(nf["line"] == "Needs a Tide Ink" and int(nf["goal"]) == 4 and is_equal_approx(float(nf["frac"]), 0.5),
+		"next form: an Ink line names the Ink, the bar shows the next level: %s" % str(nf))
+	_line("zapple", {"into": [{"id": "cindle", "item": "ink_ember"}, {"id": _no_art(), "item": "ink_storm"}]})
+	nf = EvoView.next_form(_kin("zapple", 3))
+	ok(nf["line"] == "Needs an Ember Ink", "next form: only an Ink into a form with art counts: %s" % nf["line"])
+	_line("zapple", {"into": [{"id": "cindle", "item": "ink_tide"}, {"id": "puddlet", "item": "ink_storm"}]})
+	nf = EvoView.next_form(_kin("zapple", 3))
+	ok(nf["line"] == "Needs an Ink", "next form: Inks that pick the form say 'an Ink': %s" % nf["line"])
+	_line("selenfin", {"into": [{"id": "thrumbird", "trade": true}]})
+	nf = EvoView.next_form(_kin("selenfin", 3))
+	ok(nf["line"] == "Evolves when traded" and int(nf["goal"]) == 4, "next form: a trade line says so: %s" % str(nf))
+	_line("hivara", {"level": 8,
+		"into": [{"id": _no_art(), "path": "fierce"}, {"id": "cindle", "path": "swift"}]})
+	var fierce := _kin("hivara", 3)
+	Evo.add(fierce, "fierce", 500.0)
+	nf = EvoView.next_form(fierce)
+	ok(nf["line"] == "Its next form is coming soon" and not nf.has("goal"),
+		"next form: the form its lead picks has no art, so coming soon and no bar: %s" % str(nf))
+	var swift := _kin("hivara", 3)
+	Evo.add(swift, "swift", 500.0)
+	nf = EvoView.next_form(swift)
+	ok(nf["line"] == "Evolves at Lv 8", "next form: led to the branch with art, it evolves at 8: %s" % nf["line"])
+	_line("pebbit", {"into": []})
+	nf = EvoView.next_form(_kin("pebbit", 3))
+	ok(nf["line"] == "This is its last form" and not nf.has("goal"), "next form: a last form says so")
+
+## A species with data but no rig framing, so no art.
+func _no_art() -> String:
+	for id in Data.KIN:
+		if not BokiRig.FRAME.has(id):
+			return id
+	return ""
+
 ## The art gate: never into a species without data, model and framing; it waits, then evolves.
 func _art_gate() -> void:
 	var real := _kin("cindle", 60)
 	Evo.on_level(real)
 	ok(real["species"] == "cindle" and not Evo.has_art("vespox"),
 		"art gate: a level-60 Vespyx waits, Vespox has no model yet")
-	var no_art := ""
-	for id in Data.KIN:
-		if no_art == "" and not BokiRig.FRAME.has(id):
-			no_art = id
+	var no_art := _no_art()
 	ok(no_art != "" and not Evo.has_art(no_art) and Evo.has_art("cindle"),
 		"art gate: a species with data but no rig framing (%s) has no art; Vespyx does" % no_art)
 	var wait := _kin("marchleaf", 60)        # Shinobant and Harvantis are data-only: Boki wait for them
