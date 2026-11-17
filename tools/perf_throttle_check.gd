@@ -35,6 +35,7 @@ func run(main_node: Node) -> void:
 	m.set_process(false)
 	await main.get_tree().process_frame
 	_mob_naps()
+	_worn_sums()
 	_far_bots()
 	_far_mobs()
 	_bot_los()
@@ -51,6 +52,38 @@ func _step(secs: float) -> void:
 	while t < secs:
 		m.step(Match.DT)
 		t += Match.DT
+
+## Hunter.gear_stat keeps its worn-gear and perk sums for a step: a slot changed through refresh_gear
+## and a perk taken count in the same step, not the next.
+func _worn_sums() -> void:
+	var p: Hunter = m.player
+	p.gear = Gear.empty_slots()
+	p.refresh_gear()
+	var base := p.gear_stat("speed")
+	var gid := ""
+	for g in Gear.ALL:
+		if float((Gear.ALL[g]["stats"] as Dictionary).get("speed", 0.0)) > 0.0:
+			gid = String(g)
+			break
+	ok(gid != "", "setup: a gear piece with a speed stat")
+	if gid != "":
+		p.gear[0] = {"id": gid, "rar": 1}
+		p.refresh_gear()
+		ok(p.gear_stat("speed") > base, "gear put on through refresh_gear counts in the same step")
+	var pid := ""
+	var pk := ""
+	for id in Data.PERKS:
+		var st: Dictionary = (Data.PERKS[id] as Dictionary).get("stats", {})
+		if not st.is_empty() and String(st.keys()[0]) != "dmg" and p.perk_open(String(id)):
+			pid = String(id)
+			pk = String(st.keys()[0])
+			break
+	ok(pid != "", "setup: an open perk with a stat")
+	if pid != "":
+		var before := p.gear_stat(pk)
+		p.add_perk(pid)
+		ok(p.gear_stat(pk) != before, "a perk taken counts in the same step (%s: %s)" % [pid, pk])
+
 
 func _mob_naps() -> void:
 	var mb: Mob = null
