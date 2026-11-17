@@ -81,13 +81,25 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | lock dial, three rune pylons |
-| The Sunken Forge | Stone Colossus | Cinder Steps | lock dial |
-| The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
+| Stormcrown Eyrie | Sarcobra | Stormcrown Gaol | break the Gate Seal down, three rune pylons |
+| The Sunken Forge | Siegephant | Cinder Steps | break the Gate Seal down |
+| The Thornhive | Calderoise | Thornwood | break the Gate Seal down, three ward stones |
 
 **Exits:** 2 uplink outposts.
 
 **Getting around:** 19 bridges, 6 glide routes, a sky train with 9 stops (Lark Halt, Watch Halt, Frost Halt, Eyrie Halt, Cinder Halt, Moor Halt, Salt Halt, Thorn Halt, Shard Halt).
+
+### Terrain hazards
+
+Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.
+
+| Hazard | Where | Does | Safe with |
+|---|---|---|---|
+| Lava Field | Cinder Steps | Burning | Ember type |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak |
+| Ice Sheet | Frostgate, Highwatch | No footing | Frost type |
+| Static Flats | Salt Shard | Shocks | Storm type, Tempest type |
+| Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
 
 ### Rolled each match
 
@@ -97,6 +109,8 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Vaults | 3 | Frostgate Keep, The Lantern, Shrine Table, Moor Chapel, The Kilns |
 | Item caches | 7 | The Crown, Stormcrown Gaol, Frostgate, Highwatch, Larkhollow, Thornwood, Saltmere, Duskmoor, Stormbreak, Crown Shard, Thorn Shard, Ember Shard, Salt Shard, Cinder Steps |
 | Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Cairnback, Hivara turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## Skyreach
@@ -129,9 +143,9 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
-| The Sunken Forge | Stone Colossus | Ember Quarry | lock dial |
-| Stormcrown Eyrie | Stormcoil | Stormreach | lock dial, three rune pylons |
-| The Thornhive | Brood Mother | Bloomwild | lock dial, three ward stones |
+| The Sunken Forge | Siegephant | Ember Quarry | break the Gate Seal down |
+| Stormcrown Eyrie | Sarcobra | Stormreach | break the Gate Seal down, three rune pylons |
+| The Thornhive | Calderoise | Bloomwild | break the Gate Seal down, three ward stones |
 
 **Exits:** 2 uplink outposts.
 
@@ -147,6 +161,8 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight

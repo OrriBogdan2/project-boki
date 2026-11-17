@@ -50,6 +50,9 @@ UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out stri
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
+Quest tracker (owner DECISIONS 11-10 / 11-08): scripts/ui/quest_tracker.gd, under the strip while your squad is on a
+quest seat (QuestSeats IN_USE): plain words, your progress, the leading rival squad's on a quest seat (thin bar), the
+distance; read from the seats only, so no Net change. Hidden inside the boss fight, where the boss bar is the objective.
 
 ## The quest seats (spec task 4)
 `QuestSeats` (scripts/match/quest_seats.gd, `Exits.seats`, null outside the mode) owns the schedule from heart.json
@@ -136,3 +139,14 @@ outcome are the same for both seats: any Heart exit is an extraction, so the hau
 says which seat you took (`how_line`), the reward, and what the other seat would have paid (`WaysResult.other_line`).
 Open question (the owner's words give no number): how big is the gap? Current: gems 150 vs 40 (3.75x), seeds and materials 2x to 3x,
 the Rare Egg only in major; the old heart.json note said "about 5x". Kept as is; --heart-check holds it between 3x and 5x.
+
+**Colour vision (ext/ui-ways-out-colourblind).** Every Ways Out colour goes through `SideColor`: a squad's or a rival's seat
+is `SideColor.of_team(viewer, team)`, the neutral ones (Heart, Gate, calls, tide, seat states, beams) are `SideColor.tone(key)`
+rows of the palette table, the default row full and the others only where it would sit on their rival colour (tritan: magenta
+Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
+(disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
+(rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
+Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) two rows of five pips, your squad's progress on
+top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
+charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
+boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.

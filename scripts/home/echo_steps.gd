@@ -332,6 +332,8 @@ var readout: Control = null
 var lbl: Label = null
 var card: Control = null
 var card_t := 0.0
+var cue: GardenCues.EchoCue = null   # the beat rings and hit/miss flashes while a dance runs
+var cued := -1                 # the grid beat the cue last marked
 
 func _init(home) -> void:
 	h = home
@@ -387,6 +389,8 @@ func use() -> void:
 	rng.randomize()
 	run = Run.new(dancers[YOU]["rec"], dancers[RIVAL].get("rec", {}), rng)
 	hops = [[_spot(YOU), _spot(YOU), 0.0], [_spot(RIVAL), _spot(RIVAL), 0.0]]
+	cue = GardenCues.EchoCue.new(h, middle.position, SPREAD + STONE_R + 0.15)
+	cued = -1
 	_sound_up()
 	_open_readout()
 	GardenSfx.cue("garden_go", null)
@@ -443,13 +447,17 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-	if run == null:
-		return
-	var now := _clock()
+	if run != null:
+		step_to(_clock(), d)
+
+## One frame of the dance at `now` on its clock (the checks pass their own).
+func step_to(now: float, d: float) -> void:
 	run.step(now)
+	_beat_cue(now)
 	for e in run.events:
 		_show(e, now)
 	run.events.clear()
+	cue.step(d)
 	var R := rules()
 	for s in stones.size():
 		glow[s] = maxf(0.0, glow[s] - d)
@@ -471,24 +479,50 @@ func _show(e: Array, now: float) -> void:
 			glow[stone] = float(rules()["glow_s"])
 			if e[0] == "fixed":
 				h._emote(dancers[side], "!", true)
+				cue.hit(_stone_at(stone), _col(side, stone))
 		"hit":
 			GardenSfx.cue("echo_hit", null)
+			cue.hit(_stone_at(stone), _col(side, stone))
 			if not dancers[side].is_empty() and run.streak[side] % int(rules()["cheer_every"]) == 0:
 				GardenSfx.cue("echo_streak", null)
 				h._emote(dancers[side], "♪", true)
 		"kept":
+			cue.miss(_stone_at(stone))
 			h._emote(dancers[side], "♫", true)
 			_act(side, "spin", spin_s(), now)
 		"miss":
 			GardenSfx.cue("echo_miss", null)
+			cue.miss(_stone_at(stone))
 			if not dancers[side].is_empty():
 				h._emote(dancers[side], "?", true)
 	lbl.text = _line()
 
 func _hop(side: int, stone: int, now: float) -> void:
 	_act(side, "stonehop", float(rules()["hop_s"]), now)
-	var where: Vector3 = middle.position + STONE_AT[stone] * SPREAD if stone >= 0 else _spot(side)
-	hops[side] = [_at(side, now), where, now]
+	hops[side] = [_at(side, now), _stone_at(stone) if stone >= 0 else _spot(side), now]
+
+## A stone's middle; the stones' middle for a beat you left empty in your lead.
+func _stone_at(stone: int) -> Vector3:
+	return middle.position + STONE_AT[stone] * SPREAD if stone >= 0 else middle.position
+
+## A cue's colour for side: its Boki's type colour, or the stone's own when the stones lead a solo.
+func _col(side: int, stone: int) -> Color:
+	return STONE_COL[stone] if dancers[side].is_empty() else GardenCues.type_colour(dancers[side]["rec"])
+
+## On the first frame at or past each grid beat of a phase: the lead's stone lights in its colour; on a beat
+## you dance, a ring round the stones keeps time without showing the stone.
+func _beat_cue(now: float) -> void:
+	var b := floori(now / run.beat_s)
+	if b == cued:
+		return
+	cued = b
+	var i := b - run.first
+	if (run.state != Run.S.CALL and run.state != Run.S.ANSWER) or i < 0 or i >= run.pattern.size():
+		return
+	if run.mine() or run.pattern[i] < 0:
+		cue.pulse(_col(YOU, 0))
+	else:
+		cue.beat(_stone_at(run.pattern[i]), _col(RIVAL, run.pattern[i]))
 
 ## The dancer plays a rig clip for `secs` (a spin is not cut short by a hop).
 func _act(side: int, clip: String, secs: float, now: float) -> void:
@@ -567,6 +601,7 @@ func _open_readout() -> void:
 	seen = -1
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap(run.recs.filter(func(rec): return not rec.is_empty()))
 	var res := settle(run) if finished else {}
 	for k in dancers:
 		if not k.is_empty():
@@ -575,11 +610,13 @@ func _end(finished: bool) -> void:
 			(k["node"] as Node3D).remove_meta("kact")
 	acts = [["", 0.0], ["", 0.0]]
 	bed.stop()
+	cue.clear()
+	cue = null
 	if is_instance_valid(readout):
 		readout.queue_free()
 	if finished:
 		GardenSfx.cue("garden_finish", null)
-		_card(res)
+		_card(res, before)
 		if res.has("win"):
 			h._emote(h._kin_entry(res["win"]), "♥", true)
 			h._emote(h._kin_entry(res["lose"]), "…", true)
@@ -587,19 +624,15 @@ func _end(finished: bool) -> void:
 	run = null
 	dancers = []
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, before: Array) -> void:
 	var you: Dictionary = dancers[YOU]["rec"]
-	var rows: Array = []
+	var place := "%s danced: %d points" % [you["name"], res["score"][YOU]]
 	if res.has("win"):
-		rows.append(["%s wins Echo Steps!" % res["win"]["name"], 18, UI.ACCENT_HI])
-		var line := "%s %d points, %s %d" % [you["name"], res["score"][YOU], _who(RIVAL), res["score"][RIVAL]]
-		rows.append([line, 14, UI.INK])
-	else:
-		rows.append(["%s danced Echo Steps: %d points" % [you["name"], res["score"][YOU]], 18, UI.ACCENT_HI])
-	rows.append(["Best streak %d" % res["best"], 14, UI.INK])
-	rows.append(["+%d gems" % res["gems"], 14, UI.GOLD])
-	rows.append_array(GardenPrizes.rows(res["prize"], 14))
+		var won := YOU if res["win"] == you else RIVAL
+		place = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
 	if is_instance_valid(card):
 		card.queue_free()
-	card = BaseRace.result_card(h, rows)
+	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place, "before": before,
+			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]]
+				+ GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

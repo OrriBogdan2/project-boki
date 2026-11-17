@@ -5,7 +5,7 @@ extends RefCounted
 ## Shields), so a grant names the pool only when it sets it at least as high as it was.
 
 const HEAT := "cloak"  # Cinder: Heat Shield spin and the rank 3 pounce
-const MOLTEN := "blaze_mantle"  # Tenzo: Molten Guard stacks
+const MOLTEN := "blaze_mantle"  # Tenzo: Shardskin stacks
 const TIDE := "wave"  # Gil: Tidal Wave landing
 const SWAP := "swap"  # Void (Motley): the rank 3 swap's ally shield
 const ITEM := "brightshield"  # an Effects "shield" (Shield cell, gear, abilities); also the fallback

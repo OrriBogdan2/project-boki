@@ -23,7 +23,7 @@ and passive build-ups.
 | **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
-| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
+| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
 | **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
@@ -908,7 +908,7 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
-| E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| E | **Hail Wall**: lob a volley up to 10.8m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
 | R | (removed in the accuracy pass, see docs/heroes/archer.md) **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
 
 Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
@@ -1078,7 +1078,7 @@ ranks.)
 | Slot | Input | Brall (wiki) | Ours |
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
-| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
+| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns). Shotgun and minigun as before |
 | RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (T4, `pay_rage`, no word); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
@@ -1094,8 +1094,8 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
-| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 1-2) | the sweet-spot payoff (T4) | wiki |
@@ -1129,7 +1129,9 @@ the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola l
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
 hunter's own game and bots, and since Net 0.15.0 on remote players too: the move id and its age ride the
-hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`).
+hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`). Since Net 0.24.12 a move the kit clears
+(a lowered shield, a cancelled draw) is sent as `-` and ends the copy's, and each play bumps the re-time count, so
+a quick restart of the same move restarts the copy too.
 
 Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
 rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).
@@ -1214,9 +1216,9 @@ heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, C
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
-`--gunslinger-combo-check`. No kit applies `Hex` (scripts/arch/hex.gd) any more; only its `Hex.active` checks remain (hunter.gd, arch_kit.gd, kit guards), so the status is effectively unused.
+`--gunslinger-combo-check`.
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` (its animation timing in tools/mage_anim_time_check.gd)
-and `--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+and `--gunslinger-combo-check`.
 
 ## Inspired by (per hero)
 
@@ -1242,7 +1244,13 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns we scale on purpose (one taken from the data 1:1, the PARITY FIRST default in DECISIONS 2026-11-07, can be pinned).
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
+- `"field": "weapon.primary.<key>"` reads the hero's signature weapon (`content/weapons/<signature>.json` `primary`). A number only the footage gives takes `F` evidence from `briefs/hero-ref` and a tolerance that covers the measurement (Meeko's crook range and speed).
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+## Kit card text rules (11-11)
+
+Owner: "kit card is also very annoying to read, like a giant text block". Each row of the kit card (`KitCard`: Select, the L page, K in a match) is icon, key, name, key-number chips and one line of at most `KitCard.MAX_WORDS` (12) words; the rules show on hover and on the Details page. The line is authored per hunter in `content/archetypes/<id>.json` under `card` (`dash`, `passive`, `rmb`, `e`, `x`, and `weapons.<id>` for LMB). Chips: cooldown, charges, level and the weapon's damage come from the kit data; damage chips for abilities are authored in `card.chips.<slot>` and `--arena-check` fails if a number on a chip is not a number in that slot's data. Before/after: `docs/shots/kit-card-1111/`.
+- Card text: `godot --headless -- --card-numbers-check` reads each Hunter's kit card (`KitCard.slot_text`) and fails any number it states (range, damage, cooldown, duration, slow, `A -> B` pair) that is not a field of that Hunter's JSON of the kind it names ("push N" a push/kb field, "stuns N" a stun field, "slowed N%" a slow field, "Ns" a time field, "Nm" a distance field; kinds come from the key path, a key of no kind passes for all but push, stun and slow); numbers a card works out from fields go in its `_derived`.

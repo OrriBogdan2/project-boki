@@ -1,5 +1,6 @@
 {
 	"id": "bulwark",
+	"recast_hint": {"lmb": "call the hammer back"},
 	"title": "Barnacle Knight",
 	"base_name": "Albert",
 	"gender": "male",
@@ -20,21 +21,8 @@
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down; blocking builds Guard."],
-	"silhouette": "the frozen prow shield and the long ice-cased oar",
-	"card": {
-		"role_word": "Tank",
-		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
-		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
-		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
-		"rmb": "Hold to raise your aegis and block shots from the front. With it up, left click thrusts it to shove foes back and Shift is a Shield Charge on its own cooldown.",
-		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
-		"dash": "360 Smash: a short dash that ends in one spinning hit around you that lunges you on; with the aegis up, a Shield Charge (its own 6s cooldown).",
-		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
-		"x": "Faultline (level 6): hop, slam, and the ground erupts down a long lane, throwing every foe on it up.",
-		"weapons": {
-			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you."
-		}
-	},
+	"silhouette": "the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist",
+	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Blocking builds Guard; at 50, Shield Charge becomes a Shield Slam.", "rmb": "Hold to block shots from the front; your dash key becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "rmb": ["18 slam"], "e": ["18 burst"], "x": ["18 dmg"]}},
 	"signature": "tower_shield",
 	"resource": {
 		"id": "guard",
@@ -85,7 +73,8 @@
 		},
 		"rope": {
 			"max_len": 14.0,
-			"max_t": 6.0
+			"max_t": 6.0,
+			"reel_speed": 30.0
 		},
 		"perfect": {
 			"window": 0.18,
@@ -109,14 +98,15 @@
 		"charge": 4.2,
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
-		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) into one full spin of the hammer around you (2.2m: 24 damage, push 7) that lunges you 1.6m on. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"charge_dmg": 12.0,
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
 	"rmb": {
 		"delivery": "cone",
 		"name": "Aegis",
+		"card_range": "slam.radius",
 		"short": "Aegis",
 		"icon": "bulwark_rmb",
 		"col": "#9ad8ff",
@@ -157,7 +147,7 @@
 		"surf_heat": 1.25,
 		"variants": {
 			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
-			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
+			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
 		},
@@ -172,6 +162,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Mending Ground",
+		"card_range": "radius",
 		"short": "Mend",
 		"icon": "bulwark_e",
 		"col": "#8fe3c8",
@@ -234,6 +225,12 @@
 	],
 	"rank_cd": {"dash": [1, 0.8125, 0.625]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown"}
+	},
 	"rank3": {
 		"sec": "shield HP +50% in all and it repairs and regenerates faster",
 		"dash": "the 360 Smash refunds the Shield Charge when it hits",
@@ -253,5 +250,13 @@
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",
 		"dash_spent": "dash pips dark"
+	},
+	"src": {
+		"lmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] [O] (owner question open) (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

@@ -1,5 +1,6 @@
 {
 	"id": "mage",
+	"recast_hint": {"x": "strike down at your cursor"},
 	"title": "Storm Chaser",
 	"base_name": "Sparkle",
 	"gender": "female",
@@ -12,18 +13,7 @@
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"howto": ["Play: mid-range lightning; stack Static, then run through.", "Combo: 3 bolts plus {secondary}, then {dash} through them.", "Avoid: dashing through a foe under 4 Static."],
 	"silhouette": "the copper rod mast and kite pennant on the back",
-	"card": {
-		"role_word": "Skirmisher",
-		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
-		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
-		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
-		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back.",
-		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
-		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits.",
-		"weapons": {
-			"coilcaster": "Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
-		}
-	},
+	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor, knocking everyone back.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["18.3 dmg"], "rmb": ["16-26.7 dmg"], "e": ["19.4 dmg"], "x": ["22 dmg"]}},
 	"signature": "coilcaster",
 	"resource": {
 		"id": "sparks",
@@ -67,6 +57,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Storm Rod",
+		"card_range": "coil.range",
 		"short": "Rod",
 		"icon": "mage_rmb",
 		"col": "#ff7ac4",
@@ -92,8 +83,8 @@
 			"mote_r": 1.1
 		},
 		"variants": {
-			"tap": "Let go early (it still takes 0.3s to summon): 16 damage and a short knock, flying the full 13m lane.",
-			"hold": "Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 26.7 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
+			"tap": "Let go early (it still takes 0.33s to summon): 16 damage and push 4.4, flying the full 13m lane.",
+			"hold": "Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 26.7 damage and push 6.6. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
 		},
 		"sockets": {
 			"hit": "add",
@@ -107,6 +98,7 @@
 		"ground": {"range": "reach", "r": "radius"},
 		"delivery": "burst",
 		"name": "Skycall",
+		"card_range": "reach",
 		"short": "Sky",
 		"icon": "mage_e",
 		"col": "#ffc6e6",
@@ -134,6 +126,8 @@
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Kitefall",
+		"card_range": "range",
+		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "mage_x",
 		"col": "#ffd36a",
@@ -169,9 +163,24 @@
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
 	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
 	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor"},
+		"x_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown"}
+	},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",
 		"dash_spent": "a fading lightning streak where the run went"
+	},
+	"src": {
+		"lmb": "[D] [F] [O] (owner items 70, 116) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

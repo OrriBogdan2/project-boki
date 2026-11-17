@@ -5,6 +5,7 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
+const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -78,10 +79,10 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
+			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
-			"turned %.0f deg" % turned)
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
+			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
 			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
@@ -522,7 +523,7 @@ func _rime_skate_in() -> void:
 			"fastest %.3f m/s" % fastest)
 	var yaw0 := P.model.global_transform.basis.get_euler().y
 	var yaw_dev := 0.0
-	for i in 85:
+	for i in 64:     # 6.4 rad: one full turn, inside the 3.3 s hold after the 0.9 s slide and 1 s rooted
 		P.inp["aim"] = P.pos + Vector3(cos(i * 0.1), 0.0, sin(i * 0.1)) * 6.0
 		step(m, 1.0 / 60.0)
 		face_dev = maxf(face_dev, absf(angle_difference(P.face, face0)))
@@ -944,17 +945,26 @@ func tender() -> void:
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))
-	# --- Moon Shot flies its full range past the cursor (cursor 3 m out, off the target line)
-	sc.aim_at(P, P.pos + Vector3(0, 0, 3.0))
-	P.inp["fire"] = true
-	step(m, 0.05)
-	P.inp["fire"] = false
-	var sh: Array = _mine(m, P)
-	var reach := 0.0
-	if not sh.is_empty(): reach = float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length()
+	# --- Moon Shot flies its full range past the cursor wherever it is (4, 8, 14 m out, off the target line)
+	var rng := float(P.wpn["range"])
+	var reaches: Array[float] = []
+	for d: float in [4.0, 8.0, 14.0]:
+		if not reaches.is_empty():
+			step(m, 0.45)
+		sc.aim_at(P, P.pos + Vector3(0, 0, d))
+		P.idle_fire = 0.0       # a plain ember: an idle crook's next one is Empowered (further)
+		P.shot_range_k = 1.0
+		P.inp["fire"] = true
+		step(m, 0.05)
+		P.inp["fire"] = false
+		var sh: Array = _mine(m, P)
+		reaches.append(float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length() if not sh.is_empty() else 0.0)
 	ok(
-			"mm LMB: the ember flies its full range past the cursor",
-			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+			"mm LMB: the ember flies its full range past the cursor at 4, 8 and 14 m",
+			AimMode.mode_of(P) == AimMode.MAX
+			and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
+			"range %.1f reach %s" % [rng, reaches])
+	ok("mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m)", rng >= 12.6 and rng <= 14.4, "%.1f m" % rng)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -1006,7 +1016,6 @@ func tender() -> void:
 			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false
@@ -1834,9 +1843,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
-				and _no_disc(m), "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
+				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()

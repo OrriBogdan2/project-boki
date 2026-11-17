@@ -26,8 +26,8 @@ fighting (damage, knocks) and slowly over time; each level gives a point.
 
 ## Your Boki and your class
 
-Your Boki doesn't replace any of your class abilities. It brings its own ability (C), fights on its
-own when you send it out (G), and adds a little of its type to your kit: each class ability has
+Your Boki doesn't replace any of your class abilities. It fights on its own when you send
+it out (C), and adds a little of its type to your kit: each class ability has
 **sockets** (hit, control, guard, utility, modifier) and your Boki's parts fill them at a fraction of
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
@@ -57,9 +57,9 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
-| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
-| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Deep Reach | Anchor Drop | none (Boki Fusion) |
 | [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |

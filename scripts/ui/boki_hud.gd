@@ -134,7 +134,7 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 
 ## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
 static func chip(H, ur: Rect2, text: String, col: Color) -> void:
-	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+	var tw: float = TextCache.width(H.big, text, 10) + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
@@ -167,7 +167,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var in_form := KinMerge.in_form(p)
 	if in_form:
 		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
-	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
+	var from_txt := "Boki's move" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
 	if in_form:
 		from_txt = "FUSED"
 	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)

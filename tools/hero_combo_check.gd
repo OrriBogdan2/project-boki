@@ -10,6 +10,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
+const VSTICK := preload("res://tools/vex_coin_stick_check.gd")      # her Coin Blast sticking to placed walls
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
 func ok(name_: String, cond: bool, info := "") -> void:
@@ -728,7 +729,7 @@ func _mage() -> void:
 ## scales with the aim distance (none close in, the full 25% at the 18 m range).
 func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var ed: Dictionary = K.e_def()
-	var cap_deg: float = float(ed["turn_deg_s"]) * float(ed["charge"])
+	var cap_deg: float = K.turn_deg_s("e", "early") * float(ed["charge"])
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
@@ -981,6 +982,7 @@ func _gunslinger() -> void:
 	_gunslinger_beam_look(HeroVfx.of(m), K)
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
+	T.teleport(home + Vector3(8, 0, 0))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
@@ -1203,6 +1205,7 @@ func _gunslinger() -> void:
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
+	VSTICK.new(self).run(m, P, K, T, home)
 	VTIME.new(self).run(m, P, K, T, home)
 	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
 	ac.fresh(T)

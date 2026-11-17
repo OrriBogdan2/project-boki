@@ -76,8 +76,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
     +1 is a natural counter-swing, -1 is pacing (arm and leg of one side go forward together).
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
   - **bob**, **steps/s** (cadence, timed between a leg's forward crossings), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
-  - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
-    share of frames with an arm raised 60 degrees or more and sideways (T-pose). Since 0.24.5 they read the arms about
+  - Attack rows (two per Hunter), read a game frame (1/60 s) apart: the largest one-frame hand jump and when it ends
+    (`jump_t`), the free arm's travel (body heights), and the share of frames with an arm raised 60 degrees or more and sideways (T-pose). Since 0.24.5 they read the arms about
     the hips with the hips' tilt taken out, so a cartwheel or somersault no longer counts as an arm raised or flung (a
     turn about the vertical still does). The attack numbers quoted below before Sable's were read in the model frame;
     re-read this way most move a few points, the most `juggernaut` slash_r free arm sideways 8 -> 33 % and `tender` seed 4 -> 17 %.
@@ -93,7 +93,7 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails; so does a start gap over 0.25 for the Hunters of
   [Setting off from a stand](#setting-off-from-a-stand), or a set-off that does not land on the walk's `start_phase`. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  are listed below as open. A hand jump over `MAX_JUMP` fails too, so far for `bulwark` (0.4) and `dolm` (0.45).
 
 ## What is wrong with all of them
 
@@ -123,6 +123,20 @@ body (not in the air, a crouch, or a move that owns the body):
 - **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble 1.0, 0.55; Kael 1.0,
   0.6). The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso,
   arms, head) are held back; the feet stay planted and slide is unchanged.
+- **Hip phase (Nov 15).** The clips bob the hips with the legs the wrong way round: up as the legs spread at a walk
+  (hip-height / leg-spread correlation +0.3 to +0.85 on 9 of 11 Hunters with legs; a walk wants it negative, the hips
+  highest as the legs pass), and the same inverted at a run on 6 of 11. WardenGait now pulls the hips towards a bob of
+  `loco.bob_m` [walk, run] metres (defaults 0.035, 0.06) in step with the thighs' spread, at most 4 cm off the clip's
+  height (so Kael, Dredge and Bulwark also carry a `bob` scale to bring their big clip bob inside that reach). Feet,
+  cadence, knee lift and foot height are untouched (measured). `--anim-audit` fails a walk over -0.2 or a run under 0.2.
+  The pull fades with how sideways the blend points: a strafe loop's legs spread in roll, not pitch, so the pull only
+  added noise there (hip height left over after a fit at the step rate, RMS: Thief 3.7 -> 13.5 mm, Mage 6.5 -> 15.8,
+  Tender 2.1 -> 7.7, Bulwark 23 -> 36); strafes keep their clip's own bob again. Foot height: clip 14 logs the ankles
+  in the body's own frame (aL aR vs rest a0L a0R), since CamRig.char_lean tips every Hunter back 20 degrees about the
+  feet and a world-height reading shows a strafe's feet 10-30 cm "under" the floor that is only that lean. In the body
+  frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
+  strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
+  Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -174,6 +188,14 @@ hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs 
 clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r), `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod) and `thief` (vault_r: the left arm, vault_l: the right; the pistol arm that leads the cartwheel keeps its key).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
+
+## Reaching arm (`WardenReach`)
+
+Data `"reach": {"bones": [upper arm, forearm, hand], "grip": m}` lets a kit stretch the model's own arm to a world point
+(root meta `WardenReach.TIP`): the upper arm and forearm lie straight on the line from the shoulder, the forearm stretches so
+the hand sits `grip` short of the point, and the clips can't swing it meanwhile; it eases in (14/s), comes home down the line
+and eases back into the clips (9/s). Grimble's Abyssal Hand (owner playtest 11-11: it didn't read as his arm and flailed while
+the drawn tube grew from a wrist the clips kept swinging). `--clip-live-grimble` asserts the line and the grip.
 
 ## Per Hunter, before to after
 
@@ -232,7 +254,14 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 2. The left arm hung nearly still against the legs (counter +0.17, now +0.68): the shield arm swings 0.5. The hammer arm
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
-3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
+3. lmb_slam jumped the hand 0.55 body heights in one frame (at 0.017 s) and lmb_throw 0.38 (0.133 s), now 0.38 and
+   0.33. The strikes crossed the body in two or three 30 fps keys, and the per-bone slerp between two keys swung the
+   hand off its path (0.33 out sideways and back in the slam's first frame). They are keyed at 60 fps now
+   (`bake(fps=60)`, tools/art1/fine_export.py) and the slam eases linearly into its 0.08 s impact; the 0.38 left is
+   that impact: 1.5 body heights in 0.08 s.
+
+![bulwark lmb_slam and lmb_throw, before and after: rows lmb_slam before, lmb_slam after, lmb_throw before, lmb_throw after (12 frames each, side view; the 1/60 s pop fell between these frames, the numbers above are its measure)](anim_audit/bulwark_atk.jpg)
+   (ext/anim-hand-albert's 30 fps spread of the same two clips, hand step 0.42 and 0.50, is superseded by this 60 fps key set.)
 4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
    2.71 m/s (80 %); now 0.41 m/s (12 %, Nov 13) (see "The walk and run blend in step"; rows walk, jog, run, before then after, in
    the strip below). His loops share one `loco.cycle_s` (0.5 s); docs/art/FOOT_SLIDE.md has the whole blend sweep.
@@ -242,7 +271,10 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
-3. lmb_punch and lmb_throw fling the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump.
+3. lmb_punch and lmb_throw fling the free arm 1.3 to 1.5 body heights. Their hand jump (0.47 at 0.032 s and 0.32)
+   is 0.44 and 0.31 with 60 fps keys: the punch drives 1.1 body heights in its 0.05 s beat, a straight path now.
+
+![dolm lmb_punch and lmb_throw, before and after: rows lmb_punch before, lmb_punch after, lmb_throw before, lmb_throw after (12 frames each, side view; the 1/60 s pop fell between these frames, the numbers above are its measure)](anim_audit/dolm_atk.jpg)
 
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
@@ -372,6 +404,18 @@ Sparkle's raw walk crosses her legs by frame 1; with the phase the stance opens 
 The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
 walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
 
+## Climb clips (mantle and ledge pull-up)
+
+Lace (`archer`), Tenzo (`dolm`), Grimble (`dredge`) and Neve (`rimewright`) have a keyed `mantle` (reach, hands plant, vault, land,
+run on; 0.73 s) and `ledge` (hang, pull up; 0.9 s) clip, played by the ledge rise's progress up the face (data `climb`). The
+rise had no animation state at all before: `mantle` was only set by a scripted mantle nothing starts any more, so every
+Hunter showed its fall pose up a ledge; the procedural mantle pose now shows too, for the Hunters without clips. The clips are
+keyed by `tools/art1/glb_climb_clips.py` (hips, head and limb aims solved to the rig; Lace's bow rides her hand, Grimble's
+right arm is the hook, Neve's skates trail). The rig still has no Blender-baked hand shapes: hands keep the idle's. Strip
+(top to bottom Tenzo, Lace, Grimble, Neve; --clip-shots, yaw 90):
+
+![mantle clips](anim_audit/climb_mantle.jpg)
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
@@ -381,8 +425,10 @@ Split into backlog items per Hunter (role build):
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm); `bulwark`
-  and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
+- Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm).
+- One-frame hand jumps over 0.4 body heights with no gate: `dredge` throw 0.44, `tender` seed 0.45, `thief` vault_r 0.42
+  (`bulwark` and `dolm` done: 60 fps strike keys, gated). Check for slerp swings first (`jump_t`, then the hand's path
+  frame by frame); what a kit beat asks for stays.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65; at the jog the rate cap leaves 28 % slide, so the jog gate
   exempts it), and a stronger counter-swing (+0.39).

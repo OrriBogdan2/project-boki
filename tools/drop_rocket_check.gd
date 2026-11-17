@@ -6,7 +6,9 @@ extends RefCounted
 ##  4. Nobody lands in a wall, under the ground or on top of a squadmate (several launches, steered ones too).
 ##  5. A bot leader flies the rocket to its landing spot (within BOT_SPOT_M).
 ##  6. Aboard, everyone is drawn clinging on outside the hull, each in their own seat; jumping out lets go of it.
-##  7. Its sounds (RocketSfx, docs/AUDIO.md): the ignition and the thrust loop aboard, the thrust swelling and
+##  7. The HUD on the way down (DropHud): aboard, only the map (no bars) and the leader's steer line plus everyone's
+##     jump-out line; after jumping out, the glider line until it opens; nothing once it is open.
+##  8. Its sounds (RocketSfx, docs/AUDIO.md): the ignition and the thrust loop aboard, the thrust swelling and
 ##     rising while the leader turns, the jump-out cue with the canopy still folded, a free-fall wind that
 ##     follows your speed and stops as the glider's snap plays, a small thud at landing, another squad's
 ##     rocket and its thud heard HEAR_M away, and a solo's one-seat rocket playing the same set.
@@ -171,6 +173,25 @@ func _bot_leader() -> void:
 	ok(gap <= TOGETHER_M, "with the bot leading, the squad still lands together (%.1f m)" % gap)
 	_clean_landing("bot leader")
 
+func _hud_lines() -> void:
+	await _start(6.0)
+	var P: Hunter = m.player
+	var jump := Settings.key_cap("jump")
+	ok(not DropHud.aboard(P), "aboard the ship, before launch: the full HUD")
+	m.ship_jump(P)
+	var want := ["Steer with %s" % DropHud.move_keys(), "Jump out: %s" % jump]
+	ok(DropHud.aboard(P), "aboard the rocket: the HUD shows only the map (no health or ability bars)")
+	ok(DropHud.lines(m, P) == want, "the leader reads %s" % str(DropHud.lines(m, P)))
+	var bot: Hunter = _squad().filter(func(h): return h.ctrl == "bot")[0]
+	m.skydrop.pass_lead(P, bot)
+	ok(DropHud.lines(m, P) == ["Jump out: %s" % jump], "a rider reads %s" % str(DropHud.lines(m, P)))
+	m.skydrop.detach(P)
+	m.step(Match.DT)
+	ok(not DropHud.aboard(P), "jumped out: the bars come back")
+	ok(DropHud.lines(m, P) == ["Glider: %s again" % jump], "free-falling reads %s" % str(DropHud.lines(m, P)))
+	P.do_jump()
+	m.step(Match.DT)
+	ok(not P.diving and DropHud.lines(m, P).is_empty(), "the glider open: no drop line (%s)" % str(DropHud.lines(m, P)))
 ## The squad's own rocket: launch, a hard turn, jumping out, the fall, the glider.
 func _own_sounds() -> void:
 	await _start(6.0)
@@ -274,6 +295,7 @@ func run(mn: Node) -> void:
 	await _glide_further()
 	await _no_clipping()
 	await _bot_leader()
+	await _hud_lines()
 	await _own_sounds()
 	await _far_sounds()
 	if m:

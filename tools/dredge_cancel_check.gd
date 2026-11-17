@@ -1,8 +1,8 @@
 extends RefCounted
-## Presses while the Abyssal Hand's arm is out, before it hooks anyone (docs/heroes/dredge.md, Cancels), for
+## Presses while the Deep Reach's arm is out, before it hooks anyone (docs/heroes/dredge.md, Cancels), for
 ## --dredge-combo-check. The source locks only the pull (the wiki: only the dash and the air dash while it
 ## pulls), so the gun, the Anchor Drop and the Brass Broadside all go at once and the arm flies on; a second
-## Abyssal Hand is refused (one arm, its cooldown already running).
+## Deep Reach is refused (one arm, its cooldown already running).
 
 const INTO_FLIGHT := 0.3     # s after the throw: past the 0.2 s coil-back, the arm a few metres out
 const SETTLE := 2.5          # s for the arm to miss and whatever was cast with it to finish
@@ -32,7 +32,7 @@ func run() -> void:
 	var hook := K.hook_sd
 	ak.tap(m, P)
 	ok(
-		"arm out: a second Abyssal Hand is refused, the first arm flies on",
+		"arm out: a second Deep Reach is refused, the first arm flies on",
 		K.flying and is_same(K.hook_sd, hook) and K.ch_rmb == ch0 and K.grapples == 0,
 		"flying %s, charges %.2f -> %.2f" % [K.flying, ch0, K.ch_rmb]
 	)

@@ -256,6 +256,9 @@ func thief(a) -> void:
 			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
 			and A.dmg(T) <= 0.0,
 			"len %.1f" % float(bl.get("len", 0.0)))
+	A.ok("dancer RMB telegraph: the lane is drawn as wide as it catches (rmb.bola.lane_w, the parity 1.8 m)",
+			absf(float(bl.get("width", 0.0)) - float(K.rmb_def()["bola"]["lane_w"])) < 0.01,
+			"width %.2f" % float(bl.get("width", 0.0)))
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
@@ -279,6 +282,7 @@ func thief(a) -> void:
 	A.ok("dancer Bola: Grounded can't dash or jump",
 			T.dashes >= 0.99 and T.roll_t <= 0.0 and T.vel.y < 1.0, "dashes %.2f vy %.1f" % [T.dashes, T.vel.y])
 	A.step(m, 2.0)
+	_bola_edge(A, m, P, K, T, T2, home)
 	# ... it bounces once off a wall
 	var W = m.world
 	for dz in range(-3, 4):
@@ -390,6 +394,27 @@ func thief(a) -> void:
 	await ULT.new().dancer_ring(A)
 
 
+
+## Drawn = hit for the Bola: the lane is the catch corridor for a foe of her size, so a foe whose body is just inside
+## the lane's reach past it is caught and one just outside is not.
+func _bola_edge(A, m: Match, P: Hunter, K, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var reach := float(K.rmb_def()["bola"]["lane_w"]) * 0.5 - P.r
+	A.fresh(T)
+	A.fresh(T2)
+	P.teleport(home)
+	T.teleport(home + Vector3(3.0, 0, T.r + reach - 0.08))
+	T2.teleport(home + Vector3(5.0, 0, -T2.r - reach - 0.08))
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.aim_at(P, home + Vector3(8.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.8)
+	A.ok("dancer RMB telegraph: a foe just inside the lane's edge is caught, one just outside is not",
+			KitStatus.grounded(T) and not KitStatus.grounded(T2), "in %s out %s" % [KitStatus.grounded(T),
+			KitStatus.grounded(T2)])
+	A.step(m, 1.8)
+
+
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
@@ -405,7 +430,7 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 	var dd: Dictionary = Arch.def("thief")["dash"]
 	var feel_t := float(K.dash_feel()["time"])
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]
 	var own := true
 	for mv in ThiefKit.CARTWHEELS:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
@@ -670,9 +695,9 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
 			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
-	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
-			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
-			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
+	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast, the full wave does not slow)",
+			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t <= 0.0 and K.res > 45.0,
+			"mid %.2f took %.0f rage %.0f slow %.2f" % [midk, A.dmg(T), K.res, T.slow_t])
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0
@@ -1128,10 +1153,10 @@ func combos(a) -> void:
 	var hp0 := A.dmg(T)
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
-	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+	A.ok("combo jug: E > hold RMB = Chain Lunge (no stun)",
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t <= 0.0
 			and P.flat_dist(T) < 3.4,
-			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
+			"lunges %d dist %.1f took %.0f stun %.2f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0, T.stun_t])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)
 	hook.call()
@@ -1142,8 +1167,8 @@ func combos(a) -> void:
 	P.ak.use_e()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
-	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)",
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t <= 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)

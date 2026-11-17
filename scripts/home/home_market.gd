@@ -3,10 +3,10 @@ extends RefCounted
 ## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
 ## level (Stalls.level). L1: the Vendor (goods for Boki and the Hunter, seeds, farm, house, selling
 ## crops), the Relics (which Hunters are yours and how to open the rest: MarketRelics) and the
-## Tradewind Exchange (materials, Exchange). L2 adds the Shelter, your own stall and market search;
-## L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the hub bar's Market
-## button and --open=shop[:boki|hunter|seeds|farm|home|sell] / relics / exchange[:item] / shelter /
-## stall / search / auctions.
+## Tradewind Exchange (materials, Exchange). L2 adds the Shelter (it shows up earlier while a Boki handed
+## to you waits), your own stall and market search; L3 the Auction House (those four tabs are HomeTrade).
+## Opened from the stall, the hub bar's Market button and --open=shop[:boki|hunter|seeds|farm|home|sell] /
+## relics / exchange[:item] / shelter / stall / search / auctions.
 
 ## [tab, the stall level that opens it]
 const TABS := [["Vendor", 1], ["Relics", 1], ["Exchange", 1], ["Shelter", 2], ["My stall", 2], ["Search", 2], ["Auctions", 3]]
@@ -42,8 +42,11 @@ static func tab_level(tab_name: String) -> int:
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+	var out := TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
+	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
+		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
+	return out
 
 ## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
 static func vendor_tabs() -> Array:
@@ -242,7 +245,7 @@ func _vendor_card(g: Array) -> Control:
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
 	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	if is_open and String(g[6]) != "":
@@ -251,7 +254,7 @@ func _vendor_card(g: Array) -> Control:
 	var d := UI.label(Progress.req_text(key), 12, Color("ffb3a8"))
 	if is_open: d = UI.label(String(g[2]), 12, UI.MUTED)
 	d.autowrap_mode = TextServer.AUTOWRAP_OFF
-	d.clip_text = true
+	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(d)
 	hr.add_child(nv)

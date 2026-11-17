@@ -1,5 +1,6 @@
 {
 	"id": "gil",
+	"recast_hint": {"e": "let the waterspout go"},
 	"title": "Novice Mage",
 	"base_name": "Gil",
 	"gender": "male",
@@ -11,15 +12,8 @@
 	"fantasy": "The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached.",
 	"howto": ["Play: close-range control; fence, throw potions, Beach foes.", "Combo: hit one foe with 3 different {secondary} potions in 5s.", "Avoid: {dash} as an escape; you can still be hit underground."],
 	"silhouette": "the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip",
-	"clip": {"lines": {"dash": "Dive into the ground and swim.", "lmb": "Three rapier thrusts, stepping in. Hold to lunge down a line.", "rmb": "Throw the next potion from the bag.", "e": "Spin, then send a waterspout.", "x": "Surf a tidal wave down a line."}},
-	"card": {"role_word": "Controller",
-		"loop": "Control mage: fence up close, throw the bag's potions, and land three different effects to Beach a foe.",
-		"dash": "Dive into the ground and swim 6m in 0.4s (you can still be hit). Surfacing next to foes knocks them up.",
-		"passive": "Each different potion effect, and a full Tide Lunge, marks a foe. Three different marks within 5s Beach them: stunned 0.75s.",
-		"rmb": "Throw the next potion from the bag (Thunder, Slime, Air, Fire, or a rare Super Zeep) in an arc. Hold to aim further; in the air it drops straight down.",
-		"e": "Spin with the swordfish for up to 2s, then send a waterspout down a line that knocks up. A longer spin makes a bigger spout.",
-		"x": "Surf a tidal wave down a line: it knocks foes up and slows them, and you land with a shield.",
-		"weapons": {"swordfish": "Three quick thrusts with the swordfish; every thrust steps you in, and the third slows. Hold for a Tide Lunge down a line; full charge soaks (a splash mark)."}},
+	"clip": {"lines": {"dash": "Dive into the ground and swim.", "lmb": "Three rapier thrusts, stepping in.", "rmb": "Throw the next potion from the bag.", "e": "Spin, then send a waterspout.", "x": "Surf a tidal wave down a line."}},
+	"card": {"role_word": "Controller", "loop": "Control mage: fence up close, throw the bag's potions, and land three different effects to Beach a foe.", "dash": "Dive and swim 6m in 0.4s; surfacing knocks nearby foes up.", "passive": "Each different potion marks a foe; three marks in 5s Beach them.", "rmb": "Lob the next potion from your bag in an arc.", "e": "Spin up to 2s, then send a knock-up waterspout down a line.", "x": "Surf a tidal wave that knocks up and slows; land shielded.", "weapons": {"swordfish": "Three quick thrusts; each steps you in, the third slows."}, "chips": {"rmb": ["4-16 dmg"], "e": ["10 dmg"], "x": ["18 dmg"]}},
 	"signature": "swordfish",
 	"resource": {"id": "beach_marks", "name": "Splash Marks", "max": 3, "kind": "on_targets", "col": "#48b29c"},
 	"passive": {"name": "Fish Out of Water", "window": 5.0, "need": 3, "stun": 0.75, "cd": 8.0,
@@ -47,7 +41,7 @@
 	"e": {"delivery": "dash", "name": "Riptide", "short": "Riptide", "icon": "gil_e", "col": "#3aa892", "cooldown": 12.0,
 		"spin_t": 2.0, "spin_r": 2.2, "every": 0.25, "tick": [2.0, 5.0], "move_k": 0.7,
 		"range": [7.0, 11.0], "width": [1.2, 2.2], "speed": [14.0, 22.0], "dmg": 10.0, "lift": 9.0, "knockup": 1.0,
-		"desc": "Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press E again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.",
+		"desc": "Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press it again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
 	"x": {"name": "Tidal Wave", "short": "Wave", "icon": "gil_x", "col": "#24806f", "cooldown": 90.0, "unlock": 6,
 		"range": 14.0, "width": 3.6, "time": 1.0, "dmg": 18.0, "lift": 9.0, "knockup": 1.0, "slow_k": 0.5, "slow": 2.0, "shield": 40.0, "shield_t": 3.0,
@@ -56,5 +50,13 @@
 	"rank2": {"sec": "Rank 2: cooldown 5s -> 4.5s per charge, damage +15%.", "dash": "Rank 2: cooldown 8s -> 7s, surfacing radius +0.3m.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."},
 	"rank3": {"sec": "the next two potions in the bag show", "dash": "surfacing also slows 30% for 1s", "kin": "the spout pulls foes to its line"},
 	"rank_next": {"sec": "Rank 3: cooldown 5s -> 4s, damage +30%.", "dash": "Rank 3: cooldown 8s -> 6s.", "kin": "Rank 3: cooldown 12s -> 9.6s, damage +30%."},
-	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
+	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"},
+	"src": {
+		"lmb": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)",
+		"rmb": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)",
+		"e": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)",
+		"x": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)",
+		"dash": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)",
+		"passive": "[?] ours (cd/dmg/range/timing: no KIT_PARITY row yet)"
+	}
 }

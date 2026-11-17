@@ -26,6 +26,7 @@ const REACH := 1.55
 const CHIP_COL := {"tree": Color("c8955a"), "rock": Color("b8b4ae")}
 const LEAF_COL := Color("6fb35a")
 const TREE_TOP_Y := 2.2          # m: where the leaves shake loose
+const CREAK_FROM := 0.5          # share of the hits taken after which a trunk starts to creak
 const CRACK_COL := Color("2a2622")
 
 var h                                    # the Home screen
@@ -89,6 +90,36 @@ func label(it: Dictionary) -> String:
 		return "Needs a%s %s (Market, Farm tab)" % ["n" if t == "axe" else "", String(TOOLS[t]["name"]).to_lower()]
 	return "Chop the tree" if it["what"] == "tree" else "Mine the boulder"
 
+## The home prompt pair for a wild tree or boulder: "Hold F to chop" with the ring, or why you can't.
+func prompt_pair(it: Dictionary) -> Array:
+	if not has_tool(tool_for(String(it["what"]))):
+		return [Settings.key_cap("interact"), label(it)]
+	return ["Hold " + Settings.key_cap("interact"), "to chop" if it["what"] == "tree" else "to mine"]
+
+## The home prompt ring (HoldPrompt.key_hints): a tree's hits so far plus the swing under way, or the
+## pick-up hold on a Boki. `_idx` is the pair in the row (the Boki's pick-up is its only hold pair).
+func ring_fill(_idx: int) -> float:
+	var it: Dictionary = h.interact
+	if it.get("kind", "") == "kin":
+		return h.carry.held / HomeCarry.HOLD_S if not h.carry.pending.is_empty() else 0.0
+	if it.get("kind", "") != "wild":
+		return 0.0
+	var i := int(it["i"])
+	var swing: float = h.tw.swing_t / HunterTool.period(h.tw.tool) if tile == i and h.tw.active() else 0.0
+	return (float(damage.get(i, 0)) + clampf(swing, 0.0, 1.0)) / float(HITS)
+
+## The wild tree or rock the prompt points at ("" for none).
+func _wild_at() -> String:
+	var it: Dictionary = h.interact
+	return String(it.get("what", "")) if it.get("kind", "") == "wild" else ""
+
+## Which HoldTeach action the home ring flashes for.
+func ring_action(_idx: int) -> String:
+	var it: Dictionary = h.interact
+	if it.get("kind", "") != "wild":
+		return ""
+	return "chop" if it["what"] == "tree" else "mine"
+
 func use(it: Dictionary) -> void:
 	if h.water.swimming:
 		h._toast("Not while you're swimming")
@@ -114,6 +145,8 @@ func tick(d: float) -> void:
 	if regrow_t <= 0.0:
 		regrow_t = 5.0
 		h.hb.regrow_due()
+	var what := String(h.hb.wild_t.get(tile, "")) if tile >= 0 else _wild_at()
+	HoldTeach.home_tick(h, what if what != "" and has_tool(tool_for(what)) else "", tile >= 0)      # tap vs hold
 	if tile < 0:
 		return
 	# walking away (or the tile going) stops it
@@ -143,16 +176,31 @@ func _hit() -> bool:
 			h.fx.burst(at + Vector3(0, TREE_TOP_Y, 0), LEAF_COL, 6, 1.0, 0.9, 2.0)
 		else:
 			h.fx.spark(at + Vector3(0, 0.6, 0), Vector3.UP, Color("ffe2a0"), 6, 5.0, 70.0)
-	Sfx.play("break_wood" if tree else "armor_hit", at, -6.0, 0.1)
-	Sfx.play("rustle" if tree else "thump", at, -10.0, 0.1, 0.8)
+	_hit_sound(at, tree, hits)
 	if not tree:
 		_crack(at, hits)
+	if hits >= HITS and HoldTeach.held_for("chop" if tree else "mine") > HoldTeach.TAP_S:
+		HoldTeach.done("chop" if tree else "mine")      # it came down under a held key: a finished hold
 	if hits >= HITS and demo_loop:
 		damage[tile] = 0
 	elif hits >= HITS:
 		finish()
 		return false
 	return true
+
+## The strike, and what the target answers with: a trunk that creaks higher and louder on the last hits, a
+## boulder whose crack gets lower and louder as it weakens (the last hit's sound is in finish).
+func _hit_sound(at: Vector3, tree: bool, hits: int) -> void:
+	var worn := float(hits) / float(HITS)
+	Sfx.play("axe_bite" if tree else "pick_strike", at, -6.0, 0.1)
+	if tree:
+		Sfx.play("rustle", at, -10.0, 0.1, 0.8)
+	if hits >= HITS:
+		return
+	if tree and worn > CREAK_FROM:
+		Sfx.play("trunk_creak", at, -12.0 + 6.0 * worn, 0.05, 0.8 + 0.5 * worn)
+	elif not tree:
+		Sfx.play("rock_crack", at, -14.0 + 6.0 * worn, 0.05, 1.3 - 0.5 * worn)
 
 ## Dark cracks on the boulder, one more for every hit.
 func _crack(at: Vector3, hits: int) -> void:
@@ -191,6 +239,7 @@ func finish() -> int:
 	_fall(at, what)
 	if h.fx:
 		h.fx.dust(at, 14)
+	Sfx.play("tree_down" if what == "tree" else "rock_break", at, -4.0, 0.08)
 	Sfx.play("pickup", at, -8.0, 0.1, 1.1)
 	h._refresh_top()
 	Save.save_game()

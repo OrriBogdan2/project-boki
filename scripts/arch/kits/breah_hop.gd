@@ -16,6 +16,7 @@ const CROUCH := 0.06           # s: the first rock bursts up and he crouches on 
 const RISE_LEAD := 0.06        # s before touchdown: the landing rock comes up to meet him
 const RAIL_BACK := 0.3         # m: the rock's centre lies this far ahead of the landing, so the skid stays on it
 const FOOT_KEY := "br_foot"
+const HOP_COL := Color("3a7cff")   # the landing circle and the recast marker
 
 var k: DolmKit
 var h: Hunter
@@ -54,6 +55,15 @@ func drop() -> void:
 	st = {}
 	AimKit.hide(h, "leap")
 	KitLooks.of(m).release(FOOT_KEY)
+
+## A glide press in a hop's flight: the flight (launch_to's fly_t) ends there at its own speed, no landing, no
+## rock, no crash. A hop up onto a ledge is the shared sure arc (pad) and keeps it, like every Hunter's.
+func let_go() -> bool:
+	if st.is_empty() or String(st["phase"]) != "air" or not h.pad.is_empty():
+		return false
+	h.fly_t = 0.0
+	drop()
+	return true
 
 ## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
 ## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
@@ -100,7 +110,7 @@ func _aim_hop() -> bool:
 	var at: Vector3 = spot["at"]
 	AimKit.circle(
 		h, "leap",
-		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": Color("3a7cff"), "dur": st["T"] + 0.4}
+		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": HOP_COL, "dur": st["T"] + 0.4}
 	)
 	return true
 
@@ -262,7 +272,7 @@ func _tick_air(dt: float) -> void:
 		h, "leap",
 		{
 			"at": st["spot"]["at"], "r": float(dd()["land_r"]), "fill": clampf(t / T, 0.0, 1.0), "all": true,
-			"col": Color("3a7cff")
+			"col": HOP_COL
 		}
 	)
 	if not h.grounded and h.pad.is_empty():
@@ -314,6 +324,8 @@ func _skid_room(dir: Vector2) -> float:
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
+	if not h.grounded:
+		return             # skidded off a ledge: the next hop and the crash wait for the ground below
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
 		st["press"] = false
 		if _aim_hop():
@@ -323,6 +335,17 @@ func _tick_skid(dt: float) -> void:
 		return
 	if float(st["left"]) <= 0.0:
 		_crash()
+		return
+	_mark_next()
+
+## The key on the spot the next hop would land on (toward the cursor as it is now) while the skid waits for it.
+func _mark_next() -> void:
+	var left := int(dd()["hops"]) - int(st["n"])
+	if left <= 0 or not h.is_local():
+		return
+	var spot := spot_for(h.aim_dir(), left - 1)
+	if not spot.is_empty():
+		RecastMarker.show_at(h, "dash", spot["at"], float(st["left"]), float(dd()["window"]), HOP_COL)
 
 ## A landing's nudge: a small shove, no damage.
 func _nudge() -> void:

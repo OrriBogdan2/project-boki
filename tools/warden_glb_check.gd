@@ -34,9 +34,7 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
-## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
-const TRIS_OVER := {"juggernaut": 24000}
+const TRIS_MAX := 80000         # the game budget (RIG_CONTRACT "Budget"): a v95 master's own mesh, ~60k, plus its props
 ## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
 ## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
 const WHITE_HAIR := {"thief": 0.08}
@@ -71,13 +69,13 @@ func run(main: Node) -> void:
 	var loaded: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
-		var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
 		if WardenGlb.has_model(a):
-			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and not head.visible:
+			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
 			else:
 				print("WARDENGLB %s has a .glb that did not load" % a)
-		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head.visible:
+		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
 	ok(fallback.size() + loaded.size() == Arch.ids().size(),
@@ -138,10 +136,9 @@ func _contract(a: String) -> void:
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
-	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
-	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
+	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
-			% [a, unskinned, tris, cap, str(slots.keys()), SLOT_MAX])
+			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX])
 	m.free()
 
 ## Every kit move of every table, played on this Warden: after each key, every bone is exactly where its rig
@@ -157,7 +154,7 @@ func _kmoves(a: String) -> void:
 	var count := 0
 	var dead: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]:
 		for mv in t:
 			count += 1
 			var moved := {}
@@ -584,7 +581,7 @@ func _weapon(a: String) -> void:
 			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	var own_mag := mag != null and mag.has_meta("glb")      # (the loader moved the .glb's weapon_mag here)
-	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)
+	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty
 	var mag_ok := mag != null and (mag.mesh != null and mag in shown if own_mag else mag.mesh == null)
 	var stray := shown.filter(func(mi): return mi != mag)
 	var left := str(stray.map(func(mi): return mi.name))

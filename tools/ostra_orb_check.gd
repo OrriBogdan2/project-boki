@@ -14,6 +14,7 @@ func orbs(main_node: Node) -> void:
 	await _through_walls()
 	await _glow_and_chime()
 	await _weapon_kept()
+	await _no_kit_tick_when_down()
 
 ## Fires one orb `wait` seconds after the last and returns its shot, with the kit's charge at the shot.
 func _fire_after(m: Match, P: Hunter, K: OstraKit, wait: float) -> Dictionary:
@@ -266,3 +267,43 @@ func _weapon_kept() -> void:
 	K.teardown()
 	ok("weapon: teardown leaves the weapon as loaded", absf(float(P.wpn["dmg"]) - plain * 2.0) < 0.01)
 	await done(m)
+
+## A downed Hunter is a Wisp: Motley's kit draws no charge motes or aura and builds no charge, and starts its wait over
+## on revive. The same look scan over all 12 kits is reported (NOTE) only; the other kits are not fixed here.
+func _no_kit_tick_when_down() -> void:
+	var r := setup("ostra", 12.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: OstraKit = P.ak
+	var looks := KitLooks.of(m)
+	K.last_shot_t = m.time - 3.0
+	step(m, 0.1)
+	ok("wisp kit: a charge shows before the down", looks.holding("os_charge") and K.charge >= 1.0)
+	m.knock(P, null, {})
+	step(m, 0.3)
+	ok("wisp kit: downed: no motes held", not looks.held.has("os_charge") and not looks.held.has("os_aura"))
+	ok("wisp kit: downed: no charge built", K.charge == 0.0 and K.wait_charge() < 0.05, "%.2f" % K.charge)
+	m.revive_hunter(P, P)
+	step(m, 0.2)
+	ok("wisp kit: revive: the wait starts over", K.charge == 0.0 and not looks.holding("os_charge"))
+	step(m, 3.0)
+	ok("wisp kit: revive: the charge builds again", K.charge >= 1.0 and looks.holding("os_charge"))
+	step(m, 3.0)
+	m.eliminate(P, null, "test", true)
+	step(m, 0.3)
+	ok("wisp kit: out: no motes held", P.out and not looks.held.has("os_charge") and K.charge == 0.0)
+	await done(m)
+	for arch in Arch.ids():
+		var q := setup(arch, 12.0)
+		var qm: Match = q[0]
+		var qh: Hunter = q[1]
+		step(qm, 3.0)
+		qm.knock(qh, null, {})
+		step(qm, 0.2)
+		var live := 0
+		for key in KitLooks.of(qm).held.keys():
+			var hd: Dictionary = KitLooks.of(qm).held[key]
+			if hd["ent"] == qh and float(hd["t"]) >= qm.time - 0.1: live += 1
+		if arch == "ostra": ok("wisp kit: ostra: no look still updating", live == 0)
+		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live])
+		await done(qm)

@@ -221,6 +221,8 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
 		var mine: bool = m.player != null and h.team == m.player.team
+		if mine:
+			UiSfx.extract_start()
 		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
 		if m.hud and m.player and not m.player.out:
 			m.hud.toast("Uplink started: hold the yard until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
@@ -333,6 +335,7 @@ func _fizzle(x: Dictionary) -> void:
 	if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
 		if m.hud and was == m.player.team:
+			UiSfx.extract_fail()
 			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
 
 ## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
@@ -344,7 +347,9 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	elif x.get("draining", false) and x["state"] == "charging":
 		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
 	var raised := OutpostLook.held(x)
-	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
+	var col := OutpostLook.NEUTRAL
+	if raised:
+		col = SideColor.of_team(m.player.team if m.player else -1, int(x["team"]))
 	var key := [snappedf(lit, 0.01), raised, col]
 	if key != x.get("look"):
 		x["look"] = key
@@ -459,10 +464,11 @@ func _hunter_near(p: Vector3, r: float) -> bool:
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
 	if seats: seats.tick(dt)
+	var viewer := SideColor.viewer(m)
 	for x in list:
 		_tick_outpost(x, dt)
 		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
-		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time, viewer)
 
 ## The team of someone standing in a live outpost's yard, or -1.
 func occupant(x: Dictionary) -> int:

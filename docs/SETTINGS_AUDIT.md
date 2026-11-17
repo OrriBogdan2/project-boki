@@ -35,12 +35,14 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `master`, `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
+| `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `show_fps` | Video > Quality | `overlay.gd` | |
 | `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `text_size` | Accessibility > Readability | `settings.gd` (UI.set_text_size) | 100/125/150%; old configs load at 100% |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
 

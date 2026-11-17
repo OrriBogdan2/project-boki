@@ -84,6 +84,9 @@ func _setup() -> void:
 	fx = LDFx.of(m)
 	jet = AshwickJet.new(self)
 
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [])
+
 func _best_char() -> float:
 	var b := 0.0
 	for k in chars:
@@ -149,6 +152,7 @@ func stoke(f: Ent) -> int:
 func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var key := f.get_instance_id()
 	ignites[key] = {"e": f, "lvl": lvl, "until": m.time + float(rd()["ignite_t"])}
+	if f.remote: KitStatus.apply(f, "ign", float(rd()["ignite_t"]), float(lvl), true, "", h.nid)
 	var dps := float(rd()["dps%d" % lvl]) * f.max_hp * power("sec")
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
@@ -500,7 +504,6 @@ func _cinder_hit(f: Ent) -> void:
 	# the impact: a white-hot flash, an ember shower and a rising ember puff (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
-	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
 	if cur > 0:
 		# a burning foe: upgrade, and the burn the foe had spreads to the ones around
 		spreads += 1
@@ -568,6 +571,9 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
+	if bash.get("hop", false) and h.gliding:
+		bash = {}      # a glide press cancelled the poof (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dir: Vector2 = bash["dir"]
 	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
 		var into := float(bash["t0"]) - float(bash["t"])
@@ -639,7 +645,6 @@ func _bash_impact(f: Ent) -> void:
 		_ram_reward()
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:
@@ -647,6 +652,7 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	ShieldSrc.give(h, h.max_hp * float(dd["rank3_shield"]), ShieldSrc.HEAT)
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
+	h.shield_kind = "cloak"
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -690,6 +696,7 @@ func _cloak_blast() -> void:
 		var amount: float = h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k
 		ShieldSrc.give(h, amount, ShieldSrc.HEAT)
 		h.shield_t = float(ed["shield_t"])
+		h.shield_kind = "cloak"
 		st["shield_on"] = true
 		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)

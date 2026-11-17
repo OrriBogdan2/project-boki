@@ -5,6 +5,17 @@ extends RefCounted
 
 const GOAL_COL := Color("ffd27a")
 
+## A "Start here" stamp in the card's top-right corner for a starter (ClassUnlock.start_here), over the card
+## rather than a line in it.
+static func add_start_chip(card: PanelContainer, id: String) -> void:
+	if not ClassUnlock.start_here(id):
+		return
+	var chip := UI.tag("Start here", UI.GOLD)
+	chip.name = "StartHere"
+	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
+	chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	card.add_child(chip)
+
 ## The Hunter's portrait, `px` square: its Warden's painted face (Portraits.Pic), or with `body` its
 ## splash (the reveal). A Warden with no painted art shows its rendered model instead: a TextureRect
 ## with the SubViewport that renders it as its child (`body`: the whole standing hunter).
@@ -63,6 +74,7 @@ static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
 	head.add_child(mt)
 	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
 	v.add_child(head)
+	Glossary.add_note(v, "Mastery")
 	for i in goals.size():
 		v.add_child(_mastery_row(id, i, width))
 	return v
@@ -76,7 +88,7 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.set_meta("mastery_goal", i)
 	var gl := UI.label(String(g["text"]), 12, UI.GOOD if done else UI.INK)
 	gl.custom_minimum_size.x = width * 0.5
-	gl.clip_text = true
+	gl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row.add_child(gl)
 	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 11, UI.MUTED))
 	var rw: Dictionary = g["reward"]
@@ -88,14 +100,13 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
 	return row
 
-## A Hunter's kit in one tooltip: its name, then dash, passive, RMB, E and R.
+## A Hunter's kit in one tooltip: its name, then dash, passive, and the right click, signature and fusion keys.
 static func kit_tip(id: String) -> String:
 	var adf := Arch.def(id)
-	var names := [Arch.name_of(id)]
-	for slot in ["dash", "passive", "rmb", "e"]:
-		names.append(String(adf[slot]["name"]))
-	names.append(Settings.key_cap("ultimate"))
-	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
+	var nm := func(slot: String) -> String: return String(adf[slot]["name"])
+	var head := "%s\nDash: %s  ·  Passive: %s\n" % [Arch.name_of(id), nm.call("dash"), nm.call("passive")]
+	var keys := [Settings.key_cap("secondary"), nm.call("rmb"), Settings.key_cap("signature"), nm.call("e")]
+	return head + "%s: %s  ·  %s: %s  ·  %s: Boki Fusion" % (keys + [Settings.key_cap("ultimate")])
 
 ## How the Hunter plays, three short lines (what you do, the combo to learn first, what to avoid) from the
 ## Hunter's "howto" data. `{action}` is that action's key cap (Settings.key_cap), so rebinds show.

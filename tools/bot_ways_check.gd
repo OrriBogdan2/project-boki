@@ -91,7 +91,7 @@ func _fall_through(m: Match) -> void:
 	ok(BotWays.goal(m, h).is_empty(), "a raider before raider_at_s: no seat yet (it loots)")
 	m.time = BotWays.knob("raider_at_s") + 5.0 - m.sess_t0
 	var g := BotWays.goal(m, h)
-	ok(not g.is_empty() and String(g[1]) in ["lair_dial", "lair_fight"],
+	ok(not g.is_empty() and String(g[1]) in ["lair_dial", "lair_breach", "lair_fight"],
 		"a raider at raider_at_s heads into the Sealed Lair (%s)" % str(g.slice(1)))
 	sq.lair.state = QuestSeat.S.SHUT
 	m.time = BotWays.knob("runner_at_s") - m.sess_t0
