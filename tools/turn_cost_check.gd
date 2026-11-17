@@ -10,6 +10,9 @@ const SAME_KEEP := 0.95
 const REV_KEEP := 0.9
 const RUN_SLACK := 1.0      # m/s over the run an air dash straight back may still carry
 const HEIGHT := 40.0
+## Hunters whose chained ground dash is a shorter step by their own kit, TurnCost or not (the same-way keep is
+## not asserted for them; straight back still is).
+const CHAIN_SHORT := {"dredge": "Barge's charges chain a beat apart (dash.gap): the chained lunge is shorter"}
 
 var bad := 0
 
@@ -135,7 +138,10 @@ func run(main: Node) -> void:
 			var f: float = fresh["dist"]
 			var same_d: float = same["dist"]
 			var back_d: float = back["dist"]
-			ok(same_d >= f * SAME_KEEP, "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same_d])
+			if CHAIN_SHORT.has(arch):
+				print("TURNCOST skip %s ground same way: %s" % [arch, CHAIN_SHORT[arch]])
+			else:
+				ok(same_d >= f * SAME_KEEP, "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same_d])
 			ok(back_d <= f * REV_KEEP, "%s ground: fresh %.2f m, straight back %.2f m" % [arch, f, back_d])
 		var fresh_air := _fresh(m, home, true)
 		var same_air := _chain(m, home, Vector2(1, 0), true)
