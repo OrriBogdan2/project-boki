@@ -31,7 +31,6 @@ func run(main: Node, mode: String = "check") -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
-	WardenGlb.set_model("thief", true)
 	var row := _row("thief", 1)
 	for p in WING_POSES:
 		await _hold(0, p[1], p[2], 70)
