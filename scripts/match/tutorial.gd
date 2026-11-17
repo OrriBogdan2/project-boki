@@ -65,7 +65,9 @@ const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it 
 const SPOT_T := 5.0  # s the lookout shows the glove it spotted
 const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
 const DONE_T := 0.9  # s of the step-done sting
-const LOOKOUT_R := 4.2  # m: the lookout's top is 3.6 wide; any grounded height within this counts
+const LOOKOUT_R := 5.0  # m from the stop: the whole top (3.6 m radius) and its rim count
+const LOOKOUT_DROP := 1.2  # m: how far under the top you may stand and still be up on it (the cliff is 2.4 m)
+const SEND_R := 5.0  # m: a Boki leap that lands this near a monster counts as sent at it
 const CROUCH_HOLD := 1.5  # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
 const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks them up (the fight goes on)
@@ -128,6 +130,16 @@ func stop(id: String, key := "at") -> Vector3:
 	if not s.has(key):
 		return Vector3.INF
 	var q: Array = s[key]
+	return Vector3(float(q[0]), m.world.ground_at(float(q[0]), float(q[1])), float(q[1]))
+
+
+## Where a camp's i-th monster stands (the course table's "foes": open ground, clear of every cliff), INF when
+## the camp has no fixed posts.
+func foe_spot(id: String, i: int) -> Vector3:
+	var posts: Array = _course.get(id, {}).get("foes", [])
+	if i >= posts.size():
+		return Vector3.INF
+	var q: Array = posts[i]
 	return Vector3(float(q[0]), m.world.ground_at(float(q[0]), float(q[1])), float(q[1]))
 
 
@@ -487,8 +499,9 @@ func _is_done(sid: String, dt: float) -> bool:
 				return true
 			return false
 		"gkey":
-			var k: Kin = p.kin
-			flag = flag or k == null or k.st_throws > throws0 or k.state == "downed"
+			if not flag and _boki_sent():
+				flag = true
+				camps.release()
 			seen["boki"] = seen.get("boki", false) or flag
 			return _camp_done(sid)
 		"kin":
@@ -530,10 +543,26 @@ func _camp_done(sid: String) -> bool:
 	return flag
 
 
+## Did your Boki go at the camp: a send (every launch counts), a leap that lands by a monster, or it is on one.
+func _boki_sent() -> bool:
+	var k: Kin = m.player.kin
+	if k == null or k.state == "downed" or k.st_throws > throws0:
+		return true
+	for e: Dictionary in camps.ledger:
+		var mb: Mob = e["mb"]
+		if not is_instance_valid(mb) or mb.dead:
+			continue
+		if k.target == mb or mb.tgt == k:
+			return true
+		if k.state == "flying" and (k.fly["to"] as Vector3).distance_to(mb.pos) < SEND_R:
+			return true
+	return false
+
+
 ## Standing on the lookout's top (the wall kick's goal and the scouting spot).
 func on_lookout() -> bool:
 	var p := m.player
-	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - 0.4
+	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP
 
 
 ## Does this hunter's right click have a hold variant? Read from its kit; every other kit is taps only.
@@ -702,15 +731,6 @@ func _words() -> void:
 		line = String(alt["shoot_" + shoot_kind])
 	elif sid == "sec" and rmb_has_hold():
 		line = String(alt["sec_hold"])
-	text = _fill(line)
-	need = int(Content.rules("tutorial")["need"].get(sid, 0))
-	if sid == "sec" and rmb_has_hold():
-		need = 2
-	elif sid == "shoot":
-		need = camps.count
-	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
-	var was := detail
-	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
@@ -718,6 +738,14 @@ func _words() -> void:
 		key_cap = TutorialText.rank_combo()
 	elif KEYS.has(sid):
 		key_cap = Settings.key_cap(KEYS[sid])
+	text = _fill(line)
+	need = int(Content.rules("tutorial")["need"].get(sid, 0))
+	if sid == "sec" and rmb_has_hold():
+		need = 2
+	elif sid == "shoot":
+		need = camps.count
+	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 
 
 ## How the first step's weapon is worked, when that needs saying: "draw" (a bow), "melee" (step in), else "".
@@ -744,7 +772,7 @@ func _fill(txt: String) -> String:
 	var kname := "your Boki"
 	if p.kin:
 		kname = String(p.kin.rec.get("name", kname))
-	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
+	txt = txt.replace("%K", key_cap).replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	txt = txt.replace("%Q", Settings.key_cap("gear1")).replace("%L", kit_line(key))
 	return txt.replace("%A", an).replace("%s", kname)

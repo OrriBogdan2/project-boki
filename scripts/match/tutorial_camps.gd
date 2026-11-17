@@ -82,7 +82,9 @@ func spawn(sid: String) -> void:
 	var ang := randf() * TAU
 	for i in kinds.size():
 		var at := Vector3.INF
-		if c.get("row", false):
+		if c.get("held", false):
+			at = tu.foe_spot(sid, i)       # (fixed posts in the open, clear of every cliff: they never wander off)
+		elif c.get("row", false):
 			at = tu.spot(ROW_FROM + i * ROW_STEP, ang)       # (one behind the other, to line up)
 		elif c.get("far", false):
 			at = tu.spot(8.5 - i * 3.0, ang + i * 0.7)
@@ -91,7 +93,14 @@ func spawn(sid: String) -> void:
 		if at != Vector3.INF:
 			var mb := tu.m.spawn_mob(kinds[i], at)
 			tu.tank(mb, float(c.get("hp", camp_hp)))
+			mb.held = bool(c.get("held", false))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
+
+## The send is in: the camp's held monsters wake (the Boki and they go at each other).
+func release() -> void:
+	for e: Dictionary in ledger:
+		if is_instance_valid(e["mb"]):
+			(e["mb"] as Mob).held = false
 
 ## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, and if that
 ## empties the camp a new one comes.

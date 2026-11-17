@@ -28,6 +28,7 @@ var m: Match
 var main: Node
 
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+const MAX_LINE := 40  # chars of a banner line (it names its key too; --tutorial-playtest-check measures the fit)
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -174,7 +175,7 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > 34)
+	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
@@ -186,7 +187,7 @@ func _course() -> void:
 		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
-	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+	ok(tl.contains("send "), "the Boki step says to send it ('%s')" % tl)
 
 ## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
 ## and revive prompt get through; when the banner settles the toast shows.
