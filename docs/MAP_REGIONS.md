@@ -14,3 +14,10 @@ Each match also picks one region (not the Crown) as the **hot drop zone**: loot 
 - **Stormbreak** (storm) · chokepoint bridges · twisting crystal spire · five shards over the Hollow, the Shrine Table (lv 6) · the shrine; every way across the middle.
 - **Duskmoor** (storm, ash-violet tint) · close-quarters maze · standing-stone ring · a ruin maze round the raised Moor Chapel (lv 4) · relics (×2.0).
 - **Cinder Steps** (ember) · cliff fights · forge chimney · four cliff tiers (lv 2, 6, 10, 14) to a sheer east rim, slag pools at the feet · gloves (×1.6), the Sunken Forge lair.
+
+**Terrain hazards** (`HAZARD_AREAS` in `tools/make_hollowcrown.py`; `TerrainHazards`, values in `content/rules/terrain_hazards.json`, decision 0060): ground that changes the way across a region, each with a bright edge, clear of every spot, stair foot and exit, never cutting an island off. Your active Boki's type walks it safely (a shield chip on the HUD says so), it tells you when one is near and whether it can handle it, and bots go round what theirs can't.
+- **Cinder Steps**: two lava fields (east of the camp, and by the west rim) burn you. Ember Boki: safe.
+- **Frostgate**: an ice sheet in the yard south of the Keep's west stair: no footing, you slide. Frost Boki: full footing (ice patches too).
+- **Saltmere**: the river's north reach is deep water: slow, weaker hits, and you drown once your breath runs out. Swimmers (Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak): swim faster, no drowning.
+- **Stormbreak**: static flats south-east of the shrine stair charge up and shock (damage, short stun) every few seconds. Storm and Tempest Boki: no shock.
+- **Thornwood**: a bramble patch by the north camp slows and scratches. Bloom and Spore Boki: untouched.

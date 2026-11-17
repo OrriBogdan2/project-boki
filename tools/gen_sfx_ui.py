@@ -7,7 +7,8 @@ muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a
 ultimate back = a low fifth and one bell over it (UltReadyCue).
 Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
 equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
-take = a rustle and a short rising pair (quieter and duller than pickup).
+take = a rustle and a short rising pair (quieter and duller than pickup). Ranks (RankSfx): a point
+ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that fifth with a soft bloom.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
@@ -128,6 +129,15 @@ def level_up(i):
     return finish(room(mix(*arp, top, glow), 0.9), 5600)
 
 
+def rank_ready(i):
+    """A rank point waits to be spent: two small bells rising a fourth, short and airy, over a quiet tine."""
+    bell = ((1.0, 0.8), (2.76, 0.12))
+    lo = S.chime(NOTE['D6'], 0.35, 0.12, bell)
+    hi = at(S.chime(NOTE['G6'], 0.5, 0.18, bell), 0.075)
+    tine = at(pluck(NOTE['G5'], 0.35, 0.1, 0.5) * 0.45, 0.075)
+    return finish(room(mix(lo, hi, tine), 0.6), 6000)
+
+
 def rank_up(i):
     """Choosing which ability to rank: a short rising pair; the caller pitches it per slot."""
     return finish(room(mix(pluck(NOTE['C5'], 0.3, 0.06), at(pluck(NOTE['G5'], 0.4, 0.1), 0.06)), 0.5), 4800)
@@ -160,6 +170,14 @@ def charge(i):
     high = S.sweep(660, 1040, d) * u ** 1.5
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
+# ---------------------------------------------------------------- capture and extraction cues
+def capture(i):
+    """A Boki scanned and kept: a quick rising triad, a held top note and a soft sparkle."""
+    j = jit(i, 0.01)
+    notes = [at(pluck(NOTE[n] * j, 0.4, 0.08), 0.06 * k) for k, n in enumerate(['E5', 'G5', 'C6'])]
+    top = at(mix(pluck(NOTE['E6'] * j, 0.8, 0.22), pluck(NOTE['G5'] * j, 0.8, 0.22) * 0.5), 0.2)
+    spark = at(S.chime(NOTE['C6'] * 2, 0.7, 0.25, ((1.0, 0.6), (2.76, 0.18))) * 0.2, 0.22)
+    return finish(room(mix(*notes, top, spark), 0.8), 5400)
 
 # ---------------------------------------------------------------- garden reactions
 # The farm's own cues (what you hear most at home): short, warm, one per kind, so `unlock` stays for real unlocks.
@@ -193,13 +211,6 @@ def trait(i):
     steps = [at(pluck(NOTE[nm], 0.4, 0.09), 0.06 * k) for k, nm in enumerate(['D5', 'E5', 'G5', 'A5'])]
     chime = at(S.chime(NOTE['D6'], 0.9, 0.3, ((1.0, 0.6), (2.76, 0.2))) * 0.3, 0.26)
     return finish(room(mix(sw, *steps, chime), 0.8), 5400)
-
-
-def egg(i):
-    """A hollow wooden tock (a shell settling in straw) and a small warm bell."""
-    tock = (S.sweep(420, 210, 0.09) * env(N(0.09), 0.002, 0.03)
-            + 0.3 * S.pad(bpf(noise(0.04), 900, 1800) * env(N(0.04), 0.002, 0.012), 0.09))
-    return finish(room(mix(tock, at(pluck(NOTE['E5'], 0.55, 0.16, 0.5), 0.07), at(pluck(NOTE['A5'], 0.6, 0.18, 0.4), 0.17)), 0.7), 4200)
 
 
 def toy(i):
@@ -249,6 +260,22 @@ def steal_won(i):
     rise = [at(pluck(NOTE[n], 0.3, 0.07), 0.055 * k) for k, n in enumerate(['D5', 'G5', 'D6'])]
     flick = at(S.chime(NOTE['G6'], 0.4, 0.12, ((1.0, 0.5), (2.76, 0.2))) * 0.3, 0.17)
     return finish(room(mix(*rise, flick), 0.5), 5400)
+
+
+def extract_start(i):
+    """An extraction begins (skiff called, hatch unlocking, uplink on): rising open notes over a breath."""
+    j = jit(i, 0.01)
+    breath = swell(True, 0.5, 400, 2200) * 0.3
+    return finish(room(mix(breath, pluck(NOTE['C5'] * j, 0.5, 0.12), at(pluck(NOTE['G5'] * j, 0.6, 0.16), 0.12),
+                           at(pluck(NOTE['D6'] * j, 0.7, 0.2), 0.26)), 0.7), 4200)
+
+
+def extract_fail(i):
+    """An extraction is lost (the uplink shut off, the call dropped): a slow falling trio, muted."""
+    j = jit(i, 0.01)
+    notes = [at(S.sweep(f * 1.04, f, 0.3) * env(N(0.3), 0.004, 0.12) + 0.2 * pluck(f * 2, 0.3, 0.05, 0.3), 0.14 * k)
+             for k, f in enumerate([NOTE['A4'] * j, NOTE['E4'] * j, 196 * j])]
+    return finish(room(mix(*notes), 0.5), 1900)
 
 
 def steal_lost(i):
@@ -318,7 +345,6 @@ def main():
     S.takes_cat('garden_pet', pet, 3, 'ui')
     S.save_cat('garden_friend', friend(0), 'ui')
     S.save_cat('garden_trait', trait(0), 'ui')
-    S.save_cat('garden_egg', egg(0), 'ui')
     S.save_cat('garden_toy', toy(0), 'ui')
     S.save_cat('nook_note', nook_note(0), 'ui')
     S.takes_cat('nook_nuzzle', nuzzle, 2, 'ui')
@@ -327,11 +353,15 @@ def main():
     S.save_cat('xp_tick', xp_tick(0), 'ui')
     S.save_cat('steal_won', steal_won(0), 'ui')
     S.save_cat('steal_lost', steal_lost(0), 'ui')
+    S.takes_cat('ui_capture', capture, 2, 'ui')
+    S.takes_cat('ui_extract_start', extract_start, 2, 'ui')
+    S.takes_cat('ui_extract_fail', extract_fail, 2, 'ui')
     S.takes_cat('inv_grab', inv_grab, 3, 'ui')
     S.takes_cat('inv_drop', inv_drop, 3, 'ui')
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
+    S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
 
 
 if __name__ == '__main__':

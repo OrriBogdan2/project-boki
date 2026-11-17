@@ -41,6 +41,11 @@ const REVISIT_S := 0.25       # s between two looks at the same spot
 var _share := 0.0             # spots owed a look this frame (fractional)
 var _next := -1
 var _teams := {}              # squads still in the match, refilled each tick
+var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
+var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
+var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
+var presence := LegendPresence.new()   # its roar, loop and sting, on every game (LegendPresence)
+var _t := 0.0                  # s to the next legend check
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -87,6 +92,7 @@ func shown_cats() -> Array:
 ## Where the candidates are: the layout's own lists on an authored map, else derived from the islands.
 func build(layout: Dictionary) -> void:
 	cands.clear()
+	legend_cfg = Legendary.config(layout)
 	var sp: Dictionary = layout.get("spawn_points", {})
 	if not sp.is_empty():
 		for cat in sp:
@@ -185,6 +191,7 @@ func roll(seed_val: int) -> void:
 			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
 		for i in n:
 			pool[i]["active"] = true
+	legend = Legendary.roll(seed_val, legend_cfg)
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
@@ -233,6 +240,12 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 ## Each spot is looked at again every REVISIT_S, a slice of them each frame: all of them at once
 ## was a sight check per spot per squad in one frame (a 20-30 ms spike with ten squads out).
 func tick(dt: float) -> void:
+	_t -= dt
+	if _t <= 0.0:
+		_t = 0.25
+		if Legendary.due(self):
+			legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
+		presence.tick(m)
 	if cands.is_empty():
 		return
 	_teams.clear()                   # team -> its hunters on the ground (one pass, not one per spot)

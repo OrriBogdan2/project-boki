@@ -49,6 +49,7 @@
 		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
+			"upper": "moving",
 			"hold_from": 0.24
 		, "air_legs": true},
 		"breah_punch": {
@@ -56,6 +57,10 @@
 			"upper": "moving"
 		, "air_legs": true},
 		"breah_crouch": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
+		"breah_windup": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
 		},

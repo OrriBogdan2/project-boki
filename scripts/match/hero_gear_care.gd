@@ -166,7 +166,7 @@ static func _rime(c: Dictionary) -> void:
 			t, HeroKit.band("rime_sash|%.3f" % rx, rx, rz, 0.06, 0.014), teal, Vector3(0, 0.08, 0), Vector3.ONE,
 			Vector3(0, 0, 0.05))
 	# two long scarf tails streaming behind
-	var scarf := Models._pivot(t, "Scarf", Vector3(0, 0.6, 0.18 * bw))
+	var scarf := t.get_node("Scarf") as Node3D      # (HunterBody.pivots)
 	for sx in [-1.0, 1.0]:
 		var ln := 0.55 if sx < 0.0 else 0.42      # short: on her long frame longer tails read as a spike
 		_p(
