@@ -298,6 +298,7 @@ const CHECKS := {
 	# seconds left and charges on the bar
 	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],
 	# charges + slot timers on the bar
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],      # Vex: one dash, no charge pips
 	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],      # docs/SPAWNS.md
