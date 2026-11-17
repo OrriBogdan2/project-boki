@@ -21,6 +21,7 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
@@ -317,6 +318,7 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
+	if shell_t > 0.0: shell_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
@@ -372,13 +374,15 @@ var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match 
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
 const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
+const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
-## Tints the body: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
+## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
+## else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
-	var fc := Color.WHITE
+	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col
