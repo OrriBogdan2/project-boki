@@ -10068,3 +10068,4 @@ READY ext/idle-archer-rebased-port e5f13f6492e760a73d631c7d6d00dae589de5183 (Lac
 READY ext/idle-bulwark-rebased-port d9a6a65065a5e24d7b4f9fda5d782534b173ec3a (Albert idle+stance rework clips on v95 breaker.glb + mood glance code; x_breath dropped; bulwark STAND_OPEN closed; clip-check no new red vs main)
 READY ext/merge-lane-vfx1-1117 44d387c0db (vfx1 lane: 6 sfx/impact branches on main 9a269e6b40, gate pending)
 READY ext/tutorial-beats-5-6-port a9954b09546828e84489a04f2f3cd8dee62646fa (tutorial summon+pack steps for the wisp Boki, ported onto camp-based tutorial; --tutorial-check=<arch>:wisps 0 fails; text/hud/dead-air/fight reds identical on main)
+READY ext/ostra-gait-rebased-port 0ecded063c7555056c5cf09aeb11843390902a11 (Motley Shard Snap held-arm port; bounding gait superseded by main tread gait)
