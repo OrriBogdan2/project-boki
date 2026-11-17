@@ -798,6 +798,7 @@ func _tick_slam(dt: float) -> void:
 	AimKit.lane(h, "slam", lane)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
+		var tap: Dictionary = slam_w
 		slam_w = {}
 		_slam(pin, float(tap["dk"]), float(tap["rk"]))
 

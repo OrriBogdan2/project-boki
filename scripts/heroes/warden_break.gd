@@ -13,7 +13,7 @@ const STILL := 0.25          # m/s: below this he is standing
 const FADE_OUT_RATE := 14.0  # 1/s: a cancelled break unwinds in about 0.07 s
 ## State keys that, when set, mean the hunter is busy with something (not standing idle).
 const BUSY_FLAGS := ["gliding", "rolling", "downed", "stun", "reviving", "dead", "statue"]
-const BUSY_TIMERS := ["mantle", "stomp", "reload", "drink", "base"]      # -1 while off
+const BUSY_TIMERS := ["mantle", "stomp", "drink", "base"]      # -1 while off
 
 var root: Node3D
 var skel: Skeleton3D
