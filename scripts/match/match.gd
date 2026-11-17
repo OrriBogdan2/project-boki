@@ -818,6 +818,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
+	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:
@@ -3379,6 +3380,7 @@ func _gather_input() -> void:
 		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event): return
 	if intro and intro.skip(event):
 		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -3429,6 +3431,7 @@ func step(dt: float) -> void:
 	if skydrop and skydrop.planning:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
+		SkyDeck.plan_ranks(self)
 		for k in pending_input: pending_input[k] = false
 		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)

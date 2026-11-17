@@ -228,6 +228,7 @@ var auto_glide := false        # carried by a lair's escape updraft: the glider 
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
+var second_wind_at := -INF      # m.time Second Wind last refreshed the dash (DashReset.second_wind)
 var ult_ready := false        # the hero ultimate is ready (UltGlow: read from the kit, or from the net)
 var ult_glow := 0.0           # its glow on the body, 0..1 (UltGlow)
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
@@ -378,7 +379,8 @@ func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
 func max_dashes() -> float:
-	return DashState.base_charges(dodge_def, cdat) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	var n := DashState.base_charges(dodge_def, cdat)
+	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -816,6 +818,7 @@ func do_jump() -> void:
 		glide_cd = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
+		glide_cd = 0.0      # a jump off the ground is a fresh air phase: a move's wind-down was for its own end
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
 		jump_at = m.time
 		grounded = false
@@ -1798,6 +1801,7 @@ func sim(dt: float) -> void:
 				pos = rocket.pos
 			else:
 				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
+			gate_ranks()      # a press on a locked ability still spends a point
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
@@ -1872,8 +1876,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in SLOT_GATES:
-		_gate(gk[0], gk[1], gk[2])
+	gate_ranks()
 	BaseRecall.tick(self, dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2432,7 +2435,8 @@ func _update_glide(dt: float) -> void:
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	var btn_down: bool = inp.get("glide_btn", false)
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens as the lock ends
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and bool(inp.get("glide", false)) and not grounded
 	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
 	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
@@ -2818,6 +2822,11 @@ func unlock_all() -> void:
 		slot_lv[s] = maxi(int(slot_lv[s]), 1)
 	skill_pts = 0
 
+## Every ability key pressed this step: a locked one takes a point if you have one (_gate).
+func gate_ranks() -> void:
+	for gk in SLOT_GATES:
+		_gate(gk[0], gk[1], gk[2])
+
 ## Pressing a locked ability: spend a point on it if you have one, otherwise say it's locked.
 func _gate(key: String, slot: String, fb: String) -> void:
 	if not inp.get(key, false) or int(slot_lv[slot]) > 0:
@@ -2913,6 +2922,9 @@ func mount_speed() -> float:
 	var k: Kin = kin
 	return float(k.ks.mount.get("speed", 1.0)) if k and k.ks else 1.0
 
+func _took(d: float, _by: Ent) -> void:
+	DashReset.second_wind(self, hp + d)
+
 ## How many stacks of a perk you've picked up this run.
 func perk_n(id: String) -> int:
 	return perks.count(id)
@@ -2922,7 +2934,7 @@ func perk_open(id: String) -> bool:
 	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
-## dash charges, armor) are updated on the spot.
+## armor) are updated on the spot.
 func add_perk(id: String) -> void:
 	if not Data.PERKS.has(id) or not perk_open(id):
 		return
@@ -2933,8 +2945,6 @@ func add_perk(id: String) -> void:
 			max_hp += 15.0; hp = minf(max_hp, hp + 15.0)
 		"featherfall":
 			glide_max *= 1.6
-		"secondwind":
-			dashes = minf(max_dashes(), dashes + 1.0)
 	if (Data.PERKS[id] as Dictionary).has("wup"):
 		WeaponUps.apply(self)
 	refresh_gear()
