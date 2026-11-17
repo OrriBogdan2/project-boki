@@ -79,10 +79,10 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
+			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
-			"turned %.0f deg" % turned)
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
+			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
 			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
@@ -1844,9 +1844,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
-				and _no_disc(m), "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
+				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()

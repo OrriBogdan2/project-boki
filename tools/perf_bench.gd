@@ -1,13 +1,15 @@
 extends RefCounted
-## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
-## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run, the base demo
-## (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT, and a hub run. Every frame is
-## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
-## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
+## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy expedition (6
+## Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair on the map, a fight: two
+## rivals and a monster pack brought to you), then the Heart's final (heart_final: 8 squads, 24 Hunters with their
+## Boki, fighting in and around the Heart ring with the Blight close), a farm run, the base demo (BaseDemo plus two
+## Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT, and a hub run. Every frame is logged; each
+## part ends with summary lines and the costliest match step sections and meshes, and a frame over 100 ms and 3x
+## the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--tracy=<dir>]  a Tracy capture of the match part into <dir>, then the run ends (docs/PERF.md)
 ##   [--bench-hunters=30]  hunters in the expedition (squads of 2; the default 6 is the fixed load)
 ##   [--bench-trios=10]  the expedition as that many bot trios (3 per squad), and every POSE_SAMPLE frames one extra
 ##   timed pose of each Hunter and rigged Boki, printed as "BENCH pose" lines by distance from the camera focus
@@ -28,11 +30,18 @@ const SECTION_FRAMES := 120         # frames the base part's step timing samples
 const POSE_SAMPLE := 30            # frames between the timed poses of --bench-trios
 const POSE_BANDS := [20.0, 40.0, 80.0]   # m (flat) from the camera focus: the bands of the "BENCH pose" lines
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
+const HEART_SQUADS := 8             # LIMITED_WAY_OUTS.md risk 3: up to 8 squads (24 Hunters) on the Heart's island
+const HEART_NEAR := 2.0             # m from the Heart: the nearest a squad stands (the ring is 6 m)
+const HEART_FAR := 14.0             # m from the Heart: the farthest, still well inside the last tide ring (34 m)
+const BLIGHT_AT := 22.0             # m from the Heart the Blight claws out: past the squads, inside the tide
+const HEART_BLIGHT := ["bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter",
+	"bl_warden", "bl_skitter"]
 
 const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
 const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
 const NavCheck := preload("res://tools/garden_nav_check.gd")
+const PerfTracy := preload("res://tools/perf_tracy.gd")
 
 var main: Node
 var secs := 60.0
@@ -40,6 +49,7 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var tracy_dir := ""
 var hunters := 6
 var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
 var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
@@ -54,11 +64,15 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
+	if tracy_dir != "":
+		await _tracy_match()
+		return
 	if "--bench-fight" in OS.get_cmdline_user_args():
 		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
 		_finish()
 		return
 	await _match()
+	await _heart_final()
 	await _farm("farm", {})
 	await _base()
 	await _farm("hub", {"zone": GardenZones.HUB})
@@ -80,6 +94,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--tracy="): tracy_dir = a.substr(8)
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
@@ -89,6 +104,7 @@ func setup(main_node: Node) -> void:
 	main.get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
+	main.get_tree().node_added.connect(count_node)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
 
 func _finish() -> void:
@@ -102,10 +118,36 @@ func _finish() -> void:
 	main.get_tree().quit(1 if failed else 0)
 
 func _match() -> Array:
+	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
+	return await _play(m, "match", [m.player], _bring_fight, FIGHT_AT)
+
+## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
+## (the tide closed to its last ring) and the Blight clawing out just past them.
+func _heart_final() -> void:
+	var m := await _start("heart_final", {"teams": HEART_SQUADS, "squad": 3, "total": HEART_SQUADS * 3,
+		"seed": 4102})
+	m.time = Heart.r("final_s")      # the ring opens on the Heart's next tick; the tide is at its last ring
+	var site := m.heart.site
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4102
+	for h: Hunter in m.hunters:
+		var a := TAU * (h.team + rng.randf_range(-0.15, 0.15)) / HEART_SQUADS
+		var d := rng.randf_range(HEART_NEAR, HEART_FAR)
+		h.teleport(m.world.free_spot_near(site + Vector3(cos(a), 0, sin(a)) * d, [site], 1.0, 0.45, 6.0))
+		if h.kin:
+			h.kin.teleport(h.pos + Vector3(1.0, 0, 0.7))
+	for i in HEART_BLIGHT.size():
+		var a := TAU * i / HEART_BLIGHT.size()
+		var at: Vector3 = m.world.free_spot_near(site + Vector3(cos(a), 0, sin(a)) * BLIGHT_AT, [], 1.0, 0.5, 8.0)
+		m.blight.spawn(HEART_BLIGHT[i], at, m.blight.level_here(at))
+	await _play(m, "heart_final", m.hunters, Callable(), 0.0)
+
+## Starts an expedition from the bench's base options plus `extra` and waits until it plays.
+func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
-	o.merge({"teams": hunters / 2, "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
-		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
-	if trios > 0:
+	o.merge({"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle"}, true)
+	o.merge(extra, true)
+	if trios > 0 and part == "match":
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
@@ -122,24 +164,29 @@ func _match() -> Array:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
 	var sk := steps.keys()
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
-	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
+	print("BENCH %s build (ms): " % part + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+	return m
+
+## Steps the match by hand for `secs` of match time, logging every frame as `part`. Hunters in `keep` stay
+## at full health (the fight must not end the run: "god" stops nothing once a rival stomps you); `stage`
+## runs once at `stage_at` s of match time.
+func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float) -> Array:
+	for h: Hunter in keep:
+		h.max_hp *= 20.0
 	Match.prof_on = true
 	Match.prof.clear()
 	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
-	var P: Hunter = m.player
-	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
-	while is_instance_valid(m) and m.time < secs:
-		P.hp = P.max_hp
-		if not fought and m.time >= FIGHT_AT:
-			_bring_fight(m)
-			fought = true
+	var end := m.time + secs
+	var staged := not stage.is_valid()
+	while is_instance_valid(m) and m.time < end:
+		for h: Hunter in keep:
+			h.hp = h.max_hp
+		if not staged and m.time >= stage_at:
+			stage.call(m)
+			staged = true
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
 		m.acc -= DT      # _process steps on its own clock: without this every frame ran two steps
@@ -149,7 +196,7 @@ func _match() -> Array:
 			_count_rigs(m)
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
+		fl.append(_frame(part, fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
@@ -159,20 +206,30 @@ func _match() -> Array:
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
 			_pose_sample(m)
 			last = Time.get_ticks_usec()      # (the timed poses stay out of the frame times)
-	_summary("match", fl)
-	_pose_lines(m, fl.size())
+	_summary(part, fl)
+	if trios > 0:
+		_pose_lines(m, fl.size())
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
-	print("BENCH match step sections (ms per frame): " + ", ".join(per))
+	print("BENCH %s step sections (ms per frame): " % part + ", ".join(per))
 	var vk := Match.vprof.keys()
 	vk.sort_custom(func(a, b): return Match.vprof[a] > Match.vprof[b])
 	var vper := vk.map(func(k): return "%s %.2f" % [k, Match.vprof[k] / 1000.0 / fl.size()])
-	print("BENCH match visual sections (ms per frame): " + ", ".join(vper))
+	print("BENCH %s visual sections (ms per frame): " % part + ", ".join(vper))
 	_meshes()
 	Match.prof_on = false
 	return fl
+
+## The match part alone under tracy-capture; the exit code says whether the zones were exported.
+func _tracy_match() -> void:
+	var cap := PerfTracy.new()
+	failed = not cap.start(tracy_dir)
+	if not failed:
+		await _match()
+		failed = not await cap.finish(main.get_tree())
+	_finish()
 
 ## One extra pose of every Hunter and rigged Boki, timed and filed by distance band and on or off screen: HunterAnim,
 ## the Hero clips and springs (WardenGlb.Sync) or the Boki clip, and the skeleton they write.
@@ -398,6 +455,14 @@ func _sections(home) -> void:
 	ks.sort_custom(func(a, b): return us[a] > us[b])
 	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
 	print("BENCH base steps (ms per frame): " + ", ".join(top))
+
+func count_node(n: Node) -> void:
+	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+	added[k] = int(added.get(k, 0)) + 1
+
+## One frame's row in the CSV (the brawl's frames too).
+func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
+	_frame(part, i, wall, script_ms)
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,

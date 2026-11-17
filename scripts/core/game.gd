@@ -76,7 +76,7 @@ func _setup_input() -> void:
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
-	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("throw", [KEY_C])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
@@ -141,7 +141,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
+	Incubator.tick(float(r.get("time", 0.0)))      # a match is play time for the eggs too
 	var won: bool = r.get("extracted", false)
+	TipPick.note_run(r)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
 	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes", "bosses"]:
@@ -151,6 +153,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if won: Progress.add("caught", r.get("caught", []).size())
 	if won:
 		d["extracts"] = int(d.get("extracts", 0)) + 1
+		ClanBoard.add("extract")
 		out["gems"] = int(r.get("gems", 0))
 		if d.get("guild_perks", []).has("hall"):
 			out["gems"] = int(round(out["gems"] * 1.1))
@@ -384,7 +387,9 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 		return
 	ev["text"] = Evo.describe(ev, k)
 	CareJournal.evolved(k, ev)
-	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
+	if ev["kind"] == "form":
+		Care.dex_mark(k["species"], "caught")      # it evolved into a new species
+		if Evo.is_final(String(k["species"])): ClanBoard.add("final")
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []

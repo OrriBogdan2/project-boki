@@ -97,7 +97,7 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
-    ap.add_argument("--master", help="a master .glb to use instead of the overrides / current.json one")
+    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
@@ -105,7 +105,7 @@ def main():
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
     tris = a.tris or spec.get("own_tris", TRIS)
     k = tris / float(spec["tris"])
-    spec.update(master=os.path.abspath(os.path.expanduser(a.master)) if a.master else master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
+    spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if spec.get("head_tris"):
         spec["head_tris"] = int(spec["head_tris"] * k)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)

@@ -2,8 +2,8 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
-ability in a match; **R** turns a piece in build mode and reloads in a match.
+is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and sends or calls back
+your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
 
@@ -14,7 +14,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | Left click | Weapon attack (some weapons charge when held) |
 | Right click | Your class's RMB ability: tap, hold, in the air and other variants (see your class page) |
 | Shift | Your class's dash |
-| Space | Jump; hold it in the air to glide |
+| Space | Jump; press it again in the air to open your glider |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
@@ -74,7 +74,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
-| G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
+| C | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
