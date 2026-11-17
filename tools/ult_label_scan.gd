@@ -6,13 +6,13 @@ extends RefCounted
 ## so is a status timer the HUD draws under a Hunter that never counts down (a hold refreshed every frame).
 ## A second X press at RECAST_T covers the recast ultimates. Prints ULTLABEL PASS/FAIL per Hunter.
 
-const SCAN_T := 8.0          # s watched after the cast
-const RECAST_T := 2.5        # s: the second X press (recasts, early ends)
-const EVERY := 6             # frames between scans (0.1 s at 60 fps)
-const STUCK_SCANS := 3       # scans a status timer may sit still before it counts as a stray number
-const HUD_WAIT := 600        # process frames at most for the match HUD to finish building
+const SCAN_T := 8.0  # s watched after the cast
+const RECAST_T := 2.5  # s: the second X press (recasts, early ends)
+const EVERY := 6  # frames between scans (0.1 s at 60 fps)
+const STUCK_SCANS := 3  # scans a status timer may sit still before it counts as a stray number
+const HUD_WAIT := 600  # process frames at most for the match HUD to finish building
 
-var sc                       # tools/support_check.gd: setup and step
+var sc  # tools/support_check.gd: setup and step
 var fails := 0
 var num_re := RegEx.create_from_string("^[0-9.]+$")
 
@@ -34,26 +34,26 @@ func run(main: Node, only := "") -> void:
 func _scan_arch(main: Node, arch: String) -> void:
 	var r: Array = sc.setup(arch, 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	P.ak.cd["x"] = 0.0
-	for i in HUD_WAIT:      # the HUD builds in slices: wait until it is in the tree and drawn
+	var hero: Hunter = r[1]
+	hero.ak.cd["x"] = 0.0
+	for i in HUD_WAIT:  # the HUD builds in slices: wait until it is in the tree and drawn
 		if m.hud != null and m.hud.is_inside_tree() and m.hud.process_mode != Node.PROCESS_MODE_DISABLED:
 			break
 		await main.get_tree().process_frame
 	for i in 4:
 		await main.get_tree().process_frame
 	var before := _numbers(main.get_tree().root, m)
-	HunterKeys.ult_pressed(P)
+	HunterKeys.ult_pressed(hero)
 	var seen := {}
-	var held := {}                 # hunter|status -> [last seconds shown, scans it did not go down]
+	var held := {}  # hunter|status -> [last seconds shown, scans it did not go down]
 	var frames := int(SCAN_T * 60.0)
 	for f in frames:
 		if f == int(RECAST_T * 60.0):
-			HunterKeys.ult_pressed(P)
+			HunterKeys.ult_pressed(hero)
 		sc.step(m, 1.0 / 60.0)
 		if f % EVERY != 0:
 			continue
-		await main.get_tree().process_frame      # the HUD and Fx draw on real frames
+		await main.get_tree().process_frame  # the HUD and Fx draw on real frames
 		for e in _numbers(main.get_tree().root, m):
 			var key := "%s|%s" % [e["path"], e["text"]]
 			if not seen.has(key) and not before.any(func(b): return b["path"] == e["path"] and b["text"] == e["text"]):
@@ -66,7 +66,9 @@ func _scan_arch(main: Node, arch: String) -> void:
 		if not e.get("fx", false):
 			stray += 1
 		print("ULTLABEL %-11s t=%.1f %-8s '%s' over %s  %s" % [arch, e["t"], e["cls"], e["text"], e["owner"], why])
-	print("ULTLABEL %-11s %s  %d stray, %d allowed" % [arch, "PASS" if stray == 0 else "FAIL", stray, seen.size() - stray])
+	print(
+		"ULTLABEL %-11s %s  %d stray, %d allowed" % [arch, "PASS" if stray == 0 else "FAIL", stray, seen.size() - stray]
+	)
 	fails += 1 if stray > 0 else 0
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -78,13 +80,15 @@ func _timers(m: Match, t: float, held: Dictionary, seen: Dictionary) -> void:
 	for hn in m.hunters:
 		for ic in HudPlate.statuses(hn):
 			if not HudPlate.shows_time(float(ic[3])):
-				continue                 # the HUD draws no seconds for it
+				continue  # the HUD draws no seconds for it
 			var key := "%s|%s" % [hn.pname, ic[0]]
 			var was: Array = held.get(key, [INF, 0])
 			var stuck := int(was[1]) + 1 if float(ic[3]) >= float(was[0]) - 0.001 else 0
 			held[key] = [float(ic[3]), stuck]
 			if stuck >= STUCK_SCANS and not seen.has(key):
-				seen[key] = {"t": t, "cls": "status", "text": "%.1f" % float(ic[3]), "owner": "%s %s timer" % [hn.pname, ic[2]]}
+				seen[key] = {
+					"t": t, "cls": "status", "text": "%.1f" % float(ic[3]), "owner": "%s %s timer" % [hn.pname, ic[2]]
+				}
 
 
 ## Every visible Label3D / Label in the tree whose text is a bare number: its path, class, nearest named
