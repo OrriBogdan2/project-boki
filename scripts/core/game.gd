@@ -143,6 +143,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	d["matches"] = int(d["matches"]) + 1
 	Incubator.tick(float(r.get("time", 0.0)))      # a match is play time for the eggs too
 	var won: bool = r.get("extracted", false)
+	TipPick.note_run(r)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
 	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes", "bosses"]:
