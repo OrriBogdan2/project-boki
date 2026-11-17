@@ -174,6 +174,8 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
+## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
+func speed_bonus() -> float: return 0.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
@@ -327,7 +329,7 @@ func press_rmb() -> void:
 		return
 	if rmb_press_extra():
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -352,6 +354,14 @@ func _drop_rmb() -> void:
 	rmb_t = 0.0
 	AimKit.clear(h)
 	_rmb_dropped()
+## The RMB slot as the bar shows it (slot_info "ready": a charge, the kit's own lock-out): on cooldown the press is
+## refused before it starts anything (no hold pose, wind-up, sound or step) and the bar shows the deny.
+## Every RMB press goes through here: the player's, a bot's, DashFlow's held one and a kit's own buffer.
+func rmb_open() -> bool:
+	if bool(slot_info("sec")["ready"]):
+		return true
+	h._ab_feedback("sec", "deny")
+	return false
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -771,6 +781,7 @@ func _tells(dt: float) -> void:
 		fx_t = 0.18
 		if tell != "":
 			var rc := res_col()
+			# sparks on the body only: a ground ring means gameplay, and this one landed under every dash
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)

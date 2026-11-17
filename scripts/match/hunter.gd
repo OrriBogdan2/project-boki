@@ -362,15 +362,16 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 				ch.queue_free()
 		Models.gun_parts(gun, w, Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], true, 0.0))
 
-## Chasing down whoever took your kin: 18% faster heading their way. Carrying a stolen kin: 8% slower.
-func _chase_mod(mv: Vector2) -> float:
-	var k := 0.92 if stolen_carry else 1.0
-	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
-	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
-	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+## Everything that slows your ground speed, multiplied (the bonuses add in HunterMove.speed_bonus): a
+## slow, being downed, reloading, firing, drinking, crouching, the kit's own pace, a stolen kin carried,
+## the Heartspark's weight.
+func _move_mult() -> float:
+	var k := slow_mult(0.65) * _fire_slow() * UtilityUse.channel_move(self) * KinDowned.carry_speed(self)
+	if crouch: k *= HunterMove.sneak_speed
+	if stolen_carry: k *= 0.92
+	if ak: k *= ak.pace()
+	if downed: k *= 0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0)
 	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
-	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
-		k *= 1.18
 	return k
 
 ## The colour that marks this hunter's effects (from their class).
@@ -401,7 +402,7 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried():
+	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
 		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
@@ -421,6 +422,7 @@ func _refresh_kin_stats() -> void:
 		if kin_carry_on():
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, k.carry_k)
+	KinSteal.add_passives(self, out)        # stolen wisps at a share, clamped with the rest below
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -972,6 +974,7 @@ func _skyfall(drop: float, fall_v: float) -> void:
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
+const DASH_KEEP := 0.5        # s: a press inside a dash this short waits for its end (a longer lock drops it)
 
 func do_dash() -> void:
 	if downed or out:
@@ -985,7 +988,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
+		dash_buf = DASH_BUFFER + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
 		return
 	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1746,6 +1749,8 @@ func heal(n: float) -> void:
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
 var kit_t := 0.0
+var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
+var beat_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -1863,6 +1868,7 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
+	AirLimits.fold_at_touchdown(self, dt)
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
@@ -2006,8 +2012,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * _fire_slow() * UtilityUse.channel_move(self) * (HunterMove.sneak_speed if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
-	spd *= KinDowned.carry_speed(self)
+	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
@@ -2910,8 +2915,8 @@ func _worn_stat(k: String) -> float:
 	_worn[k] = t
 	return t
 
-## Ground speed while you ride your mount (its carry.mount speed).
-func _mount_speed() -> float:
+## Ground speed while you ride your mount (its carry.mount speed), as a share of your own.
+func mount_speed() -> float:
 	var k: Kin = kin
 	return float(k.ks.mount.get("speed", 1.0)) if k and k.ks else 1.0
 
@@ -3040,7 +3045,7 @@ func _anim_state(stretch: float) -> void:
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
-	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
+	UtilityPose.fill(self, s)      # "drink", or "util" with "util_move"
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)
 	s["fired"] = idle_fire
