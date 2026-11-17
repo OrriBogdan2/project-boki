@@ -1,10 +1,9 @@
 class_name UtilityPose
 extends RefCounted
-## The body beat of a belt item (content/utility: "move"). Five shared moves, every item maps to one:
+## The body beat of a belt item (content/utility: "move"). Four shared moves, every item maps to one:
 ##   throw   the free hand cocks back by the ear and flings out ahead (smoke, flare, flask, charges)
 ##   place   down on a knee, the hand setting the item on the ground (pad, fan, kits, lamp)
 ##   read    the hand brings the item up in front of the face (cell, keys, scroll, lantern)
-##   raise   the hand lifts the item high overhead (banner, whistle, ember)
 ##   drink   the flask to the mouth (tonic, draughts); HunterAnim's "drink" state
 ## A move lasts the item's cast time: a channelled item (drink, repair) runs its "channel" time, every
 ## other item names "cast" in its data. The effect itself never waits for the beat. Upper body only:
@@ -12,7 +11,7 @@ extends RefCounted
 ## Hunter.beat_id/beat_t carry an instant item's beat; fill() turns whichever is running into the
 ## state HunterAnim poses from ("drink" 0..1, or "util" 0..1 with "util_move").
 
-const MOVES := ["throw", "place", "read", "raise", "drink"]
+const MOVES := ["throw", "place", "read", "drink"]
 const STILL := 0.5      # m/s of ground speed under which a place kneels
 
 static func move_of(id: String) -> String:
@@ -59,7 +58,6 @@ static func weight(move: String, p: float) -> float:
 		"throw": return smoothstep(0.0, 0.3, p) * (1.0 - smoothstep(0.65, 1.0, p))
 		"place": return smoothstep(0.0, 0.3, p) * (1.0 - smoothstep(0.75, 1.0, p))
 		"read": return smoothstep(0.0, 0.25, p) * (1.0 - smoothstep(0.8, 1.0, p))
-		"raise": return smoothstep(0.0, 0.35, p) * (1.0 - smoothstep(0.75, 1.0, p))
 	return 0.0
 
 ## Where the left hand goes, from its shoulder.
@@ -71,15 +69,11 @@ static func hand(move: String, p: float) -> Vector3:
 			return Vector3(0.06, -0.44 - 0.06 * sin(smoothstep(0.4, 0.7, p) * PI), -0.3)
 		"read":
 			return Vector3(0.1, 0.1 + 0.03 * sin(smoothstep(0.45, 0.65, p) * PI), -0.3)
-		"raise":
-			return Vector3(0.04, 0.42 + 0.04 * sin(smoothstep(0.4, 0.7, p) * PI), -0.14)
 	return Vector3.ZERO
 
-## The head's pitch (positive looks down): at the ground for the place, at the item for the read,
-## up at it for the raise.
+## The head's pitch (positive looks down): at the ground for the place, at the item for the read.
 static func head(move: String, p: float) -> float:
 	match move:
 		"place": return 0.25 * weight(move, p)
 		"read": return 0.3 * weight(move, p)
-		"raise": return -0.3 * weight(move, p)
 	return 0.0
