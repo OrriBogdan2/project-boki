@@ -61,7 +61,7 @@ func tick(can: bool) -> bool:
 	if tick_in <= 0.0:
 		tick_in = GardenSfx.TICK_S
 		GardenSfx.card_tick()
-	if not InteractGate.pressed():
+	if not Input.is_action_just_pressed("interact"):
 		return false
 	h._care_feed(k["rec"], item)
 	drop()

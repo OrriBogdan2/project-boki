@@ -80,7 +80,7 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 	if not can or not h.visit.is_empty():
 		pending = {}
 		return false
-	var pressed := InteractGate.pressed()
+	var pressed := Input.is_action_just_pressed("interact")
 	if carrying():
 		if pressed:
 			drop()
