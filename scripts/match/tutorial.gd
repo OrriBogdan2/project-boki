@@ -386,8 +386,10 @@ func _enter() -> void:
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
 	match sid:
-		"shoot", "sec", "gkey", "kin", "hook", "ult":
+		"sec", "gkey", "kin", "hook", "ult":
 			camps.spawn(sid)
+		"shoot":
+			camps.spawn(sid)  # (its camp pays no XP: the right click's camp pays level 2)
 		"glove":
 			if ground_item().is_empty():  # (a retry finds the glove still lying there)
 				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
