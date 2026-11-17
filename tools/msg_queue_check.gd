@@ -164,7 +164,7 @@ func _wiring() -> void:
 		hud._hud_tick(0.1)
 	ok(hud.kit_fade == 1.0, "Tab brings the kit panel back mid-fight")
 	Input.action_release("scores")
-	hud.dealt_at = -9.0
+	hud.reticle.dealt_at = -9.0
 	m.player.hurt_at = -9.0
 	for i in 10:
 		hud._hud_tick(0.1)
