@@ -14,6 +14,7 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+static var SCOUT: Dictionary = RULES["scout"]
 ## Width / height of the screen the styles' lenses are measured at. Every screen shows that frame's width of
 ## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
 static var FRAME_ASPECT: float = RULES["frame_aspect"]
