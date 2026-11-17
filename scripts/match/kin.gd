@@ -108,6 +108,7 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var tp_n := 0                     # teleports so far (the "tp" meta; BokiRig ignores the jump as speed)
 var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
 var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
 var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
@@ -188,6 +189,13 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 
 func t(k: String) -> float:
 	return float(traits.get(k, 0.5))
+
+## Put somewhere (the summon bursting or re-blooming, a blink, a swap): the rig must not read the jump as speed.
+func teleport(p: Vector3) -> void:
+	super.teleport(p)
+	tp_n += 1
+	if model:
+		model.set_meta("tp", tp_n)
 
 func is_wild() -> bool:
 	return owner_h == null
