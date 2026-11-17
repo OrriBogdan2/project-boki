@@ -10061,3 +10061,4 @@ READY ext/idle-tender-rebased-port 62a7d2f829 (Meeko idle+stance clips onto v95 
 READY ext/ui-ability-text-one-port 4f2f8eed8a (AbilityText one reader, --ability-text-check 0 fails)
 READY ext/anim-stop-start-port 834d421c2d (loco stop: legs follow the body on a let-go, gated STOPS in --anim-audit; port of old anim-stop-start)
 READY ext/merge-lane-hunters8-1117 9c4b31a4da98556de061e2a35553f1ed588febd1 (hunters8 lane: ground loot compare, passive-stack check, msg lane avoids hunter; 3 branches ported, 3 archived tags)
+READY ext/ui-stolen-wisps-port fb16f804819 (stolen wisp HUD only: rows above the Boki box + count badge on squad rows; mechanic/net already in main as KinSteal; --stolen-hud-check, wisp-steal, boki-hud, hudref green; no screenshot taken)
