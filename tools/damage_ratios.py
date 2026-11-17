@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Damage ratios vs the source (docs/specs/DAMAGE_RATIOS.md). Usage: tools/damage_ratios.py [--md]
-Reads content/ JSON for our side; the source numbers are from supervive_kits.md (hand-copied below)."""
+Reads content/ JSON for our side; the source numbers are from sv/kits.md (hand-copied below)."""
 
 import json, os
 
