@@ -42,6 +42,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
 | `--lair-fall-check` | A jump dash anywhere in a boss lair, or a dash out of its escape updraft, never ends in "you fell"; nobody over solid ground is lost to the abyss |
+| `--pit-egg-check` | A beaten boss gives exactly one Rare Egg to one random hunter inside the pit (any team), a full pack drops it reserved for ~10 s, nobody inside leaves it on the floor |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
 | `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
