@@ -444,4 +444,4 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 | 30 | silent | -72.2 dB, muffled |
 | 31 | silent | silent |
 
-`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 6 dB quieter but present, one at 31 m is silent.
+`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.
