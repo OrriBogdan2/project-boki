@@ -10063,3 +10063,4 @@ READY ext/anim-stop-start-port 834d421c2d (loco stop: legs follow the body on a 
 READY ext/merge-lane-hunters8-1117 9c4b31a4da98556de061e2a35553f1ed588febd1 (hunters8 lane: ground loot compare, passive-stack check, msg lane avoids hunter; 3 branches ported, 3 archived tags)
 READY ext/ui-stolen-wisps-port fb16f804819 (stolen wisp HUD only: rows above the Boki box + count badge on squad rows; mechanic/net already in main as KinSteal; --stolen-hud-check, wisp-steal, boki-hud, hudref green; no screenshot taken)
 READY ext/tut-summon-station-port 31e36f21b6d3d3d724cda75b939492749e2202bf (Training Grounds Boki summon pad; --summon-station-check 40/40)
+READY ext/hunter-first-hints-port ad7872a11d0d392122601ea4b93c10230aa1399a (first-time Hunter hints via Match._tip, save v20->v21 + goldens, --hunter-hint-check; targeted checks green, unique/hub-hints red on main too)
