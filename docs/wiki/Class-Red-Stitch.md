@@ -61,7 +61,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 | Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The hunter of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |
-| Resource | Hawk Sense (max 1) |
+| Resource | Red Thread (max 1) |
 
 ### Kit card
 
@@ -70,7 +70,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Rivals under half health show through cover. |
+| Passive: Red Thread | Rivals under half health show through cover. |
 | Dash: Spirit Walk | Roll, then 2.8s walking through rocks, trees and barriers. |
 | RMB: Heavy Shot | Hold, release: a heavy arrow that knocks back and pins to walls. |
 | E: Hail Wall | Rain arrows on a wall at the cursor: damage, slow, anti-heal burn. |
@@ -79,7 +79,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
+**Red Thread (passive).** Rivals under half health are seen through cover within 22m.
 
 **Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 

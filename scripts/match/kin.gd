@@ -192,6 +192,8 @@ func is_wild() -> bool:
 	return owner_h == null
 
 func hittable() -> bool:
+	if state == KinWispForm.STATE:
+		return not dead and has_meta("guard_until")     # a guardian on its pull can be hit to stop it
 	return not dead and state in ["active", "flying", "returning", "wild"] and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
