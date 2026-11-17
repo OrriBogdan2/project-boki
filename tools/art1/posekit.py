@@ -102,6 +102,41 @@ class FnClip:
         return self.fn(t / self.dur)
 
 
+class Loop:
+    """Shapes on a loop of T seconds, each periodic in T (a shape may run past the end and wraps to the start), so a
+    curve made of them closes its seam."""
+
+    def __init__(self, T):
+        self.T = T
+
+    def since(self, t, a):
+        return (t - a) % self.T
+
+    def hold(self, t, a, b, c, d):
+        """Eased up from a to b, held, eased back down from c to d (d - a < T)."""
+        x = self.since(t, a)
+        return smooth(x / (b - a)) - smooth((x - (c - a)) / (d - c))
+
+    def hill(self, t, a, b):
+        """0 outside a..b, one smooth hill inside it."""
+        u = self.since(t, a) / (b - a)
+        return math.sin(math.pi * u) ** 2 if u < 1.0 else 0.0
+
+    def settle(self, t, a, dur):
+        """The swing past a move that lands at a: out quickly, then dying away by a + dur."""
+        u = self.since(t, a) / dur
+        return math.sin(math.pi * u) * (1 - u) if u < 1.0 else 0.0
+
+    def wave(self, t, k, ph=0.0):
+        """k whole cycles a loop."""
+        return math.sin(2 * math.pi * k * t / self.T + ph)
+
+
+def smooth(u):
+    u = min(1.0, max(0.0, u))
+    return u * u * (3 - 2 * u)
+
+
 class Solver:
     def __init__(self, arm, rig):
         """rig: {"grip_rest": point, "blade_rest", "edge_rest", "lhand": {...}, "pelvis": z}"""
