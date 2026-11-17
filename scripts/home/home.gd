@@ -3227,9 +3227,10 @@ func _open_kin(rec: Dictionary) -> void:
 			var lv := int(rec["level"])
 			var next_mut := lv + ((2 - lv % 4) + 4) % 4
 			if next_mut == lv: next_mut += 4
+			EvoNextForm.block(rec, c1)
 			c1.add_child(UI.section("Growing toward"))
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
-			c1.add_child(UI.label("%s  ·  mutation at %d" % [Evo.level_note(rec), next_mut], UI.T_SMALL, UI.MUTED))
+			c1.add_child(UI.label("Mutation at level %d" % next_mut, UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
