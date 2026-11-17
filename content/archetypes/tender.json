@@ -27,6 +27,7 @@
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"howto": ["Play: support; heal with {signature}, carry the downed.", "Combo: {secondary} pins a chaser, then {dash} away.", "Avoid: duels; heal from behind your squad."],
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
+	"hint": {"lmb": "Hold {fire} to push embers; hits on foes add Kindle", "rmb": "Press {secondary}: the seed sticks to a foe and roots them", "e": "Press {signature} for a healing ring, again to throw it", "dash": "Press {dash} to hop; in the air, glide a long way"},
 	"card": {"role_word": "Medic", "loop": "Support medic: heals and carries the downed, roots whoever chases them.", "role": "Support medic: heals and carries the downed, roots whoever chases them.", "dash": "Quick hop where you move; a long floaty glide in the air.", "passive": "Run into a downed teammate to carry up to 2.", "rmb": "Seed sticks to a foe; after 2s in reach it roots them.", "e": "Healing ring on you; press again to throw it to the cursor.", "x": "Tether a teammate for 5s of healing; a downed one stands up.", "weapons": {"lantern_crook": "Hold to push embers past the cursor; hits add Kindle."}, "chips": {"rmb": ["9 hit", "32 burst"]}},
 	"signature": "lantern_crook",
 	"resource": {
