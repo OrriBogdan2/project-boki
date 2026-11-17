@@ -59,7 +59,7 @@ var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers:
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
-var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the global randf the sim uses
+var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the sim's global randf
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
