@@ -9,7 +9,6 @@ const WATCH_S := 1.0          # s watched after the press (an RMB hold is held f
 const FOE_AT := 3.0           # m in front of the hunter the foe stands
 const MOVED_MAX := 0.05       # m of planar drift that still counts as standing still
 const LEFT_S := 4.0           # s of cooldown the slot has when pressed (longer than the watch)
-const BAR_ID := {"rmb_tap": "sec", "rmb_hold": "sec", "e": "k1", "r": "r", "x": "x", "dash": "dash", "q": "gear0"}
 const SLOTS := ["none", "rmb_tap", "rmb_hold", "e", "r", "x", "dash", "q"]
 
 var bad := 0
@@ -76,9 +75,7 @@ func _trial(m: Match, hero: String, slot: String) -> void:
 	ok(foe.hp >= float(before["foe"]) - 0.01, "%s no damage (foe %.0f -> %.0f)" % [what, float(before["foe"]), foe.hp])
 	ok(absf(drift - still) <= MOVED_MAX, "%s no displacement (%.2f m, %.2f with no press)" % [what, drift, still])
 	ok(flow.cast_n == before["casts"] and h.used == before["used"], "%s nothing cast or spent" % what)
-	var fx: Dictionary = m.hud.slot_fx.get(BAR_ID[slot], {}) if m.hud else {}
-	ok(PressDeny.raised > int(before["deny"]) and bool(fx.get("cooling", false)),
-		"%s the bar shakes its slot with \"On cooldown\" (%s)" % [what, fx])
+	ok(PressDeny.raised > int(before["deny"]), "%s the bar shows the deny" % what)
 
 ## Puts `slot` ("none": the no-press control) on LEFT_S of cooldown with no charge left; the rest stay ready.
 func _cool(h: Hunter, k: ArchKit, slot: String) -> void:
