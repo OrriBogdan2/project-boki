@@ -8,7 +8,7 @@
   {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5},
   {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}
  ],
- "games": ["dash", "shove", "seek", "volley"],
+ "games": ["dash", "shove", "seek", "volley", "kite"],
  "play": 3, "win": 5, "first_win": 60,
  "curve": {"per_level": 50, "flat_from": 20},
  "pace": {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0, "grown_max_ratio": 2.2, "session_min": 45, "base_sessions": 2}

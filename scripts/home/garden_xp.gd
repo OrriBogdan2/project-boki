@@ -23,15 +23,15 @@ static func give(rec: Dictionary, action: String, points := 0, now := -1.0) -> v
 ## A finished garden game (GardenPrizes.settle) pays the Boki you backed: `play`, `win` for a win and
 ## `first_win` for the day's first win in that game. Only the games in rules().games pay.
 static func play(id: String, rec: Dictionary, won: bool, first: bool) -> void:
+	if rules()["games"].has(id):
+		Game.add_xp(rec, reward(won, first), {})
+
+## The XP a game pays: `play`, `win` for a win, `first_win` for the day's first win in that game.
+static func reward(won: bool, first: bool) -> int:
 	var r := rules()
-	if not r["games"].has(id):
-		return
-	var xp := int(r["play"])
 	if first:
-		xp = int(r["first_win"])
-	elif won:
-		xp = int(r["win"])
-	Game.add_xp(rec, xp, {})
+		return int(r["first_win"])
+	return int(r["win"]) if won else int(r["play"])
 
 static func _first_today(rec: Dictionary, kind: String, now: float) -> bool:
 	if now < 0.0:

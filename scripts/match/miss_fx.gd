@@ -22,9 +22,11 @@ static func shot_ended(m: Match, s: Dictionary, at: Vector3, why: String) -> voi
 	if x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
 		return
 	var by = s["by"]
+	if not is_instance_valid(by):      # (its shooter left the match while the shot flew)
+		return
 	if by is Kin:
 		by = (by as Kin).owner_h
-	if by is Hunter:
+	if is_instance_valid(by) and by is Hunter:
 		var v: Vector2 = s["vel"]
 		var back := Vector3(v.x, 0, v.y).normalized() * (WALL_BACK if why == "wall" else 0.0)
 		puff(m, colour_of(by as Hunter), at - back, why == "wall")

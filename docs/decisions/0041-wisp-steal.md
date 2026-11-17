@@ -23,8 +23,8 @@ A thief who goes down (not only dies) scatters: the same moment that frees the o
 back to their hunter, who keeps them for that down.
 Carry-passive stacking (Q8): `Hunter._refresh_kin_stats` sums your own Boki at 100 % and each stolen wisp at
 `passive_k` (x its carry_k, like your own), then clamps the one sum per stat at the carry cap (KinParts.OWNER_STATS).
-Left out: the soul echo (a Field Book field = a save-format change: needs its own migration + golden file),
-guardian interplay, bots grabbing, extraction bonus, HUD icons (backlog: Wisp line UI).
+Soul echo (kept from ext/merge-lane-integ-1115): a grab adds to the dex entry's optional `echo` count (seen = true;
+Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus, HUD icons (backlog: Wisp line UI).
 
 ## Consequences
 - Net.VERSION 0.24.15: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
