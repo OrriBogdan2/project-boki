@@ -8,7 +8,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
 ## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
 ## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
-## then one past it, from the ground or a jump's top). Never writes the save.
+## then one past it, from the ground or a jump's top).
+## rmb_e is Grimble's Deep Reach into the Anchor. Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -161,6 +162,13 @@ func _p_rmb_walk_lmb() -> void:
 func _p_rmb_ground() -> void:
 	await _seg("RMB at the dummy, then past it", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _rmb_shot(t, 0.2, false) or _rmb_shot(t, 2.0, true))
+
+## Grimble's combo: Deep Reach at the dummy at full range, then the Anchor Drop the moment it lands at his feet.
+func _p_rmb_e() -> void:
+	var kit: DredgeKit = P.ak
+	await _seg("RMB, then E", 6.0, func(t: float) -> void:
+		P.inp["sec"] = _rmb_shot(t, 0.2, false)
+		P.inp["sig"] = kit.arrivals > 0 and kit.anchors == 0 and kit.wind <= 0.0, 11.0)
 
 func _p_rmb_air() -> void:
 	await _seg("Jump, RMB at the dummy; jump, RMB past it", 4.0, func(t: float) -> void:

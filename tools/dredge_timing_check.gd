@@ -51,7 +51,7 @@ func _throw_and_reel() -> void:
 			arrive > 0.0 and absf(arrive - grab - 1.0) <= FRAME, "%.2f s" % (arrive - grab))
 	await ak.done(m)
 
-## Iron Smash (0221-0236): the hit at ~0.4 s; ours does not hop forward (owner 11-17: it is the combo after the reel).
+## Iron Smash (0221-0236): the hit at ~0.4 s; he stays put so the slam lands on a foe reeled to his feet.
 func _anchor() -> void:
 	var r: Array = ak.setup("dredge", 2.2, "", false)
 	var m: Match = r[0]
