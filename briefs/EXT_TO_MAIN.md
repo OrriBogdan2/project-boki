@@ -10066,3 +10066,4 @@ READY ext/tut-summon-station-port 31e36f21b6d3d3d724cda75b939492749e2202bf (Trai
 READY ext/hunter-first-hints-port ad7872a11d0d392122601ea4b93c10230aa1399a (first-time Hunter hints via Match._tip, save v20->v21 + goldens, --hunter-hint-check; targeted checks green, unique/hub-hints red on main too)
 READY ext/idle-archer-rebased-port e5f13f6492e760a73d631c7d6d00dae589de5183 (Lace idle+stance rework clips on v95 hem.glb via glb_add_clips --skip-missing; x_breath dropped; clip-check/crouch-check no new red vs main)
 READY ext/idle-bulwark-rebased-port d9a6a65065a5e24d7b4f9fda5d782534b173ec3a (Albert idle+stance rework clips on v95 breaker.glb + mood glance code; x_breath dropped; bulwark STAND_OPEN closed; clip-check no new red vs main)
+READY ext/merge-lane-vfx1-1117 44d387c0db (vfx1 lane: 6 sfx/impact branches on main 9a269e6b40, gate pending)
