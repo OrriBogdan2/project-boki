@@ -164,6 +164,8 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	if h == k.home_h:
 		return
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
+	if h == k.m.player:
+		Care.dex_mark(k.species, "echo")  # the thief keeps a soul echo in the Field Book (decision 0041)
 
 
 ## Summon with your own Boki resting or away: the first stolen wisp you carry that still has its one summon

@@ -34,16 +34,16 @@ const T := {
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
-	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
+	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"aim_side_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no strafe slow: across the aim / toward it"],
 	"aim_back_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no backpedal slow: away from the aim / toward it"],
 	"aim_back_fire_speed_k":   ["~", [0.99, 1.01], "x", "[game data] the same, fire held: one fire slow either way"],
 	"aim_back_3m_frames":      ["<=", 0.0, "frames", "[game data] frames for 3 m away from the aim minus toward it"],
-	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
-	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
-	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	"speed_light":             ["~", [5.1, 5.7], "m/s", "[game data] MoveSpeed 445-485 uu/s x body_scale 1.16 (0061)"],
+	"speed_medium":            ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
+	"speed_heavy":             ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
 	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
 	"haste_two_bonus_x":       ["~", [1.49, 1.51], "x", "haste 0.35 + kin buff 0.15 add (1.55 if stacked)"],
 	"haste_bonus_slow_x":      ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
@@ -93,6 +93,12 @@ const T := {
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
+	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push: full speed at once"],
+	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s, mean 9.8 (fit 1.42)"],
+	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
+	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
+	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
+	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix fit 1.88 (a step misses the tip)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -354,7 +360,10 @@ func _ground() -> void:
 	for c in ["light", "medium", "heavy"]:
 		_reset(flat)
 		P.cls = c
-		P.base_speed = float(Data.CLASSES[c]["speed"])
+		var of_weight := Arch.ids().filter(func(a: String) -> bool: return Arch.weight(a) == c)
+		var hero: String = of_weight[0]
+		P.base_speed = HunterMove.speed(hero)
+		P.ground_accel = HunterMove.accel(hero)
 		P.inp["move"] = Vector2(1, 0)
 		var first := -1; var t95 := -1.0
 		for i in 40:
@@ -408,7 +417,7 @@ func _ground() -> void:
 				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+	HunterMove.apply(P)
 
 # ---------------------------------------------------------------- move-speed bonuses (HunterMove.ground_speed)
 ## Top speed after a straight run with the bonuses and slows `setup` puts on.
@@ -1101,40 +1110,41 @@ func _run_up() -> float:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var x0 := 0.0
-		for i in 90:
-			var x_was := P.pos.x
+		var p0 := Vector3.ZERO
+		var want := 0.0
+		for i in 120:
+			var pos_was := P.pos
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				p0 = pos_was
+				want = _curve_dist(id)
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
-		var dd := P.ak.dash_def()
-		var feel := P.ak.dash_feel()
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
-		rec("dash_curve_dist", (P.pos.x - x0) / want)
+		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		# against her run, a kit haste in it (Sable hands over at her hasted run)
 		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * (P.ak.move_k() + P.ak.speed_bonus())))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
+			var dd := P.ak.dash_def()
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
-			t *= float(feel["time"])
+			t *= float(P.ak.dash_feel()["time"])
 			rec("dash_curve_time", speeds.size() * DT / t)
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
@@ -1192,6 +1202,14 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
+
+## The metres a fitted hero's dash is set to cover: the kit's distance under the dash feel, or for Sparkle's
+## Wirerun (a lane length from the charge, along the aim) the length its run took.
+func _curve_dist(id: String) -> float:
+	if id == "mage":
+		return float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
+	var dd := P.ak.dash_def()
+	return float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(P.ak.dash_feel()["dist"])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
