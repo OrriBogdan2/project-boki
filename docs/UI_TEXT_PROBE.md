@@ -17,6 +17,8 @@ A self-test first builds a made-up screen with one text per rule and a clean one
 Options: `--size=WxH`, `--text=K`, `--scenes=a,b` (names as printed), `--report=<file>`, `--shots-dir=<dir>` (a jpg per scene; xvfb-run with
 `LP_NUM_THREADS=2`, `--rendering-driver opengl3`). Each hit prints `UITEXT HIT <scene> | <node path> | <rule> | '<text>' | {size: detail}`.
 
-Limits: text the HUD draws itself (match HUD, drop plan, tutorial step prompts, damage numbers) is not a node, so it is not seen
-(`--safe-area-check` judges those groups). A hit another branch owns goes in `KNOWN` (scene, path prefix, rule) until it merges.
+Text the HUD draws itself through `TextCache` (`Hud._text`, `HudStyle.text` / `ctext`: the match HUD and drop plan) is
+recorded while each screen is scanned and judged by the outside rule (path `drawn`). Not seen: the few raw `draw_string` calls
+(tutorial strip and duo guide lines, Boki speech, tips) and world-hung text (names over heads).
+A hit another branch owns goes in `KNOWN` (scene, path prefix, rule) until it merges.
 Findings of the 11-17 audit: PR "UI audit: no text running off screen or wrapping per letter" (docs/shots/ui-vertical-audit/).

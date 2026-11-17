@@ -7,13 +7,15 @@ extends RefCounted
 ##   tall   : more than TALL_LINES lines for under TALL_TEXT_CHARS characters
 ##   outside: partly outside the viewport (what a scroll area or clip hides on purpose does not count)
 ##   overlap: drawn over another visible text (unless an opaque panel is drawn between the two)
+## Text the HUD draws itself (TextCache.seen_at: [text, window rect, canvas item]) is judged by outside and overlap
+## (path: the canvas item that drew it, text prefixed "drawn: ").
 ## Each hit is {rule, path, text, rect (the text's own box, px), detail}. Ignores controls that are not drawn
 ## (hidden, or faded out to alpha 0.1 or less).
 
 const NARROW_CHARS := 3.0  # px/char multiple: a wrapped column narrower than this many average characters
 const TALL_LINES := 6  # more lines than this ...
 const TALL_TEXT_CHARS := 40  # ... for fewer characters than this is "one letter per line"
-const MIN_TEXT_CHARS := 4  # shorter strings (an icon glyph, "x2") are not judged for narrow
+const MIN_TEXT_CHARS := 4  # shorter strings (an icon glyph, "x2") are not judged for narrow or drawn overlap
 const OVERLAP_FRACTION := 0.3  # of the smaller text box that two boxes must share to count
 const OVERLAP_MIN_PX := 3.0  # both sides of the shared box
 const EDGE_PX := 2.0  # how far past the viewport edge counts as outside
@@ -31,14 +33,16 @@ var _view := Rect2()
 var _items: Array[Dictionary] = []
 var _covers: Array[Dictionary] = []
 var _order := 0
+var _keys := {}  # Control -> its draw-order key (what it draws itself sits under its children)
 
 
-## Scans `root` against a viewport of `view` px (logical).
-static func scan(root: Node, view: Vector2) -> Array[Dictionary]:
+## Scans `root` against a viewport of `view` px (logical), with the text drawn meanwhile (`drawn`, TextCache.seen_at).
+static func scan(root: Node, view: Vector2, drawn: Array = []) -> Array[Dictionary]:
 	var s := UiTextScan.new()
 	s._root = root
 	s._view = Rect2(Vector2.ZERO, view)
 	s._walk(root, 0, 0, 1.0, Rect2(-Vector2.ONE * 1e6, Vector2.ONE * 2e6))
+	s._add_drawn(drawn)
 	s._overlaps()
 	texts = s._items.size()
 	return s.hits
@@ -74,6 +78,7 @@ func _walk(nd: Node, layer: int, z: int, alpha: float, clip: Rect2) -> void:
 
 func _note(c: Control, layer: int, z: int, clip: Rect2, alpha: float) -> void:
 	var key := (layer + 100) * 1000000000000 + (z + 1000) * 1000000000 + _order
+	_keys[c] = key
 	var r := c.get_global_rect()
 	if c is Panel or c is PanelContainer:
 		var sb := c.get_theme_stylebox("panel")
@@ -93,6 +98,23 @@ func _note(c: Control, layer: int, z: int, clip: Rect2, alpha: float) -> void:
 	var item := {"c": c, "key": key, "text": text, "box": box, "seen": seen}
 	_items.append(item)
 	_judge(item)
+
+
+func _add_drawn(drawn: Array) -> void:
+	var done := {}
+	for d: Array in drawn:
+		var box: Rect2 = d[1]
+		var text := String(d[0]).strip_edges()
+		var ci: CanvasItem = d[2]
+		var id := "%s|%s" % [text, box]
+		if done.has(id) or not is_instance_valid(ci) or not _keys.has(ci) or not box.intersects(_view):
+			continue
+		done[id] = true
+		var item := {"c": ci, "key": _keys[ci], "text": "drawn: " + text, "box": box, "seen": box, "drawn": true}
+		if text.length() >= MIN_TEXT_CHARS:  # (an icon glyph or a count is drawn over things on purpose)
+			_items.append(item)
+		if not _view.grow(EDGE_PX).encloses(box):
+			_hit("outside", ci, item["text"], box, "box %s outside %s" % [_fmt(box), _fmt(_view)])
 
 
 func _text_of(c: Control) -> String:
@@ -194,7 +216,8 @@ func _overlaps() -> void:
 		for j in range(i + 1, _items.size()):
 			var a: Dictionary = _items[i]
 			var b: Dictionary = _items[j]
-			if a["c"].is_ancestor_of(b["c"]) or b["c"].is_ancestor_of(a["c"]):
+			var family: bool = a["c"].is_ancestor_of(b["c"]) or b["c"].is_ancestor_of(a["c"])
+			if family and not (a.has("drawn") or b.has("drawn")):  # (a button and its own label)
 				continue
 			var sa: Rect2 = a["seen"]
 			var sb: Rect2 = b["seen"]
@@ -221,7 +244,7 @@ func _covered(ka: int, kb: int, both: Rect2) -> bool:
 	return false
 
 
-func _hit(rule: String, c: Control, text: String, box: Rect2, detail: String) -> void:
+func _hit(rule: String, c: Node, text: String, box: Rect2, detail: String) -> void:
 	(
 		hits
 		. append(

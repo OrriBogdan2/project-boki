@@ -99,7 +99,10 @@ func _look(name: String) -> void:
 		return
 	print("UITEXT scan %s %dx%d@%d%%" % [name, size_px.x, size_px.y, text_k * 100])  # (a line a check's watchdog sees)
 	await _wait(SETTLE_S)
+	TextCache.seen_at.clear()
+	TextCache.recording = true  # (what the HUD draws itself these frames)
 	await _frames(2)
+	TextCache.recording = false
 	if shots != "":
 		DirAccess.make_dir_recursive_absolute(shots)
 		await RenderingServer.frame_post_draw
@@ -108,8 +111,10 @@ func _look(name: String) -> void:
 	scene = name
 	screens_seen[name] = true
 	var view := tree.root.get_visible_rect().size
-	var found := UiTextScan.scan(tree.root, view)
+	var found := UiTextScan.scan(tree.root, view, TextCache.seen_at)
 	seen_texts[name] = maxi(int(seen_texts.get(name, 0)), UiTextScan.texts)
+	TextCache.seen_at.clear()
+	TextCache.seen.clear()
 	for h in found:
 		h["path"] = _plain.sub(h["path"], "$1", true)
 		var key := "%s|%s|%s" % [name, h["path"], h["rule"]]
@@ -328,13 +333,24 @@ func _self_test() -> void:
 	squeezed.size = Vector2(1, 1)
 	_label(box, "Runs off the left edge", Vector2(-60, 300))
 	_label(box, "Fine", Vector2(600, 300))
+	_label(box, "Under it is drawn text", Vector2(605, 400))
 	_label(box, "Overlap A is here", Vector2(100, 500))
 	_label(box, "Overlap B is here", Vector2(110, 505))
+	box.size = Vector2(SIZES[0])
+	box.draw.connect(
+		func():
+			HudStyle.text(box, Vector2(SIZES[0].x - 40, 200), "Drawn off the right", 15, Color.WHITE)
+			HudStyle.text(box, Vector2(600, 418), "Drawn under a label", 15, Color.WHITE)
+	)
+	TextCache.seen_at.clear()
+	TextCache.recording = true
 	await _frames(3)
+	TextCache.recording = false
 	var rules := {}
-	for h in UiTextScan.scan(box, tree.root.get_visible_rect().size):
+	var view := tree.root.get_visible_rect().size
+	for h in UiTextScan.scan(box, view, TextCache.seen_at):
 		rules["%s %s" % [h["rule"], h["text"].left(5)]] = true
-	for want in ["narrow Male,", "tall Male,", "outside Runs ", "overlap Overl"]:
+	for want in ["narrow Male,", "tall Male,", "outside Runs ", "overlap Overl", "outside drawn", "overlap Under"]:
 		_ok(rules.has(want), "the probe's rules catch '%s' on a made-up screen" % want)
 	_ok(not rules.keys().any(func(k): return String(k).ends_with("Fine")), "a clean label has no hit")
 	box.queue_free()
