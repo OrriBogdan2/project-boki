@@ -26,6 +26,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
   (~96 deg). Past 90 deg the legs turn round and play the backward run (they hold it 0.1 rad either side of 90, so a
   run near it does not flicker). While he runs, the legs hold their way when the aim swings. Off: the f, b, l, r ring.
+  `twist_hyst` (rad, default `TWIST_HYST` 0.1; Vex 0.35): that margin per Hunter, so an aim swaying about 90 deg while
+  she kites does not turn the legs round and back (docs/art/FOOT_SLIDE.md, the twist margin).
   Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
   `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
   (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).
@@ -42,7 +44,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
   glider stays in the hands. A Boki riding on you sits on the torso you see (`WardenGlb.shown_torso`, the hips bone back
   through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
   swing of its own side's leg; `side_foot_mps` [walk, run] is the strafe loops' own foot speed, mixed in by how far the
   move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
   so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
@@ -51,7 +53,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
   Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
   the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
   `Oomph.HEAVY_FLINCH`); any other hit is `WardenFlinch`: a torso spring (front, back, left, right from `hit_dir`) added after
