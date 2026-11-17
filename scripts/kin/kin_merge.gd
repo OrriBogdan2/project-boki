@@ -10,7 +10,7 @@ extends RefCounted
 ##     (MergeForm.surge_spec), so a full meter is never wasted
 ##   - phase "xform": ~0.7s, invulnerable, the Boki leaps into you and the form pops in (MergeXform)
 ##   - phase "live": for the form's duration you keep your own hero's abilities and the form augments them
-##     (MergeAugment), C is off, and R again (after a short lock) fires the form's ultimate, which ends the merge.
+##     (MergeAugment), every input still works (docs/decisions/0100), and R again (after a short lock) fires the form's ultimate, which ends the merge.
 ##     The shell (MergeShell) takes the damage first; when it breaks the merge ends without the ultimate. A Boki
 ##     without a form file keeps the stat merge (passives, pulses), the type's LMB rider and dash trail, and a basic burst as its ultimate.
 ##   - it ends when time runs out, with the ultimate, early if you're knocked or the Boki is lost. Time out or
