@@ -1,7 +1,7 @@
 {
-	"palette": {"main": "0a0203", "hot": "300408", "char": "080405", "smoke": "1a1012", "magenta": "0a0203", "red": "0e0204", "wave": "300408",
-		"gold": "ffc94a", "gold_hot": "ffe39a", "gold_char": "5a3208", "white": "fff4dc", "violet": "b06aff", "pink": "0a0203", "iron": "8a7058", "steel": "c8a8ac", "heal": "ffd27a",
-		"chain": "8a1020", "chain_iron": "1a1214", "chain_hot": "e01838", "chain_hook": "ff4058", "haul": "0e0204", "haul_hot": "300408"},
+	"palette": {"main": "0a0203", "hot": "300408", "char": "080405", "smoke": "1a1012", "red": "0e0204", "wave": "300408",
+		"gold": "ffc94a", "gold_hot": "ffe39a", "gold_char": "5a3208", "white": "fff4dc", "iron": "8a7058", "steel": "c8a8ac", "heal": "ffd27a",
+		"chain": "8a1020", "chain_iron": "1a1214", "chain_hot": "ff3a2a", "chain_hook": "ff4058", "haul": "0e0204", "haul_hot": "300408"},
 	"anchors": {
 		"blade_tip": {"nodes": ["anchor_blade_tip", "weapon_muzzle"], "gun": [0.0, 0.0, -0.316], "body": [0.3, 1.5, 0.9]},
 		"blade_mid": {"nodes": ["anchor_blade_mid"], "gun": [0.0, 0.0, -0.18], "body": [0.3, 1.3, 0.6]},

@@ -243,7 +243,7 @@ func _looks(arch: String) -> void:
 		return
 	var pal: Dictionary = HeroVfx.data(arch)["palette"]
 	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
-	for k: String in ["main", "hot", "char", "smoke", "magenta", "red", "wave", "pink", "peak", "chain", "chain_iron",
+	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
 			"chain_hot", "chain_hook", "haul", "haul_hot"]:
 		cols[k] = pal.get(k, "")
 	var warm: Array = []

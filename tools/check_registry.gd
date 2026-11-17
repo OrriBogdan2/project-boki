@@ -613,6 +613,10 @@ const CHECKS := {
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--bus-sliders-check": ["res://tools/bus_sliders_check.gd", "bus_sliders_check", null],      # a volume per bus
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
+	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
+	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
+	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
+	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
 	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null], # ability cards = data
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
