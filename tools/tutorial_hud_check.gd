@@ -355,7 +355,7 @@ func _cc_tips() -> void:
 		m._tip_t = 2.0
 		m._tips()
 		m.hud.msgs.clear()
-		p.root_t = Match.SELF_HOLD_S
+		p.root_t = CcTips.SELF_HOLD_S
 		m._tips()
 		ok(m.hud.msgs.count() == 0, "%s: a hunter's own hold shows nothing" % case_name)
 		p.root_t = 0.0

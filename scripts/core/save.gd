@@ -510,6 +510,7 @@ func load_from(p: String) -> void:
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
