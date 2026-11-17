@@ -53,7 +53,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.28 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds. |
 | Silhouette | small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her |
