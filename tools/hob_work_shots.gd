@@ -60,12 +60,11 @@ func _until(cond: Callable) -> void:
 
 func _shot(shot_name: String, u: int) -> void:
 	var at := HomeLayout.deco_center(FarmSites.entry(u))
-	var stand := at + Vector3(0.0, 0.0, 7.0)
+	var stand := at + Vector3(1.0, 0.0, 4.0)  # (the camera follows you: the house and Hob fill the frame)
 	home.ppos = stand
 	home.player.position = stand
 	home.cam.zoom_to = 0.9
 	home.cam.zoom = 0.9
-	home.cam.snap(at + Vector3(2.0, 0.0, 1.5))
 	if main.fade:
 		main.fade.reveal(0.05)
 		for i in 600:
