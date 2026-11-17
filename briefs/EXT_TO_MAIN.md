@@ -10078,3 +10078,4 @@ READY ext/merge-lane-hunters6-1117 250723cc60 (lane hunters6: TurnCost momentum 
 READY ext/vfx-utility-read-port b32aed7bc77 (in-match shops + source utilities + six-slot belt ported onto main; targeted checks green, lair-lock/warden-clips red same as main)
 READY ext/merge-lane-leftover-1117 d1985757009c993eff2607d08ce715c0730a8463 (6 leftover branches, targeted checks NEW-RED 0)
 READY ext/farm-crouch-scout-1117 746bc79e0d (farm: hold Ctrl pulls camera out like a match; shared CamWheel.look_zoom; --farm-crouch-look-check)
+READY ext/merge-lane-misc-1117 731eaac6b5 (merge lane misc a: tut-wide-cam, ui-first15-leftovers, tut-summon-pad, tut-first-proc, tut-wisp-beats ported on main; NEW-RED 0 on 56 targeted flags, export 5 presets OK)
