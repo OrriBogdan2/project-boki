@@ -5,6 +5,17 @@ extends RefCounted
 
 const GOAL_COL := Color("ffd27a")
 
+## A "Start here" stamp in the card's top-right corner for a starter (ClassUnlock.start_here), over the card
+## rather than a line in it.
+static func add_start_chip(card: PanelContainer, id: String) -> void:
+	if not ClassUnlock.start_here(id):
+		return
+	var chip := UI.tag("Start here", UI.GOLD)
+	chip.name = "StartHere"
+	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
+	chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	card.add_child(chip)
+
 ## The Hunter's portrait, `px` square: its Warden's painted face (Portraits.Pic), or with `body` its
 ## splash (the reveal). A Warden with no painted art shows its rendered model instead: a TextureRect
 ## with the SubViewport that renders it as its child (`body`: the whole standing hunter).
