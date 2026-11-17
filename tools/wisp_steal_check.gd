@@ -155,6 +155,8 @@ func _steal() -> void:
 		KinSteal.loose(fk) and KinSteal.loose(f2k) and fk.owner_h == f and f2k.owner_h == f2 and popped,
 		"scatter: the thief goes down, both wisps are loose again where they fell"
 	)
+	if f.downed:  # (a bot may have knocked the owner down again meanwhile: the take-back is the revived owner's)
+		m.revive_hunter(f, null)
 	_hold(f, fk, 0.7, p)
 	ok(
 		not KinSteal.taken(fk) and fk.owner_h == f and fk.carried() and f.kin_carry_on(),
