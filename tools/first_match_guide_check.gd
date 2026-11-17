@@ -1,0 +1,235 @@
+extends RefCounted
+## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
+##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
+##   2. a walk through the triggers: rank, send, chest, the Blight, an exit; each line shows
+##      once, one at a time, clears on its trigger or its time, and never touches the player's input
+##   3. in squads, the B line (base to a teammate) shows when they're all far off and clears on the wheel
+##   4. every line fits the banner lane in at most two lines at 1280x720
+var bad := 0
+var m: Match
+var main: Node
+var g: FirstMatchGuide
+
+func ok(cond: bool, what: String) -> void:
+	print("FMGUIDE %s %s" % ["PASS" if cond else "FAIL", what])
+	if not cond: bad += 1
+
+func run(mn: Node) -> void:
+	main = mn
+	Save.no_write = true
+	_save_flag()
+	for id in ["archer", "juggernaut", "gunslinger"]:      # Lace, Kael, Vex: the guide is the same for all
+		_walk(id)
+	_mates()
+	_first_ult()
+	print("FMGUIDE DONE, failures: ", bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _save_flag() -> void:
+	Save.d["first_guide"] = 0
+	var o := {"teams": 2, "squad": 1}
+	var skipped := ["tutorial", "duel", "training"].all(func(k: String): return _skips(k))
+	ok(skipped and int(Save.d["first_guide"]) == 0, "tutorial, duel and training get no guide and do not count")
+	var first := FirstMatchGuide.for_match(null, o)
+	var second := FirstMatchGuide.for_match(null, o)
+	ok(first != null and second != null, "the first two Extractions get the guide")
+	Save.d["tutorial"]["glide_dive"] = true
+	var third := FirstMatchGuide.for_match(null, o)
+	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not (the dive learnt); the flag stays at 2")
+	Save.d["tutorial"].erase("glide_dive")
+	var dive_only := FirstMatchGuide.for_match(null, o)
+	var dive_ok: bool = dive_only != null and dive_only.dive_only and int(Save.d["first_guide"]) == 2
+	ok(dive_ok, "the third keeps only the dive line, uncounted")
+	var old := {"matches": 5}
+	FirstMatchGuide.migrate(old)
+	var young := {"matches": 1}
+	FirstMatchGuide.migrate(young)
+	var kept := {"matches": 5, "first_guide": 0}
+	FirstMatchGuide.migrate(kept)
+	ok(int(old["first_guide"]) == 2 and int(young["first_guide"]) == 1, "an old save skips it; one match in: one more")
+	ok(int(kept["first_guide"]) == 0, "the field is never overwritten")
+	ok(int(Save.fresh()["first_guide"]) == 0, "a new save starts at 0")
+
+func _skips(key: String) -> bool:
+	return FirstMatchGuide.for_match(null, {key: true}) == null
+
+func _tick(secs: float) -> void:
+	var t := 0.0
+	while t < secs:
+		g.tick(0.1)
+		t += 0.1
+
+func _walk(hunter: String) -> void:
+	Save.d["first_guide"] = 0
+	m = Match.new()
+	main.add_child(m)
+	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle",
+			"arch": hunter, "cls": Arch.weight(hunter)}
+	m.start(o)
+	m.set_process(false)
+	print("FMGUIDE hunter ", hunter)
+	g = m.guide
+	var p: Hunter = m.player
+	ok(g != null and int(Save.d["first_guide"]) == 1, "a real Extraction gets the guide and is counted")
+	for h in m.hunters:
+		if h != p:
+			h.pos = p.pos + Vector3(300, 0, 0)
+	p.skill_pts = 1
+	m.time = 0.0
+	if m.chests.is_empty():
+		m.chests.append({"open": false, "pos": p.pos, "prog": 0.0})
+	var move0: Vector2 = p.inp["move"]
+	_no_hints_in_flight(p)
+	_tick(1.5)
+	ok(g.id == "rank" and g.line.contains("Rank up"), "a skill point: rank an ability (%s)" % g.line)
+	p.skill_pts = 0
+	_tick(0.2)
+	ok(g.line == "", "ranked: it clears")
+	_tick(1.6)
+	ok(g.id == "send" and g.line.contains("Send"), "your Boki is with you: send it (%s)" % g.line)
+	p.kin.st_throws += 1
+	_tick(0.2)
+	ok(g.line == "", "sent: it clears")
+	_tick(1.6)
+	ok(g.id == "chest" and g.line.contains("chest"), "a chest to open: loot it (%s)" % g.line)
+	p.add_stat("chests")
+	_tick(0.2)
+	ok(g.line == "", "opened: it clears")
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
+	foe.pos = p.pos + Vector3(10, 0, 0)
+	_tick(2.0)
+	ok(g.line == "" and not g.shown.has("squad"), "a squad close by gets no line")
+	m.time = m.length * 0.7
+	_tick(1.6)
+	ok(g.id == "blight" and g.line.contains("Blight"), "the match is closing: the Blight line (%s)" % g.line)
+	_tick(12.0)
+	ok(g.id == "" or g.id == "exit", "it clears after its time")
+	_tick(1.6)
+	ok(g.id == "exit" and g.line.contains("exit"), "then: go to an exit (%s)" % g.line)
+	var spots: Array = m.exits.spots()
+	p.pos = spots[0]
+	_tick(0.2)
+	ok(g.line == "", "at an exit: it clears")
+	ok(p.inp["move"] == move0, "the guide never touched the player's input")
+	p.extracted = true
+	g.shown.clear()
+	g.id = ""
+	_tick(0.2)
+	ok(g.line == "", "after extracting nothing shows")
+	p.extracted = false
+	if m.skydrop:
+		m.skydrop.planning = false      # (the ship waits for you to plan the drop, and the match with it)
+	g._gap = 0.0
+	m.step(Match.DT)
+	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
+	_fit()
+	m.queue_free()
+
+func _mates() -> void:
+	m.queue_free()
+	Save.d["first_guide"] = 0
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1000.0, "seed": 4243, "no_drop": true})
+	m.set_process(false)
+	g = m.guide
+	var p: Hunter = m.player
+	p.skill_pts = 0
+	p.dropping = false
+	m.chests.clear()
+	for h in m.hunters:
+		if h != p:
+			h.pos = p.pos + Vector3(300 if h.team != p.team else 60, 0, 0)
+	g.shown = {"land": true, "send": true}
+	_tick(1.6)
+	ok(g.id == "mates" and g.line.begins_with("Hold %s to pick a teammate" % Settings.key_cap("base")),
+			"squads, teammates far off: hold B to base to one (%s)" % g.line)
+	BaseWheel.open(p, Vector2(640, 360), BaseRecall.mates(m, p))
+	_tick(0.2)
+	p.inp.erase("bwheel")
+	ok(g.line == "", "opening the wheel clears it")
+
+## The plane ride and the drop: no guide line, and no first-time tip card, however due they are.
+func _no_hints_in_flight(p: Hunter) -> void:
+	for st in ["riding", "dropping"]:
+		p.set(st, true)
+		g._gap = 0.0
+		_tick(0.5)
+		ok(g.line == "" and g.shown.is_empty(), "%s: no guide line" % st)
+		m._tip_t = 20.0
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: no hint card" % st)
+		p.set(st, false)
+
+func _fit() -> void:
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
+	for row: Array in FirstMatchGuide.rules()["lines"]:
+		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle").replace("%B", "B")
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
+		var gone := txt.contains("slip away")
+		ok(not gone, "%s is not the squad or landing line" % row[0])
+
+# ------------------------------------------------------------------ 5. the first-ready ult hint
+func _first_ult() -> void:
+	var p: Hunter = m.player
+	ok(p.ak != null, "the player is a hero with a kit")
+	if p.ak == null:
+		return
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(FirstUltHint.KEY)
+	p.downed = false
+	p.dropping = false
+	p.riding = false      # (a match now starts aboard the skyship)
+	p.lvl = int(Hunter.ULT_AT[0]) - 1
+	p.ak.cd["x"] = 0.0
+	m._tip_t = 2.0
+	m.time = 100.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "below the ult level: no hint")
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 5.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "cooling down: no hint")
+	p.ak.cd["x"] = 0.0
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m.time = 101.0
+	CombatBus.hit_landed.emit(p, foe, 5.0, ["primary"])
+	m.time = 101.9
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "ready 1.9 s into a fight: held back")
+	var before: int = m.hud.msgs.count()
+	m.time = 102.1
+	m._tips()
+	ok(bool(seen.get(FirstUltHint.KEY, false)), "ready 2.1 s into the fight, still being hit: shown")
+	ok(m.hud.msgs.count() == before + 1, "through the hint lane, one line")
+	var want := FirstUltHint.text(p.ak)
+	var cap := Settings.key_cap("hunter_ult")
+	ok(want.begins_with(cap + " is ready: " + String(p.ak.x_def()["name"]) + ", "), "the key cap and name (%s)" % want)
+	m._tips()
+	ok(m.hud.msgs.count() == before + 1, "once per save: no second line")
+	seen.erase(FirstUltHint.KEY)
+	m.time = 200.0
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "a new fight after a quiet spell holds it again")
+	seen[FirstUltHint.KEY] = true
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		if not f.ends_with(".json"):
+			continue
+		var json: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		var xd: Dictionary = json.get("x", {})
+		if xd.is_empty():
+			continue
+		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
+		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])

@@ -37,7 +37,15 @@ var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, t
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
-var _t := 0.0
+const REVISIT_S := 0.25       # s between two looks at the same spot
+var _share := 0.0             # spots owed a look this frame (fractional)
+var _next := -1
+var _teams := {}              # squads still in the match, refilled each tick
+var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
+var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
+var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
+var presence := LegendPresence.new()   # its roar, loop and sting, on every game (LegendPresence)
+var _t := 0.0                  # s to the next legend check
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -84,6 +92,7 @@ func shown_cats() -> Array:
 ## Where the candidates are: the layout's own lists on an authored map, else derived from the islands.
 func build(layout: Dictionary) -> void:
 	cands.clear()
+	legend_cfg = Legendary.config(layout)
 	var sp: Dictionary = layout.get("spawn_points", {})
 	if not sp.is_empty():
 		for cat in sp:
@@ -174,19 +183,21 @@ func roll(seed_val: int) -> void:
 		var pool: Array = of(cat)
 		var pk: Array = cats[cat].get("pick", [1, 1])
 		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		if cat == "cache":
+			n = KeyChest.kept(n)      # caches are chests too: the same share as the map's
 		# shuffle with our own generator (Array.shuffle uses the global one)
 		for i in range(pool.size() - 1, 0, -1):
 			var j := r.randi_range(0, i)
 			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
 		for i in n:
 			pool[i]["active"] = true
+	legend = Legendary.roll(seed_val, legend_cfg)
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
 ## whatever a registered spawner brings.
 func spawn_all() -> void:
 	var wr := RandomNumberGenerator.new(); wr.seed = m.seed_val * 53 + 11
-	var keys: Array = Data.weapon_ids()
 	for c in cands:
 		if not c["active"]:
 			continue
@@ -194,15 +205,14 @@ func spawn_all() -> void:
 		var p: Vector3 = c["pos"]
 		match String(c["cat"]):
 			"vault":
-				c["ref"] = m.add_chest(p, 2)
+				c["ref"] = m.add_chest(p)
 			"cache":
-				c["ref"] = m.add_chest(p, 1)
-				# and a good weapon beside it, the same for everyone online
-				var wk := String(keys[wr.randi() % keys.size()])
-				var rar := clampi(Data.roll_rarity(wr, 1), 2, 4)
+				c["ref"] = m.add_chest(p)
+				# and a good piece of gear beside it, the same for everyone online
+				var gg := GearDrops.roll_gear(wr, 1, 2, -1, m.biomes.slot_lean_at(p) if m.biomes else {})
 				var wp := m.world.free_spot_near(p + Vector3(1.4, 0, 0.4), [p], 0.6)
 				wp.y = m.world.ground_at(wp.x, wp.z)
-				m.spawn_weapon(wk, rar, wp, "sc%d" % int(c["i"]), false, -1, Loot.weapon(wk, rar, Loot.roll_element(wr, m.world.biome_at(p.x, p.z))))
+				m.spawn_gear(String(gg["id"]), int(gg["rar"]), wp, "sc%d" % int(c["i"]), false)
 			"rare_kin":
 				if not m.net_on or m.is_host:
 					c["ref"] = _spawn_rare(p, wr)
@@ -213,8 +223,9 @@ func spawn_all() -> void:
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
-	var pool: Array = Data.common_kin()
-	var sp: String = pool[r.randi_range(0, pool.size() - 1)]
+	var sp := ModeBoki.draw(Data.common_kin(), "expedition", m.tier, r)
+	if HeartRaid.on(m.opts):
+		sp = BokiModes.draw(HeartRaid.boki_for(m.opts), r)      # a raid: its own Boki
 	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
 	rec["level"] = int(lv[1]) + r.randi_range(2, 4)
@@ -226,38 +237,55 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	return k
 
 # ------------------------------------------------------------------ what each squad knows
+## Each spot is looked at again every REVISIT_S, a slice of them each frame: all of them at once
+## was a sight check per spot per squad in one frame (a 20-30 ms spike with ten squads out).
 func tick(dt: float) -> void:
 	_t -= dt
-	if _t > 0.0:
+	if _t <= 0.0:
+		_t = 0.25
+		if Legendary.due(self):
+			legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
+		presence.tick(m)
+	if cands.is_empty():
 		return
-	_t = 0.25
-	for c in cands:
-		if not c["taken"] and c["active"]:
-			c["taken"] = _is_taken(c)
-	var teams := {}
+	_teams.clear()                   # team -> its hunters on the ground (one pass, not one per spot)
 	for h in m.hunters:
 		if h.out or h.extracted or h.riding:
 			continue
-		teams[h.team] = true
-	for c in cands:
-		var known: Dictionary = c["known"]
-		for t in teams:
-			if known.has(t):
-				continue
-			if _team_sees(int(t), c["pos"]):
-				known[t] = true
-				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
-					var def: Dictionary = cats.get(c["cat"], {})
-					if not def.get("announce", false):
-						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
+		if not _teams.has(h.team): _teams[h.team] = []
+		_teams[h.team].append(h)
+	_share += cands.size() * dt / REVISIT_S
+	while _share >= 1.0:
+		_share -= 1.0
+		_next = (_next + 1) % cands.size()
+		_look(cands[_next])
 
-func _team_sees(team: int, p: Vector3) -> bool:
-	for h in m.hunters:
-		if h.team != team or h.out or h.extracted or h.riding:
+func _look(c: Dictionary) -> void:
+	if not c["taken"] and c["active"]:
+		c["taken"] = _is_taken(c)
+	var known: Dictionary = c["known"]
+	for t in _teams:
+		if known.has(t) or not _team_sees(int(t), _teams[t], c["pos"]):
 			continue
+		known[t] = true
+		if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
+			var def: Dictionary = cats.get(c["cat"], {})
+			if not def.get("announce", false):
+				m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
+
+## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
+## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map
+## made spots x squads x hunters the biggest step spike.
+const SIGHT_BOUND_K := 1.25 * 1.5    # sneak range bonus x headroom for sight gear
+func _team_sees(team: int, members: Array, p: Vector3) -> bool:
+	var dmin := INF
+	for h: Hunter in members:
 		var d := Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 		if d < (DROP_REVEAL_R if h.dropping else REVEAL_R):
 			return true
+		dmin = minf(dmin, d)
+	if dmin > (Match.VIEW_RANGE + 2.0) * maxf(m.sight_k, 1.0) * SIGHT_BOUND_K:
+		return false
 	return m.sees(team, p + Vector3(0, 0.4, 0))
 
 func _is_taken(c: Dictionary) -> bool:

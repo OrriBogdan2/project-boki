@@ -85,7 +85,7 @@ func run(main: Node) -> void:
 					for glide in [false, true]:
 						var into := (-d).rotated(deg_to_rad(ang))
 						var at := Vector3(float(e["ex"]) + d.x * (P.r + gap), top + dy, float(e["ez"]) + d.y * (P.r + gap))
-						var vy := (-4.0 if dy > 0.0 else -6.0) if gap < 0.3 else -Hunter.TERMINAL
+						var vy := (-4.0 if dy > 0.0 else -6.0) if gap < 0.3 else -HunterMove.fall_max
 						_reset(at, Vector3(side.x * 1.5 * signf(into.dot(side) + 0.001), vy, side.y * 1.5 * signf(into.dot(side) + 0.001)), top)
 						var res := "fell"
 						for i in 150:
@@ -93,7 +93,6 @@ func run(main: Node) -> void:
 							P.inp["glide"] = glide
 							m.step(DT)
 							# (a ledge rise counts once it has put you on top: see the next line)
-							pass
 							if P.grounded and P.pos.y > top - 0.2:
 								res = "caught"; break
 							if P.out or P.pos.y < top - Hunter.MANTLE_REACH_ABYSS - 1.5:

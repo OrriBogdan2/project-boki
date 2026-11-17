@@ -50,17 +50,7 @@
 		}
 	],
 	"loot": {
-		"weapons": {
-			"smg": 3,
-			"minigun": 3,
-			"burst_rifle": 2,
-			"rifle": 2,
-			"twin_blades": 1,
-			"sniper": 1,
-			"shotgun": 1,
-			"longsword": 1,
-			"greatsword": 1
-		},
+		"slots": {"boots": 1.8},
 		"rarity_bonus": 0,
 		"gear": [
 			"storm"

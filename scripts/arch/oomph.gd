@@ -1,65 +1,38 @@
 class_name Oomph
 extends RefCounted
-## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (camera kick, a push
-## back on heavy weapons), what a hit does to the body it lands on (a flinch scaled by the hit, a
+## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (a push
+## back on heavy weapons; never a camera kick), what a hit does to the body it lands on (a flinch scaled by the hit, a
 ## short stagger on big hits, a hit-shake while it's frozen), and how visible a shot is (a glowing
 ## bolt with a halo and a tracer that stretches with speed). How hits look and sound beyond that
 ## (impact sparks, sound design) belongs to Juice; the numbers and these reactions live here, in
 ## separate functions, so the two never step on each other.
 ##
-## Weapon data can tune it: "kick" (camera recoil per shot, trauma-ish 0-0.25), "push" (the shooter
+## Weapon data can tune it: "push" (the shooter
 ## is shoved back this many m/s), "tracer" (how long the streak reads, 1 = default).
 
 const STAGGER_FRAC := 0.12     # a hit of at least this share of max health staggers
 const STAGGER_T := 0.28        # ... for this long
 const STAGGER_SLOW := 0.45     # ... slowed this much
 const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
-const KICK_PX := 0.55          # camera recoil offset per unit of kick (metres of view shift)
+const RULES := "res://content/rules/hit_flinch.json"
+static var _rules := {}
 static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
 
 # ------------------------------------------------------------------ shooting
-## A shot (or swing) leaving: the camera kicks back along the aim for the local shooter, and heavy
-## weapons shove the shooter back a little (shotgun, sniper, bow).
-static func on_fire(h: Hunter, melee := false) -> void:
+## A shot (or swing) leaving: heavy weapons shove the shooter back a little (shotgun, sniper, bow).
+static func on_fire(h: Hunter, _melee := false) -> void:
 	if h == null or h.m == null:
 		return
 	if legacy:
 		return
 	var w: Dictionary = h.wpn
-	var kick := float(w.get("kick", 0.05 if not melee else 0.04))
 	var d := h.aim_dir()
-	if h.is_local() and h.m.get("cam") != null:
-		var cam: Camera3D = h.m.cam
-		cam.add_trauma(kick * 0.35)
-		_cam_nudge(cam, -d * kick * KICK_PX)
 	var push := float(w.get("push", 0.0))
 	# the self push is feel for your own hands only: a bot (or a teammate reviving someone) never
 	# drifts off its spot from its own shots
 	if push > 0.0 and h.grounded and h.is_local() and h.ctrl == "local" and h.base_t <= 0.0:
 		h.vel.x -= d.x * push
 		h.vel.z -= d.y * push
-
-## A screen-space shove of the camera that springs back (Camera3D offsets; the rig never touches them).
-static func _cam_nudge(cam: Camera3D, v: Vector2) -> void:
-	if not is_instance_valid(cam):
-		return
-	var tw: Tween = cam.get_meta("oomph_tw") if cam.has_meta("oomph_tw") else null
-	if tw and tw.is_valid():
-		tw.kill()
-	# world x is screen x; world +z is toward the bottom of the screen (the camera looks north)
-	cam.h_offset = clampf(cam.h_offset * 0.5 + v.x, -0.6, 0.6)
-	cam.v_offset = clampf(cam.v_offset * 0.5 + v.y, -0.6, 0.6)
-	tw = cam.create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(cam, "h_offset", 0.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(cam, "v_offset", 0.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	cam.set_meta("oomph_tw", tw)
-
-## A directional camera punch for big moments (abilities, payoffs): the view jolts along a direction.
-static func punch_dir(m: Node, dir: Vector2, amt: float) -> void:
-	if m == null or m.get("cam") == null:
-		return
-	_cam_nudge(m.cam, dir.normalized() * amt if dir.length() > 0.01 else Vector2.ZERO)
 
 # ------------------------------------------------------------------ being hit
 ## What a landed hit does to the body (called from Match.on_damage for every hit). Only the game that
@@ -70,11 +43,9 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
 	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
-	# a visual hold scaled by the hit (the Feel tier sets it too; take the larger)
-	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
 	if target is Hunter:
 		var h := target as Hunter
-		h.hit_k = clampf(0.8 + frac * 9.0, 0.8, HEAVY_FLINCH) if not big else HEAVY_FLINCH
+		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
 		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
 		if by and is_instance_valid(by):
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
@@ -88,6 +59,27 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
+	elif target is Kin and target.model:
+		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
+		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
+
+## How hard a hit flinches (hit_k, chip = rules chip_k up to HEAVY_FLINCH): its share of max health and its
+## knock (m/s), weighted by content/rules/hit_flinch.json. The anim scales its flinch by it.
+static func hit_strength(frac: float, knock: float) -> float:
+	var r := rules()
+	var k := float(r["chip_k"]) + frac * float(r["frac_k"]) + knock * float(r["knock_k"])
+	return clampf(k, float(r["chip_k"]), HEAVY_FLINCH)
+
+## How much of the additive flinch layer a hit of strength `hit_k` plays: the rules' light share on a chip hit,
+## all of it by a stagger (the stagger itself takes the whole-body hit clip).
+static func flinch_weight(hit_k: float) -> float:
+	var r := rules()
+	return lerpf(float(r["light"]), 1.0, clampf(inverse_lerp(float(r["chip_k"]), HEAVY_FLINCH, hit_k), 0.0, 1.0))
+
+static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
+	return _rules
 
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
@@ -96,20 +88,21 @@ static func render_hit(h: Hunter, delta: float) -> void:
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
-## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
-## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
-static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
+## The colour, size and halo colour of a shot as the local player sees it. What can hurt you stays the
+## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks). The core keeps
+## the shooter's colour, the halo leans to the side (SideColor.fx): a rival's hostile, a teammate's cool.
+static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
-		return [Color(col, 0.5), size * 1.7, 0.0]
+		if p0 and by.team != p0.team:
+			return [Color(col.lerp(SideColor.foe(), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
+		return [Color(col, 0.5), shot_size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
-	var vis_size := size * 2.0
+	var vis_size := shot_size * 2.0
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = col.lerp(Color("ff5a3a"), 0.35)
-		vis_col.a = 1.0
+		vis_col = Color(col.lightened(0.1), 1.0)     # (the shooter's own colour: enemy reads by size and halo)
 		vis_size *= 1.3
 		halo = 0.4
 	elif p:
@@ -118,7 +111,34 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 		if by != p:
 			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
 			halo = 0.18
-	return [vis_col, vis_size, halo]
+	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
+
+## A kit draws this round itself (an arrow, a trail and its head): the stock orb shrinks away and stays so (the match
+## sizes it from "vr" every frame). Kits skin a round just before a draw, so the size is pushed through at once: a
+## transform set then waits for the next flush and the orb would show for a frame.
+static func hide_orb(s: Dictionary) -> void:
+	s["vr"] = 0.001
+	var orb := s.get("node") as Node3D
+	if orb == null or not is_instance_valid(orb):
+		return
+	orb.scale = Vector3.ONE * 0.001
+	orb.force_update_transform()
+	for halo: Node3D in orb.get_children():
+		halo.force_update_transform()
+
+## A shot's bolt this frame: between its last and current step (`alpha`), turned along its flight and stretched by
+## its tracer. Match draws every shot with it; tools that step the match by hand (the reels) call it too.
+static func place_shot(s: Dictionary, alpha: float) -> void:
+	var mi: MeshInstance3D = s["node"]
+	if mi == null:
+		return
+	mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+	var v: Vector2 = s["vel"]
+	if v.length() > 1.0:
+		mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+		var r: float = s.get("vr", s["r"])
+		var tracer := float((s["x"] as Dictionary).get("tracer", 1.0))
+		mi.scale = Vector3(r * 2.0, r * 2.0, tracer_len(r, v.length(), tracer))
 
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:

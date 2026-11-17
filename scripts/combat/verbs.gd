@@ -5,21 +5,35 @@ extends RefCounted
 ## create them (see Effects), the match ticks them, checks every shot against them and draws them.
 ## Each one is plain data plus one scene node, so new abilities are new JSON, not new code.
 
+const DECOY_A := 0.28      # the decoy ghost's opacity (brighter blooms into a flash at every dash start)
+const WALL_TH := 0.32      # half thickness of a barrier
+const WALL_H := 2.3
+const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
+const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
+const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
+const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
+const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
+const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
+const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
+const BRIDGE_FALL_T := 0.45     # s: ...over this long
+
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
+var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden), reused so a held prism does not rebuild its panels each press
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
-var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
+var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, col, slow, team, warn}
 var drags: Array = []     # {ent, from, to, t, dur, h}
+var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank, set down at `to` when it ends
 var decoys: Array = []    # {pos, team, t, node, owner}
+var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
-const WALL_TH := 0.32      # half thickness of a barrier
-const WALL_H := 2.3
 
 func _init(match_node: Node) -> void:
 	m = match_node
 	m.world.dyn_walls = walls
+	ripple = BarrierRipple.new(m)
 
 # ------------------------------------------------------------------ barrier walls
 ## A wall segment centred at `at`, running across `d` (the aim), `length` long.
@@ -33,12 +47,13 @@ func add_wall(by: Node, at: Vector3, d: Vector2, e: Dictionary, pw: float) -> Di
 		"block": String(e.get("block", "enemy")), "move": bool(e.get("move", false)), "reflect": bool(e.get("reflect", false)),
 		"col": col, "touch": e.get("touch", {}), "follow": bool(e.get("follow", false)), "dist": float(e.get("dist", 1.4)),
 		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else "",
-		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null)}
+		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null),
+		"hit_sfx": String(e.get("hit_sfx", "ab_shield_hit"))}
 	# don't seal anyone inside it: a movement-blocking wall skips the bits that would trap someone
 	w["node"] = _wall_node(w)
 	walls.append(w)
 	m.fx.burst(Vector3(c2.x, at.y + 0.4, c2.y), col, 20, 4.0, 0.45, 2.0, 1.2)
-	m.sfx("shield", at, -2.0, 0.7)
+	Effects.snd(m, e, "shield", at, -2.0, 0.7)
 	return w
 
 func _wall_node(w: Dictionary) -> Node3D:
@@ -53,7 +68,8 @@ func _wall_node(w: Dictionary) -> Node3D:
 	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var base := Models.part(n, Models.box(length + 0.1, 0.1, WALL_TH * 2.4), Models.glow_mat(Color(col, 0.8)), Vector3(0, 0.05, 0))
 	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for sx in [-0.5, 0.5]:
+	# (a wall carried in front of a Hunter has no opaque posts: the bearer always shows through it)
+	for sx in ([] if w["follow"] else [-0.5, 0.5]):
 		Models.part(n, Models.box(0.22, WALL_H + 0.2, WALL_TH * 2.6), Models.toon(col.darkened(0.25), true, 0.6), Vector3(length * sx, (WALL_H + 0.2) * 0.5, 0))
 	if w["reflect"]:
 		# a prism wall: facets that catch the light
@@ -85,24 +101,79 @@ func _break_wall(w: Dictionary) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
 
-## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
-static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
+## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
+## Mass Guard) never does: it would hide its own bearer from everyone they face.
+static func blocks_sight(w: Dictionary) -> bool:
+	return not bool(w.get("follow", false))
+
+## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
+## crosser class (Blockers): "phase" for a Spirit Walk.
+static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not w["move"]:
-			continue
-		if absf(y - float(w["y"])) > 1.9:
+		var top := wall_top(w, y)
+		if top <= 0.0 or not Blockers.wall_stops(w, cls):
 			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
-		if p.distance_to(c) < r * 0.8 + float(w["th"]):
-			return float(w["y"]) + 3.0
+		if p.distance_to(c) < wall_reach(w, r):
+			return top
 	return 0.0
 
+## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
+## block movement, or the body is above or on it).
+static func wall_top(w: Dictionary, y: float) -> float:
+	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+		return 0.0
+	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+	var top := StoneStand.top_for(w) if w.has("top") else 3.0
+	if y >= float(w["y"]) + top - World.STEP:
+		return 0.0
+	return float(w["y"]) + top
+
+## How close the centre of a body of radius r may come to barrier w's line.
+static func wall_reach(w: Dictionary, r: float) -> float:
+	return r * 0.8 + float(w["th"])
+
 # ------------------------------------------------------------------ reflect windows
-func add_mirror(ent: Node, e: Dictionary) -> void:
+## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
+func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 	var col := Color(String(e.get("color", "#bff6ff")))
 	var arc := float(e.get("arc", -1.0))
 	var r := float(e.get("radius", 1.7))
+	var key := "%.2f|%.2f|%s" % [arc, r, col.to_html(false)]
+	var pool: Array = _mirror_pool.get(key, [])
+	var n: Node3D = null
+	while not pool.is_empty() and n == null:
+		var cand: Node3D = pool.pop_back()
+		if is_instance_valid(cand):
+			n = cand
+			n.visible = true
+	if n == null:
+		n = _build_mirror(arc, r, col)
+		n.set_meta("pool_key", key)
+		m.add_child(n)
+	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "hit_sfx": String(e.get("hit_sfx", "")), "node": n, "col": col, "caught": 0})
+	Effects.snd(m, e, "shield", ent.pos, -3.0, 1.4)
+	return mirrors[-1]
+
+func _release_mirror(mr: Dictionary) -> void:
+	var nd = mr["node"]
+	if not is_instance_valid(nd):
+		return
+	var key := String(nd.get_meta("pool_key", ""))
+	if key == "":
+		nd.queue_free()
+		return
+	(nd as Node3D).visible = false
+	var pool: Array = _mirror_pool.get(key, [])
+	if pool.size() < 4:
+		pool.append(nd)
+		_mirror_pool[key] = pool
+	else:
+		nd.queue_free()
+
+func _build_mirror(arc: float, r: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	if arc > -0.99:
 		# a curved frontal shield: a fan of glowing panels
@@ -111,15 +182,9 @@ func add_mirror(ent: Node, e: Dictionary) -> void:
 			var a := -half + 2.0 * half * i / 6.0
 			var pnl := Models.part(n, Models.box(r * 2.0 * half / 6.0 + 0.08, 1.7, 0.08), Models.glow_mat(Color(col, 0.55)), Vector3(sin(a) * r, 0.95, -cos(a) * r), Vector3.ONE, Vector3(0, -a, 0))
 			pnl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	else:
-		var s := Models.part(n, Models.sphere(r, 20), Models.glow_mat(Color(col, 0.22)), Vector3(0, 0.9, 0))
-		s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var rg := Models.part(n, Models.flat_quad(r * 2.0), Models.ring_mat(Color(col, 0.9), 0.08), Vector3(0, 0.08, 0))
 	rg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	m.add_child(n)
-	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
-	m.sfx("shield", ent.pos, -3.0, 1.4)
+	return n
 
 func _mirror_dir(mr: Dictionary) -> Vector2:
 	var ent = mr["ent"]
@@ -175,7 +240,9 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	m.sfx("click", at, -4.0, 0.9)
 
 # ------------------------------------------------------------------ terrain
-## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span).
+## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span). The ground is
+## solid at once; e.rise (s) heaves the slabs up into place, and e.warn (s) gives the last seconds a crumble
+## warning (cracks and a shake) in place of the flicker, the slabs dropping away at the end.
 func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var length := float(e.get("length", 9.0))
 	var width := float(e.get("width", 2.0))
@@ -213,15 +280,70 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 		n.free()
 		return 0
 	m.add_child(n)
-	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
-	m.sfx("shield", from, -2.0, 1.6)
+	var rise := float(e.get("rise", 0.0))
+	if rise > 0.0:
+		n.position.y = -BRIDGE_RISE_DROP
+		n.create_tween().tween_property(n, "position:y", 0.0, rise).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	terrain.append({
+		"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0),
+		"team": int(by.team), "warn": float(e.get("warn", 0.0)),
+	})
+	Effects.snd(m, e, "shield", from, -2.0, 1.6)
 	return tiles.size()
+
+## A crumble-warned span's last seconds: cracks show and the slabs shake harder as the end nears (smooth sines,
+## no per-frame jitter); at the end they drop away.
+func _bridge_warn(tz: Dictionary, n: Node3D) -> void:
+	var left := float(tz["t"])
+	var k := clampf(1.0 - left / float(tz["warn"]), 0.0, 1.0)
+	var a := BRIDGE_SHAKE * (0.3 + 0.7 * k * k)
+	var ph := float(m.time) * BRIDGE_SHAKE_HZ * TAU
+	n.position = Vector3(sin(ph) * a, sin(ph * 1.7 + 1.3) * a * 0.5, sin(ph * 1.3 + 2.1) * a)
+	if n.get_node_or_null("Cracks") == null:
+		_bridge_cracks(n, tz)
+	if float(m.time) - float(tz.get("puff_at", -9.0)) >= BRIDGE_PUFF_GAP:
+		tz["puff_at"] = float(m.time)
+		m.fx.dust(_bridge_mid(tz), 4 + int(6.0 * k))      # grit spilling off it, more toward the end
+
+func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
+	var cracks := Node3D.new()
+	cracks.name = "Cracks"
+	n.add_child(cracks)
+	var mat := Models.glow_mat(Color((tz["col"] as Color).lightened(0.85), 1.0))
+	var w: World = m.world
+	for td in tz["tiles"]:
+		var i := int(td[0])
+		var c := Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL + 0.015, i / w.w + 0.5)
+		for j in 2:      # two crossed cracks a slab, wide enough to read at the match camera
+			var crack := Models.part(cracks, Models.box(BRIDGE_CRACK_W, 0.02, 1.15), mat, c)
+			crack.rotation.y = float(i % 7) * 0.45 + j * 1.7
+			crack.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	m.sfx("br_crack", _bridge_mid(tz), -6.0, 0.9)
+
+## The middle of a span (its middle tile's centre, on its top).
+func _bridge_mid(tz: Dictionary) -> Vector3:
+	var w: World = m.world
+	var i := int(tz["tiles"][tz["tiles"].size() / 2][0])
+	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, i / w.w + 0.5)
+
+## A crumble-warned span ends: its slabs drop into the abyss in a spray of dust.
+func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
+	var at := _bridge_mid(tz)
+	m.fx.dust(at, 12)
+	m.fx.burst(at + Vector3(0, 0.2, 0), tz["col"], 14, 4.0, 0.4, -6.0, 1.3)
+	m.sfx("br_crumble", at, -3.0, 0.9)
+	var tw := n.create_tween()
+	tw.tween_property(n, "position:y", -BRIDGE_FALL, BRIDGE_FALL_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(n.queue_free)
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
-## monsters and kin are carried.
+## monsters and kin are carried. A body another game owns is yanked there by its own game.
 func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 	if ent == null or ent.dead:
+		return
+	if ent.remote:
+		m.displace.yank_remote(ent, to, dur, hop)      # its own game runs this same yank (Displace)
 		return
 	if ent is Hunter:
 		var h := ent as Hunter
@@ -229,6 +351,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 		h.roll_t = 0.0
 		h.launch_to(to + Vector3(0, 0.3, 0), dur)
 		h.knock_t = 0.0
+		for y in yanked:
+			if y["hunter"] == h:
+				yanked.erase(y)
+				break
+		yanked.append({"hunter": h, "to": to, "t": 0.0, "dur": maxf(0.12, dur)})
 		return
 	if ent.mass() >= 6.0:
 		return          # too heavy to drag (wardens, sentinels)
@@ -240,9 +367,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 # ------------------------------------------------------------------ decoys
 func add_decoy(owner: Hunter, at: Vector3, time: float, col: Color) -> void:
 	var n := Node3D.new()
-	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, 0.55)), Vector3(0, 0.8, 0))
+	# soft and see-through: a hunter-shaped ghost left behind, not a flash where the dash set off
+	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, DECOY_A)), Vector3(0, 0.8, 0))
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var head := Models.part(n, Models.sphere(0.24, 10), Models.glow_mat(Color(col.lightened(0.3), 0.7)), Vector3(0, 1.75, 0))
+	var head_mat := Models.glow_mat(Color(col.lightened(0.3), DECOY_A + 0.1))
+	var head := Models.part(n, Models.sphere(0.24, 10), head_mat, Vector3(0, 1.75, 0))
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	n.global_position = at
@@ -256,6 +385,23 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only;
+## cls is the shot's crosser class, Blockers: a "pierce" shot passes rocks.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float, cls := "solid") -> bool:
+	if (w["block"] != "all" and int(w["team"]) == team) or not Blockers.wall_stops(w, cls):
+		return false
+	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+		return false
+	var p2 := Vector2(p.x, p.z)
+	return p2.distance_to(Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])) <= float(w["th"]) + r
+
+## The barrier that stopped a shot of `team` that ended at p ({} if none: terrain did).
+func stopper(p: Vector3, team: int, r: float) -> Dictionary:
+	for w in walls:
+		if _stops(w, team, p, r):
+			return w
+	return {}
+
 ## Called for every step of every shot. Returns "" (carry on), "end" (stopped by a wall) or
 ## "bounce" (reflected: it now belongs to the reflector).
 func shot_check(s: Dictionary, p: Vector3) -> String:
@@ -263,14 +409,11 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
+	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
-			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + WALL_H + 0.3:
+		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
-			continue
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()
@@ -278,12 +421,10 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			if v.dot(nrm) > 0.0: nrm = -nrm
 			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
-			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
+			_hit_wall(w, float(s["dmg"]) * 0.5, p)
 			return "bounce"
-		_hit_wall(w, float(s["dmg"]), s["col"])
-		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
-		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
-		m.sfx("ab_shield_hit", p, -8.0)
+		_hit_wall(w, float(s["dmg"]), p)
+		m.sfx(String(w["hit_sfx"]), p, -8.0)
 		return "end"
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
@@ -304,7 +445,6 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			var att = s["by"]
 			if float(mr["riposte"]) > 0.0 and is_instance_valid(att) and att is Ent:
 				(att as Ent).hurt(4.0, ent, {"stun": float(mr["riposte"]), "src": "abil", "ab": "parry", "kb": (att as Ent).dir_to(ent) * -5.0})
-				m.fx.word(att.pos + Vector3(0, 2.0, 0), "PARRIED", mr["col"], true)
 			m.fx.flash(p, mr["col"], 0.5, 0.08)
 			m.sfx("shield", p, 0.0, 1.8)
 			m.sfx("ab_parry", p, 0.0)
@@ -320,8 +460,11 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		_take_shot(s, back * 1.1, ent, int(mr["team"]), float(mr["k"]))
 		m.fx.flash(p, mr["col"], 0.4, 0.06)
 		m.fx.burst(p, mr["col"], 8, 4.0, 0.3, 2.0)
-		m.sfx("shield", p, -4.0, 1.9)
-		m.sfx("ab_parry", p, -5.0, 1.25)
+		if mr["hit_sfx"] != "":
+			m.sfx(String(mr["hit_sfx"]), p)
+		else:
+			m.sfx("shield", p, -4.0, 1.9)
+			m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
 		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
@@ -347,18 +490,28 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 	if s["node"]:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
-func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
+## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
+## `from` is where the blow came from.
+func absorb(w: Dictionary, dmg: float, from: Vector3) -> void:
+	if walls.has(w):
+		_hit_wall(w, dmg, from)
+
+## `from`: the shot's position, or where the blow came from; the ripple lands on the face that side.
+func _hit_wall(w: Dictionary, dmg: float, from: Vector3) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
 	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
 		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
-	if float(w["hp"]) <= 0.0:
+	var broke := float(w["hp"]) <= 0.0
+	ripple.on_wall(w, from, broke)
+	if broke:
 		_break_wall(w)
 
 # ------------------------------------------------------------------ simulation
 func tick(dt: float) -> void:
+	ripple.tick(dt)
 	for w in walls.duplicate():
 		w["t"] = float(w["t"]) - dt
 		w["hit_t"] = maxf(0.0, float(w["hit_t"]) - dt)
@@ -393,7 +546,7 @@ func tick(dt: float) -> void:
 		mr["t"] = float(mr["t"]) - dt
 		if float(mr["t"]) <= 0.0 or not is_instance_valid(mr["ent"]) or mr["ent"].dead:
 			mirrors.erase(mr)
-			if is_instance_valid(mr["node"]): mr["node"].queue_free()
+			_release_mirror(mr)
 	for t in tethers.duplicate():
 		var a = t["a"]; var b = t["b"]
 		if not is_instance_valid(a) or not is_instance_valid(b) or a.dead or b.dead or (b is Hunter and (b.downed or b.out)):
@@ -405,13 +558,11 @@ func tick(dt: float) -> void:
 			(t["kx_snap"] as Callable).call(a, b)
 			t["kx_end"] = null
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			_drop_tether(t)
 		elif d > float(t["max"]):
 			# stretched too far: it snaps, and the snap hurts
 			b.hurt(float(t["dmg"]), a, {"stun": float(t["stun"]), "src": "abil", "ab": "tether", "kb": b.dir_to(a) * 7.0, "lift": 2.0})
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			m.sfx("zap", b.pos, 0.0, 0.8)
 			m.sfx("ab_tether", b.pos, 0.0, 0.7)
 			m.fx.flash(b.pos + Vector3(0, 1.0, 0), Color(t["col"]).lerp(Color.WHITE, 0.4), 1.0, 0.14)
@@ -444,7 +595,6 @@ func tick(dt: float) -> void:
 				c3["target"] = f
 				if float(tr["reveal"]) > 0.0 and f is Hunter:
 					f.reveal_t = maxf(f.reveal_t, float(tr["reveal"]))
-				m.fx.word(at + Vector3(0, 1.6, 0), "TRAP", tr["col"], false)
 				m.sfx("click", at, 0.0, 1.7)       # the snap before it goes off
 				m.fx.flash(at + Vector3(0, 0.4, 0), Color(tr["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
 				if caster.dead:
@@ -459,10 +609,14 @@ func tick(dt: float) -> void:
 		tz["t"] = float(tz["t"]) - dt
 		if float(tz["t"]) <= 0.0:
 			var w: World = m.world
+			if is_instance_valid(tz["node"]):
+				if float(tz["warn"]) > 0.0:
+					_bridge_crumble(tz["node"], tz)       # (reads the tiles' level: before they turn back)
+				else:
+					tz["node"].queue_free()
 			for td in tz["tiles"]:
 				w.kind[int(td[0])] = int(td[1])
 				w.level[int(td[0])] = int(td[2])
-			if is_instance_valid(tz["node"]): tz["node"].queue_free()
 			terrain.erase(tz)
 	for dg in drags.duplicate():
 		var ent: Ent = dg["ent"]
@@ -477,11 +631,21 @@ func tick(dt: float) -> void:
 		ent.grounded = false
 		if k >= 1.0:
 			drags.erase(dg)
+	for y in yanked.duplicate():
+		var h: Hunter = y["hunter"]
+		y["t"] = float(y["t"]) + dt
+		if not is_instance_valid(h) or h.dead:
+			yanked.erase(y)
+		elif float(y["t"]) >= float(y["dur"]) and h.pad.is_empty():
+			# the arc ends at the hook's spot and stops there: no launch speed left to slide it into the caster
+			var to: Vector3 = y["to"]
+			h.pos = Vector3(to.x, h.pos.y, to.z)
+			h.vel = Vector3(0.0, minf(h.vel.y, 0.0), 0.0)
+			yanked.erase(y)
 	for dc in decoys.duplicate():
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:
 			if is_instance_valid(dc["node"]):
-				m.fx.burst((dc["pos"] as Vector3) + Vector3(0, 1.0, 0), Color("ffffff"), 10, 3.0, 0.3)
 				dc["node"].queue_free()
 			decoys.erase(dc)
 
@@ -520,6 +684,8 @@ func render(_alpha: float) -> void:
 			var a := 0.18 + 0.3 * hk
 			if float(w["hit_t"]) > 0.0: c = c.lerp(Color.WHITE, 0.7); a = 0.75
 			if float(w["t"]) < 0.6: a *= 0.5 + 0.5 * sin(m.time * 30.0)
+			if w["follow"]:
+				a *= CARRIED_A
 			body.material_override.set_shader_parameter("color", Color(c, a))
 	for mr in mirrors:
 		var n2: Node3D = mr["node"]
@@ -555,7 +721,11 @@ func render(_alpha: float) -> void:
 			rgn.material_override.set_shader_parameter("color", Color(tr["col"], (0.85 if armed else 0.35) if mine else 0.35))
 	for tz in terrain:
 		var n5: Node3D = tz["node"]
-		if is_instance_valid(n5) and float(tz["t"]) < 1.2:
+		if not is_instance_valid(n5):
+			continue
+		if float(tz["t"]) < float(tz["warn"]):
+			_bridge_warn(tz, n5)
+		elif float(tz["warn"]) <= 0.0 and float(tz["t"]) < 1.2:
 			n5.visible = fmod(float(tz["t"]), 0.24) > 0.08   # about to go: it flickers
 	for dc in decoys:
 		var n6: Node3D = dc["node"]
@@ -569,3 +739,7 @@ func clear() -> void:
 	for mr in mirrors:
 		if is_instance_valid(mr["node"]): mr["node"].queue_free()
 	mirrors.clear()
+	for k in _mirror_pool:
+		for nd in _mirror_pool[k]:
+			if is_instance_valid(nd): nd.queue_free()
+	_mirror_pool.clear()

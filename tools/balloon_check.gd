@@ -79,7 +79,7 @@ func run(main: Node) -> void:
 	h.kin = null; h.kin2 = null; shooter.kin = null; shooter.kin2 = null
 	for o in m.hunters:
 		if o != h and o != shooter: o.teleport(m.world.random_ground())
-	ok(_near(h.r, float(Data.CLASSES[h.cls]["hit_r"])), "hunter r is its class's hit_r (%s %.2f)" % [h.cls, h.r])
+	ok(_near(h.r, Arch.hit_r(h.arch, h.cdat)), "hunter r is its archetype's hit_r (%s %.2f)" % [h.cls, h.r])
 	var ed := _edge(m)
 	ok(not ed.is_empty(), "found an island edge")
 	if ed.is_empty():

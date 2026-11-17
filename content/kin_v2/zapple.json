@@ -7,7 +7,7 @@
 		"Bat"
 	],
 	"theme": "echo",
-	"flavor": "A long-eared hare with bat wings. It hears everything coming and fires ringing pulses of sound.",
+	"flavor": "A long-eared hare with bat wings. Echolop hears everything coming and fires ringing pulses of sound.",
 	"colors": {
 		"body": "#4a5aa8",
 		"belly": "#c9d2ff",
@@ -68,17 +68,6 @@
 			{
 				"type": "stun",
 				"duration": 0.9
-			}
-		]
-	},
-	"dodge_rider": {
-		"name": "Echo Step",
-		"modifiers": [
-			{
-				"type": "repeat",
-				"count": 1,
-				"delay": 0.18,
-				"falloff": 0.55
 			}
 		]
 	},

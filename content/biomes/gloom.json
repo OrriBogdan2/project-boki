@@ -52,17 +52,7 @@
 		}
 	],
 	"loot": {
-		"weapons": {
-			"sniper": 2,
-			"greatsword": 2,
-			"minigun": 2,
-			"rifle": 2,
-			"smg": 2,
-			"shotgun": 2,
-			"longsword": 2,
-			"twin_blades": 2,
-			"burst_rifle": 2
-		},
+		"slots": {"passive": 1.3, "glove": 1.3},
 		"rarity_bonus": 1,
 		"gear": [
 			"gloom"

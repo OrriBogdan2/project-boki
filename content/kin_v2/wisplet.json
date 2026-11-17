@@ -7,7 +7,7 @@
 		"Luna moth"
 	],
 	"theme": "lunar",
-	"flavor": "A moonlit owl with soft moth wings. It flits on moondust and dazzles foes with silver light.",
+	"flavor": "A moonlit owl with soft moth wings. Lunowl flits on moondust and dazzles foes with silver light.",
 	"colors": {
 		"body": "#d9d4f2",
 		"belly": "#fff8e6",
@@ -54,10 +54,6 @@
 		"name": "Moonstep",
 		"passives": [
 			{
-				"stat": "dodge_charges",
-				"amount": 1
-			},
-			{
 				"stat": "glide",
 				"amount": 0.2
 			}
@@ -71,11 +67,7 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Moon Blink",
-		"as": "blink"
-	},
-	"active": "moon_swap",
+	"active": "moon_mark",
 	"auto": "updraft",
 	"merge": "tempest",
 	"evolution": {

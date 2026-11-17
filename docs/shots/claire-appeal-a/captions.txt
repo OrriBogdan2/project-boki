@@ -1,0 +1,7 @@
+turnaround_close.jpg: rimewright close, front, 3/4, side, back, 3/4 back
+front_34.jpg: rimewright full length, front and three-quarter (as the sheet's two views)
+back_34.jpg: rimewright full length, back and three-quarter back
+closeup.jpg: rimewright head and shoulders, three-quarter front
+closeup_front.jpg: rimewright head and shoulders, from the front
+poses_game.jpg: rimewright at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+moves_close_1.jpg: rimewright, left to right: run, run, other foot

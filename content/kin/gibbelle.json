@@ -1,0 +1,19 @@
+{
+	"id": "gibbelle",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gibbelle.json.",
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#9b9c78",
+		"belly": "#f0f0e0",
+		"glow": "#ffc19a"
+	},
+	"work": {
+		"spark": 3,
+		"forage": 2,
+		"craft": 1
+	}
+}

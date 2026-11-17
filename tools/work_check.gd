@@ -100,6 +100,8 @@ func run(m: Node) -> void:
 	var H = load("res://scripts/home/home.gd").new()
 	main.add_child(H)
 	for _f in 4: await main.get_tree().process_frame
+	# built under a still-covered fade, the farm comes in slices
+	while H.building: await main.get_tree().process_frame
 	H.day_t = 0.5
 	var hw: HomeWork = H.hw
 	ok(hw != null and H.kins.size() == 6, "home puts the 6 farm kin out to work (the boxed one stays in the burrow)")
@@ -205,7 +207,9 @@ func run(m: Node) -> void:
 	var drip: Dictionary = ent.call("puddlet")
 	var f: Dictionary = Econ.feeders()[0] if not Econ.feeders().is_empty() else {}
 	if not f.is_empty():
-		f["food"] = ["kibble", "kibble", "kibble", "kibble"]
+		# a food Drip eats: its hated food is drawn from its random uid (Care.ensure), and 1 kin in ~14 hates kibble
+		var meal := "sweetbun" if String(drip["rec"]["likes"]["hates"]) == "kibble" else "kibble"
+		f["food"] = [meal, meal, meal, meal]
 		H.hecon.refresh_feeder(f)
 	Save.d["plots"][0] = {"crop": "sunroot", "stage": 0, "care": 0, "wt": 0.0}
 	hw.scan()

@@ -1,0 +1,17 @@
+{
+ "id": "scanner",
+ "name": "Seeker flare",
+ "short": "Seek",
+ "icon": "scanner",
+ "col": "9ab4ff",
+ "use": "scan",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 50,
+ "desc": "Reveals every rival hunter within 26 tiles for 3s, through walls and grass."
+}

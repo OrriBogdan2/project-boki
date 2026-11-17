@@ -1,3 +1,4 @@
+class_name TerrainMesh
 extends RefCounted
 ## Draws a World's tile grid as clean, deliberate terrain. Only the look changes: walking, heights,
 ## ramps and which rims you can grab all still follow the tiles exactly.
@@ -25,6 +26,18 @@ enum { E_TERRACE, E_LIP, E_SHEER, E_COAST }
 
 const PAD := 4
 var W: Node
+# the world's grids and tables the tracer reads, copied in _init: a band tracer on a worker thread reading
+# them through W copied each shared container on every access (an atomic refcount every thread fought for),
+# which made eight bands take as long as one
+var level := PackedByteArray()
+var kind := PackedByteArray()
+var island := PackedInt32Array()
+var stairs := {}
+var sheer := {}
+var lip := {}
+var paint := {}
+var isl_bio: Array = []
+var biome := {}
 var w := 0
 var h := 0
 var pw := 0
@@ -46,12 +59,26 @@ var UV := PackedVector2Array()
 func _init(world: Node) -> void:
 	W = world
 	w = W.w; h = W.h
+	level = W.level.duplicate()
+	kind = W.kind.duplicate()
+	island = W.island.duplicate()
+	stairs = W.stairs.duplicate()
+	sheer = W.sheer.duplicate()
+	lip = W.lip.duplicate()
+	paint = W.paint.duplicate()
+	isl_bio = W._isl_bio.duplicate(true)
+	biome = W.biome.duplicate(true)
 	pw = w + PAD * 2
 	rn.seed = int(W.rng.seed) + 77
 	rn.frequency = 0.9
 
 func v(x: int, z: int) -> int:
 	return vals[(z + PAD) * pw + x + PAD]
+
+## The biome an island's tile draws with (World._bio, from this tracer's copies).
+func _bio(i: int) -> Dictionary:
+	var ii: int = island[i] if i >= 0 and i < island.size() else -1
+	return isl_bio[ii] if ii >= 0 and ii < isl_bio.size() else biome
 
 ## Builds the whole terrain mesh.
 func build() -> ArrayMesh:
@@ -61,8 +88,8 @@ func build() -> ArrayMesh:
 ## The same terrain split into square chunks of `chunk` tiles, so the camera (and each shadow
 ## cascade) only draws the ground it can see: [[Vector2i chunk, ArrayMesh], ...]. Cells are traced
 ## row by row, so each chunk is a run of slices of the one big set of arrays.
-func build_chunked(chunk: int) -> Array:
-	await _emit(chunk)
+func build_chunked(chunk: int, bands := 0) -> Array:
+	await _emit(chunk, bands)
 	var by := {}
 	await W._slice()
 	for r in _ranges:
@@ -82,33 +109,89 @@ func build_chunked(chunk: int) -> Array:
 
 var _ranges: Array = []     # [chunk, first vertex, end vertex] in the order they were traced
 
-func _emit(chunk: int) -> void:
+## Fills the grids, then traces every cell: the ground colours and underside depths on two worker threads,
+## then a band of rows per thread (each band traces into a tracer of its own over the same grids), joined
+## in row order, so the vertices, chunk ranges and rim spots are what one pass traced, in a fraction of the
+## time. `bands` 0: one per core, up to BANDS_MAX (--build-threads-check compares band counts).
+func _emit(chunk: int, bands := 0) -> void:
 	_fill_grid()
 	await W._slice()
-	_fill_colors()
-	await W._slice()
-	_fill_under()
+	await BuildThreads.start(W as World, _fill_part, 2).wait()
+	_chunk = chunk
+	_bands.clear()
+	var n := bands if bands > 0 else clampi(OS.get_processor_count(), 1, BANDS_MAX)
+	for b in n:
+		var t := TerrainMesh.new(W)
+		t.vals = vals
+		t.tops = tops
+		t.under = under
+		_bands.append(t)
+	await BuildThreads.start(W as World, _trace_band, n).wait()
 	_ranges.clear()
-	for cz in range(-1, h):
-		await W._slice()       # under the loading screen: a frame now and then (never waits in one-go builds)
+	for t: TerrainMesh in _bands:
+		var off := V.size()
+		for r in t._ranges:
+			_ranges.append([r[0], int(r[1]) + off, int(r[2]) + off])
+		V.append_array(t.V)
+		N.append_array(t.N)
+		C.append_array(t.C)
+		UV.append_array(t.UV)
+		rims.append_array(t.rims)
+	_bands.clear()
+	await W._slice()
+	# each flight is drawn as one piece across its whole width (its steps run unbroken from one side
+	# wall to the other), not tile by tile: per-tile steps restarted their stones, joints and landing
+	# at every tile edge, so a 5-wide flight read as five one-block stairs side by side
+	for F in PolishTools.stair_flights(W):
+		await W._slice()
+		var tiles: Array = F["tiles"]
+		var lv0: int = W.level[W.idx(tiles[0].x, tiles[0].y)]
+		if tiles.any(func(q): return W.kind[W.idx(q.x, q.y)] == W.T_VOID or W.level[W.idx(q.x, q.y)] != lv0):
+			for q in tiles:
+				var i: int = W.idx(q.x, q.y)
+				if W.kind[i] == W.T_VOID: continue
+				var s0 := V.size()
+				_stairs(q.x, q.y, F["dir"], W.level[i] * LEVEL)
+				if chunk > 0: _ranges.append([Vector2i(q.x / chunk, q.y / chunk), s0, V.size()])
+			continue
+		var org := _flight_origin(tiles, F["dir"])
+		var mid: Vector2i = tiles[tiles.size() / 2]
+		var s1 := V.size()
+		_stairs(org.x, org.y, F["dir"], W.level[W.idx(org.x, org.y)] * LEVEL, tiles.size())
+		if chunk > 0: _ranges.append([Vector2i(mid.x / chunk, mid.y / chunk), s1, V.size()])
+
+const BANDS_MAX := 8        # tracers at once: more only splits the rows finer than the pool has cores
+var _bands: Array = []      # the band tracers while _emit runs
+var _chunk := 0
+
+func _fill_part(i: int) -> void:
+	if i == 0:
+		_fill_under()
+	else:
+		_fill_colors()
+
+## Band b's share of the rows -1..h-1, traced into its own tracer.
+func _trace_band(b: int) -> void:
+	var per := ceili(float(h + 1) / _bands.size())
+	var z0 := -1 + b * per
+	(_bands[b] as TerrainMesh)._trace_rows(z0, mini(z0 + per, h), _chunk)
+
+## The cells of rows z0..z1, row by row (chunk ranges count this tracer's own vertices).
+func _trace_rows(z0: int, z1: int, chunk: int) -> void:
+	for cz in range(z0, z1):
 		var cur := Vector2i(-99, -99)
 		var start := V.size()
 		for cx in range(-1, w):
 			if chunk > 0:
 				var key := Vector2i(clampi(cx, 0, w - 1) / chunk, clampi(cz, 0, h - 1) / chunk)
 				if key != cur:
-					if cur.x != -99: _ranges.append([cur, start, V.size()])
-					cur = key; start = V.size()
+					if cur.x != -99:
+						_ranges.append([cur, start, V.size()])
+					cur = key
+					start = V.size()
 			_cell(cx, cz)
-		if chunk > 0 and cur.x != -99: _ranges.append([cur, start, V.size()])
-	await W._slice()
-	for si in W.stairs:
-		await W._slice()
-		var i: int = si
-		if W.kind[i] != W.T_VOID:
-			var s0 := V.size()
-			_stairs(i % w, i / w, W.stairs[i], W.level[i] * LEVEL)
-			if chunk > 0: _ranges.append([Vector2i((i % w) / chunk, (i / w) / chunk), s0, V.size()])
+		if chunk > 0 and cur.x != -99:
+			_ranges.append([cur, start, V.size()])
 
 func _mesh(vv: PackedVector3Array, nn: PackedVector3Array, cc: PackedColorArray, uu: PackedVector2Array) -> ArrayMesh:
 	var arr := []
@@ -153,12 +236,12 @@ func _fill_colors() -> void:
 			var i: int = z * w + x
 			if v(x, z) < 0:
 				continue
-			var bio: Dictionary = W._bio(i)
+			var bio: Dictionary = _bio(i)
 			var cx := x + 0.5; var cz := z + 0.5
 			var nv := tn.get_noise_2d(cx * 0.6, cz * 0.6) * 0.5 + 0.5
 			var nv2 := tn.get_noise_2d(cx * 2.1 + 40.0, cz * 2.1) * 0.5 + 0.5
 			var col: Color = Color(bio["top"]).lerp(bio["top2"], nv).lerp(Color(bio["top"]).lightened(0.08), nv2 * 0.35)
-			col = col.lightened(0.03 * W.level[i])
+			col = col.lightened(0.03 * level[i])
 			# paths and soil: blend the paint of this tile and its neighbours, so paths have soft edges.
 			# (The rim paints that used to mark grabbable and sheer rims are drawn by the cliff now.)
 			var pc := Color(0, 0, 0, 0); var wsum := 0.0
@@ -168,9 +251,9 @@ func _fill_colors() -> void:
 					if tx < 0 or tz < 0 or tx >= w or tz >= h:
 						continue
 					var j: int = tz * w + tx
-					if not W.paint.has(j):
+					if not paint.has(j):
 						continue
-					var p: Color = W.paint[j]
+					var p: Color = paint[j]
 					if p == lip_paint or p == sheer_paint:
 						continue
 					var wt := 1.0 if dx == 0 and dz == 0 else (0.35 if dx == 0 or dz == 0 else 0.2)
@@ -224,13 +307,13 @@ func _fill_under() -> void:
 	var reach := {}
 	for i in w * h:
 		if d[i] > 0.0:
-			var ii: int = W.island[i]
+			var ii: int = island[i]
 			reach[ii] = maxf(float(reach.get(ii, 1.0)), d[i] - 0.5)
 	for i in w * h:
 		if d[i] <= 0.0:
 			continue
 		var x := i % w; var z := i / w
-		var R: float = maxf(1.5, float(reach.get(W.island[i], 1.5)))
+		var R: float = maxf(1.5, float(reach.get(island[i], 1.5)))
 		var dc := d[i] - 0.5
 		var deep := clampf(3.0 + R * 0.7, 4.0, 15.0)
 		var t := clampf(dc / R, 0.0, 1.0)
@@ -292,8 +375,8 @@ func _cross(ax: int, az: int, bx: int, bz: int, t: int) -> Dictionary:
 	var rim := 0.0
 	if vb < 0:
 		style = E_COAST
-		if ia >= 0 and W.sheer.has(ia): style = E_SHEER
-		elif ia >= 0 and W.lip.has(ia): style = E_LIP
+		if ia >= 0 and sheer.has(ia): style = E_SHEER
+		elif ia >= 0 and lip.has(ia): style = E_LIP
 		rim = v(ax, az) * LEVEL - _rim(p)
 	var ib := -1
 	if bx >= 0 and bz >= 0 and bx < w and bz < h: ib = bz * w + bx
@@ -318,7 +401,7 @@ func _cell(cx: int, cz: int) -> void:
 		var y: float = vs[0] * LEVEL
 		_tri3(Vector3(ps[0].x, y, ps[0].y), Vector3(ps[1].x, y, ps[1].y), Vector3(ps[2].x, y, ps[2].y), Vector3.UP, cols[0], cols[1], cols[2], S_TOP, true)
 		_tri3(Vector3(ps[0].x, y, ps[0].y), Vector3(ps[2].x, y, ps[2].y), Vector3(ps[3].x, y, ps[3].y), Vector3.UP, cols[0], cols[2], cols[3], S_TOP, true)
-		var bio: Dictionary = W._bio(cz * w + cx if cx >= 0 and cz >= 0 else 0)
+		var bio: Dictionary = _bio(cz * w + cx if cx >= 0 and cz >= 0 else 0)
 		_under_tri([Vector3(ps[0].x, us[0], ps[0].y), Vector3(ps[1].x, us[1], ps[1].y), Vector3(ps[2].x, us[2], ps[2].y)], [vs[0], vs[1], vs[2]], bio)
 		_under_tri([Vector3(ps[0].x, us[0], ps[0].y), Vector3(ps[2].x, us[2], ps[2].y), Vector3(ps[3].x, us[3], ps[3].y)], [vs[0], vs[2], vs[3]], bio)
 		return
@@ -335,7 +418,7 @@ func _cell(cx: int, cz: int) -> void:
 	var bio: Dictionary = {}
 	for k in 4:
 		if vs[k] >= 0:
-			bio = W._bio((cz + CZ[k]) * w + cx + CX[k]) if cx + CX[k] >= 0 and cz + CZ[k] >= 0 and cx + CX[k] < w and cz + CZ[k] < h else W.biome
+			bio = _bio((cz + CZ[k]) * w + cx + CX[k]) if cx + CX[k] >= 0 and cz + CZ[k] >= 0 and cx + CX[k] < w and cz + CZ[k] < h else biome
 			break
 	for t in distinct:
 		var poly := _walk(cx, cz, vs, t)
@@ -444,7 +527,7 @@ func _note_rim(P: Dictionary, Q: Dictionary, top: float) -> void:
 		return
 	for X in [P, Q]:
 		var a: int = X["a"]; var b: int = X["b"]
-		if a < 0 or absf(W.level[a] * LEVEL - top) > 0.01 or W.stairs.has(a) or (b >= 0 and W.stairs.has(b)) or W.kind[a] != W.T_GROUND:
+		if a < 0 or absf(level[a] * LEVEL - top) > 0.01 or stairs.has(a) or (b >= 0 and stairs.has(b)) or kind[a] != World.T_GROUND:
 			return
 	var m: Vector2 = (P["p"] + Q["p"]) * 0.5
 	var n: Vector2 = (P["n"] + Q["n"]).normalized()
@@ -455,7 +538,7 @@ func _note_rim(P: Dictionary, Q: Dictionary, top: float) -> void:
 func _profile(X: Dictionary, top: float) -> Array:
 	var p: Vector2 = X["p"]; var n: Vector2 = X["n"]
 	var ia: int = X["a"]
-	var bio: Dictionary = W._bio(ia) if ia >= 0 else W.biome
+	var bio: Dictionary = _bio(ia) if ia >= 0 else biome
 	var style: int = X["style"]
 	var bottom: float = minf(X["rim"], top - 0.3) if X["void"] else float(X["ground"])
 	var H := top - bottom
@@ -510,9 +593,23 @@ func _under_tri(p: Array, _lv: Array, bio: Dictionary) -> void:
 	_tri3(a, b, c, fn, cols[0], cols[1], cols[2], S_UNDER, false)
 
 # ------------------------------------------------------------------ stairs
-## A carved stone flight across one tile, rising toward dir, with stone side walls where the flight
-## ends (a wide authored flight only gets them at its two ends).
-func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
+## The tile a flight's "across" coordinate starts from: _stairs maps s = 0..1 across tile (x, z) in
+## a direction that depends on dir, so the flight's s = 0..span runs from this end tile on.
+func _flight_origin(tiles: Array, dir: Vector2i) -> Vector2i:
+	var across: Vector2
+	match dir:
+		Vector2i(1, 0): across = Vector2(0, 1)
+		Vector2i(-1, 0): across = Vector2(0, -1)
+		Vector2i(0, 1): across = Vector2(-1, 0)
+		_: across = Vector2(1, 0)
+	var best: Vector2i = tiles[0]
+	for q in tiles:
+		if Vector2(q).dot(across) < Vector2(best).dot(across): best = q
+	return best
+
+## A carved stone flight rising toward dir, `span` tiles wide starting at tile (x, z) (see
+## _flight_origin), with stone side walls where the flight ends.
+func _stairs(x: int, z: int, dir: Vector2i, y: float, span := 1) -> void:
 	var i := z * w + x
 	var bio: Dictionary = W._bio(i)
 	var stone := Color("cdc4b2").lerp(Color(bio["side"]), 0.22).lerp(Color(bio["top"]), 0.08)
@@ -529,16 +626,23 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 	var side_a := Vector3(-dir.y, 0, dir.x)
 	# which ends of the flight need a side wall
 	var cheeks: Array = []
+	var L := float(span)
 	for sv in [0.0, 1.0]:
-		var sd: Vector3 = to_world.call(0.5, -0.5 if sv == 0.0 else 1.5, 0.0)
+		var sd: Vector3 = to_world.call(0.5, -0.5 if sv == 0.0 else L + 0.5, 0.0)
 		var nx := int(floor(sd.x)); var nz := int(floor(sd.z))
 		var j := nz * w + nx
 		var same: bool = nx >= 0 and nz >= 0 and nx < w and nz < h and W.stairs.has(j) and W.stairs[j] == dir
 		cheeks.append(not same)
 	var s0 := 0.13 if cheeks[0] else 0.0
-	var s1 := 0.87 if cheeks[1] else 1.0
+	var s1 := L - 0.13 if cheeks[1] else L
 	if Flora.v2():
-		_stairs_cut(x, z, dir, y, to_world, upv, side_a, cheeks, s0, s1, bio)
+		_stairs_cut(x, z, dir, y, to_world, upv, side_a, cheeks, s0, s1, bio, L)
+		return
+	if span > 1:
+		# the first art pass's flight is drawn a tile at a time
+		var step := Vector2i(int(round((to_world.call(0.5, 1.5, 0.0) - to_world.call(0.5, 0.5, 0.0)).x)), int(round((to_world.call(0.5, 1.5, 0.0) - to_world.call(0.5, 0.5, 0.0)).z)))
+		for k in span:
+			_stairs(x + step.x * k, z + step.y * k, dir, y)
 		return
 	for k in n:
 		var u0 := float(k) / n; var u1 := float(k + 1) / n
@@ -580,7 +684,7 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 ## The second art pass's flight: each step laid from two or three cut stones with chiselled, worn
 ## edges and dark joints, set a little unevenly, moss creeping in at the sides (snow, ash or petals
 ## by biome), and side walls built of chunky blocks with a bevelled coping.
-func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, upv: Vector3, side_a: Vector3, cheeks: Array, s0: float, s1: float, bio: Dictionary) -> void:
+func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, upv: Vector3, side_a: Vector3, cheeks: Array, s0: float, s1: float, bio: Dictionary, L := 1.0) -> void:
 	var n := 4
 	var rr := RandomNumberGenerator.new(); rr.seed = hash(Vector2i(x, z))
 	var st := Flora.style_ok(W.style_at(z * w + x))
@@ -626,9 +730,9 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 		var la: float = land[0]; var lb: float = land[1]; var ly: float = land[2]
 		var cuts2: Array = [0.0]
 		var at2 := rr.randf_range(0.3, 0.55)
-		while at2 < 0.8:
+		while at2 < L - 0.2:
 			cuts2.append(at2); at2 += rr.randf_range(0.35, 0.55)
-		cuts2.append(1.0)
+		cuts2.append(L)
 		for q in cuts2.size() - 1:
 			var a0: float = float(cuts2[q]) + 0.015
 			var a1: float = float(cuts2[q + 1]) - 0.015
@@ -638,8 +742,8 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 	for q in 2:
 		if not cheeks[q]:
 			continue
-		var na: float = -0.02 if q == 0 else 0.84
-		var nb: float = 0.16 if q == 0 else 1.02
+		var na: float = -0.02 if q == 0 else L - 0.16
+		var nb: float = 0.16 if q == 0 else L + 0.02
 		var cs2 := stone.darkened(0.1)
 		_block(to_world, upv, side_a, -0.3, 0.02, na, nb, -0.04, 0.56, cs2, rr)
 		_block(to_world, upv, side_a, -0.33, 0.05, na - 0.025, nb + 0.025, 0.56, 0.64, cs2.lightened(0.16), rr)
@@ -647,8 +751,8 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 	for q in 2:
 		if not cheeks[q]:
 			continue
-		var sa: float = 0.0 if q == 0 else 0.87
-		var sb: float = 0.13 if q == 0 else 1.0
+		var sa: float = 0.0 if q == 0 else L - 0.13
+		var sb: float = 0.13 if q == 0 else L
 		var outn: Vector3 = -side_a if q == 0 else side_a
 		var cs := stone.darkened(0.06)
 		for part in 2:

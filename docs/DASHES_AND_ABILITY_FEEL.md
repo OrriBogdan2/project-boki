@@ -13,7 +13,7 @@ It follows the archetype model in `docs/ARCHETYPES.md`:
 - the **weight class** (light, medium, heavy) sets dash **charges, recharge, air dash and mass**;
 - the **archetype** (Thief, Archer, Mage, Gunslinger, Juggernaut, Bulwark) sets the dash's **shape
   and input**;
-- the **kin** adds its `dodge_rider` (KIN_GRAMMAR.md) on top.
+- the **kin** adds nothing: dodge riders are retired (§3.4).
 
 Until archetypes ship, the three current class dashes stay as they are. Phase Step grows into the
 Thief's Flicker, Combat Roll into the Gunslinger's Slide Reload, and Shoulder Charge into the
@@ -131,7 +131,7 @@ Takeaways for Kinfall:
 | Smash Ultimate hitlag = (damage×0.65 + 6)×multipliers frames, capped at 30 (a 15% hit freezes 15 frames); Melee capped at 20 | SmashWiki "Hitlag" |
 | A Godot reference hitstop of 0.08s (time scale 0.05, not 0), flash recovery 0.15s, trauma 0.7 decaying 3/s; one owner for time scale; a call token so a short stop can't end a long one | uhiyama-lab Godot hitstop note |
 | Trauma-based camera shake (shake = trauma² or trauma³, noise-driven) is the standard approach | Eiserloh GDC 2016 (session summary) |
-| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze + 0.22s slow-mo) | scripts/match/match.gd |
+| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze, ring, burst, kill sound; its 0.22s slow-mo and white flash were removed 11-11, §5.4 knock moment) | scripts/match/match.gd |
 
 ### 2.3 Colour, shape and sound language
 
@@ -285,8 +285,9 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 
 ### 3.3 Dash-wide rules
 
-- Every dash spends a visible pip. Enemies see a hunter's remaining dash charges as small pips under
-  their health bar, within 14m. This is the two-sided "they used it, now go" read the owner asked for.
+- Every dash spends a visible pip on your own dash slot (DashSlot: a pip per charge, the countdown for the
+  next, a flash and tick on return; the same slot at home). Owner item 84 removed the dash bar under the
+  overhead health bar, so enemies' charges are no longer shown; the enemy read is the dash animation itself.
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
@@ -294,7 +295,9 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
-### 3.4 How kin riders hook into each shape
+### 3.4 How kin riders hook into each shape (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 General rules, so any rider, including a community one, maps onto any shape:
 
@@ -309,7 +312,9 @@ General rules, so any rider, including a community one, maps onto any shape:
 Riders are priced in Phase 3 like any other part. A rider can't change a dash's input, charges or
 protection. Those belong to the archetype and weight class.
 
-### 3.5 Every archetype + kin dash
+### 3.5 Every archetype + kin dash (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 Riders today (content/kin_v2):
 
@@ -370,7 +375,7 @@ Notation:
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak and a "SPIKED" word | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
+| **Gravity Slam** (leap 7m → pull 3.5m → burst 2.4m lift + spike) | the landing circle shows to everyone for the whole 0.5s flight and fills as it falls; a low gravity whine rises in pitch | two beats: the pull lands on touchdown (T2, debris sucked inward), then **0.12s later** the crater erupts (lift + spike). Spiked foes get a downward slam streak | tell: whine; impact 1: sub-bass whump; impact 2: control hard hit + crack; sweetener: pebbles | control | T2 then T4 on spike | 0.3 owner, 0.35 spiked | add `{"type":"delay","time":0.12}` to the second burst, so pull and lift read as two beats and the spike has a chance on foes the pull lifted. 0.5s flight is above the 0.40s hard-CC rule |
 | **Mass Guard** (auto wall 2.4m, follows owner) | the kin rolls into a ball for 0.15s, then the plate rises | the plate slams up: dust, a clunk; enemy shots spark off it | impact: utility thunk; while up, shots hitting it ping | utility (shield) | T0 | 0 | add `then.on_end`: burst 1.5m push 6 ("the plate drops"), so the end is visible and gives a peel moment both sides can play around |
 | **Gravity Wake** (dodge rider) | a purple ring shows at the dash's end for 0.15s before the pull | foes slide in with debris streaks | sweetener: whump | control | T1 | 0.05 | setter for Slam |
 | **Heavy Star** (merge) | 0.35s collapse animation: a purple vortex column, ground cracks radiating out | on_start burst 4.5m: damage 22, push 14, lift 8. Pulses every 1.5s (burst 2.6m) | each pulse has a 0.3s ground ripple tell, a low drone while merged, and footsteps 2× louder | control | T4 on start; pulses T2, T4 on spike | 0.45 start; 0.15 per pulse | add `spike` to the pulses (the setter lifts, the next pulse spikes): a rhythm opponents can learn and dodge between |
@@ -420,7 +425,7 @@ making displacement fair.
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Moon Swap** (projectile 9m, swap with owner, stun 0.4) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, a **0.12s silver thread** joins the two bodies, both flash, then swap. The victim's screen gets a direction flash showing where they went | tell: chime; body: hum; impact: control hard hit + a reverse-whoosh swap | control | T3 both | 0.35 victim, 0.2 owner | swap counts as hard CC (5.3). Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
+| **Moon Mark** (projectile 9m, stun 0.4, reveal + vulnerable 15% for 4s; replaced Moon Swap, which moved the owner) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, the foe flashes silver and keeps a soft silver rim for the 4s mark | tell: chime; body: hum; impact: control hit + a soft bell on the mark | control | T3 both | 0.35 victim | Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
 | **Moonlift** (auto, lift owner 14) | 0.2s column-of-light tell under you | the owner rises in a moonbeam | rising chime | utility | T0 | 0.1 owner | — |
 | **Moon Blink** (dodge rider) | — | blinks with a silver streak (the streak rule) | sweetener | utility | T0 | 0 | — |
 | **Eclipse** (merge) | 0.35s darkening of a 5.5m ring around you (enemies see the ring tighten) | on_start burst 4m: damage 12, lift 9; pulses every 0.6s: pull 7 in 5.5m | a low eclipse drone; each pulse is a soft "thrum" | control | T3 start; T0 pulses | 0.3 start | pull pulses every 0.6s with no break are hard to read. Add an edge ring that tightens with each pulse, and drop the pull to 6 so walking out against it is possible (counterplay) |
@@ -446,7 +451,22 @@ The theme (venom, gravity, prism, ...) only tints particles and picks the sweete
 changes the category colour of a decal or impact flash. This is KIN_GRAMMAR's Phase 4 "colour means
 effect category" made concrete.
 
+**Heals read one way, whatever gives them.** Every heal goes through `Hunter.heal`, which calls
+`Fx.healed`: the healed Hunter gets a soft green-gold glow (`#b8f06a`, the sustain colour) that rises
+over them and moves with them, and a green `+N` (`HudStyle.HEAL`) above the damage numbers. That covers
+Meeko's Hearthlight and Hearth Call, Albert's Mending Ground, Kael's Gilded Riposte, lifesteal (a Void
+weapon, a merge's leech, Fever), tonics and knock heals. A heal number is its own kind: it adds up only
+with heals, never with a hit or a Daze `+N`, and it still shows with damage numbers turned off. A heal
+too small to read (lifesteal on a light hit) waits, hidden, until the heals add up. While the glow is up,
+more heals only grow the number, so fast heals pulse instead of stacking. A Hunter you can't see shows
+nothing. A heal on an online teammate shows on the healer's screen straight away. A kit adds only its
+theme particles (Meeko's stars). No kit draws its own heal pulse or heal number. Checked by
+`--heal-read-check`.
+
 ### 5.2 Allegiance: whose is it
+
+Built (2026-11-11, docs/COMBAT_CLARITY.md): `SideColor.fx` leans other people's areas, telegraphs and shot halos to
+their side, `SideRings` edges other Hunters' bodies in the side colour, and `BodyTell` keeps crowd control on the body.
 
 | Viewer sees | Rim and pattern | Opacity | Sound |
 |---|---|---|---|
@@ -462,7 +482,7 @@ Rules:
   this to Elluna's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
-- Enemy dash charges show as pips (3.3). Each enemy's merge and resource states have tells
+- (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
   (ARCHETYPES.md), so you can track their big tools.
 
 ### 5.3 Telegraph timing
@@ -493,43 +513,59 @@ global `freeze_frame()`. Online (it's disabled there today, since `net_on` skips
 while their hurtboxes keep updating (Sakurai's rule), only on the clients of the two players
 involved, plus a softer 50% version for the kin owner.
 
-| Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
+Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/impact_weight.json`):
+
+| Weight | What | Hold (struck body) | Attacker (melee only) | Shake on the struck player |
 |---|---|---|---|---|
 | T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
 | T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
 | T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
 | T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
-| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, existing `_reward_moment`) | — | 6 |
+| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
-Rules:
+- A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
+  or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
+  LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+  is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
+- No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
+- Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
 - Cap: 110ms in any 0.5s per player.
+- A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
+  Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 
-### 5.5 Camera: shake, kick, flash
+**Knock moment (parity, 11-11, docs/FUN_AUDIT_1111.md gap 5).** The source confirms a knock with a
+sound, the kill feed and an icon, not slow motion. `_slow` already skipped online (`net_on`), so bot
+practice and online play ran on two rhythms, and in a 3v3 two quick knocks blinded the next target pick.
 
-Shake uses the existing trauma camera (`cam.add_trauma`, shake ∝ trauma²) and falls off with
-distance (`Match.shake` already fades it over 14m). Kicks are directional `cam.punch`.
+| Knock | Before | After |
+|---|---|---|
+| You land it (`Match._reward_moment`, offline and the online `knock` event) | 0.07 s freeze, **0.22 s at ×0.35 slow-mo (offline only)**, **full-screen white flash 0.25**, ring 3 m, gold burst, duck 0.25, `kill` sound | 0.07 s freeze, ring 3 m, gold burst, duck 0.25, `kill` sound |
+| You take it (`Match.knock`, `h == player`) | **0.3 s at ×0.55 slow-mo (offline only)**, **full-screen red flash 0.3**, duck 0.6, killcam line | duck 0.6, killcam line |
 
-| Event | You did it | It happened to you | Nearby (others' fight) |
-|---|---|---|---|
-| your dash | 0 trauma; 0.03 kick along the dash | — | 0 |
-| ability cast, tier 1 | 0.05 | — | 0 |
-| T2 hit | 0.08 | 0.12 | 0 |
-| T3 CC landed | 0.15 | 0.3 | 0 |
-| T4 payoff (spike, wall slam, exploit) | 0.25 | 0.35 | 0.05 within 8m |
-| knock (downing) | 0.35 + `_reward_moment` | — | 0.08 within 10m |
-| merge / bonded R start | 0.4 + 0.1 kick + HUD flash in the category colour, 0.2s | 0.15 if you're in its on_start | 0.1 within 12m |
-| leap landing / big area | 0.2 | 0.25 | 0.1 within 8m |
+Both stay on the `knock` / `knock_confirm` sounds, the feed line and the knock callout. Still slow-mo
+(not knocks, left for the owner): you taken out 0.8 s ×0.3, the last rival squad 1.0 s ×0.22 + gold
+flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a boss kill near you
+0.55 s ×0.3 (`Juice.boss_dead`). The tutorial's scripted beat-7 slow-mo (ext/tutorial-beats-7-8, `TutorialRival` calls `_slow` itself) is untouched.
+`--kill-reset-check` (a)/(m) asserts a knock leaves `slowmo` at 0 and no screen flash.
 
-Never shake for allies' or other fights' routine hits. HUD hurt-direction indicators and
-`hud.hurt_from()` carry the "from where" information instead of the camera.
+### 5.5 Camera: almost no shake (owner rule, replaces the old table)
+
+Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
+that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
+`Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
+started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
+`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 
@@ -590,7 +626,7 @@ FeelSpec for one stage =
 | `split` | a fan flash at the muzzle |
 | `pierce` | the projectile keeps its streak through targets; a small tick per target |
 | `return` | a returning streak and rising whirr |
-| `spike` | downward slam streaks, "SPIKED" word, T4 |
+| `spike` | downward slam streaks, T4 |
 | `exploit` (new) | a payoff glyph flashes on the target (the state's icon cracking), T4 |
 
 | Delivery | Automatic tell shape |
@@ -624,7 +660,7 @@ authors see what the game will do.
 
 ## 6. Open questions
 
-- Should enemy dash pips show in squads only, or in solo too? (Recommendation: everywhere within 14m.)
+- (Enemy dash pips: removed, owner item 84.)
 - Per-entity hitstop online: is a local-only presentation freeze acceptable to the netcode owner?
   It doesn't touch simulation, but the two players see a 45-90ms visual hold.
 - Mycroll's merge pulse: lower the root (proposed) or lengthen the interval?

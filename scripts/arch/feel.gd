@@ -14,9 +14,7 @@ const CAT := {
 	"utility": Color("5fd8ff"),
 }
 const CAT_ORDER := ["control", "damage", "sustain", "utility"]
-## §5.2 allegiance: rim says whose it is.
-const RIM_ENEMY := Color("ff2d55")
-const RIM_OWN := Color(1, 1, 1, 0.9)
+## §5.2 allegiance (whose it is) is SideColor's: SideColor.fx leans a look, SideRings edges a body.
 
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))
@@ -132,32 +130,12 @@ static func floors_apply(m: Node, team: int) -> bool:
 	return p != null and int(p.team) != team
 
 # ---- §5.4 hitstop ----
-## Tier -> [attacker (melee), target] seconds. Projectiles never freeze the attacker.
-const HITSTOP := [[0.0, 0.0], [0.0, 0.025], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.10, 0.0]]
-const HS_CAP := 0.11           # at most this much freeze in any 0.5s per player
-const HS_WINDOW := 0.5
-const HS_MULTI := 0.25         # further hits on the same pair inside this get a third of their tier
-static var _pair_t := {}       # "a|b" -> last time
-static var _budget := {}       # nid -> [window start, spent]
-
-## The hitstop tier of one hit (T0..T5), from what it did (§5.4 table).
-static func tier(target: Ent, d: float, o: Dictionary) -> int:
-	if String(o.get("src", "")) in ["burn", "fall", "heat", "mob"] or o.get("tick", false):
-		return 0
-	if o.get("bonded", false) or o.get("merge_start", false):
-		return 5
-	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false) or String(o.get("src", "")) == "wall":
-		return 4
-	var mh := maxf(1.0, target.max_hp)
-	var cc := float(o.get("stun", 0.0)) > 0.0 or float(o.get("root", 0.0)) > 0.0 or float(o.get("lift", 0.0)) > 0.0
-	if cc or d >= mh * 0.15:
-		return 3
-	var kb: Vector2 = o.get("kb", Vector2.ZERO) if o.get("kb", null) is Vector2 else Vector2.ZERO
-	if d >= mh * 0.08 or kb.length() >= 8.0 or o.get("reflected", false):
-		return 2
-	if d > 0.0 and float(o.get("slow", 0.0)) <= 0.0:
-		return 1
-	return 0
+const POINT_BLANK := 0.7      # this share of a shotgun volley's slugs on one body makes it an empowered hit
+## A hit's weight (ImpactWeight: light, solid or heavy) sets a fixed hold. Projectiles never hold the
+## attacker. Every hold a body takes is capped per window (the team-fight cap); a hit no heavier than the
+## last on the same pair inside repeat_s holds for a share of its tier.
+static var _pair := {}         # "a|b" -> [last time, its tier index]
+static var _budget := {}       # body instance id -> [window start, spent]
 
 static func is_melee(by: Ent, target: Ent, o: Dictionary) -> bool:
 	if o.get("melee", false):
@@ -167,82 +145,60 @@ static func is_melee(by: Ent, target: Ent, o: Dictionary) -> bool:
 		return true
 	return by != null and is_instance_valid(by) and by.flat_dist(target) <= 2.6 and String(o.get("src", "")) == "abil"
 
-## Applies the hitstop of a hit. Offline it uses the global freeze when the local player is one of
-## the two involved; online (and for everyone else's fights) it freezes only the two bodies' visuals
-## (Ent.freeze_t), never the simulation.
-static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> int:
-	var t := tier(target, d, o)
-	if t <= 0 or m == null:
-		return t
+## Applies the hitstop and shake of a hit and returns its weight. Offline the local player's hold is the
+## global freeze (Match.freeze_frame, which spends the player's cap); everyone else's, and everything
+## online, holds only that body's visuals (Ent.freeze_t), never the simulation.
+static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> String:
+	var w := ImpactWeight.of_hit(by, target, d, o)
+	if w == "" or m == null or target == null:
+		return w
 	var now := float(m.time)
 	var key := "%s|%s" % [by.get_instance_id() if by else 0, target.get_instance_id()]
+	var rank := ImpactWeight.TIERS.find(w)
+	var last: Array = _pair.get(key, [-9.0, 0])
 	var k := 1.0
-	if now - float(_pair_t.get(key, -9.0)) < HS_MULTI:
-		k = 1.0 / 3.0
-	if (o.get("echo", false)):
+	if now - float(last[0]) < ImpactWeight.cap("repeat_s") and rank <= int(last[1]) and not o.get("heavy", false):
+		k = ImpactWeight.cap("repeat_k")
+	if o.get("echo", false):
 		k = minf(k, 0.5)
-	_pair_t[key] = now
+	_pair[key] = [now, rank]
+	if _pair.size() > 256: _pair.clear()
+	var tt := ImpactWeight.hold_s(w) * k
 	var melee := is_melee(by, target, o)
-	var ta := float(HITSTOP[t][0]) * k if melee else 0.0
-	var tt := float(HITSTOP[t][1]) * k
-	if t == 5 and by: ta = float(HITSTOP[5][0])
+	var ta := tt if melee and ImpactWeight.holds_attacker(w) else 0.0
 	var p = m.get("player")
 	var mine: bool = p != null and (by == p or target == p or (by is Kin and (by as Kin).owner_h == p))
 	if not bool(m.get("net_on")) and mine:
-		var want := tt if target == p else (ta if melee else 0.0)
-		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
-		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
-		want = _spend(p, want, now)
+		var want := tt if target == p else ta
+		# a heavy hit you land (an ult, a slam, a payoff) holds you too, even from range
+		if w == "heavy" and by == p: want = maxf(want, tt)
 		if want > 0.0: m.freeze_frame(want)
-		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
-		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
+		# your ranged hits never hold you, but the body you hit still holds for its tier
+		if target != p: hold(target, tt, now)
 	else:
-		if target: target.freeze_t = maxf(target.freeze_t, tt)
-		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
-	return t
+		hold(target, tt, now)
+		if by and ta > 0.0: hold(by, ta, now)
+	if target == p and by != p:
+		Shake.incoming_big(m, target.pos, ImpactWeight.shake(w), by)
+	return w
 
-static func _spend(p: Ent, want: float, now: float) -> float:
-	var b: Array = _budget.get(p.get_instance_id(), [now, 0.0])
-	if now - float(b[0]) > HS_WINDOW:
+## Holds one body's visuals for up to `secs`, within its cap.
+static func hold(body: Ent, secs: float, now: float) -> void:
+	body.freeze_t = maxf(body.freeze_t, spend(body, secs, now))
+
+## How much of a `want` s hold a body may still take: at most the cap's hitstop_ms in any window.
+static func spend(body: Ent, want: float, now: float) -> float:
+	if body == null or want <= 0.0:
+		return maxf(want, 0.0)
+	var id := body.get_instance_id()
+	var b: Array = _budget.get(id, [now, 0.0])
+	if now - float(b[0]) > ImpactWeight.cap("hitstop_window_s"):
 		b = [now, 0.0]
-	var got := clampf(HS_CAP - float(b[1]), 0.0, want)
+	var got := clampf(ImpactWeight.cap("hitstop_ms") / 1000.0 - float(b[1]), 0.0, want)
 	b[1] = float(b[1]) + got
-	_budget[p.get_instance_id()] = b
+	_budget[id] = b
+	if _budget.size() > 256: _budget.clear()
 	return got
-
-# ---- §5.5 camera shake ----
-## Event -> [you did it, it happened to you, nearby within the given radius] trauma, radius.
-const SHAKE := {
-	"dash": [0.0, 0.0, 0.0, 0.0],
-	"cast": [0.05, 0.0, 0.0, 0.0],
-	"t2": [0.08, 0.12, 0.0, 0.0],
-	"t3": [0.15, 0.3, 0.0, 0.0],
-	"t4": [0.25, 0.35, 0.05, 8.0],
-	"knock": [0.35, 0.0, 0.08, 10.0],
-	"bonded": [0.4, 0.15, 0.1, 12.0],
-	"leap": [0.2, 0.25, 0.1, 8.0],
-}
-## Oomph budget by ability tier (§5.7): [max hitstop tier, max own-cast shake].
-const OOMPH := {1: [3, 0.15], 2: [4, 0.25], 3: [5, 0.4]}
-
-static func shake(m: Node, ev: String, by: Ent, at: Vector3, victim: Ent = null, tier_cap := 3) -> void:
-	if m == null or m.get("player") == null or m.get("cam") == null:
-		return
-	var p: Ent = m.player
-	var row: Array = SHAKE.get(ev, SHAKE["cast"])
-	var cap := float(OOMPH.get(tier_cap, OOMPH[3])[1])
-	var amt := 0.0
-	if by == p:
-		amt = minf(float(row[0]), cap)
-	elif victim == p:
-		amt = float(row[1])
-	elif float(row[3]) > 0.0 and p.flat_dist(at) < float(row[3]):
-		amt = float(row[2])
-	if amt > 0.0:
-		m.cam.add_trauma(amt)
-
-static func shake_for_tier(t: int) -> String:
-	return ["", "cast", "t2", "t3", "t4", "bonded"][clampi(t, 0, 5)]
 
 # ---- §5.6 sound layering (placeholder sounds from the existing Sfx set) ----
 ## Layer 1, the tell, by delivery: [sound, pitch].
@@ -262,12 +218,7 @@ static func impact_row(cat: String) -> Array:
 ## Layer 3, the impact, by effect category: [sound, pitch]. Control is a hard hit then a held tone.
 const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
 ## Layer 4, the kin theme's sweetener.
-const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravity", "prism": "k_prism", "lunar": "k_lunar", "echo": "k_echo"}
-## Each archetype's dash sound: [[sound, pitch, delay]...].
-const DASH_SOUND := {
-	"thief": [["swipe", 1.7, 0.0]], "archer": [["throw", 1.4, 0.0], ["whoosh", 1.3, 0.12]], "mage": [["portal", 1.7, 0.0]],
-	"gunslinger": [["dash", 1.1, 0.0], ["reload", 1.6, 0.08]], "juggernaut": [["charge", 0.6, 0.0]], "bulwark": [["shield", 0.7, 0.0], ["whoosh", 0.7, 0.05]],
-}
+const SWEETENER := {"venom": "k_poison", "spore": "k_spore", "gravity": "k_psychic", "prism": "k_crystal", "lunar": "k_fairy", "echo": "k_sound"}
 const MAX_VOICES := 4
 static var _voices := {}       # event key -> voices started this frame
 
@@ -309,15 +260,6 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 		"sweet": vol -= 6.0
 		"impact": vol -= 3.0
 	m.sfx(String(row[0]), at, vol - 4.0, float(row[1]))
-
-## The dash's own sound per archetype (plus the kin's sweetener, played by the rider).
-static func dash_sound(m: Node, arch: String, at: Vector3, by: Ent) -> void:
-	for s in DASH_SOUND.get(arch, [["dash", 1.0, 0.0]]):
-		var sn := String(s[0]); var pt := float(s[1]); var dl := float(s[2])
-		if dl <= 0.0:
-			m.sfx(sn, at, -5.0 if by == m.player else -9.0, pt)
-		else:
-			m.later(dl, func(): if is_instance_valid(m): m.sfx(sn, at, -6.0 if by == m.player else -10.0, pt))
 
 ## A whole ability event: tell (delivery), impact (category) and the kin's sweetener.
 static func cast_sound(m: Node, delivery: String, cat: String, at: Vector3, by: Ent, theme := "") -> void:

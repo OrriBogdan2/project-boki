@@ -5,7 +5,7 @@ extends Resource
 
 @export var id := ""
 @export var display_name := ""
-@export var primary := {}              # dmg, rate, speed, mag, reload, kb, spread, range, size, color, sfx, boom...
+@export var primary := {}              # dmg, rate, speed, mag, kb, spread, range, size, color, sfx, boom...
 @export var utility := ""              # an AbilityDef id
 @export var classes: Array = ["light", "medium", "heavy"]
 

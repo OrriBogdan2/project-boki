@@ -19,6 +19,7 @@ uniform float sky_ao = 0.18;
 uniform float brush = 1.0;          // brushwork strength
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/see.gdshaderinc"
 varying vec3 lpos;
 varying vec3 wpos;
 varying flat float mat_id;
@@ -47,6 +48,7 @@ void vertex() {
 }
 
 void fragment() {
+	if (see_cut(wpos, mat_id, FRAGCOORD.xy)) { discard; }   // over your hunter or Boki (see.gdshaderinc)
 	vec3 c = COLOR.rgb;
 	int id = int(mat_id + 0.5);
 	float fw = fwidth(lpos.y) * 40.0;

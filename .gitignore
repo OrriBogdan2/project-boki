@@ -1,3 +1,34 @@
 .godot/
 export/
 tools/.cache/
+__pycache__/
+
+# Secrets: never commit these (this repo is public)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+id_rsa*
+id_ed25519*
+*_deploy
+*_deploy.pub
+credentials*.json
+secrets.*
+*.secret
+
+# Tracy profiling build (docs/PERF.md): never committed, never exported
+perf_tracy/
+tools/perf/bin/
+native/tracy/deps/
+native/tracy/build/
+native/tracy/.sconsign.dblite
+native/tracy/gen/
+native/tracy/src/*.os
+
+# The Sentry addon: fetched at export time by tools/sentry_addon.sh (docs/SENTRY.md)
+addons/sentry/

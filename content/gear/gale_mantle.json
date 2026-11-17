@@ -1,0 +1,15 @@
+{
+ "id": "gale_mantle",
+ "name": "Gale Cloak",
+ "short": "Gale",
+ "verb": "",
+ "cd": 0,
+ "slot": "armor",
+ "col": "a8e6ff",
+ "stats": {
+  "armor": 14,
+  "glide_speed": 0.08
+ },
+ "icon": "gust",
+ "desc": "A light cloak that catches the wind: some armor and a faster glide."
+}

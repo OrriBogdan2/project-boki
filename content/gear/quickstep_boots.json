@@ -1,0 +1,15 @@
+{
+ "id": "quickstep_boots",
+ "name": "Quickstep Boots",
+ "short": "Quickstep",
+ "verb": "",
+ "cd": 0,
+ "slot": "boots",
+ "col": "ffd27a",
+ "stats": {
+  "dodge": 0.15,
+  "speed": 0.03
+ },
+ "icon": "jump",
+ "desc": "Spring-loaded heels: dashes come back sooner and a touch more speed."
+}

@@ -1,0 +1,109 @@
+shader_type spatial;
+// Vex's and Sparkle's leftover effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
+// `life` runs 0 -> 1 over the effect; `color` is the body, `color2` the hot core / accent, `color3` an
+// optional edge colour (its alpha says how much). Each mode writes a BODY, alpha-blended so it keeps its
+// colour and darkness on bright grass, and a GLOW added on top for the hot cores and sparks only.
+//   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
+//   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
+//   3 DISC    a flat quad: a lit jagged crackling rim at 0.9, a soft dark falloff in from it down to `fill_a` at
+//             the centre (never a solid fill: the target reads through) and lightning veins (placed areas);
+//             hollow: no falloff or veins, a glowing centre
+//   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
+//   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the smear)
+render_mode unshaded, shadows_disabled, depth_draw_never, blend_premul_alpha, cull_disabled, fog_disabled;
+uniform int mode = 0;
+uniform vec4 color : source_color = vec4(0.4, 0.9, 0.8, 1.0);
+uniform vec4 color2 : source_color = vec4(1.0, 0.95, 0.8, 1.0);
+uniform vec4 color3 : source_color = vec4(0.0, 0.0, 0.0, 0.0);
+uniform float life = 0.0;
+uniform float seed = 0.0;
+uniform float strength = 1.0;
+uniform float fill_a = 0.2;
+uniform float hollow = 0.0;   // DISC: 0 a falloff fill, 1 only the rim and a glowing centre
+uniform float hold = 0.0;     // DISC: 1 stands at full strength and fades only over its last fifth
+uniform bool billboard = false;
+#include "res://shaders/cel.gdshaderinc"
+
+float hash(float x) { return fract(sin(x * 127.1 + seed * 311.7) * 43758.5453); }
+float vnoise(float x) {
+	float i = floor(x);
+	float f = fract(x);
+	return mix(hash(i), hash(i + 1.0), f * f * (3.0 - 2.0 * f));
+}
+
+void vertex() {
+	if (billboard) {
+		float s = length(MODEL_MATRIX[0].xyz);
+		mat4 face = mat4(INV_VIEW_MATRIX[0] * s, INV_VIEW_MATRIX[1] * s, INV_VIEW_MATRIX[2] * s, MODEL_MATRIX[3]);
+		MODELVIEW_MATRIX = VIEW_MATRIX * face;
+	}
+}
+
+void fragment() {
+	vec2 uv = UV;
+	float k = clamp(1.0 - life, 0.0, 1.0);
+	vec3 body = color.rgb;
+	float body_a = 0.0;
+	vec3 glow = vec3(0.0);
+	if (mode == 1) {
+		float rim = pow(1.0 - abs(uv.x * 2.0 - 1.0), 0.6);
+		float bands = 0.65 + 0.35 * sin(uv.y * 26.0 - TIME * 14.0);
+		float ends = smoothstep(0.0, 0.08, uv.y) * (1.0 - smoothstep(0.75, 1.0, uv.y));
+		body_a = ends * (0.25 + 0.4 * rim) * bands;
+		glow = color2.rgb * smoothstep(0.7, 1.0, rim) * ends * bands * 0.8;
+	} else if (mode == 2) {
+		vec2 p = uv * 2.0 - 1.0;
+		float r = length(p);
+		float ang = atan(p.y, p.x);
+		float front = 0.9 * sqrt(life);
+		vec2 ring_v = cel_ring(uv, sqrt(life), life, seed);
+		float needles = pow(abs(cos(ang * 6.0 + seed)), 40.0) * smoothstep(front * 0.4, front, r);
+		needles *= 1.0 - smoothstep(front, front + 0.18, r);
+		body = mix(body, mix(color2.rgb, vec3(1.0), 0.5), ring_v.y);
+		body_a = ring_v.x * 0.6 * k;     // a half-cover cel band: the arena reads through a full-screen ring
+		glow = color2.rgb * (needles * 1.4 + ring_v.y * 0.35) * k;
+	} else if (mode == 3) {
+		// a placed area: a jagged lit rim that crawls, a dark falloff in from it, veins of lightning inside
+		vec2 p = uv * 2.0 - 1.0;
+		float r = length(p);
+		float ang = atan(p.y, p.x);
+		float tick = floor(TIME * 14.0);
+		float crackle = vnoise(ang * 11.0 + tick * 2.3);
+		float edge_r = 0.9 + (crackle - 0.5) * 0.08;
+		float rim = 1.0 - smoothstep(0.0, 0.035 + 0.04 * crackle, abs(r - edge_r));     // edge_r 0.9 = VVFx.DISC_EDGE
+		float inside = 1.0 - smoothstep(edge_r - 0.02, edge_r, r);
+		float falloff = mix(fill_a, 0.45, smoothstep(0.55, 1.0, r / edge_r));
+		float spoke = fract((ang + vnoise(r * 6.0 + tick) * 0.5) * 6.0 / 6.2832);
+		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
+		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
+		body = mix(color.rgb, color3.rgb, rim * color3.a);
+		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
+		float kd = mix(k, 1.0 - smoothstep(0.8, 1.0, life), hold);
+		body_a = max(inside * falloff * (1.0 - hollow), rim) * kd;
+		glow = color2.rgb * (rim * (0.5 + 0.5 * crackle) + veins * 0.5 * (1.0 - hollow) + centre * hollow) * kd;
+	} else if (mode == 4) {
+		vec2 p = uv * 2.0 - 1.0;
+		float r = length(p);
+		float ang = atan(p.y, p.x) + seed;
+		float star = pow(abs(cos(ang * 2.0)), 24.0) * (1.0 - smoothstep(0.05, 1.0, r));
+		float core = 1.0 - smoothstep(0.0, 0.25, r);
+		float flick = 0.7 + 0.3 * hash(floor(TIME * 30.0));
+		body_a = clamp(star * 1.6 * flick, 0.0, 1.0) * k;
+		glow = color2.rgb * core * k;
+	} else if (mode == 5) {
+		float d = abs(uv.y - 0.5) * 2.0;
+		float w = mix(0.9, 0.08, uv.x);
+		float shaft = 1.0 - smoothstep(w * 0.5, w, d);
+		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
+		body_a = shaft * (1.0 - uv.x) * k;
+		glow = color2.rgb * head * k;
+	}
+	// cel steps with ragged hard edges (shaders/cel.gdshaderinc); premultiplied: the body covers what is under it,
+	// the glow adds on top
+	vec2 nuv = UV * 0.5 + seed * 0.37;
+	body_a = cel_cover(clamp(body_a, 0.0, 1.0), nuv);
+	glow = cel_glow(glow, nuv);
+	float a = clamp(body_a * color.a * strength, 0.0, 1.0);
+	ALBEDO = body * a + glow * color.a * strength;
+	ALPHA = a;
+}

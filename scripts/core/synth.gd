@@ -126,13 +126,27 @@ static func glider(set: String, close: bool) -> AudioStreamWAV:
 				# static in the canopy: a low rumble with soft crackles, not a buzz
 				v = v * 0.7 + extra.step(noise, 140.0, 0.8) * swell(t, dur, 0.03, dur * 0.6) * 1.2
 				v += crk.step(noise, 1600.0, 1.5) * grains.step() * 0.8 * swell(t, dur, 0.03, dur * 0.5)
+			"paper":
+				# a big sheet unfolding: crisp crinkles riding a thin whoosh
+				v = v * 0.6 + crk.step(noise, 2200.0, 1.8) * grains.step() * 1.1 * swell(t, dur, 0.02, dur * 0.5)
+			"coo":
+				# soft feathers and a small two-note coo as it opens
+				v *= 0.6
+				if not close:
+					var tc := t - 0.12
+					var pitch := 420.0 if tc < 0.12 else 340.0
+					if tc > 0.0 and tc < 0.3:
+						v += sin(TAU * pitch * tc) * fade_in(tc, 0.02) * exp(-fmod(tc, 0.12) / 0.06) * 0.25
 		lo += (v - lo) * 0.45      # round off the top end (about 3 kHz)
 		buf[i] = lo
 	return to_wav(buf, -25.0 if close else -21.0)
 
-## The home whistle that calls your kin: a soft, breathy two-note "fwee-fweeoo".
-static func whistle() -> AudioStreamWAV:
+## The home whistle that calls your kin, a soft and breathy one. A tap is a short two-note "fwee-fweeoo"; a hold
+## (rising) is a longer climb of three notes, so you hear which call you made.
+static func whistle(rising := false) -> AudioStreamWAV:
 	var notes := [[880.0, 1040.0, 0.15], [0.0, 0.0, 0.05], [990.0, 1320.0, 0.28]]
+	if rising:
+		notes = [[700.0, 960.0, 0.25], [960.0, 1400.0, 0.25], [1400.0, 2000.0, 0.45]]
 	var total := 0.0
 	for nt in notes: total += float(nt[2])
 	var buf := PackedFloat32Array(); buf.resize(int(RATE * total))

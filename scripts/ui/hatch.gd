@@ -1,12 +1,18 @@
 extends Node3D
-## The first thing a new player sees: a short story, then three eggs on a little island. Pick one,
-## keep it warm until it hatches, name what comes out, then head into the tutorial match together.
+## The first thing a new player sees after the prologue: one short card, then making yourself (one of the
+## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
+## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
-## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
-## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
+## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
+## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
+## egg is named for its element (Venom Egg, ...).
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const MYSTERY := {"species": "mystery", "name": "Mystery Egg", "temper": "???", "desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
-	"play": "Something that isn't any of the other three. You'll find out when it hatches."}
+const MYSTERY := {
+	"species": "mystery", "name": "Mystery Egg", "temper": "???",
+	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
+	"play": "Almost anything from the wilds could be in there, even a rare one,"
+		+ " and it's more likely than most to hatch a little strange.",
+}
 
 static func starter_eggs() -> Array:
 	var out: Array = []
@@ -19,22 +25,20 @@ static func starter_eggs() -> Array:
 	out.append(MYSTERY.duplicate())
 	return out
 
-const STORY := [
-	"The night after the storm, the old shrine on your island\nstarted to glow.",
-	"When you went to look, there were eggs waiting in the light.\nThree of them, still warm.",
-	"Boki choose their hunters.\nToday, one of them is going to choose you.",
-]
+const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
+const CARD_BUTTON := "Choose your Boki"
+const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | pick | warm | hatching | name
-var story_i := 0
-var story_lbl: Label
-var story_box: Control
+var stage := "intro"          # intro (the card) | create (yourself) | pick (eggs) | warm | hatching | name | mask
+var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
+var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
+var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
 var t := 0.0
@@ -46,19 +50,18 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var egg_defs: Array = []      # EGGS with the mystery egg's species decided
-var look: Dictionary = {}
-var preview: Node3D
-var look_at_t := Vector3(0, 0.25, 0.5)
+var new_rec: Dictionary = {}  # the hatchling's record, made when the name card opens (so its sex mark shows there) and kept by _finish
+var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
+var mystery_found := false    # its card shows once you've hovered or picked the black egg
+var locker: LookLocker      # making yourself (stage "create")
 var edit_only := false
-var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
-var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make your hunter
+var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
 	env.environment = Look.environment({"top": Color("1a1440"), "mid": Color("7a3a9a"), "horizon": Color("ffa860"), "below": Color("2a1e4a"),
@@ -75,26 +78,25 @@ func _ready() -> void:
 	cam.look_at(Vector3(0, 0.6, 0))
 	_build_set()
 	egg_defs = starter_eggs()
-	var others: Array = Data.common_kin().filter(func(k): return not k in ["cindle", "puddlet", "burrlet"])
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	for d in egg_defs:
 		if d["species"] == "mystery":
-			d["species"] = others[randi() % others.size()] if others.size() > 0 else "cindle"
+			d["species"] = MysteryEgg.roll_species(rng)
+			d["rec"] = {"mutations": MysteryEgg.roll_mutations(rng)}
 			d["mystery"] = true
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
-		var sp: Dictionary = Data.KIN[d["species"]]
 		var holder := Node3D.new()
-		var x := -2.55 + i * 1.7
-		holder.position = Vector3(x, 0, 0.2)
+		holder.position = MYSTERY_AT if d.get("mystery", false) else Vector3(-1.7 + i * 1.7, 0, 0.2)
 		add_child(holder)
-		var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
-		for ch in nest.get_children():
-			if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
-				ch.visible = false
-		holder.add_child(nest)
-		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1)
+		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1, d.get("rec", {}))
 		if d.get("mystery", false):
-			egg.shell_col = Color("c4bcd6"); egg.spot_col = Color("6a5a8a")
+			holder.add_child(MysteryEgg.new())
+			MysteryEgg.hideout(self, MYSTERY_AT)
+			egg.kind = "mystery"
+		else:
+			holder.add_child(_nest())
 		egg.hop_out = 0.35
 		egg.position = Vector3(0, 0.12, 0)
 		holder.add_child(egg)
@@ -108,18 +110,26 @@ func _ready() -> void:
 	elif "--skip-intro" in OS.get_cmdline_user_args() or Save.d["tutorial"].get("intro", false):
 		_end_intro()
 	else:
-		_show_story()
+		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
-		if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+		if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 		_end_intro()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
-			if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 			_end_intro()
 			_pick(i); _pick(i)
 			auto_warm = true
+
+## A starter egg's nest, without the eggs it comes with.
+func _nest() -> Node3D:
+	var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
+	for ch in nest.get_children():
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
+			ch.visible = false
+	return nest
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
 ## feet, a broken arch behind with the old world's heart-crystal turning inside it, lanterns and
@@ -258,7 +268,8 @@ var ship: Node3D
 
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
 	# a soft dark vignette pulls the eye to the middle, like a stage
@@ -280,7 +291,7 @@ func _build_ui() -> void:
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UI.label("Every Boki is different, and remembers how you treat them.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -299,8 +310,8 @@ func _build_ui() -> void:
 	holder.add_child(bottom)
 	_show_pick()
 
-# ---- the story
-func _show_story() -> void:
+# ---- the card
+func _show_card() -> void:
 	stage = "intro"
 	_clear_bottom()
 	title.get_parent().visible = false
@@ -308,75 +319,44 @@ func _show_story() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shade.name = "Shade"
 	root_ui.add_child(shade)
-	story_box = UI.vbox(18)
-	story_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	story_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	story_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	story_lbl = UI.title("", 30, UI.INK)
-	story_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	story_lbl.add_theme_constant_override("outline_size", 10)
-	story_lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
-	story_box.add_child(story_lbl)
-	var hint := UI.key_hints([["Space", "continue"]], 12, Color(1, 1, 1, 0.55))
-	hint.alignment = BoxContainer.ALIGNMENT_CENTER
-	story_box.add_child(hint)
-	root_ui.add_child(story_box)
-	var skip := HoldSkip.new()
-	skip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	skip.offset_left = -196; skip.offset_right = -24; skip.offset_top = 18; skip.offset_bottom = 62
-	skip.skipped.connect(_end_intro)
-	skip.name = "SkipIntro"
-	root_ui.add_child(skip)
-	_story_line()
-
-func _story_line() -> void:
-	story_lbl.text = STORY[story_i]
-	story_lbl.modulate.a = 0.0
-	var tw := create_tween()
-	tw.tween_property(story_lbl, "modulate:a", 1.0, 0.8)
+	card_box = UI.vbox(22)
+	card_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	card_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var line := UI.title(CARD_TEXT, 30, UI.INK)
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.custom_minimum_size.x = 640
+	line.add_theme_constant_override("outline_size", 10)
+	line.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
+	card_box.add_child(line)
+	var go := UI.primary(CARD_BUTTON, _end_intro, 260)
+	go.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	card_box.add_child(go)
+	root_ui.add_child(card_box)
 	Sfx.play("whoosh", null, -16.0)
-	# the camera drifts closer with each line
-	var k := float(story_i + 1) / STORY.size()
-	cam_to = Vector3(-9, 7.5, 16).lerp(Vector3(0, 3.6, 6.4), k * 0.85)
-
-func _next_story() -> void:
-	story_i += 1
-	if story_i >= STORY.size():
-		_end_intro()
-	else:
-		_story_line()
 
 func _end_intro() -> void:
 	if stage != "intro":
 		return
 	stage = "pick"
 	Save.d["tutorial"]["intro"] = true
-	for n in ["Shade", "SkipIntro"]:
-		var c := root_ui.get_node_or_null(n)
-		if c: c.queue_free()
-	if story_box: story_box.queue_free()
+	var shade := root_ui.get_node_or_null("Shade")
+	if shade: shade.queue_free()
+	if card_box: card_box.queue_free()
 	title.get_parent().visible = true
-	if not Save.d.has("look") or edit_only or "--create" in OS.get_cmdline_user_args():
-		_show_create()
+	if edit_only or "--create" in OS.get_cmdline_user_args() or not Save.d.has("look"):
+		_show_create()      # a new game starts with making yourself (Settings, Change your look, reopens it)
 	else:
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick()
+		_after_create()
 
-var turning := false
 func _unhandled_input(event: InputEvent) -> void:
-	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn your hunter round
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-			turning = event.pressed
-		elif event is InputEventMouseMotion and turning:
-			preview.rotation.y += event.relative.x * 0.012
-			return
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()
 		return
 	if stage == "intro":
-		if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
-			_next_story()
+		if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
+			_end_intro()
 		return
 	if stage == "pick" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and hover >= 0:
 		_pick(hover)
@@ -396,129 +376,42 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your hunter
-const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
-	["detail", "Details", Models.LOOK_DETAILS], ["skin", "Skin", Models.LOOK_SKIN], ["hair", "Hair", Models.LOOK_HAIRS], ["hair_col", "Hair colour", Models.LOOK_HAIR], ["outfit", "Outfit", Models.LOOK_OUTFITS]]
+## After making yourself: the eggs. (Your first Relic comes after you name your Boki: MaskMoment.)
+func _after_create() -> void:
+	stage = "pick"
+	title.text = "Choose your first Boki"
+	cam_to = Vector3(0, 3.6, 6.4)
+	_show_pick()
 
+# ---- yourself: the Empty (Unmasked), in the LookLocker
 func _show_create() -> void:
 	stage = "create"
-	if look.is_empty():
-		look = Models.clean_look(Save.d.get("look", {}))
-		for a in OS.get_cmdline_user_args():
-			if a.begins_with("--create-race="):   # test: open the creator on a race
-				look["race"] = int(a.substr(14)); look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-	look["hair"] = clampi(int(look.get("hair", 0)), 0, Models.hair_styles(int(look["race"])).size() - 1)
-	title.text = "Make your hunter"
+	title.text = "Make yourself"
 	_clear_bottom()
-	if create_box: create_box.queue_free()
-	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "Drag your hunter (or hold A / D) to turn them round."
-	_top_over(0.73)       # over your hunter, clear of the tall creator card on the left
-	# framed to the hunter's height: a big Juggernaut (or a tall race) used to run off the top
-	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
-	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
-	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
-	var card := UI.card(UI.CARD, 14, 16)
-	card.custom_minimum_size = Vector2(500, 0)
-	create_box = card
-	var v := UI.vbox(8); card.add_child(v)
-	# the archetype: who you are in a match (its silhouette, gear and weapon family always read true)
-	var cur_a := Arch.of_save()
-	var ar := UI.hbox(8)
-	var al := UI.label("Archetype", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
-	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ar.add_child(al)
-	ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
-	var av := UI.label(Arch.name_of(cur_a), UI.T_BODY, Arch.color(cur_a), UI.semi); av.custom_minimum_size.x = 170
-	av.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	av.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ar.add_child(av)
-	ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
-	v.add_child(ar)
-	var ad := Arch.def(cur_a)
-	var adl := UI.label("%s  ·  %s\n%s" % [String(Data.CLASSES[Arch.weight(cur_a)]["name"]), " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
-	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	adl.custom_minimum_size.x = 380
-	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)
-	v.add_child(am)
-	for row in LOOK_ROWS:
-		var key: String = row[0]
-		var opts: Array = row[2]
-		if key == "hair":
-			opts = Models.hair_styles(int(look["race"]))    # each race has its own styles
-		var hr := UI.hbox(8)
-		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
-		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		hr.add_child(l)
-		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
-		var val := UI.label("", UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
-		val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var i := int(look[key])
-		if opts[0] is Color:
-			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
-			var ssb := UI._box(opts[i], 13, Color(1, 1, 1, 0.25), 1)
-			sw.add_theme_stylebox_override("panel", ssb)
-			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			hr.add_child(sw)
-		else:
-			val.text = String(opts[i])
-			hr.add_child(val)
-		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
-		v.add_child(hr)
-		if key == "race":
-			var rd := UI.label(String(Models.RACES[int(look["race"])]["desc"]), UI.T_SMALL, UI.ACCENT_HI)
-			rd.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			rd.custom_minimum_size.x = 380
-			var rm := MarginContainer.new(); rm.add_theme_constant_override("margin_left", 128); rm.add_child(rd)
-			v.add_child(rm)
-	var nr := UI.hbox(8)
-	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
-	nr.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
-	nr.add_child(ne)
-	v.add_child(nr)
-	var br := UI.hbox(10)
-	br.alignment = BoxContainer.ALIGNMENT_END
-	br.add_child(UI.ghost("Random", func():
-		look = Models.random_look()
-		_show_create(), 120, "swap"))
-	br.add_child(UI.primary("Looks good", func():
-		Save.d["look"] = look.duplicate()
-		Save.save_game()
-		Sfx.play("click")
-		if preview: preview.queue_free()
-		preview = null
-		if create_box: create_box.queue_free()
-		create_box = null
-		for e in eggs: (e["holder"] as Node3D).visible = true
-		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
-		_top_over(0.5)
-		if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
-			Game.goto("home")
-			return
-		stage = "pick"
-		title.text = "Choose your first Boki"
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick(), 200))
-	v.add_child(br)
-	root_ui.add_child(card)
-	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+	if sub_lbl:
+		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round, scroll to zoom." % [
+				Settings.key_cap("left"), Settings.key_cap("right")]
+	_top_over(0.73)       # over you, clear of the tall locker card on the left
+	if locker:
+		locker.close()
+	locker = LookLocker.open(self, root_ui, cam, fx, Unmasked.clean(Save.d.get("look", {})))
+	locker.finished.connect(_looks_good)
 
-## The highest point of a model (its meshes' bounds), in world metres.
-func _model_top(n: Node3D) -> float:
-	var top := 0.0
-	var st: Array = [n]
-	while not st.is_empty():
-		var nd: Node = st.pop_back()
-		if nd is MeshInstance3D and (nd as MeshInstance3D).visible and nd.is_inside_tree():
-			var gi := nd as MeshInstance3D
-			top = maxf(top, (gi.global_transform * gi.get_aabb()).end.y)
-		for ch in nd.get_children(): st.append(ch)
-	return top
+func _looks_good() -> void:
+	if locker:
+		Save.d["look"] = locker.look.duplicate(true)
+		locker.close()
+		locker = null
+	Save.save_game()
+	Sfx.play("click")
+	for e in eggs: (e["holder"] as Node3D).visible = true
+	if sub_lbl: sub_lbl.text = "Every Boki is different, and remembers how you treat them."
+	_top_over(0.5)
+	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
+		Game.goto("home")
+		return
+	_after_create()
 
 ## Centres the title block at this fraction of the window's width.
 func _top_over(x_frac: float) -> void:
@@ -526,47 +419,14 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-## Steps through the six archetypes; the class (weight) and weapon follow it.
-func _step_arch(d: int) -> void:
-	var ids := Arch.ids()
-	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())
-	var a := String(ids[i])
-	Save.d["arch"] = a
-	Save.d["cls"] = Arch.weight(a)
-	Save.d["weapon"] = Arch.default_weapon(a)
-	Sfx.play("hover", null, -6.0)
-	_show_create()
-
-func _step_look(key: String, d: int, n: int) -> void:
-	look[key] = posmod(int(look[key]) + d, n)
-	Sfx.play("hover", null, -6.0)
-	if key == "race":
-		# each race starts in its own colouring; you can still change the skin after
-		look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-		look["hair"] = 0      # ... and its own head styles: start on its first one, keep the colour
-		look["hair_v"] = 2
-	_show_create()
-
-var preview_yaw := PI
-var preview_anim: HunterAnim
-func _rebuild_preview() -> void:
-	if preview:
-		preview_yaw = preview.rotation.y
-		preview.queue_free()
-	var pa := Arch.of_save()
-	look.erase("arch")      # the archetype's gear is never part of the look
-	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(pa, Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look, pa)
-	preview.position = Vector3(0.8, 0, 1.6)
-	preview.rotation.y = preview_yaw
-	add_child(preview)
-	preview_anim = HunterAnim.new(preview)
-
 func _show_pick() -> void:
 	_clear_bottom()
 	var row := UI.hbox(14)
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
+		if mystery and not mystery_found:
+			continue
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
 		# every egg card the same size, with its button on the same line at the bottom
@@ -607,9 +467,11 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
+		UI.pick_taken()
 		_start_hatch()
 		return
 	chosen = i
+	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
 	_show_pick()
 
@@ -618,7 +480,6 @@ func _pick(i: int) -> void:
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
 var taps := 0
-var cam_shake := 0.0
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
 		return
@@ -642,7 +503,6 @@ func _tap_egg() -> void:
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
-	cam_shake = 0.004 + 0.02 * k
 	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
 		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
@@ -656,17 +516,15 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var knock := "Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back."
+	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
 	warm_bar.draw.connect(func():
-		var bg := StyleBoxFlat.new(); bg.bg_color = Color(0, 0, 0, 0.45); bg.set_corner_radius_all(8)
-		warm_bar.draw_style_box(bg, Rect2(Vector2.ZERO, warm_bar.size))
-		if warmth > 0.01:
-			var fg := StyleBoxFlat.new(); fg.bg_color = Color("ff9a5a").lerp(Color("ffd36a"), warmth); fg.set_corner_radius_all(8)
-			warm_bar.draw_style_box(fg, Rect2(Vector2.ZERO, Vector2(warm_bar.size.x * warmth, warm_bar.size.y))))
+		var warm := Color("ff9a5a").lerp(Color("ffd36a"), snappedf(warmth, 0.05))
+		UI.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8))
 	v.add_child(warm_bar)
 	bottom.add_child(card)
 	Sfx.play("whoosh")
@@ -681,9 +539,10 @@ func _start_hatch() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-	cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
-	# a slow breathing drift so the shot is never quite still
-	cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
+	if stage != "mask" and stage != "create":
+		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
+		# a slow breathing drift so the shot is never quite still
+		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
 		(rn[0] as Node3D).rotation.y += delta * float(rn[1])
 	if orbit: orbit.rotation.y += delta * 0.04
@@ -693,14 +552,8 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-	if stage == "create":
-		cam.look_at(look_at_t)
-		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
-			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
-		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
-		# it (see _unhandled_input)
-		if preview and preview_anim:
-			preview_anim.update(delta, {"fired": 99.0, "face": preview.rotation.y})
+	if stage == "mask" or stage == "create":
+		pass       # (MaskMoment, or the LookLocker, moves the camera)
 	else:
 		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
 	if stage == "pick":
@@ -708,13 +561,13 @@ func _process(delta: float) -> void:
 		if hv != hover:
 			hover = hv
 			if hover >= 0: Sfx.play("hover", null, -12.0)
+			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
+				mystery_found = true
+				_show_pick()
 		for i in eggs.size():
 			var hs := 1.12 if i == hover else 1.0
 			var hn: Node3D = eggs[i]["holder"]
 			hn.scale = hn.scale.lerp(Vector3.ONE * hs, minf(1.0, delta * 10.0))
-	if cam_shake > 0.0:
-		cam.position += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * cam_shake
-		cam_shake = maxf(0.0, cam_shake - delta * 1.8)
 	if stage == "warm" and chosen >= 0:
 		if auto_warm and int(t * 3.0) != int((t - delta) * 3.0):
 			_tap_egg()          # test hook: taps by itself
@@ -726,6 +579,8 @@ func _process(delta: float) -> void:
 		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
+			skipper = HatchSkip.new(_skip_hatch)
+			add_child(skipper)
 			title.text = "Something's moving..."
 			_clear_bottom()
 			wegg.rotation.z = 0.0
@@ -737,8 +592,10 @@ func _process(delta: float) -> void:
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"])
+				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
+				reveal = rv
 				add_child(rv)
+				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
 					if top_box: top_box.visible = true
@@ -753,6 +610,11 @@ func _process(delta: float) -> void:
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
 
+## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
+func _skip_hatch() -> void:
+	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	reveal.skip()
+
 func _show_name() -> void:
 	_clear_bottom()
 	var sp_id: String = egg_defs[chosen]["species"]
@@ -760,6 +622,9 @@ func _show_name() -> void:
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(520, 0)
 	var v := UI.vbox(10); card.add_child(v)
+	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
+		new_rec = Save.new_kin(sp_id)          # rolled now: its sex (and he/she) is known before it is named
+	var she: bool = Unique.sex(new_rec) == "f"
 	# (lifted like the egg names: a dark species colour, Vespyx's plum, vanished on the dark card)
 	var scol: Color = sp["color"]
 	while scol.get_luminance() < 0.55:
@@ -767,9 +632,14 @@ func _show_name() -> void:
 	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
-	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
+	var sex_row := UI.hbox(8)
+	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
+	sex_row.add_child(UI.label("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
+		"A babbler for now; any name you give will stick."], 16, UI.MUTED))
+	v.add_child(sex_row)
+	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
 	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(ne)
@@ -795,25 +665,34 @@ func _show_name() -> void:
 	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	you_row.add_child(ye)
 	v.add_child(you_row)
-	# you already told us your name in the hunter creator; don't ask twice
-	you_row.visible = not Save.d.has("look")
-	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
-	skip.flat = true
-	btns.add_child(skip)
+	var btns := UI.hbox(14)
+	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, ne.text, ye.text, false)))
+	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, ne.text, ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Head out together"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
+	# Enter in either box is the same as "Tend the garden"
+	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
 
+## One of the two equal ways on from the naming card: a button and a line under it, one click.
+func _path_card(label: String, line: String, go: Callable) -> Control:
+	var c := UI.vbox(6)
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c.add_child(UI.primary(label, go, 240))
+	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
+	return c
+
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
+	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else Save.new_kin(sp_id)
+	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
+	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
+	if not muts.is_empty(): rec["mutations"] = muts
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
@@ -824,8 +703,40 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
+	if tutorial and ClassUnlock.needs_starters():      # (the garden path picks at the portal: FirstRelic)
+		_mask_moment(func(): _head_out(tutorial))
+		return
+	_head_out(tutorial)
+
+## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
+## put it on in the world (MaskMoment), then `then`.
+func _mask_moment(then: Callable) -> void:
+	stage = "mask"
+	_clear_bottom()
+	top_box.visible = false
+	var holder := ColorRect.new()      # (the island dimmed behind the cards)
+	holder.color = Color(0.02, 0.01, 0.05, 0.55)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(centre)
+	var picked := func(id: String):
+		holder.queue_free()
+		_put_on_first(id, then)
+	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
+			func(id): return ClassUnlock.choose_starters([id]), picked)
+	centre.add_child(offer.build())
+	ui.add_child(holder)
+
+func _put_on_first(first: String, then: Callable) -> void:
+	FirstRelic.wear(first)
+	var moment := MaskMoment.make(self, cam, kin_node, first)
+	moment.finished.connect(then)
+	add_child(moment)
+
+func _head_out(tutorial: bool) -> void:
 	if tutorial:
-		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+		Game.start_match(TutorialResume.opts())
 	else:
 		Save.d["tutorial"]["match"] = true
 		Save.save_game()

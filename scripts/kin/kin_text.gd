@@ -24,7 +24,7 @@ static func effect(e: PartSpec, pw := 1.0) -> String:
 		"root": t = "root %ss" % n(float(p["duration"]))
 		"stun": t = "stun %ss" % n(float(p["duration"]))
 		"pull":
-			var to := {"caster": "the kin", "owner": "its hunter", "center": "the middle"}[String(p["to"])] as String
+			var to := {"caster": "the kin", "owner": "the hunter", "center": "the middle"}[String(p["to"])] as String
 			t = ("yank to %s" % to) if float(p["gap"]) > 0.0 else ("pull in" if String(p["to"]) == "center" else "pull to %s" % to)
 		"push": t = "knock back"
 		"lift": t = "knock up" if e.target == "foes" else ("lift you up" + (" and forward" if float(p["forward"]) > 0.0 else ""))
@@ -56,7 +56,7 @@ static func effect(e: PartSpec, pw := 1.0) -> String:
 	elif e.target == "allies":
 		t += " on allies"
 	elif e.target == "self" and e.type in ["shield", "heal", "cleanse", "reflect", "buff"]:
-		t += " on itself"
+		t += " on the Boki"
 	return t
 
 static func effects(effs: Array, pw := 1.0) -> String:
@@ -75,7 +75,7 @@ static func delivery(d: PartSpec) -> String:
 		"cone": return "%s° cone %sm" % [n(float(p["angle"])), n(float(p["radius"]))]
 		"beam": return ("beam %sm" % n(float(p["range"]))) + (" (locks on)" if bool(p["seek"]) else "") + ((" for %ss" % n(float(p["duration"]))) if float(p["duration"]) > 0.0 else "")
 		"burst":
-			if float(p["radius"]) <= 0.01: return "on you" if o == "owner" else "on itself"
+			if float(p["radius"]) <= 0.01: return "on you" if o == "owner" else "on the Boki"
 			return "burst %sm%s" % [n(float(p["radius"])), " around you" if o == "owner" else (" where it lands" if o == "here" else "")]
 		"zone": return "zone %sm for %ss" % [n(float(p["radius"])), n(float(p["duration"]))]
 		"trap": return ("%d traps" % int(p["count"])) if int(p["count"]) > 1 else "a trap"
@@ -139,10 +139,12 @@ static func color(ab: AbilitySpec) -> Color:
 			return KinRules.effects_color(st.effects)
 	return KinRules.cat_color("sustain" if not ab.stages.is_empty() and ab.stages[0].delivery.type == "wall" else "utility")
 
-## A HUD icon from the shape of the ability (Icons ids).
+## A HUD icon for the ability (Icons ids): its painted icon (art/icons/boki_<id>.png), else a glyph from its shape.
 static func icon(ab: AbilitySpec) -> String:
 	if ab == null or ab.stages.is_empty():
 		return "bond"
+	if Icons.art("boki_" + ab.id):
+		return "boki_" + ab.id
 	var st: StageSpec = ab.stages[0]
 	var types := ab.effect_types()
 	match st.delivery.type:
@@ -168,7 +170,7 @@ static func icon(ab: AbilitySpec) -> String:
 
 const CUES := {"foe_in_range": "when a foe is in reach", "foes_clumped": "when foes bunch up", "owner_hurt": "when you're hurt",
 	"owner_falling": "when you fall into the abyss", "owner_fighting": "in a fight", "owner_under_fire": "when you're shot at"}
-const TRIGGERS := {"auto": "", "on_throw": "when thrown into a foe", "on_hit": "every few of its hits", "on_recall": "when recalled",
+const TRIGGERS := {"auto": "", "on_throw": "when thrown into a foe", "on_hit": "every few Boki hits", "on_recall": "when recalled",
 	"on_bond_full": "when the bond meter fills", "on_low_hp": "when health runs low"}
 
 ## When an auto ability goes off, in words.
@@ -176,8 +178,8 @@ static func when(ab: AbilitySpec) -> String:
 	if ab == null or ab.trigger == null:
 		return ""
 	if ab.trigger.type == "auto":
-		return "On its own " + String(CUES.get(ab.cue.type if ab.cue else "", "when it sees the chance"))
-	return "On its own " + String(TRIGGERS.get(ab.trigger.type, ab.trigger.type))
+		return "The Boki decides: " + String(CUES.get(ab.cue.type if ab.cue else "", "when the Boki sees the chance"))
+	return "The Boki decides: " + String(TRIGGERS.get(ab.trigger.type, ab.trigger.type))
 
 # ------------------------------------------------------------------ owner stats, carry, merge
 static func owner_stat(stat: String, v: float) -> String:
@@ -191,12 +193,12 @@ static func owner_stat(stat: String, v: float) -> String:
 		"armor": return "armor wears %s slower" % pct(v)
 		"damage_reduction": return "-%s damage taken" % pct(v)
 		"knockback_resist": return "half knockback" if is_equal_approx(v, 0.5) else "-%s knockback" % pct(v)
-		"shield": return "%s shield" % n(v)
 		"regen": return "%s hp/s regen" % n(v)
 		"damage": return "+%s damage" % pct(v)
 		"fire_rate": return "+%s fire rate" % pct(v)
 		"reload": return "%s faster reload" % pct(v)
 		"reveal_radius": return "reveals rivals within %sm" % n(v)
+		"cooldown": return "abilities recharge %s faster" % pct(v)
 	return stat
 
 static func passives(list: Array, k := 1.0) -> String:
@@ -216,9 +218,9 @@ static func on_shot(os: Dictionary) -> String:
 	if int(os.get("chain", 0)) > 0: out.append("arc to %d more" % int(os["chain"]))
 	return "your shots: " + ", ".join(out)
 
-const CARRY_NAMES := {"shoulder": "Rides your shoulder", "perch": "Perches on your pack", "mount": "You ride it"}
+const CARRY_NAMES := {"shoulder": "Return: rides your shoulder", "perch": "Return: perches on your pack", "mount": "Return: guards at your side"}
 
-## How it's carried and what that gives you: "You ride it (Anchor): -15% damage taken, half knockback".
+## How it's carried and what that gives you: "Return: guards at your side (Anchor): -15% damage taken, half knockback".
 static func carry(ks: KinSpec) -> String:
 	if ks == null:
 		return ""
@@ -229,9 +231,19 @@ static func carry(ks: KinSpec) -> String:
 	var t := "%s%s" % [CARRY_NAMES.get(ks.carry_style, ks.carry_style), (" (%s)" % ks.carry_name) if ks.carry_name != "" else ""]
 	if not bits.is_empty(): t += ": " + "; ".join(bits)
 	match ks.carry_style:
-		"mount": t += ". It curls up on your back while you glide; you can't glide riding it"
-		"perch": t += ". Thrown, it dives on the spot from above"
+		"mount": t += ". The Boki curls up on your back while you glide"
+		"perch": t += ". Thrown, the Boki dives on the spot from above"
 	return t
+
+## What you lose while it is out beside you: "Off you: no -15% damage taken" ("" if its carry gives nothing).
+static func carry_off(ks: KinSpec) -> String:
+	if ks == null:
+		return ""
+	var bits := PackedStringArray()
+	if not ks.carry_passives.is_empty(): bits.append("no " + passives(ks.carry_passives).replace(", ", ", no "))
+	var os := on_shot(ks.carry_on_shot)
+	if os != "": bits.append("no " + os)
+	return ("Off you: " + "; ".join(bits)) if not bits.is_empty() else ""
 
 const OWNER_POINTS := {"owner_max_hp": "+%s max health", "owner_armor": "armor wears %s slower", "owner_shield": "%s shield that refills out of a fight",
 	"owner_regen": "+%s hp/s regen", "owner_move_speed": "+%s move speed"}
@@ -246,24 +258,19 @@ static func owner_bonus(bonus: Dictionary) -> String:
 		out.append(String(OWNER_POINTS.get(key, key + " %s")) % vs)
 	return ", ".join(out)
 
-## The class dodge's kin rider: "Venom Trail: what you dodge through takes 3 damage, ...".
-static func rider(ks: KinSpec) -> String:
-	if ks == null or ks.dodge_rider.is_empty():
-		return ""
-	var r: Dictionary = ks.dodge_rider
-	var bits := PackedStringArray()
-	if String(r.get("as", "dash")) == "blink": bits.append("on the ground your dodge is a blink: there in an instant")
-	if not (r.get("on_pass", []) as Array).is_empty(): bits.append("what you dodge through: " + effects(r["on_pass"]))
-	for st in r.get("on_start", []): bits.append("where you start: " + stage(st))
-	for st in r.get("on_end", []): bits.append("where you stop: " + stage(st))
-	for md in r.get("modifiers", []):
-		if (md as PartSpec).type == "repeat": bits.append("a beat later it dodges again at %s" % pct(float(md.params["falloff"])))
-	return "; ".join(bits)
+## The Fusion's icon (Icons ids): the merge's painted icon (art/icons/merge_<id>.png), else the bond glyph.
+static func merge_icon(ms: MergeSpec) -> String:
+	if ms and Icons.art("merge_" + ms.id):
+		return "merge_" + ms.id
+	return "bond"
 
 ## A merge in a few lines: [what it gives, what its shots do, what it does over time].
 static func merge(ms: MergeSpec, giant := false) -> Array:
 	if ms == null:
 		return []
+	var fd: Dictionary = Content.merge_form(ms.id)
+	if not fd.is_empty():
+		return form_lines(ms, fd)
 	var out: Array = []
 	var head := "%ss: %s" % [n(ms.duration), passives(ms.passives)]
 	if giant: head = "Your mount grows huge for " + head
@@ -273,12 +280,32 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
+	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
+	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
+		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
+	out.append("%s again: a basic burst that ends the Fusion." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
-		out.append("Merged %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+		var which := Settings.key_cap("signature") if slot == "active" else "auto ability"
+		out.append("Fused %s: %s" % [which, ", ".join(bits)])
+	return out
+
+## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).
+static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
+	var f := MergeForm.kit_form(ms.id)
+	var out: Array = []
+	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the Fusion ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
+	var a: Dictionary = fd["aug"]
+	out.append("You keep your own abilities and they get stronger:")
+	out.append("%s, %s: %s" % [Settings.key_cap("fire"), a["lmb"]["name"], a["lmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("secondary"), a["rmb"]["name"], a["rmb"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("signature"), a["e"]["name"], a["e"]["desc"]])
+	out.append("%s, %s: %s" % [Settings.key_cap("dash"), a["dash"]["name"], a["dash"]["desc"]])
+	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

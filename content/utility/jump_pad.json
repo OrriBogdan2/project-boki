@@ -1,0 +1,17 @@
+{
+ "id": "jump_pad",
+ "name": "Spring pad",
+ "short": "Pad",
+ "icon": "jump_pad",
+ "col": "8ff0c8",
+ "use": "pad",
+ "cd": 2.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 35,
+ "desc": "Set down a pad. Anyone who steps on it is launched high. Lasts 20s."
+}

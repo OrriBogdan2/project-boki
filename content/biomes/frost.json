@@ -51,17 +51,7 @@
 		}
 	],
 	"loot": {
-		"weapons": {
-			"sniper": 4,
-			"rifle": 2,
-			"burst_rifle": 3,
-			"longsword": 2,
-			"smg": 1,
-			"shotgun": 1,
-			"twin_blades": 1,
-			"minigun": 1,
-			"greatsword": 1
-		},
+		"slots": {"armor": 1.8},
 		"rarity_bonus": 0,
 		"gear": [
 			"frost"

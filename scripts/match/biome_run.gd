@@ -31,12 +31,15 @@ var hazards: Array = []             # {kind, pos, node, t, phase, tele, ...}
 var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
 var player_biome := ""
+var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
+var terrain: TerrainHazards = null  # the map's lava, deep water, ice, static and bramble areas
 var rng := RandomNumberGenerator.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
 	w = m.world
 	rng.seed = int(m.seed_val) * 13 + 5
+	hot = HotZone.new(w, int(m.seed_val))
 	for isl in w.islands:
 		var b := String(isl.get("biome", ""))
 		if b != "" and not defs.has(b):
@@ -223,6 +226,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		if k in ["armored", "swift"]: continue
 		var p := CPUParticles3D.new()
 		p.amount = 10; p.lifetime = 1.0; p.preprocess = 1.0
+		ParticleCount.tune(p)
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = 0.6
 		p.direction = Vector3.UP; p.spread = 30.0; p.initial_velocity_min = 0.4; p.initial_velocity_max = 1.2
 		p.gravity = Vector3.ZERO
@@ -236,6 +240,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		var tm := TorusMesh.new(); tm.inner_radius = 0.22; tm.outer_radius = 0.3
 		crown.mesh = tm
 		crown.material_override = Models.glow_mat(Color("ffd27a"))
+		crown.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a glow: no shadow, item 94)
 		crown.position.y = 1.15 + Data.MOBS[mb.mkind]["r"] * 0.8
 		mb.add_child(crown)
 
@@ -323,6 +328,7 @@ func tick(dt: float) -> void:
 		if muts.has("void") and mb.tgt and mb.st == "chase" and mb.flat_dist(mb.tgt) > 3.5:
 			_blink(mb)
 	_tick_hazards(dt)
+	terrain.tick(dt)
 	_tick_region_banner()
 
 ## A void monster marks where it's going, then blinks there.
@@ -346,10 +352,23 @@ func _blink(mb: Mob) -> void:
 # ------------------------------------------------------------------ traps and hazards
 ## Places each region's traps on its islands, away from exits, points of interest and the edges.
 func place_hazards() -> void:
+	terrain = TerrainHazards.new(m)
 	var taken: Array = []
 	for p in w.portal_spots: taken.append(p)
 	for c in w.chest_spots: taken.append(c["pos"])
 	for c in w.camp_spots: taken.append(c["pos"])
+	if w.hand:
+		# a hand-made map lists its trap spots (World.trap_spots); which trap goes there is the
+		# region's own (its biome's hazards, in turn)
+		var nth := {}
+		for ts in w.trap_spots:
+			var ii := int(ts["island"])
+			var hz: Array = (defs.get(String(w.islands[ii].get("biome", "")), {}) as Dictionary).get("hazards", [])
+			if hz.is_empty():
+				continue
+			_add_hazard(String(hz[int(nth.get(ii, 0)) % hz.size()]["kind"]), ts["pos"])
+			nth[ii] = int(nth.get(ii, 0)) + 1
+		return
 	for ii in w.islands.size():
 		if w.islands[ii].get("perch", false):
 			continue      # the perches' danger is the drop, not traps
@@ -424,12 +443,15 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 			n.add_child(rim)
 	hazards.append(hz)
 
-## How much grip the ground has at p (1 normal, low on ice), for the hunter's footing.
-func grip(p: Vector3) -> float:
+## How much grip the ground has at p for h (1 normal, low on ice; a frost Boki keeps its hunter's
+## footing on ice sheets and patches alike).
+func grip(p: Vector3, h: Hunter = null) -> float:
+	if h != null and terrain.guards(h, "ice"):
+		return 1.0
 	for hz in hazards:
 		if hz["kind"] == "ice_patch" and Vector2(p.x - hz["pos"].x, p.z - hz["pos"].z).length() < float(hz["r"]) and absf(p.y - hz["pos"].y) < 0.3:
-			return 0.12
-	return 1.0
+			return float(TerrainHazards.kind_def("ice")["effect"]["grip"])
+	return terrain.grip(p, h)
 
 func _near_hunter(p: Vector3, d: float) -> Hunter:
 	var best: Hunter = null; var bd := d
@@ -439,9 +461,11 @@ func _near_hunter(p: Vector3, d: float) -> Hunter:
 		if dd < bd: bd = dd; best = h
 	return best
 
+## Hazards run on every game, each on its own clock: a game only hurts, pulls or slows the bodies it owns, so
+## a player online is hit once (by their own game), not once per game.
 func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary) -> void:
 	for f in m.foes_of(-3):
-		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
+		if not f.remote and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
 			var oo := o.duplicate(); oo["tags"] = ["mut", "hazard"]; oo["src"] = "hazard"
 			f.hurt(dmg * float(m.T.get("mob", 1.0)), null, oo)
 
@@ -471,8 +495,7 @@ func _tick_hazards(dt: float) -> void:
 						_zap(p + Vector3(0, 3.3, 0), at2 + Vector3(0, 0.3, 0))
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
-						m.shake(0.35, at2)
-						_hit_area(at2, 1.8, 14.0, {"stun": 0.4})
+						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"lava_vent":
 				hz["t"] = float(hz["t"]) - dt
@@ -489,7 +512,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("ff9a3a"), 34, 7.5, 0.7, 9.0, 1.4)
 						m.sfx("boom", p, -4.0, 0.8)
 						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
-						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"spore_pod":
@@ -508,7 +531,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("d88aff"), 28, 4.0, 0.8, -1.0, 1.4)
 						m.sfx("thump", p, -4.0, 0.7)
-						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
 						if pod: pod.visible = false
 						hz["phase"] = "spent"; hz["t"] = 14.0
 				else:
@@ -537,31 +560,22 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.3, 0), Color("b08aff"), 8, -3.0, 0.4, 0.0, 1.0)
 						for f in m.foes_of(-3):
 							var to := Vector2(p.x - f.pos.x, p.z - f.pos.z)
-							if to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
+							if not f.remote and to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
 								if to.length() > 0.6: f.impulse(to.normalized() * 3.2, 0.0)
 								if to.length() < 1.3: f.hurt(3.0 * float(m.T.get("mob", 1.0)), null, {"src": "hazard", "tags": ["mut", "hazard"]})
 					if float(hz["t"]) <= 0.0:
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
 
 # ------------------------------------------------------------------ loot
-## A weapon for a chest at p: the region leans toward its own weapons.
-func weapon_at(p: Vector3, keys: Array) -> String:
-	var L: Dictionary = _biome(p).get("loot", {})
-	var wts: Dictionary = L.get("weapons", {})
-	if wts.is_empty():
-		return String(keys[randi() % keys.size()])
-	var tot := 0.0
-	for k in wts: if keys.has(k): tot += float(wts[k])
-	var r := rng.randf() * tot
-	for k in wts:
-		if not keys.has(k): continue
-		r -= float(wts[k])
-		if r <= 0.0: return String(k)
-	return String(keys[randi() % keys.size()])
+## Slot weights for gear found at p (by slot name): the biome and the map region lean toward
+## their own kinds of gear.
+func slot_lean_at(p: Vector3) -> Dictionary:
+	return hot.slot_lean(p, _biome(p).get("loot", {}).get("slots", {}))
 
-## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
+## Extra rarity steps for loot here: the biome's (the Gloom pays better), the island's danger,
+## the map region's own and the hot zone's.
 func rarity_bonus_at(p: Vector3) -> int:
-	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0)
+	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0) + hot.rarity_bonus(p)
 
 ## The region's gear leanings (tags), for glove/gear tables that read them.
 func gear_tags_at(p: Vector3) -> Array:
@@ -576,7 +590,8 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		p.amount = int(clampf(r * 4.0, 20, 70)); p.lifetime = 5.0; p.preprocess = 5.0
+		ParticleCount.tune(p)
 		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)
@@ -649,7 +664,7 @@ func _tick_region_banner() -> void:
 	if P == null or P.out or P.dropping or P.riding or m.hud == null:
 		return
 	if m.opts.get("arena", false) or m.opts.get("training", false):
-		return      # the Arena and the training area aren't a region out in the wild ("Few monsters...")
+		return      # the Arena and the Training Grounds aren't a region out in the wild ("Few monsters...")
 	var b := w.biome_at(P.pos.x, P.pos.z)
 	if b == "" or b == player_biome:
 		return

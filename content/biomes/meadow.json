@@ -44,17 +44,7 @@
 	},
 	"hazards": [],
 	"loot": {
-		"weapons": {
-			"rifle": 3,
-			"smg": 2,
-			"shotgun": 2,
-			"longsword": 2,
-			"twin_blades": 1,
-			"sniper": 1,
-			"burst_rifle": 1,
-			"minigun": 1,
-			"greatsword": 1
-		},
+		"slots": {},
 		"rarity_bonus": 0
 	},
 	"id": "meadow"

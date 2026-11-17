@@ -1,0 +1,43 @@
+{
+ "doc": "Sable (thief) v2: the ART-1 build (tools/art1/sable_build.sh; docs/art/wardens/PIPELINE.md). The owner's v2 redesign (briefs/art-refs/sable_v2: sable_v2_turnaround.jpg, sable_v2_master_sheet.jpg). The scan keeps the body, coat, belt, gem and chains; the antennae, braid, wings, coat tails and weapons are taken out by the edits and rebuilt in sable_pieces.py.",
+ "name": "sable",
+ "arch": "thief",
+ "tag": "v2",
+ "raw": "~/meshy/sable_v2",
+ "art": {
+  "ref": "origin/ext/agent-briefs",
+  "turnaround": "briefs/art-refs/sable_v2/sable_v2_turnaround.jpg",
+  "design": "briefs/art-refs/sable_v2/sable_v2_master_sheet.jpg"
+ },
+ "edits_common": "Edit this 3D character sculpt render of a stylised adult woman in a relaxed A-pose. Keep her body, pose, proportions, arm positions, grey-lilac skin, face, dark lilac eyes, the beauty mark, pointed ears, the slicked-back white hair on her skull, the dark plum leather coat's upper body with its tall purple-lined collar, purple piping, the deep NARROW opening down the front of the coat exactly as drawn, with its two front edges at exactly the same place, her flat toned sternum and abs inside it, the violet diamond gem on its silver chain and the three silver chains across the abs exactly as they are, the sleeves with their buckled cuffs, the plain purple belt and its buckle, the fingerless gloves, the fitted dark trousers with the thigh straps and knee pads, the tall buckled boots, all colours, the lighting and the flat light grey background exactly the same, and keep the framing and scale exactly the same. Make ONLY these changes: (1) remove the two feathery moth antennae completely, the hair stays smooth there; (2) remove the long white braid and its ties completely: the hair ends at the nape of the neck in a small tight knot; (3) remove the pale moth wings with eye spots completely; (4) cut the long coat off at the hips, just under the belt, like a short fitted jacket that still reaches the belt everywhere: all long coat tails and their purple lining are gone and both legs in dark trousers are fully visible; (5) remove both pistols completely, her hands are empty and relaxed; (6) remove the two hip sheaths with their knives and their holster straps completely; (7) remove the keys, the key ring and the little bell completely; Do NOT touch anything between the two coat edges: no change to the chest, the opening does not get wider and the body inside it does not change. The plain belt stays. Paint what they hid (trousers, jacket, skin, background) to match.",
+ "edits": {
+  "front": "This is her front view.",
+  "tq": "This is her three-quarter front view.",
+  "side": "This is her right side view, facing right: the coat stays closed in this view all the way down to the belt, no bare skin shows, exactly as drawn.",
+  "side2 (on e_side)": "Keep this picture exactly the same: the pure side view, the character, her pose, head, legs, framing and the background. Make ONLY this change: lengthen the dark jacket so it reaches down past the purple belt and covers the bare midriff completely, no bare skin shows; the jacket is fitted to her waist, its hem with purple piping ends just under the belt at the hip, and the belt sits over it.",
+  "back": "Edit this 3D character sculpt render of a stylised adult woman in a relaxed A-pose. Keep her body, pose, proportions, arm positions, grey-lilac skin, face, dark lilac eyes, the beauty mark, pointed ears, the slicked-back white hair on her skull, the dark plum leather coat's upper body with its tall purple-lined collar, purple piping, the deep narrow opening down the front of the coat showing her grey-lilac sternum and midriff, the sleeves with their buckled cuffs, the plain purple belt and its buckle, the fingerless gloves, the fitted dark trousers with the thigh straps and knee pads, the tall buckled boots, all colours, the lighting and the flat light grey background exactly the same, and keep the framing and scale exactly the same. Make ONLY these changes: (1) remove the two feathery moth antennae completely, the hair stays smooth there; (2) remove the long white braid and its ties completely: the hair ends at the nape of the neck in a small tight knot; (3) remove the pale moth wings with eye spots completely; (4) cut the long coat off at the hips, just under the belt, like a short fitted jacket: all long coat tails and their purple lining are gone and both legs in dark trousers are fully visible; (5) remove both pistols completely, her hands are empty and relaxed; (6) remove the two hip sheaths with their knives and their holster straps completely; (7) remove the keys, the key ring and the little bell completely; (8) remove the silver chains and the purple gem pendant completely, the skin there is plain and smooth. The plain belt stays. Paint what they hid (trousers, jacket, skin, background) to match. This is her back view: the back of the jacket with its purple seams stays, ending at the belt; both legs and the backs of the boots show below it.",
+  "back2 (on e_back)": "Keep this picture exactly the same, every pixel of the character, framing and background. Make ONLY this change: remove the small round pale discs beside both knees; the outer side of the trousers and boots there is smooth dark leather like the rest."
+ },
+ "use": {
+  "front": "e_front",
+  "tq": "e_tq",
+  "side": "e_side2",
+  "back": "e_back2"
+ },
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "A": {
+    "ultra_mode": true,
+    "hd_texture": true
+   }
+  },
+  "keep": "A"
+ },
+ "build": "tools/art1/sable_build.sh source"
+}

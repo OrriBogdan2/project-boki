@@ -1,0 +1,15 @@
+{
+ "id": "bastion_plate",
+ "name": "Bastion Plate",
+ "short": "Bastion",
+ "verb": "",
+ "cd": 0,
+ "slot": "armor",
+ "col": "dfe9f7",
+ "stats": {
+  "armor": 40,
+  "speed": -0.04
+ },
+ "icon": "fortify",
+ "desc": "Heavy plate: lots of armor, a little slower on foot."
+}

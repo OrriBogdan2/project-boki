@@ -1,0 +1,20 @@
+{
+	"id": "squalltross",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/squalltross.json.",
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#f0e8e8",
+		"belly": "#f2f2f2",
+		"glow": "#ffaa9f",
+		"wing": "#684c4a"
+	},
+	"work": {
+		"spark": 3,
+		"tide": 2,
+		"haul": 1
+	}
+}

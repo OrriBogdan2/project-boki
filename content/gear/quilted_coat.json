@@ -1,0 +1,15 @@
+{
+ "id": "quilted_coat",
+ "name": "Quilted Coat",
+ "short": "Quilted",
+ "verb": "",
+ "cd": 0,
+ "slot": "armor",
+ "col": "e8c9a0",
+ "stats": {
+  "armor": 12,
+  "hp": 22
+ },
+ "icon": "heart",
+ "desc": "Padded and warm: more health and some armor."
+}

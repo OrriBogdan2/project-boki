@@ -1,5 +1,5 @@
 {
-	"desc": "How the bond meter fills. All values are fractions of a full meter.",
+	"desc": "How the bond meter fills (it gates the Merge). All values are fractions of a full meter. Your Boki's hits mark the foe for mark_s seconds, and your own hits on a marked foe fill the meter marked_factor times faster. (Every point of damage you or your Boki deal also adds 1/320, see Match.on_damage.)",
 	"per_player_dmg": 0.0016,
 	"per_kin_dmg": 0.0026,
 	"passive_per_sec": 0.002,
@@ -7,5 +7,7 @@
 	"kin_ko": 0.06,
 	"max_per_hit": 0.035,
 	"kin_required": true,
-	"mob_factor": 0.6
+	"mob_factor": 0.6,
+	"marked_factor": 2.0,
+	"mark_s": 4.0
 }

@@ -1,0 +1,24 @@
+{
+ "high": "~/meshy/breaker/s3/runC/glb.glb",
+ "out": "~/meshy/breaker/s3/bake/low.glb",
+ "blend": "~/meshy/breaker/s3/bake/bake.blend",
+ "tris": 36000,
+ "tex": 4096,
+ "head": {
+  "centre": [
+   0.0,
+   -0.2,
+   0.8
+  ],
+  "r": 0.21
+ },
+ "head_uv": 2.5,
+ "head_tris": 9000,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 16,
+ "floater_verts": 60
+}

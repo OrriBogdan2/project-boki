@@ -165,6 +165,8 @@ static func why_not(rec: Dictionary) -> String:
 		return "Asleep in the Boki Burrow"
 	if rec.get("work_rest", false):
 		return "Resting only"
+	if Mentor.is_mentor(rec):
+		return "A mentor at the Soul Shrine"
 	if rec.get("ghost_wait", false):
 		return "Away"
 	var ss := Care.starve_stage(rec)
@@ -270,6 +272,7 @@ static func assign(rec: Dictionary, u: int) -> void:
 	if u < 0: rec.erase("work_at")
 	else:
 		rec["work_at"] = u
+		rec.erase("build_at")      # (a site assignment: FarmSites)
 		rec.erase("work_rest")
 		rec.erase("work_pin")
 
@@ -343,7 +346,7 @@ static func catch_up(now := -1.0) -> Array:
 				Save.add_item("coals", n)
 				what = "%d Ember Coal%s (from %d wood)" % [n, "" if n == 1 else "s", n * int(cfg["wood"])]
 		count(String(cfg["out"]), n)
-		lines.append("%s at the %s: %s" % [" and ".join(who), HomeLayout.CATALOG[id]["name"], what])
+		lines.append("+%s from the %s (%s worked it)" % [what, HomeLayout.CATALOG[id]["name"], " and ".join(who)])
 	return lines
 
 ## A common seed (never the rare ones), picked from k.

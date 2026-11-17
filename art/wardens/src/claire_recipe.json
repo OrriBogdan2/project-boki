@@ -1,0 +1,43 @@
+{
+ "doc": "Claire (rimewright) v2: the ART-1 build (tools/art1/claire_build.sh; docs/art/wardens/PIPELINE.md). The owner's v2 redesign (briefs/art-refs/claire_v2: nivi_v2_turnaround.jpg, nivi_v2_main_design.jpg): rabbit ears, a braid, a small puff tail; no horns, wings or devil tail. The scan carries the body, face, scarf wrap, sleeves, sash, skirt and skates; the ears, braid, tail, hands, blades and spear are built pieces. Task ids and credits are in PIPELINE.md's run log.",
+ "name": "claire",
+ "arch": "rimewright",
+ "tag": "v2",
+ "raw": "~/meshy/claire_v2",
+ "art": {
+  "ref": "origin/ext/agent-briefs",
+  "turnaround": "briefs/art-refs/claire_v2/nivi_v2_turnaround.jpg",
+  "design": "briefs/art-refs/claire_v2/nivi_v2_main_design.jpg"
+ },
+ "edits_common": "Edit this 3D character sculpt render of a youthful young woman in a relaxed A-pose. Keep her body, pose, proportions, arm positions, face, big pale ice-blue eyes, rosy cheeks, the fluffy white cheek fur tufts, the white fluffy fur sleeves and fur wrist cuffs, the lilac gloves, the icy-blue skating leotard, the red-and-white candy-cane sash with its bow at her hip, the candy-cane hair bow, the light blue scarf wrapped round her neck, the white skates with candy-cane laces and fluffy fur cuffs, all colours, the lighting and the flat light grey background exactly the same, and keep the framing and scale exactly the same. Make ONLY these changes: (1) remove both tall white rabbit ears completely, the candy-cane hair bow stays pinned on the silver hair where it was; (2) remove the long braid and its snowflake clasp completely, her silver hair ends as a soft shoulder-length bob; paint what the braid hid (leotard, sash, skirt, background) to match; (3) remove the two long trailing ends of the scarf that hang down to her knees completely, only the short wrap round her neck stays; (4) remove the small round white tail completely; (5) remove the ice blades under the skates, the plain sole stays; (6) the sheer see-through skirt becomes an opaque soft frosted pale ice-blue chiffon skirt of the same shape and length, nothing shows through it. Nothing else changes, nothing floats in the background.",
+ "edits": {
+  "front": "This is her front view.",
+  "tq": "This is her three-quarter front view.",
+  "side": "This is her right side view: the scarf end hanging behind her and the tail are gone.",
+  "back": "This is her back view: the scarf ends hanging down her back, the snowflake clasp and the tail are gone; the back of her leotard and the frosted skirt show."
+ },
+ "use": {
+  "front": "e_front",
+  "tq": "e_tq2",
+  "side": "e_side",
+  "back": "e_back"
+ },
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "A": {
+    "ultra_mode": true,
+    "hd_texture": true
+   }
+  },
+  "keep": "A"
+ },
+ "build": "tools/art1/claire_build.sh source",
+ "combo_check": "--rimewright-combo-check",
+ "demo_at": "-4.5,0"
+}

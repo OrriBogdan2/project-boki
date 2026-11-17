@@ -1,0 +1,24 @@
+{
+ "high": "~/meshy/pip_r2/runB/glb.glb",
+ "out": "~/meshy/pip_r2/bakeB/low.glb",
+ "blend": "~/meshy/pip_r2/bakeB/bake.blend",
+ "tris": 36000,
+ "tex": 4096,
+ "head": {
+  "centre": [
+   -0.02,
+   -0.12,
+   0.6
+  ],
+  "r": 0.27
+ },
+ "head_uv": 2.5,
+ "head_tris": 9000,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 16,
+ "floater_verts": 60
+}

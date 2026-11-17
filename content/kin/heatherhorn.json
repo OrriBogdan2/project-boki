@@ -1,0 +1,19 @@
+{
+	"id": "heatherhorn",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/heatherhorn.json.",
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#34beaa",
+		"belly": "#a0e3e8",
+		"glow": "#c9ff8a"
+	},
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	}
+}

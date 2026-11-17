@@ -1,0 +1,759 @@
+extends RefCounted
+## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
+## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
+## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
+##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
+##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
+##                   (1.0: the match camera's own, the combat-clarity films in docs/COMBAT_CLARITY.md)
+##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
+##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
+##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
+##   5 tumble        a Tumble on the Boki base (base_tumble.gd): tells, picks that read them, presses in the gold
+##   6 echo steps    Echo Steps (echo_steps.gd): the first round answered on the beat, then every third stone wrong
+##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
+##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
+##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
+##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
+##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
+##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
+##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
+##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
+##                   (11 and 12 follow with the game's own camera, as a player sees it)
+##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
+##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##                   (the see-through canopies: SeeThrough)
+##  15 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
+##                   backpedal facing east, then kite north 4 s with the aim swaying east (KITE_SWAY), on the game
+##                   camera (--media-secs=28 for all of it); <dir>/loco_<id>.tsv logs body and feet per frame;
+##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
+## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
+
+const AUDIT := preload("res://tools/anim_audit.gd")
+const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
+const MATE_GAP := 13.0           # m from the player to each teammate (far enough that the teleport reads)
+const FRAME := 2.0 * STEP        # s per rendered frame
+## [from s, move (screen x east, y south; length = stick), label]: the player always faces east (the aim stays put).
+const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"], [4.0, Vector2.ZERO, "stop"],
+		[5.0, Vector2(1, 0), "run"], [8.0, Vector2.ZERO, "stop"], [9.0, Vector2(0, -1), "strafe_l"],
+		[13.0, Vector2.ZERO, "stop"], [14.0, Vector2(0, 1), "strafe_r"], [18.0, Vector2.ZERO, "stop"],
+		[19.0, Vector2(-1, 0), "back"], [23.0, Vector2.ZERO, "stop"], [24.0, Vector2(0, -1), "kite"],
+		[28.0, Vector2.ZERO, "stop"]]
+const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
+const SEED := 5                  # the demo map's roll (Dusk Isles)
+const FIGHT_GAP := 7.0           # m between the two squads at the start
+const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
+const FIGHT_KIN := ["cindle", "pebbit", "zapple", "wisplet", "burrlet", "puddlet"]     # ... their Boki, in that order
+const CHARGE_LEFT := 2.5         # s of the uplink's charge left when the clip starts
+const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
+const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
+const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer than the usual 1.0)
+const GAME_ZOOM := 0.55          # the home camera's zoom for clips 6-8
+const LURE_LEAD := 1.5           # s of the Show Ring walk kept before each lure (clip 7 cuts the rest)
+const JUDGE_HOLD := 4.0          # s of the judges' cards clip 7 keeps before the result
+const DUO_TAIL := 3.0            # s of the 2v2 tutorial's end card clip 9 keeps
+
+var main: Node
+var m: Match
+var dir := "/tmp/media"
+var clip := 1
+var frame := 0
+var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
+var squad_a: Array = []
+var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
+var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
+var fight := FIGHT               # --media-fight=
+var loco_id := "gunslinger"      # --media-hunter=: clip 15's Hunter
+var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
+
+func run(main_node: Node) -> void:
+	main = main_node
+	var secs := 12.0
+	var res := "1920x1080"
+	var child := false
+	for a in OS.get_cmdline_user_args():
+		var arg := String(a)
+		child = child or arg == "--media-child"
+		if arg.begins_with("--media-size="):
+			res = arg.substr(13)
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+		if arg.begins_with("--media-clip="):
+			clip = int(arg.substr(13))
+		if arg.begins_with("--media-secs="):
+			secs = float(arg.substr(13))
+		if arg.begins_with("--media-fight="):
+			fight = arg.substr(14)
+		if arg.begins_with("--media-hunter="):
+			loco_id = arg.substr(15)
+		if arg.begins_with("--media-zoom="):
+			fight_zoom = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
+	if dir.is_relative_path():
+		dir = ProjectSettings.globalize_path("res://").path_join(dir)
+	DirAccess.make_dir_recursive_absolute(dir)
+	if not child:
+		_record(res)
+		return
+	Save.no_write = true
+	Record.set_level(1)
+	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
+	match clip:
+		1: await _fight(secs)
+		2: await _boki_combat(secs)
+		3: await _extraction(secs)
+		4: await _hatch(secs)
+		5: await _tumble(secs)
+		6: await _echo(secs)
+		7: await _show(secs)
+		8: await _relay(secs)
+		9: await _duo(secs)
+		10: await _base_tp()
+		11: await _shift_glide(secs)
+		12: await _dive_feather(secs)
+		13: await _boss_focus(secs)
+		14: await _forest(secs)
+		15: await _locomotion(secs)
+	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
+	main.get_tree().quit(0)
+
+## The movie writer's flags are engine arguments, and the GPU workers (jobq) pass their job arguments after "--",
+## so this runs the same scene again as a child Godot with --write-movie (the child gets --media-child). The movie
+## is as big as the project's viewport setting, so the child gets that (and a better MJPEG quality) from a
+## temporary override.cfg.
+func _record(res: String) -> void:
+	var wh := res.split("x")
+	var cfg := ProjectSettings.globalize_path("res://override.cfg")
+	var f := FileAccess.open(cfg, FileAccess.WRITE)
+	f.store_string("[display]\n\nwindow/size/viewport_width=%s\nwindow/size/viewport_height=%s\n\n" % [wh[0], wh[1]])
+	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.95\n")
+	f.close()
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
+		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
+		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
+	if "--media-log" in OS.get_cmdline_user_args():     # the TSV only: headless, no video, same 1/30 s steps
+		args = ["--headless", "--fixed-fps", "30", "--path", ProjectSettings.globalize_path("res://"), "--"]
+	args.append_array(OS.get_cmdline_user_args())
+	args.append("--media-child")
+	var out: Array = []
+	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	DirAccess.remove_absolute(cfg)
+	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		if line.begins_with("MEDIA_") or line.contains("ERROR"):
+			print(line)
+	print("MEDIA_CHILD rc=%d" % rc)
+	main.get_tree().quit(rc)
+
+# ------------------------------------------------------------------ the match rig
+## A seeded Dusk Isles match with only the player in it (the rest are made by hand), no drop, no mobs.
+func _start(arch: String, kin: String, mobs := false) -> void:
+	Save.d["name"] = HeroTitle.base_name(arch)
+	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": SEED, "length": 1e9, "no_drop": true,
+		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": kin, "demo_kin_lv": "8:95"}
+	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
+	m = Match.new()
+	main.add_child(m)
+	await m.start(o)
+	m.set_process(false)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	_purge()
+	mobs_on = mobs
+	if m.hud:
+		m.hud.guide_hidden = true
+	m.player.unlock_all()
+
+## A bot Hunter of `arch` with a Boki of species `kin`, on `team`, standing at `at`.
+func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> Hunter:
+	var rec := Save.new_kin(kin, "", hash(id) & 0x7fffffff)
+	rec["trust"] = 90.0
+	rec["level"] = 8
+	var kit := {"arch": arch, "weapon": Arch.signature(arch), "perk": ""}
+	var h := m.make_hunter(id, team, Arch.weight(arch), HeroTitle.base_name(arch), "bot", rec, at, kit)
+	h.unlock_all()
+	h.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	return h
+
+## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
+func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
+	m.cam.zoom = z
+	m.cam.zoom_to = z
+
+func _purge() -> void:
+	if mobs_on:
+		return
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
+
+func _ground(p: Vector3) -> Vector3:
+	return m.world.free_spot_near(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), [], 1.2, 0.5, 6.0)
+
+## Steps `secs` of the match, one rendered frame per 1/30 s. `each(t)` runs before every frame's steps,
+## `cam_to(t)` gives the camera's point (`follow`: the game camera's own follow, as in play, instead of a snap).
+func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void:
+	var t := 0.0
+	while t < secs:
+		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
+		each.call(t)
+		for _i in 2:
+			m.step(STEP)
+		if follow:
+			m.cam.follow(cam_to.call(t), FRAME, false)
+		else:
+			m.cam.snap(cam_to.call(t))
+		for h in m.hunters:
+			h.render(FRAME, 1.0)
+		await main.get_tree().process_frame
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+func _still() -> void:
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("clip%d.png" % clip))
+	_mark("still")
+
+## The movie frame (AVI frame index) a phase starts on.
+func _mark(what: String) -> void:
+	print("MEDIA_MARK %s movie_frame=%d" % [what, Engine.get_frames_drawn()])
+
+func _centre(hs: Array) -> Vector3:
+	var c := Vector3.ZERO
+	for h in hs:
+		c += (h as Hunter).pos
+	return c / maxf(1.0, float(hs.size()))
+
+func _nearest(h: Hunter, foes: Array) -> Hunter:
+	var best: Hunter = null
+	for f in foes:
+		if (f as Hunter).out or (best != null and h.flat_dist(f) >= h.flat_dist(best)):
+			continue
+		best = f
+	return best
+
+## The abilities go off on a fixed rota: E then RMB, each Hunter offset so the squad never all fires at once.
+func _assist(t: float, hs: Array, foes: Array) -> void:
+	for i in hs.size():
+		var h: Hunter = hs[i]
+		var f := _nearest(h, foes)
+		if h.out or f == null or h.flat_dist(f) > 13.0 or h.ak == null:
+			continue
+		var phase := fmod(t + 0.7 * i, ASSIST_EVERY)
+		if phase < FRAME:
+			h.inp["aim"] = f.pos + Vector3(0, 0.9, 0)
+			if int((t + 0.7 * i) / ASSIST_EVERY) % 2 == 0:
+				h.ak.use_e()
+			else:
+				h.ak.press_rmb()
+
+# ------------------------------------------------------------------ 1: squad fight
+func _fight(secs: float) -> void:
+	var a := fight.get_slice("/", 0).split(",")
+	var b := fight.get_slice("/", 1).split(",")
+	await _start(a[0], FIGHT_KIN[0])
+	var P := m.player
+	P.ctrl = "bot"
+	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	var base := _ground(P.pos)
+	var foe_at := _ground(base + Vector3(FIGHT_GAP, 0, 0))
+	squad_a = [P, _hunter("a1", 0, a[1], FIGHT_KIN[1], _ground(base + Vector3(-1.4, 0, 1.6))),
+			_hunter("a2", 0, a[2], FIGHT_KIN[2], _ground(base + Vector3(-1.4, 0, -1.6)))]
+	squad_b = [_hunter("b0", 1, b[0], FIGHT_KIN[3], foe_at),
+			_hunter("b1", 1, b[1], FIGHT_KIN[4], _ground(foe_at + Vector3(1.4, 0, 1.6))),
+			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
+	for h in squad_a + squad_b:
+		h.teleport(h.pos)
+	_zoom(fight_zoom)
+	still_at = 4.0
+	_mark("start")
+	await _go(secs, func(t: float):
+		_assist(t, squad_a, squad_b)
+		_assist(t, squad_b, squad_a),
+		func(_t: float): return _centre(squad_a + squad_b))
+
+# ------------------------------------------------------------------ 2: Boki combat
+func _boki_combat(secs: float) -> void:
+	await _start("gunslinger", "zapple", true)
+	var P := m.player
+	P.ctrl = "bot"
+	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	var base := _ground(P.pos)
+	var foes: Array = []
+	for i in 3:
+		foes.append(m.spawn_mob("brute" if i == 0 else "skitter", _ground(base + Vector3(7.0 + i, 0, (i - 1) * 2.5))))
+	_zoom(0.4)
+	still_at = 3.5
+	await _go(secs, func(_t: float): pass, func(_t: float): return (P.pos + P.kin.pos) * 0.5)
+
+# ------------------------------------------------------------------ 3: extraction
+func _extraction(secs: float) -> void:
+	await _start("ashwick", "cindle")
+	var P := m.player
+	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var mast: Vector3 = o["pos"]
+	m.time = float(o["open_at"]) + 1.0
+	m.exits.act(o, "start", P)
+	o["prog"] = 1.0 - CHARGE_LEFT * Exits.crew_rate(3) / m.exits.uplink_time(o)
+	o["wave_t"] = 1e9       # no monster waves at the yard
+	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", mast), _hunter("a2", 0, "gunslinger", "zapple", mast)]
+	for i in squad_a.size():
+		var h: Hunter = squad_a[i]
+		h.ctrl = "idle"
+		var ang := TAU * i / squad_a.size()
+		h.teleport(_ground(mast + Vector3(cos(ang), 0, sin(ang)) * (Exits.OUTPOST_R - 1.0)))
+	_zoom(0.55)
+	still_at = secs * 0.6
+	await _go(secs, func(_t: float):
+		for h in squad_a:
+			var to: Vector3 = mast - h.pos
+			var go := String(o["state"]) == "open" and to.length() > 0.4
+			h.inp["move"] = Vector2(to.x, to.z).normalized() if go else Vector2.ZERO,
+		func(_t: float): return mast)
+
+# ------------------------------------------------------------------ 4: hatch
+## The real hatch screen: the egg is picked, knocked on (auto_warm), cracks, hatches, and KinReveal shows the Boki.
+func _hatch(secs: float) -> void:
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	await main.show_screen("hatch", {})
+	var hx = main.current
+	for _i in 3:
+		await main.get_tree().process_frame
+	await main.fade.reveal(0.01)
+	hx._end_intro()
+	hx._pick(0)
+	hx._pick(0)
+	hx.auto_warm = true
+	still_at = secs * 0.7
+	_mark("start")
+	var t := 0.0
+	while t < secs:
+		await main.get_tree().process_frame
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+# ------------------------------------------------------------------ 14: forest walk
+const WOOD_R := 11.0             # m: how near trees count as one wood
+const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
+const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
+const WALK := 0.6                # share of full speed the Hunter strolls at
+
+## The thickest wood on the map, thickened with planted trees of its own style; the Hunter strolls from
+## tree to tree, there and back, passing just behind each one.
+func _forest(secs: float) -> void:
+	await _start("gunslinger", "")
+	var P := m.player
+	var w := m.world
+	var trees: Array = w.tree_spots.duplicate()
+	var heart: Vector3 = trees[0]
+	var most := 0
+	for t in trees:
+		var n := trees.filter(func(u: Vector3) -> bool: return u.distance_to(t) < WOOD_R).size()
+		if n > most:
+			most = n
+			heart = t
+	var path: Array = trees.filter(func(t: Vector3) -> bool: return t.distance_to(heart) < WOOD_R)
+	var style := Flora.style_ok(w.style_at(w.idx(int(heart.x), int(heart.z))))
+	for k in 8:
+		for row in [-1.0, 1.0]:
+			var at := heart + Vector3((k - 3.5) * GROVE_STEP, 0, row * 2.2 + (k % 2) * 0.6)
+			at.y = w.ground_at(at.x, at.z)
+			if w.is_void(at.x, at.z) or w.is_block(at.x, at.z) or absf(at.y - heart.y) > 0.3:
+				continue
+			if path.any(func(t: Vector3) -> bool: return t.distance_to(at) < 2.0):
+				continue
+			var tree := Flora.node("tree", style, k % 3, 1.1)
+			tree.position = at
+			w.add_child(tree)
+			path.append(at)
+	path.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	var back := path.duplicate()
+	back.reverse()
+	path.append_array(back)
+	P.teleport(_ground(path[0] + BEHIND))
+	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	var next := [0]
+	await _go(secs, func(_t: float) -> void:
+		var goal: Vector3 = path[next[0] % path.size()] + BEHIND
+		var d := Vector2(goal.x - P.pos.x, goal.z - P.pos.z)
+		if d.length() < 0.6:
+			next[0] += 1
+		P.inp["move"] = d.normalized() * WALK
+		SeeThrough.for_match(m),
+		func(_t: float) -> Vector3: return P.pos)
+
+# ------------------------------------------------------------------ the Boki base
+## A fresh base with `n` rested level-6 Boki out (Ember, Ripple, Moss), `stats` per Boki when given, and the player
+## standing south of `at` (a Callable: the game's spot, placed once the home is built) at camera zoom `zoom`.
+func _base(n: int, at: Callable, zoom: float, stats: Array = []) -> Node:
+	FarmUnlocks.rules()["base_mode"] = true
+	var d := Save.fresh()
+	for i in n:
+		var k := Save.new_kin(["cindle", "puddlet", "zapple"][i], ["Ember", "Ripple", "Moss"][i], 11 + i)
+		k["level"] = 6
+		if not stats.is_empty():
+			k["stats"] = stats[i]
+		k["needs"]["energy"] = 95.0
+		d["roster"].append(k)
+	d["active"] = d["roster"][0]["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var home = await main._hb_home()
+	while not is_instance_valid(home.root_ui):
+		await main.get_tree().process_frame
+	home._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	for e in home.kins:
+		e.erase("indoors")
+	home.ppos = at.call(home) + Vector3(0.0, 0.0, TUMBLE_STAND)
+	home.player.position = home.ppos
+	home.cam.zoom = zoom
+	home.cam.zoom_to = zoom
+	home.cam.snap(home.ppos)
+	return home
+
+## Films a base minigame (the home ticks it) for `secs` or until `over` is true; `each(t)` scripts the presses.
+func _film(secs: float, each: Callable, over: Callable) -> void:
+	still_at = secs * 0.55
+	_mark("start")
+	var t := 0.0
+	while t < secs and not over.call():
+		await main.get_tree().process_frame
+		each.call(t)
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+	for _i in 30:                     # a second more for the result's fanfare and huff
+		await main.get_tree().process_frame
+
+func _press(game, action := "interact") -> void:
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	game.input(ev)
+
+## Two rested Boki on a fresh base; the clip opens as the first tell shows. The scripted player picks the move
+## that beats the tell a moment after it, and presses as the marker crosses the gold.
+func _tumble(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.htumble.ring.position, TUMBLE_ZOOM, [
+		{"power": 42, "guard": 20, "speed": 30, "focus": 36}, {"power": 18, "guard": 38, "speed": 34, "focus": 22}])
+	var tb: BaseTumble = home.htumble
+	tb.use()
+	tb.run.left = FRAME
+	still_at = secs * 0.55
+	_mark("start")
+	var t := 0.0
+	var picked_at := -1.0
+	while t < secs and tb.run != null:
+		await main.get_tree().process_frame
+		var r := tb.run
+		if r != null and r.state == "pick" and r.pick == "":
+			picked_at = t if picked_at < 0.0 else picked_at
+			if t - picked_at > 0.7:
+				tb._choose(BaseTumble.rules()["moves"].keys().find(BaseTumble.counter(r.tell)))
+				picked_at = -1.0
+		elif r != null and r.state == "resolve" and r.grade == "" and absf(tb.bar.m - tb.bar.zone) < TimingBar.GREAT:
+			_press(tb)
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## Two dancers: the first round answered on each beat, from the second on every third stone is the wrong one.
+func _echo(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.hecho.middle.position, GAME_ZOOM)
+	var es: EchoSteps = home.hecho
+	es.use()
+	var each := func(_t: float) -> void:
+		var r := es.run
+		if r == null or not r.mine():
+			return
+		var now := es._clock()
+		for i in r.pattern.size():
+			var pt := r.at(r.first + i)
+			if not r.done[i] and now >= pt and now - pt < r.window * 0.5:
+				var s: int = i % 4 if r.pattern[i] < 0 else r.pattern[i]
+				_press(es, EchoSteps.KEYS[(s + 1) % 4 if r.round_i > 0 and i % 3 == 2 else s])
+	await _film(secs, each, func(): return es.run == null)
+
+## Two Boki from the end of the Look round: three presses in the gold, a call at each lure, the judges' cards.
+func _show(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.hshow.stage.position, GAME_ZOOM)
+	var sr: ShowRing = home.hshow
+	sr.use()
+	sr.run.t = float(ShowRing.rules()["look_s"]) - 2.0
+	var each := func(_t: float) -> void:
+		var r := sr.run
+		if r == null:
+			return
+		if r.can_trick() and r.t > 1.0 and absf(sr.bar.m - sr.bar.zone) < TimingBar.GREAT:
+			_press(sr)
+		elif r.phase == ShowRing.Run.Phase.BOND:
+			var next := r.calls.find("")
+			if next < 0:
+				r.t = maxf(r.t, float(ShowRing.rules()["walk_s"]) - FRAME)
+			elif r.t >= r.lure_t(next):
+				_press(sr)
+			else:
+				r.t = maxf(r.t, r.lure_t(next) - LURE_LEAD)
+		elif r.phase == ShowRing.Run.Phase.JUDGE and r.t > JUDGE_HOLD:
+			r.t = float(ShowRing.rules()["judge_s"])
+	await _film(secs, each, func(): return sr.run == null)
+
+## Three of yours against a visiting team: the first hand-off in the gold, the second pressed far off it.
+func _relay(secs: float) -> void:
+	var home = await _base(3, func(hm): return hm.hrace.start, GAME_ZOOM * 1.6)
+	var rc: BaseRelay = home.hrace.relay
+	rc.use()
+	var each := func(_t: float) -> void:
+		var r := rc.run
+		if r == null or not r.can_press():
+			return
+		var off := absf(rc.bar.m - rc.bar.zone)
+		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
+			_press(rc)
+	await _film(secs, each, func(): return rc.run == null)
+
+# ------------------------------------------------------------------ 9, 10: movement feel (decision 0061)
+## The player's keys for the next rendered frame, as a player's (a press lasts one step: the hunter clears it).
+func _keys(pl: Hunter, move: Vector2, jump: bool, glide: bool, dash := false) -> void:
+	pl.inp["move"] = move
+	pl.inp["aim"] = pl.pos + Vector3(move.x, 0, move.y) * 8.0 + Vector3(0, 0.9, 0)
+	pl.inp["glide_press_only"] = true
+	pl.inp["jump"] = jump
+	pl.inp["glide"] = glide
+	pl.inp["dash"] = dash
+
+## Kingpin runs east, jumps, Shifts in the air and presses Space; the second time Space comes just after the dash.
+func _shift_glide(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	pl.teleport(_ground(pl.pos))
+	_zoom(0.55)
+	_mark("start")
+	var plan := [[0.4, 0.75, 0.85], [3.6, 3.95, 4.2]]      # [jump, Shift, Space] s: Space mid-dash, then 0.07s after it
+	await _go(secs, func(t: float):
+		var move := Vector2(1, 0) if fmod(t, 6.4) < 3.2 else Vector2(-1, 0)
+		var jump := false
+		var dash := false
+		var glide := false
+		for k in plan:
+			jump = jump or absf(t - float(k[0])) < FRAME * 0.5 or absf(t - float(k[2])) < FRAME * 0.5
+			dash = dash or absf(t - float(k[1])) < FRAME * 0.5
+			glide = glide or (t >= float(k[2]) and t < float(k[2]) + 1.4)
+		_keys(pl, move, jump, glide, dash),
+		func(_t: float): return pl.render_pos(1.0), true)
+
+## Glides out over the abyss at island level from the nearest edge east of the start, lets go for 1s, opens the glider
+## again (the feather up), and once more.
+func _dive_feather(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	var edge := pl.pos
+	while not m.world.is_void(edge.x + 0.5, edge.z) and edge.x < pl.pos.x + 200.0:
+		edge.x += 0.5
+	var lip := m.world.ground_at(edge.x, edge.z)
+	pl.teleport(Vector3(edge.x - 4.0, lip + 1.5, edge.z))
+	pl.grounded = false
+	pl.air_t = 1.0
+	pl.gliding = true
+	pl.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+	_zoom(0.55)
+	_mark("start")
+	await _go(secs, func(t: float):
+		var c := fmod(t, 3.6)          # glide 1s, drop 1s, feather 1.6s
+		_keys(pl, Vector2(1, 0), absf(c - 2.0) < FRAME * 0.5, c < 1.0 or c >= 2.0),
+		func(_t: float): return pl.render_pos(1.0), true)
+
+
+func _duo(secs: float) -> void:
+	Save.d["name"] = HeroTitle.base_name("gunslinger")
+	m = Match.new()
+	main.add_child(m)
+	m.start(DuoTutorial.opts("gunslinger", true))
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	var tu := m.duo
+	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
+
+# ------------------------------------------------------------------ 10: base to a teammate
+
+func _base_tp() -> void:
+	await _start("ashwick", "cindle")
+	var me := m.player
+	me.ctrl = "local"
+	var base := _ground(me.pos)
+	var mates := [_hunter("a1", me.team, "juggernaut", "pebbit", _ground(base + Vector3(MATE_GAP, 0, -3.0))),
+			_hunter("a2", me.team, "gunslinger", "zapple", _ground(base + Vector3(-3.0, 0, MATE_GAP)))]
+	for h in mates:
+		h.ctrl = "idle"
+		h.teleport(h.pos)
+	_zoom(0.75)
+	still_at = 4.5
+	_mark("take1")
+	await _wheel_take(me, mates[0], 1.0, base)
+	await _go(1.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+	# take 2: back where we started, a rival close by, and its hit breaks the channel 2 s in
+	me.teleport(base)
+	me.base_cd = 0.0
+	me.weak_t = 0.0
+	var foe := _hunter("b0", 1 - me.team, "archer", "wisplet", _ground(base + Vector3(-4.0, 0, -5.0)))
+	foe.ctrl = "idle"
+	foe.teleport(foe.pos)
+	_mark("take2")
+	await _wheel_take(me, mates[1], 2.0, base, foe)
+	await _go(2.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+
+## Opens the wheel, sweeps to `to`'s slice, lets go, then films the channel; with a `foe`, it shoots the
+## player `hit_at` s in (and a hit lands then for sure), else the channel runs to the end.
+func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunter = null) -> void:
+	var o := main.get_viewport().get_visible_rect().size * 0.5 + Vector2(0, 40)
+	var mates := BaseRecall.mates(m, me)
+	var slice := BaseWheel.dir(mates.find(to), mates.size()) * 110.0
+	var still := func(_t: float): me.inp["move"] = Vector2.ZERO
+	await _go(0.6, still, func(_t: float): return base)
+	BaseWheel.open(me, o, mates)
+	await _go(1.2, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		BaseWheel.update(me, o + slice * clampf((t - 0.3) / 0.5, 0.0, 1.0), FRAME),
+		func(_t: float): return base)
+	me.inp["base_pick"] = BaseWheel.close(me)
+	var hit := [false]
+	var span := BaseRecall.CHANNEL_S + 0.2 if foe == null else hit_at + 0.1
+	await _go(span, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		if foe and t >= hit_at - 0.35 and not hit[0]:
+			hit[0] = true
+			foe.inp["aim"] = me.pos + Vector3(0, 0.9, 0)
+			foe.ak.press_rmb()
+		if foe and t >= hit_at and me.base_t > 0.0:
+			me.hurt(6.0, foe, {"src": "media"}),
+		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
+# ------------------------------------------------------------------ 13: boss focus
+func _boss_focus(secs: float) -> void:
+	await _start("ashwick", "cindle", true)
+	var P := m.player
+	var L: Dictionary = m.lairs.list[0]
+	L["active"] = false      # (_start purged its sleeping boss with the other mobs: wake the lair up again)
+	m.lairs.activate(L)
+	for g in L["guards"]:
+		if is_instance_valid(g):
+			g.dead = true
+			g.visible = false
+	m.lairs.open(L, P, "dial")
+	var side := Vector3(-L["out"].y, 0, L["out"].x)
+	P.teleport(_ground(L["c"] + side * 3.0))
+	var B := _hunter("b0", 1, "juggernaut", "pebbit", _ground(L["c"] - side * 3.0))
+	var boss: Boss = m.lairs.boss_of(L)
+	_zoom(0.6)
+	still_at = 5.0
+	_mark("start")
+	var each := func(_t: float) -> void:
+		for h in [P, B]:
+			h.hp = h.max_hp
+		boss.hp = maxf(boss.hp, boss.max_hp * 0.3)      # (still up when the clip ends)
+	await _go(secs, each, func(_t: float): return (P.pos + B.pos + boss.pos) / 3.0)
+
+# ------------------------------------------------------------------ 15: locomotion
+
+## The player (--media-hunter) walks, runs and strafes the plan on the game camera; feet and speed go to a TSV.
+func _locomotion(secs: float) -> void:
+	await _start(loco_id, "cindle")
+	var pl := m.player
+	pl.teleport(_loco_start(pl.pos))
+	_zoom(fight_zoom)
+	var sk := WardenGlb.skeleton(pl.model.get_node_or_null("Warden"))
+	var log := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
+	# (aL aR: the ankles now, a0L a0R: at rest, in the body's own frame: _ankle; hL hR: the foot bones' height in the
+	# model's frame, the camera lean taken out: the strafe drift in FOOT_SLIDE.md)
+	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy\taL\taR\ta0L\ta0R\thL\thR")
+	var rest := [_ankle(sk, "L", true), _ankle(sk, "R", true)]
+	_mark("start")
+	await _go(secs, func(t: float):
+		var move := Vector2.ZERO
+		var label := "idle"
+		for k in LOCO_PLAN:
+			if t >= float(k[0]):
+				move = k[1]
+				label = k[2]
+		pl.inp["move"] = move
+		var sway := KITE_SWAY * sin(TAU * 0.7 * t) if label == "kite" else 0.0
+		pl.inp["aim"] = pl.pos + Vector3(8.0 * cos(sway), 0.9, 8.0 * sin(sway))
+		var pts := AUDIT.points(sk)
+		var lean_inv := pl.model.global_transform.affine_inverse()     # (the game leans the model toward the camera:
+		var fl: Vector3 = pts["foot.L"]                                # a foot's height is read in its own frame)
+		var fr: Vector3 = pts["foot.R"]
+		var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
+		var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
+		var cols := "%.4f\t%s" + "\t%.4f".repeat(20)
+		log.store_line(cols % [
+				t, label, pl.pos.x, pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z, pl.pos.y,
+				(pts["hips"] as Vector3).y, knee_l.y, knee_r.y, _ankle(sk, "L", false), _ankle(sk, "R", false),
+				rest[0], rest[1], (lean_inv * fl).y, (lean_inv * fr).y]),
+		func(_t: float): return pl.render_pos(1.0), true)
+	log.close()
+
+## A leg's ankle height (m) in the body's own frame, its feet's floor at 0 (the Hunters lean back toward the camera,
+## CamRig.char_lean, so the world's height is not the floor's): the foot bone's head, or for a rig without one the
+## shin's tip a thigh's length down it (as anim_audit's "foot"). `rest`: in the rest pose (the feet flat on it).
+static func _ankle(sk: Skeleton3D, side: String, rest: bool) -> float:
+	var shin := WardenSkeleton.find(sk, "shin." + side)
+	var foot := WardenSkeleton.find(sk, "foot." + side)
+	if foot < 0:
+		foot = WardenSkeleton.find(sk, "x_foot." + side)
+	var pose := sk.get_bone_global_rest if rest else sk.get_bone_global_pose
+	var at: Vector3
+	if foot >= 0:
+		at = (pose.call(foot) as Transform3D).origin
+	else:
+		var thigh := sk.get_bone_global_rest(sk.get_bone_parent(shin)).origin
+		var leg := sk.get_bone_global_rest(shin).origin.distance_to(thigh)
+		var gs: Transform3D = pose.call(shin)
+		at = gs.origin + gs.basis.y.normalized() * leg
+	return at.y * sk.global_basis.get_scale().y
+
+## The nearest spot to `p` with the plan's whole path (east 22 m, north 21 m, back, west 20 m, north 21 m) on open,
+## level ground.
+func _loco_start(p: Vector3) -> Vector3:
+	for rad in range(0, 90, 3):
+		for k in maxi(1, int(TAU * rad / 3.0)):
+			var a := TAU * k / maxi(1, int(TAU * rad / 3.0))
+			var at := Vector2(p.x + cos(a) * rad, p.z + sin(a) * rad)
+			var ok := true
+			for i in 23:
+				ok = ok and m.world.call("_fits", at.x + i, at.y, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 22.0, at.y - 0.95 * i, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 2.0, at.y - 0.95 * i, 0.7)
+				ok = ok and absf(m.world.ground_at(at.x + i, at.y) - m.world.ground_at(at.x, at.y)) < 0.3
+				ok = ok and absf(m.world.ground_at(at.x + 22.0, at.y - 0.95 * i) - m.world.ground_at(at.x, at.y)) < 0.3
+				if not ok:
+					break
+			if ok:
+				return Vector3(at.x, m.world.ground_at(at.x, at.y), at.y)
+	return _ground(p)

@@ -52,7 +52,7 @@ func _ready() -> void:
 		_build_hub()
 		Sfx.play_music("hub")
 	Sfx.play_ambience("home")
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	player.position = ppos
 	for a in OS.get_cmdline_user_args():
@@ -153,6 +153,7 @@ func _build_guild() -> void:
 	ppos = Vector3(28, 0, 44.5)
 	var fp := Models.ferry_post(); fp.position = Vector3(28, 0, 45.5); fp.rotation.y = PI; add_child(fp)
 	_spot("ferry", Vector3(28, 0, 45.5), "Take the ferry", 2.2)
+	_spot("roster", Vector3(24.2, 0, 44.0), "Read the member roll", 2.2)
 	topbar.text = "Guild isle"
 	Social.get_guild(gid, func(g: Dictionary):
 		if not is_inside_tree(): return
@@ -424,10 +425,11 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
-	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
+	var top := UI.card(Color(UI.NIGHT, 0.78), 12, 12)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
 	th.add_child(UI.title("Project Boki", 26, UI.ACCENT))
@@ -435,12 +437,12 @@ func _build_ui() -> void:
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
 	root_ui.add_child(top)
-	prompt_box = UI.card(Color(0.06, 0.07, 0.1, 0.85), 12, 12)
+	prompt_box = UI.card(Color(UI.NIGHT, 0.85), 12, 12)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
 	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	prompt_box.add_child(prompt_lbl)
 	root_ui.add_child(prompt_box)
-	var hint_box := UI.card(Color(0.06, 0.07, 0.1, 0.7), 8, 10)
+	var hint_box := UI.card(Color(UI.NIGHT, 0.7), 8, 10)
 	var hint := UI.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint_box.add_child(hint)
@@ -473,18 +475,7 @@ func _close_panel() -> void:
 	panel_open = ""
 
 func _toast(txt: String) -> void:
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.9), 12, 18)
-	var l := UI.label(txt, 20, UI.GOLD, UI.big)
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
-	c.add_child(l)
-	root_ui.add_child(c)
-	c.reset_size()
-	var vp := get_viewport().get_visible_rect().size
-	c.position = Vector2((vp.x - c.size.x) * 0.5, 100)
-	var tw := create_tween()
-	tw.tween_interval(2.4)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(c.queue_free)
+	UI.toast(root_ui, txt)
 
 func _row(v: VBoxContainer, text: String, col := UI.INK, size := 15) -> HBoxContainer:
 	var row := UI.hbox(10)
@@ -521,6 +512,7 @@ func _use(it: Dictionary) -> void:
 				var v := _new_panel("Ferry", 420)
 				v.add_child(UI.button("Home", func(): Game.goto("home"), 360))
 				v.add_child(UI.button("The town", func(): Game.goto("town", {"mode": "hub"}), 360))
+				v.add_child(UI.button("The clan base", func(): ClanBase.open(gid, guild_doc), 360))
 			else:
 				Game.goto("home")
 		"to_guild": Game.goto("town", {"mode": "guild", "gid": Social.my_guild_id()})
@@ -528,6 +520,7 @@ func _use(it: Dictionary) -> void:
 		"market": _open_market()
 		"notices": _open_notices()
 		"guilds": _open_guilds()
+		"roster": _open_roster()
 		"visit": _open_visits()
 		"member":
 			var m = it.get("data")
@@ -557,7 +550,7 @@ func _open_visits() -> void:
 # ---- market
 func _open_market() -> void:
 	var v := _new_panel("Market", 600)
-	v.add_child(UI.label("Players sell seeds, crops and Boki here. You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
+	v.add_child(UI.label("Players sell seeds and crops here. (Boki are never sold: hand one to a friend from the Shelter.) You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
 	var list := _loading(v)
 	Social.list_market(func(rows: Array):
 		if not _clear(list): return
@@ -567,14 +560,8 @@ func _open_market() -> void:
 			var l: Dictionary = r["l"]
 			var key: String = l["key"]
 			var mine: bool = l["seller"] == Social.me
-			var row: HBoxContainer
-			if l["kind"] == "kin":
-				var ck: Dictionary = l["kin"]
-				row = _row(list, "%s the %s  ·  Lv %d%s  ·  %d gems  ·  from %s" % [ck["name"], Data.KIN[key]["name"], int(ck["level"]), "  ·  shimmer" if ck["shimmer"] else "",
-					int(l["price"]), l["seller_name"]], Data.KIN[key]["color"])
-			else:
-				row = _row(list, "%s%s  ·  %d gems  ·  from %s" % [Data.CROPS[key]["name"], " seed" if l["kind"] == "seed" else "",
-					int(l["price"]), l["seller_name"]], Data.CROPS[key]["color"])
+			var row := _row(list, "%s%s  ·  %d gems  ·  from %s" % [Data.CROPS[key]["name"], " seed" if l["kind"] == "seed" else "",
+				int(l["price"]), l["seller_name"]], Data.CROPS[key]["color"])
 			var lid: String = r["id"]
 			if mine:
 				var tb := UI.button("Take back", func():
@@ -613,22 +600,6 @@ func _open_market() -> void:
 					if panel_open == "Market": _open_market()), 200))
 	if not any:
 		v.add_child(UI.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
-	# kin: one at a time leaves your farm and waits at the market until someone buys it
-	v.add_child(UI.section("Sell a Boki"))
-	var roster: Array = Save.d["roster"]
-	if roster.size() <= 1:
-		v.add_child(UI.label("You need at least two Boki to sell one.", 14, UI.MUTED))
-	else:
-		for rec in roster:
-			var price := Social.kin_price(int(rec["level"]))
-			var row := _row(v, "%s  ·  Lv %d %s" % [rec["name"], int(rec["level"]), Evo.form_name(rec)], Data.KIN[rec["species"]]["color"])
-			var uid: String = rec["uid"]
-			var nm: String = rec["name"]
-			row.add_child(UI.button("Sell for %d gems" % price, func():
-				_lock()
-				Social.sell_kin(uid, price, func(okk: bool):
-					if okk: _toast("%s is waiting at the market. You'll be paid when someone takes them home." % nm)
-					if panel_open == "Market": _open_market()), 200))
 
 # ---- notice board
 func _open_notices() -> void:
@@ -670,6 +641,12 @@ func _open_guilds() -> void:
 			Social.leave_guild(func():
 				_toast("You left the guild")
 				if panel_open == "Guild registry": _open_guilds()), 200))
+		if String(Social.guild.get("founder", "")) == Social.me:
+			var open_now: bool = Social.guild.get("open", true)
+			hb.add_child(UI.button("Open to anyone" if not open_now else "Close to newcomers", func():
+				_lock()
+				Social.set_open(gid0, not open_now, func(_okk):
+					Social.refresh_guild(func(): if panel_open == "Guild registry": _open_guilds())), 220))
 		v.add_child(hb)
 	else:
 		v.add_child(UI.label("Guilds share an isle: every member gets a cottage, and you build projects together that help everyone on expeditions.", 14, UI.MUTED))
@@ -697,16 +674,73 @@ func _open_guilds() -> void:
 			list.add_child(UI.label("No guilds yet. Found the first one.", 14, UI.MUTED))
 		for r in rows.slice(0, 10):
 			var g: Dictionary = r["g"]
-			var row := _row(list, g["name"] + (("  ·  " + g["motto"]) if g["motto"] != "" else ""))
+			var title: String = g["name"]
+			if g["motto"] != "":
+				title += "  ·  " + g["motto"]
+			if not g["open"]:
+				title += "  ·  closed"
+			var row := _row(list, title)
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
-			if Social.guild.is_empty():
+			if Social.guild.is_empty() and g["open"]:
 				row.add_child(UI.button("Join", func():
 					_lock()
-					Social.join_guild(rid, func(_okk):
-						Sfx.play("unlock")
-						_toast("Welcome to %s" % g["name"])
+					Social.join_guild(rid, func(okk: bool):
+						if okk:      # refused: the overlay says why (Social.clan_removed)
+							Sfx.play("unlock")
+							_toast("Welcome to %s" % g["name"])
 						if panel_open == "Guild registry": _open_guilds()), 90)))
+
+## Who is in this clan and what rank they hold. Members who joined before ranks existed show the guild doc's
+## rank; removed members don't show. In your own clan, the rank buttons sit on each row you may act on.
+func _open_roster() -> void:
+	var v := _new_panel("Member roll", 640)
+	var list := _loading(v)
+	Social.clan_roster(gid, guild_doc, func(rows: Array, gone: Dictionary):
+		if not _clear(list): return
+		var ranks := {}
+		for r in rows: ranks[r["id"]] = r["role"]
+		var names := {}
+		for m in members: names[m["id"]] = m["d"]["name"]
+		for id in names:
+			if not ranks.has(id) and not gone.has(id): ranks[id] = Social.rank_of(guild_doc, id)
+		var ids: Array = ranks.keys()
+		ids.sort_custom(func(a, b): return _rank_key(ranks, a) < _rank_key(ranks, b))
+		var mine := Social.rank_of(guild_doc, Social.me) if gid == Social.my_guild_id() else ""
+		for id in ids:
+			var rank: String = ranks[id]
+			var col := UI.INK if rank == "member" else UI.GOLD
+			var row := _row(list, "%s  ·  %s" % [names.get(id, "A member"), rank], col)
+			if mine != "" and id != Social.me:
+				_rank_buttons(row, id, rank, mine)
+		list.add_child(UI.label("%d of %d places filled." % [ids.size(), Social.CLAN_CAP], 13, UI.MUTED)))
+
+## The founder makes officers (and members again) and hands the founder role to an officer; founder and
+## officers remove anyone below them.
+func _rank_buttons(row: HBoxContainer, id: String, rank: String, mine: String) -> void:
+	if mine == "founder":
+		var up := rank == "member"
+		row.add_child(UI.button("Make officer" if up else "Make member", func():
+			_rank_do(func(cb): Social.set_officer(gid, id, up, cb)), 130))
+		if rank == "officer":
+			row.add_child(UI.button("Hand over founder", func():
+				_rank_do(func(cb): Social.hand_founder(gid, id, cb)), 170))
+	if Social.ROLES.find(mine) < Social.ROLES.find(rank):
+		row.add_child(UI.button("Remove", func(): _rank_do(func(cb): Social.remove_member(gid, id, cb)), 100))
+
+## Runs one rank change, then reads the guild doc again and redraws the roll.
+func _rank_do(act: Callable) -> void:
+	_lock()
+	act.call(func(okk: bool):
+		if not okk: _toast("That didn't go through")
+		Social.refresh_guild(func():
+			Social.get_guild(gid, func(g: Dictionary):
+				if not is_inside_tree(): return
+				guild_doc = g
+				if panel_open == "Member roll": _open_roster())))
+
+func _rank_key(ranks: Dictionary, id: String) -> String:
+	return "%d%s" % [Social.ROLES.find(ranks[id]), id]
 
 # ---- guild projects
 func _open_project(k: String) -> void:
@@ -754,5 +788,5 @@ func _fake_members() -> Array:
 		var rec := Save.new_kin(sp[i % sp.size()])
 		rec["level"] = rng.randi_range(2, 18)
 		Evo.simulate(rec, rng)
-		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pip"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
+		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pudding"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
 	return out
