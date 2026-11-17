@@ -669,7 +669,7 @@ func _archer_combos() -> void:
 		K.fx._process(0.0)
 		wash[0] = maxf(wash[0], P.wash)
 		var slot := 1 if K.spirit.inside else 0
-		mk[slot] = maxf(mk[slot], K.move_k()))
+		mk[slot] = maxf(mk[slot], K.move_k() + K.speed_bonus()))
 	ok(
 		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
 		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
@@ -1320,20 +1320,20 @@ func _bulwark_combos() -> void:
 		"dashes spent %.2f cd %.1f charges %.1f" % [dashes_spent, charge_cd, K.ch_rmb]
 	)
 	ok("combo bulwark: a Crush no longer heals him", P.hp <= hp_before + 1.0, "hp %.0f -> %.0f" % [hp_before, P.hp])
-	# on cooldown the Shift behind the shield does nothing
+	# on cooldown the RMB press is refused (no aegis), so the Shift is an ordinary Spin Dash, not a Shield Charge
 	P.dashes = P.max_dashes()
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	var spins_before := K.spins
-	var dashes_held := P.dashes
+	var charges_before := K.ch_rmb
+	var aegis_up := K.rmb_down
 	P.do_dash()
 	step(m, 0.2, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	ok(
-		"combo bulwark: the Shield Charge on cooldown denies the dash (no charge spent, no spin)",
-		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
-		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
+		"combo bulwark: the Shield Charge on cooldown: RMB is refused (no aegis), the Shift is no Shield Charge",
+		not aegis_up and K.ch_rmb >= charges_before,
+		"aegis %s charges %.2f -> %.2f" % [aegis_up, charges_before, K.ch_rmb]
 	)
 	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
 	step(m, 1.0)

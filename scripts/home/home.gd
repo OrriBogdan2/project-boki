@@ -3225,10 +3225,12 @@ func _open_kin(rec: Dictionary) -> void:
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])
-			EvoView.next_block(rec, c1)
+			var next_mut := lv + ((2 - lv % 4) + 4) % 4
+			if next_mut == lv: next_mut += 4
+			EvoNextForm.block(rec, c1)
 			c1.add_child(UI.section("Growing toward"))
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
-			c1.add_child(UI.label("Mutation at level %d" % (lv + 4 - (lv + 2) % 4), UI.T_SMALL, UI.MUTED))
+			c1.add_child(UI.label("Mutation at level %d" % next_mut, UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
@@ -4138,7 +4140,10 @@ func _egg_species() -> String:
 	if sp == "" or not Data.KIN.has(sp):
 		var a := Save.kin(String(egg.get("a", "")))
 		sp = String(a.get("species", ""))
-	return sp if Data.KIN.has(sp) else ""
+	if not Data.KIN.has(sp):
+		return ""
+	egg["sp"] = Data.egg_species(sp)      # a nest egg laid before the first-form rule hatches (and shows) it too
+	return String(egg["sp"])
 
 func _egg_label() -> String:
 	var sp := _egg_species()
@@ -4714,7 +4719,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	if egg_in:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
-		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. Eggs always hatch the first form of a Boki line, and legendary Boki never come from eggs. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
@@ -4730,7 +4735,8 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
-	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
+	var heirs := [rec, ok].filter(func(r): return not Data.no_egg(String(r["species"])))      # not a legendary
+	var esp := Data.egg_species(String(heirs[randi() % heirs.size()]["species"]))      # the first form of that line
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system()
 	ok["bred_t"] = rec["bred_t"]

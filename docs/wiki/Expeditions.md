@@ -132,7 +132,7 @@ rolls which lairs are live (the rest lie dormant).
   updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
   roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
-  your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Siegephant), Zephyrak
+  your deathbox if you fall, and hatches at home in the Incubator: Cairnhorn (Siegephant), Zephyrak
   (Sarcobra) or Hivara (Calderoise).
 
 ## Getting out
