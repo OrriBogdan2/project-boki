@@ -19,3 +19,5 @@ tenzo-ridge-bursts - novel=5 inmain=2
 training-merge-1111 - novel=2 inmain=0
 training-time-trial - novel=3 inmain=0
 ttk-five-cast-share - novel=1 inmain=0
+ttk-kael ARCHIVED_AT_TIP novel=1 inmain=0
+ui-ability-text-one - novel=1 inmain=0
