@@ -230,11 +230,12 @@ static func keep_inside(m: Match, p: Vector3) -> Vector3:
 	return c
 
 
-## How far from the Heart a tile path from p may lead: the tide ring, or p's own distance when it stands
-## farther out (INF: no ring). A path round a cliff to a ramp never runs out into the Blight.
+## How far from the Heart a tile path from p may lead in the end phase: the tide ring, or p's own distance when
+## it stands farther out (INF: no ring, or before the end phase). A path round a cliff to a ramp never runs out
+## into the Blight's final close.
 static func path_r(m: Match, p: Vector3) -> float:
 	var tr := Heart.tide_r(m)
-	if tr <= 0.0 or not on(m):
+	if tr <= 0.0 or not on(m) or not Heart.end_phase(m):
 		return INF
 	return maxf(tr, Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length())
 

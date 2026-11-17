@@ -943,7 +943,8 @@ func _choose(m: Match, h: Hunter) -> void:
 	if _banned(m, a, goal):
 		var dt: Vector3 = a.get("detour", Vector3.INF)
 		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
-			dt = BotWays.keep_inside(m, m.world.random_ground())      # (a detour too stays out of the tide)
+			dt = m.world.random_ground()
+			if Heart.end_phase(m): dt = BotWays.keep_inside(m, dt)      # (end phase: out of the tide)
 			a["detour"] = dt
 		goal = dt; gk = "roam"
 	# outside the zone, or a goal outside it: head inside first
