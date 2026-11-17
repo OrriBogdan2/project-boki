@@ -1,0 +1,175 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARDEN medium reference: head top 1.546 m, body 0.832 m wide
+WARDEN ok   bulwark keeps every node the animation and kits look up (missing [])
+WARDEN ok   bulwark's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   bulwark: the oar's ice head is where BjornFx looks for the hammer head
+WARDEN ok   bulwark: HunterAnim binds every part (unbound [])
+WARDEN ok   bulwark: each of its 17 keyed moves moves the hands or the body (still: [])
+WARDEN ok   bulwark: the ring under its feet shows that radius (0.404)
+WARDEN ok   bulwark stands 1.032x a medium hunter (sheet 1.03x)
+WARDEN ok   bulwark's 3D model stands 1.736x a medium hunter, headwear and all (sheet 1.74x)
+WARDEN ok   bulwark is 2.67x a medium hunter's width (1.30 to 5.20)
+WARDEN ok   bulwark's 3D model: sliders at 0 change its height within the clamps (0.913x, at most ±0.127)
+WARDEN ok   bulwark: sliders at 0 keep the height in the clamps (0.892x, at most ±0.127), the hit ring, the anchors
+WARDEN ok   bulwark's 3D model: sliders at 1 change its height within the clamps (1.088x, at most ±0.127)
+WARDEN ok   bulwark: sliders at 1 keep the height in the clamps (1.114x, at most ±0.127), the hit ring, the anchors
+WARDEN ok   bulwark: the portrait frames its head
+WARDEN ok   archer keeps every node the animation and kits look up (missing [])
+WARDEN ok   archer's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   archer: HunterAnim binds every part (unbound [])
+WARDEN ok   archer: each of its 10 keyed moves moves the hands or the body (still: [])
+WARDEN ok   archer: the ring under its feet shows that radius (0.408)
+WARDEN ok   archer stands 1.074x a medium hunter (sheet 1.07x)
+WARDEN ok   archer's 3D model stands 1.080x a medium hunter, headwear and all (sheet 1.07x)
+WARDEN ok   archer is 0.78x a medium hunter's width (0.50 to 1.15)
+WARDEN ok   archer's 3D model: sliders at 0 change its height within the clamps (0.888x, at most ±0.161)
+WARDEN ok   archer: sliders at 0 keep the height in the clamps (0.866x, at most ±0.161), the hit ring, the anchors
+WARDEN ok   archer's 3D model: sliders at 1 change its height within the clamps (1.118x, at most ±0.161)
+WARDEN ok   archer: sliders at 1 keep the height in the clamps (1.144x, at most ±0.161), the hit ring, the anchors
+WARDEN ok   archer: the portrait frames its head
+WARDEN ok   gunslinger keeps every node the animation and kits look up (missing [])
+WARDEN ok   gunslinger's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   gunslinger: HunterAnim binds every part (unbound [])
+WARDEN ok   gunslinger: each of its 7 keyed moves moves the hands or the body (still: [])
+WARDEN ok   gunslinger: the ring under its feet shows that radius (0.411)
+WARDEN ok   gunslinger stands 1.088x a medium hunter (sheet 1.09x)
+WARDEN FAIL gunslinger's 3D model stands 1.038x a medium hunter, headwear and all (sheet 1.09x)
+WARDEN ok   gunslinger is 0.79x a medium hunter's width (0.50 to 1.15)
+WARDEN ok   gunslinger's 3D model: sliders at 0 change its height within the clamps (0.868x, at most ±0.160)
+WARDEN ok   gunslinger: sliders at 0 keep the height in the clamps (0.866x, at most ±0.160), the hit ring, the anchors
+WARDEN ok   gunslinger's 3D model: sliders at 1 change its height within the clamps (1.142x, at most ±0.160)
+WARDEN ok   gunslinger: sliders at 1 keep the height in the clamps (1.144x, at most ±0.160), the hit ring, the anchors
+WARDEN ok   gunslinger: the portrait frames its head
+WARDEN ok   mage keeps every node the animation and kits look up (missing [])
+WARDEN ok   mage's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   mage: HunterAnim binds every part (unbound [])
+WARDEN ok   mage: each of its 16 keyed moves moves the hands or the body (still: [])
+WARDEN ok   mage: the ring under its feet shows that radius (0.410)
+WARDEN ok   mage stands 1.076x a medium hunter (sheet 1.08x)
+WARDEN FAIL mage's 3D model stands 0.999x a medium hunter, headwear and all (sheet 1.13x)
+WARDEN ok   mage is 0.90x a medium hunter's width (0.60 to 1.30)
+WARDEN ok   mage's 3D model: sliders at 0 change its height within the clamps (0.879x, at most ±0.158)
+WARDEN ok   mage: sliders at 0 keep the height in the clamps (0.868x, at most ±0.158), the hit ring, the anchors
+WARDEN ok   mage's 3D model: sliders at 1 change its height within the clamps (1.129x, at most ±0.158)
+WARDEN ok   mage: sliders at 1 keep the height in the clamps (1.143x, at most ±0.158), the hit ring, the anchors
+WARDEN ok   mage: the portrait frames its head
+WARDEN ok   thief keeps every node the animation and kits look up (missing [])
+WARDEN ok   thief's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   thief: HunterAnim binds every part (unbound [])
+WARDEN ok   thief: each of its 17 keyed moves moves the hands or the body (still: [])
+WARDEN ok   thief: the ring under its feet shows that radius (0.398)
+WARDEN ok   thief stands 0.980x a medium hunter (sheet 0.98x)
+WARDEN ok   thief's 3D model stands 1.065x a medium hunter, headwear and all (sheet 1.10x)
+WARDEN ok   thief is 0.94x a medium hunter's width (0.60 to 1.30)
+WARDEN ok   thief's 3D model: sliders at 0 change its height within the clamps (0.866x, at most ±0.152)
+WARDEN ok   thief: sliders at 0 keep the height in the clamps (0.871x, at most ±0.152), the hit ring, the anchors
+WARDEN ok   thief's 3D model: sliders at 1 change its height within the clamps (1.145x, at most ±0.152)
+WARDEN ok   thief: sliders at 1 keep the height in the clamps (1.139x, at most ±0.152), the hit ring, the anchors
+WARDEN ok   thief: the portrait frames its head
+WARDEN ok   dolm keeps every node the animation and kits look up (missing [])
+WARDEN ok   dolm's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   dolm: HunterAnim binds every part (unbound [])
+WARDEN ok   dolm: each of its 18 keyed moves moves the hands or the body (still: [])
+WARDEN ok   dolm: the ring under its feet shows that radius (0.411)
+WARDEN ok   dolm stands 1.087x a medium hunter (sheet 1.09x)
+WARDEN ok   dolm's 3D model stands 1.107x a medium hunter, headwear and all (sheet 1.08x)
+WARDEN ok   dolm is 1.10x a medium hunter's width (0.70 to 1.50)
+WARDEN ok   dolm's 3D model: sliders at 0 change its height within the clamps (0.865x, at most ±0.159)
+WARDEN ok   dolm: sliders at 0 keep the height in the clamps (0.866x, at most ±0.159), the hit ring, the anchors
+WARDEN ok   dolm's 3D model: sliders at 1 change its height within the clamps (1.146x, at most ±0.159)
+WARDEN ok   dolm: sliders at 1 keep the height in the clamps (1.145x, at most ±0.159), the hit ring, the anchors
+WARDEN ok   dolm: the portrait frames its head
+WARDEN ok   ostra keeps every node the animation and kits look up (missing [])
+WARDEN ok   ostra's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   ostra: HunterAnim binds every part (unbound [])
+WARDEN ok   ostra: each of its 14 keyed moves moves the hands or the body (still: [])
+WARDEN ok   ostra: the ring under its feet shows that radius (0.434)
+WARDEN ok   ostra stands 1.272x a medium hunter (sheet 1.28x)
+WARDEN ok   ostra's 3D model stands 1.199x a medium hunter, headwear and all (sheet 1.20x)
+WARDEN ok   ostra is 1.32x a medium hunter's width (0.50 to 1.60)
+WARDEN ok   ostra's 3D model: sliders at 0 change its height within the clamps (0.890x, at most ±0.167)
+WARDEN ok   ostra: sliders at 0 keep the height in the clamps (0.872x, at most ±0.167), the hit ring, the anchors
+WARDEN ok   ostra's 3D model: sliders at 1 change its height within the clamps (1.116x, at most ±0.167)
+WARDEN ok   ostra: sliders at 1 keep the height in the clamps (1.138x, at most ±0.167), the hit ring, the anchors
+WARDEN ok   ostra: the portrait frames its head
+WARDEN ok   rimewright keeps every node the animation and kits look up (missing [])
+WARDEN ok   rimewright's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   rimewright: HunterAnim binds every part (unbound [])
+WARDEN ok   rimewright: each of its 19 keyed moves moves the hands or the body (still: [])
+WARDEN ok   rimewright: the ring under its feet shows that radius (0.395)
+WARDEN ok   rimewright stands 0.956x a medium hunter (sheet 0.96x)
+WARDEN ok   rimewright's 3D model stands 1.064x a medium hunter, headwear and all (sheet 1.06x)
+WARDEN ok   rimewright is 0.77x a medium hunter's width (0.50 to 1.25)
+WARDEN ok   rimewright's 3D model: sliders at 0 change its height within the clamps (0.863x, at most ±0.156)
+WARDEN ok   rimewright: sliders at 0 keep the height in the clamps (0.869x, at most ±0.156), the hit ring, the anchors
+WARDEN ok   rimewright's 3D model: sliders at 1 change its height within the clamps (1.149x, at most ±0.156)
+WARDEN ok   rimewright: sliders at 1 keep the height in the clamps (1.142x, at most ±0.156), the hit ring, the anchors
+WARDEN ok   rimewright: the portrait frames its head
+WARDEN ok   ashwick keeps every node the animation and kits look up (missing [])
+WARDEN ok   ashwick's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   ashwick: HunterAnim binds every part (unbound [])
+WARDEN ok   ashwick: each of its 6 keyed moves moves the hands or the body (still: [])
+WARDEN ok   ashwick: the ring under its feet shows that radius (0.419)
+WARDEN ok   ashwick stands 1.155x a medium hunter (sheet 1.16x)
+WARDEN ok   ashwick's 3D model stands 1.152x a medium hunter, headwear and all (sheet 1.15x)
+WARDEN ok   ashwick is 1.27x a medium hunter's width (0.70 to 1.75)
+WARDEN ok   ashwick's 3D model: sliders at 0 change its height within the clamps (0.869x, at most ±0.156)
+WARDEN ok   ashwick: sliders at 0 keep the height in the clamps (0.869x, at most ±0.156), the hit ring, the anchors
+WARDEN ok   ashwick's 3D model: sliders at 1 change its height within the clamps (1.142x, at most ±0.156)
+WARDEN ok   ashwick: sliders at 1 keep the height in the clamps (1.141x, at most ±0.156), the hit ring, the anchors
+WARDEN ok   ashwick: the portrait frames its head
+WARDEN ok   juggernaut keeps every node the animation and kits look up (missing [])
+WARDEN ok   juggernaut's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   juggernaut: HunterAnim binds every part (unbound [])
+WARDEN ok   juggernaut: each of its 21 keyed moves moves the hands or the body (still: [])
+WARDEN ok   juggernaut: the ring under its feet shows that radius (0.429)
+WARDEN ok   juggernaut stands 1.207x a medium hunter (sheet 1.24x)
+WARDEN FAIL juggernaut's 3D model stands 1.440x a medium hunter, headwear and all (sheet 1.28x)
+WARDEN ok   juggernaut is 1.10x a medium hunter's width (1.00 to 2.00)
+WARDEN ok   juggernaut's 3D model: sliders at 0 change its height within the clamps (0.863x, at most ±0.152)
+WARDEN ok   juggernaut: sliders at 0 keep the height in the clamps (0.873x, at most ±0.152), the hit ring, the anchors
+WARDEN ok   juggernaut's 3D model: sliders at 1 change its height within the clamps (1.149x, at most ±0.152)
+WARDEN ok   juggernaut: sliders at 1 keep the height in the clamps (1.137x, at most ±0.152), the hit ring, the anchors
+WARDEN ok   juggernaut: the portrait frames its head
+WARDEN ok   dredge keeps every node the animation and kits look up (missing [])
+WARDEN ok   dredge's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   dredge: HunterAnim binds every part (unbound [])
+WARDEN ok   dredge: each of its 13 keyed moves moves the hands or the body (still: [])
+WARDEN ok   dredge: the ring under its feet shows that radius (0.458)
+WARDEN ok   dredge stands 1.477x a medium hunter (sheet 1.48x)
+WARDEN ok   dredge's 3D model stands 1.503x a medium hunter, headwear and all (sheet 1.50x)
+WARDEN ok   dredge is 1.71x a medium hunter's width (1.30 to 2.40)
+WARDEN ok   dredge's 3D model: sliders at 0 change its height within the clamps (0.895x, at most ±0.166)
+WARDEN ok   dredge: sliders at 0 keep the height in the clamps (0.860x, at most ±0.166), the hit ring, the anchors
+WARDEN ok   dredge's 3D model: sliders at 1 change its height within the clamps (1.109x, at most ±0.166)
+WARDEN ok   dredge: sliders at 1 keep the height in the clamps (1.152x, at most ±0.166), the hit ring, the anchors
+WARDEN ok   dredge: the portrait frames its head
+WARDEN ok   tender keeps every node the animation and kits look up (missing [])
+WARDEN ok   tender's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   tender: HunterAnim binds every part (unbound [])
+WARDEN ok   tender: each of its 16 keyed moves moves the hands or the body (still: [])
+WARDEN ok   tender: the ring under its feet shows that radius (0.352)
+WARDEN ok   tender stands 0.597x a medium hunter (sheet 0.60x)
+WARDEN ok   tender's 3D model stands 0.714x a medium hunter, headwear and all (sheet 0.71x)
+WARDEN ok   tender is 0.89x a medium hunter's width (0.50 to 1.50)
+WARDEN ok   tender's 3D model: sliders at 0 change its height within the clamps (0.889x, at most ±0.127)
+WARDEN ok   tender: sliders at 0 keep the height in the clamps (0.898x, at most ±0.127), the hit ring, the anchors
+WARDEN ok   tender's 3D model: sliders at 1 change its height within the clamps (1.121x, at most ±0.127)
+WARDEN ok   tender: sliders at 1 keep the height in the clamps (1.109x, at most ±0.127), the hit ring, the anchors
+WARDEN ok   tender: the portrait frames its head
+WARDEN ok   gil keeps every node the animation and kits look up (missing [])
+WARDEN ok   gil's 3D model keeps them too, all but the procedural head (missing [])
+WARDEN ok   gil: HunterAnim binds every part (unbound [])
+WARDEN ok   gil: each of its 0 keyed moves moves the hands or the body (still: [])
+WARDEN ok   gil: the ring under its feet shows that radius (0.375)
+WARDEN ok   gil stands 0.794x a medium hunter (sheet 0.79x)
+WARDEN ok   gil's 3D model stands 0.883x a medium hunter, headwear and all (sheet 0.90x)
+WARDEN ok   gil is 0.96x a medium hunter's width (0.50 to 1.50)
+WARDEN ok   gil's 3D model: sliders at 0 change its height within the clamps (0.867x, at most ±0.150)
+WARDEN ok   gil: sliders at 0 keep the height in the clamps (0.874x, at most ±0.150), the hit ring, the anchors
+WARDEN ok   gil's 3D model: sliders at 1 change its height within the clamps (1.144x, at most ±0.150)
+WARDEN ok   gil: sliders at 1 keep the height in the clamps (1.135x, at most ±0.150), the hit ring, the anchors
+WARDEN ok   gil: the portrait frames its head
+WARDEN 170 checks, 3 failed
+WARDEN_DONE FAIL

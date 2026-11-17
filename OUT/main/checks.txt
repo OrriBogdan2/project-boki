@@ -1,0 +1,4 @@
+--warden-model-check rc=0 18 WARDEN_DONE FAIL
+--dash-slot-check rc=0 3    at: clear (core/io/resource.cpp:810)
+--bot-kit-use rc=1 59    at: clear (core/io/resource.cpp:810)
+DONE

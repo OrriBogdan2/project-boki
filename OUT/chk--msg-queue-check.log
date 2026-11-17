@@ -1,0 +1,122 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+MSGQ ok   five at once: 2 show, 3 wait
+MSGQ ok   the cards on show never overlap ([[P: (561.0, 100.0), S: (118.0, 36.0)], [P: (549.0, 142.0), S: (142.0, 36.0)]])
+MSGQ ok   they stack down from the lane's top
+MSGQ ok   every line goes within a few seconds (0 left)
+MSGQ ok   three Embers make one card: ["Ember  x3"]
+MSGQ ok   a repeat of a waiting line merges too (4)
+MSGQ ok   the important line takes the first free row
+MSGQ ok   a small line that waited past 3s is dropped
+MSGQ ok   at most 6 wait (6)
+MSGQ ok   held: the line waits
+MSGQ ok   the hold lifts: it shows at once
+MSGQ ok   a fight: 1 lines at most (1)
+MSGQ ok   a fight: a line goes after 2.0s
+MSGQ ok   a fight: a hint keeps its own life (["hint"])
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wiring (res://tools/msg_queue_check.gd:139)
+       [13] run (res://tools/msg_queue_check.gd:36)
+       [14] run (res://tools/check_registry.gd:944)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wiring (res://tools/msg_queue_check.gd:139)
+       [13] run (res://tools/msg_queue_check.gd:36)
+       [14] run (res://tools/check_registry.gd:944)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wiring (res://tools/msg_queue_check.gd:139)
+       [13] run (res://tools/msg_queue_check.gd:36)
+       [14] run (res://tools/check_registry.gd:944)
+       [15] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] _wiring (res://tools/msg_queue_check.gd:139)
+       [13] run (res://tools/msg_queue_check.gd:36)
+       [14] run (res://tools/check_registry.gd:944)
+       [15] _ready (res://scripts/main.gd:270)
+MSGQ ok   Hud.toast, toast_small and level_up all land in the HUD's lane (["Bramble Isle", "LEVEL 3  ·  +1 skill point"])
+MSGQ ok   a hint lands in the same lane
+MSGQ ok   the lane is part of the HUD
+MSGQ ok   a hit you land starts the fight budget
+MSGQ ok   the kit panel fades out while the fight budget is on (0.00)
+MSGQ ok   its show timer waits the fight out
+MSGQ ok   Tab brings the kit panel back mid-fight
+MSGQ ok   the kit panel returns when the fight ends
+MSGQ ok   no hits yet: the HUD's lane keeps its full budget
+MSGQ ok   a hit you land puts the HUD's lane on its fight budget
+MSGQ ok   the first armor tier-up says what tiers are (["Armor tier up: hitting foes fills it, and each tier adds plates"])
+MSGQ ok   and only once per save
+MSGQ ok   UI.toast (the farm, town, houses) uses a lane too, repeats merged
+MSGQ ok   a label under a card fades back (1.00)
+MSGQ ok   and comes back when the card goes
+MSGQ ok   a label under a damage number fades, the number stays (1.00)
+MSGQ ok   a label that is clear of it is left alone
+MSGQ ok   of two in one group the first in the list stays, the second fades
+MSGQ ok   no claimed box: the loot name draws
+MSGQ ok   a nameplate over it: the loot name is skipped, one label is left
+MSGQ ok   a loot name elsewhere still draws
+MSGQ ok   the next frame starts clear
+MSGQ ok   claims stop at CAP, so a crowd never grows the array
+MSGQ DONE, failures: 0
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 19 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

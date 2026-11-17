@@ -1,0 +1,96 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+KINBOX ok   a new kind goes to the farm
+KINBOX ok   a plain repeat of a kind already on the farm goes to the Kin Burrow
+KINBOX ok   a shimmering repeat goes to the farm
+KINBOX ok   a mutated (Giant) repeat goes to the farm
+KINBOX ok   farm holds 6 to start (6 out)
+KINBOX ok   the farm is full: even a shimmer waits in the box (cap respected)
+KINBOX ok   caught on an expedition: a repeat lands in the box (Sent to the Boki Burrow (Box 1: Meadow))
+KINBOX ok   the Field Book records a Giant Prismander
+KINBOX ok   can't bring one out onto a full farm: "The farm is full (6/6). Box someone first or expand the cottages"
+KINBOX ok   the partner/starter stays on the farm: "Starter is your partner: partners stay on the farm"
+KINBOX ok   partner can't be boxed, nor the starter
+KINBOX ok   swap: a boxed kin and a farm kin trade places
+KINBOX ok   move inside the box to page 2, cell 16
+KINBOX ok   its old cell is free
+KINBOX ok   drop onto a full cell: they swap cells
+KINBOX ok   sort all by level: highest first, packed from cell 0 (15 boxed)
+KINBOX ok   sort a page by name
+KINBOX ok   rarity sort puts a shimmer or mutated kin first (Shiny)
+KINBOX ok   search by name, filter by mutation / shimmer
+KINBOX ok   release a boxed kin
+KINBOX ok   can't release your starter/partner
+KINBOX ok   a boxed kin picked for an expedition comes out (Fill2 went in to make room)
+KINBOX ok   Kin Cottage expansions: 6 -> 8 -> 10 -> 12, then no more (3700 gems left)
+KINBOX ok   4 days away: a boxed kin's needs are frozen (food 50, starving 0h)
+KINBOX ok   ... while a farm kin got hungry (food 0, starving 72h)
+KINBOX ok   an hour's tick doesn't touch a boxed kin
+KINBOX ok   old save with 11 kin: 6 stay out, 5 boxed, one notice (Old0, Old3, Old7, Old8, Old9, Old10)
+KINBOX ok   the partner and the first kin stay out, then the most trusted / highest level
+KINBOX ok   migration only happens once
+KINBOX  Glowing in eggs over 20000: no parent 0.0053 (base 0.0056), one parent 0.344, both 0.595
+KINBOX ok   no Glowing parent: eggs glow at base odds (1 in 180)
+KINBOX ok   one Glowing parent: about 35% of eggs (34.4%)
+KINBOX ok   both parents Glowing: about 60% of eggs (59.5%)
+KINBOX ok   a Giant and a Tiny parent never make a Giant Tiny egg (2368 of 4000 got one size)
+KINBOX  shimmer egg odds: none 1 in 4096, one parent 1 in 2048, both 1 in 1365
+KINBOX ok   shimmer egg odds: 1 in 4096, 1 in 2048 with one shimmering parent, 1 in 1365 with two
+KINBOX ok   shimmer egg roll over 1000000: 731 (expect 732 ± 108)
+KINBOX ok   Care.breed with two shimmering parents: 6 of 3000 eggs shimmer (expect ~2.2): a shimmer barely passes on
+KINBOX  wild shimmer odds: Meadow 1 in 4096, Meadow rare spot 1 in 2048, Hollow 1 in 2731, Hollow rare spot 1 in 1365
+KINBOX ok   wild shimmers: 1 in 4096 (x2 rare spots, x1.5 Hollow); 255 in 1000000 rolls (expect 244)
+KINBOX ok   every species (50) has a hand-picked shimmer palette
+KINBOX ok   a shimmering Vespyx's model wears its palette (9a2a2a)
+KINBOX ok   Care.breed passes a parent's Crystal on 35.3% of the time
+KINBOX ok   wild kin mutated in tier 0: 5.03%
+KINBOX ok   wild kin mutated in tier 1: 7.52%
+KINBOX ok   wild kin mutated in tier 2: 10.96%
+KINBOX  wild mutation odds: tier 0 5.03% (expect ~5.03%), tier 1 7.52% (expect ~7.46%), tier 2 10.96% (expect ~11.00%); rare spawn point 22.6% (expect ~23.0%)
+KINBOX ok   rare spawn points: 22.6% mutated
+KINBOX ok   real matches spawn wild kin with the mutation roll (7 wild, 1 mutated)
+KINBOX ok   Giant: +12% health, -7% speed ({ "hp": 1.12, "dmg": 1.0, "speed": 0.93, "cd": 1.0 })
+KINBOX ok   Crystal gives its hunter +6 armor, Glowing +8% sight
+KINBOX ok   9 mutations in content/mutations, every perk within 14%
+KINBOX ok   Giant and Tiny change the model's size (0.57 / 0.82 / 1.08)
+KINBOX ok   Albino is pale (body luminance 0.86)
+KINBOX ok   Crystal, Starmarked, Twin-tail, Glowing and Piebald add their parts
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:466)
+         [10] _ready (res://scripts/home/home.gd:238)
+         [11] run (res://tools/kinbox_check.gd:300)
+KINBOX ok   home puts the 6 farm kin out; the 4 in the burrow stay inside
+KINBOX ok   the Kin Burrow screen opens with a 30-cell page
+KINBOX ok   quick move onto a full farm is refused (still 4 boxed)
+KINBOX ok   quick move a farm kin into the box: it leaves the island (5 out)
+KINBOX ok   one Boki: it goes alone, no second slot
+KINBOX ok   with more Boki the second stays empty until picked (no auto-pick)
+KINBOX ok   the carry passive is one line (Carry: 2.5 hp/s regen)
+KINBOX ok   a Boki with no carry passive says so
+KINBOX ok   the same passive is shared (2.5 hp/s regen); a different or no passive is not
+KINBOX ok   second picked: Both give 2.5 hp/s regen: it counts once
+KINBOX ok   the lead can't also be the second
+KINBOX ok   picking the second as lead swaps the two
+KINBOX ok   the second cycles the other Boki and none
+KINBOX ok   a Boki that can't go is not offered
+KINBOX ok   a v13 save keeps its partner as lead and has no second
+KINBOX FAIL the portal's Boki cards show a carry passive line
+KINBOX FAIL the portal has a lead card and a second card
+KINBOX DONE failures: 2
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 21 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

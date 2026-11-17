@@ -1,4 +1,7 @@
---warden-model-check rc=0 18 WARDEN_DONE FAIL
---kill-reset-check rc=0 4    at: clear (core/io/resource.cpp:810)
---vex-dash-check rc=0 3    at: clear (core/io/resource.cpp:810)
---dash-slot-check rc=0 5    at: clear (core/io/resource.cpp:810)
+--warden-model-check rc=0 16 WARDEN_DONE FAIL
+--dash-slot-check rc=0 3    at: clear (core/io/resource.cpp:810)
+--bot-kit-use rc=1 63    at: clear (core/io/resource.cpp:810)
+--kinbox-check rc=0 7    at: clear (core/io/resource.cpp:810)
+--msg-queue-check rc=0 1    at: clear (core/io/resource.cpp:810)
+--dolm-combo-check rc=0 6    at: clear (core/io/resource.cpp:810)
+--hazard-hint-check rc=0 1    at: clear (core/io/resource.cpp:810)

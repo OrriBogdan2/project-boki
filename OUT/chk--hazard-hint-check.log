@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+HAZHINT lava, not immune: says what it does, nothing about crossing            PASS  Lava Field ahead: it burns anyone standing in it.
+HAZHINT lava, lead immune: names it and says cross                             PASS  Lava Field ahead: it burns anyone standing in it. Vespyx keeps you safe: cross it.
+HAZHINT lava: said once, not again                                             PASS  
+HAZHINT deep_water, not immune: says what it does, nothing about crossing      PASS  Deep water ahead: it slows you, weakens your hits and runs you out of breath.
+HAZHINT deep_water, lead immune: names it and says cross                       PASS  Deep water ahead: it slows you, weakens your hits and runs you out of breath. Vespyx keeps you safe: cross it.
+HAZHINT deep_water: said once, not again                                       PASS  
+HAZHINT ice, not immune: says what it does, nothing about crossing             PASS  Ice sheet ahead: there is no grip, so you slide.
+HAZHINT ice, lead immune: names it and says cross                              PASS  Ice sheet ahead: there is no grip, so you slide. Vespyx keeps you safe: cross it.
+HAZHINT ice: said once, not again                                              PASS  
+HAZHINT static, not immune: says what it does, nothing about crossing          PASS  Static Flats ahead: they shock and stun every few seconds.
+HAZHINT static, lead immune: names it and says cross                           PASS  Static Flats ahead: they shock and stun every few seconds. Vespyx keeps you safe: cross it.
+HAZHINT static: said once, not again                                           PASS  
+HAZHINT bramble, not immune: says what it does, nothing about crossing         PASS  Bramble ahead: it slows you and scratches.
+HAZHINT bramble, lead immune: names it and says cross                          PASS  Bramble ahead: it slows you and scratches. Vespyx keeps you safe: cross it.
+HAZHINT bramble: said once, not again                                          PASS  
+HAZHINT no line in the tutorial match                                          PASS  
+HAZHINT no line with tips off                                                  PASS  
+HAZHINT with both back on, the line shows                                      PASS  Lava Field ahead: it burns anyone standing in it.
+HAZHINT after a save round trip it never shows again                           PASS  
+HAZHINT CHECK DONE, 19 checks, failures: 0
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 26 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

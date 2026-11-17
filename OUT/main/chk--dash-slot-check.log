@@ -1,0 +1,97 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/dash_slot_check.gd:34)
+       [13] run (res://tools/check_registry.gd:941)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/dash_slot_check.gd:34)
+       [13] run (res://tools/check_registry.gd:941)
+       [14] _ready (res://scripts/main.gd:270)
+DASHSLOT ok   the overhead plates have no dash bar any more
+DASHSLOT ok   archer: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   juggernaut: 2 discs, all full, for 2 charges, air dash true
+DASHSLOT ok   gunslinger: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   bulwark: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   rimewright: 0 discs, all full, for 1 charges, air dash false
+DASHSLOT ok   ashwick: 2 discs, all full, for 2 charges, air dash true
+DASHSLOT ok   dolm: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   mage: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   dredge: 3 discs, all full, for 3 charges, air dash true
+DASHSLOT ok   tender: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   thief: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   ostra: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   gil: 0 discs, all full, for 1 charges, air dash true
+DASHSLOT ok   1 charge + 0%: pips [1.0, 0.0], countdown '11' (10.40s of 10.40s)
+DASHSLOT ok   1 charge + 30%: pips [1.0, 0.3], countdown '8' (7.28s of 10.40s)
+DASHSLOT ok   1 charge + 80%: pips [1.0, 0.8], countdown '3' (2.08s of 10.40s)
+DASHSLOT ok   0 charges: every pip empty, countdown '11'
+DASHSLOT ok   the real tick refills the slot's timer (0.096 charge in a second)
+DASHSLOT ok   the air-dash diamond follows its own cooldown (0.67 back)
+DASHSLOT ok   a charge returning flashes the slot (0.35s left)
+DASHSLOT ok   ... and ticks softly
+DASHSLOT ok   a slot seen for the first time doesn't flash
+DASHSLOT ok   13 of 13 archetypes shake the slot on an empty press
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:76)
+         [5] dress (res://scripts/match/unmasked.gd:279)
+         [6] dress (res://scripts/match/hunter_body.gd:106)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:466)
+         [10] _ready (res://scripts/home/home.gd:238)
+         [11] _hb_home (res://scripts/main.gd:1491)
+         [12] _home_slot (res://tools/dash_slot_check.gd:146)
+         [13] run (res://tools/dash_slot_check.gd:49)
+         [14] _deny (res://tools/dash_slot_check.gd:136)
+         [15] _frames (res://tools/dash_slot_check.gd:20)
+DASHSLOT ok   the farm's own overhead dash pips are gone
+DASHSLOT ok   the farm has the dash slot on its HUD layer
+DASHSLOT ok   farm at 1.0 charges: pips [], countdown '' (0.00s)
+DASHSLOT ok   the farm's slot shows the dash key 'SHIFT'
+DASHSLOT ok   farm at 0.4 charges: pips [], countdown '6' (5.40s)
+DASHSLOT ok   the farm's slot shows the dash key 'SHIFT'
+DASHSLOT ok   farm at 0.0 charges: pips [], countdown '9' (9.00s)
+DASHSLOT ok   the farm's slot shows the dash key 'SHIFT'
+DASHSLOT ok   an empty press shakes the farm's slot too
+DASH SLOT CHECK DONE, failures: 0
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 56 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

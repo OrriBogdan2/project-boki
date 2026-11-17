@@ -120,125 +120,16 @@ WARDEN ok   ashwick's 3D model: sliders at 1 change its height within the clamps
 WARDEN ok   ashwick: sliders at 1 keep the height in the clamps (1.141x, at most ±0.156), the hit ring, the anchors
 WARDEN ok   ashwick: the portrait frames its head
 WARDEN ok   juggernaut keeps every node the animation and kits look up (missing [])
-WARNING: 'res://art/wardens/kael/kael.glb': In external resource #3, invalid UID: 'uid://dtwwag5q5hdai' - using text path instead: 'res://art/wardens/kael/kael_v95d.jpg'.
-     at: open (core/io/resource_format_binary.cpp:1089)
-     GDScript backtrace (most recent call first):
-         [0] _scene (res://scripts/heroes/warden_glb.gd:414)
-         [1] misfits (res://scripts/heroes/warden_glb.gd:248)
-         [2] will_dress (res://scripts/heroes/warden_glb.gd:242)
-         [3] _hunter (res://scripts/match/models.gd:655)
-         [4] hunter (res://scripts/match/models.gd:625)
-         [5] _model (res://tools/warden_model_check.gd:99)
-         [6] _anchors (res://tools/warden_model_check.gd:116)
-         [7] run (res://tools/warden_model_check.gd:82)
-         [8] run (res://tools/check_registry.gd:944)
-         [9] _ready (res://scripts/main.gd:270)
-ERROR: Resource file not found: res://art/wardens/kael/kael_v95d.jpg (expected type: Texture2D)
-   at: _load (core/io/resource_loader.cpp:351)
-   GDScript backtrace (most recent call first):
-       [0] _scene (res://scripts/heroes/warden_glb.gd:414)
-       [1] misfits (res://scripts/heroes/warden_glb.gd:248)
-       [2] will_dress (res://scripts/heroes/warden_glb.gd:242)
-       [3] _hunter (res://scripts/match/models.gd:655)
-       [4] hunter (res://scripts/match/models.gd:625)
-       [5] _model (res://tools/warden_model_check.gd:99)
-       [6] _anchors (res://tools/warden_model_check.gd:116)
-       [7] run (res://tools/warden_model_check.gd:82)
-       [8] run (res://tools/check_registry.gd:944)
-       [9] _ready (res://scripts/main.gd:270)
-ERROR: Can't load dependency: 'res://art/wardens/kael/kael_v95d.jpg'.
-   at: parse_variant (core/io/resource_format_binary.cpp:459)
-   GDScript backtrace (most recent call first):
-       [0] _scene (res://scripts/heroes/warden_glb.gd:414)
-       [1] misfits (res://scripts/heroes/warden_glb.gd:248)
-       [2] will_dress (res://scripts/heroes/warden_glb.gd:242)
-       [3] _hunter (res://scripts/match/models.gd:655)
-       [4] hunter (res://scripts/match/models.gd:625)
-       [5] _model (res://tools/warden_model_check.gd:99)
-       [6] _anchors (res://tools/warden_model_check.gd:116)
-       [7] run (res://tools/warden_model_check.gd:82)
-       [8] run (res://tools/check_registry.gd:944)
-       [9] _ready (res://scripts/main.gd:270)
-ERROR: Failed loading resource: res://.godot/imported/kael.glb-2d9839a901b292b8ee04902a63fe5c9c.scn.
-   at: _load (core/io/resource_loader.cpp:343)
-   GDScript backtrace (most recent call first):
-       [0] _scene (res://scripts/heroes/warden_glb.gd:414)
-       [1] misfits (res://scripts/heroes/warden_glb.gd:248)
-       [2] will_dress (res://scripts/heroes/warden_glb.gd:242)
-       [3] _hunter (res://scripts/match/models.gd:655)
-       [4] hunter (res://scripts/match/models.gd:625)
-       [5] _model (res://tools/warden_model_check.gd:99)
-       [6] _anchors (res://tools/warden_model_check.gd:116)
-       [7] run (res://tools/warden_model_check.gd:82)
-       [8] run (res://tools/check_registry.gd:944)
-       [9] _ready (res://scripts/main.gd:270)
-ERROR: Failed loading resource: res://art/wardens/kael/kael.glb.
-   at: _load (core/io/resource_loader.cpp:343)
-   GDScript backtrace (most recent call first):
-       [0] _scene (res://scripts/heroes/warden_glb.gd:414)
-       [1] misfits (res://scripts/heroes/warden_glb.gd:248)
-       [2] will_dress (res://scripts/heroes/warden_glb.gd:242)
-       [3] _hunter (res://scripts/match/models.gd:655)
-       [4] hunter (res://scripts/match/models.gd:625)
-       [5] _model (res://tools/warden_model_check.gd:99)
-       [6] _anchors (res://tools/warden_model_check.gd:116)
-       [7] run (res://tools/warden_model_check.gd:82)
-       [8] run (res://tools/check_registry.gd:944)
-       [9] _ready (res://scripts/main.gd:270)
-WARNING: WardenGlb: res://art/wardens/kael/kael.glb does not fit the rig (["no armature"]); keeping the procedural model
-     at: push_warning (core/variant/variant_utility.cpp:1034)
-     GDScript backtrace (most recent call first):
-         [0] misfits (res://scripts/heroes/warden_glb.gd:258)
-         [1] will_dress (res://scripts/heroes/warden_glb.gd:242)
-         [2] _hunter (res://scripts/match/models.gd:655)
-         [3] hunter (res://scripts/match/models.gd:625)
-         [4] _model (res://tools/warden_model_check.gd:99)
-         [5] _anchors (res://tools/warden_model_check.gd:116)
-         [6] run (res://tools/warden_model_check.gd:82)
-         [7] run (res://tools/check_registry.gd:944)
-         [8] _ready (res://scripts/main.gd:270)
 WARDEN ok   juggernaut's 3D model keeps them too, all but the procedural head (missing [])
 WARDEN ok   juggernaut: HunterAnim binds every part (unbound [])
 WARDEN ok   juggernaut: each of its 21 keyed moves moves the hands or the body (still: [])
 WARDEN ok   juggernaut: the ring under its feet shows that radius (0.429)
 WARDEN ok   juggernaut stands 1.207x a medium hunter (sheet 1.24x)
-ERROR: Node not found: "Warden/Sync" (relative to "/root/Main/@Node3D@40/@Node3D@15889").
-   at: get_node (scene/main/node.cpp:1963)
-   GDScript backtrace (most recent call first):
-       [0] _glb_top (res://tools/warden_model_check.gd:284)
-       [1] _scale (res://tools/warden_model_check.gd:204)
-       [2] run (res://tools/warden_model_check.gd:85)
-       [3] run (res://tools/check_registry.gd:944)
-       [4] _ready (res://scripts/main.gd:270)
-SCRIPT ERROR: Invalid call. Nonexistent function 'apply' in base 'Nil'.
-          at: _glb_top (res://tools/warden_model_check.gd:284)
-          GDScript backtrace (most recent call first):
-              [0] _glb_top (res://tools/warden_model_check.gd:284)
-              [1] _scale (res://tools/warden_model_check.gd:204)
-              [2] run (res://tools/warden_model_check.gd:85)
-              [3] run (res://tools/check_registry.gd:944)
-              [4] _ready (res://scripts/main.gd:270)
-WARDEN FAIL juggernaut's 3D model stands 0.000x a medium hunter, headwear and all (sheet 1.33x)
-WARDEN ok   juggernaut is 1.81x a medium hunter's width (0.95 to 2.00)
-ERROR: Node not found: "Warden/Sync" (relative to "/root/Main/@Node3D@40/@Node3D@16323").
-   at: get_node (scene/main/node.cpp:1963)
-   GDScript backtrace (most recent call first):
-       [0] _glb_top (res://tools/warden_model_check.gd:284)
-       [1] _glb_top_of (res://tools/warden_model_check.gd:278)
-       [2] _sliders (res://tools/warden_model_check.gd:232)
-       [3] run (res://tools/warden_model_check.gd:86)
-       [4] run (res://tools/check_registry.gd:944)
-       [5] _ready (res://scripts/main.gd:270)
-SCRIPT ERROR: Invalid call. Nonexistent function 'apply' in base 'Nil'.
-          at: _glb_top (res://tools/warden_model_check.gd:284)
-          GDScript backtrace (most recent call first):
-              [0] _glb_top (res://tools/warden_model_check.gd:284)
-              [1] _glb_top_of (res://tools/warden_model_check.gd:278)
-              [2] _sliders (res://tools/warden_model_check.gd:232)
-              [3] run (res://tools/warden_model_check.gd:86)
-              [4] run (res://tools/check_registry.gd:944)
-              [5] _ready (res://scripts/main.gd:270)
+WARDEN FAIL juggernaut's 3D model stands 1.440x a medium hunter, headwear and all (sheet 1.33x)
+WARDEN ok   juggernaut is 1.10x a medium hunter's width (0.95 to 2.00)
+WARDEN ok   juggernaut's 3D model: sliders at 0 change its height within the clamps (0.863x, at most ±0.152)
 WARDEN ok   juggernaut: sliders at 0 keep the height in the clamps (0.873x, at most ±0.152), the hit ring, the anchors
+WARDEN ok   juggernaut's 3D model: sliders at 1 change its height within the clamps (1.149x, at most ±0.152)
 WARDEN ok   juggernaut: sliders at 1 keep the height in the clamps (1.137x, at most ±0.152), the hit ring, the anchors
 WARDEN ok   juggernaut: the portrait frames its head
 WARDEN ok   dredge keeps every node the animation and kits look up (missing [])
@@ -280,5 +171,5 @@ WARDEN ok   gil: sliders at 0 keep the height in the clamps (0.874x, at most ±0
 WARDEN ok   gil's 3D model: sliders at 1 change its height within the clamps (1.144x, at most ±0.150)
 WARDEN ok   gil: sliders at 1 keep the height in the clamps (1.135x, at most ±0.150), the hit ring, the anchors
 WARDEN ok   gil: the portrait frames its head
-WARDEN 168 checks, 1 failed
+WARDEN 170 checks, 1 failed
 WARDEN_DONE FAIL

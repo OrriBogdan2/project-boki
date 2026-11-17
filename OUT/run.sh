@@ -1,9 +1,9 @@
 #!/bin/bash
 # runs targeted checks, one result line each
-cd "$(dirname "$0")/.."
+cd "${RUNDIR:-$(dirname "$0")/..}"; OUTD=${OUTD:-OUT}
 export XDG_DATA_HOME=$(mktemp -d)
 for f in "$@"; do
-  timeout 900 godot --headless --path . -- $f > OUT/chk$f.log 2>&1; rc=$?
-  echo "$f rc=$rc $(grep -c -i -E 'FAIL|RED' OUT/chk$f.log) $(tail -n1 OUT/chk$f.log | cut -c1-120)" >> OUT/checks.txt
+  timeout 900 godot --headless --path . -- $f > $OUTD/chk$f.log 2>&1; rc=$?
+  echo "$f rc=$rc $(grep -c -i -E 'FAIL|RED' $OUTD/chk$f.log) $(tail -n1 $OUTD/chk$f.log | cut -c1-120)" >> $OUTD/checks.txt
 done
-echo DONE >> OUT/checks.txt
+echo DONE >> $OUTD/checks.txt

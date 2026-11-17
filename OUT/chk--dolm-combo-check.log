@@ -1,0 +1,504 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PAIRCHECK name: the display name is the class title    PASS  The Stone Seer
+PAIRCHECK card: a role line and one line each for LMB, RMB, E, Shift and the passive PASS  
+PAIRCHECK lmb: the boulder leaves the hand 0.13s into the throw, not on the press PASS  at the press 0, 0.13s later 1
+PAIRCHECK lmb: tap = boulder (one Match shot, molten skin) PASS  shots 1
+PAIRCHECK lmb: the boulder flies to full range, not to the cursor (11m) PASS  11.6 m
+PAIRCHECK lmb: the boulder hits                        PASS  took 9.0
+PAIRCHECK small: the boulder's burst splashes the foe beside it (half damage) PASS  splash 1 took 3.6
+PAIRCHECK boulder: its burst plays the blue hit flash and debris once PASS  { "rock_trail": 1, "boulder_throw": 1, "boulder_hit": 1 }
+PAIRCHECK lmb hold: the punch lane shows from the hold (4.2m by 1.8m, chevrons) PASS  4.2
+PAIRCHECK lmb hold: the cursor charge ring fills       PASS  charge 0.38
+PAIRCHECK lmb hold: a full punch at 0.9s (0.28s tap window) PASS  k 0.38 -> 1.00
+PAIRCHECK lmb hold: the fists glow while it charges    PASS  
+PAIRCHECK anim: the hold plays breah_wind              PASS  
+PAIRCHECK lmb: hold + release = punch, knocks back     PASS  punches 1 took 24.0 dx 6.3
+PAIRCHECK lmb: the punch lands with the blue hit flash and debris (sized by the lane's half width) PASS  { "rock_trail": 1, "boulder_throw": 1, "boulder_hit": 1, "punch_charge": 1, "punch": 1, "punch_hit": 1 }
+PAIRCHECK lmb: the punch steps her forward about half a body PASS  step 0.82
+PAIRCHECK lmb: the lane is gone after the punch        PASS  
+PAIRCHECK lmb: the punch is a lane, not a cone (a foe 1.6m to the side is missed) PASS  took 0.0
+PAIRCHECK small: holding LMB 2.3s throws nothing until the release, then one full punch (no boulder) PASS  held 0 punches 1 boulders 0
+PAIRCHECK lmb: a merge ends the hold with no punch     PASS  punches 3 -> 3
+PAIRCHECK combo: punch into a wall = stun, with stars over the head PASS  wall stuns 1 stun 0.47
+PAIRCHECK e: a red ground flash before the rocks (0.2s tell, everyone sees it) PASS  rocks 0
+PAIRCHECK e: Stone Row raises three rocks after the tell PASS  rocks 3
+PAIRCHECK e: the row is a slight curve 3.4m ahead (outer rocks 0.45m back, spanning about 3 body heights) PASS  [2.94999980926514, 2.94999980926514, 3.39999961853027]
+PAIRCHECK e: the row spans about 5m (3 body heights) across the aim PASS  4.80
+PAIRCHECK anim: Stone Row plays breah_raise            PASS  
+PAIRCHECK item 67: a rock's top is at least 1.6x the old 1.25m, taller than a hunter's head, and you can stand on it PASS  top 2.20
+PAIRCHECK item 67: the look reaches the top (tallest column at least the rock's top) PASS  2.20
+PAIRCHECK item 67: every rock has a ground shadow      PASS  
+PAIRCHECK rock: dropped onto a rock, she stands on its top PASS  y 3.80 top 3.80
+PAIRCHECK rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less PASS  cross 0.53s peak 2.43 top 2.20
+PAIRCHECK rock (the data, DECISIONS): an ally walking into his rock is stopped, jumping carries him up and over PASS  walk cross -1.00 peak 0.00, jump peak 2.43 top 2.20, past 4.71
+PAIRCHECK rock (bots): an ally bot at his rock jumps it at once; a Tenzo bot walks up his own (no jump) PASS  ally true caster false at (11.156, 1.6, 32.5)
+PAIRCHECK rock (DECISIONS): a foe walking or jumping into his rock is stopped, and a foe bot does not jump it PASS  walk cross -1.00 peak 0.00, jump peak 1.52, y 0.00, bot hops false
+PAIRCHECK combo: a punch along a row launches every rock in a stream PASS  swept 3 launched 3 (first frame 1)
+PAIRCHECK combo: launched rocks are flaming boulder shots (Match shots in the rock skin) PASS  
+PAIRCHECK data: rocks carry no slow, only the Rock Hop's rolling rock does PASS  
+PAIRCHECK combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL) PASS  took 38.6 vuln 2.5 slow 0.00 pay 3
+PAIRCHECK numbers: a launched rock hits about 1.5x a boulder (14 vs 9) PASS  
+PAIRCHECK small: a second burst on the same foe inside 0.8s deals 30% less PASS  1.00 0.70
+PAIRCHECK rmb hold: the slam circle shows for everyone, a hop ahead PASS  (11.0, 32.5)
+PAIRCHECK rmb hold: she can walk slowly while charging PASS  0.55
+PAIRCHECK anim: the charge is a crouch (breah_crouch)  PASS  
+PAIRCHECK rmb hold: circle and sweet spot grow through the short hold PASS  core 1.14 -> 1.80 r 4.00 -> 4.50
+PAIRCHECK rmb hold: the cursor shows the charge filling PASS  
+PAIRCHECK item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held PASS  cap 0.45 longest 0.47 down false hops 0 winding true
+PAIRCHECK item 61: a slam at the cap is the full circle and centre PASS  charge 1.00
+PAIRCHECK rmb: the hop's slam lands once, at the foe it hopped to PASS  moved 1.67m slams 1
+PAIRCHECK anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame PASS  key 0.75 landing 0.75
+PAIRCHECK rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X) PASS  walls 0 -> 0
+PAIRCHECK rmb: a full charge in the centre stuns, with stars PASS  stun 0.88
+PAIRCHECK rmb: the slam's eruption, stone chunks flying, and the cracked ground still lingering 0.3s on PASS  
+PAIRCHECK item 61: the tap is a slam on the spot, no hop and nothing vertical, in about 0.85 of the hold's circle PASS  taps 1 hops 0 moved 0.00 rose 0.00 k 0.849
+PAIRCHECK rmb: tap slam hits the centre and stuns      PASS  took 16.8 stun 0.18
+PAIRCHECK rmb: a full charge hits harder               PASS  tap 16.8 full 36.0
+PAIRCHECK rmb (item 14): the tap's slam raises no rock either PASS  
+PAIRCHECK rmb (item 14): only the sweet spot stuns (a foe 2.7m from the centre takes the outer hit, no stun) PASS  took 30.0 stun 0.00
+PAIRCHECK rmb: the circle comes with her               PASS  (11.63411, 32.5)
+PAIRCHECK rmb: jump while charging is a real leap, longer than the hop (up off the ground, about 3m forward) PASS  leaps 1 up 1.04 moved 3.36
+PAIRCHECK rmb: let go mid-leap = the leap's arc carries on (no plunge), slam where she lands PASS  slams 1 vy 3.1
+PAIRCHECK item 61: after its wind-up the hold carries him at least 2m forward with a rise, then slams on landing PASS  forward 2.46 up 1.18 in 0.92s
+PAIRCHECK item 61: the move keys nudge the landing, by under a metre PASS  aside 0.94
+PAIRCHECK item 61: a hop off a run keeps some of its speed (goes further than one from standing) PASS  run 3.01 standing 2.46
+PAIRCHECK small: a punch during the charge lunges her forward (punch to extend) PASS  moved 1.64
+PAIRCHECK combo: Stone Row > slam launches the rocks   PASS  launches 3 -> 6
+PAIRCHECK growth: the slam's damage scales with LevelGrowth.ap PASS  lvl1 14.00 lvl10 18.91 ap 1.00/1.35
+PAIRCHECK data: a slam that knocks does not reset Quakefall PASS  cd 10.48 charges 0.00
+PAIRCHECK rmb: a foe in the air is dunked              PASS  dunks 1 vy -22.0
+PAIRCHECK glide (item 162b, hop): glide held through the Quakefall never opens the glider mid-move PASS  dove true opened false (0.30s, 1.1m over the take-off)
+PAIRCHECK glide (item 162b, leap): glide held through the Quakefall never opens the glider mid-move PASS  dove true opened false (0.30s, 1.5m over the take-off)
+PAIRCHECK glide (item 162b, air): glide held through the Quakefall never opens the glider mid-move PASS  dove true opened false (0.25s, -1.1m over the take-off)
+PAIRCHECK glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s) PASS  glided true folded true reopened false vy -32.5 vx 3.7 -> 0.9
+PAIRCHECK glide slam: she slams where she lands (about 0.3s down from 8m) PASS  slams +1, 0.52 s down
+PAIRCHECK data: the dash rests 12s per charge and starts with one charge (a second at rank 3) PASS  cd 12.0 charges 1 regen 12.0
+PAIRCHECK data: punching your own rocks gives a Shardskin shield (one 18 stack a punch, rank 1), named PASS  punches 1 stacks 1 shield 18.0 swept 2 src blaze_mantle
+PAIRCHECK PARITY: Shardskin is flat per punch: a tap-charge punch gives the same 18 as a full-charge one PASS  tap 18.0 full 18.0 stacks 1
+PAIRCHECK data: a punch with no rock of yours in the lane gives no shield PASS  shield 0.0
+PAIRCHECK data: the dash is Rock Hop, 3 hops           PASS  
+PAIRCHECK dash: a rock bursts up under him first, the slab under his foot, and the move plays PASS  
+PAIRCHECK dash: the landing spot shows for everyone through the hop PASS  
+PAIRCHECK dash: a fresh rock at the landing and a skid along it PASS  
+PAIRCHECK dash: a fast, low arc (under 1.2m over the rock) PASS  peak 0.94
+PAIRCHECK hop rocks: they don't count as Stone Row rocks PASS  up 0
+PAIRCHECK dash: 1 input = 1 hop, then he lands         PASS  
+PAIRCHECK hop rocks: they crumble in a moment          PASS  
+PAIRCHECK dash: 3 inputs = 3 hops                      PASS  hops 3
+PAIRCHECK steer: the second hop turned to the new cursor (+z) PASS  (0.167061, 0.0, 2.418434)
+PAIRCHECK dash: total distance within 10%% of 7.5m     PASS  path 7.18
+PAIRCHECK dash: each hop is about 2.5m                 PASS  2.38
+PAIRCHECK window: no press inside 0.6s, the chain is over PASS  
+PAIRCHECK hop count: a 4th press is no 4th hop         PASS  3
+PAIRCHECK cooldown: nothing recharges during the chain PASS  0.000
+PAIRCHECK cooldown: it runs once the chain is over     PASS  0.044
+PAIRCHECK shove: a mid-chain landing nudges with no damage PASS  nudged 1 took 0.0
+PAIRCHECK crash: the last landing hits and shoves a foe beside it PASS  hits 1 took 10.8
+PAIRCHECK crash: the rock comes down after him (two hits, not one) PASS  
+PAIRCHECK crash: the rock rolls on and hits: shred and a slow PASS  took 18.6 slow 0.70
+PAIRCHECK crash: the rolling rock goes about 6m, not 12 PASS  took 0.0
+PAIRCHECK hop rocks: never launched                    PASS  
+PAIRCHECK hop rocks: an ally in the air hops them, a foe is stopped PASS  ally 0.6 foe 2.3
+PAIRCHECK flow: a tap in hop 2 throws the boulder mid-chain PASS  true 1
+PAIRCHECK abyss: open abyss ahead: the chain stops at the edge and never leaves the ground PASS  x 2.39
+PAIRCHECK abyss: a gap in reach: rocks rise over the void, he stands on them and lands across PASS  stood 4 x 8.49 hops 3
+PAIRCHECK abyss: left on a rock over the void, the chain ends there PASS  over true
+PAIRCHECK abyss: when the rock crumbles, he falls      PASS  y -2.43
+PAIRCHECK bounds: a hop at the map's edge never lands off the grid PASS  {  }
+PAIRCHECK rough: a hop up a terrace lands on top       PASS  x 3.01 y 1.40
+PAIRCHECK rough: a wall ahead: the hops pull back and he never lands inside it PASS  x 1.21 hops 2
+PAIRCHECK rough: a rock never rises inside a foe       PASS  
+PAIRCHECK item 183: her air dash is the Rock Hop: breah_hop, a charge spent, ex_cd untouched, reach 2.57 vs 2.56 PASS  anim breah_hop charges 1.0 -> 0.0 ex_cd 0.0
+PAIRCHECK glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, at the hop's speed, no crash PASS  open after 1 steps fly_t 0.00 chaining false h 7.96 -> 7.96 m/s crashes 13 -> 13
+PAIRCHECK anim: her long dash (no charge left) plays breah_exdash PASS  
+PAIRCHECK item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table) PASS  
+PAIRCHECK item 35: each dash move ends with its dash (ground 0.30s, air 0.23s) PASS  [0.28, 0.23]
+PAIRCHECK item 35: her ground dash draws no ground ring and no blast PASS  rings/blasts 0
+PAIRCHECK item 35: her long dash plays breah_exdash as the whole pose (no shared roll under it) PASS  anim breah_exdash kind kit roll 0.21
+PAIRCHECK item 35: her air dash draws no ground ring and no blast PASS  rings/blasts 0
+PAIRCHECK item 51: the Quake Fist charge carries through her air dash, charging on PASS  charge 0.43 -> 0.52 dash true punches +0
+PAIRCHECK item 51: let go in the air dash, she punches as it ends, still in the air and moving PASS  0.02s speed 8.0 -> 8.0
+PAIRCHECK air steer: an air punch east keeps her 3 m/s drift south and steps her east PASS  punches +1 vel x 3.76 z 2.98
+PAIRCHECK air steer: holding the keys against the drift after the punch turns it within 0.25s PASS  0.05s vz -0.41
+PAIRCHECK rank 3: slamming a foe gives a Shardskin shield PASS  shield 18
+PAIRCHECK data rank 3: a second charge, recharging in 10s (the data's -2s from rank 2, 12s base) PASS  charges 2 regen 10.00
+PAIRCHECK data rank 3: each hop goes a third further   PASS  3.81 want 3.17 + skid
+PAIRCHECK rank 3: an extra row behind the first, rising with it (the centre-out rise is Basalt Spine's) PASS  at 0.25s 6, then 6
+PAIRCHECK rank 3: the extra row does not slow (the slow is Basalt Spine's) PASS  slow 0.00
+PAIRCHECK passive: sneaking shows a pale cone ahead    PASS  
+PAIRCHECK passive: the cone lengthens 18 -> 25 m over the same 2s PASS  18.8 -> 25.0
+PAIRCHECK passive: the cone widens 25 -> 40 degrees over 2s of sneaking PASS  26.6 -> 40.0
+PAIRCHECK passive: Tremor Sense reaches 25 m grown, not 27 PASS  23 m 1, 27 m 0
+PAIRCHECK passive: Tremor Sense shows foes in front only PASS  front 1 back 0
+PAIRCHECK passive: the cone goes when she stops sneaking PASS  
+PAIRCHECK merge hold: the dive, the charge, its leap and Rock Hop all drop PASS  
+PAIRCHECK anim: every Tenzo move is keyed (KMovesStone) PASS  []
+PAIRCHECK sfx: every Tenzo sound is loaded by Sfx      PASS  []
+PAIRCHECK upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208) PASS  [[11.0, 12.0, 12.5, 1.0, 1.0, 1.0], [10.0001, 9.9996, 11.5, 1.24, 1.0, 1.0], [9.0002, 9.9996, 10.0, 1.48, 1.0, 2.0]]
+PAIRCHECK upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3 PASS  [[11.0, 12.0, 12.5, 1.0, 1.0, 1.0], [10.0001, 9.9996, 11.5, 1.24, 1.0, 1.0], [9.0002, 9.9996, 10.0, 1.48, 1.0, 2.0]]
+PAIRCHECK upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage PASS  [[11.0, 12.0, 12.5, 1.0, 1.0, 1.0], [10.0001, 9.9996, 11.5, 1.24, 1.0, 1.0], [9.0002, 9.9996, 10.0, 1.48, 1.0, 2.0]]
+PAIRCHECK ult: no cast below level 6                   PASS  level 5
+PAIRCHECK ult: one X press is one cast                 PASS  used 1
+PAIRCHECK ult cast: a tap casts at once, the slam move plays, its own cooldown starts (45s) PASS  cd 45.0
+PAIRCHECK ult telegraph: the cracks show to everyone, at the cursor, across the aim, 21m, bent 25 degrees PASS  axis (0.0, 1.0)
+PAIRCHECK ult sound: cracks at the release, then one rumble in two voices (a half each), none per rock PASS  voices 2, rumble played one-shot false
+PAIRCHECK ult sound: the rumble ends with the eruption and one heavy crack lands PASS  voices 0
+PAIRCHECK ult beats: the first rock rises 0.2s after the release (the cracks) PASS  0.23
+PAIRCHECK ult: rocks all along the ridge, one at its centre PASS  rocks 15
+PAIRCHECK ult: the ridge's rocks are apart from Stone Row's (no pips, no cap) PASS  pips 0
+PAIRCHECK ult bond: nothing when it catches nobody     PASS  paid 0.00
+PAIRCHECK ult: the cooldown denies a new cast          PASS  casts 1
+PAIRCHECK ult: the rocks stand 7s                      PASS  6.98
+PAIRCHECK ult hold: a press alone shows no crouch yet  PASS  
+PAIRCHECK ult hold: X held aims (nothing cast yet), the crouch move holds PASS  
+PAIRCHECK ult hold: the preview line with chevrons, yours only PASS  
+PAIRCHECK ult drag: the preview pivots on its centre toward the cursor PASS  (0.707107, 0.707107)
+PAIRCHECK ult drag: let go casts along the dragged line PASS  (0.707107, 0.707107)
+PAIRCHECK ult: a body on the line is shoved off it, never inside a rock PASS  off 0.94
+PAIRCHECK ult: the rise slows a foe beside it (35% for 1s) PASS  slow 0.35
+PAIRCHECK ult bond: a hunter slowed by the rise is a land (a hit: 0.6) PASS  paid 0.60
+PAIRCHECK ult bond: paid once per cast, nothing more while it stands PASS  
+PAIRCHECK ult beats: the rocks rise from the centre outward over 0.8s PASS  0.78
+PAIRCHECK ult: 15 rocks over 21m on open ground        PASS  rocks 15
+PAIRCHECK spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep PASS  
+PAIRCHECK spine arc: the ridge bends about 25 degrees (20-30), its ends curve back toward her PASS  bend 25.0 set back 1.14
+PAIRCHECK spine width: the end rocks sit about 21m apart (20-21.5) PASS  extent 20.8
+PAIRCHECK ult combo: a punch along the ridge launches its rocks in a stream PASS  launched 8
+PAIRCHECK ult combo: the ridge's rocks hit, at most 40 to one hunter PASS  dmg 40.0
+PAIRCHECK ult bond: a ridge rock into a hunter is a land PASS  paid 0.60
+PAIRCHECK ult bond: a ridge rock after the 4s window pays nothing PASS  dmg 8.4
+PAIRCHECK merge hold: a merge while aiming the ult drops it, not spent PASS  phase ''
+PAIRCHECK ult hold: a stun while aiming cancels it, not spent PASS  
+PAIRCHECK ult aim: past 11m the centre is clamped and a held still cursor stays across PASS  
+PAIRCHECK spine walkway: the whole ridge is laid over the abyss, none refused PASS  over the gap 15
+PAIRCHECK spine walkway: Tenzo stands on a rock over the abyss, no fall, no abyss sink, no damage PASS  y 3.80 top 3.80 g1 void0 hp 108
+PAIRCHECK spine walkway: a foe dropped onto the ridge stands on it too PASS  y 3.80 top 3.80 g1 void0
+PAIRCHECK spine walkway: Tenzo walks along the ridge over the abyss and stays on it PASS  moved 3.03 y 3.80
+PAIRCHECK spine walkway: when the rocks crumble, whoever stood on them falls PASS  rocks 0 y 0.00 g1
+PAIRCHECK ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing PASS  ult 40.0 total 90.6 of 124
+PAIRCHECK hold tenzo X: let go raises the ridge and X is spent PASS  { "aiming": true, "anim": "breah_spine_aim", "phase": "tell", "cd": 43.7666666666667 }
+PAIRCHECK hold tenzo X: stun mid-aim drops it, no ridge, X not spent PASS  { "aiming": false, "anim": "", "phase": "", "cd": 0.0 }
+PAIRCHECK hold tenzo X: down mid-aim drops it, no ridge, X not spent PASS  { "aiming": false, "anim": "", "phase": "", "cd": 0.0 }
+PAIRCHECK hold tenzo X: rmb mid-aim [?]: the aim goes on, casts at let go PASS  { "aiming": true, "anim": "breah_spine_aim", "phase": "tell", "cd": 43.7666666666667 }
+PAIRCHECK hold tenzo X: e mid-aim [?]: the aim goes on, casts at let go PASS  { "aiming": true, "anim": "breah_spine_aim", "phase": "tell", "cd": 43.7666666666667 }
+PAIRCHECK hop press in the first rock's crouch: the next hop PASS  hops 2 skid on true
+PAIRCHECK hop press just after the take-off: the next hop PASS  hops 2 skid on true
+PAIRCHECK hop press in the last BUFFER_S before the landing: the next hop PASS  hops 2 skid on true
+PAIRCHECK hop press on the landing, before skid_min: the next hop PASS  hops 2 skid on true
+PAIRCHECK hop press on the window's last step: the next hop PASS  hops 2 skid on true
+PAIRCHECK hop press in the last hop's final BUFFER_S, charge 1: a fresh chain PASS  fresh true dashes -0.00
+PAIRCHECK hop press in the last hop's final BUFFER_S, charge 0: none PASS  fresh false dashes 0.03
+PAIRCHECK hop press early in the last hop's flight: no fresh chain (not a double) PASS  dashes 1.00
+PAIRCHECK hop press after the window, charge 1: a fresh chain PASS  fresh true dashes -0.00
+PAIRCHECK hop press after the window, charge 0: none   PASS  fresh false dashes 0.01
+PAIRCHECK hop prompt: SHIFT AGAIN for exactly the crouch and the window, its time left the chain's PASS  up 0.667s want 0.660 last 0.000 bad 0
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] combos_of (res://tools/dash_flow_check.gd:68)
+       [14] run (res://tools/breah_combo_check.gd:21)
+       [15] tenzo (res://tools/hold_release_check.gd:192)
+       [16] _spine (res://tools/hold_release_check.gd:181)
+       [17] done (res://tools/hero_pair_check.gd:128)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+       [13] combos_of (res://tools/dash_flow_check.gd:68)
+       [14] run (res://tools/breah_combo_check.gd:21)
+       [15] tenzo (res://tools/hold_release_check.gd:192)
+       [16] _spine (res://tools/hold_release_check.gd:181)
+       [17] done (res://tools/hero_pair_check.gd:128)
+DASHFLOW ok   dolm jump -> lmb: fire (row: fire)
+DASHFLOW ok   dolm lmb -> ground out of it: act (row: fire)
+DASHFLOW ok   dolm lmb -> air out of it: act (row: fire)
+DASHFLOW ok   dolm lmb -> jump out of it: act (row: fire)
+DASHFLOW ok   dolm lmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   dolm lmb air Space: lock 0.53s, at 25/50/75%: end 0.43s, end 0.30s, end 0.17s
+DASHFLOW note dolm lmb let go after a plain hold: speed 4.8 -> 5.2 m/s
+DASHFLOW note dolm lmb let go after ground: speed 2.8 -> 5.2 m/s
+DASHFLOW ok   dolm hold lmb through ground: keep (row: keep)
+DASHFLOW note dolm lmb let go after air in the air: speed 8.0 -> 8.0 m/s
+DASHFLOW ok   dolm hold lmb through air: keep (row: keep)
+DASHFLOW note dolm lmb let go after jump in the air: speed 4.8 -> 4.7 m/s
+DASHFLOW ok   dolm hold lmb through jump: keep (row: keep)
+DASHFLOW ok   dolm dash pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm dash pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm jump pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm lmb pressed on the touchdown step of a hop landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the first step after a hop landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed in the absorb of a hop landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the touchdown step of a fall landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the first step after a fall landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed in the absorb of a fall landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the touchdown step of a glide landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the first step after a glide landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed in the absorb of a glide landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the touchdown step of a dive landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed on the first step after a dive landing: acts in 2 steps (standing 2)
+DASHFLOW ok   dolm lmb pressed in the absorb of a dive landing: acts in 2 steps (standing 2)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   dolm jump -> rmb: fire (row: fire)
+DASHFLOW ok   dolm rmb -> ground out of it: act (row: fire)
+DASHFLOW ok   dolm rmb -> air out of it: act (row: fire)
+DASHFLOW ok   dolm rmb -> jump out of it: act (row: fire)
+DASHFLOW ok   dolm rmb ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   dolm rmb air Space: lock > 0.75s, at 25/50/75%: never, never, never
+DASHFLOW note dolm rmb let go after a plain hold: speed 3.0 -> 0.0 m/s
+DASHFLOW note dolm rmb let go after a plain hold: speed 3.0 -> 0.0 m/s
+DASHFLOW ok   dolm rmb pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm rmb pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   dolm jump -> e: fire (row: fire)
+DASHFLOW ok   dolm e -> ground out of it: act (row: fire)
+DASHFLOW skip dolm e -> air out of it: n/a: it doesn't go off here (row: fire)
+DASHFLOW ok   dolm e -> jump out of it: act (row: fire)
+DASHFLOW ok   dolm e ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW skip dolm e air Space: n/a: it doesn't go off here
+DASHFLOW ok   dolm e pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm e pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   dolm jump -> x: fire (row: fire)
+DASHFLOW ok   dolm x -> ground out of it: act (row: fire)
+DASHFLOW ok   dolm x -> air out of it: act (row: fire)
+DASHFLOW ok   dolm x -> jump out of it: act (row: fire)
+DASHFLOW ok   dolm x ground Space: lock 0.00s, at 25/50/75%: now, now, now
+DASHFLOW ok   dolm x air Space: lock 1.38s, at 25/50/75%: end 1.07s, end 0.70s, end 0.37s
+DASHFLOW ok   dolm x pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm x pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_wild (res://scripts/match/match.gd:1545)
+       [9] _start (res://scripts/match/match.gd:423)
+       [10] start (res://scripts/match/match.gd:155)
+       [11] _match (res://tools/dash_flow_check.gd:123)
+       [12] _hero (res://tools/dash_flow_check.gd:75)
+DASHFLOW ok   dolm jump -> q: fire (row: fire)
+DASHFLOW ok   dolm q -> ground out of it: act (row: fire)
+DASHFLOW ok   dolm q -> air out of it: act (row: fire)
+DASHFLOW ok   dolm q -> jump out of it: act (row: fire)
+DASHFLOW ok   dolm q pressed on the touchdown step of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the first step after a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed in the absorb of a hop landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the touchdown step of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the first step after a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed in the absorb of a fall landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the touchdown step of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the first step after a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed in the absorb of a glide landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the touchdown step of a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed on the first step after a dive landing: acts in 1 steps (standing 1)
+DASHFLOW ok   dolm q pressed in the absorb of a dive landing: acts in 1 steps (standing 1)
+PAIRCHECK item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move PASS  0 failing (the DASHFLOW lines)
+PAIRCHECK hold.rmb.jump is keep, sourced to the footage (card 0240) PASS  keep
+AKCHECK parity breah: tapped, a boulder every 0.6s (card 0.6s; footage 1 per 2-3 frames) PASS  4 boulders, gap 0.63 s
+AKCHECK parity breah: the boulder is slow and readable (footage about 10-12 body heights a second) PASS  20.0 m/s
+AKCHECK parity breah: the throw is a quick side hurl with no long wind-up (out by 0.15s) PASS  0.07 s
+AKCHECK parity breah: the punch lane and her body follow the cursor during the hold (source: the lane points at it) PASS  lane 0.0 deg, face 0.0 deg
+AKCHECK parity breah: let go after about 0.75s (footage 0118-0121), the punch goes on that step PASS  
+AKCHECK parity breah: the punch steps her about half a body height along the new aim (footage 0121) PASS  0.82 m
+AKCHECK parity breah: the punch drives out at once from the cocked pose (out by 0.06s) PASS  0.05 s
+AKCHECK audit tarek: cooldowns from the data (Volcano Crusher 11s, Rockwave 12.5s) PASS  
+AKCHECK verify Nov 9: LMB tap and punch both 0.6s (card), Shift 12s, X 45s (data) PASS  
+AKCHECK audit tarek: the hunter viewer plays his own RMB and X moves PASS  { "dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"] }
+AKCHECK audit tarek: a punch into an ally's rocks launches them but gives no Shardskin (data: your Rocks) PASS  swept 1 stacks 0
+PAIRCHECK dolm DONE, 206 checks, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
