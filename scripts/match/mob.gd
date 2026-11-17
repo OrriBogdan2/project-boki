@@ -13,6 +13,8 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
+var cried := false  # its quarter-health cry has played here (StealSfx)
+var reel_heard := false  # it was reeling last frame here, so the reel thud plays once a stagger (StealSfx)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
@@ -206,6 +208,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealSfx.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
