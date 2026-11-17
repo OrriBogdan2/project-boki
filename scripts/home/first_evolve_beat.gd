@@ -75,7 +75,8 @@ func _run() -> void:
 	_t = LINE_S
 	if step < LINES.size():
 		var line := String(LINES[step])
-		MsgLane.of(h.root_ui).push(line % rec["name"] if step == 0 else line, TIP_COL, MsgLane.NORMAL, LINE_S * LINE_LIFE)
+		var text := line % rec["name"] if step == 0 else line
+		MsgLane.of(h.root_ui).push(text, TIP_COL, MsgLane.NORMAL, LINE_S * LINE_LIFE)
 		step += 1
 		return
 	var r := rec

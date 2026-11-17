@@ -1,6 +1,6 @@
 extends RefCounted
-## --kin-type-fx-check: every Boki type has its own cast accent (KinTypeFx): every theme (KinParts.THEMES) maps to a look, no two
-## share a colour or a shape, each stays inside the particle budget, and a real cast plays it.
+## --kin-type-fx-check: every Boki type has its own cast accent (KinTypeFx): each theme (KinParts.THEMES)
+## maps to a look, no two share a colour or a shape, each stays inside the particle budget, and a real cast plays it.
 ## Never touches the save.
 
 const MIN_COLOUR_GAP := 0.12     # RGB distance between two types' accent colours
@@ -24,7 +24,8 @@ func _shape(look: Dictionary) -> String:
 func run(main: Node) -> void:
 	Save.no_write = true
 	var types: Array = KinParts.THEMES.filter(func(t): return t != "none")
-	ok(KinTypeFx.BY_THEME.size() == types.size(), "every Boki type (theme) has a look (%d of %d)" % [KinTypeFx.BY_THEME.size(), types.size()])
+	var n_mapped := KinTypeFx.BY_THEME.size()
+	ok(n_mapped == types.size(), "every Boki type (theme) has a look (%d of %d)" % [n_mapped, types.size()])
 	ok(KinTypeFx.LOOKS.size() >= types.size(), "a look per type (%d)" % KinTypeFx.LOOKS.size())
 	var shapes := {}
 	var names: Array = KinTypeFx.LOOKS.keys()
