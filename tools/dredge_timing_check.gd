@@ -51,7 +51,7 @@ func _throw_and_reel() -> void:
 			arrive > 0.0 and absf(arrive - grab - 1.0) <= FRAME, "%.2f s" % (arrive - grab))
 	await ak.done(m)
 
-## Iron Smash (0221-0236): a hop up and about 1 bh forward, the hit at ~0.4 s, over by ~0.8 s.
+## Iron Smash (0221-0236): the hit at ~0.4 s; he stays put so the slam lands on a foe reeled to his feet.
 func _anchor() -> void:
 	var r: Array = ak.setup("dredge", 2.2, "", false)
 	var m: Match = r[0]
@@ -67,17 +67,15 @@ func _anchor() -> void:
 	K.use_e()
 	var t := 0.0
 	var hit := -1.0
-	var hop := 0.0
 	while t < 1.0 and hit < 0.0:
 		m.step(ak.DT)
 		t += ak.DT
 		if K.anchors > anchors:
 			hit = t
-			hop = P.flat_dist(from)
 	ok("timing anchor: the fist lands 0.4 s after the press (footage 0221-0223)",
 			hit > 0.0 and absf(hit - 0.4) <= FRAME and T.hp < hp0, "%.2f s" % hit)
-	ok("timing anchor: he hops about 1 bh forward before the slam (footage 0222)",
-			hop >= 0.6 * BH and hop <= 1.4 * BH, "%.2f m (%.1f bh)" % [hop, hop / BH])
+	ok("timing anchor: he stays where he stands (no hop forward)", P.flat_dist(from) < 0.3,
+			"%.2f m" % P.flat_dist(from))
 	await ak.done(m)
 
 ## Brute Dash (0188): about 2.5-3 bh in a frame or less, then a crouch and back on the aim within a frame.
