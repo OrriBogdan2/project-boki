@@ -123,6 +123,20 @@ body (not in the air, a crouch, or a move that owns the body):
 - **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble 1.0, 0.55; Kael 1.0,
   0.6). The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso,
   arms, head) are held back; the feet stay planted and slide is unchanged.
+- **Hip phase (Nov 15).** The clips bob the hips with the legs the wrong way round: up as the legs spread at a walk
+  (hip-height / leg-spread correlation +0.3 to +0.85 on 9 of 11 Hunters with legs; a walk wants it negative, the hips
+  highest as the legs pass), and the same inverted at a run on 6 of 11. WardenGait now pulls the hips towards a bob of
+  `loco.bob_m` [walk, run] metres (defaults 0.035, 0.06) in step with the thighs' spread, at most 4 cm off the clip's
+  height (so Kael, Dredge and Bulwark also carry a `bob` scale to bring their big clip bob inside that reach). Feet,
+  cadence, knee lift and foot height are untouched (measured). `--anim-audit` fails a walk over -0.2 or a run under 0.2.
+  The pull fades with how sideways the blend points: a strafe loop's legs spread in roll, not pitch, so the pull only
+  added noise there (hip height left over after a fit at the step rate, RMS: Thief 3.7 -> 13.5 mm, Mage 6.5 -> 15.8,
+  Tender 2.1 -> 7.7, Bulwark 23 -> 36); strafes keep their clip's own bob again. Foot height: clip 14 logs the ankles
+  in the body's own frame (aL aR vs rest a0L a0R), since CamRig.char_lean tips every Hunter back 20 degrees about the
+  feet and a world-height reading shows a strafe's feet 10-30 cm "under" the floor that is only that lean. In the body
+  frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
+  strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
+  Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
