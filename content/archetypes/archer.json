@@ -24,7 +24,6 @@
 		"max": 1,
 		"kind": "none",
 		"col": "#d8ffb0",
-		"perfect_t": 0.15,
 		"sense_hp": 0.5,
 		"sense_r": 22.0
 	},
@@ -125,7 +124,6 @@
 		"cooldown": 60.0,
 		"shots": 3,
 		"window": 6.0,
-		"nock": 0.5,
 		"recover": 1.0,
 		"range": 18.0,
 		"speed": 90.0,
@@ -135,7 +133,7 @@
 		"kb": 4.0,
 		"shred": 10.0,
 		"execute": 0.12,
-		"desc": "Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.5s and looses a big arrow to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health."
+		"desc": "Press: a big arrow leaves your bow at once, and your next 2 presses within 6s loose another (1s apart, no draw). Each flies 18m, pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health."
 	},
 	"order": [
 		"sec",

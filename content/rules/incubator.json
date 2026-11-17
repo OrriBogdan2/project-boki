@@ -1,0 +1,5 @@
+{
+	"desc": "The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hatches after hatch_secs of play time: time in the garden and time in a match both count, time with the game closed does not. An Ember kin at the brazier and Ember Coals add to the pace.",
+	"hatch_secs": 1200,
+	"hatch_secs_doc": "Seconds of play an egg needs at the plain pace (20 minutes)."
+}
