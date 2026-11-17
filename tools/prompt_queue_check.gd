@@ -6,6 +6,8 @@ extends RefCounted
 ##   2. the Boki-key hint merges into the guide's line (it never shows a second time)
 ##   3. once the banner settles the lane shows the rest under it: no card touches the banner or another card
 ##   4. the crouch hint waits for the guide's line, then takes the banner and the lane sits under it
+##   5. no banner: the Boki-key hint ("C sends your Boki") and the next hint fire in the same second: one hint
+##      shows at a time, the second after the first ends, no card touches another or the hunter (HunterZone)
 ## With --shots-dir (a real renderer) the same moments are saved as PNGs (for a before/after pair).
 
 const SEC := 60  # sim steps per second of game time (Match.DT)
@@ -46,6 +48,7 @@ func run(main_node: Node) -> void:
 	await _run_for(1.0)
 	await _send_and_hint()
 	await _crouch_hint()
+	await _two_hints()
 	print("PQ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -147,3 +150,44 @@ func _crouch_hint() -> void:
 		not cards.is_empty() and cards.all(func(r: Rect2) -> bool: return r.position.y >= _strip().end.y),
 		"the lane sits under the crouch hint %s: %s" % [_strip(), str(cards)]
 	)
+
+
+func _two_hints() -> void:
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	m.crouch_hint = null
+	m.guide.line = ""
+	m.guide.id = ""
+	Save.d["tutorial"].erase("ability")
+	m._tip("ability", TipText.ability(true))
+	m._tip("t_next", "Glowing rings in the air: fly through them for a burst of speed")
+	m.hud.toast("Picked up a gem", Color.WHITE)
+	var most := 0
+	var touch := 0
+	var on_hunter := 0
+	var seen: Array[String] = []
+	for i in int((m.hud.TIP_LIFE * 2.0 + 1.0) * SEC):
+		m.step(Match.DT)
+		lane._process(Match.DT)  # the lane runs on frame time; a headless frame is far shorter than a step
+		await main.get_tree().process_frame
+		var hints := 0
+		for t in lane.texts():
+			if t.contains("sends") or t.contains("rings"):
+				hints += 1
+				if not seen.has(t):
+					seen.append(t)
+		most = maxi(most, hints)
+		var cards: Array[Rect2] = lane.rects()
+		touch += _touching(cards)
+		var zone := HunterZone.rect(m)
+		for r in cards:
+			if zone.has_area() and r.intersects(zone):
+				on_hunter += 1
+		if i == int(0.5 * SEC):
+			await _shot("two_hints")
+	ok(most == 1, "one hint on show at a time (most at once: %d)" % most)
+	ok(
+		seen.size() == 2 and seen[0].contains("sends"),
+		"the Boki-key hint first, the next one after it ends (%s)" % str(seen)
+	)
+	ok(touch == 0 and on_hunter == 0, "no card touches another (%d) or the hunter (%d)" % [touch, on_hunter])

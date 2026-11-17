@@ -149,13 +149,18 @@ func _process(delta: float) -> void:
 	_layout(delta)
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
-## while `hold` is on only URGENT lines move.
+## while `hold` is on only URGENT lines move. One hint (a line with its own life) at a time: the next waits for it.
 func _promote() -> void:
 	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
-		var best := 0
+		var hint_up := _shown.any(func(e: Dictionary) -> bool: return bool(e["own_life"]))
+		var best := -1
 		for i in _waiting.size():
-			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			if hint_up and bool(_waiting[i]["own_life"]):
+				continue
+			if best < 0 or int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if best < 0:
+			return
 		if hold and int(_waiting[best]["prio"]) < URGENT:
 			return
 		if int(_waiting[best]["prio"]) == LOW and not _shown.is_empty():
