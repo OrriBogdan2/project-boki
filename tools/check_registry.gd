@@ -176,6 +176,7 @@ const CHECKS := {
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
+	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
@@ -291,6 +292,7 @@ const CHECKS := {
 	"--kit-panel-fight-shots": ["res://tools/kit_panel_fight_shots.gd", "kit_panel_fight_shots", null],
 	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
 	"--label-clash-shots": ["res://tools/label_clash_shots.gd", "label_clash_shots", null],
+	"--neve-ult-shots": ["res://tools/neve_ult_shots.gd", "neve_ult_shots", null],  # what is drawn over her ult
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
 	"--yaw-lock-check": ["res://tools/yaw_lock_check.gd", "yaw_lock_check", null],      # body turn per slot
