@@ -10125,3 +10125,4 @@ READY ext/stuck-integ-5d6d8248 236020384b604fd56a3d03986f0393a5c4aa9373 (re-merg
 READY ext/grimble-puddle-1117 70b1098c77828bbf98dfff673bfe0b0f91c11ea4 (Grimble floor goo puddle removed; spikes at feet gone, stretch mean 7.20->5.02)
 READY ext/stuck-integ-cd1e658f dda7724b779287a590e65d3999709bd5fa84efba (#164 conflicts resolved vs main)
 READY ext/stuck-integ-cd1e658f 8cc364fcb6b1b4d992008de5574fdd1d48a638ac (#164 conflicts resolved vs main)
+READY ext/merge-lane-vfxsfx2-1115 4e8233858f (merge lane vfxsfx2 r2: steal cues, boki_downed on summon kill/wisp loose, strike-frame sfx; 4 branches ported, NEW-RED 0 on targeted checks)
