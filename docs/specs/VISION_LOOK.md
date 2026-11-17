@@ -1,7 +1,7 @@
 # Sight wedge: how it looks (SPEC)
 
 The owner's private reference (a match frame, kept off the repo) shows a wide lit wedge in front of a crouched
-player with a soft cyan line on each side; everything else is a dim blue where the ground still reads and rivals
+player with a bright line on each side (we do not draw it: owner 11-17, the cone is a soft fade, not an outline); everything else is a dim blue where the ground still reads and rivals
 are hidden. This page holds the numbers measured from that frame and the numbers we use. Rule: `Match.sees`
 (docs/specs/VISION.md, decision 0022); look: `shaders/vis.gdshaderinc`; plates: `HudPlate.hidden`;
 check: `--vision-check`; shots: `--vision-shots`. A rival who gives herself away is lit in her own soft circle
@@ -17,8 +17,8 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | Player on screen | (985, 686) -> (946, 622): 49% across, 58% down | the match camera's own framing (camera.json) |
 | Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 170 deg on the ground (`VIEW_COS` 0.087, `VIS_COS`) |
 | Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2) |
-| Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | `VIS_LINE` (0.32, 0.86, 1.0), solid to 0.0175 m and gone at 0.035 m (~3 px solid at 82 px/m) |
-| Edge glow | 4-6 px into the lit side, none on the dim side | lit side only, 0.45 strength, 1/e at 0.083 m (~7 px) |
+| Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | none: the owner asked for a vision cone, not an outline (11-17) |
+| Edge glow | 4-6 px into the lit side, none on the dim side | none: the lit side fades out over `VIS_SOFT` (1.6 m) inside the wedge's side |
 | Lit ground | about (78-89, 105-121, 157-174), luma ~105 | the ground's own colour x 1.05 |
 | Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30-37: ~0.35 of lit; hue R:G:B ~0.02:0.47:1 | 75% toward a blue with little red (luma x 0.2, 0.75, 1.3), x `vis_dark` 0.7 (`RaidLook.VIS_DARK` clear; other weathers x7/6, ratios kept). GPU, clear, warm ground lit (212, 151, 141) luma 168: dim (21, 69, 150), luma 64, ~0.38 of lit, R:G:B 0.14:0.46:1 |
 | Range circle | lit area ends ~520-550 px out; an ally marker labelled 27 m sits ~600 px out: ~22 px/m, circle ~23-25 m | `VIEW_RANGE` 24 m, soft edge over the last 3 m |

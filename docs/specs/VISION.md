@@ -44,7 +44,7 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
   captor of a Boki (match.gd:2839). `muzzle_t` (firing) also gives you away. Replicated as flag 4096 (match.gd:5559).
 - **Output:** `_update_vision()` runs every 0.05 s and sets `Hunter.unseen` for the local player's view only; unseen
   hunters are not drawn, get no plate, nameplate, cast tells, or map dot (hud.gd, full_map.gd:506 "the map is no wallhack").
-  A shader dims ground outside your wedge to a cool grey-blue and draws its sides as a thin cyan line (`vis_*` globals,
+  A shader dims ground outside your wedge to a cool grey-blue with a soft-faded cone edge, no outline (`vis_*` globals,
   up to 3 allies; look and measurements in VISION_LOOK.md). A seen rival who is crouched or in grass/smoke shows no
   plate (`HudPlate.hidden`). A seen, revealed rival is lit in her own soft 2.0 m circle (`RevealLight`, up to 3,
   fading over the reveal's last 0.3 s; VISION_LOOK.md "Revealed rival").
