@@ -9,10 +9,12 @@ extends RefCounted
 var bad := 0
 var last_mob: Mob
 
+
 func ok(what: String, cond: bool, extra := "") -> void:
 	print("LASTHIT %s %s %s" % ["ok  " if cond else "FAIL", what, extra])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -28,8 +30,10 @@ func run(main: Node) -> void:
 	var mate: Hunter = null
 	var foe: Hunter = null
 	for h in m.hunters:
-		if h != me and h.team == me.team: mate = h
-		elif h.team != me.team: foe = h
+		if h != me and h.team == me.team:
+			mate = h
+		elif h.team != me.team:
+			foe = h
 	for id in SideColor.ORDER:
 		Settings.v[SideColor.KEY] = id
 		var p: Dictionary = SideColor.PALETTES[id]
@@ -50,14 +54,17 @@ func run(main: Node) -> void:
 	print("LASTHIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _body_glow(mb: Mob, col: Color) -> bool:
 	for mt in mb.mats:
 		if mt is ShaderMaterial and _same(mt.get_shader_parameter("flash_color"), col):
 			return true
 	return false
 
+
 func _same(a: Color, b: Color) -> bool:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.02
+
 
 ## Kills a fresh monster beside `at` for `by` (the path that pays the kill); returns the colours of the flashes.
 func _kill(m: Match, at: Vector3, by: Hunter, boss: bool) -> Array:
@@ -65,7 +72,7 @@ func _kill(m: Match, at: Vector3, by: Hunter, boss: bool) -> Array:
 	last_mob = mb
 	m.fx.flashes.clear()
 	if boss:
-		Juice.boss_dead(m, mb, by)      # (a lair boss's death; Boss needs a lair, so the bare Juice call stands in)
+		Juice.boss_dead(m, mb, by)  # (a lair boss's death; Boss needs a lair, so the bare Juice call stands in)
 	else:
 		mb.hp = 0.0
 		mb._on_zero(by, {})

@@ -111,7 +111,7 @@ static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m
@@ -192,6 +192,7 @@ static func kill_col(m: Match, mb: Mob, credit: Ent, own: Color) -> Color:
 		if mt is ShaderMaterial:
 			mt.set_shader_parameter("flash_color", col)
 	return col
+
 
 ## A monster dying (Match.on_mob_dead): a flash in the killer side's colour, a spray in its own,
 ## a ring for the big ones.

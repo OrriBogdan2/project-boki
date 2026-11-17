@@ -5,8 +5,8 @@ player-facing; every name, number and word in the shipped game is our own (renam
 Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, owner, Nov 2026). Ids and file names stay `dolm`.
 
 ## Research summary
-- Sources: the reference sheet from guide footage (briefs/hero-ref/breah.md, outside the repo), the reference hero's wiki page
-  (https://supervive.wiki.gg/wiki/Tetra) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
+- Sources: The reference sheet from guide footage (briefs/hero-ref/breah.md, outside the repo), the reference hero's wiki page
+  (reference notes) and the full patch-note text from the Steam news feed (patches 1.01-2.04, 2025).
 - Owner notes (sync61 playtest) override the footage: raised rocks give verticality (stand on them, climb them), punching
   rocks sends them flying, LMB is a hold.
 - **Deliberate change from the source (owner dash note, Nov 2):** the source's Landslide is an odd short dash followed by a
@@ -15,6 +15,21 @@ Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, own
   rock) read better than one. **Owner item 111 (Nov 5) replaced the single leap with Rock Hop:** 2-3 steerable hops off rocks
   he raises, the skateboard/parkour idea. See Rock Hop below; the crash and the rolling rock stay on the last landing.
 - Copied: structure, timing ratios and interactions. Not copied: names, text, raw numbers, art, sound.
+
+## Ranks: tier table (source: Tetra (read at level 15))
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (sv/kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB punch and boulder | none | none | none | - | - | - |
+| RMB Quakefall (11s; [D] 11s) | +50 damage, -1s | +50 damage, -1s | slamming foes or rocks grants a Molten Guard stack | 10s, damage +24% (+50 on [S] about 208) | 9s, damage +48%, an 18 shield stack per slam (up to 4) | `breah_slam.gd` (`guard_stack` at sec rank 3) |
+| Shift Rock Hop (12s; [D] 12s) | -2s | +1 charge | the dash lasts 33% longer | 10s | 10s, a second charge, each hop a third further | `extra_dashes`, `dash.speed_k` (breah_hop.gd) |
+| E Stone Row (12.5s; [D] 12.5s) | -1s | -1.5s | an extra rock wall | 11.5s | 10s, an extra row behind the first | `rock_cap` / the row count at kin rank 3 |
+| Passive Molten Guard | none | none | none | - | - | - |
 
 ## Design
 Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists.json`): a huge basalt gauntlet on each fist,
@@ -55,7 +70,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rock Hop (owner item 111), dust only (no ring or blast) | owner design |
 
 ## Parity verify, Nov 9
-Tenzo on main d255acbee against docs/KIT_PARITY.md (Tenzo block), the source cards (briefs/supervive-data/supervive_kits.md, Tetra), the
+Tenzo on main d255acbee against docs/KIT_PARITY.md (Tenzo block), the source cards (sv/briefs/kits.md, Tetra), the
 guide sheet (briefs/hero-ref/breah.md) and DECISIONS (2026-11-07: RMB out of a glide, allies hop, enemies stay blocked, he walks up his own;
 Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: match, differ (owner), regressed, open. Asserted in
 `--dolm-combo-check` (170 before, `verify Nov 9` and the rows named below).
@@ -171,7 +186,7 @@ Tenzo branch.
   left the ground). Quakefall has never raised a rock: the slam only throws rock chips (the flying lumps of the impact
   look) and launches rocks already standing in the ring. The rock the owner saw is most likely those chips plus the flat
   lunge, or Rock Hop's last rock (Shift).
-- **Source (Tetra's Volcano Crusher):** hold to charge, a short hop forward (about 1-1.5 bh) into a circular slam,
+- **Source (ref-dolm's Volcano Crusher):** hold to charge, a short hop forward (about 1-1.5 bh) into a circular slam,
   centre stun, the sweet spot grows with the charge, jump while charging for a longer forward leap. No rock.
 - **Now:** the release is a short hop, a real jump arc of 0.35s (about 2m, 1.1 bh, 0.4m up) with a dust kick at the
   push-off; the slam lands as she does (`breah_slam` re-timed: push-off 0.05, fists high behind the head at the top
@@ -249,6 +264,11 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   spot back; no spot at all ends the chain where he is, with the crash.
 - **Other moves:** RMB let go mid-hop: the slam lands with that hop and the chain ends there (crash and slam, as the old leap). Opening the
   glider, being downed or a merge drops the chain with no crash. Bots ride the whole chain.
+- **Space in a hop's flight (DECISIONS 11-08, Shift cancels into glide instantly for every Hunter):** the hop lets go on the press
+  (`BreahHop.let_go` through `ArchKit.glide_cancel`: `launch_to`'s `fly_t` hold ends) and the glider opens within 2 steps at the hop's own
+  speed, no snap, no added speed, no crash, no rock; the charge recharges from there. A hop up onto a ledge is the shared sure arc and
+  keeps it. No press: the landing, the ally hop-over and the crash are unchanged. Asserted by `--move-rule-guard-check` (Tenzo `shift`/`keep`
+  rows) and `--dolm-combo-check` (`glide (DECISIONS 11-08): ...`).
 - **Cooldown:** the charge is spent at the press; the recharge waits for the chain's end (`_hold_charge` undoes the shared step).
 - **Anim ids:** `breah_hop` (each hop), `breah_skate` (the skid), `breah_leap_land` (the crash). ART-1 Tenzo maps `breah_hop` -> `dash_hop` and `breah_skate` -> `dash_skate`.
 - **Hooks for S3/S4 (placeholders use existing dust and sounds):** take-off `br_leap` at the feet; rock rise `br_rise`; touchdown `br_slam` (soft); crash `br_slam`; roll `br_roll`.
@@ -300,7 +320,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
-| Punched rocks explode and shred armour (no slow) | card and guide: "explode and shred Armor" (`breah.md`, `supervive_kits.md`); the Landslide rock alone is "160 and SLOWED" | yes (fireballs on the dummy) | built: Shred +15%, no slow; only the Rock Hop's rolling rock slows (1.5s) |
+| Punched rocks explode and shred armour (no slow) | card and guide: "explode and shred Armor" (`breah.md`, `sv/briefs/kits.md`); the Landslide rock alone is "160 and SLOWED" | yes (fireballs on the dummy) | built: Shred +15%, no slow; only the Rock Hop's rolling rock slows (1.5s) |
 | Repeat rock explosions on one target within 0.8s deal 30% less | patch 2.00 notes | no | built (`repeat_t`, `repeat_k`) |
 | Mid-air LMB carries momentum, with a penalty (air impulse penalty 15% -> 50%) | patch 2.00 notes | no | built: the punch step in the air is half as long, added to what she carries (MOVEMENT_FEEL.md "Air velocity") |
 | Punch cooldown starts at cast, not on release | patch 2.01 / 2.04 notes | no | built (`fire_cd` set when the punch fires) |

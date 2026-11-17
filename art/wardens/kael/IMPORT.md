@@ -52,3 +52,20 @@ action 510; Meshy API output on the paid plan, commercial use under Meshy's term
 (hips -22/-23 deg) with the arms carried from the current clips, planted at 2.2 / 4.6 m/s. The blind Fable 5.2 judge kept
 the current clips: walk 4.00 vs 3.00 / 2.83, run 4.00 vs 3.00 / 3.00 (the candidates' stride reads narrow and light).
 The judge noted that the current walk's sword tip may dip to the ground line. Idle is left to the pilot4 idle job. The judging ran on the v2 build's clips; the appeal3 swap keeps the same 49 clips, so the verdict stands.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-11, ext/anim-dirloops-lace-kael): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/kael/kael.glb OUT.glb 1.62 4.35`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/kael/kael.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`.
+The speeds are the forward loops' `loco.foot_mps`, not the loco speeds: walk_f/run_f are the old clips and stay, so
+the ring keeps `stride`/`foot_mps` and the game's rate and stride lift every direction to loco speed the way they lift
+forward. The blind Fable judge kept the old walk_b, walk_r, run_l (tie or loss), so those are
+the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+**One sword (2026-11-17):** the e1 master carries its own swords as the materials `sword` and `sword.001` (two of them:
+the body it was built on already had one), names the spec's `drop_mats` did not list, so the 11-17 port joined both
+into the body mesh (10.4k triangles painted by `v95c`, weighted by bone heat over hand.R, shin.R, thigh.R and hips)
+beside the game's skinned sword: three swords. `python3 tools/art1/glb_drop_mats.py kael.glb kael.glb '*-v95c'` took
+them out (every other part, clip and image byte-identical; `kael_v95c.jpg` gone), and `own.drop_mats` now names
+`sword` and `sword.001`, so the next `v95_to_game.py Kael` drops them itself. The game's skinned sword is the one sword.
+Alternative not taken: the master's HD sword skinned to hand.R in place of the game's (anchors and blade FX follow the game's sword).

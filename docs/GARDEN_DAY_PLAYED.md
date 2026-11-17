@@ -33,12 +33,12 @@ and `Save.no_write`: the real save file's md5 is checked unchanged.
 | F | A fresh Boki cannot pair on day one: Grown is level 8 and the first-day list asks for "Pair two Boki" (known: GARDEN_SLICE_CHECK row 11; the tile now at least says Lv 8) | Follow-up 5 |
 | G | The Heirloom Thread (a nest item) has no row in the feed menu and nothing there says it works only in the Nook | Follow-up 6 (low) |
 | I | Every zone arrival shows its own "While you were away: A Rare Spore Egg is ready to hatch" card for the same egg (it showed again on arriving in Cinderstep, though the Nook is in Bramblebank), until the egg is hatched | Follow-up 7 |
-| H | The away card is one flat list with two zones open: gifts and toy lines are not under zone names, a gift can come from a Boki living in another zone, and the other zone's toys never train while away (the shared `away_seen` is used up by the first arrival) | Follow-up 2 |
+| H | The away card is one flat list with two zones open: gifts and toy lines are not under zone names, a gift can come from a Boki living in another zone, and the other zone's toys never train while away (the shared `away_seen` is used up by the first arrival) | **Fixed** (`GardenAway.mark` keeps `Save.d["away_zone"]` per zone; gifts come only from Boki that walk the arrival zone; the lines sit under the zone name via `ZoneAway.grouped`). Beat 9 asserts both |
 
 ## Follow-up tasks (not done here)
 
 1. Demo: skip or close the first-arrival card in `BaseDemo.stage`, and assert no panel open at 5 s in `--base-demo-check`.
-2. Away card by zone: group the `GardenAway` gift/toy/patch lines under zone names when two zones are open, and run each zone's toy training on arrival in that zone (per-zone `away_seen`).
+2. ~~Away card by zone~~ done (row H).
 3. Dash/Cup: make the weekly Crown reachable by intent. Either compare the game's own stat (Speed for the Dash) in `GardenPrizes._cup`, or show the Crown rival's total on the Dash card.
 4. Same as 3 for friends in a race: say on the card that friends pull together.
 5. First-day list: move "Pair two Boki" behind Grown (apply `garden_sim.json` proposal).

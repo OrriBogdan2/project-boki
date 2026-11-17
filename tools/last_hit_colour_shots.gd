@@ -13,6 +13,7 @@ var P: Hunter
 var dir := ""
 var lines: Array = []
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -32,6 +33,7 @@ func run(main_node: Node) -> void:
 	print("LASTHITSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 ## A monster in front of the player dies to `by`; frames at the flash and the dissolve.
 func _die(kind: String, side: String, by: Hunter) -> void:
 	var at := P.pos + Vector3(2.0, 0, -3.0)
@@ -45,6 +47,7 @@ func _die(kind: String, side: String, by: Hunter) -> void:
 	await _go(0.1)
 	_take("hit_%s_%s_b" % [kind, side], "The same death a beat later: dissolve and spray")
 	await _go(0.6)
+
 
 func _setup() -> void:
 	m = Match.new()
@@ -72,6 +75,7 @@ func _setup() -> void:
 		if h != P:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
 
+
 func _go(secs: float, drift := Vector3.ZERO) -> void:
 	var t := 0.0
 	while t < secs:
@@ -83,6 +87,7 @@ func _go(secs: float, drift := Vector3.ZERO) -> void:
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _take(file: String, caption: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()

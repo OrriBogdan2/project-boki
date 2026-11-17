@@ -219,7 +219,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var which := ""
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		# (an emptied Mag draws nothing: HunterAnim still shows it for the reload's motion)
+		# an emptied Mag draws nothing
 		if (mi as MeshInstance3D).is_visible_in_tree() and (mi as MeshInstance3D).mesh != null:
 			shown += 1
 			which += " " + String(gun.get_path_to(mi))
@@ -477,14 +477,14 @@ func _keys_upper(anim: Animation, dd: Dictionary) -> bool:
 ## spring: no dip to read), a kerb plays no landing, running the legs are back within JL_FREE_S, and the body is back
 ## within the data's promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
 func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
-	var jl := preload("res://tools/jump_land_check.gd")
+	var JumpLand := preload("res://tools/jump_land_check.gd")
 	var ld: Dictionary = dd.get("land", {})
 	# (skeleton metres to world metres: the rigs are built at their own sizes and scaled to the Hunter's body)
 	var on_screen := WardenGlb.skeleton(m.get_node("Warden")).global_basis.get_scale().y
 	for running: bool in [true, false]:
 		var hop_dip := 0.0
 		for way: String in ["jump", "drop", "glide", "kerb"]:
-			var r: Dictionary = jl.measure(m, sync, clips, running, way)
+			var r: Dictionary = JumpLand.measure(m, sync, clips, running, way)
 			var tag := "%s %s" % [way, "run" if running else "still"]
 			var world_dip: float = r["dip"] * on_screen
 			print(("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f"
@@ -504,12 +504,12 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 			if not dd.has("sway"):
 				var deep := way != "jump"
 				var need := maxf(JL_DIP_M, hop_dip * JL_DEEPER) if deep else JL_HOP_DIP_M
-				ok(r["dip"] <= -need and r["dip_t"] <= jl.DIP_WINDOW,
+				ok(r["dip"] <= -need and r["dip_t"] <= JumpLand.DIP_WINDOW,
 						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
 						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
 			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
 			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
-			var promise := hold + WardenClips.FADE_LOCO + jl.DT
+			var promise := hold + WardenClips.FADE_LOCO + JumpLand.DT
 			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
 					"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
 					% [id, tag, r["back"], promise, JL_BACK_MAX])
@@ -573,6 +573,14 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if pre != "" and String(km).begins_with(pre) and not moves.has(km):
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
+	# the shared actions: a stomp clip is the game's cycle with the slam at Life's hit beat, a drink clip is the drink
+	var st: Dictionary = dd.get("states", {})
+	for k in ["stomp", "drink"]:
+		if not st.has(k):
+			continue
+		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else UtilityUse.channel("tonic", "time")
+		var dur := clips.lib.get_animation(String(st[k])).length
+		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 
 ## "upper": "moving" moves ride the upper body only while he walks and own the body standing (Tenzo: the source set).
 func _upper(id: String, dd: Dictionary, clips: WardenClips) -> void:
