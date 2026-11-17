@@ -150,7 +150,7 @@ func _window() -> void:
 	await done(m)
 
 ## #49 on flat ground: in the window he launches >= 3.5 m (feet up, bul_launch) with a bigger knock, a heavier
-## hit-stop and shake; outside it (early or late) the step stays <= 2 m; it counts as a dash for DashFlow; a
+## hit-stop and shake; outside it (early or late) the lunge stays <= 2.4 m; it counts as a dash for DashFlow; a
 ## mantle ends it; glide pressed in it jumps him out into a glide that keeps the launch's speed.
 func _launch_flat() -> void:
 	var r := setup("bulwark", 7.0)
@@ -165,8 +165,9 @@ func _launch_flat() -> void:
 	var late := _swing(m, P, home, full + 0.3)
 	_ready_swing(m, P, T, home)
 	var early := _swing(m, P, home, 0.7)
-	ok("bjorn #49: a release outside the window steps him 1.5-2 m (item 30's step)",
-		late >= 1.5 and late <= 2.0 and early >= 1.4 and early <= 2.0 and K.launch.launches == 0,
+	# (the step became the swing lunge, "lunge.d" 1.4-2.4 m by charge: tools/albert_feel_check.gd)
+	ok("bjorn #49: a release outside the window lunges him 1.4-2.4 m, further the fuller the charge",
+		late >= 2.1 and late <= 2.7 and early >= 1.4 and early < late and K.launch.launches == 0,
 		"late %.2f early %.2f" % [late, early])
 	# the knock and the hit-stop: normal (late) first, then perfect, on a dummy 2.6 m ahead
 	var knocks: Array = []

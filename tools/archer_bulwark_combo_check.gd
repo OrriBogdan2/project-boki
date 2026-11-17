@@ -28,6 +28,8 @@ func run(main_node: Node) -> void:
 	cancels.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
+	var feel = load("res://tools/albert_feel_check.gd").new()
+	feel.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		_wall_climb()
@@ -44,12 +46,15 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		await feel.albert()
+	if both or "--archer-combo-check" in args:
+		await _spirit_look()
 	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
 	hits.main = main_node
 	if both:
 		await hits.audit()
-	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n + hits.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails + hits.fails
+	n += ult.n + own.n + launch.n + tall.n + feel.n + cancels.n + bow.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + feel.fails + cancels.fails + bow.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -60,7 +65,7 @@ func _hawk_rock(m: Match, x: int, z: int, kind: int) -> void:
 		wk[m.world.idx(x, z + dz)] = kind
 	m.world.kind = wk
 
-## How many of `f`'s meshes wear Hawk Sense's through-cover outline.
+## How many of `f`'s meshes wear Red Thread's through-cover outline.
 func _hawk_lines(f: Hunter) -> int:
 	if f.model == null:
 		return 0
@@ -179,12 +184,19 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
+
+## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
+func _spirit_look() -> void:
+	var look = load("res://tools/lace_spirit_look_check.gd").new()
+	look.main = main
+	await look.walk()
+	n += look.n
+	fails += look.fails
 
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -245,6 +257,10 @@ func _archer_combos() -> void:
 		P.flash_t > 0.0 or K.draw.supers >= 0,
 		"flash %.2f" % P.flash_t
 	)
+	# (past the 0.35 s perfect window)
+	step(m, 0.2, func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.1)
 	ok("pin anim: a Supercharged release plays arc_super", K.anim_id == "arc_super", K.anim_id)
@@ -253,7 +269,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, 0.85, cur)
+	var e1 := _loose_after(m, P, 1.0, cur)      # (Empowered, past the 0.35 s perfect window)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -289,7 +305,6 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -317,7 +332,6 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -329,7 +343,10 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
-	step(m, 0.25, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	# (let go past the 0.35 s window)
+	step(m, 0.35, func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)
@@ -393,7 +410,6 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
@@ -597,8 +613,8 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
-	# (a rock between them: only Hawk Sense lets her side see past it)
+	# Red Thread: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
+	# (a rock between them: only Red Thread lets her side see past it)
 	var rock_x := int(home.x) + 4
 	_hawk_rock(m, rock_x, int(home.z), World.T_BLOCK)
 	fresh(T)
@@ -607,14 +623,14 @@ func _archer_combos() -> void:
 	T.hp = T.max_hp * 0.4
 	step(m, 0.5, func(): aim_at(P, T.pos))
 	ok(
-		"combo archer: Hawk Sense: above the line hidden, below it seen past a rock and outlined",
+		"combo archer: Red Thread: above the line hidden, below it seen past a rock and outlined",
 		not healthy_seen and T.reveal_t > 0.0 and m.can_see(P.team, T) and _hawk_lines(T) > 0,
 		"healthy %s injured %.2f seen %s, %d outlined meshes at %.1f m"
 			% [healthy_seen, T.reveal_t, m.can_see(P.team, T), _hawk_lines(T), P.flat_dist(T)]
 	)
 	T.hp = T.max_hp * 0.55
 	step(m, 0.5)
-	ok("combo archer: Hawk Sense: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
+	ok("combo archer: Red Thread: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
 		and not m.can_see(P.team, T) and _hawk_lines(T) == 0, "reveal %.2f, %d outlined" % [T.reveal_t, _hawk_lines(T)])
 	_hawk_rock(m, rock_x, int(home.z), World.T_GROUND)
 	fresh(T)
@@ -622,7 +638,7 @@ func _archer_combos() -> void:
 	P.teleport(home - Vector3(7, 0, 0))
 	T.teleport(home + Vector3(18, 0, 0))
 	step(m, 0.5)
-	ok("combo archer: Hawk Sense: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
+	ok("combo archer: Red Thread: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
 		"reveal %.2f at %.1f m" % [T.reveal_t, P.flat_dist(T)])
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
@@ -656,7 +672,7 @@ func _archer_combos() -> void:
 		K.fx._process(0.0)
 		wash[0] = maxf(wash[0], P.wash)
 		var slot := 1 if K.spirit.inside else 0
-		mk[slot] = maxf(mk[slot], K.move_k()))
+		mk[slot] = maxf(mk[slot], K.move_k() + K.speed_bonus()))
 	ok(
 		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
 		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
@@ -718,7 +734,8 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
-	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). Her roll can
+	# carry the spirit run through the column first, so the entry may be its far side: out of the rock either way
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -738,8 +755,9 @@ func _archer_combos() -> void:
 	ok(
 		"combo pin: Spirit Walk running out inside a rock = back to the entry",
 		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
-			and P.pos.x < bx,
-		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
+			and P.pos.distance_to(K.spirit.entry) < 0.25 and (P.pos.x < bx or P.pos.x >= bx + 1),
+		"x %.1f (rock %d, entry %.1f) snaps %d walks %d"
+		% [P.pos.x, bx, K.spirit.entry.x, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -864,7 +882,6 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
-	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)
@@ -1080,9 +1097,10 @@ func _bulwark_combos() -> void:
 		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
 		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
 	)
-	step(m, 7.0)
+	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
+	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
 	ok(
-		"bjorn: the planted hammer never comes back by itself",
+		"bjorn: the planted hammer stays planted until the rope's time runs out",
 		String(K.mace.get("st", "")) == "ground",
 		str(K.mace.get("st"))
 	)
@@ -1306,20 +1324,20 @@ func _bulwark_combos() -> void:
 		"dashes spent %.2f cd %.1f charges %.1f" % [dashes_spent, charge_cd, K.ch_rmb]
 	)
 	ok("combo bulwark: a Crush no longer heals him", P.hp <= hp_before + 1.0, "hp %.0f -> %.0f" % [hp_before, P.hp])
-	# on cooldown the Shift behind the shield does nothing
+	# on cooldown the RMB press is refused (no aegis), so the Shift is an ordinary Spin Dash, not a Shield Charge
 	P.dashes = P.max_dashes()
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	var spins_before := K.spins
-	var dashes_held := P.dashes
+	var charges_before := K.ch_rmb
+	var aegis_up := K.rmb_down
 	P.do_dash()
 	step(m, 0.2, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	ok(
-		"combo bulwark: the Shield Charge on cooldown denies the dash (no charge spent, no spin)",
-		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
-		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
+		"combo bulwark: the Shield Charge on cooldown: RMB is refused (no aegis), the Shift is no Shield Charge",
+		not aegis_up and K.ch_rmb >= charges_before,
+		"aegis %s charges %.2f -> %.2f" % [aegis_up, charges_before, K.ch_rmb]
 	)
 	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
 	step(m, 1.0)

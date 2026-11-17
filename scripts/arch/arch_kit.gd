@@ -79,7 +79,7 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
+## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
@@ -174,6 +174,8 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
+## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
+func speed_bonus() -> float: return 0.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
@@ -292,8 +294,29 @@ func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
 ## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
+## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
+## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
+## A recast row it doesn't have is its first cast's (a second press of a slot with no recast changes nothing).
+func turn_rule(slot: String) -> Dictionary:
+	var rows: Dictionary = d.get("turn", {})
+	var row: Dictionary = rows.get(slot, rows.get(slot.trim_suffix("_recast"), {}))
+	return {"early": row.get("early", "free"), "late": row.get("late", "free")}
+## A capped row's turn rate (deg/s) for a window, read where the cast steers.
+func turn_deg_s(slot: String, window: String) -> float:
+	return float(d["turn"][slot][window])
+## A capped-turn aim lock: `cur` turned toward the raw cursor (not aim_dir(), which returns the lock) by at
+## most `deg_s` degrees per second. A committed charge keeps its line near-planted this way.
+func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
+	var a: Vector3 = h.inp["aim"]
+	var want := Vector2(a.x - h.pos.x, a.z - h.pos.z)
+	if want.length() < 0.05:
+		return cur
+	var step := deg_to_rad(deg_s) * dt
+	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
+## A fresh glide press in the air: the kit's own flight lets go for the glider (Rock Hop). True = it ended now.
+func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
@@ -309,7 +332,7 @@ func press_rmb() -> void:
 		return
 	if rmb_press_extra():
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -334,6 +357,14 @@ func _drop_rmb() -> void:
 	rmb_t = 0.0
 	AimKit.clear(h)
 	_rmb_dropped()
+## The RMB slot as the bar shows it (slot_info "ready": a charge, the kit's own lock-out): on cooldown the press is
+## refused before it starts anything (no hold pose, wind-up, sound or step) and the bar shows the deny.
+## Every RMB press goes through here: the player's, a bot's, DashFlow's held one and a kit's own buffer.
+func rmb_open() -> bool:
+	if bool(slot_info("sec")["ready"]):
+		return true
+	h._ab_feedback("sec", "deny")
+	return false
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -379,6 +410,11 @@ func use_e() -> void:
 		last_e = String(e_def().get("name", ""))
 	else:
 		h._ab_feedback("k1", "deny")
+
+## The loading screen's rehearsal of this kit's own effect library (Match.warm_up): its pools filled with one of
+## every look at `at`, so the first cast makes nothing mid-fight (--first-cast-check). Kits with a library override it.
+func warm_fx(_at: Vector3) -> void:
+	pass
 
 ## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
 func cast_ult() -> bool:
@@ -560,23 +596,28 @@ func dash_dir() -> Vector2:
 static var _dash_feel := {}
 var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
-## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
-func dash_feel() -> Dictionary:
+## The dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers. move: one of the
+## kit's Shift moves; its "moves" row (a move with no source figure) overrides the hunter's dist and time.
+func dash_feel(move := "") -> Dictionary:
 	if _dash_feel.is_empty():
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
-	return _dash_feel.get(id, _dash_feel["default"])
+	var f: Dictionary = _dash_feel.get(id, _dash_feel["default"])
+	var mv: Dictionary = (f.get("moves", {}) as Dictionary).get(move, {})
+	return f if mv.is_empty() else f.merged(mv, true)
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
 ## buffer all work as before). extra "curved": the hero's measured ground dash, which then runs on its
 ## dash_feel "curve" (docs/decisions/0025) instead of a constant speed. The hero's own: no Boki changes it
-## (DECISIONS 2026-11-05, --boki-dash-check).
+## (DECISIONS 2026-11-05, --boki-dash-check). extra "feel": the Shift move's name for its dash_feel row.
 func travel(dist: float, t: float, extra := {}) -> void:
-	var feel := dash_feel()
+	var feel := dash_feel(String(extra.get("feel", "")))
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]
+	if extra.has("feel"):
+		e["ex_feel"] = [float(feel["dist"]), float(feel["time"])]     # a long dash runs the class's numbers x this
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
 	var curve: Array = feel.get("curve", [])
 	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0
@@ -743,6 +784,7 @@ func _tells(dt: float) -> void:
 		fx_t = 0.18
 		if tell != "":
 			var rc := res_col()
+			# sparks on the body only: a ground ring means gameplay, and this one landed under every dash
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
@@ -878,6 +920,10 @@ func flip_for(dir: Vector2, base: String) -> String:
 func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
+## Dash charges: the kit's dash.charges (the source hero's count) or else the class's `class_n`, plus extra_dashes().
+func dash_charges(class_n: float) -> float:
+	return float(dash_def().get("charges", class_n)) + extra_dashes()
+
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
 
@@ -930,6 +976,13 @@ func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
 ## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
 func dash_vy(_dt: float) -> float: return 0.0
+
+## A ground dash ran off a ledge and ended in the air (HunterMove.dash_off_ledge): its ground pose stops there,
+## and so does its wind-down (the glider kept shut a beat after a dash is for a dash that stays on the ground).
+func on_dash_off_ledge() -> void:
+	if anim_at >= dash_press_at:
+		anim_id = ""
+	h.glide_cd = 0.0
 ## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
 func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
@@ -1121,7 +1174,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["jug_ting", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["dolm_rock_crunch", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)

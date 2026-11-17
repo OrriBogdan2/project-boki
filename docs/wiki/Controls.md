@@ -76,6 +76,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Ctrl | Sneak | `crouch` | yes |
 | G | Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone) | `scout` | yes |
 | C | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
+| C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |

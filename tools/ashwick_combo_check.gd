@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _growth()
 	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/ashwick_anim_check.gd").new(ak, ok).run()
 	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
@@ -78,19 +79,17 @@ func _lance_combos() -> void:
 	ak.step(m, 1.0)
 	var em3: int = K.hose.emitted
 	var slowest := 9.0
-	var reloaded := false
 	var tf := 0.0
 	while tf < 10.0:
 		keep_fire.call()
 		m.step(ak.DT)
 		tf += ak.DT
 		if tf > 0.5: slowest = minf(slowest, K.move_k())
-		reloaded = reloaded or P.reload_t > 0.0
 	var late: int = K.hose.emitted
 	m.step(ak.DT)
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
-			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
-			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+			K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
+			"puffs %d, move_k %.2f" % [late - em3, slowest])
 	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
 	ak.step(m, 0.5)
@@ -272,8 +271,8 @@ func _all() -> void:
 	P.inp["fire"] = false
 	ak.step(m, 0.6, func(): ak.aim_at(P, T.pos))      # turned back to the dummy before the next part
 	var ft0: int = int(roar["ticks"])
-	ok("lance: no fuel or reload, held 9s it still burns (no ammo count)",
-			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
+	ok("lance: no fuel, held 9s it still burns (no ammo count)",
+			K.flame_ticks > ft0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
 	var pilot := "pilot%d" % P.get_instance_id()
@@ -632,11 +631,11 @@ func _all() -> void:
 	)
 	ok(
 		"ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn",
-		P.shield >= P.max_hp * 0.11 and absf(K.move_k() - 1.16) < 0.02 and K.burning(T) == 0,
-		"shield %.1f move_k %.2f burning %d" % [P.shield, K.move_k(), K.burning(T)]
+		P.shield >= P.max_hp * 0.11 and absf(K.speed_bonus() - 0.16) < 0.02 and K.burning(T) == 0,
+		"shield %.1f bonus %.2f burning %d" % [P.shield, K.speed_bonus(), K.burning(T)]
 	)
 	ak.step(m, 2.5)
-	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
+	ok("ram rank 3: the boost ends after 2s", K.speed_bonus() <= 0.0, "bonus %.2f" % K.speed_bonus())
 	P.slot_lv["dash"] = 1
 	# --- Furnace Cloak: fires on the press frame, centred on Cinder whatever the cursor
 	reset.call()
@@ -659,11 +658,7 @@ func _all() -> void:
 			and absf(float(ring.get("r", 0.0)) - float(K.e_def()["radius"])) < 0.001,
 		"at %.2f m off, r %.2f" % [ring_at.distance_to(Vector2(home.x, home.z)), float(ring.get("r", 0.0))]
 	)
-	var flare_t := float((KMovesPair.MOVES["as_cloak"]["keys"] as Array)[-1][0])
-	ok(
-		"cloak: a quick arms-out flare (0.15-0.25 s)", K.anim_id == "as_cloak" and flare_t >= 0.15 and flare_t <= 0.25,
-		"%s %.2f s" % [K.anim_id, flare_t]
-	)
+	ok("cloak: the arms-out flare plays on the press (timed in ashwick_anim_check)", K.anim_id == "as_cloak", K.anim_id)
 	ak.step(m, 0.7)
 	ok(
 		"cloak: damage, Char, Anti-Heal and a shield",

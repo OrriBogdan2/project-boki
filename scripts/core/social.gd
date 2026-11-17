@@ -149,12 +149,12 @@ func now_ms() -> float:
 	return Time.get_unix_time_from_system() * 1000.0
 
 ## Runs step(item, next) for each item in turn, then done().
-func _each(items: Array, step: Callable, done: Callable) -> void:
+func each(items: Array, step: Callable, done: Callable) -> void:
 	if items.is_empty():
 		done.call()
 		return
 	var rest := items.slice(1)
-	step.call(items[0], func(): _each(rest, step, done))
+	step.call(items[0], func(): each(rest, step, done))
 
 func _save_dict(key: String) -> Dictionary:
 	if typeof(Save.d.get(key)) != TYPE_DICTIONARY:
@@ -184,6 +184,7 @@ static func profile_doc() -> Dictionary:
 		"plots": Save.d["plots"], "gh_plots": Save.d.get("gh_plots", []),
 		"extracts": int(Save.d.get("extracts", 0)), "matches": int(Save.d.get("matches", 0)),
 		"guild": String(Save.d.get("guild_id", "")), "updated": Time.get_unix_time_from_system() * 1000.0,
+		"tag": ClanInfo.my_tag(), "last": ClanInfo.last_deed(Save.d.get("log", [])),
 		"decor": Save.d.get("decor", {}).get("house", []),
 		"showcase": Save.d.get("showcase", []),
 	}
@@ -211,7 +212,8 @@ func send_gift(to: String, kind: String, key: String, cb := Callable()) -> void:
 	add_doc("gifts", {"to": to, "from": me, "from_name": Save.d.get("name", "Hunter"), "kind": kind, "key": key, "n": 1, "t": now_ms()}, func(id: String):
 		if cb.is_valid(): cb.call(id != ""))
 
-## Collects gifts and visits left on your island while you were away. cb gets a list of lines.
+## Collects gifts and visits left on your island while you were away, then the Boki handed to you
+## (TransferPost). cb gets a list of lines.
 ## Every gift is one item, a sender counts for at most three per visit home, and a visitor can
 ## only make each kin happier once a day.
 func collect_gifts(cb: Callable) -> void:
@@ -259,7 +261,7 @@ func collect_gifts(cb: Callable) -> void:
 		if lines.size() > 0:
 			Save.save_game()
 		_busy.erase("gifts")
-		cb.call(lines))
+		TransferPost.sync(func(handed: Array): cb.call(lines + handed)))
 
 # ------------------------------------------------------------------ guilds
 ## Your guild lives in your own save; the store only has to describe it.
@@ -286,7 +288,7 @@ func refresh_guild(cb := Callable()) -> void:
 	get_guild(gid, func(g: Dictionary):
 		if g.is_empty():
 			# missing or unreachable: stay in it under the name we last saw
-			g = clean_guild({"name": Save.d.get("guild_name", "Your guild")})
+			g = clean_guild({"name": Save.d.get("guild_name", "Your guild"), "tag": ClanInfo.my_tag()})
 		_keep_clan(gid, g, func(kept: bool):
 			if not kept:
 				clan_removed.emit(g["name"])
@@ -363,6 +365,7 @@ func _keep_clan(gid: String, g: Dictionary, done: Callable) -> void:
 		if txt_of(clan.get("id")) != gid:
 			clan = clan_for(gid, me, "member", now_ms())
 		clan["role"] = rank_of(g, me)
+		clan["tag"] = txt_of(g.get("tag"))
 		Save.d["clan"] = clan
 		set_doc("clanroster/%s_%s" % [gid, me], {"guild": gid, "role": clan["role"], "joined": clan["joined"],
 			"corner_seed": clan["corner_seed"], "last_seen": now_ms()})
@@ -372,12 +375,12 @@ func _keep_clan(gid: String, g: Dictionary, done: Callable) -> void:
 static func clan_for(gid: String, who: String, role: String, joined: float) -> Dictionary:
 	return {"id": gid, "role": role, "corner_seed": (who + gid).hash() % 1000000, "joined": joined}
 
-func create_guild(name_txt: String, motto: String, cb: Callable) -> void:
+func create_guild(name_txt: String, motto: String, tag: String, cb: Callable) -> void:
 	if busy("guild"):
 		return
 	_busy["guild"] = true
 	var gid := "g" + str(Time.get_ticks_usec() % 100000000) + str(randi() % 1000)
-	set_doc("guilds/" + gid, {"name": say_of(name_txt, "Guild", 24), "motto": say_of(motto, "", 60), "founder": me, "created": now_ms(),
+	set_doc("guilds/" + gid, {"name": say_of(name_txt, "Guild", 24), "motto": say_of(motto, "", 60), "tag": ClanInfo.clean_tag(tag), "founder": me, "created": now_ms(),
 		"color": Color.from_hsv(randf(), 0.5, 0.9).to_html(false), "built": [], "open": true}, func(okk: bool):
 		_busy.erase("guild")
 		if not okk:
@@ -428,6 +431,7 @@ func leave_guild(cb: Callable) -> void:
 func _leave(gid: String, cb: Callable) -> void:
 	if gid != "":
 		del_doc("clanroster/%s_%s" % [gid, me])
+		del_doc("clanboard/%s_%s" % [gid, me])
 	Save.d["guild_id"] = ""
 	Save.d["clan"] = {}
 	guild = {}
@@ -689,7 +693,7 @@ func collect_payouts(cb: Callable) -> void:
 	var total := [0]
 	query("payouts", [["to", "==", me]], "", "asc", 40, func(rows: Array):
 		var paid := {}
-		_each(rows, func(r: Dictionary, next: Callable):
+		each(rows, func(r: Dictionary, next: Callable):
 			var lid := txt_of(r["data"].get("lid"))
 			if not listings.has(lid) or paid.has(lid):
 				del_doc("payouts/" + r["id"])
@@ -707,7 +711,7 @@ func collect_payouts(cb: Callable) -> void:
 			for lid in listings.keys():
 				if now_ms() - float(listings[lid].get("t", now_ms())) > STRANDED_DAYS * 86400000.0:
 					old.append(lid)
-			_each(old.slice(0, 10), func(lid: String, next: Callable):
+			each(old.slice(0, 10), func(lid: String, next: Callable):
 				get_doc("market/" + lid, func(still: Dictionary):
 					if still.is_empty(): _refund(lid)
 					next.call()),
@@ -750,6 +754,8 @@ func post_notice(text: String, cb: Callable) -> void:
 # ------------------------------------------------------------------ cleaning
 static func clean_guild(d: Dictionary) -> Dictionary:
 	var col := txt_of(d.get("color"), "", 8)
+	var gname := say_of(d.get("name"), "Guild", 24)
+	var tag := ClanInfo.clean_tag(d.get("tag"))
 	var built: Array = []
 	for k in arr_of(d.get("built")):
 		if PROJECTS.has(k) and not built.has(k): built.append(String(k))
@@ -758,7 +764,8 @@ static func clean_guild(d: Dictionary) -> Dictionary:
 	for v in arr_of(d.get("officers")).slice(0, CLAN_CAP):
 		var who := txt_of(v)
 		if who != "" and who != founder and not officers.has(who): officers.append(who)
-	return {"name": say_of(d.get("name"), "Guild", 24), "motto": say_of(d.get("motto"), "", 60),
+	return {"name": gname, "motto": say_of(d.get("motto"), "", 60),
+		"tag": tag if tag != "" else ClanInfo.tag_from_name(gname),
 		"color": col if col.is_valid_html_color() else "f2a24a", "founder": founder, "officers": officers,
 		"created": num_of(d.get("created")), "built": built, "open": d.get("open", true) != false}
 
@@ -866,6 +873,8 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor")),
+		"tag": ClanInfo.clean_tag(d.get("tag")),
+		"last": ClanInfo.clean_deed(d.get("last"), int(Time.get_unix_time_from_system())),
 		"showcase": BaseShowcase.clean(d.get("showcase"))}.merged(VisitZones.clean(d))
 
 ## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.

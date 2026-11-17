@@ -123,6 +123,20 @@ body (not in the air, a crouch, or a move that owns the body):
 - **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble 1.0, 0.55; Kael 1.0,
   0.6). The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso,
   arms, head) are held back; the feet stay planted and slide is unchanged.
+- **Hip phase (Nov 15).** The clips bob the hips with the legs the wrong way round: up as the legs spread at a walk
+  (hip-height / leg-spread correlation +0.3 to +0.85 on 9 of 11 Hunters with legs; a walk wants it negative, the hips
+  highest as the legs pass), and the same inverted at a run on 6 of 11. WardenGait now pulls the hips towards a bob of
+  `loco.bob_m` [walk, run] metres (defaults 0.035, 0.06) in step with the thighs' spread, at most 4 cm off the clip's
+  height (so Kael, Dredge and Bulwark also carry a `bob` scale to bring their big clip bob inside that reach). Feet,
+  cadence, knee lift and foot height are untouched (measured). `--anim-audit` fails a walk over -0.2 or a run under 0.2.
+  The pull fades with how sideways the blend points: a strafe loop's legs spread in roll, not pitch, so the pull only
+  added noise there (hip height left over after a fit at the step rate, RMS: Thief 3.7 -> 13.5 mm, Mage 6.5 -> 15.8,
+  Tender 2.1 -> 7.7, Bulwark 23 -> 36); strafes keep their clip's own bob again. Foot height: clip 14 logs the ankles
+  in the body's own frame (aL aR vs rest a0L a0R), since CamRig.char_lean tips every Hunter back 20 degrees about the
+  feet and a world-height reading shows a strafe's feet 10-30 cm "under" the floor that is only that lean. In the body
+  frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
+  strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
+  Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -429,3 +443,19 @@ Split into backlog items per Hunter (role build):
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - Start gaps not on the gate: `rimewright` measures 0.33 now (0.06 when this page was written), `dolm` 0.25.
+
+## Mantle and ledge clips
+A ledge rise (`Hunter.lfloat`) now feeds the anim state `mantle` = how far up the face the body is (`MantleCarry.rise_k`,
+0 at the foot, 1 at the lip), so a keyed mantle clip is read at that phase and cannot lag the body; `ledge` (the float
+back up from the abyss) plays on its own clock and holds its last pose. `mage` (Sparkle), `bulwark` (Albert), `thief`
+(Sable) and `ostra` (Motley) have both clips (0.8 s mantle, 1.0 s ledge), keyed with `tools/art1/climb_clips.py` and the
+poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Blender; rerun it after any rebuild of the
+`.glb`: `python3 tools/art1/climb_clips.py <ryzz|sable|breaker|ostra>`). Sparkle scrambles with one knee up; Sable
+kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
+legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
+`--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+Motley's root stays on his hover (data `rig_root`), so his lift and lean are keyed on the hips instead (his
+`offset_bones`): the spring stretches and he rises out of the box. `--close` backs the camera off for a tall Hunter.
+Rows below are mantle then ledge for Sparkle, Sable, Albert and Motley, 8 frames each (software GL; after changing a
+`.glb`, run `godot --headless --path . --import` first or the strip shows the old clip).
+![mantle and ledge strips: Sparkle, Sable, Albert, Motley](anim_audit/climb_mantle3.jpg)

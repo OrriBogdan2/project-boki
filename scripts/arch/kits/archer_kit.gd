@@ -6,12 +6,13 @@ extends ArchKit
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Red Thread (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+
+const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
-const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
 
 var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer
@@ -200,7 +201,7 @@ func on_dash(use_ex: bool) -> bool:
 	if ex:
 		# the long dash (out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll", "feel": "flick"})
 		play("pin_flick")
 		vfx("flick")
 		st["last_dash"] = "flick"
@@ -209,20 +210,22 @@ func on_dash(use_ex: bool) -> bool:
 	spirit.start()
 	return true
 
-## A kit swap (a practice reclass) in the middle of a Spirit Walk ends the walk: Hunter.spirit_t is this
-## kit's to clear, and left set it walks the next kit through walls for good.
-## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
-## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
+## A draw right after a perfect release slows her less (wiki: perfect shots ease
 ## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
-	if spirit and spirit.active():
-		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
 	if pin_aim and rmb_down:
 		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
+
+## Walking as a spirit she moves quicker (walk_k of run speed); at rank 3 inside something she starts
+## faster still and that fades with the walk.
+func speed_bonus() -> float:
+	if not spirit or not spirit.active():
+		return 0.0
+	return float(dash_def().get("walk_k", 1.1)) - 1.0 + spirit.inside_boost()
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
 ## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
@@ -231,7 +234,7 @@ func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	if h.draw_t >= 0.0:
 		drop_draw()
@@ -243,7 +246,7 @@ func press_rmb() -> void:
 func rmb_hold_tick(t: float) -> void:
 	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
 	# whether the release looses), or from the threshold while the bow is drawn for the LMB, so a quick tap leaves
-	# that draw alone: the needle on the bow, an red bar growing from it (its own creak)
+	# that draw alone: the needle on the bow, a crimson bar growing from it (its own creak)
 	if not pin_aim and (h.draw_t < 0.0 or t > float(rmb_def()["hold"])):
 		play("arc_heavy_wind")
 		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
@@ -296,7 +299,7 @@ func _drop_holds() -> void:
 	draw.drop()
 	spirit.end("merge")
 	if ult: ult.drop()
-	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk", "pin_ult_nock"]:
+	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
 		anim_id = ""
 
 func _drop_tele() -> void:
@@ -358,7 +361,6 @@ func _pin(a: Vector3, k: float) -> void:
 			var face := KnockWall.contact(m, f, dir, float(pd["wall"]))
 			pins += 1
 			m.sfx("pay_called", f.pos, 0.0, 1.0)      # the wall stun is a payoff: its own sting
-			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", face + Vector3(0, 1.0, 0), dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
@@ -369,8 +371,7 @@ func _pin(a: Vector3, k: float) -> void:
 					vfx("heavy_stun", f.pos, dir, {"k": k})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
-	# its scorch runs from the ground under the bow (heavy_go's bursts sit on the bow itself)
-	vfx("heavy_go", AimMode.ground(m, bow), dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
+	vfx("heavy_go", bow, dir, {"k": k})
 	# the release burst's pale fletch core just off the bow along the shot (kept small enough that the bow, not her
 	# body, is what it lights), still wider than any bow cue, and a screen kick along the shot
 	fx.fletch_burst(bow + Vector3(dir.x, 0, dir.y) * HEAVY_BURST_AHEAD, 1.2 + 0.4 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
@@ -452,10 +453,12 @@ func _tick_rain(dt: float) -> void:
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
-		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
+		# (a tick: the hit reactions stay off, so the slow only takes speed: no squash, flinch or hold)
+		var tick := cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}})
+		KinExec.apply_foe(stg.effects, f, tick, f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
-		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+		if w.downed and not w.dead and w.team != h.team and _in_rain(w):
 			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots

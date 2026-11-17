@@ -5,9 +5,9 @@ extends ArchKit
 ##
 ## - Passive, Salvage: knocks and assists stack (+2.5% health each, 10 at most); being downed costs
 ##   one. Hits on a hunter's back deal 50% more. A knock heals.
-## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
-##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
-##   shot. At dash rank 3 pellet hits trim the barge recharge.
+## - LMB: the scattergun (the weapon's own firing): seven slugs that stop and hang at 6.3m, packed tight when
+##   he waits for the shot, fanned wide when he fires again at once; the spread's two edge lines on the ground
+##   follow it smoothly; the body rocks back on each shot. At dash rank 3 pellet hits trim the barge recharge.
 ## - RMB, Deep Reach: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
@@ -42,7 +42,8 @@ const GHOST_THICK := 0.45              # m: the arm's silhouette where it runs t
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
-const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
+const SPREAD_EASE := 35.0              # 1/s: how fast the drawn spread glides to the gun's (95% in ~0.09 s)
+const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -66,7 +67,6 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
-var shot_at := -9.0
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
 var armor_shreds := 0           # (tests) hits that shredded armor
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -89,6 +89,9 @@ func _setup() -> void:
 	st["base_hp"] = h.max_hp
 	fx = LDFx.of(m)
 	broadside = DredgeBlast.new(self)
+
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [float(e_def()["angle"]), float(broadside.xd()["fan_deg"])])
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
@@ -164,9 +167,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if rank("dash") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
 
-## A third barge charge: he chains several short, fast shoves in a row.
-func extra_dashes() -> float: return 1.0
-
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
@@ -229,14 +229,14 @@ func _drop_holds() -> void:
 	broadside.drop()
 
 ## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
-## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
+## streaks that hang as violet dots where they stop). The spread's two edge lines lie on the ground out to the
+## slug range at the next volley's true fan: wide right after a shot, drawing in as he holds off, tight when
+## waited for. Drawn per frame from his body, the width gliding rather than jumping.
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
-		shot_at = m.time
 		volleys += 1
 		# the first shot after the bloom folded back leaves exactly one shot's worth of it
 		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
@@ -245,16 +245,13 @@ func _tick_gun() -> void:
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	if m.time - shot_at < IDLE_T or bool(h.inp.get("fire", false)):
-		AimKit.cone(
-			h, "spread",
-			{
-				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
-				"col": Color("fff0f6"), "alpha": 0.8
-			}
-		)
-	else:
-		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
+	AimKit.cone(
+		h, "spread",
+		{
+			"len": float(w["range"]), "deg": float(w["fan_deg"]) + h.wbloom, "edges": true, "inner": 0.6,
+			"col": Color("fff0f6"), "alpha": 0.8, "follow": true, "ease": SPREAD_EASE
+		}
+	)
 
 func _dress_volley() -> void:
 	play("dr_shot")
@@ -274,7 +271,7 @@ func _dress_volley() -> void:
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
 		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.26))
+			if expired: fx.dot(at, SLUG_REST, 0.18))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
@@ -347,7 +344,7 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
@@ -452,11 +449,16 @@ func _grab(f: Ent, ally := false) -> void:
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
 
+## The Anchor's wind-up holds him on its line (the "turn" e row) and the reel keeps him turned to the catch wherever
+## the cursor goes (footage 0147; the rmb row); the barge faces where it goes.
+func face_locked() -> bool:
+	return (wind > 0.0 or not pull.is_empty()) and h.roll_t <= 0.0
+
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
 ## Displace moves it ("haul"); here the arm follows it and the reel ends with it.
-func _tick_pull(_dt: float) -> void:
+func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
 	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
@@ -464,6 +466,9 @@ func _tick_pull(_dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
+	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
+	if to.length() > 0.05 and face_locked():
+		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
 	_reach(fe.pos + Vector3(0, 0.95, 0))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
@@ -790,6 +795,11 @@ func _tick_stop(dt: float) -> void:
 	h.vel.x = flat.x
 	h.vel.z = flat.y
 
+## A barge off a ledge falls on with the shared dash exit: no planted stop (an air pounce still stops short).
+func on_dash_off_ledge() -> void:
+	super()
+	stop_t = 0.0
+
 ## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
 func _barge_trail(dt: float) -> void:
 	trail_t -= dt
@@ -801,13 +811,13 @@ func _barge_trail(dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
-## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
-## explodes).
+## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (debris, not a burst: a dash
+## never explodes).
 func _clawed_turf(dir: Vector2) -> void:
 	if not h.grounded:
 		return
 	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
-	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
+	m.fx.debris(at, Color("6a5236"), 6, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Not mid-reel, mid-Anchor or mid-dive. While the arm flies out it goes, like E, and the arm flies on: the

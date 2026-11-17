@@ -30,7 +30,7 @@ const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds her hand up off the aim (as_cloak: wide to 0.26)
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -80,6 +80,9 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 func _setup() -> void:
 	fx = LDFx.of(m)
 	jet = AshwickJet.new(self)
+
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [])
 
 func _best_char() -> float:
 	var b := 0.0
@@ -297,8 +300,11 @@ func _drop_holds() -> void:
 	jet.drop()
 
 func move_k() -> float:
-	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	return (0.6 if after_t > 0.0 else 1.0) * boost
+	return 0.6 if after_t > 0.0 else 1.0
+
+## Rank 3 Pyro Pounce: a burst of speed after a hit ([game data] +75 move speed).
+func speed_bonus() -> float:
+	return float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 0.0
 
 ## Rank 3 Cinder Shot holds a second charge.
 func rmb_charges() -> int:
@@ -568,6 +574,9 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
+	if bash.get("hop", false) and h.gliding:
+		bash = {}      # a glide press cancelled the poof (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dir: Vector2 = bash["dir"]
 	bash["t"] = float(bash["t"]) - dt
 	if tells_visible():

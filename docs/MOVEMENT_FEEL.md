@@ -64,10 +64,14 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_input_frames | 1 | 1 | <= 1 step | press acts the same step |
 | ground_t95 (to 95% run speed) | 0.083s | 0.067s | <= 0.07s | [spec] 0.05–0.1s |
 | ground_stop_t | 0.067s | 0.167s | 0.12–0.25s | [game data] braking 22.2 m/s² + friction 2/s (SV ~0.18s) |
-| ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
+| ground_stop_dist | 0.10m | 0.31m | 0.27–0.4m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
-| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
+| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm (`--move-speed-check`) |
+| haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054) |
+| haste_bonus_slow_x (haste 0.35 under a 40% slow) | 0.81x | 0.81x | 0.80–0.82x | the slow multiplies the hasted total |
+| haste_cap_mps (+100% and haste) | 10.3 m/s | 7.0 m/s | 6.95–7.0 | [game data] MaxMoveSpeed 700 uu/s |
+| haste_clip_rate (clip rate vs run, over speed vs run, worst Warden, hasted and capped) | 0.94x (rate held at RATE_MAX) | 1.00x | 0.99–1.01x | no foot slide (WardenGait.rate_for) |
 | aim_side / aim_back / aim_back_fire speed_k (run with the keys across or away from the aim, over toward it) | 1.0 | 1.0 | 0.99–1.01 | [game data] no backpedal or strafe slow: one MoveSpeed per hunter, no directional row in the movement data (the only forward/back split decoded is rail grinding, 1300/1050); hero-ref footage has no clean walk-away run to frame (see ext/feel-backpedal-speed) |
 | aim_back_3m_frames (frames to cover 3 m away from the aim, minus toward it) | 0 | 0 | <= 0 | [game data] same; 42 frames both ways at 4.55 m/s |
 | jump_input_frames | 1 | 1 | <= 1 | |
@@ -102,9 +106,10 @@ defaults aren't cited, since the data names no field for these windows.
 | glide_reverse_t | 0.417s | 0.600s | 0.45–0.8s | [game data] the same force brakes a reversal (item 163) |
 | glide_brake_ratio (10 m/s, 0.4s against vs let go) | 0.60 | 0.00 | <= 0.8 | brake stays |
 | reglide_frames / dashglide_reopen_frames | 1 / 1 | 1 / 1 | <= 1 | |
-| dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 13.8 m/s | >= 12 | [wiki] momentum + speed |
-| dashglide_1s_speed | 5.7 m/s | 12.3 m/s | >= 10.5 | [wiki] preserved |
-| dashglide_2s_speed | 5.0 m/s | 10.8 m/s | >= 9 | [wiki] preserved |
+| dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 23.0 m/s | >= 12 | [wiki] momentum + speed |
+| dashglide_1s_speed | 8.5 m/s (11-15) | 11.6 m/s | >= 10.5 | [wiki] preserved; owner 11-13 "like Supervive" (decision 0099) |
+| dashglide_2s_speed | 5.9 m/s (11-15) | 8.0 m/s | 7–9 | still fast, bleeding back |
+| dashglide_3s_speed | 5.2 m/s (11-15) | 6.3 m/s | <= 6.5 | [owner 11-08 item 9] back toward cruise |
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
 | feather_m vs feather_hold_m (distance before overheating, over the abyss) | 113.8m vs 44.6m (11-11) | 165.6m vs 44.6m | | |
 | feather_gain | 2.55x (11-11) | 3.71x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
@@ -170,6 +175,7 @@ Other checks:
 - `--mantle-fling-check` (tools/mantle_fling_check.gd, owner bug 11-11): running jumps, ground and air dashes, glides and fast launches (6-19 m/s, also with a jump in the fling window) into a long ledge one and two terraces high, 0 to 80 degrees off the face. Over the lip you leave at most `MantleCarry.exit_cap` (1.2x run speed, ~5.5 m/s; a fling at most `Hunter.FLING_SPEED`), the rise carries you at most 2.5 m along the face (speed over the cap bleeds at `MantleCarry.RISE_BLEED`), and the wall never pushes you.
   - Before (main 88b06b9): a 19 m/s launch glancing in at 65 degrees kept its speed along the face, slid 4.3 m up the rise and left the top at 13.9 m/s, flying 8.3 m; a fling in the window kept it too (14.2 m/s). 103 of 187 tops over the cap, 19 rises over 2.5 m.
   - After: fastest exit 5.5 m/s (a fling 7.4), longest slide 2.4 m, longest flight 4.6 m (a fling), 181 tops.
+- `--aim-latency-check` (tools/aim_latency_check.gd): a scripted mouse move, then the frames until the reticle and the aim point sit under the cursor, at 60 and 144 Hz, at 720p and at 4K with a UI scale (see "Aim: the raw cursor").
 - `--obstacle-check` (tools/obstacle_slide_check.gd, from branch `stuckfix`): walks round, away from and past every tree and rock cluster on the training map and an expedition island.
   - Main 3b800a0: a hunter hugging a 3-tile rock cluster on the expedition island is pinned on a corner for 823 steps (13.7s).
   - Movefeel (and `stuckfix`):
@@ -269,6 +275,15 @@ Other checks:
   - The garden's wheel zoom (0.55-1.6) is unchanged and stacks with it; a match never ticks the frame.
   - The check asserts the ease timing, both of you on screen at the wheel's closest, arrival and widest zooms (169/368/411 px from the nearest edge at full reach), and each way it lets go.
 
+## Camera zoom: start wide, wheel in, Ctrl past the end (`--cam-zoom-check`, owner playtest 11-16)
+
+Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the wheel zooms in; Ctrl extends further than max for scouting." Numbers: `content/rules/camera.json` "zoom"; code: `scripts/match/cam_wheel.gd`, `CamRig.air_zoom`.
+
+  - The match (and the practice areas) start, and every respawn (`Match._start_drop`) restart, at the widest wheel view: 1.6x the style's distance, 36.8 m back, about 37 m of ground across (the source's 35-39 m, which the old 23 m view never showed).
+  - The wheel steps 0.1 per notch between 0.55 (close) and 1.6; it does nothing while paused, in the map / swap / pack panels, with the hero picker open, or if the player bound the wheel to an action.
+  - Holding Ctrl (Sneak, on the ground) eases the view to 1.6 x 1.4 = 2.24x wherever the wheel was left, and back on release, at the camera's usual ease (no pop). The glider and height stack on top but never past the 2.4x cap.
+  - Cost: the pose LOD (`pose_far_m` 40 m) and the far plane (`120 x zoom + 30`) already scale with the view; the check holds the Ctrl view's furthest ground corner inside both. Fog is 0.0015 density (3% at 20 m): the wide view is not fogged out. The sun's shadows reach 60 m from the camera, so at the Ctrl view the top edge of the screen loses its shadows; the wheel's own widest view keeps them.
+
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
 - **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the SUPERVIVE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends.
@@ -351,7 +366,8 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 
 ## Shift into the glider, and the dive into the feather (decision 0061, owner playtest 11-11)
 - **No cut at an air dash's end:** a kit that stops its air dash short (Shiv's slide, Kingpin's pounce, Felix's poof) now eases the cut out over `dash_glide.ease_t` (0.07 s) instead of one step, and a glider already open keeps the dash's whole speed (`DashGlide`).
-- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall keeps the source's wind-down). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall's grace is 0.25 s, decision 0099). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **Brall's chains don't drop a press (decision 0099, owner playtest 11-13):** a jump off the ground clears a move's wind-down (Rampage's, the Lunge's), so Rampage or a held Smash, a jump and a glide press opens on the press; the glide button arms through a lock as a second Space does and opens as the lock ends. `--airdash-glide-check` "Brall" rows (both keys); on 11-15 main 5 of the 6 failed (3 presses dropped, 2 opened 0.2 s late).
 - **The dive carries:** opening the glider under the lip turns 0.6 of the fall speed into forward speed (up to the glide max) and the deep spring adds 0.3 of it upward (`GlideLift.open_kick`); the high glide is unchanged (the drop there never turns into speed, 11-08).
 
 ## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
@@ -375,9 +391,9 @@ settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` ch
 | Source value | Ours (`tuning.json` / code) | Status |
 |---|---|---|
 | Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
-| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (14 m/s, Lace 11) the excess bleeds at `carry_drag` 3/s more | `[?]` |
 | Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
-| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 0.8/s with keys, `glide.drag` 1.2/s without; a 10 m/s open is back to 5.5 m/s in 2.88 s / 1.92 s | `[?]` |
 | Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
 | Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
 
@@ -444,9 +460,9 @@ settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` ch
 | Source value | Ours (`tuning.json` / code) | Status |
 |---|---|---|
 | Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
-| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (14 m/s, Lace 11) the excess bleeds at `carry_drag` 3/s more | `[?]` |
 | Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
-| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 0.8/s with keys, `glide.drag` 1.2/s without; a 10 m/s open is back to 5.5 m/s in 2.88 s / 1.92 s | `[?]` |
 | Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
 | Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
 What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate proxies; every hero-ref folder on
@@ -701,30 +717,28 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84). Searing Wave: 0 px/s in all 7 holds (0062-0067 and 0076-0120, 5 fps; 1 px = 0.05 m) against about 4 m/s on his runs, but he also stands for the taps there, and the one hold away from the dummy (0062-0067) sits between two short walks; a stop by choice can't be told from a forced one | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check`. Searing Wave 0.55 kept: not determinable |
 | Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
-| Neve (Celeste) | full (kit-fired darts; the weapon's `fire_slow` 0.9 never applies) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
+| Neve (Celeste) | full (kit-fired darts never set the fire cooldown; hoar_fan has no `fire_slow`) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
-| Sable (Shiv) | 0.90 (`fire_slow`) | none | full | [F] dancer.md: 77-86 px/s while firing against 113 (0.68-0.76), "not confirmed" | kept (unconfirmed; see below) |
+| **Sable (Shiv)** | **0.71 (`fire_slow`, was 0.90)** | none | full | [F] frames: 92.5 px/s over 1.4 s of held fire against 128-130 on three plain runs (0.71; see below) | **changed**: arc_bolts `fire_slow` 0.71; asserted 0.67-0.75 in `--dancer-combo-check` |
 
-Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
-Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
-source number either way. Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
-Neve's dead `fire_slow` 0.9 on hoar_fan could go. Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are
-not determinable from the footage (2026-11-11; frames on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156):
-both stand still in every charge seen, and no hold is made on the move. A clip of either holding while walking would settle it.
+Sable's fire slow, read off the frames (2026-11-12; ext/hero-ref-footage footage/dancer, 720 px wide at 5 fps,
+frame N = 278 + (N-1)/5 s). Firing: 0008-0015, 1.4 s of a straight up-left run with LMB held on the cursor over empty
+ground (bolts leave at 0009, 0011 and 0014; they fizzle at the cursor between). Plain runs with no bolt: 0071-0075,
+0230-0233, 0311-0316. Her ground motion is the camera pan (NCC on textured world patches; frame by frame and end
+to end agree within 3%) plus her bar's move on screen, with screen height divided by 0.93, the Death Blossom ring's
+own squash (0296-0297). Firing 92.5 px/s in 960 px units (3.5 m/s at 1 body height = 48 px = 1.8 m), plain runs
+127.6-130.3 (4.8 m/s): 0.71 (0.70-0.73 for any squash from none to venator.md's 0.88; the plain runs agree best at
+0.93). dancer.md's 77-86 against 113 read both kinds of run about 12% low, and its 0230-0233 "firing" stretch has
+no bolt in it.
+
+Open, not built (suggestions): Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
+Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are not determinable from the footage (2026-11-11; frames
+on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156): both stand still in every charge seen, and no hold is made
+on the move. A clip of either holding while walking would settle it.
 
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
-
-## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
-
-The full table of every movement quantity against the source is [MOVEMENT_PARITY.md](MOVEMENT_PARITY.md). This pass fixed what it found off in the first ten seconds of play:
-
-- **The farm moved on the frame time.** A match steps 60 times a second; the farm's avatar stepped once per drawn frame, so its jump peaked at about 1.46 m at 30 fps and 1.55 m at 144 (1.52 m in a match). `FarmStep` (`scripts/home/farm_step.gd`) now runs the farm's step in `Match.DT` steps, latches a key press for exactly one step, shows the body between its last two steps and plays the pose once a frame.
-- **Coyote time and the jump buffer on the farm.** The farm had neither. Both timers live on `FarmStep` and read the match's rows (`coyote_s` 0.12, `jump_buffer_s` 0.12 in `content/rules/hunter_move.json`); the match and the farm share `HunterMove.near_landing`.
-- **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
-
-`--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 
 ## Glider trail: a side-coloured line behind every open glider (`GlideTrail`, `--glide-trail-check`)
 
@@ -1002,6 +1016,16 @@ Three ledge heights x walk / jump / glide, keys into the face (`_ledge_matrix`; 
 
 Asserted: each cell tops or not as above; a caught ledge's catch-to-top <= 0.35 s ([footage] ~0.2 s rim to top); over the lip >= max(0.6x in, 3.5 m/s) ([game data]). Rows this pass fixed, each with its source: `hunter_move.json` now says mantle_launch_keep is a share of the approach speed, not the run speed (MANTLE_185b: "the approach speed was thrown away"); `MantleCarry` lost its own copy of that 0.6; this doc's no-jump pop read 3.2 m/s where `LRISE_POP` is 2.6; the Physics pass line and docs/SUPERVIVE_FEEL.md's Mantle row said the launch was 0.6x run speed.
 
+
+## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
+
+The full table of every movement quantity against the source is [MOVEMENT_PARITY.md](MOVEMENT_PARITY.md). This pass fixed what it found off in the first ten seconds of play:
+
+- **The farm moved on the frame time.** A match steps 60 times a second; the farm's avatar stepped once per drawn frame, so its jump peaked at about 1.46 m at 30 fps and 1.55 m at 144 (1.52 m in a match). `FarmStep` (`scripts/home/farm_step.gd`) now runs the farm's step in `Match.DT` steps, latches a key press for exactly one step, shows the body between its last two steps and plays the pose once a frame.
+- **Coyote time and the jump buffer on the farm.** The farm had neither. Both timers live on `FarmStep` and read the match's rows (`coyote_s` 0.12, `jump_buffer_s` 0.12 in `content/rules/hunter_move.json`); the match and the farm share `HunterMove.near_landing`.
+- **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
+
+`--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
@@ -1146,23 +1170,30 @@ A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy
 distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
 no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
 the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+## Low frame rates: taps and dashes survive 30 fps and 100 ms stalls (`--low-fps-input-check`, 2026-11-12)
+
+DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on the frame rate. `tools/low_fps_input_check.gd` runs headless on the real `Match._process`: `Engine.max_fps = 30` caps the frames (the check measures it holds), and a stall hook (`OS.delay_msec(100)` one frame before the tap, so the tap's frame has delta 0.1 s and `Match` runs 6 steps) loses a frame's time. Per hero (gunslinger, mage, juggernaut; `=<id>,<id>` picks others), each of Shift, Space, LMB, E and R is pressed and released between two reads, six times per round, and must go off every time.
+
+- **Found and fixed: LMB.** It was read as `is_action_pressed`, "down now", so a click that came and went inside one frame was lost: 6/6 taps lost at 30 fps and after a stall. Shift, Space, E and R were already safe: they read `is_action_just_pressed`, which stays true for the frame in which the key went down and up, and queue the press in `Match.pending_input` until the next fixed step. `FireTap` (`scripts/match/fire_tap.gd`) now latches an LMB tap the same way: down for the next fixed step, once, then cleared (a held button is unchanged, a tap in a hitstop frame waits for its step, a paused or over-UI tap is dropped). After the fix: 0 lost in 180 taps (3 heroes x 5 keys x 2 rounds x 6).
+- **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
+- `--move-feel-check`: 0 failures on this branch.
 
 ## Aim: the raw cursor (`--aim-latency-check`)
 
 The owner's note (Nov 10 2026): aim must feel crisp. The in-match cursor sits exactly where the OS mouse is, with no smoothing, acceleration or a frame of lag added by us. This is the audit of the path from the mouse event to the aim point, and what `--aim-latency-check` holds.
 
-**The path, event to aim point.** The OS event lands in Godot's `Input`, which accumulates motion (`Input.use_accumulated_input`, left at its default) and flushes it once at the start of the frame: the position every reader sees that frame is the latest one, with nothing averaged. `Match._process` then moves the view (`MatchCam.update`), reads the cursor (`_gather_input` → `_mouse_aim`, which casts `CamRig.mouse_on_plane` straight through `get_viewport().get_mouse_position()`), steps the sim and draws. The HUD's crosshair (`Reticle.draw`) and the AimKit cursor states (`AimReticle`) draw at that same mouse position the same frame. Nothing on this path interpolates, eases, accelerates or dead-zones the cursor: the only lerps near it are the camera's own lean and follow, which move the world under a raw cursor, not the cursor. The one snap in `_mouse_aim` (a foe within 52 px lends its height) changes the plane the ray is cut at, never where the cursor sits.
+**The path, event to aim point.** The OS event lands in Godot's `Input`, which accumulates motion (`Input.use_accumulated_input`, left at its default) and flushes it once at the start of the frame: the position every reader sees that frame is the latest one, with nothing averaged. `Match._process` reads the cursor (`_gather_input` → `_mouse_aim`, which casts `CamRig.mouse_on_plane` straight through `get_viewport().get_mouse_position()`), steps the sim, then moves the view (the "camera" block) and draws. The HUD's crosshair (`Reticle.draw`) and the AimKit cursor states (`AimReticle`) draw at that same mouse position the same frame. Nothing on this path interpolates, eases, accelerates or dead-zones the cursor: the only lerps near it are the camera's own lean and follow, which move the world under a raw cursor, not the cursor. The one snap in `_mouse_aim` (a foe within 52 px lends its height) changes the plane the ray is cut at, never where the cursor sits.
 
-**What was adding a frame.** Before this pass the cursor was read before the view moved, so while the view leans after the cursor (every big mouse move, dash and knock) the aim point was one frame old in camera terms: on the move's frame it sat 13.6 px off the cursor at 60 Hz and 5.9 px at 144 Hz. The camera-first order from `ext/feel-aim-steady` (merged here, see "Camera before the cursor" above) removes it: 0.0 px on every case. No other smoothing was found, so nothing else was removed; the reticle art is unchanged.
+**What adds a frame (open, 11-17).** The cursor is read before the view moves, so while the view leans after the cursor (every big mouse move, dash and knock) the aim point is one frame old in camera terms: on the move's frame it sits 13.5 px off the cursor at 60 Hz and 5.8 px at 144 Hz (main ae15506e78). The camera-first order from `ext/feel-aim-steady` (a `MatchCam.update` before `_gather_input`) removed it to 0.0 px on every case; main merged it once (53a3dfe1f9) but has since lost it, so it is a backlog item (pr95-aim-camera-first). The check allows one physics tick, so it passes either way; restoring camera-first should bring the panning column to 0. No other smoothing was found, so nothing else was removed; the reticle art is unchanged.
 
 **Measured** (`AIMLAG` lines; "frames" is rendered frames after the event's own, so 0 is the same frame; allowed is one physics tick, 1 frame at 60 Hz and 2 at 144 Hz):
 
-| Case | Reticle under cursor | Aim under cursor (view still) | Aim stale while the view leans | Before this pass |
+| Case | Reticle under cursor | Aim under cursor (view still) | Aim stale while the view leans (main 11-17) | With camera-first (feel-aim-steady) |
 |---|---|---|---|---|
-| 60 Hz, 720p | 0 | 0 | 0 | 1 frame stale (13.6 px) |
-| 144 Hz, 720p | 0 | 0 | 0 | 1 frame stale (5.8 px) |
-| 60 Hz, 4K, UI scale 1.5 (canvas 1137.8x640 at 3.375) | 0 | 0 | 0 | 1 frame stale (13.9 px) |
-| 144 Hz, 4K, UI scale 1.5 | 0 | 0 | 0 | 1 frame stale (6.0 px) |
+| 60 Hz, 720p | 0 | 0 | 1 frame (13.5 px) | 0 |
+| 144 Hz, 720p | 0 | 0 | 1 frame (5.8 px) | 0 |
+| 60 Hz, 4K, UI scale 1.5 (canvas 1163.6x654.5 at 3.3) | 0 | 0 | 1 frame (13.8 px) | 0 |
+| 144 Hz, 4K, UI scale 1.5 | 0 | 0 | 1 frame (5.9 px) | 0 |
 
 The check drives `Match._process` one call per frame at the case's rate (not wall-clock), pushes the move through `Input` and flushes it as the engine would, and measures the aim point against the cursor's own projection through the camera as drawn that frame. The 4K cases set the window and the user's UI scale, so the content scale (`Settings._apply_ui_scale`) is on the path: the mouse position and the camera's ray share the scaled canvas, and the aim lands under the cursor at the same 0 frames.
 
@@ -1171,11 +1202,25 @@ The check drives `Match._process` one call per frame at the case's rate (not wal
 - Vsync is on by default (`display/window/vsync/vsync_mode=1`, Settings > Video), which adds up to one display refresh of presentation latency on every platform, and the frame rate limit is off (`max_fps` 0). Both are the player's call in Settings and were left alone.
 - The display's own queue and compositor sit outside what a headless check can see.
 
+## Dashing off a ledge (`HunterMove.dash_off_ledge`, decision 0046)
+Walking off a ledge is always allowed (DECISIONS), and so is dashing off one. A ground dash that crosses an edge keeps
+its own course (distance and speed curve) but falls as it goes: the height hold is only for dashes pressed in the air.
+It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
+dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
+`--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
+no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
+no travel of his own) must set him down below the edge.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
 - The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
 - Landing performance (branch `landhitch`).
+
+## The owner's movement rules, every Hunter (`--move-rule-guard-check`)
+`tools/move_rule_guard_check.gd` drives each of the 13 Hunters with a player's keys through the rules in briefs/DECISIONS.md that kept regressing, one `RULE ok|FAIL <hunter> | <DECISIONS line> | <measured>` row each: walking (and crouched) off a rim falls; Space held from the jump never glides, a second press does; opening the glider (from a jump, a fall, at rest) adds no horizontal speed and no lift; a fresh Space press 0.03 s and 0.15 s into an air Shift has the glider open within 2 steps, and the glide after it never jumps more than 2 m/s in a step; an overheated glider climbs back to the lip from 12 m at 0.4-0.62 of the full lift; no fall (free, glided, a dive, a landing) leaves horizontal speed, and a glide steers the same opened at rest or falling 14 m/s; WASD in the air beats the old farm's exp 6/s, turns a 5 m/s backward drift within 0.2 s and keeps a sideways speed; the farm avatar as each Hunter gives the Training Area's air and glide-open trace. Reds at 0.24.6 (docs/DEBT.md): Cinder's poof, Tenzo's Rock Hop, Sparkle's wire. Rows red on main and not yet fixed print `open` (the `OPEN` list, docs/DEBT.md).
 
 ## Golden traces: nothing changes how a Hunter moves by accident
 

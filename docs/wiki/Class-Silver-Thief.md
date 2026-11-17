@@ -56,7 +56,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Arc Shots (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the long braid, the moth wings and the twin pistols |
@@ -87,7 +87,7 @@ What the in-game kit card (K) says.
 - *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 3 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +6.1 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
-**Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (16.2m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
+**Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (15m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
 **Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4.5 each, 7.6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 

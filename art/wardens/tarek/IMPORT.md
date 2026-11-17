@@ -13,6 +13,10 @@ The appeal pass: the face is a texture-only edit (one Meshy edit of a flat head 
 head with the baked position and normal maps); the body moves positions and normals only (topology and UVs identical to
 the v95 master), a V-taper at the waist (max move 2 cm). The v95 body already matched the turnaround within ~1 cm.
 
+HY-Motion pilot 2 (NOT applied to the v95 glb): the branch baked `idle` and `walk_f` from HY-Motion-1.0-Lite clips into the old 13k-tri
+tarek.glb. To redo it on the current glb: `python3 tools/art1/glb_swap.py G CLIPS.glb G hy_idle_s2:idle:loop` (see the script header).
+Licence: tencent-hunyuan-community excludes the EU, UK and South Korea; legal signs off before these ship.
+
 Body: 13k triangles (head 3.2k), one 2048 atlas embedded (Godot extracts it to `tarek_atlas.jpg`; the old
 `tarek_tarek_atlas.jpg` and `tarek_tarek_emit.jpg` are gone). No emission map (`"emit"` off): the master has none.
 Slots by colour, bone and box (first match wins): hair (the locs, box z >= 1.3, dark), cloth (dark trousers, the sash),

@@ -90,7 +90,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Archetype | Resource | Built by | Shape |
 |---|---|---|---|
 | Thief | **Marks** | hits from behind | stored on *targets* |
-| Archer | **Hawk Sense** | always on | no meter (Focus was cut, 2026-11-07) |
+| Archer | **Red Thread** | always on | no meter (Focus was cut, 2026-11-07) |
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
@@ -896,7 +896,7 @@ through glow, ring, flash, sound and the plate's status icon; only numbers float
 
 ### Archer: Lace (on a Myth-style hunter-archer baseline)
 
-**Cut 2026-11-07 (owner, parity first):** the Focus meter and the Deadeye below were invented and are gone (no meter, no +20% range, no Deadeye hit, no HUD arc). Only Hawk Sense stays. Read the Focus and Deadeye lines in this section and the Nov 1 design above as history.
+**Cut 2026-11-07 (owner, parity first):** the Focus meter and the Deadeye below were invented and are gone (no meter, no +20% range, no Deadeye hit, no HUD arc). Only Red Thread stays. Read the Focus and Deadeye lines in this section and the Nov 1 design above as history.
 
 Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
 three empowered arrows on R. Mechanics only; names, numbers and art are ours.
@@ -1078,7 +1078,7 @@ ranks.)
 | Slot | Input | Brall (wiki) | Ours |
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
-| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
+| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns). Shotgun and minigun as before |
 | RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (T4, `pay_rage`, no word); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
@@ -1094,8 +1094,8 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
-| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 1-2) | the sweet-spot payoff (T4) | wiki |
@@ -1188,7 +1188,8 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 (tip +20), Execution Slam 70 (3.5 slashes), Lunge 45, Obsidian 52, Spin 54, Flame Step 18 / tip 36, R
 130 -> ours slash 8 (tip 16), Slam 26, Lunge 14 -> 22, Meteor 18, Spin 18, Rampage 7 / tip 14,
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
-Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
+Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top). Kael's numbers were since
+retuned to the source's time to knock (docs/TTK.md, slash 5.2, Slam 15.6), so his part of this is history.
 
 ### R removed: the ult choice (kits2-nor, Nov 2) — superseded
 

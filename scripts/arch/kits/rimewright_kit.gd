@@ -80,6 +80,8 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
 
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
@@ -313,7 +315,10 @@ func _throw_dart(heavy: bool) -> void:
 	vfx("dart")
 	var pitch := (1.0 + 0.06 * side) * (0.8 if heavy else 1.0)
 	var loud := 0.0 if heavy else -2.0
-	m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, loud, pitch)
+	if skating or heavy:
+		m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, loud, pitch)
+	else:
+		FireSfx.shot(h.get_instance_id(), String(wd["sfx"]), h.pos, loud, float(wd["rate"]))
 	if heavy:
 		stats["heavies"] += 1
 	if skating:
@@ -613,7 +618,7 @@ func _rinkrun_end(into_rime := false) -> void:
 		# ended in the air: she keeps the skate's speed the way any air dash does (Loco's air drag bleeds it)
 		h.vel.x = h.roll_dir.x * h.roll_speed
 		h.vel.z = h.roll_dir.y * h.roll_speed
-	play("tm_skate_stop")
+	play("tm_skate_stop" if h.grounded else "")      # the braced stop is a ground pose
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
@@ -1042,7 +1047,7 @@ func _tick_wall(dt: float) -> void:
 ## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
 func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
+		if not f.hittable() or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
 		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])

@@ -11,7 +11,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
-| **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Lace** | light | Longbow | Spirit Walk | Red Thread | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
@@ -33,7 +33,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
-- **Passive: Hawk Sense.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
+- **Passive: Red Thread.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
 - **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
 - **RMB: Heavy Shot** (16s):
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
@@ -77,7 +77,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
@@ -99,7 +99,7 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
@@ -142,7 +142,7 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 | ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
 | tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
 | dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Shardskin shield: flat (source: not in data) |
-| archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Hawk Sense: no number |
+| archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Red Thread: no number |
 | dredge, Grimble (Kingpin) | weapon: flat | Deep Reach dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
 | rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
 | mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
@@ -217,12 +217,12 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
-### Cairnback (Tortoise + Ibex, mount)
+### Cairnhorn (Tortoise + Ibex, mount)
 
-- **E: Boulder Heave** (projectile, 9s): Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- **E: Boulder Heave** (projectile, 9s): Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **Merge: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- **Merge: Cairn Colossus** (8s): Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 
 ### Vespyx (Fox + Scorpion, shoulder)
 

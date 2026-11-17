@@ -138,7 +138,7 @@ Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none t
 | Field | Source | Ours | Verdict |
 |---|---|---|---|
 | Throw: sticks in the first foe, else lands at the end of its path | [F] 0222-0258; [D] "throw a dagger" | same, to the cursor | match |
-| `range` | [D] none. [F] a throw with no target landed about 9 bh (16.2 m) away, at the cursor or the end of range; the max is not seen | 14 m | [?] 14 is shorter than the one throw seen; the max is unknown |
+| `range` | [D] none. [F] a throw with no target (0222, landed 0226) flew 284 px over a 34 px body height = 8.3 bh (15.0 m), past the cursor, so the end of its path | 15 m | match; locked in kit_parity (tol 0.5), docs/KIT_PARITY.md |
 | `speed` | [F] about 25 bh/s (45 m/s), read at 5 fps | 40 m/s | match within footage error (16.2 m in 0.41 s against 0.36 s, a quarter of a frame); locked 45 +-5 |
 | `dmg` | [D] the card gives no damage (every other Shiv row has one); [F] no number read on the stick (0255-0258) | 8 (0.62 of a bolt) | [?] |
 | `slow` | [D] none; [F] the panel says "Slows", the dummy slowed (0258); wiki Q: 50% | 0.5 | match (wiki); locked |
@@ -206,7 +206,7 @@ pass above.
 | LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
 | LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
 | LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
-| LMB | move while firing | 77-86 px/s firing against 113 in three stretches: 68-76% [footage] | 90% of the run | 72% (`fire_slow`, cast-move pass 2026-11-11, docs/KIT_PARITY.md); asserted 66-78% |
+| LMB | move while firing | 92.5 px/s over 1.4 s of held fire against 128-130 on plain runs: 0.71 [footage 0008-0015; docs/MOVEMENT_FEEL.md] | 90% of the run | 71% (arc_bolts `fire_slow`); asserted 0.67-0.75 |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, R | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
@@ -536,6 +536,6 @@ dagger is lost; holding the step until she is free would read better.
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); R reaches it through
   `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared R base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
-  Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
+  Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

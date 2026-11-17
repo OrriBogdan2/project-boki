@@ -3,9 +3,9 @@ extends RefCounted
 ## One hunter's glider sounds (tools/gen_sfx_glider.py, content/sfx/glider.json), and the free fall before
 ## it: after jumping out of the drop rocket the canopy is folded, so a buffeting wind (drop_fall_wind,
 ## tools/gen_sfx_rocket.py) rises with your speed until the glider opens and its snap and wind take over.
-## The glider: a snap as the canopy opens, a wind loop that pitches and swells with speed, a whoosh as the
-## Ctrl dive starts, a hiss that swells as the heat runs out, a crackle and a burn loop while it overheats,
-## a fold as it closes.
+## The glider: a snap as the canopy opens and a wind loop that pitches and swells with speed (both from the skin),
+## a whoosh as the Ctrl dive starts, a hiss that swells as the heat runs out, a crackle and a burn loop while it
+## overheats, a fold as it closes.
 ## Ticked once a frame for every hunter, yours and everyone else's (theirs are positional and quieter,
 ## driven by the synced glide flag, velocity and the overheat bit), so each cue fires once on the change
 ## of state, never every frame.
@@ -32,6 +32,8 @@ var open := false               # the glider was open last tick
 var hot := false                # ...and burning
 var diving := false             # ...and plunging
 var net_hot := false            # another player's overheat bit (Match._net_apply)
+var start_cue := Gliders.DEFAULT_SNAP    # this glider skin's cues, read as it opens
+var loop_cue := Gliders.DEFAULT_WIND
 
 ## Called every frame by the hunter; plays the cue for whatever changed since the last call.
 func tick(h: Hunter) -> void:
@@ -42,7 +44,10 @@ func tick(h: Hunter) -> void:
 	var burning := gliding and not h.dropping and (net_hot if h.remote else h.glide_fuel <= 0.001)
 	var plunging := gliding and not h.dropping and h.glide_dive.on
 	if gliding and not open:
-		Sfx.play("glider_snap", h.pos, SNAP_DB + trim)
+		var skin := Gliders.skin_of(h)
+		start_cue = Gliders.glide_cue(skin, "start")
+		loop_cue = Gliders.glide_cue(skin, "loop")
+		Sfx.play(start_cue, h.pos, SNAP_DB + trim)
 	elif open and not gliding:
 		Sfx.play("glider_fold", h.pos, FOLD_DB + trim)
 	if plunging and not diving:
@@ -63,7 +68,7 @@ func tick(h: Hunter) -> void:
 	if gliding:
 		var k := clampf(v.length() / HunterMove.dive_vy, 0.0, 1.0)
 		var vol := lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k) + trim
-		Sfx.loop_hold("glider_wind%d" % id, "glider_wind", h.pos, vol, lerpf(WIND_LOW, WIND_HIGH, k))
+		Sfx.loop_hold("glider_wind%d" % id, loop_cue, h.pos, vol, lerpf(WIND_LOW, WIND_HIGH, k))
 	if gliding and not burning and not h.remote and h.glide_fuel < HISS_FROM:
 		var hiss_db := lerpf(HISS_DB, HISS_DB - 18.0, h.glide_fuel / HISS_FROM) + trim
 		Sfx.loop_hold("glider_hiss%d" % id, "glider_hiss", h.pos, hiss_db)
