@@ -19,7 +19,7 @@ const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
-const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: mantlekit.py poses
+# (Vex, Kael, Cinder and Meeko's mantlekit.py poses are not in main's .glb files yet: they stay procedural)
 const CLIMBERS := ["dredge", "rimewright"]    # Grimble, Neve: glb_climb_clips.py (Lace and Tenzo stretch: procedural)
 
 var bad := 0
@@ -42,12 +42,10 @@ func run(main: Node) -> void:
 		_air_legs(String(id))
 		_air(String(id))
 	_finishers()
-	for id in MANTLERS:
-		_mantle(String(id), false)
 	for id in CLIMBERS:
 		_mantle(String(id), true)
 	for id in Arch.ORDER:
-		if not MANTLERS.has(String(id)) and not CLIMBERS.has(String(id)):
+		if not CLIMBERS.has(String(id)):
 			_mantle_proc(String(id))
 	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
@@ -293,7 +291,9 @@ func _mantle_proc(id: String) -> void:
 	var sync := m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	if sync != null and sync.clips != null:
 		var clips: WardenClips = sync.clips
-		ok(not (clips.d.get("climb", {}) as Dictionary).has("mantle") and bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
+		var keyed := (clips.d.get("climb", {}) as Dictionary).has("mantle")
+		keyed = keyed or (clips.d["states"] as Dictionary).has("mantle")
+		ok(keyed or bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
 				"%s: no climb clip, a ledge rise plays the procedural pose" % id)
 	m.free()
 

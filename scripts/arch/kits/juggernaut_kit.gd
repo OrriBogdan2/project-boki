@@ -664,9 +664,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash). On
+## the ground a tap with the Smash resting is the lighter strike, which keeps its own cooldown and deny (_tap_strike).
 func rmb_open() -> bool:
-	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+	return (not h.grounded and ch_rmb >= 1.0) or (h.grounded and ch_rmb < 1.0) or super.rmb_open()
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
 ## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
