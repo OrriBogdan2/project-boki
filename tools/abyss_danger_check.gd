@@ -4,7 +4,7 @@ extends RefCounted
 ## and no sound down to start_depth, then the tint and the warning heartbeat (level and rate) rise
 ## monotonically, the tint to 1 exactly at the kill depth, and both are gone again on the way back up.
 
-const SPAN := 17.5   # m, lip to the point of no return (World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA)
+const SPAN := 17.5  # m, lip to the point of no return (World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA)
 
 var bad := 0
 
@@ -48,7 +48,10 @@ func run(m: Node) -> void:
 	var db_full := AbyssFallSfx.warn_db(1.0)
 	var db_mid := AbyssFallSfx.warn_db(mid)
 	var db_low := AbyssFallSfx.warn_db(fx.danger_depth(start + 0.5, SPAN))
-	ok(db_low < db_mid and db_mid < db_full and db_full <= 0.0, "warning volume follows depth (%.1f < %.1f < %.1f dB)" % [db_low, db_mid, db_full])
+	ok(
+		db_low < db_mid and db_mid < db_full and db_full <= 0.0,
+		"warning volume follows depth (%.1f < %.1f < %.1f dB)" % [db_low, db_mid, db_full]
+	)
 	ok(AbyssFallSfx.warn_rate(1.0) > AbyssFallSfx.warn_rate(0.3) * 1.5, "the heartbeat quickens toward the end")
 	ok(fx.danger_depth(SPAN * 0.9, SPAN, true) >= fx.danger_depth(SPAN * 0.9, SPAN), "an empty glider reads no better")
 	ok(fx.danger_depth(start * 0.9, SPAN, true) == 0.0, "an empty glider still shows nothing above the start")

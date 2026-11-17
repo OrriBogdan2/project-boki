@@ -9,8 +9,8 @@ extends RefCounted
 ## (the child gets --abyss-child) and the movie lands in <tree>/<clip-dir>/abyss_danger.avi.
 
 const FPS := 60
-const LEAD_S := 1.5          # s above the lip before the drop
-const TAIL_S := 3.0          # s after the point of no return
+const LEAD_S := 1.5  # s above the lip before the drop
+const TAIL_S := 3.0  # s after the point of no return
 
 var main: Node
 var m: Match
@@ -28,9 +28,21 @@ func run(main_node: Node) -> void:
 			sink = float(String(a).substr(7))
 	var arch := "gunslinger"
 	Save.d["name"] = HeroTitle.base_name(arch)
-	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": 77, "length": 1e9, "no_drop": true,
-		"raid": "clear", "blight": false, "sim_keep": true, "arch": arch, "cls": Arch.weight(arch),
-		"weapon": Arch.signature(arch)}
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": 77,
+		"length": 1e9,
+		"no_drop": true,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"arch": arch,
+		"cls": Arch.weight(arch),
+		"weapon": Arch.signature(arch)
+	}
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
@@ -60,7 +72,10 @@ func run(main_node: Node) -> void:
 		var k: float = AbyssFx.danger(p)
 		maxk = maxf(maxk, k)
 		var db := AbyssFallSfx.warn_db(k)
-		label.text = "depth %4.1f m   danger %.2f   warning %s" % [lip - p.pos.y, k, ("%.0f dB, %.1f/s" % [db, AbyssFallSfx.warn_rate(k)]) if db > -INF else "off"]
+		label.text = (
+			"depth %4.1f m   danger %.2f   warning %s"
+			% [lip - p.pos.y, k, ("%.0f dB, %.1f/s" % [db, AbyssFallSfx.warn_rate(k)]) if db > -INF else "off"]
+		)
 		if frames % 30 == 0:
 			print("ADCLIP depth=%.1f k=%.2f db=%.1f" % [lip - p.pos.y, k, db])
 		frames += 1
@@ -106,8 +121,21 @@ func _record() -> void:
 	f.store_string("[display]\n\nwindow/size/viewport_width=1920\nwindow/size/viewport_height=1080\n\n")
 	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.9\n")
 	f.close()
-	var args := ["--path", root, "--rendering-driver", "vulkan", "--audio-driver", "Dummy", "--resolution",
-		"1920x1080", "--fixed-fps", str(FPS), "--write-movie", root.path_join(dir).path_join("abyss_danger.avi"), "--"]
+	var args := [
+		"--path",
+		root,
+		"--rendering-driver",
+		"vulkan",
+		"--audio-driver",
+		"Dummy",
+		"--resolution",
+		"1920x1080",
+		"--fixed-fps",
+		str(FPS),
+		"--write-movie",
+		root.path_join(dir).path_join("abyss_danger.avi"),
+		"--"
+	]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--abyss-child")
 	var out: Array = []
