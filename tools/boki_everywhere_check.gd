@@ -19,8 +19,10 @@ var bad := 0
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--species="): species = a.substr(10).split(",")
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--species="):
+			species = a.substr(10).split(",")
 	var shots := out != "" and DisplayServer.get_name() != "headless"
 	if shots:
 		DirAccess.make_dir_recursive_absolute(out)
@@ -32,8 +34,20 @@ func run(m: Node) -> void:
 		var reveal := KinReveal.new(sp, {"level": 5})
 		main.add_child(reveal)
 		var rev_rig := reveal.find_child("BokiRig", true, false)
-		print("BOKI_EVERYWHERE %s glb=%s exists=%s has=%s models_kin=%s reveal=%s tris=%d" % [sp, p,
-			ResourceLoader.exists(p), BokiRig.has(sp), "rig" if rig else "OLD", "rig" if rev_rig else "OLD", _tris(k)])
+		print(
+			(
+				"BOKI_EVERYWHERE %s glb=%s exists=%s has=%s models_kin=%s reveal=%s tris=%d"
+				% [
+					sp,
+					p,
+					ResourceLoader.exists(p),
+					BokiRig.has(sp),
+					"rig" if rig else "OLD",
+					"rig" if rev_rig else "OLD",
+					_tris(k)
+				]
+			)
+		)
 		if rig == null or rev_rig == null:
 			bad += 1
 		if shots:
@@ -71,8 +85,9 @@ func _shot(k: Node3D, path: String) -> void:
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	main.add_child(vp)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	vp.add_child(env)
 	Look.lights(vp, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var cam := Camera3D.new()
@@ -90,6 +105,6 @@ func _shot(k: Node3D, path: String) -> void:
 
 
 func _grab_window(path: String) -> void:
-	for i in 30:      # the card's intro plays a moment before the Boki is in view
+	for i in 30:  # the card's intro plays a moment before the Boki is in view
 		await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(path)
