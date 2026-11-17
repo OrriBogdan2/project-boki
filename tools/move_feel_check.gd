@@ -1326,7 +1326,7 @@ const KIT_DASH := {
 	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
 	"archer": {"ground": [3.375, 0.386], "long": [5.0, 0.286],
 			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
-	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
+	"ashwick": {"ground": [3.4, 0.33], "air": [3.4, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 3.4 m (owner 11-17)"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
 	# owner item 183 (bdb7703bd): with a charge her air cartwheel is the ground one (the sheet's 8.4 m / 0.95 s retired)
