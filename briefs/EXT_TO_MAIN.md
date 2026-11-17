@@ -10097,3 +10097,4 @@ READY ext/motley-r3a-game 9740278f7e (Motley v95 r3 A tail paint in game ostra.g
 READY ext/rimewright-skate-rebased-port 2b0156455bf0530ef7b0827b35be778aaa17f35b (origin/main merged in; only conflict tools/art1/glb_add_clips.py: main's --drop-missing kept plus the orphan prune; same-clip replace on breaker.glb 9.28 MB vs 9.47 MB with main's script, rerun identical; gen_wiki --check 50 unchanged; health --strict red only on main's style rows + numpy missing on w2, none in glb_add_clips; SUPERSEDES 17b64eb0ed2)
 READY ext/boki-models-everywhere-1117 dbe846b9cf8 (Soakybara+Umbrathere glb restored; --boki-everywhere-check)
 READY ext/abyss-danger-ramp-1117 4a1f9bf78bfa9bcf4a01f9dc3e5d44a4b883e0d5 (abyss tint+warning graded by depth, start depth in rules data, headless check + GPU mp4)
+READY ext/merge-lane-hunters1-1117 a632803444 (SUPERSEDES f02f57817c: same bundle plus origin/main d39f69a357; local gate on f02f57817c GREEN, NEW-RED 0, export OK 841 MB)
