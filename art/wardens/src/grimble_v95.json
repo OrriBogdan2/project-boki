@@ -65,6 +65,6 @@
   "anchor_gun_root": [-0.47, -0.05, 0.5]
  },
  "anchor_bones": {"weapon_muzzle": "hand.L", "anchor_gun_root": "hand.L"},
- "detach": [["gun", "*"], ["hoard", "*"], ["hook", "thigh.R"], ["hook", "shin.R"], ["hook", "foot.R"], ["hook", "root"], ["hook", "hips"]],
+ "detach": [["gun", "*"], ["forearm.L", "thigh.L"], ["hand.L", "thigh.L"], ["forearm.L", "hips"], ["hand.L", "hips"], ["hoard", "*"], ["hook", "thigh.R"], ["hook", "shin.R"], ["hook", "foot.R"], ["hook", "root"], ["hook", "hips"]],
  "move_bones": {"ball": [0.0, 0.1, 0.26]}
 }
