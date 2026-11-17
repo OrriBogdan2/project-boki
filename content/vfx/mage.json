@@ -72,10 +72,6 @@
 		"blowout": {"net": false, "fx": [
 			{"p": "bolt", "y": 6.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.3, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
-		"refund": {"net": false, "fx": [
-			{"p": "skirt", "size": 0.77, "from": 1.0, "tall": 3.2, "life": 1.2, "c": "copper", "c2": "core", "c3": "deep"}
-		]},
-
 		"rod_summon": {"net": false, "fx": [
 			{"p": "flare", "at": "hand_r", "size": 1.0, "life": 0.08, "c": "core", "c2": "hot", "c3": "deep"},
 			{"p": "ember", "n": 5, "speed": 6.0, "spread": 1.0, "drag": 1.0, "life": 0.16, "size": 0.06, "stretch": 0.06,
