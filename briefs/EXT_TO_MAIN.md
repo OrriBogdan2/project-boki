@@ -10101,3 +10101,4 @@ READY ext/merge-lane-hunters1-1117 a632803444 (SUPERSEDES f02f57817c: same bundl
 READY ext/hunter-glb-restore-1117 c0218cc89d (hunters: picked 3D models restored for Kael, Vex, Sable, Sparkle, Tenzo; glb_relax and Art: guards; GPU sheets in meshy/hunter-glb-restore-1117)
 READY ext/prompt-queue-1117 48fe778a3412 (tutorial/HUD pop-ups never overlap: one hint at a time + banner-first top stack; --prompt-queue-check 12/12)
 READY ext/neve-ult-label-1117 43573bd8e9 (Neve ult: no stray ROOTED 0.1; no stuck status seconds under 0.5 s; --ult-label-scan 13/13)
+READY ext/vex-coin-palm-1117 aae12ce1f248d624ccfe1c77325dc3802ff6551c (Vex: RMB is a clear coin toss, E casts from her palm)
