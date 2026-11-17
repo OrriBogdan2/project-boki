@@ -77,7 +77,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
@@ -99,7 +99,7 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster

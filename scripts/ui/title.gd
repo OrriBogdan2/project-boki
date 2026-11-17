@@ -15,7 +15,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")          # its own slow drone, not the match wind
 	_build_ui()
 
 func _process(delta: float) -> void:
@@ -99,6 +99,7 @@ func _build_ui() -> void:
 		items.append(["Party", func(): Game.goto("party", {}), "bond"])
 	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
+	items.append(["Help", _open_words, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
@@ -137,6 +138,10 @@ func _build_ui() -> void:
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
 	b1.grab_focus()
+
+func _open_words() -> void:
+	Overlay.ctx = "title"
+	Overlay.open_words()
 
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:

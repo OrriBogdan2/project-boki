@@ -2,7 +2,9 @@ extends RefCounted
 ## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
-## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
 ##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
@@ -25,11 +27,22 @@ extends RefCounted
 ##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
 ##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
 ##                   (the see-through canopies: SeeThrough)
+##  15 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
+##                   backpedal facing east, then kite north 4 s with the aim swaying east (KITE_SWAY), on the game
+##                   camera (--media-secs=23 for all of it); <dir>/loco_<id>.tsv logs body and feet per frame
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
+const AUDIT := preload("res://tools/anim_audit.gd")
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
 const MATE_GAP := 13.0           # m from the player to each teammate (far enough that the teleport reads)
 const FRAME := 2.0 * STEP        # s per rendered frame
+## [from s, move (screen x east, y south; length = stick), label]: the player always faces east (the aim stays put).
+const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"], [4.0, Vector2.ZERO, "stop"],
+		[5.0, Vector2(1, 0), "run"], [8.0, Vector2.ZERO, "stop"], [9.0, Vector2(0, -1), "strafe_l"],
+		[11.0, Vector2.ZERO, "stop"], [12.0, Vector2(0, 1), "strafe_r"], [14.0, Vector2.ZERO, "stop"],
+		[15.0, Vector2(-1, 0), "back"], [17.0, Vector2.ZERO, "stop"], [18.0, Vector2(0, -1), "kite"],
+		[22.0, Vector2.ZERO, "stop"]]
+const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
 const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
@@ -51,8 +64,10 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
+var loco_id := "gunslinger"      # --media-hunter=: clip 15's Hunter
 var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
@@ -73,8 +88,12 @@ func run(main_node: Node) -> void:
 			secs = float(arg.substr(13))
 		if arg.begins_with("--media-fight="):
 			fight = arg.substr(14)
+		if arg.begins_with("--media-hunter="):
+			loco_id = arg.substr(15)
 		if arg.begins_with("--media-zoom="):
 			fight_zoom = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -84,6 +103,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
@@ -99,6 +120,7 @@ func run(main_node: Node) -> void:
 		12: await _dive_feather(secs)
 		13: await _boss_focus(secs)
 		14: await _forest(secs)
+		15: await _locomotion(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -160,6 +182,8 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 
 ## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
 func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
 	m.cam.zoom = z
 	m.cam.zoom_to = z
 
@@ -179,6 +203,8 @@ func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void
 	var t := 0.0
 	while t < secs:
 		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
@@ -650,3 +676,78 @@ func _boss_focus(secs: float) -> void:
 			h.hp = h.max_hp
 		boss.hp = maxf(boss.hp, boss.max_hp * 0.3)      # (still up when the clip ends)
 	await _go(secs, each, func(_t: float): return (P.pos + B.pos + boss.pos) / 3.0)
+
+# ------------------------------------------------------------------ 14: locomotion
+
+## The player (--media-hunter) walks, runs and strafes the plan on the game camera; feet and speed go to a TSV.
+func _locomotion(secs: float) -> void:
+	await _start(loco_id, "cindle")
+	var pl := m.player
+	pl.teleport(_loco_start(pl.pos))
+	_zoom(fight_zoom)
+	var sk := WardenGlb.skeleton(pl.model.get_node_or_null("Warden"))
+	var log := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
+	# (aL aR: the ankles now, a0L a0R: at rest, in the body's own frame: _ankle)
+	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy\taL\taR\ta0L\ta0R")
+	var rest := [_ankle(sk, "L", true), _ankle(sk, "R", true)]
+	_mark("start")
+	await _go(secs, func(t: float):
+		var move := Vector2.ZERO
+		var label := "idle"
+		for k in LOCO_PLAN:
+			if t >= float(k[0]):
+				move = k[1]
+				label = k[2]
+		pl.inp["move"] = move
+		var sway := KITE_SWAY * sin(TAU * 0.7 * t) if label == "kite" else 0.0
+		pl.inp["aim"] = pl.pos + Vector3(8.0 * cos(sway), 0.9, 8.0 * sin(sway))
+		var pts := AUDIT.points(sk)
+		var fl: Vector3 = pts["foot.L"]
+		var fr: Vector3 = pts["foot.R"]
+		var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
+		var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
+		var cols := "%.4f\t%s" + "\t%.4f".repeat(18)
+		log.store_line(cols % [
+				t, label, pl.pos.x, pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z, pl.pos.y,
+				(pts["hips"] as Vector3).y, knee_l.y, knee_r.y, _ankle(sk, "L", false), _ankle(sk, "R", false),
+				rest[0], rest[1]]),
+		func(_t: float): return pl.render_pos(1.0), true)
+	log.close()
+
+## A leg's ankle height (m) in the body's own frame, its feet's floor at 0 (the Hunters lean back toward the camera,
+## CamRig.char_lean, so the world's height is not the floor's): the foot bone's head, or for a rig without one the
+## shin's tip a thigh's length down it (as anim_audit's "foot"). `rest`: in the rest pose (the feet flat on it).
+static func _ankle(sk: Skeleton3D, side: String, rest: bool) -> float:
+	var shin := WardenSkeleton.find(sk, "shin." + side)
+	var foot := WardenSkeleton.find(sk, "foot." + side)
+	if foot < 0:
+		foot = WardenSkeleton.find(sk, "x_foot." + side)
+	var pose := sk.get_bone_global_rest if rest else sk.get_bone_global_pose
+	var at: Vector3
+	if foot >= 0:
+		at = (pose.call(foot) as Transform3D).origin
+	else:
+		var thigh := sk.get_bone_global_rest(sk.get_bone_parent(shin)).origin
+		var leg := sk.get_bone_global_rest(shin).origin.distance_to(thigh)
+		var gs: Transform3D = pose.call(shin)
+		at = gs.origin + gs.basis.y.normalized() * leg
+	return at.y * sk.global_basis.get_scale().y
+
+## The nearest spot to `p` with the plan's whole path (east 21 m, north 10 m, back, west 10 m, north 18 m) on open,
+## level ground.
+func _loco_start(p: Vector3) -> Vector3:
+	for rad in range(0, 90, 3):
+		for k in maxi(1, int(TAU * rad / 3.0)):
+			var a := TAU * k / maxi(1, int(TAU * rad / 3.0))
+			var at := Vector2(p.x + cos(a) * rad, p.z + sin(a) * rad)
+			var ok := true
+			for i in 23:
+				ok = ok and m.world.call("_fits", at.x + i, at.y, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 22.0, at.y - 0.5 * i, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 12.0, at.y - 0.85 * i, 0.7)
+				ok = ok and absf(m.world.ground_at(at.x + i, at.y) - m.world.ground_at(at.x, at.y)) < 0.3
+				if not ok:
+					break
+			if ok:
+				return Vector3(at.x, m.world.ground_at(at.x, at.y), at.y)
+	return _ground(p)

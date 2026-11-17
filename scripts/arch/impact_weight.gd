@@ -44,8 +44,12 @@ static func of_hit(by: Ent, target: Ent, d: float, o: Dictionary) -> String:
 	var w := of_ability((by as Hunter).arch, ability_of(o)) if by is Hunter else ""
 	if w == "":
 		w = "solid" if big else "light"
+	if o.get("heavy", false) and w != "heavy":
+		w = "solid"      # an empowered hit (a point-blank volley, a primed shot) is never a poke
 	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false):
 		w = TIERS[mini(TIERS.find(w) + 1, TIERS.size() - 1)]
+	if o.get("heavy", false) and w == "light":
+		w = "solid"    # an empowered hit (o.heavy: a point-blank volley, a marked finisher) is never light
 	return w
 
 ## The tier's fixed hit-stop, seconds.
