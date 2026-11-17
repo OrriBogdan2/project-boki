@@ -1,0 +1,15 @@
+content/archetypes/archer.json
+content/archetypes/dredge.json
+content/archetypes/tender.json
+content/rules/kit_parity.json
+docs/TTK.md
+docs/heroes/archer.md
+docs/heroes/dredge.md
+docs/heroes/tender.md
+docs/wiki/Class-Dawnfox.md
+docs/wiki/Class-Red-Stitch.md
+docs/wiki/Class-Scrap-King.md
+docs/wiki/Rules.md
+tools/archer_bulwark_combo_check.gd
+tools/parity_pvb.gd
+tools/ttk_check.gd

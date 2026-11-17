@@ -1,0 +1,18 @@
+CONFLICT ef5cfe9425: scripts/home/base_race.gd tools/race_check.gd 
+CONFLICT d95721ee68: tools/race_check.gd 
+CONFLICT 87f1f9019d: tools/garden_first_day_check.gd 
+CONFLICT ba7de7b971: tools/hatch_check.gd 
+CONFLICT 334a66e2a0: tools/hatch_check.gd tools/style_baseline.json 
+OK 5efb734186
+CONFLICT b24ee8dccd: scripts/core/settings.gd 
+CONFLICT b310a1a621: content/rules/dash_feel.json scripts/arch/kits/ashwick_kit.gd tools/move_feel_check.gd 
+CONFLICT 23b3e91ac3: docs/DEBT.md docs/SUPERVIVE_FEEL.md 
+CONFLICT da994ed0ca: 
+OK 80747c29fb
+CONFLICT 2bb9c7791a: content/rules/hunter_move.json content/rules/tuning.json docs/HUD.md docs/decisions/0026-supervive-movement-pass.md scripts/arch/arch_kit.gd scripts/arch/kits/juggernaut_kit.gd 
+OK ab80f7f467
+OK 4ad2bd04a5
+CONFLICT 5109eea5d0: tools/hub_hints_check.gd 
+CONFLICT 71c53a6dc6: scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd scripts/arch/kits/juggernaut_kit.gd tools/kael_cancel_rows_check.gd tools/kael_turn_check.gd tools/move_feel_check.gd 
+CONFLICT cbb26d25de: ops/stuck-integ-62ec7ba9/README.md 
+DONE

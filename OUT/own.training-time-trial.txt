@@ -1,0 +1,17 @@
+content/maps/arena.json
+docs/decisions/0062-time-trial-bests.md
+docs/wiki/Maps.md
+scripts/core/save.gd
+scripts/match/arena.gd
+scripts/match/grounds.gd
+scripts/match/grounds.gd.uid
+scripts/match/time_trial.gd
+scripts/match/time_trial.gd.uid
+tools/arena_check.gd
+tools/check_registry.gd
+tools/grounds_check.gd
+tools/grounds_check.gd.uid
+tools/grounds_shots.gd
+tools/grounds_shots.gd.uid
+tools/time_trial_check.gd
+tools/time_trial_check.gd.uid

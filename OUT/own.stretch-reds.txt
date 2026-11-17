@@ -1,0 +1,15 @@
+art/wardens/cinder/cinder.glb
+art/wardens/claire/claire.glb
+art/wardens/dredge/dredge.glb
+art/wardens/hem/hem.glb
+art/wardens/kael/kael.glb
+art/wardens/ostra/ostra.glb
+art/wardens/pip/pip.glb
+art/wardens/ryzz/ryzz.glb
+art/wardens/sable/sable.glb
+art/wardens/tarek/tarek.glb
+art/wardens/vex/vex.glb
+docs/DEBT.md
+docs/art/wardens/V95_SWAP.md
+tools/art1/glb_relax.py
+tools/art1/skin_relax.py
