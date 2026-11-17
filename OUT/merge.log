@@ -1,0 +1,353 @@
+Auto-merging docs/AUDIO.md
+Auto-merging docs/DASHES_AND_ABILITY_FEEL.md
+Auto-merging docs/DEBT.md
+Auto-merging scripts/arch/arch_kit.gd
+Auto-merging scripts/arch/kits/dolm_kit.gd
+Auto-merging scripts/arch/kits/dredge_kit.gd
+Auto-merging scripts/arch/kits/juggernaut_kit.gd
+Auto-merging scripts/arch/kits/pin_draw.gd
+Auto-merging scripts/arch/kits/rimewright_kit.gd
+Auto-merging scripts/arch/kits/thief_kit.gd
+Auto-merging scripts/match/match.gd
+Auto-merging scripts/match/step_reach.gd
+Auto-merging tools/capture_check.gd
+Auto-merging tools/garden_sfx_check.gd
+Auto-merging tools/sfx_set_check.gd
+Merge made by the 'ort' strategy.
+Auto packing the repository in background for optimum performance.
+See "git help gc" for manual housekeeping.
+ AGENTS.md                                          |   1 +
+ CONTRIBUTING.md                                    |   2 +-
+ MERGE_REPORT.md                                    |   4 +-
+ README.md                                          |   6 +-
+ answer.md                                          |   4 +-
+ art-refs/source/celeste_lmb/README.md              |   6 +-
+ art/wardens/hem/IMPORT.md                          |   9 +
+ art/wardens/kael/IMPORT.md                         |   9 +
+ art/wardens/kael/kael.glb                          | Bin 14032740 -> 15410976 bytes
+ art/wardens/ryzz/ryzz.glb                          | Bin 17415500 -> 17415500 bytes
+ art/wardens/sable/sable.glb                        | Bin 12398088 -> 12398088 bytes
+ art/wardens/tarek/IMPORT.md                        |   2 +
+ art/wardens/tarek/tarek.glb                        | Bin 9864792 -> 9864792 bytes
+ art/wardens/vex/IMPORT.md                          |   2 +
+ art/wardens/vex/vex.glb                            | Bin 8567012 -> 8567012 bytes
+ briefs/CAMERA_DEPTH.md                             |   6 +-
+ content/archetypes/dredge.json                     |   2 +-
+ content/dash_flow/archer.json                      |  53 +--
+ content/dash_flow/ashwick.json                     |  27 +-
+ content/dash_flow/bulwark.json                     |  25 +-
+ content/dash_flow/dolm.json                        |  31 +-
+ content/dash_flow/dredge.json                      |  18 +-
+ content/dash_flow/gil.json                         |   6 +
+ content/dash_flow/gunslinger.json                  |  30 +-
+ content/dash_flow/juggernaut.json                  |  29 +-
+ content/dash_flow/mage.json                        |  47 ++-
+ content/dash_flow/ostra.json                       |  42 ++-
+ content/dash_flow/rimewright.json                  |  22 +-
+ content/dash_flow/tender.json                      |  20 +-
+ content/dash_flow/thief.json                       |  14 +-
+ content/rules/boki_system.json                     |   2 +-
+ content/rules/camera.json                          |   3 +-
+ content/rules/hunter_move.json                     |   6 +-
+ content/rules/kit_parity.json                      |  22 +-
+ content/rules/level_growth.json                    |   2 +-
+ content/rules/mantle_press.json                    |  10 +-
+ content/rules/tuning.json                          |   2 +-
+ docs/ABILITIES.md                                  |   8 +-
+ docs/AIMKIT.md                                     |   2 +-
+ docs/AIM_PREVIEWS.md                               |   2 +-
+ docs/ARCHETYPES.md                                 | 112 +++---
+ docs/ARMOUR_PARITY.md                              |   6 +-
+ docs/ASSET_CREDITS.md                              |   2 +-
+ docs/AUDIO.md                                      |   6 +-
+ docs/BALANCE_1111.md                               |   4 +-
+ docs/BRANCH_AUDIT.md                               |   2 +-
+ docs/CAMP_PARITY.md                                |   6 +-
+ docs/COMBAT_CLARITY.md                             |   2 +-
+ docs/COMBAT_NUMBERS.md                             |  15 +
+ docs/CONSUMABLES.md                                |   2 +-
+ docs/CREDITS.md                                    |   2 +-
+ docs/DASHES_AND_ABILITY_FEEL.md                    | 130 +++----
+ docs/DEATH_AND_REVIVE.md                           |   6 +-
+ docs/DEBT.md                                       |  23 +-
+ docs/EXPEDITION_SPEC.md                            |  27 +-
+ docs/FUN_AUDIT_1111.md                             |   2 +-
+ docs/GARDEN_DAY_PLAYED.md                          |   4 +-
+ docs/HITBOX_SIZE.md                                |   4 +-
+ docs/HUD.md                                        |   5 +-
+ docs/INPUT_MODES.md                                |  44 +--
+ docs/KINFALL_CLASSES.md                            |  30 +-
+ docs/KIT_PARITY.md                                 |  94 ++---
+ docs/KNOCK_RESETS.md                               |   2 +-
+ docs/KNOCK_WALLS.md                                |   6 +-
+ docs/LOOT_FEEL.md                                  |   6 +-
+ docs/MERGE_PLAN_0246.md                            |  12 +-
+ docs/MOVEMENT_FEEL.md                              | 170 +++++----
+ docs/MOVEMENT_PARITY.md                            |   6 +-
+ docs/MOVEMENT_TUNING.md                            |  40 +++
+ docs/PARITY_1111.md                                |   2 +-
+ docs/PICKUP_REACH.md                               |   4 +-
+ docs/SOURCE_UTILITIES.md                           |   4 +-
+ docs/SUPERVIVE_DATA.md                             | 298 ----------------
+ docs/SUPERVIVE_FEEL.md                             |   5 +-
+ docs/TTK.md                                        |  14 +-
+ docs/TTK_MATRIX.md                                 |   2 +-
+ docs/UI_DESIGN.md                                  |   2 +-
+ docs/UTHANA_RANK.md                                |   2 +-
+ docs/WEAPON_FIRING_DATA.md                         |  48 +--
+ docs/art/DASH_DIR.md                               |   2 +-
+ docs/art/mobs/README.md                            |   4 +-
+ docs/art/wardens/LOOK_AT.md                        |   2 +-
+ docs/art/wardens/V95_SWAP.md                       |   4 +-
+ docs/art/wardens/dirloops/JUDGE.md                 |  56 +++
+ docs/art/wardens/dirloops/lace-kael/key.json       | 178 ++++++++++
+ docs/art/wardens/dirloops/lace-kael/pair01.jpg     | Bin 0 -> 63581 bytes
+ docs/art/wardens/dirloops/lace-kael/pair02.jpg     | Bin 0 -> 52668 bytes
+ docs/art/wardens/dirloops/lace-kael/pair03.jpg     | Bin 0 -> 52210 bytes
+ docs/art/wardens/dirloops/lace-kael/pair08.jpg     | Bin 0 -> 68601 bytes
+ docs/art/wardens/dirloops/lace-kael/pair09.jpg     | Bin 0 -> 51020 bytes
+ docs/art/wardens/dirloops/lace-kael/pair10.jpg     | Bin 0 -> 49638 bytes
+ docs/art/wardens/dirloops/lace-kael/pair15.jpg     | Bin 0 -> 57514 bytes
+ docs/art/wardens/dirloops/lace-kael/pair16.jpg     | Bin 0 -> 46076 bytes
+ docs/art/wardens/dirloops/lace-kael/pair17.jpg     | Bin 0 -> 44990 bytes
+ docs/art/wardens/dirloops/lace-kael/pair22.jpg     | Bin 0 -> 57054 bytes
+ docs/art/wardens/dirloops/lace-kael/pair23.jpg     | Bin 0 -> 41540 bytes
+ docs/art/wardens/dirloops/lace-kael/pair24.jpg     | Bin 0 -> 41635 bytes
+ docs/art/wardens/dirloops/lace-kael/solo04.jpg     | Bin 0 -> 41948 bytes
+ docs/art/wardens/dirloops/lace-kael/solo05.jpg     | Bin 0 -> 42940 bytes
+ docs/art/wardens/dirloops/lace-kael/solo06.jpg     | Bin 0 -> 43347 bytes
+ docs/art/wardens/dirloops/lace-kael/solo07.jpg     | Bin 0 -> 42367 bytes
+ docs/art/wardens/dirloops/lace-kael/solo11.jpg     | Bin 0 -> 45843 bytes
+ docs/art/wardens/dirloops/lace-kael/solo12.jpg     | Bin 0 -> 45869 bytes
+ docs/art/wardens/dirloops/lace-kael/solo13.jpg     | Bin 0 -> 45265 bytes
+ docs/art/wardens/dirloops/lace-kael/solo14.jpg     | Bin 0 -> 45939 bytes
+ docs/art/wardens/dirloops/lace-kael/solo18.jpg     | Bin 0 -> 37451 bytes
+ docs/art/wardens/dirloops/lace-kael/solo19.jpg     | Bin 0 -> 37679 bytes
+ docs/art/wardens/dirloops/lace-kael/solo20.jpg     | Bin 0 -> 38161 bytes
+ docs/art/wardens/dirloops/lace-kael/solo21.jpg     | Bin 0 -> 37893 bytes
+ docs/art/wardens/dirloops/lace-kael/solo25.jpg     | Bin 0 -> 36854 bytes
+ docs/art/wardens/dirloops/lace-kael/solo26.jpg     | Bin 0 -> 37512 bytes
+ docs/art/wardens/dirloops/lace-kael/solo27.jpg     | Bin 0 -> 37987 bytes
+ docs/art/wardens/dirloops/lace-kael/solo28.jpg     | Bin 0 -> 37474 bytes
+ .../dirloops/pelvis/vex_run_strip.jpg.import       |  40 +++
+ .../dirloops/pelvis/vex_walk_strip.jpg.import      |  40 +++
+ docs/decisions/0006-perk-orbs.md                   |  28 +-
+ docs/decisions/0007-wall-moves.md                  |   2 +-
+ docs/decisions/0019-downed-wisp.md                 |   4 +-
+ docs/decisions/0021-glide-dive.md                  |   8 +-
+ docs/decisions/0022-held-fire-resume.md            |  20 ++
+ docs/decisions/0022-one-movement-model.md          |   2 +-
+ docs/decisions/0022-slow-haste-ramp.md             |   2 +-
+ docs/decisions/0022-ult-ranks.md                   |  28 +-
+ docs/decisions/0023-glide-wall-slide.md            |   4 +-
+ docs/decisions/0025-fitted-dash-curves.md          |   6 +-
+ docs/decisions/0026-movement-pass.md               |  26 ++
+ docs/decisions/0026-supervive-movement-pass.md     |  32 --
+ docs/decisions/0027-glide-start-steer-parity.md    |   8 +-
+ docs/decisions/0045-mantle-press.md                |   2 +-
+ docs/decisions/0047-dash-wall-slide.md             |   4 +-
+ docs/decisions/0054-move-speed-stacking.md         |   2 +-
+ docs/decisions/0061-walk-speed-body-scale.md       |   4 +-
+ docs/decisions/0099-dash-glide-carry.md            |   2 +-
+ docs/heroes/archer.md                              |  50 +--
+ docs/heroes/ashwick.md                             |  46 +--
+ docs/heroes/bulwark.md                             |  38 +-
+ docs/heroes/dash_interactions.md                   | 337 +++++++++++-------
+ docs/heroes/deployables.md                         |   2 +-
+ docs/heroes/dolm.md                                |  12 +-
+ docs/heroes/dredge.md                              |  56 +--
+ docs/heroes/gunslinger.md                          |  34 +-
+ docs/heroes/hold_release_rules.md                  |   2 +-
+ docs/heroes/juggernaut.md                          |  26 +-
+ docs/heroes/mage.md                                |  26 +-
+ docs/heroes/ostra.md                               |  24 +-
+ docs/heroes/range_clamp.md                         |   2 +-
+ docs/heroes/rimewright.md                          |  54 +--
+ docs/heroes/tender.md                              |  52 +--
+ docs/heroes/thief.md                               |  32 +-
+ docs/heroes/ults.md                                |   2 +-
+ docs/parity_reel/README.md                         |  12 +-
+ docs/shots/ui-clutter-zone/before_after.jpg        | Bin 0 -> 226138 bytes
+ docs/specs/ADS_CAMERA.md                           |   8 +-
+ docs/specs/DAMAGE_RATIOS.md                        |   4 +-
+ docs/specs/DOWNED_ABILITIES.md                     |   8 +-
+ docs/specs/LOOK_AHEAD.md                           |  30 ++
+ docs/specs/STEAL_COUNTERPLAY.md                    |   2 +-
+ docs/specs/SUMMON_CC.md                            |   2 +-
+ docs/specs/VISION.md                               |  29 +-
+ docs/wiki/Contributing-and-Licensing.md            |   2 +-
+ docs/wiki/Controls.md                              |   1 +
+ docs/wiki/Design-Docs.md                           |   4 +-
+ docs/wiki/Expeditions.md                           |   2 +-
+ docs/wiki/Inspirations.md                          |  20 +-
+ docs/wiki/Rules.md                                 |  25 +-
+ ops/merge-rush-1113/merge_batch.sh                 |   4 +-
+ ops/merge-train-1114/TRAIN_BATCH.md                |  49 +++
+ ops/merge-train-1114/regate_stub.sh                |   5 +
+ ops/merge-train-1114/train-batch                   | 382 ++++++++++++++++++++
+ ops/merge-train-1114/train_batch_test.sh           |  56 +++
+ project.godot                                      |   4 +
+ scripts/arch/arch_kit.gd                           |   7 +-
+ scripts/arch/kits/archer_kit.gd                    |   4 +-
+ scripts/arch/kits/ashwick_kit.gd                   |   6 +-
+ scripts/arch/kits/bulwark_kit.gd                   |  16 +-
+ scripts/arch/kits/dolm_kit.gd                      |   4 +-
+ scripts/arch/kits/dredge_kit.gd                    |   2 +-
+ scripts/arch/kits/gil_kit.gd                       |   8 +-
+ scripts/arch/kits/juggernaut_kit.gd                |   6 +-
+ scripts/arch/kits/pin_draw.gd                      |   2 +-
+ scripts/arch/kits/pin_ult.gd                       |   2 +-
+ scripts/arch/kits/rimewright_kit.gd                |   2 +-
+ scripts/arch/kits/thief_kit.gd                     |   4 +-
+ scripts/combat/verbs.gd                            |   1 -
+ scripts/core/care_journal.gd                       |   8 +-
+ scripts/core/game.gd                               |   1 +
+ scripts/core/loot.gd                               |   2 +-
+ scripts/core/net.gd                                |   2 +-
+ scripts/core/settings.gd                           |   5 +-
+ scripts/home/garden_away.gd                        |  38 +-
+ scripts/home/home.gd                               |   2 +-
+ scripts/match/aim/aim_mode.gd                      |   4 +-
+ scripts/match/base_recall.gd                       |   2 -
+ scripts/match/cam.gd                               |  63 +++-
+ scripts/match/fx.gd                                |   5 +
+ scripts/match/glider_sfx.gd                        |   3 +-
+ scripts/match/hunter.gd                            | 390 +--------------------
+ scripts/match/hunter_attack.gd                     | 390 +++++++++++++++++++++
+ scripts/match/hunter_attack.gd.uid                 |   1 +
+ scripts/match/hunter_move.gd                       |   2 +
+ scripts/match/juice.gd                             |   2 +-
+ scripts/match/kin_downed.gd                        |   2 -
+ scripts/match/lairs.gd                             |   1 -
+ scripts/match/mantle_carry.gd                      |  13 +-
+ scripts/match/match.gd                             |  78 +----
+ scripts/match/match_cam.gd                         |  66 ++++
+ scripts/match/match_cam.gd.uid                     |   1 +
+ scripts/match/merge_xform.gd                       |   2 -
+ scripts/match/rolling.gd                           |   7 +-
+ scripts/match/scout_look.gd                        |  26 ++
+ scripts/match/scout_look.gd.uid                    |   1 +
+ scripts/match/step_reach.gd                        |   2 +-
+ scripts/match/ult_glow.gd                          |   2 +-
+ scripts/match/wall_moves.gd                        |   4 +-
+ scripts/ui/hud.gd                                  |   2 +-
+ scripts/ui/hunter_zone.gd                          |  53 +++
+ scripts/ui/hunter_zone.gd.uid                      |   1 +
+ scripts/ui/knock_banner.gd                         |   9 +
+ scripts/ui/label_spacing.gd                        |   7 +-
+ scripts/ui/msg_lane.gd                             |  13 +-
+ scripts/ui/overlay.gd                              |   2 +-
+ shaders/vis.gdshaderinc                            |  18 +-
+ tools/README.md                                    |   2 +-
+ tools/aimkit_check.gd                              |   4 +-
+ tools/air_cast_check.gd                            | 149 ++++++++
+ tools/air_cast_check.gd.uid                        |   1 +
+ tools/ally_cc_check.gd                             |   2 +-
+ tools/archetype_check.gd                           |   2 +-
+ tools/art1/glb_relax.py                            | 227 ++++++++++++
+ tools/art1/hunter_dir_gait.py                      |  61 +++-
+ tools/art1/skin_relax.py                           |  84 +++--
+ tools/bjorn_launch_check.gd                        |   1 -
+ tools/capture_check.gd                             |   2 +-
+ tools/care_carry_check.gd                          |   2 +-
+ tools/check_registry.gd                            |  28 +-
+ tools/cliff_mantle_check.gd                        |   7 +-
+ tools/damage_ratio_check.gd                        |   2 +-
+ tools/damage_ratios.py                             |   2 +-
+ tools/displace_net_check.gd                        |  30 +-
+ tools/dredge_combo_check.gd                        |   3 +-
+ tools/equal_check.gd                               |   2 +-
+ tools/garden_day_played_check.gd                   |  31 ++
+ tools/garden_sfx_check.gd                          |   2 +-
+ tools/gear_parity_check.gd                         |   2 +-
+ tools/gen_wiki.py                                  |  46 ++-
+ tools/glide_hit_check.gd                           |   2 +-
+ tools/glider_heat_check.gd                         |  31 +-
+ tools/grammar_runtime_check.gd                     |   2 +-
+ tools/health.py                                    |   2 +-
+ tools/held_fire_resume_check.gd                    | 214 +++++++++++
+ tools/held_fire_resume_check.gd.uid                |   1 +
+ tools/hold_release_check.gd                        |   8 +-
+ tools/hunter_zone_check.gd                         | 157 +++++++++
+ tools/hunter_zone_check.gd.uid                     |   1 +
+ tools/hunter_zone_shots.gd                         |  54 +++
+ tools/journal_check.gd                             |  34 +-
+ tools/jump_land_shots.gd                           |   4 +-
+ tools/lint_baseline.json                           |  59 ++++
+ tools/lint_gate.py                                 |  25 +-
+ tools/move_feel_check.gd                           | 178 +++++++++-
+ tools/move_rule_guard_check.gd                     |   2 +-
+ tools/msg_queue_check.gd                           |  13 +-
+ tools/ostra_combo_check.gd                         |   2 +-
+ tools/pin_bjorn_owner_check.gd                     |  21 +-
+ tools/rimewright_anim_check.gd                     |   2 +-
+ tools/scout_cam_check.gd                           | 235 +++++++++++++
+ tools/scout_cam_check.gd.uid                       |   1 +
+ tools/shot_vertical_check.gd                       |   2 +-
+ tools/stretch_check.gd                             |   2 +-
+ tools/ttk_matrix.py                                |   2 +-
+ tools/ttk_matrix_check.gd                          |   2 +-
+ tools/ttk_matrix_source.json                       |   2 +-
+ tools/wallmove_check.gd                            |   1 +
+ tools/weapon_check.gd                              |   2 +-
+ 274 files changed, 4605 insertions(+), 2023 deletions(-)
+ create mode 100644 docs/MOVEMENT_TUNING.md
+ delete mode 100644 docs/SUPERVIVE_DATA.md
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/key.json
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair01.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair02.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair03.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair08.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair09.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair10.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair15.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair16.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair17.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair22.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair23.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/pair24.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo04.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo05.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo06.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo07.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo11.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo12.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo13.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo14.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo18.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo19.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo20.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo21.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo25.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo26.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo27.jpg
+ create mode 100644 docs/art/wardens/dirloops/lace-kael/solo28.jpg
+ create mode 100644 docs/art/wardens/dirloops/pelvis/vex_run_strip.jpg.import
+ create mode 100644 docs/art/wardens/dirloops/pelvis/vex_walk_strip.jpg.import
+ create mode 100644 docs/decisions/0022-held-fire-resume.md
+ create mode 100644 docs/decisions/0026-movement-pass.md
+ delete mode 100644 docs/decisions/0026-supervive-movement-pass.md
+ create mode 100644 docs/shots/ui-clutter-zone/before_after.jpg
+ create mode 100644 docs/specs/LOOK_AHEAD.md
+ create mode 100644 ops/merge-train-1114/TRAIN_BATCH.md
+ create mode 100755 ops/merge-train-1114/regate_stub.sh
+ create mode 100755 ops/merge-train-1114/train-batch
+ create mode 100755 ops/merge-train-1114/train_batch_test.sh
+ create mode 100644 scripts/match/hunter_attack.gd
+ create mode 100644 scripts/match/hunter_attack.gd.uid
+ create mode 100644 scripts/match/match_cam.gd
+ create mode 100644 scripts/match/match_cam.gd.uid
+ create mode 100644 scripts/match/scout_look.gd
+ create mode 100644 scripts/match/scout_look.gd.uid
+ create mode 100644 scripts/ui/hunter_zone.gd
+ create mode 100644 scripts/ui/hunter_zone.gd.uid
+ create mode 100644 tools/air_cast_check.gd
+ create mode 100644 tools/air_cast_check.gd.uid
+ create mode 100644 tools/art1/glb_relax.py
+ create mode 100644 tools/held_fire_resume_check.gd
+ create mode 100644 tools/held_fire_resume_check.gd.uid
+ create mode 100644 tools/hunter_zone_check.gd
+ create mode 100644 tools/hunter_zone_check.gd.uid
+ create mode 100644 tools/hunter_zone_shots.gd
+ create mode 100644 tools/scout_cam_check.gd
+ create mode 100644 tools/scout_cam_check.gd.uid
