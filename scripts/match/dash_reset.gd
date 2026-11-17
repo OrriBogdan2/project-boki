@@ -8,10 +8,13 @@ extends RefCounted
 ## Match.on_damage (and damage-free CC) calls note(). The hero-specific resets (a Sparkle blowout, a Vex
 ## vault, a knife in a foe) call cue() so every "dash is back" gives the same feedback to the one who got
 ## it: the reset sound (Sfx.play_reset_cue) and a pop on the HUD's Shift icon.
+## The Second Wind perk (second_wind) refills the whole dash when a hit drops you under 30% health.
 
 const HEAL := 0.05          # of max health, per takedown, knocker only (a knock and the kill that follows each give it)
 const ASSIST_WINDOW := 4.0  # s: how recent a teammate's hit or CC on the victim must be to count as an assist
 const ASSIST_SOFTER_DB := 6.0  # dB: how much quieter an assist's reset cue plays than the knocker's
+const SECOND_WIND_HP := 0.3    # of max health: dropping under it fires the Second Wind perk
+const SECOND_WIND_CD := 45.0   # s between two Second Wind refreshes
 
 ## Hunter `by` (or its Boki) landed damage or crowd control on enemy hunter `target`: remember when.
 ## One dictionary write per landed hit; takedown() reads it.
@@ -35,12 +38,24 @@ static func takedown(h: Hunter, victim: Hunter) -> void:
 			_refresh(mate, "assist")
 	victim.assist_t = float(h.m.time)
 
-## Gives `h` its dash back by the rule above; false if it can't have it (down, out, another game's, opted out).
-static func _refresh(h: Hunter, source: String) -> bool:
-	if h.downed or h.out or h.remote or (h.ak and not bool(h.ak.dash_def().get("knock_refresh", true))):
+## The Second Wind perk: a hit that takes `h` from at least SECOND_WIND_HP of its health to under it
+## refreshes the dash, at most once every SECOND_WIND_CD seconds. `hp_before` is its health before the hit.
+static func second_wind(h: Hunter, hp_before: float) -> void:
+	var line := h.max_hp * SECOND_WIND_HP
+	if h.perk_n("secondwind") == 0 or h.hp >= line or hp_before < line or h.hp <= 0.0:
+		return
+	if float(h.m.time) - h.second_wind_at < SECOND_WIND_CD:
+		return
+	if _refresh(h, "second_wind", true):
+		h.second_wind_at = float(h.m.time)
+
+## Gives `h` its dash back by the rule above (`full`: every charge, Second Wind); false if it can't have it
+## (down, out, another game's, opted out of the takedown refresh).
+static func _refresh(h: Hunter, source: String, full := false) -> bool:
+	if h.downed or h.out or h.remote or (not full and h.ak and not bool(h.ak.dash_def().get("knock_refresh", true))):
 		return false
 	var most := h.max_dashes()
-	h.dashes = most if most <= 1.0 else minf(most, h.dashes + 1.0)
+	h.dashes = most if full or most <= 1.0 else minf(most, h.dashes + 1.0)
 	h.ex_cd = 0.0
 	cue(h, source)
 	return true

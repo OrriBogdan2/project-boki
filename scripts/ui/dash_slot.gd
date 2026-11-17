@@ -1,17 +1,17 @@
 class_name DashSlot
 extends RefCounted
 ## The dash slot: ONE component for the bottom bar in a match (Hud) and at home (HomeDashSlot). It is an
-## ordinary ability slot (HudSlot.ab_slot: icon, dark sweep, countdown, red frame, key pill) with a pip
-## per charge that fills as the next one recharges, a countdown for that next charge, a flash and a soft
-## tick when a charge returns, and a small diamond for the long air dash. Both callers hand it the same
-## numbers (src): a match from the Hunter (of_hunter), the farm from its mirror of the same state.
+## ordinary ability slot (HudSlot.ab_slot: icon, dark sweep, countdown, red frame, key pill) with, for a
+## dash of 2+ charges, a disc per charge on the top edge (HudSlot.charge_discs) that fills as the next one
+## recharges, a countdown for that next charge, a flash and a soft tick when a charge returns, and a small
+## diamond for the long air dash. Both callers hand it the same numbers (src): a match from the Hunter
+## (of_hunter), the farm from its mirror of the same state.
 
-const PIP_H := 4.0                      # px, a charge pip's height
-const PIP_Y := 16.0                     # px from the slot's bottom edge to the pips (clears the key pill)
+const PIP_Y := 16.0                     # px from the slot's bottom edge to the rank pips (clears the key pill)
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
+const AIR_Y := 18.0                     # px from the slot's top edge to the air diamond (under the charge discs)
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
-const TOP_CD_FS := 12                   # countdown size while a charge is ready and another recharges
 const AIR_CD_FS := 10                   # the air dash's countdown while airborne
 const AIR_COL := Color("bfe6ff")        # the long air dash, ready
 
@@ -61,28 +61,16 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 			Sfx.play("click", null, TICK_VOL, 0.0, TICK_PITCH)
 	_was[hid] = n
 	var key := Settings.key_cap("dash")
-	HudSlot.ab_slot(H, "dash", r, String(s["icon"]), key, col, left / float(s["regen"]), left, n >= 1)
 	var cap := int(s["cap"])
-	var pw := minf(12.0, (r.size.x - 12.0) / float(cap) - 2.0)
-	var px := r.get_center().x - (pw * cap + 2.0 * (cap - 1)) * 0.5
-	var fills: Array = []
-	for i in cap:
-		var pr := Rect2(Vector2(px + i * (pw + 2.0), r.end.y - PIP_Y), Vector2(pw, PIP_H))
-		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
-		c.draw_rect(pr, Color(1, 1, 1, 0.18))
-		var fill := clampf(float(s["charges"]) - float(i), 0.0, 1.0)
-		c.draw_rect(Rect2(pr.position, Vector2(pw * fill, PIP_H)), col)
-		fills.append(fill)
-	shown[hid] = {"pips": fills, "text": "", "air": -1.0}
-	if n >= 1 and left > 0.0:
-		var t := HudSlot.cd_text(left)
-		HudStyle.ctext(c, r.position + Vector2(r.size.x * 0.5, 17.0), t, TOP_CD_FS, Color(HudStyle.INK, 0.9), 4)
-		H.slot_text["dash"] = t
-	shown[hid]["text"] = String(H.slot_text.get("dash", ""))
+	HudSlot.shown_pips.erase("dash")
+	HudSlot.ab_slot(H, "dash", r, String(s["icon"]), key, col, left / float(s["regen"]), left, n >= 1,
+		float(s["charges"]), cap)
+	var text := String(H.slot_text.get("dash", ""))
+	shown[hid] = {"pips": HudSlot.shown_pips.get("dash", []), "text": text, "air": -1.0}
 	if float(s["air_max"]) > 0.0:
 		var back := 1.0 - float(s["air_cd"]) / float(s["air_max"])
 		shown[hid]["air"] = clampf(back, 0.0, 1.0)
-		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + 9.0), back)
+		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + AIR_Y), back)
 		shown[hid]["air_text"] = ""
 		if bool(s["airborne"]) and float(s["air_cd"]) > 0.0:
 			var at := HudSlot.cd_text(float(s["air_cd"]))      # in the air the pounce's own timer is spelled out
