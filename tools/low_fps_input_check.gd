@@ -11,20 +11,22 @@ extends "res://tools/dash_flow_check.gd"
 const MFC := preload("res://tools/move_feel_check.gd")
 const HEROES := ["gunslinger", "mage", "juggernaut"]
 const ACTION_OF := {"dash": "dash", "jump": "jump", "lmb": "fire", "e": "signature", "x": "hunter_ult"}
-const TAPS := 6                 # taps per key and round
-const CAP_FPS := 30             # the low-end target
-const CAP_FRAMES := 15          # frames timed to see the cap holds
-const STALL_S := 0.1            # s: one frame's time lost (a disk read, a shader compile)
-const STALL_EVERY := 5          # frames between stalls in the dash rounds
-const SETTLE := 5               # frames a tap gets to show
-const RISE := 0.05              # m: a jump has left the ground by this
+const TAPS := 6  # taps per key and round
+const CAP_FPS := 30  # the low-end target
+const CAP_FRAMES := 15  # frames timed to see the cap holds
+const STALL_S := 0.1  # s: one frame's time lost (a disk read, a shader compile)
+const STALL_EVERY := 5  # frames between stalls in the dash rounds
+const SETTLE := 5  # frames a tap gets to show
+const RISE := 0.05  # m: a jump has left the ground by this
 const DASH_FRAMES := 150
 const ROUNDS := [["30 fps", 1.0 / 30.0, false], ["60 fps + 100 ms stalls", 1.0 / 60.0, true]]
+
 
 func ok(cond: bool, what: String) -> void:
 	print("LOWFPS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -57,16 +59,19 @@ func run(main: Node) -> void:
 	print("LOWFPS DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 func _hero_ids() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--low-fps-input-check=") and arg.length() > 22:
 			return arg.get_slice("=", 1).split(",")
 	return HEROES
 
+
 ## An action pressed and let go before the next frame reads it (a real tap on a slow frame).
 func _tap(action: String) -> void:
 	_event(action, true)
 	_event(action, false)
+
 
 func _event(action: String, down: bool) -> void:
 	var e := InputEventAction.new()
@@ -74,6 +79,7 @@ func _event(action: String, down: bool) -> void:
 	e.pressed = down
 	e.strength = 1.0 if down else 0.0
 	Input.parse_input_event(e)
+
 
 ## One tap, in the continuation of a frame (before that frame's _process): did it go off within SETTLE frames?
 func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
@@ -90,12 +96,16 @@ func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 		await tree.process_frame
 		var went: bool
 		match key:
-			"dash": went = hunter.dash_at > dash0
-			"jump": went = hunter.pos.y > y0 + RISE
-			_: went = _went_off(before, key)
+			"dash":
+				went = hunter.dash_at > dash0
+			"jump":
+				went = hunter.pos.y > y0 + RISE
+			_:
+				went = _went_off(before, key)
 		if went:
 			return true
 	return false
+
 
 ## One hero's dash, on the ground or in the air, at the rounds' frame rates against the 60 fps dash.
 func _dash_rounds(tree: SceneTree, m: Match, hero: String, air: bool) -> void:
@@ -106,6 +116,7 @@ func _dash_rounds(tree: SceneTree, m: Match, hero: String, air: bool) -> void:
 		var hit: bool = ref[0] > 0.0 and absf(got[0] / ref[0] - 1.0) <= tol[0] and absf(got[1] - ref[1]) <= tol[1]
 		var what := "%s %s dash %s" % [hero, "air" if air else "ground", r[0]]
 		ok(hit, "%s: %.2f m in %.3f s, 60 fps %.2f m in %.3f s" % [what, got[0], got[1], ref[0], ref[1]])
+
 
 ## One dash (Shift held for the first frame, a move key until it starts) with frames of `fdt` seconds, every
 ## STALL_EVERY-th of them STALL_S when `stall`. Returns [metres, seconds] of the dash's travel, as
