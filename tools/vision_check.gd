@@ -149,7 +149,7 @@ func _reveal(m: Match) -> void:
 		var away := "%.0f degrees off your aim, %.0f m out" % [AWAY_DEG, SIDE_M]
 		ok(_lit(m, foe) == 0.0 and foe.unseen, away + ": hidden, no circle")
 		foe.inp["aim"] = P.pos
-		foe.fire()
+		foe.atk.fire()
 		ok(foe.reveal_t >= SHOT_REVEAL, "her shot gives her away for %.1f s (%.2f)" % [SHOT_REVEAL, foe.reveal_t])
 		ok(_lit(m, foe) == 1.0 and not foe.unseen, "she is seen, inside her own lit circle")
 		foe.reveal_t = 0.0
