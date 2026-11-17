@@ -5394,6 +5394,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+var hunter_hints := HunterHints.new()   # the first-time lines for each fighting slot of a Hunter
 
 func _tips() -> void:
 	tips_live = false
@@ -5411,6 +5412,8 @@ func _tips() -> void:
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if _tip_t > 14.0:
 		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
 	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
