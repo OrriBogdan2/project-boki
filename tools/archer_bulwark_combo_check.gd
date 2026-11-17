@@ -669,7 +669,7 @@ func _archer_combos() -> void:
 		K.fx._process(0.0)
 		wash[0] = maxf(wash[0], P.wash)
 		var slot := 1 if K.spirit.inside else 0
-		mk[slot] = maxf(mk[slot], K.move_k()))
+		mk[slot] = maxf(mk[slot], K.move_k() + K.speed_bonus()))
 	ok(
 		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
 		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
