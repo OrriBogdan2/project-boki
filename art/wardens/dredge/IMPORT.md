@@ -1,5 +1,12 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Gun in hand (2026-11-17, ext/grimble-gun-hand):** the master is the owner's 11-17 pick (CURRENT_OVERRIDES: weapons-fix-1116b/Grimble/hand/grip1117/final/cand.glb,
+"grimble a seems fine"): the same body with the blunderbuss off the belt and in the iron fist, its own node. The swap
+spec puts it rigid on `hand.L` (a region box round it), weapon_muzzle and anchor_gun_root sit on its muzzle and stock on
+`hand.L` (`anchor_bones`), and the `gun` bone stays in the rig, unweighted. The left forearm and hand are detached from
+the left thigh and hips (they touched once the gun box no longer covered them), and the patched belt keeps the old gun
+boxes, now on `hips`. Stretch: worst 12.64 (ledge) against main's 8.37; main's own spec on this master gives 47.66.
+
 **v95 (2026-11-11):** the mesh is the v95 master with the appeal3 face and calves (~/meshy/v95/Grimble/r2/appeal3/cand_b.glb: the face
 repainted from the v2 art, with scrap-metal teeth, the gold tooth, a dark gap, purple lips and the smug squint; the calves 12% slimmer;
 pick.txt beside it) put on this same skeleton, clips and anchors by tools/art1/v95_swap.py with art/wardens/src/grimble_v95.json
