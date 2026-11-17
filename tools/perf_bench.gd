@@ -104,9 +104,7 @@ func setup(main_node: Node) -> void:
 	main.get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+	main.get_tree().node_added.connect(count_node)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
 
 func _finish() -> void:
@@ -161,6 +159,11 @@ func _start(part: String, extra: Dictionary) -> Match:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
+	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
+	# screen, so without this the run's tail was shader compiles a player never sees mid-match
+	var warm0 := Time.get_ticks_msec()
+	await m.warm_up()
+	print("BENCH match warm-up: %d ms" % (Time.get_ticks_msec() - warm0))
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
@@ -458,6 +461,14 @@ func _sections(home) -> void:
 	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
 	print("BENCH base steps (ms per frame): " + ", ".join(top))
 
+func count_node(n: Node) -> void:
+	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+	added[k] = int(added.get(k, 0)) + 1
+
+## One frame's row in the CSV (the brawl's frames too).
+func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
+	_frame(part, i, wall, script_ms)
+
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"hud": hud_us / 1000.0,
@@ -502,6 +513,13 @@ func _summary(part: String, fl: Array) -> void:
 	var slow := w.filter(func(x): return x > SLOW_MS).size()
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
 		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
+	# (where the slow frames fall: a warm-up tail, a first fight's new effects, or spread over the run)
+	var at: Array = []
+	for i in fl.size():
+		if float(fl[i]["wall"]) > SLOW_MS and at.size() < 60:
+			at.append("%.1f" % (i * DT))
+	print("BENCH %s frames: p50 %.1f ms, p95 %.1f ms, p99 %.1f ms; over %.0f ms at s: %s" % [part,
+		float(w[int((w.size() - 1) * 0.5)]), float(w[int((w.size() - 1) * 0.95)]), p99, SLOW_MS, " ".join(at)])
 	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
 		"render cpu %.2f ms, gpu %.2f ms"
 	print(cpu_line % [

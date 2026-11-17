@@ -87,6 +87,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
+		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -255,7 +256,9 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	var n := int(d["serials"].get(sp, 0)) + 1
 	d["serials"][sp] = n
 	rec["serial"] = n
-	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, {"how": String(o["how"]), "serial": n})
+	var extra := {"how": String(o["how"]), "serial": n}
+	if rec.has("parents"): extra["bred"] = true        # an egg of two of your Boki (ClanInfo.last_deed)
+	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, extra)
 
 ## Everyone in the collection has provenance (anything that came in without it gets it now).
 func register_all() -> void:

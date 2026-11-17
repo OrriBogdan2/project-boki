@@ -37,4 +37,3 @@ On the ground `ThiefKit._tick_curve` holds the tail past the peak at her hasted 
 1.0x with no dip; the ramp, the peak and the air Cartwheel stay the fit's. Rows: `dash_curve_thief_exit_k` (0.6),
 `vault_exit_run`, `vault_slow_frames`. The other option, re-fitting the curve to end at ~0.6, drops its peak/mean
 under the footage's 1.77 (mean kept at 1), so it was not taken.
-Meeko's ground hop has no footage and Motley's Swap is a teleport. Fits: sv/FEEL.md.

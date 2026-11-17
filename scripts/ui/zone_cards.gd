@@ -100,7 +100,7 @@ static func lock_line(id: String) -> String:
 	var seed := "Find its Wayseed in a run's lair or at the trader"
 	return seed + "." if keys["lean"] else seed + ", and " + food + "."
 
-## An open zone's card body: its Boki with their moods, who woke it, today's game and your best at it.
+## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)
@@ -121,6 +121,8 @@ static func _open_lines(id: String, tree: SceneTree) -> Array:
 	out.append(UI.para("Today: " + String(z["game"]), 12, UI.INK))
 	var top := MinigameHub.best(String(z["play"]))
 	out.append(UI.para("Not played yet" if top.is_empty() else "Your best: %s" % top["name"], 12, UI.GOLD))
+	for line in DecorComfort.card_lines(id):
+		out.append(UI.para(line, 12, UI.GOLD))
 	return out
 
 ## One Boki on a card: its picture with today's mood face on the corner; its name and mood on hover.

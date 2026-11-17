@@ -34,10 +34,11 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
   everything inside a 2.0 m circle (1.0 m crouched), plus a forward wedge (dot > 0.087, 170 degrees; was 106 until
   2026-11-12, see VISION_LOOK.md) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
+  Holding Look ahead (`scout`, C) adds x1.25 inside a 30 degree cone along the aim (`ScoutLook`, docs/specs/LOOK_AHEAD.md).
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
 - **Grass and smoke** hide a target from anyone outside (`in_bush`, `in_smoke`) unless revealed.
 - **Reveal** is one field, `Hunter.reveal_t`: while above 0 the target ignores cone, grass and crouch (range
-  `VIEW_RANGE`+2). Writers: your own shot or strike (1.2 s), being hit (1.0 s), Hawk Sense (archer_kit.gd:134, hp under 50%, 22 m, re-armed 0.4 s), Seeker/scan belt item
+  `VIEW_RANGE`+2). Writers: your own shot or strike (1.2 s), being hit (1.0 s), Red Thread (archer_kit.gd:134, hp under 50%, 22 m, re-armed 0.4 s), Seeker/scan belt item
   (utility_use.gd:71, `SCAN_TIME`), using any utility (0.6 s), kin `reveal` effect, Tripwire (verbs.gd:499),
   Rimelock (rimewright_kit.gd:238), ref-bulwark hammer vision (bulwark_kit.gd:591), truce betrayer (truce.gd:201, 15 s) and the
   captor of a Boki (match.gd:2839). `muzzle_t` (firing) also gives you away. Replicated as flag 4096 (match.gd:5559).
@@ -54,10 +55,10 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
 
 ## 3. The gap
 
-We already hide and reveal Hunters, and Hawk Sense has meaning. Differences from the source: (a) our range and cone
+We already hide and reveal Hunters, and Red Thread has meaning. Differences from the source: (a) our range and cone
 are invented numbers, the source's fog is a radius with an ADS cone, [gap] so there is nothing to match; (b) we have
 no visible hint that someone nearby but unseen is acting (a sound or ping direction); (c) bots use `sees`/`can_see` the
-same as players, so no cheating, but Hawk Sense is the only passive writing hp-based reveals; (d) the rules live only
+same as players, so no cheating, but Red Thread is the only passive writing hp-based reveals; (d) the rules live only
 in code comments, not a doc, and remote clients derive `unseen` from replicated flags only.
 
 ## 4. Recommendation

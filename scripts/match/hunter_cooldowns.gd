@@ -22,7 +22,6 @@ static func tick(h: Hunter, dt: float) -> void:
 	h.fortify_t = maxf(0.0, h.fortify_t - dt)
 	h.recoil = maxf(0.0, h.recoil - dt)
 	h.muzzle_t = maxf(0.0, h.muzzle_t - dt)
-	h.regen_wait = maxf(0.0, h.regen_wait - dt)
 	h.land_t = maxf(0.0, h.land_t - dt)
 	h.glide_cd = maxf(0.0, h.glide_cd - dt)
 	h.bless_t = maxf(0.0, h.bless_t - dt)

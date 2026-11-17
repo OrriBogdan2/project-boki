@@ -64,7 +64,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var boss := _boss()
-	var sp: String = String(Data.MOBS[boss]["egg"]) if boss != "" else String(Data.common_kin()[0])
+	var sp: String = Data.egg_pool()[0]      # a first form: a legendary boss egg rerolls (egg_rules_check)
 	# ---------------------------------------------------------------- 1. cradles and the shelf
 	Incubator.ensure()
 	ok(Incubator.slots() == 5 and Incubator.eggs().is_empty() and Incubator.shelf().is_empty(), "a fresh save has an Incubator with 5 empty cradles")
@@ -349,7 +349,7 @@ func _egg_sounds() -> void:
 		Sfx.last_played.erase("egg_ready")      # (Sfx merges a quick repeat and plays a burst of one sound quieter)
 		Sfx.recent.erase("egg_ready")
 		EggSfx.hear("loud", 1.0, egg_at, 0.1)
-		var voice: AudioStreamPlayer = Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
+		var voice: AudioStreamPlayer3D = Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
 		return voice.volume_db if Sfx.last_played.has("egg_ready") else NAN
 	var v_close: float = vol_at.call(1.0)
 	var v_far: float = vol_at.call(8.0)

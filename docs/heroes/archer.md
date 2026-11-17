@@ -39,7 +39,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | Spirit Walk cooldown 6 vs 9.5 (MED) | (b) | 9.5 s (data) |
 | Shift fx: roll ring and bursts, flick bursts (MED) | (a)+(b) | 24a34e21 (roll); the air flick's four bursts removed now |
 | Shift through raised walls (MED) | (c) | the heightmap has no passable ledge faces; recorded as an Assumption (the walk passes rocks, trees, pillars and barriers) |
-| Passive: Focus/Deadeye invented; instant full draw; knock heal (MED) | (b) partly, (c) | the knock heal (and its RUN DOWN ring and move) is gone; a full draw is the only way past the draw stages (it is spent on the arrow loosed, `Hunter.focus_draw` removed). Focus and Deadeye are now cut entirely (owner decision 2026-11-07): no meter, no +20% range, no Deadeye hit, no `pin_deadeye` move, no HUD arc; Hawk Sense stays |
+| Passive: Focus/Deadeye invented; instant full draw; knock heal (MED) | (b) partly, (c) | the knock heal (and its RUN DOWN ring and move) is gone; a full draw is the only way past the draw stages (it is spent on the arrow loosed, `Hunter.focus_draw` removed). Focus and Deadeye are now cut entirely (owner decision 2026-11-07): no meter, no +20% range, no Deadeye hit, no `pin_deadeye` move, no HUD arc; Red Thread stays |
 | LMB (-) | (a) | parity 24a34e21: cooldown 0.5 s (card) |
 | Heavy Shot wall payoff ~5x, pierce invented (MED) | (b) pierce, (c) the ratio | it stops on the first foe (asserted). PARITY FIRST (owner 2026-11-07): the wall hit is 4.94x the shot (`pin.wall_mult`, the data's 173 extra on 35), so 80 to 148 on top of 16 to 30; a full pin is 178 and takes any 124 HP light in one. Asserted (`parity lace`) |
 | RMB hold 0.5 s dead zone, auto-release (LOW) | (c) | PARITY FIRST: `rmb.hold` 0.15 s is only a tap guard; the charge counts from the press and is full at 1.1 s. Asserted (`parity lace`) |
@@ -83,6 +83,11 @@ ext/vfx-pass (merges ext/vfx-archer), ext/the reference-movement (`pin_spirit.gd
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
+| Passive | always | Red Thread (foes under half health show through cover within 22 m; for her side they wear an outline in her colour drawn through rocks and walls, the squad-Boki x-ray shell, `HawkSense`) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor; let go inside `draw_min` 0.08 s (a mashed click) and nothing looses, the next press draws afresh | Weak tap shot (not isolated); a charge weapon ignores early taps (coordinator's read of the source, 2026-11-10) | Assumed to land at the cursor too; `--lmb-spam-check` |
+| Passive | always | Red Thread (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor; a short sharp orchid streak (`fire_tap`: 0.5 m wide, about 4 m long, a white-hot pointed head; Empowered and Supercharged a step wider) | Weak tap shot (not isolated) | Assumed to land at the cursor too |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
 | Passive | always | Hawk Sense (foes under half health show through cover within 22 m; for her side they wear an outline in her colour drawn through rocks and walls, the squad-Boki x-ray shell, `HawkSense`) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor; a short sharp orchid streak (`fire_tap`: 0.5 m wide, about 4 m long, a white-hot pointed head; Empowered and Supercharged a step wider); let go inside `draw_min` 0.08 s (a mashed click) and nothing looses, the next press draws afresh | Weak tap shot (not isolated); a charge weapon ignores early taps (coordinator's read of the source, 2026-11-10) | Assumed to land at the cursor too; `--lmb-spam-check` |
 | LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). The reticle (owner item 55b) is a thin line to the cursor that a bright fill runs along from near Lace like a progress bar, full at Supercharged, with one small circle on the line at the next perfect point: it flashes gold from the frame the fill reaches it to the end of the perfect window, then moves on to the end of the line. Nothing else: no V, no glints, no cursor ring. At Supercharged: a body flash, a thick white line past the cursor to 16 m and a target ring | Same stages; the owner's filling line overrides the footage's V | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
@@ -131,7 +136,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
 - Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
 - Starpiercer's execute is "finish a hunter left under 12% of max health" (the card's "execution damage" isn't defined anywhere we found).
-- "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier (a raised terrace only dims her screen; ending in one lifts her onto it); the edge of the abyss still holds her.
+- "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier (in a raised terrace face her screen darkens and the portals open, but ending in one lifts her onto it); the edge of the abyss still holds her.
 
 ## Body and movement (hero sheet: Body, scale and movement feel)
 - Scale ~0.98 of a medium to the top of the head (`--warden-model-check`), slim build kept; hit radius 0.392 (`body.hit_r`, docs/HITBOX_SIZE.md). The Warden model (concept sheet, `scripts/heroes/warden_archer.gd`) is long-legged with a smaller head: `body.legs` 1.62, `body.head` 0.72, `body.neck` 0.03, so `body.size` is 1.05.
@@ -184,7 +189,7 @@ Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (
 On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
 (sv/briefs/kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
 archer.json (the old `cd_per_rank` and the shared steps are gone); cooldowns match the data directly (Heavy Shot 16s,
-Spirit Walk 9.5s, Hail Wall 15s). LMB and Hawk Sense have no tiers in the data and do not rank; R (Starpiercer on X) is
+Spirit Walk 9.5s, Hail Wall 15s). LMB and Red Thread have no tiers in the data and do not rank; R (Starpiercer on X) is
 decision 0022's.
 
 | Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--archer-combo-check` |
@@ -193,7 +198,7 @@ decision 0022's.
 | RMB Heavy Shot | +20% dmg, -3s / +20% dmg, -3s / more range, a wall stun gives a dash charge [D] | 13s, damage +20% | 10s, damage +40%; flies 3m farther; a wall stun gives a dash charge | `upgrade parity: Heavy Shot ...`, `Heavy Shot ranks cut 3 s ...`, `pin rank 3: a Heavy Shot wall stun ...` |
 | Shift Spirit Walk | -1s / -1s / +0.5s, +150 decaying speed inside terrain, allies get it too [D] | recharge 8.5s | 7.5s; 3.3s long, +33% inside something (fading), allies within 6m walk too | `upgrade parity: Spirit Walk ...`, `pin rank 3: Spirit Walk lasts 0.5 s longer ...`, `pin rank 3: +33% inside ...` |
 | E Hail Wall | +30% dmg, -2s / +30% dmg, -2s / -2s, +30% arc [D] | 13s, damage +30% | 9s, damage +60%; arc 120 -> 156 degrees (`e.deg_r3_k`) | `upgrade parity: Hail Wall ...`, `upgrade parity: rank 3 (tier IV) Hail Wall arc ...` |
-| Passive Hawk Sense | none [D] | - | - | - |
+| Passive Red Thread | none [D] | - | - | - |
 
 Before the source pass: Heavy Shot 13s / 10s with +15% / +30% (shared), Spirit Walk 8.1s / 6.7s (shared -15%), Hail Wall
 13.5s / 12s with +15% / +30%. This pass moved the Hail Wall's rank 3 width (1.3) from an inline number into the data and
@@ -218,7 +223,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back (no cost) | same |
 | Knock | +1 dash charge (DashReset); no kit heal (audit: the source has none) | same |
-| Rival under half health | Shown through cover (Hawk Sense) | same |
+| Rival under half health | Shown through cover (Red Thread) | same |
 | A Boki merge mid draw / Heavy Shot / Spirit Walk | Each dropped with no shot; Spirit Walk ends | same |
 | Starpiercer, then a wall pin, then three beams | The pinned foe eats every beam; lined-up foes behind it are pierced too | `--archer-combo-check` |
 | Starpiercer during Spirit Walk | Shots kept; she can roll between beams | same |
@@ -330,7 +335,8 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 - Ult on R: `scripts/arch/hero_ult.gd` (HeroUlt, the shared R base: main's `HunterKeys.ult_pressed` takes the `hunter_ult` press and the level gate, then `cast_ult` returns `HeroUlt.press(self, ult.cast)`: the cooldown in `ArchKit.cd["x"]`, the recast, a cast id), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_beam`, `pin_ult_final`. Bond: `HeroUlt.landed` sends `KinBond.from_ult(h, "hit" / "knock" / "kill", cast_id)`, the best event of a cast.
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).
 
-- Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
+- Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground, Spirit Walk's laced portals (`spirit_portal`).
+- Spirit Walk strip vs the footage: docs/shots/vfx-lace-spirit-walk (`--parity-strip --slot=dash --pillar`).
 
 ## Verification on main d255acbee (Nov 9, job 20261109-204749-a2: Lace vs Myth, PARITY FIRST)
 Read: this doc, KIT_PARITY, pin.md, sv/briefs/kits.md (Myth, [D]), DECISIONS (owner notes win). `--archer-combo-check` 159/0, `--archetype-check` 379/0. These assert our spec, not the source, so rows below are checked by reading `archer.json`, `longbow.json`, `archer_kit.gd`, `pin_spirit.gd`. [F] = footage. Verdicts: match, differ, owner, [?].
@@ -345,7 +351,7 @@ Read: this doc, KIT_PARITY, pin.md, sv/briefs/kits.md (Myth, [D]), DECISIONS (ow
 | E Rain of Arrows | arc ~120 deg at cursor distance, 4.4 s [F]; 15 s, 61 dmg/s, Slow, Anti-Heal [D] | arc 120 deg, 2-9 m, 4.4 s, cd 15, 5 per 0.5 s (10/s), slow 35%, blight | match shape and cd; DPS differs (~0.16x of the source's 61/s, kept for light HP: ext/damage-ratio-audit); slow 35% [?]; Cremate +10 is ours (ext/parity-antiheal removes it) |
 | R / X Starpiercer | 3 empowered shots, no charge, 60 s; first two 326, third 422 (1.29x) [D] | 3 shots, 6 s, cd 60, 18 / 18 / 25 (1.39x), pierce, execute under 12% | match; the final reads 1.39x against 1.29x: would be 23 (S, needs the burst-cap check re-run; the older doc quotes 1.41x from a source I could not find) |
 | Shift Spirit Walk | roll then 2.8 s through terrain incl. the raised wall, 9.5 s, 10 mana; roll toward the cursor [D]; roll 3 m / 0.27 s [F]; +5-10% [F]; rank 3 +0.5 s, +150 in terrain [D] | cd 9.5, 1 charge, roll 3.5 x 0.85 = 3.0 m in 0.24 x 1.15 = 0.28 s, walk 2.8 s x1.1, rank 3 +0.5 s and +33%; passes rocks, trees, pillars, barriers, **not ledge faces** | match on numbers and timing; **differ: ledges** (below); roll follows WASD, cursor when still: owner (movement default); mana and 30-mana snap-back cost: none, [?] |
-| Passive | injured hunters seen through fog; climbs tall ledges [D] | Hawk Sense: foes under 50% HP within 22 m; no Focus or Deadeye (cut); no ledge climb | owner (keep Hawk Sense); 50% and 22 m are ours [?]; the ledge climb differs |
+| Passive | injured hunters seen through fog; climbs tall ledges [D] | Red Thread: foes under 50% HP within 22 m; no Focus or Deadeye (cut); no ledge climb | owner (keep Red Thread); 50% and 22 m are ours [?]; the ledge climb differs |
 | Animations | [F] timing table above | every row in "Animation timing" still reads match | match on coverage; not re-measured frame by frame; `pin_deadeye` row removed (move is gone) |
 | Dash interactions | silent on casts in the roll [F] | LMB through Shift keeps the draw (owner item 51); RMB / E / X fire mid-roll; 8 rows have no source | owner; `[?]` rows listed in KIT_PARITY item 20 |
 
@@ -358,7 +364,7 @@ Read: this doc, KIT_PARITY, pin.md, sv/briefs/kits.md (Myth, [D]), DECISIONS (ow
 **READY, touching Lace, not on main** (latest line per branch; older lines are superseded):
 - `ext/lace-phasewalk-verify` 728a6c834: ledge passage and tall climb (above).
 - `ext/lace-playtest-1108` b79ec35c5: owner items 18-20 (needle on the nock anchor, Starpiercer fires on the press with the nock deleted, perfect window 0.35 s in `tuning.json`); moves the window and nock away from the source numbers above, owner calls.
-- `ext/lace-hawk-sense` f67042371: Hawk Sense sight shared by the team, `sense_linger`; numbers stay ours.
+- `ext/lace-hawk-sense` f67042371: Red Thread sight shared by the team, `sense_linger`; numbers stay ours.
 - `ext/lace-hail-wisps` d93205aaa: Hail Wall hits Wisps.
 - `ext/parity-antiheal` 55a5d0dfc: Anti-Heal on the source's four, removes our Cremate rider.
 - `ext/vfx-lace-impact` 2199382e1: Heavy Shot impact size, Spirit Walk shell.
@@ -372,7 +378,7 @@ Read: this doc, KIT_PARITY, pin.md, sv/briefs/kits.md (Myth, [D]), DECISIONS (ow
 4. Hail Wall damage 10/s against the source's ratio (`archer.json` `e.dmg`; S, owner: light-HP balance).
 5. Supercharged 1.15 -> 1.2 s (`longbow.json` `draw`, `arc_draw` clip, perfect-window asserts; S, owner: ranged TTK).
 6. Spirit Walk has no mana cost or 30-mana snap-back cost; roll follows WASD, not the cursor (owner default).
-7. Hawk Sense 50% / 22 m, Hail slow 35%, quick draw 1.6x, hold slow 38%: ours, not in the source [?].
+7. Red Thread 50% / 22 m, Hail slow 35%, quick draw 1.6x, hold slow 38%: ours, not in the source [?].
 
 Suggestions (ours, not built): none beyond the 0.05 s fade noted under Animation timing.
 

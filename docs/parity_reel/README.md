@@ -92,8 +92,8 @@ Still differs:
 - Skate: 10.5 m/s, the footage mean; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
-  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
-  stacking slow ramp is ours.
+  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone
+  slows a flat 35% (no number in the source); its periodic Shatter stacks are not built.
 - Darts now match the source burst: a hold is one even stream of plain darts, the let-go ends it on the three
   large ones, then a 0.5 s pause ([D] + [F], `ext/combat-neve-dart-burst`; the reel predates it). Skating beams
   keep 2x damage (wiki, footage 1.6x) and home late like the darts (owner).
@@ -197,12 +197,12 @@ it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Mot
 shown. The rest of the "Seen in the reel" lines match the new renders.
 
 **KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
-  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot
+  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Heavy Shot
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
   and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
-  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Heavy Shot wall
   payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
   stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
@@ -259,7 +259,7 @@ Still differs:
   (card text to fix).
 - Shift: a 3.0 m / 0.27 s roll, then Spirit Walk through rocks, trees and barriers; raised walls and ledge faces
   are still on unmerged `ext/lace-phasewalk-verify` (gap 8). `ext/lace-1111` makes the roll 3.375 m.
-- Passive: Hawk Sense 22 m only; the source's tall-ledge climb is not built.
+- Passive: Red Thread 22 m only; the source's tall-ledge climb is not built.
 - Her kit colours on main are violet/magenta; the owner's 11-11 crimson (d41e2e) is on `ext/lace-1111`.
 - 8 of her 17 dash flow rows are unsourced `[?]`.
 

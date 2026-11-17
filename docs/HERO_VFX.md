@@ -101,6 +101,7 @@ everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). No
 The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
 
 ## Rules
+- **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
@@ -152,3 +153,49 @@ puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, w
 range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
 oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
 asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
+
+## Boki type accents
+`KinTypeFx` (`scripts/match/kin_type_fx.gd`) fixes that: one cheap accent per type, played on **every cast by a Boki
+of that type** (active, auto and triggered casts; not while the Boki is out of the local player's sight). It sits at
+the Boki's feet and chest and uses the shared `Fx` pools only (dots, streaks, one ground ring), so it adds no node,
+no shader and no per-frame code. It does not recolour the effect itself, so colour keeps meaning the effect.
+Budget per cast: at most 10 dots, 8 streaks, 3 rings (before the quality preset's `fx` factor). `--kin-type-fx-check`
+asserts coverage of all 18 types, distinct colours and shapes, the budget and a real cast. Sheet:
+`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`). Tuned on grass over GPU sheets 20261109-121559 (too faint),
+20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
+The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
+
+### Movement trail and capture pop
+
+`KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its
+type's colour (`KinTypeFx.LOOKS`): embers and motes rise (Fire, Spore, Psychic, Fairy, Dark, Poison, Dragon), drips fall
+(Water, Ice, Rock), leaves flutter (Grass, Bug, Normal, Flying), Electric/Steel/Crystal/Sound crackle in short streaks.
+Budget: four shared `GPUParticles3D` (one per group, 64 live particles each), fed one particle at a time with
+`emit_particle`, one per 0.07 s per moving Boki at full quality (scaled by the `fx` preset); nothing for a Boki that is
+standing still, parked, knocked out, out of sight or over 45 m from the local player. The capture pop's colour burst
+uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
+(GPU) walks one Boki per type and pops them.
+
+| Type | Species | Colour | Accent | Before |
+|---|---|---|---|---|
+| Normal | 0 | cream | plain short puff | none |
+| Fire | 4 | orange | embers rise slowly | none |
+| Water | 0 | blue | droplets arc up and fall | none |
+| Grass | 4 | green | leaves drift down | none |
+| Spore | 3 | tan | big soft puffs float up | cue only |
+| Electric | 4 | yellow | thin fast zaps, all directions | none |
+| Ice | 4 | cyan | chunky shards fall | none |
+| Rock | 4 | brown | pebbles drop fast | none |
+| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
+| Flying | 2 | sky white | wind streaks along the cast | none |
+| Dragon | 0 | indigo | embers and streaks rising | none |
+| Dark | 4 | deep violet | big slow smoke | none |
+| Poison | 3 | acid green | bubbles rise | cue only |
+| Bug | 4 | amber | many tiny dots, scattered | none |
+| Steel | 2 | silver | short thick glints along the cast | none |
+| Fairy | 3 | pink | small sparkles float up | cue only |
+| Crystal | 3 | teal | facets fan upward | cue only |
+| Sound | 3 | gold | three quick rings | cue only |
+
+Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
+data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.
