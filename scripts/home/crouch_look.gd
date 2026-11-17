@@ -25,9 +25,10 @@ func tick(cam: CamRig, crouching: bool, free: bool) -> void:
 		base = -1.0
 
 
-## The mouse wheel while looking changes the zoom you come back to, not the look. True when it did.
-func wheel(step: float) -> bool:
+## A wheel notch (`button`, CamWheel.notch): while looking it changes the zoom you come back to, not the look;
+## otherwise it steps the camera's zoom in the wheel's range, as in a match.
+func wheel(cam: CamRig, button: int) -> void:
 	if base < 0.0:
-		return false
-	base = clampf(base + step, 0.55, 1.6)
-	return true
+		cam.zoom_to = CamWheel.stepped(cam.zoom_to, button)
+	else:
+		base = CamWheel.stepped(base, button)

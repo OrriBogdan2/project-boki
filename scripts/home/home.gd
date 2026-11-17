@@ -425,7 +425,7 @@ func _ready_rest() -> void:
 	item_fx = GardenItemFx.new()
 	add_child(item_fx)
 	cam = CamRig.new(); add_child(cam)
-	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
+	cam.zoom_to = CamWheel.far(); cam.zoom = cam.zoom_to; cam.lead = 0.2      # arriving: the wheel's widest
 	_apply_cam_settings()
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
@@ -1140,7 +1140,6 @@ var dash := DashState.new()    # the dash charges and the long dash cooldown, th
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
-const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
 const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
@@ -1174,7 +1173,7 @@ func _exit_tree() -> void:
 	Sfx.clear_amb_layers()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
-## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
+## expedition's (HOME_ACROSS_REF framing at zoom 1.2), and at match size a Boki was a speck beside
 ## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size).
 const FARM_BOKI_SCALE := 1.7
 
@@ -2391,9 +2390,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_kin(hover_k["rec"])
 			get_viewport().set_input_as_handled()
 			return
-		var notch := {MOUSE_BUTTON_WHEEL_UP: -0.08, MOUSE_BUTTON_WHEEL_DOWN: 0.08}.get(event.button_index, 0.0) as float
-		if notch != 0.0 and not crouch_look.wheel(notch):
-			cam.zoom_to = clampf(cam.zoom_to + notch, 0.55, 1.6)
+		var notch := CamWheel.notch(event)      # the match's wheel: same steps and range, not over a menu or talk
+		if notch != 0 and not building_now and not chat_open and train.is_empty():
+			crouch_look.wheel(cam, notch)
 	if panel_open == HomeClasses.TITLE and event.is_action_pressed("kit_card") and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
@@ -3681,7 +3680,7 @@ func _play_evolutions() -> void:
 		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
-		cam.zoom_to = HOME_ZOOM
+		cam.zoom_to = CamWheel.far()
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
