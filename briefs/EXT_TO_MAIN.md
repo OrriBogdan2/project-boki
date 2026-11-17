@@ -10084,3 +10084,4 @@ READY ext/merge-lane-misc-1117-b b9ce5664a3 (UPDATE of the line above, amended m
 READY ext/merge-lane-hunters3-1117 8d5fc06221 (hunters3 lane: heart-check/lace-playtest gate fixes; the other 26 lane branches HARD, see lanes/hunters3-RESULT.md)
 READY ext/merge-lane-hunters1-1117 f02f57817c (lane hunters1: win/lose result beats + ResultsStage on main; skiff board beat not taken; results-stage-check ok)
 READY ext/mask-memory-panels-1117 227cf4fd89 (Relic moment: 3 painted memories per Hunter, 4-6 s instead of 1-2 s; PR via gh-outbox)
+READY ext/merge-lane-hunters7-1117 ef0f512b1751b8d80a28771cc8ae0d05f3fa9fb5 (lane hunters7: 4 clean ports from stuck-integ-38a28c4e: presets steps knob drop, release continue-on-error, Red Stitch unnamed player, ops notes; behind 0 of origin/main 9a269e6b40; health: only baseline-red rows from other files; gate by regate bot)
