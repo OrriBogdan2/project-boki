@@ -107,6 +107,10 @@ static func rules() -> Dictionary:
 static func cap() -> int:
 	return int(rules()["cap"])
 
+## A final form: a species that evolves into nothing.
+static func is_final(species: String) -> bool:
+	return (rules()["lines"].get(species, {}).get("into", []) as Array).is_empty()
+
 ## One level more, never past the cap.
 static func level_up(rec: Dictionary) -> void:
 	rec["level"] = mini(int(rec.get("level", 1)) + 1, cap())
