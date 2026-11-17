@@ -32,7 +32,8 @@ func run(main: Node, what: String) -> void:
 	main.add_child(vp)
 	var cam := CamRig.new()
 	vp.add_child(cam)
-	cam.use_style("supervive")
+	cam.use_style("default")
+	cam.fov = cam.frame_fov()      # (set each frame by _apply; the check never runs one)
 	_distance(cam)
 	_ease(cam)
 	vp.queue_free()
@@ -72,7 +73,7 @@ func _distance(cam: CamRig) -> void:
 	cam.scout_k = 0.0
 	cam.snap(Vector3.ZERO)
 	var side := cam.scout_to(Vector2(1, 0)).length()
-	var cap := float(CamRig.FOLLOW["supervive"][2])
+	var cap := float(CamRig.FOLLOW["lean"][2])
 	print("SCOUTCAM far look across the screen: %.1f m (cursor lean cap %.1f m)" % [side, cap])
 
 ## Frames until scout_k crosses `to` with scout_on `on`, as seconds.
