@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """regate-bot [--dry] [--pr N] [--ignore-owner] : auto re-gate for GATE GREEN PRs that main left behind (no LLM).
 
-Hetzner cron (gh lives there), flock'd, one PR at a time. Each run:
- 1. In flight? Poll the worker's regate-run result. GREEN -> post its "GATE GREEN <full sha>: ..." (merge-ready-watch
-    merges it next run); RED -> "REGATE RED <flags>"; CONFLICT -> "REGATE CONFLICT <files>" (once per head); then wait
-    until that PR merged / moved / 30 min, so the next re-gate sees the new main.
+Hetzner cron (gh lives there), flock'd. 11-14b: up to REGATE_MAX_INFLIGHT (default 4) gates at once, each on a
+different worker (state.json 'inflight' is a list of per-PR entries; the old single dict is migrated on load). Each run:
+ 1. For every in-flight entry: poll the worker's regate-run result. GREEN -> post its "GATE GREEN <full sha>: ..."
+    (merge-ready-watch merges it next run); RED -> "REGATE RED <flags>"; CONFLICT -> "REGATE CONFLICT <files>" (once
+    per head); then track it until that PR merged / moved / main moved past it / 30 min (log only, no longer blocks
+    the queue). No result after REGATE_GATE_MAX_MIN -> kill that run's own process group (+ its descendants) on its
+    worker, 60 min cooldown for that PR.
  2. Else scan open ext/* PRs: a GATE GREEN comment by our gh user whose sha is the head (or the head adds only merge
     commits on top of it) and whose head does not contain origin/main, or whose head
-    holds main but adds only merge commits on the green (gated as it is). (This covers the WAITING PRs of
-    ~/cj/merge-ready-state.txt: every ext/* PR with a GATE GREEN is looked at.)
+    holds main but adds only merge commits on the green (gated as it is). 11-14b: also a head with ungated (non-merge)
+    commits after its last GATE GREEN, gated head+main exactly like a re-gate (--select-base = that green, so the new
+    commits and main's delta are re-checked), quiet rule always on for these. PRs that never had a GATE GREEN stay
+    out. (This covers the WAITING PRs of ~/cj/merge-ready-state.txt: every ext/* PR with a GATE GREEN is looked at.)
     Skip: activity (non-bot comment or head commit) < 20 min old; newest "<job> owns this PR until merged" from a job
-    still running; a REGATE RED/CONFLICT already posted for this head; ~/release-hold present (merges are exempt
-    from the build freeze, so only the release hold stops the bot).
- 3. Pick the first by /home/boki/bin/merge-first.txt (PR numbers in file order), else oldest PR first, and start
-    regate-run on the least-loaded worker (~/cj/workers, ssh key boki_s2_deploy; REGATE_WORKER=name|local).
+    still running; a REGATE RED/CONFLICT already posted for this head; cooldown after an error/timeout; already in
+    flight; ~/release-hold present (merges are exempt from the build freeze, so only the release hold stops the bot).
+ 3. Order: /home/boki/bin/merge-first.txt (PR numbers in file order) first, then oldest WAITING first (first-seen time
+    of the PR's WAITING line in regate-state.txt, the clock regate.lag uses), then oldest PR. Fill the free slots:
+    each start takes the worker with the most free cores (nproc - load1) among workers with >= REGATE_MIN_CORES (8)
+    cores and godot, excluding workers already running one of our gates (~/cj/workers, ssh key boki_s2_deploy;
+    REGATE_WORKER=name|local pins one worker, which then means one gate at a time).
 --dry prints the per-PR decision and changes nothing. State: ~/cj/regate-bot/{state.json,log.tsv,regate-state.txt}.
 """
 
@@ -21,28 +29,35 @@ import argparse
 import fcntl
 import os
 import re
+import shlex
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from regate_common import (GATE_RE, HOME, MARK_RE, OWNER_RE, REGATE_RE, STATE_DIR, GH, git, iso, is_ancestor,  # noqa: E402
-                           job_running, load_json, now, parse_iso, run, save_json, ssh_cmd, workers)
+                           inflight_list, job_running, load_json, now, parse_iso, run, save_json, ssh_cmd, workers)
 
 HERE = Path(__file__).resolve().parent
+import regate_carry as rc  # noqa: E402  (11-15: carry / tree cache / train)
+TRAIN_MIN = int(os.environ.get("REGATE_TRAIN_MIN", 3))
 QUIET_MIN = int(os.environ.get("REGATE_QUIET_MIN", 20))
 MERGE_WAIT_MIN = int(os.environ.get("REGATE_MERGE_WAIT_MIN", 30))
 GATE_MAX_MIN = int(os.environ.get("REGATE_GATE_MAX_MIN", 150))
+MAX_INFLIGHT = max(1, int(os.environ.get("REGATE_MAX_INFLIGHT", 4)))
+MIN_CORES = int(os.environ.get("REGATE_MIN_CORES", 8))
 REMOTE_DIR = "/home/boki/regate-bot"
 RUNS = "/home/boki/cj/regate-bot/runs"
 STATE = STATE_DIR / "state.json"
 
 
 def log(event, pr="-", detail=""):
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
     line = f"{iso(now())}\t{pr}\t{event}\t{detail}"
-    with open(STATE_DIR / "log.tsv", "a") as fh:
-        fh.write(line + "\n")
+    if not args.dry:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(STATE_DIR / "log.tsv", "a") as fh:
+            fh.write(line + "\n")
     print(line.replace("\t", " "))
 
 
@@ -53,8 +68,12 @@ def merge_first():
     return [int(x) for x in re.findall(r"#?\b(\d{1,5})\b", re.sub(r"(?m)#[^\d].*$", "", p.read_text()))]
 
 
+FIRST_RE = re.compile(r"ext/(merge-batch-|merge-lane-|merge-auto-|integ-|mc-integ-|mc-demo-)")  # 11-15: merge-week lanes too  # branches the bot may gate with no earlier GATE GREEN
+
 def scan(gh, st):
-    """-> (main sha, [row]) where row = dict(pr, branch, head, gated, verdict, why, created)."""
+    """-> (main sha, [row]) where row = dict(pr, branch, head, gated, kind, verdict, why, created).
+    kind: "stale" (only merge commits since the green: re-gate) or "ungated" (non-merge commits after the green)."""
+    busy = {f["pr"]: f for f in inflight_list(st)}
     prs = gh.open_prs()
     # one fetch for main and every PR head (a fetch per PR took ~10 s each on the big repo)
     git("fetch", "-q", "origin", "main", *[f"+refs/pull/{p['number']}/head:refs/regate/pr/{p['number']}" for p in prs], timeout=600)
@@ -63,7 +82,7 @@ def scan(gh, st):
     rows = []
     for p in prs:
         n, branch, head = p["number"], p["head"]["ref"], p["head"]["sha"]
-        row = dict(pr=n, branch=branch, head=head, gated="", created=p["created_at"], verdict="skip", why="")
+        row = dict(pr=n, branch=branch, head=head, gated="", kind="", created=p["created_at"], verdict="skip", why="")
         rows.append(row)
         if not branch.startswith("ext/") or (p["head"]["repo"] or {}).get("full_name") != p["base"]["repo"]["full_name"]:
             row["why"] = "not an ext/* branch of this repo"
@@ -75,16 +94,27 @@ def scan(gh, st):
         cs = gh.comments(n)
         gates = [(c, m.group(1)) for c in cs if c["user"]["login"] == me for m in GATE_RE.finditer(c["body"])]
         if not gates:
-            row["why"] = "no GATE GREEN by " + me + ("" if behind else " (head contains main)")
-            continue
-        gc, short = gates[-1]
-        gated = git("rev-parse", "--verify", "-q", f"{short}^{{commit}}") or ""
-        row["gated"] = gated
-        if not gated:
-            row["why"] = f"GATE GREEN {short} does not resolve"
-            continue
-        if gated != head and not (is_ancestor(gated, head) and not git("rev-list", "--no-merges", head, f"^{gated}", f"^{main}")):
-            row["why"] = f"head {head[:10]} has ungated commits after GATE GREEN {short}"
+            # 11-14: first gate for merge-week batch/integ PRs whose head already contains main: regate-run gates the head
+            # as it is with --select-base main = every check the branch's own diff touches (#53 #60 #63 #67 #69 sat ungated)
+            # 11-15: PRs listed in merge-first.txt (urgent fixes, e.g. #98 canary) are first-gated even when behind main;
+            # regate-run merges main in, and --select-base main then covers exactly the PR's own diff
+            if not FIRST_RE.match(branch) and n not in merge_first():  # 11-15: behind is fine, regate-run merges main in
+                row["why"] = "no GATE GREEN by " + me + ("" if behind else " (head contains main)")
+                continue
+            gated = short = main
+            row["gated"], row["kind"] = main, "first"
+        else:
+            gc, short = gates[-1]
+            gated = git("rev-parse", "--verify", "-q", f"{short}^{{commit}}") or ""
+            row["gated"] = gated
+            if not gated:
+                row["why"] = f"GATE GREEN {short} does not resolve"
+                continue
+            merges_only = gated == head or (is_ancestor(gated, head) and not git("rev-list", "--no-merges", head, f"^{gated}", f"^{main}"))
+            row["kind"] = "stale" if merges_only else "ungated"
+        if n in busy:
+            f = busy[n]
+            row["why"] = f"in flight ({f.get('phase')}) on {f.get('worker')} since {iso(f.get('started', 0))}"
             continue
         if not behind and gated == head:
             row["why"] = f"GATE GREEN {short} is the head and contains main: merge-ready-watch's case"
@@ -97,8 +127,8 @@ def scan(gh, st):
         if red:
             row["why"] = "REGATE RED/CONFLICT already posted for this head: needs a person or an LLM job"
             continue
-        if n in st.get("cooldown", {}) and st["cooldown"][n] > now():
-            row["why"] = f"cooldown after an error until {iso(st['cooldown'][n])}"
+        if st.get("cooldown", {}).get(str(n), 0) > now():
+            row["why"] = f"cooldown after an error until {iso(st['cooldown'][str(n)])}"
             continue
         if not args.ignore_owner:
             owners = [(c, m.group(1)) for c in cs for m in OWNER_RE.finditer(c["body"])]
@@ -111,117 +141,304 @@ def scan(gh, st):
         last = max([parse_iso(c["created_at"]) for c in cs if "[regate-bot " not in c["body"]] or [0])
         ct = int(git("log", "-1", "--format=%ct", head) or 0)
         quiet = (now() - max(last, ct)) / 60
-        if quiet < QUIET_MIN and not args.ignore_owner:
+        # ungated commits: someone pushed real work after the green, so the quiet rule holds even with --ignore-owner
+        if quiet < QUIET_MIN and (row["kind"] in ("ungated", "first") or not args.ignore_owner):
             row["why"] = f"live: last push/comment {quiet:.0f} min ago (< {QUIET_MIN})"
+            if row["kind"] == "ungated":
+                row["why"] += f"; head {head[:10]} has ungated commits after GATE GREEN {short}"
             continue
         row["verdict"] = "regate"
-        row["why"] = (f"GATE GREEN {gated[:10]}, head behind main {main[:10]}" if behind
-                      else f"head contains main but its last GATE GREEN is {gated[:10]}: gate the head as it is")
+        if row["kind"] == "first":
+            row["why"] = f"no GATE GREEN yet, head contains main {main[:10]}, quiet {quiet:.0f} min: first gate of the head as it is"
+        elif row["kind"] == "ungated":
+            row["why"] = (f"head {head[:10]} has ungated commits after GATE GREEN {gated[:10]}, quiet {quiet:.0f} min: "
+                          f"gate head + main {main[:10]}")
+        else:
+            row["why"] = (f"GATE GREEN {gated[:10]}, head behind main {main[:10]}" if behind
+                          else f"head contains main but its last GATE GREEN is {gated[:10]}: gate the head as it is")
     return main, rows
 
 
-def pick_worker():
+def push_branch(branch, old, commit):
+    """Fast-forward origin/<branch> from old to commit; refuses when the branch moved. -> error text or ''."""
+    now_sha = (git("ls-remote", "origin", f"refs/heads/{branch}") or "").split("\t")[0]
+    if now_sha != old:
+        return f"{branch} is at {now_sha[:10]}, not {old[:10]}"
+    rcode, _, err = run(["git", "-C", rc.REPO, "push", "-q", "origin", f"{commit}:refs/heads/{branch}"], timeout=300)
+    return err.strip()[-200:] if rcode else ""
+
+
+def release_green(gh, st, r, main, commit, text):
+    """Make commit (head + main, already covered by an earlier green) the PR's gated head: push, post, track the merge."""
+    n, tag = r["pr"], f"[regate-bot pr={n} head={r['head'][:10]} main={main[:10]}]"
+    body = f"GATE GREEN {commit} ({text}). No checks re-run: {tag}"
+    if args.dry:
+        print(f"  #{n}: would push {commit[:10]} to {r['branch']} and post: {body[:150]}")
+        return True
+    err = push_branch(r["branch"], r["head"], commit) if commit != r["head"] else ""
+    if err:
+        log("carry-push-failed", n, err)
+        return False
+    log("carry", n, f"{text}: {commit[:10]} on {r['branch']}; {gh.post(n, body)}")
+    st["inflight"].append(dict(pr=n, branch=r["branch"], head=r["head"], gated=r["gated"], main=main, kind=r["kind"], worker="carry",
+                               ip=None, out="", phase="awaiting_merge", started=now(), posted=now(), new=commit,
+                               main_time=int(git("log", "-1", "--format=%ct", main) or now())))
+    return True
+
+
+def carry_row(gh, st, r, main):
+    """Tree cache first, then carry (stale PRs only). True when the PR got its GATE GREEN without a suite run."""
+    head = r["head"]
+    keys = rc.keys_for(head, main)
+    hit = keys and rc.cache_get(*keys)
+    if hit:
+        commit = head if is_ancestor(main, head) else rc.commit_merge(keys[0], head, main, f"Merge origin/main {main[:10]} into PR (regate-bot, cached)")
+        return bool(commit) and release_green(gh, st, r, main, commit, f"cached: this exact tree was gated GREEN for PR #{hit['pr']}")
+    if r["kind"] != "stale":
+        return False
+    ok, why, commit = rc.carry_check(head, r["gated"], main)
+    if not ok:
+        log("carry-no", r["pr"], why)
+        return False
+    return release_green(gh, st, r, main, commit, f"carried, no overlap: {why}")
+
+
+def carry_pass(gh, st, todo, main):
+    """-> the rows of todo that still need a suite run."""
+    left = []
+    for r in todo:
+        try:
+            if carry_row(gh, st, r, main):
+                continue
+        except Exception as e:  # never block the normal gate on a carry bug
+            log("carry-error", r["pr"], f"{type(e).__name__}: {str(e)[-200:]}")
+        left.append(r)
+    return left
+
+
+# ---- train (REGATE_TRAIN=1): 3+ stale PRs gate as one chain; the tip's green is carried onto each member in turn
+def train_start(st, stale, main):
+    """-> row for the train's single gate (a temp ext/ branch at the chain tip) or None."""
+    plan = rc.train_plan(stale, main)
+    if len(plan) < TRAIN_MIN:
+        return None
+    tip, tid = plan[-1][1], f"ext/regate-train-{int(now())}"
+    members = [dict(pr=r["pr"], branch=r["branch"], head=r["head"], chain=c) for r, c, _t in plan]
+    if args.dry:
+        print(f"  train of {len(plan)}: {' '.join('#%d' % m['pr'] for m in members)} -> tip {tip[:10]} (would gate once)")
+        return None
+    rcode, _, err = run(["git", "-C", rc.REPO, "push", "-q", "origin", f"{tip}:refs/heads/{tid}"], timeout=300)
+    if rcode:
+        log("train-push-failed", "-", err.strip()[-200:])
+        return None
+    return dict(pr=-1, branch=tid, head=tip, gated=main, kind="first", train=dict(members=members, tip=tip, main=main, branch=tid))
+
+
+def train_done(st, f, word, res):
+    t = f["train"]
+    run(["git", "-C", rc.REPO, "push", "-q", "origin", "--delete", t["branch"]], timeout=120)
+    if word == "GREEN":
+        t["until"] = now() + 3 * 3600
+        st["train"] = t
+        log("train-green", "-", f"{t['tip'][:10]}: {len(t['members'])} PRs, released one by one as each merges")
+    else:
+        log("train-failed", "-", f"{res[:200]}: members gate alone")
+    return False
+
+
+def train_release(gh, st, main):
+    """Release the next member of a green train: carry the tip's green onto chain commit i + current main."""
+    t = st.get("train")
+    if not t:
+        return
+    if now() > t["until"]:
+        log("train-expired", "-", t["tip"][:10])
+        st.pop("train")
+        return
+    for m in t["members"]:
+        if m.get("done"):
+            if is_ancestor(m["new"], main):
+                continue
+            return  # the previous member is not merged yet
+        row = dict(pr=m["pr"], branch=m["branch"], head=m["head"], gated=t["tip"], kind="stale")
+        if (gh.pr(m["pr"]).get("head") or {}).get("sha") != m["head"]:
+            log("train-dropped", m["pr"], "PR head moved"); st.pop("train"); return
+        ok, why, commit = rc.carry_check(m["chain"], t["tip"], main)
+        if not ok:
+            log("train-dropped", m["pr"], f"{why}: the rest gate alone"); st.pop("train"); return
+        row["head"] = m["head"]
+        if release_green(gh, st, row, main, commit, f"train of {len(t['members'])} gated at tip {t['tip'][:10]}; {why}"):
+            m.update(done=True, new=commit)
+        return
+    st.pop("train")
+
+
+def probe_workers():
+    """-> [(free cores, name, ip, nproc)] for reachable workers with godot and >= MIN_CORES cores, most free first.
+    free = nproc - load1. REGATE_WORKER=name pins one worker, =local runs here (no ssh)."""
     want = os.environ.get("REGATE_WORKER", "")
     if want == "local":
-        return "local", None
+        return [(float(os.cpu_count() or 1), "local", None, os.cpu_count() or 1)]
     ws = workers()
     if want:
-        return want, ws.get(want, want)
-    best = None
-    for name, ip in ws.items():
+        return [(0.0, want, ws.get(want, want), 0)]
+
+    def probe(item):
+        name, ip = item
         rc, out, _ = ssh_cmd(ip, "cat /proc/loadavg; nproc; command -v godot >/dev/null && echo godot-ok", timeout=20)
-        if rc or "godot-ok" not in out:
-            continue
-        lines = out.split()
-        load = float(lines[0]) / max(1, int(lines[5]))
-        if best is None or load < best[0]:
-            best = (load, name, ip)
-    return (best[1], best[2]) if best else (None, None)
+        w = out.split()
+        if rc or "godot-ok" not in out or len(w) < 6 or not w[5].isdigit():
+            return None
+        cores = int(w[5])
+        # 11-14: a 4-core w3 won on load ratio and ran the gate with jobs=2 (hours per PR): skip < MIN_CORES (8) cores,
+        # most idle cores wins (nproc - load1)
+        return None if cores < MIN_CORES else (cores - float(w[0]), name, ip, cores)
+
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        got = [r for r in ex.map(probe, ws.items()) if r]
+    return sorted(got, key=lambda r: -r[0])
 
 
-def start(row, main, st):
-    name, ip = pick_worker()
-    if not name:
-        log("no-worker", row["pr"], "no reachable worker with godot")
-        return
+def pick_worker(busy, probes):
+    """Most free cores among probes, excluding workers in busy (names running one of our gates) -> (name, ip)."""
+    for _free, name, ip, _cores in probes:
+        if name not in busy:
+            return name, ip
+    return None, None
+
+
+# the run's own process group: regate-run starts under setsid and writes its pgid to OUT/pgid. The kill only fires when
+# that pid's command line still holds OUT (pid reuse), and takes the group plus every descendant (suite_speed puts each
+# check in a new session, so the group alone would leave godot checks running). Nothing else on the worker is touched.
+KILL_SH = r'''O=%(out)s; P=$(cat "$O/pgid" 2>/dev/null)
+case "$P" in ''|*[!0-9]*) echo "no pgid file: not ours, nothing killed"; exit 0;; esac
+tr '\0' ' ' < /proc/$P/cmdline 2>/dev/null | grep -qF -- "$O" || { echo "pgid $P gone or not ours, nothing killed"; exit 0; }
+D=$(ps -eo pid=,ppid= | awk -v r=$P '{pp[$1]=$2} END {for (p in pp) {q=p; n=0; while (q != "" && n++ < 64) {if (q == r) {print p; break}; q=pp[q]}}}')
+kill -TERM -- -$P $D 2>/dev/null; sleep 5; kill -KILL -- -$P $D 2>/dev/null
+echo "killed pgid $P + $(echo $D | wc -w) descendants"'''
+
+
+def kill_run(f):
+    """Kill one in-flight run's own process group (and descendants) on its worker; -> short text for the log."""
+    sh = KILL_SH % {"out": shlex.quote(f["out"])}
+    if args.dry:
+        return f"DRY would kill the regate-run process group of {f['out']} on {f['worker']}"
+    rc, out, err = run(["bash", "-c", sh], timeout=60) if f.get("ip") is None else ssh_cmd(f["ip"], sh, timeout=60)
+    return (out or err).strip()[-200:] or f"rc={rc}"
+
+
+def start(row, main, st, name, ip):
+    """Start regate-run for row on worker (name, ip); True when it started (an inflight entry was added)."""
     out = f"{RUNS}/pr{row['pr']}-{row['head'][:10]}-{int(now())}"
     a = [str(row["pr"]), row["branch"], row["head"], row["gated"], out]
+    # setsid: the run leads its own process group (pgid written first), so a timeout can kill exactly this run
+    inner = f"echo $$ > {shlex.quote(out)}/pgid; exec {REMOTE_DIR if ip else HERE}/regate-run " + " ".join(map(shlex.quote, a))
     if ip is None:
         Path(out).mkdir(parents=True, exist_ok=True)
-        subprocess.Popen([str(HERE / "regate-run"), *a], stdout=open(out + ".stdout", "w"), stderr=subprocess.STDOUT,
+        subprocess.Popen(["sh", "-c", inner], stdout=open(out + ".stdout", "w"), stderr=subprocess.STDOUT,
                          stdin=subprocess.DEVNULL, start_new_session=True)
     else:
         rc, _, err = run(["rsync", "-a", "-e", f"ssh -i {os.environ.get('REGATE_SSH_KEY', HOME / '.ssh/boki_s2_deploy')} -o BatchMode=yes",
                           f"{HERE}/regate-run", f"{HERE}/suite_speed.py", f"{HERE}/canary.txt", f"boki@{ip}:{REMOTE_DIR}/"], timeout=120)
-        q = " ".join(f"'{x}'" for x in a)
-        rc2, _, err2 = ssh_cmd(ip, f"mkdir -p {out} && nohup {REMOTE_DIR}/regate-run {q} > {out}.stdout 2>&1 < /dev/null &", timeout=60)
+        q = shlex.quote
+        rc2, _, err2 = (1, "", "rsync failed") if rc else ssh_cmd(
+            # 11-14: start detached (setsid nohup, all fds redirected, '& exit 0') so ssh returns at once; mkdir failure -> rc 1
+            ip, f"mkdir -p {q(out)} || exit 1; setsid nohup sh -c {q(inner)} > {q(out + '.stdout')} 2>&1 < /dev/null & exit 0", timeout=60)
         if rc or rc2:
             log("start-failed", row["pr"], f"{name}: {(err or err2).strip()[-200:]}")
-            return
-    st["inflight"] = dict(pr=row["pr"], branch=row["branch"], head=row["head"], gated=row["gated"], main=main,
-                          worker=name, ip=ip, out=out, phase="gating", started=now(),
-                          main_time=int(git("log", "-1", "--format=%ct", main) or now()))
-    log("start", row["pr"], f"{row['branch']} {row['head'][:10]} + main {main[:10]} on {name}: {out}")
+            return False
+    keys = rc.keys_for(row["head"], main)
+    st["inflight"].append(dict(pr=row["pr"], branch=row["branch"], head=row["head"], gated=row["gated"], main=main, ckey=keys,
+                               train=row.get("train"),
+                               kind=row.get("kind") or "stale", worker=name, ip=ip, out=out, phase="gating", started=now(),
+                               main_time=int(git("log", "-1", "--format=%ct", main) or now())))
+    log("start", row["pr"], f"{row.get('kind') or 'stale'} {row['branch']} {row['head'][:10]} + main {main[:10]} on {name}: {out}")
+    return True
 
 
 def fetch_result(f):
     if f["ip"] is None:
         r, c = Path(f["out"], "result"), Path(f["out"], "comment.md")
         return (r.read_text().strip() if r.exists() else ""), (c.read_text() if c.exists() else "")
-    rc, out, _ = ssh_cmd(f["ip"], f"cat {f['out']}/result 2>/dev/null && echo @@COMMENT@@ && cat {f['out']}/comment.md 2>/dev/null", timeout=60)
+    rc, out, _ = ssh_cmd(f["ip"], f"cat {f['out']}/result 2>/dev/null; echo @@COMMENT@@; cat {f['out']}/comment.md 2>/dev/null; true", timeout=60)  # 11-14: MOVED/ERROR have no comment.md; '&&' made rc!=0 and the result was never collected (slot held 60+ min)
     if rc or "@@COMMENT@@" not in out:
         return "", ""
     r, c = out.split("@@COMMENT@@\n", 1) if "@@COMMENT@@\n" in out else (out.split("@@COMMENT@@")[0], "")
     return r.strip(), c
 
 
-def step_inflight(gh, st):
-    """Advance the in-flight PR; True while it still blocks the queue."""
-    f = st.get("inflight")
-    if not f:
-        return False
+def step_one(gh, st, f, main_now):
+    """Advance one in-flight entry; True keeps it in the list. Every per-PR rule (cooldown, timeout + kill of its own
+    process group, release on merge/move) is applied to this entry only."""
     n, age = f["pr"], (now() - f["started"]) / 60
     if f["phase"] == "gating":
         res, comment = fetch_result(f)
         if not res:
             if age > GATE_MAX_MIN:
-                log("timeout", n, f"no result after {age:.0f} min on {f['worker']} ({f['out']}); released, 60 min cooldown")
-                st.setdefault("cooldown", {})[n] = now() + 3600
-                st.pop("inflight")
+                log("timeout", n, f"no result after {age:.0f} min on {f['worker']} ({f['out']}): {kill_run(f)}; released, 60 min cooldown")
+                st["cooldown"][str(n)] = now() + 3600
                 return False
             print(f"#{n}: gating on {f['worker']} for {age:.0f} min")
             return True
         word = res.split()[0]
-        log("result", n, f"{res[:300]} ({age:.0f} min)")
+        log("result", n, f"{res[:300]} ({age:.0f} min, {f['worker']})")
+        if f.get("train"):
+            return train_done(st, f, word, res)
+        if word == "GREEN" and f.get("ckey"):
+            rc.cache_put(*f["ckey"], "GREEN", pr=n, sha=res.split()[1] if len(res.split()) > 1 else "")
         if word in ("GREEN", "RED", "CONFLICT") and comment.strip():
             if args.dry:
                 print(gh.post(n, comment, dry=True))
             else:
                 log("comment", n, gh.post(n, comment.strip()))
-        if word == "GREEN":
+        if word == "GREEN" and len(res.split()) > 1:
             log("lag", n, f"main {f['main'][:10]} landed -> GATE GREEN {res.split()[1][:10]}: {(now() - f['main_time']) / 60:.0f} min")
             f.update(phase="awaiting_merge", posted=now(), new=res.split()[1])
             return True
         if word == "ERROR":
-            st.setdefault("cooldown", {})[n] = now() + 3600
-        st.pop("inflight")
+            st["cooldown"][str(n)] = now() + 3600
         return False
-    # awaiting_merge: one PR at a time, so wait for merge-ready-watch to take it before re-gating the next on new main
+    # awaiting_merge: holds no worker and no longer blocks the queue (11-14b); kept to log merge lag and so the scan
+    # does not pick the PR again while merge-ready-watch has it
     p = gh.pr(n)
     wait = (now() - f["posted"]) / 60
     if p.get("merged_at"):
         log("merged", n, f"{wait:.0f} min after GATE GREEN, {(parse_iso(p['merged_at']) - f['main_time']) / 60:.0f} min after main moved")
     elif p["state"] != "open" or p["head"]["sha"] != f["new"]:
         log("released", n, f"PR {p['state']}, head {p['head']['sha'][:10]}")
-    elif git("fetch", "-q", "origin", "main") is not None and not is_ancestor("origin/main", f["new"]):
+    elif main_now and not is_ancestor(main_now, f["new"]):
         log("released", n, "main moved past the new gate before merge-ready-watch took it: re-queued as stale")
     elif wait > MERGE_WAIT_MIN:
         log("not-merged", n, f"GATE GREEN posted {wait:.0f} min ago, merge-ready-watch has not merged it; moving on")
     else:
         print(f"#{n}: GATE GREEN {f['new'][:10]} posted {wait:.0f} min ago, waiting for merge-ready-watch")
         return True
-    st.pop("inflight")
     return False
+
+
+def step_inflight(gh, st):
+    """Advance every in-flight entry; -> number of entries still gating (each holds one worker)."""
+    fl = inflight_list(st)
+    main_now = None
+    if any(f["phase"] != "gating" for f in fl) and git("fetch", "-q", "origin", "main") is not None:
+        main_now = git("rev-parse", "origin/main")
+    keep = []
+    for f in fl:
+        try:
+            alive = step_one(gh, st, f, main_now)
+        except Exception as e:  # one broken entry (ssh, gh) must not stall the others: keep it, retry next run
+            log("step-error", f.get("pr"), f"{type(e).__name__}: {str(e)[-200:]}")
+            alive = True
+        if alive:
+            keep.append(f)
+    st["inflight"] = keep
+    return sum(1 for f in keep if f["phase"] == "gating")
+
+
+def waiting_since(st, r, default):
+    """First-seen time of the PR's WAITING line (key pr:head10, the regate.lag clock); unseen -> default (one fixed
+    time per run, so unseen rows tie and fall back to PR age)."""
+    return st.get("seen", {}).get(f"{r['pr']}:{r['head'][:10]}", default)
 
 
 def write_state(rows, st):
@@ -252,36 +469,68 @@ def main():
         print("regate-bot: ~/release-hold present, nothing done")
         return 0
     st = load_json(STATE, {})
+    inflight_list(st)  # migrates the pre-11-14b single-dict form
     gh = GH()
-    if step_inflight(gh, st) and not args.dry:
-        save_json(STATE, st)
-        return 0
+    gating = step_inflight(gh, st)
+    free = MAX_INFLIGHT - gating
+    if free <= 0:
+        print(f"regate-bot: {gating} gates in flight (max {MAX_INFLIGHT}), no free slot (carry and cache still run)")
+    t0 = now()
     main_sha, rows = scan(gh, st)
-    order = merge_first()
-    rank = {n: i for i, n in enumerate(order)}
-    rows.sort(key=lambda r: (rank.get(r["pr"], len(order)), parse_iso(r["created"])))
-    todo = [r for r in rows if r["verdict"] == "regate" and (not args.pr or r["pr"] == args.pr)]
-    if args.dry or os.environ.get("REGATE_VERBOSE"):
-        print(f"main {main_sha[:10]}, gh {'live' if gh.live else 'public API (read-only)'}, merge-first: {order or 'none (oldest first)'}")
-        for r in rows:
-            if r["gated"] or r["verdict"] == "regate" or args.dry:
-                print(f"  #{r['pr']:<3} {r['branch']:<30} {r['head'][:10]} {r['verdict']:<6} {r['why']}")
     if not args.dry:
         write_state(rows, st)
-    if todo and not st.get("inflight"):
+    order = merge_first()
+    rank = {n: i for i, n in enumerate(order)}
+    # merge-first.txt, then oldest WAITING (first-seen of the PR's WAITING line), then oldest PR
+    rows.sort(key=lambda r: (rank.get(r["pr"], len(order)), waiting_since(st, r, t0), parse_iso(r["created"])))
+    todo = [r for r in rows if r["verdict"] == "regate" and (not args.pr or r["pr"] == args.pr)]
+    if args.dry or os.environ.get("REGATE_VERBOSE"):
+        print(f"main {main_sha[:10]}, gh {'live' if gh.live else 'public API (read-only)'}, merge-first: {order or 'none'}, "
+              f"in flight {gating}/{MAX_INFLIGHT} gating, {len(st['inflight']) - gating} awaiting merge")
+        for r in rows:
+            if r["gated"] or r["verdict"] == "regate" or args.dry:
+                w = f"waiting since {iso(waiting_since(st, r, t0))[5:16]}" if r["gated"] else ""
+                print(f"  #{r['pr']:<3} {r['branch']:<30} {r['head'][:10]} {r['verdict']:<6} {r['kind'] or '-':<7} {w:<23} {r['why']}")
+    if not args.no_carry:
+        train_release(gh, st, main_sha)
+        held = {m["pr"] for t in [st.get("train")] + [f.get("train") for f in st["inflight"]] if t for m in t["members"]}
+        todo = carry_pass(gh, st, [r for r in todo if r["pr"] not in held], main_sha)
+        stale = [r for r in todo if r["kind"] == "stale"]
+        if free > 0 and os.environ.get("REGATE_TRAIN") == "1" and len(stale) >= TRAIN_MIN and not held:
+            row = train_start(st, stale, main_sha)
+            if row:
+                todo = [row] + [r for r in todo if r["pr"] not in {m["pr"] for m in row["train"]["members"]}]
+    if todo and free > 0:
+        probes = probe_workers()
+        busy = {f["worker"] for f in st["inflight"] if f["phase"] == "gating"}
         if args.dry:
-            print(f"would start: #{todo[0]['pr']} ({len(todo)} waiting: {' '.join('#%d' % r['pr'] for r in todo)})")
-        else:
-            start(todo[0], main_sha, st)
+            print(f"workers (>= {MIN_CORES} cores, godot, most free cores first): "
+                  + (", ".join(f"{nm} {fr:.1f}/{c}" for fr, nm, _ip, c in probes) or "none reachable")
+                  + (f"; busy with our gates: {', '.join(sorted(busy))}" if busy else ""))
+        for r in todo:
+            if free <= 0:
+                break
+            name, ip = pick_worker(busy, probes)
+            if not name:
+                log("no-worker", r["pr"], f"no free worker (>= {MIN_CORES} cores, godot, not running one of our gates)")
+                break
+            busy.add(name)  # one gate per worker; a worker that failed to start is not retried this run
+            if args.dry:
+                print(f"would start: #{r['pr']} ({r['kind']}) on {name}")
+                free -= 1
+            elif start(r, main_sha, st, name, ip):
+                free -= 1
+        if args.dry:
+            print(f"{len(todo)} to gate in order: {' '.join('#%d' % r['pr'] for r in todo)}")
     if not args.dry:
         save_json(STATE, st)
     return 0
 
-
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--dry", action="store_true")
-    ap.add_argument("--pr", type=int, default=0, help="only this PR (still one at a time)")
+    ap.add_argument("--pr", type=int, default=0, help="only this PR")
+    ap.add_argument("--no-carry", action="store_true", help="skip the tree cache / carry / train pass (every row gets a suite run)")
     ap.add_argument("--ignore-owner", action="store_true", help="manual runs: ignore 'owns this PR' and the 20 min quiet rule")
     args = ap.parse_args()
     sys.exit(main())
