@@ -70,8 +70,6 @@ const JL_HEAVY_OPEN := {
 }
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
-	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
-	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
 }
@@ -405,6 +403,11 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+		var g: Array = dd.get("mood", {}).get("glance", [])
+		if clip == "idle" and not g.is_empty():
+			var fits := g.size() == 3 and 0.0 <= float(g[0]) and float(g[0]) < float(g[1])
+			fits = fits and float(g[1]) <= anim.length and WardenMood.IDS.has(String(g[2]))
+			ok(fits, "%s: the idle's glance %s falls inside its %.1f s" % [id, g, anim.length])
 
 ## A walk or run ring: the back and side loops last as long as the forward one, or a diagonal's two feet drift apart.
 func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:

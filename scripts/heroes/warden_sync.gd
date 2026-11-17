@@ -136,7 +136,7 @@ func _process(dt: float) -> void:
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
 	if mood:
-		mood.step(dt)
+		mood.step(dt, clips.idle_at() if clips else -1.0)
 	if sway:
 		sway.tumble(dt, orbits.pivots)
 	if bool(root.get_meta(WardenGlb.CHAIN_OUT, false)):

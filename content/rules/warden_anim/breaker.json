@@ -189,6 +189,7 @@
 		"emote": "happy",
 		"hit": "angry",
 		"hit_t": 1.2,
+		"glance": [1.5, 2.8, "happy"],
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [
