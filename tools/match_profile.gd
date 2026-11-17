@@ -29,8 +29,8 @@ var _rode_at := -1.0
 var _hunters := 0
 
 
-func run(main_node: Node) -> void:
-	main_node.add_child(self)
+func run(main_node: Node, _mode: String = "") -> void:
+	main_node.add_child(self)  # a report, never advisory: hitch-check's mode is not used
 
 
 func _ready() -> void:
