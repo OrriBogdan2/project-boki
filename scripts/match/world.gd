@@ -88,6 +88,12 @@ func ground_at(x: float, z: float) -> float:
 func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
 
+## The tile under a point: T_GROUND, T_BLOCK or T_VOID (off the map counts as the void).
+func tile_kind(x: float, z: float) -> int:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return kind[idx(ix, iz)] if inb(ix, iz) else T_VOID
+
 ## Tile idx -> top height of a block you can climb (the farm's placed blocks); a block not in here is BLOCK_H tall.
 var block_top := {}
 
@@ -97,12 +103,6 @@ func block_top_of(i: int) -> float:
 ## Standing room on a block's top: a climbable block, not a wall of BLOCK_H.
 func is_stand_block(x: float, z: float) -> bool:
 	return is_block(x, z) and block_top.has(idx(int(floor(x)), int(floor(z))))
-
-## The tile under a point: T_GROUND, T_BLOCK or T_VOID (off the map counts as the void).
-func tile_kind(x: float, z: float) -> int:
-	var ix := int(floor(x))
-	var iz := int(floor(z))
-	return kind[idx(ix, iz)] if inb(ix, iz) else T_VOID
 
 func is_block(x: float, z: float) -> bool:
 	var ix := int(floor(x))

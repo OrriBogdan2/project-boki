@@ -50,11 +50,6 @@ func _pose(b: Node3D) -> void:
 				for a in ["ArmL", "ArmR"]:
 					var arm := t.get_node_or_null(a) as Node3D
 					if arm: arm.rotation.x = w * 2.7 + (s * 0.6 if a == "ArmL" else -s * 0.6) * -1.0
-		"sentinel":
-			var cr := b.get_node_or_null("Crystal") as Node3D
-			if cr:
-				cr.position.y += 0.25 * w; cr.scale = Vector3.ONE * (1.0 + 0.12 * w)
-				cr.rotation.x = -0.2 * w + 0.2 * s; cr.rotation.y = 0.9 * s + 1.2 * w
 		"skitter":
 			for i in 3:
 				for sx in [-1, 1]:
