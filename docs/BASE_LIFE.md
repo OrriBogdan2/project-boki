@@ -18,6 +18,13 @@ check: `--base-life-check`.
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
   Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
 - Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
+- Nap spots: each zone lists a few in `garden_zones.json` `nap` ([kind, tile x, tile z]: a sunny rock, under a tree,
+  by the water). A Boki about to nap walks to the nearest free one within `spot_reach` (one Boki on it), giving up
+  after `spot_walk` s; a friend (`friend_at`, a parent weighs in) prefers the place beside its friend's spot, then a
+  napping friend nearby (the pile), then a free spot; with none it naps where it stands. A spot moves up to 3 m to
+  open ground, so Bramblebank's per-save island keeps its spots. Claims live on the runtime Boki (`life_spot`),
+  nothing is saved. Checks: `--base-life-check` (walk, beside, a third spot), `--garden-zones-check` (spots on
+  open ground in each built zone).
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
@@ -25,15 +32,27 @@ check: `--base-life-check`.
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
+  Joy sets the pace: at the base it wears `base_joy_decay` a minute awake (care.json, 8; Care.DECAY's 0.6 off the
+  base and for time you were away), a Boki under toys.json `joy_below` (90) goes to a toy on its own, and a play
+  gives only `joy_gain` (3): play trains stats, care keeps a Boki happy. A favourite meal (+28) is about one day's
+  wear, so a Boki you feed plays 5-10 times a day and stays content; one left alone plays too but slides toward
+  sulky (care.json `sulky`), never sick.
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
-  goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
-  the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
-  the Eat state (k["life_eat"]); the meal is `Care.feed`, so the journal and lean see it.
+  goes to a feeder with food first (HomeEcon), then a feeding bowl you filled, else picks the ripe snack patch and
+  eats one snack (the rest go to the pantry), else fetches a snack from the pantry (Save.d crops) at the house door
+  or the landing. The walk is the Eat state (k["life_eat"]); every meal is `BaseFeed.meal` (`Care.feed`, the lean
+  through `Evo.eat`), so the journal and lean see it.
+- Feeding bowl (`feed_bowl`, the Base tab, `scripts/home/feed_bowl.gd`): walk up and drop a pantry snack in (3 at
+  most, kept on the piece as `snacks`); hungry Boki within 9 m come. It is a place of the Eat state, not a machine
+  of its own: k["life_eat"] carries `from: "bowl"` and a phase, go (to a 2 m ring), wait, huff (a rival,
+  base_life.json `rival_at`, already there: a stare-down and a `huff` line), eat (one at a time). Bold and hungry
+  Boki go first; a timid one (bravery under 0.4) waits for every bolder one. `--feed-check` covers it.
 - Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
 - Duo bonus (`scripts/home/base_duo.gd`, `content/rules/base_duo.json`): friends at bond 0.6 or more wake +6 joy from a shared nap (8 s asleep side by side), hand off cleanly in the Dash (x1.06 pace into a stretch with the friend alongside), show a heart pair and "Duo with X" on the Boki card in the Burrow view, and get one journal line the first time. The Show Ring joint trick waits for the Show Ring. Check: `--duo-check`.
-- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
+- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, an unfed Boki that never ate on its own, or a fed Boki that plays under 3.5 toys a day, starts under one every other day from low joy, or
+  is ever sulky (it prints toys a day, lowest joy and time sulky for each Boki), and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
   = {gifted}`. In `BaseLife` it is the MENTOR state: slow steps (`Mentor.PACE`, `mentor`/`mentor_radius` in the
@@ -104,6 +123,18 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+- Game cues (`scripts/home/garden_cues.gd`): each garden game builds one small world cue set when it starts and
+  frees it when it ends; nothing goes on the HUD. Dash marks, Shove meter, Seek trail and Volley ring are teal and
+  magenta. The newer four share two pools (`Bursts` rings, `PopCue` labels) and use the Boki's type colour
+  (`GardenCues.type_colour`, the Field Book colour). Echo Steps: on the lead's beat its stone gets a ring; on your
+  beats one ring circles all four stones (it never shows which); a hit flashes bright, a miss dull and shrinking.
+  Tumble: the rival's tell is an icon over its head for the tell's 1.5 s (Rush double chevron toward your Boki,
+  Brace shield, Dodge hoop). Its alpha is the chance the tell is honest and it sways more the less sure it is, so
+  it reads as "probably". Relay Cup: a baton floats over each team's runner, blinking while a fumbled pass is
+  taken, and bursts at the next runner on every hand-off (bright when the pass lost no time). Show Ring: each
+  round's score pops over your Boki as the round ends ("Look 7.4"), and both totals pop after the Bond walk.
+  Check: `--garden-games-vfx-check` (each cue on the frame of its beat, at its spot, in its colour).
+  Clips: `--gameplay-media` clips 6 (Echo Steps), 7 (Show Ring) and 8 (Relay Cup) show them.
 
 ## Zone air (ambient layer per zone)
 

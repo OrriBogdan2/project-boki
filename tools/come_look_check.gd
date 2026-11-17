@@ -171,6 +171,20 @@ func run(m: Node) -> void:
 	ok(near < ComeLook.LOOK_DIST, "a new toy: A (most curious) reaches the toy first (%.1f m)" % near)
 	var line := _last_mem("A")
 	ok(_mem_size("A") == before + 1 and line.contains("picnic rug"), "a new toy: A keeps '%s'" % line)
+	# ------------------------------------------------ a base toy (from ext/farm-new-toy): news too
+	at = _open_spot()
+	_gather(at)
+	before = _mem_size("A")
+	tile = Vector2i(int(at.x), int(at.z))
+	home.hb.held = {"id": "toy_ball", "kind": "d", "r": 0, "c": ""}
+	home.hb.cells = [tile]
+	home.hb.ghost_ok = true
+	ok(home.hb.place_held(), "a base toy: you put a play ball down")
+	came = ComeLook._looks.map(func(l): return l["k"])
+	ok(came.size() >= 2 and ComeLook._looks[0]["kind"] == "toy" and came[0] == _entry("A"),
+		"a base toy: %s come, A (most curious) first" % _names(came))
+	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"), "a base toy: A keeps '%s'" % _last_mem("A"))
+	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1

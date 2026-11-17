@@ -122,12 +122,10 @@ const WEAPONS := {
 		"dmg": 3.87,
 		"rate": 0.08,
 		"speed": 110.0,
-		"mag": 30,
-		"reload": 1.8,
 		"kb": 0.8,
 		"spread": 0.035,
 		"range": 9.5,
-		"sfx": "rifle",
+		"sfx": "gun_rifle",
 		"color": Color("d9ff66"),
 		"size": 0.12
 	},
@@ -346,7 +344,7 @@ const PERKS := {
 	"deepmag":
 	{
 		"name": "Deep Magazine",
-		"desc": "20% more rounds before a reload.",
+		"desc": "20% more rounds in the drum.",
 		"icon": "satchel",
 		"col": Color("ffd27a"),
 		"max": 3,

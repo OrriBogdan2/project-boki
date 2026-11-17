@@ -108,7 +108,8 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
-## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide); a hanging wing (Sable's moth wings)
+## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's
@@ -295,11 +296,11 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	var muzzle := gun.get_node_or_null("Muzzle") as Node3D
 	if mouth and muzzle:
 		muzzle.transform = WardenGlb.model_xf(weapon, mouth)
-	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
+	# its magazine (WEAPON_MAG) becomes the Gun's Mag
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
 	if old is MeshInstance3D and mag == null:
-		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole: the reload still moves the Mag node)
+		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole)
 	if mag and old:
 		var at := WardenGlb.model_xf(gun, mag)
 		gun.remove_child(old)
@@ -426,7 +427,7 @@ static func _skinned_weapon(root: Node3D) -> void:
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
-	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	if mag:
 		mag.mesh = null
 		mag.visible = false

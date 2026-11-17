@@ -124,8 +124,7 @@ func arch_tip(id: String, p: Hunter) -> Array:
 			)
 			return out
 	var si := p.slot_info(id)
-	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Ability", "k1": "Utility", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}     # (the key is shown once, below)
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -441,7 +440,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 		"weapon":
 			var wp: Dictionary = p.wpn
 			out.append([wp["name"], Color("e6dccb")])
-			out.append(["Your signature weapon  ·  reloads by itself when empty", H.MUTED, 12])
+			out.append(["Your signature weapon", H.MUTED, 12])
 			var ups := WeaponUps.summary(p)
 			if ups != "":
 				out.append([ups, H.GOOD, 13])
@@ -456,16 +455,8 @@ func tip_lines(id: String, p: Hunter) -> Array:
 					14
 				]
 			)
-			out.append(
-				[
-					(
-						"Magazine %d  ·  reload %s  ·  range %d tiles"
-						% [int(wp["mag"]), secs(float(wp["reload"])), int(float(wp.get("range", 10.0)))]
-					),
-					H.MUTED,
-					13
-				]
-			)
+			var drum := "Drum %d  ·  " % int(wp["mag"]) if wp.get("ammo", true) else ""
+			out.append(["%srange %d tiles" % [drum, int(float(wp.get("range", 10.0)))], H.MUTED, 13])
 			out.append(
 				[
 					"It's the one weapon you carry; level-ups, chests and tunings on the ground make it stronger.",
