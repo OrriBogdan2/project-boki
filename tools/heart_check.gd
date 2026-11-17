@@ -216,9 +216,9 @@ func _early_seat(main: Node) -> void:
 	ok(is_equal_approx(float(p.get_meta("heart_slow", 0.0)), float(rl["carrier_slow"])),
 		"the carrier is slowed by %.0f%%" % (float(rl["carrier_slow"]) * 100.0))
 	p.set_meta("heart_slow", 0.0)
-	var k0 := p._chase_mod(Vector2(1, 0))
+	var k0 := p._move_mult()
 	p.set_meta("heart_slow", float(rl["carrier_slow"]))
-	ok(is_equal_approx(p._chase_mod(Vector2(1, 0)), k0 * (1.0 - float(rl["carrier_slow"]))),
+	ok(is_equal_approx(p._move_mult(), k0 * (1.0 - float(rl["carrier_slow"]))),
 		"that slow is in the move speed")
 	m.step(Match.DT)
 	ok(p.reveal_t > 0.0, "the carrier is revealed")
