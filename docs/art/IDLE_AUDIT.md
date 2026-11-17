@@ -31,7 +31,7 @@ No source hero's pose or attitude is copied.
 | 4 | Cinder the Ashen Kiss (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
-| 7 | Meeko the Dawnfox (`tender`) | Idle and stance built on the lantern that DECISIONS dropped |
+| 7 | Meeko the Dawnfox (`tender`) | Done Nov 17 (ext/idle-tender-rebased-port): weight shift, strap hug, no lantern pose |
 | 8 | Neve the Snowglide (`rimewright`) | Toy-soldier pike stance, feet together; no skater weight |
 | 9 | Sable the Silver Thief (`thief`) | Square, locked knees; the stance only raises the pistol |
 | 10 | Vex the Hired Gun (`gunslinger`) | Locked knees and a dead pelvis, but the coin flip is a real signature |
@@ -260,6 +260,10 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The same feet. She hugs her satchel strap and rises onto her toes to look ahead.
 - **Note:** the model swap waits for her final master sheet (DECISIONS). The rework edits only the clips on the
   current model and hides the lantern by keying it out of view. If companion bones exist by then, leave them unkeyed.
+- **Done (ext/idle-tender-rebased-port):** tools/art1/pip_clips.py `CALM`/`STAND`.
+  - Idle 5.0 s: weight shifts foot to foot on soft knees, the head and shoulders trailing the hips (`LAG`). Ear flick and a held glance over her shoulder (the tail curls in), then a deep breath and she squares up. Paws at her chest.
+  - Stance 6.0 s: the idle's feet. She hugs her satchel strap, rises onto her toes to look ahead, settles, sighs.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 138 of 141 tracks: the 3 `x_breath` tracks are dropped, the v95 rig has no such bone, and the 3 lantern scale keys are left out because the lantern is gone from the v95 model). The 9 spring joints the v95 rig moved (cape, tail) are held at rest; the runtime springs move them.
 
 ### 8. Neve the Snowglide (`rimewright`, art `claire`)
 
