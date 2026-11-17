@@ -16,9 +16,6 @@ extends ArchKit
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
-const PUNCH_TAP_K := 0.55      # the shortest held punch's impact, as a share of the full one (the lane's width)
-const DUST := Color(0.62, 0.58, 0.52, 0.85)    # the punch's dust cloud: pale basalt grit
-const STONE := Color(0.4, 0.42, 0.48, 0.95)    # its heavier grit, the gauntlet's dark stone
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
@@ -395,7 +392,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			_punch_tele(k)
 			HeroVfx.of(m).hold(h, "punch_charge", k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
-			KitLooks.of(m).charge_fist("br_fist", h, hand_pos(true), k, COBALT.lerp(Color("9ad0ff"), k))
+			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
 		if lmb_t < float(ld["tap"]): _boulder()
@@ -403,6 +400,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 	elif pressed:
 		pass
 	return true
+
+func _fist_at() -> Vector3:
+	var dir := h.aim_dir()
+	return h.pos + Vector3(dir.x * 0.35 - dir.y * 0.3, 1.05, dir.y * 0.35 + dir.x * 0.3)
 
 ## The held punch's lane: a pale rectangle with chevrons, from her feet toward the cursor.
 func _punch_tele(k: float) -> void:
@@ -468,7 +469,6 @@ func _punch(k: float) -> void:
 	punches += 1
 	play("breah_punch")
 	AimKit.hide(h, "punch")
-	KitLooks.of(m).release("br_fist")
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
@@ -515,7 +515,6 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-<<<<<<< HEAD
 ## A bot punches when its own rocks stand in line with the foe: the punch sends the row at them.
 func _row_between(tg: Ent) -> bool:
 	var dir := h.aim_dir()
@@ -527,20 +526,6 @@ func _row_between(tg: Ent) -> bool:
 ## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
-=======
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): basalt chips and a dust
-## cloud thrown on along the punch, as wide as the lane at full charge and PUNCH_TAP_K of it from the shortest hold,
-## and the blue flash. No ground ring: the lane, not a circle, is what it hits.
-func _punch_impact(at: Vector3, dir: Vector2, k: float, dmg: float) -> void:
-	var across := float(lmb_def()["punch"]["width"]) * lerpf(PUNCH_TAP_K, 1.0, k)    # m across
-	var g := AimMode.ground(m, at)
-	var fwd := Vector3(dir.x, 0.3, dir.y)
-	KitLooks.of(m).chips(g, int(5 + 9 * k), k, dir)
-	m.fx.burst(g + Vector3(0, 0.4, 0), DUST, int(10 + 16 * k), 1.6 * across, 0.6, 1.5, 0.9 * across, fwd, 65.0)
-	m.fx.burst(g + Vector3(0, 0.15, 0), STONE, int(8 + 10 * k), 2.2 * across, 0.4, 9.0, 0.6 * across, fwd, 45.0)
-	m.fx.dust(g, int(6 + 8 * k), DUST)
-	DolmImpact.blow(m, g, dmg, dir)
->>>>>>> origin/ext/vfx-tenzo-punch-hold
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
