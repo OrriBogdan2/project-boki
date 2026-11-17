@@ -21,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	Settings.set_v("hud_full", true, false)      # (every HUD panel from the start, squad rows too)
 	Game.god = false      # (god mode would stand the downed thief straight back up)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
@@ -97,18 +98,22 @@ func _rows() -> void:
 	ok(BokiHud.stolen_shown.size() == 2 and BokiHud.stolen_shown[1]["state"] == "ready",
 		"a second wisp: two rows, the new one ready")
 	await _shot("two")
+	_revive(foes)          # (a squad's last hunter standing is out for good, not downed: no wisp to grab)
 	var k3 := _steal(mate, foes[2])
 	ok(KinSteal.count(mate) == 1 and KinSteal.stolen(k3), "a teammate carries a wisp")
 	await _drawn()
 	ok(TeamBoki.stolen_shown.get(mate.nid, 0) == 1,
 		"...their squad row shows the count 1 (%s)" % str(TeamBoki.stolen_shown))
 	await _shot("mate")
-	for f in foes:
-		if f.downed:
-			m.revive_hunter(f, null)
+	_revive(foes)
 	m.knock(p, null, {})
 	_frames(0.1)
 	ok(p.downed and BokiHud.stolen_rows(p).is_empty(), "the thief goes down: both wisps are loose, the rows go")
+
+func _revive(hunters: Array) -> void:
+	for h in hunters:
+		if h.downed:
+			m.revive_hunter(h, null)
 
 ## The HUD as it is (real renderer only).
 func _shot(what: String) -> void:

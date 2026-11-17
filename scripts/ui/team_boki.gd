@@ -41,7 +41,7 @@ static func draw(hud, p: Hunter) -> void:
 		var n := KinSteal.count(h)
 		if n > 0:
 			stolen_shown[h.nid] = n
-			HudStyle.count_badge(hud.c, at + Vector2(ICON, 0.0), n, HudStyle.ALLY)
+			HudStyle.count_badge(hud.c, at + Vector2(ICON, 0.0), n, SideColor.ally())
 
 static func _icon(hud, at: Vector2, h: Hunter, k: Kin) -> void:
 	var st := state_of(h, k)
