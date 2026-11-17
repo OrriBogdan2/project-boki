@@ -29,4 +29,7 @@ if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ] && [ "${1:-}" != "--n
 	echo "$out" | grep -q "failures: 0" || { echo "FAILED: golden saves (docs/SAVES.md)"; exit 1; }
 	python3 tools/size_budget.py --check || { echo "FAILED: size budget (docs/SIZE_BUDGET.md)"; exit 1; }
 fi
+if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ]; then
+	python3 tools/warden_glb_guard.py || { echo "FAILED: hunter glbs changed outside an Art: commit"; exit 1; }
+fi
 exec "$VENV/bin/python" -I tools/lint_gate.py "$@"

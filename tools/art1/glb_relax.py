@@ -6,7 +6,12 @@ seams split (one per UV island) are welded first, so both sides of a seam get th
 Each mesh first loses the deeper limb bones off its torso and other limbs (skin_relax.limbs_apart), then the
 triangles that still join such a limb to the body (a scan's hand fused to the thigh it hung beside): they become
 degenerate (not drawn), so the contact opens as the arm swings away instead of pulling a web of skin after it.
-Run: python3 tools/art1/glb_relax.py <in.glb> <out.glb>   (numpy only, no Blender)"""
+Run: python3 tools/art1/glb_relax.py <in.glb> <out.glb> [--i-checked-renders]   (numpy only, no Blender)
+It refuses to write a shipped Hunter (art/wardens/<id>/<id>.glb) without --i-checked-renders: on 11-17 a merge lane
+re-ran it on five owner-picked models and flattened their arms and hands (docs/DEBT.md). Render before and after on
+the GPU and get the owner's pick first."""
+import os
+import re
 import struct
 import sys
 
@@ -207,6 +212,10 @@ def relax_mesh(prims, pz, apart, name, before, after):
 
 
 def main(args):
+    checked = "--i-checked-renders" in args
+    args = [a for a in args if a != "--i-checked-renders"]
+    if re.search(r"(^|/)art/wardens/([^/]+)/\2\.glb$", os.path.abspath(args[1])) and not checked:
+        sys.exit("glb_relax: refusing to write a shipped Hunter glb (%s) without --i-checked-renders" % args[1])
     j, bin_ = glb_add_clips.read(args[0])
     skin = j["skins"][0]
     pz, parent = poses(j, bin_, skin)
