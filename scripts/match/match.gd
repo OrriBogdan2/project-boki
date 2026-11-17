@@ -1804,6 +1804,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
+	KinWispForm.mark(self, h)
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
@@ -1889,18 +1890,16 @@ func _check_team(team: int) -> void:
 	if members.is_empty():
 		return
 	for x in members:
-		if not x.downed:
+		if not x.downed or KinWispForm.guarding(self, x):
 			return
-		if x.kin and not x.kin.dead and x.kin.state not in ["downed"] and x.kin.hp > 0.0:
-			return
-		if x.kin2 and not x.kin2.dead and x.kin2.hp > 0.0:
-			return
+		if x.remote and x.kin and not x.kin.dead and x.kin.state != "downed" and x.kin.hp > 0.0:
+			return           # (its owner's game decides: we only see its Boki's state)
 	for x in members:
 		if not x.remote:
 			eliminate(x, x.last_hit_by, "team wiped")
 	_team_gone(team)
 
-## The whole team is down or dead with nobody to bring them back: everyone's dead for good.
+## The whole team is out (_check_team): everyone's dead for good.
 func _team_gone(team: int) -> void:
 	if Life.team_alive(self, team):
 		return
