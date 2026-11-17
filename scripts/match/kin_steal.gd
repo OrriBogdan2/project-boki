@@ -110,8 +110,11 @@ static func _ride_with(k: Kin, h: Hunter) -> void:
 
 
 ## The prompt for a loose wisp within reach, and the grab once interact is held long enough
-## (Match._update_interact). Empty when none is near.
-static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictionary:
+## (Match._update_interact). `held`, a prompt an earlier source already chose, comes back as it is.
+## Empty when none is near.
+static func interact_for(m: Match, h: Hunter, want: bool, dt: float, held: Dictionary) -> Dictionary:
+	if not held.is_empty():
+		return held
 	var r := rules()
 	var near: Kin = null
 	var best := float(r["grab_r"])
