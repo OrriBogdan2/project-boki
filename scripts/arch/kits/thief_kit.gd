@@ -15,7 +15,7 @@ extends ArchKit
 ##   keeps fast Shift presses (ThiefChain). A bolt soon after it starts a quick run of bolts (ThiefQuick). No ring
 ##   or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
-## - RMB, Dark Bola: a 0.4s wind-up with the lane showing, then a kit-run Dark Bola that grounds the first foe and
+## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
 ##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
 ##   foe caught and both are stunned with bonus damage.
 ## - E, White Flash: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
@@ -32,7 +32,7 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const BOLA_HOT := Color("ffb02a")      # the Dark Bola's lane front and inner binding ring
+const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
@@ -48,8 +48,8 @@ var pips := {}                 # target instance id -> {node, t: Ent}: the Mark 
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
 var knife := {}                # the stuck White Flash: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
-var bola_cast := {}            # the Dark Bola winding up, lane showing: {t}
-var bola := {}                 # the Dark Bola in flight: {pos, dir, left, first, bounces, stg}
+var bola_cast := {}            # the Bola winding up, lane showing: {t}
+var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
 var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
@@ -71,7 +71,7 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
-var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
 var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
@@ -85,7 +85,7 @@ func _setup() -> void:
 func fx() -> DJFx:
 	return DJFx.of(m)
 
-## A Boki merge starting drops the Dark Bola's wind-up and a running Last Dance (nothing fires, nothing is left
+## A Boki merge starting drops the Bola's wind-up and a running Last Dance (nothing fires, nothing is left
 ## for after the merge). Hold fields: bola_cast, encore.st.
 func _drop_holds() -> void:
 	bola_cast = {}
@@ -161,7 +161,7 @@ func clear_marks(t: Ent) -> void:
 func pip_count() -> int:
 	return int(res_def().get("max", 8))
 
-## Sets a target's Marks outright (the Dark Bola pooling two foes' Marks at rank 3).
+## Sets a target's Marks outright (the Bola pooling two foes' Marks at rank 3).
 func set_marks(t: Ent, n: int) -> void:
 	if t == null or not is_instance_valid(t) or t.dead:
 		return
@@ -346,8 +346,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func move_k() -> float:
-	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+func speed_bonus() -> float:
+	return vault_haste() if haste_t > 0.0 else 0.0
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
@@ -375,7 +375,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	else:
 		bolt_buf = maxf(0.0, bolt_buf - dt)
 	_fire_was = held
-	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.can_fire():
+	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.atk.can_fire():
 		bolt_buf = 0.0
 		_bolt()
 	return true
@@ -386,7 +386,7 @@ func _bolt() -> void:
 	var emp := primed_t > 0.0
 	var n0: int = m.shots.size()
 	h.shot_aim = AimMode.CURSOR
-	h.fire()
+	h.atk.fire()
 	if m.shots.size() <= n0:
 		return
 	var sd: Dictionary = m.shots[-1]
@@ -430,6 +430,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
+		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
@@ -469,10 +470,10 @@ func on_dash(use_ex: bool) -> bool:
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
-	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	var extra := {"invuln": 0.1, "feel": "long"} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air, "aloft": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -484,7 +485,7 @@ func _empowers(use_ex: bool) -> bool:
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
-## it ends where she lands.
+## it ends where she lands (not the long dash on the ground: cutting that one leaves its full speed unhanded).
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -493,8 +494,25 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+	if bool(vault["aloft"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
+
+## On the ground the fitted curve's tail (past its peak) never drops under her (hasted) run, so the hand-over is at
+## run speed: the source runs down into the faster run with no dip (dancer.md: 154 -> 140 px/s into the 127-136 px/s
+## hasted run; the fit's 0.25 end knot is its straight line's, docs/heroes/thief.md "Cartwheel exit"). The crouch
+## ramp before the peak is the fit's. Only the Cartwheel runs on a curve here, and its last step comes after
+## _tick_vault has let it go, so this keys off `curved`.
+func _tick_curve(dt: float) -> void:
+	var curve: Array = curved["curve"]
+	var t0 := float(curved["t0"])
+	super._tick_curve(dt)
+	if curved.is_empty() or not h.grounded:
+		return
+	var peak: Array = curve[0]
+	for knot in curve:
+		if float(knot[1]) > float(peak[1]): peak = knot
+	if 1.0 - h.roll_t / t0 > float(peak[0]):
+		h.roll_speed = maxf(h.roll_speed, h.base_speed * (move_k() + speed_bonus()) / Loco.dash_speed(h.arch))
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -509,7 +527,7 @@ func _tick_landing() -> void:
 	if anim_id == "thf_exdash":
 		play("thf_land")
 
-## A move another press starts mid-cartwheel (a bolt, the Dark Bola, the dagger) waits out the flip: the ability
+## A move another press starts mid-cartwheel (a bolt, the Bola, the dagger) waits out the flip: the ability
 ## goes off, the cartwheel isn't cut short.
 func play(move: String) -> void:
 	if not vault.is_empty() and anim_id in CARTWHEELS and move not in CARTWHEELS:
@@ -623,7 +641,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
-# ------------------------------------------------------------------ RMB: Dark Bola
+# ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not bola_cast.is_empty() or not spend_rmb(): return
@@ -644,7 +662,8 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Dark Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
@@ -683,11 +702,12 @@ func _throw_bola() -> void:
 func _ground_t() -> float:
 	return float(rmb_def()["bola"]["ground"])
 
-## The Dark Bola in flight (it's ours, not a stage shot, so it can fly on through its first foe and bounce
+## The Bola in flight (it's ours, not a stage shot, so it can fly on through its first foe and bounce
 ## once off a wall): it grounds the first foe it wraps, flies on, and tangles the second.
 func _tick_bola(dt: float) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var spd := float(bd["speed"])
+	var reach := float(bd["lane_w"]) * 0.5 - h.r      # m past a foe's body: a foe her size is caught inside the lane
 	var p: Vector3 = bola["pos"]
 	var dir: Vector2 = bola["dir"]
 	var steps := maxi(1, int(ceil(spd * dt / 0.25)))
@@ -711,7 +731,7 @@ func _tick_bola(dt: float) -> void:
 		bola["left"] = float(bola["left"]) - step
 		var first = bola["first"]
 		if first == null and not bola.get("broke", false):
-			# a crate or barrel counts as the first catch: the Dark Bola breaks on it and flies on
+			# a crate or barrel counts as the first catch: the Bola breaks on it and flies on
 			for b in m.breaks:
 				if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.7:
 					m.brk.hit(b, h)
@@ -721,7 +741,7 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + reach and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o
@@ -748,7 +768,7 @@ func _end_bola(at: Vector3) -> void:
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
-## The Dark Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
+## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
 	var stg: StageSpec = bola["stg"]
 	KinExec.apply_foe(stg.effects, f, cx("rmb", "bola", f.pos, {"at": f.pos}), f.pos, stg)
@@ -774,7 +794,7 @@ func _tick_wrapped(dt: float) -> void:
 		AimKit.circle(h, "gnd2%d" % key,
 				{"at": e.pos, "r": r * 0.7, "col": BOLA_HOT, "all": true, "dashed": true})
 
-## Two foes in one Dark Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
+## Two foes in one Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
 func _tangle(f, other: Ent) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var col := col_of(rmb_def())
@@ -1004,7 +1024,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and bola_cast.is_empty() and los and dist < lane_len() - 1.0:
-		# best when someone stands behind them along the throw (the Dark Bola flies on and catches both)
+		# best when someone stands behind them along the throw (the Bola flies on and catches both)
 		var pair := false
 		var dv := h.dir_to(tgt)
 		for o in m.foes_of(h.team):

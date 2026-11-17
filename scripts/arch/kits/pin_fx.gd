@@ -10,7 +10,8 @@ extends Node3D
 ## - arrows: the look of each of her shots (Empowered red bolt, Supercharged white-red beam, a dull
 ##   overdrawn shaft, the big red Pin Down with a hot core), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
-## - spent arrows: one that lands with no hit stays stuck in the ground, thread attached, for 4 s
+## - spent arrows: one of the bow's arrows that lands with no hit stays stuck in the ground, thread attached,
+##   for 4 s (the Pin Down leaves nothing: owner 11-08)
 ## - the Rain of Arrows (Hemline): needle posts round the arc laced together like her corset, red thread
 ##   criss-crossing between the posts and across the ground the wall covers (her laces, red, not a
 ##   glowing band), arrows streaking down, blue burn flames on foes inside
@@ -33,7 +34,6 @@ const WISP_T := 0.26
 const WISPS := 12
 const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
-const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Pin Down's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
 const HEAVY_BACK := 4.5        # m the Pin Down's arrow reaches back from its head: it grows in over that much
@@ -45,6 +45,7 @@ const DEEP := Color("7a0c14")       # her laces in shade: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
+const TINT_WALK := 0.45         # the Slip Stitch wash while she walks clear of everything (1 = inside something)
 const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
 const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
@@ -70,7 +71,6 @@ var tint_k := 0.0
 var tint_want := 0.0
 var wash_k := 0.0              # 0..1: the body tint now
 var planted := 0               # spent arrows planted (checks)
-var staked := 0                # Pin Down stakes left in walls (checks)
 var fx_clock := 0.0            # the match time effects last advanced to
 
 func _init(hunter: Hunter) -> void:
@@ -121,6 +121,8 @@ func _ready() -> void:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
+	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
+	aura.material_override.set_shader_parameter("bands", 3.0)
 
 func _arrow_node() -> Node3D:
 	var n := Node3D.new()
@@ -295,7 +297,7 @@ func tick_shots() -> void:
 		var kind := String(e["kind"])
 		var at: Vector3 = e["pos"]
 		var hit := hits.any(func(hh): return (hh[0] as Vector3).distance_to(at) < 1.6)
-		if not hit and kind in ["tap", "arrow", "over", "heavy"]:
+		if not hit and kind in ["tap", "arrow", "over"]:
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
 
 ## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
@@ -317,25 +319,6 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	best["t"] = SPENT_T
 	planted += 1
 	HeroVfx.of(h.m).play(h, "needle_stuck", g, -v.normalized(), {"t": SPENT_T})
-
-## The Pin Down's stake: a wall pin leaves its big arrow standing in the wall at `at`, pointing along `dir`
-## (into the wall), for STAKE_T s.
-func stake(at: Vector3, dir: Vector2) -> void:
-	var best: Dictionary = spent[0]
-	for c in spent:
-		if float(c["t"]) <= 0.0:
-			best = c
-			break
-		if float(c["t"]) < float(best["t"]): best = c
-	var n: Node3D = best["node"]
-	_dress(n, "heavy")
-	(n.get_node("Trail") as Node3D).visible = false
-	n.global_position = at
-	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	n.visible = true
-	best["t"] = STAKE_T
-	staked += 1
-	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
 ## Her dash after-image: three red fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).
@@ -560,13 +543,10 @@ func _tick_bursts(delta: float) -> void:
 		KitShaders.param(n, "power", 1.6 * (1.0 - u))
 
 # ------------------------------------------------------------------ Slip Stitch aura
-var aura: MeshInstance3D = null
+var aura: MeshInstance3D       # built with the pools above, hidden until she walks
 
 ## A soft red shell over her while she walks as a spirit (k 0 = off).
 func aura_on(k: float) -> void:
-	if aura == null:
-		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
-		aura.material_override.set_shader_parameter("bands", 3.0)
 	aura.visible = k > 0.01
 	if aura.visible:
 		aura.global_position = h.position + Vector3(0, 0.9 * float(h.cdat.get("scale", 1.0)), 0)

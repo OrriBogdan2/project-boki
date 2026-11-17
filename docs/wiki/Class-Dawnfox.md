@@ -53,7 +53,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.28 m/s, 1 dash charge |
 | Signature weapon | Hot and Cold (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds. |
 | Silhouette | small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her |
@@ -66,13 +66,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
-| Passive: Carry the Day | Carry the Day: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
-| Dash: Foxtrot | Foxtrot: a quick hop where you move; in the air, a long floaty glide. |
-| LMB | Hot and Cold: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
-| RMB: Stick Around | Stick Around: a 0.6s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them. |
-| E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
-| Hunter ultimate: Rise and Shine | Rise and Shine (hunter ultimate, level 6): tether a teammate within 12.6m for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. Nobody in reach: nothing happens. |
-| Weapon: Hot and Cold | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
+| Passive: Carry the Day | Run into a downed teammate to carry up to 2. |
+| Dash: Foxtrot | Quick hop where you move; a long floaty glide in the air. |
+| RMB: Stick Around | Seed sticks to a foe; after 2s in reach it roots them. |
+| E: Hearthlight | Healing ring on you; press again to throw it to the cursor. |
+| Hunter ultimate: Rise and Shine | Tether a teammate for 5s of healing; a downed one stands up. |
+| Weapon: Hot and Cold | Hold to push embers past the cursor; hits add Kindle. |
 
 ### Abilities in full
 

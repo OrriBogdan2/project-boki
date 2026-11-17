@@ -3,7 +3,7 @@ extends RefCounted
 ## Each of the 12 heroes presses each slot (LMB, RMB tap and hold, E, X, dash), on the ground and in the air,
 ## with an ally standing on the aim line at 2, 3.5, 6 and 9 m. Pushes, pulls, knocks, swaps, roots, slows,
 ## stuns, Grounded, Shred, Dazed, Blight and burns all count. The source's own ally rules are the EXCEPTIONS
-## (briefs/supervive-data/supervive_kits.md): Grimble's Abyssal Grasp "pulls the first target hit (enemy or ally)",
+## (sv/briefs/kits.md): Grimble's Abyssal Grasp "pulls the first target hit (enemy or ally)",
 ## Motley's Swap teleports "you and all units" it lands on. Tenzo's rocks are walls an ally hops (owner-decided,
 ## not a move); his Backbone never raises a rock inside a body, so whoever stands on the line steps aside
 ## (a move only, no status: EXCEPTIONS with `move_only`).

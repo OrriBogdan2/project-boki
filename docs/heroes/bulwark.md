@@ -3,7 +3,7 @@
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/hunter_abilities/bulwark.json) is now Bracewall.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
+Source: ref-bulwark, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
 shared damage step is gone (the source gives none of these slots any). The ultimate takes no upgrade in our kit (the
 source's R: +20% damage, -5s, twice), so it is not changed. Rank 3 also sends both dashes 1m further (ours, not the source's; kept).
 
@@ -28,10 +28,10 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | LMB hold: tracking [footage 0102-0108] | turns freely with the cursor (1.5 turns in 1.2 s) | faces the aim (shared turn) | same; asserted: trails a 1.25 turn/s sweep by <= 25 deg, standing and walking (15 deg measured) |
 | LMB hold: movement [footage] | stands in the two holds seen (unclear if forced) | walks at 55% | kept: owner #59 ("he can walk, keep the source hold-walk speed"); the data has no number and the footage can't tell (parity item 12); asserted `bjorn #59: he walks at the hold speed` |
 | LMB release: timing [footage 0146-0149] | one-frame sweep, the impact the frame after, ~0.4 s recovery | the same keys (`bul_smash`), 0.61 s before the next action | unchanged; asserted: the swing goes on the release step at the cursor (even behind him), the hit within 0.1 s, 0.61 s recovery |
-| LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49) |
+| LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49); his body keeps turning to the cursor through the step as in the hold (yaw-lock pass, the `turn` lmb row) |
 | LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand ~0.12 s after the press, as the arm comes through (`THROW_WIND`); asserted |
-| LMB cadence [game data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
-| RMB [game data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
+| LMB cadence [reference data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
+| RMB [reference data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
 | Shift [footage 0369-0380, game data Spin Dash] | ~3.5 m hard dash, one spin, 0.4 s recovery; 8 s (data at level 15) / 9.2 s (card) | matched in the earlier pass (3.5 m, 0.17 s, one spin) | off the dash feel, so it is felt as 3.5 m in 0.17 s (it was 3.0 m in 0.2 s under it); cooldown 8 s (game data, set in the audit) |
 | Shift while charging [wiki] | a short dash without the spin, ending the charge, on a reduced cooldown | short dash for half a charge | short dash on a full charge (owner #51 keeps the charge, so the reduction has no reason left; the game data doesn't list one) |
 | E, R, passive | see the per-slot table | matched in the earlier passes | unchanged |
@@ -106,8 +106,8 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Shift | Blue Guard up (or RMB held, in the 0.1 s it takes to rise) | Full Ahead (the Bash): 4.2 m, invulnerable, 10, push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent, never the Spin Dash; on cooldown the Shift does nothing; a Shift in the rise raises the Blue Guard and goes; in the air, riding Shield Surf, it is the same bash); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
 | Shift | tap | Tideturner: a hard fixed 3.5 m dash (~20 m/s, 0.17 s, the sheet's run-up), sliding on about 1 m through one full spin hit around him (2.2 m, 24 = 2x the throw, push 7) with a red-gold swirl ring | Short fixed dash, one 360 spin on arrival (350 = 2x the throw) | Matches; cooldown 8 s (data; the card showed 9.2) |
 | Shift | Blue Guard up | Full Ahead (the Bash): 4.2 m, invulnerable, 12 (source 198 vs the throw 192 at level 15), push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent; on cooldown the Shift does nothing); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
-| Shift / jump | LMB held | Owner #51: the swing keeps charging through a jump and a Shift dash (on the ground the dash is the short plain one, no spin, on a full charge; in the air the lumber) and swings where he lets go: in the air with no step, keeping his speed; in a dash riding it; in the window a perfect launch from there. Out of the dash he eases back into the wind-up pose at the charge reached. A mantle (owner #30), glide, knock, stun or another ability ends the hold, and the button must come up before it can start again; a jump or Shift in the swing's step or the launch goes at once | Wiki (Spin Dash): Shift while charging ends the Hammer Smash in a short dash without the spin | Owner #51 keeps the charge (supersedes #30's dash cancel) |
-| Shift | in a dash / planted | A press in the dash: LMB waits for its end (a tap throws or recalls, held it winds up), RMB, E and Q go mid-dash, R ends the dash and plants him. Shift while planted for Groundswell goes when the plant ends. Every pair: [dash_interactions.md](dash_interactions.md) (content/dash_flow/bulwark.json) | Not in the data or footage beyond the Shield Bash and the short dash out of a Hammer Smash | Our picks, nothing dropped |
+| Shift / jump | LMB held | Owner #51: the swing keeps charging through a jump and a Shift dash (on the ground the dash is the short plain one, no spin, on a full charge; in the air the lumber) and swings where he lets go: in the air with no step, keeping his speed; in a dash riding it; in the window a perfect launch from there. Out of the dash he eases back into the wind-up pose at the charge reached. A mantle (owner #30), glide, knock, stun or another ability ends the hold, and the button must come up before it can start again; a jump or Shift in the swing's step or the launch goes at once | Wiki (Spin Dash): Shift while charging ends the Hammer Final Swing in a short dash without the spin | Owner #51 keeps the charge (supersedes #30's dash cancel) |
+| Shift | in a dash / planted | A press in the dash: LMB waits for its end (a tap throws or recalls, held it winds up), RMB, E and Q go mid-dash, R ends the dash and plants him. Shift while planted for Groundswell goes when the plant ends. Every pair: [dash_interactions.md](dash_interactions.md) (content/dash_flow/bulwark.json) | Not in the data or footage beyond the Shield Bash and the short dash out of a Hammer Final Swing | Our picks, nothing dropped |
 | Shift | long dash | In the air or out of charges: a lumbering shoulder shove (`bul_lumber`), shoving foes aside | (base dash) | Our per-hero base dash variant |
 | E | tap | Safe Harbour: round the hammer wherever it is (planted, flying, or on himself with the hammer in hand), following it. A light column in his own colour comes down over 1 s with a filling ring everyone sees, then a lasting zone: allies inside get 2 health every 0.5 s for 4 s, and it ends in a burst of 18 (mends the Blue Guard 60 while raised; a downed teammate inside gets a third of the revive). No slow on foes. Cooldown 12 s | Regen Field: a healing zone round the hammer wherever it is, bursting for extra healing | Data: a lasting zone with a burst, 12 s base (8 s at the top rank) |
 | X | tap (level 6) | Groundswell: planted 0.4 s with the hammer overhead while a 16 m lane of four cells, 4 m long and 4.5 m wide, shows to everyone; the slam sends the fissure racing down the lane, striking each foe on it once (4, stun 0.5), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, slowed 50% for 1.5 s). A wall or ledge stops it; it runs on over a drop or the abyss (drawn at his height). A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). He is planted only for the wind-up and the slam (0.6 s): no walk and no jump (a jump pressed there is dropped, not kept for the plant's end); from there he walks at full speed while the lane erupts where it was cast. Cooldown 40 s (0.8 x the data's 50 s) | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.5 bh wide and 8.9 bh long, as the sheet. Eruption 1.5x the throw (source 1.2x) |
@@ -131,7 +131,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | X Groundswell | the same wind-up and slam where he is | the same, glider stays open; after the slam or a 360 spin a 0.3 s glider lock | [D] Oath: no air rule; wiki patch 05.02.25 (wind-down frames) |
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -161,7 +161,7 @@ Spin Dash and Groundswell: ext/vfx-albert-faultline (the ring at its hit radius,
 - Knockout is a 1.0 s stun and 8 damage; the old heal (24) is gone (data). The data says "Stunned" with no number; the footage label stays up about 1 s or more (briefs/hero-ref/bjorn.md), so 1.0 (was 0.5, ours).
 - The Crushing Blow has no stun of its own (a full one stunned 0.4 s, ours, removed 11-11 by DECISIONS 11-07: ours-only riders, keep none). Data: "up to 522 dmg + Knockback"; footage: knock and a debris trail, the STUNNED label only off a wall. A blow that drives a foe into a wall still Crushes it.
 - The Blue Guard keeps 160 HP, regenerating 20/s after 2 s down, and he walks at 60% behind it.
-- The blue ring on the target before the Smash is the hammer's reveal, not part of the dash.
+- The blue ring on the target before the Final Swing is the hammer's reveal, not part of the dash.
 - The wind-down is a 0.3 s glider lock after the slam and the 360 spin.
 - "Begin to resurrect" is +0.35 of a downed teammate's revive bar.
 - Groundswell: the lane's direction is locked on the press; he can't move, jump, swing, block or dash while planted (0.4 s wind-up and 0.2 s after the slam). The jump follows the sheet's "planted for the wind-up and slam (f25-f31)"; no frame shows a jump press there (`content/dash_flow/bulwark.json` into_jump.x lock).
@@ -181,25 +181,25 @@ Spin Dash and Groundswell: ext/vfx-albert-faultline (the ring at its hit radius,
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
 | The throw lands at the cursor, clamped to range | sheet bjorn.md, owner note | confirms (0408, 0024-0029) | built | `bjorn aim: the hammer lands at the cursor` |
-| The hammer flies a minimum distance | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) (5 m) | consistent | built at 2.5 m so close clicks land near the cursor (owner: anywhere in range) | `bjorn small: a close cursor still throws 2.5 m` |
-| A recall can't come within 0.25 s of the throw | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
+| The hammer flies a minimum distance | wiki patch 20.11.24 (5 m) | consistent | built at 2.5 m so close clicks land near the cursor (owner: anywhere in range) | `bjorn small: a close cursor still throws 2.5 m` |
+| A recall can't come within 0.25 s of the throw | wiki patch 20.11.24 | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
 | The recall flight takes about 0.3 s | sheet bjorn.md (no game data) | recall flight 0.2-0.4 s (0031, 0044, 0427) | built: `lmb.recall_t` 0.3, on the clip's catch key from any range | `bjorn recall: from 5 m the hand closes on the hammer` |
-| It passes through enemies, hitting out and back for the same damage | [wiki: Magnetic Hammer](https://supervive.wiki.gg/wiki/Oath) | confirms (0041, 0043) | built | `bulwark LMB` lines |
-| Allies get vision round the planted hammer | [wiki](https://supervive.wiki.gg/wiki/Oath) | not visible | built (already ours) | archetype check |
+| It passes through enemies, hitting out and back for the same damage | wiki: Magnetic Hammer | confirms (0041, 0043) | built | `bulwark LMB` lines |
+| Allies get vision round the planted hammer | wiki | not visible | built (already ours) | archetype check |
 | No automatic return | sheet | 3.6 s+ planted | built | `bjorn: the planted hammer never comes back by itself` |
-| Wind-down frames after the swing and the spin: no glider straight away, so momentum carries | [wiki patch 05.02.25](https://supervive.wiki.gg/wiki/Oath) | not visible | built: 0.3 s glide lock after the slam and the 360 spin (not after the perfect launch, which hands its speed to the glider: owner #49) | `bjorn small: wind-down after the slam` |
+| Wind-down frames after the swing and the spin: no glider straight away, so momentum carries | wiki patch 05.02.25 | not visible | built: 0.3 s glide lock after the slam and the 360 spin (not after the perfect launch, which hands its speed to the glider: owner #49) | `bjorn small: wind-down after the slam` |
 | Perfect window: launch >= 3.5 m in it, step <= 2 m outside, off a ledge into a glide at >= 70% of the launch speed | owner #49 | (no lunge in the footage) | built | `bjorn #49 ...` (tools/bjorn_launch_check.gd) |
 | Ult: free to move from the end of the slam while it erupts | owner #48, sheet f25-f49 | confirms (planted f25-f31, then he shifts) | built | `bjorn #48 ult: ...` |
-| Hammer Smash full at 1.25 s | [wiki](https://supervive.wiki.gg/wiki/Oath) | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
-| Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | [wiki: Spin Dash](https://supervive.wiki.gg/wiki/Oath) | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
-| Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, [wiki: Shield Bash](https://supervive.wiki.gg/wiki/Oath) | not shown | built: Full Ahead on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
+| Hammer Final Swing full at 1.25 s | wiki | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
+| Shift during a Hammer Final Swing: a short dash without the spin, reduced cooldown | wiki: Spin Dash | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
+| Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, wiki: Shield Bash | not shown | built: Full Ahead on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
 | The charged swing: damage and knockback, no stun of its own | in-game data ("up to 522 dmg + Knockback") | knock, debris trail, no label in the open (0146-0151) | built: the 0.4 s full-charge stun removed | `combo bulwark: a full Crushing Blow in the open knocks, no stun` |
-| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, [wiki: Valiant Strength](https://supervive.wiki.gg/wiki/Oath) | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the Tideturner, the Full Ahead and Slam; walls only | `combo bulwark: the Tideturner into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
-| Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Safe Harbour is a zone`, `bjorn small: Safe Harbour doesn't repair a broken Blue Guard` |
-| Allied wisps hit by the burst begin to resurrect | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
-| Ult: a fissure that travels forward from him | [wiki: Abyssalbreaker](https://supervive.wiki.gg/wiki/Oath), sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
-| Ult: the first strike is small and briefly stuns; the eruptions hit hard and slow heavily | [wiki](https://supervive.wiki.gg/wiki/Oath) | not legible | built: the racing fissure strikes each foe on the lane (4 + stun 0.5, data: "stuns struck targets"), then 18 + slow 50% per cell | same, `bjorn ult: the racing fissure struck every foe ...` |
-| Ult: blocked by walls | [wiki](https://supervive.wiki.gg/wiki/Oath) | not shown | built | `bjorn ult small: a wall stops the fissure` |
+| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, wiki: Valiant Strength | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the Tideturner, the Full Ahead and Slam; walls only | `combo bulwark: the Tideturner into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
+| Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, wiki: Regen Field | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Safe Harbour is a zone`, `bjorn small: Safe Harbour doesn't repair a broken Blue Guard` |
+| Allied wisps hit by the burst begin to resurrect | wiki: Regen Field | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
+| Ult: a fissure that travels forward from him | wiki: Abyssalbreaker, sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
+| Ult: the first strike is small and briefly stuns; the eruptions hit hard and slow heavily | wiki | not legible | built: the racing fissure strikes each foe on the lane (4 + stun 0.5, data: "stuns struck targets"), then 18 + slow 50% per cell | same, `bjorn ult: the racing fissure struck every foe ...` |
+| Ult: blocked by walls | wiki | not shown | built | `bjorn ult small: a wall stops the fissure` |
 | Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult small: planted, a jump in the wind-up is ignored`, `bjorn ult telegraph` |
 | Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
 | Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |
@@ -223,7 +223,7 @@ Rank paths that do not fit our system: the Spin Dash's own cooldown still uses t
 Rank paths that do not fit our system: the data's four tiers fold into our three (III and IV share our rank 3); the upgrade table at the top lists the numbers per rank.
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV (III and IV share our
-rank 3). [D] = game data (briefs/supervive-data/supervive_kits.md, Oath `Upg:` II / III / IV). Each slot reads `rank_cd` /
+rank 3). [D] = game data (sv/briefs/kits.md, Oath `Upg:` II / III / IV). Each slot reads `rank_cd` /
 `rank_dmg` in bulwark.json; `rank_dmg` is 1.0 on every slot because the data names no damage upgrade (the shared +15% a
 rank is gone from the Crush, Tideturner and field). LMB and the Guard passive have no tiers in the data and do not rank;
 R (Abyssalbreaker, our Groundswell on X) is decision 0022's.
@@ -232,12 +232,12 @@ R (Abyssalbreaker, our Groundswell on X) is decision 0022's.
 |---|---|---|---|---|
 | LMB hammer | none [D] | - | - | - |
 | RMB Blue Guard | +25% max-HP shield / faster repair and regen / +25% max-HP shield [D] | shield 160 -> 200 HP | 240 HP; regen 20 -> 30 a second, back in 2 s when broken, 1.4 s wait | `Blue Guard 160 / 200 / 240`, `rank 3 repairs faster` |
-| Shift Tideturner | -1.5 s (Spin Dash and Shield Bash) / -1.5 s / a dash hit refunds the Shield Bash [D] (8 s) | recharge 8 -> 6.5 s; Full Ahead 6 -> 4.5 s | 5 s; Full Ahead 3 s; a Smash that hits refunds it | `rank row`, `Full Ahead cooldown 6 / 4.5 / 3`, `rank 3, a Tideturner` |
+| Shift Tideturner | -1.5 s (Spin Dash and Shield Bash) / -1.5 s / a dash hit refunds the Shield Bash [D] (8 s) | recharge 8 -> 6.5 s; Full Ahead 6 -> 4.5 s | 5 s; Full Ahead 3 s; a Final Swing that hits refunds it | `rank row`, `Full Ahead cooldown 6 / 4.5 / 3`, `rank 3, a Tideturner` |
 | E Safe Harbour | +25% heal / -4 s / +25% heal [D] (8 s at IV) | healing +25%, cooldown 12 s | cooldown 8 s, healing +50% | `E cooldown 12 / 12 / 8 s` |
 | Passive Guard | none [D] | - | - | - |
 
 Fixed to the data in this pass: the Spin Dash recharge was the shared -15% a rank (6.8 / 5.6 s), now the data's -1.5 s
-(`rank_cd.dash`); the shared +15% damage a rank on the Blue Guard, Smash and field is gone; the extra 1 m on both dashes at
+(`rank_cd.dash`); the shared +15% damage a rank on the Blue Guard, Final Swing and field is gone; the extra 1 m on both dashes at
 rank 3 (ours, not in the data) is gone. Skipped: the Guard meter stays as our own loop (the data has no such meter, but
 the Shield Slam payoff depends on it).
 
@@ -273,7 +273,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | A merge in the Groundswell wind-up | No slam; a fissure already running finishes | same |
 | Groundswell then a merge on a full-health light hunter | Standing (burst cap) | same |
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.12 s after the press, as the arm comes through |

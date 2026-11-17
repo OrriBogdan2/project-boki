@@ -35,7 +35,7 @@ Body: a very small hunter (`body` in tender.json; legs 0.98, torso 1.02, shoulde
 Scaling: HP 145 (medium). Rise and Shine heals 35 over 5s (7/s, about a quarter of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember is 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93). The seed burst is 32 (4x an ember). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Stick Around 10.5s against Hearthlight 11s (the data's 11.5 : 12).
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Elluna), [footage] = briefs/hero-ref/mooshmoosh.md.
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, ref-tender), [footage] = briefs/hero-ref/mooshmoosh.md.
 
 | Slot | Source | Ours | Asserted (`--tender-combo-check`) |
 |---|---|---|---|
@@ -69,10 +69,10 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 
 | Row | Sev | Verdict | Where / why |
 |---|---|---|---|
-| The dropped 3x rule still enforced (10.7 m glide, the 2.7-3.3 check) | HIGH | (a) | 89edfb96, af549ca4: Elluna's 13.3 m / 0.95 s; the ratio check is now the source's 3-4x; see "Dashes: Elluna's numbers and ours" |
+| The dropped 3x rule still enforced (10.7 m glide, the 2.7-3.3 check) | HIGH | (a) | 89edfb96, af549ca4: ref-tender's 13.3 m / 0.95 s; the ratio check is now the source's 3-4x; see "Dashes: ref-tender's numbers and ours" |
 | On the ground with the hop spent, Shift fires the glide along the ground | HIGH | (b) | 99f79210: the glide is airborne only; `mm dashes: on the ground with the hop spent, Shift is refused ...` |
 | No steering in the glide (owner: air control) | MED | (b) | 99f79210: the move keys bend the heading at 3 rad/s (`dash.air.steer`); `mm air dash: the move keys steer the glide ...` |
-| Ground dash numbers can't be found ("copy Elluna") | MED | (a) | 89edfb96: the measured hunter ground dash (2 bh in 0.2 s), flagged as an owner clip in the dash table |
+| Ground dash numbers can't be found ("copy ref-tender") | MED | (a) | 89edfb96: the measured hunter ground dash (2 bh in 0.2 s), flagged as an owner clip in the dash table |
 | Dash cooldowns | ok | (a) | b0106659: 7 s / 14 s (data) |
 | Stick Around cd 8 s vs about 10.5 s (data ratio to E) | MED | (b) | 99f79210: 10.5 s (ranks 10.5 / 7.8 s, see "Ranks: source tier table"); `mm RMB: Stick Around 10.5 s ...` |
 | Rise and Shine heals her instead of the downed ally (data: an ally or Wisp) | MED | (b) | 99f79210: it heals the downed teammate's bleed-out pool (`wisp_k`); `mm X: the tether heals the downed teammate ...` (care ult check) |
@@ -91,7 +91,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
-(briefs/supervive-data/supervive_kits.md, Elluna `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
+(sv/briefs/kits.md, Elluna `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
 tender.json (`rank_dmg.kin` is her healing; `rank_cd.air` the long air glide); the shared -10% cooldown / +15% / -15%
 recharge steps no longer apply to her. Our Stick Around and Hearthlight cooldowns are a second under the source's, so their
 cuts keep the source's share (-3 of 11.5, -3 of 12); the dash cuts match directly. LMB and Soulpack (Bearer) have no tiers
@@ -113,30 +113,30 @@ Hearthlight 9.9s / 8.8s and +15% / +30% healing (shared) -> 11s / 8.25s and +22.
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
 |---|---|---|---|---|
-| A teammate being stomped can't be picked up | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "a teammate being stomped can't be scooped up" |
-| Damage or crowd control drops them with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
-| The Empowered shot after a pause (effect not stated) | [wiki](https://supervive.wiki.gg/wiki/Elluna), card | card only | yes | "after a pause the next ember is Empowered" |
-| Damage or a stun drops them (not a root or hex) with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
-| Damage or a stun drops them with a 4s no-pickup lock; a root, slow, knock-back or a heal holds them; no stun on you, no carry slow; Hex no longer exists as a kit status, so it is not a case (data: supervive_kits.md Soulpack, sheet mooshmoosh.md says drop rules "not shown"; "too much damage" has no figure, so any damage [est]); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--tender-combo-check` "mm carry" rows (tools/care_carry_check.gd) |
-| The Empowered shot after a pause: more range, double return | [wiki](https://supervive.wiki.gg/wiki/Elluna), card | card only | yes | "after a pause the next ember is Empowered" |
+| A teammate being stomped can't be picked up | wiki | no | yes | "a teammate being stomped can't be scooped up" |
+| Damage or crowd control drops them with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | wiki | no | yes (existing) | `--support-check` Bearer rows |
+| The Empowered shot after a pause (effect not stated) | wiki, card | card only | yes | "after a pause the next ember is Empowered" |
+| Damage or a stun drops them (not a root or hex) with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | wiki | no | yes (existing) | `--support-check` Bearer rows |
+| Damage or a stun drops them with a 4s no-pickup lock; a root, slow, knock-back or a heal holds them; no stun on you, no carry slow; Hex no longer exists as a kit status, so it is not a case (data: sv/briefs/kits.md Soulpack, sheet mooshmoosh.md says drop rules "not shown"; "too much damage" has no figure, so any damage [est]); the Carry the Day shield is cut (owner, 2026-11-07: no ours-only riders) | wiki | no | yes (existing) | `--tender-combo-check` "mm carry" rows (tools/care_carry_check.gd) |
+| The Empowered shot after a pause: more range, double return | wiki, card | card only | yes | "after a pause the next ember is Empowered" |
 | Embers fly to max range, past the cursor | footage | yes | yes | "the ember flies its full range past the cursor" |
 | Bound by Fate shows a lane to max range while aiming and fires on release | footage | yes | yes | "held, a dotted lane..."; "nothing leaves while it is held" |
 | Its area shows at once and roots 2s later, held by her reach (owner 11-10 over the footage's 0.6-0.8s) | wiki (2s), owner | no (footage 0.6-0.8s) | yes, 2s; out of 15m it unwinds 2x and falls off | "it roots at about 2.0 s of contact", "out of her reach it unwinds 2x", "escaped ... never roots" |
-| The aura's recast throws it to a spot, and it sticks to the first ally it passes | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
+| The aura's recast throws it to a spot, and it sticks to the first ally it passes | wiki, footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
 | A stun on you does not put out the aura (data pass; the wiki's rule was not in the tooltip data) | tooltip data | no | yes | `--support-check` |
 | Dashing through an ally refunds nothing `[?]`: not base kit in any source; the refund sits only on the footage card's upgraded Super dash (older build), and the Nov 2 tooltips have it at no rank (see "Ally-pass refund" below) | tooltip data, footage card | card only (Super) | removed | `--support-check` |
-| Rank 3 (source level 4): picking up a wisp refreshes the air dash | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
-| Healing is x5 on wisps | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
+| Rank 3 (source level 4): picking up a wisp refreshes the air dash | wiki | no | yes | `--support-check` |
+| Healing is x5 on wisps | wiki | no | yes | `--support-check` |
 | Foxtrot goes where you move, not at the cursor | footage | yes | yes | "Foxtrot goes where you move" |
 | R: she can move while the tether channels | footage (f41-f72) | yes | yes | "mm R: she walks while it channels" |
-| R: other abilities can be cast during the channel | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "mm R: other abilities still cast during the channel" |
-| R: it ends if she is knocked or stunned, or moves too far from the teammate | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (break range = the 7 bh ring) | "mm R: it breaks when the teammate leaves the ring, and pays nothing" |
-| R: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage f74-f75 | the teleport, yes | yes | "mm R: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
+| R: other abilities can be cast during the channel | wiki | no | yes | "mm R: other abilities still cast during the channel" |
+| R: it ends if she is knocked or stunned, or moves too far from the teammate | wiki | no | yes (break range = the 7 bh ring) | "mm R: it breaks when the teammate leaves the ring, and pays nothing" |
+| R: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | wiki, footage f74-f75 | the teleport, yes | yes | "mm R: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
 | R: unit-targeted, an aim line onto the ally first | footage f19-f24 | yes | yes (a tap; the line and ring show while the cursor is on a teammate) | "mm R: with the cursor on a teammate, the 7 bh reach ring and a line onto them" |
 | X: she can move while the tether channels | footage (f41-f72) | yes | yes | "mm X: she walks while it channels" |
-| X: other abilities can be cast during the channel | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "mm X: other abilities still cast during the channel" |
-| X: it ends if she is knocked or stunned, or moves too far from the teammate | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (break range = the 7 bh ring) | "mm X: it breaks when the teammate leaves the ring, and pays nothing", "mm X cancel (stun / knock / dead / mate_dead)", "mm X: plain damage and her own dash do not end it", "the teammate being knocked mid-channel does not end it" |
-| X: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage f74-f75 | the teleport, yes | yes | "mm X: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
+| X: other abilities can be cast during the channel | wiki | no | yes | "mm X: other abilities still cast during the channel" |
+| X: it ends if she is knocked or stunned, or moves too far from the teammate | wiki | no | yes (break range = the 7 bh ring) | "mm X: it breaks when the teammate leaves the ring, and pays nothing", "mm X cancel (stun / knock / dead / mate_dead)", "mm X: plain damage and her own dash do not end it", "the teammate being knocked mid-channel does not end it" |
+| X: on a downed teammate (wisp) the heal goes to her, and at the end they are resurrected and teleported to her | wiki, footage f74-f75 | the teleport, yes | yes | "mm X: the tether heals the downed teammate ...", "... pulled to her side and stood up" |
 | X: unit-targeted, an aim line onto the ally first | footage f19-f24 | yes | yes (a tap; the line and ring show while the cursor is on a teammate) | "mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them" |
 
 ## Footage gaps, Nov 9 re-check
@@ -150,14 +150,14 @@ The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main 
 | 4 | Hearthlight toss lands at the cursor | closed | `e.toss_speed` 45 (e87df2c59); the latch on the first teammate is kept (owner call); "mm E: thrown, it lands on the cursor within 0.2 s" |
 | 5 | Hearthlight radius | closed | `e.radius` 2.6 m = 1.4 bh at 1.8 m/bh (source 1.3-1.5), thrown 2.9 m; "mm E: lit on her, a 2.6 m ring (1.4 bh)" |
 | 6 | Hearthlight cast and thrown look | closed | `cast_e` lantern plus and rising rays (`lk().burst("plus", ...)`), thrown disc `fill` 1.8, amber to teal rim, brighter than the carried ring (`_hearth_node`) |
-| 7 | Cooldowns | closed (data wins) | Stick Around 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Stick Around 10.5 s", "mm dashes: Elluna's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
+| 7 | Cooldowns | closed (data wins) | Stick Around 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Stick Around 10.5 s", "mm dashes: ref-tender's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
 | 8 | Crook cast swirl | closed | a swirl, flash and sparks at the casting hand per ember (`_dress_ember`, `stats["swirls"]`); "mm LMB: each ember has its comet look, a swirl at the hand and the flick move" |
 | 9 | Ramp readability | closed (footage; ext/meeko-gap9) | the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`), at 5 stacks, and the damage number is yellow (`HudStyle.CRIT`) on an ember into a foe at full Kindle, white before (`TenderKit.number_col`, the `ArchKit.number_col` hook, 2 wiring lines in `Match.on_damage`); `mm passive: the damage number is yellow at the plateau ...`. Numbers: see the table below |
 | 9 | Ramp readability | partly open | closed: the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`) and a full glow at 5. Open: damage numbers do not tint with the stacks (the shared `HudStyle.dmg_col` path in match.gd); the sheet itself calls it optional, so it is a suggestion, and the kit hook would sit in `tender_kit.gd` (in flight) |
 | 10 | Dash direction | closed | `on_dash` steers by `h.roll_dir` (movement); "mm Shift: Foxtrot goes where you move" |
 | 11 | Sound | n/a | no audio in the footage |
 
-Row 9 numbers (source order: owner note > game data > footage; no owner note covers them, and the tooltip data (`supervive_kits.md`, Elluna) gives the ramp no figure, so the footage decides):
+Row 9 numbers (source order: owner note > game data > footage; no owner note covers them, and the tooltip data (`sv/briefs/kits.md`, Elluna) gives the ramp no figure, so the footage decides):
 
 | Number | Source | Old | New | Assert |
 |---|---|---|---|---|
@@ -179,14 +179,14 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 - **Rise and Shine:** it can't be ended early (no recast in the source); X again is ignored. Damage on her, her own dash and the teammate being knocked do not break it (the wiki lists only her being knocked or stunned, and range; it says nothing about silence, and nothing like silence exists in our game). The break range is the same 12.6m as the cast range. A downed teammate in our game is the source's wisp. Its healing does not scale with ranks (no X ranks); it grows with level (LevelGrowth). The cooldown starts on the cast. With no teammate in the match at all it lights on her (healing at a third) so the key is never dead in solo play.
 - **Rise and Shine:** it can't be ended early (no recast in the source); X again is ignored. Damage on her, her own dash and the teammate being knocked do not break it (the wiki lists only her being knocked or stunned, and range; it says nothing about silence, and nothing like silence exists in our game). The break range is the same 12.6m as the cast range. A downed teammate in our game is the source's wisp. Its healing does not scale with ranks (no X ranks); it grows with level (LevelGrowth). The cooldown starts on the cast. It needs a valid ally or ally Wisp inside its 12.6m range (source: a channel on an ally or ally Wisp); otherwise the press is refused and the cooldown is kept. The old "lights on herself with no teammate in the match" was ours, not the source's, and is removed (parity reel note, DECISIONS 2026-11-07: no ours-only riders).
 - **Rise and Shine and the bond:** a completed tether counts as a "hit" for `KinBond.from_ult` (with the cast's `HeroUlt.cast_id`), a rescue (a downed teammate stood up) as its top event ("kill"); a broken one pays nothing. The sheet's +0.2 on the teammate's own meter is not built (the amounts are the main session's, in boki_system.json).
-- **Body and movement** (owner study, 23:00): the scale, hitbox and cadence are from the study; the dashes are Elluna's (below).
+- **Body and movement** (owner study, 23:00): the scale, hitbox and cadence are from the study; the dashes are ref-tender's (below).
 - Starts and stops use the shared acceleration (no per-hero change).
 - Kindle readability is the HUD n/5 and "KINDLED" at 5 (the foot glow was cut, ext/vfx-gold-ground-rings). Tinting damage numbers by stack (sheet gap 9, optional) is not done: the numbers come from the shared damage path.
 
 ## Dashes: Elluna's numbers and ours (owner 18:20: "copy Elluna")
 Item 24's "air about 3x the ground" rule is dropped; both dashes copy the source, then the owner's playtest (11-11: "dashes are too fast, the air dash gives too much movement at the end, the ground dash goes a bit too far") slowed both, cut the ground one 12.5% and cut the glide's float-out: the "Ours" columns are below the source on purpose. Her cute moves stay (`mm_skip`, `mm_float`, retimed to the new lengths). Precedence: data, then footage (briefs/hero-ref/mooshmoosh.md section 4; 50 px = 1 m, 1 bh = 1.8 m).
 
-| | Source (Elluna) | Where from | Ours (data) | Ours (in game) |
+| | Source (ref-tender) | Where from | Ours (data) | Ours (in game) |
 |---|---|---|---|---|
 | Ground dash distance | about 2 bh (3.6 m): her own ground dash is never shown cleanly, so this is the measured hunter ground dash (1.5-2.5 bh); the data only says the air one goes further | data (Lunar Dash), footage section 4 | `dash.dist` 3.6 | 3.6 m (off the dash feel) |
 | Ground dash time | about 0.2 s | footage section 4 | `dash.time` 0.2 | 0.2 s |
@@ -206,7 +206,7 @@ Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm das
 ### Ally-pass refund `[?]` (Nov 12 check: not settled, no code changed)
 The parity reel asked whether dashing through a teammate should refund the dash. The evidence:
 - **Footage card** (briefs/hero-ref/mooshmoosh.md, `0157`): the card names "Lighter Than Air / Super Lighter Than Air". Only the **Super** (upgraded) version has it: "through an ally refunds half its cooldown and 1 s of E", on a 9.2 s cooldown. The card's names (Backpack, Moon Shot) are from an older build than the tooltip data.
-- **Tooltip data** (briefs/supervive-data/supervive_kits.md, Nov 2): Lunar Dash 7 s and Lunar Air Dash 14 s, upgrades "-0.75 s (-1.5 s air) cooldown x2 / air dash cooldown refreshed on picking up a wisp". There is no ally refund at any rank.
+- **Tooltip data** (sv/briefs/kits.md, Nov 2): Lunar Dash 7 s and Lunar Air Dash 14 s, upgrades "-0.75 s (-1.5 s air) cooldown x2 / air dash cooldown refreshed on picking up a wisp". There is no ally refund at any rank.
 - **Ours:** the old Foxtrot refund (half a charge and 1 s of Hearthlight, `ally_r` 1.1) was removed by the owner's data pass (c6932ae60, kit_comparison.md "Foxtrot bonus ... invented"). Rank 3 has the tooltip upgrade (a wisp pickup refreshes the air glide). `--support-check` asserts that a pass refunds nothing.
 - **What `refund` 0.2 / `emp_refund` 0.4 are:** they're unrelated to the dash. They are Kindle's Hearthlight wind-back: an ember into a Kindled foe takes 0.2 s off Hearthlight's cooldown, or 0.4 s for an Empowered ember (`TenderKit.on_deal`).
 
@@ -217,7 +217,7 @@ Owner: "it's like 0.2-0.5 too slow, check Elluna"; and nothing should start at h
 
 | | Before (0.24.4) | Source reference | Now |
 |---|---|---|---|
-| Press to throw (`rmb.windup`) | 1.0 s (seed left at 1.02 s) | Elluna's cast is a flick: the release is a small hop of about 0.3 s with a two-arm push (briefs/hero-ref/mooshmoosh.md, 720.9-722.4 s, f105-113); the "telegraph up about 1 s" (f116-120) is the player holding aim, which item 118 had turned into a forced 1 s. The source's casts run 0.1-0.65 s, median 0.45 (docs/SUPERVIVE_DATA.md); the wiki lists no cast time | 0.6 s (thrown at 0.62 s) |
+| Press to throw (`rmb.windup`) | 1.0 s (seed left at 1.02 s) | Elluna's cast is a flick: the release is a small hop of about 0.3 s with a two-arm push (briefs/hero-ref/mooshmoosh.md, 720.9-722.4 s, f105-113); the "telegraph up about 1 s" (f116-120) is the player holding aim, which item 118 had turned into a forced 1 s. The source's casts run 0.1-0.65 s, median 0.45 (sv/DATA.md); the wiki lists no cast time | 0.6 s (thrown at 0.62 s) |
 | Seed flight | 24 m/s (item 23, ext/meeko-lane-picks): 8 m in 0.33 s | about 4 bh a footage frame (f121-122), about 30 m/s | unchanged |
 | Contact to root (`seed.build`) | 2.0 s | owner 11-10 | unchanged |
 | Press to root, foe at 8 m | about 3.3 s | | about 2.9 s |
@@ -253,7 +253,7 @@ The hero reels (tools/vv_shots.gd) used to leave a fired shot's bolt where it sp
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
 or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero

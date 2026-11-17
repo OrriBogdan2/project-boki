@@ -1,5 +1,6 @@
 {
 	"id": "rimewright",
+	"recast_hint": {"e": "freeze the Cold Front", "x": "crack Freeze Frame now"},
 	"title": "Snowglide",
 	"base_name": "Neve",
 	"gender": "female",
@@ -9,7 +10,7 @@
 	"body": {
 		"size": 1.014,
 		"bulk": 1.0,
-		"hit_r": 0.38,
+		"hit_r": 0.395, "hit_h": 1.66, "body_r": 0.38,
 		"head": 0.6,
 		"legs": 2.04,
 		"torso": 0.96,
@@ -18,23 +19,11 @@
 	},
 	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
 	"color": "#8ae6ff",
-	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
+	"fantasy": "A frost bunny show-skater. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"howto": ["Play: mid-range ice; darts Chill, hold {dash} to skate.", "Combo: land 8 darts on one foe to Shatter their Chill.", "Avoid: standing still in the open; keep skating."],
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
-	"card": {
-		"role_word": "Controller",
-		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
-		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
-		"lmb": "Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones.",
-		"rmb": "Icebreaker: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
-		"e": "Cold Front: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
-		"dash": "Free Skate: hold the dash key to skate where you move; your darts fly as fast, thick beams that still curve onto your target, and hit twice as hard.",
-		"passive": "Cold Snap: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
-		"weapons": {
-			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones, then a short pause."
-		},
-		"x": "Freeze Frame (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.47m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
-	},
+
+	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate; darts fly straight and hit twice as hard.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; use it again to freeze it.", "x": "Sealed, invulnerable, rooted; cracks open at 3.3s to stun.", "weapons": {"hoar_fan": "Hold for slow homing darts; big ones every few shots."}, "chips": {"rmb": ["18 hit", "22 burst"], "x": ["18 dmg"]}},
 	"signature": "hoar_fan",
 	"resource": {
 		"id": "chill",
@@ -46,7 +35,7 @@
 	},
 	"passive": {
 		"name": "Cold Snap",
-		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.7m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 3m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,
@@ -56,7 +45,7 @@
 	},
 	"dash": {
 		"id": "rinkrun",
-		"name": "Free Skate",
+		"name": "Skate",
 		"icon": "rimewright_dash",
 		"col": "#bff7ef",
 		"cd": 13.0,
@@ -83,7 +72,7 @@
 		"delivery": "projectile",
 		"name": "Icebreaker",
 		"card_range": "lance.range",
-		"short": "Breaker",
+		"short": "Spear",
 		"icon": "rimewright_rmb",
 		"col": "#8fe8d8",
 		"cooldown": 10.2,
@@ -118,7 +107,7 @@
 		"name": "Cold Front",
 		"card_range": "travel",
 		"again": "freeze the wall in place",
-		"short": "Front",
+		"short": "Rink",
 		"icon": "rimewright_e",
 		"col": "#9af0e6",
 		"cooldown": 17.0,
@@ -153,11 +142,19 @@
 		"kin",
 		"gear"
 	],
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown"},
+		"x": {"early": "locked", "late": "locked", "source": "briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65)"},
+		"x_recast": {"early": "locked", "late": "free", "source": "briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out"}
+	},
 	"rank_cd": {"sec": [1, 0.8542, 0.7083], "dash": [1, 0.8846, 0.7692], "kin": [1, 0.875, 0.75]},
 	"rank_dmg": {"sec": [1, 1.15, 1.3], "dash": [1, 1, 1], "kin": [1, 1, 1]},
-	"rank3": {"sec": "the spear's detonation hits 45% harder", "dash": "a Free Skate over the Abyss lays ice underfoot that holds for 5s", "kin": "the wall is 40 points tougher"},
+	"rank3": {"sec": "the spear's detonation hits 45% harder", "dash": "a Skate over the Abyss lays ice underfoot that holds for 5s", "kin": "the wall is 40 points tougher"},
 	"rank2": {"sec": "Rank 2: cooldown 10.2s -> 8.7s, damage +15%.", "dash": "Rank 2: recharge 13s -> 11.5s.", "kin": "Rank 2: cooldown 17s -> 14.9s."},
-	"rank_next": {"sec": "Rank 3: cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder.", "dash": "Rank 3: recharge 13s -> 10s; a Free Skate over the Abyss lays ice underfoot that holds for 5s.", "kin": "Rank 3: cooldown 17s -> 12.8s; the wall is 40 points tougher."},
+	"rank_next": {"sec": "Rank 3: cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder.", "dash": "Rank 3: recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s.", "kin": "Rank 3: cooldown 17s -> 12.8s; the wall is 40 points tougher."},
 	"tells": {
 		"half": "a frost glow on foes that grows with each dart",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
@@ -167,7 +164,7 @@
 		"name": "Freeze Frame",
 		"card_range": "radius",
 		"again": "break out early",
-		"short": "Freeze",
+		"short": "Rime",
 		"icon": "rimewright_x",
 		"col": "#7fd8ff",
 		"unlock": 6,
@@ -176,15 +173,21 @@
 		"snap_t": 0.2,
 		"carry_t": 0.8,
 		"carry_k": 1.05,
-		"hold": 3.5,
+		"hold": 3.3,
 		"late": 0.75,
 		"late_k": 0.67,
 		"dmg": 18.0,
 		"stun": 0.75,
 		"recover": 0.4,
-		"slow_base": 0.15,
-		"slow_per_s": 0.12,
-		"slow_max": 0.55,
-		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.47m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"zone_slow": 0.35,
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.47m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed 35%. Its cracks glow brighter as it builds; at 3.3s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+	},
+	"src": {
+		"lmb": "[D] [O] (owner question (gap 16) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

@@ -2,14 +2,14 @@ extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
-## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Coin Blast shows
-## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
-## draw it as long as the host's.
-## Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
-## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
-## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
+## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop, the same
+## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log every change of the
+## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
+## compares the ground cone her Coin Blast shows stuck on a wall (a row of rock tiles 4 m out on the host only;
+## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## Then the lair bosses (Net 0.24.6's "bat" event): the
+## host wakes a Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a
+## Boss fed by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
@@ -30,11 +30,15 @@ const BOSS_AT := Vector3(3.0, 0, 0)      # m from home: where a boss stands (the
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
 
+## Holds a kit cancels by clearing its move id (Albert's raised shield, Lace's Pin Down draw, Kael's Lunge
+## wind-up): held CUT_AT s, then cut as a Boki merge cuts them (MergeAugment), the key let go after.
+const CUTS := ["archer rmb", "bulwark rmb", "juggernaut rmb"]
+const CUT_AT := 0.6          # s: past every RMB hold threshold (0.1-0.3 s) plus a snapshot, so the hold move shows
+
 ## Casts whose copy still differs, and why (docs/DEBT.md): printed as GAP, not failures (timing may hide one
-## run to run). Both fixes sit in ArchKit.net_move / apply_net_move, not in Net.
+## run to run).
 const KNOWN := {
-	"bulwark rmb held": "lowering the shield clears the move id; the wire's '' is ignored, the copy keeps guarding",
-	"gunslinger lmb held": "a restart of the same move within 0.3 s of its start is not seen (apply_net_move)",
+	"gunslinger lmb held": "one restart in ten (2.36 s in, rpc5 11-15) still does not show on the copy",
 }
 
 var log_rows: Array = []     # [unix ms, the kit's move id, HunterAnim's move id]; one row per change or restart
@@ -73,6 +77,8 @@ func _host() -> void:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
+			if "%s %s" % [arch, key] in CUTS:
+				await _cast(G, arch, key, true, true)
 	_wash_rows_ok()
 	ok(not tele_kinds.is_empty(), "some cast draws an all telegraph (else none was compared)")
 	for kind in tele_kinds:
@@ -144,9 +150,11 @@ func _first_k(rows: Array, move_name: String) -> float:
 			return float(r[3])
 	return -1.0
 
-func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
+func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	if cut:
+		what = "%s %s cut" % [arch, key]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
@@ -168,7 +176,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var rocks := what == "gunslinger rmb"      # only a wall gives the cone
 	if rocks:
 		_rocks(World.T_BLOCK)
-	await _press(key, held)
+	await _press(key, held, cut)
 	var lace_walk: bool = what == "archer dash"
 	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	if rocks:
@@ -205,10 +213,13 @@ func _rocks(kind: int) -> void:
 	for dz in [-1, 0, 1]:
 		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
 
-## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
-func _press(key: String, held: bool) -> void:
+## One key for the kit: tapped (one step) or held for HOLD s (CUT_AT, then cut), then let go. E gets a flick of the
+## aim (Sparkle's drag).
+func _press(key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var secs := HOLD if held else DT
+	if cut:
+		secs = CUT_AT
 	var flick := P.pos + Vector3(6.0, 0, 4.0)
 	match key:
 		"lmb": P.inp["fire"] = true
@@ -225,6 +236,9 @@ func _press(key: String, held: bool) -> void:
 		t += DT
 		if key != "lmb" or not held: P.inp["fire"] = false
 		P.inp["sec"] = false
+	if cut:
+		MergeAugment.drop_class_holds(P)
+		P.ak.drop_holds()
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
@@ -304,11 +318,17 @@ func _compare(mine: Array, theirs: Array) -> Dictionary:
 		if not ids.has(String(r[2])) and out["bad"] == "":
 			out["bad"] = "the copy plays '%s', the host never did" % r[2]
 	var at := 0
+	var shown := ""          # the host's last move that lasted a snapshot
 	for i in mine.size():
 		var id := String(mine[i][2])
 		var life: float = (float(mine[i + 1][0]) - float(mine[i][0])) / 1000.0 if i + 1 < mine.size() else 9.0
 		if life < MIN_LIFE or i == 0:
+			if i == 0:
+				shown = id
 			continue
+		if id == "" and shown == "":
+			continue          # (no move again after one no snapshot carried, a tapped shield: the copy never changed)
+		shown = id
 		if id != "": out["moves"] += 1
 		var found := false
 		for j in range(at, theirs.size()):

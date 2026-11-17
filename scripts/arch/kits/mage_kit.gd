@@ -32,6 +32,8 @@ var glide_key_was := false     # the glide key held last step (only a fresh pres
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Undercurrent: {at, t, dir, phase ("flick" | "count"), dir0}
+const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (crackle and wire), one pooled node each
+
 var rod: Node3D = null         # the Pink Spear held in the hand while RMB is down
 var rod_full := false
 var blowouts := 0              # tests and the demo
@@ -75,6 +77,14 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 
 func fx() -> VVFx:
 	return VVFx.of(m)
+
+## The rehearsal also pools the Coil's arcs and builds the Pink Spear: the first RMB built it mid-fight (7 meshes,
+## 6 shader compiles).
+func warm_fx(at: Vector3) -> void:
+	fx().prewarm(at, h, int(res_def()["max"]), COIL_ARCS)
+	if rod == null:
+		rod = _build_rod()
+		rod.visible = false
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
@@ -348,7 +358,7 @@ func on_dash(use_ex: bool) -> bool:
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
 			return true
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
-		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0})
+		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0, "feel": "long"})
 		play("mage_dash_ex")
 		vfx("dash_ex", null, h.roll_dir, {"len": ex_dist})
 		last_dash_kind = "ex"
@@ -437,11 +447,12 @@ func _tick_wire(dt: float) -> void:
 func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
 	var time := run_time(L)
-	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d, "curved": true})
 	# momentum carries: the streak adds the drift you had
 	var v := d * (L / time) + drift
 	h.roll_dir = v.normalized()
 	h.roll_speed = v.length()
+	if not curved.is_empty(): curved["speed"] = h.roll_speed    # Joule's fitted curve on the drifted speed
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	run_t = time
 	run_exit = true
@@ -515,8 +526,8 @@ func _arrive(n: int) -> void:
 	if h.model: h.model.visible = true
 	vfx("dash_land")              # a quiet arrival: no ring or burst on a dash, the hits are on the way
 	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
-	if ult.phase() != MageUlt.CROUCH:
-		play("mage_dash_land")      # (a run out of Stormfall's crouch lands in the crouch: it plays that instead)
+	if ult.phase() != MageUlt.CROUCH and h.grounded:
+		play("mage_dash_land")      # (out of Stormfall's crouch it lands in the crouch; off a ledge, the air pose)
 
 func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return
@@ -539,7 +550,6 @@ func _blowout(f: Ent) -> void:
 	vfx("blowout", f.position)
 	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Pink Spear
@@ -787,7 +797,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 			_grab_mote(mt)
 
 ## An orb in her hands (Undercurrent pulled it in) or under her Wirerun: the dash is back at once, with the
-## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+## usual reset cue (the chime and the Shift icon). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
 	var was_spent := h.dashes < h.max_dashes()

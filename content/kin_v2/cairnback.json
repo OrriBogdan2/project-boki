@@ -1,13 +1,13 @@
 {
 	"grammar": 1,
 	"id": "cairnback",
-	"name": "Cairnback",
+	"name": "Cairnhorn",
 	"animals": [
 		"Tortoise",
 		"Ibex"
 	],
 	"theme": "titan",
-	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnback's shell. Hatched from the egg Siegephant guards.",
+	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnhorn's shell. Hatched from the egg Siegephant guards.",
 	"colors": {
 		"body": "#6a6f7a",
 		"belly": "#d8c59a",

@@ -1,10 +1,10 @@
 # Camera depth readability (job 20261107-123002-a4)
 
-Owner feedback: height, ledges and drop depth are hard to read; Supervive reads well. Sources: the owner's
-34 s mantle clip (contact sheet and frames in /home/boki/refs/supervive-mantle/), our captures from
+Owner feedback: height, ledges and drop depth are hard to read; the reference reads well. Sources: the owner's
+34 s mantle clip (contact sheet and frames in /home/boki/refs/the reference-mantle/), our captures from
 `--depth-shots` (tools/depth_shots.gd, seed 77, GPU job), shots in briefs/camera_depth/.
 
-## What Supervive does (from the clip)
+## What the reference does (from the clip)
 1. **Value contrast between lit ground and everything below it.** Ground is bright and saturated (green
    or stone); the abyss and cliff faces are dark navy, a clearly lower value. The lit top reads as "up",
    the dark mass as "down".

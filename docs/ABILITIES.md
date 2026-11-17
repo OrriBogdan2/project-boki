@@ -10,21 +10,21 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| **Thief** | light | Twin Blades | Vault | Marks | Dark Bola | White Flash (18s) | none (X is the Merge) |
+| **Thief** | light | Twin Blades | Vault | Marks | Bola | White Flash (18s) | none (X is the Merge) |
 | **Lace** | light | Drawstring | Slip Stitch | Red Thread | Pin Down | Hemline (9s) | none (X is the Merge) |
 | **Sparkle** | light | Finger Guns | Wirerun | Sparks | Coilshot | Undercurrent (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Brass Tacks | Slipstep | Fever | Coin Blast | Palm Spear (12s) | none (X is the Merge) |
-| **Juggernaut** | heavy | Bitter End | Rampage | Bad Blood | Final Swing | Short Leash (13s) | none (X is the Merge) |
-| **Mossy** | heavy | Capstan Hammer | Tideturner | Hold Fast | Blue Guard | Safe Harbour (12s) | none (X is the Merge) |
+| **Juggernaut** | heavy | Bitter End | Rampage | Rage | Final Swing | Short Leash (13s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Blue Guard | Tideturner | Guard | Blue Guard | Safe Harbour (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
 _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 
-- **Passive: Marks.** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Dark Bola 1. The fifth Mark pays out Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
+- **Passive: Marks.** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Bola 1. The fifth Mark pays out Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
 - **Shift: Vault** (6.5s a charge). A 3.4m flip (shots pass through it) and +30% speed until your next hit (2s at most). Your next weapon hit within 3s is Primed: +10 damage, 2 Marks and Shred (+15% damage taken for 3s). Landing it resets Vault.
-- **RMB: Dark Bola** (12s):
-  - tap: Throw a spinning Dark Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Dark Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- **RMB: Bola** (12s):
+  - tap: Throw a spinning Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
   - in the air: Thrown from the air the same way.
 - **E: White Flash** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
@@ -76,30 +76,30 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **RMB: Final Swing** (3s):
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
-  - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Short Leash: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+  - in the air only: Hit the Deck: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
+  - with E: With the Short Leash: tap while it pulls you for a Full Circle (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 - **E: Short Leash** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
 ### Mossy (heavy)
 
-_The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
+_The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
-- **Shift: Tideturner** (9s a charge). Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **Passive: Guard.** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Shift: Tideturner** (9s a charge). Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Blue Guard** (6s):
-  - tap: A tap only raises and lowers the aegis; the Bash is the Full Ahead on Shift.
-  - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Full Ahead on this slot's 6s cooldown.
+  - tap: A tap only raises and lowers the Blue Guard; the Bash is the Full Ahead on Shift.
+  - hold: Raise the Blue Guard: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Full Ahead on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
   - resource full: Guard 50+: the Full Ahead ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
-- **E: Safe Harbour** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
+- **E: Safe Harbour** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your Blue Guard is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
 The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
@@ -116,11 +116,11 @@ In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets 
 
 Every level past the first adds the same share of a Hunter's level-1 numbers (`content/rules/level_growth.json`, `scripts/match/level_growth.gd`), as in the source. Asserted by `--level-growth-check`.
 
-**What the source does** (settled from briefs/supervive-data):
-- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (docs/SUPERVIVE_DATA.md section 7) and each ability has an AP ratio on it (supervive_kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (supervive_kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
+**What the source does** (settled from sv/briefs):
+- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (sv/DATA.md section 7) and each ability has an AP ratio on it (sv/briefs/kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (sv/briefs/kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
 - **Ability healing** is on the same Power (no heal lists a max-health ratio; heal upgrades are flat percentages: Elluna's Moonlight Blessing, Oath's Regen Field, Brall's Rebuke).
-- **Max health** grows ~6% of base a level, a straight line (docs/SUPERVIVE_DATA.md section 6, all 24 hunters' stats).
-- **Shields**: Oath's Brightshield scales with max health (supervive_kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
+- **Max health** grows ~6% of base a level, a straight line (sv/DATA.md section 6, all 24 hunters' stats).
+- **Shields**: Oath's Brightshield scales with max health (sv/briefs/kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
 - **Weapon (LMB) damage** and knock heals: the data has no level-1/level-15 pair, so it settles nothing. Ours stays flat (weapon) or a share of max health (knock heals).
 
 **The curves** (multiplier on the level-1 number; ratio = ours now / source):
@@ -131,7 +131,7 @@ Every level past the first adds the same share of a Hunter's level-1 numbers (`c
 | HP: max health, max-health shields | 1.000 / 1.240 / 1.540 | 1.000 / 1.240 / 1.420 (+6% to L6, half from L7) | 1.000 / 1.240 / 1.540 | 1.00 / 1.00 / 1.00 |
 | Flat | 1 / 1 / 1 | | | |
 
-Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10 on HP. Fixes: `level_growth.json` (`ap` 0.05 to 0.039; the half rate from level 7, which the source does not have, is gone), Albert's Aegis now grows with max health (`BulwarkKit.shield_max`, `LevelGrowth.hp`), and Safe Harbour's and Hearthlight's heals now grow with AP (their `heal_k`), as the source's heals do.
+Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10 on HP. Fixes: `level_growth.json` (`ap` 0.05 to 0.039; the half rate from level 7, which the source does not have, is gone), Albert's Blue Guard now grows with max health (`BulwarkKit.shield_max`, `LevelGrowth.hp`), and Safe Harbour's and Hearthlight's heals now grow with AP (their `heal_k`), as the source's heals do.
 
 **Every slot** (number: what grows; "AP", "HP" and "flat" are the curves above; ours is now, before only where it changed):
 
@@ -139,15 +139,15 @@ Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10
 |---|---|---|---|---|---|---|
 | gunslinger, Vex (Ghost) | weapon: flat | Coin Blast dmg: AP = AP | Slipstep: no number | Palm Spear dmg: AP = AP | Penny Drop dmg: AP = AP | Hot Streak heal: a share of damage dealt |
 | juggernaut, Kael (Brall) | weapon: flat | Final Swing dmg: AP = AP | Rampage dmg: AP = AP | Short Leash dmg: AP = AP | Blow for Blow dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
-| ashwick, Cinder (Felix) | weapon: flat | Spitfire dmg: AP = AP | Lock Horns dmg: AP = AP; rank-3 shield: HP (source: not in data) | Molten Hug dmg: AP = AP; shield: HP (source: not in data) | Red Carpet dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
-| tender, Meeko (Elluna) | weapon: flat | Stick Around dmg: AP = AP | Foxtrot: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Rise and Shine heal: AP = AP | Carrier: no number |
-| dolm, Tenzo (Tetra) | weapon: flat | Rock Bottom dmg: AP = AP | Rock Hop dmg: AP = AP | Foothold wall: flat (ranks only) | Backbone dmg: AP = AP | Jade Ward shield: flat (source: not in data) |
+| ashwick, Cinder (Felix) | weapon: flat | Spitfire dmg: AP = AP | Lock Horns dmg: AP = AP; rank-3 shield: HP (source: not in data) | Molten Hug dmg: AP = AP; shield: HP (source: not in data) | Red Carpet dmg: AP = AP | Boiling Point knock heal: HP (source: not in data) |
+| tender, Meeko (Elluna) | weapon: flat | Stick Around dmg: AP = AP | Foxtrot: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Rise and Shine heal: AP = AP | Carry the Day: no number |
+| dolm, Tenzo (Tetra) | weapon: flat | Rock Bottom dmg: AP = AP | Leap of Faith dmg: AP = AP | Foothold wall: flat (ranks only) | Backbone dmg: AP = AP | Jade Ward shield: flat (source: not in data) |
 | archer, Lace (Myth) | weapon: flat | Pin Down dmg: AP = AP (measured source line) | Slip Stitch: no number | Hemline dmg: AP = AP (measured source line) | Finishing Touch dmg: AP = AP | Red Thread: no number |
-| dredge, Grimble (Kingpin) | weapon: flat | Sticky Fingers dmg: AP = AP | Barge: no number | Lump Sum dmg: AP = AP | Both Barrels dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
-| rimewright, Neve (Celeste) | weapon: flat | Icebreaker dmg: AP = AP | Skate: no number | Cold Front: flat (ranks only) | Freeze Frame dmg: AP = AP | Hoarfrost splinters: AP = AP |
+| dredge, Grimble (Kingpin) | weapon: flat | Sticky Fingers dmg: AP = AP | Mad Dash: no number | Lump Sum dmg: AP = AP | Both Barrels dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| rimewright, Neve (Celeste) | weapon: flat | Icebreaker dmg: AP = AP | Skate: no number | Cold Front: flat (ranks only) | Freeze Frame dmg: AP = AP | Cold Snap splinters: AP = AP |
 | mage, Sparkle (Joule) | weapon: flat | Pink Spear dmg: AP = AP | Wirerun dmg: AP = AP | Undercurrent dmg: AP = AP | Stormfall dmg: AP = AP | Static: no number |
 | bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Blue Guard shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | Tideturner dmg: AP = AP | Safe Harbour heal: AP = AP (before flat: 0.87 / 0.74) | Groundswell dmg: AP = AP | Guard: no number |
-| thief, Sable (Shiv) | weapon: flat; source 160 @15 only | Dark Bola dmg: AP = AP | Vault: no number | White Flash dmg: AP = AP | Last Dance dmg: AP = AP | Marks knock heal: HP (source: not in data) |
+| thief, Sable (Shiv) | weapon: flat; source 160 @15 only | Bola dmg: AP = AP | Vault: no number | White Flash dmg: AP = AP | Last Dance dmg: AP = AP | Marks knock heal: HP (source: not in data) |
 | ostra, Motley (Void) | weapon: flat; source 263 @15 only | Stage Fright dmg: AP = AP | Musical Chairs ally shield: flat (source 375 at rank IV @15, scaling not in data) | Gag Gift dmg: AP = AP | Main Attraction dmg: AP = AP | Swell: no number |
 
 Heals and shields a Hunter's abilities give through the effect verbs (a Boki's typing riding a slot, `Effects._heal_k`) are on AP too.
@@ -169,7 +169,7 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Weapon | Class | Ability | Verb | Cooldown | What it does |
 |---|---|---|---|---|---|
 | Burst Rifle | medium | **Leash Bolt** | tether | 10s | A bolt that leashes whoever it hits to you for 3.5s. If they get 6m away it snaps: 22 damage, stunned 1s, dragged back. |
-| Greatsword | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
+| Bitter End | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
 | Longsword | medium | **Riposte** | reflect | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
 | Minigun | heavy | **Bracewall** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
 | Rifle | medium | **Rail Charge** | charge-shot | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
@@ -208,7 +208,7 @@ Passive gloves (no Q, stats only): **Bastion Plate** (Heavy plate: lots of armor
 
 ## E, the kin's own ability, and the merge
 
-Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
@@ -217,12 +217,12 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
-### Cairnback (Tortoise + Ibex, mount)
+### Cairnhorn (Tortoise + Ibex, mount)
 
-- **E: Boulder Heave** (projectile, 9s): Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- **E: Boulder Heave** (projectile, 9s): Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **Merge: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- **Merge: Cairn Colossus** (8s): Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 
 ### Vespyx (Fox + Scorpion, shoulder)
 
@@ -286,7 +286,7 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Sticky Fingers (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Foothold, Backbone); **ice** = Neve's Cold Front; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Sticky Fingers (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised Blue Guard and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Foothold, Backbone); **ice** = Neve's Cold Front; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|

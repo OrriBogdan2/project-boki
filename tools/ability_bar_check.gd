@@ -64,14 +64,14 @@ func _kit(m: Match, P: Hunter, kit: String) -> void:
 	_pick(m, P, kit, 3)
 	await _airborne(m, P, hid, kit)
 
-## Dash: a pip per charge (kit + rank), one ready and the next at 45%, the countdown of the next.
+## Dash: a disc per charge (kit + rank; none for one charge), one ready and the next at 45%, the countdown of the next.
 func _dash(m: Match, P: Hunter, hid: int, tag: String) -> void:
 	var cap := int(P.max_dashes())
 	P.dashes = float(cap) - 0.55 if cap > 1 else 1.0
 	await _drawn(m.hud)
 	var sh: Dictionary = DashSlot.shown.get(hid, {})
 	var want: Array = []
-	for i in cap:
+	for i in cap if cap > 1 else 0:        # a one-charge dash draws no charge discs (the source)
 		want.append(clampf(P.dashes - i, 0.0, 1.0))
 	var text := HudSlot.cd_text((1.0 - fposmod(P.dashes, 1.0)) * P.dash_regen()) if cap > 1 else ""
 	ok(_near(sh.get("pips", []), want) and sh.get("text", "") == text,

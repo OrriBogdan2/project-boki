@@ -46,7 +46,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.39 m/s, 2 dash charges |
 | Signature weapon | Open Flame (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock. |
 | Silhouette | the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail |
@@ -59,18 +59,18 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Close-range burner: soak foes in fire until they blaze, then finish them in the flames. |
-| Passive: Boiling Point | Boiling Point: your fire sets foes Ablaze, then Flashes them over. A knock heals you and readies Molten Hug. |
-| Dash: Lock Horns | Ram head first the way you move (or at the cursor with Dash-to-cursor on); you stop on the first foe with a fiery hit. 2 charges. |
-| RMB: Spitfire | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
-| E: Molten Hug | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
-| Hunter ultimate: Red Carpet | Red Carpet (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly. |
-| Weapon: Open Flame | Hold to pour fire from your hand 6m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
+| Passive: Boiling Point | Your fire sets foes Ablaze, then Flashes them. A knock heals you. |
+| Dash: Lock Horns | Head-first ram that stops on the first foe with a fiery hit. |
+| RMB: Spitfire | Hold to aim, release: a cinder that slows and sets foes Ablaze. |
+| E: Molten Hug | Heat blast drags foes in and wraps you in a fire shield. |
+| Hunter ultimate: Red Carpet | Fly toward the cursor, laying a lava carpet; press again to land. |
+| Weapon: Open Flame | Hold to pour fire 6m ahead; it hits harder on burning foes. |
 
 ### Abilities in full
 
 **Boiling Point (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 0.5% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (1%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 6% more from the stream and the cinder (10% once Flashed over), and the stream also takes 0.4% (0.6%) of their health a second. A knock heals you 16% of your health.
 
-**Lock Horns (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
+**Lock Horns (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 18 damage, a heavy shove (you bounce back a little) and 17 Char (half a Boiling Point). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
 
 **Spitfire (RMB, 7s cooldown).**
 

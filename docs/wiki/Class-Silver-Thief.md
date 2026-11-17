@@ -21,7 +21,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 2. **Vault** (Shift): a quick sideways cartwheel. Your next bolt is **empowered**: a big blue chakram for 2.3
    times a bolt (your Marks add to it as usual). You can throw it mid-flip. The aim line turns gold while it's ready.
 3. Land it and Vault comes back at once. Cartwheel again. Keep the chain going and the Marks never drop.
-4. **Dark Bola** (right click): the lane shows for a moment while you aim, then the Dark Bola grounds the first foe
+4. **Bola** (right click): the lane shows for a moment while you aim, then the Bola grounds the first foe
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Last Dance** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
@@ -33,12 +33,12 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |---|---|
 | Vault, then a bolt that hits within 3s | Empowered: 2.3x a bolt and a Mark; Vault comes back at once and the speed boost ends |
 | Vault, then a bolt that misses | The empowered shot is spent |
-| Dark Bola into a single foe | Grounded 1.5s: no dash, jump or glide, slowed; yellow rings bind them |
-| Dark Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
+| Bola into a single foe | Grounded 1.5s: no dash, jump or glide, slowed; yellow rings bind them |
+| Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
 | White Flash, then E again (or wait 6s) | You blink to the knife through a trail of afterimages |
 | White Flash sticks in a foe (rank 3) | Vault comes back and half the Knife's cooldown comes back (a quarter on the ground) |
 | Last Dance (X) | Up to 5 blades at each foe in the ring over 2s; every blade refreshes your Marks; you keep moving and shooting |
-| Dark Bola, then Last Dance | The Grounded foe can't leave the ring and takes every blade |
+| Bola, then Last Dance | The Grounded foe can't leave the ring and takes every blade |
 | Keep a foe at the ring's edge | Harder blades and a 6s blight (healing barely takes) |
 | Knock or assist | You heal (a quarter of your health in all on a knock) |
 
@@ -56,7 +56,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Sleight Trigger (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the long braid, the moth wings and the twin pistols |
@@ -69,25 +69,25 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
-| Passive: Marks | Each hit on the same foe adds a Mark: +1.3 damage on your shots at them, with no cap. Knocks heal you. |
-| Dash: Vault | Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. Shoot straight away and your next shots come quicker. |
-| RMB: Dark Bola | A short wind-up, then a Dark Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
-| E: White Flash | Throw a dagger to your cursor or into a foe. Press it again to blink to it. |
-| Hunter ultimate: Last Dance | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
-| Weapon: Sleight Trigger | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
+| Passive: Marks | Each hit on a foe adds a Mark: +10% damage, uncapped. |
+| Dash: Vault | Cartwheel, then an empowered shot that refunds Vault if it lands. |
+| RMB: Bola | Bola down the lane: grounds the first foe, stuns a second too. |
+| E: White Flash | Throw a dagger; press it again to blink to it. |
+| Hunter ultimate: Last Dance | A ring of blades for 2s, harder at its edge. |
+| Weapon: Sleight Trigger | Bolts from alternating hands every 0.45s, landing at your cursor. |
 
 ### Abilities in full
 
-**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +1.3 per Mark (a tenth of a shot, added flat, the empowered shot included). The empowered shot adds 2, the Dark Bola 1. A knock heals you 20% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +1.3 per Mark (a tenth of a shot, added flat, the empowered shot included). The empowered shot adds 2, the Bola 1. A knock heals you 20% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
 **Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Throw it within 1.2s of the Vault and it and the next three bolts leave 40% sooner (0.27s apart), their tails cyan. Rank 2: the empowered bonus +20%; rank 3: +40%.
 
-**Dark Bola (RMB, 7s cooldown).**
+**Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Dark Bola flies 7m: 3 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Dark Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +6.1 (TANGLED).
+- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 3 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +6.1 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
-**White Flash (E, 15s cooldown).** Throw a dagger to your cursor (16.2m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
+**White Flash (E, 15s cooldown).** Throw a dagger to your cursor (15m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
 **Last Dance (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4.5 each, 7.6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 

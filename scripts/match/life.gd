@@ -22,7 +22,7 @@ const R := {
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
-	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
+	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
@@ -115,6 +115,8 @@ static func tick_wisps(m: Match, dt: float) -> void:
 		if foes > 0 and not o.get_meta("stomped", false) and o == m.player and m.hud:
 			m.hud.toast("%s is on you! Drift away" % stompers[0].pname, Color("ff5a4a"))
 		o.set_meta("stomped", foes > 0)
+		if KinWispForm.lapsed(m, o):
+			m._check_team(o.team)          # the guardian's pull ran out or an enemy is on the Wisp
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
 			o.down_hp -= base * R["stomp_mult"] * dt

@@ -123,7 +123,7 @@ func _strike(s: Dictionary) -> void:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
 		kit.vfx("grounded", f.position, null, {"on": f, "t": float(ed["grounded"])})
 	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
-		if o.team != kit.h.team and o.downed and o.hittable() and not CareUtil.is_carried(o) \
+		if o.team != kit.h.team and o.downed and not o.dead and not o.out and not CareUtil.is_carried(o) \
 				and o.flat_dist(at) < float(ed["radius"]) + o.r and absf(o.pos.y - at.y) < 2.2:
 			_slide(o, dir, ed)
 	for mt in kit.motes.duplicate():

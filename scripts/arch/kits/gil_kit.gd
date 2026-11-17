@@ -16,6 +16,7 @@ var beach_at := {}                  # foe instance id -> time it can be Beached 
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
+var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
 var swim_t := 0.0                   # Deep End under way
 var spin_t := -1.0                  # Spin Cycle spin time (-1: not spinning)
 var spin_tick := 0.0
@@ -90,7 +91,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	if lmb_t >= 0.0:
-		if not h.can_fire(): _drop_tide()
+		if not h.atk.can_fire(): _drop_tide()
 		elif held: _tide_tick(dt)
 		else: _tide_lunge()
 		return true
@@ -99,7 +100,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		press_at = m.time
 	lmb_buf -= dt
 	var bot := h.ctrl != "local"
-	if not h.can_fire():
+	if not h.atk.can_fire():
 		return true
 	if h.fire_cd <= 0.0 and (lmb_buf > 0.0 or (bot and held)):
 		lmb_buf = 0.0
@@ -116,10 +117,10 @@ func _thrust() -> void:
 	combo_at = m.time
 	combo_n += 1
 	h.combo_i = i + 1
-	h._lunge(float(ld["step"][i]))
+	h.atk.lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
 	var how := {"heavy": i == 2, "own_look": true}
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
+	h.atk.strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	play(THRUSTS[i])
 	var o := {"len": float(ld["reach"][i])}
@@ -332,18 +333,31 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
+		ComboMark.payoff(m, h, f)        # the Beach payoff: the foe flashes
 		m.sfx("pay_flashpoint", f.pos, 0.0, 1.0)      # the Beach: its own payoff sting
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
 
+## The splash marks on `f`, for the ComboMark tag: a pip per different mark (three Beach it); the ring is the
+## time the oldest mark has left (when it runs out the count drops).
+func combo_read(f: Ent) -> Dictionary:
+	var pd: Dictionary = d.get("passive", {})
+	var win := float(pd.get("window", 5.0))
+	var n := 0
+	var left := win
+	for stamp: float in marks.get(f.get_instance_id(), {}).values():
+		var rest: float = win - (m.time - stamp)
+		if rest > 0.0:
+			n += 1
+			left = minf(left, rest)
+	if n == 0:
+		return {}
+	return {"icon": "tonic", "n": n, "max": int(pd.get("need", 3)), "left": left, "total": win}
+
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:
-	var pd: Dictionary = d.get("passive", {})
-	var n := 0
-	for k in marks.get(f.get_instance_id(), {}):
-		if m.time - float(marks[f.get_instance_id()][k]) <= float(pd.get("window", 5.0)): n += 1
-	return n
+	return int(combo_read(f).get("n", 0))
 
 # ------------------------------------------------------------------ dash: Deep End
 func on_dash(use_ex: bool) -> bool:
@@ -353,7 +367,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class long dash in the air: no ground to swim through, so no dive and no surfacing
 		if spend_dash(true):
-			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
+			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust", "feel": "long"})
 		return true
 	if not spend_dash(false):
 		return true
@@ -389,6 +403,12 @@ func cast_e() -> bool:
 
 func e_recastable() -> bool:
 	return spin_t >= 0.0
+
+## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+func recast_window() -> Dictionary:
+	if spin_t < 0.0:
+		return {}
+	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
 
 func e_recast() -> bool:
 	if spin_t < 0.0:
@@ -571,7 +591,7 @@ func _tick(dt: float) -> void:
 	glow_t -= dt
 	if glow_t <= 0.0 and not h.unseen and h.visible and not h.out:
 		glow_t = 0.3
-		m.fx.burst(HeroVfx.of(m).anchor_pos(h, "hand_l"), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
+		m.fx.debris(HeroVfx.of(m).anchor_pos(h, "hand_l"), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
 
 func _drop_holds() -> void:
 	spin_t = -1.0

@@ -47,7 +47,7 @@ straight through them is a Blowout that gives your dash back at once.
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Finger Guns (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back. |
 | Silhouette | the copper rod mast and kite pennant on the back |
@@ -60,22 +60,22 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them. |
-| Passive: Live Wire | Live Wire: every hit adds a Static stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live. |
-| Dash: Wirerun | Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster. |
-| RMB: Pink Spear | Pink Spear: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back. |
-| E: Undercurrent | Undercurrent: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them. |
-| Hunter ultimate: Stormfall | Stormfall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits. |
-| Weapon: Finger Guns | Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static. |
+| Passive: Static | Hits stack Static; the 4th calls a sky bolt. |
+| Dash: Wirerun | Tap for a short zap, hold to charge a longer streak. |
+| RMB: Pink Spear | Throw a copper rod: knocks back, adds Static, stuns on walls. |
+| E: Undercurrent | Drop a circle; 0.8s later lightning drags foes inside and grounds them. |
+| Hunter ultimate: Stormfall | Launch up, then strike down at your cursor, knocking everyone back. |
+| Weapon: Finger Guns | Finger bolts every 0.65s; each hit adds 1 Static. |
 
 ### Abilities in full
 
-**Live Wire (passive).** Your finger bolts, Pink Spear and Undercurrent each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Undercurrent) also gives it back.
+**Static (passive).** Your finger bolts, Pink Spear and Undercurrent each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Undercurrent) also gives it back.
 
 **Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 6.02 to 10.48m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 43m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
 
 **Pink Spear (RMB, 8s cooldown).**
 
-- *Tap:* Let go early (it still takes 0.3s to summon): 16 damage and push 4.4, flying the full 13m lane.
+- *Tap:* Let go early (it still takes 0.33s to summon): 16 damage and push 4.4, flying the full 13m lane.
 - *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 26.7 damage and push 6.6. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Undercurrent pulls it to you. It adds no Static.
 
 **Undercurrent (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 19.4 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.

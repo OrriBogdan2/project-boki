@@ -4,7 +4,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07, "the source decides"). Five holds:
 Shot and bow draw, Sparkle's Undercurrent drag, Albert's Crushing Blow whirl, Tenzo's Backbone drag. Asserted in
 `tools/hold_release_check.gd`, run from each hero's `--<hero>-combo-check`.
 
-**Evidence:** [D] game data (briefs/supervive-data/supervive_kits.md), [F] footage (briefs/hero-ref), [O] owner
+**Evidence:** [D] game data (sv/briefs/kits.md), [F] footage (briefs/hero-ref), [O] owner
 note. `[?]` = the source shows nothing for that ending, so it is ours and unsettled.
 
 ## The rule

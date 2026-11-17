@@ -4,7 +4,7 @@ Checks (`*_check.gd`, registered in `check_registry.gd`), shot tools (`*_shots.g
 
 ## The gate: `tools/check.sh`
 
-It runs `health.py --strict` (god-file budgets, the style ratchet), then `lint_gate.py`. That covers gdlint, gdformat (120 columns), ruff, ruff format, vulture, glTF validation, and Godot's unused-code and shadowing warnings, counted per file. Old debt sits in `lint_baseline.json` and may not grow, and a new file must be clean. See `check.sh`'s header for the flags. The suite and merge-candidate run `tools/check.sh --changed`: on top of the ratchet, every `.gd` a branch changes must be gdformat clean. This applies to branches cut after that rule landed.
+It runs `health.py --strict` (god-file budgets, the style ratchet), then `lint_gate.py`. That covers gdlint, gdformat (120 columns), ruff, ruff format, vulture, glTF validation, Godot's unused-code and shadowing warnings, and `private-ref` (no outside game's name in any tracked text file or file name; the old code comments are baselined and go down when you touch a file), counted per file. Old debt sits in `lint_baseline.json` and may not grow, and a new file must be clean. See `check.sh`'s header for the flags. The suite and merge-candidate run `tools/check.sh --changed`: on top of the ratchet, every `.gd` a branch changes must be gdformat clean. This applies to branches cut after that rule landed.
 
 ## Formatting old files in batches
 
@@ -51,6 +51,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `art1/<hero>_clips.py` (blender) | The hero's animation clips on the rig, exported into the .glb | `blender -b --python tools/art1/cinder_clips.py -- cinder.blend out.glb idle,run` |
 | `art1/anim_kit.py`, `crouchkit.py`, `fistkit.py`, `gardenkit.py` | Shared clip helpers (imported, not run) | |
 | `art1/glb_add_clips.py` | Copy clips from one .glb into another | `python3 tools/art1/glb_add_clips.py target.glb source.glb run_,idle out.glb` |
+| `art1/glb_drop_mats.py` | Drop the mesh parts on named materials (a master's own copy of a prop the game .glb carries), all else byte-identical | `python3 tools/art1/glb_drop_mats.py in.glb out.glb '*-v95c'` |
 | `boki/<species>_anim.py`, `boki_clips.py` (blender) | A Boki species' clips | built by `build_boki.py` |
 
 ## Audio

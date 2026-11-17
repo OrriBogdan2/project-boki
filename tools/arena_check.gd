@@ -192,6 +192,14 @@ func _arena() -> void:
 	ok("the V glove fires alone: V on cooldown, Q ready", float(P.gear_cd[1]) > 0.0 and float(P.gear_cd[0]) <= 0.0)
 	m.use_gear(P, 0)
 	ok("then the Q glove fires too", float(P.gear_cd[0]) > 0.0)
+	var cast_all := true
+	for gid in Gear.ALL:
+		if Gear.active(gid) and Gear.slot_of(gid) == 0:
+			P.gear[0] = {"id": gid, "rar": 1}
+			P.gear_cd[0] = 0.0
+			m.use_gear(P, 0)
+			cast_all = cast_all and float(P.gear_cd[0]) > 0.0
+	ok("every active glove casts (their own sounds play)", cast_all)
 	A.give_glove("blink", 1)
 	ok("one glove can't be worn twice: blink to V empties Q", A.gloves[0] == "" and gid0.call(1) == "blink")
 	A.give_glove("grapple", 0)
@@ -322,8 +330,10 @@ func _arena() -> void:
 				# one
 				B.hp = B.max_hp - 20.0
 			# step back every 5s: with no glove ranks its RMB is ready so often that it never leaves melee for an E
+			# (toward the ring's middle: on the Training Area' open floor, a step back to the far side of a
+			# wall, after the Thief swaps places with you, puts the bot out of sight and it wanders off)
 			if int(tb / DT) % int(5.0 / DT) == 2:
-				B.teleport(P.pos + Vector3(6.0, 0, 0))
+				B.teleport(P.pos + Vector3(6.0 if P.pos.x < A.home.x + 3.0 else -6.0, 0, 0))
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true
@@ -531,14 +541,41 @@ func _cards() -> void:
 			"kit card sub-page keeps its size: %s" % a, c.page == "rmb" and c.size.is_equal_approx(s0),
 			"%s -> %s" % [str(s0), str(c.size)]
 		)
-		for s in KitCard.slots_of(a):
+		for s in KitCard.card_slots(a):
 			var info := KitCard.slot_text(a, s)
 			if String(info["line"]) == "" or String(info["name"]) == "":
 				ok("kit card text %s.%s" % [a, s], false)
+			elif String(info["line"]).split(" ", false).size() > KitCard.MAX_WORDS:
+				ok("kit card line is one short line: %s.%s" % [a, s], false, String(info["line"]))
+		_chip_numbers(a)
 		c.queue_free()
 	var inf := KitCard.infusion_lines("thief", KinLib.kin("cindle"))
 	ok("kit card: Boki infusion lines (RMB and E; her ultimate on X isn't infused)", inf.size() == 2, " | ".join(inf))
 	host.queue_free()
+
+## Every number on a hunter's authored damage chips (`card.chips`) is a number its slot's kit data holds.
+func _chip_numbers(a: String) -> void:
+	var num := RegEx.create_from_string("\\d+(\\.\\d+)?")
+	var chips: Dictionary = Arch.def(a)["card"]["chips"]
+	var bad: Array = []
+	for slot in chips:
+		var have: Array = []
+		_numbers_in(Arch.def(a)[slot], have)
+		for c in chips[slot]:
+			for m in num.search_all(String(c)):
+				if not have.any(func(v): return is_equal_approx(v, float(m.get_string()))):
+					bad.append("%s %s" % [slot, c])
+	ok("kit card chips quote the kit's numbers: %s" % a, bad.is_empty(), ", ".join(bad))
+
+func _numbers_in(v: Variant, out: Array) -> void:
+	if v is Dictionary:
+		for k in v:
+			_numbers_in(v[k], out)
+	elif v is Array:
+		for x in v:
+			_numbers_in(x, out)
+	elif v is float or v is int:
+		out.append(float(v))
 
 func _loadout() -> void:
 	var st := KitCard.strip("juggernaut", func(): pass)

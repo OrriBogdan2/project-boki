@@ -62,18 +62,18 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - **Glide dive** (hold Ctrl under the glider) has the source's numbers, but the key is ours.
 - **Dash to LMB/RMB flow rows** marked `[?]` have no source; they run as the kit's default.
 
-## Grimble the Scrap King (`dredge`, source Kingpin)
+## Grimble the Scrap King (`dredge`, source ref-dredge)
 [dredge.mp4](dredge.mp4)
 
 Still differs:
 - Cooldowns: Sticky Fingers 12 s vs 18, Lump Sum 7 vs 12, Both Barrels 21 vs 36 [D].
-- Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
+- Mad Dash: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
   Nov 7).
 - Lump Sum: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
   cone shows to everyone (matches the source [F]). Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
-- The Barge has no red burst at its start point [F]; the owner forbids bursts on dashes.
+- The Mad Dash has no red burst at its start point [F]; the owner forbids bursts on dashes.
 - Both Barrels turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
   the press [F]. He walks at 30% then 20% through it (owner).
 - Backstab +50% and a 16% heal on a knock are ours (wiki), not in [D].
@@ -82,7 +82,7 @@ Seen in the reel: the slugs hang as violet dots at the stop line like the footag
 drags (HOOKED); the cone telegraph and slam read; the Broadside's fan is a flat-edged amber wedge where the
 footage's is a pale rounded fan [F]; the hero is smaller in frame than the source's view.
 
-## Neve the Snowglide (`rimewright`, source Celeste)
+## Neve the Snowglide (`rimewright`, source ref-rimewright)
 [rimewright.mp4](rimewright.mp4)
 
 Still differs:
@@ -92,8 +92,8 @@ Still differs:
 - Skate: 10.5 m/s, the footage mean; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
 - Freeze Frame: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
-  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
-  stacking slow ramp is ours.
+  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone
+  slows a flat 35% (no number in the source); its periodic Shatter stacks are not built.
 - Darts now match the source burst: a hold is one even stream of plain darts, the let-go ends it on the three
   large ones, then a 0.5 s pause ([D] + [F], `ext/combat-neve-dart-burst`; the reel predates it). Skating beams
   keep 2x damage (wiki, footage 1.6x) and home late like the darts (owner).
@@ -103,7 +103,7 @@ Seen in the reel: the spear's burst ring and the wall's tall pale-blue slab matc
 dash leaves an ice slab behind instead of the footage's streaking crystal ribbon; Freeze Frame is one big cyan disc
 with a swirl, the footage's a smaller frost bud with the zone ring [F].
 
-## Sparkle the Storm Chaser (`mage`, source Joule)
+## Sparkle the Storm Chaser (`mage`, source ref-mage)
 [mage.mp4](mage.mp4)
 
 Still differs:
@@ -119,7 +119,7 @@ Still differs:
 Seen in the reel: the Pink Spear's pink burst reads like the footage's spear impact; Stormfall is a wide pink
 storm field over the arena, where the footage zooms out to a dark ring with a gold marker at the cursor [F].
 
-## Mossy the Barnacle Knight (`bulwark`, source Oath)
+## Mossy the Barnacle Knight (`bulwark`, source ref-bulwark)
 [bulwark.mp4](bulwark.mp4)
 
 Still differs:
@@ -127,7 +127,7 @@ Still differs:
   b2e942eb4 removes them and is not merged.
 - LMB hold walks at 55% while charging, with a 1.5 to 1.8 m step and a 4 m perfect-release launch (owner items 30,
   49, 59); the source stands still [F].
-- Aegis: a 160 HP shield with Full Ahead on Shift; the source's is regenerating shield energy and the routing is
+- Blue Guard: a 160 HP shield with Full Ahead on Shift; the source's is regenerating shield energy and the routing is
   `[?]`.
 - Groundswell: four cells, 0.5 s stun, cooldown 40 vs 50. Safe Harbour matches the data: 12 s, 8 s at rank 3 (the
   reel's rank), as the source's 8 s at tier IV.
@@ -138,14 +138,14 @@ Groundswell telegraph is an amber rectangle with rubble where the footage's is a
 [F]; the Tideturner's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
 damage number, as in the footage (it was an orange swirl inside the radius).
 
-## Sable the Silver Thief (`thief`, source Shiv)
+## Sable the Silver Thief (`thief`, source ref-thief)
 [thief.mp4](thief.mp4)
 
 Still differs:
-- Cooldowns: Dark Bola 7 s vs 13, Last Dance 24 vs 50, White Flash 15 vs 20 at the top rank, Vault 4.5 vs 5.
-- Dark Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
+- Cooldowns: Bola 7 s vs 13, Last Dance 24 vs 50, White Flash 15 vs 20 at the top rank, Vault 4.5 vs 5.
+- Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
 - Marks: a flat +1.3 per hit (the source's +16 on its 160 shot) with no cap, as the data; the 4 s fade is ours (the
-  data gives none). A knock heals 25% in all (the data's). The Dark Bola and the Knife still add a Mark, the empowered
+  data gives none). A knock heals 25% in all (the data's). The Bola and the Knife still add a Mark, the empowered
   shot 2 (the owner's call); the source stacks only on Arcslinger hits.
 - LMB: 12 m to the cursor (the footage's bolt also stops at the cursor); damage is the scaled 13.
 - Last Dance's look (violet ring, gold outer band) is ours; the source's is a cyan ring about 3.5 body heights wide.
@@ -153,7 +153,7 @@ Still differs:
 Seen in the reel: the Vault flip reads like the footage; the Last Dance is a wide pale-violet disc where the footage's
 is a thin cyan ring [F].
 
-## Motley the Void Jester (`ostra`, source Void)
+## Motley the Void Jester (`ostra`, source ref-ostra)
 [ostra.mp4](ostra.mp4)
 
 Still differs:
@@ -183,7 +183,7 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
 **Owner-direct 11-11 branches not in main** (none of the four is merged, so these reels show the kits before them):
 - `ext/vex-rmb-1111` a796f3a38: the Coin Blast lane's end is a dud on the ground or in the air; only a wall cone.
 - `ext/kael-owner-1111` 4cb48148d: tap RMB is a locked 4.3 x 0.72 lane, no Chain Lunge, hold has no lane or ring,
-  Meteor Drop centred under him. Based on ext/release-integ-0245, not main.
+  Hit the Deck centred under him. Based on ext/release-integ-0245, not main.
 - `ext/lace-1111` cf1adae16: Pin Down from the bow mouth, no feet crescent, roll 3.375 m, crimson kit colours,
   red laces for Hemline. Based on ext/release-integ-0245, not main.
 - `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
@@ -199,7 +199,7 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
 **KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
   clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Pin Down
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
-  and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
+  and Bjorn's ground and air rows still `buffer`. Meeko's Carry the Day shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Pin Down wall
@@ -232,7 +232,7 @@ says should not be there: worth a look.
 Still differs:
 - RMB on main: the tap slam is a ring round him and the hold is the forward lunge pose with its lane; the
   owner's 11-11 playtest (`ext/kael-owner-1111`) wants a locked lane strike, the hold with no lane or ring (blade
-  over the head), no Chain Lunge and the Meteor Drop circle under him.
+  over the head), no Chain Lunge and the Hit the Deck circle under him.
 - Dash: 4.5 m raw, felt 3.8 m / 0.2 s with a 0.07 s dip, 2 charges, cd 10.4 vs 13 (owner 113.8); the source has 3
   Quick Dash charges [F summary_screen].
 - Dash to LMB: ground and air rows `buffer` (gap 9, item 51 says combine).
@@ -305,10 +305,10 @@ Still differs:
   steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
   footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
   "Ally-pass refund").
-- Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
+- Bearer: the Carry the Day shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
   updated. Which hits drop a carried teammate was not traced.
   steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
-- Bearer: the Carrier shield is cut (tender.md, owner 11-07; KIT_PARITY row updated). Which hits drop a carried teammate was not traced.
+- Bearer: the Carry the Day shield is cut (tender.md, owner 11-07; KIT_PARITY row updated). Which hits drop a carried teammate was not traced.
 - Body 0.66 of a medium (owner item 108).
 
 Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, where the footage's are a blue comet
@@ -328,12 +328,12 @@ side in a gold ring, like the footage's ally appearing next to the hunter [F 027
 Still differs:
 - Foothold (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
   them by jumping as in the source (owner 23:55, `StoneStand`); KIT_PARITY gap 14 and dolm.md's ally-hop row say so too.
-- Rock Hop (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
+- Leap of Faith (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
   Landslide's short dash with a rock riding ahead [F]; the rolling rock at the end keeps the source's slow and knock.
 - Backbone (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
   cooldown 45 s [D]. The source's Tetraform is one spiked ridge about 18 to 22 m long [F]; ours was shortened from
   19.8 m on purpose with no owner line either way (KIT_PARITY ranges, `[?]`).
-- Tremor Sense: the cone is a fixed 16 m, widening 25 to 40 degrees over 2 s; the source's also lengthens, to about
+- Sight Unseen: the cone is a fixed 16 m, widening 25 to 40 degrees over 2 s; the source's also lengthens, to about
   18 to 25 m [F] (dolm.md gap 9). `ext/tenzo-cone-length` c557c270d grows it to 25 m and is not on main. Not in the
   reel (it needs a sneak).
 - Rock Bottom (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
@@ -350,5 +350,5 @@ impact, the footage a bright streak and rocks bursting in fire. Both hits now pl
 before/after: `docs/shots/tenzo-hit-impact/before_after_gpu.jpg`); the Rock Bottom hold circle is pale blue-white where
 the footage's is red, while the dark red crater with orange cracks matches; Foothold's molten basalt columns read like the footage's
 spiked rocks; Backbone is a row of separate rocks where the footage's is one continuous orange spiked ridge
-with fire [F]; the Rock Hop shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
+with fire [F]; the Leap of Faith shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
 footage's Landslide.

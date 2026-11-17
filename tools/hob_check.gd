@@ -244,9 +244,9 @@ func _offer() -> void:
 	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
 			"the short Mask moment plays (you stand still)")
 	await _shot("hob_7_mask_moment", 1.0)
-	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 6.0)
+	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 10.0)
 	await _shot("hob_8_mask_name", 0.3)
-	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 10.0)
+	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 16.0)
 	await _frames(5)
 	ok(home.panel_open == "" and ClassUnlock.pending_reveal().is_empty()
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
@@ -298,14 +298,14 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-## Waits for `cond` (at most `secs` of wall time); returns the game seconds it took (the frames' own delta).
+## Waits for `cond`, at most `secs` of the home's own clock (its frame step is capped at 0.05 s, so slow frames
+## on a loaded box do not use the wait up before the game got there); returns the game seconds it took.
 func _wait(cond: Callable, secs: float) -> float:
-	var t0 := Time.get_ticks_msec()
-	var game_s := 0.0
-	while not cond.call() and Time.get_ticks_msec() - t0 < int(secs * 1000.0):
+	var t := 0.0
+	while not cond.call() and t < secs:
 		await main.get_tree().process_frame
-		game_s += main.get_process_delta_time()
-	return game_s
+		t += minf(main.get_process_delta_time(), 0.05)
+	return t
 
 func _shot(file: String, secs: float) -> void:
 	if shots == "":

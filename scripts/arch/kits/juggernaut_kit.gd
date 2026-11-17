@@ -46,7 +46,7 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Final Swing
 var rmb_queued_at := -9.0      # a Final Swing pressed while a heavy move ran (BUFFER)
-var e_held := false            # E on a hooked chain while a Final Swing owned the body: the pull goes as it ends
+var e_held := false            # E pressed on a hooked chain while a Final Swing owned the body: the pull goes as it ends
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -228,15 +228,31 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
-		_reset_riposte()
+		if _reset_riposte() and is_instance_valid(t):
+			ComboMark.payoff(m, h, t)
 
-## The Slam then a knock: the Blow for Blow (X) is ready again (once it is unlocked).
-func _reset_riposte() -> void:
-	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
-		return
+## The Slam then a knock: the Blow for Blow (X) is ready again (once it is unlocked). False when it was
+## already ready or not yet unlocked.
+func _reset_riposte() -> bool:
+	if not _riposte_resettable():
+		return false
 	HeroUlt.reset(self)
 	slam_resets += 1
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	return true
+
+func _riposte_resettable() -> bool:
+	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
+
+## The combo tag (ComboMark): the Short Leash's hold on `t`, else the Slam's 2s window in which a knock readies X.
+func combo_read(t: Ent) -> Dictionary:
+	if warchain.hooked() and warchain.target == t:
+		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
+	var window := float(rmb_def()["slam"].get("reset_t", 2.0))
+	var left: float = window - (float(m.time) - float(slam_hit.get(t.get_instance_id(), -99.0)))
+	if left <= 0.0 or not _riposte_resettable():
+		return {}
+	return {"icon": "slam", "n": 0, "max": 0, "left": left, "total": window}
 
 # ------------------------------------------------------------------ X: Blow for Blow (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
@@ -312,6 +328,8 @@ func wave_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
 
+func lmb_holding() -> bool: return lmb_t >= 0.0
+
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
@@ -328,7 +346,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
 	# pull, a dash or a Hit the Deck holds the blade is kept for BUFFER and swings when it's free
-	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
+	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
@@ -404,7 +422,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
+	h.atk.strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()
@@ -438,7 +456,6 @@ func _wave() -> void:
 	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
-		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
 	var stg := StageSpec.parse(
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
@@ -478,7 +495,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded and h.dashes < 1.0:          # a charge in the air is the same Rampage (item 183)
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
-				{"invuln": 0.08, "trail": "dust"})
+				{"invuln": 0.08, "trail": "dust", "feel": "long"})
 		if not meteor.running(): play("jug_exdash")     # out of charges: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
@@ -646,6 +663,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
+## In the air the bar shows the Hit the Deck's rest, but a Final Swing charge still takes the press (the ground Final Swing).
+func rmb_open() -> bool:
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+
 ## The Final Swing press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Hit the Deck, the Gilded
 ## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Short Leash's pull (and just
 ## after) it spins at once.
@@ -661,8 +682,7 @@ func press_rmb() -> void:
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
-## Every interaction is chainable (DECISIONS): a Final Swing pressed in a heavy move or the Riposte's planted beat
-## waits.
+## Every interaction is chainable (DECISIONS): a Final Swing pressed in a heavy move or the Riposte's planted beat waits.
 func _rmb_waits() -> bool:
 	return smash_running() or riposte.move_k() <= 0.0
 
@@ -781,7 +801,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
-	var strike := {"no_floor": true, "lane_w": float(sl["width"])}       # KinExec's cone hits this lane
+	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a solid hold)
+	var strike := {"no_floor": true, "lane_w": float(sl["width"]), "hit_extra": {"heavy": true}}
 	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
@@ -791,7 +812,6 @@ func _slam(pin := Vector2.ZERO) -> void:
 		var sw: Array = sl["sweet"]
 		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
 		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
-		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["sweet_k"]) * power("sec"), h,
@@ -834,9 +854,8 @@ func _tick_lunge() -> void:
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			if was_chain and f.hittable():
-				f.hurt(1.0, h,
-						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
+			if was_chain:
+				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -865,7 +884,7 @@ func _aims_down_chain() -> bool:
 	return to.length() > 0.05 and off <= deg_to_rad(float(rmb_def()["lunge"]["chain_deg"]))
 
 ## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
-## the wall), harder and with a short stun on the foe; the chain is spent.
+## the wall), harder; the chain is spent.
 func _chain_lunge(k: float) -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var f := warchain.target
@@ -920,17 +939,13 @@ func _haul_land(k: float) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
 		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
 				{"type": "push", "strength": float(hd["push"])}]})
-	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
-		if is_instance_valid(f) and not f.dead:
-			f.hurt(1.0, h,
-					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
-							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
+	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Final Swing is ready (yours only), the
-## Hit the Deck's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
-## body while the Searing Wave charges.
+## Hit the Deck's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
+## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy() or KinMerge.active(h):
 		return
@@ -942,7 +957,9 @@ func _tick_tells() -> void:
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
 	# the Hit the Deck's own slot (not while a Lunge charges through a jump: that release is the Lunge)
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
-	if not h.grounded and air_ready and not h.gliding and not rmb_down:
+	if h.roll_t > 0.0:
+		AimKit.hide(h, "drop_aim")          # no disc on a dash: it comes back when the dash ends
+	elif not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):

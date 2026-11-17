@@ -55,10 +55,10 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
-| Signature weapon | Capstan Hammer (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Body | 193 health, 5.63 m/s, 2 dash charges |
+| Signature weapon | War Hammer & Blue Guard (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot. |
-| Silhouette | the frozen prow shield and the long ice-cased oar |
+| Silhouette | the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist |
 | Resource | Guard (max 100) |
 
 ### Kit card
@@ -68,17 +68,16 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Frontline tank: block with your Blue Guard, then knock foes into walls with your hammer to stun them. |
-| Passive: Hold Fast | Hold Fast: blocking builds Guard (50 turns your Full Ahead into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
-| Dash: Tideturner | Tideturner: a short dash that ends in one spinning hit around you; with the Blue Guard up, a Full Ahead (its own 6s cooldown). |
-| LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
-| RMB: Blue Guard | Hold to raise your Blue Guard and block shots from the front. With it up, Shift is a Full Ahead on its own cooldown. |
-| E: Safe Harbour | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
-| Hunter ultimate: Groundswell | Groundswell (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
-| Weapon: Capstan Hammer | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
+| Passive: Guard | Blocking builds Guard; at 50, Full Ahead becomes a Shield Slam. |
+| Dash: Tideturner | Short dash ending in a spinning hit; with Blue Guard up, Full Ahead. |
+| RMB: Blue Guard | Hold to block shots from the front; your dash key becomes Full Ahead. |
+| E: Safe Harbour | Healing zone around your hammer for 4s, ending in a burst. |
+| Hunter ultimate: Groundswell | Plant and slam: the ground erupts down a lane, throwing foes up. |
+| Weapon: War Hammer & Blue Guard | Tap throws the hammer, tap again recalls; hold to spin and slam. |
 
 ### Abilities in full
 
-**Hold Fast (passive).** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
+**Guard (passive).** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 
 **Tideturner (dash, Shift, 8s cooldown).** Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
@@ -91,7 +90,7 @@ What the in-game kit card (K) says.
 
 **Safe Harbour (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your Blue Guard is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Groundswell (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Groundswell (hunter ultimate, from level 6, 40s cooldown).** Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 

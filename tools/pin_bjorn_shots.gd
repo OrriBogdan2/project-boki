@@ -313,14 +313,6 @@ const SHOTS := [
 		"Finishing Touch up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
 	],
 	[
-		"ult_pin_nock",
-		"archer",
-		"pin_ult",
-		0.98,
-		4.0,
-		"Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling"
-	],
-	[
 		"ult_pin_impact",
 		"archer",
 		"pin_ult",
@@ -816,7 +808,6 @@ func _reset(hero: String) -> void:
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO

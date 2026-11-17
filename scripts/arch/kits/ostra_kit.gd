@@ -69,6 +69,11 @@ func _setup() -> void:
 	well = OstraWell.new(self)
 
 # ------------------------------------------------------------------ X: Main Attraction (OstraWell)
+## The loading screen's rehearsal: one of each of his KitLooks bodies in the pools (two sigils: the Trade's ends).
+func warm_fx(_at: Vector3) -> void:
+	KitLooks.of(m).prewarm({"aura": 1, "mote": 1, "star": 1, "sigil": 2, "dark": 1, "column": 1, "orb": 1, "spear": 1,
+		"crown": 1, "well_dome": 1})
+
 func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
@@ -136,8 +141,11 @@ func move_k() -> float:
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
 	var casting := not snap.is_empty() or snap_rec > 0.0
-	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
-	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
+	return 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
+
+## Snap rank 3's burst of speed ([game data] +50 on the cast, +100 on a hit).
+func speed_bonus() -> float:
+	return boost_k if boost_t > 0.0 else 0.0
 
 ## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
 func _boost(k: float) -> void:
@@ -611,7 +619,8 @@ func _tick_seed(dt: float) -> void:
 		if float(seed["burn"]) <= 0.0:
 			seed["burn"] = float(ed["burn_every"])
 			for f in foes_in(seed["pos"], seed_radius()):
-				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
+				var burn := float(ed["burn"]) * float(ed["burn_every"]) * power("kin")
+				f.hurt(burn, h, {"src": "abil", "ab": "e", "tick": true})
 	if h.downed:
 		_pop(false)
 	elif h.ctrl == "bot":
