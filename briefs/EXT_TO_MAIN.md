@@ -10025,3 +10025,4 @@ READY ext/stuck-integ-c14ccd66 d53d7a02f9e6a79bcfce4088234316b954054b23 (conflic
 READY ext/cinder-emission-fix-1117 aee686c3d09 (Cinder solid-red body fix: skin+metal desat/albedo lift in warden_look.json, RTX 4090 before/after, PR opened via gh-outbox)
 READY ext/merge-lane-hunters3-1117 76dce7586d (merge lane hunters3: haste-stack port, cooldown gate, chain-sweep check, no ring under a dash; targeted NEW-RED 0)
 READY ext/stuck-integ-e1b5e125 5a1e8f3987 (supersedes: merge-lane-feelcombat-1115 msg_queue fix taken; hunters8-1114, vfx1-1114, fix-strafe-cadence-1115 superseded; 179 list branches now in main, 89 gone; refresh of stuck-integ-62ec7ba9 triage; 587 conflicts left for per-area ports)
+READY ext/merge-lane-hunters2-1117 b1a422ef53 (hunters2 lane: boki-summon-1115 + zone damage by stage + utility poses; 3 of 27 branches, 24 HARD)
