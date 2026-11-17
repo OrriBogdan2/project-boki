@@ -4,9 +4,10 @@
   the affine map that takes the master rapier onto the game one (vertices paired through their shared UVs), on the same
   bone as before, a separate mesh with the game's material.
 - the robe: the port's weight smoothing spread arm weight over the whole robe (hem and chest centre included), so it
-  webbed out to his wrists whenever the arms rose. On the robe and leather, arm weight is kept in full within ARM_NEAR
-  of the upper arm and forearm (the sleeves; not the hand, which hangs against the robe's front), faded out by ARM_FAR,
-  and given back to the bones the vertex already had (or the skirt below the hips, the hips above). Skin keeps its own.
+  webbed out to his wrists whenever the arms rose. On the robe and leather, a vertex keeps its arm weight by how much
+  nearer it is to the upper arm and forearm than to his body's vertical axis (through the hips): the bell sleeves are
+  the arm's, the robe's panels the body's (a plain distance from the arm took the wide sleeves off it too). What it
+  loses goes to the bones the vertex already had (or the skirt below the hips, the hips above). Skin keeps its own.
 - the satchel: the leather in the hip box (either hip: the game frame is the fit frame mirrored, the bag hangs at -x)
   rides the hips only (it stretched out with the hand into a flat paddle).
 Run: blender -b --factory-startup --python tools/art1/gil_sword_bag.py -- GAME.glb MASTER.glb OUT.glb"""
@@ -28,7 +29,7 @@ BAG_MAT = "leather-v95"
 BAG_BONE = "hips"
 ARM_BONES = ("upper_arm", "forearm", "hand")  # .L/.R
 SLEEVE_BONES = ("upper_arm", "forearm")  # the segments a sleeve hangs on
-ARM_NEAR, ARM_FAR = 0.07, 0.13  # m from a sleeve bone's segment: full arm weight inside, none past
+SIDE_BIAS, SIDE_BAND = 0.04, 0.10  # m: arm weight kept = 0.5 + (to the body axis - to the arm - bias) / band, 0..1
 CLOTH_MATS = ("cloth-v95", "leather-v95")  # the surfaces eased (skin: the hands and arms keep their weights)
 BAG_BOX = (
     (0.10, 0.45),
@@ -137,7 +138,9 @@ def main():
         d = t - h
         u = np.clip(((co - h) @ d) / (d @ d), 0, 1)
         dist = np.minimum(dist, np.linalg.norm(co - (h + u[:, None] * d), axis=1))
-    keep = np.clip((ARM_FAR - dist) / (ARM_FAR - ARM_NEAR), 0, 1)
+    axis = np.array(arm.matrix_world @ arm.data.bones["hips"].head_local)  # his vertical body axis runs through it
+    to_axis = np.hypot(co[:, 0] - axis[0], co[:, 1] - axis[1])
+    keep = np.clip(0.5 + (to_axis - dist - SIDE_BIAS) / SIDE_BAND, 0, 1)
     cloth_idx = [i for i, m in enumerate(body.data.materials) if m.name in CLOTH_MATS]
     on_cloth = np.zeros(len(co), bool)
     for p in body.data.polygons:
