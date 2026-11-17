@@ -1,5 +1,6 @@
 {
 	"id": "tender",
+	"recast_hint": {"e": "throw the Hearthlight"},
 	"title": "Dawnfox",
 	"base_name": "Meeko",
 	"gender": "female",

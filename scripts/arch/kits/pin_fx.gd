@@ -45,6 +45,7 @@ const DEEP := Color("7a0c14")       # her laces in shade: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
+const TINT_WALK := 0.45         # the Spirit Walk wash while she walks clear of everything (1 = inside something)
 const WASH_COL := Color("2e0c3e")   # her orchid darkened: the body colour while she phases (pin.md frame 0360)
 const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_COL at the full tint
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
