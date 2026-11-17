@@ -7,6 +7,9 @@ extends RefCounted
 ## not a new dash (a recast) is skipped.
 
 const SAME_KEEP := 0.95
+## Hunters whose chained dash is shorter on its own: Dredge's chained Barge goes 2.46 m of a fresh 2.81 m with the
+## turn cost off too (main's Barge chain, not this rule), so its bar is that share less a little.
+const SAME_KEEP_ARCH := {"dredge": 0.85}
 const REV_KEEP := 0.9
 const RUN_SLACK := 1.1      # m/s over the run an air dash straight back may still carry
 const HEIGHT := 40.0
@@ -135,7 +138,7 @@ func run(main: Node) -> void:
 			var f: float = fresh["dist"]
 			var same_d: float = same["dist"]
 			var back_d: float = back["dist"]
-			ok(same_d >= f * SAME_KEEP, "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same_d])
+			ok(same_d >= f * float(SAME_KEEP_ARCH.get(arch, SAME_KEEP)), "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same_d])
 			ok(back_d <= f * REV_KEEP, "%s ground: fresh %.2f m, straight back %.2f m" % [arch, f, back_d])
 		var fresh_air := _fresh(m, home, true)
 		var same_air := _chain(m, home, Vector2(1, 0), true)
