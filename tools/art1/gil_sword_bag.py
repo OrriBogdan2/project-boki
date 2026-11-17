@@ -7,7 +7,8 @@
   webbed out to his wrists whenever the arms rose. On the robe and leather, arm weight is kept in full within ARM_NEAR
   of the upper arm and forearm (the sleeves; not the hand, which hangs against the robe's front), faded out by ARM_FAR,
   and given back to the bones the vertex already had (or the skirt below the hips, the hips above). Skin keeps its own.
-- the satchel: its leather in the hip box rides the hips only (it stretched out with the arm into a flat disc).
+- the satchel: the leather in the hip box (either hip: the game frame is the fit frame mirrored, the bag hangs at -x)
+  rides the hips only (it stretched out with the hand into a flat paddle).
 Run: blender -b --factory-startup --python tools/art1/gil_sword_bag.py -- GAME.glb MASTER.glb OUT.glb"""
 
 import os
@@ -29,7 +30,11 @@ ARM_BONES = ("upper_arm", "forearm", "hand")  # .L/.R
 SLEEVE_BONES = ("upper_arm", "forearm")  # the segments a sleeve hangs on
 ARM_NEAR, ARM_FAR = 0.07, 0.13  # m from a sleeve bone's segment: full arm weight inside, none past
 CLOTH_MATS = ("cloth-v95", "leather-v95")  # the surfaces eased (skin: the hands and arms keep their weights)
-BAG_BOX = ((0.10, 0.45), (-9.0, 9.0), (0.40, 0.85))  # m, Blender frame x, y, z: the satchel at his right hip
+BAG_BOX = (
+    (0.10, 0.45),
+    (-9.0, 9.0),
+    (0.40, 0.85),
+)  # m, Blender frame |x|, y, z: the satchel and the leather at his hips
 FLOATER_VERTS = 60  # loose crumbs under this many vertices are dropped (v95_swap.py's default)
 
 
@@ -173,7 +178,7 @@ def main():
     for i in on_bag:
         v = body.data.vertices[i]
         w = Mw @ v.co
-        if all(lo <= c <= hi for c, (lo, hi) in zip(w, BAG_BOX)):
+        if all(lo <= c <= hi for c, (lo, hi) in zip((abs(w.x), w.y, w.z), BAG_BOX)):
             for g in list(v.groups):
                 if g.group != hips.index:
                     body.vertex_groups[g.group].remove([i])
