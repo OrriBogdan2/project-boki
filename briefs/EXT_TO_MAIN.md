@@ -10070,3 +10070,4 @@ READY ext/merge-lane-vfx1-1117 44d387c0db (vfx1 lane: 6 sfx/impact branches on m
 READY ext/tutorial-beats-5-6-port a9954b09546828e84489a04f2f3cd8dee62646fa (tutorial summon+pack steps for the wisp Boki, ported onto camp-based tutorial; --tutorial-check=<arch>:wisps 0 fails; text/hud/dead-air/fight reds identical on main)
 READY ext/ostra-gait-rebased-port 0ecded063c7555056c5cf09aeb11843390902a11 (Motley Shard Snap held-arm port; bounding gait superseded by main tread gait)
 READY ext/anim-cancel-blend-port 7a0d78315ed (port of ext/anim-cancel-blend: --clip-cancels-check with 126 cancel rows + WardenClips cancel hand-offs; 12 open rows in CANCEL_OPEN; glide casts of Ashwick/Dolm/Mage fixed)
+READY ext/anim-summon-clips-port 5d83c0bb85d268c3fc213e85b7164704e19aabb6 (port of ext/anim-summon-clips: a teleport is not speed in BokiRig (46/46 species 55 m/s -> 0), garden pet clip; faint/flinch/eat not ported: superseded or in main)
