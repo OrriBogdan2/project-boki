@@ -3,6 +3,7 @@ On 11-17 merge lanes re-ran glb_relax and took bundle resolutions on the hunters
 were swapped for relaxed ones (flat arms and hands) with no art commit to see it. Each changed glb's blob at HEAD must
 be the blob an "Art: ..." commit in <base>..HEAD left (a later merge or tool run that rewrites it fails).
 Run: python3 tools/warden_glb_guard.py [base]   (base: $BOKI_BASE or origin/main; no base ref -> skipped)"""
+
 import os
 import re
 import subprocess
@@ -27,8 +28,10 @@ def main(args):
     for f in changed:
         head = git("rev-parse", f"HEAD:{f}").stdout.strip()
         log = git("log", "--no-merges", "--format=%H %s", f"{mb}..HEAD", "--", f).stdout.splitlines()
-        ok = any(s.startswith("Art:") and git("rev-parse", f"{h}:{f}").stdout.strip() == head
-                 for h, _, s in (line.partition(" ") for line in log))
+        ok = any(
+            s.startswith("Art:") and git("rev-parse", f"{h}:{f}").stdout.strip() == head
+            for h, _, s in (line.partition(" ") for line in log)
+        )
         if not ok:
             bad.append(f)
     for f in bad:
