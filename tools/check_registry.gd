@@ -142,6 +142,7 @@ const CHECKS := {
 	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
+	"--cinder-shift-check": ["res://tools/cinder_shift_check.gd", "cinder_shift_check", null],      # owner 11-17: one Shift, metres
 	"--aim-latency-check": ["res://tools/aim_latency_check.gd", "aim_latency_check", null],  # aim under a mouse move
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
 	"--ring-stack-shots": ["res://tools/ring_stack_shots.gd", "ring_stack_shots", null],      # GPU, --shots-dir=
@@ -868,6 +869,7 @@ const CHECKS := {
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
+	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
