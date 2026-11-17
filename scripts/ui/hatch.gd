@@ -6,6 +6,7 @@ extends Node3D
 ## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
 ## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
 ## egg is named for its element (Venom Egg, ...).
+const TOP_MARGIN := 48.0       # px: room kept clear of the window edges by the title block (both sides together)
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
@@ -418,6 +419,10 @@ func _top_over(x_frac: float) -> void:
 	if top_box:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
+		# the line wraps inside the room either side of that centre, so a big Text size never pushes it off screen
+		var room := 2.0 * minf(x_frac, 1.0 - x_frac) * get_viewport().get_visible_rect().size.x - TOP_MARGIN
+		sub_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sub_lbl.custom_minimum_size.x = room
 
 func _show_pick() -> void:
 	_clear_bottom()

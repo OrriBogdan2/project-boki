@@ -6,14 +6,20 @@ extends RefCounted
 const GOAL_COL := Color("ffd27a")
 
 ## A "Start here" stamp in the card's top-right corner for a starter (ClassUnlock.start_here), over the card
-## rather than a line in it.
-static func add_start_chip(card: PanelContainer, id: String) -> void:
+## rather than a line in it. At a big Text size the stamp would cover the name, so with `col` (the card's text
+## column) it takes the top line of that column instead.
+static func add_start_chip(card: PanelContainer, id: String, col: Container = null) -> void:
 	if not ClassUnlock.start_here(id):
 		return
 	var chip := UI.tag("Start here", UI.GOLD)
 	chip.name = "StartHere"
-	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
 	chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	if col != null and UI.text_k > 1.0:
+		chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		col.add_child(chip)
+		col.move_child(chip, 0)
+		return
+	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
 	card.add_child(chip)
 
 ## The Hunter's portrait, `px` square: its Warden's painted face (Portraits.Pic), or with `body` its

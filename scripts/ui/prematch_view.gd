@@ -286,7 +286,7 @@ func _tile(ak: String) -> PanelContainer:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
-	ClassCard.add_start_chip(card, ak)
+	ClassCard.add_start_chip(card, ak, col)
 	card.set_meta("arch", ak)
 	return card
 
