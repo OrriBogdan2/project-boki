@@ -241,6 +241,10 @@ const CHECKS := {
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
 	"--wild-type-cue-check": ["res://tools/wild_type_cue_check.gd", "wild_type_cue_check", null],
 	"--wild-type-cue-shots": ["res://tools/wild_type_cue_shots.gd", "wild_type_cue_shots", null], # GPU, --shots-dir
+	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
+	"--kin-type-trail-check": ["res://tools/kin_type_trail_check.gd", "kin_type_trail_check", null],
+	"--kin-type-trail-shots": ["res://tools/kin_type_trail_shots.gd", "kin_type_trail_shots", null],
+	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
 	# Bokidex quirks, sex ratios
@@ -469,6 +473,8 @@ const CHECKS := {
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],  # rigged Boki
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],  # rigged Boki gait gate
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],  # rigged Boki gait strips
+	"--boki-idle-check": ["res://tools/boki_idle_check.gd", "boki_idle_check", null],    # rigged Boki idles and fidgets
+	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],  # idle and fidget strips
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],
