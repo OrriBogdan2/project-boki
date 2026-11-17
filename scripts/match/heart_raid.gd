@@ -348,8 +348,7 @@ static func reward() -> Dictionary:
 
 
 func egg_species() -> String:
-	var sp := BokiModes.draw(boki(difficulty), _rng)
-	return sp if sp != "" else String(Data.common_kin()[0])
+	return Data.egg_species(BokiModes.draw(boki(difficulty), _rng), _rng)
 
 
 # ------------------------------------------------------------------ the end
