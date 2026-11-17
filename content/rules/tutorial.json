@@ -171,7 +171,8 @@
     "skitter",
     "skitter"
    ],
-   "to": 3
+   "to": 3,
+   "post": true
   },
   "kin": {
    "foes": [

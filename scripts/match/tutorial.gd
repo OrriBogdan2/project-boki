@@ -131,6 +131,16 @@ func stop(id: String, key := "at") -> Vector3:
 	return Vector3(float(q[0]), m.world.ground_at(float(q[0]), float(q[1])), float(q[1]))
 
 
+## Where a camp's i-th monster stands (the course table's "foes": open ground, clear of every cliff), INF when
+## the camp has no fixed posts.
+func foe_spot(id: String, i: int) -> Vector3:
+	var posts: Array = _course.get(id, {}).get("foes", [])
+	if i >= posts.size():
+		return Vector3.INF
+	var q: Array = posts[i]
+	return Vector3(float(q[0]), m.world.ground_at(float(q[0]), float(q[1])), float(q[1]))
+
+
 ## The pads and their glowing edges: built once the world is there.
 func setup() -> void:
 	for id in GAP_STEPS:
