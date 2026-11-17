@@ -10073,3 +10073,4 @@ READY ext/anim-cancel-blend-port 7a0d78315ed (port of ext/anim-cancel-blend: --c
 READY ext/anim-summon-clips-port 5d83c0bb85d268c3fc213e85b7164704e19aabb6 (port of ext/anim-summon-clips: a teleport is not speed in BokiRig (46/46 species 55 m/s -> 0), garden pet clip; faint/flinch/eat not ported: superseded or in main)
 READY ext/early-camps-bots-a3-port 8906aa9b599443fac1a59cb3faa40619eb50908d (camps own the early game: Camps sizes/bundle/comeback, camps-check green; drop height/bots/layout/XpRules not ported)
 READY ext/idle-ostra-port 4b77519952 (Motley idle+stance rework onto the v95 glb via glb_add_clips; seams 13x/16x -> 0.0x; x_breath dropped; port of old idle-ostra)
+READY ext/merge-lane-hunters5-1117 ed8e34988c (lane hunters5: kael-black-red, kael-tap-ult-port partial, hunt4 PR #143, integ-1113-A1; GATE GREEN NEW-RED 0, export 839 MB)
