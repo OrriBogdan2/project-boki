@@ -147,6 +147,11 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
+	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	T.armor_tier = 0
+	T.armor_xp = 0.0
+	T.armor = 0.0   # a tier-up from earlier hits left Common armor on the body, taking 20% off the next hit
+	T.max_armor = 0.0
 	T.set_meta("marks", {})
 
 func dmg(T: Hunter) -> float:
@@ -275,7 +280,7 @@ func _controls() -> void:
 	ok("keys: E archetype utility", _has_key("signature", KEY_E))
 	ok("keys: X merge, R hunter ultimate, no reload",
 		_has_key("ultimate", KEY_X) and _has_key("hunter_ult", KEY_R) and not InputMap.has_action("reload"))
-	ok("keys: G send/recall, MMB pings", _has_key("throw", KEY_G) and _has_mouse("ping", MOUSE_BUTTON_MIDDLE))
+	ok("keys: C send/recall, MMB pings", _has_key("throw", KEY_C) and _has_mouse("ping", MOUSE_BUTTON_MIDDLE))
 	ok("keys: Q glove, Shift dash, RMB", _has_key("gear1", KEY_Q) and _has_key("dash", KEY_SHIFT) and _has_mouse("secondary", MOUSE_BUTTON_RIGHT))
 	ok("keys: binding version bumped", Settings.KEYS_V >= 3, "keys_v %d" % Settings.KEYS_V)
 	ok("keys: rebindable list names them", Settings.ACTIONS.any(func(a): return a[0] == "hunter_ult"))
@@ -320,6 +325,8 @@ func _data() -> void:
 		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
 			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
 	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
+	ok("weapons: no weapon in the game has a reload time",
+			Data.weapon_ids().all(func(w): return not Data.weapon_stats(w).has("reload")))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
@@ -359,12 +366,12 @@ func _archer() -> void:
 	# no Focus meter (KIT_PARITY 5, cut by the owner): standing still builds nothing
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.6)
-	ok("archer passive: no Focus meter (Hawk Sense only)",
+	ok("archer passive: no Focus meter (Red Thread only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
+	# Red Thread stays: a rival under half health is seen through cover within 22m
 	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Red Thread: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
@@ -408,7 +415,7 @@ func _archer() -> void:
 	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
-	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1)
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
@@ -602,7 +609,7 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.atk.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
@@ -805,14 +812,15 @@ func _feel() -> void:
 	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
 			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
-	# hitstop tiers
+	# hit weights (the Hunters' own are --impact-weight-check's): what a hit did, when no rule names it
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
-	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)
-	ok("feel: solid hit T2", Feel.tier(dummy, 14.0, {"src": "shot"}) == 2)
-	ok("feel: CC landing T3", Feel.tier(dummy, 2.0, {"stun": 0.4}) == 3)
-	ok("feel: wall slam / payoff T4", Feel.tier(dummy, 10.0, {"src": "wall"}) == 4 and Feel.tier(dummy, 5.0, {"payoff": true}) == 4)
-	ok("feel: bonded start T5", Feel.tier(dummy, 0.0, {"bonded": true}) == 5)
-	ok("feel: ticks never freeze", Feel.tier(dummy, 30.0, {"src": "burn"}) == 0)
+	ok("feel: chip hit is light", ImpactWeight.of_hit(null, dummy, 4.0, {"src": "shot"}) == "light")
+	ok("feel: a hit of 8%+ is solid", ImpactWeight.of_hit(null, dummy, 14.0, {"src": "shot"}) == "solid")
+	ok("feel: CC landing is solid", ImpactWeight.of_hit(null, dummy, 2.0, {"stun": 0.4}) == "solid")
+	ok("feel: wall slam and a solid payoff are heavy", ImpactWeight.of_hit(null, dummy, 10.0, {"src": "wall"}) == "heavy"
+			and ImpactWeight.of_hit(null, dummy, 14.0, {"payoff": true}) == "heavy")
+	ok("feel: bonded start is heavy", ImpactWeight.of_hit(null, dummy, 0.0, {"bonded": true}) == "heavy")
+	ok("feel: ticks never hold", ImpactWeight.of_hit(null, dummy, 30.0, {"src": "burn"}) == "")
 	ok("feel: category colours", Feel.cat_color("control") == Color("c46bff") and Feel.cat_color("damage") == Color("ff7a3d") and Feel.cat_color("utility") == Color("5fd8ff"))
 	ok("feel: severity from parts", Feel.severity([{"type": "root", "duration": 1.2}]) == "hard_cc" and Feel.severity([{"type": "slow", "duration": 1.0}]) == "soft_cc" and Feel.severity([{"type": "damage", "amount": 30}]) == "heavy_dmg")
 	dummy.free()

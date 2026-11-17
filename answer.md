@@ -24,7 +24,7 @@ PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/
 |Cinderfall `archetypes/gunslinger.json:119`|Brass Rain|Sky Shell|clashes with Cinder|
 |Albert: 360 Smash `archetypes/bulwark.json:95`|Capstan Spin|Round Turn|dev label with a number|
 |Faultline `:186`|Keelbreak|Hull Splitter|Valorant Breach's Fault Line|
-|Oathsteel, Iron Oath `rules/class_unlock.json:93,96`|Hullsteel, Iron Vow|Brinesteel|Supervive's shield hunter is Oath|
+|Oathsteel, Iron Oath `rules/class_unlock.json:93,96`|Hullsteel, Iron Vow|Brinesteel|the reference's shield hunter is Oath|
 |Sparkle: Kitefall `archetypes/mage.json:133`|Boltfall|Spire Drop|her design has no kite|
 |Kael: Smash `archetypes/juggernaut.json:24`|Final Bell|Verdict|generic|
 |Lace: Hawk Sense `archetypes/archer.json:35`|Red Thread|Loose Thread|LoL Ashe's Hawkshot|
@@ -93,7 +93,7 @@ Tuning lives in `content/rules/tuning.json` section `kael` (the file did not exi
 |Dash Isle, Ledge Isle, Training Range `maps/tutorial.json:11,13,17`|Skipstone Isle, Tiptoe Isle, Tin-Can Range|Hopscotch, Shelf, Scarecrow Row|dev labels|
 |Stormreach `maps/skyreach.json:405`|Thunder Shelf|Gale Steps|a D&D Online city; sixth Storm- name|
 |"uplink" (the exit) `scripts/match/exits.gd:153`|Waylight|Homebeam|sci-fi word in a fantasy world|
-|Supervive (camera preset) `rules/camera.json:4`|Skyview|Kite View|another game's name in Settings|
+|the reference (camera preset) `rules/camera.json:4`|Skyview|Kite View|another game's name in Settings|
 |Inborn · IVs `scripts/ui/iv_view.gd:205`|Inborn Gifts|Birth Gifts|Pokemon fan jargon|
 |Vulpin `scripts/match/models.gd:520`|Brushtail|Russet|one letter from Vulpix|
 |Owlet `:528`|Featherfolk|Tuftfolk|one letter from Rowlet; matches Scalefolk|

@@ -60,7 +60,7 @@ var top_box: VBoxContainer    # the title and its line: centred, or over the pre
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
@@ -467,6 +467,7 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
+		UI.pick_taken()
 		_start_hatch()
 		return
 	chosen = i
@@ -633,8 +634,12 @@ func _show_name() -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	sex_row.add_child(UI.label("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
-		"A babbler for now; any name you give will stick."], 16, UI.MUTED))
+	# (a long line wraps, so it must be given the row's width: in an HBox with no expand it shrank to ~0 wide
+	# and wrapped one letter per line, a column running off the top of the screen)
+	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
+		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sex_row.add_child(sex_line)
 	v.add_child(sex_row)
 	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)

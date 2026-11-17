@@ -7,9 +7,9 @@ the kits' effects can find their anchors, and gameplay stays per class. The load
 (`WardenGlb`); `--warden-glb-check` asserts the contract's tables and the fallback.
 
 ## How the game uses it
-Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
-ring and the MantleLook sizes. When the Warden's .glb exists, `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
-and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
+Models.hunter still builds the procedural hunter's node rig HunterAnim poses, the weapon, the glider, the hit
+ring and the MantleLook sizes. When the Warden's .glb exists, it builds no procedural body on that rig (`HunterBody`, only for
+the procedural model), `WardenGlb.dress` adds the .glb and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
 (`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
 below, in this rest pose, at this scale. A .glb whose armature doesn't match (`WardenSkeleton.mismatches`: names,
@@ -101,9 +101,12 @@ Whichever design the owner picks ships as `<art>/<art>.glb`.
 
 ### Belt item moves
 Every belt item (content/utility, `move`) has one body beat, as long as its cast time (`UtilityPose`): `throw`, `place`,
-`read`, and `drink` (the "drink" state). A throw, place or read sets the state's `util` (0..1) and `util_move`; the rig
-poses the free left hand (and a place crouches), and WardenClips hands the arms back to the rig while `util` runs, so a
-.glb that follows these bones needs no clip for them. `--utility-pose-check` and `--utility-pose-shots`.
+`read` and `drink` (the "drink" state). A
+channelled item (drink, repair) lasts its `channel.time`; the rest name `cast`. A throw, place, read
+sets the state's `util` (0..1) and `util_move`; the rig poses the free left hand (and a place kneels when
+standing; on the move the legs keep the gait), and WardenClips hands the arms back to the rig while `util` runs, so a
+.glb that follows these bones needs no clip for them. `--utility-pose-check` and `--utility-pose-shots` (`<move>/` and
+`<move>_run/` strips).
 
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
@@ -185,15 +188,13 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
-  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
-  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
-  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
-- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
-  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
-  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
-  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
+- **At most 80k triangles per Warden, weapon included** (`--warden-glb-check`, `--clip-check`). Since 11-15 (owner:
+  the v95 masters go in as they are) a Hunter is its current v95 master decimated to ~60k with its own UVs and
+  Meshy paint, no rebake: `python3 tools/art1/v95_to_game.py <Name>` (V95_SWAP.md "Own paint"). Measured cost of
+  triangles: DETAIL_PILOT.md (40k: +0.06 ms GPU a frame for six Hunters) and the 11-15 bench in V95_SWAP.md.
+- Textures: the master's own images, each at most 4096² (`v95_to_game.py --tex`), VRAM-compressed
+  (`compress/mode=2`: BPTC on desktop), mipmapped; a kept old prop keeps its 2048² atlas. At most 8 toon slots
+  (slots, not materials, count: a slot spans the master's images, "<slot>-v95", "<slot>-v95b").
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every

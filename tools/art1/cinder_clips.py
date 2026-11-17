@@ -20,6 +20,7 @@ import gardenkit
 import mantlekit
 
 A_Z = K.ANKLE_Z
+GAIT_T = 11 / FPS                # s: one walk or run cycle (two steps)
 
 
 READY = {
@@ -276,12 +277,9 @@ def garden_set():
          "peak": PEAK, "pump": dict(PEAK, pel=(0.022, 0.0, 0.0), G=(0.38, 0.05, 1.58), LP=(-0.38, 0.05, 1.58), FL=(-0.085, 0.05, A_Z), FR=(0.135, -0.05, A_Z))}
     return gardenkit.clips(C, READY, P, {"lead": 0.03, "snap": 1.0})
 
-
 ACT = {"stomp": {"set": {"G": (0.4, 0.0, 0.96), "LP": (-0.4, 0.0, 0.96)}, "top": {"G": (0.5, 0.05, 1.0), "LP": (-0.5, 0.05, 1.0)}},
        "drink": {"hand": "LP"},
        "revive": {"kneel": {"G": (0.14, 0.46, 0.34), "LP": (-0.14, 0.46, 0.34), "fing": 0.1, "jaw": 0.3}}}
-
-
 def action_set():
     return actionkit.clips(C, READY, A_Z, ("G", "LP"), (-0.04, 0.15, 1.42), ACT)
 

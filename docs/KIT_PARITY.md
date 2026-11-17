@@ -2,6 +2,13 @@
 
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
+## Charges vs the source (charges-sv-1116, 2026-11-16)
+Every dash and ability charge count read against the tooltips [D]: all match but two. **Albert** had the heavy class's 2
+dash charges; Oath's Spin Dash has 1, so `bulwark.json` `dash.charges` is 1 (a kit's `dash.charges` now overrides the
+class's, `ArchKit.dash_charges`). **Grimble** keeps 3 (owner, Kingpin has 1 + an air slot); it moved from
+`DredgeKit.extra_dashes()` to `dredge.json` `dash.charges`. Tenzo (Tetra +1 at an upgrade), Kael (Brall +1 at tier II),
+Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Table: coord/reports/charges-sv-1116.md.
+
 ## Still open: 0.24.5 re-read (ext/release-integ-0245 272368589 and the 0.24.6 waves, 2026-11-11)
 
 Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read against ext/release-integ-0245 272368589 (data and kit code, no number changed) and against the branches that moved since: the 0.24.6 waves (ext/w0246-*, by ancestry and their docs/MERGE_0246_*.md), the riders, aegis, guard-cut, range and anim-time branches, and the READY lines after the 0.24.4 audit. Marks: **done** `ext/<branch>` (the fix exists; *where* says which line carries it), **open** (no fix anywhere; a task below), **owner** (an owner call decides it, or the source cannot settle it so ours stands). "No line" = READY but on neither 0.24.5 nor a 0.24.6 wave. On 0.24.5 itself nothing below changed: every kit cooldown, rider and range reads as the 0.24.4 re-audit found it.
@@ -41,7 +48,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Sparkle | Skycall circle 1.5 vs 1.8 | **done** `ext/parity-skycall-size` 7a40610b7 | no line |
 | Sparkle | E slide 3.4 vs ~7.2 | **owner** | owner item 9b "wasn't that drastic" (kept by the skycall branch) |
 | Sable | Bola pair stun .9 vs ~1.8 s | **owner** | ext/parity-sable-pair-stun 29e008365: no two-foe tie in the footage, .9 kept |
-| Sable | E range 14 | **open** | two READY reads disagree: ext/parity-ranges-rest bee6f9728 sets 16.2 (40 px/bh), ext/ranges-source-rest says not determinable at 13.5-13.8 m (48 px/bh) |
+| Sable | E range 14 | **fixed** 15 m | frame re-read (2026-11-12, ext/parity-sable-e-range c0fdf19d64, ported by ext/stuck-integ-f1f63a7a): 284 px over a 34 px body height = 8.3 bh = 15.0 m, past the cursor so the end of the path; settles 16.2 vs 13.5-13.8 |
 | Sable | Ground Cartwheel curve | **open** | ext/w0246-feel kept 0.24.5's `VAULT_CURVE` (thief_kit.gd:40, rms 27%) over the ext/dash-curves-b fit (rms 14%) |
 | All | Glide dive held to the ground lands at the glide sink | **done** `ext/glide-dive-land` e4081da34 | ext/w0246-feel |
 
@@ -49,7 +56,7 @@ Owner, unchanged: air control, Kael's straight down slam, Neve's rink +15%, Vex 
 
 **Ready to queue (one per open row):**
 - `parity-sable-e-range`: re-read Sable's no-target dagger (briefs/hero-ref/dancer.md, Shiv frame 0236) at one scale and keep one of ext/parity-ranges-rest / ext/ranges-source-rest; files `content/archetypes/thief.json` (`e` range), `scripts/arch/kits/thief_kit.gd`, `content/rules/kit_parity.json`, `docs/heroes/thief.md`, `docs/KIT_PARITY.md`, generated `docs/wiki/Class-Silver-Thief.md` and `docs/wiki/Rules.md`.
-- `parity-sable-cartwheel-curve`: port the ext/dash-curves-b Sable Cartwheel fit onto the 0.24.6 line, replacing `VAULT_CURVE`/`VAULT_MEAN`; files `content/rules/dash_feel.json`, `scripts/arch/kits/thief_kit.gd`, `tools/move_feel_check.gd`, `docs/SUPERVIVE_FEEL.md`, `docs/KIT_PARITY.md`, generated `docs/wiki/Rules.md`.
+- `parity-sable-cartwheel-curve`: port the ext/dash-curves-b Sable Cartwheel fit onto the 0.24.6 line, replacing `VAULT_CURVE`/`VAULT_MEAN`; files `content/rules/dash_feel.json`, `scripts/arch/kits/thief_kit.gd`, `tools/move_feel_check.gd`, `sv/FEEL.md`, `docs/KIT_PARITY.md`, generated `docs/wiki/Rules.md`.
 
 **Owner questions:** the cooldown scale (1.0x source vs the line's 0.8x; ext/cooldown-parity-verify and ext/grimble-parity-verify wait on it) and Tenzo's rock slows (patch notes vs CC table). **Merge, not build:** the "no line" branches above, plus ext/w0246-combat-b-wip still to finish as READY.
 
@@ -98,7 +105,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 
 **How to read a verdict.** `match`: same mechanic, within footage error. `differ`: built, not the same (says how). `missing`: not built. `differ (owner)`: an owner note overrides the source, so it stays unless the owner reverses it; not a gap. `ours`: not in the source at all.
 
-**Evidence:** [D] game data (supervive_kits.md, supervive_physics.md), [F] footage (briefs/hero-ref), [O] owner note. Order of trust: O > D > wiki > F. Source references live only on `origin/ext/agent-briefs` (briefs/supervive-data, briefs/hero-ref, briefs/specs/kit-audit).
+**Evidence:** [D] game data (sv/briefs/kits.md, sv/briefs/physics.md), [F] footage (briefs/hero-ref), [O] owner note. Order of trust: O > D > wiki > F. Source references live only on `origin/ext/agent-briefs` (sv/briefs, briefs/hero-ref, briefs/specs/kit-audit).
 
 **What was and was not verified.**
 - Numbers, modes and code paths were read from main. The Nov 3 audit (briefs/specs/kit-audit) is stale: many of its gaps are closed, and rows here were re-checked against main before use. `ext/online-displace` and `ext/no-shake` are merged, so the online pull bug and self-shake are closed.
@@ -123,9 +130,11 @@ Every Vex, Kael, Lace and Cinder row (slots, cooldowns, dash flow, felt dash, CC
 - Two "Ours" numbers below were stale before 0.24.4 (not merges) and are corrected: Lace R nock .3 → **.5** (97ffe28a9, footage), Cinder LMB reach 7 → **6.1** (632de4b22, owner playtest 11-10).
 - Checks on this tree: `--kit-parity-check` 0 failures; `--gunslinger-combo-check` 126, `--juggernaut-combo-check` 210, `--archer-combo-check` 167, `--ashwick-combo-check` 125 checks, 0 failures; `--move-feel-check` 0 failures (felt dash: Vex 4.81 m/.45 s, Kael 3.82 m/.262 s incl. the .07 dip, Lace 3.0 m/.386 s, Cinder 3.46 m/.33 s and air 6.8 m/.28 s). Kael's `rmb.drop.radius` still passes at the edge (2.4 against 2.2 ±0.22), owner call as above.
 
+Sable E range re-read (2026-11-12, settles ext/parity-ranges-rest 16.2 vs ext/ranges-source-rest 13.5-13.8): both used the sheet's "about 9 bh" with an assumed px per bh (40 or 48); this read uses the frames (origin/ext/hero-ref-footage footage/dancer, 720x405). Throw at 0222: Sable at (379, 221) (health-bar frame centre, soles 43 px under its top edge as in 0236). The dagger lies at (122, 100) in 0222 coordinates (0226 landing, camera pan 0222->0226 fitted on 41 ground patches: 1% scale, (-5, 10) px). Distance 284 px. Body height in the same camera: 34 px head to sole at the same screen spot, standing (0235-0237; the sheet's 93-95 px at 1080p is 35), so 1 bh = 34 px = 1.8 m: 284 / 34 = 8.3 bh = **15.0 m** (33-35 px: 14.6-15.5). The cursor was 238 px (7.0 bh) out at the throw, and the dagger landed about 46 px past it, so the landing is the end of the path, not a lower bound. Not corrected for perspective (no other row is): the same distance remapped into 0236, where the throw point sits low on screen, reads 8.8 bh (15.9). 14 is below every read and 16.2 is above the throw-frame read. Ours: the knife stops at the cursor when it is nearer (thief.md item 6); in the source it flew on past the cursor.
+
 ## Ranges and radii: RMB, E, R (main d255acbee, 2026-11-10)
 
-Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range numbers, so only the Black Hole radius, 350/500 uu = 3.5/5.0 m, is data) plus the footage measures in `briefs/hero-ref` (1 body height = 1.8 m; a later per-ultimate re-measure wins over the first sheet). Ours = `content/archetypes/<id>.json`, metres. The aim indicator and the hit read the same JSON field for every row below; the Bola lane is drawn at the width the hit reaches (0.45 + body radius per side). **fixed** = changed here and asserted in `--kit-parity-check`. `[?]` = not measurable from the source, or an owner note stands.
+Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the Black Hole radius, 350/500 uu = 3.5/5.0 m, is data) plus the footage measures in `briefs/hero-ref` (1 body height = 1.8 m; a later per-ultimate re-measure wins over the first sheet). Ours = `content/archetypes/<id>.json`, metres. The aim indicator and the hit read the same JSON field for every row below; the Bola lane is drawn at the width the hit reaches (0.45 + body radius per side). **fixed** = changed here and asserted in `--kit-parity-check`. `[?]` = not measurable from the source, or an owner note stands.
 
 | Hero | Slot, number | Ours | Source | Verdict | 0.24.4 main (11-12) |
 |---|---|---|---|---|
@@ -159,7 +168,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Lace | E arc, reach | 120, 10.8 | see above | reach fixed, locked · **closed** |
 | Lace | R range, width | 18, 0.5 | see above | width locked; range **Not determinable** · **open** |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] · **open** |
-| Lace | RMB range | 14 | farthest hit seen 4 bh (7.2 m, low charge, 0270-0273); charge bar 3.3 bh (0494); no full charge lands far | Not determinable. Clips checked: pin 0264-0275, 0490-0497 (the only Myth clip; no other hero-ref clip shows Myth firing); supervive_kits.md and supervive_physics.md give no range |
+| Lace | RMB range | 14 | farthest hit seen 4 bh (7.2 m, low charge, 0270-0273); charge bar 3.3 bh (0494); no full charge lands far | Not determinable. Clips checked: pin 0264-0275, 0490-0497 (the only Myth clip; no other hero-ref clip shows Myth firing); sv/briefs/kits.md and sv/briefs/physics.md give no range |
 | Lace | E arc, reach | 120, 9 -> 10.8 | 120, wall centred on the cursor at 6.0 +-0.4 bh = 10.8 m (0498; 0457: 4.9 bh) | arc match; reach was below the frame lower bound, now 10.8 and pinned in kit_parity.json (`e.reach`); the clamp above it is not determinable |
 | Lace | R range, width | 18, 0.5 | Primal Forces beam tip 7.3 +-0.4 bh = 13.1 m (0574, one frame, 2 bh past the hit); the Supercharged line runs >=6 bh and is cut by a pillar (0168) | Not determinable. Kept 18 / 0.5: 13.1 m is a lower bound, a tip drawn short of the range is not excluded, and the beam glow is ~1.1 m wide (0574), which is not the hit width. Clips checked: pin 0168-0169, 0570-0604 (only Myth clip; the old /home/claude/svvid/ult/pin frames are gone) |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] |
@@ -225,7 +234,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 ## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
 
-How: `--hit-shape-fine` (tools/hit_shape_fine.gd) fires each input of the four hunters at ONE training dummy moved around, in a match stepped at the game's 60 Hz, level 6 (rank 3 numbers apply): a scan along the aim line gives the nearest and farthest foe centre that still takes damage, a scan across the middle gives the lane, a scan round it the arc; the numbers below have the foe's circle taken off. `--hit-shape-shots` (tools/hit_shape_shots.gd) fires the same inputs at a field of dummies, each wearing its ground circle (its hitbox), at the gameplay camera: strips in `docs/shots/verify-hitbox-slice/`. Ours = `content/archetypes/<id>.json`; source = `briefs/supervive-data/supervive_kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m).
+How: `--hit-shape-fine` (tools/hit_shape_fine.gd) fires each input of the four hunters at ONE training dummy moved around, in a match stepped at the game's 60 Hz, level 6 (rank 3 numbers apply): a scan along the aim line gives the nearest and farthest foe centre that still takes damage, a scan across the middle gives the lane, a scan round it the arc; the numbers below have the foe's circle taken off. `--hit-shape-shots` (tools/hit_shape_shots.gd) fires the same inputs at a field of dummies, each wearing its ground circle (its hitbox), at the gameplay camera: strips in `docs/shots/verify-hitbox-slice/`. Ours = `content/archetypes/<id>.json`; source = `sv/briefs/kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m).
 
 What the game does with a number (so a row reads straight): areas (cone, ring, strip, disc, lane of a beam) take a foe in when its body circle, 0.40 m, touches them, so measured = content to 0.15 m. Bullets, hooks and swing rays take it in at body circle + 0.08 m + their own radius; a bullet starts 0.6 m ahead of the hunter and lives to the end of the 1/60 s step in which its range runs out (74 m/s: +1.2 m, 90 m/s: +1.5 m); a swing is a fan of 7 or 9 such rays 0.22 m wide, so its arc reads about 30 degrees wider than the drawn one (175 reads 206).
 
@@ -274,7 +283,7 @@ A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0
 
 ## Hit shapes in game: Albert, Neve, Tenzo, Sparkle, Grimble, Meeko, Sable, Motley (main 88b06b9e7 + ext/verify-hitbox-slice, 2026-11-12)
 
-Same method as the slice section above (`--hit-shape-fine`, rows for the eight added in tools/hit_shape_fine.gd; `--hit-shape-shots` for the hitbox-circle strips in `docs/shots/verify-hitbox-rest/<hero>_hit_shapes.jpg`, one tile per input, circles drawn on the dummies). Level 6, all slots unlocked, one lone dummy (circle 0.40 m) scanned along and across the aim line; **in-game numbers are foe centres, so an area reads its content number + 0.40 m on every edge, a swing ray + 0.30, a bullet or lane + 0.48 + its own radius, and a bullet starts 0.6 m ahead of the hero.** Where the row says "asserted", `--hit-shape-fine` fails if the game and the content drift apart (Albert LMB, Albert R, Sparkle E and R). The probe hero carries the weapon upgrades, so a weapon's range reads about 24% above its JSON (Grimble's shotgun 6.3 -> 7.8, Sable's bolt 8.5 -> 10.5); rows quote the JSON and say when the game number is that. Source = `briefs/supervive-data/supervive_kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m). **Not measured by a dummy** (they hurt nobody, or only after a second press, a delay or a dash): Albert RMB, E, Tenzo E, Meeko E and R, Motley E; those rows give the content number against the source and the strip shows the drawn shape.
+Same method as the slice section above (`--hit-shape-fine`, rows for the eight added in tools/hit_shape_fine.gd; `--hit-shape-shots` for the hitbox-circle strips in `docs/shots/verify-hitbox-rest/<hero>_hit_shapes.jpg`, one tile per input, circles drawn on the dummies). Level 6, all slots unlocked, one lone dummy (circle 0.40 m) scanned along and across the aim line; **in-game numbers are foe centres, so an area reads its content number + 0.40 m on every edge, a swing ray + 0.30, a bullet or lane + 0.48 + its own radius, and a bullet starts 0.6 m ahead of the hero.** Where the row says "asserted", `--hit-shape-fine` fails if the game and the content drift apart (Albert LMB, Albert R, Sparkle E and R). The probe hero carries the weapon upgrades, so a weapon's range reads about 24% above its JSON (Grimble's shotgun 6.3 -> 7.8, Sable's bolt 8.5 -> 10.5); rows quote the JSON and say when the game number is that. Source = `sv/briefs/kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m). **Not measured by a dummy** (they hurt nobody, or only after a second press, a delay or a dash): Albert RMB, E, Tenzo E, Meeko E and R, Motley E; those rows give the content number against the source and the strip shows the drawn shape.
 
 **Albert** (`bulwark`, source Oath)
 
@@ -356,7 +365,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 3. Open: the lone-dummy scan reads Sable's Encore 0.7 m past its ring and Motley's Nightwell across the whole scan (the strips' field of dummies shows both at their content edge, so the game is built right; the probe has an artefact, cause not found: low priority); Tenzo's Basalt Spine is read only at one rock (the field takes 10.0 and 12.5 m, all rows).
 4. `--hit-shape-check`'s grid reads swings short (rays stop at the first dummy: Albert LMB hold 1.2 m there against 3.6 here) and its "content" column picks the weapon with upgrades (Grimble 7.8); use `--hit-shape-fine` for these.
 
-## Vex (`gunslinger`, source Ghost) · slice Warden
+## Vex (`gunslinger`, source ref-gunslinger) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -435,17 +444,18 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m only; the invented Focus/Deadeye is gone (gap 5 closed) | differ: tall-ledge climb not built |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (ffa20b0f7) | match (gap 5 closed) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m only; the invented Focus/Deadeye is gone (gap 5 closed) | differ: tall-ledge climb not built |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; Focus/Deadeye cut (ffa20b0f7) | match (gap 5 closed) |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .5, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) · **done** `ext/parity-phasewalk-rebased`, `ext/lace-phasewalk-verify`: passes raised terrain, set on top if it ends inside; follow-up in ext/combat-lace-spirit-ledges-rebased (not on the candidate) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open · **done** `ext/parity-lace-focus` (main): Focus and Deadeye cut, Red Thread kept; climb asserted (`ext/lace-tall-climb-rebased`) |
 | Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open · **done** `ext/parity-lace-focus` (main): Focus and Deadeye cut, Hawk Sense kept; climb asserted (`ext/lace-tall-climb-rebased`) |
 | RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Guard .15 s, wall hit 4.94x the shot (full pin 178), stun 1.2, cd 16, 1 charge | match (verified Nov 9; gaps 6, 7 closed, docs/heroes/archer.md) |
 | Q | none | glove | ours |
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | 3.5 m/.24 s raw → ~3 m/.28 s, walks rocks and barriers, **not ledges** | differ (gap 8: READY `ext/lace-phasewalk-verify` 728a6c834) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB `fire`; 8 of 17 rows unsourced | gap 9 closed here |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 · LMB **done** `ext/parity-dashlmb` (main, fires mid-dash); 8 rows unsourced **open** [?] |
@@ -457,7 +467,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match | still done (tell .35, 4.4 s, slow 35%, cd 15) |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match | still done (3 shots, window 6 s, cd 60); nock now .5 (97ffe28a9) |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) | still differ, open (gap 8, ledges): roll 3.0 m/.27 s unchanged; not played in --arena |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | **closed** (ffa20b0f7): Focus/Deadeye cut, Hawk Sense 22 m kept; gap 5 done |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | **closed** (ffa20b0f7): Focus/Deadeye cut, Red Thread 22 m kept; gap 5 done |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | still done (`hem.glb` 48 clips) |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | gap 9 closed for Hem (4e788af65): 11 `fire` rows; 8 of 17 rows still unsourced `[?]` (open) |
 | Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
@@ -495,13 +505,13 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match | First tick 0.38 s (tell 0.35), 5 per tick, 8 ticks in 4.4 s at 0.52 s (gap C); slow 35%, cd 15 s. **match** |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match | First beam 0.90 s after the press and fire held (nock 0.5); 18, 18, 25 (finisher under 12%), 1.52 s apart (footage 1.5), cd 60 s. **match** |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) | Roll 3.03 m, 98% by 0.37 s (data 3.0/.27), cd 9.5 s; Spirit Walk passes rocks and terrace walls (combo PASS). Gap 8 closed on terraces. dash-flow rows 0 fail. **match** |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | Hawk Sense shows only the injured (PASS); Focus and Deadeye cut. **match** |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | Red Thread shows only the injured (PASS); Focus and Deadeye cut. **match** |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | Draw, loose, perfect, overdraw, Heavy and ult clips all PASS by name. **match** |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | Draw and hold carry through a dash, jump out in 0.1 s (item 51 PASS). **match** |
 
 **0.24.5 mark:** unchanged on ext/integ-ways-out-0245; every row holds (R nock corrected to .5 above, a stale doc number). Spirit Walk ledge follow-up still **branch ready** (ext/combat-lace-spirit-ledges-rebased not landed); 8 flow rows and RMB 14 / E 9 / R 18 x .5 still `[?]`.
 
-## Cinder (`ashwick`, source Felix) · slice Warden
+## Cinder (`ashwick`, source ref-ashwick) · slice Warden
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
@@ -574,7 +584,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match · charge scaling **open** (branch ready: ext/parity-no-riders-grimble-tenzo) |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
 
-## Grimble (`dredge`, source Kingpin)
+## Grimble (`dredge`, source ref-dredge)
 
 **0.24.5:** dredge-combo 112/0. Air slot 12.5 s stands. Open: E Grounds the foe (ext/parity-no-riders-grimble-tenzo); cooldowns 12, 7, 21 vs 18, 12, 36 (ext/grimble-parity-verify, ext/cooldown-parity-verify).
 
@@ -630,7 +640,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80; crash 18 = 155/156 x spear hit 18 | match; +15% radius, +5% slide (owner 11-08) |
+| R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Hold 3.5, flat 35% slow (no ramp), carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80; crash 18 = 155/156 x spear hit 18 | match; +15% radius, +5% slide (owner 11-08); the periodic Shatter stacks are not built (no period in [D]) |
 | Dash | Hold, release stops, 13 s [D] | 10.5 m/s (F 10-11, the mean), 1.6 s, early-release refund .6 (owner) | match; refund owner |
 | Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd · cd **open** (gap 10) |
@@ -724,7 +734,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Flow | Silent | Dash→LMB `fire`, X buffer | gap 9 closed for LMB |
 | Flow | Silent | Dash→LMB, X buffer | gap 9 · **done** `ext/parity-dashlmb` (main): LMB fires mid-dash; 5 rows unsourced **open** [?] |
 
-## Sable (`thief`, source Shiv)
+## Sable (`thief`, source ref-thief)
 
 **0.24.5:** dancer-combo 144/0. LMB 8.5 m and no Shred stand. Open: cooldowns RMB 7, E 15, R 24 vs 13, 28, 50 (ext/cooldown-parity-verify); E range 14 `[?]` (ext/parity-ranges-rest).
 
@@ -771,19 +781,19 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
 
-Read from `content/archetypes/*.json` and the kit code. Source = the card text in `supervive_kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Ostra's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except Oath's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
+Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Motley's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except ref-bulwark's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
 
 | Hunter | Effect (ours) | Source | Verdict |
 |---|---|---|---|
 | Vex | Burr Charge Daze 1.4 s (only +90% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
 | Zedran | Meteor Drop: core stun 0.8 s, ring slow 40% 1.5 s | "Slow + 88 dmg; center hits Stun" [D], no numbers | match in shape |
-| Zedran | Fireblast (full) slow 30% 1 s; Chain Lunge stun 0.35 s; Haul Slam stun 0.25 to 0.6 s | none: the tooltips list no slow on the blast and no stun on the chain | ours-only riders, see suggestions |
+| Zedran | Fireblast, Chain Lunge, Haul Slam: no CC (the full blast's 30% 1 s slow, the Chain Lunge's 0.35 s stun and the Haul Slam's 0.25 to 0.6 s stun are **removed**) | none: the tooltips list no slow on the blast and no stun on the chain | **fixed**: match (ours-only riders: keep none, DECISIONS 2026-11-07) |
 | Hem | Heartpiercer wall stun 1.2 s (rank 3: dash charge); Rain of Arrows slow 35% 0.8 s refreshed | "enemies that collide with terrain are Stunned", "Slow + Anti-Heal", no numbers; wall stun not shown cleanly [F] | match; numbers unsourced |
 | Cinder | Cinder Shot slow 30% 1.5 s; Flue Flight carpet slow 30% 0.5 s refreshed | "Slow" on both [D]; dummy read SLOWED once, maybe the jump pad [F] | match; numbers unsourced |
 | Pip | Burrseed root 1.1 s, +0.3 s at rank 3 | Root, +0.3 s upgrade [D]; root seen about 1 s or more [F] | match |
 | Tarek | Punch wall stun 0.9 s; Volcano slam centre stun 0.5 to 1.2 s by charge; Basalt Spine slow 35% 1.0 s; Rock Hop's rolling rock slow 30% 1.5 s; punched, Rockwave and Spine rocks shred, no slow | wall stun and centre stun, slam stun about 1 s [F]; Tetraform slows [D]; Landslide's launched rock "160 and SLOWED" [D, F 0539-0540], no duration; punched rocks "explode and shred Armor", no slow [D] | match; the rock slow (0.8 s) was ours-only and is removed, the rolling rock's slow is sourced (strength and time unsourced) |
 | Grimble | Anchor stun 1.1 s (+0.1 s a rank, +0.2 s rank 3); the hook's foe is stunned the whole reel (0.2 s refreshed), Grimble Grounded while reeling; no Ground after the Anchor (ours-only rider cut, DECISIONS 11-07) | Anchor stun 1.2 to 1.4 s [F]; +0.1 s and +0.2 s steps [D]; reeled foe stunned, caster Grounded [F] | match. Dredge gap 3 ("about a third", it was 0.45 s) is **closed**: 1.1 s is 80 to 90% of the read, inside footage error |
-| Claire | Ice Spear zone slow 35% and hit slow 35% 0.6 to 0.8 s; Rimelock stun 0.75 s with a slow that builds 15% +12%/s to 55%; Rink Wall touch slow 30% 1 s; splinter slow 30% 1.2 s | Spear "slow zone", Ice Crash "slowing zone, stuns after a delay", slow stacks up to 3.5 s [D,F]; stun not legible, dummy encased about 0.5 s | match in shape; numbers unsourced |
+| Claire | Ice Spear zone slow 35% and hit slow 35% 0.6 to 0.8 s; Rimelock stun 0.75 s and a flat 35% zone slow (the ramp was ours, removed); Rink Wall touch slow 30% 1 s; splinter slow 30% 1.2 s | Spear "slow zone", Ice Crash "slowing zone, stuns after a delay", slow stacks up to 3.5 s [D,F]; stun not legible, dummy encased about 0.5 s | match in shape; numbers unsourced |
 | Ostra | Snap stun 0.8 to 1.8 s by flight; Nightwell stun and pull 3.5 s; full orb slow 6% 1.5 s | 0.8 to 1.8 s; 3.5 s; "slow 6% for 1.5 s" [D, in-game card text read in the footage] | Snap and Nightwell match. Orb slow fixed 10% to 6% (2026-11-11): the data file only says "Slows"; the card text is game text, so D outranks the wiki 10%; 1.5 s agrees. `lmb.prime_slow` 0.06, locked in kit_parity.json, asserted in `--ostra-combo-check`; reasoning in `docs/heroes/ostra.md` "Orb slow" |
 | Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; Shield Slam stun 0.6 s; Crushing Blow no stun of its own (was 0.4 s at full) | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F]; the charged swing is damage + Knockback only [D] ("up to 522 dmg + Knockback"), knock and debris trail, no label off a wall [F] | **fixed**: Crush 0.5 to 1.0 s; the blow's 0.4 s stun **removed** (`lmb.smash_stun`, ours-only, DECISIONS 11-07: keep none). Shield Slam stun is ours (no source row; ext/parity-bulwark-guardcut) |
 | Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; Shield Slam stun 0.6 s; no stun on the full Crushing Blow (knock only; removed) | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F] | **fixed**: 0.5 to 1.0 s; the blow's 0.4 s stun was ours-only and is removed (asserted `combo bjorn: a full slam only knocks`). Shield Slam stun is ours (no source row) |
@@ -796,10 +806,9 @@ monster): stars for stun, thorns for root, cords for Grounded, rings down the le
 (`docs/STATUS_LOOKS.md`), sized to the hitbox, up for the status's time, on every game, never a ring on the ground.
 `--status-look-check` lands each row from a caster of its kit and asserts it.
 
-**Fixed in this change (1):** Albert's Crush stun 0.5 to 1.0 s (`content/archetypes/bulwark.json` `resource.crush_stun`, text and docs), asserted by `combo bulwark: a Crush stuns 1.0 s` in `--bulwark-combo-check`.
+**Fixed (2):** Zedran's three ours-only riders removed (`lmb.wave_slow`, the Chain Lunge stun, `rmb.haul.stun`; data, kit, text, docs), asserted by `juggernaut LMB hold: Searing Wave (... the full wave does not slow)`, `combo jug: E > hold RMB = Chain Lunge (no stun)` and `combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)` in `--juggernaut-combo-check`. Albert's Crush stun 0.5 to 1.0 s (`content/archetypes/bulwark.json` `resource.crush_stun`, text and docs), asserted by `combo bulwark: a Crush stuns 1.0 s` in `--bulwark-combo-check`.
 
 **Suggestions, not built (PARITY FIRST):**
-- Zedran: drop the fireblast slow (`lmb.wave_slow`), the Chain Lunge stun and the Haul Slam stun (`rmb.haul.stun`): the source has no CC on them. Removing the Haul stun changes a documented move, so it needs the owner.
 - Tarek: drop `rock.slow_*` and `dash.slow_t` (the source rocks shred armour, they do not slow).
 - Albert: the Shield Slam stun 0.6 s has no source row (goes with ext/parity-bulwark-guardcut). The Crushing Blow stun 0.4 s is removed (ext/parity-albert-crush-stun).
 - Albert: the Shield Slam stun 0.6 s has no source row.
@@ -855,16 +864,16 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 
 ## Felt dash per kit (gap 4)
 
-`content/rules/dash_feel.json` defaults to ×1 / ×1: a kit whose dash is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time) stays only where no source number exists; Ryzz gets the time part only (his lane is the owner's, item 70). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows, ±5% / ±0.035 s) to the moment the dash ends: the step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08), and that tail isn't counted.
+`content/rules/dash_feel.json` defaults to ×1 / ×1: a move that is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time, DECISIONS Movement) stays on every Shift move with no source number. It is set per move, not per kit: a hunter's `dist`/`time` cover its moves, and its `moves` row (the name the kit passes to `ArchKit.travel` as `"feel"`) overrides one move. Sparkle gets the time part only on the lane (the owner's, item 70). A long dash (out of charges) runs the class's `ex_dist`/`ex_time` (light 5.0 m/.2 s, medium 4.6 m/.2 s, heavy 4.2 m/.21 s; ours, no source) times its move's feel (`Hunter.dash_with`). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows for each plain dash, `felt move` rows for the unsourced moves on top; ±5% / ±0.035 s) to the moment the dash ends. The step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08). That tail isn't counted.
 
-| Kit | Raw ground | Raw air | Sourced | Feel | Felt ground | Felt air |
+| Hunter | Shift move | Raw | Source | Feel | Felt | Was (0.24.4) |
 |---|---|---|---|---|---|---|
 | Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
-| Zedran | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
-| Hem | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
+| Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
+| Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
 | Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 6.8 m/.28 s |
-| Pip | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
-| Tarek | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
+| Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
+| Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
 | Claire | Skate 10.5 m/s, up to 1.6 s | same | F speed | none (not a travel) | as raw | as raw |
 | Ostra | lob 12 m, 1.8 s | same | F time | none (not a travel) | as raw | as raw |
@@ -872,13 +881,15 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Ryzz | lane 6.02-10.48 m at 43 m/s | same | no (owner item 70, lane cut 11-10, +7.5% 11-11) | time ×1.15 | 6.02-10.48 m at ~37 m/s (shortest measured 6.14 m/.164 s) | same; long dash 5.0 m/.2 s (class data) |
 | Sable | 4.5 m/.48 s | the ground one with a charge (item 183) | F | ×1 | 4.5 m/.48 s | 4.5 m/.48 s, then the air's drag |
 
-On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
+Speed shape (sv/FEEL.md "Dash speed curves", Nov 11, 1/15 s tracks): Grimble's ground Barge, Ryzz's Wirerun and Cinder's Soot Ram now run the source's fitted curve inside the felt distance and time above (Kingpin: full speed at once for a third, then a slowing tail; Joule: flat, easing over the last third; Felix: a burst at 0.1, a cruise, a dead stop, which replaces the kit's hand two-step). Tarek's Rock Hop is the owner's hop chain (item 111), so the source's Landslide push has no counterpart; every air dash of the four keeps a constant speed (none is in the footage).
 
-Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 1 bh = 1.8 m) and `briefs/supervive-data` on 2026-11-12: none shows the move, so none has a measure, no number moved and no `felt dash` row was added. DECISIONS has no owner line on any of them.
+Before this, every long dash ran the class's raw numbers whatever the hunter's feel was: `Hunter.dash_with` swapped them in and dropped the feel (Vex's kit 4.6 × 0.9 travel never ran either). The `felt move` rows check each "no" row that has a feel row above. Sable's long dash on the ground stops after about 0.13 s, because her Cartwheel treats a long dash as an air one and ends it on touching ground (`ThiefKit._tick_vault`). That cut is older than this table, so her row is measured in the air.
+
+Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 1 bh = 1.8 m) and `sv/briefs` on 2026-11-12: none shows the move, so none has a measure, no number moved and no `felt dash` row was added. DECISIONS has no owner line on any of them.
 
 | Move | Raw (ours) | Source | Looked at | Row |
 |---|---|---|---|---|
-| Bjorn Shield Charge | 4.2 m / .23 s (18 m/s) | Oath Shield Bash: knock-back and brief invulnerability, no travel figure (supervive_kits.md) | bjorn 0180-0362 every 6th, 0296-0311 and 0343-0362 every frame: the shield is held planted; the bash flares (0300, 0352-0353) move his body under 5 px (0.2 m), the second one at point blank on the dummy, so no travel can be read | [?] |
+| Bjorn Shield Charge | 4.2 m / .23 s (18 m/s) | Oath Shield Bash: knock-back and brief invulnerability, no travel figure (sv/briefs/kits.md) | bjorn 0180-0362 every 6th, 0296-0311 and 0343-0362 every frame: the shield is held planted; the bash flares (0300, 0352-0353) move his body under 5 px (0.2 m), the second one at point blank on the dummy, so no travel can be read | [?] |
 | Bjorn short dash in the wind-up | 2.6 m / .13 s (20.5 m/s) | none: Spin Dash is a plain Shift | bjorn 0100-0172 every 3rd (the charged swings: he walks the hold, no Shift in it); 0363-0371 (the 360 Smash starts with no charge glint) | [?] |
 | Bjorn lumber (long dash) | 4.2 m / .3 s (14 m/s) | none: the source has no long dash; Oath never leaves the ground (bjorn.md 5) | same frames as above; 0512-0518 is Earthshatter, not a dash | [?] |
 | Vex long dash (air slide) | 4.7 m / .33 s (2/3 of the 7 m / .55 s hold) | patch notes only; Combat Slide card has no figure | venator_ghost 0114-0153 every 3rd: the three slides (0117, 0135, 0150) are all on the ground, no hold told apart, none in the air | [?] |
@@ -915,10 +926,10 @@ The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, 
 | | RMB Burrseed wind-up | aim lane while held, walk not measured | 0.5 (`rmb.wind_move`) | owner item 118 |
 | | E Hearthlight | instant | 1.0 | match |
 | | R Hearth Call channel | walks normally, several bh in f41-f72 | 1.0 | match |
-| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.72 (was 0.9)** | **fixed**: `arc_bolts.fire_slow`, asserted in `--dancer-combo-check` |
+| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.71 (was 0.72, 0.9)** | **fixed**: `arc_bolts.fire_slow`; the frames re-read 2026-11-12 give 0.71 (docs/MOVEMENT_FEEL.md), asserted 0.67-0.75 in `--dancer-combo-check` |
 | | RMB Bola wind-up (0.4 s) | no stop shown | 1.0 | match |
 | | E dagger, throw and blink | no stop shown | 1.0 | match |
-| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.72 | match |
+| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.71 | match |
 | | After the Vault | 127-136 px/s for 1-1.5 s: 1.12-1.2 | 1.18 for up to 2 s | match |
 | Motley `ostra` (ostra.md, 205 px/s) | LMB Gravity Orb | the LMB-window plateaus (0082-0087, 0102-0106) are not tied to a shot | 0.9 (`tether_lantern`) | not measured |
 | | RMB Void Snap aim | not seen | 0.75 (`rmb.snap.cast_slow`) | not seen |
@@ -929,7 +940,7 @@ The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, 
 **Checks:** the eight combo checks and `--move-feel-check`. **Footage to get:** a straight walk with and without LMB held for Sable (it would settle "attack slow or the player's choice", dancer.md section 9), and a walk through each "not seen" row.
 ## Verify: Grimble and Albert on main d255acbee (job 20261109-210110-a2, ext/verify-grimble-albert)
 
-Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DECISIONS (owner wins). Checks run: `--dredge-combo-check` 95/0, `--bulwark-combo-check` 146/0 (with the new rank 3 range assert), `--archetype-check` 379/0. Verdicts: match, differ (how), owner, `[?]`. "READY" names the branch in EXT_TO_MAIN that already fixes the row and is not on main.
+Sources: sv/briefs/kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DECISIONS (owner wins). Checks run: `--dredge-combo-check` 95/0, `--bulwark-combo-check` 146/0 (with the new rank 3 range assert), `--archetype-check` 379/0. Verdicts: match, differ (how), owner, `[?]`. "READY" names the branch in EXT_TO_MAIN that already fixes the row and is not on main.
 
 **Grimble (`dredge`)**
 | Slot | Row | Main | Verdict |
@@ -1028,14 +1039,16 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 2 | **Closed** bc1a70608 (2026-11-07): brake 22.2 m/s² plus ground_friction 2/s (source), a let-go from a run slides ~0.3 m; 5a2831b2b retired the last ours number (`GROUND_SHED` 110), over-run speed now sheds under the same brake. Still differs: nothing in the stop; asserted in --move-feel-check | none | content/rules/hunter_move.json, scripts/match/hunter.gd | done |
 | 3 | Air control 0.3 vs 0.015, 20x source | Lower it; keep owner-asked steer rows | hunter_move.json, hunter_move.gd | M |
 | 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs only on kits with no source dash (table below) | hunter.gd | M |
+| 5 | Done: Hem's Focus/Deadeye is removed (Red Thread only) | none | archer_kit.gd | done |
+| 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs on every Shift move with no source number, per move (table below) | hunter.gd | M |
 | 5 | Done: Hem's Focus/Deadeye is removed (Hawk Sense only) | none | archer_kit.gd | done |
 | 6 | Done: Hem's Heavy Shot wall payoff is `wall_mult` 4.94 | none | archer.json | done |
-| 5 | **Closed** ffa20b0f7 (2026-11-08, owner decision 2026-11-07): Focus meter, its +20% range and the Deadeye crit cut; Hawk Sense kept. Still differs: nothing; checks assert no meter and a plain arrow into a pinned foe | none | archer_kit.gd, archer.json | done |
+| 5 | **Closed** ffa20b0f7 (2026-11-08, owner decision 2026-11-07): Focus meter, its +20% range and the Deadeye crit cut; Red Thread kept. Still differs: nothing; checks assert no meter and a plain arrow into a pinned foe | none | archer_kit.gd, archer.json | done |
 | 6 | **Closed** 4aa011a49 (2026-11-07): `wall_dmg` 12 and the .4 floor replaced by `pin.wall_mult` 4.94, the source's 173 extra on 35. Still differs: nothing in the payoff | none | archer.json | done |
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
 | 9 | Dash→LMB still `buffer` on Zedran and Bjorn (Hem, Vex, Cinder, Ryzz, Tarek are `fire`); Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
-| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine. Lace and Cinder are `fire` now. Kael's and Albert's ground and air rows stay `buffer`: the source (juggernaut.md, bjorn.md, supervive_kits.md) never shows an LMB press inside the dash, so they say "Not determinable" (11-12) | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
+| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine. Lace and Cinder are `fire` now. Kael's and Albert's ground and air rows stay `buffer`: the source (juggernaut.md, bjorn.md, sv/briefs/kits.md) never shows an LMB press inside the dash, so they say "Not determinable" (11-12) | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 4 | Dashes stop dead: keep 15%/30% vs carry; global ×.85/×1.15 | Raise carry; drop scale where kit numbers already match | hunter.gd, content/rules/dash_feel.json | M |
 | 5 | ~~Hem's invented Focus/Deadeye~~ cut (owner 11-07) | done | archer_kit.gd, archer.json | closed |
 | 6 | ~~Hem's Heavy Shot wall payoff~~ now 4.94x | done | archer.json | closed |
@@ -1044,7 +1057,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
 | 11 | Done: Cinder is off the dash feel (3.4 m/.33 s, poof 6.8 m/.28 s); Grimble's air barge is scaled once (measured 3.7 m/.2 s) | none | asserted in --move-feel-check | done |
-| 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
+| 12 | Albert's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
 | 13 | Grimble's air dash lacks its own 12.5 s slot | Add slot | dredge_kit.gd, dredge.json | M |
 | 14 | Done: Tarek's allies hop his rocks (owner 23:55, `StoneStand`) | none | stone_stand.gd | done |
 | 12 | **Closed** 1eecee8c3 (2026-11-07): `throw_rate` .48 → .45, the source card's; bjorn_launch_check asserts it. Still differs: the hold walks at 55% where the footage only shows him standing; no source number, owner note keeps it | none | bulwark.json | done |
@@ -1089,16 +1102,16 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 
 ## Item 20: jump speed and the unsourced flow rows
 
-**Jump speed.** Source: JumpZVelocity 750 uu/s = 7.5 m/s at gravity 14.7 m/s² (supervive_physics.md:45, [D]). Ours: `Hunter.JUMP_V` 6.8 m/s. Kept on purpose (`docs/MOVEMENT_FEEL.md`, "Jump 9 → 6.8"): 7.5 lets jump plus mantle top four terraces. It is a map-grammar deviation, not a source value; the owner can flip it once the terraces change. `--move-feel-check` now asserts `jump_speed_vs_source` (lift-off over 7.5, must sit in 0.85 to 1.0), so the source number is pinned and the gap cannot drift.
+**Jump speed.** Source: JumpZVelocity 750 uu/s = 7.5 m/s at gravity 14.7 m/s² (sv/briefs/physics.md:45, [D]). Ours: `Hunter.JUMP_V` 6.8 m/s. Kept on purpose (`docs/MOVEMENT_FEEL.md`, "Jump 9 → 6.8"): 7.5 lets jump plus mantle top four terraces. It is a map-grammar deviation, not a source value; the owner can flip it once the terraces change. `--move-feel-check` now asserts `jump_speed_vs_source` (lift-off over 7.5, must sit in 0.85 to 1.0), so the source number is pinned and the gap cannot drift.
 
 **Dash-flow rows marked `[?]`.** A row in `content/dash_flow` that exists but has no `source`, or whose `source` starts "Not determinable". No source or footage settles these; they run as the kit's default (`keep` for holds, `fire` for Q and the silent dash rows). Not guessed. `tools/gen_wiki.py` puts `[?]` at the start of each one's Source cell in `docs/heroes/dash_interactions.md` (a pair with no row stays empty), so both places list the same 55 rows (names as of 2026-11-09; `*` = already says "Not determinable"):
 
 | Hero | Rows | Result |
 |---|---|---|
-| Lace (`archer`, Pin) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) | Not determinable, each `source` cites what was checked: pin.md:33-47 (draw, walks while drawing, frames 0111-0116), :91-110 (Impaling charge, 0264-0269, 0494), :247 (open question 'whether you can shoot during it'), :322-334 (roll bare 0388-0389; air dash and jump not shown); supervive_kits.md:73-75, :78. Kept `keep`. Still `[?]` |
-| Sparkle (`mage`, Vireo) | `hold.rmb.{ground,air,jump}` (3, `keep`) | Not determinable: vireo.md:80-94 (spear hold 1.2 s, she stood still, frames 0043-0049, 0057-0063, 0078-0084), :211-219 (spear thrown, then Surge), :386 (open question 5), :460-476, :503 (air Surge and jump not shown); supervive_kits.md:66-67. Kept `keep`. Still `[?]` |
-| Tenzo (`dolm`, Breah) | `hold.rmb.jump` (1, `keep`) | **Sourced**: breah.md:114 (card frame 0240) 'when she jumps while charging, she leaps forward and the circle comes with her'; supervive_kits.md:106 'Jump while charging to leap forward'. The charge survives the jump, so `keep` is the source. No longer `[?]` |
-| Tenzo (`dolm`) | `hold.rmb.{ground,air}`, `hold.lmb.{ground,air,jump}` (5, `keep`) | Not determinable: breah.md:71-82 (punch wind-up 0117-0124), :98-115 (charge, 0938-0958 is a punch pressed during a charge), :140-143 (dunk casts RMB after the dash), :145-158, :357 (open question 3), :361 (no transcript; the tip title 'Punch to Extend Dash/RMB' cannot be read), :433-449 (air dash 'not shown as a dash'); supervive_kits.md:105-106. Kept `keep`. Still `[?]` |
+| Lace (`archer`, Pin) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) | Not determinable, each `source` cites what was checked: pin.md:33-47 (draw, walks while drawing, frames 0111-0116), :91-110 (Impaling charge, 0264-0269, 0494), :247 (open question 'whether you can shoot during it'), :322-334 (roll bare 0388-0389; air dash and jump not shown); sv/briefs/kits.md:73-75, :78. Kept `keep`. Still `[?]` |
+| Sparkle (`mage`, Vireo) | `hold.rmb.{ground,air,jump}` (3, `keep`) | Not determinable: vireo.md:80-94 (spear hold 1.2 s, she stood still, frames 0043-0049, 0057-0063, 0078-0084), :211-219 (spear thrown, then Surge), :386 (open question 5), :460-476, :503 (air Surge and jump not shown); sv/briefs/kits.md:66-67. Kept `keep`. Still `[?]` |
+| Tenzo (`dolm`, Breah) | `hold.rmb.jump` (1, `keep`) | **Sourced**: breah.md:114 (card frame 0240) 'when she jumps while charging, she leaps forward and the circle comes with her'; sv/briefs/kits.md:106 'Jump while charging to leap forward'. The charge survives the jump, so `keep` is the source. No longer `[?]` |
+| Tenzo (`dolm`) | `hold.rmb.{ground,air}`, `hold.lmb.{ground,air,jump}` (5, `keep`) | Not determinable: breah.md:71-82 (punch wind-up 0117-0124), :98-115 (charge, 0938-0958 is a punch pressed during a charge), :140-143 (dunk casts RMB after the dash), :145-158, :357 (open question 3), :361 (no transcript; the tip title 'Punch to Extend Dash/RMB' cannot be read), :433-449 (air dash 'not shown as a dash'); sv/briefs/kits.md:105-106. Kept `keep`. Still `[?]` |
 
 Left as ours: Hem (`archer`) `dash.ground.q`, `dash.air.q` and Ryzz (`mage`) `dash.ground.q`, `dash.air.q` (4, `fire`; Q is ours, no source exists).
 
@@ -1129,18 +1142,18 @@ Also still `[?]` and already marked "Not determinable" in their own `source`: He
 
 | Hero | Rows | Checked |
 |---|---|---|
-| Cinder (`ashwick`, Felix) | `hold.rmb.{ground,air,jump}` (3) | linwick.md:55-63 (bolt lane 0073-0074, 0102-0103, 0131), :267-276 (bash 0143-0144, 0159-0160, never inside a lane), :278-279 and :285-286 (air dash and jump not shown); supervive_kits.md:41-42 |
-| Zedran (`juggernaut`, Brall) | `hold.rmb.{ground,air,jump}`, `hold.lmb.jump` (4; the old count of 3 missed `hold.lmb.jump`) | juggernaut.md:20 (card 'Dash while attacking', silent on a charge), :41 (blast charge 0087), :57-65 (Charge Dash 0121-0127, 0141-0146), :86-92 and :259-266 (Quick Dash on its own, 0371-0420), :273-274 (air dash not shown), :283 (no plain jump; jumps are Air Slams 0251-0300); supervive_kits.md:18, 21-22, 26 |
-| Bjorn (`bulwark`, Oath) | `hold.lmb.jump` (1) | bjorn.md:67-74 (swing holds 0101-0172, all standing), :271 (open question: can he move while charging), :363-366 (air and jump not shown); supervive_kits.md:88 |
-| Claire (`rimewright`, Celeste) | `hold.rmb.{ground,air,jump}` (3) | tamsin.md:18 (the spear is a tap in the source), :48-53 (RMB 0094-0168) against :66-79 (Skate 0169-0296), no overlap; :293-298 (air dash and jump not shown); supervive_kits.md:33-34 |
-| Pip (`tender`, Elluna) | `hold.rmb.{ground,air,jump}` (3) | mooshmoosh.md:61-72 and :386-388 (aim f105-113, f116-120), :340 (dashes at f35, f157, f181, f227, none in an aim; no clean ground dash); supervive_kits.md:9-11. Ours: holding RMB does nothing past the wind-up, so these rows have nothing held to act on |
+| Cinder (`ashwick`, Felix) | `hold.rmb.{ground,air,jump}` (3) | linwick.md:55-63 (bolt lane 0073-0074, 0102-0103, 0131), :267-276 (bash 0143-0144, 0159-0160, never inside a lane), :278-279 and :285-286 (air dash and jump not shown); sv/briefs/kits.md:41-42 |
+| Zedran (`juggernaut`, Brall) | `hold.rmb.{ground,air,jump}`, `hold.lmb.jump` (4; the old count of 3 missed `hold.lmb.jump`) | juggernaut.md:20 (card 'Dash while attacking', silent on a charge), :41 (blast charge 0087), :57-65 (Charge Dash 0121-0127, 0141-0146), :86-92 and :259-266 (Quick Dash on its own, 0371-0420), :273-274 (air dash not shown), :283 (no plain jump; jumps are Air Slams 0251-0300); sv/briefs/kits.md:18, 21-22, 26 |
+| Bjorn (`bulwark`, Oath) | `hold.lmb.jump` (1) | bjorn.md:67-74 (swing holds 0101-0172, all standing), :271 (open question: can he move while charging), :363-366 (air and jump not shown); sv/briefs/kits.md:88 |
+| Claire (`rimewright`, Celeste) | `hold.rmb.{ground,air,jump}` (3) | tamsin.md:18 (the spear is a tap in the source), :48-53 (RMB 0094-0168) against :66-79 (Skate 0169-0296), no overlap; :293-298 (air dash and jump not shown); sv/briefs/kits.md:33-34 |
+| Pip (`tender`, Elluna) | `hold.rmb.{ground,air,jump}` (3) | mooshmoosh.md:61-72 and :386-388 (aim f105-113, f116-120), :340 (dashes at f35, f157, f181, f227, none in an aim; no clean ground dash); sv/briefs/kits.md:9-11. Ours: holding RMB does nothing past the wind-up, so these rows have nothing held to act on |
 
 I re-checked Cinder's and Grimble's `dash.ground.lmb`: nothing new. Cinder's LMB is never pressed inside a bash (linwick.md:267-276). Grimble's Buckshot (0040-0080) and his ~0.12 s Brute Dash (0188, dredge.md:100-103, 302-306) are in separate windows. Their sources stand as written.
 
 To settle any of these rows, a clip has to show the held ability running into the move: Felix aiming the bolt and then bashing, Brall charging and then Quick Dashing, Oath charging and then jumping, Elluna aiming and then dashing. For Celeste the spear is a tap, so the hold is ours and there is no source row to match.
 
 ## Boots and charms (gear parity, `--gear-parity-check`)
-Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched briefs/supervive-data and briefs/hero-ref
+Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched sv/briefs and briefs/hero-ref
 (origin/ext/agent-briefs, 2026-11-10) for boots actives, cooldowns and passive move speed: the source data
 has no boots or charm items at all (no item tables; PHYSICS_PARITY only says gear scales move speed at
 runtime, with no numbers). So no piece has a source match and nothing was changed; the list below goes to
@@ -1163,7 +1176,7 @@ pieces meant to become charms. No boots piece has an active, so none needs a key
 stat line; the check asserts both for every boots piece.
 ## Friendly fire (--friendly-fire-check)
 
-**Rule** [O: owner brief, PARITY FIRST]: a Hunter's abilities never hurt a teammate or the caster; a world explosion (powder keg, meteor) hurts everyone. `supervive_kits.md` states no exception: every damage line names "enemies", "struck targets" or "foes"; `docs/SUPERVIVE_DATA.md` has no self-damage row.
+**Rule** [O: owner brief, PARITY FIRST]: a Hunter's abilities never hurt a teammate or the caster; a world explosion (powder keg, meteor) hurts everyone. `sv/briefs/kits.md` states no exception: every damage line names "enemies", "struck targets" or "foes"; `sv/DATA.md` has no self-damage row.
 
 **Audit (all 128 `.hurt(` call sites).** Every damage source picks its victims through one of three team-filtered lists, so there is no per-kit exception to fix and none was added:
 
@@ -1181,22 +1194,22 @@ stat line; the check asserts both for every boots piece.
 
 PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a smaller scale than the source's, so each Hunter is compared as a share of its own roster's average: ours = max health / 154 (mean of the 12), source = Base HP / 1285 (mean of the 12). Ratio = ours share / source share; 1.00 is parity, the bar is 1.25x either way.
 
-**Where the numbers live.** Source: `Base HP` column of the per-hunter attribute table, supervive_physics.md (`origin/ext/agent-briefs`, briefs/supervive-data; `supervive_kits.md` has no HP rows) [D]. Ours: `Data.CLASSES[weight].hp` in `scripts/core/data.gd` (light 124, medium 145, heavy 193); every archetype takes its weight class's health (`Arch.weight`), `hunter.gd` adds kin and level growth on top. **Armour:** ours is `round(base health x ARMOR_DUR 2.2)`, so its ratio is the health ratio. The source has no per-hunter armour (a loadout item, `docs/SUPERVIVE_DATA.md` section 3), and no hunter has a base shield in either game (Bjorn's Brightshield, Grimble's and Pip's shields are ability shields, not base stats). So health is the only per-Hunter number.
+**Where the numbers live.** Source: `Base HP` column of the per-hunter attribute table, sv/briefs/physics.md (`origin/ext/agent-briefs`, sv/briefs; `sv/briefs/kits.md` has no HP rows) [D]. Ours: `Data.CLASSES[weight].hp` in `scripts/core/data.gd` (light 124, medium 145, heavy 193); every archetype takes its weight class's health (`Arch.weight`), `hunter.gd` adds kin and level growth on top. **Armour:** ours is `round(base health x ARMOR_DUR 2.2)`, so its ratio is the health ratio. The source has no per-hunter armour (a loadout item, `sv/DATA.md` section 3), and no hunter has a base shield in either game (Albert's Brightshield, Grimble's and Meeko's shields are ability shields, not base stats). So health is the only per-Hunter number.
 
 | Hunter (weight) | Ours | Share | Source (Base HP) | Share | Ratio |
 |---|---|---|---|---|---|
-| Vex / Ghost (medium) | 145 | 0.942 | 1225 | 0.953 | 0.99 |
-| Zedran = Kael / Brall (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
-| Hem = Lace / Myth (light) | 124 | 0.805 | 1100 | 0.856 | 0.94 |
-| Cinder / Felix (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
-| Pip = Meeko / Elluna (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
-| Tarek = Tenzo / Tetra (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
-| Grimble / Kingpin (heavy) | 193 | 1.253 | 1445 | 1.124 | 1.12 |
-| Claire = Neve / Celeste (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
-| Ostra = Motley / Void (medium) | 145 | 0.942 | 1150 | 0.895 | 1.05 |
-| Bjorn = Albert / Oath (heavy) | 193 | 1.253 | 1475 | 1.147 | 1.09 |
-| Ryzz = Sparkle / Joule (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
-| Sable / Shiv (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Vex / ref-gunslinger (medium) | 145 | 0.942 | 1225 | 0.953 | 0.99 |
+| Kael / ref-juggernaut (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
+| Lace / ref-archer (light) | 124 | 0.805 | 1100 | 0.856 | 0.94 |
+| Cinder / ref-ashwick (heavy) | 193 | 1.253 | 1290 | 1.004 | **1.25** |
+| Meeko / ref-tender (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
+| Tenzo / ref-dolm (medium) | 145 | 0.942 | 1290 | 1.004 | 0.94 |
+| Grimble / ref-dredge (heavy) | 193 | 1.253 | 1445 | 1.124 | 1.12 |
+| Neve / ref-rimewright (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Motley / ref-ostra (medium) | 145 | 0.942 | 1150 | 0.895 | 1.05 |
+| Albert / ref-bulwark (heavy) | 193 | 1.253 | 1475 | 1.147 | 1.09 |
+| Sparkle / ref-mage (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
+| Sable / ref-thief (light) | 124 | 0.805 | 1290 | 1.004 | **0.80** |
 
 **Verdict: no outlier over 1.25x, so no health number was changed** (global scale untouched). Kael and Cinder sit at 1.249 and Neve, Sparkle and Sable at 0.802 (1/1.247): inside the bar by a hair, caused by the same thing: three weight classes against a source where 8 of 12 Hunters share 1290. No owner note on tankiness was found in DECISIONS or OWNER_REVIEW_1103, so none overrides these rows. `--archetype-check` ("health:" rows) asserts every Hunter is inside 0.8x to 1.25x.
 
@@ -1244,7 +1257,7 @@ Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm
 
 Every knock, pull, push, root, slow, stun and Grounded the 12 kits apply goes to `foes_of(team)` (or `foes_in`), so a teammate is never moved or given a status. `--ally-cc-check` (`tools/ally_cc_check.gd`) proves it: each hero presses LMB, RMB tap and hold, E, X and the dash, on the ground and in the air, with a teammate standing on the aim line at 2, 3.5, 6 and 9 m; the teammate must not move, be towed, or gain stun, root, slow, knock, Shred, Blight, burn, Grounded, Dazed or Disoriented. Over the relay, `--displace-net-check` aims Cinder's cloak, Sparkle's Skycall and Albert's aegis at a teammate on the guest's game: no move is sent and the guest stays put.
 
-Where the source lets a move touch an ally (`supervive_kits.md`), the check excuses exactly that slot:
+Where the source lets a move touch an ally (`sv/briefs/kits.md`), the check excuses exactly that slot:
 
 | Move | Source | Ours |
 |---|---|---|

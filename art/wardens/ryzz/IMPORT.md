@@ -46,3 +46,5 @@ Idle/run pilot (2026-11-11, ext/anim-pilot-four), licence for both: Meshy genera
 
 Carried onto the v95 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ext/anim-pilot-four 37d910944 glb> idle --hold-moved-rest` (2026-11-13, merge of origin/main 18402df5b): the core bones' rest is identical between the two builds and main's old idle matched the judged ones, so the clips are the judged ones; the spring bones the new model moved (spring_pig*, gum) hold this model's rest in them, as every other clip does.
 `run_f`: Not carried (2026-11-13): the pilot run_f above; `--anim-audit` on the game rig reads run slide 97% (sole sweep 1.03 m/s at a 4.83 m/s run) (main's own clip 9%, limit 25%), so main's clip stays. The candidate is `run_f` in ext/anim-pilot-four 37d910944's ryzz.glb, to copy with `glb_add_clips.py --hold-moved-rest` once the in-game foot slide is fixed.
+
+Merge 11-15 (ext/merge-lane-anim-hard2-1115): main's glb (45 clips, idle, pigtails) with only the key-pose-read `lmb_l` put back from the branch (`glb_add_clips.py <main ryzz.glb> <branch ryzz.glb> =lmb_l`, then `glb_compact.py`); the other 44 clips are main's byte for byte.

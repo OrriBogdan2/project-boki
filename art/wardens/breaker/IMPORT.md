@@ -60,3 +60,9 @@ hatch shield kept on `x_shield` (`keep`).
   rest with `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb OUT.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55`
   in step with walk_f/run_f (the walks take two steps a side in walk_f's time, his legs can't reach one; docs/art/wardens/dirloops/JUDGE.md).
   Re-run both on the v95 model in Blender when one is free; the legs and hips are the same rig, so the loops carry over as they are.
+
+The strikes lmb_slam and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
+them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files (the swap keeps the clips): import the shipped .glb in Blender
+(bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
+the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.py <shipped> <new> <clip,...>` (the
+other clips re-bake byte-equal that way).

@@ -54,7 +54,7 @@ func drop_y() -> float:
 ## The hunter's basis, tipped forward into a stroke while moving (upright treading water when still).
 func tilt(b: Basis, speed: float) -> Basis:
 	if k <= 0.01: return b
-	return b * Basis(Vector3.RIGHT, -STROKE_TILT * k * clampf(speed / maxf(0.1, h.SPEED * SWIM_SPEED), 0.0, 1.0))
+	return b * Basis(Vector3.RIGHT, -STROKE_TILT * k * clampf(speed / maxf(0.1, h.walk_speed() * SWIM_SPEED), 0.0, 1.0))
 
 ## What HunterAnim needs to wade (shallow) or swim (deep): the hunter's own wade and stroke, not a glide.
 func anim_state() -> Dictionary:
@@ -94,7 +94,8 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 	if stroke_t <= 0.0 and (moving or wdep == 2):
 		stroke_t = 0.75 if wdep == 2 else 0.45
 		if wdep == 2 or moving:
-			Sfx.play("swim" if wdep == 2 else "step_grass", h.ppos, -15.0 if wdep == 2 else -20.0, 0.12)
+			var wade := "step_water_" + StepSurface.weight_of(String(Save.d.get("arch", "")))
+			Sfx.play("swim" if wdep == 2 else wade, h.ppos, -15.0 if wdep == 2 else -20.0, 0.12)
 		if fx and wdep == 2:      # (wading leaves its wake instead)
 			fx.ring(at, 0.55 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.55), 0.6)
 			if moving: fx.burst(at + Vector3(0, 0.1, 0), Color("e8f7ff"), 4, 1.6, 0.35)

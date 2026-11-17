@@ -1,16 +1,18 @@
 class_name UtilityPose
 extends RefCounted
 ## The body beat of a belt item (content/utility: "move"). Four shared moves, every item maps to one:
-##   throw   the free hand cocks back by the ear and flings out ahead (smoke, flare)
-##   place   down on a knee, the hand setting the item on the ground (pad, mending kit, armor kit)
-##   read    the hand brings the item up in front of the face (cell, keys)
+##   throw   the free hand cocks back by the ear and flings out ahead (smoke, flare, flask, charges)
+##   place   down on a knee, the hand setting the item on the ground (pad, fan, kits, lamp)
+##   read    the hand brings the item up in front of the face (cell, keys, scroll, lantern)
 ##   drink   the flask to the mouth (tonic, draughts); HunterAnim's "drink" state
-## A move lasts the item's cast time: the tonic and armor kit channel (their channel "time"),
-## every other item names "cast" in its data. The effect itself never waits for the beat.
+## A move lasts the item's cast time: a channelled item (drink, repair) runs its "channel" time, every
+## other item names "cast" in its data. The effect itself never waits for the beat. Upper body only:
+## a place kneels only while standing; on the move the legs keep running.
 ## Hunter.beat_id/beat_t carry an instant item's beat; fill() turns whichever is running into the
 ## state HunterAnim poses from ("drink" 0..1, or "util" 0..1 with "util_move").
 
 const MOVES := ["throw", "place", "read", "drink"]
+const STILL := 0.5      # m/s of ground speed under which a place kneels
 
 static func move_of(id: String) -> String:
 	return String(UtilityBelt.def(id).get("move", ""))
@@ -47,7 +49,7 @@ static func fill(h: Hunter, s: Dictionary) -> void:
 		return
 	s["util"] = p
 	s["util_move"] = mv
-	if mv == "place":
+	if mv == "place" and Vector2(h.vel.x, h.vel.z).length() < STILL:
 		s["crouch"] = maxf(float(s.get("crouch", 0.0)), weight(mv, p))
 
 ## How much of the pose is on at progress p (0..1): in, hold, out.

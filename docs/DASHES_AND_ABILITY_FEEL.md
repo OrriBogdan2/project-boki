@@ -19,9 +19,9 @@ Until archetypes ship, the three current class dashes stay as they are. Phase St
 Thief's Flicker, Combat Roll into the Gunslinger's Slide Reload, and Shoulder Charge into the
 Juggernaut's Rampage. Archer, Mage and Bulwark get new dashes.
 
-Research section 1 is SUPERVIVE-only and comes from the public wiki. Section 2 adds LoL, Battlerite,
+Research section 1 is the reference-only and comes from the public wiki. Section 2 adds LoL, Battlerite,
 Smash, Street Fighter, Overwatch and general game-feel sources. Nothing here comes from game files.
-No SUPERVIVE hunter names, kits or numbers are copied into Kinfall content. They only informed the
+No the reference hunter names, kits or numbers are copied into Kinfall content. They only informed the
 patterns.
 
 ---
@@ -44,58 +44,58 @@ patterns.
 
 ---
 
-## 1. Research: how SUPERVIVE hunters' movement abilities differ
+## 1. Research: how the reference hunters' movement abilities differ
 
-Source: each hunter's page on supervive.wiki.gg, read Oct 2026 (the game shut down Feb 2026, so
-these are final values; see docs/SUPERVIVE_DATA.md for eras). The wiki almost never publishes dash
+Source: each hunter's page on the community wiki, read Oct 2026 (the game shut down Feb 2026, so
+these are final values; see sv/DATA.md for eras). The wiki almost never publishes dash
 distances or speeds. Where it doesn't, the column says "n/l" (not listed). "Knock" means downing an
 enemy hunter. "Ex-dash" means the long dash you get in the air or while the main dash is on cooldown.
 
 | Hunter | Dash | Input | Charges / recharge | Arrival / payload | Protection | Counterplay notes |
 |---|---|---|---|---|---|---|
-| Jin | Dodge Roll | tap toward cursor; ex-dash in the air or when on cooldown | 1; 7s mini / 12.5s ex | none (pure mobility) | n/l | two separate cooldowns you can track |
-| Shiv | Quickflip | tap | 1; 6.5s | movement speed burst; next shot empowered; **landing that shot resets the dash** | n/l | punish the dash if the empowered shot misses |
-| Myth | Phase Walk | tap into a roll, then a 2.8s state | **2 charges**, 11s; knock restores 1 | walk through walls and objects; leaves a phase orb others can use; taking damage ends it | through walls only | hit her once to end it |
-| Shrike | Disengage | tap; fires a shot that **propels her backward** | 1; 11s; knock resets | the shot slows and grounds who it hits | n/l | she always moves away from her aim |
-| Brall | Flame Step | tap, forward | **2**, 13s listed (patched 11/9/7/6 by level); knock restores 1 | dash-attack with a tip sweet spot (damage ×2) | n/l | wind-down frames stop an instant glide after it |
-| Carbine | Thrusters / Jetpack | tap; Jetpack is the ex version (0.8s hover, pops over low obstacles) | 1 + ex; 12s / 12s | next shot empowered and slows | n/l | LMB hits refund only the base dash |
-| Crysta | Double Dash | tap | **2**, 15s; knock restores 1 | each dash empowers a double shot and resets LMB | n/l | short dashes, so watch for the second |
-| Joule | Surge | **hold and release** | 1; 9s; resets off her own passive and orbs | dash-attack through targets; detonates her static marks | **ignores projectiles** (melee and CC still land; stun, root, ground and glider cancel it) | melee or CC her, don't shoot |
-| Saros | Dive Slash | tap dive, then **recast** a slash | 1; 10s; a hit allows one more cast | dive pushes; slash knocks back, double damage and stun into a wall; can kick his orb | n/l | the recast is the threat |
-| Wukong | Cloud Somersault | **tap = quick dash, hold-release = somersault into the air** | 1; 14s; perching in a tree resets it | attack speed +50% briefly | n/l | resets near trees |
-| Bishop | Rocket Jump | tap; launches **up** | **2**, 14s; knock restores 1 | blast at the feet, knockback; hitting enemies from above slams them | n/l | he lands where his arc goes |
-| Kingpin | Dash | tap; goes further in the air | 1 + separate air; 7s / 14s | a level-4 upgrade ties it to his shotgun | n/l | two cooldowns |
-| Felix | Pyro Pounce | tap | **2**, 9s; knock restores 1 | dash-attack, knockback, ignite; bounces him back a little on impact | n/l | he ends up next to you |
-| Oath | Spin Dash / Shield Bash | tap = spin dash; **with shield held (RMB) = Shield Bash** | 11s / 7s | spin damage and knock; bash knocks back and the shield is briefly invulnerable | shield only | the context version changes the threat |
-| Elluna | Lunar Dash | tap; ex in the air | 1 + air; 7s / 14s | **dashing through allies refunds half the cooldown** | n/l | support movement |
+| ref-duelist | Dodge Roll | tap toward cursor; ex-dash in the air or when on cooldown | 1; 7s mini / 12.5s ex | none (pure mobility) | n/l | two separate cooldowns you can track |
+| ref-thief | Quickflip | tap | 1; 6.5s | movement speed burst; next shot empowered; **landing that shot resets the dash** | n/l | punish the dash if the empowered shot misses |
+| ref-archer | Phase Walk | tap into a roll, then a 2.8s state | **2 charges**, 11s; knock restores 1 | walk through walls and objects; leaves a phase orb others can use; taking damage ends it | through walls only | hit her once to end it |
+| ref-sniper | Disengage | tap; fires a shot that **propels her backward** | 1; 11s; knock resets | the shot slows and grounds who it hits | n/l | she always moves away from her aim |
+| ref-juggernaut | Flame Step | tap, forward | **2**, 13s listed (patched 11/9/7/6 by level); knock restores 1 | dash-attack with a tip sweet spot (damage ×2) | n/l | wind-down frames stop an instant glide after it |
+| ref-burst | Thrusters / Jetpack | tap; Jetpack is the ex version (0.8s hover, pops over low obstacles) | 1 + ex; 12s / 12s | next shot empowered and slows | n/l | LMB hits refund only the base dash |
+| ref-crystal | Double Dash | tap | **2**, 15s; knock restores 1 | each dash empowers a double shot and resets LMB | n/l | short dashes, so watch for the second |
+| ref-mage | Surge | **hold and release** | 1; 9s; resets off her own passive and orbs | dash-attack through targets; detonates her static marks | **ignores projectiles** (melee and CC still land; stun, root, ground and glider cancel it) | melee or CC her, don't shoot |
+| ref-hunter | Dive Slash | tap dive, then **recast** a slash | 1; 10s; a hit allows one more cast | dive pushes; slash knocks back, double damage and stun into a wall; can kick his orb | n/l | the recast is the threat |
+| ref-staff | Cloud Somersault | **tap = quick dash, hold-release = somersault into the air** | 1; 14s; perching in a tree resets it | attack speed +50% briefly | n/l | resets near trees |
+| ref-rocket | Rocket Jump | tap; launches **up** | **2**, 14s; knock restores 1 | blast at the feet, knockback; hitting enemies from above slams them | n/l | he lands where his arc goes |
+| ref-dredge | Dash | tap; goes further in the air | 1 + separate air; 7s / 14s | a level-4 upgrade ties it to his shotgun | n/l | two cooldowns |
+| ref-ashwick | Pyro Pounce | tap | **2**, 9s; knock restores 1 | dash-attack, knockback, ignite; bounces him back a little on impact | n/l | he ends up next to you |
+| ref-bulwark | Spin Dash / Shield Bash | tap = spin dash; **with shield held (RMB) = Shield Bash** | 11s / 7s | spin damage and knock; bash knocks back and the shield is briefly invulnerable | shield only | the context version changes the threat |
+| ref-tender | Lunar Dash | tap; ex in the air | 1 + air; 7s / 14s | **dashing through allies refunds half the cooldown** | n/l | support movement |
 | Zeph | Cyclone Dash | **tap = short dash (partial refund), hold = summon a cyclone, release = long dash carrying allies** | 1; 11s | gives allies glider fuel; can carry ally wisps | n/l | the hold is visible |
 | Eva | Sashay | tap | 1; 8s | 80 bonus speed decaying over 2s | **incorporeal 0.1s** | mostly a speed boost |
-| Beebo | Shwoop | tap | **2**, 8s; knock restores 1 | decaying speed buff | n/l | — |
-| Celeste | Skate | **hold to skate, release to stop**; early release refunds cooldown | 1; 13s | her shots do ×2 while skating; makes ice islands over the abyss | n/l | long, steerable, predictable |
-| Hudson | Hover Jets | tap = speed burst; **hold = hover up to 1.4s** (longer cooldown) | 1; 12.5s; hitting refunds 25% | ram for 100 (300 spun up), knockback scales with speed | n/l | ram is speed-based |
-| Mercury | Backblast | tap; blasts **backward and up** | 1; 12s | goes further with charged rockets; nearby enemies knocked back, stunned into walls | n/l | always away from his aim |
-| Void | Swap | **aimed lob to a point**, travel time 1.7s (1.25s empowered), then teleport | 1; 9.5s | **swaps places** with units at the spot; enemies swapped are slowed 40% for 3s | n/l | the lob shows the destination for 1.25-1.7s |
-| Tetra | Landslide | tap | 1; 12s | makes a rock, dashes, then launches the rock forward | n/l | the rock is a projectile to dodge |
-| Ghost | Combat Slide | **tap = short slide, hold = longer slide**; early release lowers the cooldown | 1; 11.5s (min 3.5s); knocks reset | movement speed at the end (level 4) | n/l | the hold slide is long and committed |
+| ref-hunter | Shwoop | tap | **2**, 8s; knock restores 1 | decaying speed buff | n/l | — |
+| ref-rimewright | Skate | **hold to skate, release to stop**; early release refunds cooldown | 1; 13s | her shots do ×2 while skating; makes ice islands over the abyss | n/l | long, steerable, predictable |
+| ref-minigun | Hover Jets | tap = speed burst; **hold = hover up to 1.4s** (longer cooldown) | 1; 12.5s; hitting refunds 25% | ram for 100 (300 spun up), knockback scales with speed | n/l | ram is speed-based |
+| ref-hunter | Backblast | tap; blasts **backward and up** | 1; 12s | goes further with charged rockets; nearby enemies knocked back, stunned into walls | n/l | always away from his aim |
+| ref-ostra | Swap | **aimed lob to a point**, travel time 1.7s (1.25s empowered), then teleport | 1; 9.5s | **swaps places** with units at the spot; enemies swapped are slowed 40% for 3s | n/l | the lob shows the destination for 1.25-1.7s |
+| ref-dolm | Landslide | tap | 1; 12s | makes a rock, dashes, then launches the rock forward | n/l | the rock is a projectile to dodge |
+| ref-gunslinger | Combat Slide | **tap = short slide, hold = longer slide**; early release lowers the cooldown | 1; 11.5s (min 3.5s); knocks reset | movement speed at the end (level 4) | n/l | the hold slide is long and committed |
 
-Two other movement tools sit outside Shift but are useful patterns: Shiv's Farstep Dagger (throw a
-dagger, auto-teleport to it after 6s or recast early) and Brall's Feysteel Chain (chain to an enemy
+Two other movement tools sit outside Shift but are useful patterns: ref-thief's Farstep Dagger (throw a
+dagger, auto-teleport to it after 6s or recast early) and ref-juggernaut's Feysteel Chain (chain to an enemy
 or wall, recast to pull yourself in).
 
 ### Patterns
 
 | Pattern | Who | What it gives the design |
 |---|---|---|
-| Multi-charge short dashes (2 charges, knock restores 1) | Myth, Brall, Crysta, Bishop, Felix, Beebo | rhythm; a "did they spend both?" read for enemies |
-| Tap vs hold on one key | Wukong, Zeph, Hudson, Ghost, Celeste, Joule | one button, two jobs; the hold is a visible commitment |
-| Dash-attack (damage or knock on contact) | Brall, Joule, Felix, Saros, Hudson, Oath | dashes become part of the combo, not just escape |
-| Dash that empowers the next shot / resets on hit | Shiv, Carbine, Crysta | ties the dash to the weapon (kit cohesion) |
-| Backward self-propulsion off a shot | Shrike, Mercury | disengage you can only aim away from |
-| Vertical (rocket jump, somersault) | Bishop, Wukong, Carbine Jetpack | high ground and abyss play |
-| Telegraphed teleport to a point | Void (1.25-1.7s lob) | a long teleport made fair by a visible destination |
-| Context variants (with shield, in the air, during another ability) | Oath, Jin/Kingpin/Elluna ex-dash | the same key reads differently in different states |
-| Partial-projectile immunity rather than full invulnerability | Joule (ignores projectiles), Eva (0.1s incorporeal) | counterplay survives: melee and CC still land |
-| Ally interaction | Elluna (refund through allies), Zeph (carry allies) | support identity in movement |
+| Multi-charge short dashes (2 charges, knock restores 1) | ref-archer, ref-juggernaut, ref-crystal, ref-rocket, ref-ashwick, ref-hunter | rhythm; a "did they spend both?" read for enemies |
+| Tap vs hold on one key | ref-staff, Zeph, ref-minigun, ref-gunslinger, ref-rimewright, ref-mage | one button, two jobs; the hold is a visible commitment |
+| Dash-attack (damage or knock on contact) | ref-juggernaut, ref-mage, ref-ashwick, ref-hunter, ref-minigun, ref-bulwark | dashes become part of the combo, not just escape |
+| Dash that empowers the next shot / resets on hit | ref-thief, ref-burst, ref-crystal | ties the dash to the weapon (kit cohesion) |
+| Backward self-propulsion off a shot | ref-sniper, ref-hunter | disengage you can only aim away from |
+| Vertical (rocket jump, somersault) | ref-rocket, ref-staff, ref-burst Jetpack | high ground and abyss play |
+| Telegraphed teleport to a point | ref-ostra (1.25-1.7s lob) | a long teleport made fair by a visible destination |
+| Context variants (with shield, in the air, during another ability) | ref-bulwark, ref-duelist/ref-dredge/ref-tender ex-dash | the same key reads differently in different states |
+| Partial-projectile immunity rather than full invulnerability | ref-mage (ignores projectiles), Eva (0.1s incorporeal) | counterplay survives: melee and CC still land |
+| Ally interaction | ref-tender (refund through allies), Zeph (carry allies) | support identity in movement |
 
 Takeaways for Kinfall:
 
@@ -115,10 +115,10 @@ Takeaways for Kinfall:
 |---|---|
 | Average reaction to a single, expected, clear stimulus is ~265ms (~16 frames). 15f is "virtually unreactable", 19f is "reactable but near the limit", ~27f is easy when it's the main threat but harder in a mix | infil, "On Reaction Times" |
 | A strong visual windup tell matters as much as total startup: moves with little early motion are hard to react to even when slow | infil |
-| SUPERVIVE cast windups in its data run 0.1-0.65s (median 0.45); charge-to-full 0.5-1.25s (median 1.0) | docs/SUPERVIVE_DATA.md §6 (wiki) |
-| SUPERVIVE delays its big area hits: Shrike's Dive-Bomb 0.65s fuse; Hudson's Barbed Wire 1s activation (raised from 0.6); Kingpin's second slug wave 0.6s later; Celeste's ult must be held to full; Bishop's ult cast raised 0.3→0.5s | wiki hunter pages |
-| SUPERVIVE added **enemy-only global iconography** to Elluna's delayed root, so the victim knows a 2s detonation is coming; Joule's ult got a landing indicator | Elluna and Joule wiki pages (patch notes) |
-| SUPERVIVE added wind-down frames after dashes and big swings (Brall, Oath) so you can't instantly glide away; an end-of-action vulnerability window | Brall and Oath wiki pages |
+| The reference cast windups in its data run 0.1-0.65s (median 0.45); charge-to-full 0.5-1.25s (median 1.0) | sv/DATA.md §6 (wiki) |
+| The reference delays its big area hits: ref-sniper's Dive-Bomb 0.65s fuse; ref-minigun's Barbed Wire 1s activation (raised from 0.6); ref-dredge's second slug wave 0.6s later; ref-rimewright's ult must be held to full; ref-rocket's ult cast raised 0.3→0.5s | wiki hunter pages |
+| The reference added **enemy-only global iconography** to ref-tender's delayed root, so the victim knows a 2s detonation is coming; ref-mage's ult got a landing indicator | ref-tender and ref-mage wiki pages (patch notes) |
+| The reference added wind-down frames after dashes and big swings (ref-juggernaut, ref-bulwark) so you can't instantly glide away; an end-of-action vulnerability window | ref-juggernaut and ref-bulwark wiki pages |
 | Battlerite: cues exist "to show players what to dodge or interrupt". The sniper shows an aim line and has a distinct cast sound that plays even from stealth. A teleport was cut for a dash that stops on the first enemy hit because it was "more consistent and fair to land" | Stunlock dev blog 003 |
 | Kinfall today: enemy area casts get a 0.32s filling ground marker; leaps show their landing circle to everyone; `delay` shows a telegraph ring | docs/ABILITIES.md, KIN_GRAMMAR.md |
 
@@ -145,24 +145,24 @@ Takeaways for Kinfall:
 | Overwatch mixes each player's sounds by **threat**: how big they are on your screen, whether they're aiming at you, and path distance (not straight-line distance). Each hero has distinct footsteps, so you can tell who's coming by ear | Overwatch audio, PCGamesN |
 | Battlerite: a character should read as what it is "just by looking at it" | 80.lv Battlerite interview |
 
-### 2.4 Kit cohesion and counterplay in SUPERVIVE
+### 2.4 Kit cohesion and counterplay in the reference
 
-Nearly every SUPERVIVE kit has one mark, stack or state that its other parts feed and consume:
+Nearly every the reference kit has one mark, stack or state that its other parts feed and consume:
 
 | Kit | Setter | Payoff |
 |---|---|---|
-| Joule | everything applies Static stacks | Surge dashes through a fully charged target: cooldown reset, %HP burst |
-| Crysta | abilities mark | basic attack or ult detonates the mark → dash recharge |
-| Celeste | damage applies Chill | knock while Chilled → Shatter explosion |
-| Felix | damage builds Ignite | spread and upgrade with his bolt |
-| Saros | orb hit or portal → Ionized | faster fire and more speed; the dash kicks the orb |
-| Kingpin | grab pulls you in | slam stuns, with a bonus in the air |
-| Brall | chain pull | a special RMB spin while being pulled; RMB has tap, hold, air and during-Q variants |
-| Tetra | rock walls | punch rocks with LMB or RMB to launch them |
+| ref-mage | everything applies Static stacks | Surge dashes through a fully charged target: cooldown reset, %HP burst |
+| ref-crystal | abilities mark | basic attack or ult detonates the mark → dash recharge |
+| ref-rimewright | damage applies Chill | knock while Chilled → Shatter explosion |
+| ref-ashwick | damage builds Ignite | spread and upgrade with his bolt |
+| ref-hunter | orb hit or portal → Ionized | faster fire and more speed; the dash kicks the orb |
+| ref-dredge | grab pulls you in | slam stuns, with a bonus in the air |
+| ref-juggernaut | chain pull | a special RMB spin while being pulled; RMB has tap, hold, air and during-Q variants |
+| ref-dolm | rock walls | punch rocks with LMB or RMB to launch them |
 
-Counterplay windows come from a few devices: visible delays, cancel conditions (Joule's dash is
-cancelled by CC; Myth's ends on damage), committed lines (Celeste's skate, Ghost's held slide), and
-resets that only work if the payoff lands (Shiv, Shrike level 4).
+Counterplay windows come from a few devices: visible delays, cancel conditions (ref-mage's dash is
+cancelled by CC; ref-archer's ends on damage), committed lines (ref-rimewright's skate, ref-gunslinger's held slide), and
+resets that only work if the payoff lands (ref-thief, ref-sniper level 4).
 
 ---
 
@@ -290,7 +290,7 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
   overhead health bar, so enemies' charges are no longer shown; the enemy read is the dash animation itself.
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
-- Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
+- Wind-down: no glider for 0.12s after a ground dash ends, as the reference did. Dash → jump is unchanged.
 - Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
@@ -478,8 +478,8 @@ Rules:
 
 - Enemy telegraphs are never culled by the effect budget. Allied cosmetics are culled first.
 - Enemy-only icons go over a target's head when a delayed effect is coming for them (a delayed burst
-  on them, a trap they triggered, a tether, a Rampage arrow on their line). SUPERVIVE added exactly
-  this to Elluna's delayed root.
+  on them, a trap they triggered, a tether, a Rampage arrow on their line). The reference added exactly
+  this to ref-tender's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
 - (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
@@ -513,7 +513,9 @@ global `freeze_frame()`. Online (it's disabled there today, since `net_on` skips
 while their hurtboxes keep updating (Sakurai's rule), only on the clients of the two players
 involved, plus a softer 50% version for the kin owner.
 
-| Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
+Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/impact_weight.json`):
+
+| Weight | What | Hold (struck body) | Attacker (melee only) | Shake on the struck player |
 |---|---|---|---|---|
 | T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
 | T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
@@ -522,7 +524,13 @@ involved, plus a softer 50% version for the kin owner.
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
 | T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
-Rules:
+- A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
+  or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
+  LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+  is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
+- No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
+- Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
@@ -531,7 +539,7 @@ Rules:
 - Cap: 110ms in any 0.5s per player.
 - A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
   Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
-- The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
+- The spike tier is a bit longer than REFERENCE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 
 **Knock moment (parity, 11-11, docs/FUN_AUDIT_1111.md gap 5).** The source confirms a knock with a
@@ -555,7 +563,8 @@ Your own abilities, dashes, landings and hits never shake or kick your camera: i
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
-never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off).
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
+started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
 `--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
@@ -742,9 +751,9 @@ case (an aim circle, then the lob) and stays on the release.
 
 ## Sources
 
-SUPERVIVE (public wiki pages, read Oct 2026):
-- [Ghost](https://supervive.wiki.gg/wiki/Ghost), [Jin](https://supervive.wiki.gg/wiki/Jin), [Shiv](https://supervive.wiki.gg/wiki/Shiv), [Myth](https://supervive.wiki.gg/wiki/Myth), [Shrike](https://supervive.wiki.gg/wiki/Shrike), [Brall](https://supervive.wiki.gg/wiki/Brall), [Carbine](https://supervive.wiki.gg/wiki/Carbine), [Crysta](https://supervive.wiki.gg/wiki/Crysta), [Joule](https://supervive.wiki.gg/wiki/Joule), [Saros](https://supervive.wiki.gg/wiki/Saros), [Wukong](https://supervive.wiki.gg/wiki/Wukong), [Bishop](https://supervive.wiki.gg/wiki/Bishop), [Kingpin](https://supervive.wiki.gg/wiki/Kingpin), [Felix](https://supervive.wiki.gg/wiki/Felix), [Oath](https://supervive.wiki.gg/wiki/Oath), [Elluna](https://supervive.wiki.gg/wiki/Elluna), [Zeph](https://supervive.wiki.gg/wiki/Zeph), [Eva](https://supervive.wiki.gg/wiki/Eva), [Beebo](https://supervive.wiki.gg/wiki/Beebo), [Celeste](https://supervive.wiki.gg/wiki/Celeste), [Hudson](https://supervive.wiki.gg/wiki/Hudson), [Mercury](https://supervive.wiki.gg/wiki/Mercury), [Void](https://supervive.wiki.gg/wiki/Void), [Tetra](https://supervive.wiki.gg/wiki/Tetra), [Getting Started](https://supervive.wiki.gg/wiki/Getting_Started)
-- Kinfall's earlier SUPERVIVE research: docs/SUPERVIVE_DATA.md, docs/SUPERVIVE_FEEL.md
+The reference (public wiki pages, read Oct 2026):
+- ref-gunslinger, ref-duelist, ref-thief, ref-archer, ref-sniper, ref-juggernaut, ref-burst, ref-crystal, ref-mage, ref-hunter, ref-staff, ref-rocket, ref-dredge, ref-ashwick, ref-bulwark, ref-tender, Zeph, Eva, ref-hunter, ref-rimewright, ref-minigun, ref-hunter, ref-ostra, ref-dolm, Getting Started
+- Kinfall's earlier the reference research: sv/DATA.md, sv/FEEL.md
 
 Readability, telegraphs, feel:
 - [Riot Games, "Clarity in League"](https://riotgames.com/en/news/dev-clarity-in-league)

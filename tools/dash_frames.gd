@@ -89,6 +89,7 @@ func _ready() -> void:
 		todo = SEQ.keys()
 	if shots_dir != "":
 		DirAccess.make_dir_recursive_absolute(shots_dir)
+	Engine.max_fps = 60              # (headless draws 100+ fps: a step shows in 2-3 frames and the pose rate reads lumpy)
 	process_priority = -100
 	var tl := Tail.new()
 	tl.d = self

@@ -79,10 +79,10 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
+			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
-			"turned %.0f deg" % turned)
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
+			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
 			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
@@ -523,7 +523,7 @@ func _rime_skate_in() -> void:
 			"fastest %.3f m/s" % fastest)
 	var yaw0 := P.model.global_transform.basis.get_euler().y
 	var yaw_dev := 0.0
-	for i in 85:
+	for i in 64:     # 6.4 rad: one full turn, inside the 3.3 s hold after the 0.9 s slide and 1 s rooted
 		P.inp["aim"] = P.pos + Vector3(cos(i * 0.1), 0.0, sin(i * 0.1)) * 6.0
 		step(m, 1.0 / 60.0)
 		face_dev = maxf(face_dev, absf(angle_difference(P.face, face0)))
@@ -1016,7 +1016,6 @@ func tender() -> void:
 			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false
@@ -1208,8 +1207,8 @@ func tender() -> void:
 			absf(glide_d - glide_want) < 1.0 and sink < 1.0 and K.anim_id == "mm_float",
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
-			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
+			"mm body: small (a 0.65 model) with the 0.352 m hurtbox (the chart size, --hurtbox-check)",
+			absf(P.r - 0.352) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
@@ -1844,9 +1843,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
-				and _no_disc(m), "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
+				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()

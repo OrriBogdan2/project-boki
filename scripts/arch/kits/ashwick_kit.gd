@@ -25,9 +25,6 @@ const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("fff4c8")
 const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
 const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
-const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
-const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
-const RAM_BACK_K := 0.85
 # s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
 const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
@@ -83,6 +80,9 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 func _setup() -> void:
 	fx = LDFx.of(m)
 	jet = AshwickJet.new(self)
+
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [])
 
 func _best_char() -> float:
 	var b := 0.0
@@ -174,6 +174,7 @@ func _flashover_fx(f: Ent) -> void:
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
+	ComboMark.payoff(m, h, f)        # the body flash and the combo chime every other mark payoff has
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -236,7 +237,8 @@ func _shield_swirls() -> void:
 		)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
-## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
+## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
+## stage is the ComboMark tag over their plate instead (combo_read).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
@@ -260,7 +262,7 @@ func _tick_tells(dt: float) -> void:
 	for key in ignites:
 		var e: Dictionary = ignites[key]
 		var f := e["e"] as Ent
-		if not is_instance_valid(f):
+		if not is_instance_valid(f) or f is Hunter:
 			continue
 		var lvl := int(e["lvl"])
 		var top := f.pos + Vector3(0, 3.7, 0)
@@ -277,6 +279,15 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
+
+## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
+func combo_read(f: Ent) -> Dictionary:
+	var lvl := burning(f)
+	if lvl == 0:
+		return {}
+	var e: Dictionary = ignites[f.get_instance_id()]
+	return {"icon": "fireball", "n": lvl, "max": 2, "left": float(e["until"]) - m.time,
+			"total": float(rd()["ignite_t"])}
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -300,8 +311,11 @@ func _drop_holds() -> void:
 	jet.drop()
 
 func move_k() -> float:
-	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	return (0.6 if after_t > 0.0 else 1.0) * boost
+	return 0.6 if after_t > 0.0 else 1.0
+
+## Rank 3 Pyro Pounce: a burst of speed after a hit ([game data] +75 move speed).
+func speed_bonus() -> float:
+	return float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 0.0
 
 ## Rank 3 Cinder Shot holds a second charge.
 func rmb_charges() -> int:
@@ -318,6 +332,8 @@ func ignite_pct(f: Ent) -> float:
 	return 0.0 if lvl == 0 else float(d["ignite_bonus"]["tick_pct"][lvl - 1])
 
 # ------------------------------------------------------------------ LMB: Torch Lance
+func lmb_holding() -> bool: return was_held
+
 func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_key_was
 	lmb_key_was = held
@@ -331,7 +347,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
-	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
+	if not held or not h.atk.can_fire() or merging or (relight_t > 0.0 and not was_held):
 		if was_held:
 			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
@@ -498,10 +514,10 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
+		ComboMark.payoff(m, h, f)        # the Ignite payoff: bonus damage on a burning foe
 	# the impact: a white-hot flash, an ember shower and a rising ember puff (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
-	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
 	if cur > 0:
 		# a burning foe: upgrade, and the burn the foe had spreads to the ones around
 		spreads += 1
@@ -542,13 +558,14 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir})
+	# on Felix's fitted ram curve (content/rules/dash_feel.json, sv/FEEL.md "Dash speed curves")
+	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir, "curved": true})
 	st["last_dash"] = "soot_ram"
 	play("as_leap")
 	vfx("ram", null, dir)
 	h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
+	bash = {"t": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
 ## The air dash, Cinder's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
@@ -569,10 +586,10 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
+	if bash.get("hop", false) and h.gliding:
+		bash = {}      # a glide press cancelled the poof (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dir: Vector2 = bash["dir"]
-	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
-		var into := float(bash["t0"]) - float(bash["t"])
-		h.roll_speed = float(bash["speed"]) * (RAM_FRONT_K if into < RAM_FRONT * float(bash["t0"]) else RAM_BACK_K)
 	bash["t"] = float(bash["t"]) - dt
 	if tells_visible():
 		_ram_looks(dir)
@@ -640,7 +657,6 @@ func _bash_impact(f: Ent) -> void:
 		_ram_reward()
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:

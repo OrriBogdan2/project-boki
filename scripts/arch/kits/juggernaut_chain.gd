@@ -191,6 +191,8 @@ func pull() -> void:
 		_stop("stopped", false)
 		return
 	k.arm_haul()
+	if target != null:
+		ComboMark.payoff(k.m, h, target)
 	var at := _anchor_now()
 	var to := Vector2(at.x - h.pos.x, at.z - h.pos.z)
 	var dist := to.length()
@@ -290,9 +292,6 @@ func _tick_hooked(dt: float) -> void:
 		return
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
-	if stretch > 1.0 and not k.lunge.is_empty():
-		snap()                      # a Lunge aimed away carried him past the length: the chain breaks (no clamp)
-		return
 	if stretch > 1.0:
 		_hold_taut(most)
 		stretch = 1.0

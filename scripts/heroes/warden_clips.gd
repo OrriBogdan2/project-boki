@@ -22,6 +22,10 @@ extends RefCounted
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
+const FEEL := "anim_feel"     # root meta from HunterAnim: Vector2(landing 0..1, run-start/stop lean, rad)
+const LAND_SQUASH := 0.1     # how far a hard landing flattens him (share of his height; widens by 0.6 of that)
+const LEAN_K := 0.5          # of HunterAnim's torso lean, tipped from the feet over the clips
+const LEAN_RATE := 12.0      # 1/s: how fast that lean follows
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
@@ -29,6 +33,7 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs (a move's "fade_out" overrides)
 const CLIMB_FADE := 0.06     # s: into the climb clips (a rise is over in well under a second)
 const AIR_FADE := 0.12
+const DIVE_SLOW := 0.8       # share of the drop's crouch rate for the dive's touchdown (land_tier 3): a heavier settle
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
@@ -97,15 +102,18 @@ var beats := {}              # "beats": the win, lose and board beats the .glb c
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
+var twist_max := TWIST_MAX   # rad: 90 deg plus "loco.twist_hyst" (default TWIST_HYST), the leg turn-round margin
 var twist_goal := 0.0        # rad the legs turn off the aim this frame (0 when he is not running)
 var twist_back := false      # past the twist limit the legs turn round and run backwards
 var twist_face := 0.0        # rad: the facing last frame, so the legs can hold their way while the aim swings
 var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
+var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
+var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -169,6 +177,12 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
+## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
+func move_len(mv: Dictionary) -> float:
+	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
+	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	return length / rate - float(mv.get("lead", 0.0))
+
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
@@ -208,6 +222,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.active = true
 	var lc: Dictionary = d["loco"]
 	twist_on = bool(lc.get("aim_twist", false))
+	twist_max = PI / 2.0 + float(lc.get("twist_hyst", TWIST_HYST))
 	var cycle := float(lc.get("cycle_s", 0.0))
 	gait = WardenGait.new(sk, lc.get("arm_swing", {}),
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["walk"]["f"])).length,
@@ -215,6 +230,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
+	reach = WardenReach.make(sk, d)
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
 		turn = WardenTurn.make(model, sk)
@@ -484,58 +500,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
-	# (a move that has played out leaves the states below showing: a hit, a stun, a landing)
 	if moves.has(km):
-		var mv: Dictionary = moves[km]
-		# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
-		# "lead": the cock is skipped, so the hit pose lands on the kit's hit; under zero holds the first frame)
-		var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
-		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
-		if km != alt_km or tt < alt_t:
-			alt_on = not alt_on
-			air_cast = false
-			from_air = not bool(s.get("grounded", true))
-		air_cast = air_cast or not bool(s.get("grounded", true))
-		alt_km = km
-		alt_t = tt
-		if mv.get("owns_land", false):
-			# this move is the landing (it may start in the air): the generic land clip must not follow it
-			land_t = LAND_DONE
-		if from_air and mv.has("air_clip") and _air_over(s):
-			return {}          # an air dash gives way to the glide or the landing below
-		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		# ("ground_clip" / "air_clip": the clip when the move starts on the ground / in the air; the kit's timing,
-		# hitbox and distance stay the same)
-		clip = String(mv.get("air_clip" if from_air else "ground_clip", clip))
-		var length := lib.get_animation(clip).length
-		if mv.has("fit"):
-			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
-		# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
-		if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
-			tt = minf(tt, length - 0.001)
-		if mv.has("hold_from") and root.has_meta(PHASE):
-			var start := float(mv["hold_from"])
-			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
-		elif tt >= length:
-			if not mv.has("hold_from"):
-				return {}
-			var from := float(mv["hold_from"])
-			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
-		# ("upper": true, or "moving": the legs keep walking only while he walks)
-		var up = mv.get("upper", false)
-		if planted(s):
-			up = true      # rooted: the legs stay on the standing layer, only the body plays the move
-		elif up is String:
-			var vel: Vector3 = s.get("vel", Vector3.ZERO)
-			up = Vector2(vel.x, vel.z).length() >= STILL
-		# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
-		# to the move's end: no planted stance mid-air, no snap into it on the landing)
-		if bool(mv.get("air_legs", false)) and air_cast:
-			up = true
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
-				"legs_heading": bool(mv.get("legs_heading", false)),
-				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+		return _move_clip(km, moves[km], s)
 	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
@@ -648,6 +614,60 @@ func _lockin_at(t: float) -> Dictionary:
 static func lockin_dur(art_name: String) -> float:
 	return float(data(art_name).get("lockin", {}).get("dur", 0.0))
 
+## A keyed move's clip and time ({} once a move that does not hold has played out).
+func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
+	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
+	var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
+	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
+	if km != alt_km or tt < alt_t:
+		alt_on = not alt_on
+		air_cast = false
+		from_air = not bool(s.get("grounded", true))
+	air_cast = air_cast or not bool(s.get("grounded", true))
+	alt_km = km
+	alt_t = tt
+	if mv.get("owns_land", false):
+		# this move is the landing (it may start in the air): the generic land clip must not follow it
+		land_t = LAND_DONE
+	if from_air and mv.has("air_clip") and _air_over(s):
+		return {}          # an air dash gives way to the glide or the landing below
+	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	# ("ground_clip" / "air_clip": the clip when the move starts on the ground / in the air; the kit's timing,
+	# hitbox and distance stay the same)
+	clip = String(mv.get("air_clip" if from_air else "ground_clip", clip))
+	# ("cut": the clip ends there (clip seconds), "scale": it runs that much faster: to fit the kit's cadence)
+	var length := minf(lib.get_animation(clip).length, float(mv.get("cut", 1e9)))
+	if mv.has("fit"):
+		tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
+	tt *= float(mv.get("scale", 1.0))
+	# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
+	if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
+		tt = minf(tt, length - 0.001)
+	if mv.has("hold_from") and root.has_meta(PHASE):
+		var start := float(mv["hold_from"])
+		tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+	elif tt >= length:
+		if not mv.has("hold_from"):
+			return {}
+		var from := float(mv["hold_from"])
+		tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
+	# ("upper": true, or "moving": the legs keep walking only while he walks)
+	var up = mv.get("upper", false)
+	if planted(s):
+		up = true      # rooted: the legs stay on the standing layer, only the body plays the move
+	elif up is String:
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		up = Vector2(vel.x, vel.z).length() >= STILL
+	# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
+	# to the move's end: no planted stance mid-air, no snap into it on the landing)
+	if bool(mv.get("air_legs", false)) and air_cast:
+		up = true
+	return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
+			"legs_heading": bool(mv.get("legs_heading", false)),
+			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	var want := force
@@ -687,6 +707,8 @@ func step(dt: float) -> void:
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
+			if act_w <= 0.0:
+				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
@@ -727,8 +749,12 @@ func step(dt: float) -> void:
 	_air_tilt()
 	if turn:
 		turn.step(dt)
+	if root_bi >= 0:     # (the root's scale is unkeyed: reset, feel() can't build up)
+		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
+	if reach:
+		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 
@@ -784,6 +810,26 @@ func _heart(on: bool, dt: float) -> void:
 	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
 	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, String(d.get("heart_hand", "L")), fwd))
 
+## HunterAnim's landing squash and its lean into starting and stopping (meta FEEL), laid on the root bone over what
+## the clips show (WardenGlb, after the blend with the rig, which has its own; `squash` false: the root rides the Rig,
+## which already squashes). The root sits at the feet, so the body flattens and tips over them. Visual only.
+func feel(dt: float, squash: bool) -> void:
+	var f: Vector2 = root.get_meta(FEEL, Vector2.ZERO)
+	lean = lerpf(lean, f.y * LEAN_K, 1.0 - exp(-LEAN_RATE * dt))
+	var bi := WardenSkeleton.find(skel, "root")
+	var k := 1.0 - proc_w
+	var kl := k * (1.0 - up_w)      # (a move that owns the upper body keeps its own posture: no lean over it)
+	var sq := f.x * LAND_SQUASH * k if squash else 0.0
+	if bi < 0 or (sq < 0.001 and absf(lean * kl) < 0.001):
+		return
+	# (in the skeleton's space: his up and right, whichever way the .glb was built)
+	var inv := skel.global_basis.inverse()
+	var up := (inv * root.global_basis.y).normalized()
+	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
+	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
+	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * kl)
+	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
+
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
 ## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
@@ -807,7 +853,7 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		if twist_goal != 0.0 and air_w <= 0.0:      # (in the air the body turns with the rig: glide bank)
 			# running: the legs hold their way while the aim swings, but never twist him past the limit
 			var held := head_turn - wrapf(face - twist_face, -PI, PI)
-			head_turn = clampf(held, minf(head_turn, -TWIST_MAX), maxf(head_turn, TWIST_MAX))
+			head_turn = clampf(held, minf(head_turn, -twist_max), maxf(head_turn, twist_max))
 	twist_face = face
 	var follow := 1.0 - exp(-dt * HEADING_RATE)     # how far the turn eases toward its goal this frame
 	# (the twist swings the legs across his front, never round his back)
@@ -831,7 +877,7 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 		twist_goal = 0.0
 		return Vector2.ZERO
 	var rel := wrapf(atan2(-flat.x, -flat.y) - face, -PI, PI)
-	twist_back = absf(rel) > (PI - TWIST_MAX if twist_back else TWIST_MAX)
+	twist_back = absf(rel) > (PI - twist_max if twist_back else twist_max)
 	twist_goal = rel - signf(rel) * PI if twist_back else rel
 	return Vector2(0.0, -k if twist_back else k)
 
@@ -904,7 +950,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
-			land = d["land"]["drop" if tier == 2 else "hop"]
+			land = d["land"]["hop" if tier == 1 else "drop"]
+			if tier == 3:
+				land = land.duplicate()
+				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y

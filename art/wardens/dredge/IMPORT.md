@@ -1,5 +1,12 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Gun in hand (2026-11-17, ext/grimble-gun-hand):** the master is the owner's 11-17 pick (CURRENT_OVERRIDES: weapons-fix-1116b/Grimble/hand/grip1117/final/cand.glb,
+"grimble a seems fine"): the same body with the blunderbuss off the belt and in the iron fist, its own node. The swap
+spec puts it rigid on `hand.L` (a region box round it), weapon_muzzle and anchor_gun_root sit on its muzzle and stock on
+`hand.L` (`anchor_bones`), and the `gun` bone stays in the rig, unweighted. The left forearm and hand are detached from
+the left thigh and hips (they touched once the gun box no longer covered them), and the patched belt keeps the old gun
+boxes, now on `hips`. Stretch: worst 12.64 (ledge) against main's 8.37; main's own spec on this master gives 47.66.
+
 **v95 (2026-11-11):** the mesh is the v95 master with the appeal3 face and calves (~/meshy/v95/Grimble/r2/appeal3/cand_b.glb: the face
 repainted from the v2 art, with scrap-metal teeth, the gold tooth, a dark gap, purple lips and the smug squint; the calves 12% slimmer;
 pick.txt beside it) put on this same skeleton, clips and anchors by tools/art1/v95_swap.py with art/wardens/src/grimble_v95.json
@@ -28,7 +35,7 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
 - **Right arm:** the bone hook IS the arm. Everything past the right wrist rides bone `hook` (hand.R); the crescent, which curls in by his
   right shin, is split from the leg by place (a capsule round the leg's core). It reaches the ground at rest, as on the sheet (the crescent's lowest edge rides the right foot).
-  anchor_claw and anchor_hook_tip sit on its tip: the kit's abyssal arm reaches out from there. While the kit's arm is stretched out, bone `hook` shrinks away (`hide_while_chain`): the kit draws the hook at the arm's end, so anchor_claw
+  anchor_claw and anchor_hook_tip sit on its tip. The Abyssal Hand is this arm: while it is out, `WardenReach` (data `reach`) lays upper_arm.R and forearm.R on the line to the hook and stretches forearm.R, so the hand and everything on `hook` (the slime hand, the crescent) sit at the tip (owner playtest 11-11).
   collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
 - **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
