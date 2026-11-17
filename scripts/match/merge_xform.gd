@@ -71,8 +71,6 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 		m.fx.spark(h.pos + Vector3(0, 1.0, 0), Vector3.UP, Color(col).lerp(Color.WHITE, 0.4), 20, 9.0, 180.0, 0.45, 8.0, 1.2)
 		m.sfx("armor_break", h.pos, 2.0, 0.9)
 		Shake.incoming_big(m, h.pos, 0.5, h)
-		if h.is_local() and m.hud:
-			m.hud.toast_small("SHELL BROKEN", col)
 	else:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
 		m.sfx(end_cue(why), h.pos, -2.0)

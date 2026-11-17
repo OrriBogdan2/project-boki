@@ -194,7 +194,7 @@ settled the 11 rows it had left unsettled. None of [D], [F] or [W] shows those p
 row combines, so the second press goes and the first runs on). Each row is one assert in `--gunslinger-combo-check`
 ("Vex cancel ...", tools/vex_cancel_rows_check.gd). Any pair not in the table: both (ArchKit has no shared cast lock),
 except that every press is ignored, not buffered, while stunned or downed, and no hero but Vex fires from a glide
-(`Hunter.can_fire`, `ArchKit.fires_in_glide`).
+(`HunterAttack.can_fire`, `ArchKit.fires_in_glide`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
