@@ -37,7 +37,6 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_idle": 1.0,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -166,6 +165,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
 	"x": {
 		"name": "Hearth Call",
 		"card_range": "range",

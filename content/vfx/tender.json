@@ -18,6 +18,10 @@
 			{"p": "star", "y": 0.6, "n": 5, "shape": "disc", "radius": 0.35, "speed": 1.1, "spread": 0.3, "grav": -0.4,
 				"curl": 1.5, "life": 1.2, "size": 0.12, "c": "pink", "c2": "hot", "near": true}
 		]},
+		"ready": {"net": false, "fx": [
+			{"p": "flare", "size": 0.5, "grow": 1.2, "life": 0.1, "c": "main", "c2": "hot", "c3": "pink"},
+			{"p": "star", "n": 5, "way": "fwd", "speed": 0.8, "spread": 1.5, "drag": 2.0, "life": 0.35, "size": 0.08, "c": "main", "c2": "hot"}
+		]},
 		"cast": {"net": false, "fx": [
 			{"p": "flare", "size": 0.28, "size_k": 1.0, "grow": 1.0, "life": 0.1, "c": "pink", "c2": "main", "c3": "lilac"},
 			{"p": "star", "n": 4, "way": "fwd", "speed": 2.0, "spread": 0.5, "drag": 2.0, "life": 0.4, "size": 0.1,

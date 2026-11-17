@@ -7,7 +7,7 @@ const NEAR := [Vector3(0.9, 0, -1.3), Vector3(0.9, 0, 1.3)]     # m from the tar
 var near: Array[Hunter] = []
 
 func parts() -> Array:
-	return ["lmb", "hold", "dash", "rmb", "e", "r"]
+	return ["lmb", "wait", "hold", "dash", "rmb", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(6.0)
@@ -16,6 +16,17 @@ func _part_lmb() -> void:
 		_aim(T.pos)
 	await _go(2.0, cast, _sheet("lmb", "LMB held: starlit comets from alternating hands, the hand flares, Kindled",
 		[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.3, 1.6, 1.9], func(): return (P.pos + T.pos) * 0.5), 2.0)
+	await _go(GAP)
+
+## The dummy stands 7.8 m out: two quick embers die short of him (6.75 m), then after a 1 s pause the ready cue
+## shows and the bigger ember flies 1.25x further and reaches him.
+func _part_wait() -> void:
+	await _reset(7.8)
+	var cast := func(t: float):
+		P.inp["fire"] = (t > 0.1 and t < 0.15) or (t > 0.5 and t < 0.55) or (t > 2.2 and t < 2.25)
+		_aim(T.pos)
+	await _go(3.2, cast, _sheet("wait", "LMB: two short embers, a pause with the ready flare, then the bigger ember reaches",
+		[0.2, 0.55, 1.4, 1.6, 2.3, 2.4, 2.5, 2.65, 3.0], func(): return (P.pos + T.pos) * 0.5), 2.0)
 	await _go(GAP)
 
 func _part_dash() -> void:

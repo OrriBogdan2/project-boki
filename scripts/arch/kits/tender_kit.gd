@@ -28,7 +28,8 @@ var burr_n := 0
 var field_look := {}           # the Burrseed field's look from content/vfx/tender.json "field", colours resolved
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
-var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
+var ready_shown := false        # the bigger ember's ready cue has played (once per wait)
+var emp_until := 0.0           # the next ember left an idle gun (Empowered: bigger, further, its own look and sound)
 var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
 var carry_t := 0.0
@@ -139,9 +140,12 @@ func _tick(dt: float) -> void:
 		e["left"] = float(e["left"]) - dt
 		if float(e["left"]) <= 0.0 or not is_instance_valid(e["t"]) or (e["t"] as Ent).dead:
 			kind.erase(key)
-	# an idle gun: the next ember is Empowered (the source gives no effect, so it only looks different)
-	if h.idle_fire >= 1.0 and not h.downed:
+	# an idle gun: the next ember is Empowered (lmb.wait s without firing): bigger and further (lmb.range_k, size_k)
+	if h.idle_fire >= float(lmb_def()["wait"]) and not h.downed:
 		emp_until = m.time + 0.9
+		h.shot_range_k = float(lmb_def()["range_k"])
+		if not ready_shown:
+			_show_ready()
 	_tick_seed(dt)
 	_tick_burrs(dt)
 	_tick_hearth(dt)
@@ -165,9 +169,16 @@ func _tick_look(dt: float) -> void:
 	if ult_look != null:
 		ult_look.tick(dt)
 
+## The wait is over: a chime and a flare at the hand the next ember leaves from (Motley's full-orb cue).
+func _show_ready() -> void:
+	ready_shown = true
+	m.sfx("os_prime", h.pos, -12.0, 1.0)
+	vfx("ready", CareUtil.hand_at(h, h.shot_n % 2 == 0), h.aim_dir())
+
 func _dress_ember(s: Dictionary) -> void:
 	var emp: bool = m.time < emp_until
 	emp_until = 0.0
+	ready_shown = false
 	var right := h.shot_n % 2 == 1
 	var d2 := h.aim_dir()
 	# the ember leaves from the casting hand's side at hand height (the hit band is the same)
@@ -175,7 +186,9 @@ func _dress_ember(s: Dictionary) -> void:
 	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
 	s["pos"] = from
 	s["start"] = from
-	lk().skin(s, "ember")
+	var size_k: float = float(lmb_def()["size_k"]) if emp else 1.0
+	s["r"] = float(s["r"]) * size_k          # the hit grows with the look
+	lk().skin(s, "ember", {}, size_k)
 	HeroVfx.of(m).trail(h, "cast_trail", s["node"])
 	stats["embers"] += 1
 	stats["swirls"] += 1
