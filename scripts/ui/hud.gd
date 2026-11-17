@@ -129,6 +129,7 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
