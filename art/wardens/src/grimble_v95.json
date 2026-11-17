@@ -39,8 +39,7 @@
   {"bone": "hoard", "box": [-9, 9, -9, 0.18, 1.4, 9]},
   {"bone": "hoard", "box": [-0.2, 0.2, -9, -0.05, 1.28, 1.4]},
   {"bone": "hoard", "box": [0.25, 0.5, -0.1, 0.1, 1.33, 1.4]},
-  {"bone": "gun", "box": [-0.18, 0.03, 0.115, 0.3, 0.62, 0.84]},
-  {"bone": "gun", "box": [-0.4, -0.18, 0.06, 0.3, 0.7, 0.84]}
+  {"bone": "hand.L", "box": [-0.62, -0.37, -0.14, 0.68, 0.27, 0.62]}
  ],
  "slots": [
   {"slot": "glow", "h": [0.15, 0.55], "s": [0.15, 1], "v": [0.2, 1], "box": [-0.08, 0.14, 0.34, 0.6, 1.22, 1.42]},
@@ -62,9 +61,10 @@
   "anchor_coins": [-0.22, 0.12, 1.42],
   "anchor_hoard_top": [0.0, -0.1, 1.86],
   "anchor_chest": [0.0, 0.17, 1.01],
-  "weapon_muzzle": [-0.05, 0.18, 0.75],
-  "anchor_gun_root": [-0.34, 0.1, 0.78]
+  "weapon_muzzle": [-0.47, 0.61, 0.41],
+  "anchor_gun_root": [-0.47, -0.05, 0.5]
  },
+ "anchor_bones": {"weapon_muzzle": "hand.L", "anchor_gun_root": "hand.L"},
  "detach": [["gun", "*"], ["hoard", "*"], ["hook", "thigh.R"], ["hook", "shin.R"], ["hook", "foot.R"], ["hook", "root"], ["hook", "hips"]],
  "move_bones": {"ball": [0.0, 0.1, 0.26]}
 }

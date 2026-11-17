@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://cpmcwrvnuf4dt"
-path="res://.godot/imported/pin_ult_nock.wav-7c2738e971f4eddfc79a789dd506ee31.sample"
+uid="uid://jcqdu46es817"
+path="res://.godot/imported/gun_rifle_1.wav-307a7825ac332801ae99b7e3b40d12a0.sample"
 
 [deps]
 
-source_file="res://audio/pin_ult_nock.wav"
-dest_files=["res://.godot/imported/pin_ult_nock.wav-7c2738e971f4eddfc79a789dd506ee31.sample"]
+source_file="res://audio/gun_rifle_1.wav"
+dest_files=["res://.godot/imported/gun_rifle_1.wav-307a7825ac332801ae99b7e3b40d12a0.sample"]
 
 [params]
 
