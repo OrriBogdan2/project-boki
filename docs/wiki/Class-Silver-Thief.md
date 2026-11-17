@@ -56,7 +56,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Arc Shots (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the long braid, the moth wings and the twin pistols |

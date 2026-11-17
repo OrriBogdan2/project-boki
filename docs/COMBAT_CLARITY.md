@@ -24,6 +24,20 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | in a fight (`MusicDir.fight_on`) only your own Boki's speech bubble is drawn; a Boki's ability name floats over your own Boki only (others' read from their looks) |
 
+## Ground order (11-12): a melee is not one disc
+A ground ring means gameplay, so in a pile the draw order and strength are one rule (`SideColor.ORDER_*`, a material's
+`render_priority`; `SideColor.order(m, by)` picks the tier):
+| tier | what | rule |
+|---|---|---|
+| top (3) | a rival's telegraphs and area rings (`Fx.telegraph_*`, `Fx.ring`, AimKit `all` entries; bosses and Boki enemy areas too) | drawn last; AimKit puts them in their own surface after yours |
+| 1 | your own casts | over a teammate's |
+| 0 | a teammate's casts | over the rings |
+| -2 | ownership rings (`SideRings`: Hunter and Boki) | thinnest band (`THIN` 0.07), and `COVERED_K` 0.25 of their alpha while any telegraph, cast ring or AimKit shape covers the body |
+One full-strength fill under a body: `Fx.stack_telegraphs` drops a telegraph whose centre lies inside a higher one (the
+later on a tie) to `UNDER_A` 0.35 of its alpha until that one ends; AimKit fills are already faint (0.18). Checked in
+`--clarity-check` (3v3 pile, Boki out) and `--aimkit-check`; stills `docs/shots/combat-melee-ring-stack/` (`before*.png` on the clarity branch tip 8c5cc0019, `after*.png` on this; `_close` is a 2x crop) from
+`--ring-stack-shots`, GPU jobs 20261112-114315-11530 / -13824.
+
 Checked by `--clarity-check` (side edges per viewer, the side lean, the shot halo, stars / tendrils / frost / tint on
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
 `--dolm-combo-check` and `--aimkit-check`.
@@ -40,7 +54,7 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 
 | Hunter | grade | why (what still reads badly) | owner |
 |---|---|---|---|
-| Grimble (dredge) | unclear | the ult's giant violet-and-gold spiked shape covers the whole fight for seconds; four colours across the kit | per-Hunter job |
+| Grimble (dredge) | clear-ish | ult fixed: the fan is the true area in his gold (`#ffc832`) at AimKit's low fill, the crescent that swept the fan each wave is cut, each slug draws only its own orb (Match's plain sphere and its 3 m halo went under it), the wave flash at his fists 0.6 m (was 1.9 m) and a slug's hit glow 0.4 m (was 0.9 m); still four colours across the kit | ult on `ext/combat-grimble-ult-clarity` (stills `docs/shots/combat-grimble-ult-clarity/`), the rest per-Hunter |
 | Motley (ostra) | unclear | several large violet well discs at once, no edge to tell whose (now leaning red/blue via shared telegraphs only where they go through ArchKit/AimKit); indigo vs teal signature | per-Hunter job |
 | Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | per-Hunter job |
 | Sable (thief) | unclear | LMB hits barely show; her X discs are pale | per-Hunter job |
@@ -56,4 +70,4 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 Shared things still noisy in the films: Boki ability names (`Stinger Hook`, `Prism Wall`) over other people's Boki
 and other Boki's bubbles ("Echolope: behind you!") are now off in a fight (above). Still open: the "Hold F to
 stomp" prompt over a downed fight (the downed rework on `ext/wisp-clarity-1112` changes it); Boki rings and the
-Hunters' cast rings stack under a melee.
+Hunters' cast rings stack under a melee (fixed: Ground order, above).

@@ -228,15 +228,31 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
-		_reset_riposte()
+		if _reset_riposte() and is_instance_valid(t):
+			ComboMark.payoff(m, h, t)
 
-## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
-func _reset_riposte() -> void:
-	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
-		return
+## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked). False when it was
+## already ready or not yet unlocked.
+func _reset_riposte() -> bool:
+	if not _riposte_resettable():
+		return false
 	HeroUlt.reset(self)
 	slam_resets += 1
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	return true
+
+func _riposte_resettable() -> bool:
+	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
+
+## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+func combo_read(t: Ent) -> Dictionary:
+	if warchain.hooked() and warchain.target == t:
+		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
+	var window := float(rmb_def()["slam"].get("reset_t", 2.0))
+	var left: float = window - (float(m.time) - float(slam_hit.get(t.get_instance_id(), -99.0)))
+	if left <= 0.0 or not _riposte_resettable():
+		return {}
+	return {"icon": "slam", "n": 0, "max": 0, "left": left, "total": window}
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
@@ -328,7 +344,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
 	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
-	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
+	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
@@ -404,7 +420,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
+	h.atk.strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()

@@ -144,11 +144,11 @@ func drop_draw() -> void:
 	if anim_id in ["arc_draw", "arc_over"]:
 		anim_id = ""
 
-## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
+## HunterAttack.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
 	return draw.rate()
 
-## Hunter._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
+## HunterAttack._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
 func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
@@ -458,7 +458,7 @@ func _tick_rain(dt: float) -> void:
 		KinExec.apply_foe(stg.effects, f, tick, f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
-		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+		if w.downed and not w.dead and w.team != h.team and _in_rain(w):
 			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots
