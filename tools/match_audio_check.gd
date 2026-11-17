@@ -21,6 +21,7 @@ extends RefCounted
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
 ## And the carry cues (CarrySfx): the swap's two notes in order, a claim's lock-in, a steal heard by its owner, the
 ## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
+## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
 var main: Node
 var fails := 0
@@ -84,6 +85,7 @@ func run(main_node: Node) -> void:
 	await _glider(P, "yours")
 	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	await load("res://tools/match_audio_interrupts.gd").new().run(self, m, P, other)
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
@@ -438,8 +440,13 @@ func _barks(m: Match, P: Hunter) -> void:
 ## Carry 2 in, 1 out: the swap key, a claim and a steal, through the real paths (Hunter.swap_kin, Life.take_item,
 ## KinTrack.register, which every game runs for a catch online).
 func _carry(m: Match, P: Hunter) -> void:
-	var pairs := m.hunters.filter(func(x): return x != P and not x.out and x.kin and x.kin2 and not x.kin2.dead)
-	ok(not pairs.is_empty(), "setup: a bot brought two Boki")
+	var pairs := m.hunters.filter(func(x): return x != P and not x.out and x.kin and not x.kin.dead)
+	if not pairs.is_empty() and (pairs[0].kin2 == null or pairs[0].kin2.dead):
+		# main retired two Boki at the start (Match.TWO_KIN): a second one comes back out of a box (give_kin)
+		var r2: Dictionary = (pairs[0].kin.rec as Dictionary).duplicate()
+		r2["uid"] = "carry_check_2"
+		m.give_kin(pairs[0], r2)
+	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
 	if pairs.is_empty():
 		return
 	var B: Hunter = pairs[0]
@@ -588,7 +595,7 @@ func _set_speed(h: Hunter, flat: float, vy: float) -> void:
 	h.net_vel = h.vel
 
 func _pitch(key: String) -> float:
-	return (Sfx.loops[key]["p"] as AudioStreamPlayer3D).pitch_scale
+	return (Sfx.loops[key]["p"] as AudioStreamPlayer).pitch_scale
 
 ## The state just changed: one tick plays `cue`; a second tick in the same state does not play it again.
 func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
