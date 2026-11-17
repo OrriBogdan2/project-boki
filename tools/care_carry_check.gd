@@ -1,6 +1,6 @@
 extends RefCounted
 ## Meeko's Soulpack (docs/heroes/tender.md, passive Bearer), run by tools/support_check.gd inside
-## --tender-combo-check. Source (supervive_kits.md, Elluna): taking too much damage or being stunned
+## --tender-combo-check. Source (sv/briefs/kits.md, Elluna): taking too much damage or being stunned
 ## drops the carried Wisps and locks re-pick for 4 s; nothing else. Each way a carrier can be hit is
 ## asserted: shot damage, a DoT tick, a knock-back, a stun, a root, a slow and a teammate's heal.
 

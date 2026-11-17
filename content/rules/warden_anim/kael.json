@@ -58,11 +58,13 @@
 	"kmoves": {
 		"jug_slash_r": {
 			"clip": "slash_r",
+			"scale": 1.38,
 			"upper": "moving",
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_slash_l": {
 			"clip": "slash_l",
+			"scale": 1.38,
 			"fade_out": 0.4
 		, "air_legs": true},
 		"jug_wave_wind": {
@@ -172,6 +174,8 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"dead_t": 1.5,
 		"stun": "stun",
@@ -258,9 +262,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",

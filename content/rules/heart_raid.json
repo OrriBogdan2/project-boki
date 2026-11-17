@@ -8,7 +8,7 @@
  "boss_s": 660.0,
  "_boss_s": "the boss comes at this time, or boss_after_clear_s after the last wave is cleared, whichever is first",
  "boss_after_clear_s": 20.0,
- "boss": {"kind": "colossus", "name": "Blighted Cairnback", "hp": 4000.0, "half": 13.0, "enrage": 150.0,
+ "boss": {"kind": "colossus", "name": "Blighted Cairnhorn", "hp": 4000.0, "half": 13.0, "enrage": 150.0,
   "_doc": "the one prototype boss: a Lair boss kit (scripts/match/boss.gd) fought in the open around the Heart, named for the Boki it is (content/kin/*.json \"boss\"). hp is for a squad of 4 at tier 1 before scale.boss_hp; enrage = seconds before it hits harder (a Lair's is 75); half = the half-width in metres of the square it fights in, centred on the Heart"},
  "warn_s": 10.0,
  "_warn_s": "a wave's gates are marked (a ring and a countdown on the ground, a badge on the minimap) this many seconds before it comes out of them",

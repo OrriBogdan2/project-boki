@@ -168,8 +168,6 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 		k.teleport(at)
 	if why == "cc":
 		k.m.sfx(KinVoice.cue(k.species, "unsure"), k.pos, -6.0)
-		if h.is_local() and k.m.hud:
-			k.m.hud.toast_small("Dropped it", Color("ffd89a"))
 
 ## Speed factor while carrying a Boki (Hunter._physics).
 static func carry_speed(h: Hunter) -> float:

@@ -33,6 +33,7 @@ ART = {
 }
 TRIS = 60000  # the body's triangles in game (RIG_CONTRACT "Budget": the v95 masters' own-paint models)
 TEX = 4096  # the largest side of each of the master's images in the .glb (px)
+HEAD_SHARE = 0.45  # the head's share of the body triangles (a 20% head band tears the face at 60k even with seam-weighted collapses)
 SECOND_TEX = 2048  # px: the game's size limit for a master's other images (VRAM: 4096 is 11 MB compressed, 2048 2.7 MB)
 
 
@@ -104,10 +105,9 @@ def main():
     spec = spec_for(art)
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
     tris = a.tris or spec.get("own_tris", TRIS)
-    k = tris / float(spec["tris"])
     spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if spec.get("head_tris"):
-        spec["head_tris"] = int(spec["head_tris"] * k)
+        spec["head_tris"] = int(tris * HEAD_SHARE)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
     spec["move_bones"] = {b: v for b, v in spec.get("move_bones", {}).items() if isinstance(v, dict)}
     work = os.path.abspath(os.path.expanduser(a.work or "~/meshy/v95/_ingame/%s" % a.name))

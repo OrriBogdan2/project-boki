@@ -803,6 +803,7 @@ def main():
         skin_relax.relax(arm)
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
         print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
+    BW._unfold(low)     # (the fit folds a few more over: Motley's four 10-17 cm collar shards came from here, not the collapse)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:

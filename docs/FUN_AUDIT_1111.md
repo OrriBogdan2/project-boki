@@ -1,4 +1,4 @@
-# Fun audit 11-11: a SUPERVIVE player's read of Project Boki
+# Fun audit 11-11: a REFERENCE player's read of Project Boki
 
 Base: origin/ext/release-integ-0245 (92df78ce4). Owner rules first: briefs/DECISIONS.md (PARITY FIRST 11-07, cooldowns at 1.0x, TTK bar 0.8 to 1.25 in `--ttk-check`). Kits are judged against the source; personality is ours and not judged here. The Boki loop (catch, garden, summon) is covered by reviews/DESIGN_REVIEW_1110_FUN.md and is only linked below.
 

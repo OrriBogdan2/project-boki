@@ -35,6 +35,6 @@ const EDGE_DOWN := 0.12      # and this far below it: the arrow's tip stays abov
 ## Where the edge arrow for screen direction `d` is anchored: the edge of the play area round the middle.
 static func edge_point(sz: Vector2, d: Vector2) -> Vector2:
 	var mid := Vector2(sz.x * 0.5, sz.y * 0.47)
-	var hx := (mid.x - EDGE_LEFT) if d.x < 0.0 else (sz.x - EDGE_SIDE - mid.x)
-	var hy := sz.y * (EDGE_UP if d.y < 0.0 else EDGE_DOWN)
+	var hx := (mid.x - HudScale.from_edge(EDGE_LEFT)) if d.x < 0.0 else (sz.x - EDGE_SIDE - mid.x)
+	var hy := sz.y * (EDGE_UP if d.y < 0.0 else EDGE_DOWN / HudScale.up())
 	return mid + d * minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
