@@ -2,7 +2,7 @@ extends "res://tools/dash_flow_check.gd"
 ## --chain-sweep-check (advisory: prints, never gates a ship): DECISIONS "every interaction is chainable". For
 ## a light, medium and heavy Hunter, in every movement state, press dash, jump, glide, wall kick, mantle, LMB
 ## and E on the next step and assert the move starts, or that the documented rule (REFUSE below) says it does not.
-## States: ground, air, glide, ground dash, air dash, rocket free fall, glide ring, lift ring, Ice Sheet (grip
+## States: ground, air, glide, ground dash, air dash, rocket free fall, glide ring, Ice Sheet (grip
 ## 0.12), Deep Water (speed 0.55). A wall is a carved 1.6 m block (two terraces) the wall actions use.
 ## It takes a player's keys (glide_press_only). A press that starts later than WATCH_NOW steps is a buffered
 ## one (DashFlow rows): it must start inside BUFFER_S and the line says how late. Prints "CHAIN ok|FAIL|n/a ...".
@@ -29,20 +29,17 @@ const REFUSE := {
 	"dash_ground/glide": "no glider off the ground",
 	"glide/jump": "already gliding: the press has nothing to open", "glide/glide": "already gliding",
 	"glide_ring/jump": "already gliding", "glide_ring/glide": "already gliding",
-	"lift_ring/jump": "already gliding", "lift_ring/glide": "already gliding",
 	"rocket_fall/wall_kick": "a dropping hunter never kicks (WallMoves.try_kick): Space pulls the glider",
 	"rocket_fall/dash": "no dash, attack or ability while dropping (ArchKit.locked, the drop's own rules)",
 	"rocket_fall/lmb": "no attack while dropping (ArchKit.locked)",
 	"rocket_fall/e": "no ability while dropping (ArchKit.locked)",
 	"glide/lmb": "no attack with the glider open (Hunter.can_fire)", "glide_ring/lmb": "no attack with the glider open",
-	"lift_ring/lmb": "no attack with the glider open",
 }
 ## Wall actions need a wall within reach: these states have none (a lane or the sky) or are on the ground.
 const NO_WALL := {
 	"ground/wall_kick": "a wall kick is an air move; on the ground Space is a jump",
 	"ice/wall_kick": "air move", "deep_water/wall_kick": "air move", "dash_ground/wall_kick": "air move",
 	"glide_ring/wall_kick": "no wall in an air lane", "glide_ring/mantle": "no wall in an air lane",
-	"lift_ring/wall_kick": "no wall in an air lane", "lift_ring/mantle": "no wall in an air lane",
 	"rocket_fall/mantle": "no wall in the sky",
 }
 
@@ -73,7 +70,10 @@ func run(main: Node) -> void:
 		mm.queue_free()
 		await main.get_tree().process_frame
 		mm = _crown(main, hero)
-		for st in ["ice", "deep_water", "glide_ring", "lift_ring"]:
+		var wet_states := ["ice", "deep_water"]
+		if not mm.air_rings.is_empty():     # (a map with no glide ring has no ring state to sweep)
+			wet_states.append("glide_ring")
+		for st in wet_states:
 			_state_row(weight, hero, st)
 		mm.queue_free()
 		await main.get_tree().process_frame
@@ -311,9 +311,7 @@ func _enter(st: String, wall: bool) -> bool:
 			mm.step(Match.DT)
 			return hunter.dropping and hunter.diving
 		"glide_ring":
-			return _ring(false)
-		"lift_ring":
-			return _ring(true)
+			return _ring()
 	return false
 
 ## Keys held through the state: into the wall for a wall pose, none otherwise.
@@ -339,13 +337,11 @@ func _open_glider() -> void:
 			break
 	hunter.inp["jump"] = false
 
-## Flies into the first glide ring (or lift ring) of the map and returns true the step after it took the hunter.
-func _ring(lift: bool) -> bool:
-	for rg in mm.air_rings.list:
-		if rg["lift"] != lift:
-			continue
+## Flies into the first glide ring of the map and returns true the step after it took the hunter.
+func _ring() -> bool:
+	for rg in mm.air_rings:
 		var c: Vector3 = rg["pos"]
-		var dir: Vector2 = rg["dir"] if not lift else Vector2.ZERO
+		var dir: Vector2 = rg["dir"]
 		hunter.teleport(c - Vector3(dir.x, 0.0, dir.y) * 1.5)
 		hunter.grounded = false
 		hunter.vel = Vector3(dir.x, 0.0, dir.y) * 12.0
