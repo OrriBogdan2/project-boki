@@ -617,10 +617,6 @@ func _pick_clip(dt: float) -> void:
 	var feel: Dictionary = LAYER.get(String(root.get_meta("pose", "")), {})
 	_step_layer(feel, dt)
 	var want := _state_clip()
-	if want == "idle":
-		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
-	else:
-		_idle.rest(_rng)
 	if want in GAITS and feel.has("clip"):
 		want = feel["clip"]
 	if want == "idle":
