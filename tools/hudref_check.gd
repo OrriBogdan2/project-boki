@@ -16,6 +16,7 @@ extends RefCounted
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
+##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -218,6 +219,7 @@ func run(main_node: Node) -> void:
 	_check_safe(hud)
 	await _frames(m, hud, P)
 	await _hud_size(m)
+	await _check_wash(P)
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,
@@ -488,6 +490,39 @@ func _banner_closes(kb: KnockBanner) -> void:
 		guard += 1
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
+
+## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## DamageDir.hit) weights the left edge, and a second later the wash is even again.
+func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
+	var hp_was := P.hp
+	P.hp = P.max_hp * 0.5
+	var above := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.3
+	var high := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.1
+	var low := HurtWash.strength(P)
+	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
+		% [int(HurtWash.BELOW * 100.0), high, low])
+	var foe: Hunter = P.m.hunters.filter(func(x): return x.team != P.team)[0]
+	foe.pos = P.pos + Vector3(-6.0, 0.0, 0.0)
+	hud.dmg_dir.hits.clear()
+	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.dmg_dir.hit(P.m, foe, P, 30.0)
+	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
+	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
+	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
+	ok(left > 0.9 and right == 0.0 and top < left, said)
+	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
+	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
+	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
+	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
+	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
+	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
+	P.hp = hp_was
+
 
 ## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
 func _channel(m: Match, hud, P: Hunter) -> void:

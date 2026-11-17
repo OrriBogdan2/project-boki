@@ -92,10 +92,27 @@ func _eggs(tree: SceneTree) -> void:
 	await tree.process_frame
 	hx._looks_good()
 	await _shot(tree, "hatch_eggs", 2.5)
+	hx.cam.position = hx.cam_to      # (settled, so the egg holds still under the pointer)
+	await tree.process_frame
+	var basket: Vector3 = (hx.eggs[3]["holder"] as Node3D).global_position + Vector3(0, 0.45, 0)
+	_mouse_to(hx.cam.unproject_position(basket))
+	await _shot(tree, "hatch_mystery_hover", 0.6)
+	_mouse_to(Vector2(40, 40))
+	await _shot(tree, "hatch_mystery_left", 0.6)
 	hx._pick(3)
 	await _shot(tree, "hatch_mystery_picked", 1.2)
+	hx._pick(3)
+	await _shot(tree, "hatch_mystery_used", 0.6)
 	hx.queue_free()
 	await tree.process_frame
+
+## The pointer to `p` on screen: the real one (a windowed run) and the viewport's (headless).
+func _mouse_to(p: Vector2) -> void:
+	main.get_viewport().warp_mouse(p)
+	var e := InputEventMouseMotion.new()
+	e.position = main.get_viewport().get_screen_transform() * p      # (input arrives in window pixels)
+	e.global_position = e.position
+	Input.parse_input_event(e)
 
 func _viewer(tree: SceneTree) -> void:
 	_fresh()

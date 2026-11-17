@@ -1,6 +1,6 @@
 class_name ScoreMute
 extends RefCounted
-## The Mute chip on each other player's row of the Tab scoreboard (Hud._draw_scores). Only people on
+## The Mute chip on each other player's row of the Tab scoreboard (SquadBoard). Only people on
 ## the net get one: bots have nobody to silence. Click one while Tab is held to flip MuteList for that
 ## name; while you hold Tab over a chip the click belongs to the chip, not to your weapon.
 

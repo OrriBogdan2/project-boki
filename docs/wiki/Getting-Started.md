@@ -9,7 +9,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 ## The title screen
 
 - **New game / Continue.** A new game starts with a short story, then your first egg.
-- **Arena.** Every Hunter against dummies and a sparring bot. No save needed. See [Arena and training](Arena-and-Training.md).
+- **Training Grounds.** Every Hunter against dummies and a sparring bot. No save needed. See [Arena and training](Arena-and-Training.md).
 - **Demo match** (once you have a save). A ready-made Duos expedition with a bot squadmate, clear
   weather and no Blight. See [Expeditions](Expeditions.md#the-demo-match).
 - **Play with friends** (when online play is available), **Save files**, **Settings**, **Quit**.
