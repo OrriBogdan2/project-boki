@@ -10,6 +10,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `reticle.gd` (`Reticle`, one on `hud.reticle` for the tick) | the aiming reticle in the player's style (static `draw`), and the hit tick: four short strokes out of the reticle in the Hunter's colour (`AimKit.hero_col`) for 0.09 s on each hit you land on a foe's Hunter, Boki or a monster (`CombatBus.hit_landed`), longer and ringed for 0.12 s on a knock; none for misses, zone (DoT) ticks, your Boki's or teammates' hits (`--hit-marker-check`, `--hit-marker-shots`) |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
@@ -65,6 +66,23 @@ Check: `--hudref-check` (segments follow max health, the chip holds then drains,
 drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears,
 the ultimate tile goes cooling -> ready with the shine on the redraw it comes back, steady after, padlocked while stunned,
 no second shine).
+
+## Damage numbers
+
+Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
+or your Boki, or taken by you) and picks one of three looks (`Fx.Num` HIT, KIN, TICK) from the hit itself (`Fx.num_kind`),
+never from the kit:
+
+| Look | Source | Size | Colour | Where, and what adds up |
+|---|---|---|---|---|
+| hit | your direct hits (and anyone's hits on you) | full | `HudStyle.HIT`, crit / armour / hurt colours | the hit spot; rapid hits add up |
+| Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
+| tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
+
+Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
+Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
+smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
+the draw cost doesn't grow with the sources. Check: `--number-looks-check`.
 
 ## Boki HUD: decision, state, gaps
 
