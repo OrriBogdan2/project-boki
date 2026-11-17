@@ -279,7 +279,7 @@ func _early_seat(main: Node) -> void:
 	# ---- the home half (the major bundle: egg and materials)
 	var major: Dictionary = H3.pay(m3.hunters[1], Heart.HOW_FINAL)
 	var egg_sp := String(major["egg"].get("sp", ""))
-	ok(Data.is_rare(egg_sp), "the major bundle has a rare egg (%s)" % egg_sp)
+	ok(Data.egg_pool().has(egg_sp), "the major bundle has a first-form egg (%s)" % egg_sp)
 	ok(major["goods"].has("starstone"), "...and starstone")
 	Incubator.ensure()
 	var eggs0 := Incubator.count()

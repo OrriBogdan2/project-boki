@@ -21,6 +21,9 @@ set -u
 PR=$1 BRANCH=$2 HEAD_SHA=$3 GATED=$4 OUT=$(realpath -m "$5")
 REPO=${BOKI_REPO:-/home/boki/project-boki} WORK=${REGATE_WORK:-/home/boki/cj/regate-bot/work}
 JOBS=${REGATE_JOBS:-$(( $(nproc) / 3 > 2 ? $(nproc) / 3 : 2 ))}
+# 11-16: leave the other gates on this box their share: at most the free cores (load1 vs nproc), never under 2
+FREE=$(awk -v n="$(nproc)" '{f = int(n - $1); print (f < 2 ? 2 : f)}' /proc/loadavg)
+[ "$FREE" -lt "$JOBS" ] && JOBS=$FREE
 HERE=$(cd "$(dirname "$0")" && pwd)
 # one run per work slot: two runs sharing a worktree reset each other's trees mid-gate (seen 11-14 on rpc7)
 for SLOT in 0 1 2; do

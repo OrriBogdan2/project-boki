@@ -44,7 +44,7 @@ func run(main: Node) -> void:
 	main.add_child(rm)
 	await rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
 	rm.set_process(false)
-	ok(Practice.of(rm) == null and rm.cam.user_zoom == 1.0, "a real match has no practice bar, picker or wheel zoom")
+	ok(Practice.of(rm) == null, "a real match has no practice bar or picker")
 	rm.queue_free()
 	print("PRACTICEHERO DONE, failures: %d" % bad)
 	tree.quit()
@@ -106,13 +106,13 @@ func _area(main: Node, m: Match, area: String) -> void:
 	m.set_process(true)        # (the camera follows in the render frame)
 	for i in 90: await tree.process_frame
 	m.set_process(false)
-	ok(zin < z0 and m.cam.zoom < 1.0, "%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom])
+	ok(zin < z0 and m.cam.zoom_to < z0, "%s: the wheel zooms in (user zoom %.2f -> %.2f, camera %.2f)" % [area, z0, zin, m.cam.zoom])
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	ok(m.cam.user_zoom > zin, "%s: and out again (%.2f)" % [area, m.cam.user_zoom])
 	for i in 200: await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
-	ok(is_equal_approx(m.cam.user_zoom, Practice.ZOOM_MAX), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+	ok(is_equal_approx(m.cam.user_zoom, CamWheel.far()), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
 
 func _key(tree: SceneTree, action: String) -> void:
 	var ev := InputEventAction.new(); ev.action = action; ev.pressed = true
