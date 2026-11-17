@@ -81,4 +81,5 @@ static func _pick(home: Node, id: String) -> void:
 	if not HeroGrid.save_pick(id):
 		return
 	home._refresh_player_model()
+	ExpFold.forget("All Relics")
 	home._open_expedition()
