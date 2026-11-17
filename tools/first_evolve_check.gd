@@ -110,10 +110,11 @@ func _beat() -> void:
 
 ## The beat and the lane's own clock together (lines expire and the waiting one moves up, as in play).
 func _tick(beat: FirstEvolveBeat, h: FakeHome, secs: float) -> void:
-	beat.tick(secs)
 	var lane := MsgLane.of(h.root_ui)
 	for k in 12:
 		lane._process(secs / 12.0)
+	beat.tick(secs)
+	lane._process(0.0)
 
 func _skip_and_tips() -> void:
 	Save.d["tutorial"].erase("first_evolve")
