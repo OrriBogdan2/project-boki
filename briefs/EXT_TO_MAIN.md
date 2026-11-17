@@ -10033,3 +10033,4 @@ READY ext/merge-lane-hunters4-1117 94a1e006f2 (merge lane hunters4: Gil v95 glb 
 READY ext/merge-lane-uihud-1117 52026532d2 (uihud lane: rest of PR #104 + loading/title; main d65d37d14a7 merged, NEW-RED 0 on targeted checks)
 READY ext/merge-lane-vfx1-1117 cc6d69ab13 (lane vfx1: kin-type-trail + sfx-listener-hunter ported onto main; suite not run locally, host overloaded)
 READY ext/cinder-emission-fix-1117 1d9f42ee1db (Cinder solid-red fix: skin+metal desat 0.4/albedo lift in warden_look.json, merged with current main; re-gated)
+READY ext/vex-single-dash a67a2b8a80e5232c314ae98d47517d59d5c6d312 (Vex Slipstep single dash, no charge pips; origin/main merged in by hand: main's dash_charges/charge_discs kept, single_dash keeps max_dashes 1 + no Second Wind offer; --vex-dash-check, --dash-slot-check, --kill-reset-check, --check pass; health --strict red only on main's own match.gd budget and style ratchet)
