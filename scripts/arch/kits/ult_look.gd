@@ -1,12 +1,12 @@
 class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
-##   Pip, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
-##   Claire, Rimelock: the rink (a faint sheet of ice whose cracks glow as it builds, a fringe of
+##   Pip, Rise and Shine: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
+##   Claire, Freeze Frame: the rink (a faint sheet of ice whose cracks glow as it builds, a fringe of
 ##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
 ##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
 ##   IceBody's while sealed.
-## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted),
+## keep(key, "tether", from, {b, a, col}) (also the Stick Around's vine, tinted),
 ## keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
 ## keep(key, "frostbud", at, {grow, crack}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).

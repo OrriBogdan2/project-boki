@@ -1,13 +1,13 @@
 class_name PinUlt
 extends Node3D
-## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). The press is the
+## Hem's ultimate on X, Finishing Touch (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). The press is the
 ## first shot: the same frame X goes down a big arrow leaves the bow's nock point at the cursor, with no cast
 ## lock, wind-up or nock (the owner's 11-08 note: the ult fires on press, its effects alongside the shot, never before).
 ## It empowers the bow for "shots" (3) within "window" seconds: each LMB press after "recover" s looses the
 ## next arrow the instant it is pressed. Each flies "speed" m/s (the source's beam crosses its 18 m in about
 ## 0.2 s), pierces every foe out to "range" (1.5x her Empowered range), knocks back and strips "shred" armor.
 ## The last arrow hits harder and finishes a hunter it leaves under "execute" of their health. She can walk,
-## roll and Spirit Walk between shots. The window ends after the last arrow or on time.
+## roll and Slip Stitch between shots. The window ends after the last arrow or on time.
 ##
 ## Telegraphs (AimKit, own player): the arrow's lane out to its range and a ticked crosshair ring at her
 ## feet while empowered. Everyone sees pips over her for the shots left and her glowing bow, and hears the

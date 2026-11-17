@@ -1,8 +1,9 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Albert's reel (tools/hero_vfx_reel.gd, docs/decisions/0061-breaker-swing-lunge.md), every slot at the match
 ## camera's zoom: the hammer thrown and called back, the charged swing, the swing's lunge standing and running (its
-## distance over him with the full performance overlay on), the raised shield, the aegis boop on the dummy, its Shield
-## Charge into a Shield Slam, a foe driven into a rock, the 360 Smash (dash), Mending Ground (e), the Faultline hop and
+## distance over him with the full performance overlay on), the raised shield, the Blue Guard boop on the dummy, its
+## Shield
+## Charge into a Shield Slam, a foe driven into a rock, the Tideturner (dash), Safe Harbour (e), the Groundswell hop and
 ## slam (r), and the thrown hammer reeled home by its rope.
 
 const HOLD := 1.5              # s the swing is held: past full charge and its perfect window
@@ -69,11 +70,11 @@ func _part_bash() -> void:
 		if t > 0.55:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Shield Charge into a Shield Slam",
+	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Full Ahead into a Shield Slam",
 		[0.45, 0.52, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.5]), 2.0)
 	await _go(GAP)
 
-## The 360 Smash: the run-up, then the turn frame by frame (the hit lands about a third of the way round, 0.21 s
+## The Tideturner: the run-up, then the turn frame by frame (the hit lands about a third of the way round, 0.21 s
 ## after the press), the ring left at the hit radius running round with the hammer, and the damage number.
 func _part_dash() -> void:
 	await _reset(5.4)
@@ -162,7 +163,7 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(home + Vector3(12.0, 0, 0))
-	await _go(2.6, cast, _sheet("r", "R, Faultline: the hop, the slam, the lane",
+	await _go(2.6, cast, _sheet("r", "R, Groundswell: the hop, the slam, the lane",
 		[0.15, 0.25, 0.32, 0.4, 0.5, 0.56, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
 

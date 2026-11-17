@@ -28,13 +28,13 @@ extends RefCounted
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
 ##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
 ##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
-##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
+##  11. Meeko's Rise and Shine channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
 ##      even when X is pressed again, and it is gone within one frame of every way the channel can end
-## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
+## Reads the files (and, for the Rise and Shine loop, one short training match); never touches the save.
 ##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
-##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##  11. Sparkle's Stormfall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ## Never touches the save.
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
@@ -361,7 +361,7 @@ func _ult_cues() -> void:
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
 	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to the aim telegraph")
 
-## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
+## Penny Drop's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
 ## it carries past hearing range, and the kit plays it where the shell will land.
 func _nuke_fall() -> void:
 	var delay := float(Arch.def("gunslinger")["x"]["delay"])

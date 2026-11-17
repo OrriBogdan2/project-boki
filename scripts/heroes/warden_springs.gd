@@ -25,7 +25,7 @@ var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint p
 var fold := 0.0             # wing chains folded (1) or flared, a hanging one raised (-1) (WardenGlb.WING_FOLD)
 var wind_t := 0.0
 var calm := false           # no ripple (a check measuring how a chain settles)
-var still := false          # no ripple: a statue pose (data "still": Claire's Rimelock)
+var still := false          # no ripple: a statue pose (data "still": Claire's Freeze Frame)
 
 func setup(skeleton: Skeleton3D) -> void:
 	skel = skeleton
@@ -43,7 +43,7 @@ func setup(skeleton: Skeleton3D) -> void:
 			ids.append(cur)
 		if ids.size() >= 2:
 			# (a "hang" chain, spring_hang<name>_<i>: a chain or rope whose rest shape is straight down from its
-			# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points;
+			# root, not riding its parent: Kael's Short Leash hangs from his fist whichever way the arm points;
 			# a "wing" chain folds back while the Warden skates, WING_FOLD)
 			chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
 				"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),

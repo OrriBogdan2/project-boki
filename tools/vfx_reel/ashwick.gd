@@ -1,6 +1,6 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Cinder's reel (tools/hero_vfx_reel.gd): the lance held and swept across the dummy (the hose, its tongues and
-## scorch), the Cinder Shot into a burning dummy (the spread), the ram into it, the cloak, and the flight with the
+## scorch), the Spitfire into a burning dummy (the spread), the ram into it, the cloak, and the flight with the
 ## tank jets over the carpet.
 
 func parts() -> Array:
@@ -35,6 +35,6 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(T.pos + Vector3(4.0, 0, 2.0))
-	await _go(2.8, cast, _sheet("r", "R, Flue Flight: lift-off, the tank jets, the carpet, the landing",
+	await _go(2.8, cast, _sheet("r", "R, Red Carpet: lift-off, the tank jets, the carpet, the landing",
 		[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
 	await _go(GAP)

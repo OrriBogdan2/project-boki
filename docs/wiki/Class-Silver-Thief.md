@@ -23,7 +23,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 3. Land it and Vault comes back at once. Cartwheel again. Keep the chain going and the Marks never drop.
 4. **Bola** (right click): the lane shows for a moment while you aim, then the Bola grounds the first foe
    and flies on; catch a second and both are stunned. It bounces once off a wall.
-5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
+5. **Last Dance** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
    on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
 
@@ -35,10 +35,10 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 | Vault, then a bolt that misses | The empowered shot is spent |
 | Bola into a single foe | Grounded 1.5s: no dash, jump or glide, slowed; yellow rings bind them |
 | Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
-| Shadow Knife, then E again (or wait 6s) | You blink to the knife through a trail of afterimages |
-| Shadow Knife sticks in a foe (rank 3) | Vault comes back and half the Knife's cooldown comes back (a quarter on the ground) |
-| Encore (X) | Up to 5 blades at each foe in the ring over 2s; every blade refreshes your Marks; you keep moving and shooting |
-| Bola, then Encore | The Grounded foe can't leave the ring and takes every blade |
+| White Flash, then E again (or wait 6s) | You blink to the knife through a trail of afterimages |
+| White Flash sticks in a foe (rank 3) | Vault comes back and half the Knife's cooldown comes back (a quarter on the ground) |
+| Last Dance (X) | Up to 5 blades at each foe in the ring over 2s; every blade refreshes your Marks; you keep moving and shooting |
+| Bola, then Last Dance | The Grounded foe can't leave the ring and takes every blade |
 | Keep a foe at the ring's edge | Harder blades and a 6s blight (healing barely takes) |
 | Knock or assist | You heal (a quarter of your health in all on a knock) |
 
@@ -46,7 +46,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 - Marks last 4s and refresh on every hit. Switching targets throws your stacks away.
 - Vault is your damage as much as your escape: don't spend it running unless you must.
-- Throw the Shadow Knife past a fleeing target, then blink to it to cut them off.
+- Throw the White Flash past a fleeing target, then blink to it to cut them off.
 - Put the cursor on them: a bolt stops where you aim, so aiming short misses.
 
 ## Kit
@@ -57,7 +57,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |  |  |
 |---|---|
 | Body | 124 health, 5.39 m/s, 1 dash charge |
-| Signature weapon | Arc Shots (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Sleight Trigger (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the long braid, the moth wings and the twin pistols |
 | Resource | Marks (max 8) |
@@ -72,9 +72,9 @@ What the in-game kit card (K) says.
 | Passive: Marks | Each hit on a foe adds a Mark: +10% damage, uncapped. |
 | Dash: Vault | Cartwheel, then an empowered shot that refunds Vault if it lands. |
 | RMB: Bola | Bola down the lane: grounds the first foe, stuns a second too. |
-| E: Shadow Knife | Throw a dagger; press it again to blink to it. |
-| Hunter ultimate: Encore | A ring of blades for 2s, harder at its edge. |
-| Weapon: Arc Shots | Bolts from alternating hands every 0.45s, landing at your cursor. |
+| E: White Flash | Throw a dagger; press it again to blink to it. |
+| Hunter ultimate: Last Dance | A ring of blades for 2s, harder at its edge. |
+| Weapon: Sleight Trigger | Bolts from alternating hands every 0.45s, landing at your cursor. |
 
 ### Abilities in full
 
@@ -87,9 +87,9 @@ What the in-game kit card (K) says.
 - *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 3 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +6.1 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
-**Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (15m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
+**White Flash (E, 15s cooldown).** Throw a dagger to your cursor (15m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4.5 each, 7.6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Last Dance (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4.5 each, 7.6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -108,7 +108,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
-| Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs |
+| Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Last Dance runs |
 | Dash spent | a white cartwheel arc, dash pip dark; the quick bolts after it carry cyan tails and a cyan star at the hand; a landed empowered shot flashes the pip back with RESET at her hand |
 
 <!-- /gen:kit -->

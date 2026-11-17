@@ -5,7 +5,7 @@ extends RefCounted
 ## %C crouch (the dive), %E the E key, %U the ultimate's level, %F interact, %S the right-click key, %T the Boki key,
 ## %R rank-up combo, %N the E ability's name, %X the E ability in plain words (key included).
 
-## "Press E: Longneedle. Stand still ..." built from the hunter's card text (any Hunter).
+## "Press E: Palm Spear. Stand still ..." built from the hunter's card text (any Hunter).
 static func ability_tip(h: Hunter) -> String:
 	var cap := Settings.key_cap("signature")
 	if h == null or h.ak == null:

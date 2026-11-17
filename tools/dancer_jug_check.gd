@@ -6,7 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
-const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
+const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Hit the Deck and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation timing against the source
@@ -157,7 +157,7 @@ func thief(a) -> void:
 			and absf(float(tp[1][0]) - 7.0) < 0.01 and absf(float(tp[2][0]) - 4.85) < 0.05, str(tp))
 	A.ok("upgrade parity: Vault recharge stays 5 (Quickflip 5s, no cooldown upgrade)",
 			absf(float(tp[1][2]) - 5.0) < 0.01 and absf(float(tp[2][2]) - 5.0) < 0.01, str(tp))
-	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
+	A.ok("upgrade parity: White Flash cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
 			absf(float(tp[1][3]) - 10.71) < 0.05 and absf(float(tp[2][3]) - 10.71) < 0.05
 			and absf(float(tp[2][4]) / float(tp[0][4]) - 1.0) < 0.01, str(tp))
 	# Vault: a cartwheel, speed, the next bolt empowered; it lands for 3.5x and the Vault comes back
@@ -554,7 +554,7 @@ func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector
 	K.haste_t = 0.0
 	A.step(m, 0.5)
 
-## An Encore blade's damage on the first foe with the hunter at level `lvl`.
+## A Last Dance blade's damage on the first foe with the hunter at level `lvl`.
 func _blade(lvl: int) -> float:
 	var r = A.setup("thief", 6.0)
 	var m: Match = r[0]
@@ -573,7 +573,7 @@ func _blade(lvl: int) -> float:
 func _growth() -> void:
 	var d1: float = await _blade(1)
 	var d10: float = await _blade(10)
-	A.ok("dancer Encore: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
+	A.ok("dancer Last Dance: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 			d1 >= 3.9 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 
@@ -610,7 +610,7 @@ func juggernaut(a) -> void:
 	var air_r3 := K.air_cooldown()
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
-	A.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Warchain cooldown -12.5% / -37.5%, Meteor Drop 7.2s -> 4.8s",
+	A.ok("juggernaut ranks: Final Swing +20% at rank 2, 3, Short Leash cd -12.5% / -37.5%, Hit the Deck 7.2s -> 4.8s",
 			absf(float(smash_ks[0]) - 1.0) < 0.001 and absf(float(smash_ks[1]) - 1.2) < 0.001
 			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
 			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,
@@ -631,9 +631,9 @@ func juggernaut(a) -> void:
 	P.slot_lv["kin"] = 1
 	A.ok("upgrade parity: Rampage recharge 10.4 -> 8.8 -> 6.4 (source -1.6s, then -2.4s more)",
 			close.call(jc[0][0], 10.4) and close.call(jc[1][0], 8.8) and close.call(jc[2][0], 6.4), str(jc))
-	A.ok("upgrade parity: Warchain cooldown 12.8 -> 11.2 -> 8.0, no damage step (the source has none)",
+	A.ok("upgrade parity: Short Leash cooldown 12.8 -> 11.2 -> 8.0, no damage step (the source has none)",
 			close.call(jc[1][2], 11.2) and close.call(jc[2][2], 8.0) and close.call(jc[2][3], 1.0), str(jc))
-	A.ok("upgrade parity: Smash keeps its 2s cooldown at every rank (only damage and the Meteor Drop change)",
+	A.ok("upgrade parity: Final Swing keeps its 2s cooldown at every rank (only damage and the Hit the Deck change)",
 			close.call(jc[1][1], 2.0) and close.call(jc[2][1], 2.0), str(jc))
 	# Rage (Blazing Spirit): damage fills it; nothing below full; Enraged gives damage, dash and ability haste
 	K.res = 0.0
@@ -879,10 +879,10 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB air: the down slam lands under him, its hit circle just ahead (everyone sees it)",
 			disc and K.meteor.drops == 1 and off < 0.05 and absf(K.meteor.last_hit.x - x0 - ahead) < 0.01,
 			"landed %.2f off, hit at +%.2f" % [off, K.meteor.last_hit.x - x0])
-	A.ok("juggernaut RMB air: Meteor Drop knocks down, the centre takes more",
+	A.ok("juggernaut RMB air: Hit the Deck knocks down, the centre takes more",
 			K.last_variant == "air" and A.dmg(T) >= 14.0 and T.stun_t > 0.0,
 			"took %.0f stun %.2f" % [A.dmg(T), T.stun_t])
-	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
+	A.ok("juggernaut Hit the Deck: its own 7.2s slot, the Final Swing charge untouched",
 			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 			"air cd %.2f smash charge %.1f cd %.2f" % [float(K.cd["air"]), K.ch_rmb, float(K.cd["rmb"])])
 	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
@@ -890,7 +890,7 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
 	A.step(m, 0.2)
-	A.ok("juggernaut Meteor Drop: while its slot rests an air press is the ground Smash (a Slam), not a second drop",
+	A.ok("juggernaut Hit the Deck: while it rests an air press is the ground Final Swing (a Slam), not a second drop",
 			K.meteor.drops == 1 and K.last_variant == "tap" and not K.slam_w.is_empty(),
 			"drops %d variant %s" % [K.meteor.drops, K.last_variant])
 	# the hit sits ahead, not round his feet: T 2.6m behind him (inside a circle round him) is not touched
@@ -904,17 +904,17 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos + Vector3(9.0, 0, 0))
 	P.ak.press_rmb()
 	A.step(m, 0.6)
-	A.ok("juggernaut Meteor Drop: it fires with the Smash resting (usable right after a ground Smash)",
+	A.ok("juggernaut Hit the Deck: it fires with the Final Swing resting (usable right after a ground Final Swing)",
 			K.meteor.drops == 2 and K.ch_rmb < 1.0 and float(K.cd["air"]) > 6.0,
 			"drops %d air cd %.2f" % [K.meteor.drops, float(K.cd["air"])])
-	A.ok("juggernaut Meteor Drop: a foe 2.6m behind him is outside the hit circle", A.dmg(T) <= 0.0,
+	A.ok("juggernaut Hit the Deck: a foe 2.6m behind him is outside the hit circle", A.dmg(T) <= 0.0,
 			"took %.0f" % A.dmg(T))
 	# on the ground RMB is never the drop: no cast, its slot untouched
 	K.cd["air"] = 0.0
 	A.step(m, 0.6)
 	A.tap(m, P)
 	A.step(m, 0.3)
-	A.ok("juggernaut Meteor Drop: never from the ground (he must already be in the air)",
+	A.ok("juggernaut Hit the Deck: never from the ground (he must already be in the air)",
 			P.grounded and K.meteor.drops == 2 and float(K.cd["air"]) <= 0.0,
 			"drops %d air cd %.2f" % [K.meteor.drops, float(K.cd["air"])])
 	K.ch_rmb = 1.0
@@ -950,7 +950,7 @@ func juggernaut(a) -> void:
 			rage_r1 <= 0.01 and absf(K.res - 15.0) < 0.5, "r1 %.1f r3 %.1f" % [rage_r1, K.res])
 	P.inv_t = 0.0
 	P.slot_lv["dash"] = 1
-	# E: the Warchain hooks a foe (blight); its cooldown waits for the pull; a Smash in the pull spins
+	# E: the Short Leash hooks a foe (blight); its cooldown waits for the pull; a Final Swing in the pull spins
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -959,7 +959,7 @@ func juggernaut(a) -> void:
 	P.ak.use_e()
 	A.step(m, 0.3)
 	var chain_dmg := float(K.e_def()["dmg"])
-	A.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
+	A.ok("juggernaut E: Short Leash hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
 			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= chain_dmg * 0.85
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
@@ -976,7 +976,7 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
 	A.step(m, 0.2)
-	A.ok("juggernaut RMB during the pull: Cinder Spin (blight)",
+	A.ok("juggernaut RMB during the pull: Full Circle (blight)",
 			K.spins == 1 and K.last_variant == "during_e" and A.dmg(T) >= 13.0,
 			"spins %d variant %s took %.0f" % [K.spins, K.last_variant, A.dmg(T)])
 	# rooted: no chain; a stun breaks a chain
@@ -1029,13 +1029,13 @@ func juggernaut(a) -> void:
 	A.step(m, 0.45, func(): P.inp["move"] = Vector2(0, 1))
 	P.inp["move"] = Vector2.ZERO
 	var side_off := absf(P.pos.z - straight.z)
-	A.ok("juggernaut Warchain small mechanic: sideways input shifts the arrival by at least 1.5m",
+	A.ok("juggernaut Short Leash small mechanic: sideways input shifts the arrival by at least 1.5m",
 			side_off >= 1.5, "%.2f m aside" % side_off)
 	# a pull stopped in the air (the chain snaps) keeps its speed and the keys steer (docs/MOVEMENT_FEEL.md)
 	A.step(m, 0.5)
 	T.teleport(home + Vector3(6.0, 0, 0))
 	A.fresh(T)
-	var carry := A.air_steers(m, P, home, "a Warchain pull that snaps mid-air", func():
+	var carry := A.air_steers(m, P, home, "a Short Leash pull that snaps mid-air", func():
 		P.teleport(home)
 		P.grounded = true
 		A.aim_at(P, T.pos)
@@ -1048,7 +1048,7 @@ func juggernaut(a) -> void:
 		P.grounded = false
 		A.step(m, 0.05)
 		K.warchain.snap())
-	A.ok("juggernaut Warchain stopped mid-air: the pull's speed carries (not zeroed)", carry > P.base_speed,
+	A.ok("juggernaut Short Leash stopped mid-air: the pull's speed carries (not zeroed)", carry > P.base_speed,
 			"%.1f m/s" % carry)
 	A.fresh(T)
 	# the source's Execution Slam: knock a foe within 2s of its sweet spot and the ultimate (X) is ready again
@@ -1068,7 +1068,7 @@ func juggernaut(a) -> void:
 	P.hp = 1.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
-	A.ok("juggernaut Smash small mechanic: a knock after the sweet spot resets the Gilded Riposte",
+	A.ok("juggernaut Final Swing small mechanic: a knock after the sweet spot resets the Blow for Blow",
 			T.downed and K.slam_resets == 1 and float(K.cd["x"]) <= 0.0 and K.knock_healed > 0.0,
 			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
@@ -1092,7 +1092,7 @@ func juggernaut(a) -> void:
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
-	A.ok("juggernaut Smash: a knock after any Slam hit (not the sweet spot) resets the Gilded Riposte",
+	A.ok("juggernaut Final Swing: a knock after any Slam hit (not the sweet spot) resets the Blow for Blow",
 			K.sweet_spots == spots0 and K.slam_resets == resets0 + 1 and float(K.cd["x"]) <= 0.0,
 			"spots +%d resets +%d" % [K.sweet_spots - spots0, K.slam_resets - resets0])
 	await A.done(m)
@@ -1136,7 +1136,7 @@ func combos(a) -> void:
 		K.haul = {}
 		P.ak.use_e()
 		A.step(m, 0.3)
-	# E, E, then RMB tap in the pull: Cinder Spin
+	# E, E, then RMB tap in the pull: Full Circle
 	hook.call()
 	P.ak.use_e()
 	var wait := 0.0
@@ -1145,7 +1145,7 @@ func combos(a) -> void:
 		wait += A.DT
 	A.tap(m, P)
 	A.step(m, 0.3)
-	A.ok("combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits)",
+	A.ok("combo jug: E > E > RMB tap = Full Circle (it blights who it hits)",
 			K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0,
 			"spins %d variant %s" % [K.spins, K.last_variant])
 	# E, then RMB held and let go while attached: Chain Lunge along it
@@ -1171,7 +1171,7 @@ func combos(a) -> void:
 	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)",
 			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t <= 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
-	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
+	# E, E, then RMB pressed (and held) in the pull: the Full Circle goes on the press, no Haul Slam
 	A.step(m, 1.0)
 	hook.call()
 	P.ak.use_e()
@@ -1183,7 +1183,7 @@ func combos(a) -> void:
 	A.step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	A.step(m, 0.3)
-	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
+	A.ok("combo jug: E > E > hold RMB = Full Circle on the press (no Haul Slam, no second move)",
 			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
 			"spins %d slams %d" % [K.spins, K.haul_slams])
 	# E attached, RMB tapped (not pulling): a normal Finishing Slam
@@ -1191,7 +1191,7 @@ func combos(a) -> void:
 	hook.call()
 	A.tap(m, P)
 	A.ok("combo jug: E > RMB tap = Finishing Slam", not K.slam_w.is_empty() and K.last_variant == "tap")
-	A.ok("combo jug: the attached Warchain draws as a link chain",
+	A.ok("combo jug: the attached Short Leash draws as a link chain",
 			is_instance_valid(DJFx.of(m).chains.get("war%d" % P.get_instance_id(), {}).get("node"))
 			and (DJFx.of(m).chains["war%d" % P.get_instance_id()]["node"] as Node3D).visible)
 	A.step(m, 0.8)
@@ -1223,7 +1223,7 @@ func combos(a) -> void:
 	home = r[4]
 	lv = r[5]
 	K = P.ak
-	# a Lunge that strikes nothing doubles the Smash cooldown
+	# a Lunge that strikes nothing doubles the Final Swing cooldown
 	A.aim_at(P, home + Vector3(0, 0, 6.0))
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
@@ -1245,11 +1245,11 @@ func combos(a) -> void:
 	K.cd["e"] = 0.0
 	P.root_t = 1.0
 	P.ak.use_e()
-	A.ok("combo jug: rooted = no Warchain", K.warchain.state == "ready")
+	A.ok("combo jug: rooted = no Short Leash", K.warchain.state == "ready")
 	P.root_t = 0.0
 	KitStatus.apply(P, "gnd", 1.0)
 	P.ak.use_e()
-	A.ok("combo jug: Grounded = no Warchain", K.warchain.state == "ready")
+	A.ok("combo jug: Grounded = no Short Leash", K.warchain.state == "ready")
 	A.step(m, 1.1)
 	P.teleport(home)
 	A.fresh(T)
@@ -1259,12 +1259,12 @@ func combos(a) -> void:
 	A.step(m, 0.3)
 	P.stun_t = 0.3
 	A.step(m, 0.05)
-	A.ok("combo jug: stun breaks the Warchain", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
+	A.ok("combo jug: stun breaks the Short Leash", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
 	A.step(m, 0.4)
 	K.gain_rage(100.0)
 	K.cd["rmb"] = 3.0
 	A.step(m, 1.0)
-	A.ok("combo jug: Enraged hastes the Smash", float(K.cd["rmb"]) < 1.85, "%.2f" % float(K.cd["rmb"]))
+	A.ok("combo jug: Enraged hastes the Final Swing", float(K.cd["rmb"]) < 1.85, "%.2f" % float(K.cd["rmb"]))
 	await A.done(m)
 	# ---- Sable
 	r = A.setup("thief", 4.0, "", true)
@@ -1423,7 +1423,7 @@ func merge_holds() -> void:
 			K.slam_w.is_empty() and K.sweet_spots == 0 and A.dmg(T) <= ctl + 0.5,
 			"took %.0f (merge alone %.0f)" % [A.dmg(T), ctl])
 	await A.done(m)
-	# the Smash held (the Lunge charge), and a Haul Slam armed for the end of a pull
+	# the Final Swing held (the Lunge charge), and a Haul Slam armed for the end of a pull
 	r = A.setup("juggernaut", 6.0, "cindle")
 	m = r[0]
 	P = r[1]
@@ -1441,11 +1441,11 @@ func merge_holds() -> void:
 	KinMerge.cast(P)
 	P.inp["sec_hold"] = false
 	A.step(m, 0.6)
-	A.ok("merge hold jug: the charged Lunge does not go and no Smash charge is spent",
+	A.ok("merge hold jug: the charged Lunge does not go and no Final Swing charge is spent",
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
 	await A.done(m)
-	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
+	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Last Dance: tools/dj_ult_check.gd)
 	r = A.setup("thief", 4.0, "cindle")
 	m = r[0]
 	P = r[1]
@@ -1463,7 +1463,7 @@ func merge_holds() -> void:
 	A.ok("merge hold dancer: the wound-up Bola is not thrown",
 			TK.bola_cast.is_empty() and TK.bola.is_empty() and not KitStatus.grounded(T) and not AimKit.shown(P, "rmb"))
 	await A.done(m)
-	# ---- Juggernaut: a Meteor Drop diving when a merge starts doesn't land
+	# ---- Juggernaut: a Hit the Deck diving when a merge starts doesn't land
 	r = A.setup("juggernaut", 4.0, "cindle")
 	m = r[0]
 	P = r[1]
@@ -1477,7 +1477,7 @@ func merge_holds() -> void:
 	JK.ch_rmb = 1.0
 	JK.cd["rmb"] = 0.0
 	P.ak.press_rmb()
-	A.ok("merge hold jug: the Meteor Drop is diving", JK.meteor.running())
+	A.ok("merge hold jug: the Hit the Deck is diving", JK.meteor.running())
 	KinMerge.cast(P)
 	A.step(m, 0.8)
 	A.ok("merge hold jug: the dive is dropped, no slam lands", not JK.meteor.running() and JK.meteor.drops == 0)
@@ -1513,7 +1513,7 @@ func _foreign_cols(K: ArchKit, cols: Array) -> Array:
 				out.append("%s ~ %s" % [c.to_html(false), id])
 	return out
 
-## A Smash telegraph in Kael's crimson (his archetype colour, owner 11-08) with a lit rim and a faint inside.
+## A Final Swing telegraph in Kael's crimson (his archetype colour, owner 11-08) with a lit rim and a faint inside.
 func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 	var edge := float(e.get("width", 0.0)) * 0.5 if e.get("kind", "") == "lane" else float(e.get("len", 0.0))
 	var got: Array = load("res://tools/aimkit_check.gd").measure(e, 0.6, edge - 0.02)
@@ -1523,7 +1523,7 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
 
-## VFX_QUALITY 6: the crimson Smash telegraphs are the hit, read off the drawn entries (not the data): a foe
+## VFX_QUALITY 6: the crimson Final Swing telegraphs are the hit, read off the drawn entries (not the data): a foe
 ## whose body just reaches into the drawn Slam cone or lane (at its rim or side, at its tip) is hit and one just
 ## past it is not; the same at the drawn Lunge lane's side, and the fling travels the drawn length.
 func _smash_drawn_is_hit(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3) -> void:

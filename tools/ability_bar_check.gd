@@ -1,7 +1,7 @@
 extends RefCounted
 ## --ability-bar-check: the ability bar tells the truth about the kits that got charges or a separate
-## airborne slot in the parity work. For Kael (dash charges, the Meteor Drop's own slot while airborne),
-## Cinder (dash charges, a second Cinder Shot charge at rank 3), Neve (Ice Spear's two charges) and
+## airborne slot in the parity work. For Kael (dash charges, the Hit the Deck's own slot while airborne),
+## Cinder (dash charges, a second Spitfire charge at rank 3), Neve (Icebreaker's two charges) and
 ## Grimble (two barges, the air pounce's own timer) it reads the kit's charges and timers and asserts
 ## the drawn bar shows the same: a pip per charge, the recharging pip's fill, the next charge's countdown
 ## beside a ready one, and the airborne slot's own timer. Never touches the save.
@@ -102,7 +102,7 @@ func _rmb(m: Match, P: Hunter, tag: String) -> void:
 	ok(absf(float(first[0]) - 0.75) < 0.02 and rest_empty and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
 		"%s: RMB none ready, first pip at 75%%, countdown %.1fs" % [tag, left])
 
-## The contextual slot's own timer while airborne: Kael's Meteor Drop on the RMB slot, Grimble's air
+## The contextual slot's own timer while airborne: Kael's Hit the Deck on the RMB slot, Grimble's air
 ## pounce beside the dash; on the ground neither is spelled out.
 func _airborne(m: Match, P: Hunter, hid: int, kit: String) -> void:
 	if kit == "juggernaut":
@@ -112,17 +112,17 @@ func _airborne(m: Match, P: Hunter, hid: int, kit: String) -> void:
 		P.grounded = false
 		await _drawn(m.hud)
 		var txt: String = m.hud.slot_text.get("sec", "")
-		ok(txt == HudSlot.cd_text(3.0), "Kael airborne: the RMB slot counts the Meteor Drop's own 3 s ('%s')" % txt)
+		ok(txt == HudSlot.cd_text(3.0), "Kael airborne: the RMB slot counts the Hit the Deck's own 3 s ('%s')" % txt)
 		P.ak.cd["air"] = 0.0
 		P.ak.cd["rmb"] = 5.0
 		P.ak.ch_rmb = 0.0
 		await _drawn(m.hud)
 		txt = m.hud.slot_text.get("sec", "")
-		ok(txt == "", "Kael airborne: Meteor Drop ready while the Smash rests, slot shows no countdown")
+		ok(txt == "", "Kael airborne: Hit the Deck ready while the Final Swing rests, slot shows no countdown")
 		P.grounded = true
 		await _drawn(m.hud)
 		txt = m.hud.slot_text.get("sec", "")
-		ok(txt == HudSlot.cd_text(5.0), "Kael on the ground: the Smash's own 5 s again")
+		ok(txt == HudSlot.cd_text(5.0), "Kael on the ground: the Final Swing's own 5 s again")
 	elif kit == "dredge":
 		var full: float = P.ak.long_dash_cd()
 		P.ex_cd = full * 0.5

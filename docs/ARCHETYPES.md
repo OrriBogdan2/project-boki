@@ -353,7 +353,7 @@ the long weapon over the shoulder**.
 
 | Weapon | LMB |
 |---|---|
-| **Longbow** (new) | hold to draw. Stage 1 at 0.4s: 30 damage, 12m, 45 m/s. Stage 2 at 0.9s: 60 damage, 15m, 60 m/s. An early release does 15. Slowed 30% while drawing |
+| **Drawstring** (new) | hold to draw. Stage 1 at 0.4s: 30 damage, 12m, 45 m/s. Stage 2 at 0.9s: 60 damage, 15m, 60 m/s. An early release does 15. Slowed 30% while drawing |
 | Sniper | press → 0.6s aim laser enemies can see → one heavy round (today's numbers) |
 
 Tripwire Mine (today's Sniper RMB) folds into the RMB below.
@@ -583,14 +583,14 @@ RMB. The held slide is a long line. Break line of sight against Last Round.
 **Silhouette:** the biggest shoulders in the game, with horned pauldrons. Hunched forward, with an
 oversized blade or a drum-fed shotgun and heavy dust footsteps. The **primary feature is the horned pauldrons**.
 
-**Weapons** (both use the RMB Smash; the tap is a knock cone in each weapon's style, the hold is the same leap slam):
+**Weapons** (both use the RMB Final Swing; the tap is a knock cone in each weapon's style, the hold is the same leap slam):
 
 | Weapon | LMB | RMB tap flavour |
 |---|---|---|
-| Greatsword | slow 3-hit combo, tip bonus; hold 1s: slam stun 0.6 | Overhead Smash: a 3m cone, 18 damage, push 6 |
+| Bitter End | slow 3-hit combo, tip bonus; hold 1s: slam stun 0.6 | Overhead Final Swing: a 3m cone, 18 damage, push 6 |
 | Shotgun | 7 slugs in a 60° fan | Breach (today's): a point-blank cone pushes 13 and kicks you back |
 
-Earthshatter (today's Greatsword RMB) becomes the hold variant. Breach stays as the Shotgun's tap.
+Earthshatter (today's Bitter End RMB) becomes the hold variant. Breach stays as the Shotgun's tap.
 
 **Passive: Rage.** +6 per hit (a pellet volley counts as one), +10 per 10% of max HP lost, +20 on a
 wall slam. Decays 12/s after 3s out of combat. At 100 you're **Enraged** for 5s: your next RMB is
@@ -599,13 +599,13 @@ Rampage's hold windup is 50% faster.
 **Tells:** red steam from the pauldrons at 50+. Red eyes and weapon at 100, and a roar audible
 within 25m when you become Enraged. HUD: a red bar under health.
 
-**RMB: Smash** (9s, shared):
+**RMB: Final Swing** (9s, shared):
 
 | Variant | What it does |
 |---|---|
 | tap | the weapon's knock cone (above) |
 | hold 0.6-1.0s | **Earthshatter** (today's): leap up to 7m. The landing circle shows to all. A 3m burst: 20 damage, push 3, lift 8, `spike` (+60%, stun 1.0) |
-| airborne / gliding | **Meteor Drop**: slam straight down where you are. A 2.5m burst: 16 damage, lift 6, spike (stun 0.6). You leave the glide at once |
+| airborne / gliding | **Hit the Deck**: slam straight down where you are. A 2.5m burst: 16 damage, lift 6, spike (stun 0.6). You leave the glide at once |
 | during E (Iron Hide) | the tap pulls foes within 4m in (pull 9) before the knock |
 | Enraged | empowered (above) |
 
@@ -623,7 +623,7 @@ a cleanse on cast. When it ends, a 2.5m burst pushes 10 ("shrug off").
 **Dash: Rampage** (DASHES §3.2): tap shove or held charge. The carry into a wall builds Rage.
 
 **Loop:** brawl to build Rage → Rampage carries someone into a wall (+20 Rage) → an Enraged
-Earthshatter lifts the group → a Meteor Drop from a jump spikes them → Iron Hide plus the pull tap to
+Earthshatter lifts the group → a Hit the Deck from a jump spikes them → Iron Hide plus the pull tap to
 hold the brawl → Avalanche to finish.
 
 **Level-up order:** 1 Dash · 2 RMB · 3 E · 4 RMB · 5 Dash · 6 R · 7 RMB · 8 E · 9 R · 10 Q.
@@ -641,7 +641,7 @@ Earthshatter landing circle are both dodgeable. Kite during Iron Hide and Avalan
 
 **Kin modifiers:**
 
-| Kin | RMB Smash | E Iron Hide | R Avalanche |
+| Kin | RMB Final Swing | E Iron Hide | R Avalanche |
 |---|---|---|---|
 | Vespyx | + poison 8; Earthshatter + blight 3s | the end burst + poison 10 | stomps leave a venom trail (linger poison) |
 | Gravadillo | tap + a gravity-well pre-pull 8; Earthshatter + a pull on landing (Gravity Slam's two beats) and spike +0.3 | + shield 15 | stomps lift 4; Avalanche wall slams spike |
@@ -755,7 +755,7 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 
 ## 8. Open questions
 
-- New weapons (Longbow, Spellstaff, Tower Shield & Mace) need art and firing data
+- New weapons (Drawstring, Spellstaff, Tower Shield & Mace) need art and firing data
   (WEAPON_FIRING_DATA.md style). Until they exist, the Archer, Mage and Bulwark run on one weapon each.
 - Kin E actives: archive them, or rotate them in as alternative autos (a kin has 2 autos and the
   player picks one)?
@@ -828,7 +828,7 @@ hitstop and shake tiers, category colours, sound layers). Test: `--archetype-che
   own active by itself (a mount lends it), G / middle mouse send-recall, Shift archetype dash, Q glove,
   RMB archetype. The training guide moved from G to H.
 - **Weapons:** families narrow `Loot.usable` (others still pack and go home). Thief twin blades / SMG;
-  Archer Longbow (new: hold-to-draw stages 0.4s/0.9s, Focus draws it instantly) / sniper; Mage Spellstaff
+  Archer Drawstring (new: hold-to-draw stages 0.4s/0.9s, Focus draws it instantly) / sniper; Mage Spellstaff
   (new: orb every 0.45s, every 4th +50%) / longsword; Gunslinger rifle / burst rifle; Juggernaut
   greatsword / shotgun / minigun; Bulwark Tower Shield & Mace (new: 2-hit mace, hold for an overhead; the
   shield is the RMB) / minigun. The owner's list puts the minigun with the Juggernaut and §6.6 with the
@@ -875,7 +875,7 @@ chest) and the merge starts on the same frame the ult fires, with the bonded col
 | Archer | Skyfall Volley | 110s | 0.50s | vulnerable |
 | Mage | Meteor | 105s | 0.55s | vulnerable |
 | Gunslinger | Last Round | 100s | 0.45s | vulnerable |
-| Juggernaut | none (kits2-nor: the Smash's rank-3 crash) | | | |
+| Juggernaut | none (kits2-nor: the Final Swing's rank-3 crash) | | | |
 | Bulwark | Bastion | 120s | 0.50s | unstoppable (fortify) |
 
 An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
@@ -883,7 +883,7 @@ fizzles; if everyone escapes during it, almost all of the cooldown comes back.
 
 ## Kit loops: every archetype at the Thief / Juggernaut bar (kits4, Nov 1)
 
-The Thief (Marks -> Knife ready at 3 -> Cash In) and the Juggernaut (Rage -> Enraged -> Rage Smash)
+The Thief (Marks -> Knife ready at 3 -> Cash In) and the Juggernaut (Rage -> Enraged -> Final Swing)
 set the bar for "oomph": one resource that the kit's own abilities build, a hunter that visibly
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
@@ -909,16 +909,16 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 
 | Slot | What it does |
 |---|---|
-| LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
-| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8. In the air: Plunge |
-| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| LMB (Drawstring) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Pin Down**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8. In the air: Plunge |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Pin Down**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
-| E | **Hail Wall**: lob a volley up to 10.8m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| E | **Hemline**: lob a volley up to 10.8m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
 | R | (removed in the accuracy pass, see docs/heroes/archer.md) **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
 
-Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
-Heavy Shot that hits adds 40 Focus (driven into a wall fills it). At 100 Focus the **Deadeye is
+Snares (tap, Tripwire, Pin Down, the Great Arrow's wall stun) root or stun people; a snare or
+Pin Down that hits adds 40 Focus (driven into a wall fills it). At 100 Focus the **Deadeye is
 armed**: the next shot is drawn at once (+20% range) and, if it hits a **pinned** foe (rooted or
 stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
 
@@ -926,12 +926,12 @@ stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
   line along the shot, and crosshairs over every pinned foe within 18m (everyone sees them); the
   crosshair reads "DEADEYE READY" (or "GREAT ARROWS · n" during the ult).
 - Payoff: "DEADEYE", the arrow's line redrawn in gold, `pay_deadeye`, T4 hitstop and shake.
-- Numbers: Longbow Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
+- Numbers: Drawstring Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
   (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a foe pinned to a wall reads
-  about 108; it needs a full Heavy Shot into a wall first. Great Arrows 100 if all three land
-  (Volley was 30 + a root over 2s, but area); Hail Wall ~35 over its life plus the slow and blight.
+  about 108; it needs a full Pin Down into a wall first. Great Arrows 100 if all three land
+  (Volley was 30 + a root over 2s, but area); Hemline ~35 over its life plus the slow and blight.
 - Bots: snare first when the target isn't pinned; loose the Deadeye when armed and they're pinned;
-  Hail Wall across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
+  Hemline across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
   fire them through.
 - Retired: Flare Arrow (E), Skyfall Volley (R).
 
@@ -947,7 +947,7 @@ The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
 | Passive | **Runes and Heat**: your next spell on a Runed foe (a Bolt, a Hex, an echo) **detonates** it: a **Runeburst**, 16 + root 0.5, T4. Casting builds Heat (Bolt 15, Hex 25); Overcharged (70+) a detonation is a **Flashpoint**: 30 + 14 to everyone within 2.6m, root 0.8, all the Heat spent with no Vent, the Bolt back. 100 Vents (the risk stays) |
 | E | **Hex**: a dodgeable bolt (20 m/s, 11m; a projectile, so it can be sidestepped or blocked) that turns a hunter into a harmless critter for 1.3s: half speed, no attacks, casts, dashes, gloves or glides; the model swaps for a hopping critter with a rune over it. Monsters are stunned 1s. On a Runed foe it detonates the Rune too (no root on top of the Hex) |
 | Dash | **Blink**: a 0.12s windup (the landing sigil shows), up to 5.5m through walls; the sigil left behind slows foes 0.6s later and for 3s a second dash **snaps you back** to it (free) |
-| R | **Encore** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
+| R | **Last Dance** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
 
 - Loop: Guided Bolt round a pillar (Rune) -> Hex them (detonates: Runeburst, then they're a critter)
   -> Blink in, Bolt again; Overcharged, the detonation is a Flashpoint -> snap back out.
@@ -958,7 +958,7 @@ The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
 - Hex online: `Hex.apply` sends a Net event `["hex", nid, seconds]`; every game shows the critter,
   the body's own game runs the rules. **Net.VERSION 0.4.0 -> 0.5.0** (a new event kind).
 - Bots: Guided Bolts steered onto the target (their aim follows it while they hold), Hex rival
-  hunters (always on a Runed one), Encore in range, Blink away when hurt and snap back once safe;
+  hunters (always on a Runed one), Last Dance in range, Blink away when hurt and snap back once safe;
   a hexed bot scurries away from its target.
 - Retired: Lance, Sigil (and the Sigil-based Flashpoint), Meteor.
 
@@ -989,18 +989,18 @@ above is superseded by this:
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (no stun); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
 | RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
-| Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
-| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
-| E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
+| Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Full Ahead**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
+| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Full Ahead or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| E | **Safe Harbour**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
 | R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
 
-- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+- Loop: raise the shield into their fire (Guard) -> Full Ahead or Slam them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
-  Throw the mace to scout a corner, then Mending Ground on it.
+  Throw the mace to scout a corner, then Safe Harbour on it.
 - Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
   shield burns gold. Payoff: `pay_slam`, T4.
-- Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
-  Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
+- Bots: shield toward whoever is shooting, Bash up close, Full Ahead / Whirl in from 1.5-4.5m,
+  Safe Harbour when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
 - Retired: Interpose (ally leap), Rally Banner, Bastion.
 
@@ -1012,7 +1012,7 @@ above is superseded by this:
 | Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: a stun; feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
-| Juggernaut | tap (wound up) / hold / air / in the pull | a Finishing Slam lane after a 0.6s aimed wind-up; hold a Lunge; air a Meteor Drop; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot is the payoff; at rank 3 it also crashes and heals |
+| Juggernaut | tap (wound up) / hold / air / in the pull | a Finishing Slam lane after a 0.6s aimed wind-up; hold a Lunge; air a Hit the Deck; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot is the payoff; at rank 3 it also crashes and heals |
 | Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
 
 ### Holds and charges: the wind-up feel (shared, every archetype)
@@ -1062,12 +1062,12 @@ step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 | LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
 | Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
 | RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 |
-| E (their Q) | tap, recast | **Farstep Dagger**: a dagger that sticks to surfaces or characters (slows 50% 4s); recast to teleport to it; after 6s you teleport anyway | **Shadow Knife**: 12m, sticks in the first foe (8, slow 50% for 2.5s) or where it stops; recast to step to it; after 5s you step anyway |
+| E (their Q) | tap, recast | **Farstep Dagger**: a dagger that sticks to surfaces or characters (slows 50% 4s); recast to teleport to it; after 6s you teleport anyway | **White Flash**: 12m, sticks in the first foe (8, slow 50% for 2.5s) or where it stops; recast to step to it; after 5s you step anyway |
 | R | tap | **Fusillade**: after a short delay, up to 5 shots at each nearby enemy over 2s, each resetting all stacks' duration; the outer ring takes bonus damage and anti-heal; 2 charges of a weaker dash; LMB usable | **No R (kits2-nor).** **Jackpot** is a Mark trigger: the fifth Mark on a foe releases 4 knives at it over 0.45s (4.5 each, in sight within 14m); each knife refreshes every Mark; one free Vault (2.8m, it Primes too) for 4s; it rests 8s. R is the Boki Merge |
 
 Ranks (wiki levels 2-4 -> our ranks): Bola rank 3 flies 1m further after the first foe and two foes
 caught pool their Marks (level 3 travel, level 3-4 stack combining); Vault rank 3: Primed hits +20% and
-a Shadow Knife sticking in a foe resets Vault (levels 2-4); Shadow Knife rank 3: sticking refunds 25% of
+a White Flash sticking in a foe resets Vault (levels 2-4); White Flash rank 3: sticking refunds 25% of
 the cooldown, 50% in a foe (level 3). (Jackpot used to have its own rank 2; as a Mark trigger it has no
 ranks.)
 
@@ -1084,11 +1084,11 @@ ranks.)
 | Slot | Input | ref-juggernaut (wiki) | Ours |
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
-| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns). Shotgun and minigun as before |
-| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (T4, `pay_rage`, no word); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
+| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Bitter End (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns). Shotgun and minigun as before |
+| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Final Swing**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (T4, `pay_rage`, no word); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Hit the Deck 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Short Leash: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
-| E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
-| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
+| E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Short Leash**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
+| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Final Swing rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
 
 ### E + RMB combinations and the other cross-ability interactions
 
@@ -1099,7 +1099,7 @@ pose, sound and VFX.
 
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
-| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
+| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Full Circle**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
 | Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
@@ -1107,14 +1107,14 @@ pose, sound and VFX.
 | Juggernaut | RMB tap, sweet spot (rank 1-2) | the sweet-spot payoff (T4) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 3) | the payoff **and a crash** on the foe (3m, 24) that heals you 60% of its damage; it rests 12s | wiki (Volcanic Rebuke, folded in) |
 | Juggernaut | the crash, then a knock on someone it hit (2s) | **the crash is ready again**; the knock also heals 20% of their health and gives a Rampage charge | wiki |
-| Juggernaut | RMB hold that strikes nothing | the Smash cooldown **doubles** | wiki |
+| Juggernaut | RMB hold that strikes nothing | the Final Swing cooldown **doubles** | wiki |
 | Juggernaut | Rampage / Lunge, then glide | no glider for the wind-down (0.35s) | wiki (patch notes) |
 | Juggernaut | rooted / Grounded -> E | no chain; a stun on you breaks a chain (its cooldown starts) | wiki (patch notes) |
-| Juggernaut | Enraged (full Rage) | +15% damage, +20% cooldown speed (every Smash, the chain), +12% dash recharge | wiki |
+| Juggernaut | Enraged (full Rage) | +15% damage, +20% cooldown speed (every Final Swing, the chain), +12% dash recharge | wiki |
 | Juggernaut | Searing Wave hits | fill Rage 3x as fast | wiki |
 | Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks; Vault resets; the speed boost ends | wiki |
-| Thief | Shadow Knife in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
-| Thief | Shadow Knife -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
+| Thief | White Flash in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
+| Thief | White Flash -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
 | Thief | Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
 | Thief | Bola -> Grounded foe | can't dash, jump or glide | wiki |
 | Thief | fifth Mark on a foe | **Jackpot**: 4 knives at it, every knife refreshes all Marks; it rests 8s | wiki (Fusillade, made a trigger) |
@@ -1139,15 +1139,15 @@ hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`). Since Ne
 (a lowered shield, a cancelled draw) is sent as `-` and ends the copy's, and each play bumps the re-time count, so
 a quick restart of the same move restarts the copy too.
 
-Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
-rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).
+Ranks: Final Swing rank 3 +20% on every Final Swing and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
+rank 3 a third charge (level 2); Short Leash rank 3 refunds 33% when it hooks a foe (level 4).
 
 - Loop: slash and wave into Rage -> Enraged (everything comes back faster) -> chain them, pull in and
   spin -> Rampage tip -> an Finishing Slam's sweet spot (rank 3: the crash and its heal) -> the knock
   makes the crash ready again.
 - Tells: red heat at the pauldrons that grows with Rage; the Enraged shell, swell and roar; the red "!"
-  over the head while a Smash winds up; crosshair "SMASH · aim it".
-- Retired: the Rage Smash (Brall's Empowered state buffs everything instead of one strike), the
+  over the head while a Final Swing winds up; crosshair "SMASH · aim it".
+- Retired: the Final Swing (Brall's Empowered state buffs everything instead of one strike), the
   tap/hold Rampage carry, Earthshatter, Iron Hide, Avalanche, the chain's slow, leash and haul stun.
 
 ### Sources cross-checked (Nov 1)
@@ -1178,7 +1178,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 - Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
 - ref-juggernaut: climbing double-height walls is now **built** (`climb_tall` for Kael `juggernaut` and the Archer in `content/rules/hunter_move.json`). Still missing (see docs/KIT_PARITY.md, Kael): dodging shots building Blazing Spirit (his level-4 dash
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
-  knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
+  knocked hunter goes down as usual); turn restriction when dashing out of a Final Swing.
 - ref-thief (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
@@ -1199,15 +1199,15 @@ retuned to the source's time to knock (docs/TTK.md, slash 5.2, Slam 15.6), so hi
 
 ### R removed: the ult choice (kits2-nor, Nov 2) — superseded
 
-> **Stale since the ult pass (server update 6):** Sable and Kael each have their own ultimate again (on X; see docs/heroes/thief.md and docs/heroes/juggernaut.md), and the Boki Merge has its own `ultimate` key. The text below is history; the R-to-Merge rule no longer holds for them (the Merge is the same for every hero, on its own key). Doomfall/Jackpot-as-Smash/Mark-trigger folds are only built where those hero docs still list them.
+> **Stale since the ult pass (server update 6):** Sable and Kael each have their own ultimate again (on X; see docs/heroes/thief.md and docs/heroes/juggernaut.md), and the Boki Merge has its own `ultimate` key. The text below is history; the R-to-Merge rule no longer holds for them (the Merge is the same for every hero, on its own key). Doomfall/Jackpot-as-Final Swing/Mark-trigger folds are only built where those hero docs still list them.
 
 Owner decision (Nov 1): R becomes the Boki Merge for every hero, so the Thief and Juggernaut lose
 theirs. Rather than drop the wiki's ultimates, each is folded into the kit where it already fits:
 
-- **Doomfall -> Smash rank 3.** The Smash's sweet spot already was Doomfall's reset trigger, so at rank
+- **Doomfall -> Final Swing rank 3.** The Final Swing's sweet spot already was Doomfall's reset trigger, so at rank
   3 landing it brings the crash down (3m, 24, push 7, heals 60% of the damage dealt); a knock within 2s on
   a foe it hit makes it ready again (the old reset rule), and it rests 12s so it is a moment, not a loop.
-  The 0.6s invulnerable rise is gone: the Smash's own 0.5s wind-up is the tell.
+  The 0.6s invulnerable rise is gone: the Final Swing's own 0.5s wind-up is the tell.
 - **Jackpot -> a Mark trigger.** The fifth Mark on a foe releases 4 knives at it over 0.45s, each
   refreshing every Mark (the Fusillade's rule), plus one free Vault; it rests 8s. The all-foes 2s volley,
   the rim ring and its blight are gone.
@@ -1219,8 +1219,8 @@ other four kits; a kit with no `"r"` in its JSON refuses the press.
 ## Hero rebuild: Sparkle (mage) and Vex (gunslinger), Nov 1
 
 The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
-heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
-(id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
+heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Undercurrent) and **Vex**
+(id `gunslinger`, Medium: Fever, Slipstep, Coin Blast, Palm Spear). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
 `--gunslinger-combo-check`.

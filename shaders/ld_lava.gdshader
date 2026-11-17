@@ -1,5 +1,5 @@
 shader_type spatial;
-// Cinder's lava carpet (Flue Flight, LDFx.lava). Alpha-blended, not additive, so the dark charred rim and the
+// Cinder's lava carpet (Red Carpet, LDFx.lava). Alpha-blended, not additive, so the dark charred rim and the
 // deep orange read as colour on bright ground instead of washing out to beige; only the hot cracks glow.
 // UV.x runs along the strip, UV.y across; life 0 -> 1 over the carpet's life (the edge starts hot and cools); progress is the strip length (m).
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabled, fog_disabled;

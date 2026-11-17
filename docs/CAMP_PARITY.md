@@ -11,53 +11,53 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). Question: does the source's kit d
 | Hunter | Slot | Ability (ours) | Source modifier vs monsters | Ours vs monsters | Tag |
 |---|---|---|---|---|---|
 | archer | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| archer | RMB | Heavy Shot | none listed | same as vs Hunters, x1.0 | [?] |
-| archer | E | Hail Wall | none listed | same as vs Hunters, x1.0 | [?] |
-| archer | R | Starpiercer | none listed | same as vs Hunters, x1.0 | [?] |
+| archer | RMB | Pin Down | none listed | same as vs Hunters, x1.0 | [?] |
+| archer | E | Hemline | none listed | same as vs Hunters, x1.0 | [?] |
+| archer | R | Finishing Touch | none listed | same as vs Hunters, x1.0 | [?] |
 | ashwick | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| ashwick | RMB | Cinder Shot | none listed | same as vs Hunters, x1.0 | [?] |
-| ashwick | E | Furnace Cloak | none listed | same as vs Hunters, x1.0 | [?] |
-| ashwick | R | Flue Flight | none listed | same as vs Hunters, x1.0 | [?] |
+| ashwick | RMB | Spitfire | none listed | same as vs Hunters, x1.0 | [?] |
+| ashwick | E | Molten Hug | none listed | same as vs Hunters, x1.0 | [?] |
+| ashwick | R | Red Carpet | none listed | same as vs Hunters, x1.0 | [?] |
 | bulwark | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
 | bulwark | RMB | Aegis | none listed | same as vs Hunters, x1.0 | [?] |
-| bulwark | E | Mending Ground | none listed | same as vs Hunters, x1.0 | [?] |
-| bulwark | R | Faultline | none listed | same as vs Hunters, x1.0 | [?] |
+| bulwark | E | Safe Harbour | none listed | same as vs Hunters, x1.0 | [?] |
+| bulwark | R | Groundswell | none listed | same as vs Hunters, x1.0 | [?] |
 | dolm | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| dolm | RMB | Quakefall | none listed | same as vs Hunters, x1.0 | [?] |
-| dolm | E | Stone Row | none listed | same as vs Hunters, x1.0 | [?] |
-| dolm | R | Basalt Spine | none listed | same as vs Hunters, x1.0 | [?] |
+| dolm | RMB | Rock Bottom | none listed | same as vs Hunters, x1.0 | [?] |
+| dolm | E | Foothold | none listed | same as vs Hunters, x1.0 | [?] |
+| dolm | R | Backbone | none listed | same as vs Hunters, x1.0 | [?] |
 | dredge | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| dredge | RMB | Deep Reach | none listed | same as vs Hunters, x1.0 | [?] |
-| dredge | E | Anchor Drop | none listed | same as vs Hunters, x1.0 | [?] |
-| dredge | R | Brass Broadside | none listed | same as vs Hunters, x1.0 | [?] |
+| dredge | RMB | Sticky Fingers | none listed | same as vs Hunters, x1.0 | [?] |
+| dredge | E | Lump Sum | none listed | same as vs Hunters, x1.0 | [?] |
+| dredge | R | Both Barrels | none listed | same as vs Hunters, x1.0 | [?] |
 | gunslinger | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| gunslinger | RMB | Burr Charge | none listed | same as vs Hunters, x1.0 | [?] |
-| gunslinger | E | Longneedle | none listed | same as vs Hunters, x1.0 | [?] |
-| gunslinger | R | Cinderfall | none listed | same as vs Hunters, x1.0 | [?] |
+| gunslinger | RMB | Coin Blast | none listed | same as vs Hunters, x1.0 | [?] |
+| gunslinger | E | Palm Spear | none listed | same as vs Hunters, x1.0 | [?] |
+| gunslinger | R | Penny Drop | none listed | same as vs Hunters, x1.0 | [?] |
 | juggernaut | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
 | juggernaut | RMB | Smash | none listed | same as vs Hunters, x1.0 | [?] |
-| juggernaut | E | Warchain | none listed | same as vs Hunters, x1.0 | [?] |
-| juggernaut | R | Gilded Riposte | none listed | same as vs Hunters, x1.0 | [?] |
+| juggernaut | E | Short Leash | none listed | same as vs Hunters, x1.0 | [?] |
+| juggernaut | R | Blow for Blow | none listed | same as vs Hunters, x1.0 | [?] |
 | mage | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| mage | RMB | Storm Rod | none listed | same as vs Hunters, x1.0 | [?] |
-| mage | E | Skycall | none listed | same as vs Hunters, x1.0 | [?] |
-| mage | R | Kitefall | none listed | same as vs Hunters, x1.0 | [?] |
+| mage | RMB | Pink Spear | none listed | same as vs Hunters, x1.0 | [?] |
+| mage | E | Undercurrent | none listed | same as vs Hunters, x1.0 | [?] |
+| mage | R | Stormfall | none listed | same as vs Hunters, x1.0 | [?] |
 | ostra | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| ostra | RMB | Shard Snap | none listed | same as vs Hunters, x1.0 | [?] |
-| ostra | E | Brimseed | none listed | same as vs Hunters, x1.0 | [?] |
-| ostra | R | Nightwell | none listed | same as vs Hunters, x1.0 | [?] |
+| ostra | RMB | Stage Fright | none listed | same as vs Hunters, x1.0 | [?] |
+| ostra | E | Gag Gift | none listed | same as vs Hunters, x1.0 | [?] |
+| ostra | R | Main Attraction | none listed | same as vs Hunters, x1.0 | [?] |
 | rimewright | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| rimewright | RMB | Ice Spear | none listed | same as vs Hunters, x1.0 | [?] |
-| rimewright | E | Rink Wall | none listed | same as vs Hunters, x1.0 | [?] |
-| rimewright | R | Rimelock | none listed | same as vs Hunters, x1.0 | [?] |
+| rimewright | RMB | Icebreaker | none listed | same as vs Hunters, x1.0 | [?] |
+| rimewright | E | Cold Front | none listed | same as vs Hunters, x1.0 | [?] |
+| rimewright | R | Freeze Frame | none listed | same as vs Hunters, x1.0 | [?] |
 | tender | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| tender | RMB | Burrseed | none listed | same as vs Hunters, x1.0 | [?] |
+| tender | RMB | Stick Around | none listed | same as vs Hunters, x1.0 | [?] |
 | tender | E | Hearthlight | none listed | same as vs Hunters, x1.0 | [?] |
-| tender | R | Hearth Call | none listed | same as vs Hunters, x1.0 | [?] |
+| tender | R | Rise and Shine | none listed | same as vs Hunters, x1.0 | [?] |
 | thief | LMB | weapon | none listed | same as vs Hunters, x1.0 | [?] |
-| thief | RMB | Bola | none listed | same as vs Hunters, x1.0 | [?] |
-| thief | E | Shadow Knife | none listed | same as vs Hunters, x1.0 | [?] |
-| thief | R | Encore | none listed | same as vs Hunters, x1.0 | [?] |
+| thief | RMB | Dark Bola | none listed | same as vs Hunters, x1.0 | [?] |
+| thief | E | White Flash | none listed | same as vs Hunters, x1.0 | [?] |
+| thief | R | Last Dance | none listed | same as vs Hunters, x1.0 | [?] |
 
 **Ideas of ours (not built):** a slow-kit damage bonus vs monsters to narrow the 4-12x clear spread; see EXPEDITION_SPEC "Camp clear pacing".
 # Camp and lair-boss parity: ours against the source

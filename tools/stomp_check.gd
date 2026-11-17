@@ -1,7 +1,8 @@
 extends RefCounted
 ## --stomp-check: a stomp (Life.start_stomp) is uncancellable except by the animation ending or the stomper
 ## being hard-CC'd (briefs/DECISIONS.md 2026-11-11). Every hard CC in docs/KIT_PARITY.md "Crowd control"
-## (stuns, Ground, roots, wall stuns, the Nightwell pull, Snap, Rimelock, the Bola pair, Anchor, a reel) lands
+## (stuns, Ground, roots, wall stuns, the Main Attraction pull, Snap, Freeze Frame, the Dark Bola pair, Anchor, a
+## reel) lands
 ## on a stomper a second in and must cancel it with the wisp alive; slows and Daze must not. A CC is checked
 ## by the channel it travels (hurt opts, KitStatus, a Displace tow, a knock), with the kit's real numbers.
 ## Prints STOMP ok/FAIL and a STOMPCHECK PASS/FAIL line.
@@ -63,17 +64,17 @@ func _hard() -> Array:
 		["Vex wall slam stun 0.7", stun.call(0.7)], ["Zedran Meteor core stun 0.8", stun.call(0.8)],
 		["Zedran Chain Lunge stun 0.35", stun.call(0.35)], ["Zedran Haul Slam stun 0.6", stun.call(0.6)],
 		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)], ["Tarek punch wall stun 0.9", stun.call(0.9)],
-		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Rimelock stun 0.75", stun.call(0.75)],
+		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Freeze Frame stun 0.75", stun.call(0.75)],
 		["Ostra Snap stun 1.8", stun.call(1.8)], ["Albert Crush stun 1.0", stun.call(1.0)],
 		["Albert Shield Slam stun 0.6", stun.call(0.6)], ["Albert Crushing Blow stun 0.4", stun.call(0.4)],
-		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)], ["Sable Bola pair stun 0.9", stun.call(0.9)],
+		["Ryzz Pink Spear wall stun 0.8", stun.call(0.8)], ["Sable Dark Bola pair stun 0.9", stun.call(0.9)],
 		["Grimble Anchor stun 1.1", stun.call(1.1)],
-		["Pip Burrseed root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],
-		["Pip Burrseed root 1.4 (rank 3)", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.4})],
-		["Sable Bola Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
-		["Ryzz Skycall Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
+		["Pip Stick Around root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],
+		["Pip Stick Around root 1.4 (rank 3)", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.4})],
+		["Sable Dark Bola Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
+		["Ryzz Undercurrent Grounded 1.5", func(): KitStatus.apply(s, "gnd", 1.5)],
 		["Grimble Anchor Grounded", func(): KitStatus.apply(s, "gnd", 1.0)],
-		["Ostra Nightwell stun and pull 3.5", func():
+		["Ostra Main Attraction stun and pull 3.5", func():
 			s.hurt(1.0, f, {"src": "abil", "stun": 3.5})
 			tow.call(0.0).call()],
 		["Grimble hook reel (stun 0.2 and a haul)", func():
@@ -88,14 +89,15 @@ func _soft() -> Array:
 	var slow := func(k: float, sec: float) -> Callable:
 		return func(): s.hurt(1.0, f, {"src": "abil", "slow": sec, "slow_k": k})
 	return [
-		["Vex Cinderfall slow 30%", slow.call(0.3, 0.6)], ["Zedran Meteor ring slow 40%", slow.call(0.4, 1.5)],
+		["Vex Penny Drop slow 30%", slow.call(0.3, 0.6)], ["Zedran Meteor ring slow 40%", slow.call(0.4, 1.5)],
 		["Zedran Fireblast slow 30%", slow.call(0.3, 1.0)], ["Hem Rain of Arrows slow 35%", slow.call(0.35, 0.8)],
-		["Cinder Shot slow 30%", slow.call(0.3, 1.5)], ["Tarek Basalt Spine slow 35%", slow.call(0.35, 1.0)],
-		["Claire Ice Spear slow 35%", slow.call(0.35, 0.8)], ["Claire Rimelock build to 55%", slow.call(0.55, 1.5)],
-		["Ostra orb slow 10%", slow.call(0.1, 1.5)], ["Sable Shadow Knife slow 50%", slow.call(0.5, 2.5)],
-		["Sable Bola slow 30%", slow.call(0.3, 1.5)],
+		["Spitfire slow 30%", slow.call(0.3, 1.5)], ["Tarek Backbone slow 35%", slow.call(0.35, 1.0)],
+		["Claire Icebreaker slow 35%", slow.call(0.35, 0.8)], ["Claire Freeze Frame build to 55%", slow.call(0.55,
+			1.5)],
+		["Ostra orb slow 10%", slow.call(0.1, 1.5)], ["Sable White Flash slow 50%", slow.call(0.5, 2.5)],
+		["Sable Dark Bola slow 30%", slow.call(0.3, 1.5)],
 		["Ostra Trade Disoriented", func(): KitStatus.apply(s, "dsr", 1.5, 0.4)],
-		["Vex Burr Charge Daze 1.4", func(): KitStatus.apply(s, "rat", 1.4)],
+		["Vex Coin Blast Daze 1.4", func(): KitStatus.apply(s, "rat", 1.4)],
 		["Daze and a slow together", func():
 			KitStatus.apply(s, "rat", 1.4)
 			s.hurt(1.0, f, {"src": "abil", "slow": 1.0, "slow_k": 0.3})],

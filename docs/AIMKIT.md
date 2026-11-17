@@ -147,7 +147,7 @@ AimKit.arc_wall(h, "e", {"rmax": reach})       # Lace's Rain of Arrows: at the c
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
-`deg` (120), `thick` (0.9), `panels` (7). With `"lace": true` (Lace's Hail Wall) the band's fill is two
+`deg` (120), `thick` (0.9), `panels` (7). With `"lace": true` (Lace's Hemline) the band's fill is two
 strands criss-crossing between its rims instead.
 
 ### Two-end swap marker
@@ -162,10 +162,10 @@ AimKit.line(h, "aim")                                        # the thin aim line
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lace stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
-AimKit.span(h, "x", {"len": 12.0, "width": 3.2})              # Basalt Spine: the line over the band it slows
+AimKit.span(h, "x", {"len": 12.0, "width": 3.2})              # Backbone: the line over the band it slows
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-`"lace": true` on a line or a lane (Lace's draw reticle and Heavy Shot bar, owner 11-11) draws two strands
+`"lace": true` on a line or a lane (Lace's draw reticle and Pin Down bar, owner 11-11) draws two strands
 criss-crossing along it, one cross every 0.5 m, the one passing under darker: a laced cord, not a plain
 line or fill. The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
@@ -181,8 +181,8 @@ ring at that range round the caster (`<slot>_reach`) and the landing disc at the
 it stops where the cast lands (`<slot>_spot`). Aimed means:
 - **Quick cast off**: E or R held (`Match.aim_hold`), cast on release. R holds only for a ground-target R that has
   no aim hold of its own (`AimReach.holds`). With Quick cast on (the default) these cast on the press, as in the source.
-- **The kit's own aim hold**: Neve's Ice Spear (RMB held), Motley's Trade (Shift held), Tenzo's Basalt Spine (R held)
-  draw their own landing mark and add the ring with `AimReach.ring(kit, slot)`. Sparkle's Kitefall hang keeps its
+- **The kit's own aim hold**: Neve's Icebreaker (RMB held), Motley's Trade (Shift held), Tenzo's Backbone (R held)
+  draw their own landing mark and add the ring with `AimReach.ring(kit, slot)`. Sparkle's Stormfall hang keeps its
   own `x_ring` round the take-off spot.
 
 The ground-target slots: Vex R, Sparkle E and R, Meeko E (throw), Neve RMB, Motley E, R and Shift, Tenzo R.
@@ -234,7 +234,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Online, every `all` telegraph reaches the other games by itself (AimNet, section 6); aim reticles
     and cursor states stay on your own screen. Nothing to add in the kit.
   - Ground cones also have `ArchKit.net_cone`: `["fx", "cone", nid, at, dir, len, deg, dur, col]`, a static
-    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Burr Charge uses it.
+    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Coin Blast uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
@@ -266,13 +266,13 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 |---|---|---|---|---|
 | Lace (pin) | LMB stage 1 | clamp; lands at the cursor | clamp, 12 m | match |
 | | LMB stage 2 | full, past the cursor, longer range | full, 16 m | match |
-| | RMB Heavy Shot | skillshot toward the cursor; range ? | full, 14 m | match (?) |
-| | E Hail Wall | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
-| | X Starpiercer | beam, fixed length | full, 18 m | match |
+| | RMB Pin Down | skillshot toward the cursor; range ? | full, 14 m | match (?) |
+| | E Hemline | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
+| | X Finishing Touch | beam, fixed length | full, 18 m | match |
 | Cinder (linwick) | LMB | stream runs its full length | full, 6.1 m | match |
-| | RMB Cinder Shot | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
+| | RMB Spitfire | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
 | | Shift | toward the cursor, stops on impact | fixed dash along the aim | match |
-| | X Flue Flight | flies forward along the aim | fixed flight, steers with the aim | match |
+| | X Red Carpet | flies forward along the aim | fixed flight, steers with the aim | match |
 | Albert (bjorn) | LMB throw | clamp; lands at the cursor, max range ? (seen to 7 bh = 12.6 m) | clamp, 2.5..9 m (owner: 2.5 m floor) | match on the rule; **9 m is below the 12.6 m seen, left for the owner** |
 | | E | at the planted hammer, not the cursor | the hammer | match |
 | | R | lane along the aim, not cursor-clamped | full lane | match |
@@ -280,32 +280,32 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | Tenzo (breah) | LMB boulder | cursor or max range: **unrecorded** | full, 11 m | ? (sheet open question) |
 | | RMB slam | a short hop ahead toward the cursor | fixed hop | match |
 | | Shift Rock Hop | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
-| | X Basalt Spine | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
+| | X Backbone | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
 | Grimble (dredge) | LMB | fixed range, does not stop at the cursor | full | match |
 | | RMB Grasp | full range, to the first foe | full, 11.5 m | match |
 | | R | cone, fixed | fixed | match |
 | Vex (venator) | LMB | full, past the cursor | full | match |
 | | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
-| | E Longneedle | fixed long lane | full, 18 m | match |
+| | E Palm Spear | fixed long lane | full, 18 m | match |
 | | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
 | Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
 | | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
-| | E Warchain | hook toward the cursor, length ? | full, 13 m | match (?) |
+| | E Short Leash | hook toward the cursor, length ? | full, 13 m | match (?) |
 | Sparkle (vireo) | LMB, RMB | full range | full | match |
-| | E Skycall | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
-| | X Kitefall | at the cursor, clamped inside a ring | clamp 14.4 m, backed off to standable ground | match |
+| | E Undercurrent | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
+| | X Stormfall | at the cursor, clamped inside a ring | clamp 14.4 m, backed off to standable ground | match |
 | Motley (ostra) | LMB, RMB Snap | full, past the cursor | full | match |
 | | Shift Swap | lands at the cursor (lob) | clamp 12 m, no minimum | match |
-| | E Brimseed | at the cursor | clamp 9 m; refuses with no ground | match (?) |
-| | X Nightwell | at the cursor, clamped (10 m) | clamp 10 m; refuses with no ground | match |
+| | E Gag Gift | at the cursor | clamp 9 m; refuses with no ground | match (?) |
+| | X Main Attraction | at the cursor, clamped (10 m) | clamp 10 m; refuses with no ground | match |
 | Neve (tamsin) | LMB darts | homing toward the cursor | full, homing | match |
-| | RMB Ice Spear | lands at the cursor | clamp 1.5..12 m | match (the 1.5 m floor is ours) |
-| | E Rink Wall | slides toward the cursor and stops there | clamp 4.5..16.2 m | match |
+| | RMB Icebreaker | lands at the cursor | clamp 1.5..12 m | match (the 1.5 m floor is ours) |
+| | E Cold Front | slides toward the cursor and stops there | clamp 4.5..16.2 m | match |
 | Meeko (mooshmoosh) | LMB, RMB | full range | full | match |
 | | E Hearth | thrown to the cursor | clamp 9 m, no minimum | match |
 | Sable (dancer) | LMB | ends at the cursor, clamped | clamp 1.5..12 m | match |
-| | RMB Bola | fixed-length lane toward the cursor | fixed | match |
-| | E Shadow Knife | skillshot; with no target lands at the cursor or the end of range | clamp 14 m | match (?) |
+| | RMB Dark Bola | fixed-length lane toward the cursor | fixed | match |
+| | E White Flash | skillshot; with no target lands at the cursor or the end of range | clamp 14 m | match (?) |
 
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
@@ -326,19 +326,19 @@ Now all of them arrive through "tele".
 
 | Hunter (kit) | `all` telegraphs (id: shape) | Before 0.24.6 on other games |
 |---|---|---|
-| Lace (archer) | E Hail Wall `e`: arc_wall | nothing |
+| Lace (archer) | E Hemline `e`: arc_wall | nothing |
 | Cinder (ashwick) | E cloak ring `e_ring`: circle | nothing |
 | Albert (bulwark, bjorn_*) | RMB push `aegis_push`: lane; E mend zone `e`: circle; R cells `x`: lane | a ring at the mend and per R cell |
 | Tenzo (dolm, breah_*) | RMB slam `rmb`: sweet circle; Shift hop `leap`: circle; E tells `e_tell<n>`: circle; X cracks `x_cracks`: span | a ring at the slam, the blast and the spine |
 | Grimble (dredge) | E `e_tell`, `e_hit`: cone; dive quake: circle; X fan `x_fan`: cone | a ring at the hit |
-| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Longneedle `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
+| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Palm Spear `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
 | Kael (juggernaut) | RMB slam `slam`: cone; Meteor Drop `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
-| Sparkle (mage) | Shift end `dash_end`: circle; E Skycall `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Skycall and the X |
-| Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Nightwell `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
-| Neve (rimewright) | spear zones: circle; E Rink Wall: lane; X rink `x`: circle | nothing |
+| Sparkle (mage) | Shift end `dash_end`: circle; E Undercurrent `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Undercurrent and the X |
+| Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Main Attraction `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
+| Neve (rimewright) | spear zones: circle; E Cold Front: lane; X rink `x`: circle | nothing |
 | Meeko (tender) | burr circles; X `x`, `x_me`, `x_pick`: circle | a bolt at the X pick |
-| Sable (thief) | Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
+| Sable (thief) | Dark Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
 
 `--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
 per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
-`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hail Wall arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).
+`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hemline arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).

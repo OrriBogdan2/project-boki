@@ -1,6 +1,6 @@
 extends RefCounted
 ## Owner item 113, Kael's accuracy pass against the source: no accidental glider (2), the blade forward in the
-## Lunge's hold (3), the Searing Wave a side swing (4), E free of RMB's direction (5), the Meteor Drop straight
+## Lunge's hold (3), the Searing Wave a side swing (4), E free of RMB's direction (5), the Hit the Deck straight
 ## down (6), E > R > the pull through the ult (7), the short dash hit (8); the owner's 11-10 playtest: the air
 ## slam spikes and knocks down, and the combo E > air RMB > jump > RMB > E > Haul Slam chains with no dropped press.
 ## Runs inside --juggernaut-combo-check (tools/zedran_feel_check.gd). A is tools/archetype_check.gd.
@@ -158,7 +158,7 @@ func e_free() -> void:
 			thrown and A.dmg(T) >= 20.0, "thrown %s, foe took %.0f" % [thrown, A.dmg(T)])
 	await A.done(m)
 
-# ------------------------------------------------------------------ 6: the Meteor Drop straight down
+# ------------------------------------------------------------------ 6: the Hit the Deck straight down
 func vertical_slam() -> void:
 	var g := _rig()
 	var m: Match = g["m"]
@@ -282,7 +282,7 @@ func _until(m: Match, cond: Callable, most: float) -> void:
 		t += A.DT
 
 ## E onto a foe, jump and slam down (spiking an airborne foe beside him), jump out of the recovery, hold RMB (the
-## Meteor Drop resting: the ground Smash), E pulls him in and the Haul Slam lands on arrival.
+## Hit the Deck resting: the ground Final Swing), E pulls him in and the Haul Slam lands on arrival.
 func slam_combo() -> void:
 	var r := A.setup("juggernaut", 7.0, "", true)
 	var m: Match = r[0]
@@ -326,7 +326,7 @@ func slam_combo() -> void:
 	var held := func(): P.inp["sec_hold"] = true
 	held.call()
 	K.press_rmb()
-	A.ok("jug combo: RMB in the air with the slam resting is the Smash charge, not a dead press",
+	A.ok("jug combo: RMB in the air with the slam resting is the Final Swing charge, not a dead press",
 			K.rmb_down and not K.rmb_ctx.get("air", true) and D.drops == 1, "down %s ctx %s" % [K.rmb_down, K.rmb_ctx])
 	A.step(m, 0.15, held)
 	K.use_e()
@@ -341,7 +341,7 @@ func slam_combo() -> void:
 					P.flat_dist(T), T.stun_t])
 	await A.done(m)
 
-## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Slam's wind-up) is
+## E's pull on a hooked chain pressed while a Final Swing runs (the air slam's hang, the Finishing Slam's wind-up) is
 ## kept and goes the moment it lands, never lost and never fighting the slam's own movement.
 func pull_waits() -> void:
 	var g := _rig()
@@ -387,7 +387,7 @@ func pull_waits() -> void:
 
 # ------------------------------------------------------------------ RMB held: the aim stays his
 ## Holds RMB aimed north, turns the cursor east mid-hold and lets go: he faces east and the Lunge goes east,
-## free and with the Warchain hooked to a foe in the north (only a hold aimed down the chain is a Chain Lunge).
+## free and with the Short Leash hooked to a foe in the north (only a hold aimed down the chain is a Chain Lunge).
 func rmb_steer() -> void:
 	var g := _rig()
 	var m: Match = g["m"]

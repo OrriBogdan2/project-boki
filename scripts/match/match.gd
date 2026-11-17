@@ -1932,7 +1932,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
-	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Rise and Shine) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -2718,7 +2718,7 @@ func _update_shots(dt: float) -> void:
 				hit = true; break
 			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
+			# a Sticky Fingers pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
 			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not pierces
 			if rock_hit or (gp > p.y and not over_ok and not pierces):
@@ -3019,7 +3019,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("mark"):
 		KinRules.mark(e, String(x["mark"][0]), float(x["mark"][1]), float(x["mark"][2]))
 	if x.get("blinkto", false) and by is Hunter and not by.remote and not by.downed:
-		# Shadow Knife: appear behind whoever it hit
+		# White Flash: appear behind whoever it hit
 		var back := Vector2(e.pos.x - by.pos.x, e.pos.z - by.pos.z).normalized()
 		var to := Vector3(e.pos.x + back.x * 1.1, 0, e.pos.z + back.y * 1.1)
 		if not world.is_void(to.x, to.z) and not world.is_block(to.x, to.z):

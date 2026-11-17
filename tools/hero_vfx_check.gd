@@ -5,7 +5,8 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it
+## from their anchor, follow it, stream behind a run and are off at Low; her Freeze Frame breaks outward when she
+## ends it
 ## and melts when it runs out. Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
 ## And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
@@ -25,7 +26,7 @@ const MAX_FLARE := 4.0  # m across, the largest burst (no screen-filling flashes
 const ZONE_CORE_A := 0.25  # alpha at most at the centre of a zone (docs/VFX_QUALITY.md)
 const MAX_VORTEX := 4.5  # m radius, the largest ground swirl or shockwave ring
 const TRACER_FULL := 3  # steps (60/s) a round flies before its tracer must be drawn full length
-const END_MS := 1.0  # ms of CPU a Rimelock end look may take to spawn from a warm pool
+const END_MS := 1.0  # ms of CPU a Freeze Frame end look may take to spawn from a warm pool
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -103,7 +104,7 @@ const CALLED_ELSEWHERE := [
 ## (fx_dot has its own ground fade: FxDot, ground_y.)
 const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
-const DT_FILL := 1.0 / 60.0  # s per step while timing the Faultline fill
+const DT_FILL := 1.0 / 60.0  # s per step while timing the Groundswell fill
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -456,7 +457,7 @@ func _motley_trade(m: Match, P: Hunter) -> void:
 				% ["Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad]
 			)
 		)
-	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Nightwell: the Swollen core is teal, not pink")
+	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Main Attraction: the Swollen core is teal, not pink")
 
 
 ## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
@@ -544,7 +545,7 @@ func _vex_tracer(main: Node) -> void:
 ## well (floor and dome), Meeko's seed and Hearthlight discs and Sable's X ring, from the values the kits draw with.
 func _zones(main: Node) -> void:
 	var m: Match = flow._match(main, "gunslinger")
-	# VVFx.disc (Sparkle's Skycall; Vex's discs are HeroVfx data since ext/vfx-vex-data)
+	# VVFx.disc (Sparkle's Undercurrent; Vex's discs are HeroVfx data since ext/vfx-vex-data)
 	var vex: Node3D = VVFx.of(m).disc(Vector3.ZERO, 3.4, Color("2a1018"), Color("c43a2a"), 1.0, Color("ff9a5c"))
 	var vm := (vex as MeshInstance3D).material_override as ShaderMaterial
 	ok(
@@ -578,7 +579,7 @@ func _zones(main: Node) -> void:
 	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
 
 
-## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
+## Meeko's Stick Around root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
 ## grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts) at most 0.25, and the burst's ring lands on its rim
 ## (the ring shader's band ends at 0.9 of its size).
 func _meeko_field() -> void:
@@ -610,7 +611,7 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 	ok(int(V.plays.get("needle_stuck", 0)) == 1, "a missed needle leaves its thread")
 	var last: Dictionary = V.live.filter(func(e): return (e["node"] as Node3D).visible)[0]
 	ok(is_equal_approx(float(last["dur"]), PinFx.SPENT_T), "the thread lasts as long as the needle")
-	ok(is_equal_approx(PinFx.HEAVY_SCALE, 6.0), "the Heavy Shot stays big")
+	ok(is_equal_approx(PinFx.HEAVY_SCALE, 6.0), "the Pin Down stays big")
 	V.hold(P, "string_idle")
 	var key := "%d/string_idle" % P.get_instance_id()
 	var wanted: int = 0 if V._model_has(P, "halo_bow_mid") else 1
@@ -622,7 +623,7 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 	)
 
 
-## Cinderfall's hot centre ring: at every ult rank it sits at the radius the +core_k damage uses (the data's
+## Penny Drop's hot centre ring: at every ult rank it sits at the radius the +core_k damage uses (the data's
 ## core_r), everyone sees it (rivals in the hostile tint) and it fills toward the impact with the outer disc.
 func _vex_core(main: Node) -> void:
 	var m: Match = flow._match(main, "gunslinger")
@@ -646,7 +647,7 @@ func _vex_core(main: Node) -> void:
 				and is_equal_approx(float(ring.get("fill", 0.0)), fill)
 			),
 			(
-				"Cinderfall rank %d: the centre ring is the damage core (%.2f m), seen by all, filling with the disc"
+				"Penny Drop rank %d: the centre ring is the damage core (%.2f m), seen by all, filling with the disc"
 				% [rank, want]
 			)
 		)
@@ -920,7 +921,7 @@ func _scarf(main: Node) -> void:
 	S.prewarm_end()
 
 
-## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
+## Albert's Groundswell tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
 ## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
 ## time is read from data.
 func _slam_fill(main: Node) -> void:
@@ -958,7 +959,7 @@ func _slam_fill(main: Node) -> void:
 	m.queue_free()
 
 
-## Rimelock's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
+## Freeze Frame's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
 ## the shell outward with a flash, the time running out melts it off her. Warm, each look spawns in under END_MS.
 func _rime_ends(main: Node) -> void:
 	var m: Match = flow._match(main, "rimewright")
@@ -985,7 +986,7 @@ func _rime_ends(main: Node) -> void:
 		var not_want := "rime_break" if path[2] == "" else "rime_melt"
 		ok(
 			K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
-			"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want]
+			"Freeze Frame ended by %s: %s, not %s" % [path[0], want, not_want]
 		)
 	for mv: String in ["rime_break", "rime_melt"]:
 		var best := INF
@@ -1390,7 +1391,8 @@ func _streak_span(V: HeroVfx, fps: float) -> float:
 	return span
 
 
-## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
+## Sable's Last Dance ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and
+## the
 ## blade layer stay centred on her through a Vault, to within a hand's width.
 func _sable_ring(main: Node) -> void:
 	var m: Match = flow._match(main, "thief")
@@ -1404,7 +1406,7 @@ func _sable_ring(main: Node) -> void:
 	while float(U.st["t"]) < 0.2 - 0.5 * Match.DT:
 		m.step(Match.DT)
 	var half := float(AimKit.entry(P, "ult")["r"]) / reach
-	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	ok(absf(half - 0.5) < 0.05, "Sable's Last Dance ring is about half its full radius at 0.2s (%.2f)" % half)
 	m.step(0.3)
 	P.inp["move"] = Vector2(0, -1)
 	P.inp["dash"] = true

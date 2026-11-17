@@ -1,6 +1,7 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Tenzo's reel (--hero-vfx-reel --reel-hero=dolm): a boulder thrown, Stone Row raised then punched into flying
-## rocks that burst, Rock Hop, a full Quakefall, and Basalt Spine erupting; owner playtest 11-08: the held Quakefall
+## Tenzo's reel (--hero-vfx-reel --reel-hero=dolm): a boulder thrown, Foothold raised then punched into flying
+## rocks that burst, Leap of Faith, a full Rock Bottom, and Backbone erupting; owner playtest 11-08: the held Rock
+## Bottom
 ## at a dummy right in its path, and R pressed while falling over the abyss (the rock floor rising under him).
 
 ## Engine.time_scale while the reel runs: a software frame takes about half a second, so at this scale the
@@ -41,7 +42,7 @@ func _part_rocks() -> void:
 		P.inp["sig"] = _at(t, 0.1)
 		P.inp["fire"] = t > 1.2 and t < 2.3
 		_aim(T.pos)
-	var caption := "E then a held LMB: the eye-stones, Stone Row erupting, the punch, rocks flying and bursting"
+	var caption := "E then a held LMB: the eye-stones, Foothold erupting, the punch, rocks flying and bursting"
 	await _go(3.2, row, _sheet("rocks", caption, [0.12, 0.35, 0.55, 0.8, 1.8, 2.32, 2.4, 2.6, 2.9]), 3.5)
 	await _go(GAP)
 
@@ -57,7 +58,7 @@ func _part_quake() -> void:
 		quake,
 		_sheet(
 			"quake",
-			"RMB held: the eye-stones, the charge, the Quakefall, the cracked ground",
+			"RMB held: the eye-stones, the charge, the Rock Bottom, the cracked ground",
 			[0.4, 0.9, 1.5, 1.7, 1.8, 1.9, 2.1, 2.5, 2.9]
 		),
 		1.5
@@ -80,7 +81,7 @@ func _part_r() -> void:
 		ult,
 		_sheet(
 			"r",
-			"R, Basalt Spine: the eye-stones, the cracks, the ridge erupting",
+			"R, Backbone: the eye-stones, the cracks, the ridge erupting",
 			[0.15, 0.3, 0.45, 0.55, 0.65, 0.75, 0.9, 1.3, 2.0],
 			func(): return T.pos + Vector3(-2.0, 0.5, 0)
 		),

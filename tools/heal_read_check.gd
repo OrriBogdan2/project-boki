@@ -2,7 +2,7 @@ extends RefCounted
 ## --heal-read-check: every heal reads one way, through Fx.healed (docs/DASHES_AND_ABILITY_FEEL.md 5.1): a soft
 ## green-gold glow (Feel's sustain colour) riding on the healed Hunter and a green "+N" (HudStyle.HEAL) of the
 ## heal kind, never added into a damage number. Runs the real sources on support_check's flat strip: Meeko's
-## Hearthlight (a pulse, the flare) and Hearth Call, Albert's Mending Ground (a tick, the burst), Kael's Gilded
+## Hearthlight (a pulse, the flare) and Rise and Shine, Albert's Safe Harbour (a tick, the burst), Kael's Gilded
 ## Riposte and a Void weapon's lifesteal; then the number rules. Never touches the save. With --shots-dir=<dir>
 ## every step is drawn and each source leaves a strip heal_read_<source>.png (needs a GPU: jobq).
 
@@ -75,8 +75,8 @@ func _meeko() -> void:
 	await _step(m, A)
 	_clear(m.fx)
 	HunterKeys.ult_pressed(P)
-	ok(await _until_healed(m, A, 2.0) and not K.hearth_call.is_empty(), "Meeko Hearth Call: the tether heals")
-	_reads(m, A, "Meeko Hearth Call tick")
+	ok(await _until_healed(m, A, 2.0) and not K.hearth_call.is_empty(), "Meeko Rise and Shine: the tether heals")
+	_reads(m, A, "Meeko Rise and Shine tick")
 	await _strip(m, A, "meeko_hearth_call")
 	parts += 1
 	await _free(m)
@@ -92,8 +92,8 @@ func _albert() -> void:
 	P.inp["aim"] = P.pos
 	_clear(m.fx)
 	K.use_e()
-	ok(await _until_healed(m, A, 2.0) and not K.mend.is_empty(), "Albert Mending Ground: a tick heals the teammate")
-	_reads(m, A, "Albert Mending Ground tick")
+	ok(await _until_healed(m, A, 2.0) and not K.mend.is_empty(), "Albert Safe Harbour: a tick heals the teammate")
+	_reads(m, A, "Albert Safe Harbour tick")
 	await _strip(m, A, "albert_mend_tick")
 	var t := 0.0
 	while not K.mend.is_empty() and t < 6.0:
@@ -101,8 +101,8 @@ func _albert() -> void:
 		_clear(m.fx)
 		await _step(m, A)
 		t += DT
-	ok(K.mend.is_empty(), "Albert Mending Ground: the zone ends in its burst")
-	_reads(m, A, "Albert Mending Ground burst")
+	ok(K.mend.is_empty(), "Albert Safe Harbour: the zone ends in its burst")
+	_reads(m, A, "Albert Safe Harbour burst")
 	await _strip(m, A, "albert_mend_burst")
 	parts += 1
 	await _free(m)
@@ -114,8 +114,8 @@ func _kael() -> void:
 	P.hp = P.max_hp * 0.5
 	_clear(m.fx)
 	HunterKeys.ult_pressed(P)
-	ok(await _until_healed(m, P, 2.5), "Kael Gilded Riposte: the cleave heals him")
-	_reads(m, P, "Kael Gilded Riposte")
+	ok(await _until_healed(m, P, 2.5), "Kael Blow for Blow: the cleave heals him")
+	_reads(m, P, "Kael Blow for Blow")
 	await _strip(m, P, "kael_riposte")
 	parts += 1
 	await _free(m)

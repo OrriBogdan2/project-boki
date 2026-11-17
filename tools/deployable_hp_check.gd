@@ -1,10 +1,10 @@
 extends "res://tools/hero_pair_check.gd"
 ## --deployable-hp-check: how placed objects die (docs/heroes/deployables.md). One break case per object, each
 ## through the real path: a foe's LMB shots into a rock / ice wall / aegis, the timer for the others.
-##   Tenzo: Stone Row rock (45 hp, 9 s), Basalt Spine rock (45 hp, 7 s)
-##   Neve: Rink Wall (70 hp, 4.5 s; frozen 6 s)       Albert: Aegis (160 hp, lock 3 s), Mending Ground (4 s, no hp)
-##   Motley: Brimseed (no hp, fizzles)                  Meeko: Hearthlight (2.5 s, no hp)
-##   Sable: Shadow Knife (6 s, no hp)                   Kael: Warchain anchor on a rock (5 s)
+##   Tenzo: Foothold rock (45 hp, 9 s), Backbone rock (45 hp, 7 s)
+##   Neve: Cold Front (70 hp, 4.5 s; frozen 6 s)       Albert: Blue Guard (160 hp, lock 3 s), Safe Harbour (4 s, no hp)
+##   Motley: Gag Gift (no hp, fizzles)                  Meeko: Hearthlight (2.5 s, no hp)
+##   Sable: White Flash (6 s, no hp)                   Kael: Short Leash anchor on a rock (5 s)
 
 func run(main_node: Node) -> void:
 	main = main_node

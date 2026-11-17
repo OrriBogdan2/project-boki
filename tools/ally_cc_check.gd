@@ -5,7 +5,7 @@ extends RefCounted
 ## stuns, Grounded, Shred, Dazed, Blight and burns all count. The source's own ally rules are the EXCEPTIONS
 ## (sv/briefs/kits.md): Grimble's Abyssal Grasp "pulls the first target hit (enemy or ally)",
 ## Motley's Swap teleports "you and all units" it lands on. Tenzo's rocks are walls an ally hops (owner-decided,
-## not a move); his Basalt Spine never raises a rock inside a body, so whoever stands on the line steps aside
+## not a move); his Backbone never raises a rock inside a body, so whoever stands on the line steps aside
 ## (a move only, no status: EXCEPTIONS with `move_only`).
 ## Prints ALLYCC PASS/FAIL.
 

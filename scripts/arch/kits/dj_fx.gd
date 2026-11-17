@@ -2,7 +2,7 @@ class_name DJFx
 extends Node3D
 ## Sable's and Juggernaut's own effects, pooled (one node per match, DJFx.of(m)): projectile looks that
 ## ride on a shot (or on a kit-run projectile), four-point stars, fizzle puffs, heal pillars, two-tone
-## crescents, afterimage chains, and per-frame chains (the Warchain, the Bola cord). Every node is made
+## crescents, afterimage chains, and per-frame chains (the Short Leash, the Dark Bola cord). Every node is made
 ## once and reused; nothing is created per frame. One set of looks (shaders/dj_fx.gdshaderinc, a mode per
 ## look) drawn alpha blended (dj_fx_mix.gdshader) so colour and darkness hold on bright ground; only glows
 ## (cores, the lightning) are additive (dj_fx.gdshader).
@@ -352,7 +352,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			bolt.name = "Bolt"
 			n.add_child(bolt)
 		"bola":
-			# the Bola: two glowing weights on a short crackling cord, whirling
+			# the Dark Bola: two glowing weights on a short crackling cord, whirling
 			for sx in [-1.0, 1.0]:
 				var w := _mi(Models.sphere(0.16, 8), solid(col))
 				w.position = Vector3(sx * 0.42, 0, 0)
@@ -374,7 +374,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			gd.position.z = 0.2
 			head.add_child(gd)
 		"blade":
-			# an Encore blade: a small spinning star in its two colours
+			# a Last Dance blade: a small spinning star in its two colours
 			head.add_child(_mi(star_mesh(3, 0.3), solid(col)))
 			head.add_child(_mi(Models.sphere(0.25, 6), solid(col2)))
 			head.scale = Vector3.ONE * 0.4
@@ -394,7 +394,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			glow.scale = Vector3.ONE * 0.86
 			head.add_child(glow)
 		"hook":
-			# the Warchain's head: a barbed iron hook, its barbs glowing orange
+			# the Short Leash's head: a barbed iron hook, its barbs glowing orange
 			head.add_child(_mi(Models.box(0.14, 0.14, 0.46), solid(Color("3a2a22"))))
 			for sx in [-1.0, 1.0]:
 				var b := _mi(Models.box(0.08, 0.08, 0.32), solid(col))
@@ -433,7 +433,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
 
-## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
+## Shows a projectile look this step (a kit-run projectile: the Dark Bola flying on). Stop calling and it hides.
 func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,
 		width := 0.3) -> void:
 	var e: Dictionary = placed.get(id, {})

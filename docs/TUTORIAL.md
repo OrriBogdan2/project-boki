@@ -29,8 +29,8 @@ check rebinds the actions to F-keys and reads each tutorial, farm and garden lin
 | first Relic: naming leads into the starter pick | 0.0 | wall | 95 | 27.6 | - | - | A NEW BOKI Name your Vespyx "Cin-cin! Vespyx!" It's sly and eager, and it can only babble for now. Whatever yo |
 | first Relic: the pick leads into the first Relic | 0.0 | wall | 105 | 30.4 | - | - | A NEW BOKI Name your Vespyx "Cin-cin! Vespyx!" It's sly and eager, and it can only babble for now. Whatever yo |
 | first Relic: the Relic waits by your face | 3.3 | wall | 22 | 6.7 | - | - | This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. F Put on the Relic |
-| first Relic: putting it on opens its page | 6.3 | wall | 83 | 24.2 | - | - | Vex the Hired Gun 145 health  ·  1 dash  ·  Quill Rifle SHIFT Slipstep Skid or slide, and keep shooting. LMB Q |
-| first Relic: the page has a way on | 0.0 | wall | 83 | 24.2 | - | - | Vex the Hired Gun 145 health  ·  1 dash  ·  Quill Rifle SHIFT Slipstep Skid or slide, and keep shooting. LMB Q |
+| first Relic: putting it on opens its page | 6.3 | wall | 83 | 24.2 | - | - | Vex the Hired Gun 145 health  ·  1 dash  ·  Brass Tacks SHIFT Slipstep Skid or slide, and keep shooting. LMB Q |
+| first Relic: the page has a way on | 0.0 | wall | 83 | 24.2 | - | - | Vex the Hired Gun 145 health  ·  1 dash  ·  Brass Tacks SHIFT Slipstep Skid or slide, and keep shooting. LMB Q |
 
 13 rows, 942 words, 275 s of reading at 3.5 words/s plus 0.45 s a row; 26 s of driven play.
 Wall stage totals: prologue (held to skip) 0.8 s, hatch card+look 0.1, egg pick and 7 knocks 12.2, its look and naming 5.2, first
@@ -44,8 +44,8 @@ plain text: fixed (section 4).
 |---|---|---|---|---|---|---|---|
 | land | 3.7 | sim | 5 | 1.9 | WASD | - | Steer down to the meadow |
 | points | 3.5 | sim | 19 | 5.9 | - | - | You start with 1 ability point Choose wisely: every level gives one more. Monsters give XP when they fall. |
-| pick_sec | 0.6 | sim | 12 | 3.9 | RMB | - | Unlock Burr Charge Fire the charge from your cannon; its blast Dazes. |
-| sec | 0.6 | sim | 6 | 2.2 | RMB | - | Hit the monsters with Burr Charge |
+| pick_sec | 0.6 | sim | 12 | 3.9 | RMB | - | Unlock Coin Blast Fire the charge from your cannon; its blast Dazes. |
+| sec | 0.6 | sim | 6 | 2.2 | RMB | - | Hit the monsters with Coin Blast |
 | shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Now shoot them down Full-auto rifle. Dazed foes take 90% more. |
 | pick_dash | 0.6 | sim | 10 | 3.3 | SHIFT | - | Level 2! Unlock Slipstep Skid or slide, and keep shooting. |
 | dash | 3.8 | sim | 4 | 1.6 | SHIFT | - | Dash across the gap |
@@ -54,8 +54,8 @@ plain text: fixed (section 4).
 | wallkick | 1.6 | sim | 15 | 4.7 | SPACE | - | Jump at the cliff, then again A jump against a wall kicks you up it. |
 | crouch | 1.6 | sim | 11 | 3.6 | CTRL | - | Hold to crouch and scout Crouching shows what lies far ahead. |
 | gkey | 3.0 | sim | 17 | 5.3 | G | - | Send Vespyx at the monsters G sends Vespyx at a monster. Tap again to call it back. |
-| pick_kin | 0.6 | sim | 12 | 3.9 | E | - | Level 3! Unlock Longneedle Stand still, then fire a beam through walls. |
-| kin | 26.0 | sim | 5 | 1.9 | E | nagged | Hit the line with Longneedle |
+| pick_kin | 0.6 | sim | 12 | 3.9 | E | - | Level 3! Unlock Palm Spear Stand still, then fire a beam through walls. |
+| kin | 26.0 | sim | 5 | 1.9 | E | nagged | Hit the line with Palm Spear |
 | glove | 11.4 | sim | 11 | 3.6 | F,Q | - | Grab the glove Gloves need no points. Q uses this one. |
 | hook | 3.4 | sim | 16 | 5.0 | Q | - | Hook the Sentinel to you It shoots from afar. Your glove drags it to your feet. |
 | pick_ult | 0.6 | sim | 17 | 5.3 | X | - | Level 6! Unlock your ultimate Fuse with Vespyx: one body, its power and yours, for a while. |
@@ -77,7 +77,7 @@ three runs of `--tutorial-timing-check` on the branch, all with the gunslinger s
 
 | Step | Before s (runs) | Median | Why it was slow | Change | After s (runs) | Median |
 |---|---|---|---|---|---|---|
-| `kin` | 26.0, 17.1, 12.6 | 17.1 | A second E press during the 0.6 s unlock step fired Longneedle at nothing, so "Hit the line" opened on an 11 s cooldown with nothing saying why. The row stood 8 m away, inside an idle monster's 7.5 m notice range, so it charged in and the line broke up. Your Boki killed the camp before the cast, so the camp came back. Then three 2.5x-health skitters to shoot down. | The step's E is ready when the step opens. The row starts 10 m out and holds its line. The row's monsters have 1x health, so one Longneedle clears the line. | 2.7, 1.7, 1.4 | 1.7 |
+| `kin` | 26.0, 17.1, 12.6 | 17.1 | A second E press during the 0.6 s unlock step fired Palm Spear at nothing, so "Hit the line" opened on an 11 s cooldown with nothing saying why. The row stood 8 m away, inside an idle monster's 7.5 m notice range, so it charged in and the line broke up. Your Boki killed the camp before the cast, so the camp came back. Then three 2.5x-health skitters to shoot down. | The step's E is ready when the step opens. The row starts 10 m out and holds its line. The row's monsters have 1x health, so one Palm Spear clears the line. | 2.7, 1.7, 1.4 | 1.7 |
 | `ult` | 15.4, 14.2, 14.9 | 14.9 | After the fuse, a 7-monster fight (8 for Kael) at 2.5x health: the lesson is the fuse, not the fight | The ult camp is 3 monsters (skitter, spitter, skitter) for every starter, in `camps.ult`. The per-starter `fight_foes` list is gone. | 4.6, 7.0, 6.6 | 6.6 |
 | `defend` | 14.0, 14.0, 14.0 | 14.0 | A fixed 14 s capture timer (`Exits.TUT_UPLINK_T`) | 8 s: still long enough for its one wave of 2 skitters to arrive | 8.0, 8.0, 8.0 | 8.0 |
 

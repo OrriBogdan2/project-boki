@@ -94,7 +94,7 @@ func run(main: Node) -> void:
 	P.inp["sec_hold"] = false
 	_run(m, P, 45, seen)
 	ok(seen.has("spear"), "the release plays the push")
-	# the Rimelock statue (item 65): nothing on her moves while it holds, not even the braid's idle ripple
+	# the Freeze Frame statue (item 65): nothing on her moves while it holds, not even the braid's idle ripple
 	var c0 := _clips(P)
 	c0.force = {"clip": "rime_hold", "t": 0.2}
 	_run(m, P, 30, seen)

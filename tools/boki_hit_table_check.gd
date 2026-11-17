@@ -68,7 +68,7 @@ func _kit(a: String, kind: String) -> Dictionary:
 	var home: Vector3 = s[4]
 	var spot := Vector3(T.pos.x, m.world.ground_at(T.pos.x, T.pos.z), T.pos.z)
 	var tgt: Ent = T
-	if T.kin:      # the dummy's own Boki would be a second foe beside it (Sable's Bola tangles two)
+	if T.kin:      # the dummy's own Boki would be a second foe beside it (Sable's Dark Bola tangles two)
 		var o: Kin = T.kin
 		o.dead = true
 		m.kins.erase(o)

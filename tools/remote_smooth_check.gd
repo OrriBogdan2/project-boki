@@ -6,7 +6,7 @@ extends RefCounted
 ## and drops 2% of snapshots; packets to one peer arrive in the order they were sent, as through a real
 ## queue (the host's hunter and world snapshots of one step are two packets). The host's Hunter runs,
 ## stops, turns, dashes, is lifted 5 m (a teleport), glides and is knocked, then becomes Sparkle and casts
-## Kitefall (its scripted 0.2 s fall onto a spot 12 m off, numbered on its own); the guest records where its
+## Stormfall (its scripted 0.2 s fall onto a spot 12 m off, numbered on its own); the guest records where its
 ## game puts that Hunter every step. Both games step their match on the wall clock as Match._process does
 ## (a slow frame takes two steps) and stamp each step with the wall moment it stands for. The host draws
 ## nothing: only the line and the guest's buffer are measured, and a host drawn on a loaded software
@@ -31,7 +31,7 @@ const JERK_DV := 1.5          # m/s change of the drawn speed in one frame that 
 const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
 const NET_CAP := 4.0          # m in one frame: Ent.net_follow's snap distance, NetSmooth's SNAP_SPEED x 0.1 s
-const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Kitefall landing, inside the flat strip
+const KITE_OFF := Vector3(12.0, 0, 0)   # m from the take-off to the Stormfall landing, inside the flat strip
 const DN := preload("res://tools/displace_net_check.gd")
 
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
@@ -185,7 +185,7 @@ func _script(truth: Array) -> void:
 	await _host_run(1.2, "knock", truth)
 	await _kitefall(truth)
 
-## Sparkle's Kitefall: crouch, rise, hang, then the scripted fall the snapshot reports a velocity for.
+## Sparkle's Stormfall: crouch, rise, hang, then the scripted fall the snapshot reports a velocity for.
 ## "move" (the reset to the strip's start and its settle) is left out of the numbers.
 func _kitefall(truth: Array) -> void:
 	var P := m.player
@@ -194,9 +194,9 @@ func _kitefall(truth: Array) -> void:
 	await _host_run(0.8, "move", truth)
 	var U: MageUlt = (P.ak as MageKit).ult
 	P.inp["aim"] = P.pos + KITE_OFF
-	ok(U.cast(), "Kitefall goes off on the host")
+	ok(U.cast(), "Stormfall goes off on the host")
 	await _host_run(0.9, "fall", truth)
-	ok(U.phase() == MageUlt.AIR, "Kitefall hangs", U.phase())
+	ok(U.phase() == MageUlt.AIR, "Stormfall hangs", U.phase())
 	U.recast()
 	await _host_run(1.0, "fall", truth)
 
@@ -243,7 +243,7 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		return
 	var w0: float = truth[0][0]
 	var w1: float = truth[-1][0]
-	var move_w := w1                 # wall time of the reset before Kitefall, and of its cast
+	var move_w := w1                 # wall time of the reset before Stormfall, and of its cast
 	var fall_w := w1
 	for x in truth:
 		if x[4] == "move": move_w = minf(move_w, x[0])
@@ -303,7 +303,7 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
 	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
 	var f: Dictionary = tot["fall"]
-	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
+	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Stormfall's fall is drawn as a drop, not a jump",
 		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
 
 ## Seconds of match clock the stalls between wall times a and b cost.

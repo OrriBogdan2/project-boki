@@ -53,7 +53,7 @@ const MEDIAN_BAR := "roster median"      # source name of a Hunter with no sourc
 
 ## Casts the share table lists that no combo row uses: hero -> slot -> source damage of one cast, a level 1
 ## tooltip against the level 1 target (the footage LMB is level 9, so Celeste cannot join a combo). our_hit
-## casts the ult, then waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
+## casts the ult, then waits ULT_WAIT s for a held ult to go off (Freeze Frame cracks open at 3.5 s).
 const SHARE_ONLY := {"rimewright": {"rmb": 346.0, "x": 155.0}}
 const ULT_WAIT := 4.5
 

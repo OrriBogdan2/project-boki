@@ -25,12 +25,12 @@
 		"variants": {"tap": "A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 3 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +6.1 (TANGLED).", "air": "Thrown from the air the same way."},
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"},
 		"card_range": "bola.range"},
-	"e": {"delivery": "projectile", "name": "Shadow Knife", "short": "Knife", "icon": "thief_e", "col": "#b07aff", "cooldown": 15.0, "range": 15.0, "speed": 40.0, "dmg": 8.0, "slow": 0.5, "slow_t": 2.5, "time": 6.0, "refund_wall": 0.25, "refund_foe": 0.5, "ghosts": 5,
+	"e": {"delivery": "projectile", "name": "White Flash", "short": "Knife", "icon": "thief_e", "col": "#b07aff", "cooldown": 15.0, "range": 15.0, "speed": 40.0, "dmg": 8.0, "slow": 0.5, "slow_t": 2.5, "time": 6.0, "refund_wall": 0.25, "refund_foe": 0.5, "ghosts": 5,
 		"desc": "Throw a dagger to your cursor (15m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press it again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"},
 		"card_range": "range",
 		"again": "blink to the dagger"},
-	"x": {"name": "Encore", "short": "Encore", "icon": "thief_x", "col": "#ff8ac8", "cooldown": 24.0, "unlock": 6,
+	"x": {"name": "Last Dance", "short": "Last Dance", "icon": "thief_x", "col": "#ff8ac8", "cooldown": 24.0, "unlock": 6,
 		"grow": 0.4, "r0": 0.3, "reach": 5.4, "rim": 0.75, "time": 2.0, "shots": 10, "dmg": 4.5, "rim_dmg": 3.1, "rim_blight": 6.0,
 		"desc": "A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4.5 each, 7.6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.",
 		"card_range": "reach"},
@@ -47,7 +47,7 @@
 		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:22 reactivate steps to the dagger; no turn limit shown (ours snaps to face the foe on arrival, then turns freely)"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:22 Death Blossom is a self-centred ring; no turn limit shown"}
 	},
-	"tells": {"half": "gold Mark diamonds over the target, one per stack", "full": "a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Encore runs", "dash_spent": "a white cartwheel arc, dash pip dark; the quick bolts after it carry cyan tails and a cyan star at the hand; a landed empowered shot flashes the pip back with RESET at her hand"},
+	"tells": {"half": "gold Mark diamonds over the target, one per stack", "full": "a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next shot is empowered; a violet ring round her and blades circling her while Last Dance runs", "dash_spent": "a white cartwheel arc, dash pip dark; the quick bolts after it carry cyan tails and a cyan star at the hand; a landed empowered shot flashes the pip back with RESET at her hand"},
 	"src": {
 		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"rmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",

@@ -544,7 +544,7 @@ def build():
                    at(coins * 1.5, 0.02), reflections(tail(0.6, 2600, 0.1) * 0.8))
     takes('pay_cashin', pay_cashin, 1, rms_db=-14)
 
-    # Juggernaut Rage Smash (kits2): a roaring fire-gust into a deep crunching slam with embers after it
+    # Juggernaut Final Swing (kits2): a roaring fire-gust into a deep crunching slam with embers after it
     def pay_rage(i):
         d = 1.4
         roar = sat(bpf(noise(0.32), 180, 1400) * np.linspace(0.3, 1.0, N(0.32)) ** 1.5, 2.6) * 1.2

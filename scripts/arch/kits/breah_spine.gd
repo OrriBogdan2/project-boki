@@ -1,6 +1,6 @@
 class_name BreahSpine
 extends RefCounted
-## Tarek's ultimate on X, Basalt Spine (HeroUlt): a ridge of rocks laid in a shallow arc round him. Tap X for
+## Tarek's ultimate on X, Backbone (HeroUlt): a ridge of rocks laid in a shallow arc round him. Tap X for
 ## a ridge centred at the cursor, across his aim, bowing away from him (its ends curve back toward him by
 ## `bend` degrees in all); hold X and drag the cursor to swing it round that centre, let go to cast. Everyone
 ## then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward over 0.8s, slowing
@@ -17,7 +17,7 @@ const CRACK_LW := 0.16  # m: the cracks are a heavy line, wider than an aim reti
 const FLOOR_SLACK := 0.05  # m: feet this far under a terrace's height still raise the floor at it
 const FLOOR_LEAD := 0.6  # m: Verbs.add_bridge lays its first slab this far along from its start
 const HUSH_PAD := 0.1  # s past the last rock the rocks make no rumble of their own
-const TELL_DB := -3.0  # the cracks opening (the cast level of Stone Row's tell)
+const TELL_DB := -3.0  # the cracks opening (the cast level of Foothold's tell)
 const ROLL_DB := -4.0  # each half of the rolling rumble (two voices sum to about -1)
 const END_DB := -1.0  # the one heavy crack when the ridge is up (the ultimate's level)
 

@@ -1,6 +1,6 @@
 {
 	"id": "ostra",
-	"recast_hint": {"e": "pop your Brimseed"},
+	"recast_hint": {"e": "pop your Gag Gift"},
 	"title": "Void Jester",
 	"base_name": "Motley",
 	"gender": "male",
@@ -42,7 +42,7 @@
 	"dash": {
 		"ground": {"range": "reach", "r": "radius"},
 		"id": "swap",
-		"name": "Lantern Trade",
+		"name": "Musical Chairs",
 		"card_range": "reach",
 		"icon": "ostra_dash",
 		"col": "#7fe0d0",
@@ -61,7 +61,7 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Shard Snap",
+		"name": "Stage Fright",
 		"card_range": "snap.range",
 		"short": "Snap",
 		"icon": "ostra_rmb",
@@ -102,7 +102,7 @@
 	"e": {
 		"ground": {"range": "reach", "r": "rmax"},
 		"delivery": "burst",
-		"name": "Brimseed",
+		"name": "Gag Gift",
 		"card_range": "reach",
 		"again": "pop the seed",
 		"short": "Seed",
@@ -131,7 +131,7 @@
 	},
 	"x": {
 		"ground": {"range": "range", "r": "r"},
-		"name": "Nightwell",
+		"name": "Main Attraction",
 		"card_range": "range",
 		"short": "Well",
 		"icon": "ostra_x",

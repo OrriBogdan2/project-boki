@@ -10,7 +10,7 @@ func run(main_node: Node) -> void:
 	await _ranks()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
-	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
+	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Backbone drag ends
 	n += ult_check.n
 	fails += ult_check.fails
 	var press_check = load("res://tools/breah_hop_press_check.gd").new()
@@ -49,13 +49,13 @@ func _ranks() -> void:
 		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), K.e_def()["cooldown"] * K.cd_k("kin"),
 				K.power("sec") / ps, K.power("kin") / pk, P.max_dashes()])
 	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
-	ok("upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
+	ok("upgrade parity: Rock Bottom cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
 			near.call(up[1][0], 10.0) and near.call(up[2][0], 9.0)
 			and near.call(up[1][3], 1.24) and near.call(up[2][3], 1.48), str(up))
-	ok("upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3",
+	ok("upgrade parity: Leap of Faith recharge 12 -> 10 -> 10, a second charge only at rank 3",
 			near.call(up[1][1], 10.0) and near.call(up[2][1], 10.0)
 			and up[1][5] == up[0][5] and up[2][5] == up[0][5] + 1.0, str(up))
-	ok("upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage",
+	ok("upgrade parity: Foothold cooldown 12.5 -> 11.5 -> 10 and no rank damage",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 10.0) and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
 	await done(m)
 
@@ -239,7 +239,7 @@ func _breah() -> void:
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
-	# ---- Stone Row: the red tell first, then a slight curve of three rocks 3.4m ahead
+	# ---- Foothold: the red tell first, then a slight curve of three rocks 3.4m ahead
 	reset.call()
 	T.teleport(home + Vector3(9.0, 0, 0))
 	aim_at(P, T.pos)
@@ -254,7 +254,7 @@ func _breah() -> void:
 	var rs := rocks(m)
 	var along: Array = rs.map(func(w): return K.rock_mid(w).x - home.x)
 	along.sort()
-	ok("e: Stone Row raises three rocks after the tell", rs.size() == 3, "rocks %d" % rs.size())
+	ok("e: Foothold raises three rocks after the tell", rs.size() == 3, "rocks %d" % rs.size())
 	ok(
 		"e: the row is a slight curve 3.4m ahead (outer rocks 0.45m back, spanning about 3 body heights)",
 		rs.size() == 3 and absf(float(along[2]) - 3.4) < 0.2 and absf(float(along[2]) - float(along[0]) - 0.45) < 0.1,
@@ -266,7 +266,7 @@ func _breah() -> void:
 		"e: the row spans about 5m (3 body heights) across the aim", float(zs0[2]) - float(zs0[0]) > 4.6,
 		"%.2f" % (float(zs0[2]) - float(zs0[0]))
 	)
-	ok("anim: Stone Row plays breah_raise", K.anim_id == "breah_raise")
+	ok("anim: Foothold plays breah_raise", K.anim_id == "breah_raise")
 	# ---- verticality: stand on a rock, climb it with a jump, walking into it is blocked
 	var w0: Dictionary = rs[0]
 	var top := K.rock_mid(w0).y + float(w0["top"])
@@ -374,7 +374,7 @@ func _breah() -> void:
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
 	ok(
-		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
+		"data: rocks carry no slow, only the Leap of Faith's rolling rock does",
 		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
 	)
 	step(m, 0.6)
@@ -468,7 +468,7 @@ func _breah() -> void:
 		"key %.2f landing %.2f" % [hit_key, K.slam.flight()]
 	)
 	ok(
-		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
+		"rmb (item 14): no rock comes from Rock Bottom (rocks come from E, the dash and X)",
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
@@ -571,7 +571,7 @@ func _breah() -> void:
 	K.cd["rmb"] = 0.0
 	hold(m, P, 0.5)
 	step(m, 1.0)
-	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
+	ok("combo: Foothold > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
 	P.lvl = 1
@@ -602,7 +602,7 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"data: a slam that knocks does not reset Quakefall",
+		"data: a slam that knocks does not reset Rock Bottom",
 		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
@@ -619,7 +619,7 @@ func _breah() -> void:
 	)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
-	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
+	# ---- data pass: Landslide is 12s with one charge; Jade Ward is the base passive
 	ok(
 		"data: the dash rests 12s per charge and starts with one charge (a second at rank 3)",
 		absf(float(K.dash_def()["cd"]) - 12.0) < 0.01 and P.max_dashes() == 1.0 and absf(P.dash_regen() - 12.0) < 0.01,
@@ -644,7 +644,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Shardskin shield (one 18 stack a punch, rank 1), named",
+		"data: punching your own rocks gives a Jade Ward shield (one 18 stack a punch, rank 1), named",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2
 			and P.shield_src == ShieldSrc.MOLTEN,
 		"punches %d stacks %d shield %.1f swept %d src %s" % [K.guard_punches - gp0, K.shield_stacks, P.shield,
@@ -671,7 +671,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"PARITY: Shardskin is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
+		"PARITY: Jade Ward is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - full_shield) < 0.01
 		and absf(P.shield - float(K.d["passive"]["guard"]["shield"])) < 0.01,
 		"tap %.1f full %.1f stacks %d" % [P.shield, full_shield, K.shield_stacks]
@@ -691,15 +691,15 @@ func _breah() -> void:
 		"data: a punch with no rock of yours in the lane gives no shield",
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
-	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
+	# ---- Leap of Faith (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
-	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
+	# item 183: a charge in the air is the same Leap of Faith as on the ground (its clip, its charge, its reach)
 	reset.call()
 	var hop_x := _first_hop_reach(m, P, false)
 	reset.call()
 	var charges := P.dashes
 	var air_x := _first_hop_reach(m, P, true)
-	ok("item 183: her air dash is the Rock Hop: breah_hop, a charge spent, ex_cd untouched, reach %.2f vs %.2f"
+	ok("item 183: her air dash is the Leap of Faith: breah_hop, a charge spent, ex_cd untouched, reach %.2f vs %.2f"
 			% [air_x, hop_x],
 		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
 		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
@@ -728,7 +728,7 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"rank 3: slamming a foe gives a Shardskin shield", P.shield >= 17.0 and K.shield_stacks >= 1,
+		"rank 3: slamming a foe gives a Jade Ward shield", P.shield >= 17.0 and K.shield_stacks >= 1,
 		"shield %.0f" % P.shield
 	)
 	ok(
@@ -753,14 +753,14 @@ func _breah() -> void:
 	var mid_n := rocks(m).size()
 	step(m, 0.4)
 	ok(
-		"rank 3: an extra row behind the first, rising with it (the centre-out rise is Basalt Spine's)",
+		"rank 3: an extra row behind the first, rising with it (the centre-out rise is Backbone's)",
 		rocks(m).size() == 6 and mid_n == 6, "at 0.25s %d, then %d" % [mid_n, rocks(m).size()]
 	)
-	ok("rank 3: the extra row does not slow (the slow is Basalt Spine's)", T.slow_t <= 0.0, "slow %.2f" % T.slow_t)
+	ok("rank 3: the extra row does not slow (the slow is Backbone's)", T.slow_t <= 0.0, "slow %.2f" % T.slow_t)
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
 	P.slot_lv["dash"] = 1
-	# ---- Tremor Sense: the cone shows while sneaking and widens
+	# ---- Sight Unseen: the cone shows while sneaking and widens
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
 	aim_at(P, T.pos)
@@ -786,13 +786,13 @@ func _breah() -> void:
 	T.teleport(home + Vector3(27.0, 0, 0))
 	var s_out := K.stonesight()
 	ok(
-		"passive: Tremor Sense reaches 25 m grown, not 27", s_far == 1 and s_out == 0,
+		"passive: Sight Unseen reaches 25 m grown, not 27", s_far == 1 and s_out == 0,
 		"23 m %d, 27 m %d" % [s_far, s_out]
 	)
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
 	ok(
-		"passive: Tremor Sense shows foes in front only", s_front == 1 and s_back == 0,
+		"passive: Sight Unseen shows foes in front only", s_front == 1 and s_back == 0,
 		"front %d back %d" % [s_front, s_back]
 	)
 	P.inp["crouch"] = false
@@ -811,7 +811,7 @@ func _breah() -> void:
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	K.drop_holds()
 	ok(
-		"merge hold: the dive, the charge, its leap and Rock Hop all drop",
+		"merge hold: the dive, the charge, its leap and Leap of Faith all drop",
 		leaping and not K.dive and K.lmb_t < 0.0 and not K.hop.chaining()
 			and not K.slam.leapt
 		and not AimKit.shown(P, "rmb")
@@ -922,8 +922,8 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 		float(ran["x"]) > float(plain["x"]) + 0.3, "run %.2f standing %.2f" % [float(ran["x"]), float(plain["x"])]
 	)
 
-## Item 162b (replaces item 26's glide mid-Quakefall): glide held from the hop, a charge leap or an air press
-## never opens the glider while the Quakefall runs (AirLimits; DolmKit.locks_glide). Over the abyss it may.
+## Item 162b (replaces item 26's glide mid-Rock Bottom): glide held from the hop, a charge leap or an air press
+## never opens the glider while the Rock Bottom runs (AirLimits; DolmKit.locks_glide). Over the abyss it may.
 func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	for mode in ["hop", "leap", "air"]:
 		reset.call()
@@ -955,13 +955,13 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 			t += DT
 			opened = opened or (P.gliding and K.dive)
 		ok(
-			"glide (item 162b, %s): glide held through the Quakefall never opens the glider mid-move" % mode,
+			"glide (item 162b, %s): glide held through the Rock Bottom never opens the glider mid-move" % mode,
 			dove and not opened, "dove %s opened %s (%.2fs, %.1fm over the take-off)" % [dove, opened, t, P.pos.y - z0]
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
 
-## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
+## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Rock Bottom
 ## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
 ## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
 func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
@@ -1060,7 +1060,7 @@ func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 
-## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+## How far a Leap of Faith pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
 ## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
 ## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
 func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
@@ -1105,7 +1105,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 	P.inp["move"] = Vector2.ZERO
 	return Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 
-## Item 35: her own ground (Rock Hop) and air (the long dash) moves, ids no other hero's table has, each one
+## Item 35: her own ground (Leap of Faith) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (a hop's flight; the air dash's time with the dash feel), and
 ## neither dash draws a ground ring or a blast (the hit area is the landing circle, shown in flight).
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
@@ -1194,12 +1194,12 @@ func _blast_kind(V: HeroVfx, node: Node3D) -> bool:
 			return true
 	return false
 
-## Rock Hop: 2-3 steerable hops off rocks he raises.
+## Leap of Faith: 2-3 steerable hops off rocks he raises.
 func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var dd := K.dash_def()
 	var reach := float(dd["dist"]) * float(K.dash_feel()["dist"])
 	var far := home + Vector3(30.0, 0, 0)
-	ok("data: the dash is Rock Hop, 3 hops", dd["name"] == "Rock Hop" and int(dd["hops"]) == 3)
+	ok("data: the dash is Leap of Faith, 3 hops", dd["name"] == "Leap of Faith" and int(dd["hops"]) == 3)
 	# the rock first, under him, then a fast low arc
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 12.0))
@@ -1226,7 +1226,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	ok("dash: a fresh rock at the landing and a skid along it", skid[0] and anim[0] and hop_rocks(m).size() == 2)
 	ok("dash: a fast, low arc (under 1.2m over the rock)", peak[0] < 1.8 and peak[0] > 0.5, "peak %.2f" % peak[0])
 	step(m, 0.6)
-	ok("hop rocks: they don't count as Stone Row rocks", K.rocks_up() == 0, "up %d" % K.rocks_up())
+	ok("hop rocks: they don't count as Foothold rocks", K.rocks_up() == 0, "up %d" % K.rocks_up())
 	ok("dash: 1 input = 1 hop, then he lands", K.hop.chain_hops == 1 and K.leap_lands >= 1 and P.grounded)
 	step(m, float(dd["hop_rock_t"]) + 0.1)
 	ok("hop rocks: they crumble in a moment", hop_rocks(m).is_empty())

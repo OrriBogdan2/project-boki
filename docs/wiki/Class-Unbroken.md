@@ -21,12 +21,12 @@ every knock.
 2. The greatsword slashes fast and hits twice as hard at the tip. Hold it for a **Searing Wave**,
    which fills Rage three times as fast.
 3. **Rampage** (Shift, 3 charges): a short dash attack the way you face; its tip hits hardest and can stun into a wall.
-4. **Smash** (RMB): tap for a wound-up **Finishing Slam** behind a magenta strike lane (more to the
+4. **Final Swing** (RMB): tap for a wound-up **Finishing Slam** behind a magenta strike lane (more to the
    badly hurt, who show a red outline while it's ready); hold for a **Lunge**: crouch while a lane grows
    ahead of you and flashes magenta at full (you can jump while you charge), then let go to fling
-   yourself forward; in the air, a disc shows under your cursor and the **Meteor Drop** dives onto it.
-5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
-6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
+   yourself forward; in the air, a disc shows under your cursor and the **Hit the Deck** dives onto it.
+5. **Short Leash** (E): hook a foe or a wall, then press E again to pull yourself in.
+6. **Blow for Blow** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
    into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
    harder; a knock with it makes it ready again. The Boki Fusion has its own key.
 
@@ -34,13 +34,13 @@ every knock.
 
 | Do this | And you get |
 |---|---|
-| Finishing Slam's sweet spot (the far tip, dead ahead), then a knock on that foe within 2s | The Gilded Riposte is ready again |
-| Gilded Riposte while they unload on you | Every hit blocked (two at most) makes the cleave 20% harder |
-| Warchain in, then the Riposte | Dive in, eat their answer in the guard, cleave back |
-| Warchain hooked, pull (E), then tap RMB during the pull | **Cinder Spin**: a spin around you that blights |
-| Warchain attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
-| Warchain, hold RMB, then E while holding (or pull, then hold) | **Haul Slam** where you arrive, stronger the longer you charged |
-| A held Lunge that hits nothing | Smash's cooldown doubles |
+| Finishing Slam's sweet spot (the far tip, dead ahead), then a knock on that foe within 2s | The Blow for Blow is ready again |
+| Blow for Blow while they unload on you | Every hit blocked (two at most) makes the cleave 20% harder |
+| Short Leash in, then the Riposte | Dive in, eat their answer in the guard, cleave back |
+| Short Leash hooked, pull (E), then tap RMB during the pull | **Full Circle**: a spin around you that blights |
+| Short Leash attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
+| Short Leash, hold RMB, then E while holding (or pull, then hold) | **Haul Slam** where you arrive, stronger the longer you charged |
+| A held Lunge that hits nothing | Final Swing's cooldown doubles |
 | Rooted or Grounded | You can't throw the chain; a stun on you breaks it |
 | Any knock | A Rampage charge back, and a heal (a fifth of their health) |
 
@@ -59,7 +59,7 @@ every knock.
 |  |  |
 |---|---|
 | Body | 193 health, 5.28 m/s, 2 dash charges |
-| Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Bitter End (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |
 | Resource | Rage (max 100) |
@@ -73,10 +73,10 @@ What the in-game kit card (K) says.
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage: more damage, faster dashes. Knocks heal you. |
 | Dash: Rampage | Short dash attack with two charges; the tip hits twice as hard. |
-| RMB: Smash | Tap: heavy slam. Hold: charge and fling yourself forward. |
-| E: Warchain | Chain a foe or wall, press it again to haul yourself. |
-| Hunter ultimate: Gilded Riposte | Guard 0.65s taking nothing, then lunge into a healing cleave. |
-| Weapon: Greatsword | Wide slashes, harder at the tip; hold to throw a Searing Wave. |
+| RMB: Final Swing | Tap: heavy slam. Hold: charge and fling yourself forward. |
+| E: Short Leash | Chain a foe or wall, press it again to haul yourself. |
+| Hunter ultimate: Blow for Blow | Guard 0.65s taking nothing, then lunge into a healing cleave. |
+| Weapon: Bitter End | Wide slashes, harder at the tip; hold to throw a Searing Wave. |
 
 ### Abilities in full
 
@@ -84,16 +84,16 @@ What the in-game kit card (K) says.
 
 **Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4.5m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
-**Smash (RMB, 2s cooldown).**
+**Final Swing (RMB, 2s cooldown).**
 
-- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a strike down a 4.3m lane, 0.72m wide: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
+- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a strike down a 4.3m lane, 0.72m wide: 26 and push 6; foes under 35% (outlined in red while the Final Swing is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Blow for Blow is ready again.
 - *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you in his crimson, its rim flaring hot at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
-- *In the air:* Meteor Drop: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back. While it rests, a press in the air is the Smash as on the ground (tap a Slam, or hold to charge).
-- *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25).
+- *In the air:* Hit the Deck: only in the air, mid-jump or falling. Press and you stop where you are, the blade hauled overhead for a split second, then slam straight down to the ground below you. It hits a 2.4m circle centred just ahead of where you land (everyone sees it from the press): 18, and everyone in it is knocked down for 0.45s (anyone in the air or gliding is spiked to the ground); the inner ring (1.2m) takes +50% and stays down 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Final Swing right before it does not hold it back. While it rests, a press in the air is the Final Swing as on the ground (tap a Slam, or hold to charge).
+- *During E:* With the Short Leash: press while it pulls you, or as you arrive, for a Full Circle at once (2.2m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30); charge while it's attached and let go aimed down it for a Chain Lunge along it (aimed elsewhere it is a plain Lunge; x1.25).
 
-**Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (6 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press it again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Short Leash (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (6 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press it again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Blow for Blow (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 
@@ -101,7 +101,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | +20% damage on every Smash. | +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less (7.2s -> 4.8s). |
+| RMB | +20% damage on every Final Swing. | +40% damage on every Final Swing in all, and the Hit the Deck rests 2.4s less (7.2s -> 4.8s). |
 | Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 12.8s -> 11.2s. | cooldown 12.8s -> 8s. |
 
@@ -112,7 +112,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike lane while a Final Swing winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

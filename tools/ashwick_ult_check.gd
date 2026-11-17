@@ -1,7 +1,7 @@
 extends RefCounted
-## Cinder's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
+## Cinder's ultimate on X, Red Carpet, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Cinder Shot
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Spitfire
 ## mid-flight, the lance off for the whole flight, a knockback speeding it up, a stun ending it, never over the
 ## abyss, the merge drop, the cooldown and the burst cap.
 
@@ -355,11 +355,11 @@ func _carpet() -> void:
 	ak.step(m, 0.4, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	var used0: int = K.cloaks
 	P.ak.use_e()
-	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
+	ok("ult: E (Molten Hug) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
 	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
 	var card := String(K.x_def()["desc"])
-	ok("ult card: only the Furnace Cloak works in the flight",
-		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
+	ok("ult card: only the Molten Hug works in the flight",
+		card.contains("only the Molten Hug works") and not card.contains("Shift) speeds"))
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
 	var denied0: int = K.lmb_denied
@@ -451,7 +451,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 	)
 	KinMerge.end(P, "test")
 
-## LMB does nothing in Flue Flight (no flame, nothing queued, a soft tick on a press), and the lance
+## LMB does nothing in Red Carpet (no flame, nothing queued, a soft tick on a press), and the lance
 ## is back on the first frame after it, however the flight ended.
 func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) -> void:
 	# held through the whole flight, a foe at the nozzle, watched every frame
@@ -627,11 +627,11 @@ func _burst() -> void:
 		ak.step(m, 0.4))
 	var info := "ult %.0f, ult + merge %.0f of %d" % [res["ult"], res["total"], int(Data.CLASSES["light"]["hp"])]
 	ok(
-		"burst: Flue Flight then the merge never one-shots a full-health light hunter",
+		"burst: Red Carpet then the merge never one-shots a full-health light hunter",
 		bool(res["merged"]) and bool(res["alive"]), info
 	)
 
-## Owner decision (item 66): in Flue Flight ONLY E works. RMB, Shift, the glove and utility slots, gear, a throw and
+## Owner decision (item 66): in Red Carpet ONLY E works. RMB, Shift, the glove and utility slots, gear, a throw and
 ## the Boki's C are dropped before their handlers: no cooldown or charge spent, no projectile, no item used. E and
 ## X (land early) still work, and RMB is back the moment the flight ends. Called mid-flight, E-checked after.
 func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:

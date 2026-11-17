@@ -4,7 +4,7 @@ extends RefCounted
 ## and saves the frame at the scripted time, then quits.
 ##   thief       SMG hits stack Marks on the dummy (3 = the coin), Vault Primes the next hit (gold glint)
 ##   primed      the same, ending on the Primed hit landing (VAULT RESET, the payoff)
-##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
+##   bola        the Thief's Dark Bola catching two dummies: Grounded, TANGLED
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
 ##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
 ##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
@@ -154,7 +154,7 @@ static func tick(A: Arena, dt: float) -> void:
 				if TK.primed_hits > 0 and not A.has_meta("ph_at"): A.set_meta("ph_at", t)
 				at_t = float(A.get_meta("ph_at", 9.0)) + 0.06
 		"bola":
-			# the Bola wraps the dummy and the heavy dummy beside it: both Grounded, TANGLED, stunned
+			# the Dark Bola wraps the dummy and the heavy dummy beside it: both Grounded, TANGLED, stunned
 			var H: Hunter = A.dummies[2]["h"]
 			if t < 0.05:
 				if P.arch != "thief": A.set_arch("thief", "arc_bolts")
@@ -214,7 +214,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["fire"] = t > 0.3 and t < 1.45
 			at_t = 1.3 if "--hold-shot" in OS.get_cmdline_user_args() else 1.56
 		"encore", "encorehit":
-			# Sable's Encore: the dummy stands in the ring's outer band, a second one inside it
+			# Sable's Last Dance: the dummy stands in the ring's outer band, a second one inside it
 			if t < 0.05:
 				if P.arch != "thief" or P.wid != "arc_bolts": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
@@ -225,7 +225,7 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
 			at_t = 0.55 if w == "encore" else 1.24
 		"riposte", "ripostehit":
-			# Kael's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
+			# Kael's Blow for Blow: the guard with the strip toward the dummy, then the cleave through it
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
@@ -513,8 +513,8 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				P.do_dash()
 	P.inp["fire"] = fire
 
-## The X ultimates' strips: Starpiercer cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the
-## last one with a single shot left), Faultline cast at 0.5.
+## The X ultimates' strips: Finishing Touch cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the
+## last one with a single shot left), Groundswell cast at 0.5.
 static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	P.lvl = 6
@@ -528,7 +528,7 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	P.inp["fire"] = mv.begins_with("pin_ult_") and t > 0.5 and t < 0.6
 
 ## Breaker's owner-review strips (#48, #49, #51): a full swing let go after the perfect window, one let go in it,
-## one in it at an island's edge (it carries him over and he glides), Faultline cast with him walking off
+## one in it at an island's edge (it carries him over and he glides), Groundswell cast with him walking off
 ## across the lane after the plant; the hold through a jump let go in the air, through a Shift dash let go
 ## after it, and through a jump let go in the window (the launch from the air).
 static func _anim_bjorn(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:

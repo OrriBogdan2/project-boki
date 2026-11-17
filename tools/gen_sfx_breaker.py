@@ -16,10 +16,10 @@ huge man's, deep and warm, with a wet gurgle under the bad moments (he went down
   bjorn_slam (3)                the Crushing Blow landing
   bjorn_shield_up / bjorn_block (3) / bjorn_break   the prow raised / a shot thudding into it / it splitting
   bjorn_bash                    the prow rammed into foes (push hint, Shield Slam)
-  bulwark_charge                Shield Charge: the prow driven forward like a ram, the hull groaning
-  bulwark_dash / bjorn_whirl    the 360 Smash's lunge / its spin landing all round him
-  bjorn_purify / _burst         Mending Ground: a bell toll and a rising sea glow / the healing wave breaking
-  bjorn_ult_wind/_slam/_rumble/_crackle   Faultline: the hull-groaning wind-up, the slam, the lane erupting,
+  bulwark_charge                Full Ahead: the prow driven forward like a ram, the hull groaning
+  bulwark_dash / bjorn_whirl    the Tideturner's lunge / its spin landing all round him
+  bjorn_purify / _burst         Safe Harbour: a bell toll and a rising sea glow / the healing wave breaking
+  bjorn_ult_wind/_slam/_rumble/_crackle   Groundswell: the hull-groaning wind-up, the slam, the lane erupting,
                                 the scar's crackle
   bulwark_step_<surface>        heavy sea boots, iron bands and a rattle of shells (3 takes each)
   bulwark_hurt/down/death       wordless voice
@@ -234,7 +234,7 @@ def bash():
 
 
 def shield_charge():
-    """Shield Charge: the hull groans as he drives in behind it, the boots pound, a roar of effort."""
+    """Full Ahead: the hull groans as he drives in behind it, the boots pound, a roar of effort."""
     d = 0.9; t = T(d)
     hull = groan(d, 55, 75, 0.12, 700) * np.minimum(1, t / 0.08) * np.exp(-np.maximum(0, t - 0.4) / 0.2) * 0.9
     creak = S.creak(0.6, 45, 30, 0.6, 2000) * 1.2
@@ -245,7 +245,7 @@ def shield_charge():
     return lpf(mix(soft(hull, 15), fo(creak), fo(rush), roar, boots, rattle), 7000)
 
 
-# ------------------------------------------------------------------ Shift: 360 Smash
+# ------------------------------------------------------------------ Shift: Tideturner
 def dash():
     """The lunge: a big body heaving forward, a heavy boot push-off and the gear swinging."""
     d = 0.5
@@ -257,7 +257,7 @@ def dash():
 
 
 def whirl():
-    """The 360 Smash landing: the hammer swept all the way round, a booming hit and the head's ring."""
+    """The Tideturner landing: the hammer swept all the way round, a booming hit and the head's ring."""
     d = 1.0
     sweep_air = swoosh(0.32, 180, 1500, 1.6, 1.0, 1.0) * 0.9
     hit = at(mix(click(0.005, 1500, 6500) * 1.3, kick(130, 42, 0.7, 0.025, 0.09, 3.0) * 0.85,
@@ -267,9 +267,9 @@ def whirl():
     return pad(lpf(mix(fo(sweep_air, 0.2), hit, clang, dirt), 8000), d)
 
 
-# ------------------------------------------------------------------ E: Mending Ground
+# ------------------------------------------------------------------ E: Safe Harbour
 def purify():
-    """Mending Ground called down: a deep bell toll, the sea glowing up in a slow rising chord."""
+    """Safe Harbour called down: a deep bell toll, the sea glowing up in a slow rising chord."""
     d = 1.5; t = T(d)
     toll = S.chime(196, d, 0.9, ((1.0, 1.0), (2.0, 0.5), (2.4, 0.35), (3.0, 0.2), (4.1, 0.1)))
     chord = sum(S.sweep(f * 0.98, f, d) * g for f, g in ((392, 0.25), (494, 0.2), (587, 0.18), (784, 0.1)))
@@ -292,7 +292,7 @@ def purify_burst():
     return lpf(mix(soft(wave, 3), spray, bells, bubbles(1.0, 20, 300, 900, 0.05) * 0.2), 8500)
 
 
-# ------------------------------------------------------------------ R: Faultline
+# ------------------------------------------------------------------ R: Groundswell
 def ult_wind():
     """He lifts the hammer high: the whole hull groaning, water pouring off, a rising surge."""
     d = 0.9; t = T(d)
@@ -306,7 +306,7 @@ def ult_wind():
 
 
 def ult_slam():
-    """Faultline's slam: the biggest hit he has, iron, rock and a sub drop that shakes the ground."""
+    """Groundswell's slam: the biggest hit he has, iron, rock and a sub drop that shakes the ground."""
     d = 1.8
     hit = mix(click(0.006, 1200, 6500) * 2.0, kick(110, 28, d, 0.05, 0.18, 3.6) * 0.95,
               crack(0.9, 120, 2400, 0.09) * 3.0, sub(50, 26, d, 0.4) * 0.75)

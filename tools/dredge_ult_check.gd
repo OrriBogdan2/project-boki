@@ -1,5 +1,5 @@
 extends RefCounted
-## Grimble's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
+## Grimble's ultimate on X, Both Barrels, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
 ## the 1.1s charge behind a growing fan everyone sees (a slow walk, the fan turning with the aim), two waves 0.6s
 ## apart of six slugs each (shots through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer
 ## further out, bond once per cast and only on a land, the stun that stops it, the other buttons locked while
@@ -213,7 +213,7 @@ func _props() -> void:
 	)
 	await ak.done(m)
 
-## Deep Reach, the foe hauled to your feet stunned, then the Broadside: every slug lands.
+## Sticky Fingers, the foe hauled to your feet stunned, then the Broadside: every slug lands.
 func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var K: DredgeKit = P.ak
 	ak.fresh(T)
@@ -294,6 +294,6 @@ func _burst() -> void:
 		ak.step(m, 2.2))
 	var info := "ult %.0f, ult + merge %.0f of %d" % [res["ult"], res["total"], int(Data.CLASSES["light"]["hp"])]
 	ok(
-		"burst: Brass Broadside then the merge never one-shots a full-health light hunter",
+		"burst: Both Barrels then the merge never one-shots a full-health light hunter",
 		bool(res["merged"]) and bool(res["alive"]), info
 	)

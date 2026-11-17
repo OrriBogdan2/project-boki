@@ -306,7 +306,7 @@ func _vireo_rmb() -> void:
 	marks.append([0.05,
 			"full",
 			"rmb_summon",
-			"RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring"])
+			"RMB pressed: the copper Pink Spear arrives in her raised hand with a teal crackle and a ring"])
 	marks.append([0.5,
 			"full",
 			"rmb_aim",
@@ -411,7 +411,7 @@ func _vireo_e() -> void:
 	await _go(1.6, flick, marks)
 
 ## The animation-timing fixes (docs/heroes/mage.md 'Animation timing'): an RMB tap's throw lands on the bolt
-## (0.33 s), and a 1.0 s Skycall drag keeps the arm up through the 0.8 s count to the strike (1.8 s).
+## (0.33 s), and a 1.0 s Undercurrent drag keeps the arm up through the 0.8 s count to the strike (1.8 s).
 func _vireo_timing() -> void:
 	var K = P.ak
 	await _reset(6.0)
@@ -438,7 +438,7 @@ func _vireo_owner1103() -> void:
 		if tt > 0.05:
 			_aim(home + Vector3(4.0, 0, 0))
 	var marks := []
-	var count_cap := "owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike"
+	var count_cap := "owner1103 #9: Undercurrent circle, radius 1.5 m (15-20% smaller), before the strike"
 	marks.append([0.7, "full", "owner1103_e_count", count_cap, _on_target])
 	var a_cap := "owner1103 #9b: struck, the target starts a slow slide toward her"
 	marks.append([1.2, "full", "owner1103_e_slide_a", a_cap, _on_target])
@@ -603,7 +603,7 @@ func _venator_owner1103() -> void:
 	K.press_rmb()
 	await _go(0.6, func(_t: float): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
-	var direct_cap := "owner1103: Burr Charge direct hit: damage and DAZED, no cone"
+	var direct_cap := "owner1103: Coin Blast direct hit: damage and DAZED, no cone"
 	var direct := [[0.22, "full", "owner1103_direct_a", direct_cap, _on_target]]
 	direct.append([0.26, "full", "owner1103_direct_b", "owner1103: direct hit, a beat later: DAZED", _on_target])
 	await _go(0.7, Callable(), direct, 5.0)
@@ -649,9 +649,9 @@ func _venator_e() -> void:
 			"e_fire",
 			"E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil"])
 	await _go(1.2, Callable(), marks)
-	# payoff: Longneedle on a Dazed hunter
+	# payoff: Palm Spear on a Dazed hunter
 	await _reset(8.0)
 	KitStatus.apply(T, "rat", 3.0)
 	K.use_e()
-	var skewer := "Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number"
+	var skewer := "Payoff: Palm Spear through a Dazed hunter at the hit: SKEWERED and the number"
 	await _go(0.8, Callable(), [[0.66, "full", "skewer", skewer, _above_target]])

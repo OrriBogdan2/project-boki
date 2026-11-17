@@ -1,6 +1,6 @@
 class_name AshwickJet
 extends RefCounted
-## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, where she hangs
+## Cinder's ultimate on X, Red Carpet (docs/heroes/ashwick.md): a ring of embers at lift-off, where she hangs
 ## for lift_t (rising to her hover height and turning to the aim, as Felix does), then 1.8s of low flight
 ## toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 5.2s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
@@ -47,9 +47,9 @@ func running() -> bool:
 
 const LIFT_LEAD := 0.12         # s of lw_jet skipped on the press: its fly key (0.22) lands at 0.1 s
 
-## Flue Flight: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
-## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
-## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
+## Red Carpet: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
+## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Spitfire, and a
+## hold carried in is cancelled with nothing fired), Shift (no poof, no Lock Horns), the glove/utility slots,
 ## gear, the Boki's C, a throw and the Merge key. A press answers with the soft "can't" tick.
 const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw", "ult"]
 const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
@@ -177,7 +177,7 @@ func _take_boost(x: Dictionary) -> void:
 	_feed(push, x)
 
 ## Shift in the flight: a poof from the bellows along `dir` feeds it like a knockback: the poof's kept speed
-## (Soot Ram's air_keep share of it) adds to the flight's, and the heading bends its way.
+## (Lock Horns's air_keep share of it) adds to the flight's, and the heading bends its way.
 func poof(dir: Vector2) -> void:
 	var dd := k.dash_def()
 	var kept := float(dd["air_dist"]) / float(dd["air_time"]) * float(dd["air_keep"])

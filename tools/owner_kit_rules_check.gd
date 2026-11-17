@@ -4,7 +4,7 @@ extends "res://tools/archetype_check.gd"
 ## archetype check's flat strip. Every row names the DECISIONS line it guards (line numbers as of Nov 11).
 ## Prints "OKRCHECK <row> PASS|FAIL" and "OKRCHECK DONE, failures: N".
 
-const LOCK_S := [0.85, 1.25]      # s: Motley's Nightwell cast lock, "about 1 s"
+const LOCK_S := [0.85, 1.25]      # s: Motley's Main Attraction cast lock, "about 1 s"
 const GLIDE_S := 2.0              # s Space is held from the jump
 
 func ok(label: String, cond: bool, info := "") -> void:
@@ -23,8 +23,8 @@ func drive(m: Match, P: Hunter, secs: float, each: Callable) -> void:
 		m.mobs.clear()
 		m.step(DT)
 
-## DECISIONS:83 "during her ult (Flue Flight) only E works. No LMB, no RMB (Cinder Shot), no other weapon or
-## utility; E (Furnace Cloak) stays usable."
+## DECISIONS:83 "during her ult (Red Carpet) only E works. No LMB, no RMB (Spitfire), no other weapon or
+## utility; E (Molten Hug) stays usable."
 func _cinder() -> void:
 	var r := setup("ashwick", 16.0)
 	var m: Match = r[0]
@@ -50,7 +50,7 @@ func _cinder() -> void:
 			P.inp[key] = key == "fire" or i == 0
 			P.inp["sec_hold"] = key == "sec")
 	P.inp["sec_hold"] = false
-	ok("Cinder Flue Flight (DECISIONS:83): LMB, RMB, Shift, utility, glove and C are refused",
+	ok("Cinder Red Carpet (DECISIONS:83): LMB, RMB, Shift, utility, glove and C are refused",
 		J.running() and K.hose.emitted == puffs and K.ch_rmb == charges and m.shots.size() == shots
 		and P.dashes == dashes and P.ex_cd == 0.0 and int(P.belt[0]["n"]) == 3 and float(P.gear_cd[0]) == 0.0,
 		"flying %s puffs +%d rmb %.1f->%.1f shots +%d dashes %.1f->%.1f tonic %s glove cd %.1f" % [J.running(),
@@ -58,11 +58,11 @@ func _cinder() -> void:
 		float(P.gear_cd[0])])
 	var cloaks := K.cloaks
 	drive(m, P, 0.1, func(i): P.inp["sig"] = i == 0)
-	ok("Cinder Flue Flight (DECISIONS:83): E (Furnace Cloak) still works, the flight goes on",
+	ok("Cinder Red Carpet (DECISIONS:83): E (Molten Hug) still works, the flight goes on",
 		K.cloaks == cloaks + 1 and J.running(), "cloaks +%d" % (K.cloaks - cloaks))
 	await done(m)
 
-## DECISIONS:78 "Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs."
+## DECISIONS:78 "Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Main Attraction runs."
 func _motley() -> void:
 	var r := setup("ostra", 7.0)
 	var m: Match = r[0]
@@ -83,9 +83,9 @@ func _motley() -> void:
 	drive(m, P, 0.5, func(_i): P.inp["move"] = Vector2(-1, 0))
 	var speed := Vector2(P.pos.x - from.x, P.pos.z - from.z).length() / 0.5
 	P.inp["move"] = Vector2.ZERO
-	ok("Motley Nightwell (DECISIONS:78): about 1 s of cast lock, then he walks out",
+	ok("Motley Main Attraction (DECISIONS:78): about 1 s of cast lock, then he walks out",
 		freed >= LOCK_S[0] and freed <= LOCK_S[1], "first step at %.2fs" % freed)
-	ok("Motley Nightwell (DECISIONS:78): free at >= 90% run speed while the well runs",
+	ok("Motley Main Attraction (DECISIONS:78): free at >= 90% run speed while the well runs",
 		speed >= 0.9 * P.base_speed and K.well.running(), "%.2f of %.2f m/s" % [speed, P.base_speed])
 	await done(m)
 
@@ -216,7 +216,7 @@ func _vex() -> void:
 		on_press and not lane and not held, "on press %s lane %s held %s" % [on_press, lane, held])
 	await done(m)
 
-## DECISIONS:82 "Deep Reach ... goes through walls and cliffs (placed walls still stop it)".
+## DECISIONS:82 "Sticky Fingers ... goes through walls and cliffs (placed walls still stop it)".
 func _grimble(placed: bool) -> void:
 	var r := setup("dredge", 8.0)
 	var m: Match = r[0]
@@ -239,10 +239,11 @@ func _grimble(placed: bool) -> void:
 		t += DT
 	drive(m, P, 0.1, func(_i): pass)
 	if placed:
-		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach", K.grapples == grapples and K.pull.is_empty(),
+		ok("Grimble (DECISIONS:82): a placed wall stops the Sticky Fingers",
+			K.grapples == grapples and K.pull.is_empty(),
 			"grapples +%d" % (K.grapples - grapples))
 	else:
-		ok("Grimble (DECISIONS:82): the Deep Reach passes a cliff face and hooks the foe behind it",
+		ok("Grimble (DECISIONS:82): the Sticky Fingers passes a cliff face and hooks the foe behind it",
 			K.grapples == grapples + 1, "grapples +%d" % (K.grapples - grapples))
 	await done(m)
 

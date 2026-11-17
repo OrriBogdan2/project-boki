@@ -7,7 +7,7 @@ extends ArchKit
 ##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
-## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
+## - X, Last Dance (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
@@ -18,7 +18,7 @@ extends ArchKit
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
 ##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
 ##   foe caught and both are stunned with bonus damage.
-## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
+## - E, White Flash: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
@@ -47,7 +47,7 @@ var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
-var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
+var knife := {}                # the stuck White Flash: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
@@ -85,13 +85,13 @@ func _setup() -> void:
 func fx() -> DJFx:
 	return DJFx.of(m)
 
-## A Boki merge starting drops the Bola's wind-up and a running Encore (nothing fires, nothing is left
+## A Boki merge starting drops the Bola's wind-up and a running Last Dance (nothing fires, nothing is left
 ## for after the merge). Hold fields: bola_cast, encore.st.
 func _drop_holds() -> void:
 	bola_cast = {}
 	encore.drop()
 
-# ------------------------------------------------------------------ X: Encore (ThiefUlt)
+# ------------------------------------------------------------------ X: Last Dance (ThiefUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
 func cast_ult() -> bool:
 	return HeroUlt.press(self, _start_encore)
@@ -174,7 +174,7 @@ func set_marks(t: Ent, n: int) -> void:
 	_on_marks(t, had, n)
 	sync_marks(t)
 
-## Every Mark we have on anyone back to its full time (each Encore blade).
+## Every Mark we have on anyone back to its full time (each Last Dance blade).
 func refresh_marks() -> void:
 	for f in m.foes_of(h.team):
 		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
@@ -819,7 +819,7 @@ func _tangle(f, other: Ent) -> void:
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
-# ------------------------------------------------------------------ E: Shadow Knife
+# ------------------------------------------------------------------ E: White Flash
 func in_e() -> bool:
 	return not knife.is_empty()
 
@@ -896,7 +896,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("kin") >= 3:
-		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
+		h.dashes = h.max_dashes()           # White Flash rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
@@ -1012,7 +1012,7 @@ func _blink(to: Vector3) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	# Encore once a foe is well inside the ring's reach (it rides with her, so she can chase them)
+	# Last Dance once a foe is well inside the ring's reach (it rides with her, so she can chase them)
 	if HeroUlt.ready(self) and los and dist < float(x_def()["reach"]) * 0.7:
 		HunterKeys.ult_pressed(h)
 	# the dagger is stuck in them: step to them

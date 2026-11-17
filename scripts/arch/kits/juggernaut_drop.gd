@@ -1,6 +1,6 @@
 class_name JuggernautDrop
 extends RefCounted
-## Kael's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json): a down slam, owner
+## Kael's airborne Final Swing, the Hit the Deck (`rmb.drop` in content/archetypes/juggernaut.json): a down slam, owner
 ## spec 11-10. Only from the air (he must already be jumping or falling; on the ground RMB is the Finishing Slam or
 ## the Lunge). Press: his drift stops, a beat of hang with the blade hauled overhead (`hang`, <= 0.1s), then a fast
 ## straight drop to the ground under him (no dive across, no leap, no extra height). The hit is a small circle
@@ -9,7 +9,7 @@ extends RefCounted
 ## and debris, a shake for those nearby and a deep boom. Then a recovery rising from the crouch. Owned by
 ## JuggernautKit.
 
-const AREA := Color("ff3a2a")         # the hit circle (the damage area): his crimson, as his Smash telegraphs
+const AREA := Color("ff3a2a")         # the hit circle (the damage area): his crimson, as his Final Swing telegraphs
 const CORE := Color("fff1dc")         # its centre ring: the stun area, white-hot
 const SPIKE_OVER := 0.3               # m over the landing a foe counts as airborne (spiked down, not only knocked down)
 
@@ -59,7 +59,7 @@ func hit_at(feet: Vector3, d: Vector2) -> Vector3:
 	var c := feet + Vector3(d.x, 0.0, d.y) * float(data()["ahead"])
 	return Vector3(c.x, feet.y, c.z)
 
-## Where a Meteor Drop pressed now would hit: ahead of the ground straight under him, in his aim.
+## Where a Hit the Deck pressed now would hit: ahead of the ground straight under him, in his aim.
 func point() -> Vector3:
 	return hit_at(k.ground(k.h.pos), k.h.aim_dir())
 

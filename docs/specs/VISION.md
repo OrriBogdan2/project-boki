@@ -40,7 +40,7 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
 - **Reveal** is one field, `Hunter.reveal_t`: while above 0 the target ignores cone, grass and crouch (range
   `VIEW_RANGE`+2). Writers: your own shot or strike (1.2 s), being hit (1.0 s), Red Thread (archer_kit.gd:134, hp under 50%, 22 m, re-armed 0.4 s), Seeker/scan belt item
   (utility_use.gd:71, `SCAN_TIME`), using any utility (0.6 s), kin `reveal` effect, Tripwire (verbs.gd:499),
-  Rimelock (rimewright_kit.gd:238), ref-bulwark hammer vision (bulwark_kit.gd:591), truce betrayer (truce.gd:201, 15 s) and the
+  Freeze Frame (rimewright_kit.gd:238), ref-bulwark hammer vision (bulwark_kit.gd:591), truce betrayer (truce.gd:201, 15 s) and the
   captor of a Boki (match.gd:2839). `muzzle_t` (firing) also gives you away. Replicated as flag 4096 (match.gd:5559).
 - **Output:** `_update_vision()` runs every 0.05 s and sets `Hunter.unseen` for the local player's view only; unseen
   hunters are not drawn, get no plate, nameplate, cast tells, or map dot (hud.gd, full_map.gd:506 "the map is no wallhack").
@@ -51,7 +51,7 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
 - **Blight** (blight.gd:80) uses the same `reveal_t`/`muzzle_t` as "lit" for its senses.
 - **Tiers and abyss:** `los()` samples every 0.4 m and blocks on `ground_at > y + 0.2`, so higher tiers block sight
   from below and the abyss does not block (not verified for void cells).
-- **Dolm's Tremor Sense** (dolm_kit.gd) reveals in its sneak cone through walls, like the source.
+- **Dolm's Sight Unseen** (dolm_kit.gd) reveals in its sneak cone through walls, like the source.
 
 ## 3. The gap
 

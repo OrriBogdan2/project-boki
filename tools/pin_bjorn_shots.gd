@@ -138,7 +138,7 @@ const SHOTS := [
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held: the great silver needle on the bow, its red thread trailing, glowing with the charge"
+		"Pin Down held: the great silver needle on the bow, its red thread trailing, glowing with the charge"
 	],
 	[
 		"pin_heavy_flight",
@@ -146,7 +146,7 @@ const SHOTS := [
 		"heavy",
 		1.27,
 		4.0,
-		"Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet"
+		"Pin Down: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet"
 	],
 	[
 		"pin_heavy_hit",
@@ -154,16 +154,16 @@ const SHOTS := [
 		"heavy",
 		1.4,
 		5.0,
-		"Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring"
+		"Pin Down impact: a red star and red-white burst, dust as the dummy is driven back, the white ring"
 	],
-	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Spirit Walk: the dodge roll and its green burst"],
+	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Slip Stitch: the dodge roll and its green burst"],
 	[
 		"pin_spirit_inside",
 		"archer",
 		"spirit_rock",
 		1.15,
 		1.0,
-		"Spirit Walk inside a rock: the green shell, her screen tinted dark blue"
+		"Slip Stitch inside a rock: the green shell, her screen tinted dark blue"
 	],
 	[
 		"pin_hail_tell",
@@ -171,7 +171,7 @@ const SHOTS := [
 		"hail",
 		0.6,
 		3.0,
-		"Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance"
+		"Hemline cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance"
 	],
 	[
 		"pin_hail_rain",
@@ -179,7 +179,7 @@ const SHOTS := [
 		"hail",
 		1.8,
 		3.0,
-		"Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy"
+		"Hemline: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy"
 	],
 	# ------------------------------------------------ Breaker
 	[
@@ -260,7 +260,7 @@ const SHOTS := [
 		"aegis_block",
 		1.1,
 		1.5,
-		"Aegis blocking: the whole slab flashes, gold sparks off its face"
+		"Blue Guard blocking: the whole slab flashes, gold sparks off its face"
 	],
 	[
 		"bjorn_aegis_break",
@@ -268,7 +268,7 @@ const SHOTS := [
 		"aegis_break",
 		1.14,
 		1.5,
-		"Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet"
+		"Blue Guard broken: gold shards, SHIELD BROKEN, rocked back on his feet"
 	],
 	[
 		"bjorn_smash_dash",
@@ -276,7 +276,7 @@ const SHOTS := [
 		"smash",
 		0.6,
 		3.0,
-		"360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind"
+		"Tideturner: the hard 0.17 s run-up, upright, the gold chevron wake behind"
 	],
 	[
 		"bjorn_smash_spin",
@@ -284,7 +284,7 @@ const SHOTS := [
 		"smash",
 		0.78,
 		3.5,
-		"360 Smash: the one spin hit, the red ring on the hit radius running round with the hammer, sliding on"
+		"Tideturner: the one spin hit, the red ring on the hit radius running round with the hammer, sliding on"
 	],
 	[
 		"bjorn_purify_column",
@@ -292,9 +292,9 @@ const SHOTS := [
 		"purify",
 		1.05,
 		1.0,
-		"Mending Ground with the hammer in hand: the green column coming down on him, the ring filling"
+		"Safe Harbour with the hammer in hand: the green column coming down on him, the ring filling"
 	],
-	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Mending Ground lands: the green ring bloom"],
+	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Safe Harbour lands: the green ring bloom"],
 	[
 		"bjorn_crushed",
 		"bulwark",
@@ -310,7 +310,7 @@ const SHOTS := [
 		"pin_ult",
 		0.7,
 		4.0,
-		"Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
+		"Finishing Touch up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
 	],
 	[
 		"ult_pin_impact",
@@ -334,7 +334,7 @@ const SHOTS := [
 		"bjorn_ult",
 		0.55,
 		6.0,
-		"Faultline wind-up: one outlined 16 m lane with a glowing crack, shown to everyone, the hammer overhead"
+		"Groundswell wind-up: one outlined 16 m lane with a glowing crack, shown to everyone, the hammer overhead"
 	],
 	[
 		"ult_bjorn_slam",
@@ -425,7 +425,7 @@ const OWNER := [
 		"heavy_pin",
 		1.0,
 		3.0,
-		"owner1103 #6: the Heavy Shot held, the thick gold lane from the bow"
+		"owner1103 #6: the Pin Down held, the thick gold lane from the bow"
 	],
 	[
 		"o1103_pin_heavy_release",
@@ -433,7 +433,7 @@ const OWNER := [
 		"heavy_pin",
 		1.29,
 		3.0,
-		"owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow"
+		"owner1103 #6: the Pin Down's release burst on the aim line and the big arrow"
 	],
 	[
 		"o1103_pin_heavy_flight",
@@ -441,7 +441,7 @@ const OWNER := [
 		"heavy_pin",
 		1.33,
 		4.0,
-		"owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail"
+		"owner1103 #6: the Pin Down mid-flight, about 3.5 times a normal arrow with a long trail"
 	],
 	[
 		"o1103_pin_heavy_impact",
@@ -449,7 +449,7 @@ const OWNER := [
 		"heavy_pin",
 		1.5,
 		5.0,
-		"owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it"
+		"owner1103 #6: the Pin Down on the body: hit flash, pinned against the wall, the stake in it"
 	],
 	[
 		"wall_pin_a_impact",
@@ -457,7 +457,7 @@ const OWNER := [
 		"heavy_pin",
 		1.36,
 		5.0,
-		"Heavy Shot into a rock at 1.36 s: the burst on the wall face, the stun mark over the foe"
+		"Pin Down into a rock at 1.36 s: the burst on the wall face, the stun mark over the foe"
 	],
 	[
 		"wall_pin_b_impact",
@@ -465,7 +465,7 @@ const OWNER := [
 		"heavy_pin",
 		1.42,
 		5.0,
-		"Heavy Shot into a rock at 1.42 s: the burst on the wall face, the stun mark over the foe"
+		"Pin Down into a rock at 1.42 s: the burst on the wall face, the stun mark over the foe"
 	],
 	[
 		"wall_pin_c_impact",
@@ -473,7 +473,7 @@ const OWNER := [
 		"heavy_pin",
 		1.52,
 		5.0,
-		"Heavy Shot into a rock at 1.52 s: the burst on the wall face, the stun mark over the foe"
+		"Pin Down into a rock at 1.52 s: the burst on the wall face, the stun mark over the foe"
 	],
 	[
 		"wall_pin_d_impact",
@@ -481,7 +481,7 @@ const OWNER := [
 		"heavy_pin",
 		1.9,
 		5.0,
-		"Heavy Shot into a rock 1.80 s into the hold: the burst on the wall face, the stun mark over the foe"
+		"Pin Down into a rock 1.80 s into the hold: the burst on the wall face, the stun mark over the foe"
 	],
 	[
 		"o1103_pin_heavy_stake",
@@ -497,7 +497,7 @@ const OWNER := [
 		"spirit",
 		0.54,
 		2.0,
-		"owner1103 #35: Lisette's own dash, the Spirit Walk roll (strip frame 1/3)"
+		"owner1103 #35: Lisette's own dash, the Slip Stitch roll (strip frame 1/3)"
 	],
 	[
 		"o1103_pin_dash_b",
@@ -593,7 +593,7 @@ const OWNER := [
 		"smash",
 		0.53,
 		2.5,
-		"owner1103 #35: Breaker's ground dash (360 Smash), strip 1/5, the push-off"
+		"owner1103 #35: Breaker's ground dash (Tideturner), strip 1/5, the push-off"
 	],
 	[
 		"o1103_bjorn_dash_b",
@@ -601,7 +601,7 @@ const OWNER := [
 		"smash",
 		0.6,
 		2.5,
-		"owner1103 #35: Breaker's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer"
+		"owner1103 #35: Breaker's ground dash (Tideturner), strip 2/5, the stretched run-up behind the hammer"
 	],
 	[
 		"o1103_bjorn_dash_c",
@@ -609,7 +609,7 @@ const OWNER := [
 		"smash",
 		0.72,
 		2.5,
-		"owner1103 #35: Breaker's ground dash (360 Smash), strip 3/5, the spin on arrival"
+		"owner1103 #35: Breaker's ground dash (Tideturner), strip 3/5, the spin on arrival"
 	],
 	[
 		"o1103_bjorn_dash_d",
@@ -617,7 +617,7 @@ const OWNER := [
 		"smash",
 		0.86,
 		2.5,
-		"owner1103 #35: Breaker's ground dash (360 Smash), strip 4/5, the low crouched recovery"
+		"owner1103 #35: Breaker's ground dash (Tideturner), strip 4/5, the low crouched recovery"
 	],
 	[
 		"o1103_bjorn_dash_e",
@@ -625,7 +625,7 @@ const OWNER := [
 		"smash",
 		1.05,
 		2.5,
-		"owner1103 #35: Breaker's ground dash (360 Smash), strip 5/5, settled"
+		"owner1103 #35: Breaker's ground dash (Tideturner), strip 5/5, settled"
 	],
 	[
 		"o1103_bjorn_air_dash_a",
@@ -673,7 +673,7 @@ const OWNER := [
 		"bjorn_abyss",
 		1.2,
 		-6.0,
-		"owner1103 #29: the Faultline's trail running on out over the abyss at his height"
+		"owner1103 #29: the Groundswell's trail running on out over the abyss at his height"
 	],
 ]
 ## The before/after pairs (top 3 gaps per hero), run on this build and, with --before, on an older one.

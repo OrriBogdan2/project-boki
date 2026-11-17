@@ -15,12 +15,12 @@ hollow shimmer for the shadow. Her voice is an adult woman's, cool and quiet, mo
   pin_perfect                    the perfect release: a pair of shears' clean snip-shing
   pin_overdraw                   held too long: a dull falling creak
   pin_super_hit (2 takes)        the Supercharged hit
-  pin_heavy / pin_heavy_hit      the Heavy Shot loosed / landing and pinning (3 takes)
-  pin_heavy_full / pin_heavy_burst  the Heavy Shot drawn full / its charged release crack
+  pin_heavy / pin_heavy_hit      the Pin Down loosed / landing and pinning (3 takes)
+  pin_heavy_full / pin_heavy_burst  the Pin Down drawn full / its charged release crack
   pin_arrow_hit (3 takes)        an Empowered or tap arrow landing
-  pin_hail / pin_rain / pin_patter  Hail Wall: arrows up, the rain falling, one arrow striking (3 takes)
-  pin_spirit / pin_spirit_end    Spirit Walk: the roll into her shadow / stepping back out
-  pin_ult_cast/_nock/_beam/_final  Starpiercer
+  pin_hail / pin_rain / pin_patter  Hemline: arrows up, the rain falling, one arrow striking (3 takes)
+  pin_spirit / pin_spirit_end    Slip Stitch: the roll into her shadow / stepping back out
+  pin_ult_cast/_nock/_beam/_final  Finishing Touch
   archer_dash                    the roll: a cloak flap and a whoosh
   archer_step_<surface>          soft boots, a cloak's brush, now and then a needle's tick (3 takes each)
   archer_hurt/down/death         wordless voice
@@ -145,7 +145,7 @@ def draw():
 
 
 def heavy_draw():
-    """The Heavy Shot's draw: a deep slow creak, a heavier ratchet, the thread groaning tight."""
+    """The Pin Down's draw: a deep slow creak, a heavier ratchet, the thread groaning tight."""
     d = 0.85
     return pad(mix(creak(0.8, 50, 80, 1400, 0.7) * 0.9, ratchet(0.7, 9, 22, 1600, 5000) * 0.2,
                    stretch(0.75, 420, 760) * 0.8), d)
@@ -160,7 +160,7 @@ def stage():
 
 
 def super_ready():
-    """Supercharged ready: a fuller two-note chime over a low swell (also the deep layer under a Heavy Shot)."""
+    """Supercharged ready: a fuller two-note chime over a low swell (also the deep layer under a Pin Down)."""
     d = 0.75
     a = fo(S.chime(1568, 0.7, 0.2), 0.4) * 0.6
     b = at(fo(S.chime(2093, 0.65, 0.2), 0.4) * 0.6, 0.07)
@@ -192,9 +192,9 @@ def super_hit(i):
     return lpf(pad(mix(hit, glass), d), 9500)
 
 
-# ------------------------------------------------------------------ RMB: Heavy Shot
+# ------------------------------------------------------------------ RMB: Pin Down
 def heavy():
-    """The Heavy Shot loosed: a thick low thread thrum and a low whoosh."""
+    """The Pin Down loosed: a thick low thread thrum and a low whoosh."""
     d = 0.65
     th = pluck(196, 0.6, 0.995, 0.6, bend=0.05) * 0.9
     th2 = pluck(98, 0.6, 0.996, 0.4) * 0.5
@@ -204,7 +204,7 @@ def heavy():
 
 
 def heavy_hit(i):
-    """The Heavy Shot landing: a meaty thunk, the shaft biting in and quivering, a puff of grit."""
+    """The Pin Down landing: a meaty thunk, the shaft biting in and quivering, a puff of grit."""
     d = 0.5
     thunk = mix(click(0.003, 1800, 6500) * 1.2, kick(190 + 12 * i, 65, 0.4, 0.012, 0.05, 2.8) * 0.75,
                 crack(0.2, 300, 2200, 0.025) * 2.0)
@@ -215,7 +215,7 @@ def heavy_hit(i):
 
 
 def heavy_full():
-    """The Heavy Shot drawn full: the thread hums taut under a bright needle ping (the draw's ready cue)."""
+    """The Pin Down drawn full: the thread hums taut under a bright needle ping (the draw's ready cue)."""
     d = 0.6
     hum = fo(S.sweep(220, 233, 0.55) * env(N(0.55), 0.03, 0.2), 0.4) * 0.35
     ping = fo(S.chime(2349, 0.5, 0.14, ((1.0, 1.0), (2.76, 0.3), (5.4, 0.1))), 0.4) * 0.7
@@ -240,7 +240,7 @@ def arrow_hit(i):
     return pad(mix(thunk, tick), d)
 
 
-# ------------------------------------------------------------------ E: Hail Wall
+# ------------------------------------------------------------------ E: Hemline
 def hail():
     """A flight of arrows swishing up: several plucks and swooshes staggered."""
     d = 0.8
@@ -272,7 +272,7 @@ def patter(i):
                    crack(0.04, 800, 3500, 0.006) * 0.8), d)
 
 
-# ------------------------------------------------------------------ Shift: Spirit Walk
+# ------------------------------------------------------------------ Shift: Slip Stitch
 def spirit():
     """The roll into her shadow: a quick whoosh, then a hollow airy shimmer and a thread unspooling."""
     d = 0.9; t = T(d)
@@ -293,9 +293,9 @@ def spirit_end():
     return pad(mix(a, b, breath), d)
 
 
-# ------------------------------------------------------------------ X: Starpiercer
+# ------------------------------------------------------------------ X: Finishing Touch
 def ult_cast():
-    """Starpiercer: a bright rising shimmer over a low swell, a chord of threads blooming out."""
+    """Finishing Touch: a bright rising shimmer over a low swell, a chord of threads blooming out."""
     d = 1.0; t = T(d)
     swell = fo(lpf(S.sweep(80, 140, d, 'saw'), 500) * np.minimum(1, t / 0.3) * np.exp(-t / 0.6), 0.3) * 0.5
     shim = fo(S.sweep(900, 2600, 0.6, curve=0.7) * env(N(0.6), 0.15, 0.3), 0.3) * 0.18

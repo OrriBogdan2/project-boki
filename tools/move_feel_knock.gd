@@ -8,8 +8,8 @@ extends RefCounted
 ## Reference knocks: each kit's full-charge push on main d255acbee (m/s along the hit). The numbers are fixed
 ## here on purpose: these asserts pin the shared curve, so a kit retuning its push doesn't move them.
 const REF := {
-	"lace": 12.0,       # Heavy Shot, archer.json rmb.pin.push [8, 12]
-	"sparkle": 9.0,     # Storm Rod, mage.json rmb.coil.push [6, 9]
+	"lace": 12.0,       # Pin Down, archer.json rmb.pin.push [8, 12]
+	"sparkle": 9.0,     # Pink Spear, mage.json rmb.coil.push [6, 9]
 	"albert": 13.0,     # hammer swing, bulwark.json lmb.smash_kb [5, 13]
 	"kael": 6.0,        # Finishing Slam, juggernaut.json rmb.slam.push
 }
@@ -21,14 +21,14 @@ const WALL_GAP := 1.5          # m from the body's centre to the cliff face
 ## not in the data and the 5 fps footage can't resolve it), held within a few centimetres; the share done by
 ## 0.4 s is the footage's.
 const T := {
-	"knock_lace_01_m":      ["~", [1.12, 1.22], "m", "Heavy Shot push 12 at 0.1 s"],
-	"knock_lace_02_m":      ["~", [2.22, 2.32], "m", "Heavy Shot push 12 at 0.2 s"],
-	"knock_lace_04_m":      ["~", [4.03, 4.23], "m", "Heavy Shot push 12 at 0.4 s"],
-	"knock_lace_keys_s":    ["~", [0.33, 0.37], "s", "Heavy Shot push 12: keys back (knock_t, capped 0.35 s)"],
-	"knock_sparkle_01_m":   ["~", [0.81, 0.91], "m", "Storm Rod push 9 at 0.1 s"],
-	"knock_sparkle_02_m":   ["~", [1.62, 1.72], "m", "Storm Rod push 9 at 0.2 s"],
-	"knock_sparkle_04_m":   ["~", [2.62, 2.82], "m", "Storm Rod push 9 at 0.4 s"],
-	"knock_sparkle_keys_s": ["~", [0.27, 0.30], "s", "Storm Rod push 9: keys back (0.1 + 0.02 s per m/s)"],
+	"knock_lace_01_m":      ["~", [1.12, 1.22], "m", "Pin Down push 12 at 0.1 s"],
+	"knock_lace_02_m":      ["~", [2.22, 2.32], "m", "Pin Down push 12 at 0.2 s"],
+	"knock_lace_04_m":      ["~", [4.03, 4.23], "m", "Pin Down push 12 at 0.4 s"],
+	"knock_lace_keys_s":    ["~", [0.33, 0.37], "s", "Pin Down push 12: keys back (knock_t, capped 0.35 s)"],
+	"knock_sparkle_01_m":   ["~", [0.81, 0.91], "m", "Pink Spear push 9 at 0.1 s"],
+	"knock_sparkle_02_m":   ["~", [1.62, 1.72], "m", "Pink Spear push 9 at 0.2 s"],
+	"knock_sparkle_04_m":   ["~", [2.62, 2.82], "m", "Pink Spear push 9 at 0.4 s"],
+	"knock_sparkle_keys_s": ["~", [0.27, 0.30], "s", "Pink Spear push 9: keys back (0.1 + 0.02 s per m/s)"],
 	"knock_albert_01_m":    ["~", [1.21, 1.31], "m", "hammer swing push 13 at 0.1 s"],
 	"knock_albert_02_m":    ["~", [2.42, 2.52], "m", "hammer swing push 13 at 0.2 s"],
 	"knock_albert_04_m":    ["~", [4.51, 4.71], "m", "hammer swing push 13 at 0.4 s"],

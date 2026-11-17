@@ -1,7 +1,7 @@
 extends RefCounted
 ## --hitstop-input-check: a press made inside a hit-stop plays out the moment the freeze ends (source parity:
 ## heavy hitters never feel sticky). For every Hunter, the kit's heaviest own-body freeze lands on a dummy
-## (Kael's Smash in its sweet band, Mossy's perfect swing, Tenzo's punch, Grimble's anchor slam, Cinder's ram,
+## (Kael's Final Swing in its sweet band, Mossy's perfect swing, Tenzo's punch, Grimble's anchor slam, Cinder's ram,
 ## the others' top hit), then Shift, LMB, E or Space is tapped inside the freeze, and in a replica of the same
 ## match the same tap is made on the first frame after it: the inside tap must act no later than the outside
 ## one, and never be lost while the outside one acts. The frames run through Match._process (the hit-stop gate
@@ -17,7 +17,7 @@ const SETTLE := 40              # steps before the hit: the fresh match's own hi
 const SEED := 77                # the two trials of a pair replay the same match: only the tap's timing differs
 ## hero -> [the top hit's slot, how long it's held (steps), the dummy's distance in front (m)]
 const HEAVY := {
-	"juggernaut": ["rmb", 60, 3.2],     # Smash held to full, the dummy in the sweet band (2.4-4.2 m): payoff
+	"juggernaut": ["rmb", 60, 3.2],     # Final Swing held to full, the dummy in the sweet band (2.4-4.2 m): payoff
 	"bulwark": ["lmb", 78, 2.0],        # Crushing Blow let go in the perfect window (full 1.25 s + 0.18 s)
 	"dolm": ["lmb", 30, 2.5],           # the punch (a hold past lmb.tap)
 	"dredge": ["e", 1, 4.0],            # the anchor slam

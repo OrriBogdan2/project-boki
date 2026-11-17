@@ -20,11 +20,11 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 1. **Hold left click** to flick embers from your hands. They fly their full range, past the
    cursor. Each ember **Kindles** a foe (up to 5): Kindle adds damage to your embers, and an ember into a
    Kindled foe winds Hearthlight back. Pause a second and the next ember is Empowered and flies further.
-2. **Press RMB** for the Burrseed: a 1s wind-up at half speed, then it flies at the cursor by itself, so flick your aim onto the target as it ends. The seed sticks to the first foe, a
+2. **Press RMB** for the Stick Around: a 1s wind-up at half speed, then it flies at the cursor by itself, so flick your aim onto the target as it ends. The seed sticks to the first foe, a
    violet disc shows the area under them, and 0.7s later it roots everyone in it.
 3. **E** lights Hearthlight, a ring that heals the squad and flares at the end. Press E again to throw it
    to the cursor; it latches onto the first teammate it passes.
-4. **Shift** (Relay Step) is a short hop where you move. Pass through a teammate to get half a dash back.
+4. **Shift** (Foxtrot) is a short hop where you move. Pass through a teammate to get half a dash back.
 5. **Bearer** (passive): run into a downed teammate to carry them (up to two). You get a shield and move
    slower; set them down with crouch.
 
@@ -34,7 +34,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 |---|---|
 | Ember into a Kindled foe | Hearthlight winds back 0.2s |
 | Five embers on one foe | About 45% more damage per ember |
-| Relay Step through a teammate | Half a dash back and 1s off Hearthlight |
+| Foxtrot through a teammate | Half a dash back and 1s off Hearthlight |
 | Hearthlight on a downed teammate | Their bleed bar fills five times over |
 | Throw Hearthlight at yourself while carrying | It lands on the one you carry |
 | Rank 3 flare | A downed teammate in the ring stands back up |
@@ -42,7 +42,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 
 ## Tips
 
-- Burrseed a chaser, then carry your friend out while they are rooted.
+- Stick Around a chaser, then carry your friend out while they are rooted.
 - Keep a foe Kindled to cut the Hearthlight cooldown.
 - A stun puts Hearthlight out while it rides on you: throw it before you are caught.
 
@@ -54,7 +54,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 |  |  |
 |---|---|
 | Body | 145 health, 5.28 m/s, 1 dash charge |
-| Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Hot and Cold (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds. |
 | Silhouette | small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her |
 | Resource | Kindle (max 5) |
@@ -66,26 +66,26 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
-| Passive: Carrier | Run into a downed teammate to carry up to 2. |
-| Dash: Relay Step | Quick hop where you move; a long floaty glide in the air. |
-| RMB: Burrseed | Seed sticks to a foe; after 2s in reach it roots them. |
+| Passive: Carry the Day | Run into a downed teammate to carry up to 2. |
+| Dash: Foxtrot | Quick hop where you move; a long floaty glide in the air. |
+| RMB: Stick Around | Seed sticks to a foe; after 2s in reach it roots them. |
 | E: Hearthlight | Healing ring on you; press again to throw it to the cursor. |
-| Hunter ultimate: Hearth Call | Tether a teammate for 5s of healing; a downed one stands up. |
-| Weapon: Ember Cast | Hold to push embers past the cursor; hits add Kindle. |
+| Hunter ultimate: Rise and Shine | Tether a teammate for 5s of healing; a downed one stands up. |
+| Weapon: Hot and Cold | Hold to push embers past the cursor; hits add Kindle. |
 
 ### Abilities in full
 
-**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them (a root or a slow does not) and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carry the Day (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them (a root or a slow does not) and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
-**Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown).
+**Foxtrot (dash, Shift, 7s cooldown).** A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown).
 
-**Burrseed (RMB, 10.5s cooldown).**
+**Stick Around (RMB, 10.5s cooldown).**
 
 - *Tap:* Press: a fixed 0.6s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A seed (24 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press it again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.
 
-**Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept.
+**Rise and Shine (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept.
 
 ### Ranks
 
@@ -104,7 +104,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | ember sparks over the foes she has Kindled, one per stack |
-| Armed / full | a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone |
+| Armed / full | a foe at 5 Kindle burns bright; a stuck Stick Around shows its violet disc under them, filling, for everyone |
 | Dash spent | dash pip dark |
 
 <!-- /gen:kit -->

@@ -54,7 +54,7 @@ func _walks(m: Match, P: Hunter, arch: String, edge_kind: String, top: float, ed
 		P.hp = P.max_hp
 		P.teleport(Vector3(edge - RUN_UP, top, hz + 0.5))
 		P.vel = Vector3.ZERO
-		# an E aims along the edge: Neve's Rink Wall would stand in the way, and that is not the ledge
+		# an E aims along the edge: Neve's Cold Front would stand in the way, and that is not the ledge
 		var cursor_z := hz - 7.5 if st.begins_with("e") else hz + 0.5
 		P.inp["aim"] = Vector3(edge + 8.0, top, cursor_z)
 		P.inp["aim_y"] = top

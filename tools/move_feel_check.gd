@@ -67,7 +67,7 @@ const T := {
 	"vault_exit_run":          ["~", [0.95, 1.05], "x", "[footage] Sable's Cartwheel runs down into her hasted run"],
 	"vault_slow_frames":       ["<=", 0.0, "frames", "[footage] past the peak, no step under the hasted run (no dip)"],
 	"vault_shot_gap_frames":   ["<=", 0.0, "frames", "[footage 0193] she throws as the flip ends (mid-flip too)"],
-	# Grimble's Barge chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
+	# Grimble's Mad Dash chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
 	# that arrives with almost no skid and turns back to the aim within ~0.1 s (briefs/hero-ref/dredge.md 296-306)
 	"barge_chain_shoves":      ["~", [3.0, 3.0], "", "[owner 11-03] three charges, a Shift tap inside each shove"],
 	"barge_chain_gap_t":       ["<=", 0.1, "s", "[footage] turned back to the aim within ~0.1 s of the dash"],
@@ -88,7 +88,7 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
-	"dash_curve_bulwark_peak_u":      ["~", [0.4, 0.6], "", "[footage] Oath Smash peaks 0.17s into 0.33s"],
+	"dash_curve_bulwark_peak_u":      ["~", [0.4, 0.6], "", "[footage] Oath Final Swing peaks 0.17s into 0.33s"],
 	"dash_curve_bulwark_peak_k":      ["~", [1.12, 1.3], "x", "[footage] Oath peak 530 px/s, mean 436"],
 	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
@@ -108,7 +108,7 @@ const T := {
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"dash_jump_keep":                 ["~", [0.74, 0.76], "x", "[est] 0.75: source undecoded, no footage"],
 
-	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
+	# Red Carpet: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Red Carpet lift-off"
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
 	"flue_turn_deg_s":         ["~", [85.0, 95.0], "deg/s", "[footage] peaks ~85-100 deg/s (cast 1: 52-67)"],
@@ -1319,7 +1319,7 @@ func _plain_dash() -> void:
 ## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air
 ## ("hold": the key kept down on the ground, for a kit whose held dash goes further).
 ## A sourced kit runs its source numbers as-is (no dash feel); the owner's x0.85 / x1.15 stays only on the
-## kits with no source dash (content/rules/dash_feel.json). Claire's Skate and Ostra's Lantern Trade never
+## kits with no source dash (content/rules/dash_feel.json). Claire's Skate and Ostra's Musical Chairs never
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
@@ -1341,7 +1341,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Ground Swim 6 m/0.4 s, air light long"},
+	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Deep End 6 m/0.4 s, air light long"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -1422,7 +1422,7 @@ func _felt_move(move: String, air: bool) -> Array:
 		return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	for k in hold: P.inp[k] = false
 	return [0.0, 0.0]
-## Grimble's Barge run through the real step: one Shift tap in the middle of each shove, the cursor ahead. Reads
+## Grimble's Mad Dash run through the real step: one Shift tap in the middle of each shove, the cursor ahead. Reads
 ## the shoves made, the still steps between them (and how many of those the gap doesn't explain), the turn to a
 ## cursor swung 90 degrees as the first shove ends, and the steps from the last shove's end to the shot of an LMB
 ## tapped inside it.
@@ -1487,7 +1487,7 @@ func _barge_chain() -> void:
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
 ## `hold` keeps the dash key down to the end; `long` runs out of charges first (the class's long dash).
 func _felt_dash(air: bool, hold := false, long := false) -> Array:
-	_steps(30)          # past any chain gap from the dash before (Grimble's Barge would hold a press inside it)
+	_steps(30)          # past any chain gap from the dash before (Grimble's Mad Dash would hold a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
@@ -1545,7 +1545,7 @@ func _vault_exit() -> void:
 			rec("vault_slow_frames", slow)
 	P.reclass(was[0], was[1])
 
-## Cinder's Flue Flight (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
+## Cinder's Red Carpet (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
 ## ring, rising to her low hover, before the flight moves; then, the cursor swung a right angle, the heading turns
 ## at its capped rate.
 func _flue_flight() -> void:
@@ -1576,7 +1576,7 @@ func _flue_flight() -> void:
 	P.lvl = was[2]
 	P.reclass(was[0], was[1])
 
-## Tarek's Rock Hop is an arc off a rock: its reach and flight as the hop reads them.
+## Tarek's Leap of Faith is an arc off a rock: its reach and flight as the hop reads them.
 func _dolm_hop() -> Array:
 	var dd := P.ak.dash_def()
 	var feel: Dictionary = P.ak.dash_feel()
@@ -1602,7 +1602,7 @@ func _standing_dash() -> void:
 		P.inp["aim"] = flat + Vector3(STAND_AIM.x, 0, STAND_AIM.y) * 5.0
 		P.inp["dash"] = true
 		P.inp["dash_down"] = true
-		for i in 150:             # 2.5 s: Lantern Trade's 1.8 s lob lands after the hold
+		for i in 150:             # 2.5 s: Musical Chairs's 1.8 s lob lands after the hold
 			m.step(DT)
 			P.inp["dash"] = false
 			P.inp["dash_down"] = i < STAND_HOLD

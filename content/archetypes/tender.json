@@ -42,7 +42,7 @@
 		"col": "#ffb347"
 	},
 	"passive": {
-		"name": "Carrier",
+		"name": "Carry the Day",
 		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them (a root or a slow does not) and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
@@ -51,7 +51,7 @@
 	},
 	"dash": {
 		"id": "relay_step",
-		"name": "Relay Step",
+		"name": "Foxtrot",
 		"card_range": "dist",
 		"icon": "tender_dash",
 		"col": "#ffe2a8",
@@ -73,7 +73,7 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Burrseed",
+		"name": "Stick Around",
 		"card_range": "seed.range",
 		"short": "Burr",
 		"icon": "tender_rmb",
@@ -162,12 +162,12 @@
 	"rank_next": {"sec": "Rank 3: cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power.", "dash": "Rank 3: recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash.", "kin": "Rank 3: cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%."},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
-		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
+		"full": "a foe at 5 Kindle burns bright; a stuck Stick Around shows its violet disc under them, filling, for everyone",
 		"dash_spent": "dash pip dark"
 	},
-	"lmb_note": "Ember Cast",
+	"lmb_note": "Hot and Cold",
 	"x": {
-		"name": "Hearth Call",
+		"name": "Rise and Shine",
 		"card_range": "range",
 		"short": "Call",
 		"icon": "tender_x",

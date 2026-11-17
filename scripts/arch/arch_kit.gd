@@ -988,7 +988,7 @@ func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)
-# The Thief (Cash In) and the Juggernaut (Rage Smash) set the bar: a kit builds a resource, the
+# The Thief (Cash In) and the Juggernaut (Final Swing) set the bar: a kit builds a resource, the
 # hunter visibly changes when its payoff is armed, and the payoff lands with a named word, T4
 # hitstop (the hit carries payoff: true), a T4 shake, its own sound, VFX and a camera punch. The
 # helpers below give the Archer, Mage, Gunslinger and Bulwark the same language.

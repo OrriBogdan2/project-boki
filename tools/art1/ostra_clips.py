@@ -199,7 +199,7 @@ CLIPS = {
     "crouch_in": {"len": 0.34, "base": STILL, "keys": [(0.0, {}), (0.15, SQUEEZE), (0.34, HUNCH)]},
     "crouch_out": {"len": 0.36, "base": HUNCH, "keys": [(0.0, {}), (0.08, SQUEEZE), (0.24, SPRUNG), (0.36, STILL)]},
 
-    # ---------------------------------------------------------------- LMB: Tether Lantern, thrown from the body on the kit's beats
+    # ---------------------------------------------------------------- LMB: Comic Timing, thrown from the body on the kit's beats
     # (kmoves_stone ostra_orb: drawn in 0.04, flicked 0.09, back by 0.30): the orb cupped at the ruff, the hand flicked out along the
     # aim and back in to him; the deck held in at his chest the while (no arm out sideways)
     "orb": {"len": 0.30, "base": dict(STILL, **FAN_IN), "keys": [
@@ -241,7 +241,7 @@ CLIPS = {
                 "jaw": 10.0, "box": (-4.0, 0.0), **FAN_IN}),
         (0.50, dict(HAND_IN_R, spine=STILL["spine"], head=STILL["head"], lift=(0.0, 0.0, 0.0), box=(0.0, 0.0), jaw=0.0, lid=0.3, cheek=0.3, brow=-0.5)),
     ]},
-    # ---------------------------------------------------------------- RMB: Shard Snap (the spring wound right down, then the release)
+    # ---------------------------------------------------------------- RMB: Stage Fright (the spring wound right down, then the release)
     "snap_wind": {"len": 0.70, "base": STILL, "add": lambda P, t: t > 0.3 and twitch(0.5, 44.0)(P, t), "keys": [
         (0.00, {}),
         (0.133, dict(WIND, spine=(0.0, 12.0, 0.0), head=(-8.0, -8.0, 8.0), hR=(0.13, 0.25, 1.14), lift=(0.0, -0.03, -0.1), smoke=0.3)),
@@ -255,7 +255,7 @@ CLIPS = {
         (0.30, {"spine": (12.0, -8.0, 0.0), "lift": (0.0, 0.04, -0.03), "box": (3.0, 0.0)}),
         (0.50, dict(STILL, jaw=0.0, pld=(0.0, 0.0), lift=(0.0, 0.0, 0.0), box=(0.0, 0.0))),
     ]},
-    # ---------------------------------------------------------------- Shift: Lantern Trade
+    # ---------------------------------------------------------------- Shift: Musical Chairs
     # holding Shift: the spring compresses, the smoke winds on
     "swap_aim": {"len": 0.66, "base": STILL, "add": lambda P, t: t > 0.16 and twitch(0.35, 30.0)(P, t), "keys": [(0.00, {}), (0.167, AIM_LOW, "out"), (0.66, AIM_LOW)]},
     # the launch: the lantern leaves with the press, so the lob stroke is done by 0.033 (the coil is swap_aim's hold; --contact-check)
@@ -288,7 +288,7 @@ CLIPS = {
         (0.37, {"lift": (0.0, 0.0, 0.05), "lidb": -0.05, "hR": (0.38, 0.14, 1.14), "hL": (-0.34, 0.14, 1.14), "spine": (0.0, -4.0, 2.0), "head": (-14.0, 4.0, 12.0), "pld": (0.0, 0.0)}),
         (0.60, dict(STILL, jaw=0.0, pld=(0.0, 0.0), lidb=0.0)),
     ]},
-    # ---------------------------------------------------------------- E: Brimseed
+    # ---------------------------------------------------------------- E: Gag Gift
     "seed": {"len": 0.80, "base": STILL, "keys": [
         (0.00, {}),
         (0.067, {"hR": (0.2, 0.2, 1.5), "fR": (0.0, 0.25, 1.0), "pR": (0.0, 0.9, -0.2), "eR": (1.0, -0.2, -0.5), "cR": 0.55, "spine": (0.0, -4.0, 2.0), "head": (-20.0, 6.0, -8.0), "cheek": 0.9, "lift": (0.0, 0.0, 0.05)}, "out"),
@@ -304,7 +304,7 @@ CLIPS = {
         (0.34, {"lift": (0.0, 0.0, -0.03)}),
         (0.60, dict(STILL, pld=(0.0, 0.0), jaw=0.0, lift=(0.0, 0.0, 0.0), smoke=0.0)),
     ]},
-    # ---------------------------------------------------------------- X: Nightwell: the lid thrown wide, the void hauling at everything, the jack riding high and laughing
+    # ---------------------------------------------------------------- X: Main Attraction: the lid thrown wide, the void hauling at everything, the jack riding high and laughing
     "well": {"len": 1.27, "base": STILL, "add": lambda P, t: t > 0.25 and (P.update(wR=0.3, wL=0.2) or laugh(7.0, 9.0, 0.25, 9.0)(P, t)), "keys": [
         (0.00, {}),
         (0.10, dict(CLENCH, hR=(-0.1, 0.25, 0.92), fR=(-0.5, 0.3, -0.8), pR=(0.3, 0.9, 0.2), hL=(0.1, 0.25, 0.92), fL=(0.5, 0.3, -0.8), pL=(-0.3, 0.9, 0.2), lift=(0.0, 0.0, -0.26), lidb=0.5, cR=0.7, cL=0.7), "out"),

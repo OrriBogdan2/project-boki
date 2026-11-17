@@ -136,7 +136,7 @@ static func _axes(m: Match) -> Array:
 
 
 ## Moves that travel go to screen right (side-on in the frames); a downed teammate lies off to that side
-## for the carry and Hearth Call; otherwise the teammate stands behind her and to the left, never between
+## for the carry and Rise and Shine; otherwise the teammate stands behind her and to the left, never between
 ## her and the camera.
 static func _place_ally(A: Arena, P: Hunter, Al: Hunter, what: String) -> void:
 	var ax := _axes(A.m)

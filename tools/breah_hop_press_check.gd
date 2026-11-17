@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Rock Hop's presses, for --dolm-combo-check (docs/heroes/dolm.md "Rock Hop"): every Shift press goes through
+## Leap of Faith's presses, for --dolm-combo-check (docs/heroes/dolm.md "Leap of Faith"): every Shift press goes through
 ## Hunter.do_dash as a real one-step input, at each point of a chain. A press from the first rock's crouch to the
 ## window's last step is the next hop (a press in the flight waits for the landing), and it leaves the skid
 ## running; a press in the last hop's final BUFFER_S, or after the window, is a fresh chain only with a charge up.

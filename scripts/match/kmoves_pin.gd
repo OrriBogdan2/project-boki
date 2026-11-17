@@ -165,7 +165,7 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# the Heavy Shot's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
+	# the Pin Down's draw: like the bow draw but sunk low, weight back, the shoulders turned hard (holds)
 	"arc_heavy_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
@@ -225,7 +225,7 @@ const MOVES := {
 		],
 		[0.28, {"p": 0.25, "lift": -0.05, "lw": 0.8, "legs": [0.6, -0.8, -0.3, -0.4]}],
 		[0.6, {}]]},
-	# Hail Wall: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
+	# Hemline: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
 	"arc_hail": {"keys": [
 		[0.0, {"p": 0.1}],
 		[
@@ -253,7 +253,7 @@ const MOVES := {
 			}
 		],
 		[0.6, {}]]},
-	# Spirit Walk's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
+	# Slip Stitch's dodge roll: tucked into one forward roll in 0.16 s, then up and light on the feet
 	"pin_roll": {"keys": [
 		[0.0, {"p": -0.35, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, 0.9, -1.3]}],
 		[
@@ -447,7 +447,7 @@ const MOVES := {
 		[0.06, {"p": -0.18, "y": 0.4, "sq": 0.14, "lw": 0.9, "hw": 1.0, "fl": Vector3(0.1, -0.05, 0.2), "gp": -0.5}],
 		[0.3, {"p": -0.1, "y": 0.15, "r": 0.08, "sq": 0.06, "gp": -0.3}],
 		[0.55, {}]]},
-	# Spirit Walk after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
+	# Slip Stitch after the roll: light on the toes, leaning in, arms trailing like a ghost (held while it lasts)
 	"pin_walk": {"hold": true, "keys": [
 		[0.0, {"p": -0.15, "fx": 6.28, "lw": 0.5, "legs": [0.4, -0.5, -0.2, -0.3]}],
 		[
@@ -462,7 +462,7 @@ const MOVES := {
 				"fr": Vector3(0.15, -0.1, 0.35)
 			}
 		]]},
-	# the base long dash (in the air, or out of Spirit Walk charges): a quick flick and a sideways tumble
+	# the base long dash (in the air, or out of Slip Stitch charges): a quick flick and a sideways tumble
 	"pin_flick": {"keys": [
 		[0.0, {"p": -0.2, "sq": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.2, -0.4]}],
 		[

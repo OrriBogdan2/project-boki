@@ -2,7 +2,7 @@ class_name HunterNet
 extends RefCounted
 ## Extra hunter fields in the "st" snapshot that the HUD shows to everyone: the run level, so every
 ## player sees every hunter's level on their overhead plate (HudPlate.level_badge) and the badge
-## pulses when it goes up; and Meeko's Hearth Call target and seconds left, so the ally shows the
+## pulses when it goes up; and Meeko's Rise and Shine target and seconds left, so the ally shows the
 ## protection bar (ChannelBar). Appended as a tagged tail at the very end of the hunter row (after
 ## KinNet's fields) so it never shifts anything already there; a row without it is ignored.
 

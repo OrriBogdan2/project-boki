@@ -1,6 +1,6 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Pip's reel (tools/hero_vfx_reel.gd): her starlit casts, the hop's star trail, the Burrseed to its root, the
-## Hearthlight on her and thrown (its heals rising as stars, the bloom), and Hearth Call's tether to its end.
+## Pip's reel (tools/hero_vfx_reel.gd): her starlit casts, the hop's star trail, the Stick Around to its root, the
+## Hearthlight on her and thrown (its heals rising as stars, the bloom), and Rise and Shine's tether to its end.
 
 const NEAR := [Vector3(0.9, 0, -1.3), Vector3(0.9, 0, 1.3)]     # m from the target: the RMB part's extra dummies
 
@@ -77,7 +77,7 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(T.pos)
-	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the arc of light to the ally, the heals rising as stars",
+	await _go(2.8, cast, _sheet("r", "R, Rise and Shine: the arc of light to the ally, the heals rising as stars",
 		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + T.pos) * 0.5), 1.0)
 	T.team = foe_team
 	await _go(GAP)

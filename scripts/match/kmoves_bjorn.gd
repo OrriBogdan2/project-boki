@@ -213,7 +213,7 @@ const MOVES := {
 			}
 		],
 		[0.85, {}]]},
-	# the aegis raised: braced low behind it, the shield arm out front (holds while it's up)
+	# the Blue Guard raised: braced low behind it, the shield arm out front (holds while it's up)
 	"bul_guard": {"hold": true, "keys": [
 		[0.0, {}],
 		[
@@ -229,7 +229,7 @@ const MOVES := {
 				"fl": Vector3(0.0, 0.15, -0.48)
 			}
 		]]},
-	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
+	# Tideturner: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
 	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
 	# recovery to 0.58 s
 	"bul_whirl": {"keys": [
@@ -275,7 +275,7 @@ const MOVES := {
 		],
 		[0.58, {"p": -0.08, "fy": 6.28, "sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.3, -0.35, -0.8]}],
 		[0.75, {"fy": 6.28}]]},
-	# the Shield Charge: head down behind the shield, a ram (on top of the dash's own forward lean)
+	# the Full Ahead: head down behind the shield, a ram (on top of the dash's own forward lean)
 	"bul_charge": {"keys": [
 		[0.0, {"p": -0.1, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
 		[0.16, {"p": -0.2, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.1, -0.8, -0.3]}],
@@ -286,7 +286,7 @@ const MOVES := {
 		[0.0, {"y": 0.75, "p": 0.12, "lift": -0.06, "gp": 0.25, "lw": 1.0, "legs": [0.55, -0.85, -0.45, -0.5]}],
 		[0.1, {"y": 0.6, "p": 0.05, "lift": 0.05, "gp": 0.25, "lw": 1.0, "legs": [0.7, -0.6, -0.5, -0.3]}],
 		[0.25, {"y": 0.75, "p": 0.12, "lift": -0.06, "gp": 0.25, "lw": 1.0, "legs": [0.55, -0.85, -0.45, -0.5]}]]},
-	# Mending Ground (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
+	# Safe Harbour (Purify): the hammer hauled up to the sky on the toes, then driven down into the earth
 	# as the light comes down; overshoot into a deep crouch, settle
 	"bul_mend": {"keys": [
 		[0.0, {}],
@@ -367,7 +367,7 @@ const MOVES := {
 		],
 		[0.55, {"p": -0.35, "y": -0.15, "sq": 0.18, "hw": 0.8, "fl": Vector3(0.0, 0.1, -0.5)}],
 		[0.85, {}]]},
-	# the aegis broken: rocked back, the shield arm flung wide, a stagger and recover
+	# the Blue Guard broken: rocked back, the shield arm flung wide, a stagger and recover
 	"bul_break": {"keys": [
 		[0.0, {}],
 		[
@@ -413,7 +413,7 @@ const MOVES := {
 		[0.3, {"p": -0.12, "y": 0.3, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.3, -0.4, -0.8]}],
 		[0.5, {"sq": -0.05}],
 		[0.6, {}]]},
-	# Faultline wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
+	# Groundswell wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
 	"bul_ult_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
@@ -446,7 +446,7 @@ const MOVES := {
 				"legs": [0.7, -0.9, -0.55, -0.7]
 			}
 		]]},
-	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it through the plant
+	# the Groundswell slam: one frame from overhead down into the ground, a deep crouch over it through the plant
 	# (0.2 s), then the legs free to walk while the back comes up over the hammer as the lane erupts
 	"bul_ult_slam": {"keys": [
 		[

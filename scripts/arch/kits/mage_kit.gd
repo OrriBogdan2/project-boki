@@ -3,12 +3,12 @@ extends ArchKit
 ## Sparkle (archetype id "mage", light): the storm-kite runner. docs/heroes/mage.md has the per-slot
 ## table, the assumptions and the research notes (briefs/hero-ref/vireo.md, owner playtest notes).
 ##
-## Loop: finger bolts (1 Static each, every 0.8s, out to full range), Storm Rod and Skycall (2) load
+## Loop: finger bolts (1 Static each, every 0.8s, out to full range), Pink Spear and Undercurrent (2) load
 ## Static onto a foe; at 4 a sky bolt lands on them and they are Live. Wirerun (hold: the lane and its
 ## end ring grow with the charge, you can't steer and you keep your height, any drift carries) through
 ## a Live foe is a Blowout: the run hits double, Static spent, Wirerun back at once (the only reset).
-## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
-## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
+## The Pink Spear knocks the first foe back (a stun against a wall or another foe) and leaves a charge
+## orb, a pickup that gives Wirerun back; Undercurrent drags a crowd the way you flick and grounds it.
 
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
@@ -31,10 +31,10 @@ var run_n := 0                 # streaks started or cut: a cut streak's pending 
 var glide_key_was := false     # the glide key held last step (only a fresh press cancels: _tick_glide_cancel)
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
-var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
+var strikes: Array = []        # Undercurrent: {at, t, dir, phase ("flick" | "count"), dir0}
 const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (crackle and wire), one pooled node each
 
-var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
+var rod: Node3D = null         # the Pink Spear held in the hand while RMB is down
 var rod_full := false
 var blowouts := 0              # tests and the demo
 var reset_dash_boost := false  # a reset armed the next Wirerun: further, charged quicker
@@ -44,11 +44,11 @@ var orb_bursts := 0
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
-var last_strike := {}          # tests: the last Skycall's {at, dir}
+var last_strike := {}          # tests: the last Undercurrent's {at, dir}
 var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
-var ult: MageUlt               # Kitefall, her ultimate on X
-var sky: MageSky               # Skycall (E) and the orbs it flings
+var ult: MageUlt               # Stormfall, her ultimate on X
+var sky: MageSky               # Undercurrent (E) and the orbs it flings
 var gum                        # the bubble she blows and pops (mage_gum.gd)
 
 func _setup() -> void:
@@ -78,7 +78,7 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 func fx() -> VVFx:
 	return VVFx.of(m)
 
-## The rehearsal also pools the Coil's arcs and builds the Storm Rod: the first RMB built it mid-fight (7 meshes,
+## The rehearsal also pools the Coil's arcs and builds the Pink Spear: the first RMB built it mid-fight (7 meshes,
 ## 6 shader compiles).
 func warm_fx(at: Vector3) -> void:
 	fx().prewarm(at, h, int(res_def()["max"]), COIL_ARCS)
@@ -113,7 +113,7 @@ func combo_marks(out: Array) -> void:
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
 
-## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
+## Stormfall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
 	return super.busy() or ult.busy()
@@ -198,7 +198,7 @@ func _tick_sparks(dt: float) -> void:
 		var s: Dictionary = sparks[key]
 		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
 		var f: Ent = fv if is_instance_valid(fv) else null
-		if not ult.busy():                 # (Kitefall can't refresh it: it waits for the strike that spreads it)
+		if not ult.busy():                 # (Stormfall can't refresh it: it waits for the strike that spreads it)
 			s["t"] = float(s["t"]) - dt
 		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
 			sparks.erase(key)
@@ -352,7 +352,7 @@ func run_time(L: float) -> float:
 
 func on_dash(use_ex: bool) -> bool:
 	if ult.airborne():
-		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
+		return true         # Stormfall's flight is its own move (content/dash_flow/mage.json); its crouch combines
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
 		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a pink-white streak)
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
@@ -377,8 +377,8 @@ func on_dash(use_ex: bool) -> bool:
 	m.sfx("vv_surge_charge", h.pos, -3.0)
 	return true
 
-## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
-## still waiting for its flick and a Kitefall in the air (she drops where she took off), with nothing released.
+## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Pink Spear's hold, an Undercurrent
+## still waiting for its flick and a Stormfall in the air (she drops where she took off), with nothing released.
 func _drop_holds() -> void:
 	_end_wire(true)
 	ult.drop()
@@ -478,7 +478,7 @@ func _tick_run(dt: float) -> void:
 		h.model.visible = true
 
 ## Source patch 05.03.25: "Stuns, Roots, Grounds, and Glider cancel the state". A fresh press of the glide key
-## in the air (never Space held: DECISIONS 11-08) ends the Wirerun's charge or streak or Kitefall's climb and hang
+## in the air (never Space held: DECISIONS 11-08) ends the Wirerun's charge or streak or Stormfall's climb and hang
 ## the way a stun ends the charge: the charge stays spent, nothing hits after it, and Hunter._update_glide opens
 ## the glider on the same press this step.
 func _tick_glide_cancel() -> void:
@@ -527,7 +527,7 @@ func _arrive(n: int) -> void:
 	vfx("dash_land")              # a quiet arrival: no ring or burst on a dash, the hits are on the way
 	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
 	if ult.phase() != MageUlt.CROUCH and h.grounded:
-		play("mage_dash_land")      # (out of Kitefall's crouch it lands in the crouch; off a ledge, the air pose)
+		play("mage_dash_land")      # (out of Stormfall's crouch it lands in the crouch; off a ledge, the air pose)
 
 func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return
@@ -552,7 +552,7 @@ func _blowout(f: Ent) -> void:
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	DashReset.cue(h)
 
-# ------------------------------------------------------------------ RMB: Storm Rod
+# ------------------------------------------------------------------ RMB: Pink Spear
 func rmb_charge_full() -> float:
 	return float(rmb_def()["hold"])
 
@@ -584,7 +584,7 @@ func _summon_rod() -> void:
 func shows_charge_ball() -> bool:
 	return false                   # the summoned rod is her charge tell
 
-## The Storm Rod: a 1.3 m copper shaft along -Z (the tip) with a dark grip at +0.25 where the hand
+## The Pink Spear: a 1.3 m copper shaft along -Z (the tip) with a dark grip at +0.25 where the hand
 ## holds it, three pale pink windings and a pale pink crystal tip with a pink heart.
 func _build_rod() -> Node3D:
 	var n := own_node()
@@ -796,7 +796,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 		if bool(fly["home"]):
 			_grab_mote(mt)
 
-## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
+## An orb in her hands (Undercurrent pulled it in) or under her Wirerun: the dash is back at once, with the
 ## usual reset cue (the chime and the Shift icon). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
@@ -822,7 +822,7 @@ func _free_mote(mt: Dictionary, fizzle: bool) -> void:
 			vfx("orb_fizzle", (n as Node3D).global_position)
 	motes.erase(mt)
 
-# ------------------------------------------------------------------ E: Skycall (mage_sky.gd)
+# ------------------------------------------------------------------ E: Undercurrent (mage_sky.gd)
 func cast_e() -> bool:
 	return sky.cast()
 

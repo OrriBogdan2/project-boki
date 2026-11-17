@@ -1,6 +1,6 @@
 {
 	"id": "rimewright",
-	"recast_hint": {"e": "freeze the Rink Wall", "x": "crack Rimelock now"},
+	"recast_hint": {"e": "freeze the Cold Front", "x": "crack Freeze Frame now"},
 	"title": "Snowglide",
 	"base_name": "Neve",
 	"gender": "female",
@@ -34,7 +34,7 @@
 		"col": "#9af0e6"
 	},
 	"passive": {
-		"name": "Hoarfrost",
+		"name": "Cold Snap",
 		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 3m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
@@ -70,7 +70,7 @@
 	"rmb": {
 		"ground": {"range": "lance.range", "r": "lance.zone_r"},
 		"delivery": "projectile",
-		"name": "Ice Spear",
+		"name": "Icebreaker",
 		"card_range": "lance.range",
 		"short": "Spear",
 		"icon": "rimewright_rmb",
@@ -104,7 +104,7 @@
 	},
 	"e": {
 		"delivery": "wall",
-		"name": "Rink Wall",
+		"name": "Cold Front",
 		"card_range": "travel",
 		"again": "freeze the wall in place",
 		"short": "Rink",
@@ -161,7 +161,7 @@
 		"dash_spent": "skate blades dark, dash pip dark"
 	},
 	"x": {
-		"name": "Rimelock",
+		"name": "Freeze Frame",
 		"card_range": "radius",
 		"again": "break out early",
 		"short": "Rime",

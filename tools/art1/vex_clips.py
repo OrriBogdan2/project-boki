@@ -364,13 +364,13 @@ def clips():
     t0 = dict(ON_AIM, prt=(0.0, 0.0, 0.0), FL=(-0.1, 0.0, A_Z + 0.35), FR=(0.12, 0.05, A_Z + 0.42), FLp=-0.8, FRp=-0.8, LP=(-0.18, 0.1, 1.2), pel=(0, 0, 0.1))
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))
 
-    # ---- Longneedle: 0.6 s of charge braced deep, the left hand on the sleeve, chin down the barrel; the beam at 0.6 throws her chest back and she settles by 1.05
+    # ---- Palm Spear: 0.6 s of charge braced deep, the left hand on the sleeve, chin down the barrel; the beam at 0.6 throws her chest back and she settles by 1.05
     e0 = dict(BRACE, BE=aim(0, 1), UA=(-14, -38), LP=(0.11, 0.42, 1.06), LQ=(1.2, -0.6, 0), pel=(0, -0.05, -0.2), prt=(0.22, 0.18, 0), tor=(0.26, -0.2, 0), hed=(-0.32, 0.16, 0.06), brow=1.0, lid=0.42, fing=0.75)
     e1 = dict(e0, pel=(0, -0.07, -0.22), tor=(0.3, -0.2, 0), BE=aim(0, 0))
     e2 = dict(e0, BE=aim(0, 13), UA=(-8, -24), pel=(0, -0.16, -0.08), prt=(-0.12, 0.12, 0), tor=(-0.34, -0.1, 0), hed=(-0.05, 0.1, 0), LP=(-0.34, 0.1, 1.2), LQ=(0.3, 0, 0), brow=-0.2, lid=0.05, fing=0.1)
     out.append(C("e", 1.05, [(0.0, READY), (0.15, e0), (0.58, e1), (0.65, e2, "out"), (0.8, dict(e2, BE=aim(0, 4), tor=(-0.05, -0.1, 0), pel=(0, -0.08, -0.1))), (1.05, READY)]))
 
-    # ---- Cinderfall: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
+    # ---- Penny Drop: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
     x0 = dict(BRACE, BE=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)
     x1 = dict(x0, pel=(0, -0.05, -0.17), BE=aim(0, 66), tor=(0.0, -0.12, -0.08))
     out.append(C("x", 0.6, [(0.0, READY), (0.06, READY), (0.14, x0, "out"), (0.18, x1, "out"), (0.3, x0), (0.6, READY)]))

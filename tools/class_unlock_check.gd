@@ -817,7 +817,7 @@ func _texts(n: Node) -> Array:
 	return out
 
 ## No Light/Medium/Heavy label (a weight name on its own, as a tag, a suffix or "X weight") and no
-## "weight" anywhere. Ability names that happen to use the word ("Heavy Shot") are not labels.
+## "weight" anywhere. Ability names that happen to use the word ("Pin Down") are not labels.
 func _no_weight(n: Node) -> bool:
 	var rx := RegEx.create_from_string("(?i)\\bweight\\b|^(light|medium|heavy)$|\\((light|medium|heavy)\\)"
 			+ "|·\\s*[LMH]$|\\b(light|medium|heavy)\\s+(weight|class|frame)\\b")

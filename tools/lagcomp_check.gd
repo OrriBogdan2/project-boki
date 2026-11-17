@@ -4,7 +4,7 @@ extends RefCounted
 ## dedicated --relay server) and the shooter's game; the target (--lagcomp-check=guest) is a second
 ## headless game. The relay adds SHOOTER_RTT_MS of round trip to the shooter and TARGET_RTT_MS to the
 ## target, half each way. The target strafes (left and right at random 0.3-0.7 s turns) 12 m from the
-## shooter, who tracks its drawn body and fires Vex's rifle (LMB), Lace's Heavy Shot and Sparkle's Storm Rod.
+## shooter, who tracks its drawn body and fires Vex's rifle (LMB), Lace's Pin Down and Sparkle's Pink Spear.
 ## Online hits are the shooter's: its game flies the shot against its view of the target and sends the hit
 ## to the target's owner, which applies it (Match.net_send_hit, Match._net_hit_in). So the check counts
 ##   shooter    hits on the shooter's screen
@@ -27,7 +27,7 @@ const HOLD_S := {"archer": 1.25, "mage": 1.1}   # s of RMB hold: past the full d
 const VOLLEYS := 12           # Heavy Shots and Storm Rods per case
 const RIFLE_S := 6.0          # s of LMB held for Vex's case
 const DN := preload("res://tools/displace_net_check.gd")
-const CASES := [["Vex LMB", "gunslinger"], ["Lace Heavy Shot", "archer"], ["Sparkle RMB", "mage"]]
+const CASES := [["Vex LMB", "gunslinger"], ["Lace Pin Down", "archer"], ["Sparkle RMB", "mage"]]
 
 ## The relay on a slow line: each peer's packets wait half its added round trip in, and half out.
 class LagRelay extends RelayServer:

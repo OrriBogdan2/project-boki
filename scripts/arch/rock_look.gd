@@ -1,6 +1,6 @@
 class_name RockLook
 extends RefCounted
-## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
+## What Tarek's raised rocks look like (Foothold, Backbone; owner item 67): a craggy crown of tapered
 ## columns in warm earth tones, the main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit
 ## upward faces that read from the match camera, warm light on the edges, thin molten cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,
@@ -26,7 +26,7 @@ const COLS := [
 ]
 
 static var _rumble_at := -9.0
-static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
+static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Backbone) sets it
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 const SPARES := "rock_spares"        # the match's meta: rocks done with (crumbled, launched), hidden, for the next take
 

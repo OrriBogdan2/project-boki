@@ -397,14 +397,14 @@ def clips():
     # overdrawn: the arm starts to shake, the brows lift
     out.append(C("over", 0.56, [(0.0, FULL)] + [(0.08 * i, dict(OVER, dr=1.0, G=(-0.046 + 0.0035 * (-1) ** i, 0.575, 1.288 + 0.003 * (-1) ** (i // 2))), "lin") for i in range(1, 8)]))
     out.append(loose("over_loose", 0.55, OVER, 0.06, 0.3, 0.6))
-    # --- RMB: Heavy Shot. Sunk low, weight back, the shoulders turned hard; a held creak; thrown back by the shot
+    # --- RMB: Pin Down. Sunk low, weight back, the shoulders turned hard; a held creak; thrown back by the shot
     HW = dict(NOCK, ar=0.0, dr=1.0, tor=(0.2, AIM_Y - 0.32, -0.08), hed=(-0.16, -AIM_Y + 0.14, 0.12), G=(0.0, 0.60, 1.13), BA=n3((0.30, 0.05, 0.95)), BS=(0.0, -1.0, 0.0), CH=(0.02, 0.03, 1.15), brow=1.0, lid=0.42,
               pel=(0.0, -0.05, -0.10), prt=(0.05, -0.1, 0.0), FL=(-0.15, 0.24, A_Z), FR=(0.13, -0.22, A_Z), FLy=0.12, FRy=-0.7)
     out.append(C("heavy_wind", 1.2, [(0.0, dict(HIP)), (0.2, dict(HW, dr=0.2), "out"), (0.8, dict(HW, dr=0.85)), (1.1, HW), (1.2, dict(HW, G=(0.0, 0.598, 1.128)))]))
     hrel = dict(HW, Rw=0.0, ar=0.0, dr=0.0, RF=(0.14, -0.2, 1.32), RD=n3((0.3, -0.5, 0.8)), RP=(-0.8, 0.3, 0.1), fing=0.0, pin=0.0, tor=(-0.1, AIM_Y - 0.5, -0.14), hed=(0.08, -AIM_Y + 0.2, 0.16),
                 pel=(0.0, -0.13, -0.08), G=(0.0, 0.56, 1.18), BA=n3((0.22, -0.32, 0.92)), brow=1.0, lid=0.1)
     out.append(C("heavy", 0.6, [(0.0, HW), (0.06, hrel, "out"), (0.28, dict(hrel, tor=(0.0, AIM_Y - 0.3, -0.08), pel=(0.0, -0.09, -0.12), G=(-0.02, 0.55, 1.14))), (0.6, READY)]))
-    # --- E: Hail Wall. The bow high, the body arched back, the volley lobbed up in an arc
+    # --- E: Hemline. The bow high, the body arched back, the volley lobbed up in an arc
     H0 = dict(NOCK, dr=0.75, tor=(-0.32, AIM_Y + 0.1, 0.0), hed=(-0.3, -AIM_Y - 0.1, 0.0), G=(-0.09, 0.36, 1.70), BA=n3((0.1, -0.72, 0.68)), BS=n3((0.0, -0.68, -0.72)), RD=n3((0.0, 0.6, 0.8)), brow=0.7, lid=0.2, Lpole=(-0.9, 0.1, 0.2), Rpole=(0.5, -1.0, -0.4))
     H1 = dict(H0, Rw=0.0, ar=0.0, dr=0.0, RF=(0.05, 0.02, 1.52), RD=n3((-0.1, 0.5, 0.85)), RP=(-1.0, 0.0, 0.0), fing=0.05, pin=0.0, tor=(-0.36, AIM_Y, 0.0))
     out.append(C("hail", 0.6, [(0.0, dict(HIP)), (0.12, H0, "out"), (0.3, dict(H0, dr=1.0)), (0.36, H1, "out"), (0.42, H1), (0.6, dict(HIP))]))
@@ -414,7 +414,7 @@ def clips():
                                 (0.17, dict(T, prt=(3.3, 0.0, 0.3), pel=(0, 0.26, -0.33), tor=(0.8, 0, 0), FL=(-0.12, 0.3, 0.6), FR=(0.12, 0.34, 0.66), FLp=2.0, FRp=2.0), "lin"),
                                 (0.24, dict(T, prt=(5.2, 0.0, 0.1), pel=(0, 0.28, -0.3), FL=(-0.12, 0.3, 0.2), FR=(0.12, -0.05, 0.3), FLp=0.7, FRp=1.0), "lin"),
                                 (0.36, dict(READY, prt=(6.283 + 0.08, 0.0, 0.0), pel=(0, 0.04, -0.09), brow=0.5, lid=0.1), "lin")]))
-    # Spirit Walk: light on the toes, leaning in, the arms trailing like a ghost (upper body, the legs keep running)
+    # Slip Stitch: light on the toes, leaning in, the arms trailing like a ghost (upper body, the legs keep running)
     SW = {"tor": (0.26, 0.0, 0.0), "hed": (-0.24, 0.0, 0.0), "G": (-0.28, -0.20, 0.92), "BA": n3((0.05, 0.86, 0.5)), "BS": n3((0.0, -0.5, 0.86)), "RF": (0.28, -0.22, 0.92), "RD": n3((0.3, -0.75, -0.55)), "RP": (-0.7, -0.6, 0.3), "Rpole": (0.6, 0.2, -0.8), "Lpole": (-0.6, 0.2, -0.8), "brow": -0.3, "lid": 0.3, "fing": 0.1}
     out.append(C("spirit", 1.0, [(0.0, dict(HIP)), (0.2, SW), (0.6, dict(SW, tor=(0.3, 0.05, 0.03), G=(-0.28, -0.22, 0.90), RF=(0.28, -0.25, 0.95))), (1.0, SW)]))
     # the air dash: a quick flick and a sideways tumble, the coat and tail streaming
@@ -423,7 +423,7 @@ def clips():
     # Deadeye: the bow thrust out at the target, the body locked low and still, a slow rise
     DE = dict(HW, CH=(-0.012, 0.14, 1.412), Rw=0.0, ar=0.0, dr=0.0, pel=(0, 0.04, -0.12), tor=(0.14, AIM_Y, 0.0), hed=(-0.1, -AIM_Y, 0.0), G=(-0.05, 0.62, 1.2), BA=n3((0.06, 0.0, 1.0)), RF=(0.06, 0.05, 1.2), RD=n3((0, 0.9, 0.2)), RP=(-1, 0, 0), brow=1.0, lid=0.42)
     out.append(C("deadeye", 0.75, [(0.0, dict(READY)), (0.05, DE, "out"), (0.4, DE), (0.75, READY)]))
-    # --- R: Starpiercer. The bow swept up and across the chest, three beams, the last one thrown
+    # --- R: Finishing Touch. The bow swept up and across the chest, three beams, the last one thrown
     CAST = dict(HIP, tor=(-0.25, 0.25, 0.0), hed=(-0.3, -0.2, 0.0), G=(0.05, 0.3, 1.5), BA=n3((0.96, 0.1, 0.28)), BS=n3((-0.28, 0.0, 0.96)), RF=(0.3, 0.1, 1.25), RD=n3((1, 0.1, 0.2)), RP=(0, 1, 0), brow=0.6, lid=0.0, Lpole=(-0.8, -0.3, -0.3))
     out.append(C("ult_cast", 0.45, [(0.0, dict(HIP)), (0.1, CAST, "out"), (0.25, dict(CAST, tor=(-0.32, 0.25, 0.0))), (0.45, dict(NOCK))]))
     UN = dict(NOCK, dr=1.0, hed=(-0.01, -AIM_Y, 0.08), brow=1.0, lid=0.3)

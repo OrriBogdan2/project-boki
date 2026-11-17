@@ -1,6 +1,6 @@
 extends RefCounted
 ## --ryzz-live-check: Sparkle's clips through the real match code (tools/clip_live_check.gd for her kit): a Match,
-## the kit's own presses and the render path. Each ability plays its clip, the rods blaze in Kitefall and at no
+## the kit's own presses and the render path. Each ability plays its clip, the rods blaze in Stormfall and at no
 ## other time, and a knock-out plays the death clip.
 ## Never touches the save.
 
@@ -108,20 +108,20 @@ func run(main: Node) -> void:
 	_run(m, P, 40, seen)
 	K._release_rmb()
 	_run(m, P, 50, seen)
-	ok(seen.has("rmb_hold") and seen.has("rmb"), "Storm Rod plays its hold and its throw")
+	ok(seen.has("rmb_hold") and seen.has("rmb"), "Pink Spear plays its hold and its throw")
 	K.on_dash(false)
 	_run(m, P, 90, seen)
 	ok(seen.has("dash") or seen.has("dash_go"), "Wirerun plays its clips")
 	K.cast_e()
 	_run(m, P, 150, seen)
-	ok(seen.has("sky"), "Skycall plays sky")
+	ok(seen.has("sky"), "Undercurrent plays sky")
 	ok(calm <= 1.05, "the rods sit dark outside the ult (flare %.2f)" % calm)
 	K.cast_ult()
 	var blaze := _run(m, P, 90, seen)
 	K.ult_recast()
 	blaze = maxf(blaze, _run(m, P, 90, seen))
-	ok(seen.has("ult") and seen.has("ult_air"), "Kitefall plays its crouch and its hang")
-	ok(blaze >= 3.0, "the rods blaze on Kitefall (flare %.2f)" % blaze)
+	ok(seen.has("ult") and seen.has("ult_air"), "Stormfall plays its crouch and its hang")
+	ok(blaze >= 3.0, "the rods blaze on Stormfall (flare %.2f)" % blaze)
 	_run(m, P, 60, seen)
 	var blown: bool = K.gum.blow()
 	_run(m, P, 80, seen)

@@ -454,7 +454,7 @@ effect category" made concrete.
 **Heals read one way, whatever gives them.** Every heal goes through `Hunter.heal`, which calls
 `Fx.healed`: the healed Hunter gets a soft green-gold glow (`#b8f06a`, the sustain colour) that rises
 over them and moves with them, and a green `+N` (`HudStyle.HEAL`) above the damage numbers. That covers
-Meeko's Hearthlight and Hearth Call, Albert's Mending Ground, Kael's Gilded Riposte, lifesteal (a Void
+Meeko's Hearthlight and Rise and Shine, Albert's Safe Harbour, Kael's Blow for Blow, lifesteal (a Void
 weapon, a merge's leech, Fever), tonics and knock heals. A heal number is its own kind: it adds up only
 with heals, never with a hit or a Daze `+N`, and it still shows with damage numbers turned off. A heal
 too small to read (lifesteal on a light hit) waits, hidden, until the heals add up. While the glow is up,

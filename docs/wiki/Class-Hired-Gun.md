@@ -16,11 +16,11 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 ## How it plays
 
-1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 76% more (big gold numbers).
-2. **Burr Charge** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall or the ground at the end of its flight. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
-1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 90% more (big gold numbers) and the string doesn't fade on them.
-2. **Burr Charge** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall in its path; on nothing it fizzles. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
-3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
+1. **Brass Tacks** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 76% more (big gold numbers).
+2. **Coin Blast** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall or the ground at the end of its flight. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
+1. **Brass Tacks** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 90% more (big gold numbers) and the string doesn't fade on them.
+2. **Coin Blast** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall in its path; on nothing it fizzles. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
+3. **Palm Spear** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
 6. There is no R: the Boki Fusion takes that key.
@@ -29,17 +29,17 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 | Do this | And you get |
 |---|---|
-| Burr Charge past a foe, then the rifle | Dazed and pushed toward you: +76% rifle damage |
-| Burr Charge, then Longneedle | +20% and a Skewered payoff on a hunter |
-| Burr Charge in a wall beside a foe | A cone, Dazed, a stun into more terrain, and the cooldown drops 40% |
-| Longneedle through a wall | Still hits; the cooldown drops 30% per hunter |
-| Knock a hunter | Heal 25%, Slipstep back (Burr Charge back too at rank 3) |
+| Coin Blast past a foe, then the rifle | Dazed and pushed toward you: +76% rifle damage |
+| Coin Blast, then Palm Spear | +20% and a Skewered payoff on a hunter |
+| Coin Blast in a wall beside a foe | A cone, Dazed, a stun into more terrain, and the cooldown drops 40% |
+| Palm Spear through a wall | Still hits; the cooldown drops 30% per hunter |
+| Knock a hunter | Heal 25%, Slipstep back (Coin Blast back too at rank 3) |
 
 ## Tips
 
 - A charge that strikes a foe hurts and Dazes them at once; fired at a wall it Dazes everyone in the cone.
 - Slide sideways while you keep shooting.
-- You stand still while Longneedle charges: use cover, since the beam ignores it.
+- You stand still while Palm Spear charges: use cover, since the beam ignores it.
 
 ## Kit
 
@@ -49,7 +49,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |  |  |
 |---|---|
 | Body | 145 health, 5.28 m/s, 1 dash charge |
-| Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
+| Signature weapon | Brass Tacks (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
 | Silhouette | the long scarf streaming behind, the brass ammo strap across a narrow black top, the gold coin on her choker and the six-barrel brass minigun for a right forearm |
 | Resource | Fever (max 1) |
@@ -63,25 +63,25 @@ What the in-game kit card (K) says.
 | Loop | Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts. |
 | Passive: Hot Streak | Knocking a hunter down returns Slipstep; landed abilities give lifesteal. |
 | Dash: Slipstep | Tap to skid, hold to slide further; keep shooting throughout. |
-| RMB: Burr Charge | Shoot a charge that Dazes; hitting a wall blasts a cone back. |
-| E: Longneedle | Stand still 0.6s, then fire a beam through walls and everything. |
-| Hunter ultimate: Cinderfall | A shell lands at your cursor after 1.6s, then burns the patch. |
-| Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 90% more. |
+| RMB: Coin Blast | Shoot a charge that Dazes; hitting a wall blasts a cone back. |
+| E: Palm Spear | Stand still 0.6s, then fire a beam through walls and everything. |
+| Hunter ultimate: Penny Drop | A shell lands at your cursor after 1.6s, then burns the patch. |
+| Weapon: Brass Tacks | Full-auto rifle; Dazed foes take 90% more. |
 
 ### Abilities in full
 
-**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold).
+**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast blast, Palm Spear) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold).
 
 **Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
 
-**Burr Charge (RMB, 6.5s cooldown).**
+**Coin Blast (RMB, 6.5s cooldown).**
 
 - *Tap:* Tap the ability key: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
 - *Resource full:* Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone.
 
-**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
+**Palm Spear (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
-**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
+**Penny Drop (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
 ### Ranks
 

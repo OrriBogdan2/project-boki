@@ -189,7 +189,7 @@ var flipping := false
 var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
-var bank_k := 0.0              # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
+var bank_k := 0.0              # the roll into turns: the glider's, and a move keyed "bank" (Red Carpet)
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -610,7 +610,7 @@ func update(dt: float, s: Dictionary) -> void:
 	stun_k = _ease(stun_k, 1.0 if stun else 0.0, 8.0, dt)
 	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k)
 	if s.get("statue", false):
-		still = 0.0       # a statue (Rimelock): no sway, breath, glance or fidget
+		still = 0.0       # a statue (Freeze Frame): no sway, breath, glance or fidget
 	if moving or not grounded or fired < 1.0 or rolling:
 		idle_t = 0.0
 	else:
@@ -1181,7 +1181,7 @@ const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
 ## The whole body's turn in the air, about the hips: nose-down by the dive (DIVE_PITCH), and under the glider a roll
 ## into its turns by the turn rate (times the speed: the sideways pull), GLIDE_BANK at full steer, the glider's whole
-## steering pull (HunterMove.glide_accel); a move keyed "bank" (Flue Flight) rolls the same; it leans toward the
+## steering pull (HunterMove.glide_accel); a move keyed "bank" (Red Carpet) rolls the same; it leans toward the
 ## inside of the turn about the way it flies (the body faces the aim, which need not be where it flies). Handed to a
 ## Hero's clips as AIR_TILT (WardenClips._air_tilt), so the body you see, its glider and a Boki riding on it turn
 ## as one.

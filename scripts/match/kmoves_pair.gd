@@ -39,7 +39,7 @@ const MOVES := {
 		[0.14, {"p": 0.18, "y": 0.55, "gp": 0.35, "sq": 0.06, "lw": 0.7, "legs": [0.4, -0.7, -0.5, -0.3]}],
 		[0.24, {"p": -0.05, "y": -0.06, "gp": -0.05, "sq": -0.03}],
 		[0.36, {}]]},
-	# Deep Reach throw (RMB): the gun swings to the off side, the free arm coils back (0.08 s), then punches
+	# Sticky Fingers throw (RMB): the gun swings to the off side, the free arm coils back (0.08 s), then punches
 	# out along the aim and stays out while the arm flies (0.4 s to full reach)
 	"dr_throw": {"keys": [
 		[0.0, {}],
@@ -91,7 +91,7 @@ const MOVES := {
 		}],
 		[0.22, {"p": -0.08, "sq": 0.05}],
 		[0.36, {}]]},
-	# Anchor Drop (E, 0.38 s to impact, planted): the free fist raised high, the shoulder turned away; up on the
+	# Lump Sum (E, 0.38 s to impact, planted): the free fist raised high, the shoulder turned away; up on the
 	# toes at the top (0.3); the fist driven down into the ground in front (0.38, the slam frame); a recoil
 	# bounce (0.48), then a slow recovery
 	"dr_anchor": {"keys": [
@@ -114,7 +114,7 @@ const MOVES := {
 		}],
 		[0.75, {"p": -0.2, "fl": Vector3(0.05, 0.1, -0.3), "hw": 0.5, "sq": 0.1, "lift": -0.03}],
 		[1.0, {}]]},
-	# Anchor Drop in the air: both fists locked overhead, knees up, dropping like a stone (held to the ground)
+	# Lump Sum in the air: both fists locked overhead, knees up, dropping like a stone (held to the ground)
 	"dr_dive": {"hold": true, "keys": [
 		[0.0, {
 			"p": 0.2, "fl": Vector3(-0.1, 0.6, 0.1), "hw": 1.0, "fr": Vector3(0.1, 0.6, 0.1), "rw": 1.0, "sq": 0.3,
@@ -140,7 +140,7 @@ const MOVES := {
 		}],
 		[0.55, {"p": 0.12, "sq": -0.12, "lift": 0.06}],
 		[0.75, {}]]},
-	# Barge (Shift, one fast 0.18 s lunge of a run of them): a monster's lunge, low to the ground, both hands
+	# Mad Dash (Shift, one fast 0.18 s lunge of a run of them): a monster's lunge, low to the ground, both hands
 	# reaching far ahead and clawing at the turf, then hauling the bulk along after them; he lands on his
 	# knuckles in a squat (0.18, the dash's end) and is back up by 0.38 for the next one
 	"dr_lunge": {"keys": [
@@ -192,7 +192,7 @@ const MOVES := {
 		}],
 		[0.55, {}]]},
 	# ================================================================= Cinder
-	# Torch Lance (LMB, held): the pilot flickers for 0.2 s while he sets his feet and drops the nozzle to the
+	# Open Flame (LMB, held): the pilot flickers for 0.2 s while he sets his feet and drops the nozzle to the
 	# right hip, then the roar kicks him back hard (overshoot) and he settles braced, leaning into it, the hose
 	# bucking in his hands (an 8 Hz wobble, looped while he holds)
 	"as_lance": {"hold": true, "loop": 0.34, "keys": [
@@ -252,14 +252,14 @@ const MOVES := {
 		}],
 		[0.08, {"p": 0.15, "sq": -0.08, "fr": Vector3(0.12, -0.25, -0.3), "rw": 0.7, "gp": 0.3}],
 		[0.3, {}]]},
-	# Cinder Shot aim (RMB held): the gun hand cocked back at the shoulder, the off hand sighting down the lane
+	# Spitfire aim (RMB held): the gun hand cocked back at the shoulder, the off hand sighting down the lane
 	"as_aim": {"hold": true, "keys": [
 		[0.0, {}],
 		[0.12, {
 			"p": 0.1, "y": 0.4, "sq": 0.15, "fr": Vector3(0.15, 0.2, 0.15), "rw": 1.0, "fl": Vector3(-0.05, 0.15, -0.7),
 			"hw": 1.0, "lw": 0.8, "legs": [0.5, -0.8, -0.4, -0.3], "gp": 0.2
 		}]]},
-	# Cinder Shot release: a quick forward thrust of the gun arm (overshoot), the body kicked back from the shot
+	# Spitfire release: a quick forward thrust of the gun arm (overshoot), the body kicked back from the shot
 	"as_shot": {"keys": [
 		[0.0, {
 			"p": 0.1, "y": 0.4, "fr": Vector3(0.15, 0.2, 0.15), "rw": 1.0, "fl": Vector3(-0.05, 0.15, -0.7), "hw": 1.0,
@@ -275,7 +275,7 @@ const MOVES := {
 		}],
 		[0.3, {"p": -0.06, "y": 0.04, "sq": -0.04, "fr": Vector3(0.0, 0.05, -0.5), "rw": 0.5}],
 		[0.48, {}]]},
-	# Soot Ram (Shift, 0.32 s, fastest at the start): a quick coil, then head-first like a battering ram, balled
+	# Lock Horns (Shift, 0.32 s, fastest at the start): a quick coil, then head-first like a battering ram, balled
 	# up compact inside the flame skull (arms swept back, knees folded up behind him), held through the dash;
 	# he snaps upright on arrival (a squash, the gun back on the aim) (hero-ref bash, body section 4)
 	"as_leap": {"keys": [
@@ -297,7 +297,7 @@ const MOVES := {
 		}],
 		[0.42, {"p": 0.12, "sq": -0.1, "lift": 0.04}],
 		[0.55, {}]]},
-	# Furnace Cloak (E, 0.24 s, fires on the press): a quick tuck (0.03 s), then chest out and both arms flung
+	# Molten Hug (E, 0.24 s, fires on the press): a quick tuck (0.03 s), then chest out and both arms flung
 	# wide as the blast goes off (an overshoot up on the toes, the flamer swung up on its strap so the long gun
 	# clears the ground), held a beat while the shield swirls up, and a quick settle back onto the grip
 	"as_cloak": {"keys": [
@@ -343,7 +343,7 @@ const MOVES := {
 		}],
 		[0.22, {"p": 0.2, "sq": 0.2, "lift": -0.05, "fl": Vector3(-0.05, 0.95, -0.05), "hw": 1.0, "gp": 0.9}],
 		[0.5, {}]]},
-	# Flue Flight (X, held for the 1.8s flight): a quick crouch as the ember ring bursts (0.08s), then she springs
+	# Red Carpet (X, held for the 1.8s flight): a quick crouch as the ember ring bursts (0.08s), then she springs
 	# up into the hover, both palms out and down where the fire builds (0.22s), and holds that lean into the jet,
 	# legs trailing; "bank": the whole body rolls into the flight's turns, as under the glider
 	"lw_jet": {"hold": true, "bank": true, "keys": [
@@ -369,7 +369,7 @@ const MOVES := {
 		[0.0, {"p": -0.08, "lift": 0.08}],
 		[0.07, {"p": 0.06, "sq": 0.1, "lift": -0.05, "lw": 0.5, "legs": [0.35, -0.6, 0.3, -0.55]}],
 		[0.2, {}]]},
-	# Brass Broadside (X, 2.1s): hunched over his fists while the charge builds (1.1s, deeper at the end), a
+	# Both Barrels (X, 2.1s): hunched over his fists while the charge builds (1.1s, deeper at the end), a
 	# two-fisted shove at wave 1 (overshoot), a short rewind, the second shove at 1.7s, then he straightens up
 	"dr_blast": {"keys": [
 		[0.0, {}],

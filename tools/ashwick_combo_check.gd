@@ -1,12 +1,13 @@
 extends RefCounted
 ## --ashwick-combo-check: Cinder's (id ashwick) abilities and their interactions in the archetype check's
-## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
+## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Open Flame hose (pilot,
 ## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
 ## stops at once,
-## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
-## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
-## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
-## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
+## the 0.35s relight gap), the burn stages and their pips, the Spitfire lane and its fixed full range, the
+## Lock Horns stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and
+## shield,
+## the Molten Hug on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
+## and the X ult, Red Carpet (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
 ## squash on the hit frame, the jet lift-off, the run's footfalls).
 
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
@@ -104,7 +105,7 @@ func _lance_combos() -> void:
 			in_ram and K.anim_id != "as_lance", "in ram %s, move %s" % [in_ram, K.anim_id])
 	await ak.done(m)
 
-## Soot Ram's hit on the first foe with the hunter at level `lvl`.
+## Lock Horns's hit on the first foe with the hunter at level `lvl`.
 func _ram(lvl: int) -> float:
 	var r: Array = ak.setup("ashwick", 4.0, "", true)
 	var m: Match = r[0]
@@ -162,7 +163,7 @@ func _growth() -> void:
 	var d1: float = await _ram(1)
 	var d10: float = await _ram(10)
 	ok(
-		"growth: the Soot Ram's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
+		"growth: the Lock Horns's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10]
 	)
 
@@ -255,7 +256,7 @@ func _all() -> void:
 		P.inp["fire"] = false
 		m.step(ak.DT)
 	ok(
-		"linwick: heavy, Torch Lance, 2 ram charges",
+		"linwick: heavy, Open Flame, 2 ram charges",
 		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0
 			and Arch.name_of("ashwick") == "The Ashen Kiss",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
@@ -426,7 +427,7 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 2, hz + dz)] = lv
-	# --- Cinder Shot: hold shows the full fixed lane, release fires; it always flies its max range
+	# --- Spitfire: hold shows the full fixed lane, release fires; it always flies its max range
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
@@ -506,10 +507,10 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.8)
 	ok(
-		"combo: lance burn > Cinder Shot = upgrade + spread",
+		"combo: lance burn > Spitfire = upgrade + spread",
 		K.burning(T) == 2 and K.burning(T2) >= 1 and K.spreads == sp0 + 1, "T %d T2 %d" % [K.burning(T), K.burning(T2)]
 	)
-	# --- Soot Ram: toward the cursor, stops on the first foe with the impact
+	# --- Lock Horns: toward the cursor, stops on the first foe with the impact
 	reset.call()
 	T.teleport(home + Vector3(3.0, 0, 0))
 	T2.teleport(home + Vector3(5.5, 0, 0))
@@ -639,7 +640,7 @@ func _all() -> void:
 	ak.step(m, 2.5)
 	ok("ram rank 3: the boost ends after 2s", K.speed_bonus() <= 0.0, "bonus %.2f" % K.speed_bonus())
 	P.slot_lv["dash"] = 1
-	# --- Furnace Cloak: fires on the press frame, centred on Cinder whatever the cursor
+	# --- Molten Hug: fires on the press frame, centred on Cinder whatever the cursor
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	ak.aim_at(P, home + Vector3(-12.0, 0, 9.0))      # the cursor far off to the other side
@@ -704,7 +705,7 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
-	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
+	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Spitfire holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	var n1: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()     # a wandering third foe may stand in range
@@ -749,7 +750,7 @@ func _all() -> void:
 			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
 			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
 	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
-	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
+	ok("upgrade parity: Molten Hug cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
 			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
 			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
 	P.slot_lv["dash"] = 1
@@ -787,7 +788,7 @@ func _all() -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
-## Cinder Shot in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
+## Spitfire in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
 ## deep-red glow, drawn at its hit radius (docs/VFX_QUALITY.md "Scale"), leaving her palm and then on its hitbox, with
 ## the data's flicker trail following it.
 func _orb_look(K: AshwickKit, m: Node, old_ribbons: Array) -> void:

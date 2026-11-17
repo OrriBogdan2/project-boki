@@ -15,16 +15,16 @@ extends RefCounted
 ## hold (a lane, a shield, a fan, a stream), which draws no ring.
 ## Tender and Thief have no hold slot.
 const HOLDS := [
-	["archer", "Heavy Shot", "rmb", true, "cursor"], ["archer", "bow draw", "lmb", false, ""],
-	["ashwick", "Cinder Shot lane", "rmb", false, ""], ["ashwick", "Torch Lance stream", "lmb", false, ""],
-	["bulwark", "hammer whirl", "lmb", true, "cursor"], ["bulwark", "Aegis", "rmb", false, ""],
-	["dolm", "punch", "lmb", true, "cursor"], ["dolm", "Quakefall", "rmb", true, "cursor"],
-	["dredge", "Brass Broadside fan", "e", false, ""],
-	["gunslinger", "Longneedle", "e", true, "cursor"],
+	["archer", "Pin Down", "rmb", true, "cursor"], ["archer", "bow draw", "lmb", false, ""],
+	["ashwick", "Spitfire lane", "rmb", false, ""], ["ashwick", "Open Flame stream", "lmb", false, ""],
+	["bulwark", "hammer whirl", "lmb", true, "cursor"], ["bulwark", "Blue Guard", "rmb", false, ""],
+	["dolm", "punch", "lmb", true, "cursor"], ["dolm", "Rock Bottom", "rmb", true, "cursor"],
+	["dredge", "Both Barrels fan", "e", false, ""],
+	["gunslinger", "Palm Spear", "e", true, "cursor"],
 	["juggernaut", "blast", "lmb", true, "body"], ["juggernaut", "Lunge", "rmb", true, "cursor"],
-	["mage", "Wirerun", "dash", true, "cursor"], ["mage", "Storm Rod", "rmb", true, "cursor"],
-	["ostra", "Lantern Trade ends", "dash", false, ""],
-	["rimewright", "Ice Spear aim", "rmb", false, ""], ["rimewright", "Skate", "dash", false, ""],
+	["mage", "Wirerun", "dash", true, "cursor"], ["mage", "Pink Spear", "rmb", true, "cursor"],
+	["ostra", "Musical Chairs ends", "dash", false, ""],
+	["rimewright", "Icebreaker aim", "rmb", false, ""], ["rimewright", "Free Skate", "dash", false, ""],
 ]
 const HOLD_SECS := 2.5         # s each hold is kept down
 const OLD_REACH := 13.0     # px: how far the old cross reached from the cursor at rest (gap 6 + arm 7)

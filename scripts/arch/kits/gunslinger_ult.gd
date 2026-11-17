@@ -1,6 +1,6 @@
 class_name GunslingerUlt
 extends RefCounted
-## Vex's ultimate, Cinderfall (X). docs/heroes/gunslinger.md has the numbers and the research notes.
+## Vex's ultimate, Penny Drop (X). docs/heroes/gunslinger.md has the numbers and the research notes.
 ##
 ## One tap: the rifle snaps straight up and fires a shell into the sky. It comes down exactly where the cursor
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
@@ -62,7 +62,7 @@ func cast() -> bool:
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 
-## The shell: a big Burr Charge with its spikes out, made once and reused.
+## The shell: a big Coin Blast with its spikes out, made once and reused.
 func _take_node() -> Node3D:
 	for n in pool:
 		if is_instance_valid(n) and not (n as Node3D).visible:

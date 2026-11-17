@@ -17,12 +17,12 @@ class StubHud extends Node:
 	func _ctext(_at: Vector2, text: String, _size: int, _col: Color, _font: Font) -> void:
 		texts.append(text)
 
-const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
+const WAIT := 4.0              # s the first step gets to open its window (Freeze Frame's late crack comes last)
 
 ## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
 	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
-const RUN_OUT := 18.0          # s a window left alone gets to close (Brimseed: 6.5s grow + 10s at full, the longest)
+const RUN_OUT := 18.0          # s a window left alone gets to close (Gag Gift: 6.5s grow + 10s at full, the longest)
 
 ## The first step of `slot` (also the shots' way in: tools/recast_cue_shots.gd).
 static func first(m: Match, P: Hunter, slot: String) -> void:
@@ -181,7 +181,7 @@ const PAYOFFS := [
 	["gunslinger", "Vex's Daze + rifle", "combo"],
 	["mage", "Sparkle's Static Blowout", "hero_blowout"],
 	["rimewright", "Neve's Chill Shatter on a knock", "rime_splinter"],
-	["ostra", "Motley's full Brimseed pop on a foe", "pay_collapse"],
+	["ostra", "Motley's full Gag Gift pop on a foe", "pay_collapse"],
 	["archer", "Lace's wall stun", "pay_called"],
 	["gil", "Gil's Beach", "pay_flashpoint"],
 	["ashwick", "Cinder's Flashover", "lw_blaze"],
@@ -299,7 +299,7 @@ func _land(hero: String, s: Array) -> void:
 		"tender":
 			(P.ak as TenderKit).add_kindle(T, 5)
 
-## Lace's Heavy Shot, fully drawn, into a wall behind the foe: the pin.
+## Lace's Pin Down, fully drawn, into a wall behind the foe: the pin.
 func _lace_pin(s: Array) -> void:
 	var m: Match = s[0]
 	var P: Hunter = s[1]

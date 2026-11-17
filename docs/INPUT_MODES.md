@@ -46,8 +46,8 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | LMB | hold-charge, release, two stages, perfect-release window | same, Empowered then Supercharged, perfect release speeds the next draw | match | D; S:pin 20; W archer.md |
 | RMB | D: hold-charge, release. Footage sheet: a tap fires uncharged | hold-charge, release; a tap before 0.15 s does nothing and costs nothing; auto-looses 3 s after full | unsettled (D against footage; W settles for D) | D "HOLD to charge, RELEASE"; S:pin 21; W archer.md row RMB |
 | E | press | press | match | D; S:pin 23 |
-| R | press, then the next 3 charged shots need no charge, 6 s | press, next 3 LMB presses nock 0.5 s then loose a piercing arrow, 6 s window | match | D; S:pin 251 ff; W archer.md Starpiercer |
-| Shift | press = roll then Phase Walk | press = roll then Spirit Walk 2.8 s | match | D; S:pin 22 |
+| R | press, then the next 3 charged shots need no charge, 6 s | press, next 3 LMB presses nock 0.5 s then loose a piercing arrow, 6 s window | match | D; S:pin 251 ff; W archer.md Finishing Touch |
+| Shift | press = roll then Phase Walk | press = roll then Slip Stitch 2.8 s | match | D; S:pin 22 |
 
 ## Cinder (`ashwick`, source ref-ashwick, sheet linwick)
 
@@ -107,14 +107,14 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | RMB | hold = shield up | hold (guard 0.1 s) | match | D; S:bjorn 24 |
 | E | press, at the planted hammer (on you if it is in hand) | press, light on the hammer or on you, 1 s delay | match | D; S:bjorn 26 |
 | R | press | press; plant, raise 0.4 s, slam | match | D; S:bjorn 27 |
-| Shift | press; with the shield up it is Shield Bash | press 360 Smash; with the aegis up a Shield Charge on its own cooldown | match | D; S:bjorn 25 |
+| Shift | press; with the shield up it is Shield Bash | press Tideturner; with the aegis up a Full Ahead on its own cooldown | match | D; S:bjorn 25 |
 
 ## Motley (`ostra`, source ref-ostra, sheet ostra)
 
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
 | LMB | tap / hold-auto; the wait between shots charges the next orb | hold-auto; the wait since the last shot builds size and damage | match | O 60; S:ostra 16 |
-| RMB | tap, shard cluster | press, short wind-up, shards (json still Shard Snap) | unsettled: owner #136 replaces it with a card flurry, not built | S:ostra 17; O 136 |
+| RMB | tap, shard cluster | press, short wind-up, shards (json still Stage Fright) | unsettled: owner #136 replaces it with a card flurry, not built | S:ostra 17; O 136 |
 | E | press, recast after 0.3 s or more detonates | press, E again from 0.3 s (`min_recast`) pops it; unpopped for 10 s at full size it fizzles | match; the fizzle is ours (source auto-detonate unread) | D; S:ostra 19, 193, 211 |
 | R | tap, cursor-placed | tap, dome at the cursor 1 s, then the well | match | D; S:ostra 20 |
 | Shift | press, lob lands at the cursor | tap lobs at once; hold shows both ends, release lobs | match+ | S:ostra 18; O 135 keeps the mechanic |
@@ -165,5 +165,5 @@ changed and no combo check was added: a row marked match is asserted by the Hunt
 2. Vex RMB: the footage lane-while-held against owner #112 TAP ONLY; stays tap-only unless the owner reverses it.
 3. Neve R late-recast window (0.75 s ours against about 0.3-0.5 s in the footage) and Sparkle R / RMB auto-land and auto-throw: read the source for a hard maximum.
 4. Kael E tether lifetime: the source never says; ours is 5 s.
-5. Motley RMB: json and card still say Shard Snap while owner #136 asks for a card flurry; settle which is current.
+5. Motley RMB: json and card still say Stage Fright while owner #136 asks for a card flurry; settle which is current.
 6. Neve RMB and Motley Shift accept a hold the source does not have (match+). Harmless, and each hold animation is gated on that hold, so nothing shows without its input.

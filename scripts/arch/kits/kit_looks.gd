@@ -9,11 +9,11 @@ extends Node3D
 ## Skins (shape, colour, trail, impact):
 ##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
-##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
-##   footrock   the slab under Tarek's foot through a Rock Hop (held)
+##   dashrock   Leap of Faith's last rock: rolls along the ground, dust and embers
+##   footrock   the slab under Tarek's foot through a Leap of Faith (held)
 ##   orb        Motley's Gravity Orb: a teal glass shard, or from half charge a void orb with a teal rim; skin_orb
 ##              grows and brightens it with its charge (its trail and hit are content/vfx/ostra.json)
-##   spear      Shard Snap: a long bundle of dark crystal prisms with pale teal rims (trail and hit: ostra.json)
+##   spear      Stage Fright: a long bundle of dark crystal prisms with pale teal rims (trail and hit: ostra.json)
 ## Lingering: aura (Ostra's Swollen sphere), column (the grown seed's light), mote (a coloured glow at a hand:
 ## Tarek's fists, Ostra's charge), dark (the Snap's black wind-up orb), star (the Trade's lobbed, masked lantern).
 ## Tarek's trails, debris, dust and cracked ground are his HeroVfx moments (content/vfx/dolm.json).
@@ -32,9 +32,9 @@ const ORB_RIM := [Color("2ee6c0"), Color("eafffa")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb, not the quick shard
 const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke tail (the UI's #1e1430)
-const DARK_RIM_POWER := 0.9    # the held black orbs (Snap, Nightwell): a broad lit rim (glass default 2.2: thin)
+const DARK_RIM_POWER := 0.9    # the held black orbs (Snap, Main Attraction): a broad lit rim (glass default 2.2: thin)
 const ORB_EDGE := Color("2ee6c0")    # the void orb's rim shell: Motley's sea teal (docs/VFX_QUALITY.md)
-const WELL_RIM := Color(0.18, 0.9, 0.75, 0.95)     # the Nightwell's lit rim (its inside fades to 0 at the centre)
+const WELL_RIM := Color(0.18, 0.9, 0.75, 0.95)     # the Main Attraction's lit rim (its inside fades to 0 at the centre)
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 const MASK_TILT := 0.58       # rad: the Trade lantern's mask tipped back toward the match camera (pitch 57 deg)
 ## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
@@ -74,7 +74,8 @@ static func glass_mat(core: Color, rim: Color, a := 1.0, body := 0.35) -> Shader
 	mt.set_shader_parameter("body", body)
 	return mt
 
-## A black orb with a broad lit sea-teal rim (the held orbs, the Nightwell's rim orbs), so it reads on dark ground.
+## A black orb with a broad lit sea-teal rim (the held orbs, the Main Attraction's rim orbs), so it reads on dark
+## ground.
 static func dark_mat() -> ShaderMaterial:
 	var mt := glass_mat(Color("02100d"), ORB_EDGE, 1.0, 1.0)
 	mt.set_shader_parameter("power", DARK_RIM_POWER)
@@ -153,7 +154,7 @@ static func basalt_mat(seed_v: float) -> ShaderMaterial:
 ## Tenzo's rocks in flight: opaque basalt lumps with a cobalt (alpha-blended) haze.
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
-	# Rock Hop's last rock stands tall: a tumbling crag, not a ball
+	# Leap of Faith's last rock stands tall: a tumbling crag, not a ball
 	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
 		n, lump(r), basalt_mat(vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
@@ -163,7 +164,7 @@ func _build_rock(n: Node3D, kind: String) -> void:
 	Models.part(body, lump(r * 0.45), basalt_mat(vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
 	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.COBALT, 0.28)), Vector3.ZERO)
 
-## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
+## The slab he rides through a Leap of Faith, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
 func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
@@ -288,7 +289,7 @@ func _build_mask(n: Node3D) -> void:
 		var grin_at := Vector3(sin(a) * 0.1, 0.04, 0.07 + 0.035 * cos(a))
 		Models.part(mask, Models.box(0.045, 0.02, 0.018), slit, grin_at, Vector3.ONE, Vector3(0, -a * 0.6, 0))
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a lit teal rim with a soft inner falloff and no floor
+## Ostra's Main Attraction, radius 1 (scaled to the well): a lit teal rim with a soft inner falloff and no floor
 ## (docs/VFX_QUALITY.md zone rule), four spiral arms of light turning on it, small black orbs riding the rim, and a
 ## light-teal core (OstraKit.HOT) shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:

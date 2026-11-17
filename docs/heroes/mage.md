@@ -14,21 +14,21 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
 
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
-bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
+bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Pink Spear 18 to 30 (1.5 to 2.5 bolts; the
 source is about 4, held lower because the rod also stuns and leaves an orb; the --ttk-check row: source share 0.104 of the
-target against our 0.117 at 18 to 30, ext/parity-ttk-sparkle-sable-lace takes it to 16 to 26.7); Skycall 20 (source 2.5
+target against our 0.117 at 18 to 30, ext/parity-ttk-sparkle-sable-lace takes it to 16 to 26.7); Undercurrent 20 (source 2.5
 bolts, ours 1.7); Wirerun pass 20 (1.7 bolts; was 10 before the audit), doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 Damage is the source's share of the standard target (1285 source HP, 154 ours; docs/TTK.md, pinned in
 content/rules/kit_parity.json): bolt 9 every 0.648s (the cadence is owner items 70 and 116; 90 every 0.8 s is
-8.75% of the target a second, 9 every 0.648 s is 9.0%); Storm Rod 16 to 26.7 (Voltaic Spear 133, read as the
-uncharged throw; the full hold keeps our 5:3); Skycall 19.4 (Lightning Strike 162); Wirerun pass 18.3 (Surge 153),
+8.75% of the target a second, 9 every 0.648 s is 9.0%); Pink Spear 16 to 26.7 (Voltaic Spear 133, read as the
+uncharged throw; the full hold keeps our 5:3); Undercurrent 19.4 (Lightning Strike 162); Wirerun pass 18.3 (Surge 153),
 doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
-source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
+source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Stormfall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
 its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
-height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.8 m radius (about 2 bh across in the footage), slide 3.4 m (owner item 9b).
+height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Undercurrent circle 1.8 m radius (about 2 bh across in the footage), slide 3.4 m (owner item 9b).
 
 **Time to knock (docs/TTK.md, 11-12).** LMB 1.00 of the source; combo 0.30 at rank 0 and 0.20 at max, kept and
 not tuned. A traced rank-0 fight: the Rod's orb gives the Wirerun back at 1.17 s, and the run at 1.27 s goes through
@@ -45,9 +45,9 @@ upgrade in our kit (the source's R: +50% impact damage -7.5s, then -7.5s; our X 
 
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
 |---|---|---|---|
-| RMB Storm Rod | +20% damage, -1s x2; tier IV +50% damage | 7.2s / 6.4s, damage +15% / +30%, then x1.5 on top (x1.95) | 7.2s / 6.4s, damage +20% / +90% (+40%, +50% on top) |
+| RMB Pink Spear | +20% damage, -1s x2; tier IV +50% damage | 7.2s / 6.4s, damage +15% / +30%, then x1.5 on top (x1.95) | 7.2s / 6.4s, damage +20% / +90% (+40%, +50% on top) |
 | Shift Wirerun | -0.75s x2; tier IV +100% non-passive dash damage | 7.2s / 6.4s, damage +15% / +30% on the Blowout and run | 7.3s / 6.7s; no shared damage step; the run's own hit x2 at 3 (Blowout unchanged) |
-| E Skycall | +25% x2; tier IV -3s | 9.5s / 5.4s (3s off the shared 8.4s), damage +15% / +30% | 10.5s / 7.9s (a quarter off, the source's 3 of 12), damage +25% / +50% |
+| E Undercurrent | +25% x2; tier IV -3s | 9.5s / 5.4s (3s off the shared 8.4s), damage +15% / +30% | 10.5s / 7.9s (a quarter off, the source's 3 of 12), damage +25% / +50% |
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
 Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`
@@ -59,11 +59,11 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 | LMB tracking | faces the cursor [footage] | each bolt leaves along the cursor of its step and the body faces it, while walking and with the cursor sweeping 60 deg/s | matches; asserted |
 | LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.648 s (owner items 70, 116), mag 99 | matches; asserted |
 | LMB range and speed | always to max range (about 7.5 bh) past the cursor, about 18 bh/s [footage]; one target [data] | 13 m past the cursor, 37 m/s, stops on the first foe (audit fix) | matches; asserted |
-| RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
-| E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
+| RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Pink Spear: the same beats, fixed 13 m lane | matches |
+| E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Undercurrent: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
 | Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 40 m/s, owner item 70), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
-| X Eye of the Storm | launch, hang, reactivate to crash at the cursor; a large ring with a glowing centre and a marker at the cursor [footage] | Kitefall: the same; the range shows as the edge ring with a glowing centre (no dark fill, no dome) and the cursor marker is the strike's 2.7 m hit area (`--mage-combo-check`) | matches |
-| R Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
+| X Eye of the Storm | launch, hang, reactivate to crash at the cursor; a large ring with a glowing centre and a marker at the cursor [footage] | Stormfall: the same; the range shows as the edge ring with a glowing centre (no dark fill, no dome) and the cursor marker is the strike's 2.7 m hit area (`--mage-combo-check`) | matches |
+| R Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Stormfall: the same | matches |
 
 ## Footage gaps, Nov 9 re-check
 The ranked gap list of briefs/hero-ref/vireo.md (section 5, rows 1 to 17) against main d255acbee. Status: closed (code or
@@ -82,21 +82,21 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 6 | RMB fixed max-range lane | closed | `_coil()` reads one fixed `range` 13 m (charge only scales damage and push), lane `width` 0.3 with rails (22ceca1e1); check "a fixed 13m double-rail lane (no growth)" 13.0 / 13.0 |
 | 7 | Surge end marker | closed | `_tick_wire()`: end circle `end_r` 2.25 m (4.5 m across, about 2.5 bh) with ticks and star, rails lane 0.35 wide; check "rails lane and the ticked end ring show". Lane length changes to 7 to 11 m in ext/sparkle-dash-feel (owner 11-08) |
 | 8 | Surge look | closed, owner override (arrival ring) | sky bolt on the press and the lightning body (model hidden, pink-teal after-images, invulnerable) are in `on_dash()` and `_run()`. The source's INVULNERABLE label is not ported: the owner cut every floating callout word on 11-11 (010edcd17); the hidden lightning body is the cue, and the check asserts it and that no word floats (so nothing to send to other games; ext/parity-sparkle-surge-word's net word is dropped). The arrival ring and burst are an owner override (DECISIONS: no bursts, rings or discs on dashes; 6d0546330) |
-| 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Skycall held 0.6s ... still dragging", "the release commits the drag" |
+| 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Undercurrent held 0.6s ... still dragging", "the release commits the drag" |
 | 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
 | 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
 | 12 | E telegraph: dark disc, rim, descending pillar | closed on main, in flight (look) | `MageSky._commit()` plays `e_count` (content/vfx/mage.json): a dark `pool` disc on the exact radius, full until the strike, and a short pink-white pillar narrowing over the 0.8 s; ticked pink rim with chevron, committed arrow. `--mage-combo-check` asserts the disc, the pillar and the chevron |
 | 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with the bolt on the 4th stack |
 | 8 | Surge look | closed, owner override (arrival ring) | sky bolt on the press and the lightning body (model hidden, pink-teal after-images, invulnerable) are in `on_dash()` and `_run()`. `_run()` shows no word (owner 11-11: no floating callout words); the lightning body is the cue. The arrival ring and burst are an owner override (DECISIONS: no bursts, rings or discs on dashes; 6d0546330) |
-| 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Skycall held 0.6s ... still dragging", "the release commits the drag" |
+| 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Undercurrent held 0.6s ... still dragging", "the release commits the drag" |
 | 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
 | 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
 | 12 | E telegraph: dark disc, rim, descending pillar | closed on main, in flight (look) | `MageSky._commit()`: violet disc with copper rim plus a pillar that narrows over the 0.8 s (`fx.pillar`, `mage_sky.gd:85`), ticked rim with chevron, committed arrow. ext/vfx-mage re-builds the look as HeroVfx data. No check asserts the pillar: add one after that merge |
 | 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them (no word on the 4th stack; the bolt is the cue) |
 | 14 | LMB alternating hands | closed | `mage_lmb_l` / `mage_lmb_r` (parity f99f03c7); check "alternating hands, each a quick fling" |
-| 15 | Spear knockback size | closed | `rmb.coil.push` is [4.4, 6.6] (was [6, 9]); a standard-mass foe is knocked 1.77 m on open ground through the shared `Ent.impulse` path (no special case), the source is about 1 bh = 1.8 m (vireo.md item 15). Check "Storm Rod: a standard-mass foe is knocked about 1.8 m" asserts 1.5 to 2.1 m |
+| 15 | Spear knockback size | closed | `rmb.coil.push` is [4.4, 6.6] (was [6, 9]); a standard-mass foe is knocked 1.77 m on open ground through the shared `Ent.impulse` path (no special case), the source is about 1 bh = 1.8 m (vireo.md item 15). Check "Pink Spear: a standard-mass foe is knocked about 1.8 m" asserts 1.5 to 2.1 m |
 | 16 | Sfx | nothing to copy | no audio in the footage |
-| 17 | R (ult relocate) | owner override | X is Kitefall, R is the Boki Merge (SERVER_UPDATE6; "Ultimate choice" below) |
+| 17 | R (ult relocate) | owner override | X is Stormfall, R is the Boki Merge (SERVER_UPDATE6; "Ultimate choice" below) |
 
 Open after this check: row 15 (knockback size), small, blocked on the in-flight branches (row 8 closed: word cut by the owner)
 Open after this check: row 8 (closed: no word, the lightning body is the cue) and row 15 (knockback size), both small, both blocked on the in-flight branches
@@ -104,7 +104,7 @@ above; rows 10 (Static count) and 4 (cadence) are owner calls already recorded.
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/vex_vireo_sable.md. (a) done on this branch, (b) fixed now, (c) not applied, with the
-reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (data) ...`).
+reason. Asserts: `--mage-combo-check` (`Undercurrent ...`, `small: ...`, `Stormfall (data) ...`).
 
 | Row (sev) | Verdict | Where / why |
 |---|---|---|
@@ -113,8 +113,8 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed (the shared payoff ring too: `payoff_fx(..., rings := false)`); the copper pillars stay |
 | E size re-measured (KIT_PARITY, 11-11) | (b) | radius **1.8** (was 1.5, cut on 11-03 with no owner line): briefs/hero-ref/vireo.md reads the placement circle (`0184`) and the strike flash (`0190`) each about 2 bh across, so 1.8 m; the AimKit rim, the placement disc, the strike ring and the hit all read `e.radius` (a body overlapping the ring is hit). Slide kept at **3.4 m**: the footage reads about 4 bh (7.2 m) over about 1 s (`0197` to `0209`, `0212` to `0224`), but owner item 9b (OWNER_REVIEW_1103: "Joule E sends people too far; it wasn't that drastic in the game") set the cut, and an owner note stands. Asserted in `--mage-combo-check` and `--kit-parity-check` |
-| Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
-| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
+| Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Undercurrent's ring at its radius (was 2.3), Stormfall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
+| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Undercurrent's strike spray, Stormfall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
 | E Static 2 vs 1 (MED) | (b) | 1 (data); asserted |
 | E numbers (-) | (a) | already per items 9/9b |
 | Shift pass damage 10 vs ~20 (MED) | (b) | 20 (1.7 bolts, the data's ratio); asserted |
@@ -129,22 +129,22 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
-| LMB Coilcaster (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a soft pink bolt from the fingertip, left hand then right (`lmb_trail`: a 1 m glow strewn with twinkling white glints, about 5 m long, a round twinkling head); stops on the first foe (data); 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
-| RMB Storm Rod | hold, release (full at 1.0s, throws itself at 1.2s, 0.33s minimum) | max range, a fixed 13 m lane | summons a copper rod; the throw knocks the first foe back about 1 bh (stun on a wall or another foe), 1 Static, leaves a charge orb at the impact at once | double-rail lane with chevrons for the whole hold; cursor charge ring; a white body flash and flare at full | `mage_rmb_hold` (rod by the shoulder), `mage_rmb` (overarm) | `vv_rod_summon`, `vv_rod_full`, `vv_rod_throw` |
+| LMB Finger Guns (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a soft pink bolt from the fingertip, left hand then right (`lmb_trail`: a 1 m glow strewn with twinkling white glints, about 5 m long, a round twinkling head); stops on the first foe (data); 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
+| RMB Pink Spear | hold, release (full at 1.0s, throws itself at 1.2s, 0.33s minimum) | max range, a fixed 13 m lane | summons a copper rod; the throw knocks the first foe back about 1 bh (stun on a wall or another foe), 1 Static, leaves a charge orb at the impact at once | double-rail lane with chevrons for the whole hold; cursor charge ring; a white body flash and flare at full | `mage_rmb_hold` (rod by the shoulder), `mage_rmb` (overarm) | `vv_rod_summon`, `vv_rod_full`, `vv_rod_throw` |
 | Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
-| E Skycall | press, hold and drag, release (data) | at the cursor (11 m) | drops a circle; while E is held (up to 1 s) the drag follows the cursor from the circle (toward you pulls in, away throws out; a tap = away); the release commits it, then 0.8s countdown; lightning: 20, 1 Static (data), everyone inside slid about 3.4 m along the ground that way (peak 6.2 m/s, easing to a stop over 1.1 s) and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark blue-violet disc on its exact radius (pink rim, the chevron) and a short pink-white pillar narrowing onto it until the strike (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
+| E Undercurrent | press, hold and drag, release (data) | at the cursor (11 m) | drops a circle; while E is held (up to 1 s) the drag follows the cursor from the circle (toward you pulls in, away throws out; a tap = away); the release commits it, then 0.8s countdown; lightning: 20, 1 Static (data), everyone inside slid about 3.4 m along the ground that way (peak 6.2 m/s, easing to a stop over 1.1 s) and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark blue-violet disc on its exact radius (pink rim, the chevron) and a short pink-white pillar narrowing onto it until the strike (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
-| R Kitefall (ultimate, level 6) | press, then press again (R or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it), gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| R Stormfall (ultimate, level 6) | press, then press again (R or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it), gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
 | X | | | Fuse with your Boki (the Boki system's key, see below) | | | |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live); the data passive text says a knock heals 15%, but `on_knock` only blows gum: that heal is removed (audit) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_charge` (crouch), `vv_ult_rise` (lift-off), `vv_ult_hum` (hover loop, stops on the drop), `vv_ult_crack` (the drop), `vv_ult_slam` (the strike) |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a pink range ring with ticks round the take-off from the press (everyone sees it; no burst), on a dark ring band once she is up (hers), pink crackle on the rim; a small gold crown (ticked ring, pink star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, a scorched storm on the 2.7 m hit area (nothing range-wide), and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a pink range ring with ticks round the take-off from the press (everyone sees it; no burst), on a dark ring band once she is up (hers), pink crackle on the rim; a small gold crown (ticked ring, pink star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, a scorched storm on the 2.7 m hit area (nothing range-wide), and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| X Stormfall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| X Stormfall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_charge` (crouch), `vv_ult_rise` (lift-off), `vv_ult_hum` (hover loop, stops on the drop), `vv_ult_crack` (the drop), `vv_ult_slam` (the strike) |
+| X Stormfall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a pink range ring with ticks round the take-off from the press (everyone sees it; no burst), on a dark ring band once she is up (hers), pink crackle on the rim; a small gold crown (ticked ring, pink star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, a scorched storm on the 2.7 m hit area (nothing range-wide), and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| X Stormfall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a pink range ring with ticks round the take-off from the press (everyone sees it; no burst), on a dark ring band once she is up (hers), pink crackle on the rim; a small gold crown (ticked ring, pink star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, a scorched storm on the 2.7 m hit area (nothing range-wide), and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count to everyone else (she reads her SPARKS badge), with sparks on the body that grow per stack; the 4th calls a sky bolt (Live) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
 | R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
-Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
+Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Undercurrent dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Undercurrent fling is 6 m.
 
 ## Cancels (ability to ability)
 
@@ -166,27 +166,27 @@ nothing from a glide (`Hunter.can_fire`).
 | RMB tap (under 0.33 s) | RMB | "Cast time increased from 0.25 >>> 0.33 seconds"; earlier "minimum cast time 0.2 >>> 0.4" | the throw **waits** to 0.33 s; a second press is denied (one charge), no queue | match | [W] patches 05.03.25, 20.11.24; `small: ...` |
 | RMB held (rod) | LMB, E | not shown | both | unsettled | |
 | RMB held | X | not shown | the cast is refused while the rod is held; the hold goes on | unsettled | `MageUlt.cast` |
-| Storm Rod throw | any | spear flight is nearly instant | free at once | unsettled | [F] 0063 |
-| Wirerun charge (to 0.9 s, press to release) | LMB, RMB, E | not shown | both: the bolts, the rod and Skycall go while she charges | unsettled | [F] open question 5 |
+| Pink Spear throw | any | spear flight is nearly instant | free at once | unsettled | [F] 0063 |
+| Wirerun charge (to 0.9 s, press to release) | LMB, RMB, E | not shown | both: the bolts, the rod and Undercurrent go while she charges | unsettled | [F] open question 5 |
 | Wirerun charge | X | not shown | **ignored** (refused, not buffered) | unsettled | `MageUlt.cast` |
 | Wirerun charge | jump | not shown | **ignored**: the walk and the jump are zeroed while she holds it | unsettled | [F] open question 5 |
 | Wirerun charge | stun, root, ground | "Stuns, Roots, Grounds, and Glider cancel the state" | the charge is cut and stays spent | match | [W] patch 05.03.25; `a stun mid-hold cancels Wirerun` |
 | Wirerun charge or run (in the air) | glide key (Space held never) | "Stuns, Roots, Grounds, and Glider cancel the state" | **cancels** as a stun does: the charge or streak ends and stays spent, the glider opens that step, no hit after it; a cut streak hands over at run speed, never lands (`MageKit._tick_glide_cancel`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key mid-charge ...`, `... mid-streak ...`, `no hit ...` (main: wire on, glide shut; the streak landed) |
 | Wirerun through a full-Static foe | Wirerun | "Surge is ready again at once"; "dashes straight back" | back at once | match | [F] 0133-0171; the dash rows |
-| E Skycall flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
+| E Undercurrent flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
 | E flick or countdown (0.8 s) | any | not shown | free: LMB, RMB, X all go | unsettled | [F] 0181-0226 |
-| X Kitefall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | the second press is **queued** and lands her when the hang starts | match | [D]; [F] 0349-0395 |
+| X Stormfall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | the second press is **queued** and lands her when the hang starts | match | [D]; [F] 0349-0395 |
 | X hang (from 0.25 s, up to 1.7 s) | X | reactivate crashes down | lands at the cursor in 0.2 s | match | [D]; [F] "stayed up 1.2 to 1.8 s" |
 | X hang | LMB | not shown | **an attack press also lands her** (from 0.25 s in; a button already down at the cast does not) | ours (the source names only the reactivate) | `MageUlt._wants_down` |
 | X crouch to strike | RMB, E | not shown | **ignored** (`busy`), not buffered | unsettled | `MageKit.busy` |
 | X crouch to strike | jump, Shift | not shown | the crouch combines (owner item 51); in the hang a jump or Shift does nothing | owner | #51; content/dash_flow `into_jump.x` |
-| X climb and hang | glide key (Space held never) | "Glider cancel the state" | **cancels**: Kitefall ends where she is and she glides down from there, no strike, the cooldown stays spent (`MageUlt.glide_out`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key in the hang ...`, `no strike ...` (main: the hang went on, `h.gliding` cleared) |
+| X climb and hang | glide key (Space held never) | "Glider cancel the state" | **cancels**: Stormfall ends where she is and she glides down from there, no strike, the cooldown stays spent (`MageUlt.glide_out`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key in the hang ...`, `no strike ...` (main: the hang went on, `h.gliding` cleared) |
 | X strike (0.5 s crackle) | any | not shown | free at once | unsettled | |
 
-Fixes made: the glider ends Wirerun and Kitefall (sparkle-glider-cancel 11-11, the two glide rows); before, the
+Fixes made: the glider ends Wirerun and Stormfall (sparkle-glider-cancel 11-11, the two glide rows); before, the
 glider stayed shut through both. The wiki gives the state change, not what comes after it, so the cancel is built as
 the stun's (charge spent, no hit) plus a normal glide; checked by `--mage-combo-check` (`glider: ...`).
-Suggestions (not built): the LMB landing in Kitefall's hang is ours (the source names only the reactivate); if the
+Suggestions (not built): the LMB landing in Stormfall's hang is ours (the source names only the reactivate); if the
 owner wants strict parity, X would be the only landing key.
 
 ## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
@@ -196,32 +196,32 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Slot | Mid-jump / mid-fall | Out of a glide | Source |
 |---|---|---|---|
 | LMB | bolts fire as on the ground | no shot, glider stays open | gap (no air or glide rule) |
-| RMB Storm Rod | the same hold and throw | the same, glider stays open | [D] Joule: no air rule |
+| RMB Pink Spear | the same hold and throw | the same, glider stays open | [D] Joule: no air rule |
 | Shift Wirerun | the same Surge; with a charge it holds her height, with none it is the plain air dash (`mage_dash_ex`) | the glider folds for the dash; a held glide key reopens it as it ends | [D] Joule: no air rule; footage: air Surge not shown |
-| E Skycall | the same cast | the same cast, glider stays open | [D] Joule: no air rule |
-| X Kitefall | the same launch, from where she is; invulnerable in the air | the same, glider stays open | [D] "PRESS to launch into the air"; thebackdash list: invulnerable |
+| E Undercurrent | the same cast | the same cast, glider stays open | [D] Joule: no air rule |
+| X Stormfall | the same launch, from where she is; invulnerable in the air | the same, glider stays open | [D] "PRESS to launch into the air"; thebackdash list: invulnerable |
 
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|
-| 3 bolts + Storm Rod / Skycall | the 4th Static: sky bolt, Live | `--mage-combo-check` |
+| 3 bolts + Pink Spear / Undercurrent | the 4th Static: sky bolt, Live | `--mage-combo-check` |
 | Wirerun through a Live foe | double hit + Blowout, Static spent, Wirerun back | `--mage-combo-check` |
 | Wirerun through a foe under 4 Static | plain hit, no reset | `--mage-combo-check` |
-| Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
+| Pink Spear, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
-| Storm Rod into a wall / another foe | stun (both) | `--mage-combo-check` |
-| Skycall dragged toward you | foes pulled in, Grounded (no dashing), 1 Static | `--mage-combo-check` |
-| Skycall over a rival's orb | flung, now yours | `--mage-combo-check` |
-| Skycall Grounded on you | no Wirerun | `--mage-combo-check` |
-| Boki merge mid-hold | Wirerun refunded, Rod and an unflicked Skycall dropped, nothing fires | `--mage-combo-check` |
-| Kitefall into a crowd, then Wirerun | 1 Static each plus the knockback; foes already at 3 go Live, so the Wirerun through them is a Blowout | `--mage-combo-check` (Static from the strike) |
-| Kitefall on an enemy hunter, then the Merge | the strike fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--mage-combo-check` (burst) |
-| Kitefall as a dodge | invulnerable from the take-off to the strike; a strike on nobody pays no bond | `--mage-combo-check` |
+| Pink Spear into a wall / another foe | stun (both) | `--mage-combo-check` |
+| Undercurrent dragged toward you | foes pulled in, Grounded (no dashing), 1 Static | `--mage-combo-check` |
+| Undercurrent over a rival's orb | flung, now yours | `--mage-combo-check` |
+| Undercurrent Grounded on you | no Wirerun | `--mage-combo-check` |
+| Boki merge mid-hold | Wirerun refunded, Rod and an unflicked Undercurrent dropped, nothing fires | `--mage-combo-check` |
+| Stormfall into a crowd, then Wirerun | 1 Static each plus the knockback; foes already at 3 go Live, so the Wirerun through them is a Blowout | `--mage-combo-check` (Static from the strike) |
+| Stormfall on an enemy hunter, then the Merge | the strike fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--mage-combo-check` (burst) |
+| Stormfall as a dodge | invulnerable from the take-off to the strike; a strike on nobody pays no bond | `--mage-combo-check` |
 | Boki merge while she hangs | she drops where she took off, nothing strikes, the cooldown stays spent | `--mage-combo-check` |
-| Shift in Kitefall's crouch (item 51) | the Wirerun charges at once; the crouch waits, starts over where the run ended, and she launches from there (the ring moves with her) | `--mage-combo-check` (`Kitefall + Shift ...`) |
-| Jump in Kitefall's crouch (item 51) | the jump goes at once and she launches from up there; the climb starts at her height (no drop first) | `--mage-combo-check` (`Kitefall + jump ...`) |
-| Shift or a jump while Kitefall has her up | nothing: the flight is the ult's own move, held over the ring (the recorded exception in content/dash_flow/mage.json) | `--dash-flow-check` |
+| Shift in Stormfall's crouch (item 51) | the Wirerun charges at once; the crouch waits, starts over where the run ended, and she launches from there (the ring moves with her) | `--mage-combo-check` (`Stormfall + Shift ...`) |
+| Jump in Stormfall's crouch (item 51) | the jump goes at once and she launches from up there; the climb starts at her height (no drop first) | `--mage-combo-check` (`Stormfall + jump ...`) |
+| Shift or a jump while Stormfall has her up | nothing: the flight is the ult's own move, held over the ring (the recorded exception in content/dash_flow/mage.json) | `--dash-flow-check` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
@@ -230,7 +230,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Surge passes through targets and hits each one | wiki (Surge) | shown (pass hit 146) | yes: "Wirerun hits every foe it passes" |
 | Surge ignores projectiles; stuns, roots, grounds cancel it | wiki patch 05.03.25 | invulnerable label shown in the source; ours has no word, the lightning body shows it | yes: phase while running; "a stun mid-hold cancels Wirerun" |
 | Knocking an enemy does not reset Surge | wiki (Surge) | not shown | the kit adds no knock reset; since sync65 the game-wide takedown reset (DashReset) gives every hero their dash back on a knock, which overrides this |
-| Spear has a minimum cast time (0.33 to 0.4s) | wiki patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Storm Rod's 0.33s minimum cast" |
+| Spear has a minimum cast time (0.33 to 0.4s) | wiki patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Pink Spear's 0.33s minimum cast" |
 | Spear stuns on terrain or another target | wiki (Voltaic Spear) | stun on a pillar | yes: wall and foe stuns |
 | Lightning Strike flings enemy orbs, which can then be stolen | wiki (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
 | Lightning Strike can launch Wisps | wiki | not shown | built: rival downed hunters in the circle slide with the strike (no Static, no Grounded); `--mage-combo-check`. Spec: docs/specs/DOWNED_ABILITIES.md |
@@ -257,12 +257,12 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
   A fresh glide-key press in the air (Space held never) cancels the charge or the streak the same way and opens the
-  glider; it ends Kitefall's climb or hang too, with no strike (source patch 05.03.25: "Glider cancel the state").
+  glider; it ends Stormfall's climb or hang too, with no strike (source patch 05.03.25: "Glider cancel the state").
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
-- Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
+- Undercurrent: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
-- Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in
+- Stormfall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in
   the air with the climb), the sheet's build note. The 0.3 s crouch is not invulnerable (a fair window to punish
   it); the climb, the hang and the drop are. She hangs over the take-off spot (no drifting). The attack key also
   brings her down, but only a fresh press (a held attack from before the cast does not). A press during the
@@ -271,10 +271,10 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
   with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
   off with no strike.
 
-## Kitefall movement, settled (Nov 10)
+## Stormfall movement, settled (Nov 10)
 Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/vireo.md, ult frames at 10 fps). The data says only
 "launch into the air ... reactivate to crash down at target location" [D]. Nothing changed: every number below matched.
-Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall ledge` rows of `--mage-combo-check`.
+Asserted by the `Stormfall move` / `Stormfall end` / `Stormfall abyss` / `Stormfall ledge` rows of `--mage-combo-check`.
 
 | What | Ours | Source |
 |---|---|---|
@@ -285,7 +285,7 @@ Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall 
 | Abyss | no cast over the void; a cursor over it (or in a wall) backs off toward the take-off to the nearest ground | ours ([F] silent) |
 
 ## Ultimate choice
-R is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
+R is her own ultimate, Stormfall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
 reference sheet's "Ultimate (on R)" section. It was never folded into another slot during the kit pass, so no
 slot changes. Fuse is on X.
 
@@ -307,10 +307,10 @@ were worked out from the clip lengths and the kit's timers; every "after" cell i
 | `mage_dash` travel | ~0.6 s at full length, ~0.4 s to re-form [f106-111]; about 29-37 m/s | 9.75 m at 40 m/s (owner, a quarter off on 11-10): 0.24 s, `dash_go` 0.5, `dash_land` 0.42 | measured: 9.6 m in 0.28 s, tap 5.1 m in 0.17 s; legs back 0.6 after the stop | owner value, kept; the global dash feel (content/rules/dash_feel.json, time x1.15) puts it at 34.8 m/s on screen, inside the source's range |
 | `mage_dash` tap | a player-driven hold (the source's crouch is 0.2 s) | crouch about 2 frames when tapped | same | idea, not built (see suggestions) |
 | Wirerun pass hit | 146 as the body crosses [f165, f300] | on `dash_go` through the pass, 20 damage | measured: on `dash_go`, 0.10 into the full run, 0.10 into a tap | owner value (damage), timing matches |
-| `mage_e` Skycall | disc to strike 0.8 s [f186-190]; a one-arm sweep, no long wind-up | arm clip 1.4 s; a 1.0 s drag plus the 0.8 s count strike at 1.8 s: by reading, the arm dropped for 0.4 s before the snap | the arm clip held on its arm-up pose (0.9 s) while a strike is pending: drag 1.0, commit 1.00, strike and snap 1.80, out 2.50 | fixed; asserted |
+| `mage_e` Undercurrent | disc to strike 0.8 s [f186-190]; a one-arm sweep, no long wind-up | arm clip 1.4 s; a 1.0 s drag plus the 0.8 s count strike at 1.8 s: by reading, the arm dropped for 0.4 s before the snap | the arm clip held on its arm-up pose (0.9 s) while a strike is pending: drag 1.0, commit 1.00, strike and snap 1.80, out 2.50 | fixed; asserted |
 | `mage_e` tap | strike 0.8 s after the circle | arm up, strike 0.8 s after the cast | measured: strike and snap 0.82 | matches |
 | `sky_snap` | the strike flash [f190] | starts from the arm-up pose, 0.55 clip | same | matches |
-| `mage_x` Kitefall launch | crouch and take-off 0.3-0.4 s [f28-31]; ring first | crouch 0.3, rise 0.3 | measured: crouch 0.02, rise 0.30, airborne 0.60 | matches (0.3 against about 0.4: within one frame) |
+| `mage_x` Stormfall launch | crouch and take-off 0.3-0.4 s [f28-31]; ring first | crouch 0.3, rise 0.3 | measured: crouch 0.02, rise 0.30, airborne 0.60 | matches (0.3 against about 0.4: within one frame) |
 | `mage_x` hover | 1.2-1.8 s airborne [f32-46] | 1.7 s hover | measured: fall 2.32 (a recast at 0.8 drops her at 0.83) | matches |
 | `mage_x` crash | marker 0.1 s, pillar on the next frame [f47-49]; free to shoot at f51 | drop 0.2, after 0.5 | measured: land 2.53, end 3.05 | matches |
 | `mage_dash_ex` (air) | not in the footage | 0.5 clip | same | no source |
@@ -339,14 +339,14 @@ Suggestions (ours, not built):
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
   coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_ryzz.py` listed in `VVSfx.NAMES` and content/sfx/mage.json.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
-- Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
+- Stormfall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
   cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). R reaches
   it through main's HunterKeys.ult_pressed (the level gate) and `MageKit.cast_ult()`; numbers in `mage.json` `x`.
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
-  Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
+  Undercurrent in `strikes` still in its `"flick"` phase, and Stormfall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
 
-## Storm Rod damage in --mage-combo-check (11-11)
+## Pink Spear damage in --mage-combo-check (11-11)
 The Rod landed 24 where the check asserts 25 or more (full charge is 30 in data, 18 to 30 by charge). Not a stale assert and
 not a lost multiplier: the shared dummy reset (`archetype_check.fresh`) zeroed the armour tier but kept the armour the
 Wirerun/Blowout hits had already earned the dummy, so the Rod took Common's 20% off (30 -> 24). `fresh` now zeroes the

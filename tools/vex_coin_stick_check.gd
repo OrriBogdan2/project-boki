@@ -19,15 +19,15 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 		C.ac.aim_at(T, home)
 		var e := {"length": 4.2, "hp": 160.0, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy"}
 		return m.verbs.add_wall(T, T.pos + Vector3(west.x, 0, west.y), west, e, 1.0)
-	var rink := func() -> Dictionary:        # Neve's Rink Wall: a block of ice that slides and then stands 4.5 s
+	var rink := func() -> Dictionary:        # Neve's Cold Front: a block of ice that slides and then stands 4.5 s
 		var e := {"length": 3.0, "hp": 200.0, "time": 4.5, "move": true, "block": "enemy"}
 		return m.verbs.add_wall(T, home + Vector3(SPOT, 0, 0), east, e, 1.0)
-	var rock := func() -> Dictionary:        # Tenzo's Stone Row rock
+	var rock := func() -> Dictionary:        # Tenzo's Foothold rock
 		return HeroZones.rock(m, T, home + Vector3(SPOT, 0, 0), east, "vexc", 2.0, 9.0, 45.0, false)
 	var walk := func(_w: Dictionary) -> void: T.teleport(T.pos + Vector3(REACH, 0, 0))     # the bearer steps on
 	var slide := func(w: Dictionary) -> void: _slide(w, REACH)
 	_case(m, P, K, T, home, far, "an aegis", aegis, walk, true)
-	_case(m, P, K, T, home, far, "a Rink Wall", rink, slide, false)
+	_case(m, P, K, T, home, far, "a Cold Front", rink, slide, false)
 	_case(m, P, K, T, home, far, "a Tenzo rock", rock, Callable(), true)
 	_own_wall(m, P, K, T, home, far)
 

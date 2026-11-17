@@ -9,23 +9,23 @@ extends ArchKit
 ##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
 ##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
 ##   perfect swing, a leaping launch (BjornLaunch).
-## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it. Walking into it pushes
+## - RMB: hold to raise his Blue Guard (its own HP, regenerates); letting go only lowers it. Walking into it pushes
 ##   nobody; LMB with it up is the boop, a short shield thrust that shoves foes in front (BjornBoop).
-## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
-##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
-## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
-##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
+## - Dash: Tideturner, a short dash that ends in one full spin hit around him; with the Blue Guard raised it's
+##   the Full Ahead (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
+## - Passive, Guard: damage the Blue Guard blocks becomes Guard; at 50 the Full Ahead ends in a Shield Slam.
+##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, Tideturner, Shield
 ##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
-## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
-##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
-## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
+## - E, Safe Harbour: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
+##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised Blue Guard.
+## - X, Groundswell (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
 var wall: Dictionary = {}      # the raised shield (a following verbs wall)
 var shield_hp := 160.0
 var down_t := 0.0              # seconds since it was lowered (regen after 2s)
 var lock_t := 0.0              # broken: locked out
-var front_t := 0.0             # the Shield Charge's front guard
-var mend := {}                 # Mending Ground waiting to burst: {pos, t}
+var front_t := 0.0             # the Full Ahead's front guard
+var mend := {}                 # Safe Harbour waiting to burst: {pos, t}
 var mace := {}                 # the thrown mace: {} in hand, else {st: fly|ground|back, pos, dir, d, hit, node, t}
 var lmb_t := -1.0              # how long the attack key has been held with the mace in hand (-1: not)
 var lmb_was := false
@@ -35,23 +35,23 @@ var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
 var fx: BjornFx                # Breaker's pooled effects
-var ult: BjornUlt              # X: Faultline
+var ult: BjornUlt              # X: Groundswell
 var launch: BjornLaunch        # the perfect swing's launch
 var lunge: BjornLunge          # every other swing's forward pull
 var reels := 0                 # (checks) times the rope hauled the hammer home on its own
-var boop: BjornBoop            # LMB behind the raised aegis: the shield thrust
+var boop: BjornBoop            # LMB behind the raised Blue Guard: the shield thrust
 var flared := false            # this hold's full-charge flare has gone off
 var spin := 0.0                # the whirled hammer's angle (rad), counted on match time (BjornFx draws it)
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
 var slams := 0                 # (checks) Crushing Blows let go, the last one's charge and carry start
 var slam_k := 0.0
-var spins := 0                 # (checks) 360 Smash spin hits
-var kickstarts := 0             # (checks) downed teammates Mending Ground started reviving
+var spins := 0                 # (checks) Tideturner spin hits
+var kickstarts := 0             # (checks) downed teammates Safe Harbour started reviving
 var ticks_healed := 0           # (checks) heals the zone's ticks gave
-var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
+var shield_slams := 0           # (checks) Shield Slams the Full Ahead ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
-var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
+var dash_after_plant := false  # Shift came in while planted for Groundswell: the dash goes when the plant ends
 var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
 const SIZE_REF := 2.0          # the body size the kit's heights over him (crest, hammer hand, wake) were set at
@@ -78,21 +78,21 @@ func body_k() -> float:
 func hand_at() -> Vector3:
 	return h.pos + Vector3(0, body_k(), 0)
 
-## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
+## The Blue Guard grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
 ## and with the max health levels give (LevelGrowth.hp), as the source's Brightshield scales with max health.
 func shield_max() -> float:
 	var sd: Dictionary = rmb_def()["shield"]
 	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1)) * LevelGrowth.hp(h)
 
-## One of the aegis's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
+## One of the Blue Guard's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
 func _shield_stat(key: String) -> float:
 	var sd: Dictionary = rmb_def()["shield"]
 	if rank("sec") >= 3 and sd.has(key + "_rank3"):
 		return float(sd[key + "_rank3"])
 	return float(sd[key])
 
-## The Shield Charge's own cooldown drops by "cd_per_rank" seconds for every dash rank past the first, and
-## Mending Ground's drops to its rank-3 time; the shared rule keeps the other slots.
+## The Full Ahead's own cooldown drops by "cd_per_rank" seconds for every dash rank past the first, and
+## Safe Harbour's drops to its rank-3 time; the shared rule keeps the other slots.
 func cd_k(slot: String) -> float:
 	if slot == "sec":
 		var cut := float(rmb_def().get("cd_per_rank", 1.5)) * float(rank("dash") - 1)
@@ -101,7 +101,7 @@ func cd_k(slot: String) -> float:
 		return float(e_def()["cooldown_rank3"]) / float(e_def()["cooldown"]) if rank("kin") >= 3 else 1.0
 	return super.cd_k(slot)
 
-## Mending Ground heals 25% more at rank 2 and another 25% at rank 3, grown by the level's
+## Safe Harbour heals 25% more at rank 2 and another 25% at rank 3, grown by the level's
 ## ability power (LevelGrowth.ap).
 func heal_k() -> float:
 	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
@@ -156,7 +156,7 @@ func _tick(dt: float) -> void:
 			wall["t"] = 99.0
 			if h.gliding:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
-			# his aegis over the wall (armed: it burns hotter), cracking as it weakens
+			# his Blue Guard over the wall (armed: it burns hotter), cracking as it weakens
 			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
 	else:
 		fx.aegis_hide()
@@ -191,7 +191,7 @@ func _tick_glove() -> void:
 	if used and lmb_t >= 0.0:
 		cancel_hold()
 
-## Slides a booped foe back along the aegis's facing (a wall behind it stops the slide; Displace: a player
+## Slides a booped foe back along the Blue Guard's facing (a wall behind it stops the slide; Displace: a player
 ## online slides on their own game).
 func shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
 	var push := {"mode": "push", "dir": [dir.x, dir.y], "dist": dist, "spd": speed, "dur": dist / speed + 0.1}
@@ -236,7 +236,7 @@ func dash_afterimage() -> bool:
 func fire_ok() -> bool:
 	return wall.is_empty() and not ult.planted()
 
-## X: Faultline. The aegis comes down and a Crushing Blow charge is dropped as he plants.
+## X: Groundswell. The Blue Guard comes down and a Crushing Blow charge is dropped as he plants.
 func cast_ult() -> bool: return HeroUlt.press(self, _start_ult)
 func has_ult() -> bool: return true
 
@@ -250,7 +250,7 @@ func ult_running() -> bool:
 func lock_left() -> float:
 	return ult.lock_left()
 
-## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
+## The Full Ahead's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
 		# it takes the hit (and turns it into Guard) as it does a shot
@@ -267,7 +267,7 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 			return [0.0, o]
 	return [dmg, o]
 
-## The raised aegis blocks all damage from the front (data: Brightshield), melee and abilities as well as the
+## The raised Blue Guard blocks all damage from the front (data: Brightshield), melee and abilities as well as the
 ## shots the wall itself stops: a hit from a foe inside its arc, facing the cursor. Damage over time isn't a hit.
 func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	if wall.is_empty() or by == null or not is_instance_valid(by) or o.get("tick", false):
@@ -278,11 +278,11 @@ func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
 	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
 
-## The raised aegis faces `by`: it stops their pulls too (Blockers).
+## The raised Blue Guard faces `by`: it stops their pulls too (Blockers).
 func blocks_from(by: Ent) -> bool:
 	return _aegis_takes(by, {})
 
-## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
+## A Full Ahead counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
 	return not mend.is_empty()
 
@@ -341,7 +341,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
 		return true
 	if not wall.is_empty():
-		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
+		if pressed: boop.press()      # behind the raised Blue Guard LMB is the boop, never a swing or a throw
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
@@ -692,7 +692,7 @@ func press_rmb() -> void:
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
 	cancel_hold()
 	if _can_raise():
-		play("bul_guard")           # the arm comes up on the press, the aegis 0.1 s into the hold
+		play("bul_guard")           # the arm comes up on the press, the Blue Guard 0.1 s into the hold
 
 func rmb_hold_tick(t: float) -> void:
 	if t >= float(rmb_def()["hold"]) and _can_raise():
@@ -713,12 +713,12 @@ func _raise() -> void:
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
 
-## Faultline's hop drives him down faster than a fall.
+## Groundswell's hop drives him down faster than a fall.
 func dive_speed() -> float:
 	return ult.dive_cap()
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
-## shield (it keeps its hit points and starts its regen). The mace in flight and Mending Ground's pending burst are casts, not holds.
+## shield (it keeps its hit points and starts its regen). The mace in flight and Safe Harbour's pending burst are casts, not holds.
 func _drop_holds() -> void:
 	if lmb_t >= 0.0:
 		lmb_t = -1.0
@@ -745,15 +745,15 @@ func _lower() -> void:
 	fx.aegis_hide()
 	if anim_id == "bul_guard": anim_id = ""
 
-## Letting go of the RMB only lowers the aegis: the Bash lives on Shift behind a raised shield (the Shield Charge).
+## Letting go of the RMB only lowers the Blue Guard: the Bash lives on Shift behind a raised shield (the Full Ahead).
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
 	if anim_id == "bul_guard":
-		anim_id = ""                # a tap: the arm goes back down with no aegis
+		anim_id = ""                # a tap: the arm goes back down with no Blue Guard
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
-## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
+## Guard at 50: the Full Ahead ends in a Shield Slam, a short cone that knocks back hard and stuns.
 func _shield_slam() -> void:
 	var sl: Dictionary = rmb_def()["slam"]
 	var dv := h.aim_dir()
@@ -771,7 +771,7 @@ func _shield_slam() -> void:
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
 
-# ------------------------------------------------------------------ dash: Whirl / Shield Charge
+# ------------------------------------------------------------------ dash: Whirl / Full Ahead
 func on_dash(use_ex: bool) -> bool:
 	if ult.planted():
 		dash_after_plant = true          # planted for the slam: Shift goes when the plant ends (into_dash.x)
@@ -793,9 +793,9 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
 	if wall.is_empty() and rmb_down and lock_t <= 0.0 and shield_hp > 5.0:
-		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
+		_raise()          # Shift while the Blue Guard is still rising: it is up now, the bash goes
 	if not wall.is_empty():
-		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
+		# Full Ahead (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
 		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
 		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
@@ -815,7 +815,7 @@ func on_dash(use_ex: bool) -> bool:
 		play("bul_charge")
 		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
-	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same 360 Smash (item 183)
+	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same Tideturner (item 183)
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
@@ -828,7 +828,7 @@ func on_dash(use_ex: bool) -> bool:
 		for i in 4:
 			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
-	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
+	# Tideturner: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
 	var dist2 := float(dd["whirl"])
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
@@ -840,7 +840,7 @@ func on_dash(use_ex: bool) -> bool:
 		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
 	return true
 
-## The 360 Smash's spin on arrival: one hit all round him, lunging on along `wd` ("lunge.spin_d" m, BjornLunge);
+## The Tideturner's spin on arrival: one hit all round him, lunging on along `wd` ("lunge.spin_d" m, BjornLunge);
 ## its ring (HeroVfx "spin") lies on the hit radius and runs round once with the turn.
 func _spin_hit(wd: Vector2) -> void:
 	lunge.start(wd, float(lmb_def().get("lunge", {}).get("spin_d", 1.6)), "spin")
@@ -849,7 +849,7 @@ func _spin_hit(wd: Vector2) -> void:
 	spins += 1
 	knock_until = m.time + 0.25
 	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
-		# rank 3: hitting foes with the dash refunds the Shield Charge (cue only when something was spent)
+		# rank 3: hitting foes with the dash refunds the Full Ahead (cue only when something was spent)
 		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
@@ -861,7 +861,7 @@ func _spin_hit(wd: Vector2) -> void:
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 
-# ------------------------------------------------------------------ E: Mending Ground
+# ------------------------------------------------------------------ E: Safe Harbour
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
 func _zone_anchor() -> Vector3:
 	if not mace.is_empty():
@@ -963,7 +963,7 @@ func _bot_hammer(dist: float, los: bool) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	# the Faultline first: its lane starts at his feet, so a foe up close is on it too
+	# the Groundswell first: its lane starts at his feet, so a foe up close is on it too
 	if HeroUlt.ready(self) and los and dist > 1.5 and dist < 13.0:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
@@ -981,8 +981,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		elif dist < 4.5 and rmb_ready() and not rmb_down:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 			bot_hold["rmb"] = 1.2
-	# close in: a Shield Charge from behind the shield, else a Whirl
-	# (behind the raised aegis the dash is the Shield Charge)
+	# close in: a Full Ahead from behind the shield, else a Whirl
+	# (behind the raised Blue Guard the dash is the Full Ahead)
 	var odds := 0.8 if not wall.is_empty() and rmb_ready() else 0.3
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist < 4.5 and dist > 1.5 and randf() < odds:
 		h.inp["aim"] = tgt.pos

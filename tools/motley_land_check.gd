@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## --motley-land-check: Motley's Lantern Trade onto high and awkward spots: he can throw it onto high ledges and
+## --motley-land-check: Motley's Musical Chairs onto high and awkward spots: he can throw it onto high ledges and
 ## get there, and it never leaves him inside a wall. On every shipped map
 ## (arena, tutorial, Skyreach, Hollow Crown) it throws, through the real Shift press, at:
 ##   ledge   the cliff face of a terrace >= 2 levels above him (cursor just in front of it): he ends on its top

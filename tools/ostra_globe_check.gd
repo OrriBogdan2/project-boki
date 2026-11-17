@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Motley's Brimseed globe (for --ostra-combo-check; docs/heroes/ostra.md): at 0, 25, 50 and 100% growth the drawn
+## Motley's Gag Gift globe (for --ostra-combo-check; docs/heroes/ostra.md): at 0, 25, 50 and 100% growth the drawn
 ## globe's radius equals the radius the pop hits at (rmax at that share of its 6.5 s): a hunter just inside the drawn
 ## rim is caught and one just outside is not.
 

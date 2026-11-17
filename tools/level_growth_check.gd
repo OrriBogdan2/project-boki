@@ -86,7 +86,7 @@ func _read(P: Hunter, a: String) -> Dictionary:
 	if a == "bulwark":
 		shield = (k as BulwarkKit).shield_max()
 	elif a == "ashwick":
-		shield = P.max_hp  # Furnace Cloak, rank-3 Soot Ram: a share of max health
+		shield = P.max_hp  # Molten Hug, rank-3 Lock Horns: a share of max health
 	return {"dmg": k.power(String(DMG_SLOT[a])), "heal": heal, "shield": shield, "hp": P.max_hp - P.kin_hp_added}
 
 

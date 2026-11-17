@@ -151,7 +151,7 @@ func _ostra() -> void:
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
 	reset.call()
-	ok("rmb: Shard Snap has one charge", K.rmb_charges() == 1)
+	ok("rmb: Stage Fright has one charge", K.rmb_charges() == 1)
 	P.inp["sec_hold"] = true
 	m.step(DT)
 	ok(
@@ -502,7 +502,7 @@ func _ostra() -> void:
 	var plain0 := P.hp
 	P.hurt(5.0, null, {"src": "mob"})
 	ok("data: a plain hit still lands", P.hp < plain0 - 1.0)
-	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Nightwell's, on X)
+	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Main Attraction's, on X)
 	P.slot_lv["kin"] = 3
 	var burn := float(K.e_def()["burn"])
 	reset.call()
@@ -585,14 +585,14 @@ func _ostra() -> void:
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
-	ok("upgrade parity: Shard Snap cooldown 10 -> 8.5 -> 7 and damage +20% / +40%",
+	ok("upgrade parity: Stage Fright cooldown 10 -> 8.5 -> 7 and damage +20% / +40%",
 			near.call(op[1][0], 8.5) and near.call(op[2][0], 7.0)
 			and near.call(float(op[1][1]) / float(op[0][1]), 1.2)
 			and near.call(float(op[2][1]) / float(op[0][1]), 1.4), str(op))
-	ok("upgrade parity: Lantern Trade recharge 9.5 -> 8 -> 6.5, no damage step",
+	ok("upgrade parity: Musical Chairs recharge 9.5 -> 8 -> 6.5, no damage step",
 			near.call(op[1][2], 8.0) and near.call(op[2][2], 6.5)
 			and near.call(float(op[2][5]) / float(op[0][5]), 1.0), str(op))
-	ok("upgrade parity: Brimseed cooldown 10 -> 10 -> 8 and damage +10% / +20%",
+	ok("upgrade parity: Gag Gift cooldown 10 -> 10 -> 8 and damage +10% / +20%",
 			near.call(op[1][3], 10.0) and near.call(op[2][3], 8.0)
 			and near.call(float(op[1][4]) / float(op[0][4]), 1.1)
 			and near.call(float(op[2][4]) / float(op[0][4]), 1.2), str(op))
@@ -788,7 +788,7 @@ func _zone_looks(m: Match) -> void:
 	var held := (looks.hold_on("zone_dark", "dark", m, Vector3.ZERO, 1.0).get_child(0) as MeshInstance3D)
 	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 3.6)
 	var rim_orb := (well.get_node("Spin").get_children().back() as MeshInstance3D).material_override as ShaderMaterial
-	ok("zones: the black orbs (Snap wind-up, Nightwell rim) have a broad lit sea-teal rim",
+	ok("zones: the black orbs (Snap wind-up, Main Attraction rim) have a broad lit sea-teal rim",
 		[held.material_override, rim_orb].all(func(mt: ShaderMaterial):
 			return mt.get_shader_parameter("rim") == OstraKit.SEA and float(mt.get_shader_parameter("power")) < 1.5))
 	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
@@ -853,7 +853,7 @@ func _ranks(P: Hunter, K: OstraKit) -> void:
 			and near.call(up[1][1], 1.2) and near.call(up[2][1], 1.4), str(up))
 	ok("upgrade parity: Trade recharge 9.5 -> 8 -> 6.5",
 			near.call(up[1][2], 8.0) and near.call(up[2][2], 6.5), str(up))
-	ok("upgrade parity: Brimseed damage +10% / +20%, cooldown 10 -> 10 -> 8",
+	ok("upgrade parity: Gag Gift damage +10% / +20%, cooldown 10 -> 10 -> 8",
 			near.call(up[1][3], 10.0) and near.call(up[2][3], 8.0)
 			and near.call(up[1][4], 1.1) and near.call(up[2][4], 1.2), str(up))
 

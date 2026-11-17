@@ -10,12 +10,12 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
-| **Lace** | light | Longbow | Spirit Walk | Red Thread | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
-| **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
-| **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Thief** | light | Twin Blades | Vault | Marks | Bola | White Flash (18s) | none (X is the Merge) |
+| **Lace** | light | Drawstring | Slip Stitch | Red Thread | Pin Down | Hemline (9s) | none (X is the Merge) |
+| **Sparkle** | light | Finger Guns | Wirerun | Sparks | Coilshot | Undercurrent (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Brass Tacks | Slipstep | Fever | Coin Blast | Palm Spear (12s) | none (X is the Merge) |
+| **Juggernaut** | heavy | Bitter End | Rampage | Rage | Final Swing | Short Leash (13s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Blue Guard | Tideturner | Guard | Blue Guard | Safe Harbour (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -26,7 +26,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **RMB: Bola** (12s):
   - tap: Throw a spinning Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
   - in the air: Thrown from the air the same way.
-- **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
+- **E: White Flash** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
 ### Lace (light)
@@ -34,37 +34,37 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
 - **Passive: Red Thread.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
-- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
-- **RMB: Heavy Shot** (16s):
-  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
-- **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
-  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
-  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2. A quick tap does nothing and costs nothing.
-- **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+- **Shift: Slip Stitch** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
+- **RMB: Pin Down** (16s):
+  - hold: Pin Down: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- **E: Hemline** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-10.8m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Pin Down that knocks a burning foe Cremates them: +10 and a longer burn.
+  - hold: Pin Down: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+  - hold: Pin Down: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2. A quick tap does nothing and costs nothing.
+- **E: Hemline** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Pin Down that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
 ### Sparkle (light)
 
 _The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back._
 
-- **Passive: Sparks.** Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
+- **Passive: Sparks.** Your bolts, Coilshot and Undercurrent each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
 - **Shift: Wirerun** (9s a charge). Press and hold: a lane grows from 5 to 8.5m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
 - **RMB: Coilshot** (10s):
   - tap: A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.
   - hold: Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back.
-- **E: Skycall** (12s). Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.
+- **E: Undercurrent** (12s). Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Marlowe (medium)
 
 _The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
 
-- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Passive: Fever.** Each ability that lands (Coin Blast, its blast, Palm Spear) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Coin Blast counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
 - **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
-- **RMB: Burr Charge** (9s):
+- **RMB: Coin Blast** (9s):
   - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
-  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
-- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Coin Blast's cooldown drops 40%.
+- **E: Palm Spear** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)
@@ -73,26 +73,26 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 
 - **Passive: Rage.** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 - **Shift: Rampage** (9s a charge). A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
-- **RMB: Smash** (3s):
+- **RMB: Final Swing** (3s):
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a sweet-spot payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
-  - in the air only: Meteor Drop: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
-- **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+  - in the air only: Hit the Deck: slam straight down where you are, a 2.4m circle just ahead of the landing: 18, everyone in it knocked down (the airborne spiked); the centre (1.2m) takes +50% and stays down 0.8s.
+  - with E: With the Short Leash: tap while it pulls you for a Full Circle (2.2m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- **E: Short Leash** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
 ### Mossy (heavy)
 
-_The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
+_The squad's shield. Holds the line with his Blue Guard, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
-- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
-- **RMB: Aegis** (6s):
-  - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
-  - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- **Passive: Guard.** Damage your Blue Guard blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Full Ahead ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, Tideturner, Full Ahead, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Shift: Tideturner** (9s a charge). Tideturner: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the Blue Guard raised it's a Full Ahead on its own 6s cooldown (it spends no dash charge): 4.2m behind the Blue Guard, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **RMB: Blue Guard** (6s):
+  - tap: A tap only raises and lowers the Blue Guard; the Bash is the Full Ahead on Shift.
+  - hold: Raise the Blue Guard: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Full Ahead on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
-- **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
+  - resource full: Guard 50+: the Full Ahead ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
+- **E: Safe Harbour** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your Blue Guard is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
 The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.
@@ -131,24 +131,24 @@ Every level past the first adds the same share of a Hunter's level-1 numbers (`c
 | HP: max health, max-health shields | 1.000 / 1.240 / 1.540 | 1.000 / 1.240 / 1.420 (+6% to L6, half from L7) | 1.000 / 1.240 / 1.540 | 1.00 / 1.00 / 1.00 |
 | Flat | 1 / 1 / 1 | | | |
 
-Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10 on HP. Fixes: `level_growth.json` (`ap` 0.05 to 0.039; the half rate from level 7, which the source does not have, is gone), Albert's Aegis now grows with max health (`BulwarkKit.shield_max`, `LevelGrowth.hp`), and Mending Ground's and Hearthlight's heals now grow with AP (their `heal_k`), as the source's heals do.
+Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10 on HP. Fixes: `level_growth.json` (`ap` 0.05 to 0.039; the half rate from level 7, which the source does not have, is gone), Albert's Blue Guard now grows with max health (`BulwarkKit.shield_max`, `LevelGrowth.hp`), and Safe Harbour's and Hearthlight's heals now grow with AP (their `heal_k`), as the source's heals do.
 
 **Every slot** (number: what grows; "AP", "HP" and "flat" are the curves above; ours is now, before only where it changed):
 
 | Hunter (source) | LMB | RMB | Shift | E | X | Passive |
 |---|---|---|---|---|---|---|
-| gunslinger, Vex (Ghost) | weapon: flat | Burr Charge dmg: AP = AP | Slipstep: no number | Longneedle dmg: AP = AP | Cinderfall dmg: AP = AP | Hot Streak heal: a share of damage dealt |
-| juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
-| ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
-| tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
-| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Shardskin shield: flat (source: not in data) |
-| archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Red Thread: no number |
-| dredge, Grimble (Kingpin) | weapon: flat | Deep Reach dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
-| rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
-| mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
-| bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Aegis shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | 360 Smash dmg: AP = AP | Mending Ground heal: AP = AP (before flat: 0.87 / 0.74) | Faultline dmg: AP = AP | Guard: no number |
-| thief, Sable (Shiv) | weapon: flat; source 160 @15 only | Bola dmg: AP = AP | Vault: no number | Shadow Knife dmg: AP = AP | Encore dmg: AP = AP | Marks knock heal: HP (source: not in data) |
-| ostra, Motley (Void) | weapon: flat; source 263 @15 only | Shard Snap dmg: AP = AP | Lantern Trade ally shield: flat (source 375 at rank IV @15, scaling not in data) | Brimseed dmg: AP = AP | Nightwell dmg: AP = AP | Swell: no number |
+| gunslinger, Vex (Ghost) | weapon: flat | Coin Blast dmg: AP = AP | Slipstep: no number | Palm Spear dmg: AP = AP | Penny Drop dmg: AP = AP | Hot Streak heal: a share of damage dealt |
+| juggernaut, Kael (Brall) | weapon: flat | Final Swing dmg: AP = AP | Rampage dmg: AP = AP | Short Leash dmg: AP = AP | Blow for Blow dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
+| ashwick, Cinder (Felix) | weapon: flat | Spitfire dmg: AP = AP | Lock Horns dmg: AP = AP; rank-3 shield: HP (source: not in data) | Molten Hug dmg: AP = AP; shield: HP (source: not in data) | Red Carpet dmg: AP = AP | Boiling Point knock heal: HP (source: not in data) |
+| tender, Meeko (Elluna) | weapon: flat | Stick Around dmg: AP = AP | Foxtrot: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Rise and Shine heal: AP = AP | Carry the Day: no number |
+| dolm, Tenzo (Tetra) | weapon: flat | Rock Bottom dmg: AP = AP | Leap of Faith dmg: AP = AP | Foothold wall: flat (ranks only) | Backbone dmg: AP = AP | Jade Ward shield: flat (source: not in data) |
+| archer, Lace (Myth) | weapon: flat | Pin Down dmg: AP = AP (measured source line) | Slip Stitch: no number | Hemline dmg: AP = AP (measured source line) | Finishing Touch dmg: AP = AP | Red Thread: no number |
+| dredge, Grimble (Kingpin) | weapon: flat | Sticky Fingers dmg: AP = AP | Mad Dash: no number | Lump Sum dmg: AP = AP | Both Barrels dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| rimewright, Neve (Celeste) | weapon: flat | Icebreaker dmg: AP = AP | Skate: no number | Cold Front: flat (ranks only) | Freeze Frame dmg: AP = AP | Cold Snap splinters: AP = AP |
+| mage, Sparkle (Joule) | weapon: flat | Pink Spear dmg: AP = AP | Wirerun dmg: AP = AP | Undercurrent dmg: AP = AP | Stormfall dmg: AP = AP | Static: no number |
+| bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Blue Guard shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | Tideturner dmg: AP = AP | Safe Harbour heal: AP = AP (before flat: 0.87 / 0.74) | Groundswell dmg: AP = AP | Guard: no number |
+| thief, Sable (Shiv) | weapon: flat; source 160 @15 only | Bola dmg: AP = AP | Vault: no number | White Flash dmg: AP = AP | Last Dance dmg: AP = AP | Marks knock heal: HP (source: not in data) |
+| ostra, Motley (Void) | weapon: flat; source 263 @15 only | Stage Fright dmg: AP = AP | Musical Chairs ally shield: flat (source 375 at rank IV @15, scaling not in data) | Gag Gift dmg: AP = AP | Main Attraction dmg: AP = AP | Swell: no number |
 
 Heals and shields a Hunter's abilities give through the effect verbs (a Boki's typing riding a slot, `Effects._heal_k`) are on AP too.
 
@@ -169,7 +169,7 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Weapon | Class | Ability | Verb | Cooldown | What it does |
 |---|---|---|---|---|---|
 | Burst Rifle | medium | **Leash Bolt** | tether | 10s | A bolt that leashes whoever it hits to you for 3.5s. If they get 6m away it snaps: 22 damage, stunned 1s, dragged back. |
-| Greatsword | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
+| Bitter End | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
 | Longsword | medium | **Riposte** | reflect | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
 | Minigun | heavy | **Bracewall** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
 | Rifle | medium | **Rail Charge** | charge-shot | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
@@ -286,19 +286,19 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Blockers and crossers
 
-One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Sticky Fingers (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised Blue Guard and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Foothold, Backbone); **ice** = Neve's Cold Front; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
 
 | Crosser | Class | shield | rock | ice | wall | guard |
 |---|---|---|---|---|---|---|
 | every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
-| Grimble's Deep Reach (pierces terrain) | pierce | stop | pass | stop | stop | stop |
-| Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
-| Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
-| Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |
-| Albert's Faultline cells | solid | stop | stop | stop | stop | stop |
+| Grimble's Sticky Fingers (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Vex's Palm Spear (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Kael's Short Leash (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
+| Cinder's Molten Hug pull (needs sight) | solid | stop | stop | stop | stop | stop |
+| Albert's Groundswell cells | solid | stop | stop | stop | stop | stop |
 | every knockback | solid | stop | stop | stop | stop | stop |
 | every dash | body | - | stop | stop | stop | - |
-| Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it) | phase | - | pass | pass | pass | - |
+| Lace's Slip Stitch (through walls, objects and raised terrain; only the edge guard stops it) | phase | - | pass | pass | pass | - |
 | Motley's Trade (a high lob, then a swap) | lob | pass | pass | pass | pass | pass |
 
 ## Readability

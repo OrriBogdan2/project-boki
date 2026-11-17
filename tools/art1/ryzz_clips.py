@@ -294,7 +294,7 @@ def clips():
         out.append(FnClip("walk_" + nm, 0.92, gait(0.45, ang)))
         out.append(FnClip("run_" + nm, 0.6, gait(1.0, ang)))
     out += [shot("lmb_l", False), shot("lmb_r", True)]
-    # Storm Rod: she reaches back over her right shoulder, the rod comes off the rack; side-on, left finger aiming
+    # Pink Spear: she reaches back over her right shoulder, the rod comes off the rack; side-on, left finger aiming
     RH = {"G": (0.3, -0.06, 1.62), "BE": ((0.2, -0.1, 1), (0, 1, 0)), "gunR": 0.75, "LP": (0.05, 0.46, 1.34), "LBE": aim(-4, 0), "gunL": 1.0, "tor": (0.06, -0.75, 0.03), "hed": (0.0, 0.75, 0.03), "prt": (0.03, -0.3, 0), "FL": (-0.09, 0.2, A_Z), "FR": (0.13, -0.15, A_Z), "FLy": 0.05, "FRy": -0.6, **OPEN, "brow": 0.6, "smile": 0.6}
     out.append(C("rmb_hold", 0.8, [(0.0, {}), (0.12, RH, "out"), (0.8, dict(RH, G=(0.31, -0.08, 1.64), tor=(0.08, -0.82, 0.03)))]))
     out.append(C("rmb", 0.7, [(0.0, dict(RH, G=(0.31, -0.08, 1.64))), (0.06, {"G": (0.28, 0.3, 1.58), "BE": ((0, 1, 0.3), (0, 0, 1)), "gunR": 0.2, "tor": (0.35, 0.3, 0), "hed": (-0.25, -0.3, 0), "prt": (0.15, 0.25, 0), "FL": (-0.09, 0.3, A_Z), "FR": (0.13, -0.26, A_Z), "FRp": 0.3, "smile": 1.0}, "out"),
@@ -313,13 +313,13 @@ def clips():
     # the air dash: a tuck-and-flip
     TK = {"pel": (0, 0, -0.1), "tor": (0.7, 0, 0), "hed": (0.5, 0, 0), "G": (0.15, 0.3, 0.95), "BE": ((0, 0.3, -1), (0, 1, 0)), "LP": (-0.15, 0.3, 0.95), "LBE": ((0, 0.3, -1), (0, 1, 0)), "FL": (-0.09, 0.28, 0.45), "FR": (0.09, 0.3, 0.5), "FLp": 0.9, "FRp": 0.9}
     out.append(C("dash_ex", 0.5, [(0.0, {"prt": (0, 0, 0)}), (0.05, dict(TK, prt=(1.5, 0, 0)), "out"), (0.2, dict(TK, prt=(5.2, 0, 0))), (0.36, {"prt": (6.283, 0, 0), "tor": (0.1, 0, 0), "hed": (0.05, 0, 0), "G": READY["G"], "BE": READY["BE"], "LP": READY["LP"], "LBE": READY["LBE"], "FL": READY["FL"], "FR": READY["FR"], "FLp": 0, "FRp": 0}), (0.5, {"prt": (6.283, 0, 0)})]))
-    # Skycall: left finger stabs the spot, then points straight up through the 0.8 s countdown
+    # Undercurrent: left finger stabs the spot, then points straight up through the 0.8 s countdown
     PT = {"LP": (-0.14, 0.55, 1.32), "LBE": aim(10, -12), "gunL": 1.0, "tor": (0.05, 0.3, 0), "hed": (0.05, -0.3, 0), **OPEN}
     SK = {"LP": (-0.2, 0.1, 1.78), "LBE": ((0, 0.05, 1), (0, -1, 0.05)), "gunL": 1.0, "G": (0.26, 0.03, 1.02), "tor": (-0.18, 0.1, 0.06), "hed": (-0.42, 0.0, 0.05), "pel": (0.02, 0, 0.0), "lidR": 0.25, "lidL": 0.12, "smile": 1.0}
     out.append(C("sky", 1.4, [(0.0, {}), (0.07, {"tor": (0.1, 0.5, 0), "LP": (-0.3, -0.05, 1.2), "gunL": 1.0}), (0.14, PT, "out"), (0.3, SK, "out"), (0.5, dict(SK, LP=(-0.2, 0.1, 1.74))), (1.15, SK), (1.4, END)]))
     out.append(C("sky_snap", 0.55, [(0.0, SK), (0.06, {"LP": (-0.18, 0.5, 0.98), "LBE": aim(6, -48), "tor": (0.42, 0.1, 0), "hed": (-0.1, -0.1, 0), "pel": (0, 0, -0.1), "prt": (0.2, 0, 0), "smile": 1.0, "lidR": 0.9}, "out"), (0.3, {"LP": (-0.22, 0.42, 1.08), "tor": (0.2, 0.1, 0), "pel": (0, 0, -0.04), "prt": (0.08, 0, 0)}), (0.55, END)]))
     out.append(C("live", 0.55, [(0.0, {}), (0.07, {"LP": (-0.2, 0.1, 1.76), "LBE": ((0, 0.05, 1), (0, -1, 0.05)), "gunL": 1.0, "tor": (-0.12, 0, 0), "hed": (-0.3, 0, 0), "smile": 1.0}, "out"), (0.3, {"LP": (-0.2, 0.1, 1.7)}), (0.55, END)]))
-    # Kitefall: the crouch, the launch and hang with the rods blazing, the dive down the bolt, the landing on one knee
+    # Stormfall: the crouch, the launch and hang with the rods blazing, the dive down the bolt, the landing on one knee
     XC = {"pel": (0, -0.02, -0.34), "prt": (0.55, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.65, 0, 0), "G": (0.34, -0.22, 0.92), "BE": ((0.2, -0.6, -0.8), (0, 0, 1)), "LP": (-0.34, -0.22, 0.92), "LBE": ((-0.2, -0.6, -0.8), (0, 0, 1)), "gunR": 0.8, "gunL": 0.8,
           "FL": (-0.15, 0.08, A_Z), "FR": (0.15, -0.1, A_Z), "skirt": 0.7, "brow": 0.9, **OPEN, "smile": 0.6, "lit": 0.6, "fan": 0.4}
     out.append(C("ult", 0.3, [(0.0, {}), (0.1, dict(XC, pel=(0, -0.02, -0.22)), "out"), (0.3, XC)]))

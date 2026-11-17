@@ -62,7 +62,7 @@
 		"x": {
 			"mode": "buffer",
 			"source": "ref-ostra is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is held (never lost) and goes the step the well opens and frees him; after that Swap goes at once.",
-			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens Shift goes at once"
+			"reason": "owner 18:20 (replacing item 16): Main Attraction locks him in the cast for the 1.0 s dome only; once it opens Shift goes at once"
 		},
 		"q": {
 			"mode": "fire",
@@ -72,7 +72,7 @@
 	"into_jump": {
 		"x": {
 			"mode": "lock",
-			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
+			"reason": "owner 18:20 (replacing item 16): Main Attraction locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
 			"source": "Footage (ult f23-f33): ref-ostra is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
 	},

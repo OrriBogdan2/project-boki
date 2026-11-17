@@ -301,7 +301,7 @@ def clips():
     out.append(C("aim", 0.3, [(0.0, END), (0.12, aim), (0.3, dict(aim, G=(0.12, 0.445, 1.282)))]))
     sh0 = dict(aim, G=(0.12, 0.34, 1.38), tor=(-0.1, -0.3, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, brow=-0.4)
     out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.12, 0.38, 1.34)), "out"), (0.3, dict(aim, jaw=0.5, tor=(0.1, -0.2, 0.05))), (0.48, END)]))
-    # Shift, Soot Ram: head first, horns of her own making: crouched, then flat out behind her own forehead, arms flung back, teeth first; the hit stops her dead and she bounces
+    # Shift, Lock Horns: head first, horns of her own making: crouched, then flat out behind her own forehead, arms flung back, teeth first; the hit stops her dead and she bounces
     cr = {"pel": (0, -0.06, -0.2), "prt": (0.35, 0, 0), "tor": (0.35, 0, 0), "hed": (-0.3, 0, 0), "G": (0.25, -0.1, 0.76), "LP": (-0.24, -0.12, 0.74), "brow": 0.8, "lid": 0.1, "jaw": 0.2, "fing": 1.0,
           "FL": (-0.11, 0.14, A_Z), "FR": (0.12, -0.18, A_Z), "FRp": 0.5}
     ram = {"pel": (0, 0.2, -0.26), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.75, 0, 0), "G": (0.3, -0.42, 0.74), "LP": (-0.3, -0.42, 0.76), "jaw": 0.7, "brow": 0.9,
@@ -313,7 +313,7 @@ def clips():
     roll = dict(ball, prt=(-3.0, 0, 0))
     spread = {"pel": (0, 0, 0.0), "prt": (-6.283 + 0.35, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.36, 0.02, 1.03), "LP": (-0.42, 0.02, 1.08), "FL": (-0.24, -0.1, 0.32), "FR": (0.24, -0.16, 0.36), "FLp": 0.7, "FRp": 0.7, "jaw": 0.9, "lid": 0.05, "brow": -0.7}
     out.append(C("hop", 0.7, [(0.0, {"pel": (0, 0, -0.08), "FL": (-0.1, 0.1, 0.25), "FR": (0.12, 0.1, 0.26)}), (0.05, ball, "out"), (0.17, roll), (0.25, spread), (0.5, dict(spread, prt=(-6.283 + 0.45, 0, 0))), (0.7, dict(END, prt=(-6.283 + 0.04, -0.14, 0.09)))]))
-    # E, Furnace Cloak (0.24): tuck for a blink, then everything flung wide on the blast frame (0.03, held to 0.07), chest out, up on her toes, a shriek of joy
+    # E, Molten Hug (0.24): tuck for a blink, then everything flung wide on the blast frame (0.03, held to 0.07), chest out, up on her toes, a shriek of joy
     tuck = {"pel": (0, 0, -0.1), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.16, 0.16, 0.96), "LP": (-0.14, 0.14, 0.95), "fing": 1.0, "lid": 0.5, "jaw": 0.05}
     wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "LP": (-0.44, 0.06, 1.14), "cast": 1.0, "castl": 1.0, "fing": 0.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
             "FLp": 0.5, "FRp": 0.5, "FL": (-0.15, 0.05, A_Z + 0.045), "FR": (0.17, -0.05, A_Z + 0.045), "skirt": 0.3}
@@ -321,7 +321,7 @@ def clips():
     # a Flashover or a knock: the left fist punches up, a bounce on her heels, cackling
     pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.2), "LP": (-0.14, 0.08, 1.76), "cast": 1.0, "fistl": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
     out.append(C("stoke", 0.5, [(0.0, END), (0.1, pu, "out"), (0.22, dict(pu, pel=(0, 0, -0.09), LP=(-0.14, 0.08, 1.68))), (0.5, END)]))
-    # X, Flue Flight: down into a crouch as the ring bursts, then up on the two heel jets: leaning into it with her arms back, legs trailing, howling
+    # X, Red Carpet: down into a crouch as the ring bursts, then up on the two heel jets: leaning into it with her arms back, legs trailing, howling
     up0 = {"pel": (0, 0, -0.14), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.2, 0, 0), "G": (0.22, -0.05, 0.86), "LP": (-0.22, -0.06, 0.84), "FL": (-0.11, 0.08, A_Z), "FR": (0.12, -0.08, A_Z), "jet": 0.6, "jaw": 0.3}
     fly = {"pel": (0, 0.0, 0.0), "prt": (0.62, 0, 0.0), "tor": (-0.05, 0, 0.0), "hed": (-0.6, 0, 0.0), "G": (0.25, -0.2, 0.98), "LP": (-0.29, -0.2, 0.96), "FL": (-0.12, -0.14, 0.38), "FR": (0.13, -0.3, 0.52),
            "FLp": 0.8, "FRp": 1.1, "jet": 1.0, "jaw": 0.9, "brow": -0.6, "lid": 0.05, "skirt": -0.7, "fing": 0.8}

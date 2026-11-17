@@ -47,7 +47,7 @@ func _tenzo() -> void:
 	P.ak.use_e()
 	step(m, 1.0)
 	var rs := rocks(m)
-	ok("tenzo: Stone Row raised", rs.size() == 3, "rocks %d" % rs.size())
+	ok("tenzo: Foothold raised", rs.size() == 3, "rocks %d" % rs.size())
 	await _probe("tenzo", m, T, rs[1], "rock")
 
 func _neve() -> void:

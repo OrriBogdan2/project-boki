@@ -67,7 +67,7 @@ w("| Weapon | Class | Ability | Verb | Cooldown | What it does |\n|---|---|---|-
 for f in sorted(os.listdir(os.path.join(R, "content/weapons"))):
     wp = j("content/weapons/" + f)
     if not wp.get("utility"):
-        continue      # the archetype weapons (Longbow, Spellstaff, Tower Shield & Mace) have no RMB of their own
+        continue      # the archetype weapons (Drawstring, Spellstaff, Tower Shield & Mace) have no RMB of their own
     a = ab(wp["utility"])
     w(f"| {wp['name']} | {', '.join(wp['classes'])} | **{a['name']}** | {a.get('verb','')} | {a['cooldown']}s | {a['desc']} |")
 w("\n## Q: active gloves\n")
@@ -101,7 +101,7 @@ w("- **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor t
 w("- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).")
 w("- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).\n")
 w("## Blockers and crossers\n")
-w("One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Deep Reach (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).\n")
+w("One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Sticky Fingers (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Foothold, Backbone); **ice** = Neve's Cold Front; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).\n")
 bl = j("content/rules/blockers.json")
 kinds = ["shield", "rock", "ice", "wall", "guard"]
 w("| Crosser | Class | " + " | ".join(kinds) + " |\n|---|---|" + "---|" * len(kinds))

@@ -26,7 +26,7 @@
 	},
 	"passive": {
 		"name": "Hot Streak",
-		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast blast, Palm Spear) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
 	},
 	"dash": {
 		"id": "slipstep",
@@ -48,7 +48,7 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Burr Charge",
+		"name": "Coin Blast",
 		"card_range": "burr.range",
 		"short": "Burr",
 		"icon": "gunslinger_rmb",
@@ -82,7 +82,7 @@
 	},
 	"e": {
 		"delivery": "burst",
-		"name": "Longneedle",
+		"name": "Palm Spear",
 		"card_range": "range",
 		"short": "Needle",
 		"icon": "gunslinger_e",
@@ -109,7 +109,7 @@
 	},
 	"x": {
 		"ground": {"range": "range", "r": "radius"},
-		"name": "Cinderfall",
+		"name": "Penny Drop",
 		"card_range": "range",
 		"short": "Fall",
 		"icon": "gunslinger_x",

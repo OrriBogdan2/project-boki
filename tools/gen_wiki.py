@@ -813,23 +813,23 @@ def gen_turn_table():
 AIR_AUDIT = {
     "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
               "dancer.md and owner items 7 / 129: the air dash is longer and slower"],
-    "archer": ["same", "with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
-               "pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "archer": ["same", "with a charge: the same Slip Stitch (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
+               "pin.md: one Slip Stitch, no air variant. Item 183 moved the generic long dash off the charged press"],
     "mage": ["same", "the same Wirerun (7.5 to 13 m by rank, one charge, same clip)", "vireo.md: one Wirerun, no air variant"],
     "gunslinger": ["special", "a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip",
                    "venator.md: the air slide is shorter"],
     "tender": ["special", "its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown", "mooshmoosh.md and owner item 24"],
-    "rimewright": ["same", "the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Skate"],
-    "dolm": ["same", "with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
+    "rimewright": ["same", "the same Free Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Free Skate"],
+    "dolm": ["same", "with a charge: the same Leap of Faith (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
              "out of charges the class long dash (`breah_exdash`)", "breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press"],
-    "ostra": ["same", "the same Lantern Trade (1.8 s), the same charge and clip", "ostra.md: one Lantern Trade"],
-    "bulwark": ["same", "with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash",
-                "bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press"],
-    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, "
+    "ostra": ["same", "the same Musical Chairs (1.8 s), the same charge and clip", "ostra.md: one Musical Chairs"],
+    "bulwark": ["same", "with a charge: the same Tideturner (`bul_whirl`, one charge); out of charges the class long dash",
+                "bjorn.md: one Tideturner. Item 183 moved the generic long dash off the charged press"],
+    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Hit the Deck's gather it rides the drive with no wind-up, "
                    "the gather pose kept; out of charges the class shoulder charge (`jug_exdash`)",
                    "juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press"],
     "ashwick": ["skipped", "air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s)", "parity 11 (queued)"],
-    "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
+    "dredge": ["skipped", "`air_k` carry on the Mad Dash", "parity 13 (queued)"],
 }
 
 def _air_audit_table():

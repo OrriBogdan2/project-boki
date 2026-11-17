@@ -11,7 +11,7 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
+const SPIRIT_CLIMB := 14.0       # m/s a Slip Stitch rises up a ledge face (Phase Walk goes through raised terrain)
 # one-step presses, cleared after each sim step
 const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill",
 		"swap"]
@@ -260,7 +260,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range multiplier (1 unless a kit sets it)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
+var spirit_t := 0.0           # Slip Stitch (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -882,7 +882,7 @@ func can_glide() -> bool:
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
 ## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled, unless
-## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Rock Hop's launch_to). The dash's own
+## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Leap of Faith's launch_to). The dash's own
 ## wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
@@ -1506,7 +1506,7 @@ func sim(dt: float) -> void:
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
-	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
+	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Red Carpet: only E)
 	# gloves need no point: Gloves
 	gate_ranks()
 	BaseRecall.tick(self, dt)

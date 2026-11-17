@@ -12,7 +12,7 @@ extends RefCounted
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
 ##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
 ##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
-##   9. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
+##   9. an ally's Rise and Shine on you: a slim bar with Meeko's portrait under your vitals, draining over the
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
@@ -489,7 +489,7 @@ func _banner_closes(kb: KnockBanner) -> void:
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
 
-## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
+## 9. Meeko's Rise and Shine on you: the ChannelBar under your vitals, from her kit and from a snapshot.
 func _channel(m: Match, hud, P: Hunter) -> void:
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
 	ok(not mates.is_empty(), "an ally to be Meeko (%d)" % mates.size())

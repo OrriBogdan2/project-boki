@@ -1,5 +1,5 @@
 extends RefCounted
-## --sfx-set-check section 11: Sparkle's Kitefall has a cue on every beat (crouch, lift-off, hover, drop, strike).
+## --sfx-set-check section 11: Sparkle's Stormfall has a cue on every beat (crouch, lift-off, hover, drop, strike).
 ## One cast runs frame by frame; each cue must sound within CUE_MS of its state change (counted in sim time, so the
 ## number does not depend on how fast the check runs), and the hover's hum loop must be off again by the drop.
 
@@ -29,14 +29,14 @@ func run(main: Node, ok: Callable) -> void:
 		ac.step(m, DT)
 		frame += 1
 	_note(U, frame, seen, cue_at)
-	ok.call(started and seen.has("crouch"), "Kitefall: the press starts the cast")
+	ok.call(started and seen.has("crouch"), "Stormfall: the press starts the cast")
 	for b in BEATS:
 		var ms := _ms(cue_at.get(b[1], NEVER), seen.get(b[0], 0))
-		ok.call(ms >= 0.0 and ms <= CUE_MS, "Kitefall %s: %s sounds %.0f ms after the state change" % [b[0], b[1], ms])
+		ok.call(ms >= 0.0 and ms <= CUE_MS, "Stormfall %s: %s sounds %.0f ms after the state change" % [b[0], b[1], ms])
 	var on := _ms(seen.get("hum_on", NEVER), seen.get("air", 0))
-	ok.call(on >= 0.0 and on <= CUE_MS, "Kitefall hover: the hum loop is on %.0f ms after the hover starts" % on)
+	ok.call(on >= 0.0 and on <= CUE_MS, "Stormfall hover: the hum loop is on %.0f ms after the hover starts" % on)
 	var off := _ms(seen.get("hum_off", NEVER), seen.get("fall", 0))
-	ok.call(off >= 0.0 and off <= CUE_MS, "Kitefall drop: the hum loop is off %.0f ms after the drop starts" % off)
+	ok.call(off >= 0.0 and off <= CUE_MS, "Stormfall drop: the hum loop is off %.0f ms after the drop starts" % off)
 	m.queue_free()
 
 ## Milliseconds from the frame a state began to the frame its cue sounded (huge when the cue never did).

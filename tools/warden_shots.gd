@@ -273,8 +273,8 @@ func _fit(img: Image) -> Image:
 
 ## Kit moves keyed under their own names (not <id>_lmb / _dash / _rmb): [caption, move, time (s)].
 const OWN_MOVES := {
-	"ashwick": [["Torch Lance", "as_lance", 0.2], ["Soot Ram", "as_leap", 0.08], ["Soot Ram, late", "as_leap", 0.2],
-		["Cinder Shot aim", "as_aim", 0.3], ["Cinder Shot", "as_shot", 0.12], ["Furnace Cloak", "as_cloak", 0.15]],
+	"ashwick": [["Open Flame", "as_lance", 0.2], ["Lock Horns", "as_leap", 0.08], ["Lock Horns, late", "as_leap", 0.2],
+		["Spitfire aim", "as_aim", 0.3], ["Spitfire", "as_shot", 0.12], ["Molten Hug", "as_cloak", 0.15]],
 }
 
 ## The run cycle at two phases, then the hero's own kit moves (<id>_lmb, _dash, _rmb) at key moments: [label,
@@ -296,8 +296,8 @@ func _move_frames(id: String) -> Array:
 ## Heroes whose kit moves aren't named <id>_lmb / _dash / _rmb (KMovesStone, Hem's bow): [label, kit move, its time
 ## (s), arena_demo.gd's timings].
 const KIT_FRAMES := {
-	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
-		["Heavy Shot", "arc_heavy", 1.42]],
+	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Slip Stitch roll", "pin_roll", 0.58],
+		["Pin Down", "arc_heavy", 1.42]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
 		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_hop", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],

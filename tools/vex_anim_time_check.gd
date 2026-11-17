@@ -8,7 +8,7 @@ const DT := 1.0 / 60.0
 const BLEND_IN := 0.12       # s: a move owns the body by this (WardenClips.FADE 0.1 + a frame)
 const BACK_SLACK := 2 * DT   # s past a clip's end and its blend-out (warden_anim "fade_out") the legs are back
 const SLIDE_UP := 0.62       # s: the dash clip's stand-up key (tools/art1/vex_clips.py): the skid ends before it
-const BEND := 0.25           # m: the most a walk key bends the Longneedle's recoil shove (Hunter knock_steer);
+const BEND := 0.25           # m: the most a walk key bends the Palm Spear's recoil shove (Hunter knock_steer);
                              # walking the hold would be ~2 m
 const CLIP_TOL := 0.04       # s: the GLB samples its clips at 30 fps, so a length can sit a frame long
 var C                        # the combo check (ok, ac)

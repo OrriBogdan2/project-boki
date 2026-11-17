@@ -8,13 +8,13 @@
 //   1 orb      a radial glow: a core (color2) inside a halo (color); `strength` scales the halo's cover
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y, with a smoke tail (color2)
 //   3 crescent a blade arc swept by `progress`: UV.x along the sweep, UV.y from the edge inward
-//   4 sunburst a jagged burst of sharp rays thrown out over life (the Furnace Cloak, the barge, impacts)
+//   4 sunburst a jagged burst of sharp rays thrown out over life (the Molten Hug, the barge, impacts)
 //   6 scorch   a cracked, glowing scorch disc that cools from orange to soot
 //   7 swirl    a ring of flame streaks rotating round the centre (Cinder's shield)
 //   8 links    a ring of chain links (Dredge Grounded while he reels)
 //   9 flame icon  a small teardrop flame (the burn pips over a foe)
-//  10 spiral   a stun spiral (Anchor Drop victims)
-//  11 wave     a cel shockwave ring that races out over life (the Anchor's landing ring, Cinder Shot's fizzle)
+//  10 spiral   a stun spiral (Lump Sum victims)
+//  11 wave     a cel shockwave ring that races out over life (the Anchor's landing ring, Spitfire's fizzle)
 //  12 dot      a round dot with a dark core (a slug hanging at its stop line)
 uniform vec4 color : source_color = vec4(1.0, 0.6, 0.2, 1.0);
 uniform vec4 color2 : source_color = vec4(1.0, 1.0, 0.8, 1.0);

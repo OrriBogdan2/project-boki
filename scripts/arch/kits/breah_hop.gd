@@ -1,6 +1,6 @@
 class_name BreahHop
 extends RefCounted
-## Tarek's ground dash, Rock Hop (docs/heroes/dolm.md): a rock bursts up under him and he springs
+## Tarek's ground dash, Leap of Faith (docs/heroes/dolm.md): a rock bursts up under him and he springs
 ## off it toward the cursor, up to `hops` times. Fast, low arcs; a fresh low rock rises to meet his feet at each
 ## landing, laid along the hop like a rail, and he skids along it. A press inside `window` of the last take-off
 ## sends the next hop toward the cursor as it is then; no press and the skid ends in the landing. Each landing but
@@ -10,7 +10,7 @@ extends RefCounted
 ## on a rock raised at his height, but only if ground lies ahead within the reach of the hops left: he crosses a
 ## gap, never runs out into open abyss (nothing past the map's edge is ground, so that is out of reach too).
 ## The charge is spent at the press and recharges from the chain's end. Rocks are "hop" rocks: real ones that stop
-## foes and carry allies, not counted among his Stone Row, never launched, gone in `hop_rock_t`.
+## foes and carry allies, not counted among his Foothold, never launched, gone in `hop_rock_t`.
 
 const CROUCH := 0.06           # s: the first rock bursts up and he crouches on it
 const RISE_LEAD := 0.06        # s before touchdown: the landing rock comes up to meet him
@@ -256,7 +256,7 @@ func _kick() -> void:
 	k.vfx("leap")
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 
-## Rock Hop falls at its own leap_grav: the pull on top of gravity.
+## Leap of Faith falls at its own leap_grav: the pull on top of gravity.
 func _pull() -> float:
 	return maxf(0.0, float(dd().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
 

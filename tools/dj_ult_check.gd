@@ -1,5 +1,5 @@
 extends RefCounted
-## The ultimates on X of Sable (Encore, ThiefUlt) and Kael (Gilded Riposte, JuggernautUlt), run inside
+## The ultimates on X of Sable (Last Dance, ThiefUlt) and Kael (Blow for Blow, JuggernautUlt), run inside
 ## --dancer-combo-check / --juggernaut-combo-check / --kit-combo-check (tools/dancer_jug_check.gd) with the
 ## helpers of tools/archetype_check.gd passed in as A. Each asserts the cast, the telegraph, the payoff, the
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
@@ -35,7 +35,7 @@ func _gate(P: Hunter, who: String) -> void:
 			locked and float(P.ak.cd["x"]) <= 0.0 and not P.ak.ult_running() and not P.ak.slot_info("x")["ready"])
 	_open(P)
 
-# ------------------------------------------------------------------ Sable: Encore
+# ------------------------------------------------------------------ Sable: Last Dance
 func dancer(a) -> void:
 	A = a
 	var r = A.setup("thief", 4.6, "", true)
@@ -61,7 +61,7 @@ func dancer(a) -> void:
 	A.ok("dancer X: one press, one cast (main's X path only)", U.casts == 1 and int(P.used.get("x", 0)) == used0 + 1,
 			"casts %d used +%d" % [U.casts, int(P.used.get("x", 0)) - used0])
 	var ring: Dictionary = AimKit.entry(P, "ult")
-	A.ok("dancer X: Encore casts; the ring everyone sees starts small and grows; the Vault comes back",
+	A.ok("dancer X: Last Dance casts; the ring everyone sees starts small and grows; the Vault comes back",
 			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and P.dashes >= P.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), P.dashes])
@@ -153,7 +153,7 @@ func dancer(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
 
-## One cast of Encore against dummies that stand still while Sable stands or walks (`walk` m/s along +x).
+## One cast of Last Dance against dummies that stand still while Sable stands or walks (`walk` m/s along +x).
 ## Returns each foe's landings: {foe id: [[seconds since the cast, hp lost], ...]}; `rings` is the ring's radius
 ## and the foe's distance at every beat, so a check can say which volleys a foe was in reach of.
 func _cast_log(m: Match, P: Hunter, foes: Dictionary, walk: float, rings: Array) -> Dictionary:
@@ -261,7 +261,7 @@ func dancer_ring(a) -> void:
 			hits.size(), rings.size(), in_band, got, want, P.pos.x - home.x])
 	await A.done(m)
 
-# ------------------------------------------------------------------ Kael: Gilded Riposte
+# ------------------------------------------------------------------ Kael: Blow for Blow
 func zedran(a) -> void:
 	A = a
 	var r = A.setup("juggernaut", 2.6, "", true)
@@ -292,7 +292,7 @@ func zedran(a) -> void:
 	P.inp["jump"] = true
 	A.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
 	P.inp["move"] = Vector2.ZERO
-	A.ok("juggernaut X small mechanic: planted through the guard (no walk, no jump, no Smash)",
+	A.ok("juggernaut X small mechanic: planted through the guard (no walk, no jump, no Final Swing)",
 			P.pos.distance_to(p0) < 0.1 and K.busy(), "moved %.2f" % P.pos.distance_to(p0))
 	# invulnerable: hits do nothing and can't stun; each one blocked (two at most) makes the answer harder
 	var hp0 := P.hp
@@ -540,7 +540,7 @@ func combos(a) -> void:
 	await _merge_holds()
 	await _burst_cap()
 
-## The sheet's natural combo: Bola grounds a foe, then Encore: Grounded, they can't leave the ring.
+## The sheet's natural combo: Dark Bola grounds a foe, then Last Dance: Grounded, they can't leave the ring.
 func _bola_encore() -> void:
 	var r = A.setup("thief", 3.5)
 	var m: Match = r[0]
@@ -556,7 +556,7 @@ func _bola_encore() -> void:
 	var grounded := KitStatus.grounded(T)
 	HunterKeys.ult_pressed(P)
 	A.step(m, 2.5)
-	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 10,
+	A.ok("combo dancer: Dark Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 10,
 			"grounded %s blades %d" % [grounded, K.encore.blades])
 	await A.done(m)
 
@@ -597,7 +597,7 @@ func _merge_holds() -> void:
 	KinMerge.cast(P)
 	var b0 := TK.encore.blades
 	A.step(m, 1.6)
-	A.ok("merge hold dancer: Encore's blades stop and its ring goes (hold field encore.st)",
+	A.ok("merge hold dancer: Last Dance's blades stop and its ring goes (hold field encore.st)",
 			not TK.encore.running() and TK.encore.blades == b0 and not AimKit.shown(P, "ult") and KinMerge.active(P),
 			"blades after %d" % (TK.encore.blades - b0))
 	await A.done(m)

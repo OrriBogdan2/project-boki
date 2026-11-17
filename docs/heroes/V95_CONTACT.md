@@ -19,7 +19,7 @@ window it could measure (Vex, Sable, Albert, Meeko, Motley, Neve, Sparkle; 21 mo
 swap kept the clip timing. Cinder's and Kael's pre-swap files do not load with today's clip setup (no `Warden/Sync`), so they
 have no before/after; their rows below are measured on the current files only.
 
-Result: 27 of 27 PASS. Albert's Shield Slam was 0.250 s off and is fixed in data (`lead` 0.25 in breaker.json). Vex's Cinderfall (X) and Motley's Swap (E)
+Result: 27 of 27 PASS. Albert's Shield Slam was 0.250 s off and is fixed in data (`lead` 0.25 in breaker.json). Vex's Penny Drop (X) and Motley's Swap (E)
 were fixed by re-timing the clip keys, not the kit (`FIRE_T` and the press-time lob are the source's): Vex's `x` holds READY to 0.06 s and snaps the cannon up by 0.14 s (the shell's
 frame; it was up by 0.1) and squashes at 0.18 (`tools/art1/vex_clips.py`); Motley's `swap` throws by 0.033 s, with the coil left to the `swap_aim` hold (`tools/art1/ostra_clips.py`;
 a `lead` 0.1 had failed `--ostra-combo-check`, this keeps it at 0 so the body hands back as before). Both clips were rebuilt on the shipped .glb with `tools/art1/rebake_from_glb.py` and

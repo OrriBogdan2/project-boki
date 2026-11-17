@@ -1,6 +1,6 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Claire's reel (tools/hero_vfx_reel.gd): the darts held, the skate carving its frost trail with beams, the spear
-## through its landing and detonation, the Rink Wall frozen, and Rimelock to its crash.
+## through its landing and detonation, the Cold Front frozen, and Freeze Frame to its crash.
 
 func parts() -> Array:
 	return ["lmb", "hold", "dash", "rmb", "e", "r"]
@@ -54,6 +54,6 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(T.pos)
-	await _go(4.2, cast, _sheet("r", "R, Rimelock: the seal, the cold held round her, the crash and its frost",
+	await _go(4.2, cast, _sheet("r", "R, Freeze Frame: the seal, the cold held round her, the crash and its frost",
 		[0.15, 0.3, 0.6, 1.2, 2.4, 3.55, 3.7, 3.9, 4.15]), 1.5)
 	await _go(GAP)

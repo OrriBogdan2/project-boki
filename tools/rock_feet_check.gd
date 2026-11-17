@@ -1,6 +1,6 @@
 extends RefCounted
 ## --rock-feet-check: Tenzo's feet on his own rocks, through the real match path (Match.step, Hunter.render,
-## HunterAnim, FootPlant, the .glb's Sync with legs_rigid). He stands on a Stone Row rock, walks along a cast Basalt
+## HunterAnim, FootPlant, the .glb's Sync with legs_rigid). He stands on a Foothold rock, walks along a cast Basalt
 ## Spine ridge and steps between rocks whose bases differ (a stair's rise, a terrace), while a twin of his model on
 ## flat ground plays his exact animation state (Hunter.anim_s) unplanted. Per grounded frame, the weight-bearing
 ## ankle's height over the surface under it (the rock's top he stands on, StoneStand) is held against the twin's
@@ -53,7 +53,7 @@ func run(main: Node) -> void:
 	print("ROCK_FEET_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Stone Row ahead; he stands on its middle rock, still.
+## Foothold ahead; he stands on its middle rock, still.
 func _stand_row() -> void:
 	A.aim_at(P, home + Vector3(6, 0, 0))
 	P.ak.cd["e"] = 0.0
@@ -63,9 +63,9 @@ func _stand_row() -> void:
 	row.sort_custom(func(a, b): return _mid(a).x < _mid(b).x)
 	var mid: Dictionary = row[row.size() / 2]
 	_place(_mid(mid) + Vector3(0, float(mid["top"]), 0))
-	_score("stand on a Stone Row rock", Vector2.ZERO, SETTLE)
+	_score("stand on a Foothold rock", Vector2.ZERO, SETTLE)
 
-## Basalt Spine across his aim; he walks its length from one end rock to the other, steering along the arc.
+## Backbone across his aim; he walks its length from one end rock to the other, steering along the arc.
 func _ridge_walk() -> void:
 	_clear()
 	A.aim_at(P, home + Vector3(6, 0, -5))
@@ -76,11 +76,11 @@ func _ridge_walk() -> void:
 	_rise(1.0)
 	var ridge := _rocks()
 	ridge.sort_custom(func(a, b): return _mid(a).x < _mid(b).x)
-	ok(ridge.size() >= 9, "Basalt Spine stands (%d rocks)" % ridge.size())
+	ok(ridge.size() >= 9, "Backbone stands (%d rocks)" % ridge.size())
 	var first: Dictionary = ridge[1]
 	_place(_mid(first) + Vector3(0, float(first["top"]), 0))
 	var last := _mid(ridge[-2]).x
-	_score("walk along the Basalt Spine ridge", func(): return _along(ridge), SETTLE, func(): return P.pos.x > last)
+	_score("walk along the Backbone ridge", func(): return _along(ridge), SETTLE, func(): return P.pos.x > last)
 
 ## Five rocks end to end, the last four a stair's rise (then a terrace) above the first; he walks from the first
 ## onto the last and back.
