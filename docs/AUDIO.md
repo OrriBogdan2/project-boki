@@ -151,6 +151,8 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 - Farm reactions: `garden_feed|pet|friend|trait|toy` (UI set, `tools/gen_sfx_ui.py`), one per kind of good thing at home; `unlock` is only for real unlocks. The Boki eat and nap sounds (`boki_eat`, `boki_sleep`) play from the care states. `--garden-react-check` guards both. (No race exists on the farm yet, so there is no race cue.)
 - Warnings (`content/sfx/warn.json`, `tools/gen_sfx_warn.py`): `warn_heartbeat` (the local Hunter under 25% health, quicker as it falls, silent when healed, downed or out: `WarnSfx.low_hp`), `warn_tick` (one a second, rising in pitch, for the last 5 s of a skiff boarding or an open uplink lift: `WarnSfx.countdown`; the rift hatch has its own unlock ticks) and `blight_rumble` (a Skitter pack clawing out of the ground, a Blight Warden's shriek).
 - Boki moments: `boki_downed` / `boki_revive` (a Boki goes down / comes round, `KinDowned`, `KinNet`), `boki_fuse` / `boki_unfuse` (`MergeXform`), `boki_eat` (feeding at home), `boki_sleep` (a nap starts at home). `--sfx-set-check` asserts each is in a set, exists and is named by the script that plays it (`WIRED`).
+- UI and event cues go through `UiSfx` (`scripts/ui/ui_sfx.gd`): `error` (`ui_deny`), `captured` (`ui_capture`), `extract_start` / `extract_success` / `extract_fail` (`ui_extract_start`, `extract_ok`, `ui_extract_fail`). Item pickup stays per-Hunter via `HeroSfx` in `Pack`. `--sfx-set-check` asserts every name in `UiSfx` has a file.
+- Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
 
 ## Sound sets (`content/sfx/<group>.json`)
 ```json
