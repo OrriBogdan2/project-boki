@@ -29,12 +29,12 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_slide(m, P, K, home)
 	_needle(m, P, K, T, home)
 	_nuke(m, P, K, home)
-	_knock(m, P, K, T, home)
+	_knock(m, P, K, T)
 	_settle(m, P, home, 1.0)
 
 
-func _clips(P: Hunter) -> WardenClips:
-	return P.model.get_node("Warden/Sync").get("clips") as WardenClips
+func _clips(hunter: Hunter) -> WardenClips:
+	return hunter.model.get_node("Warden/Sync").get("clips") as WardenClips
 
 
 ## How long past its clip's end `move` keeps the body: its own blend back to the legs, and a frame or two.
@@ -388,7 +388,7 @@ func _lock_lines(move: String, what: String, lift: float, went: int, rec: Dictio
 
 
 ## The knock cue: a 0.6 s upper-body beat (no source frames: the footage shows no knock).
-func _knock(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+func _knock(m: Match, P: Hunter, K: GunslingerKit, T: Hunter) -> void:
 	K.knocked.clear()
 	P.dashes = 0.0
 	T.hp = 0.0
