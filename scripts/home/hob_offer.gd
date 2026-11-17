@@ -162,6 +162,7 @@ func show_clip(k: int) -> void:
 func ask(id: String) -> void:
 	if is_instance_valid(asking) or not ids.has(id):
 		return
+	focus(ids.find(id))
 	var name_txt := HeroTitle.base_name(id)
 	var layer := CanvasLayer.new()
 	layer.layer = ASK_LAYER
