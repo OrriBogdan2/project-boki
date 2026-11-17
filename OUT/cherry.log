@@ -13,3 +13,9 @@ stuck-integ-cd1e658f - novel=11 inmain=1
 stuck-integ-d2f36c16 - novel=26 inmain=0
 stuck-integ-f60f9dd7 - novel=20 inmain=0
 stuck-integ-f6bd2b7c - novel=7 inmain=0
+summon-clips-port - novel=65 inmain=2
+summon-kill-credit-port - novel=70 inmain=1
+tenzo-ridge-bursts - novel=5 inmain=2
+training-merge-1111 - novel=2 inmain=0
+training-time-trial - novel=3 inmain=0
+ttk-five-cast-share - novel=1 inmain=0
