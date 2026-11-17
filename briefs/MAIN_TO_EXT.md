@@ -1409,3 +1409,5 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
 SHIPPED 2026-11-17 10:30Z PR #189 (e3274233a4): seam-safe keep_uv decimate in tools/meshy/bake_warden.py (UV-seam verts collapse last, head band 45%) + tools/art1/v95_to_game.py; python tools only, no game diff (gate: 0 NEW-RED, export dry-run 938M/733M pass). Next: re-port every hunter (job 20261117-093357-a2).
+
+SHIPPED 2026-11-17 10:42Z PR #122 (d90bfb2d02) ext/merge-lane-misc2-1115-b: clans slice 3 tag + last deeds, Scrap King LMB eased always-drawn spread (owner 11-11), walk at body_scale 1.16 everywhere (decision 0061, owner 11-11). Merge with main resolved (job 20261117-094758-a2, b5fc1fd), gated and merged by regate-bot (4db27cfed4).
