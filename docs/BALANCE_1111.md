@@ -1,6 +1,6 @@
 # Balance 11-11: 12x12 bot duels and kit parity
 
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07): every kit is compared with its SUPERVIVE source before
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07): every kit is compared with its REFERENCE source before
 any tuning. Findings split in two: **differs from source** (fixed to the source, one commit each, for
 coordinator review) and **source-faithful but broken in our build** (explained, not changed). Owner
 rules beat the source data (DECISIONS line 2; the burst cap in SERVER_UPDATE6 is one).
@@ -133,7 +133,7 @@ so neither fix changes the picture: both are parity corrections, not balance lev
 
 ## Kit damage against the source
 
-Source: `briefs/supervive-data/supervive_kits.md` (tooltips; Oath, Shiv, Tetra and Void were read at
+Source: `sv/briefs/kits.md` (tooltips; Oath, Shiv, Tetra and Void were read at
 level 15). Our numbers are on a smaller scale (health ~1/8), so each ability is compared as a **ratio to
 the same kit's basic attack** (level-free; the tooltips' level-15 rows stay comparable). Ours =
 `content/archetypes/<id>.json` + the signature weapon (`content/weapons`). Bar 1.25x either way, like the
