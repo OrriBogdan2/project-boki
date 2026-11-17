@@ -6,6 +6,7 @@ var root: Node3D
 var skel: Skeleton3D
 var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 var springs := WardenSprings.new()  # the spring_ bone chains (braids) swinging on top
+var cloth: WardenCloth      # the cloth_ bone chains on SpringBoneSimulator3D (WardenCloth), or null
 var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 var orbits := WardenOrbits.new()    # the orbit_ props (seeing-stones) circling their bone
 var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
@@ -49,6 +50,7 @@ func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 	for b in WardenGlb.LEG_BONES:
 		leg_bones.append(WardenSkeleton.find(skel, b))
 	springs.setup(skel)
+	cloth = WardenCloth.make(skel)
 	orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 	drop_pose = WardenDropPose.make(root, skel)
 
@@ -130,6 +132,8 @@ func _process(dt: float) -> void:
 	FootPlant.bones(root, skel, leg_bones, dt)
 	springs.fold = float(root.get_meta(WardenGlb.WING_FOLD, 0.0))
 	springs.step(dt)
+	if cloth:
+		cloth.step(dt)
 	if companions:
 		companions.step(dt)     # (before the blade: the sun's FX points ride it)
 	apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)

@@ -1,0 +1,17 @@
+{
+  "mesh": "hem",
+  "parent": "hips",
+  "groups": [
+    {
+      "tag": "skirt",
+      "materials": ["cloth-v95b", "leather-v95b"],
+      "from_bones": ["thigh.L", "thigh.R"],
+      "y": [0.06, 1.06],
+      "center": [0.0, 0.03],
+      "sectors": 8,
+      "levels": [1.0, 0.8, 0.6, 0.4, 0.22],
+      "tip": 0.08,
+      "blend": 1.0
+    }
+  ]
+}
