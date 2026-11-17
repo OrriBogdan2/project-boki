@@ -31,7 +31,7 @@ const DEFAULTS := {
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "centred", "cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
 	# accessibility
@@ -240,7 +240,7 @@ func load_file() -> ConfigFile:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+		v["cam_follow"] = "centred"     # the centred follow becomes everyone's default once
 	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
