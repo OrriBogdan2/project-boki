@@ -906,6 +906,10 @@ func flip_for(dir: Vector2, base: String) -> String:
 func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
+## Dash charges: the kit's dash.charges (the source hero's count) or else the class's `class_n`, plus extra_dashes().
+func dash_charges(class_n: float) -> float:
+	return float(dash_def().get("charges", class_n)) + extra_dashes()
+
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
 
