@@ -10059,3 +10059,4 @@ READY ext/glider-heat-parity-port b2800c6221 (port of ext/glider-heat-parity: 6 
 READY ext/ui-settings-trim-port 801ebc6ac4e (settings Main page + More tabs + More keys fold + plainer labels; --settings-trim-check; Esc More already in main; title/expedition More skipped: main redesigned both menus)
 READY ext/idle-tender-rebased-port 62a7d2f829 (Meeko idle+stance clips onto v95 glb; x_breath and lantern keys dropped)
 READY ext/ui-ability-text-one-port 4f2f8eed8a (AbilityText one reader, --ability-text-check 0 fails)
+READY ext/anim-stop-start-port 834d421c2d (loco stop: legs follow the body on a let-go, gated STOPS in --anim-audit; port of old anim-stop-start)
