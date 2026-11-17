@@ -261,10 +261,11 @@ Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes of
 | Throwing (chain in flight) | any | as on the ground or in the air; the throw goes on | ours |
 | Hooked, on the ground | tap | Finishing Slam; the chain stays on | ours |
 | Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, no stun: DECISIONS 2026-11-07), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
-| Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun: DECISIONS 2026-11-07) | ours |
+| Hooked, RMB held 0.12 s or more | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun: DECISIONS 2026-11-07) | ours |
 | Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
+| Hooked, RMB pressed under 0.12 s before E (tapped, or still down; a Slam wound up that short a time) | E | the pull starts with the Cinder Spin (the spin wins over the Slam and the Haul Slam) | owner 11-17 |
 | Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
-| Arriving (0.25 s) | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |
+| Arriving (0.25 s), or 0.15 s after a pull a dash or a knock cut short | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |
 | Arrived, window over | tap / hold | Finishing Slam / Lunge from where you stand, with the carried speed | |
 | Arrived beside a foe | tap | the Slam hits as a body hit (you're 1.2 m off, inside the 2.4 to 4.2 m sweet spot); a wall pull or a steered pull that leaves them 2.4 to 4.2 m ahead gets the sweet spot | no special rule (source: edge hits) |
 | Jumped out of a pull | press | Meteor Drop | ours |
