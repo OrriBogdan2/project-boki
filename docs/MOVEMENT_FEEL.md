@@ -1110,18 +1110,18 @@ the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 dow
 
 The owner's note (Nov 10 2026): aim must feel crisp. The in-match cursor sits exactly where the OS mouse is, with no smoothing, acceleration or a frame of lag added by us. This is the audit of the path from the mouse event to the aim point, and what `--aim-latency-check` holds.
 
-**The path, event to aim point.** The OS event lands in Godot's `Input`, which accumulates motion (`Input.use_accumulated_input`, left at its default) and flushes it once at the start of the frame: the position every reader sees that frame is the latest one, with nothing averaged. `Match._process` then moves the view (`MatchCam.update`), reads the cursor (`_gather_input` → `_mouse_aim`, which casts `CamRig.mouse_on_plane` straight through `get_viewport().get_mouse_position()`), steps the sim and draws. The HUD's crosshair (`Reticle.draw`) and the AimKit cursor states (`AimReticle`) draw at that same mouse position the same frame. Nothing on this path interpolates, eases, accelerates or dead-zones the cursor: the only lerps near it are the camera's own lean and follow, which move the world under a raw cursor, not the cursor. The one snap in `_mouse_aim` (a foe within 52 px lends its height) changes the plane the ray is cut at, never where the cursor sits.
+**The path, event to aim point.** The OS event lands in Godot's `Input`, which accumulates motion (`Input.use_accumulated_input`, left at its default) and flushes it once at the start of the frame: the position every reader sees that frame is the latest one, with nothing averaged. `Match._process` reads the cursor (`_gather_input` → `_mouse_aim`, which casts `CamRig.mouse_on_plane` straight through `get_viewport().get_mouse_position()`), steps the sim, then moves the view (the "camera" block) and draws. The HUD's crosshair (`Reticle.draw`) and the AimKit cursor states (`AimReticle`) draw at that same mouse position the same frame. Nothing on this path interpolates, eases, accelerates or dead-zones the cursor: the only lerps near it are the camera's own lean and follow, which move the world under a raw cursor, not the cursor. The one snap in `_mouse_aim` (a foe within 52 px lends its height) changes the plane the ray is cut at, never where the cursor sits.
 
-**What was adding a frame.** Before this pass the cursor was read before the view moved, so while the view leans after the cursor (every big mouse move, dash and knock) the aim point was one frame old in camera terms: on the move's frame it sat 13.6 px off the cursor at 60 Hz and 5.9 px at 144 Hz. The camera-first order from `ext/feel-aim-steady` (merged here, see "Camera before the cursor" above) removes it: 0.0 px on every case. No other smoothing was found, so nothing else was removed; the reticle art is unchanged.
+**What adds a frame (open, 11-17).** The cursor is read before the view moves, so while the view leans after the cursor (every big mouse move, dash and knock) the aim point is one frame old in camera terms: on the move's frame it sits 13.5 px off the cursor at 60 Hz and 5.8 px at 144 Hz (main ae15506e78). The camera-first order from `ext/feel-aim-steady` (a `MatchCam.update` before `_gather_input`) removed it to 0.0 px on every case; main merged it once (53a3dfe1f9) but has since lost it, so it is a backlog item (pr95-aim-camera-first). The check allows one physics tick, so it passes either way; restoring camera-first should bring the panning column to 0. No other smoothing was found, so nothing else was removed; the reticle art is unchanged.
 
 **Measured** (`AIMLAG` lines; "frames" is rendered frames after the event's own, so 0 is the same frame; allowed is one physics tick, 1 frame at 60 Hz and 2 at 144 Hz):
 
-| Case | Reticle under cursor | Aim under cursor (view still) | Aim stale while the view leans | Before this pass |
+| Case | Reticle under cursor | Aim under cursor (view still) | Aim stale while the view leans (main 11-17) | With camera-first (feel-aim-steady) |
 |---|---|---|---|---|
-| 60 Hz, 720p | 0 | 0 | 0 | 1 frame stale (13.6 px) |
-| 144 Hz, 720p | 0 | 0 | 0 | 1 frame stale (5.8 px) |
-| 60 Hz, 4K, UI scale 1.5 (canvas 1137.8x640 at 3.375) | 0 | 0 | 0 | 1 frame stale (13.9 px) |
-| 144 Hz, 4K, UI scale 1.5 | 0 | 0 | 0 | 1 frame stale (6.0 px) |
+| 60 Hz, 720p | 0 | 0 | 1 frame (13.5 px) | 0 |
+| 144 Hz, 720p | 0 | 0 | 1 frame (5.8 px) | 0 |
+| 60 Hz, 4K, UI scale 1.5 (canvas 1163.6x654.5 at 3.3) | 0 | 0 | 1 frame (13.8 px) | 0 |
+| 144 Hz, 4K, UI scale 1.5 | 0 | 0 | 1 frame (5.9 px) | 0 |
 
 The check drives `Match._process` one call per frame at the case's rate (not wall-clock), pushes the move through `Input` and flushes it as the engine would, and measures the aim point against the cursor's own projection through the camera as drawn that frame. The 4K cases set the window and the user's UI scale, so the content scale (`Settings._apply_ui_scale`) is on the path: the mouse position and the camera's ray share the scaled canvas, and the aim lands under the cursor at the same 0 frames.
 
