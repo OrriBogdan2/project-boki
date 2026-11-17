@@ -362,6 +362,9 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
+		+ "Off: it walks beside you"
+	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
@@ -377,7 +380,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
-			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
@@ -457,6 +460,8 @@ func _tab_access(v: VBoxContainer) -> void:
 	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
 			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
+	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
+	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
 	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),

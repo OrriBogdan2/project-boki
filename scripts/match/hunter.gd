@@ -399,7 +399,7 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried():
+	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
 		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
@@ -419,6 +419,7 @@ func _refresh_kin_stats() -> void:
 		if kin_carry_on():
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, k.carry_k)
+	KinSteal.add_passives(self, out)        # stolen wisps at a share, clamped with the rest below
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -1746,6 +1747,8 @@ func heal(n: float) -> void:
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
 var kit_t := 0.0
+var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
+var beat_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -2106,7 +2109,7 @@ func _physics(dt: float) -> void:
 	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
-		HunterMove.fall(self, dt)
+		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard (a walk only: a shove still takes them over)
 	var guard: bool = ctrl == "bot" and grounded and roll_t <= 0.0 and knock_t <= 0.0 and m.time - kb_t > 0.6 \
@@ -3033,7 +3036,7 @@ func _anim_state(stretch: float) -> void:
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
-	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
+	UtilityPose.fill(self, s)      # "drink", or "util" with "util_move"
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)
 	s["fired"] = idle_fire
