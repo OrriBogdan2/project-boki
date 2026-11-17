@@ -46,7 +46,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.39 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The Scrap King. Hooks you in with his bone-hook arm, drops a hoard on you, and grows with every knock. |
 | Silhouette | the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back |
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
-| Weapon: Shotgun | Seven slugs in a tight fan, 6m out; rear hits hurt more. |
+| Weapon: Shotgun | Seven slugs, 6m out: wait and they fly in a tight pack, fire at once and they fan wide; rear hits hurt more. |
 
 ### Abilities in full
 

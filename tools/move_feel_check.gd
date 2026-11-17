@@ -34,16 +34,16 @@ const T := {
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
-	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
+	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"aim_side_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no strafe slow: across the aim / toward it"],
 	"aim_back_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no backpedal slow: away from the aim / toward it"],
 	"aim_back_fire_speed_k":   ["~", [0.99, 1.01], "x", "[game data] the same, fire held: one fire slow either way"],
 	"aim_back_3m_frames":      ["<=", 0.0, "frames", "[game data] frames for 3 m away from the aim minus toward it"],
-	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
-	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
-	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	"speed_light":             ["~", [5.1, 5.7], "m/s", "[game data] MoveSpeed 445-485 uu/s x body_scale 1.16 (0061)"],
+	"speed_medium":            ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
+	"speed_heavy":             ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
 	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
 	"haste_two_bonus_x":       ["~", [1.49, 1.51], "x", "haste 0.35 + kin buff 0.15 add (1.55 if stacked)"],
 	"haste_bonus_slow_x":      ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
@@ -354,7 +354,10 @@ func _ground() -> void:
 	for c in ["light", "medium", "heavy"]:
 		_reset(flat)
 		P.cls = c
-		P.base_speed = float(Data.CLASSES[c]["speed"])
+		var of_weight := Arch.ids().filter(func(a: String) -> bool: return Arch.weight(a) == c)
+		var hero: String = of_weight[0]
+		P.base_speed = HunterMove.speed(hero)
+		P.ground_accel = HunterMove.accel(hero)
 		P.inp["move"] = Vector2(1, 0)
 		var first := -1; var t95 := -1.0
 		for i in 40:
@@ -408,7 +411,7 @@ func _ground() -> void:
 				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+	HunterMove.apply(P)
 
 # ---------------------------------------------------------------- move-speed bonuses (HunterMove.ground_speed)
 ## Top speed after a straight run with the bonuses and slows `setup` puts on.
@@ -1964,6 +1967,33 @@ func _landing() -> void:
 		if P.vel.x > 0.5: dead = i + 1; break
 	rec("land_dead_frames", dead)
 	rec("land_squash", sq)
+	_landing_quiet()
+
+## No landing draws a ring or a burst (DECISIONS: none on landings): the hop, a fall, a glide's end, a glide dive,
+## the opening drop's touchdown. Each is [m/s down, under the glider, in the drop, the HunterAnim.land_tier it plays].
+const LANDINGS := [[6.8, false, false, 1], [12.0, false, false, 2], [2.5, true, false, 2], [25.0, true, false, 3],
+		[2.2, true, true, 2]]
+func _landing_quiet() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for way: Array in LANDINGS:
+		_reset(flat + Vector3(0, 0.01, 0), false)
+		m.fields.clear()
+		P.xp = 0.0
+		P.vel.y = -float(way[0])
+		P.gliding = way[1]
+		P.dropping = way[2]
+		var radial0: int = m.fx.radial
+		for i in 30:
+			m.step(DT)
+		var tier := HunterAnim.land_tier(float(way[0]), way[1])
+		ok(tier == int(way[3]), "a landing at %.1f m/s plays land tier %d (want %d)" % [float(way[0]), tier, way[3]])
+		var off := " off the glider" if way[1] else ""
+		if way[2]:
+			off = " out of the drop"
+		ok(P.grounded and m.fx.radial == radial0, "a landing at %.1f m/s%s spawns no ring or burst (%d)"
+				% [float(way[0]), off, m.fx.radial - radial0])
+	m.biomes = biomes
 
 # ---------------------------------------------------------------- camera
 func _render_pos() -> Vector3:
