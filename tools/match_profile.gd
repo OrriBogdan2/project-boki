@@ -113,7 +113,7 @@ func _set_phase(p: String) -> void:
 
 
 func _next_phase() -> void:
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	match phase:
 		"land":
 			if phase_t >= 1.0 and not _pack_done:
@@ -134,11 +134,11 @@ func _next_phase() -> void:
 		"extract":
 			if phase_t >= CHARGE_S and String(_uplink.get("state", "")) == "charging":
 				_uplink["prog"] = 1.0  # a brawl round the yard contests it: the lift opens anyway
-			if not P.extracted:
-				P.hp = P.max_hp
-				var at: Vector3 = _uplink.get("pos", P.pos)
-				if P.flat_dist(at) > 0.5:
-					P.teleport(at)  # (autoplay would walk off the lift)
+			if not me.extracted:
+				me.hp = me.max_hp
+				var at: Vector3 = _uplink.get("pos", me.pos)
+				if me.flat_dist(at) > 0.5:
+					me.teleport(at)  # (autoplay would walk off the lift)
 			elif _rode_at < 0.0:
 				_rode_at = phase_t
 				print("HITCH rode the lift at t=%.2f" % m.time)
@@ -162,23 +162,23 @@ func _tally_rates(key: String) -> void:
 
 
 func _others() -> Array:
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	return m.hunters.filter(
-		func(h): return h != P and not h.out and not h.extracted and not h.riding and not h.dropping
+		func(h): return h != me and not h.out and not h.extracted and not h.riding and not h.dropping
 	)
 
 
 ## Every other hunter stood across the view, WATCH_X m to your left and right, not after anyone (no bot think, no
 ## target): rivals in view that are not fighting you, as most of a match frame has them.
 func _bring_watch() -> void:
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	var side: Vector3 = m.cam.global_transform.basis.x
 	var fwd := Vector3(side.z, 0.0, -side.x)
 	var others := _others()
 	for i in others.size():
 		var h: Hunter = others[i]
 		var x := lerpf(WATCH_X.x, WATCH_X.y, float(i / 2) / maxf(1.0, others.size() / 2.0 - 1.0))
-		var want: Vector3 = P.pos + side * (x if i % 2 == 0 else -x) + fwd * float(i % 3 - 1) * 2.0
+		var want: Vector3 = me.pos + side * (x if i % 2 == 0 else -x) + fwd * float(i % 3 - 1) * 2.0
 		var at: Vector3 = m.world.free_spot_near(want, [], 0.6, 0.5, 6.0)
 		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 		h.ctrl = "idle"
@@ -190,7 +190,7 @@ func _bring_watch() -> void:
 
 ## Every other hunter still in the match is put on a ring round you: a 30-hunter brawl.
 func _bring_hunters() -> void:
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	for h in _watchers:
 		h.ctrl = "bot"
 	_watchers.clear()
@@ -198,7 +198,7 @@ func _bring_hunters() -> void:
 	for i in others.size():
 		var a := TAU * i / maxf(1.0, others.size())
 		var r := lerpf(FIGHT_R.x, FIGHT_R.y, float(i % 3) / 2.0)
-		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * r, [], 0.6, 0.5, 8.0)
+		var at: Vector3 = m.world.free_spot_near(me.pos + Vector3(cos(a), 0, sin(a)) * r, [], 0.6, 0.5, 8.0)
 		var h: Hunter = others[i]
 		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	_hunters = m.hunters.size()
@@ -244,13 +244,13 @@ func _census() -> void:
 
 ## Your squad's uplink started with you on its lift spot, nearly charged, so the waves come, it opens and you ride.
 func _start_uplink() -> void:
-	var P: Hunter = m.player
+	var me: Hunter = m.player
 	_uplink = m.exits.uplink_x() if m.exits else {}
 	if _uplink.is_empty():
 		print("HITCH no uplink on this map")
 		return
-	P.teleport(_uplink["pos"])
-	m.exits.act(_uplink, "start", P, true)
+	me.teleport(_uplink["pos"])
+	m.exits.act(_uplink, "start", me, true)
 	_uplink["prog"] = 0.9
 	_uplink["wave_t"] = 0.0
 	print("HITCH uplink started at %s t=%.2f" % [_uplink["name"], m.time])
