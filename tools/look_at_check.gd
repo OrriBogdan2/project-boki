@@ -195,7 +195,7 @@ func _off_checks(id: String) -> int:
 	ok(_shown() == Vector2.ZERO, "%s: off under the full-body clip of %s" % [id, move])
 	return 1
 
-## A kit move of this Hero keyed as a full-body clip at least CLIP_MIN long ("" none).
+## A kit move of this Hero keyed as a full-body clip that plays at least CLIP_MIN (its length over its rate; "" none).
 func _full_body_move() -> String:
 	if sync.clips == null:
 		return ""
