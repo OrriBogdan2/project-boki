@@ -1,0 +1,720 @@
+diff --git a/content/rules/base_race.json b/content/rules/base_race.json
+index 383237d030..b337ecd928 100644
+--- a/content/rules/base_race.json
++++ b/content/rules/base_race.json
+@@ -1,12 +1,20 @@
+ {
+ 	"desc": "The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/home/base_race.gd). Only with farm_build.json base_mode on. 2 to 4 Boki run one lap of a short loop next to the Training post; you back your partner and cheer with the training drill's timing bar at three marks. Units: metres, seconds, metres a second; joy and trust are 0-100 points, bonds -1..1.",
+-	"stretches": [
+-		{"kind": "straight", "len": 6.0, "mult": 1.0},
+-		{"kind": "water", "len": 3.0, "mult": 0.7},
+-		{"kind": "climb", "len": 6.0, "mult": 0.65},
+-		{"kind": "jump", "len": 3.0, "mult": 0.9}
+-	],
+-	"stretches_doc": "One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches.",
++	"tracks": {
++		"garden": [
++			{"kind": "straight", "len": 6.0, "mult": 1.0},
++			{"kind": "water", "len": 3.0, "mult": 0.7},
++			{"kind": "climb", "len": 6.0, "mult": 0.65},
++			{"kind": "jump", "len": 3.0, "mult": 0.9}
++		],
++		"ridge": [
++			{"kind": "straight", "len": 6.0, "mult": 1.0},
++			{"kind": "jump", "len": 3.0, "mult": 0.75},
++			{"kind": "updraft", "len": 6.0, "mult": 0.65},
++			{"kind": "jump", "len": 3.0, "mult": 0.75}
++		]
++	},
++	"tracks_doc": "One lap per course, in order, laid out as a 6 x 3 m loop (the lens of stretches 0 and 2 are 6, of 1 and 3 are 3). A home island runs the course named by its theme's 'track' (home_layout.gd THEMES), else 'garden'. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. 'ridge' is Kitewind Ridge's (GARDEN.md 10.2): a run, a glide gap, a climb up an updraft, a second gap.",
+ 	"pace": 1.1,
+ 	"pace_doc": "m/s on a straight for a Boki with no Speed points and joy 50.",
+ 	"speed_per_point": 0.015,
+@@ -17,6 +25,10 @@
+ 	"swim_per_tide_doc": "The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist.",
+ 	"glide": 1.45,
+ 	"glide_doc": "The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it.",
++	"rise": 1.4,
++	"rise_doc": "The updraft stretch: a winged Boki rides the rising air at this times the pace; a lean in one of updraft_types blends toward it.",
++	"updraft_types": ["flying", "electric", "fairy", "sound"],
++	"updraft_types_doc": "The Kitewind Ridge types (GARDEN.md 10.2): the leans that ride an updraft.",
+ 	"wobble": 0.1,
+ 	"wobble_doc": "Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win.",
+ 	"cheer": {"great": 1.15, "good": 1.07, "miss": 1.0},
+diff --git a/content/rules/garden_zones.json b/content/rules/garden_zones.json
+index 425c7ca3f5..50189cb01e 100644
+--- a/content/rules/garden_zones.json
++++ b/content/rules/garden_zones.json
+@@ -60,7 +60,7 @@
+ 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"],
+ 			"build": {"theme": "hushwood", "seed": 7731, "sk": 0.9, "deco": [["training_post", 38, 32, 0], ["toy_dig", 42, 37, 0], ["snack_patch", 33, 37, 0]], "clear": [16, 16, 62, 56], "scatter": {"seed": 31, "mushroom": 40, "fern": 50, "pebble": 30}}},
+ 		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"],
+-			"build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}
++			"build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["toy_vent", 38, 37, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}
+ 	},
+ 	"lair_biomes_doc": "A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists).",
+ 	"budget": {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5},
+diff --git a/content/rules/toys.json b/content/rules/toys.json
+index 6cf5b778ae..9ca2c80c34 100644
+--- a/content/rules/toys.json
++++ b/content/rules/toys.json
+@@ -26,6 +26,7 @@
+ 		"toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"},
+ 		"toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"},
+ 		"toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"},
++		"toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound", "tempest", "storm", "lunar", "echo"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types (species themes tempest, storm, lunar, echo today)"},
+ 		"toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}
+ 	}
+ }
+diff --git a/docs/BASE_LIFE.md b/docs/BASE_LIFE.md
+index d3133ede74..60f7bf85da 100644
+--- a/docs/BASE_LIFE.md
++++ b/docs/BASE_LIFE.md
+@@ -77,3 +77,7 @@ check: `--base-life-check`.
+   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
+   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
+   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
++
++## Kitewind Ridge (GARDEN.md 10.2, step 7d)
++
++A zone is a home theme (`HomeLayout.THEMES`, `"zone": true`, not sold in the Island tab); the zone system will point a zone at its theme. `"ridge"` carries the ground colours, `style` (`storm`: the world's MultiMesh flora set for its trees, rocks and undergrowth, set on the island by `HomeBuild._apply_theme`) and `track` (the Dash course). On a ridge island: the Updraft vent toy (`toy_vent`, liked by Flying, Electric, Fairy and Sound leans), the snack patch grows `puffcorn`, `tonicbrew`, `starfruit` and `chimebun` (snack_patch.json `zone_snacks`; prepared foods go to the items store, `SnackPatch.shelve`), and the Dash runs `base_race.json` `tracks.ridge` (two glide gaps, an updraft climb that every ridge type rides). `--garden-nav-check` sweeps both themes, `--race-check` both courses, `--snack-patch-check` the ridge patch, `--ridge-shots --shots-dir=<dir>` makes day, night and course shots, and `--perf-bench --bench-secs=0 --bench-theme=ridge` benches the zone part.
+diff --git a/docs/wiki/Rules.md b/docs/wiki/Rules.md
+index ea82997363..811407b345 100644
+--- a/docs/wiki/Rules.md
++++ b/docs/wiki/Rules.md
+@@ -187,8 +187,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
+ 
+ | Setting | Value |
+ |---|---|
+-| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
+-| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
++| tracks | {"garden": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}], "ridge": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "jump", "len": 3.0, "mult": 0.75}, {"kind": "updraft", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.75}]} |
++| tracks_doc | One lap per course, in order, laid out as a 6 x 3 m loop (the lens of stretches 0 and 2 are 6, of 1 and 3 are 3). A home island runs the course named by its theme's 'track' (home_layout.gd THEMES), else 'garden'. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. 'ridge' is Kitewind Ridge's (GARDEN.md 10.2): a run, a glide gap, a climb up an updraft, a second gap. |
+ | pace | 1.1 |
+ | pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
+ | speed_per_point | 0.015 |
+@@ -199,6 +199,10 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
+ | swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
+ | glide | 1.45 |
+ | glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
++| rise | 1.4 |
++| rise_doc | The updraft stretch: a winged Boki rides the rising air at this times the pace; a lean in one of updraft_types blends toward it. |
++| updraft_types | ["flying", "electric", "fairy", "sound"] |
++| updraft_types_doc | The Kitewind Ridge types (GARDEN.md 10.2): the leans that ride an updraft. |
+ | wobble | 0.1 |
+ | wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
+ | cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
+@@ -969,7 +973,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
+ | pace | {"seeds": 200, "days": 16, "runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10, "biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"], "meals": 2, "zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]} |
+ | pace_doc | The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1]. |
+ | hub_hints | {"start_s": 1.5, "start_s_doc": "Seconds after you arrive in the hub before its first hint can show.", "gap_s": 8.0, "gap_s_doc": "Seconds between two hub hints: one at a time, each longer than its 6 s on screen.", "near_m": 6.0, "near_m_doc": "Metres from the place a hint is about (the Waystone, the nest corner) at which it shows.", "list": [{"id": "waystone", "at": "waystone", "text": "The Waystone: step on the ring and press {interact} to travel."}, {"id": "nest", "at": "nest", "text": "The nest corner: pair two Boki here, hatch eggs and pass on gifts."}, {"id": "keys", "at": "waystone", "needs": "waystone", "locked": true, "text": "A dark stone needs two keys: a Wayseed and a Boki leaning its way. Its card shows both."}], "list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone or nest), needs (a hint seen first), locked (only while a zone sleeps), text."} |
+-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "loves": {"types": ["water", "ice"], "nature": "Gentle"}, "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"], "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "loves": {"types": ["fire", "rock"], "nature": "Fiery"}, "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"], "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"], "build": {"theme": "hushwood", "seed": 7731, "sk": 0.9, "deco": [["training_post", 38, 32, 0], ["toy_dig", 42, 37, 0], ["snack_patch", 33, 37, 0]], "clear": [16, 16, 62, 56], "scatter": {"seed": 31, "mushroom": 40, "fern": 50, "pebble": 30}}}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"], "build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}} |
++| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "loves": {"types": ["water", "ice"], "nature": "Gentle"}, "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"], "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "loves": {"types": ["fire", "rock"], "nature": "Fiery"}, "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"], "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"], "build": {"theme": "hushwood", "seed": 7731, "sk": 0.9, "deco": [["training_post", 38, 32, 0], ["toy_dig", 42, 37, 0], ["snack_patch", 33, 37, 0]], "clear": [16, 16, 62, 56], "scatter": {"seed": 31, "mushroom": 40, "fern": 50, "pebble": 30}}}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"], "build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["toy_vent", 38, 37, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}} |
+ | lair_biomes_doc | A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists). |
+ | budget | {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5} |
+ | budget_hub | {"draws": 200, "objects": 500, "nodes": 2000, "emitters": 6, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 0.5} |
+@@ -1488,7 +1492,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
+ | trait_weight | 1 |
+ | join_weight | 2.5 |
+ | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
+-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
++| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound", "tempest", "storm", "lunar", "echo"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types (species themes tempest, storm, lunar, echo today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+ 
+ ## tuning (`content/rules/tuning.json`)
+ 
+diff --git a/scripts/home/base_demo.gd b/scripts/home/base_demo.gd
+index 44d4463527..ec83e72fb0 100644
+--- a/scripts/home/base_demo.gd
++++ b/scripts/home/base_demo.gd
+@@ -12,14 +12,19 @@ const THINK_SECS := 0.4          # s until each Boki's first choice, so a greeti
+ const JOY := 60.0                # joy need: under toys.json joy_below, so a Boki goes to play on its own
+ const SNACKS := {"emberberry": 3, "tidebloom": 3, "sunroot": 2, "puffcorn": 2}
+ const TOYS := {"toy_ball": Vector3(-3.5, 0, -3.0), "toy_post": Vector3(4.0, 0, -4.0), "toy_tub": Vector3(-6.0, 0, 2.0)}
++## A zone theme's own playthings instead of TOYS (GARDEN.md 10.2), as [id, offset from the landing]: Kitewind
++## Ridge's post, two vents and its snack patch (ripe).
++const ZONE_TOYS := {"ridge": [["toy_post", Vector3(4.0, 0, -4.0)], ["toy_vent", Vector3(-3.5, 0, -3.0)],
++	["toy_vent", Vector3(-6.0, 0, 2.0)], ["snack_patch", Vector3(-7.0, 0, -6.0)]]}
+ const NOOK_AT := Vector3(8.0, 0, -8.0)
+ const EGG_SPECIES := "burrlet"
+ ## name -> [species, offset from the landing, temper]. Moss and Pip are friends, Ash and Rocky rivals.
+ const CAST := {"Pip": ["zapple", Vector3(2.0, 0, 2.0), 0.1], "Moss": ["burrlet", Vector3(3.2, 0, 2.0), 0.1],
+ 	"Ash": ["cindle", Vector3(-3.0, 0, 4.0), 0.95], "Rocky": ["pebbit", Vector3(-0.8, 0, 4.0), 0.95]}
+ 
+-## The demo's save: base_mode on, a farm-start island, the four Boki, their bonds, the snacks and the ready egg.
+-static func save() -> Dictionary:
++## The demo's save: base_mode on, a farm-start island (of the given theme), the four Boki, their bonds, the snacks and
++## the ready egg.
++static func save(theme := "meadow") -> Dictionary:
+ 	FarmUnlocks.rules()["base_mode"] = true
+ 	var d := Save.fresh()
+ 	var recs := {}
+@@ -38,6 +43,7 @@ static func save() -> Dictionary:
+ 	d["crops"] = SNACKS.duplicate()
+ 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
+ 	HomeLayout.new_fs(d, SEED)
++	HomeLayout.ensure(d)["theme"] = theme
+ 	Save.d = d
+ 	Incubator.ensure()
+ 	var egg := Incubator.add(EGG_SPECIES)
+@@ -48,8 +54,12 @@ static func save() -> Dictionary:
+ func stage(h) -> void:
+ 	var land := HomeLayout.LANDING
+ 	h.day_t = 0.42
+-	for id in TOYS:
+-		h.hg.demo_place(id, land + TOYS[id])
++	var plain: Array = TOYS.keys().map(func(id): return [id, TOYS[id]])
++	for t in ZONE_TOYS.get(String(HomeLayout.of(Save.d)["theme"]), plain):
++		var e: Dictionary = h.hg.demo_place(String(t[0]), land + t[1])
++		if String(t[0]) == SnackPatch.ID and not e.is_empty():
++			e["t"] = 0.0      # ripe
++			HomeLayout.of(Save.d)["inv"].erase(SnackPatch.ID)      # the one patch is out of storage
+ 	h.hg.demo_place("nesting_nook", land + NOOK_AT)
+ 	h._sync_fixtures()
+ 	h.hinc.refresh()
+diff --git a/scripts/home/base_race.gd b/scripts/home/base_race.gd
+index 79aff4b910..622976c821 100644
+--- a/scripts/home/base_race.gd
++++ b/scripts/home/base_race.gd
+@@ -6,6 +6,7 @@ extends RefCounted
+ ## Boki out on the base run one lap; you back your partner and cheer at three marks with the
+ ## Training post's timing bar (TimingBar). Pace comes from trained Speed, joy, and a lean on its own
+ ## stretch (the Tide knack swims, wings glide the gap); friends run side by side, rivals bump.
++## Kitewind Ridge runs its own course (base_race.json "tracks": two glide gaps and an updraft climb).
+ ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
+ ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
+ ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
+@@ -24,8 +25,10 @@ const JUMP_H := 0.6                          # m, the top of the jump's arc
+ const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
+ const TRACK_W := 1.4                         # m, the track's width (four lanes)
+ const REACH := 1.6                           # m from the post to start a race
++const UPDRAFT_H := 1.2                       # m, the top of the updraft climb
+ const STRETCH_COL := {
+ 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
++	"updraft": Color("9fe6f2"),
+ }
+ 
+ static func rules() -> Dictionary:
+@@ -48,7 +51,7 @@ static func tweak(game: String) -> Dictionary:
+ 
+ static func lap() -> float:
+ 	var out := 0.0
+-	for s in rules()["stretches"]:
++	for s in stretches():
+ 		out += float(s["len"])
+ 	return out
+ 
+@@ -67,9 +70,20 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
+ static func winged(rec: Dictionary) -> bool:
+ 	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
+ 
+-## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
++## 0..1 how well it rides air: a winged species fully, else its strongest lean among types.
++static func air(rec: Dictionary, types: Array) -> float:
++	if winged(rec):
++		return 1.0
++	var best := 0.0
++	for t in types:
++		best = maxf(best, float(rec.get("lean", {}).get(t, 0.0)))
++	return clampf(best, 0.0, 1.0)
++
++## The lap's stretches: this island's theme track (home_layout.gd THEMES "track", else "garden"), then a
++## weekly tweak's 'swap' changes one stretch's kind and mult (a second water stretch).
+ static func stretches(tw := {}) -> Array:
+-	var out: Array = rules()["stretches"]
++	var theme: Dictionary = HomeLayout.THEMES.get(String(HomeLayout.of(Save.d)["theme"]), {})
++	var out: Array = rules()["tracks"][String(theme.get("track", "garden"))]
+ 	if tw.has("swap"):
+ 		out = out.duplicate(true)
+ 		out[int(tw["swap"]["at"])].merge(tw["swap"], true)
+@@ -90,8 +104,9 @@ static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
+ 			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
+ 			p *= 1.0 + float(R["swim_per_tide"]) * tide
+ 		"jump":
+-			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
+-			p *= lerpf(1.0, float(R["glide"]), g)
++			p *= lerpf(1.0, float(R["glide"]), air(rec, ["flying"]))
++		"updraft":
++			p *= lerpf(1.0, float(R["rise"]), air(rec, R["updraft_types"]))
+ 	return p
+ 
+ ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
+@@ -128,7 +143,7 @@ class Run:
+ 		backed = back
+ 		rng = r
+ 		var at := 0.0
+-		for s in R["stretches"]:
++		for s in BaseRace.stretches():
+ 			at += float(s["len"])
+ 			ends.append(at)
+ 		for i in recs.size():
+@@ -363,7 +378,7 @@ func ground(p: Vector3) -> float:
+ 
+ ## Corner i of the loop: 0 the start, then round the 6 x 3 rectangle back to it.
+ func _corner(i: int) -> Vector3:
+-	var deep := float(rules()["stretches"][1]["len"])
++	var deep := float(stretches()[1]["len"])
+ 	return start + [Vector3.ZERO, Vector3(LOOP_W, 0, 0), Vector3(LOOP_W, 0, -deep), Vector3(0, 0, -deep)][i % 4]
+ 
+ func find(p2: Vector2) -> Dictionary:
+@@ -507,7 +522,7 @@ func track_at(s: int, f: float, side: float) -> Vector3:
+ 	var a := _corner(s)
+ 	var fwd := (_corner(s + 1) - a).normalized()
+ 	var p := a.lerp(_corner(s + 1), f) + Vector3(-fwd.z, 0, fwd.x) * side
+-	p.y = ground(p) + _lift(String(rules()["stretches"][s]["kind"]), f)
++	p.y = ground(p) + _lift(String(stretches()[s]["kind"]), f)
+ 	return p
+ 
+ ## The facing (rotation.y) of a runner on stretch s.
+@@ -518,6 +533,7 @@ func heading(s: int) -> float:
+ func _lift(kind: String, f: float) -> float:
+ 	match kind:
+ 		"climb": return CLIMB_H * sin(PI * f)
++		"updraft": return UPDRAFT_H * sin(PI * f)
+ 		"jump": return JUMP_H * sin(PI * f)
+ 		"water": return -SWIM_DIP
+ 	return 0.0
+diff --git a/scripts/home/base_relay.gd b/scripts/home/base_relay.gd
+index 313d6f8edd..3e39a16e90 100644
+--- a/scripts/home/base_relay.gd
++++ b/scripts/home/base_relay.gd
+@@ -19,7 +19,7 @@ static func rules() -> Dictionary:
+ 
+ ## Seconds `rec` takes over leg `leg` with no wobble.
+ static func leg_time(rec: Dictionary, leg: int) -> float:
+-	var st: Array = BaseRace.rules()["stretches"]
++	var st: Array = BaseRace.stretches()
+ 	var out := 0.0
+ 	for s in rules()["legs"][leg]:
+ 		out += float(st[s]["len"]) / BaseRace.stretch_pace(rec, int(s))
+@@ -80,7 +80,7 @@ class Run:
+ 		teams = [mine, theirs]
+ 		rng = r
+ 		var at := 0.0
+-		for s in BaseRace.rules()["stretches"]:
++		for s in BaseRace.stretches():
+ 			at += float(s["len"])
+ 			ends.append(at)
+ 		for team in 2:
+@@ -345,7 +345,7 @@ func _nodes(ents: Array) -> Array:
+ 	return ents.map(func(e): return e["node"])
+ 
+ func _place_runners() -> void:
+-	var st: Array = BaseRace.rules()["stretches"]
++	var st: Array = BaseRace.stretches()
+ 	var lane := float(BaseRace.rules()["lane"])
+ 	for team in 2:
+ 		var side := lane * (team - 0.5)
+@@ -392,7 +392,7 @@ func _end(finished: bool) -> void:
+ 	visitors = []
+ 
+ func _card(res: Dictionary) -> void:
+-	var st: Array = BaseRace.rules()["stretches"]
++	var st: Array = BaseRace.stretches()
+ 	var legs: Array = []
+ 	for i in run.legs.size():
+ 		legs.append("%s the %s" % [run.teams[0][i]["name"], st[run.legs[i][0]]["kind"]])
+diff --git a/scripts/home/farm_models.gd b/scripts/home/farm_models.gd
+index 0319c4ff88..5168bf0d80 100644
+--- a/scripts/home/farm_models.gd
++++ b/scripts/home/farm_models.gd
+@@ -184,7 +184,7 @@ static func _piece(n: Node3D, mesh: Mesh, col: String, at: Vector3, nm: String,
+ 		rot := Vector3.ZERO) -> void:
+ 	Models.part(n, mesh, Models.toon(Color(col), outline), at, Vector3.ONE, rot, nm)
+ 
+-## A ball, climbing post, splash tub, warm stone or dig patch (HomeToys), from simple parts. The ball
++## A ball, climbing post, splash tub, warm stone, updraft vent or dig patch (HomeToys), from simple parts. The ball
+ ## is its own child named "Ball" so HomeToys can roll it.
+ static func toy(id: String) -> Node3D:
+ 	var n := Node3D.new()
+@@ -216,6 +216,14 @@ static func toy(id: String) -> Node3D:
+ 					Vector3(0, 0.5, 0))
+ 			_piece(n, Models.box(0.3, 0.02, 0.06), "ffc05a", Vector3(-0.1, 0.555, -0.12), "Glow", false,
+ 					Vector3(0, 1.4, 0))
++		"toy_vent":
++			_piece(n, Models.cyl(0.62, 0.7, 0.14, 16), "7e8296", Vector3(0, 0.07, 0), "Base")
++			_piece(n, Models.cyl(0.46, 0.46, 0.05, 16), "2c3a52", Vector3(0, 0.16, 0), "Mouth", false)
++			for i in 3:
++				var a := TAU * i / 3.0
++				var at := Vector3(cos(a) * 0.22, 0.65, sin(a) * 0.22)
++				_piece(n, Models.box(0.04, 0.9, 0.04), "cfeeff", at, "Draft", false)
++			_piece(n, Models.cyl(0.5, 0.5, 0.02, 16), "9fe6f2", Vector3(0, 1.1, 0), "Ring", false)
+ 		"toy_dig":
+ 			_piece(n, Models.cyl(0.7, 0.82, 0.12, 14), "6b4a2e", Vector3(0, 0.06, 0), "Soil")
+ 			_piece(n, Models.cyl(0.42, 0.46, 0.14, 12), "4a3320", Vector3(0.05, 0.09, 0), "Hole", false)
+diff --git a/scripts/home/home_layout.gd b/scripts/home/home_layout.gd
+index 9ee7772122..d953a3230b 100644
+--- a/scripts/home/home_layout.gd
++++ b/scripts/home/home_layout.gd
+@@ -26,7 +26,8 @@ const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
+ const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
+ 
+ ## Ground colours for every home island. region is the world's region look (trees, rocks) to use;
+-## its ground colours win over the theme's unless own_ground; style: the Flora set its props use (Flora.STYLES).
++## its ground colours win over the theme's unless own_ground; style: the Flora set its props use (Flora.STYLES);
++## track: the Dash course there (base_race.json "tracks").
+ const THEMES := {
+ 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
+ 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
+@@ -39,8 +40,8 @@ const THEMES := {
+ 		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
+ 	"hushwood": {"name": "Hushwood", "zone": true, "region": 0, "style": "gloom", "top": "4a6a52", "top2": "3a5848",
+ 		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
+-	"ridge": {"name": "Kitewind Ridge", "zone": true, "region": 0, "style": "storm", "top": "9cba86", "top2": "7fa27a",
+-		"side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
++	"ridge": {"name": "Kitewind Ridge", "zone": true, "region": 0, "style": "storm", "track": "ridge",
++		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
+ }
+ 
+ ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
+@@ -86,6 +87,8 @@ const CATALOG := {
+ 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
+ 	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
+ 		"desc": "Fire Boki love to bask on it. Trains Guard."},
++	"toy_vent": {"name": "Updraft vent", "cat": "Base", "gems": 22, "toy": true,
++		"desc": "Flying, Electric, Fairy and Sound Boki love to hover on its rising air. Trains Speed."},
+ 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
+ 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
+ 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
+diff --git a/scripts/home/home_toys.gd b/scripts/home/home_toys.gd
+index e5f6c812c9..5b77facefe 100644
+--- a/scripts/home/home_toys.gd
++++ b/scripts/home/home_toys.gd
+@@ -290,6 +290,11 @@ func pose(k: Dictionary, n: Node3D, d: float) -> void:
+ 			n.set_meta("pose", "comfort")
+ 			if randf() < d * 1.2:
+ 				h.fx.burst(tp + Vector3(0, 0.6, 0), Color("ffb066"), 2, 0.8, 0.9, -1.0)
++		"toy_vent":
++			body.position.y = 0.55 + sin(s * 2.0) * 0.12
++			n.set_meta("pose", "alert")
++			if randf() < d * 3.0:
++				h.fx.burst(tp + Vector3(0, 0.2, 0), Color("cfeeff"), 3, 1.2, 0.8, -1.0)
+ 		"toy_dig":
+ 			body.position.y = absf(sin(s * 10.0)) * 0.05
+ 			body.rotation.x = -0.45 + sin(s * 10.0) * 0.12
+diff --git a/tools/check_registry.gd b/tools/check_registry.gd
+index 65a6d94b2a..e432368c74 100644
+--- a/tools/check_registry.gd
++++ b/tools/check_registry.gd
+@@ -42,6 +42,7 @@ const CHECKS := {
+ 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
+ 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
+ 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],      # wishes, away gifts
++	"--ridge-shots": ["res://tools/ridge_shots.gd", "ridge_shots", null],      # Kitewind Ridge, --shots-dir=<dir>
+ 	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],      # garden snack patch
+ 	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],      # food lean by type (base_mode)
+ 	"--lean-shots": ["res://tools/lean_shots.gd", "lean_shots", null],      # --shots-dir=<dir>
+diff --git a/tools/race_check.gd b/tools/race_check.gd
+index fdf594d1c5..e9f3e37b58 100644
+--- a/tools/race_check.gd
++++ b/tools/race_check.gd
+@@ -2,7 +2,8 @@ extends RefCounted
+ ## --race-check: the Dash (scripts/home/base_race.gd, briefs/design/GARDEN.md 5.1 and 9.4).
+ ##   1. 20 headless races of 3 Boki with random Speed, joy and species, a random backed Boki and
+ ##      random cheer grades: the one with the highest expected pace wins at least 60% of them
+-##   2. leans: a water lean swims faster, a flying lean glides the gap faster, neither helps elsewhere
++##   2. leans: a water lean swims faster, a flying lean glides the gap faster, neither helps elsewhere; on
++##      Kitewind Ridge's course (base_race.json "tracks") every ridge type rides the updraft faster, water does not
+ ##   3. friends run side by side (closer than strangers), rivals bump
+ ##   4. a settled race: the winner's joy and trust go up, the loser's joy down, both remember it,
+ ##      you get gems, the two grow apart (bonds)
+@@ -13,6 +14,8 @@ extends RefCounted
+ ##   8. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
+ ##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
+ ##   9. the Training post drill still runs on the shared timing bar: three presses, then it ends
++##  10. parts 1 to 3 run on both courses (the garden's and the ridge's); a ridge base lays out the ridge course
++##      and runs a race on it to a result card
+ ## Never touches the real save.
+ 
+ const RACES := 20
+@@ -32,14 +35,19 @@ func ok(cond: bool, what: String) -> void:
+ func run(m: Node) -> void:
+ 	main = m
+ 	Save.no_write = true
++	for theme in ["meadow", "ridge"]:
++		Save.d = Save.fresh()
++		HomeLayout.ensure(Save.d)["theme"] = theme
++		print("RACE course: %s, %d stretches" % [theme, BaseRace.stretches().size()])
++		_favourites()
++		_leans()
++		_friends_rivals()
+ 	Save.d = Save.fresh()
+-	_favourites()
+-	_leans()
+-	_friends_rivals()
+ 	_settle()
+ 	_twists()
+ 	_formats()
+ 	await _on_base()
++	await _ridge_base()
+ 	print("RACE DONE, failures: %d" % bad)
+ 	main.get_tree().quit(1 if bad > 0 else 0)
+ 
+@@ -91,15 +99,22 @@ func _leans() -> void:
+ 	var fly := _kin(walker, "Fly", 10, 60.0)
+ 	swim["lean"] = {"water": 1.0}
+ 	fly["lean"] = {"flying": 1.0}
+-	var st: Array = BaseRace.rules()["stretches"]
+-	var water := -1
+-	var jump := -1
+-	for i in st.size():
+-		if st[i]["kind"] == "water": water = i
+-		if st[i]["kind"] == "jump": jump = i
++	var kinds: Array = BaseRace.stretches().map(func(st): return st["kind"])
++	var water := kinds.find("water")
++	var jump := kinds.find("jump")
+ 	var base0 := BaseRace.stretch_pace(plain, 0)
+-	ok(BaseRace.stretch_pace(swim, water) > BaseRace.stretch_pace(plain, water) * 1.2, "a water lean swims faster")
++	if water >= 0:
++		ok(BaseRace.stretch_pace(swim, water) > BaseRace.stretch_pace(plain, water) * 1.2, "a water lean swims faster")
+ 	ok(BaseRace.stretch_pace(fly, jump) > BaseRace.stretch_pace(plain, jump) * 1.2, "a flying lean glides the gap")
++	var rise := kinds.find("updraft")
++	if rise >= 0:
++		for t in BaseRace.rules()["updraft_types"]:
++			var air := _kin(walker, "Air", 10, 60.0)
++			air["lean"] = {t: 1.0}
++			var rides := BaseRace.stretch_pace(air, rise) > BaseRace.stretch_pace(plain, rise) * 1.2
++			ok(rides, "the %s lean rides the updraft" % t)
++		var same := is_equal_approx(BaseRace.stretch_pace(swim, rise), BaseRace.stretch_pace(plain, rise))
++		ok(same, "a water lean does not")
+ 	var flat := is_equal_approx(BaseRace.stretch_pace(swim, 0), base0) \
+ 			and is_equal_approx(BaseRace.stretch_pace(fly, 0), base0)
+ 	ok(flat, "leans don't help on the straight")
+@@ -159,7 +174,7 @@ func _settle() -> void:
+ 
+ func _twists() -> void:
+ 	var rec := _kin("zapple", "Tw", 10, 60.0)
+-	var st: Array = BaseRace.rules()["stretches"]
++	var st: Array = BaseRace.stretches()
+ 	var tw := {"mult": {"water": 0.5}}
+ 	for i in st.size():
+ 		var want := 0.5 if st[i]["kind"] == "water" else 1.0
+@@ -203,9 +218,8 @@ func _formats() -> void:
+ 			var slower := BaseRace.expected_time(plain, t) > BaseRace.expected_time(plain)
+ 			ok(slower, "format %s lengthens a plain Boki's lap" % t["id"])
+ 
+-func _on_base() -> void:
+-	var rules: Dictionary = FarmUnlocks.rules()
+-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
++## Three Boki on a stock farm (a Training post) whose island has the given theme.
++func _base_save(theme: String) -> Dictionary:
+ 	var d := Save.fresh()
+ 	for i in 3:
+ 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
+@@ -215,7 +229,13 @@ func _on_base() -> void:
+ 			d["active"] = k["uid"]
+ 	d["tutorial"] = {"hatched": true, "intro": true}
+ 	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
+-	Save.d = d
++	d["layout"]["theme"] = theme
++	return d
++
++func _on_base() -> void:
++	var rules: Dictionary = FarmUnlocks.rules()
++	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
++	Save.d = _base_save("meadow")
+ 	HomeLayout.ensure(Save.d)
+ 	var off = await main._hb_home()
+ 	ok(off.hrace == null, "off: no race post on the farm")
+@@ -263,6 +283,33 @@ func _on_base() -> void:
+ 	home.queue_free()
+ 	await main.get_tree().process_frame
+ 
++## A ridge base: the race post lays the ridge course (its updraft strip is there) and a race on it ends with a card.
++func _ridge_base() -> void:
++	FarmUnlocks.rules()["base_mode"] = true
++	Save.d = _base_save("ridge")
++	HomeLayout.ensure(Save.d)
++	var home = await main._hb_home()
++	for f in SETTLE_FRAMES:
++		if is_instance_valid(home.root_ui):
++			break
++		await main.get_tree().process_frame
++	home._close_panel()
++	var race: BaseRace = home.hrace
++	var strips := race.post.get_children().filter(func(c): return c is MeshInstance3D and c.mesh is BoxMesh).size()
++	ok(strips >= BaseRace.stretches().size() and BaseRace.stretches().any(func(st): return st["kind"] == "updraft"),
++			"ridge: the post lays out the ridge course (%d strips)" % strips)
++	for k in home.kins:
++		k.erase("indoors")
++	race.use()
++	var t := 0.0
++	while race.run != null and t < MAX_S:
++		race.tick(0.1)
++		t += 0.1
++	ok(race.run == null and is_instance_valid(race.card), "ridge: a race on it ends with a result card (%.1f s)" % t)
++	FarmUnlocks.rules()["base_mode"] = false
++	home.queue_free()
++	await main.get_tree().process_frame
++
+ ## One solo training lap: presses on every mark (perfect: the marker sits in the gold) or none.
+ func _lap(home, perfect: bool) -> void:
+ 	var race: BaseRace = home.hrace
+diff --git a/tools/ridge_shots.gd b/tools/ridge_shots.gd
+new file mode 100644
+index 0000000000..3e3146f69a
+--- /dev/null
++++ b/tools/ridge_shots.gd
+@@ -0,0 +1,114 @@
++extends RefCounted
++## --ridge-shots --shots-dir=<dir>: Kitewind Ridge (GARDEN.md 10.2, theme "ridge") for review. ridge_day.png and
++## ridge_night.png show the demo base on the ridge (post, two updraft vents, the ripe snack patch); ridge_track.png
++## shows a Dash on the ridge course (glide gaps, updraft climb). Needs a renderer. Never touches the real save.
++
++const DAY := 0.42           # day_t for the day shot
++const NIGHT := 0.97         # day_t for the night shot
++const ZOOM_BASE := 1.25     # camera zoom (0.8 close .. 1.6 wide)
++const ZOOM_TRACK := 0.75
++const WIPE_S := 1.2           # s for the ink wipe to clear before a shot
++const RACE_SECS := 6.0      # s of racing before the course shot
++const WAIT_FRAMES := 900    # frames to wait at most for the home to build
++
++var bad := 0
++var main: Node
++var dir := "/tmp/ridge_shots"
++
++func ok(cond: bool, what: String) -> void:
++	print("RIDGE %s %s" % ["ok  " if cond else "FAIL", what])
++	if not cond:
++		bad += 1
++
++func _shot(home, shot: String) -> void:
++	for i in 3:
++		await main.get_tree().process_frame
++	if main.fade:
++		main.fade.reveal(0.05)
++	await main.get_tree().create_timer(WIPE_S).timeout
++	home._close_panel()
++	if home.guide and home.guide.tracker:
++		home.guide.tracker.visible = false
++	home.hover_box.visible = false
++	home.prompt_box.visible = false
++	await main.get_tree().process_frame
++	main.get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, shot])
++	print("RIDGE shot %s" % shot)
++
++func _ready(home) -> void:
++	for i in WAIT_FRAMES:
++		if home.root_ui != null and home.hb != null and home.player != null:
++			break
++		await main.get_tree().process_frame
++
++func _look(home, at: Vector3, zoom: float) -> void:
++	home.ppos = at
++	home.player.position = at
++	home.cam.zoom_to = zoom
++	home.cam.zoom = zoom
++	home.cam.snap(at)
++
++func run(m: Node) -> void:
++	main = m
++	for a in OS.get_cmdline_user_args():
++		if a.begins_with("--shots-dir="): dir = a.substr(12)
++	DirAccess.make_dir_recursive_absolute(dir)
++	Save.no_write = true
++	await _base()
++	await _track()
++	FarmUnlocks.rules()["base_mode"] = false
++	print("RIDGE DONE, failures: %d" % bad)
++	main.get_tree().quit(1 if bad > 0 else 0)
++
++## The demo base on the ridge, by day and by night.
++func _base() -> void:
++	Save.d = BaseDemo.save("ridge")
++	var home = await main._hb_home()
++	await _ready(home)
++	BaseDemo.new().stage(home)
++	var ids: Array = home.toys.toys().map(func(t): return t["id"])
++	ids.sort()
++	ok(ids == ["toy_post", "toy_vent", "toy_vent"] and HomeLayout.count_of(SnackPatch.ID, Save.d) == 1,
++			"the ridge base has its post, two vents and a snack patch (%s)" % str(ids))
++	_look(home, HomeLayout.LANDING + Vector3(-2.5, 0, -2.5), ZOOM_BASE)
++	home.day_t = DAY
++	await _shot(home, "ridge_day")
++	home.day_t = NIGHT
++	await main.get_tree().create_timer(0.5).timeout
++	await _shot(home, "ridge_night")
++	home.queue_free()
++	await main.get_tree().process_frame
++
++## A Dash on the ridge course, a few seconds in.
++func _track() -> void:
++	var d := Save.fresh()
++	for i in 3:
++		var k := Save.new_kin(["kestrike", "zapple", "cindle"][i], ["Kes", "Pip", "Ash"][i])
++		Care.ensure(k)
++		k["level"] = 5
++		d["roster"].append(k)
++	d["roster"][0]["starter"] = true
++	d["active"] = d["roster"][0]["uid"]
++	d["tutorial"] = {"hatched": true, "intro": true}
++	d["layout"] = HomeLayout.fresh()
++	d["layout"]["theme"] = "ridge"
++	Save.d = d
++	HomeLayout.ensure(Save.d)
++	FarmUnlocks.rules()["base_mode"] = true
++	var home = await main._hb_home()
++	await _ready(home)
++	home.day_t = DAY
++	var race: BaseRace = home.hrace
++	for k in home.kins:
++		k.erase("indoors")
++	race.use()
++	var t := 0.0
++	while race.run != null and t < RACE_SECS:
++		race.tick(0.1)
++		t += 0.1
++	ok(race.run != null, "the ridge Dash is running after %.0f s" % RACE_SECS)
++	race.bar.card.visible = false
++	_look(home, race.start + Vector3(BaseRace.LOOP_W * 0.5, 0, -1.5), ZOOM_TRACK)
++	await _shot(home, "ridge_track")
++	home.queue_free()
++	await main.get_tree().process_frame
+diff --git a/tools/toy_check.gd b/tools/toy_check.gd
+index e2a67e2255..2cecee767f 100644
+--- a/tools/toy_check.gd
++++ b/tools/toy_check.gd
+@@ -1,6 +1,6 @@
+ extends RefCounted
+ ## --toy-check: the Boki base's playthings (GARDEN.md section 4, content/rules/toys.json, HomeToys).
+-##   1. data: a ball, post, tub, warm stone and dig patch in the Base category, each with a stat Care knows
++##   1. data: a ball, post, tub, warm stone, updraft vent and dig patch in the Base category, each with a Care stat
+ ##   2. lean: Flying and Rock Boki weigh the post up, Water, Ice and Crystal the tub
+ ##   3. off: with base_mode off (the shipped default) nothing plays
+ ##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
+@@ -11,7 +11,7 @@ extends RefCounted
+ 
+ ## Each toy and a species whose lean it is made for (ember = Fire; bloom = Grass; swarm = Bug).
+ const FITTING := [["toy_ball", "zapple"], ["toy_post", "kestrike"], ["toy_tub", "rimeshrew"],
+-	["toy_stone", "kilnbadger"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
++	["toy_stone", "kilnbadger"], ["toy_vent", "kestrike"], ["toy_dig", "lilybara"], ["toy_dig", "moundvark"]]
+ 
+ var bad := 0
+ var main: Node
+@@ -49,7 +49,7 @@ func run(m: Node) -> void:
+ 	var in_base := func(id: String) -> bool:
+ 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
+ 	ok(ids.all(in_base),
+-			"all five toys are in the Base category, each training a Care stat")
++			"every toy is in the Base category, each training a Care stat")
+ 	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
+ 	Save.d = _new_save()
+ 	var lay := HomeLayout.ensure(Save.d)
+@@ -69,6 +69,9 @@ func run(m: Node) -> void:
+ 			and toys.weight(stone, "toy_post") > toys.weight(stone, "toy_ball")
+ 	ok(likes_post,
+ 			"flying and rock leans weigh the post up")
++	var vent_up: bool = toys.weight(storm, "toy_vent") > toys.weight(storm, "toy_ball")
++	var vent_flat: bool = toys.weight(stone, "toy_vent") <= toys.weight(stone, "toy_ball") + 0.01
++	ok(vent_up and vent_flat, "a flying lean weighs the vent up, a rock lean does not")
+ 	var likes_tub: bool = toys.weight(frost, "toy_tub") > toys.weight(frost, "toy_post") \
+ 			and toys.weight(wet, "toy_tub") > toys.weight(wet, "toy_post") \
+ 			and toys.weight(glass, "toy_tub") > toys.weight(glass, "toy_post")
+@@ -91,7 +94,7 @@ func run(m: Node) -> void:
+ 	home.hb.toggle()
+ 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
+ 	home.hb.cat = "Base"
+-	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
++	ok(home.hb._tab_items().size() == 6, "and it offers all six toys")
+ 	home.hb.toggle()
+ 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
+ 	var first_t := -1.0

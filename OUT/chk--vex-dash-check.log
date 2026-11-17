@@ -1,0 +1,52 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/vex_dash_check.gd:21)
+       [13] run (res://tools/check_registry.gd:944)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] spawn_wild (res://scripts/match/match.gd:1550)
+       [8] _spawn_rare (res://scripts/match/spawn_plan.gd:235)
+       [9] spawn_all (res://scripts/match/spawn_plan.gd:218)
+       [10] _start (res://scripts/match/match.gd:438)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/vex_dash_check.gd:21)
+       [13] run (res://tools/check_registry.gd:944)
+       [14] _ready (res://scripts/main.gd:270)
+VEXDASH ok   Vex max_dashes() is 1.0
+VEXDASH ok   Second Wind leaves Vex at 1.0
+VEXDASH ok   Second Wind is not offered to Vex
+VEXDASH ok   Vex dash slot reports max_charges 0
+VEXDASH ok   Vex dash slot draws pips []
+VEXDASH ok   a takedown refills Vex's dash (1.0, long cd 0.0)
+VEXDASH ok   dredge keeps its charges (3.0)
+VEX DASH CHECK DONE, failures: 0
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

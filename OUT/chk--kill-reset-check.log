@@ -1,0 +1,82 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/kill_reset_check.gd:31)
+       [13] run (res://tools/check_registry.gd:944)
+       [14] _ready (res://scripts/main.gd:270)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 31).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:133)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:414)
+       [4] kin (res://scripts/match/models.gd:1975)
+       [5] look (res://scripts/match/kin_wisp.gd:28)
+       [6] init_kin (res://scripts/match/kin.gd:176)
+       [7] make_hunter (res://scripts/match/match.gd:622)
+       [8] make_bot (res://scripts/match/match.gd:804)
+       [9] _spawn_hunters (res://scripts/match/match.gd:782)
+       [10] _start (res://scripts/match/match.gd:380)
+       [11] start (res://scripts/match/match.gd:155)
+       [12] run (res://tools/kill_reset_check.gd:31)
+       [13] run (res://tools/check_registry.gd:944)
+       [14] _ready (res://scripts/main.gd:270)
+KILLRESET ok   a match with at least two rival hunters (9)
+KILLRESET ok   a squad of three (2 mates, 9 rivals)
+KILLRESET ok   (a) the rival is down
+KILLRESET ok   (a) the knock brings back every dash charge (1.00 / 1.00)
+KILLRESET ok   (a) the long-dash cooldown is cleared
+KILLRESET ok   (a) +5% of max health (110.0, want 110)
+KILLRESET ok   (a) the reset cue event fired once for the local hunter (1)
+KILLRESET ok   (a) a knock you land: the short freeze (0.070 s)
+KILLRESET ok   (a) a knock you land: no slow-mo (0.00) and no screen flash
+KILLRESET ok   (b) near full health the heal stops at max (200.0 / 200.0)
+KILLRESET ok   (c) the kill is credited
+KILLRESET ok   (c) a kill resets and heals too (dashes 1.00, hp 110.0)
+KILLRESET ok   (d) the mob is dead
+KILLRESET ok   (d) killing a mob does not reset or heal (dashes 0.01, ex_cd 4.9, hp 100.0)
+KILLRESET ok   (e) a bot's takedown refreshes its dash (1.00, want 1.00) and heals, with no cue (0)
+KILLRESET ok   (f) no reset for a takedown on yourself
+KILLRESET ok   (g) a hero-specific reset fires the same event
+KILLRESET ok   (g) and only for the local hunter
+KILLRESET ok   (h) the default variant is a
+KILLRESET ok   (h) reset_a, reset_b and reset_c are loaded
+KILLRESET ok   (h) each is 0.4 to 0.65 s long ({ "a": 0.56, "b": 0.5, "c": 0.6 })
+KILLRESET ok   (h) the HUD holds the Shift pop
+KILLRESET ok   (i) the knocker refreshes (1.00)
+KILLRESET ok   (i) the teammate who hit the victim refreshes (1.00, want 1.00)
+KILLRESET ok   (i) a teammate whose hit is older than the window does not (0.00)
+KILLRESET ok   (j) an assist refreshes the local hunter, no heal (1.00, hp 100.0)
+KILLRESET ok   (j) with the assist cue ([[@Node3D@1773:<Node3D#1134206921887>, "assist"]])
+KILLRESET ok   (k) a 2-charge dash gains one charge (0.3 -> 1.30)
+KILLRESET ok   (n) no Second Wind perk: the drop under 30% gives nothing (0.00)
+KILLRESET ok   (n) a hit that stays over 30% gives nothing (0.00)
+KILLRESET ok   (n) Second Wind: under 30% (hp 38) refills all 2 charges (2.00)
+KILLRESET ok   (n) a second drop inside 45 s gives nothing (0.00)
+KILLRESET ok   (n) 45 s later it fires again (2.00)
+KILLRESET ok   (l) the local hunter has a kit
+KILLRESET ok   (l) knock_refresh: false opts out (0.00)
+KILLRESET ok   (m) the local hunter is down
+KILLRESET ok   (m) being knocked: no slow-mo (0.00) and no screen flash
+KILLRESET DONE, failures: 0
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 35 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

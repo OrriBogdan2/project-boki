@@ -1,0 +1,4 @@
+--warden-model-check rc=0 18 WARDEN_DONE FAIL
+--kill-reset-check rc=0 4    at: clear (core/io/resource.cpp:810)
+--vex-dash-check rc=0 3    at: clear (core/io/resource.cpp:810)
+--dash-slot-check rc=0 5    at: clear (core/io/resource.cpp:810)
