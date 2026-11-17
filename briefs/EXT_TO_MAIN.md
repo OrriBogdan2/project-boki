@@ -10048,3 +10048,4 @@ READY ext/stuck-integ-fad43424 4603c402fe (supersedes: mc-20261117-0240, bot-kit
 READY ext/sfx-extract-cues-port ef94a856bc (lift countdown 10 s ticks; skiff cues dropped, skiff gone from main)
 READY ext/fsm-m1-port b41122f55d (port of ext/fsm-m1: --fsm-check over loco+base_life, dead feel-lab deleted, -1079 net lines)
 READY ext/anim-boki-cast-rebased-port 6679dd920c8 (Boki cast wind-up: ability plays as 0.56s cast clip, skill lets go on release frame 0.2s; bite half already in main; boki-system/agency/shield/grammar-runtime checks green, boki-rig-check only lilybara/umbrathere glb missing as on main)
+READY ext/vfx-vex-kit-port 8221e812dcf (Vex parity: tracer 0.82, burnt-disc Cinderfall patch, no slide puff; same reds as main)
