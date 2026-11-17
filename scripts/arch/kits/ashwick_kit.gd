@@ -332,6 +332,8 @@ func ignite_pct(f: Ent) -> float:
 	return 0.0 if lvl == 0 else float(d["ignite_bonus"]["tick_pct"][lvl - 1])
 
 # ------------------------------------------------------------------ LMB: Torch Lance
+func lmb_holding() -> bool: return was_held
+
 func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_key_was
 	lmb_key_was = held
@@ -556,7 +558,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	# on Felix's fitted ram curve (content/rules/dash_feel.json, docs/SUPERVIVE_FEEL.md "Dash speed curves")
+	# on Felix's fitted ram curve (content/rules/dash_feel.json, sv/FEEL.md "Dash speed curves")
 	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir, "curved": true})
 	st["last_dash"] = "soot_ram"
 	play("as_leap")

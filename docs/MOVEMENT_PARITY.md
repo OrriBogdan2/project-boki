@@ -3,7 +3,7 @@
 One table per area: the source's value, ours, where each comes from, and a status. Mechanics and numbers only.
 
 - **Status:** `match` (same number or within measuring error), `off` (differs; "ruling" = the owner chose it), `unknown` (the source value is not decoded or not documented, so ours is an estimate), `[?]` (the data does not settle what the row means, so nothing is built on it).
-- **Source of truth tags:** `[D]` the source's game data (briefs/supervive-data/supervive_physics.md, 100 uu = 1 m), `[W]` its wiki, `[F]` a footage frame count (docs/MOVEMENT_FEEL.md, docs/SUPERVIVE_FEEL.md), `[est]` ours, tuned.
+- **Source of truth tags:** `[D]` the source's game data (sv/briefs/physics.md, 100 uu = 1 m), `[W]` its wiki, `[F]` a footage frame count (docs/MOVEMENT_FEEL.md, docs/the reference_FEEL.md), `[est]` ours, tuned.
 - **Ours** is a data row (file named) or a measurement by a check: `MFEEL` = `--move-feel-check`, `RATE` = `--move-rate-check` (both on the real step; 2026-11-10, branch ext/move-parity-1).
 - The match steps at 60 Hz (`Match.DT`). Since decision 0048 the farm does too.
 
@@ -70,10 +70,10 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Acceleration | 162,500 force on mass 100 | glide_accel 16.25 m/s² | [D]; hunter_move.json | match |
 | Catch (fall to glide) | not documented | 0.183 s | MFEEL `glide_catch_t` | unknown |
 | Steering | target speeds not decoded | turn 420°/s; 90° in 0.383 s, reverse in 0.600 s | [F] decision 0027; MFEEL | unknown (footage-tuned) |
-| Sink | glide gravity factor not decoded | 1.4 m/s | MFEEL `glide_sink` | unknown |
+| Sink | glide gravity factor not decoded; footage checked 11-11, none measurable: no long steady glide on disk (hetzner /home/boki/svvid abilities video 1174 s + its hero-ref frames, Tetra guide 300 s; refs/supervive-mantle Joule 1v4 42 s, owner clip 34 s). The abyss-tinted seconds are a storm zone (Tetra 16, 122, 240-243 s) and a fight over the abyss with the camera swinging (owner clip 12-20 s); the one glide the hero-ref notes name (Elluna, 706.8 s) is a step off the practice range's edge | 1.4 m/s, hunter_move.json `glide_sink` | owner: 2.2 fell faster than the source; MFEEL `glide_sink`, `--glider-heat-check` | unknown |
 | Height hold | 8.5 m over the ground, sinks 3.5 m/s above it | glide_height 8.5, glide_pull_vy 3.5 | [D]; hunter_move.json | match |
 | Drop into speed (swoop) | height trades for speed | never | owner 11-08 item 8 | off (ruling) |
-| Heat | coefficients not decoded | tuned; `--glider-heat-check` | [D] undecoded | unknown |
+| Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/the reference_FEEL.md; not on disk to recount); the same footage check as Sink | 9 s from the open to overheat, hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | off (owner) / unknown (coefficients) |
 | Overheat | burns; the glider closes | opens at any heat, burns, lifts at half strength | [W]; owner item 63 | off (ruling) |
 | Dive | −32.5 m/s, force 350,000, steer 0.25, cancel under 3.5 m, 10 s | dive_vy 32.5, dive_accel 35, dive_steer 0.25, dive_cancel_h 3.5, dive_timeout 10 | [D]; hunter_move.json | match |
 | Spike (knocked out of a glide) | stun 0.7 s on landing; slam threshold not decoded | land stun 0.7 s; slam numbers [est] | [W]; hunter_move.json `glide_spike` | match / unknown (slam) |
