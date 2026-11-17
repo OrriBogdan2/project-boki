@@ -1,0 +1,13 @@
+UU docs/DEATH_AND_REVIVE.md
+UU docs/DEBT.md
+UU docs/specs/DOWNED_ABILITIES.md
+UU docs/wiki/Rules.md
+UU scripts/core/net.gd
+UU scripts/main.gd
+UU scripts/match/hunter.gd
+UU scripts/match/life.gd
+UU scripts/match/match.gd
+UU tools/check_registry.gd
+UU tools/remote_anim_check.gd
+AA tools/stomp_check.gd.uid
+UU tools/style_baseline.json

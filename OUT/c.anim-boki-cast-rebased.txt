@@ -1,0 +1,7 @@
+UU MERGE_REPORT.md
+UU docs/art/kin/RIGGED_BOKI.md
+UU scripts/match/boki_rig.gd
+UU scripts/match/kin.gd
+UU tools/boki_rig_check.gd
+UU tools/boki_rig_shots.gd
+UU tools/check_registry.gd

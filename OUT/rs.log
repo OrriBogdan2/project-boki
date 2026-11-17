@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 23.2.1-1ubuntu3.1~22.04.4 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 15.0.7, 256 bits)
+
+RESULTSTAGE ok   the roster: the player's team, each one's eliminated and extracted ([[true, false, false], [false, true, false], [false, false, true]])
+RESULTSTAGE ok   archer: win emote, lose downed
+RESULTSTAGE ok   juggernaut: win emote, lose downed
+RESULTSTAGE ok   gunslinger: win emote, lose downed
+RESULTSTAGE ok   bulwark: win emote, lose downed
+RESULTSTAGE ok   rimewright: win emote, lose downed
+RESULTSTAGE ok   ashwick: win emote, lose downed
+RESULTSTAGE ok   dolm: win emote_toss, lose downed
+RESULTSTAGE ok   mage: win emote, lose downed
+RESULTSTAGE ok   dredge: win emote, lose downed
+RESULTSTAGE ok   tender: win emote, lose downed
+RESULTSTAGE ok   thief: win emote, lose downed
+RESULTSTAGE ok   ostra: win emote, lose downed
+RESULTSTAGE ok   all 12 Hunters with clips have a win and a lose beat (no clips: gil)
+RESULTSTAGE ok   got out, left, left, in: plays win, win, win (want win, win, win)
+RESULTSTAGE ok   got out, left, left, in: 3 Boki, one beside each winner
+RESULTSTAGE ok   got out, left, left, in: closing frees all 6 models
+RESULTSTAGE ok   got out, left, out: plays win, wisp (want win, wisp)
+RESULTSTAGE ok   got out, left, out: 1 Boki, one beside each winner
+RESULTSTAGE ok   got out, left, out: closing frees all 3 models
+RESULTSTAGE ok   got out, left: plays win (want win)
+RESULTSTAGE ok   got out, left: 1 Boki, one beside each winner
+RESULTSTAGE ok   got out, left: closing frees all 2 models
+RESULTSTAGE ok   did not, out, left, in: plays wisp, win, lose (want wisp, win, lose)
+RESULTSTAGE ok   did not, out, left, in: 1 Boki, one beside each winner
+RESULTSTAGE ok   did not, out, left, in: closing frees all 4 models
+RESULTSTAGE ok   did not, in, in, in: plays lose, lose, lose (want lose, lose, lose)
+RESULTSTAGE ok   did not, in, in, in: 0 Boki, one beside each winner
+RESULTSTAGE ok   did not, in, in, in: closing frees all 3 models
+RESULTSTAGE ok   did not, out, out, out: plays wisp, wisp, wisp (want wisp, wisp, wisp)
+RESULTSTAGE ok   did not, out, out, out: 0 Boki, one beside each winner
+RESULTSTAGE ok   did not, out, out, out: closing frees all 3 models
+RESULTSTAGE ok   did not, in: plays idle (want idle)
+RESULTSTAGE ok   did not, in: 0 Boki, one beside each winner
+RESULTSTAGE ok   did not, in: closing frees all 1 models
+RESULTSTAGE ok   results (extracted true, 3 in squad) carries one stage
+RESULTSTAGE ok   closing results frees the stage
+RESULTSTAGE ok   results (extracted false, 0 in squad) carries one stage
+RESULTSTAGE ok   closing results frees the stage
+RESULTSTAGE ok   results (extracted true, 0 in squad) carries one stage
+RESULTSTAGE ok   closing results frees the stage
+RESULTSTAGE DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

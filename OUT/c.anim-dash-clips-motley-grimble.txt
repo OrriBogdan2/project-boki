@@ -1,0 +1,9 @@
+UU art/wardens/dredge/dredge.glb
+UU art/wardens/ostra/ostra.glb
+UU content/rules/warden_anim/dredge.json
+UU content/rules/warden_anim/ostra.json
+UU docs/ANIM_COVERAGE.md
+UU tools/anim_coverage_check.gd
+UU tools/art1/glb_add_clips.py
+UU tools/art1/ostra_clips.py
+AA tools/art1/rebake_from_glb.py

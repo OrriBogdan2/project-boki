@@ -1,0 +1,24 @@
+CLIP FAIL archer: 102027 tris, weapon included (budget 80000)
+CLIP FAIL archer: every clip lasts as long as its kit move (worst 0.173 s, pin_roll, clip 0.533 s, keys 0.360 s)
+CLIP FAIL juggernaut: 119415 tris, weapon included (budget 80000)
+CLIP FAIL juggernaut: moves hand over without a pop (worst 0.515 m over the clip's own, jug_dash @0.17; limit 0.282)
+CLIP FAIL juggernaut: no weapon rides a hand into the Boki (longest piece on a hand alone 1.28 m, limit 0.25)
+CLIP FAIL gunslinger: 120190 tris, weapon included (budget 80000)
+CLIP FAIL bulwark: 108541 tris, weapon included (budget 80000)
+CLIP FAIL rimewright: 107003 tris, weapon included (budget 80000)
+CLIP FAIL rimewright: no weapon rides a hand into the Boki (longest piece on a hand alone 1.05 m, limit 0.25)
+CLIP FAIL ashwick: 104419 tris, weapon included (budget 80000)
+CLIP FAIL dolm: 95626 tris, weapon included (budget 80000)
+CLIP FAIL dolm: every clip lasts as long as its kit move (worst 0.143 s, breah_slam, clip 1.367 s, keys 1.510 s)
+CLIP FAIL dolm: breah_raise plays on the upper body
+CLIP FAIL mage: 97278 tris, weapon included (budget 80000)
+CLIP FAIL mage: moves hand over without a pop (worst 0.279 m over the clip's own, mage_lmb_l @0.00; limit 0.240)
+CLIP FAIL dredge: 124701 tris, weapon included (budget 80000)
+CLIP FAIL tender: 121292 tris, weapon included (budget 80000)
+CLIP FAIL tender jump run: the landing dips -0.000 m (the hop's dip, at least 0.015), lowest at 0.00 s
+CLIP FAIL tender drop run: the landing dips -0.000 m (the deep crouch, at least 0.030), lowest at 0.00 s
+CLIP FAIL tender glide run: the landing dips -0.000 m (the deep crouch, at least 0.030), lowest at 0.00 s
+CLIP FAIL thief: 115114 tris, weapon included (budget 80000)
+CLIP FAIL thief: moves hand over without a pop (worst 0.293 m over the clip's own, thf_vault_f @0.00; limit 0.232)
+CLIP FAIL thief: no weapon rides a hand into the Boki (longest piece on a hand alone 0.51 m, limit 0.25)
+CLIP FAIL ostra: 98459 tris, weapon included (budget 80000)
