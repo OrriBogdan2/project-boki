@@ -23,15 +23,17 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
+	"hold_done": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "centred", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true, "low_hp_pulse": true,
+	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	"colour_vision": "default",      # SideColor.ORDER
@@ -238,7 +240,7 @@ func load_file() -> ConfigFile:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+		v["cam_follow"] = "centred"     # the centred follow becomes everyone's default once
 	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
@@ -665,6 +667,10 @@ func fill_keys(text: String) -> String:
 	for a in ACTIONS:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
+
+## The four walking keys' caps in a row ("WASD"), joined by `sep`.
+func move_caps(sep := "") -> String:
+	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:

@@ -35,6 +35,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `master`, `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
+| `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |

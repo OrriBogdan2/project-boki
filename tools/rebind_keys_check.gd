@@ -123,7 +123,7 @@ func _match() -> void:
 	P.ak.cue.erase("w")
 	var texts: Array = TextCache.seen.duplicate()
 	for id in ["sec", "k1", "r", "dash"]:
-		for line in m.hud._tip_lines(id, P): texts.append(String(line[0]))
+		for line in m.hud.hover.tip_lines(id, P): texts.append(String(line[0]))
 	none("no hunter slot text or tooltip names a default key (%d texts)" % texts.size(), _stale_in(texts))
 	m.free()
 
@@ -156,14 +156,14 @@ func _tutorial() -> void:
 	ok("the move step's strip cap is the bound move keys ('%s')" % tu.key_cap,
 			tu.key_cap == tu._wasd() and tu.key_cap.begins_with("F"))
 	ok("the strip's key cap is the bound key on %d steps" % capped, capped > 0 and off.is_empty(), str(off))
-	for row in m.train_rows(): texts.append(String(row[1]))
+	for row in m.training.rows(): texts.append(String(row[1]))
 	none("tutorial lines, details, hints, training rows name no default key (%d)" % texts.size(), _stale_in(texts))
 	m.free()
 
 # ------------------------------------------------------------------ 4. loading tips, tokens, kit card
 func _loading() -> void:
 	var texts: Array = []
-	for tip in load("res://scripts/ui/loading.gd").TIPS: texts.append(Settings.fill_keys(String(tip)))
+	for tip in TipPick.rules()["tips"]: texts.append(TipPick.render(String(tip["text"])))
 	none("loading tips name no default key (%d tips)" % texts.size(), _stale_in(texts))
 	var sample := ["Press E again", "Hold Shift to aim", "Dash (Shift)", "on RMB", "your right click"]
 	var fine := ["Press F5 again", "hold F13", "F2 AGAIN", "Press it again"]
@@ -172,7 +172,7 @@ func _loading() -> void:
 	ok("the kit card's tile caps follow the bindings",
 			TILES.keys().all(func(k): return KitCard._cap(k) == Settings.key_cap(TILES[k])))
 	ok("no loading tip leaves a {token} unfilled", not texts.any(func(t): return String(t).contains("{")))
-	var moved := Settings.fill_keys("{jump} {crouch} {interact} {util1}")
+	var moved := TipPick.render("{jump} {crouch} {interact} {util1}")
 	var caps: Array = ["jump", "crouch", "interact", "util1"].map(func(a): return Settings.key_cap(a))
 	ok("tokens fill from the bindings ('%s')" % moved, moved == " ".join(caps))
 

@@ -22,9 +22,7 @@
 		"tip": "weapon_muzzle",
 		"bone": "gun"
 	},
-	"hide_while_chain": [
-		"hook"
-	],
+	"reach": {"bones": ["upper_arm.R", "forearm.R", "hand.R"], "grip": 0.35},
 	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
 		"idle": "idle",
@@ -43,7 +41,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.4, "stride": [1.3, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.61, 5.01], "start_phase": 0.7
+		"run_speed": 4.4, "stride": [1.3, 1.2], "bob": [0.5, 0.5], "foot_mps": [1.61, 5.01], "start_phase": 0.7
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {
@@ -91,7 +89,9 @@
 			"hold_from": 0.39
 		},
 		"dr_lunge_out": {
-			"clip": "lunge_out"
+			"clip": "lunge_out",
+			"rate": 1.4,
+			"fade_out": 0.12
 		},
 		"dr_pounce": {
 			"clip": "pounce"
@@ -119,6 +119,8 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"dead_t": 1.5,
 		"stun": "stun",
@@ -178,9 +180,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [

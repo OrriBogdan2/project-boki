@@ -64,21 +64,21 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 		sg = maxi(sg, int(clampf(r * 170.0, 16.0, 48.0)))
 	sg += sg % 2
 	var key := "%.4f|%d" % [r, sg]
-	if _spheres.has(key):
-		return _spheres.mesh(key)
+	var hit = _spheres.read(key)
+	if hit:
+		return hit
 	var s := SphereMesh.new()
 	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
-	_spheres.put(key, s)
-	return s
+	return _spheres.keep(key, s)
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
 	var key := "cap|%.4f|%.4f" % [r, h]
-	if _spheres.has(key):
-		return _spheres.mesh(key)
+	var hit = _spheres.read(key)
+	if hit:
+		return hit
 	var c := CapsuleMesh.new()
 	c.radius = r; c.height = h; c.radial_segments = int(clampf(r * 380.0, 20.0, 48.0)); c.rings = 16
-	_spheres.put(key, c)
-	return c
+	return _spheres.keep(key, c)
 
 static var _rbox := MeshCache.new()
 
@@ -92,11 +92,11 @@ static func box(x: float, y: float, z: float) -> Mesh:
 		b.size = Vector3(x, y, z)
 		return b
 	var key := "%.4f|%.4f|%.4f" % [x, y, z]
-	if _rbox.has(key):
-		return _rbox.mesh(key)
+	var hit = _rbox.read(key)
+	if hit:
+		return hit
 	var am := rounded_box(Vector3(x, y, z), r, 4 if mn > 0.1 else (3 if mn > 0.03 else 2))
-	_rbox.put(key, am)
-	return am
+	return _rbox.keep(key, am)
 
 ## A rounded box: every face is a grid whose outer rows are bent around the edges and corners on a
 ## radius r, with `steps` grid lines per 45 degrees of the bend.
@@ -173,8 +173,9 @@ static var _lathes := MeshCache.new()
 ## with radius 0 close the shape on the axis. Normals come from the profile's own curve, so it
 ## shades as one soft surface. Cached by `key` when one is given.
 static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMesh:
-	if key != "" and _lathes.has(key):
-		return _lathes.mesh(key)
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var n := profile.size()
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var idx: Array = []
 	var total := 0.0
@@ -202,8 +203,7 @@ static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMes
 			var b0 := (i + 1) * (seg + 1) + j
 			_quad(verts, norms, idx, a0, a0 + 1, b0 + 1, b0)
 	var am := _commit(verts, norms, uvs, idx)
-	if key != "": _lathes.put(key, am)
-	return am
+	return _lathes.keep(key, am) if key != "" else am
 
 ## A smooth curve through the given points (Catmull-Rom), `sub` steps per span. The ends are kept.
 static func smooth_curve(pts: PackedVector2Array, sub := 4) -> PackedVector2Array:
@@ -266,8 +266,9 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 		c.top_radius = top; c.bottom_radius = bottom; c.height = h; c.radial_segments = maxi(seg + 2, 8); c.rings = 1
 		return c
 	var key := "%.4f|%.4f|%.4f|%d" % [top, bottom, h, radial]
-	if _cyls.has(key):
-		return _cyls.mesh(key)
+	var hit = _cyls.read(key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var poly: Array = []
 	poly.append(Vector2(bottom, -hh) if bottom > 0.0005 else Vector2(0.0, -hh))
@@ -278,8 +279,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 	var loop := _fillet(poly, bev, 5)
 	var prof := _right_half(loop)
 	var am := lathe(prof, radial)
-	_cyls.put(key, am)
-	return am
+	return _cyls.keep(key, am)
 
 ## The x >= 0 half of a closed, counter-clockwise outline that is mirror-symmetric about x = 0,
 ## from where it crosses the axis at the bottom to where it crosses back at the top.
@@ -315,8 +315,9 @@ static func _right_half(loop: Array) -> PackedVector2Array:
 ## bottom, a little fuller a third of the way down (a muscle, a sleeve). Centred like a capsule.
 static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "limb|%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
-	if _lathes.has(key):
-		return _lathes.mesh(key)
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	# bottom cap
@@ -332,8 +333,7 @@ static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := smooth_curve(pts, 3)
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := lathe(prof, int(clampf(maxf(r0, r1) * 380.0, 24.0, 40.0)))
-	_lathes.put(key, am)
-	return am
+	return _lathes.keep(key, am)
 
 static var _eyes := MeshCache.new()
 
@@ -373,8 +373,9 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 ## toward the hem (their normals follow the folds, so they catch the light like painted drapery).
 static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07) -> ArrayMesh:
 	var key := "skirt|%.4f|%.4f|%.4f|%d|%.3f" % [r_top, r_bot, h, folds, amp]
-	if _lathes.has(key):
-		return _lathes.mesh(key)
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var seg := 72
 	var rows := 12
 	var hh := h * 0.5
@@ -413,16 +414,16 @@ static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07)
 		if fn.dot(Vector3.DOWN) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 		else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, idx)
-	_lathes.put(key, am)
-	return am
+	return _lathes.keep(key, am)
 
 static var _crystals := MeshCache.new()
 
 ## A cut crystal: a faceted prism with a pointed top, flat-shaded on purpose so it glints.
 static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 	var key := "%.4f|%.4f|%d" % [r, h, sides]
-	if _crystals.has(key):
-		return _crystals.mesh(key)
+	var hit = _crystals.read(key)
+	if hit:
+		return hit
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var y0 := -h * 0.5; var y1 := h * 0.18; var y2 := h * 0.5
@@ -450,8 +451,7 @@ static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 			st.set_normal(-fn)
 			st.add_vertex(p)
 	var am := st.commit()
-	_crystals.put(key, am)
-	return am
+	return _crystals.keep(key, am)
 
 ## A glossy material: metal, gems, polished things catch a crisp highlight.
 static func shiny(c: Color, gloss := 0.6) -> ShaderMaterial:
@@ -588,7 +588,8 @@ static func _pivot(torso: Node3D, nm: String, at: Vector3) -> Node3D:
 		torso.add_child(n)
 	return n
 
-static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
+## The class emblem on the glider pack (light: a chevron, medium: a diamond, heavy: a shield).
+static func class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
 	var m_cls := class_mat(cls)
 	var at := Vector3(0, 0.655, 0.27 * bw)
 	var tilt := Vector3(-1.05, 0, 0)          # lying back on the rolled wing, facing up and back
@@ -606,13 +607,13 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 ## ribs, broad at the shoulders and rounded over into the neck. About 0.62 tall, centred.
 static func torso_mesh() -> ArrayMesh:
 	var key := "torso"
-	if _lathes.has(key):
-		return _lathes.mesh(key)
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var pts := PackedVector2Array([Vector2(0.0, -0.31), Vector2(0.13, -0.305), Vector2(0.2, -0.27), Vector2(0.218, -0.17), Vector2(0.205, -0.05),
 		Vector2(0.212, 0.05), Vector2(0.236, 0.14), Vector2(0.248, 0.205), Vector2(0.236, 0.255), Vector2(0.19, 0.293), Vector2(0.11, 0.312), Vector2(0.0, 0.318)])
 	var am := lathe(smooth_curve(pts, 4), 56)
-	_lathes.put(key, am)
-	return am
+	return _lathes.keep(key, am)
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
 ## class's own) the silhouette and gear, and the look the person inside it: a player's look
@@ -649,126 +650,34 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var oi: int = OUTFIT_KEYS.find(outfit)
 	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
 	if um: hero_col = Unmasked.colour(appearance)      # the shroud's colour
-	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
-	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
-	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
-	# colour set in HSV from the outfit's hue so nothing goes muddy; the team colour is kept off the
-	# cloth and only marks the key shapes
-	var coat_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.1, 0.06, 0.7), clampf(hero_col.v * 0.6, 0.36, 0.6))
-	var shirt_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.45, 0.04, 0.3), 0.9)
-	var pants_col := Color.from_hsv(fposmod(coat_col.h + 0.02, 1.0), 0.28, 0.2)
-	var m_body := toon(coat_col)
-	var m_shirt := toon(shirt_col)
-	var m_pants := toon(pants_col)
-	var m_leather := toon(Color("6b4330").lerp(hero_col, 0.06))
-	var skin_c: Color = lk["skin_col"]
-	var hair_c: Color = lk["hair_col"]
-	var m_skin := toon(skin_c)
-	var m_hair := toon(hair_c)
-	var m_dark := toon(Color("2b2a33"))
-	var m_acc := toon(Color.from_hsv(team_col.h, minf(1.0, team_col.s * 1.08), team_col.v * 0.94))
-	var m_gold := shiny(Color("dcaa48"), 0.65); m_gold.set_shader_parameter("glow", 0.08)
-	var m_gun := shiny(Color("4a4d5c"), 0.5)
-	var m_hero := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.05, 0.06, 0.8), clampf(hero_col.v * 0.85, 0.45, 0.85)))
-	var m_trim := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.05, 0.75), clampf(hero_col.v * 0.95, 0.55, 0.95)))
-	var m_steel := shiny(Color("b0b2b8").lerp(hero_col, 0.06), 0.6)      # dark gunmetal: the highlights and the fresnel do the work
-	var m_glow := toon(hero_col.lerp(Color.WHITE, 0.35), false, 1.4)
-	var m_glow_soft := StandardMaterial3D.new()
-	m_glow_soft.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m_glow_soft.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m_glow_soft.albedo_color = Color(hero_col.lerp(Color.WHITE, 0.5), 0.28)
-	m_glow_soft.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	var m_bone := toon(Color("efe3c8"))
-	var m_wood := toon(Color("7a5236"))
-	var m_fur := toon(Color("4a3428").lerp(hero_col, 0.08))
-	var m_feather := toon(Color("f6f0e2"))
-	var m_cloak := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.06, 0.6), clampf(hero_col.v * 0.5, 0.3, 0.5)))
-	var m_hat := toon(Color("6e4a30").lerp(hero_col, 0.1))
-	for mm in [m_body, m_shirt, m_hair, m_acc, m_hero, m_trim, m_cloak, m_hat, m_feather]:
-		(mm as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
-	m_skin.set_shader_parameter("sss", 0.45)
-	m_hair.set_shader_parameter("gloss", 0.35)
-	m_leather.set_shader_parameter("gloss", 0.15)
-	m_bone.set_shader_parameter("gloss", 0.3)
-	for mm in [m_body, m_shirt, m_pants, m_acc, m_hero, m_trim, m_cloak, m_feather]:
-		painted(mm, 1, 0.3, 0.3, 0.26)
-	painted(m_leather, 2, 0.26, 0.26, 0.24); painted(m_hat, 2, 0.26, 0.24, 0.24); painted(m_dark, 2, 0.18, 0.2, 0.2)
-	painted(m_skin, 4, 0.0, 0.0, 0.18)     # no part gradient on skin: the jaw, nose and ears would show seams
-	painted(m_hair, 5, 0.3, 0.24, 0.24); painted(m_fur, 5, 0.3, 0.3, 0.3)
-	painted(m_gun, 3, 0.12, 0.1, 0.1); painted(m_gold, 3, 0.1, 0.0, 0.0); painted(m_steel, 3, 0.14, 0.12, 0.14); m_steel.set_shader_parameter("sky_ao", 0.12)
-	painted(m_bone, 0, 0.3, 0.2, 0.2); painted(m_wood, 2, 0.2, 0.2, 0.2)
-	m_acc.set_shader_parameter("gloss", 0.12)
+	# a Warden drawn from its .glb hides this body: only its rig (the pivots drive the .glb's bones) and the pieces
+	# the .glb keeps are built, not the body's meshes (HunterBody)
+	var rig_only := WardenGlb.will_dress(arch)
+	var mats: Dictionary = HunterBody.gun_mats(team_col) if rig_only else HunterBody.mats(hero_col, team_col, lk)
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = lk["build"]
 	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0)) * float(Arch.body(arch).get("build", 1.0))
-	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var fem := int(lk["gender"]) == 0
-	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
-	# legs swing from the hip: a tapered thigh, a knee guard, and a boot in one piece hanging from
-	# the knee (so the leg can bend), with a cuff that overlaps the trousers
+	# legs swing from the hip, the boot hangs from the knee (so the leg can bend)
 	var knees := {}
 	for sx in [-1.0, 1.0]:
 		var leg := Node3D.new(); leg.name = "LegL" if sx < 0.0 else "LegR"
 		leg.position = Vector3(0.11 * sx * bw, 0.44, 0)
 		legs.add_child(leg)
-		part(leg, limb(0.108 * bw, 0.068 * bw, 0.34, 0.16), m_pants, Vector3(0, -0.12, 0))
 		var knee := Node3D.new(); knee.name = "Knee"; knee.position = Vector3(0, -0.2, 0)
 		leg.add_child(knee)
 		knees["L" if sx < 0.0 else "R"] = knee
-		if not heavy_gear:
-			part(knee, sphere(0.068, 14), m_pants, Vector3(0, 0.0, 0.0))      # (plate knee cops cover it on heavies)
-			part(knee, HeroKit.dome_plate("kneepad", 0.065, 0.45, 0.8, 0.2, 0.012), m_leather if arch != "thief" else m_dark, Vector3(0, 0.0, -0.045), Vector3.ONE, Vector3(-PI * 0.5 + 0.1, 0, 0))
-		part(knee, HeroKit.boot(boot_k), m_leather, Vector3.ZERO)
-		part(knee, HeroKit.sole(boot_k), m_dark, Vector3.ZERO)
-		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_steel if heavy_gear else (m_trim if arch != "thief" else m_leather), Vector3(0, -0.06, 0.005))
 	legs.scale.y = lk["limbs"] * float(Arch.body(arch).get("legs", 1.0))      # the Warden's leg length
 	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42 * legs.scale.y, 0); rig.add_child(torso)
 	root.set_meta("hip_y", torso.position.y)      # HunterAnim keeps the torso on the legs at this height
 	var chest_w := bw * (0.92 if fem else 1.12) * float(lk["shoulders"])
-	# hips, then the sculpted torso (waist, ribcage, chest or bust, shoulder blades), then the neck
-	# flaring into the shoulders so the head sits on the body, not on a peg
-	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, -0.08), Vector2(0.18, -0.07), Vector2(0.225, -0.02), Vector2(0.22, 0.06), Vector2(0.2, 0.1), Vector2(0, 0.1)]), 3), 40, "hips"),
-		m_pants, Vector3(0, 0.02, 0), Vector3((1.04 if fem else 1.0) * bw, 1.0, bw))
-	part(torso, HeroKit.torso(fem), m_body, Vector3(0, 0.33, 0), Vector3(chest_w, 1.0, bw * 0.9))
-	var nr := 0.072 if fem else 0.088
-	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0.0), Vector2(nr * 2.0, 0.0), Vector2(nr * 1.3, 0.035), Vector2(nr, 0.08), Vector2(nr * 0.98, 0.16), Vector2(0, 0.16)]), 3), 28, "neck%.3f" % nr), m_skin, Vector3(0, 0.58, 0))
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
-	# the glider pack: a rolled wing on a back plate (under whatever the archetype carries)
-	if not um:      # (the Empty's shroud covers its back)
-		part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
-		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-		for sx in [-1.0, 1.0]:
-			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
-	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
-	var hk := HeroKit.head_key(rid, fem)
-	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
-	if rid == "human" and not um:
-		for sx in [-1.0, 1.0]:
-			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
-			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	if um: Unmasked.face(torso, appearance)
-	else: _face(torso, lk, m_dark, m_skin, team_col)
-	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
-	# hood or helm: only what spills out below)
-	var cov := HeroGear.cover(arch, bare)
-	var hair_n := Node3D.new(); hair_n.name = "Hair"; torso.add_child(hair_n)
-	if rid == "human":
-		HeroHair.human(hair_n, int(lk["hair"]), fem, m_hair, hk, cov)
-	else:
-		_race_hair(hair_n, rid, int(lk["hair"]), m_hair, hair_c, skin_c, cov in ["hood", "helm"])
-	_race_parts(torso, rid, m_skin, m_hair, m_dark, skin_c, hair_c, hero_col)
-	var gear := Node3D.new(); gear.name = "Gear"; torso.add_child(gear)
-	# the arms and the gun move together from the shoulders ("Aim"), for recoil, reloads and poses
+	HunterBody.pivots(torso, rid, arch, bw)
+	# the arms and the gun move together from the shoulders ("Aim"), for recoil and poses
 	var aim := Node3D.new(); aim.name = "Aim"; aim.position = Vector3(0, 0.5, 0.0); torso.add_child(aim)
 	var gun := Node3D.new(); gun.name = "Gun"; gun.position = Vector3(0.22, -0.18, -0.18); aim.add_child(gun)
-	# arms: they hang from the shoulders with an elbow and a hand on joints of their own, so HunterAnim
-	# can put the hands on the weapon's grips (solving the elbows) or let them swing free.
-	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
-	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
-	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
-	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
+	# arms hang from the shoulders with an elbow and a hand on joints of their own: ArmXPivot (shoulder) > Elbow > Hand
 	var arms := {}
 	# (archetype body "arms": long arms as its art draws them; HunterAnim solves the same lengths)
 	var arm_k := float(Arch.body(arch).get("arms", 1.0))
@@ -779,18 +688,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 				0.5 * float(Arch.body(arch).get("torso", 1.0)), 0.0)
 		piv.position.x *= float(Arch.body(arch).get("shoulder", 1.0))
 		torso.add_child(piv)
-		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
-		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
 		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position.y = -0.21 * arm_k; piv.add_child(elbow)
-		part(elbow, sphere(0.064, 14), m_body)
-		part(elbow, limb(0.068, 0.05, 0.22, 0.14), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
 		var hand := Node3D.new(); hand.name = "Hand"; hand.position.y = -0.235 * arm_k; elbow.add_child(hand)
-		part(hand, HeroKit.mitten(), m_glove, Vector3(0, 0.0, 0.0), Vector3(hk2, hk2, hk2) * Vector3(1.0, 1.0, 1.0))
-		part(hand, HeroKit.thumb(), m_glove, Vector3(-0.042 * sx * hk2, 0.01, -0.03 * hk2), Vector3.ONE * hk2, Vector3(0, 0, 0.35 * sx))
-		part(hand, HeroKit.cuff(0.062 * hk2, 0.078 * hk2, 0.05), m_glove if heavy_gear else m_leather, Vector3(0, 0.065, 0))
-		if arch == "juggernaut":
-			for k in 3:
-				_spike(hand, m_bone, Vector3((k - 1) * 0.03 * hk2, -0.09 * hk2, -0.05 * hk2), Vector3(0, -0.3, -1.0), 0.014, 0.05)
 		arms[sd] = [piv, elbow, hand]
 	# shoulder pieces hang on their own pivots at the shoulders, which HunterAnim turns part of the
 	# way with the arm, so raised arms never come up through the plate
@@ -800,17 +699,10 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		pd.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
 		torso.add_child(pd)
 		pads["L" if sx < 0.0 else "R"] = pd
-	var ctx := {"torso": torso, "skirt": skirt_n, "gear": gear, "pl": pads["L"], "pr": pads["R"], "arms": arms, "knees": knees, "bw": bw, "cw": chest_w,
-		"fem": fem, "rid": rid, "hk": hk, "bare": bare, "arch": arch, "hero_col": hero_col,
-		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
-			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
-			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
-	if um: Unmasked.dress(ctx, appearance)
-	else: HeroGear.dress(arch, ctx)
-	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
+	gun_parts(gun, weapon, mats["gun"], mats["dark"], mats["acc"])
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
-		part(gun, box(0.06, 0.15, 0.09), m_acc, Vector3(0, -0.13, -0.24), Vector3.ONE, Vector3(0.15, 0, 0), "Mag")
+		part(gun, box(0.06, 0.15, 0.09), mats["acc"], Vector3(0, -0.13, -0.24), Vector3.ONE, Vector3(0.15, 0, 0), "Mag")
 	if not gun.has_node("Muzzle"):
 		var muzzle := Node3D.new(); muzzle.name = "Muzzle"; muzzle.position = Vector3(0, 0.02, -0.75); gun.add_child(muzzle)
 	var shoulder := Node3D.new(); shoulder.name = "Shoulder"; shoulder.position = Vector3(-0.3, 0.8, 0.04); torso.add_child(shoulder)
@@ -839,27 +731,10 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var head := Node3D.new(); head.name = "HeadPivot"
 	head.position = Vector3(0, 0.68 * float(Arch.body(arch).get("torso", 1.0)), 0)
 	torso.add_child(head)
-	for ch in torso.get_children():
-		if ch is MeshInstance3D and (String(ch.name).begins_with("@") or ch.name == "Head") and (ch as Node3D).position.y > 0.72 and not ch.has_meta("stay"):
-			torso.remove_child(ch)
-			head.add_child(ch)
-			(ch as Node3D).position.y -= 0.68
-	for nd in [hair_n, gear]:
-		torso.remove_child(nd); head.add_child(nd)
-		(nd as Node3D).position.y -= 0.68
-	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
-	# they drive the .glb's bones; "Focus" is kept and drawn)
-	var drop := WardenGlb.will_dress(arch)
-	for nd in [torso, head, hair_n, gear]:
-		merge_static(nd, drop)
-	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
-	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm), drop)
-		merge_static(legs.get_node(nm + "/Knee"), drop)
-	for sd in ["L", "R"]:
-		for nd in arms[sd]:
-			merge_static(nd, drop)
+	if not rig_only:
+		HunterBody.dress({"torso": torso, "legs": legs, "skirt": skirt_n, "pl": pads["L"], "pr": pads["R"], "arms": arms,
+			"knees": knees, "bw": bw, "cw": chest_w, "fem": fem, "rid": rid, "bare": bare, "arch": arch, "hero_col": hero_col,
+			"m": mats, "cls": cls, "um": um, "look": appearance, "lk": lk, "team_col": team_col})
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -983,7 +858,7 @@ static func _on_head(x: float, y: float, z: float, out := 0.0) -> Vector3:
 ## Each race's own head styles (see HAIR_STYLES): fur for the Vulpin (parted round their ears),
 ## crystals, stone and moss for the Stoneborn, leaves and flowers for Sprigs, crests, frills, horns
 ## and spines for Scalefolk, feathers for Owlets. All in the hair colour.
-static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
+static func race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
 	var light := toon(hair_c.lightened(0.3)); (light as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
 	var dark := toon(hair_c.darkened(0.25))
 	match rid:
@@ -1169,7 +1044,7 @@ static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hai
 						_blade(n, m_hair if i % 2 == 0 else light, _on_head(x * 2.0, 0.4, 0.9), Vector3(x, -1.0, 0.35), 0.44 - absf(i - 1.5) * 0.06, 0.08, PI * 0.5, 0.25)
 
 ## What each race adds: ears, tails, wings, snouts, crests, crystals.
-static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
+static func race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
 	match rid:
 		"vulpin":
 			var inner := toon(Color("ffb6bf"))
@@ -1179,7 +1054,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			part(torso, sphere(0.1, 12), toon(skin_c.lightened(0.35)), Vector3(0, 0.79, -0.19), Vector3(1.15, 0.75, 0.9))   # muzzle
 			part(torso, sphere(0.035, 8), m_dark, Vector3(0, 0.81, -0.285))   # nose
 			# the tail: a big brush that sweeps up behind, with a white tip
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.02, 0.26); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			var pts := [[Vector3(0, -0.02, 0.08), 0.11], [Vector3(0.07, 0.07, 0.28), 0.19], [Vector3(0.19, 0.21, 0.46), 0.23], [Vector3(0.31, 0.4, 0.55), 0.19]]
 			for p in pts:
 				part(tail, sphere(float(p[1]), 12), m_hair, p[0])
@@ -1207,7 +1082,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			wing_m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			wing_m.albedo_color = Color(hero_col.lerp(Color("c8ffd8"), 0.5), 0.55)
 			wing_m.cull_mode = BaseMaterial3D.CULL_DISABLED
-			var wings := Node3D.new(); wings.name = "Wings"; wings.position = Vector3(0, 0.5, 0.3); torso.add_child(wings)
+			var wings := torso.get_node("Wings") as Node3D
 			for sx in [-1.0, 1.0]:
 				var wmi := part(wings, sphere(0.26, 12), wing_m, Vector3(0.26 * sx, 0.1, 0.1), Vector3(0.8, 1.9, 0.06), Vector3(1.0, 0.35 * sx, 0.95 * sx))
 				wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -1218,7 +1093,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			for sx in [-1.0, 1.0]:
 				part(torso, sphere(0.02, 6), m_dark, Vector3(0.05 * sx, 0.84, -0.385))
 			# a long tail that tapers down to the ground behind
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.0, 0.24); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			var segs := [[Vector3(0, -0.04, 0.08), 0.11, 0.3], [Vector3(0, -0.16, 0.3), 0.085, 0.3], [Vector3(0, -0.3, 0.52), 0.06, 0.28], [Vector3(0, -0.38, 0.72), 0.035, 0.22]]
 			for sg in segs:
 				part(tail, capsule(float(sg[1]), float(sg[2]) + float(sg[1]) * 2.0), m_skin, sg[0], Vector3.ONE, Vector3(1.05, 0, 0))
@@ -1226,7 +1101,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			part(torso, cyl(0.0, 0.05, 0.13, 4), toon(Color("f2a24a")), Vector3(0, 0.8, -0.26), Vector3(1.0, 1.0, 0.8), Vector3(-PI / 2 + 0.35, 0, 0))   # beak
 			for sx in [-1.0, 1.0]:
 				part(torso, sphere(0.11, 14), m_hair, Vector3(0.27 * sx, 0.3, 0.05), Vector3(0.3, 1.0, 0.15), Vector3(0.1, 0, -0.25 * sx))   # wing feathers at the sides
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.0, 0.26); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			for i in 5:
 				var a := (i - 2) * 0.32
 				part(tail, sphere(0.12, 16), m_hair if i % 2 == 0 else toon(hair_c.lightened(0.25)), Vector3(sin(a) * 0.12, -0.1, 0.14), Vector3(0.4, 1.95, 0.11), Vector3(1.0, 0, a))
@@ -1372,9 +1247,8 @@ static func bake_part_y(n: Node) -> void:
 					and (mi.material_override as ShaderMaterial).shader == TOON \
 					and not (mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_TEX_UV2)):
 				var id := mi.mesh.get_instance_id()
-				if not _part_y_cache.has(id):
-					_part_y_cache.put(id, _with_part_y(mi.mesh))
-				mi.mesh = _part_y_cache.mesh(id)
+				var baked = _part_y_cache.read(id)
+				mi.mesh = baked if baked else _part_y_cache.keep(id, _with_part_y(mi.mesh))
 		for ch in c.get_children(): stack.append(ch)
 
 ## Sets a toon material's painted structure: its brushwork (see toon.gdshader's `surface`), the
@@ -1411,7 +1285,7 @@ static func m_trim0(c: Color) -> ShaderMaterial:
 ## Eyes, brows and a mouth: small shapes, but they carry a lot of character.
 ## The face on the head: eyes, brows, nose and mouth for the look's expression and gender, sized and
 ## placed by its face factors (MantleLook params: eye_size, eye_shape, brow, nose), and its markings.
-static func _face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
+static func hunter_face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
 	var face := int(lk["face"])
 	var detail := int(lk["detail"])
 	var skin: Color = lk["skin_col"]

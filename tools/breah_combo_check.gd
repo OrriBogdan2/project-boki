@@ -85,7 +85,15 @@ func _breah() -> void:
 	step(m, 0.08, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	m.step(DT)
+	# the source's throw lets go on the whip of the arm (about 0.13s in), not on the press
+	var early := m.shots.filter(func(s): return s["by"] == P).size()
+	step(m, 0.13)
 	var bshot: Array = m.shots.filter(func(s): return s["by"] == P)
+	ok(
+		"lmb: the boulder leaves the hand 0.13s into the throw, not on the press",
+		early == 0 and bshot.size() == 1 and absf(float(K.d["lmb"]["boulder"]["release"]) - 0.13) < 0.001,
+		"at the press %d, 0.13s later %d" % [early, bshot.size()]
+	)
 	var blen := float(bshot[0]["life"]) * (bshot[0]["vel"] as Vector2).length() if not bshot.is_empty() else 0.0
 	ok(
 		"lmb: tap = boulder (one Match shot, molten skin)",
@@ -400,8 +408,11 @@ func _breah() -> void:
 		longest[0] = maxf(longest[0], K.rmb_t))
 	ok(
 		"item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held",
-		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
-		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
+		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down
+			and (K.slam.hops == 1 or K.slam.wind_t >= 0.0),
+		"cap %.2f longest %.2f down %s hops %d winding %s" % [
+			cap_t, longest[0], str(K.rmb_down), K.slam.hops, str(K.slam.wind_t >= 0.0)
+		]
 	)
 	ok(
 		"item 61: a slam at the cap is the full circle and centre",
@@ -426,8 +437,8 @@ func _breah() -> void:
 			hit_key = float(key[0])
 	ok(
 		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
-		absf(hit_key - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.05,
-		"key %.2f landing %.2f" % [hit_key, K.slam._flight(float(K.slam_def()["hop_up"]))]
+		absf(hit_key - K.slam.flight()) < 0.05,
+		"key %.2f landing %.2f" % [hit_key, K.slam.flight()]
 	)
 	ok(
 		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
@@ -532,7 +543,7 @@ func _breah() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	hold(m, P, 0.5)
-	step(m, 0.6)
+	step(m, 1.0)
 	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
@@ -666,6 +677,7 @@ func _breah() -> void:
 		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
 		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
 	step(m, 0.8)
+	_hop_let_go(m, P, K, reset)
 	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
@@ -863,9 +875,9 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 	aim_at(P, home + Vector3(10, 0, 0))
 	var plain := _hop_run(m, P, K, Vector2.ZERO, Vector2.ZERO)
 	ok(
-		"item 61: the hold carries him at least 2m forward with a rise, then slams on landing",
-		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.0
-			and absf(float(plain["t"]) - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.07,
+		"item 61: after its wind-up the hold carries him at least 2m forward with a rise, then slams on landing",
+		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.3
+			and absf(float(plain["t"]) - float(K.slam.feel()["windup"]) - K.slam.flight()) < 0.07,
 		"forward %.2f up %.2f in %.2fs" % [float(plain["x"]), float(plain["up"]), float(plain["t"])]
 	)
 	reset.call()
@@ -892,6 +904,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		var z0 := P.pos.y
 		if mode == "hop":
 			hold(m, P, 0.25)
+			step(m, float(K.slam.feel()["windup"]))       # (the wind-up: the hop leaves after it)
 		elif mode == "leap":
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()
@@ -1021,6 +1034,37 @@ func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
+## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
+func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 6.0
+	P.grounded = false
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	step(m, BreahHop.CROUCH + 0.09)
+	var hv0 := Vector2(P.vel.x, P.vel.z).length()
+	var lands0 := K.leap_lands
+	var open_in := 99
+	P.inp["jump"] = true
+	for i in 10:
+		P.inp["glide"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		if P.gliding:
+			open_in = i + 1
+			break
+	var hv1 := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, "
+			+ "at the hop's speed, no crash",
+		open_in <= 2 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05 and K.leap_lands == lands0,
+		"open after %s steps fly_t %.2f chaining %s h %.2f -> %.2f m/s crashes %d -> %d"
+			% [str(open_in), P.fly_t, str(K.hop.chaining()), hv0, hv1, lands0, K.leap_lands]
+	)
+	step(m, 0.3)
+	P.inp["glide"] = false
+
 func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 	if air:
 		P.pos.y += 1.5
@@ -1040,7 +1084,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))

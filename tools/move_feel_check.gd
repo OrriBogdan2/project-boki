@@ -16,6 +16,7 @@ const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const DIRS := preload("res://tools/move_feel_dirs.gd")      # the W A S D and diagonal rows
 const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
+const LEDGE := preload("res://tools/move_feel_ledge.gd")     # the ground dash off a ledge, every kit
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -28,7 +29,8 @@ const T := {
 	"ground_input_frames":     ["<=", 1.0, "frames", "press to velocity change, same sim step"],
 	"ground_t95":              ["<=", 0.10, "s", "[game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s"],
 	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
-	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
+	"ground_stop_dist":        ["~", [0.27, 0.4], "m", "[game data] UE's walking brake: 0.28-0.39m at 30-144 fps"],
+	"brake_vs_ue_err":         ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
@@ -82,13 +84,15 @@ const T := {
 	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
 	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
 	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
-	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
+	"dash_curve_thief_exit_k":        ["~", [0.5, 0.7], "x", "[footage] Shiv ends 140 px/s, mean 235: hasted run"],
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	"dash_jump_keep":                 ["~", [0.74, 0.76], "x", "[est] 0.75: source undecoded, no footage"],
+
 	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
@@ -195,6 +199,10 @@ const T := {
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
+	# the source_scale test camera (off by default; bands from camera.json "source")
+	"source_view_across_m":    ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
+	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
+	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
 
 var results := {}
@@ -244,7 +252,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.pad = {}; P.grap = {}; P.grap_cd = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.dropping = false; P.diving = false
 	P.stun_t = 0.0; P.root_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.0
-	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
+	P.coyote = 0.0; P.jump_buf = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
 	_clear_mobs()
@@ -275,7 +283,8 @@ func _flat_spot(r: float) -> Vector3:
 			return Vector3(floor(g.x) + 0.5, g.y, floor(g.z) + 0.5)
 	return w.random_ground()
 
-func run(main: Node) -> void:
+## A quiet match with one local hunter (P), everything unlocked, and the flat spot found.
+func _begin(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	m = Match.new()
@@ -294,6 +303,9 @@ func run(main: Node) -> void:
 	P.unlock_all()
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
+
+func run(main: Node) -> void:
+	_begin(main)
 	_ground()
 	_face_turn()
 	_jump()
@@ -302,12 +314,15 @@ func run(main: Node) -> void:
 	_dash_glide()
 	_airdash_fall()
 	_dash_exit()
+	_brake_exact()
 	_slow_ramp()
 	_dash_curves()
+	_dash_jump_keep()
 	_plain_dash()
 	_kit_dashes()
 	_barge_chain()
 	_flue_flight()
+	LEDGE.new(self).run()
 	_abyss_updraft()
 	_feather()
 	load("res://tools/move_feel_knock.gd").run(self)     # the knock arc (docs/MOVEMENT_FEEL.md "Knock arc")
@@ -320,6 +335,7 @@ func run(main: Node) -> void:
 	_e2e()
 	_standing_dash()          # late: it swaps the kit and model the framing rows measure
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
+	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
@@ -844,6 +860,74 @@ func _dash_glide() -> void:
 	rec("dashglide_2s_speed", v2)
 	P.set_arch(kit_was)
 
+# ---------------------------------------------------------------- the walking brake against UE's own
+## UE's ApplyVelocityBraking (CharacterMovementComponent.cpp) written out with the source's rows, as the oracle
+## HunterMove.brake must equal: friction 1/s (GroundFriction 1 x BrakingFrictionFactor 2), BrakingDeceleration-
+## Walking m/s2, BrakingSubStepTime s, BRAKE_TO_STOP_VELOCITY m/s. Speeds only: a let-go keeps its direction.
+const UE_FRICTION := 2.0
+const UE_BRAKE := 22.2
+const UE_SUBSTEP := 1.0 / 33.0
+const UE_STOP := 0.1
+
+static func ue_brake(v: float, dt: float) -> float:
+	var left := dt
+	while left >= 1e-6:
+		var sub := minf(UE_SUBSTEP, left * 0.5) if left > UE_SUBSTEP else left
+		left -= sub
+		v += (-UE_FRICTION * v - UE_BRAKE) * sub
+		if v <= 0.0:
+			return 0.0
+	return 0.0 if v <= UE_STOP else v
+
+## Metres the source slides from a run at v0 m/s drawn at `fps` (PhysWalking: brake the frame, move at what is left).
+static func ue_slide(v0: float, fps: float) -> float:
+	var x := 0.0
+	while v0 > 0.0:
+		v0 = ue_brake(v0, 1.0 / fps)
+		x += v0 / fps
+	return x
+
+## The source's slide band for a run at v0: drawn at 30 fps (shortest) to 144 fps (longest).
+static func ue_band(v0: float) -> Vector2:
+	return Vector2(ue_slide(v0, 30.0), ue_slide(v0, 144.0))
+
+## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
+static func run_speeds() -> Dictionary:
+	var out := {}
+	for id in HunterMove.rules():
+		var row = HunterMove.rules()[id]
+		if row is Dictionary and row.has("speed"):
+			var v := float(row["speed"])
+			out[v] = out.get(v, []) + [id]
+	return out
+
+## HunterMove.brake against the oracle at the source's frame times and longer (sub-steps), from a run and a knock,
+## then every Hunter's let-go on the real match step inside the source's band.
+func _brake_exact() -> void:
+	var err := 0.0
+	for dt in [1.0 / 144.0, DT, 1.0 / 30.0, 0.1, 0.2]:
+		for v0 in [4.45, 4.85, 10.0]:
+			var a := Vector2(v0, 0).rotated(0.7)
+			var b: float = v0
+			while b > 0.0:
+				a = HunterMove.brake(a, 1.0, dt)
+				b = ue_brake(b, dt)
+				err = maxf(err, absf(a.length() - b))
+	rec("brake_vs_ue_err", err)
+	var speeds := run_speeds()
+	for v in speeds:
+		_reset(flat + Vector3(-2.0, 0, 0))
+		P.base_speed = v
+		P.inp["move"] = Vector2(1, 0)
+		_steps(30)
+		var x0 := P.pos.x
+		P.inp["move"] = Vector2.ZERO
+		_steps(30)
+		var band := ue_band(v)
+		var got := P.pos.x - x0
+		var what := "stop slide %.3f m from %.2f m/s in the source's %.3f-%.3f m (%s)"
+		ok(got >= band.x and got <= band.y, what % [got, v, band.x, band.y, ", ".join(speeds[v])])
+
 # ---------------------------------------------------------------- air dash out of a fast fall
 ## The class dash pressed out of a 10 m free fall and out of a glide dive (keys let go): how much of the fall
 ## and forward speed it keeps, and the speed it ends on.
@@ -894,9 +978,9 @@ var _rim := {}
 ## starts: it hands over at run speed and the walking stop takes it from there.
 func _dash_exit() -> void:
 	var brake := HunterMove.brake_decel
-	var fric := HunterMove.ground_friction
-	ok(is_equal_approx(brake, 22.2), "brake = BrakingDecelerationWalking 2220 uu/s2 (%s)" % brake)
-	ok(is_equal_approx(fric, 2.0), "ground_friction = GroundFriction 1.0 x2 (%s)" % fric)
+	var fric := HunterMove.brake_friction
+	ok(is_equal_approx(brake, UE_BRAKE), "brake = BrakingDecelerationWalking 2220 uu/s2 (%s)" % brake)
+	ok(is_equal_approx(fric, UE_FRICTION), "brake_friction = GroundFriction 1.0 x BrakingFrictionFactor 2 (%s)" % fric)
 	var kit_was := P.arch
 	P.set_arch("")
 	_reset(flat + Vector3(-3.0, 0, 0))
@@ -991,7 +1075,8 @@ func _dash_curves() -> void:
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
-		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
+		# against her run, a kit haste in it (Sable hands over at her hasted run)
+		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
@@ -1000,6 +1085,37 @@ func _dash_curves() -> void:
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
 	P.reclass(cls_was, kit_was)
+
+## Jump out of a ground dash, keys let go: the take-off keeps tuning.json dash.jump_keep of the dash's speed. The
+## jump is pressed once the dash is at full travel (past Kael's wind-up and the slow start of Lace's roll); the
+## speed after the jump step has that step's air drag (Loco.air_step, no keys) undone. One shared value: the
+## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (docs/MOVEMENT_PARITY.md).
+func _dash_jump_keep() -> void:
+	var was := [P.cls, P.arch]
+	var keep := Loco.dash_jump_keep
+	ok(is_equal_approx(keep, 0.75), "dash.jump_keep = 0.75, one value for every Hunter (%s)" % keep)
+	for id in ["gunslinger", "juggernaut", "archer", "ashwick"]:
+		P.reclass(Arch.weight(id), id)
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		for i in 40:
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["move"] = Vector2.ZERO
+			if _hv(P).length() > 1.5 * P.base_speed: break
+		var before := _hv(P).length()
+		var dashing := P.roll_t > 0.0 and P.grounded
+		P.inp["jump"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		var cap := P.base_speed
+		var took := (_hv(P).length() / exp(-Loco.air_idle_drag * DT) - cap) / exp(-Loco.air_drag * DT) + cap
+		print("MFEEL dash jump: %s %.2f -> %.2f m/s (dashing %s)" % [id, before, _hv(P).length(), dashing])
+		ok(dashing and not P.grounded, "dash jump %s: pressed mid-dash on the ground, takes off" % id)
+		rec("dash_jump_keep", took / before)
+	P.reclass(was[0], was[1])
 
 ## Meeko's air dash is her kit's own measured curve (tender.json dash.air: ramp, burst, float-out): from a
 ## height, so it ends on time rather than on a touchdown; its distance, time and the speed it floats out at.
@@ -1069,7 +1185,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
+	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Ground Swim 6 m/0.4 s, air light long"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -1090,8 +1206,66 @@ func _kit_dashes() -> void:
 		var feel: Dictionary = P.ak.dash_feel()
 		var off := float(feel["dist"]) == 1.0 and float(feel["time"]) == 1.0
 		ok(not src or off, "felt dash %s: a sourced dash is off the dash feel" % id)
+	for row in MOVE_DASH:
+		P.reclass(Arch.weight(String(row[0])), String(row[0]))
+		var got := _felt_move(String(row[1]), row.size() > 4)
+		var want: Array = row[2]
+		var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0] and absf(got[1] - float(want[1])) <= DASH_TOL[1]
+		ok(hit and String(P.ak.st.get("last_dash", row[1])) == String(row[1]),
+				"felt move %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (no source: %s x0.85 / x1.15)"
+				% [row[0], row[1], got[0], got[1], want[0], want[1], row[3]])
 	P.reclass(was[0], was[1])
 
+## The Shift moves with no source figure on a kit whose plain dash is sourced (x1): each keeps the owner's
+## x0.85 / x1.15 through its dash_feel "moves" row. [kit, move, felt [m, s], raw, (in the air)]. A long dash (out of
+## charges) runs the class's ex_dist / ex_time (Hunter.dash_with), so its raw is the class's, not the kit's.
+const MOVE_DASH := [
+	["gunslinger", "long", [3.91, 0.23], "medium long dash 4.6 m / 0.2 s"],
+	["archer", "flick", [4.25, 0.329], "light long dash 5.0 m / 0.2 s, dash_speed x0.7"],
+	["bulwark", "lumber", [3.57, 0.242], "heavy long dash 4.2 m / 0.21 s"],
+	["bulwark", "charge", [3.57, 0.268], "4.2 m at 18 m/s"],
+	["bulwark", "short", [2.21, 0.146], "2.6 m at 20.5 m/s"],
+	["mage", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s"],
+	["thief", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s", true],
+	["gil", "long", [4.25, 0.23], "light long dash 5.0 m / 0.2 s", true],
+	["juggernaut", "long", [3.57, 0.242], "heavy long dash 4.2 m / 0.21 s", true],
+	["dolm", "long", [3.91, 0.23], "medium long dash 4.6 m / 0.2 s"],
+]
+
+## One unsourced Shift move: set up its trigger (out of charges for a long dash, the shield up
+## for Albert's charge, the Crushing Blow winding for his short dash), Shift, then measured as _felt_dash.
+func _felt_move(move: String, air: bool) -> Array:
+	_steps(30)
+	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
+	var hold := {}
+	if move == "charge":
+		hold = {"sec_hold": true}
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+	elif move == "short":
+		hold = {"fire": true}
+	else:
+		P.dashes = 0.0
+	for i in (int(0.4 / DT) if not hold.is_empty() else 0):
+		for k in hold: P.inp[k] = hold[k]
+		m.step(DT)
+	P.inp["move"] = Vector2(1, 0)
+	var start := P.pos
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	var n := 0
+	for i in (150 if P.roll_t > 0.0 else 0):
+		var left := minf(P.roll_t, DT)
+		for k in hold: P.inp[k] = hold[k]
+		m.step(DT)
+		if P.roll_t > 0.0:
+			n += 1
+			continue
+		for k in hold: P.inp[k] = false
+		var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
+		return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
+	for k in hold: P.inp[k] = false
+	return [0.0, 0.0]
 ## Grimble's Barge run through the real step: one Shift tap in the middle of each shove, the cursor ahead. Reads
 ## the shoves made, the still steps between them (and how many of those the gap doesn't explain), the turn to a
 ## cursor swung 90 degrees as the first shove ends, and the steps from the last shove's end to the shot of an LMB
@@ -1178,6 +1352,42 @@ func _felt_dash(air: bool, hold := false, long := false) -> Array:
 			P.inp["dash_down"] = false
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
+
+## Sable's Vault exit (briefs/hero-ref/dancer.md, docs/heroes/thief.md), keys held. Run on, the Cartwheel runs down
+## into her hasted run and hands over at it, with no step under it past the peak. LMB pressed for the step the flip
+## ends in throws a bolt in that step (a run of its own: the empowered bolt ends the speed by design).
+func _vault_exit() -> void:
+	var was := [P.cls, P.arch]
+	P.reclass(Arch.weight("thief"), "thief")
+	for shoot in [false, true]:
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		var slow := 0
+		var peak := 0.0
+		var gap := 99
+		for i in 60:
+			var was_rolling := P.roll_t > 0.0
+			P.inp["fire"] = shoot and was_rolling and P.roll_t <= DT
+			var shots: int = m.shots.size()
+			m.step(DT)
+			P.inp["dash"] = false
+			var v := _hv(P).length()
+			var run := P.base_speed * P.ak.move_k()
+			peak = maxf(peak, v)
+			if v < peak and v < run - 0.05:
+				slow += 1
+			if P.inp["fire"] and m.shots.size() > shots:
+				gap = 0
+			if not shoot and was_rolling and P.roll_t <= 0.0:
+				rec("vault_exit_run", v / run)
+		P.inp["fire"] = false
+		if shoot:
+			rec("vault_shot_gap_frames", gap)
+		else:
+			rec("vault_slow_frames", slow)
+	P.reclass(was[0], was[1])
 
 ## Cinder's Flue Flight (X) against Felix's jetpack (docs/heroes/ashwick.md "Ultimate"): she hangs at the ember
 ## ring, rising to her low hover, before the flight moves; then, the cursor swung a right angle, the heading turns
@@ -1793,7 +2003,8 @@ func _glide_cam(cam: CamRig) -> void:
 		z_min = minf(z_min, cam.zoom)
 		lead = maxf(lead, Vector2(cam.focus.x - P.pos.x, cam.focus.z - P.pos.z).length())
 		var vh := cam.get_viewport().get_visible_rect().size.y
-		land_y = maxf(land_y, cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5)
+		var to16 := tan(deg_to_rad(cam.fov) * 0.5) / tan(deg_to_rad(cam.lens) * 0.5)      # (as on a 16:9 screen)
+		land_y = maxf(land_y, (cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5) * to16)
 	ok(n_on > 10, "glide_cam: the plunge ran (%d steps)" % n_on)
 	rec("cam_dive_zoom_hold", z_min / z_dive)
 	rec("cam_dive_land_view", land_y)
@@ -1836,22 +2047,23 @@ func _screen_scale() -> void:
 		cam.follow(P.position, DT, false)
 	var vh := cam.get_viewport().get_visible_rect().size.y
 	var vw := cam.get_viewport().get_visible_rect().size.x
-	var aspect := 16.0 / 9.0
-	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
-	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.lens) * 0.5) * CamRig.FRAME_ASPECT)
+	# shares of a 16:9 screen's height: this view's shape widens or narrows the vertical lens (CamRig.frame_fov),
+	# and a share from the centre scales with the tangent of half the lens
+	var h16 := vh * tan(deg_to_rad(cam.lens) * 0.5) / tan(deg_to_rad(cam.fov) * 0.5)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
 	print("MFEEL framing: style default pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
-	rec("hunter_screen_pct", now[1] / vh * 100.0)
-	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	rec("hunter_screen_pct", now[1] / h16 * 100.0)
+	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / h16 * 100.0)
 	for id in FRAME_HEROES:
 		var hm := _stand_in(id, PlayerLook.neutral())
 		var hs := _model_span(cam, hm)
 		var kind := "3D" if hm.has_node("Warden") else "procedural"
-		var feet := (float(hs[3]) - vh * 0.5) / vh * 100.0
+		var feet := (float(hs[3]) - vh * 0.5) / h16 * 100.0
 		print("MFEEL framing %s (%s model): %.2f%% of screen height, feet %.2f%% below the centre"
-				% [id, kind, hs[1] / vh * 100.0, feet])
+				% [id, kind, hs[1] / h16 * 100.0, feet])
 		hm.free()
 	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
 	var d0 := cam.dist
@@ -1860,9 +2072,38 @@ func _screen_scale() -> void:
 	ref.scale /= vs
 	cam.snap(P.pos)
 	var was := _model_span(cam, ref)
-	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / vh * 100.0, was[0] / vh * 100.0, now[0] / vh * 100.0])
+	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / h16 * 100.0, was[0] / h16 * 100.0, now[0] / h16 * 100.0])
 	ref.free()
 	cam.dist = d0
+	cam.snap(P.pos)
+	_source_scale(cam, vh, hfov)
+
+## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
+## source's ground across and its Hunter size together, then back to the default style. The MFEEL source
+## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
+func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
+	cam.use_style("source_scale")
+	P.render(DT, 1.0)      # Hunter.fit_scale picks the style's hunter_scale up
+	cam.snap(P.pos)
+	for i in 120:
+		cam.follow(P.position, DT, false)
+	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
+	var now := _model_span(cam, ref)
+	rec("source_view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
+	rec("source_hunter_screen_pct", now[1] / vh * 100.0)
+	rec("source_hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	var shot_from := 0.95 * float(P.cdat["scale"])
+	var hit_top := m.shot_band(P).y - m.shot_stance_y(P)
+	print("MFEEL source scale x%.2f (model %.2f): body %.2f m tall; kept: hit circle r %.2f m," % [cam.hunter_scale,
+			P.vis_k, float(now[2]), P.hit_radius()]
+			+ " shots leave %.2f m up and hit it below %.2f m, teammate tag 2.4 m up" % [shot_from, hit_top])
+	ref.free()
+	for id in FRAME_HEROES:
+		var hm := _stand_in(id, PlayerLook.neutral())
+		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / vh * 100.0])
+		hm.free()
+	cam.use_style("default")
+	P.render(DT, 1.0)
 	cam.snap(P.pos)
 
 ## A model of Warden `id` ("" with an at-home look: the plain hunter) standing where the player does, at
@@ -1872,7 +2113,7 @@ func _stand_in(id: String, look: Dictionary) -> Node3D:
 	var weapon := Arch.signature(id) if id != "" else REF_WEAPON
 	var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", look, id)
 	m.add_child(h)
-	var at_scale := h.scale * Hunter.VIS_SCALE
+	var at_scale := h.scale * Hunter.VIS_SCALE * m.cam.hunter_scale
 	var lean := P.model.global_basis.orthonormalized()
 	h.global_transform = Transform3D(lean * Basis.from_scale(at_scale), P.model.global_position)
 	h.set_meta("anim_seed", 1)      # one stance for every measure (HunterAnim seeds it per node otherwise)

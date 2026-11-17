@@ -44,8 +44,14 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails
+	if both or "--archer-combo-check" in args:
+		await _spirit_look()
+	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
+	hits.main = main_node
+	if both:
+		await hits.audit()
+	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -161,7 +167,7 @@ func _recall_caught(m: Match, K: BulwarkKit) -> float:
 
 ## Where the recall clip closes the hand (bul_recall's third key; breaker.glb lmb_recall has it at 0.3 s too).
 func _catch_key() -> float:
-	return float(KMovesPinBjorn.MOVES["bul_recall"]["keys"][2][0])
+	return float(KMovesBjorn.MOVES["bul_recall"]["keys"][2][0])
 
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
@@ -175,12 +181,19 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
 	return _shot_reach(m, P)
+
+## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
+func _spirit_look() -> void:
+	var look = load("res://tools/lace_spirit_look_check.gd").new()
+	look.main = main
+	await look.walk()
+	n += look.n
+	fails += look.fails
 
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -241,6 +254,10 @@ func _archer_combos() -> void:
 		P.flash_t > 0.0 or K.draw.supers >= 0,
 		"flash %.2f" % P.flash_t
 	)
+	# (past the 0.35 s perfect window)
+	step(m, 0.2, func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.1)
 	ok("pin anim: a Supercharged release plays arc_super", K.anim_id == "arc_super", K.anim_id)
@@ -249,7 +266,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, 0.85, cur)
+	var e1 := _loose_after(m, P, 1.0, cur)      # (Empowered, past the 0.35 s perfect window)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -285,7 +302,6 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -313,7 +329,6 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -325,7 +340,10 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
-	step(m, 0.25, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	# (let go past the 0.35 s window)
+	step(m, 0.35, func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)
@@ -389,7 +407,6 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
@@ -714,7 +731,8 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
-	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). Her roll can
+	# carry the spirit run through the column first, so the entry may be its far side: out of the rock either way
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -734,8 +752,9 @@ func _archer_combos() -> void:
 	ok(
 		"combo pin: Spirit Walk running out inside a rock = back to the entry",
 		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
-			and P.pos.x < bx,
-		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
+			and P.pos.distance_to(K.spirit.entry) < 0.25 and (P.pos.x < bx or P.pos.x >= bx + 1),
+		"x %.1f (rock %d, entry %.1f) snaps %d walks %d"
+		% [P.pos.x, bx, K.spirit.entry.x, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -860,7 +879,6 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
-	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)
