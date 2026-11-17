@@ -1156,6 +1156,536 @@
 				"amp": 2.5,
 				"calm": true
 			}
+		},
+		"casquebill": {
+			"fidget": {
+				"note": "bill clack: head tips up, snaps down twice",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						2,
+						0
+					],
+					[
+						"neck",
+						"x",
+						0.1,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"duskapi": {
+			"fidget": {
+				"note": "ear-flick look: head swivels back over one shoulder",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.45,
+						0,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.15,
+						0,
+						0
+					],
+					[
+						"spine",
+						"z",
+						0.05,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"glaciyak": {
+			"fidget": {
+				"note": "shake: a slow head toss side to side",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.2,
+						2,
+						0
+					],
+					[
+						"neck",
+						"z",
+						0.08,
+						2,
+						0.1
+					]
+				]
+			}
+		},
+		"heatherhorn": {
+			"fidget": {
+				"note": "horn rub: head tilts and grinds left",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"z",
+						-0.25,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.12,
+						0,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.06,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"kilnbadger": {
+			"fidget": {
+				"note": "dig: shoulders drop, nose down",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"spine",
+						"x",
+						0.12,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.3,
+						2,
+						0
+					]
+				]
+			}
+		},
+		"limpetor": {
+			"fidget": {
+				"note": "clamp: hunkers low, then eases up",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"hips",
+						"x",
+						0.08,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.12,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.18,
+						0,
+						0.1
+					]
+				]
+			}
+		},
+		"moonloris": {
+			"fidget": {
+				"note": "slow blink-stare: head turns right, holds",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"head",
+						"y",
+						-0.4,
+						0,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.08,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"moundvark": {
+			"fidget": {
+				"note": "snuffle: nose sweeps the ground",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.25,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.3,
+						2,
+						0
+					],
+					[
+						"neck",
+						"x",
+						0.08,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"murmurling": {
+			"fidget": {
+				"note": "hum: a soft sway and nod",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"spine",
+						"z",
+						0.08,
+						2,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.12,
+						2,
+						0.25
+					]
+				]
+			}
+		},
+		"nacrolin": {
+			"fidget": {
+				"note": "sheen turn: rolls its body to catch the light",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"spine",
+						"z",
+						-0.12,
+						0,
+						0
+					],
+					[
+						"hips",
+						"z",
+						0.05,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.1,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"opalisk": {
+			"fidget": {
+				"note": "tongue taste: head darts forward twice",
+				"at": 0.3,
+				"dur": 1.3,
+				"rows": [
+					[
+						"neck",
+						"x",
+						0.15,
+						2,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.15,
+						2,
+						0.1
+					]
+				]
+			}
+		},
+		"orchisloth": {
+			"fidget": {
+				"note": "stretch: a long slow lean back",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"spine",
+						"x",
+						-0.14,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.25,
+						0,
+						0.1
+					]
+				]
+			}
+		},
+		"scaldamus": {
+			"fidget": {
+				"note": "steam huff: chest puffs, head jerks up",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"spine",
+						"x",
+						-0.1,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.28,
+						1,
+						0
+					]
+				]
+			}
+		},
+		"sentrikat": {
+			"fidget": {
+				"note": "lookout: rises tall, scans left then right",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"hips",
+						"x",
+						-0.06,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.4,
+						1,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.08,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"spatewader": {
+			"fidget": {
+				"note": "wade step: weight shifts, head bobs",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"hips",
+						"z",
+						0.07,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.2,
+						2,
+						0
+					]
+				]
+			}
+		},
+		"squalltross": {
+			"fidget": {
+				"note": "wind test: head up, sways into a gust",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						0,
+						0
+					],
+					[
+						"neck",
+						"z",
+						0.12,
+						1,
+						0
+					],
+					[
+						"spine",
+						"z",
+						0.05,
+						1,
+						0.25
+					]
+				]
+			}
+		},
+		"threadwyrm": {
+			"fidget": {
+				"note": "coil: a ripple runs up the body",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"hips",
+						"y",
+						0.08,
+						1,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.1,
+						1,
+						0.15
+					],
+					[
+						"neck",
+						"y",
+						0.12,
+						1,
+						0.3
+					],
+					[
+						"head",
+						"y",
+						0.12,
+						1,
+						0.45
+					]
+				]
+			}
+		},
+		"tuatrune": {
+			"fidget": {
+				"note": "third-eye glance: head cocks up and to one side",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.22,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.18,
+						0,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.08,
+						0,
+						0
+					]
+				]
+			}
+		},
+		"velvorm": {
+			"fidget": {
+				"note": "knead: a soft squash front to back",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"spine",
+						"x",
+						0.1,
+						2,
+						0
+					],
+					[
+						"hips",
+						"x",
+						-0.05,
+						2,
+						0.25
+					]
+				]
+			}
+		},
+		"nimbostrich": {
+			"fidget": {
+				"note": "peck-check: neck pumps forward and back",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"neck",
+						"x",
+						0.2,
+						2,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.2,
+						2,
+						0
+					]
+				]
+			}
 		}
 	}
 }
