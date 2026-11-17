@@ -10014,3 +10014,4 @@ READY ext/lace-eyes-c-1116 30bc7fe1fc (Lace hem.glb on eyes C v95 master; glb-ch
 READY ext/agent-briefs bcc39cb2433c528787f1a06f8f3383f70cb603cc (Sable turnaround eyes solid dark grey-black)
 READY ext/rpc6-settings-pollution-1117 7fcd35866b7 (ui-sfx-check ran on the real user dir and left sfx=0 / ult_ready_cue=false; now a child on a temp dir)
 READY ext/merge-lane-uiboki-1115r2 96c400ad38 (bulk-rebase: origin/main merged in mechanically, was f783c20ca2; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/team-wipe-rule-1116 36e63c9d85c0651567385b1e7862407cc1207ac5 (team wipe rule: only a Boki summoned at the knock is a guardian, it can be hit, no guardian = team out; NO PR yet: gh missing on rpc5 and token API call denied, needs a PR + gate on hetzner)
