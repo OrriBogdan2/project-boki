@@ -273,6 +273,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 		"open":
 			x["t"] = float(x["t"]) - dt
 			var p: Vector3 = x["pos"]
+			WarnSfx.countdown(m, x, p, float(x["t"]))
 			var seat: bool = x.get("seat", false)      # the Uplink seat: its lift is the finishing squad's alone
 			var rode := false
 			for h in m.hunters:
