@@ -61,6 +61,7 @@ const TEST := {
 				{"p": "ribbon", "at": "tip"},
 				{"p": "thread", "len": 2.0},
 				{"p": "bolt", "len": 4.0, "jag": 0.4},
+				{"p": "portal", "size": 1.4},
 				{"p": "vortex", "size": 2.0},
 				{"p": "ring", "size": 2.0},
 				{"p": "fist", "size": 2.0, "drop": 3.0},
@@ -208,7 +209,7 @@ func _recipes(arch: String) -> void:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
-			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
+			var flare_big: bool = layer["p"] in ["flare", "portal"] and big > MAX_FLARE
 			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):

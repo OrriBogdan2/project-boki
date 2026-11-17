@@ -56,6 +56,8 @@ const STONES_RANGE := 12.0     # m: how far the seeing-stones watch a foe
 const STONES_EVERY := 0.2      # s between picks
 var stones_t := 0.0
 
+const WARM_ROCKS := 16         # spare rocks built at match load: a rank-3 Row (6), a Spine (9) and the hop's, all up
+
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
 
@@ -63,6 +65,13 @@ func _setup() -> void:
 	slam = BreahSlam.new(self)
 	spine = BreahSpine.new(self)
 	hop = BreahHop.new(self)
+
+## The loading screen's rehearsal: her spare rocks and her KitLooks bodies built into the pools, so the first Row,
+## Slam or launch builds nothing mid-fight (--first-cast-check: a Row built 57 meshes, a Slam 38, in one frame).
+func warm_fx(_at: Vector3) -> void:
+	RockLook.prewarm(m, WARM_ROCKS)
+	KitLooks.of(m).prewarm({"mote": 3, "rock": 1, "dashrock": 1, "boulder": 1, "footrock": 1, "burst": 1, "crater": 1,
+		"shard": 11, "crown": 1})
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
 func cast_ult() -> bool: return HeroUlt.press(self, spine.start)
@@ -578,7 +587,8 @@ func on_dash(use_ex: bool) -> bool:
 		if not spend_dash(true): return true
 		play("breah_exdash")
 		travel(
-			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}
+			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)),
+			{"invuln": 0.1, "trail": "dust", "feel": "long"}
 		)
 		m.sfx(HeroSfx.dash_name(h), h.pos, -4.0, 1.0)
 		return true
