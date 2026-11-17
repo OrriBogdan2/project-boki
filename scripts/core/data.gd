@@ -330,7 +330,7 @@ const PERKS := {
 	},
 	"hotload":
 	{
-		# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
+		# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
 		"name": "Hotload",
 		"desc": "Your weapon hits 10% harder.",
 		"icon": "burst",
