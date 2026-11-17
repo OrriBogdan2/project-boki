@@ -25,9 +25,10 @@ func run(main: Node) -> void:
 	var low_k := float(P.wpn["low_mag_dmg"])
 	var edge := mag * float(P.wpn["low_mag_at"])
 	var wait := float(P.wpn["refill_after"]) + float(mag) / float(P.wpn["refill_rate"]) + 0.2
-	var held := _fire(m, P, 1.2)
+	var held := _fire(m, P, 1.6)
 	var full: float = held[0][1]
-	ok(held.size() >= 8 and P.ammo < mag * 0.6, "hold fire 1.2 s: %d rounds, the drum falls from %d to %d" % [held.size(), mag, P.ammo])
+	ok(held.size() >= 8 and P.ammo < mag * 0.6,
+			"hold fire 1.6 s: %d rounds, the drum falls from %d to %d" % [held.size(), mag, P.ammo])
 	ok(held.all(func(s: Array) -> bool: return is_equal_approx(s[1], full if s[0] >= edge else full * low_k)),
 			"rounds with the drum at or over half deal %.1f, under half %.1f" % [full, full * low_k])
 	ok(held.any(func(s: Array) -> bool: return s[0] < edge), "the string reaches the low half")

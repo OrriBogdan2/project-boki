@@ -2,7 +2,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ## --parity-reel --shots-dir=<dir> --reel-hero=<arch> [--reel-only=<part>]: one Hunter's whole move set in the
 ## Training Grounds against a dummy, at the match camera, for the parity reel (docs/parity_reel/): LMB tap and
 ## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a glide and a mantle
-## (`--reel-only=lmb_bursts`: three short bursts and the drum between them; `dash_lmb`: LMB held, then Shift into LMB at once and late, for Sable's quick bolts). A
+## (`--reel-only=lmb_bursts`: three short bursts, the drum refilling between; `dash_lmb`: LMB held, then Shift
+## into LMB at once and late, for Sable's quick bolts). A
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
