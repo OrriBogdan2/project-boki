@@ -610,7 +610,7 @@ func juggernaut(a) -> void:
 	var air_r3 := K.air_cooldown()
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
-	A.ok("juggernaut ranks: Final Swing +20% at rank 2 and 3, Short Leash cooldown -12.5% / -37.5%, Hit the Deck 7.2s -> 4.8s",
+	A.ok("juggernaut ranks: Final Swing +20% at rank 2, 3, Short Leash cd -12.5% / -37.5%, Hit the Deck 7.2s -> 4.8s",
 			absf(float(smash_ks[0]) - 1.0) < 0.001 and absf(float(smash_ks[1]) - 1.2) < 0.001
 			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
 			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,
@@ -890,7 +890,7 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
 	A.step(m, 0.2)
-	A.ok("juggernaut Hit the Deck: while its slot rests an air press is the ground Final Swing (a Slam), not a second drop",
+	A.ok("juggernaut Hit the Deck: while it rests an air press is the ground Final Swing (a Slam), not a second drop",
 			K.meteor.drops == 1 and K.last_variant == "tap" and not K.slam_w.is_empty(),
 			"drops %d variant %s" % [K.meteor.drops, K.last_variant])
 	# the hit sits ahead, not round his feet: T 2.6m behind him (inside a circle round him) is not touched

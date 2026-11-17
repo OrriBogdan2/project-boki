@@ -1020,7 +1020,7 @@ func _growth() -> void:
 	var d1: float = await _spin(1)
 	var d10: float = await _spin(10)
 	ok(
-		"growth: the Tideturner spin hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
+		"growth: the Tideturner spin grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
@@ -1264,10 +1264,10 @@ func _bulwark_combos() -> void:
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	ok(
 		"bjorn RMB: his Blue Guard is drawn in place of the plain wall",
-		not K.wall.is_empty() and K.fx.Blue Guard.visible and not (
+		not K.wall.is_empty() and K.fx.aegis.visible and not (
 			K.wall["node"] as Node3D
 		).visible and K.anim_id == "bul_guard",
-		"Blue Guard %s anim %s" % [K.fx.Blue Guard.visible, K.anim_id]
+		"Blue Guard %s anim %s" % [K.fx.aegis.visible, K.anim_id]
 	)
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
@@ -1332,14 +1332,14 @@ func _bulwark_combos() -> void:
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	var charges_before := K.ch_rmb
-	var Blue Guard_up := K.rmb_down
+	var aegis_up := K.rmb_down
 	P.do_dash()
 	step(m, 0.2, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	ok(
 		"combo bulwark: the Full Ahead on cooldown: RMB is refused (no Blue Guard), the Shift is no Full Ahead",
-		not Blue Guard_up and K.ch_rmb >= charges_before,
-		"Blue Guard %s charges %.2f -> %.2f" % [Blue Guard_up, charges_before, K.ch_rmb]
+		not aegis_up and K.ch_rmb >= charges_before,
+		"Blue Guard %s charges %.2f -> %.2f" % [aegis_up, charges_before, K.ch_rmb]
 	)
 	# Shift in the 0.1 s the Blue Guard takes to rise (the press and the Shift together): the bash, not the Spin Dash
 	step(m, 1.0)
@@ -1382,7 +1382,7 @@ func _bulwark_combos() -> void:
 		regens.append(P.dash_regen())
 		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
 	ok(
-		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the Blue Guard, Final Swing or field",
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on Blue Guard, Final Swing, field",
 		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
 				and dmgs[2] == dmgs[0],
 		"recharge %s power %s" % [str(regens), str(dmgs)]

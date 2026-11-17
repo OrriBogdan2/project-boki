@@ -5,7 +5,8 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low; her Freeze Frame breaks outward when she ends it
+## from their anchor, follow it, stream behind a run and are off at Low; her Freeze Frame breaks outward when she
+## ends it
 ## and melts when it runs out. Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
 ## And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
@@ -1390,7 +1391,8 @@ func _streak_span(V: HeroVfx, fps: float) -> float:
 	return span
 
 
-## Sable's Last Dance ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
+## Sable's Last Dance ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and
+## the
 ## blade layer stay centred on her through a Vault, to within a hand's width.
 func _sable_ring(main: Node) -> void:
 	var m: Match = flow._match(main, "thief")

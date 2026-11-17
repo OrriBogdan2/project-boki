@@ -46,7 +46,7 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Final Swing
 var rmb_queued_at := -9.0      # a Final Swing pressed while a heavy move ran (BUFFER)
-var e_held := false            # E pressed on a hooked chain while a Final Swing owned the body: the pull goes as it ends
+var e_held := false            # E pressed on a hooked chain while a Final Swing owned the body: it pulls at the end
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -663,7 +663,8 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## In the air the bar shows the Hit the Deck's rest, but a Final Swing charge still takes the press (the ground Final Swing).
+## In the air the bar shows the Hit the Deck's rest, but a Final Swing charge still takes the press (the ground Final
+## Swing).
 func rmb_open() -> bool:
 	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
 
@@ -682,7 +683,8 @@ func press_rmb() -> void:
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
-## Every interaction is chainable (DECISIONS): a Final Swing pressed in a heavy move or the Riposte's planted beat waits.
+## Every interaction is chainable (DECISIONS): a Final Swing pressed in a heavy move or the Riposte's planted beat
+## waits.
 func _rmb_waits() -> bool:
 	return smash_running() or riposte.move_k() <= 0.0
 
@@ -801,7 +803,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
-	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a solid hold)
+	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a
+	# solid hold)
 	var strike := {"no_floor": true, "lane_w": float(sl["width"]), "hit_extra": {"heavy": true}}
 	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return

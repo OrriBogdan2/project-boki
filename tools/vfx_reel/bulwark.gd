@@ -1,7 +1,8 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Albert's reel (tools/hero_vfx_reel.gd, docs/decisions/0061-breaker-swing-lunge.md), every slot at the match
 ## camera's zoom: the hammer thrown and called back, the charged swing, the swing's lunge standing and running (its
-## distance over him with the full performance overlay on), the raised shield, the Blue Guard boop on the dummy, its Shield
+## distance over him with the full performance overlay on), the raised shield, the Blue Guard boop on the dummy, its
+## Shield
 ## Charge into a Shield Slam, a foe driven into a rock, the Tideturner (dash), Safe Harbour (e), the Groundswell hop and
 ## slam (r), and the thrown hammer reeled home by its rope.
 

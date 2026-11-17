@@ -132,7 +132,7 @@ func on_block(dmg: float, by) -> void:
 		if by is Node3D and is_instance_valid(by):
 			var to := Vector2((by as Node3D).global_position.x - h.pos.x, (by as Node3D).global_position.z - h.pos.z)
 			if to.length() > 0.1: d = to.normalized()
-		fx.Blue Guard_block(h.pos + Vector3(d.x * 0.95, 1.1, d.y * 0.95))
+		fx.aegis_block(h.pos + Vector3(d.x * 0.95, 1.1, d.y * 0.95))
 		m.sfx("bjorn_block", h.pos, -5.0)
 
 func _tick(dt: float) -> void:
@@ -148,7 +148,7 @@ func _tick(dt: float) -> void:
 			lock_t = _shield_stat("lock")
 			down_t = 0.0
 			var d0 := h.aim_dir()
-			fx.Blue Guard_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
+			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
 			play("bul_break")
 			m.sfx("bjorn_break", h.pos, -2.0)
 		else:
@@ -157,9 +157,9 @@ func _tick(dt: float) -> void:
 			if h.gliding:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
 			# his Blue Guard over the wall (armed: it burns hotter), cracking as it weakens
-			fx.Blue Guard_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
+			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
 	else:
-		fx.Blue Guard_hide()
+		fx.aegis_hide()
 		down_t += dt
 		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
@@ -252,7 +252,7 @@ func lock_left() -> float:
 
 ## The Full Ahead's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
-	if _Blue Guard_takes(by, o):
+	if _aegis_takes(by, o):
 		# it takes the hit (and turns it into Guard) as it does a shot
 		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
@@ -269,7 +269,7 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 
 ## The raised Blue Guard blocks all damage from the front (data: Brightshield), melee and abilities as well as the
 ## shots the wall itself stops: a hit from a foe inside its arc, facing the cursor. Damage over time isn't a hit.
-func _Blue Guard_takes(by: Ent, o: Dictionary) -> bool:
+func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	if wall.is_empty() or by == null or not is_instance_valid(by) or o.get("tick", false):
 		return false
 	if String(o.get("src", "")) in ["burn", "fall", "heat"]:
@@ -280,7 +280,7 @@ func _Blue Guard_takes(by: Ent, o: Dictionary) -> bool:
 
 ## The raised Blue Guard faces `by`: it stops their pulls too (Blockers).
 func blocks_from(by: Ent) -> bool:
-	return _Blue Guard_takes(by, {})
+	return _aegis_takes(by, {})
 
 ## A Full Ahead counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
@@ -711,7 +711,7 @@ func _raise() -> void:
 		play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
-	fx.Blue Guard_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
+	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
 
 ## Groundswell's hop drives him down faster than a fall.
 func dive_speed() -> float:
@@ -742,7 +742,7 @@ func _lower() -> void:
 		if is_instance_valid(wall["node"]): (wall["node"] as Node3D).queue_free()
 	wall = {}
 	down_t = 0.0
-	fx.Blue Guard_hide()
+	fx.aegis_hide()
 	if anim_id == "bul_guard": anim_id = ""
 
 ## Letting go of the RMB only lowers the Blue Guard: the Bash lives on Shift behind a raised shield (the Full Ahead).
