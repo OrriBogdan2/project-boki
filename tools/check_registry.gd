@@ -34,6 +34,7 @@ const CHECKS := {
 	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],      # a dead check run ends
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
+	"--hazard-hint-check": ["res://tools/hazard_hint_check.gd", "hazard_hint_check", null],
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
