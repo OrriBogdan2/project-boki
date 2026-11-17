@@ -454,6 +454,20 @@ func interact_for(h: Hunter) -> Dictionary:
 			say = "Hold the Heart ring to leave  ·  %d%%" % int(final_prog * 100.0)
 	return {} if say == "" else {"kind": "heart", "col": col(), "label": say}
 
+## The once-per-save tip (Match._tip key, text) for this Hunter now: the charged spark lying free, or carrying
+## it. The Gate's own label says the rest once you are there.
+func tip_for(h: Hunter) -> Array:
+	if not spark_live():
+		return []
+	if state == S.READY and carrier == null:
+		return ["heart_spark",
+			"The Heart is charged  ·  take the Heartspark to the Heart Gate: your squad leaves early"]
+	if carrier == h:
+		return ["heart_carry",
+			"Everyone can see you  ·  reach the Heart Gate and hold %s there" % Settings.key_cap("interact")]
+	return []
+
+
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if not it.has("act"):
 		return
@@ -502,11 +516,7 @@ func pay(h: Hunter, how: String) -> Dictionary:
 	return out
 
 func _egg_species() -> String:
-	var pool: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
-	pool.sort()
-	if pool.is_empty():
-		return String(Data.common_kin()[0])
-	return pool[_rng.randi() % pool.size()]
+	return Data.egg_species("", _rng)
 
 ## Applies the bundle's home half to the save (Game.apply_result, on an extract).
 static func settle(res: Dictionary, out: Dictionary) -> void:

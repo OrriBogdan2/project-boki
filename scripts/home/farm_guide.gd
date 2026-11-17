@@ -33,6 +33,7 @@ func _init(home) -> void:
 func build_ui() -> void:
 	if h.root_ui == null:
 		return
+	BaseCard.attach(h)
 	refresh()
 
 ## Rebuilds the card and the hint now.
@@ -146,7 +147,7 @@ func toast_top() -> float:
 
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "":
+	if id == "":      # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):
@@ -157,12 +158,6 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
 	var txt := s.strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
 			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)

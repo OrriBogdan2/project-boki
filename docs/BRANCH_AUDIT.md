@@ -2204,7 +2204,7 @@ ext/perf-fight-pools  2026-11-09 07:58
 ext/anim-react-audit  2026-11-09 07:55
 ext/albert-parity-verify  2026-11-09 07:54
 ext/remove-hex  2026-11-09 07:53
-ext/supervive-impact  2026-11-09 07:48
+ext/reference-impact  2026-11-09 07:48
 ext/anim-mantle-2  2026-11-09 07:46
 ext/cooldown-parity-verify  2026-11-09 07:44
 ext/cooldown-parity-verify-rebased  2026-11-09 07:44

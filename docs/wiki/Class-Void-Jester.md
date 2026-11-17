@@ -25,7 +25,7 @@ The jester on a spring, floating over his box. Stuns from range, drops a growing
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Tether Lantern (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in. |
 | Silhouette | a floating jester in a three-tailed cap, his smoky tail trailing below |
@@ -38,13 +38,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
-| Passive: Swell | Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by. |
-| Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
-| LMB | Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows. |
-| RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
-| E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
-| Hunter ultimate: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
-| Weapon: Tether Lantern | Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows. |
+| Passive: Swell | Hits fill Swell; full, you are Swollen 9s and everything grows. |
+| Dash: Lantern Trade | Lob a lantern; foes in its circle swap places with you. |
+| RMB: Shard Snap | Shard bundle that stuns the first foe, longer the further it flew. |
+| E: Brimseed | Plant a bomb that grows for 6.5s; press again to pop it. |
+| Hunter ultimate: Nightwell | Open a well that stuns and pulls in everything for 3.5s. |
+| Weapon: Tether Lantern | Quick orbs through walls; wait longer between shots for bigger ones. |
 
 ### Abilities in full
 
@@ -77,7 +76,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | a ring of teal motes closes around him |
-| Armed / full | the lantern burns white and his ribbons lift |
+| Armed / full | the jack-in-the-box glows white and his spring coils tall |
 | Dash spent | a pale ripple where he stood |
 
 <!-- /gen:kit -->

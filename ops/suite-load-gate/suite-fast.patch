@@ -1,0 +1,91 @@
+--- a/suite-fast.sh
++++ b/suite-fast.sh
+@@ -55,12 +55,27 @@
+ #   OPT-IN ONLY (SUITE_ORDER=longest). Measured 11-13 (0245c vs 0245b, same trees): the first 40 flags ran a median 2.3x
+ #   slower when the heavy ones ran together (CPU contention), giving 4 extra 1200 s timeouts = false NEW-RED. Needs a
+ #   heavy-flag concurrency cap before it can be the default.
++# 11-15 LOAD GATE (gate-0249 + anim-lane suite ENV-BROKEN: the aimkit canary timed out rc124 on BOTH trees at load 26-34 on 16
++#   cores; the trees were fine). load_wait waits while loadavg1 > SUITE_MAX_LOAD (default 1.5 x nproc; 0 disables):
++#   - before the canary: max SUITE_LOAD_WAIT s (900), and while >= SUITE_MAX_SUITES (default 3) other suites are live
++#     (pid files in SUITE_CACHE_DIR/running/), so merge lanes / candidates / regates cap themselves by load and count.
++#   - before every run(): max SUITE_RUN_LOAD_WAIT s (300), after the memory gate (back-pressure between concurrent suites);
++#     a run whose wait hits the cap writes OUT/LOADCAP, and runs skip this wait for 10 min after that.
++#   - canary runs that timed out (rc124) are rerun once after another wait before the ENV-BROKEN verdict; the verdict line
++#     carries loadavg1 so an overloaded box is visible. SUITE_RUN_TIMEOUT (1200) and SUITE_CANARY_ONLY=1 are test hooks.
+ set -u
+ P=${1:-6}
+ OUT=${OUT:-/home/boki/suite-claude}; MW=${MW:-/home/boki/wt-main-claude}; GW=${GW:-/home/boki/wt-merge-claude}
+ GODOT_BIN=${GODOT_BIN:-/opt/godot/godot-bin}   # override only for tests
+ export OUT MW GW GODOT_BIN LP_NUM_THREADS=2; T0=$(date +%s)
+ mkdir -p $OUT/merge $OUT/main
++LMAX=${SUITE_MAX_LOAD:-$(( $(nproc) * 3 / 2 ))}; export LMAX
++load1() { awk '{print int($1 + 0.5)}' /proc/loadavg; }; export -f load1
++load_wait() { # MAXSECS [WHY]: wait while loadavg1 > LMAX (max MAXSECS); prints only when it waited
++  local t=0 l; [ "$LMAX" = 0 ] && return 0; l=$(load1)
++  while [ $l -gt $LMAX ] && [ $t -lt $1 ]; do sleep 5; t=$((t + 5)); l=$(load1); done
++  [ $t -gt 0 ] && echo "suite-fast: load gate waited ${t}s${2:+ ($2)}, loadavg1 now $l (limit $LMAX)"; return 0; }
++export -f load_wait
+ SC=${SUITE_CACHE_DIR:-/home/boki/suite-cache}; DUR=$SC/durations.tsv; mkdir -p $SC; export DUR
+ CHECK_MAP=${CHECK_MAP:-}; CMAP_PY=${CMAP_PY:-/home/boki/bin/check-map.py}
+ NOCACHE_RE=${SUITE_NOCACHE_RE:-perf|bench|hitch|load|net-check|title-check}
+@@ -145,7 +160,7 @@
+ ALERT=${SUITE_ALERT:-/home/boki/coord/SUITE_ALERT}; SID=$(echo "$OUT" | md5sum | cut -c1-8); export SID
+ stop_suite() { { echo "flags: $(wc -l < $OUT/flags.txt)"; echo "$1"; echo "No NEW-RED/WORSE verdict: suite stopped, nothing cached. Logs: $OUT/merge, $OUT/main"; echo DONE; } > $OUT/summary.txt
+   echo "$1 ($OUT)" > $ALERT; echo "suite-fast: $1"; exit 3; }
+-rm -f $OUT/BREAKER $OUT/NORETRY $OUT/ABORT $OUT/main_tree_cached
++rm -f $OUT/BREAKER $OUT/NORETRY $OUT/ABORT $OUT/main_tree_cached $OUT/LOADCAP
+ run() { side=$1; flag=$2; T=$([ $side = main ] && echo $MW || echo $GW)
+   n=$(echo "$flag" | tr -c 'a-z0-9\n' _); [ -f $OUT/ABORT ] && return
+   if [ -f $OUT/$side/$n.rc ]; then   # done, except not-run results (126/127) and timeouts (retried unless too many)
+@@ -157,9 +172,13 @@
+   # 11-15 MEMORY GATE: several suites (merge lanes, merge-candidate) share hetzner; 23 Godot runs = 22G pushed it to 3G free and
+   # Claude Code reaped shells. Wait (max 15 min) while MemAvailable < SUITE_MIN_FREE_MB (default 6000) before starting a run.
+   for _w in $(seq 180); do [ $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) -ge ${SUITE_MIN_FREE_MB:-6000} ] && break; sleep 5; done
++  # 11-15 LOAD GATE (header). A wait that hits its cap writes OUT/LOADCAP; for 10 min after that, runs do not wait again
++  # (a box that stays loaded must not add 300 s to every run).
++  if [ -z "$(find $OUT/LOADCAP -mmin -10 2>/dev/null)" ] && [ $(load1) -gt $LMAX ]; then
++    load_wait ${SUITE_RUN_LOAD_WAIT:-300} "$side $flag" >&2; [ $(load1) -gt $LMAX ] && touch $OUT/LOADCAP; fi
+   (set -o noclobber; echo server > $OUT/$side/$n.claim) 2>/dev/null || return   # pods (suite-pod) claim both sides
+   X=$(mktemp -d /tmp/xdg.$SID.XXXX); t0=$(date +%s)
+-  (cd $T && XDG_DATA_HOME=$X timeout 1200 xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag 2>&1 | timeout -k 5 1300 tail -c 20000000 >$OUT/$side/$n.log; exit ${PIPESTATUS[0]})  # cap 20 MB: Godot leak spam made 2 GB logs (11-11 disk full)
++  (cd $T && XDG_DATA_HOME=$X timeout ${SUITE_RUN_TIMEOUT:-1200} xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag 2>&1 | timeout -k 5 1300 tail -c 20000000 >$OUT/$side/$n.log; exit ${PIPESTATUS[0]})  # cap 20 MB: Godot leak spam made 2 GB logs (11-11 disk full)
+   rc=$?; rm -rf $X; secs=$(( $(date +%s) - t0 )); rm -f $OUT/$side/$n.cached
+   echo $secs > $OUT/$side/$n.secs; printf '%s\t%s\t%s\tserver\t%s\n' "$flag" $side $secs "$(date -u +%FT%TZ)" >> $DUR
+   echo "$rc $(grep -cE 'FAIL|SCRIPT ERROR' $OUT/$side/$n.log)" > $OUT/$side/$n.rc
+@@ -186,6 +205,10 @@
+   for f in $CANARY; do grep -qxF -- "$f" $OUT/flags.txt && echo "$f"; done > $OUT/canary.txt
+   [ -s $OUT/canary.txt ] || return 0
+   { sed 's/^/merge /' $OUT/canary.txt; sed 's/^/main /' $OUT/canary.txt; } | nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run {}'
++  local to; to=$(while IFS= read -r f; do n=$(fname "$f"); for s in merge main; do grep -qs '^124 ' $OUT/$s/$n.rc && echo "$s $f"; done; done < $OUT/canary.txt)
++  if [ -n "$to" ]; then   # 11-15: a timed-out canary run means a loaded box more often than a broken tree: wait, rerun once
++    echo "suite-fast: $(echo "$to" | wc -l) canary runs timed out (loadavg1 $(load1)), rerunning them once after the load gate"
++    load_wait ${SUITE_RETRY_LOAD_WAIT:-${SUITE_LOAD_WAIT:-900}} "canary retry"; echo "$to" | nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run {}'; fi
+   while IFS= read -r f; do n=$(fname "$f"); tot=$((tot + 1)); bad=0
+     for s in merge main; do read r c < $OUT/$s/$n.rc; [ "$r$c" != 00 ] && bad=$((bad + 1))
+       v=$(grep -oE 'failures: [0-9]+' $OUT/$s/$n.log | tail -1); v=${v#failures: }
+@@ -194,8 +217,15 @@
+   done < $OUT/canary.txt
+   echo "suite-fast: canary $both of $tot red on both trees, $mm of $((tot * 2)) runs exit != own verdict"
+   [ $((both * 2)) -lt $tot ] && [ $mm -lt $tot ] && { rm -f $ALERT; return 0; }
+-  stop_suite "ENV-BROKEN: $both of $tot canary checks red on BOTH trees, $mm of $((tot * 2)) runs exit != the check's own 'failures: N' ($(date -u +%H:%MZ), $(( $(date +%s) - T0 )) s in; canary: $(tr '\n' ' ' < $OUT/canary.txt))"; }
++  stop_suite "ENV-BROKEN: $both of $tot canary checks red on BOTH trees, $mm of $((tot * 2)) runs exit != the check's own 'failures: N' ($(date -u +%H:%MZ), $(( $(date +%s) - T0 )) s in, loadavg1 $(load1) of limit $LMAX; canary: $(tr '\n' ' ' < $OUT/canary.txt))"; }
++RUND=$SC/running; mkdir -p $RUND; echo "$OUT" > $RUND/$$; trap 'rm -f $RUND/$$' EXIT   # live-suite count for the cap
++nlive() { local f k=0; for f in $RUND/*; do [ -f "$f" ] || continue; [ "${f##*/}" = $$ ] && continue
++  kill -0 "${f##*/}" 2>/dev/null && k=$((k + 1)) || rm -f "$f"; done; echo $k; }
++_t=0; while [ "$LMAX" != 0 ] && [ $_t -lt ${SUITE_LOAD_WAIT:-900} ] && { [ $(load1) -gt $LMAX ] || [ $(nlive) -ge ${SUITE_MAX_SUITES:-3} ]; }; do sleep 5; _t=$((_t + 5)); done
++[ $_t -ge ${SUITE_LOAD_WAIT:-900} ] && [ $(load1) -gt $LMAX ] && touch $OUT/LOADCAP   # gave up: no per-run waits for 10 min
++echo "suite-fast: start gate ${_t}s: loadavg1 $(load1) (limit $LMAX), $(nlive) other suites live (cap ${SUITE_MAX_SUITES:-3})"
+ canary
++[ "${SUITE_CANARY_ONLY:-0}" = 1 ] && { echo "suite-fast: SUITE_CANARY_ONLY, stopping after the canary ($(( $(date +%s) - T0 )) s)"; exit 0; }
+ order $OUT/flags.txt > $OUT/order.txt
+ if [ $CACHE_ON = 1 ]; then fpgen merge $GW $OUT/fp.merge.tsv; fpgen main $MW $OUT/fp.main.tsv; cache_apply merge $OUT/flags.txt; fi
+ # One suite owns the worker pointer at a time (two suites used to overwrite and delete each other's, 2026-11-06).
+@@ -226,7 +256,7 @@
+ pod_stop() { local p h; [ -n "$PODPIDS" ] || return 0; for p in $PODPIDS; do pkill -P $p 2>/dev/null; kill $p 2>/dev/null; done
+   for h in $PODS; do h=${h%%:*}; timeout 30 ssh -i $PODK -o BatchMode=yes -o ConnectTimeout=10 $h "pkill -f -- '--path /root/mcshard/$(echo "$OUT" | md5sum | cut -c1-10)/'" 2>/dev/null; done
+   PODPIDS=""; rm -f $OUT/merge/*.log.pod $OUT/main/*.log.pod; }
+-trap 'pod_stop; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
++trap 'rm -f $RUND/$$; pod_stop; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
+ for p in $PODS; do h=${p%%:*}; sl=${p#*:}; [ "$sl" = "$p" ] && sl=8
+   OUT=$OUT GW=$GW SUITE_POD_KEY=$PODK bash ${SUITE_POD_BIN:-/home/boki/bin/suite-pod} $h $sl > $OUT/pod-$h.log 2>&1 & PODPIDS="$PODPIDS $!"; done
+ # 1. merge side, every flag

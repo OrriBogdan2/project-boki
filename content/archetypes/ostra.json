@@ -1,5 +1,6 @@
 {
 	"id": "ostra",
+	"recast_hint": {"e": "pop your Brimseed"},
 	"title": "Void Jester",
 	"base_name": "Motley",
 	"gender": "male",
@@ -9,21 +10,8 @@
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
 	"howto": ["Play: floating mid-range; pull the fight in with seeds.", "Combo: {secondary} stuns, drop a {signature} seed on them.", "Avoid: spamming {dash}; with no charge it does nothing."],
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
-	"card": {
-		"role_word": "Controller",
-		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
-		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
-		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
-		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
-		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
-		"weapons": {
-			"tether_lantern": "Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows."
-		},
-		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
-	},
-	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
+	"card": {"role_word": "Controller", "loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "dash": "Lob a lantern; foes in its circle swap places with you.", "passive": "Hits fill Swell; full, you are Swollen 9s and everything grows.", "rmb": "Shard bundle that stuns the first foe, longer the further it flew.", "e": "Plant a bomb that grows for 6.5s; press again to pop it.", "x": "Open a well that stuns and pulls in everything for 3.5s.", "weapons": {"tether_lantern": "Quick orbs through walls; wait longer between shots for bigger ones."}, "chips": {"rmb": ["9.5 dmg"], "e": ["12.5 dmg"]}},
+	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.434, "hit_h": 2.22, "body_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
@@ -56,8 +44,6 @@
 		"id": "swap",
 		"name": "Lantern Trade",
 		"card_range": "reach",
-		"icon": "shadowstep",
-		"col": "#c65cff",
 		"icon": "ostra_dash",
 		"col": "#7fe0d0",
 		"cd": 9.5,
@@ -177,10 +163,25 @@
 	"rank_dmg": {"sec": [1, 1.2, 1.4], "dash": [1, 1, 1], "kin": [1, 1.1, 1.2]},
 	"rank3": {"sec": "a burst of speed when you cast and when it hits", "dash": "allies within 1.5m of you when you leave get a shield", "kin": "the seed burns foes inside while it grows (16 a second)"},
 	"rank2": {"sec": "Rank 2: cooldown 10s -> 8.5s, damage +20%.", "dash": "Rank 2: recharge 9.5s -> 8s per charge.", "kin": "Rank 2: damage +10%."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:40 'she turns to the aim'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
+		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
+	},
 	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 16 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies within 1.5m of you when you leave get a shield of a third of your health for 3s."},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
-		"full": "the lantern burns white and his ribbons lift",
+		"full": "the jack-in-the-box glows white and his spring coils tall",
 		"dash_spent": "a pale ripple where he stood"
+	},
+	"src": {
+		"lmb": "[D] [O] (owner items 60, data overruled) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner item 40) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

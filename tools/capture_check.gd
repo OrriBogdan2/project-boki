@@ -150,7 +150,7 @@ func _flow() -> void:
 	var p0 := P.pos
 	run_for(1.0)
 	ok(Capture.active(P) and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() < 0.2, "...rooted while it runs (moved %.2fm)" % Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length())
-	ok(not P.can_fire(), "...and you cannot shoot")
+	ok(not P.atk.can_fire(), "...and you cannot shoot")
 	ok(k.state == "dazed" and k.scan_by == P, "...the Boki is held in its daze by the scan")
 	ok(P.caught.is_empty(), "...nothing is in the box yet")
 	run_for(scan_s - 1.0 + 0.5)
@@ -490,9 +490,9 @@ func _scan_through(edit: Callable) -> Dictionary:
 	var scan_s := float(Capture.rules()["scan_s"])
 	run_for(0.5)
 	var hum := String(Capture.state(P).get("hum", ""))
-	var lo := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	var lo := (Sfx.loops[hum]["p"] as AudioStreamPlayer3D).pitch_scale if Sfx.loops.has(hum) else 0.0
 	run_for(scan_s - 1.2)
-	var hi := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	var hi := (Sfx.loops[hum]["p"] as AudioStreamPlayer3D).pitch_scale if Sfx.loops.has(hum) else 0.0
 	run_for(2.0)
 	return {"cues": _cue_counts(), "lo": lo, "hi": hi, "caught": P.caught.size(), "k": k}
 

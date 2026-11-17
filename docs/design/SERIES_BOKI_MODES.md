@@ -27,7 +27,7 @@ its mode. The Bokidex shows where each Boki is found and how rare it is.
   Heart Raid asks `BokiModes.pool("heart_raid", ["common", "rare", "very_rare"], difficulty)`.
 - Expeditions: wild spots draw `site_pool("expedition", "wild")` (commons + rares), the Rare Boki
   spots (SpawnPlan) draw `"rare_spot"` (rares + very rares). Boss-egg kin (content/kin `"rare"`)
-  never spawn; they only hatch from their lair boss's Rare Egg, and they are Expedition very rares.
+  never spawn and never hatch from an egg either (`no_egg`, docs/EGG_RULES.md); they are Expedition very rares.
   The hatch scene's mystery egg draws with the same tickets (its odds are unchanged).
 - Check: `--boki-modes-check` (every species has one mode, Expedition pools never yield another
   mode's Boki, ticket odds, Heart Raid gates).
