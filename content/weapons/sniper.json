@@ -15,7 +15,7 @@
 		"range": 16.0,
 		"size": 0.3,
 		"color": "#ff8033",
-		"sfx": "sniper",
+		"sfx": "gun_sniper",
 		"warmup": 0.6,
 		"fire_slow": 0.6,
 		"close_mult": 0.5,
