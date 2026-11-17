@@ -11,22 +11,24 @@ extends RefCounted
 
 const HEROES := {"gunslinger": "Vex", "juggernaut": "Kael", "bulwark": "Albert", "thief": "Sable"}
 const STEPS := [1.0 / 30.0, 1.0 / 60.0, 1.0 / 144.0]
-const SPREAD := 0.03            # largest relative difference allowed (between steps, and to a [game data] number)
-const GLIDE_AT := 20.0          # m over the ground: well above HunterMove.glide_height, where the source pulls down
+const SPREAD := 0.03  # largest relative difference allowed (between steps, and to a [game data] number)
+const GLIDE_AT := 20.0  # m over the ground: well above HunterMove.glide_height, where the source pulls down
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("FPSFEEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var apex_target := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
 	for arch: String in HEROES:
-		var rows := {}          # measure -> [value per step]
+		var rows := {}  # measure -> [value per step]
 		for dt: float in STEPS:
 			var got := _measure(main, arch, dt)
 			for key: String in got:
@@ -47,6 +49,7 @@ func run(main: Node) -> void:
 					ok(absf(x / target - 1.0) <= SPREAD, "%s %s %.3f matches [game data] %.3f" % [who, key, x, target])
 	print("FPS FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
 
 ## One hero's scripted run at one step size: {apex_m, sink_mps}.
 func _measure(main: Node, arch: String, dt: float) -> Dictionary:
@@ -79,6 +82,7 @@ func _measure(main: Node, arch: String, dt: float) -> Dictionary:
 	m.queue_free()
 	return out
 
+
 ## Steps `seconds` of sim at `dt`, the glide key held when it was set.
 func _for(m: Match, seconds: float, dt: float) -> void:
 	var glide := bool(m.player.inp["glide"])
@@ -86,10 +90,11 @@ func _for(m: Match, seconds: float, dt: float) -> void:
 		m.player.inp["glide"] = glide
 		m.step(dt)
 
+
 ## A standing hunter at p with full dashes, no keys.
 func _reset(h: Hunter, p: Vector3) -> void:
 	for i in 30:
-		h.m.step(Match.DT)          # (whatever ran before ends on the same clock every time)
+		h.m.step(Match.DT)  # (whatever ran before ends on the same clock every time)
 	h.teleport(p)
 	h.vel = Vector3.ZERO
 	h.grounded = true
@@ -105,12 +110,26 @@ func _reset(h: Hunter, p: Vector3) -> void:
 		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
 
+
 ## A fresh match as `arch` on a flat 29 x 29 m patch, the other hunters far away and idle.
 func _match(main: Node, arch: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"god": true, "cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
+	m.start(
+		{
+			"training": true,
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 77,
+			"no_drop": true,
+			"god": true,
+			"cls": Arch.weight(arch),
+			"arch": arch,
+			"weapon": Arch.signature(arch)
+		}
+	)
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()
