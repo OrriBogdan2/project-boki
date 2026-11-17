@@ -800,9 +800,6 @@ AIR_AUDIT = {
     "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
 }
 
-AIR_NAMES = {"thief": "Sable", "archer": "Hem", "mage": "Vex", "gunslinger": "Ghost", "tender": "Elluna", "rimewright": "Claire",
-             "dolm": "Tarek", "ostra": "Void", "bulwark": "Oath", "juggernaut": "Kael", "ashwick": "Cinder", "dredge": "Grimble"}
-
 def _air_audit_table():
     rows = []
     for aid in ARCH_ORDER:
@@ -814,7 +811,7 @@ def _air_audit_table():
         ground = "%s (cd %s s)" % (d.get("name", "?"), d.get("cd", "?"))
         if isinstance(dist, (int, float)) and tm:
             ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
-        rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
+        rows.append(["%s (%s)" % (ARCH.get(aid, {}).get("base_name", aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
 DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),

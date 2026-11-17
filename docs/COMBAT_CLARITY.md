@@ -6,7 +6,7 @@ shared layer carry the read on the bodies and the ground, and takes clutter off 
 the per-Hunter jobs' (VFX_QUALITY.md); the audit below lists what is still theirs.
 
 ## How the source keeps a fight readable (and what we take)
-`docs/DASHES_AND_ABILITY_FEEL.md` §5 has the research (SUPERVIVE, Battlerite, Riot, Overwatch). In short: the enemy
+`docs/DASHES_AND_ABILITY_FEEL.md` §5 has the research (REFERENCE, Battlerite, Riot, Overwatch). In short: the enemy
 is red on the body and on the ground (outline + telegraph rim), your own and allies' looks are calmer; a cast reads on
 the caster first; crowd control reads on the victim's body (a stun ring over the head, roots at the feet); floating
 text is rare. Our looks stay ours: the signature colour is the body of every effect, the side colour is an edge.
