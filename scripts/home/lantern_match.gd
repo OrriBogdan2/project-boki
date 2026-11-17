@@ -371,6 +371,10 @@ func _pick(i: int) -> void:
 	if board != null and board.pick(i):
 		Sfx.play("click", null, -10.0)
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return state == S.PLAY
+
 func tick(d: float) -> void:
 	state_t += d
 	match state:
