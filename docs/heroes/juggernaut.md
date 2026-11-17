@@ -8,7 +8,7 @@ docs/wiki/Inspirations.md.
 
 ## Research summary
 
-- **Source hero:** Brall, from SUPERVIVE (supervive.wiki.gg ability text, levels 2-4, patch history).
+- **Source hero:** ref-juggernaut, from the reference (the community wiki ability text, levels 2-4, patch history).
   Version chosen: the wiki's current page as read on Nov 1, with the patch notes' shapes where they differ.
 - **Patches that shaped it:** *Leveling Rework + Big Balance Patch* (LMB hitbox -20%, sweet spot moved to the
   central tip, the 3rd/4th-hit bonus removed, Flame Step charges, R no longer resets on Wisp execution) and
@@ -23,7 +23,7 @@ docs/wiki/Inspirations.md.
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
-bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+bulwark doc does it. [D] = game data (sv/briefs/kits.md, `Upg:` II / III / IV). Our seconds keep
 the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
 no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
@@ -37,10 +37,14 @@ no such upgrade). LMB and the passive have no tiers in the data and do not rank;
 
 ## Scaling
 
-Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam 52, Spin 54, Flame Step 18
-with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
-with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
-Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
+Time to knock (docs/TTK.md, PARITY FIRST): each hit is the source's share of a target, Brall's number over the
+source's 1285 mean Base HP times our 154 mean health: slash 5.2 (43), Searing Wave 7.7 -> 12.8 (fireblast 107),
+Slam 15.6 (130), Lunge 7.1 -> 10.1 (84), Meteor 10.5 (88), Spin 11.9 (99), Rampage 2 along it + tip 4 (49 for the
+whole dash attack; the tip doubling is ours), Warchain 3.6 (30). The Haul Slam (8 -> 15.1) has no source number and
+keeps its place beside the Lunge (x0.5 with it). Pinned as ratios to the slash in content/rules/kit_parity.json.
+Before that the kit was kept as ratios to the footage's numbers (slash 8, Slam 26, Lunge 14 to 22, Meteor 18,
+Spin 18, Rampage 9 with tip 18), 1.5 to 4.6x the source per hit. The Gilded Riposte (43) is an ult,
+left out of the TTK combo and not tuned here. Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
 specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 7.2s slot (9s against the Smash's 2.5s, kept as the
 ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
 a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
@@ -83,7 +87,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
-Source vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/juggernaut.md; its header puts the ability clips at 5 fps,
+Source vs ours per slot, LMB first. [D] game data (sv/briefs/kits.md), [F] footage (hero-ref/juggernaut.md; its header puts the ability clips at 5 fps,
 one frame = 0.2 s, and the ult frames at 10 fps), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `tools/zedran_feel_check.gd`
 ("jug parity ...").
 
@@ -125,7 +129,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
 | LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
 | LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
-| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
+| Shift numbers | LOW | (b) | 2 along it, tip 4 (the data's 49 = 1.14x a slash for pass and tip together; docs/TTK.md), cooldown 10.4 s (0.8 x 13) |
 | Air dash shove | LOW | (b) | no shove (no source) |
 | R cooldown / damage | MED | (b) | 36 s (0.8 x 45) and 43 (the data's 230 = 5.35x a slash) |
 | R fx (guard ring, self-shake) | LOW | (b)+(c) | the guard-start ring is gone; the shake is ext/no-shake's |
@@ -142,9 +146,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:
 **[O]** the owner's notes (OWNER_REVIEW items 21/22, the 14:07 ET "small mechanics" note), **[D]** the game data
-(`supervive-data/supervive_kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
+(`sv/briefs/kits.md`: "Feysteel Chain (16s, 15): tether that attaches to enemies or walls, 30 dmg;
 reactivate to pull yourself to the target. Upg: -2s CD x3"), **[W]** the wiki's ability page and patch notes
-(https://supervive.wiki.gg/wiki/Brall: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
+(reference notes: tether 5s; the pull is an impulse of 1900 uu/s; the cooldown starts on the
 second press or when the chain breaks; a stun breaks it; no throw while rooted or Grounded), **[F]** the footage
 notes (`hero-ref/juggernaut.md` E and RMB sections, frames 0301-0366).
 
@@ -256,8 +260,8 @@ Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes of
 | In the air, the Meteor Drop resting | tap / hold | as on the ground: a Finishing Slam, or the Lunge charge (E while it charges: a Haul Slam); never a dead press | owner 11-10 (the combo below) |
 | Throwing (chain in flight) | any | as on the ground or in the air; the throw goes on | ours |
 | Hooked, on the ground | tap | Finishing Slam; the chain stays on | ours |
-| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, a short stun on the foe), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
-| Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, stun 0.25 to 0.6 s) | ours |
+| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, no stun: DECISIONS 2026-11-07), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
+| Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun: DECISIONS 2026-11-07) | ours |
 | Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
 | Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
 | Arriving (0.25 s) | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |
@@ -293,8 +297,8 @@ Differences from the source, and why:
     Never longer than the 0329 throw.
 
   So the longest stretch shown is the throw itself (7 bh, ~12.6 m, our 13 m), and what happens at a limit (break, drag
-  or hold) is never shown. The data has no length either: `supervive_kits.md` Feysteel Chain (16s, 15, 30 dmg; upgrades
-  only -2s CD x3), `kit_comparison.md` (rank paths, cooldowns), `supervive_physics.md` and `PHYSICS_PARITY.md` (no
+  or hold) is never shown. The data has no length either: `sv/briefs/kits.md` Feysteel Chain (16s, 15, 30 dmg; upgrades
+  only -2s CD x3), `kit_comparison.md` (rank paths, cooldowns), `sv/briefs/physics.md` and `PHYSICS_PARITY.md` (no
   chain rows); the wiki patch notes we cite ([W]) change only stun breaks and no throw while rooted or Grounded. Kept:
   24 m, held taut (DECISIONS: extends up to a max). Alternative not taken: leash = throw range would end the
   extend-on-retreat the owner asked for.
@@ -356,14 +360,14 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Brall) and the owner's notes.
+From the wiki's ability page and patch notes (reference notes) and the owner's notes.
 "Built" means it is in the kit and asserted in `--juggernaut-combo-check` / `--kit-combo-check`.
 
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
 | The tether pull can be steered sideways while you're pulled in | owner's playtest note, item 57 | not visible | Built: looking aside or a held key swings the arrival up to 6 m aside; asserted "jug swing: ..." (13 m: 4.6 m, 41 deg, full speed) |
 | Chain cooldown starts on the pull or when the chain breaks, not on the throw | wiki patch 07.01.25 | n/a | Built (kits2), asserted |
-| A stun on Brall breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
+| A stun on ref-juggernaut breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
 | The chain's cooldown drops 2s three times | owner's game data | n/a | Built: 12.5% at rank 2, 37.5% at rank 3 (the hook refund is gone) |
 | The tether stays attached while you walk (about 2.5s+) | footage 0305-0317; wiki 5s | yes | Built (5s), drawn as a link chain |
 | The Fiery Lunge doubles its cooldown if nothing is struck | wiki RMB | n/a | Built, asserted |
@@ -374,7 +378,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
-| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd: a jump into a 4-terrace wall (3.2 m) tops it, 5 terraces not; asserted `combo archer: tall climb, juggernaut ...` (tools/tall_climb_check.gd, run by --archer-combo-check) |
+| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (sv/briefs/physics.md:67) | no | Built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd: a jump into a 4-terrace wall (3.2 m) tops it, 5 terraces not; asserted `combo archer: tall climb, juggernaut ...` (tools/tall_climb_check.gd, run by --archer-combo-check) |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
@@ -396,7 +400,7 @@ Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffe
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
 line or wiki line shows the pair: ours stays as it is and nothing was guessed. **Settled** (11-12) means no source
@@ -404,7 +408,7 @@ line shows it either, so DECISIONS "every interaction is chainable" decides: the
 buffered (waits), never dropped by a lock; the owner's Kael notes (RMB a straight thrust, LMB no knockback, the
 113.2 glide rows) don't touch these pairs. One assert per settled row: `jug cancel:` (tools/kael_cancel_rows_check.gd). Any pair not in the table: both
 (ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
@@ -472,6 +476,38 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 `jug_exdash` (his air dash: a hurled shoulder charge, knees tucked, blade trailing; no ground mark), `jug_chain` / `jug_reel`, `jug_spin`,
 `jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`, `jug_roar` (Enraged). Strips: `--arena-demo=anim_<move>`
 (scripts/arch/dj_demo.gd).
+
+## Animation timing (Nov 9-10: parity pass against the 5 fps footage)
+
+Kael's v2 clips are the v1 clips retargeted by bone name, so each strike is a one-frame snap off frame 0 followed by an
+eased follow-through. Measured offline through `WardenClips` (kael.glb clips swept at 60 Hz; the "strike" is the blade
+tip's fastest frame) and in `--juggernaut-combo-check` (tools/kael_anim_check.gd: the kit's own hit moment, the first
+hp drop on a dummy, on the move clock `kmove_t`). Source times from briefs/hero-ref/juggernaut.md (one frame = 0.2 s).
+A `lead` in content/rules/warden_anim/kael.json shifts the clip on the kit's clock: positive skips the cock, negative
+holds the first frame (docs/art/wardens/CLIPS.md). Kit numbers untouched.
+
+| Move | Source (s) | Ours before (clip strike / kit hit / clip end) | Ours after | Status |
+|---|---|---|---|---|
+| `jug_slash_r` `jug_slash_l` | 1 frame wind-up, 1 frame swing, alternating [f26/29/33] | 0.02-0.03 / 0.033 / 0.27 | same | matches; asserted |
+| `jug_wave_wind` (held) | a 0.6-1.0 s charge, the arc around him [f87] | pose from the tap window (0.22), held from 0.5 | same | matches; asserted (never on a tap) |
+| `jug_wave` | the blast fires on release | 0.07 / 0.017 / 0.60 | lead 0.05: strike 0.02 | fixed; asserted |
+| `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
+| `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.03 / 0.217 (arrival) / 0.60 | lead -0.17: the coiled frame 0 holds through the travel, thrust 0.20 | fixed; asserted |
+| `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.217 (the old 0.2 s hang) | lead 0.14: the kit\'s hang is now <= 0.1 s (owner spec 11-10), dive 0.083 | fixed; asserted |
+| `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
+| `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.25 / 0.233 / 0.40 | same | matches; asserted |
+| `jug_chain` / `jug_reel` | throw; pull about 0.4 s [f303-333] | throw 0.02 (hook at 0.183); reel 0.03 / pull from 0.017, arrive 0.283 | same | matches |
+| `jug_haul_wind` (held) / `jug_haulslam` | - | pose only once armed; 0.02 / 0.000 / 0.47 | same | no source; asserted |
+| `jug_guard` (held) / `jug_riposte` | guard 0.4-1.0 s, then the crescent [f425-439] | guard 0.65; strike 0.02 / 0.117 (after the 0.1 s step) / 0.47 | lead -0.08: the dropped blade holds the step, cleave 0.10 | fixed; asserted |
+| `jug_spin` `jug_chainlunge` `jug_exdash` | spin on arrival [f333-336] | spin runs on the press (0.000); chainlunge 0.03 / 0.20 | same | left alone (the chain lunge is unlisted) |
+| `jug_lunge` perfect release (owner) | no source (the owner's window, not on film) | first window at 0.80 s of hold, the wind-up pose still from 0.75 s; thrust 0.20 / hit 0.217 | same | matches; asserted (pose still before the window, strike on the hit) |
+| Riposte phases | guard 0.4-1.0 s [f425-436]; strike and recover not on film (0.2 s frames) | guard 0.65 / strike 0.117 / recover 0.35; clip ends 0.08 s after the hand-off | same, the tail plays under the 0.16 s blend to the legs | matches the card; asserted per phase |
+| Run cadence (`run_f`) | stride ~2.26 Hz, ~4.5 footfalls/s [f12-17] | `run_f` 0.67 s loop, 2 plants: 3.0 footfalls/s (1.5 Hz) at 4.55 m/s | main's WardenGait data (`stride`, `foot_mps`): rate 1.08, 3.2 footfalls/s at 4.6 m/s, feet planted | the `cadence` 1.5 key (4.5/s, feet slide) was dropped for the gait layer when merging main; for the footage cadence set `foot_mps` run to about 3.1 (rate 1.5), at the cost of foot slide. Asserted: rate = speed / foot_mps, 3.0+/s |
+
+Left alone: the tap-RMB overhead strike (ext/kael-tap-ult-1108 is unmerged; the Finishing Slam above is main's tap).
+An Enrage on a hit plays `jug_roar` over the move's clip (`_enrage_fx`), so a hit that fills Rage shows the roar, not
+the follow-through.
 
 ## Look and sound (all ours)
 
@@ -581,7 +617,7 @@ The sword tip is the point that jumps: idle, rest stance and walk carry the blad
 ## Parity verify, Nov 9
 
 Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block, this sheet, hero-ref/juggernaut.md,
-supervive_kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
+sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
 `--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,

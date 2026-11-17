@@ -56,6 +56,15 @@ func drop() -> void:
 	AimKit.hide(h, "leap")
 	KitLooks.of(m).release(FOOT_KEY)
 
+## A glide press in a hop's flight: the flight (launch_to's fly_t) ends there at its own speed, no landing, no
+## rock, no crash. A hop up onto a ledge is the shared sure arc (pad) and keeps it, like every Hunter's.
+func let_go() -> bool:
+	if st.is_empty() or String(st["phase"]) != "air" or not h.pad.is_empty():
+		return false
+	h.fly_t = 0.0
+	drop()
+	return true
+
 ## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
 ## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
 ## last flight's final BUFFER_S is held for the landing (_crash).
@@ -132,7 +141,7 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 func _lands(p: Vector3, g: float) -> bool:
 	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var fits: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
+	var fits: bool = m.world.occupy(p.x, p.z, h.hull_r(), maxf(g, h.pos.y), false) == 0.0
 	StoneStand.mover = asking
 	return fits
 
@@ -315,6 +324,8 @@ func _skid_room(dir: Vector2) -> float:
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
+	if not h.grounded:
+		return             # skidded off a ledge: the next hop and the crash wait for the ground below
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
 		st["press"] = false
 		if _aim_hop():

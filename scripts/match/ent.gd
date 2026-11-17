@@ -12,7 +12,8 @@ var kind := ""
 var pos := Vector3.ZERO
 var prev := Vector3.ZERO
 var vel := Vector3.ZERO
-var r := 0.4
+var r := 0.4          # the hurtbox: shots and abilities hit inside it
+var body_r := -1.0    # the body's collision radius against walls and other bodies; -1 = same as r
 var hp := 100.0
 var max_hp := 100.0
 var grounded := true
@@ -21,6 +22,7 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
@@ -44,6 +46,7 @@ var marks := {}             # combo setups on this body: combo id -> {team, owne
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var combat_at := -99.0      # match time it last dealt or took fight damage (InCombat)
 var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
@@ -75,7 +78,11 @@ func ground() -> float:
 		var d: float = st.deck_y(pos)
 		if d > World.VOID + 1.0 and (g < d or g > pos.y + 0.9):
 			g = d
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, g)
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), g)
+
+## The radius this body takes up against walls, rocks and other bodies (its hurtbox is `r`).
+func hull_r() -> float:
+	return r if body_r < 0.0 else body_r
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)
@@ -89,7 +96,7 @@ func over_void() -> bool:
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
 	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o
@@ -117,6 +124,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		if mt.demo_shielded(self):
 			return 0.0
 		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
+	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
@@ -152,7 +160,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	last_hit_by = by
 	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	squash = 0.1
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
 			set("knock_steer", float(opts.get("kbi", 0.3)))
@@ -288,7 +297,7 @@ func slide(dt: float, guard := false) -> bool:
 	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
-	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, hull_r(), pos.y)
 	if po.distance_squared_to(tgt) > 1e-10:
 		var bn := (po - tgt).normalized()
 		var hv := Vector2(vel.x, vel.z)
@@ -299,14 +308,14 @@ func slide(dt: float, guard := false) -> bool:
 		bumped = true
 		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
-	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
+	var b1: float = m.world.occupy(nx, pos.z, hull_r(), pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
 		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
-	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
+	var b2: float = m.world.occupy(pos.x, nz, hull_r(), pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
@@ -316,6 +325,7 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
+	if shell_t > 0.0: shell_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
@@ -343,12 +353,13 @@ func tick_status(dt: float) -> void:
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
-## The burn's tick number, only for burns that involve you; it rolls into the same label as the
-## burner's other damage on this body.
+## The burn's tick number: Fx.damage_number's tick kind, only for burns that involve you; it rolls
+## with the burner's other ticks on this body.
 func _burn_number() -> void:
 	var mt := m as Match
-	if mt and (self == mt.player or burn_by == mt.player):
-		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false, "", Fx.roll_key(burn_by, self))
+	if mt:
+		var by: Ent = burn_by if is_instance_valid(burn_by) else null
+		mt.fx.damage_number(self, by, burn_dps * 0.25, {"src": "burn"}, mt.player)
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
@@ -371,13 +382,15 @@ var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match 
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
 const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
+const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
-## Tints the body: the hit flash (white), else the wash (Spirit Walk), else the DoT tint (DotLook).
+## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
+## else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
-	var fc := Color.WHITE
+	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col

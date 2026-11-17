@@ -87,7 +87,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 52
+"long_line": 49
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -551,9 +551,6 @@
 },
 "scripts/match/merge_look.gd": {
 "long_line": 6
-},
-"scripts/match/merge_moves.gd": {
-"long_line": 5
 },
 "scripts/match/merge_parts.gd": {
 "long_line": 23

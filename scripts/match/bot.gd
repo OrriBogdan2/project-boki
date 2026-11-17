@@ -156,7 +156,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 	# ---- combat
 	var finishing: bool = tgt is Hunter and tgt.downed and not tgt.out
-	if tgt and not tgt.dead and tgt.hittable() and (finishing or not (tgt is Hunter and not tgt.targetable())):
+	if tgt and not tgt.dead and (finishing or (tgt.hittable() and not (tgt is Hunter and not tgt.targetable()))):
 		var d := h.flat_dist(tgt)
 		var to := h.dir_to(tgt)
 		var pref: float = {"light": 4.5, "medium": 7.0, "heavy": 5.5}[h.cls]
@@ -1148,13 +1148,19 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
+	var W: World = m.world
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
-		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
+		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
+		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
+		if W.tile_kind(p.x, p.y) != World.T_GROUND:
 			return false
-		# the abyss blocks a walk too: straight at a goal across a bay in the island, the edge guard
-		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
-		if m.world.is_void(p.x, p.y) or TerrainHazards.avoid(m, h, p.x, p.y):
+		if W.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
+			return false
+		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
+			return false
+		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
+		if TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 

@@ -87,6 +87,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
+		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -255,7 +256,9 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	var n := int(d["serials"].get(sp, 0)) + 1
 	d["serials"][sp] = n
 	rec["serial"] = n
-	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, {"how": String(o["how"]), "serial": n})
+	var extra := {"how": String(o["how"]), "serial": n}
+	if rec.has("parents"): extra["bred"] = true        # an egg of two of your Boki (ClanInfo.last_deed)
+	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, extra)
 
 ## Everyone in the collection has provenance (anything that came in without it gets it now).
 func register_all() -> void:
@@ -510,7 +513,9 @@ func load_from(p: String) -> void:
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

@@ -196,6 +196,12 @@ def block(name, key, body):
 ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
+MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
+
+
+def walk_speed(aid):
+    """A hunter's walk in m/s, as HunterMove.speed: its row (or the default) times body_scale."""
+    return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
@@ -307,7 +313,7 @@ def gen_classes():
         block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
-            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(walk_speed(aid)), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
@@ -493,10 +499,10 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
-    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
+    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -755,6 +761,28 @@ def _dash_ours(row, modes):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
+TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
+              ("x_recast", "ult (X) recast")]
+
+def _turn(rule):
+    return rule if isinstance(rule, str) else "slow (%g deg/s)" % rule
+
+def gen_turn_table():
+    """The body-turn rows from each kit JSON's "turn" block (ArchKit.turn_rule, --yaw-lock-check)."""
+    rows = []
+    for aid in ARCH_ORDER:
+        hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in TURN_SLOTS:
+            row = ARCH.get(aid, {}).get("turn", {}).get(slot)
+            if row:
+                rows.append([hero, label, _turn(row["early"]), _turn(row["late"]), row["source"]])
+    return ("\n## Body turning during casts\n\n_Generated from the \"turn\" block in `content/archetypes/<hero>.json`._"
+            "\n\nDoes the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor "
+            "east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it "
+            "follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first "
+            "cast's.\n\n" + table(["Hero", "Slot", "0.1-0.33 s (wind-up, channel)", "0.53-0.77 s (release, after)",
+                                    "Source"], rows))
+
 # Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
 AIR_AUDIT = {
     "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
@@ -778,9 +806,6 @@ AIR_AUDIT = {
     "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
 }
 
-AIR_NAMES = {"thief": "Sable", "archer": "Hem", "mage": "Vex", "gunslinger": "Ghost", "tender": "Elluna", "rimewright": "Claire",
-             "dolm": "Tarek", "ostra": "Void", "bulwark": "Oath", "juggernaut": "Kael", "ashwick": "Cinder", "dredge": "Grimble"}
-
 def _air_audit_table():
     rows = []
     for aid in ARCH_ORDER:
@@ -792,7 +817,7 @@ def _air_audit_table():
         ground = "%s (cd %s s)" % (d.get("name", "?"), d.get("cd", "?"))
         if isinstance(dist, (int, float)) and tm:
             ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
-        rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
+        rows.append(["%s (%s)" % (ARCH.get(aid, {}).get("base_name", aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
 DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
@@ -854,6 +879,7 @@ def gen_dash_flow():
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
     body += table(["Pair", "Source", "Ours"], _mantle_rows())
+    body += gen_turn_table()
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

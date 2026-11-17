@@ -264,7 +264,10 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			break
 	return p
 
-## Line of sight at height y between two points (rocks and higher ground block it).
+## Line of sight at height y between two points (rocks and higher ground block it). A sample every
+## 0.4 m, each read straight off the grid and a tile read once however many samples land on it (its
+## ground is one height, stairs aside): can_see, Bot.can_hit and the kits ask this hundreds of times
+## a step in a ten-squad brawl, and the three lookups a sample were a quarter of the step.
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1

@@ -52,7 +52,7 @@ R is your Boki's Merge.
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.16 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A frost bunny show-skater. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
 | Silhouette | tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates |
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 | Passive: Hoarfrost | Hits Chill; 8 darts or a knock on a Chilled foe Shatters. |
 | Dash: Skate | Hold to skate; darts fly straight and hit twice as hard. |
 | RMB: Ice Spear | Ice spear: hits and slows where it lands, then bursts after 1.8s. |
-| E: Rink Wall | An ice wall slides to the cursor, shoving foes; E freezes it. |
+| E: Rink Wall | An ice wall slides to the cursor, shoving foes; use it again to freeze it. |
 | Hunter ultimate: Rimelock | Sealed, invulnerable, rooted; cracks open at 3.3s to stun. |
 | Weapon: Hoar Fan | Hold for slow homing darts; big ones every few shots. |
 

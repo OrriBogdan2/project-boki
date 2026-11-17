@@ -322,12 +322,15 @@ static func _kg(x: float) -> String:
 ## caught yours.
 static func _habitat(spk: String) -> String:
 	var out := ""
-	if Data.is_rare(spk):
+	if Data.no_egg(spk):
 		var boss := String(Data.KIN[spk].get("boss", ""))
 		var bn := String(Data.MOBS.get(boss, {}).get("name", "a lair boss"))
-		out = "Never in the wild. It only hatches from a Rare Egg won from %s." % bn
+		out = "Never in the wild, and never from an egg. It keeps the lair of %s." % bn
+	elif Evo.base_form(spk) != spk:
+		var first := String(Data.KIN[Evo.base_form(spk)]["name"])
+		out = "Never from an egg: eggs hatch %s, and it grows from there." % first
 	else:
-		out = "Wild, on any island of the Skylands."
+		out = "Wild, on any island of the Skylands. Eggs hatch this first form."
 	var places: Array = []
 	for r in Save.d.get("roster", []):
 		if String(r.get("species", "")) != spk: continue
