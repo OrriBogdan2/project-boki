@@ -10050,3 +10050,4 @@ READY ext/fsm-m1-port b41122f55d (port of ext/fsm-m1: --fsm-check over loco+base
 READY ext/anim-boki-cast-rebased-port 6679dd920c8 (Boki cast wind-up: ability plays as 0.56s cast clip, skill lets go on release frame 0.2s; bite half already in main; boki-system/agency/shield/grammar-runtime checks green, boki-rig-check only lilybara/umbrathere glb missing as on main)
 READY ext/vfx-vex-kit-port 8221e812dcf (Vex parity: tracer 0.82, burnt-disc Cinderfall patch, no slide puff; same reds as main)
 READY ext/farm-boki-xp-curve-port 8b202e18f077bf0853f86ba97aea46cc2559ce1a (roster of 124: 73 data-only stubs + Ermink live, kin grammar roster/type2/data_only; XP curve not ported, main has garden_xp curve)
+READY ext/idle-dredge-rebased-port e7747a2a0b (Grimble idle+stance clips onto v95 glb; x_breath dropped)
