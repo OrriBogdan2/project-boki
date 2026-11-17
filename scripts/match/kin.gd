@@ -13,6 +13,7 @@ var species := "cindle"
 var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
+var trail_t := 0.0               # s since its last type-trail particle (KinTypeTrail)
 var unseen := false             # a rival's kin out of the local player's sight
 var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | wisp | wild | dazed | bench | fused | away
 var settle := 1.0                 # 0..1 while settling onto the shoulder
@@ -446,6 +447,8 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	var cx := KinExec.make_cx(m, caster, self, owner_h, p, pw * Effects.level_k({"level": rank}), slot, def.id, chain)
 	KinExec.cast(effective(slot), cx)
 	CombatBus.ability_used.emit(caster, def.id, slot)
+	if not unseen:
+		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
@@ -1064,6 +1067,7 @@ func render(delta: float, alpha: float) -> void:
 	KinDowned.render(self, delta)
 	if model:
 		SummonRing.tick(self)
+	trail_t = KinTypeTrail.of(m.fx).tick(self, trail_t, delta, m.fx.particles / Fx.PARTICLES)
 	if not model or KinWispForm.render(self, model) or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")
