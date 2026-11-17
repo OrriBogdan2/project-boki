@@ -10076,3 +10076,4 @@ READY ext/idle-ostra-port 4b77519952 (Motley idle+stance rework onto the v95 glb
 READY ext/merge-lane-hunters5-1117 ed8e34988c (lane hunters5: kael-black-red, kael-tap-ult-port partial, hunt4 PR #143, integ-1113-A1; GATE GREEN NEW-RED 0, export 839 MB)
 READY ext/merge-lane-hunters6-1117 250723cc60 (lane hunters6: TurnCost momentum port + Gil swim; GATE GREEN NEW-RED 0, export 841 MB)
 READY ext/vfx-utility-read-port b32aed7bc77 (in-match shops + source utilities + six-slot belt ported onto main; targeted checks green, lair-lock/warden-clips red same as main)
+READY ext/merge-lane-leftover-1117 d1985757009c993eff2607d08ce715c0730a8463 (6 leftover branches, targeted checks NEW-RED 0)
