@@ -64,7 +64,7 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_input_frames | 1 | 1 | <= 1 step | press acts the same step |
 | ground_t95 (to 95% run speed) | 0.083s | 0.067s | <= 0.07s | [spec] 0.05–0.1s |
 | ground_stop_t | 0.067s | 0.167s | 0.12–0.25s | [game data] braking 22.2 m/s² + friction 2/s (SV ~0.18s) |
-| ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
+| ground_stop_dist | 0.10m | 0.31m | 0.27–0.4m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
@@ -200,8 +200,6 @@ Other checks:
   - Letting go falls like any jump (`Loco.air_step`, decision 0052): the glide's extra over run speed bleeds at the air drag, so a let-go 2 m up lands at 1.05x run with the keys held (was 1.14x: for 0.6s the glide's speed and steering were kept).
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
-- **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too). `--move-feel-check` `dash_jump_keep` jumps Vex, Kael, Lace and Cinder out of a ground dash at full travel and asserts the 0.75 (one air step of drag undone); the source value is undecoded and the footage has no dash-then-jump moment (docs/MOVEMENT_PARITY.md §4).
-- **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
 - **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too).
 - **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled, but its own Shift move is (`ArchKit.in_dash`: Tenzo's hops end on a press, Neve's skate and Sparkle's streak too); the dash's wind-down (`glide_cd`, set at its start by Grimble and Cinder or left by the dash before in a chain) goes with it, and a press the locomotion state refuses stays armed; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
@@ -240,7 +238,7 @@ Other checks:
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
   - The movefeel framing stays available as "Default (wider lens)" (`default_wide`). `--cam-style=<id>` picks a style for one tooling run.
-- **Camera framing vs the source (parity pass, 2026-11-09, now `--camera-frame-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
+- **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
   |---|---|---|---|
@@ -250,56 +248,14 @@ Other checks:
   | Ground across 16:9 | ~37 m: Void's 3.5 m Black Hole [D] reads ~2 bh (90 px) and run pans of 205–250 px/s at the data's 4.4–4.8 m/s [D] both give ~51 px/m | 23.5 m | 23.5 m (narrower) |
   | Hunter height on screen | mediums 90–100 px of 1080 (8.3–9.3%), Oath 107 px, Elluna 67 px [F] | 3.8–11.1% by Hunter (gunslinger 6.0, bulwark 11.1, tender 3.8), median ~1.3x smaller than the source's | same |
   | Feet below the centre | ~3–4% [F camcal] | 3.0% on level ground | 3.5% (`rise` 1.0 -> 1.2 m) |
-  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | none: measured from the clips, "Camera lead" below (ext/feel-camera-lead) |
+  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | same share and cap, also held to the screen's room (perspective-correct), you stay >= 1.5 m inside |
   | Cursor lean, how fast | not measurable [F]; a blink dash takes ~0.5 s to catch up (dredge) | eased 6/s; follow 15/s | unchanged |
   | Glide / drop zoom | only ability zoom-outs (Vireo's R, Oath's ult) [F]; data names an abyss zoom, no value [D]; abyss zoom not determinable (below) | glide 1.25x, drop 1.05–1.7x, sneak 1.45x | unchanged |
   | `CameraDistance` 5500 uu [D] | 55 m, meaning unproven (the ADS row is a fog-of-war radius); as an arm length it would need a ~21° lens, against the footage's ~32° | not used | not used |
 
   - Not matched: the distance. The source shows ~1.6x more ground across and draws its Hunters ~1.3x bigger: its Hunters are about twice the size of the world ours are, which no camera can match. 36 m back would show the source's ground but shrink tender to ~2.5% of the screen (the owner wants silhouettes that read at gameplay zoom); 18 m would match the Hunters' size on half the source's view. 23 m sits between the two, so it stays. Matching both means drawing Hunters larger (`Hunter.VIS_SCALE`), a model call for the owner (docs/DEBT.md).
   - Abyss zoom: **not determinable** (2026-11-12). The data names a camera zoom for the abyss next to the slow fall, with no value [D]. No reference frame shows the player's own Hunter below an island's lip: the cliff demo cuts to the Hunter standing on the pillar while the target falls, and the walkway demo stays at lip height [F]. So there is no distance or rate to measure, and `CamRig` gets no abyss state. Below the lip the view still sinks with you at the same size (`CamRig.follow`, `p.y < 0`), with the glide's 1.25x when the glider is open. To settle it, use a clip of the player stepping off a lip and falling for 2 s or more before a glide or a mantle brings them back.
-  - GPU pair (`--cam-framing-shots`, since replaced by `--camera-frame-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
-- **Camera frame per aspect (2026-11-11, `--camera-frame-check`):** what the Supervive style shows of level ground around your feet, on each screen shape. Sources: the 16:9 source column is the framing table above solved for the ground (pitch 65.5°, lens 32°, ~37 m across at your feet, so ~36 m from the camera, feet 3-5% below the centre [F]); the source's other aspects are inferred [E]: its footage is all 16:9, its engine keeps the horizontal lens by default, and players reported no ultrawide view (a Steam thread, 2024-10), so every screen shows the 16:9 width. The numbers are in `content/rules/camera.json` (`styles`, `frame_aspect`, the `source` bands).
-
-  | Measure | Source 16:9 | Ours before 16:9 / 21:9 / 4:3 | Ours after 16:9 / 21:9 / 4:3 | Source 21:9 / 4:3 [E] |
-  |---|---|---|---|---|
-  | Camera height above your feet | ~33 m | 22.2 m (all) | 22.2 m (all) | ~33 m |
-  | Pitch | 65.5° ±1.5 | 66° | 66° | 65.5° |
-  | Vertical lens | ~32° | 32° / 32° / 32° | 32° / 24.6° / 41.8° | 24.6° / 41.8° |
-  | Ground ahead (to the top edge) | ~14.2 m | 9.3 / 9.3 / 9.3 m | 9.3 / 7.0 / 12.8 m | ~10.7 / ~19.6 m |
-  | Ground behind (to the bottom edge) | ~9.3 m | 6.2 / 6.2 / 6.2 m | 6.2 / 4.8 / 8.2 m | ~7.1 / ~12.2 m |
-  | Ground to each side, at your feet | ~18.5 m | 12.3 / 16.1 / 9.2 m | 12.3 / 12.3 / 12.3 m | ~18.5 / ~18.5 m |
-  | Ahead per behind | 1.46-1.62 | 1.49 | 1.49 | same |
-  | Side per ahead | 1.25-1.35 | 1.32 | 1.32 | — |
-
-  - Fixed: the screen's shape. Godot keeps the vertical lens, so a 21:9 screen showed 31% more ground to each side than 16:9 and a 4:3 one 25% less. `CamRig.frame_fov` now sets the lens each frame so every screen shows the 16:9 frame's width (`frame_aspect` 1.7778; the style's `fov` is the lens on that screen, kept as `CamRig.lens`): 21:9 sees less ahead and behind, 4:3 more. Windowed and full screen differ only by shape: a 1280x720 window, 1920x1080 and 3840x2160 frame the same metres, and a maximised window under a title bar (1920x1017) is a slightly wider shape (8.7 m ahead). Only the shape counts: `frame_fov` reads the view's width over its height.
-  - The shape matches the source (ahead per behind, side per ahead inside its bands); the scale does not: ours shows 0.66x the source's metres every way, the distance left open in the table above (docs/DEBT.md, an owner call on Hunter size). Kept as it was: the cursor lean (none, below), the glide camera, the cast view (its room follows the live lens).
-  - `--camera-frame-check` asserts it on ten views (16:9 at 1280x720, 1920x1080, 3840x2160 and 1920x1017; 16:10; 21:9 at 2560x1080, 3440x1440, 1680x720; 4:3 at 1600x1200, 1024x768): the 16:9 side metres within 0.5% everywhere, less ahead on wider shapes and more on narrower ones, the same shape framing the same metres at any size, your feet and head inside the screen; and the 16:9 pitch, lens, feet and ground shape inside the source's bands. `--move-feel-check`'s framing rows now read shares of a 16:9 screen's height (the headless view is square, so its lens is wider).
-  - GPU pair (`--camera-frame-shots`, one 720 px-tall window per shape; `--frame-before` keeps the lens at every shape, the rule before this change): before jobq 20261111-053358-15138 (rp1-0), after 20261111-053415-04484 (pc-MRROBOTO, gl_compatibility, so the light differs), `out/frame_16x9|21x9|4x3.png`. The 4:3 window came out 1240x930 (the window's minimum width), still 4:3.
-  - Not taken: black bars at 21:9 (the 16:9 picture, with as much ahead as 16:9). Fairer to ultrawide players, but nothing shows the source draws them, and it needs a letterbox under the HUD.
-- **Camera lead (measured, Nov 2026):** the Supervive follow used to lean toward the cursor (42% of its distance from you after a
-  1.4 m deadzone, capped at 7.5 m). Nobody had checked that against the source, so it was measured from the reference clips in
-  `/home/boki/refs/supervive-mantle/` (hetzner): the cursor ring and the player's own health bar were tracked per frame, and the
-  ground's shift between frames read by phase correlation of the HUD-free centre of the picture.
-  - `sv_every_ability.mp4` (training ground, 1080p60): a cursor flick with the hunter standing moves the view by nothing. At
-    252.27 s (frame 15136) the cursor jumps 116 px of 480 (a quarter of the screen) and the ground shifts under 1 px over the next
-    4 s; at 293.53 s a 108 px flick gives 5 px; the flicks at 218.2, 220.3, 221.8, 247.6, 248.4, 249.1, 284.0, 285.2, 288.4 and
-    301.0 s all give 0-2 px. The hunter sits a fixed ~5% of the height below the centre whatever the cursor does.
-  - `sv_joule_1v4.mp4` (a fight, 1080p60): over the 1173 frames where both the bar and the cursor read, the hunter's screen offset
-    against the cursor's has a slope of -0.03 px/px (r = -0.1): no lean. From 2.0 to 4.25 s the cursor flips between (-240, +50)
-    and (+296, -130) px of 960x540 while the hunter stays at (-100 +-10, -30).
-  - `owner_mantle_clip.mp4` (a streamer's clip, webcam overlays): too noisy to read (weak slopes of -0.1 and -0.24), not used.
-  - So **the view stays on the hunter wherever the cursor is**: the Supervive row of `content/rules/camera.json` "follow" has a 0 m pan and there is no ease to time.
-    The lean survives as the Standard and Fully dynamic follow presets, which model the source's own camera options (deadzone,
-    maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
-  - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
-    while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
-    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
-    dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
-  - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
-  - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
-    under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
-    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
-    a review frame (GPU).
+  - GPU pair (`--cam-framing-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
 - **Source scale flag (2026-11-12, ext/feel-camera-source-flag, off by default):** the Settings camera style "Far view, big Hunters (test)" (`source_scale` in `content/rules/camera.json`) moves the camera and the Hunters together, for the owner to judge: 36.3 m back (pitch 66°, lens 32°, rise 1.9 m) shows 37.0 m of ground across 16:9, and `hunter_scale` 2.1 draws match Hunters 2.1x bigger on top of `Hunter.VIS_SCALE` (2.35x their model in all), so the plain medium Hunter stands 8.66% of the screen height (the source's 90–100 px of 1080, 8.3–9.3%; Supervive 6.47%). DEBT's estimate was ~1.9x; 2.0x measured 8.20%, under the band. Visual only: hitbox `r`, the TeamRing hit circle, shot heights and every gameplay number are unchanged, so it does not touch Net or saves. `CamRig.hunter_scale` carries it, `Hunter.fit_scale` puts it on the model (also when the style changes mid-match); the home keeps the Supervive view under it (it has no match Hunters to scale). `--cam-framing-check` holds the style inside the source's across band, off by default and home-safe; `--move-feel-check` measures `source_*` rows and prints the bigger body against what keeps its size.
   - What breaks at the new scale (medium body 4.29 m tall; measured by `--move-feel-check`, seen in the A/B clip): (1) hits: the hit circle stays r 0.50 m and shots hit only up to 2.4 m above your stance, so the top ~44% of a drawn body (chest, head) is shot-through, and bodies drawn about twice as wide still collide at their old radius, so Hunters in contact overlap; (2) shots leave at 0.95 m, about a fifth of the way up the body (knee height), well below the drawn gun; (3) overhead UI is pinned in metres: the teammate tag at 2.4 m, the bond line at 2.8 m, and the revive ring at 0.9 m sit inside the body; (4) Boki, mounts and monsters keep their size, so a Boki is knee-high and a riding Hunter dwarfs its mount (`Kin.ride_height` 0.42 m x mount scale); (5) the world keeps its size: a 1.5 m mantle ledge reads as a step, low cover and doorways no longer hide or fit a Hunter, ability rings, lair and exit rings read half as big against the body; (6) the glider and weapon effects tied to the model's bones double, while shots, hit sparks and ground decals stay at sim size. Matching the source fully would mean scaling the world and hit shapes too (a gameplay change), not just the draw.
   - A/B (same seeded squad fight, `--gameplay-media --media-clip=1 --media-zoom=1.0`, 1920x1080, `--cam-style=supervive` vs `--cam-style=source_scale`): docs/shots/camera-source-flag/ (`ab_still.jpg` side by side at the 4 s still, `a_supervive.jpg`, `b_source_scale.jpg`, `ab_fight.mp4` 12 s side by side). Rendered on rpc3 under xvfb (software GL, opengl3) because the GPU queue was ~70 jobs deep; GPU jobs 20261112-013141-28995 / -013154-32253 are queued for the same takes (an earlier GPU pair, 20261112-003554-07179 / -003609-15210, leaned onto the HUD and caught a stray Esc: `--media-zoom` now locks the follow and the take closes any overlay). The scripted fight is not deterministic run to run (two Supervive takes differ too), so A and B share the setup and seed, not every frame.
@@ -744,30 +700,29 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84). Searing Wave: 0 px/s in all 7 holds (0062-0067 and 0076-0120, 5 fps; 1 px = 0.05 m) against about 4 m/s on his runs, but he also stands for the taps there, and the one hold away from the dummy (0062-0067) sits between two short walks; a stop by choice can't be told from a forced one | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check`. Searing Wave 0.55 kept: not determinable |
 | Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
-| Neve (Celeste) | full (kit-fired darts; the weapon's `fire_slow` 0.9 never applies) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
+| Neve (Celeste) | full (kit-fired darts never set the fire cooldown; hoar_fan has no `fire_slow`) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
-| Sable (Shiv) | 0.90 (`fire_slow`) | none | full | [F] dancer.md: 77-86 px/s while firing against 113 (0.68-0.76), "not confirmed" | kept (unconfirmed; see below) |
+| **Sable (Shiv)** | **0.71 (`fire_slow`, was 0.90)** | none | full | [F] frames: 92.5 px/s over 1.4 s of held fire against 128-130 on three plain runs (0.71; see below) | **changed**: arc_bolts `fire_slow` 0.71; asserted 0.67-0.75 in `--dancer-combo-check` |
 
-Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
-Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
-source number either way. Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
-Neve's dead `fire_slow` 0.9 on hoar_fan could go. Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are
-not determinable from the footage (2026-11-11; frames on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156):
-both stand still in every charge seen, and no hold is made on the move. A clip of either holding while walking would settle it.
+Sable's fire slow, read off the frames (2026-11-12; ext/hero-ref-footage footage/dancer, 720 px wide at 5 fps,
+frame N = 278 + (N-1)/5 s). Firing: 0008-0015, 1.4 s of a straight up-left run with LMB held on the cursor over empty
+ground (bolts leave at 0009, 0011 and 0014; they fizzle at the cursor between). Plain runs with no bolt: 0071-0075,
+0230-0233, 0311-0316. Her ground motion is the camera pan (NCC on textured world patches; frame by frame and end
+to end agree within 3%) plus her bar's move on screen, with screen height divided by 0.93, the Death Blossom ring's
+own squash (0296-0297). Firing 92.5 px/s in 960 px units (3.5 m/s at 1 body height = 48 px = 1.8 m), plain runs
+127.6-130.3 (4.8 m/s): 0.71 (0.70-0.73 for any squash from none to venator.md's 0.88; the plain runs agree best at
+0.93). dancer.md's 77-86 against 113 read both kinds of run about 12% low, and its 0230-0233 "firing" stretch has
+no bolt in it.
+
+Open, not built (suggestions): Sparkle's Storm Rod hold [?] needs a clip of her holding the Rod while a move key is held.
+Kael's Searing Wave charge (0.55) and Tenzo's punch hold (0.85) are not determinable from the footage (2026-11-11; frames
+on ext/hero-ref-footage, juggernaut 0001-0480, breah 0100-0156): both stand still in every charge seen, and no hold is made
+on the move. A clip of either holding while walking would settle it.
 
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
-## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
-
-The full table of every movement quantity against the source is [MOVEMENT_PARITY.md](MOVEMENT_PARITY.md). This pass fixed what it found off in the first ten seconds of play:
-
-- **The farm moved on the frame time.** A match steps 60 times a second; the farm's avatar stepped once per drawn frame, so its jump peaked at about 1.46 m at 30 fps and 1.55 m at 144 (1.52 m in a match). `FarmStep` (`scripts/home/farm_step.gd`) now runs the farm's step in `Match.DT` steps, latches a key press for exactly one step, shows the body between its last two steps and plays the pose once a frame.
-- **Coyote time and the jump buffer on the farm.** The farm had neither. Both timers live on `FarmStep` and read the match's rows (`coyote_s` 0.12, `jump_buffer_s` 0.12 in `content/rules/hunter_move.json`); the match and the farm share `HunterMove.near_landing`.
-- **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
-
-`--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 ## Glider trail: a side-coloured line behind every open glider (`GlideTrail`, `--glide-trail-check`)
 
 In a 30-Hunter match, squads gliding in from the sky were hard to pick out at range. Every open glider now draws one thin ribbon (0.3 m at the glider, narrowing to nothing) at canopy height, in the Hunter's team colour lightened a quarter toward white: the colour of their glider stripe and ground ring, so allies and each rival squad read apart. A point fades out in 1.2 s, so the line is about one glide-second long and is gone soon after the glider folds. No burst when it opens or closes (DECISIONS). It is one pooled `ImmediateMesh` per glider (one unshaded draw, turned to the camera), the same on every preset, and sits under a skin's own cosmetic trail (`Gliders.trail`). The trail is taken when a glider opens and goes back to the pool once its tail has faded. `--glide-trail-check` asserts both, and the colour. `--glide-trail-shots` renders two squads from 40 m and 80 m, with and without the trails.
@@ -1020,6 +975,16 @@ The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt
 - **Not a snag:** the other Tenzo stall was a sealed lair's ward bouncing the glider back out (`Lairs._push_out`, 2 m/s away from it) while the keys held into it. That is the ward working; the check now treats a sealed or dormant lair within 2 m as a wall by design.
 
 After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
+
+## Frame-rate parity: the farm steps like the match (`FarmStep`, `--move-rate-check`; decision 0048)
+
+The full table of every movement quantity against the source is [MOVEMENT_PARITY.md](MOVEMENT_PARITY.md). This pass fixed what it found off in the first ten seconds of play:
+
+- **The farm moved on the frame time.** A match steps 60 times a second; the farm's avatar stepped once per drawn frame, so its jump peaked at about 1.46 m at 30 fps and 1.55 m at 144 (1.52 m in a match). `FarmStep` (`scripts/home/farm_step.gd`) now runs the farm's step in `Match.DT` steps, latches a key press for exactly one step, shows the body between its last two steps and plays the pose once a frame.
+- **Coyote time and the jump buffer on the farm.** The farm had neither. Both timers live on `FarmStep` and read the match's rows (`coyote_s` 0.12, `jump_buffer_s` 0.12 in `content/rules/hunter_move.json`); the match and the farm share `HunterMove.near_landing`.
+- **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
+
+`--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
@@ -1148,6 +1113,17 @@ A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy
 distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
 no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
 the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+
+## Dashing off a ledge (`HunterMove.dash_off_ledge`, decision 0046)
+Walking off a ledge is always allowed (DECISIONS), and so is dashing off one. A ground dash that crosses an edge keeps
+its own course (distance and speed curve) but falls as it goes: the height hold is only for dashes pressed in the air.
+It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
+dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
+`--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
+no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
+no travel of his own) must set him down below the edge.
 
 ## Not touched
 
