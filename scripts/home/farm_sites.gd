@@ -151,6 +151,14 @@ static func _paid(cost: Dictionary) -> Dictionary:
 		if int(cost.get(m, 0)) > 0: out[m] = int(cost[m])
 	return out
 
+## Hands over the materials the rest of a site's build still needs and you lack (a skipped tutorial).
+static func top_up(e: Dictionary) -> void:
+	var s: Dictionary = e["site"]
+	for m in MATS:
+		var left := int(s["cost"].get(m, 0)) - int(s["paid"].get(m, 0))
+		_add(m, maxi(0, left - have(m)))
+
+
 ## Takes a site down: what was paid comes back. The entry is left as it was before (tier kept).
 static func cancel(e: Dictionary) -> void:
 	if not has_site(e): return
@@ -365,10 +373,10 @@ static func swing(hw, k: Dictionary, J: Dictionary) -> void:
 	if e.is_empty() or not has_site(e): return
 	land(hw, e, J["look"], String(k["rec"]["name"]))
 
-## The player's own swing (FarmHob): the same as a Boki's.
-static func player_swing(hw, e: Dictionary) -> void:
+## The player's own swing, or Hob's (FarmHob): the same as a Boki's.
+static func player_swing(hw, e: Dictionary, who := "You") -> void:
 	if has_site(e):
-		land(hw, e, HomeLayout.deco_center(e), "You")
+		land(hw, e, HomeLayout.deco_center(e), who)
 
 static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	if stalled(e): return
