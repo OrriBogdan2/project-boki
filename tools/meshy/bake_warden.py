@@ -122,8 +122,39 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
         _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
         _decimate(low, n_tris / tris(low), "head")
         low.vertex_groups.clear()
+    _unfold(low)
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
+
+
+def _unfold(ob, passes=24):
+    """The collapse leaves a few triangles flipped back over their neighbours (Motley's 60k body: 27, four of them
+    10-17 cm slivers at the collar that read as stray shards floating off him). Each one whose neighbours mostly
+    face the other way (2 of 3 below -0.5) has its corners moved to the mean of their neighbours, until none is
+    left. Only positions move: no vertex, face or UV changes, so no holes or loose bits."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+
+    def flipped():
+        bm.normal_update()
+        out = []
+        for f in bm.faces:
+            ns = [g for e in f.edges for g in e.link_faces if g is not f]
+            if ns and sum(1 for g in ns if f.normal.dot(g.normal) < -0.5) >= min(2, len(ns)):
+                out.append(f)
+        return out
+
+    bad = flipped()
+    first = len(bad)
+    for _ in range(passes):
+        if not bad:
+            break
+        vs = {v for f in bad for v in f.verts}
+        bmesh.ops.smooth_vert(bm, verts=list(vs), factor=1.0, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        bad = flipped()
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("unfold: %d flipped triangles -> %d" % (first, len(bad)))
 
 
 def _decimate(ob, ratio, group):
