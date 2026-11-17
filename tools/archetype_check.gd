@@ -325,6 +325,8 @@ func _data() -> void:
 		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
 			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
 	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
+	ok("weapons: no weapon in the game has a reload time",
+			Data.weapon_ids().all(func(w): return not Data.weapon_stats(w).has("reload")))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
@@ -364,12 +366,12 @@ func _archer() -> void:
 	# no Focus meter (KIT_PARITY 5, cut by the owner): standing still builds nothing
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.6)
-	ok("archer passive: no Focus meter (Hawk Sense only)",
+	ok("archer passive: no Focus meter (Red Thread only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
+	# Red Thread stays: a rival under half health is seen through cover within 22m
 	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Red Thread: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
@@ -413,7 +415,7 @@ func _archer() -> void:
 	# a tapped arrow into a pinned foe is one ordinary arrow (it was 30+ with the Deadeye)
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
-	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1)
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)

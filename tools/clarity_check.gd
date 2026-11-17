@@ -68,8 +68,9 @@ func run(main: Node) -> void:
 	var k: Kin = ally.kin
 	ok(k != null, "the downed teammate has a Boki")
 	if k:
-		var riding := k.state == KinWispForm.STATE and BokiMarks.status(k) == ""
-		ok(riding, "its Boki rides on it as a wisp: no icon over it")
+		ok(k.state != KinWispForm.STATE, "a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state)
+		k.state = KinWispForm.STATE            # (a guardian's ride: summoned at the knock)
+		ok(BokiMarks.status(k) == "", "its Boki rides on it as a wisp: no icon over it")
 		k.state = "downed"
 		ok(BokiMarks.status(k) == "knock", "a Boki down too shows the knock")
 		k.state = KinWispForm.STATE

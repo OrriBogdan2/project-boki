@@ -102,16 +102,16 @@
 			"clip": "guard_armed",
 			"upper": true
 		},
-		"bul_whirl": {
+		"bul_whirl": {"dash": true, 
 			"clip": "shift_whirl"
 		},
-		"bul_charge": {
+		"bul_charge": {"dash": true, 
 			"clip": "shift_charge"
 		},
-		"bul_short": {
+		"bul_short": {"dash": true, 
 			"clip": "dash_short"
 		},
-		"bul_lumber": {
+		"bul_lumber": {"dash": true, 
 			"clip": "dash_air"
 		},
 		"bul_crush": {
@@ -141,8 +141,12 @@
 	},
 	"lockin": {"clip": "emote", "from": 0.1, "dur": 1.45, "rate": 1.2},
 	"states": {
+		"mantle": "mantle",
+		"ledge": "ledge",
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"stun": "stun",
 		"emote": "emote",
@@ -159,11 +163,7 @@
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"ledge",
-		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",

@@ -196,6 +196,12 @@ def block(name, key, body):
 ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
+MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
+
+
+def walk_speed(aid):
+    """A hunter's walk in m/s, as HunterMove.speed: its row (or the default) times body_scale."""
+    return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
@@ -307,7 +313,7 @@ def gen_classes():
         block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
-            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(walk_speed(aid)), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
@@ -493,9 +499,9 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
-    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
+    body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
     body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])

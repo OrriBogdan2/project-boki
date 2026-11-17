@@ -116,7 +116,7 @@ Ground that changes the way across a region. Your active Boki's type (or, for de
 | Item caches | 7 | The Crown, Stormcrown Gaol, Frostgate, Highwatch, Larkhollow, Thornwood, Saltmere, Duskmoor, Stormbreak, Crown Shard, Thorn Shard, Ember Shard, Salt Shard, Cinder Steps |
 | Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
 
-**Legendary Boki:** a 20% chance per match that one of Cairnback, Hivara turns up, partway in, at a quiet Rare Boki spot.
+**Legendary Boki:** a 20% chance per match that one of Cairnhorn, Hivara turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## Skyreach
@@ -168,7 +168,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
 
-**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
+**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnhorn turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight
