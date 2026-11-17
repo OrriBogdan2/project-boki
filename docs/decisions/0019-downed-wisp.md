@@ -61,7 +61,7 @@ hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the w
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
 
 ## Clarity pass and Boki riding the downed Hunter (owner 2026-11-11)
-Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how Supervive does this ... their
+Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how the reference does this ... their
 pets always come back to them and go into wisp form when they're downed".
 - **Marks (`DownedMarks`):** the always-on ground ring the size of the revive range is gone. A downed Hunter shows
   a compact ring hugging their Wisp in their side colour (ally or rival): the bleed-out drains round it, revive
@@ -73,7 +73,7 @@ pets always come back to them and go into wisp form when they're downed".
   theirs that is up zips back (blinks from beyond 14 m or when it can't walk there) and circles the Hunter Wisp as
   its Boki wisp (`BokiWispLook`, round = Hunter, critter = Boki). It does not fight, cast or take orders and
   can't be hit. It still pulls its Hunter up as the old kin revive did (same wait and `kin_revive_time`, bleed
-  paused meanwhile); a stomp stops the pull (as Supervive's stomp blocks self-revives). Revived: back on the
+  paused meanwhile); a stomp stops the pull (as the reference's stomp blocks self-revives). Revived: back on the
   shoulder with its old order. Dead: `KinLoss` as before. A Boki that is down itself stays down (KinDowned).
   The old guard (attacking whoever stood on the Wisp) is removed.
 - **Net:** `wisp` takes `reviving`'s slot in `Match.KIN_STATES`, so the snapshot shape is unchanged.

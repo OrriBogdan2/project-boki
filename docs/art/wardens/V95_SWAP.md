@@ -33,7 +33,9 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    model before skin_relax, for looking at the weights. It fits the low mesh
    onto the rig (grimble_source.py's segment method), weights it (bone heat on the body bones, on a rig copy whose
    hips bone reaches the neck), detaches and caps, slots it, moves the anchors, runs skin_relax (no edge past 1.3x
-   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`,
+   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`, run
+   `python3 tools/art1/glb_relax.py <glb> <glb>` on it (the swap's heat weights leave hand and forearm weight on the hip
+   and thigh skin a scan's arms hung against; this takes them off, rips the fused contact, relaxes; no Blender),
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).

@@ -14,7 +14,7 @@ const RULES := {      # DECISIONS line (its date: [11-08], [11-11]; no date = "M
 	"heat": "An overheated glider still lifts you out of the abyss, at half strength, while it burns.",
 	"fall": "falling never converts into horizontal momentum [11-11]",
 	"air": "Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer",
-	"keep": "air control as SUPERVIVE (... never overwrite air velocity) [11-08]",
+	"keep": "air control as REFERENCE (... never overwrite air velocity) [11-08]",
 	"profile": "One shared movement profile for all modes [11-11]",
 }
 const HIGH_UP := 25.0          # m over the ground: room for a second of falling or gliding
