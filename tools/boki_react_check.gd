@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		for weight in MASS:
 			await _case(main, "%s %s" % [plan, weight], String(PLANS[plan]), weight, float(MASS[weight]))
 	BokiRig.enabled = true
+	BokiIdle.config()["gap_s"] = [1.0e6, 1.0e6]      # no idle fidget: it would move the hit Boki and its control apart
 	for id in boki_species():
 		var mass := KinLib.kin(id).mass
 		await _case(main, "rigged %s" % id, id, weight_of(mass), mass)

@@ -121,9 +121,10 @@ static func _look(h, dt: float, now: float) -> void:
 	if sp == "":
 		return
 	var r := begin(zone, sp, now)
-	VisitorArrive.trail(h, h.add_kin(r, 0)["pos"], sp)
-	VisitorIntro.start(h, r, now)
+	var k: Dictionary = h.add_kin(r, 0)
+	VisitorArrive.trail(h, k["pos"], sp)
 	GardenSfx.cue("garden_visit_in", h._kin_entry(r)["node"].position)
+	VisitorIntro.start(h, r, now)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 

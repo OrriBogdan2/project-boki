@@ -14,7 +14,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | Left click | Weapon attack (some weapons charge when held) |
 | Right click | Your class's RMB ability: tap, hold, in the air and other variants (see your class page) |
 | Shift | Your class's dash |
-| Space | Jump; press it again in the air to open your glider |
+| Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
@@ -75,6 +75,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | C | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
+| C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |

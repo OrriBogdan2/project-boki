@@ -494,7 +494,7 @@ func _ready() -> void:
 	_skel = skeleton()
 	for g in PLANT_GAITS:
 		_plants[g] = BokiPlant.of(species, model, _skel, g)
-	BokiIdle.build(player, _skel, species)
+	BokiIdle.build(player, skeleton(), species)
 	_idle.rest(_rng)
 	set_clip("idle")
 
@@ -623,6 +623,10 @@ func _pick_clip(dt: float) -> void:
 		_idle.rest(_rng)
 	if want in GAITS and feel.has("clip"):
 		want = feel["clip"]
+	if want == "idle":
+		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
+	else:
+		_idle.rest(_rng)
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want in NAP_CLIPS:

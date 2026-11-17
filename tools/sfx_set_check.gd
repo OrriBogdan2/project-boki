@@ -428,7 +428,7 @@ func _level_cues() -> void:
 	ok(pitched, "every ranked slot has its own confirm pitch")
 	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
 	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
-	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl)\n\t\t\tLevelSfx"),
 			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
@@ -583,11 +583,12 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash on the ground: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash"]
+	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash_ground: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash_ground"]
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
+	ok(Sfx.ensure("dash_ground") and Sfx.ensure("dash_air"), "the shared dash_ground and dash_air exist")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:

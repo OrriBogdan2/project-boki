@@ -81,7 +81,7 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
 	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
 	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
-	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"own_ambient": Vector3(0.85, 0.84, 0.83), "light_neutral": 0.9, "light_neutral_warm": 1.0, "dark_lift": 0.07,
 	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
@@ -217,6 +217,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	WardenMerge.merge_equal(glb)
+	WardenMerge.join_inks(glb)
 	_lights(glb, look(art(arch)))
 	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)

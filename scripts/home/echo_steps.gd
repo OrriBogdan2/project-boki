@@ -412,6 +412,7 @@ func use() -> void:
 	for k in dancers:
 		if not k.is_empty():
 			k["busy"] = true
+	GardenSfx.cue("garden_go", null)
 	var tut: Dictionary = Save.d["tutorial"]
 	var first: bool = not tut.get("echo_practice", false)
 	tut["echo_practice"] = true
@@ -426,13 +427,12 @@ func _begin(slow: bool) -> void:
 	for s in caps.size():
 		caps[s].text = Settings.key_cap(KEYS[s])
 		caps[s].visible = slow
-	if cue != null:
-		cue.clear()     # the practice phrase's rings go before the dance proper's
+	if cue != null:     # the practice's cue, when the dance proper follows it
+		cue.clear()
 	cue = GardenCues.EchoCue.new(h, middle.position, SPREAD + STONE_R + 0.15)
 	cued = -1
 	_sound_up()
 	_open_readout()
-	GardenSfx.cue("garden_go", null)
 
 ## The notes and the bed: generated once a dance; the bed's position is the dance's clock.
 func _sound_up() -> void:

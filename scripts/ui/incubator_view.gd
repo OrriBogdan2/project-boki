@@ -11,11 +11,11 @@ const CARD_W := 222.0
 static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callable) -> void:
 	Incubator.ensure()
 	var q := Incubator.shelf()
-	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches after about %d minutes of play, in the garden or in matches." % int(Incubator.need() / 60.0))
+	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches a first-form Boki, with good stats, after about %d minutes of play, in the garden or in matches." % int(Incubator.need() / 60.0))
 	var coals := int(Save.d["items"].get("coals", 0))
 	UI.head_extra(v).add_child(UI.chip("dash", "%d Ember Coals" % coals, Color("ff9a4a"), "Stoke them into the brazier: every egg warms faster for %d minutes. The market stall sells them." % int(Incubator.COAL_SECS / 60.0)))
 	if Incubator.count() == 0 and Incubator.slots() == Incubator.SLOTS:
-		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch into a rare Boki. It has %d cradles to start with." % Incubator.SLOTS))
+		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch a baby Boki: always the first form of its line. It has %d cradles to start with." % Incubator.SLOTS))
 		return
 	# what's warming them
 	var warm := _warmer(home)

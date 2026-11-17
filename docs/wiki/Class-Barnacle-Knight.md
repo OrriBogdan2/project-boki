@@ -55,7 +55,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.63 m/s, 2 dash charges |
 | Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist |
@@ -90,7 +90,7 @@ What the in-game kit card (K) says.
 
 **Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Faultline (hunter ultimate, from level 6, 40s cooldown).** Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 

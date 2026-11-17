@@ -29,7 +29,7 @@ class FxSpy extends Fx:
 		pass
 	func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
 		got_bursts.append([col, amount])
-	func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+	func ring(at: Vector3, radius: float, col: Color, dur := 0.35, _order := 0) -> void:
 		got_rings += 1
 
 func run(m: Node) -> void:
@@ -75,7 +75,7 @@ func run(m: Node) -> void:
 	ok(seen["done"], "the egg hatches all the way through (%.1f s)" % float(seen["clock"]))
 	var shell_s: float = float(seen["t_shell"]) - float(seen["t_pop"])
 	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
-	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])
+	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])   # game seconds (the clock sums frame deltas)
 	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s)" % beat_s)
 	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
 	ok(seen["looked_away"], "it looks around before it finds you")

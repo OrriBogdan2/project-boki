@@ -127,8 +127,10 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
-		"dead_t": 1.6,
+		"dead_t": 2.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {
@@ -143,9 +145,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",

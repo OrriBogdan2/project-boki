@@ -281,7 +281,6 @@ func _start() -> void:
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
 	if teach != null:
 		run.R = TumbleTeach.rules()
-	run.visitor = pair[1].has("visitor")
 	cue = GardenCues.TumbleTellCue.new(h, GardenCues.type_colour(pair[1]["rec"]))
 	seen = ""
 	shown_pos = 0.0
@@ -481,19 +480,19 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-## Clears the screen of a run: rig clips, the drill bar and the panel.
+## Clears the screen of a run: rig clips, the drill bar, the rival's tell cue and the panel.
 func _clear() -> void:
 	_clips("", "")
 	_close_bar()
 	if cue != null:
 		cue.clear()
-	cue = null
+		cue = null
 	if is_instance_valid(panel):
 		panel.queue_free()
 
 func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
-		card.queue_free()
+		card.free()     # now, so the new card keeps the name GameResultCard (the practice's card may still show)
 	card = GameResultCard.open(h, {"game": "Tumble", "before": before, "prize": [["+%d gems" % res["gems"], UI.GOLD]],
 			"place": "%s wins, %s" % [res["win"]["name"], "out of the ring" if run.out() else "on points"]})
 	card_t = float(rules()["card_s"])

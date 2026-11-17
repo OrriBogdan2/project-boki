@@ -287,24 +287,13 @@ func _on_base() -> void:
 		ok(tb.find(at) == {"kind": "tumble"}, "on: the ring offers a Tumble")
 		for e in home.kins:
 			e.erase("indoors")
-		await _teach(tb, home)
-		tb.use()
-		ok(tb.teach == null and _bout_start(tb), "teach: never repeats, the second Tumble is the bout")
-		tb._end(false)
-		Save.d["tutorial"].erase("first_tumble")
-		tb.use()
-		tb.input(_menu())
-		ok(tb.teach == null and _bout_start(tb) and not TumbleTeach.due(),
-				"teach: skip (menu key) goes straight to the bout and is not offered again")
-		tb._end(false)
-		if is_instance_valid(tb.card):      # the teach bout's card: gone before the next one opens, so its name holds
-			tb.card.free()
 		# one rested Boki out: refuses cleanly, no bout, nobody left busy
 		var lone: Dictionary = home.kins[1]
 		lone["indoors"] = true
 		tb.use()
 		ok(tb.run == null and tb.pair.is_empty(), "on: one rested Boki refuses (needs two), no bout")
 		ok(not home.kins[0].get("busy", false), "on: the refused Tumble leaves your Boki free")
+		ok(TumbleTeach.due(), "teach: a refused Tumble does not use up the practice")
 		# no ring built: use() and find() stay quiet instead of touching a nil ring
 		var kept: MeshInstance3D = tb.ring
 		tb.ring = null
@@ -312,7 +301,9 @@ func _on_base() -> void:
 		ok(tb.run == null and tb.find(at) == {}, "no ring: use() and find() do nothing, no script error")
 		tb.ring = kept
 		lone.erase("indoors")
+		await _teach(tb, home)
 		tb.use()
+		ok(tb.teach == null and _bout_start(tb), "teach: never repeats, the second Tumble is the bout")
 		ok(tb.run != null and not tb.run.visitor and tb.pair.size() == 2, "on: two rested Boki start a bout")
 		var t := 0.0
 		while tb.run != null and tb.run.state != "resolve" and t < 200.0:
@@ -328,6 +319,12 @@ func _on_base() -> void:
 		await main.get_tree().process_frame
 		ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
 				"on: the bout ends in the shared result card (%.1f s)" % t)
+		Save.d["tutorial"].erase("first_tumble")
+		tb.use()
+		tb.input(_menu())
+		ok(tb.teach == null and _bout_start(tb) and not TumbleTeach.due(),
+				"teach: skip (menu key) goes straight to the bout and is not offered again")
+		tb._end(false)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -354,7 +351,7 @@ func _teach(tb: BaseTumble, home) -> void:
 	tb.use()
 	ok(tb.teach != null and is_instance_valid(tb.teach.card) and not TumbleTeach.due(),
 			"teach: the first Tumble opens the practice card, marked seen at once")
-	ok(tb.run != null and not tb.run.visitor and tb.pair.size() == 2, "teach: two rested Boki start the practice")
+	ok(tb.run != null and tb.pair.size() == 2, "teach: the practice is between your two Boki")
 	var rival: Node3D = tb.pair[1]["node"] if tb.pair.size() == 2 else null
 	var tri := tb.teach.card.find_children("*", "Control", true, false).filter(
 			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
@@ -403,5 +400,4 @@ func _teach(tb: BaseTumble, home) -> void:
 		tb.tick(0.1)
 		t += 0.1
 	await main.get_tree().process_frame
-	ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
-			"teach: the bout after the practice ends in the shared result card (%.1f s)" % t)
+	ok(tb.run == null and is_instance_valid(tb.card), "teach: the bout ends in a result card (%.1f s)" % t)

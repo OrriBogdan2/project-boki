@@ -408,7 +408,7 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
+	# --- the scattergun: a shot every 0.5s, the spread's edge lines wide while firing, tight idle
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
@@ -430,12 +430,15 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 34.0 and float(cone.get("deg", 0.0)) <= 45.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
-	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	ok(
+		"gun: idle, the edge lines close in on the tight cluster",
+		AimKit.shown(P, "spread") and float(AimKit.entry(P, "spread")["deg"]) == float(P.wpn["fan_deg"])
+	)
 	P.ammo = int(P.wpn["mag"])
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
 	var wear := []
@@ -981,6 +984,34 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun, air pounce cd]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), cd_e, K.power("kin") / pk, K._stun_t(),
+				K.long_dash_cd()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
+	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
+	ok("upgrade parity: air pounce 12.5 -> 10.5 -> 8.5 (-2s twice, the source's own numbers)",
+			near.call(up[1][5], 10.5) and near.call(up[2][5], 8.5), str(up))
+	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	await ak.done(m)
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop

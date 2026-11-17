@@ -10,7 +10,7 @@
 	"body": {
 		"size": 1.39, "bulk": 0.8,
 		"build": 1.4,
-		"hit_r": 0.46,
+		"hit_r": 0.404, "hit_h": 1.78, "body_r": 0.46,
 		"head": 0.3,
 		"legs": 0.46,
 		"torso": 1.06,
@@ -65,10 +65,17 @@
 		"smash_reach": 2.8,
 		"smash_arc": 180.0,
 		"smash_rate": 0.61,
-		"carry": [
-			1.5,
-			1.8
-		],
+		"lunge": {
+			"d": [1.4, 2.4],
+			"spin_d": 1.6,
+			"t": 0.22,
+			"air_k": 0.55
+		},
+		"rope": {
+			"max_len": 14.0,
+			"max_t": 6.0,
+			"reel_speed": 30.0
+		},
 		"perfect": {
 			"window": 0.18,
 			"dist": 4.0,
@@ -84,6 +91,7 @@
 		"icon": "bulwark_dash",
 		"col": "#cfe8ff",
 		"cd": 8.0,
+		"charges": 1,
 		"whirl": 3.5,
 		"whirl_speed": 20.5,
 		"whirl_kb": 7.0,
@@ -189,9 +197,10 @@
 		"cooldown": 40.0,
 		"windup": 0.4,
 		"plant": 0.2,
+		"leap_h": 1.2,
 		"cells": 4,
 		"cell_len": 4.0,
-		"width": 4.5,
+		"width": 5.5,
 		"lead": 0.4,
 		"cell_t": 0.15,
 		"strike_dmg": 4.0,
@@ -204,7 +213,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",

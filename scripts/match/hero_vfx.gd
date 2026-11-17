@@ -61,7 +61,6 @@ var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
 var _arcs := {}                # arc degrees -> arc mesh
-var rng := RandomNumberGenerator.new()   # the noise seeds' own stream: what is on screen must not shift the sim's dice
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)

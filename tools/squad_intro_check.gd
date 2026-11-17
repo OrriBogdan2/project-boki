@@ -10,6 +10,10 @@ extends RefCounted
 ##     sails, then the jump.
 ##  5. The same lineup again this session (offline) skips it; a check that starts a match by hand
 ##     (no squad_intro) never sees it.
+##  6. Nothing of the ship sticks up through the deck where the squad stands (a ray down each rider's slot
+##     meets the deck, not the hull), and the ride has no looping sound.
+##  7. A press on a locked ability while aboard (in the plan, and on the ride) spends the skill point,
+##     and the Boki ride on the shoulder without hopping off the deck and back (ring + sound each beat).
 
 const MAX_MESHES := 14         # mesh instances in a whole ship (one per material after the bake, plus props)
 const MAX_TRIS := 60000        # triangles in a whole ship (low preset: a few % of the 1.5M budget)
@@ -45,6 +49,56 @@ func _model() -> void:
 	ok(meshes <= MAX_MESHES, "the ship is baked into %d meshes (at most %d)" % [meshes, MAX_MESHES])
 	ok(tris <= MAX_TRIS, "the ship is %d triangles (at most %d)" % [tris, MAX_TRIS])
 	n.free()
+
+## The highest surface of the ship (its meshes, not the shadow) over a deck spot, in ship space.
+func _top_at(n: Node3D, x: float, z: float) -> float:
+	var top := -INF
+	for c in n.get_children():
+		var mi := c as MeshInstance3D
+		if mi == null or mi.mesh == null or mi.name == "Shadow":
+			continue
+		var hit: Dictionary = mi.mesh.generate_triangle_mesh().intersect_ray(
+				mi.transform.affine_inverse() * Vector3(x, 3.0, z), Vector3.DOWN)
+		if not hit.is_empty():
+			top = maxf(top, (mi.transform * (hit["position"] as Vector3)).y)
+	return top
+
+func _deck_and_sounds(m: Match) -> void:
+	var n: Node3D = m.ship["node"]
+	for h in m.intro.squad:
+		var at: Vector2 = SkyDeck.slot(m, h)
+		var top := _top_at(n, at.x, at.y)
+		var met := absf(top - SkyshipModel.DECK_Y) < 0.02
+		ok(met, "%s's feet meet the deck, not the hull (surface %.2f, deck %.2f)" % [h.pname, top, SkyshipModel.DECK_Y])
+	var loops := Sfx.loops.keys().filter(func(k: String) -> bool: return k.begins_with("ship_"))
+	ok(loops.is_empty(), "the ride plays no looping engine or wind (%s)" % [loops])
+
+func _ranks_aboard() -> void:
+	var m := await _start(false)
+	var p: Hunter = m.player
+	p.skill_pts = 2
+	ok(int(p.slot_lv["sec"]) == 0 and int(p.slot_lv["dash"]) == 0, "every ability starts locked")
+	m.pending_input["sec"] = true
+	m.step(Match.DT)
+	ok(int(p.slot_lv["sec"]) == 1 and p.skill_pts == 1, "a key press in the plan spends a point on it")
+	m.skydrop.plan_t = 0.0
+	_tick(m, 0.5)
+	ok(not m.skydrop.planning and p.riding, "the ship has set off")
+	m.pending_input["dash"] = true
+	_tick(m, 0.1)
+	ok(int(p.slot_lv["dash"]) == 1 and p.skill_pts == 0 and p.riding, "a key press on the ride spends a point on it")
+	# the Boki stay on their riders' shoulders: no hop off the deck and back (a ring and a sound every beat)
+	Sfx.cue_log = []
+	_tick(m, 2.0)
+	var hops: Array = Sfx.cue_log.filter(func(e: Array) -> bool: return e[0] == "recall")
+	Sfx.cue_log = null
+	var kins := m.hunters.filter(func(h: Hunter) -> bool: return h.riding and h.kin is Kin)
+	var off := kins.filter(func(h: Hunter) -> bool: return (h.kin as Kin).state != "shoulder")
+	var on_txt := "every rider's Boki stays on the shoulder (%d of %d off)" % [off.size(), kins.size()]
+	ok(not kins.is_empty() and off.is_empty(), on_txt)
+	ok(hops.is_empty(), "no Boki hop sound on the ride (%d in 2 s)" % hops.size())
+	m.queue_free()
+	await main.get_tree().process_frame
 
 func _start(intro: bool) -> Match:
 	var m := Match.new()
@@ -91,6 +145,7 @@ func _plays_out() -> void:
 		if h.team != m.player.team and h.riding:
 			ok(not SkyDeck.shown(h), "another squad aboard is not drawn")
 			break
+	_deck_and_sounds(m)
 	var wisps: Dictionary = m.ship.get("wisps", {})
 	var kins := squad.filter(func(h: Hunter) -> bool: return h.kin is Kin).size()
 	ok(wisps.size() == kins, "a Boki wisp beside each hunter with one (%d of %d)" % [wisps.size(), kins])
@@ -147,5 +202,6 @@ func run(mn: Node) -> void:
 	_model()
 	await _plays_out()
 	await _skips()
+	await _ranks_aboard()
 	print("INTRO DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

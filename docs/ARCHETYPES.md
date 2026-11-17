@@ -90,7 +90,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Archetype | Resource | Built by | Shape |
 |---|---|---|---|
 | Thief | **Marks** | hits from behind | stored on *targets* |
-| Archer | **Hawk Sense** | always on | no meter (Focus was cut, 2026-11-07) |
+| Archer | **Red Thread** | always on | no meter (Focus was cut, 2026-11-07) |
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
@@ -896,7 +896,7 @@ through glow, ring, flash, sound and the plate's status icon; only numbers float
 
 ### Archer: Lace (on a Myth-style hunter-archer baseline)
 
-**Cut 2026-11-07 (owner, parity first):** the Focus meter and the Deadeye below were invented and are gone (no meter, no +20% range, no Deadeye hit, no HUD arc). Only Hawk Sense stays. Read the Focus and Deadeye lines in this section and the Nov 1 design above as history.
+**Cut 2026-11-07 (owner, parity first):** the Focus meter and the Deadeye below were invented and are gone (no meter, no +20% range, no Deadeye hit, no HUD arc). Only Red Thread stays. Read the Focus and Deadeye lines in this section and the Nov 1 design above as history.
 
 Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
 three empowered arrows on R. Mechanics only; names, numbers and art are ours.
@@ -1188,7 +1188,8 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 (tip +20), Execution Slam 70 (3.5 slashes), Lunge 45, Obsidian 52, Spin 54, Flame Step 18 / tip 36, R
 130 -> ours slash 8 (tip 16), Slam 26, Lunge 14 -> 22, Meteor 18, Spin 18, Rampage 7 / tip 14,
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
-Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
+Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top). Kael's numbers were since
+retuned to the source's time to knock (docs/TTK.md, slash 5.2, Slam 15.6), so his part of this is history.
 
 ### R removed: the ult choice (kits2-nor, Nov 2) — superseded
 

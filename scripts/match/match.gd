@@ -45,7 +45,7 @@ var meteors: Array = []     # {at, t, tele}
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
-var ktip: KnockTip = null           # the first-knock card, in the same two Extractions
+var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
@@ -293,8 +293,8 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
-	crouch_hint = CrouchHint.for_match(self, o)
 	ktip = KnockTip.for_match(self, guide)
+	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -491,7 +491,7 @@ func _start(o: Dictionary) -> void:
 	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 	Bridge.kin_lines_for_match(self)
 	await _stage("build.finish")
 	set_process(true)
@@ -818,6 +818,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
+	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:
@@ -1500,7 +1501,7 @@ func _collide_breaks() -> void:
 			if absf(e.pos.y - bp.y) > 0.6:
 				continue
 			var d := Vector2(e.pos.x - bp.x, e.pos.z - bp.z)
-			var mind: float = e.r + 0.36
+			var mind: float = e.hull_r() + 0.36
 			var l := d.length()
 			if l >= mind:
 				continue
@@ -1509,7 +1510,7 @@ func _collide_breaks() -> void:
 				continue
 			var nrm := d / l if l > 0.0001 else Vector2(1, 0)
 			var push := nrm * (mind - l)
-			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.r, e.pos.y, e.grounded) == 0.0:
+			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.hull_r(), e.pos.y, e.grounded) == 0.0:
 				e.pos.x += push.x; e.pos.z += push.y
 
 ## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
@@ -1801,6 +1802,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
+	KinWispForm.mark(self, h)
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
@@ -1809,9 +1811,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
+		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
-		if ktip: ktip.on_knock()
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
@@ -1886,18 +1888,16 @@ func _check_team(team: int) -> void:
 	if members.is_empty():
 		return
 	for x in members:
-		if not x.downed:
+		if not x.downed or KinWispForm.guarding(self, x):
 			return
-		if x.kin and not x.kin.dead and x.kin.state not in ["downed"] and x.kin.hp > 0.0:
-			return
-		if x.kin2 and not x.kin2.dead and x.kin2.hp > 0.0:
-			return
+		if x.remote and x.kin and not x.kin.dead and x.kin.state == KinWispForm.STATE and x.kin.hp > 0.0:
+			return           # a guardian riding its Wisp (its owner's game decides: we only see the Boki's state)
 	for x in members:
 		if not x.remote:
 			eliminate(x, x.last_hit_by, "team wiped")
 	_team_gone(team)
 
-## The whole team is down or dead with nobody to bring them back: everyone's dead for good.
+## The whole team is out (_check_team): everyone's dead for good.
 func _team_gone(team: int) -> void:
 	if Life.team_alive(self, team):
 		return
@@ -2720,8 +2720,7 @@ func _update_shots(dt: float) -> void:
 			if _dome_blocks(s, p):
 				_shot_end(s, p, null)
 				hit = true; break
-			# terrain and rocks
-			var gp := world.ground_at(p.x, p.z)
+			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
 			# an Deep Reach pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
@@ -2833,7 +2832,7 @@ func shot_stance_y(e: Ent) -> float:
 
 ## Shots flying between these heights (x..y) hit this body.
 func shot_band(e: Ent) -> Vector2:
-	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
+	var top: float = Arch.hit_h(e.arch) if e is Hunter else maxf(0.9, e.r * 2.2)
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
@@ -2879,8 +2878,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	shots.erase(s)
 	if s.has("deco") and is_instance_valid(s["deco"]):
 		(s["deco"] as Node3D).queue_free()
-	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
-	# that stopped it
+	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall that stopped it
 	var fxx: Dictionary = s["x"]
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
@@ -3146,6 +3144,7 @@ func _process(delta: float) -> void:
 		acc -= DT
 		steps += 1
 		step(DT)
+		FireTap.stepped(player)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):
@@ -3291,7 +3290,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = (hud != null and hud.mouse_on_ui() or PanelInput.panel_up(hud)) and player.draw_t < 0.0
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
+	player.inp["fire"] = FireTap.down(player, not paused and not over_ui)
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
@@ -3352,6 +3351,10 @@ func _gather_input() -> void:
 			aimable = false
 		if a[0] == "signature" and player.ak != null and player.ak.e_on_press():
 			aimable = false       # a self-centred E goes off on the press (no cursor preview)
+		var pressed: bool = Input.is_action_just_pressed(a[0]) and not paused
+		if aimable and pressed and not player.slot_info(AIM_SLOT.get(a[0], "sec"))["ready"]:
+			pending_input[a[1]] = true      # on cooldown: no aim preview, the press is refused at once (on the bar)
+			continue
 		if aimable:
 			# hold to see where it will land, let go to cast it
 			if PanelInput.pressed(self, a[0]):
@@ -3370,8 +3373,11 @@ func _gather_input() -> void:
 	if aim_hold == "hunter_ult" and not Input.is_action_pressed("hunter_ult"):
 		aim_hold = ""
 		HunterKeys.ult_pressed(player)
+	if Input.is_action_just_pressed("summon") and not paused:
+		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event): return
 	if intro and intro.skip(event):
 		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
@@ -3414,7 +3420,7 @@ func on_menu_opened() -> void:
 func _on_menu_closed() -> void:
 	paused = false
 	if not over:
-		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+		CursorMode.aim()
 
 func step(dt: float) -> void:
 	if over:
@@ -3422,6 +3428,7 @@ func step(dt: float) -> void:
 	if skydrop and skydrop.planning:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
+		SkyDeck.plan_ranks(self)
 		for k in pending_input: pending_input[k] = false
 		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)
@@ -3837,6 +3844,9 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
+		if pending_input.get("summon", false):
+			pending_input["summon"] = false
+			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
@@ -4011,7 +4021,7 @@ func _separate() -> void:
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
-			var mind := a.r + b.r
+			var mind := a.hull_r() + b.hull_r()
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
@@ -4021,9 +4031,9 @@ func _separate() -> void:
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
 				# bodies push each other around, but never off an edge
-				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.r, a.pos.y, a.grounded) == 0.0:
+				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.hull_r(), a.pos.y, a.grounded) == 0.0:
 					a.pos.x += pa.x; a.pos.z += pa.y
-				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
+				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.hull_r(), b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
 
 ## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something
@@ -4260,6 +4270,7 @@ func _update_interact(dt: float) -> void:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
+		best = KinSteal.interact_for(self, h, want, dt, best)      # 2b. grab a loose Boki wisp
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var wp := PickupReach.under_cursor(self, h)
@@ -4719,6 +4730,7 @@ func _finish() -> void:
 	if over:
 		return
 	over = true
+	KinSteal.match_end(self)
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
@@ -4783,7 +4795,7 @@ func _finish() -> void:
 	elif player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if net_on:
 		Net.end_match()
 	Game.finish_match(r)
@@ -4821,6 +4833,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
 			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
+			player.clan_tag = ClanInfo.clean_tag(r.get("tag"))
 			Equal.start(self, player)
 			if player.kin:
 				_apply_treat(player.kin)
@@ -4828,6 +4841,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		else:
 			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
 			h.remote = true
+			h.clan_tag = ClanInfo.clean_tag(r.get("tag"))
 			if h.kin:
 				h.kin.remote = true
 	if not is_host:
@@ -5421,6 +5435,8 @@ func tip_once(key: String) -> bool:
 	seen[key] = true
 	return true
 
+var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+
 func _tips() -> void:
 	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
@@ -5430,6 +5446,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	ult_hint.tick(self)
 	tips_live = true
 	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
@@ -5437,15 +5454,12 @@ func _tips() -> void:
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
-		if player.ak:
-			_tip("ability", TipText.ability(true))
-		else:
-			_tip("ability", TipText.ability(false))
+		_tip("ability", TipText.ability(player.ak != null))
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
-		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
+	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
@@ -5459,18 +5473,16 @@ func _tips() -> void:
 		return
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		var a2 := k.runner.def_of("k2")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
-	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", TipText.scan())
+	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
-	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
+	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
 var aim_hold := ""
+const AIM_SLOT := {"signature": "k1", "ultimate": "r", "gear1": "q", "gear2": "v"}      # aimed key -> its slot_info id
 var ind_range: MeshInstance3D
 var ind_area: MeshInstance3D
 var ind_fill: MeshInstance3D

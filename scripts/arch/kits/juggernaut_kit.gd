@@ -228,15 +228,31 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
-		_reset_riposte()
+		if _reset_riposte() and is_instance_valid(t):
+			ComboMark.payoff(m, h, t)
 
-## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
-func _reset_riposte() -> void:
-	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
-		return
+## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked). False when it was
+## already ready or not yet unlocked.
+func _reset_riposte() -> bool:
+	if not _riposte_resettable():
+		return false
 	HeroUlt.reset(self)
 	slam_resets += 1
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	return true
+
+func _riposte_resettable() -> bool:
+	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
+
+## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+func combo_read(t: Ent) -> Dictionary:
+	if warchain.hooked() and warchain.target == t:
+		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
+	var window := float(rmb_def()["slam"].get("reset_t", 2.0))
+	var left: float = window - (float(m.time) - float(slam_hit.get(t.get_instance_id(), -99.0)))
+	if left <= 0.0 or not _riposte_resettable():
+		return {}
+	return {"icon": "slam", "n": 0, "max": 0, "left": left, "total": window}
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
@@ -645,6 +661,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+func rmb_open() -> bool:
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
 ## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
 ## after) it spins at once.
@@ -922,8 +942,8 @@ func _haul_land(k: float) -> void:
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
-## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
-## body while the Searing Wave charges.
+## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
+## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy() or KinMerge.active(h):
 		return
@@ -935,7 +955,9 @@ func _tick_tells() -> void:
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
 	# the Meteor Drop's own slot (not while a Lunge charges through a jump: that release is the Lunge)
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
-	if not h.grounded and air_ready and not h.gliding and not rmb_down:
+	if h.roll_t > 0.0:
+		AimKit.hide(h, "drop_aim")          # no disc on a dash: it comes back when the dash ends
+	elif not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
