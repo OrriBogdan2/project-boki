@@ -1,5 +1,11 @@
 # Ryzz v2 redesign (in progress, Nov 6)
 
+## CURRENT TURNAROUND (owner-approved Mon 11-16 3:11 PM EST, re-confirmed 11-17 ~9:45 PM EST)
+`ryzz_v2_turnaround.jpg` = `ryzz_v2_turnaround_owner_pick_1116.png` (source: meshy/turn9-1116/Sparkle/pickA-rods1116/A_owner_pick.png).
+Younger face, big pink-magenta eyes, 3 thin copper backpack rods, black shorts + striped jacket tied at the waist, fishnet left / dark stocking right, brown boots.
+This is THE Sparkle turnaround and THE face for 3D. Superseded, never brief from them: 11-07 sheet (explorations/ryzz_v2_turnaround_1107_superseded.jpg) and the 11-15 kite-flag/briefs sheet (explorations/ryzz_v2_turnaround_1115_superseded.jpg). If the master sheet disagrees on face/outfit, this turnaround wins.
+
+
 Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 
 ## Current direction (owner-approved)
