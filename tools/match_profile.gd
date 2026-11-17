@@ -7,7 +7,9 @@ extends "res://tools/hitch_check.gd"
 ## every frame over HITCH_MS with what it was spent on (shader compiles, first draws, sim sections, nodes
 ## spawned: UI or VFX, build steps). GDScript has no GC (reference counting), so no GC column.
 ##   jobq submit --needs gpu --only <worker> --tree <tree> -- --match-profile [--profile-view=1920x1080]
-##   [--quality=...] [--hitch-seed=4101]
+##   [--quality=...] [--hitch-seed=4101] [--profile-ab]
+## --profile-ab: SimLod's slow-frame pose rate (rivals in view every 2nd frame) forced off and on in turns of AB_FRAMES
+## frames, each phase's line once per side: a same-run A/B, since two runs of one worker differ by 10 ms at the p50.
 ## Reports only: exits 0 once the match is done (or 1 if it never got to the extraction).
 
 const VIEW := Vector2i(1920, 1080)
@@ -20,6 +22,7 @@ const AFTER_S := 3.0  # s run on after you rode the lift, unless the match ends 
 const FIGHT_R := Vector2(5.0, 14.0)  # m: the ring the other hunters are put on
 const FAR_M := 60.0  # m from the camera: an emitter this far off is out of any view the match uses
 const PHASES := ["ride", "drop", "land", "fight", "extract"]
+const AB_FRAMES := 30  # frames a side of --profile-ab runs before the other
 
 var _added := {}  # "Control"/"VFX"/"3D"/"other" -> nodes that entered the tree this frame
 var _pipes := 0  # pipeline compilations so far (Forward+/Mobile; Compatibility counts none)
@@ -27,6 +30,7 @@ var _bench = preload("res://tools/perf_bench.gd").new()  # its HUD draw hook (hu
 var _uplink := {}
 var _rode_at := -1.0
 var _hunters := 0
+var _ab := false  # --profile-ab: SimLod.force_slow 0 and 1 in turns
 
 
 func run(main_node: Node, _mode: String = "") -> void:
@@ -42,6 +46,9 @@ func _ready() -> void:
 			var wh := a.substr(15).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 	get_window().size = view
+	_ab = "--profile-ab" in OS.get_cmdline_user_args()
+	if _ab:
+		SimLod.force_slow = 0
 	get_tree().node_added.connect(_on_added)
 	super._ready()
 
@@ -81,6 +88,10 @@ func _process(delta: float) -> void:
 			p += RenderingServer.get_rendering_info(info)
 		lf["pipes"] = p - _pipes
 		_pipes = p
+		if _ab:
+			lf["ab"] = SimLod.force_slow
+			if Engine.get_process_frames() % AB_FRAMES == 0:
+				SimLod.force_slow = 1 - SimLod.force_slow
 	_added.clear()
 	super._process(delta)
 
@@ -225,6 +236,13 @@ func _finish() -> void:
 		var fl: Array = frames.filter(func(f): return f["phase"] == ph)
 		if not fl.is_empty():
 			lines.append(_phase_line(ph, fl))
+	if _ab:
+		lines.append("PROFILE A/B: SimLod slow-frame pose rate off (0) and on (1), %d frames a side" % AB_FRAMES)
+		for ph in PHASES:
+			for side in [0, 1]:
+				var fl: Array = frames.filter(func(f): return f["phase"] == ph and int(f.get("ab", -1)) == side)
+				if not fl.is_empty():
+					lines.append("PROFILE slow=%d %s" % [side, _phase_line(ph, fl)])
 	var tally := {}
 	var hitches: Array = frames.filter(func(f): return float(f["wall"]) > HITCH_MS and f["phase"] in PHASES)
 	for f in hitches:

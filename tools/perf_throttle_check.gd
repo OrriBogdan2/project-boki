@@ -10,7 +10,8 @@ extends RefCounted
 ## Poses (SimLod.pose_every): a rival far on screen at the widest match view (the sky ship ride's camera) is
 ## posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN, hidden every POSE_UNSEEN, every frame
 ## once on the player's squad or in a fight with it; one that comes on screen is posed that frame, and a Hero's
-## clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
+## clips and skeleton (WardenGlb.Sync) hold with it and catch up the time. Under SimLod.SLOW_FPS a rival in view
+## past POSE_SLOW_M is posed every POSE_SLOW frames (one nearer or after the player every frame) until EASE_FPS.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -241,6 +242,28 @@ func _pose_rates() -> void:
 	b.team = P.team
 	ok(SimLod.pose_every(m, b) == 1, "the player's squad: every frame")
 	b.team = team
+	var off := Vector3(SimLod.POSE_SLOW_M + 1.5, 0, 0)
+	SimLod.force_slow = 1
+	b.teleport(P.pos + off)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_SLOW, "the match slow: a rival %.1f m off is posed every %d frames" % [off.x, SimLod.POSE_SLOW])
+	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival within %.0f m every frame" % SimLod.POSE_SLOW_M)
+	b.teleport(P.pos + off)
+	b.ai["tgt"] = P
+	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival after the player every frame")
+	b.ai["tgt"] = null
+	SimLod.force_slow = 0
+	ok(SimLod.pose_every(m, b) == 1, "the match quick: that rival every frame")
+	SimLod.force_slow = -1
+	SimLod.slow = false
+	SimLod.judge(30.0)
+	ok(SimLod.slow, "under %.0f fps the match is slow" % SimLod.SLOW_FPS)
+	SimLod.judge(45.0)
+	ok(SimLod.slow, "slow until the fps is back over %.0f" % SimLod.EASE_FPS)
+	SimLod.judge(55.0)
+	ok(not SimLod.slow, "over %.0f fps it is quick again" % SimLod.EASE_FPS)
+	SimLod.judge(45.0)
+	ok(not SimLod.slow, "quick until the fps is under %.0f" % SimLod.SLOW_FPS)
 	b.teleport(P.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_OFF_SCREEN, "off screen: every %d frames" % SimLod.POSE_OFF_SCREEN)
 	var held := false
