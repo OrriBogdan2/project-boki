@@ -6,7 +6,7 @@ extends ArchKit
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Red Thread (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
 const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
 
@@ -210,18 +210,22 @@ func on_dash(use_ex: bool) -> bool:
 	spirit.start()
 	return true
 
-## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
-## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
+## A draw right after a perfect release slows her less (wiki: perfect shots ease
 ## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
-	if spirit and spirit.active():
-		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
 	if pin_aim and rmb_down:
 		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
+
+## Walking as a spirit she moves quicker (walk_k of run speed); at rank 3 inside something she starts
+## faster still and that fades with the walk.
+func speed_bonus() -> float:
+	if not spirit or not spirit.active():
+		return 0.0
+	return float(dash_def().get("walk_k", 1.1)) - 1.0 + spirit.inside_boost()
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
 ## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
@@ -230,7 +234,7 @@ func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	if h.draw_t >= 0.0:
 		drop_draw()

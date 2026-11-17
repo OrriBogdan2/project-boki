@@ -30,8 +30,9 @@ extends RefCounted
 ## those who fought can ride, up over the wall and away on the glider from a side the campers aren't
 ## watching. It dies down when the gate opens. Everyone near hears the boss fall, so campers know the
 ## clock is running.
-## The boss drops a Rare Egg (a backpack item, see Loot.rare_egg) shown on everyone's minimap for a
-## few seconds, plus a strong weapon, a glove, treasure and XP.
+## The boss's one Rare Egg (a backpack item, see Loot.rare_egg) goes to one hunter picked at random from
+## everyone inside the lair at the kill, any team (_award_egg); with nobody inside it lies on the floor,
+## shown on everyone's minimap for a few seconds. Plus a strong weapon, a glove, treasure and XP.
 
 const DIAL_R := 1.8            # reach to work the dial
 const SEALED_STATES := ["sealed", "dormant"]      # lair states whose walls put bodies back out
@@ -48,6 +49,7 @@ const GUARD_R := 3.5           # metres from the dial, rune or ward that called 
 const GUARD_FAN := 0.5         # radians between their posts, fanned on the side away from the lair
 const RUNE_HOLD := 2.2
 const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
+const EGG_HOLD_T := 10.0       # s a winner's egg, dropped at their feet (full pack), is theirs alone
 const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
 const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
 const LOCK_T := 90.0           # the longest a fight can keep you sealed in
@@ -773,7 +775,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		if near > best: best = near; egg_at = q
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
-		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
+		_award_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
@@ -1003,8 +1005,43 @@ func _floor_spot(L: Dictionary, p: Vector3, margin: float) -> Vector3:
 	q.y = m.world.ground_at(q.x, q.z)
 	return q
 
+## The boss's egg: one hunter picked at random (the match RNG) from all those inside the lair gets it
+## in their pack. A full pack puts it at their feet for EGG_HOLD_T, theirs alone. Nobody inside: on the floor.
+func _award_egg(L: Dictionary, item: Dictionary, floor_at: Vector3) -> void:
+	var in_pit: Array = m.hunters.filter(func(h: Hunter): return not h.out and not h.extracted and inside(L, h.pos))
+	if in_pit.is_empty():
+		drop_egg(L, item, floor_at)
+		return
+	var w: Hunter = in_pit[m.rng.randi() % in_pit.size()]
+	if Pack.room(w):
+		w.pack.append(item)
+		m.sfx("pickup", w.pos, 0.0, 0.8)
+	else:
+		var wp := _egg_on_floor(L, item, Vector3(w.pos.x, w.ground(), w.pos.z))
+		wp["only"] = w
+		wp["free_at"] = m.time + EGG_HOLD_T
+		L["egg_told"] = true
+	var line := "%s got the %s Egg" % [w.pname, String(Data.KIN[String(item["sp"])]["name"])]
+	m.add_feed(line)
+	if m.player and m.hud and not m.player.out and inside(L, m.player.pos):
+		m.hud.toast(line, Color("ffd36a"))
+
+## Is this egg still reserved for someone else (its winner's pack was full)?
+func held_from(wp: Dictionary, h: Hunter) -> bool:
+	return wp.get("only") != null and wp["only"] != h and m.time < float(wp["free_at"])
+
 ## Puts a Rare Egg on the ground (a boss's, or one spilled from a pack), loud.
 func drop_egg(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
+	var wp := _egg_on_floor(L, item, at)
+	egg_pings.append({"pos": at, "until": m.time + EGG_PING_T, "follow": null, "text": "Rare Egg"})
+	m.add_feed("A Rare Egg dropped at %s" % L["name"])
+	m.sfx("unlock", at, 4.0, 0.6)
+	if m.player and not m.player.out:
+		m.ping(at, Color("ffd36a"))
+		if m.hud: m.hud.toast("A RARE EGG DROPPED AT %s" % String(L["name"]).to_upper(), Color("ffd36a"))
+	return wp
+
+func _egg_on_floor(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
 	m.spawn_val(item, at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	var old: Node3D = wp["node"]
@@ -1017,12 +1054,6 @@ func drop_egg(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
 	L["egg_wp"] = wp
 	L["egg_uid"] = String(item["uid"])
 	L["egg_told"] = false
-	egg_pings.append({"pos": at, "until": m.time + EGG_PING_T, "follow": null, "text": "Rare Egg"})
-	m.add_feed("A Rare Egg dropped at %s" % L["name"])
-	m.sfx("unlock", at, 4.0, 0.6)
-	if m.player and not m.player.out:
-		m.ping(at, Color("ffd36a"))
-		if m.hud: m.hud.toast("A RARE EGG DROPPED AT %s" % String(L["name"]).to_upper(), Color("ffd36a"))
 	return wp
 
 # ------------------------------------------------------------------ every tick
@@ -1383,7 +1414,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 			return [L["up_land"], "lair_escape"]
 	for L in list:
 		var wp = L.get("egg_wp")
-		if wp != null and m.wpicks.has(wp) and h.flat_dist(wp["pos"]) < 50.0:
+		if wp != null and m.wpicks.has(wp) and h.flat_dist(wp["pos"]) < 50.0 and not held_from(wp, h):
 			if not a.has("egg_" + String(L["id"])): a["egg_" + String(L["id"])] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 			if a["egg_" + String(L["id"])]:
 				return [wp["pos"], "lair_egg"]
@@ -1436,7 +1467,7 @@ func bot_lair(L: Dictionary, h: Hunter) -> Array:
 func _bot_exit(L: Dictionary, h: Hunter) -> Array:
 	var a := h.ai
 	var wp = L.get("egg_wp")
-	if wp != null and m.wpicks.has(wp) and inside(L, wp["pos"], 0.0) and victory_left(L) > 3.0:
+	if wp != null and m.wpicks.has(wp) and inside(L, wp["pos"], 0.0) and victory_left(L) > 3.0 and not held_from(wp, h):
 		var key := "egg_" + String(L["id"])
 		if not a.has(key): a[key] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 		if a[key]:
@@ -1505,7 +1536,7 @@ func bot_pickups() -> void:
 		if wp == null or not m.wpicks.has(wp):
 			continue
 		for h in m.hunters:
-			if h.ctrl != "bot" or h.out or h.downed or h.remote or h.dropping:
+			if h.ctrl != "bot" or h.out or h.downed or h.remote or h.dropping or held_from(wp, h):
 				continue
 			if h.flat_dist(wp["pos"]) < 1.3 and absf(h.pos.y - float(wp["pos"].y)) < 1.2:
 				var it := Pack.ground_item(wp)
