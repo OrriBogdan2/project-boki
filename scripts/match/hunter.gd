@@ -343,7 +343,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	anim = null
 	equip(wid, -1, false)      # (Models.hunter just built this weapon, a 3D Warden's own model included)
 	dashes = max_dashes(); ex_cd = 0.0
-	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
+	roll_t = 0.0; stun_t = 0.0; root_t = 0.0; dash_buf = 0.0      # (a Shift press waiting in the old kit's buffer)
 
 ## Puts a weapon in hand with this run's weapon upgrades on it (WeaponUps). A hunter has one
 ## signature weapon (Arch.signature), so this is only called to build it, or when practice swaps archetype.
