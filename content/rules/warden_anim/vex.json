@@ -16,7 +16,7 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
 	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
-		"gunslinger_lmb": {"clip": "lmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
+		"gunslinger_lmb": {"clip": "lmb", "cut": 0.08, "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade_out": 0.4, "rate": 1.25},
 		"gunslinger_dash_ex": {"clip": "dash_ex", "fade_out": 0.4},

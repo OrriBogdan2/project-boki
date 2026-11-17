@@ -26,6 +26,7 @@ func run(main_node: Node, who := "all") -> void:
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
 		await HOLD.kael(A)
+		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "juggernaut")
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
