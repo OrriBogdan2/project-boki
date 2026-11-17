@@ -35,7 +35,7 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	var k: ArchKit = P.ak
 	Sfx.listener = P.pos
 	Sfx.last_played.clear()
-	var voices := Sfx.get_child_count()
+	var voices := Sfx.get_child_count() - Sfx.loops.size()     # (a channel's held loop is its own player on main)
 	await _start(m, P, k, mate, arch, slot)
 	var held: Array = k.windups.get(slot, [])
 	c.ok(held.any(Sfx.sounding), "%s %s: the wind-up's voice plays (%s)" % [arch, slot, held])
@@ -52,7 +52,7 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	var gone := not held.any(Sfx.sounding)
 	c.ok(gone and took <= CUT_MAX, "%s: the wind-up's voice ends %d ms after the break" % [arch, took])
 	c.ok(Sfx.last_played.has(KitWindup.BROKEN), "%s: the caster hears the broken tick" % arch)
-	c.ok(Sfx.get_child_count() == voices, "%s: no new player for the cast or the cut" % arch)
+	c.ok(Sfx.get_child_count() - Sfx.loops.size() <= voices, "%s: no new player for the cast or the cut" % arch)
 	P.inp["fire"] = false
 	mate.team = team0
 

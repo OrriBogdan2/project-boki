@@ -440,8 +440,13 @@ func _barks(m: Match, P: Hunter) -> void:
 ## Carry 2 in, 1 out: the swap key, a claim and a steal, through the real paths (Hunter.swap_kin, Life.take_item,
 ## KinTrack.register, which every game runs for a catch online).
 func _carry(m: Match, P: Hunter) -> void:
-	var pairs := m.hunters.filter(func(x): return x != P and not x.out and x.kin and x.kin2 and not x.kin2.dead)
-	ok(not pairs.is_empty(), "setup: a bot brought two Boki")
+	var pairs := m.hunters.filter(func(x): return x != P and not x.out and x.kin and not x.kin.dead)
+	if not pairs.is_empty() and (pairs[0].kin2 == null or pairs[0].kin2.dead):
+		# main retired two Boki at the start (Match.TWO_KIN): a second one comes back out of a box (give_kin)
+		var r2: Dictionary = (pairs[0].kin.rec as Dictionary).duplicate()
+		r2["uid"] = "carry_check_2"
+		m.give_kin(pairs[0], r2)
+	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
 	if pairs.is_empty():
 		return
 	var B: Hunter = pairs[0]
