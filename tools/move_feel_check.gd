@@ -91,6 +91,8 @@ const T := {
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	"dash_jump_keep":                 ["~", [0.74, 0.76], "x", "[est] 0.75: source undecoded, no footage"],
+
 	# Flue Flight: Felix at 15 fps (casts 1-2); docs/heroes/ashwick.md "Flue Flight lift-off"
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
@@ -316,6 +318,7 @@ func run(main: Node) -> void:
 	_brake_exact()
 	_slow_ramp()
 	_dash_curves()
+	_dash_jump_keep()
 	_plain_dash()
 	_kit_dashes()
 	_barge_chain()
@@ -1085,6 +1088,37 @@ func _dash_curves() -> void:
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
 	P.reclass(cls_was, kit_was)
+
+## Jump out of a ground dash, keys let go: the take-off keeps tuning.json dash.jump_keep of the dash's speed. The
+## jump is pressed once the dash is at full travel (past Kael's wind-up and the slow start of Lace's roll); the
+## speed after the jump step has that step's air drag (Loco.air_step, no keys) undone. One shared value: the
+## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (docs/MOVEMENT_PARITY.md).
+func _dash_jump_keep() -> void:
+	var was := [P.cls, P.arch]
+	var keep := Loco.dash_jump_keep
+	ok(is_equal_approx(keep, 0.75), "dash.jump_keep = 0.75, one value for every Hunter (%s)" % keep)
+	for id in ["gunslinger", "juggernaut", "archer", "ashwick"]:
+		P.reclass(Arch.weight(id), id)
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		for i in 40:
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["move"] = Vector2.ZERO
+			if _hv(P).length() > 1.5 * P.base_speed: break
+		var before := _hv(P).length()
+		var dashing := P.roll_t > 0.0 and P.grounded
+		P.inp["jump"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		var cap := P.base_speed
+		var took := (_hv(P).length() / exp(-Loco.air_idle_drag * DT) - cap) / exp(-Loco.air_drag * DT) + cap
+		print("MFEEL dash jump: %s %.2f -> %.2f m/s (dashing %s)" % [id, before, _hv(P).length(), dashing])
+		ok(dashing and not P.grounded, "dash jump %s: pressed mid-dash on the ground, takes off" % id)
+		rec("dash_jump_keep", took / before)
+	P.reclass(was[0], was[1])
 
 ## Meeko's air dash is her kit's own measured curve (tender.json dash.air: ramp, burst, float-out): from a
 ## height, so it ends on time rather than on a touchdown; its distance, time and the speed it floats out at.
@@ -1973,7 +2007,8 @@ func _glide_cam(cam: CamRig) -> void:
 		z_min = minf(z_min, cam.zoom)
 		lead = maxf(lead, Vector2(cam.focus.x - P.pos.x, cam.focus.z - P.pos.z).length())
 		var vh := cam.get_viewport().get_visible_rect().size.y
-		land_y = maxf(land_y, cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5)
+		var to16 := tan(deg_to_rad(cam.fov) * 0.5) / tan(deg_to_rad(cam.lens) * 0.5)      # (as on a 16:9 screen)
+		land_y = maxf(land_y, (cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5) * to16)
 	ok(n_on > 10, "glide_cam: the plunge ran (%d steps)" % n_on)
 	rec("cam_dive_zoom_hold", z_min / z_dive)
 	rec("cam_dive_land_view", land_y)
@@ -2016,22 +2051,23 @@ func _screen_scale() -> void:
 		cam.follow(P.position, DT, false)
 	var vh := cam.get_viewport().get_visible_rect().size.y
 	var vw := cam.get_viewport().get_visible_rect().size.x
-	var aspect := 16.0 / 9.0
-	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
-	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.lens) * 0.5) * CamRig.FRAME_ASPECT)
+	# shares of a 16:9 screen's height: this view's shape widens or narrows the vertical lens (CamRig.frame_fov),
+	# and a share from the centre scales with the tangent of half the lens
+	var h16 := vh * tan(deg_to_rad(cam.lens) * 0.5) / tan(deg_to_rad(cam.fov) * 0.5)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
 	print("MFEEL framing: style default pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
-	rec("hunter_screen_pct", now[1] / vh * 100.0)
-	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	rec("hunter_screen_pct", now[1] / h16 * 100.0)
+	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / h16 * 100.0)
 	for id in FRAME_HEROES:
 		var hm := _stand_in(id, PlayerLook.neutral())
 		var hs := _model_span(cam, hm)
 		var kind := "3D" if hm.has_node("Warden") else "procedural"
-		var feet := (float(hs[3]) - vh * 0.5) / vh * 100.0
+		var feet := (float(hs[3]) - vh * 0.5) / h16 * 100.0
 		print("MFEEL framing %s (%s model): %.2f%% of screen height, feet %.2f%% below the centre"
-				% [id, kind, hs[1] / vh * 100.0, feet])
+				% [id, kind, hs[1] / h16 * 100.0, feet])
 		hm.free()
 	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
 	var d0 := cam.dist
@@ -2040,7 +2076,7 @@ func _screen_scale() -> void:
 	ref.scale /= vs
 	cam.snap(P.pos)
 	var was := _model_span(cam, ref)
-	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / vh * 100.0, was[0] / vh * 100.0, now[0] / vh * 100.0])
+	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / h16 * 100.0, was[0] / h16 * 100.0, now[0] / h16 * 100.0])
 	ref.free()
 	cam.dist = d0
 	cam.snap(P.pos)
