@@ -58,6 +58,7 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 	var spent0: int = shown.call()
 	var live0: int = lingering.call()
 	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0      # a ready slot: the cooldown gate refuses a press with no charge
 	var far := home + Vector3(10.0, 0, 0)
 	P.inp["sec_hold"] = true
 	K.press_rmb()
@@ -93,6 +94,7 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 	T.teleport(home + Vector3(7.0, 0, 0))
 	_wall_at(m, T.pos, lv, 2)
 	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0      # a ready slot: the cooldown gate refuses a press with no charge
 	var pins0 := K.pins
 	P.inp["sec_hold"] = true
 	K.press_rmb()
