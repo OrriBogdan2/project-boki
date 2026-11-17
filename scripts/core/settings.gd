@@ -34,7 +34,7 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true, "low_hp_pulse": true,
+	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	"colour_vision": "default",      # SideColor.ORDER
@@ -668,6 +668,10 @@ func fill_keys(text: String) -> String:
 	for a in ACTIONS:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
+
+## The four walking keys' caps in a row ("WASD"), joined by `sep`.
+func move_caps(sep := "") -> String:
+	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:

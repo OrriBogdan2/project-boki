@@ -291,6 +291,10 @@ func _archer_combos() -> void:
 		P.flash_t > 0.0 or K.draw.supers >= 0,
 		"flash %.2f" % P.flash_t
 	)
+	# (past the 0.35 s perfect window)
+	step(m, 0.2, func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.1)
 	ok("pin anim: a Supercharged release plays arc_super", K.anim_id == "arc_super", K.anim_id)
@@ -299,7 +303,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, 0.85, cur)
+	var e1 := _loose_after(m, P, 1.0, cur)      # (Empowered, past the 0.35 s perfect window)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -389,9 +393,10 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
+	# (let go past the 0.35 s window)
 	step(
 		m,
-		0.25,
+		0.35,
 		func():
 			P.inp["fire"] = true
 			aim_at(P, T.pos)
@@ -853,7 +858,8 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
-	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). Her roll can
+	# carry the spirit run through the column first, so the entry may be its far side: out of the rock either way
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -877,9 +883,10 @@ func _archer_combos() -> void:
 			and not K.spirit.active()
 			and P.spirit_t <= 0.0
 			and K.spirit.snap_backs == sn0 + 1
-			and P.pos.x < bx
+			and P.pos.distance_to(K.spirit.entry) < 0.25
+			and (P.pos.x < bx or P.pos.x >= bx + 1)
 		),
-		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
+		"x %.1f (rock %d, entry %.1f) snaps %d walks %d" % [P.pos.x, bx, K.spirit.entry.x, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
