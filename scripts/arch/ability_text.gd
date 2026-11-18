@@ -10,14 +10,28 @@ extends RefCounted
 ## ClassCard's "howto" lines use) and `{slot.field}` (a number from the same JSON, e.g. {e.time}), both filled here.
 
 ## A slot, however the caller spells it ("sec" for the HUD, "rmb" for the card), to its JSON block.
-const BLOCK := {"dash": "dash", "dodge": "dash", "rmb": "rmb", "sec": "rmb", "utility": "rmb",
-	"e": "e", "k1": "e", "kin": "e", "r": "r", "ult": "r", "x": "x", "passive": "passive"}
+const BLOCK := {
+	"dash": "dash",
+	"dodge": "dash",
+	"rmb": "rmb",
+	"sec": "rmb",
+	"utility": "rmb",
+	"e": "e",
+	"k1": "e",
+	"kin": "e",
+	"r": "r",
+	"ult": "r",
+	"x": "x",
+	"passive": "passive"
+}
 ## The right-click variants in the order they are told, and how a row is headed.
-const VARIANTS := {"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During {signature}",
-	"full": "Resource full"}
-const DECIMALS := 2      # digits a number keeps ({e.every} 0.35 stays 0.35)
+const VARIANTS := {
+	"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During {signature}", "full": "Resource full"
+}
+const DECIMALS := 2  # digits a number keeps ({e.every} 0.35 stays 0.35)
 
 static var _token: RegEx
+
 
 ## The text with its `{action}` and `{slot.field}` tokens filled in for this archetype.
 static func fill(arch: String, text: String) -> String:
@@ -38,8 +52,10 @@ static func fill(arch: String, text: String) -> String:
 		out = out.replace(m.get_string(), String.num(float(v), DECIMALS))
 	return out
 
+
 static func block(arch: String, slot: String) -> Dictionary:
 	return Arch.def(arch).get(BLOCK.get(slot, slot), {})
+
 
 ## "Heavy Shot", "Hawk Sense", the signature weapon's name for the attack.
 static func name_of(arch: String, slot: String) -> String:
@@ -48,10 +64,12 @@ static func name_of(arch: String, slot: String) -> String:
 		return String(Data.weapon_stats(String(ws[0])).get("name", ws[0])) if not ws.is_empty() else ""
 	return String(block(arch, slot).get("name", ""))
 
+
 ## The JSON "short" word ("Heavy"), else the name's first word. (The Bulwark dash's "short" is a distance.)
 static func short_name(arch: String, slot: String) -> String:
 	var s: Variant = block(arch, slot).get("short", "")
 	return String(s) if s is String and s != "" else name_of(arch, slot).split(" ")[0]
+
 
 ## One line: the JSON "card" text for the slot, else its description (the attack: the weapon's line).
 static func line(arch: String, slot: String) -> String:
@@ -62,10 +80,12 @@ static func line(arch: String, slot: String) -> String:
 	var sd := block(arch, slot)
 	return fill(arch, String(card.get(BLOCK.get(slot, slot), sd.get("desc", ""))))
 
+
 ## The signature weapon's (or any of the kit's weapons') card line.
 static func weapon_line(arch: String, weapon: String) -> String:
 	var wl: Dictionary = Arch.def(arch).get("card", {}).get("weapons", {})
 	return fill(arch, String(wl.get(weapon, Data.weapon_stats(weapon).get("desc", ""))))
+
 
 ## The whole description; the right click has no single one: its variants, one per line.
 static func full(arch: String, slot: String) -> String:
@@ -73,6 +93,7 @@ static func full(arch: String, slot: String) -> String:
 	if BLOCK.get(slot, slot) != "rmb":
 		return fill(arch, String(sd.get("desc", "")))
 	return "\n".join(variant_rows(arch).map(func(r): return "%s: %s" % r))
+
 
 ## The right click's variants as [heading, text] rows.
 static func variant_rows(arch: String) -> Array:
@@ -82,6 +103,7 @@ static func variant_rows(arch: String) -> Array:
 		if vs.has(v):
 			rows.append([fill(arch, VARIANTS[v]), fill(arch, String(vs[v]))])
 	return rows
+
 
 ## The role in a sentence (the hero pick, the arena toast).
 static func loop(arch: String) -> String:
