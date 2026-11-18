@@ -208,6 +208,13 @@ func _travel_part(m: Node) -> void:
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
 	await _cards_part(m, hub)
+	var hints := ZoneCards.key_hints("glasswater")
+	var terms := BlackMarket.seed_terms()
+	ok("Old Pell" in hints[0] and ("%d days" % terms[0]) in hints[0] and ("%d gems" % terms[1]) in hints[0],
+		"the Wayseed line names the trader, his every-%d-days stock and %d gems: %s" % [terms[0], terms[1], hints[0]])
+	var near := GardenZones.closest("glasswater")
+	ok(not near.is_empty() and String(near["rec"]["name"]) in hints[1] and "Closest" in hints[1],
+		"the lean line names the closest Boki: %s" % hints[1])
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
@@ -255,6 +262,8 @@ func _cards_part(m: Node, hub) -> void:
 	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
 	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
 		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
+	ok(String(gw.tooltip_text) == "\n".join(ZoneCards.key_hints("glasswater")),
+		"its tooltip says where each key comes from: %s" % String(gw.tooltip_text).replace("\n", " / "))
 	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
 
 ## The text lines on an open zone's card.
@@ -423,6 +432,18 @@ func _texts(n: Node) -> String:
 	for c in n.get_children():
 		out += "\n" + _texts(c)
 	return out
+
+## The open panel as it shows now, saved in --shots-dir when one is given.
+func _grab(m: Node, file: String) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	print("ZONES shot %s" % dir.path_join(file))
 
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
 func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
