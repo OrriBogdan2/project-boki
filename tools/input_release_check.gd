@@ -3,7 +3,8 @@ extends "res://tools/dash_flow_check.gd"
 ## real press (InputEventMouseButton, or the key the action is bound to), held 0.5 s and let go: the match's held state
 ## for that key (Hunter.inp, Match.aim_hold) is off on the first frame after the release, and LMB starts no attack
 ## after the weapon's own let-go (TAIL_S: Neve's heavy darts). Then, per hero: LMB let go while the full map is up
-## stops with the map closed again, and a focus loss mid-hold with no release at all (FocusRelease) lets go of every
+## stops with the map closed again, LMB let go mid-hitstop, mid-stun, mid-dash, under the pause or in a one-frame
+## re-click starts nothing after (MID), and a focus loss mid-hold with no release at all (FocusRelease) lets go of every
 ## key. Once: a map drag whose release went to a window over the map ends when the mouse next moves, and a map you
 ## opened on the ship closes when you land. Frames run for real (Match._process), so the input path is the game's.
 ## --input-release-check=<id>,<id> picks the heroes. Never touches the save.
@@ -20,6 +21,8 @@ const KEYS := {
 	"jump": ["jump", 0],
 	"glide": ["glide", 0],
 }
+## LMB let go while the sim can't step it: in a hitstop, a stun, a dash, the pause menu, or a re-click in one frame.
+const MID := ["hitstop", "stun", "dash", "pause", "reclick"]
 ## The Hunter.inp flag each key's hold sets (E and R hold through Match.aim_hold instead).
 const FLAG := {"lmb": "fire", "rmb": "sec_hold", "dash": "dash_down", "jump": "glide", "glide": "glide_btn"}
 
@@ -44,6 +47,8 @@ func run(main: Node) -> void:
 		for key in KEYS:
 			await _hold_release(tree, hero, key)
 		await _release_under_map(tree, hero)
+		for how in MID:
+			await _release_mid(tree, hero, how)
 		for key in KEYS:
 			await _focus_out(tree, hero, key)
 		if hero == _hero_ids()[0]:
@@ -132,6 +137,41 @@ func _hold_release(tree: SceneTree, hero: String, key: String) -> void:
 				% [hero, TAIL_S, after[0], after[1]]
 			)
 		)
+	m.set_process(false)
+
+
+## LMB held 0.4 s, then let go in the middle of something (MID): no attack starts after the weapon's own let-go.
+func _release_mid(tree: SceneTree, hero: String, how: String) -> void:
+	await _start(tree)
+	_send("lmb", true)
+	await _frames(tree, 0.4)
+	match how:
+		"hitstop":
+			m.hitstop = 0.12
+		"stun":
+			hunter.stun_t = 0.6
+		"dash":
+			_send("dash", true)
+		"pause":
+			m.paused = true
+	await tree.process_frame
+	_send("lmb", false)
+	if how == "reclick":
+		_send("lmb", true)
+		_send("lmb", false)
+	await tree.process_frame
+	if how == "dash":
+		_send("dash", false)
+	if how == "pause":
+		for i in 12:  # (match time stands still under the pause)
+			await tree.process_frame
+		m.paused = false
+	await _one_frame(tree)
+	var after: Array = await _frames(tree, WATCH_S)
+	ok(
+		float(after[1]) <= TAIL_S and not Input.is_action_pressed("fire") and not _held("lmb"),
+		"%s lmb: let go in a %s, %d attacks after (last at %.2f s)" % [hero, how, after[0], after[1]]
+	)
 	m.set_process(false)
 
 
