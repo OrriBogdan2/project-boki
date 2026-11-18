@@ -4,7 +4,9 @@ extends RefCounted
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
 ## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
-## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall).
+## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall). A jump
+## the owner took (Ent.teleport over TP_JUMP) flips TP_BIT in its flags and snaps whatever the snapshot gap,
+## so a lost or late snapshot can't stretch a teleport into a sweep.
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest recent arrival. The margin on top of one snapshot gap follows how
 ## late recent snapshots came against that quickest one (a jitter buffer), so a jittery long line (two hops
@@ -20,6 +22,8 @@ const SNAP_SPEED := 40.0    # m/s between two snapshots: anything faster is a te
 const RESYNC := 0.5         # s an arrival is off the usual: a clock was reset, start over
 const OFF_EASE := 0.05      # share of a slower-than-usual arrival the clock gap takes on per snapshot
 const KEEP := 6             # snapshots kept (0.6 s at 10 a second)
+const TP_JUMP := 2.0        # m in one Ent.teleport that counts as a jump (per-frame scripted moves stay under it)
+const TP_BIT := 128         # hunter flags (Match._flags): the parity of the owner's jumps
 const GUESS_M := 0.01       # m of run-on past the last snapshot that counts as a guess (a standing body never is)
 
 var ts := PackedFloat64Array()
@@ -28,11 +32,12 @@ var vs := PackedVector3Array()
 var off := 0.0
 var late := JITTER_MIN      # s: the margin, the latest recent snapshot against the quickest
 var jumped := false         # a teleport came in: the next follow snaps instead of sweeping
+var tp := false             # the last snapshot's TP_BIT
 var drawn := -INF           # s: the owner time the last follow drew
 var drawn_at := 0.0         # s: our match time then
 var guessing := false       # drawn running on past its last snapshot: a guess, so it shoves no body (Match._separate)
 
-func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
+func push(t_owner: float, now: float, p: Vector3, v: Vector3, tp_bit := false) -> void:
 	var gap := now - t_owner
 	var n := ts.size()
 	if n > 0 and absf(gap - off) > RESYNC:
@@ -40,13 +45,15 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 		n = 0
 	if n > 0 and t_owner <= ts[n - 1]:
 		return
+	var tp_flip := tp_bit != tp
+	tp = tp_bit
 	if n == 0 or gap < off:
 		late += off - gap if n > 0 else 0.0
 		off = gap
 	else:
 		late = maxf(late * JITTER_KEEP, gap - off)
 		off += (gap - off) * OFF_EASE
-	if n > 0 and p.distance_to(ps[n - 1]) > _reach(p - ps[n - 1], v, vs[n - 1]) * (t_owner - ts[n - 1]):
+	if n > 0 and (tp_flip or p.distance_to(ps[n - 1]) > _reach(p - ps[n - 1], v, vs[n - 1]) * (t_owner - ts[n - 1])):
 		_clear()
 		jumped = true
 	ts.append(t_owner)

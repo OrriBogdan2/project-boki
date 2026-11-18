@@ -290,6 +290,8 @@ func _tick_mag(dt: float) -> void:
 	h.ammo = mini(mag, h.ammo + add)
 
 # ------------------------------------------------------------------ dash: Slipstep
+func single_dash() -> bool: return true
+
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex and h.dashes >= 1.0 and not h.grounded:

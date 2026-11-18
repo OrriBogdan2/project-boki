@@ -53,6 +53,7 @@ var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
 var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
+var jump_n := 0                 # teleports over NetSmooth.TP_JUMP (its parity is NetSmooth.TP_BIT)
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -66,6 +67,8 @@ func set_model(n: Node3D) -> void:
 	mats = n.get_meta("mats", [])
 
 func teleport(p: Vector3) -> void:
+	if pos.distance_to(p) > NetSmooth.TP_JUMP:
+		jump_n += 1
 	pos = p
 	prev = p
 	position = p
@@ -160,7 +163,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	last_hit_by = by
 	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold)
 		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -183,7 +186,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0)))
+		burn_dps = maxf(burn_dps, float(opts["burn"]))
+		burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk

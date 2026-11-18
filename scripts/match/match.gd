@@ -4829,6 +4829,7 @@ func _flags(h: Hunter) -> int:
 	if h.roll_t > 0.0: f |= 16
 	if h.grounded: f |= 32
 	if h.fortify_t > 0.0: f |= 64
+	if h.jump_n & 1: f |= NetSmooth.TP_BIT
 	if h.gliding: f |= 256
 	if h.dropping: f |= 512
 	if h.riding: f |= 1024
@@ -4983,9 +4984,9 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			var h: Hunter = e
 			h.net_vel = Vector3(it[5], it[6], it[7])
 			if h.net_buf == null: h.net_buf = NetSmooth.new()
-			h.net_buf.push(t_owner if t_owner >= 0.0 else time, time, h.net_pos, h.net_vel)
-			h.face = it[8]; h.hp = it[9]; h.max_hp = it[10]
 			var f := int(it[11])
+			h.net_buf.push(t_owner if t_owner >= 0.0 else time, time, h.net_pos, h.net_vel, f & NetSmooth.TP_BIT != 0)
+			h.face = it[8]; h.hp = it[9]; h.max_hp = it[10]
 			h.downed = f & 1 != 0
 			if f & 2 != 0 and not h.out:
 				h.out = true
