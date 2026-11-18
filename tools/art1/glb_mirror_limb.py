@@ -8,6 +8,7 @@ winding reversed, normals mirrored, same UVs and colours, joints renamed .L <-> 
 buffer is rebuilt with only this primitive's attributes and indices replaced.
 Run: python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb [--mat skin-v95] [--from L] [--to R] [--below 0.30]
      [--overlap 0.02] [--bones thigh,shin,foot]"""
+
 import argparse
 import json
 import struct
@@ -21,16 +22,16 @@ NC = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 def load(path):
     b = open(path, "rb").read()
     n = struct.unpack("<I", b[12:16])[0]
-    j = json.loads(b[20:20 + n])
+    j = json.loads(b[20 : 20 + n])
     off = 20 + n
-    bl = struct.unpack("<I", b[off:off + 4])[0]
-    return j, b[off + 8:off + 8 + bl]
+    bl = struct.unpack("<I", b[off : off + 4])[0]
+    return j, b[off + 8 : off + 8 + bl]
 
 
 def view(j, binb, bvi):
     bv = j["bufferViews"][bvi]
     o = bv.get("byteOffset", 0)
-    return binb[o:o + bv["byteLength"]]
+    return binb[o : o + bv["byteLength"]]
 
 
 def read(j, binb, ai):
