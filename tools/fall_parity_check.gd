@@ -27,7 +27,6 @@ const MODES := {
 }
 const STILL_TOL := 0.02  # m of horizontal drift a straight fall may show
 const SPEED_TOL := 0.01  # m/s a landing or a jump may differ from the speed it carried
-const MOB_CLEAR := 8.0  # m: a mob this close to the drop is removed (it could walk into the faller)
 const SLIDE_TOL := 0.05  # m a stop after a landing or on a flight may slide past a flat let-go
 const VIEW_TOL := 0.1  # m (ground-equivalent) the view may drift after a 10 m landing (it was ~0.7)
 const LANE := Rect2i(-6, -2, 11, 5)  # tiles round the drop spot the runs cross (the held fall starts 5.3 m back)
@@ -68,6 +67,11 @@ func _flat_round(w: World, g: Vector3) -> bool:
 			var q := Vector2(g.x + dx, g.z + dz)
 			if absf(w.ground_at(q.x, q.y) - y) > 0.001 or w.stairs.has(w.idx(int(floor(q.x)), int(floor(q.y)))):
 				return false
+			# a block (a prop's footprint) beside the lane would push a falling body out of its side at its top
+			for bz in range(int(floor(q.y)) - 1, int(floor(q.y)) + 2):
+				for bx in range(int(floor(q.x)) - 1, int(floor(q.x)) + 2):
+					if w.inb(bx, bz) and w.kind[w.idx(bx, bz)] == World.T_BLOCK:
+						return false
 			if w.occupy(q.x, q.y, 0.45, y, false) != 0.0:
 				return false
 	return true
@@ -101,11 +105,11 @@ var h: Hunter
 
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
 	# a mode that respawns mobs (the Training Area) must not walk one into the faller: it nudges its position
-	if is_instance_valid(m) and not m.opts.get("tutorial", false):  # (the tutorial reads its dummies going)
-		for mb in m.mobs.duplicate():
-			if is_instance_valid(mb) and mb.flat_dist(at) < MOB_CLEAR:
+	if is_instance_valid(m):
+		for mb in m.mobs:
+			if is_instance_valid(mb):
 				mb.queue_free()
-				m.mobs.erase(mb)
+		m.mobs.clear()
 	h.teleport(at)
 	h.vel = v
 	h.grounded = standing
