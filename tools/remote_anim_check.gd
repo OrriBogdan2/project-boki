@@ -166,8 +166,8 @@ func _hazard_moves() -> void:
 	var spots := {"deep_water": home + Vector3(-5.0, 0, -6.0), "ice": home + Vector3(10.0, 0, -6.0), "": home}
 	for kind in ["deep_water", "ice"]:
 		var c: Vector3 = spots[kind]
-		tz._add_area({"kind": kind, "poly": [[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5],
-			[c.x - 2.5, c.z + 2.5]]})
+		tz._add_area(kind, [[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5],
+			[c.x - 2.5, c.z + 2.5]])
 	for kind: String in spots:
 		_fresh(P)
 		P.teleport(spots[kind])
