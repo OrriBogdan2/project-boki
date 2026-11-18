@@ -9,6 +9,8 @@ extends RefCounted
 ##   5. a settled game: prizes from the lantern table, a solo win never moves the cup, a versus win does
 ##   6. the state machine refuses moves its table lacks
 ##   7. on the base: no ring with base_mode off; with it on, the ring opens a panel, solo plays to a card
+##   8. sounds (garden_sfx.gd): a flip per cap opened, a match per pair, a miss per mismatch, the ring's win on
+##      a cleared solo ring; on the panel each plays once on the tick after it, and a lost solo ends on the "aww"
 ## Never touches the real save.
 
 const RUNS := 40                 # seeded games per comparison
@@ -88,6 +90,30 @@ func _picks() -> void:
 			b.pick(b.partner(c))
 	var fresh: bool = b.pairs[0] == 6 and not b.matched.has(true) and b.flash_t > 0.0
 	ok(fresh, "a cleared solo ring deals a fresh one that flashes")
+	var said := {}
+	for e in b.heard:
+		said[e[0]] = int(said.get(e[0], 0)) + 1
+	var want := {"lantern_flip": 14, "lantern_miss": 1, "lantern_match": 6, "lantern_win": 1}
+	ok(said == want, "sounds: a flip per cap opened, a miss, a match per pair, the cleared ring's win (%s)" % [said])
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## On the panel: a pair and a mismatch picked by hand, each sound heard once per event on the next tick.
+func _sounds(lm: LanternMatch) -> void:
+	GardenSfx.heard.clear()
+	var b: LanternMatch.Board = lm.board
+	while b.flash_t > 0.0:
+		lm.tick(0.1)
+	var miss: int = range(2, 12).filter(func(i): return b.caps[i] != b.caps[0] and i != b.partner(0))[0]
+	var other: int = range(1, 12).filter(func(i): return b.caps[i] != b.caps[0] and b.caps[i] != b.caps[miss])[0]
+	lm._pick(0)
+	lm._pick(b.partner(0))
+	lm._pick(miss)
+	lm._pick(other)
+	lm.tick(0.1)
+	var got := [_heard("lantern_flip"), _heard("lantern_match"), _heard("lantern_miss")]
+	ok(got == [4, 1, 1] and b.heard.is_empty(), "on: four caps, one pair, one mismatch heard once each (%s)" % [got])
 
 func _past_flash(b: LanternMatch.Board) -> void:
 	while b.flash_t > 0.0:
@@ -249,12 +275,15 @@ func _on_base() -> void:
 		ok(home.panel_open == LanternMatch.PANEL and lm.state == LanternMatch.S.IDLE, "on: the ring opens its panel")
 		lm._start(home.hrace.entrants().slice(0, 1))
 		ok(lm.state == LanternMatch.S.PLAY and lm.buttons.size() == 12, "on: solo starts with 12 caps on the panel")
+		_sounds(lm)
 		var t := 0.0
 		while lm.state == LanternMatch.S.PLAY and t < float(LanternMatch.rules()["time_s"]) + 10.0:
 			lm.tick(0.1)
 			t += 0.1
 		var carded: bool = lm.state == LanternMatch.S.RESULT and is_instance_valid(lm.card)
 		ok(carded, "on: the clock runs out to a card (%.1f s)" % t)
+		var end := [_heard("garden_cheer_miss"), _heard("lantern_win")]
+		ok(end == [1, 0], "on: one pair short of the goal ends on the crowd's aww, no win (%s)" % [end])
 		lm.tick(float(LanternMatch.rules()["card_s"]) + 1.0)
 		ok(lm.state == LanternMatch.S.IDLE, "on: the card goes and the ring is ready again")
 		lm.use()

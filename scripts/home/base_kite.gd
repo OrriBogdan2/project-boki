@@ -260,12 +260,17 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	if Input.is_action_just_pressed("jump") and run.flap():
-		GardenSfx.cue("jump", flier["pos"])
+		GardenSfx.cue("kite_flap", flier["pos"])
+	var refunds := run.refunds
 	var passed := run.step(d, Input.get_axis("left", "right"))
-	if passed == "vent":
+	if run.refunds > refunds:      # counted, not read off passed: a vent and a ring can share a step
+		GardenSfx.cue("kite_updraft", flier["pos"])
 		h._toast("Updraft! A flap back (%d left)" % run.flaps)
-	elif passed != "":
-		GardenSfx.crowd("great" if passed == "hit" else "miss", flier["pos"])
+	if passed in ["hit", "miss"]:
+		if passed == "hit":
+			GardenSfx.cue("kite_ring", flier["pos"])
+		else:
+			GardenSfx.crowd("miss", flier["pos"])
 		_paint_hoops()
 	_place_flier()
 	if run.over():
@@ -343,7 +348,9 @@ func _end(finished: bool) -> void:
 	vent_nodes = []
 	kite = null
 	if finished:
-		GardenSfx.cue("garden_win_medium", land)
+		GardenSfx.cue("kite_finish", land)
+		if res["won"]:
+			GardenSfx.cue("garden_win_" + GardenSfx.size_word(flier["rec"]), land)
 		h._emote(flier, "♥", true)
 		_card(res)
 		h._play_evolutions.call_deferred()     # a level the garden XP brought plays its form
