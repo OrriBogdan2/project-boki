@@ -38,7 +38,7 @@ Columns:
 | Kael Finishing Slam (jug_slam) | +1 f | 2 → 5 f | 0.07 → 2.24 m | 37.2 → 20.0 m/s | 0.68 → 0.55 s (kit 0.55) |
 | Kael Meteor Drop (jug_meteor_land) | +3 f | 2 → 3 f | 1.80 → 3.13 m | 36.8 → 35.0 m/s (open, DEBT) | 0.67 → 0.50 s (kit 0.50) |
 | Tarek RMB slam (breah_slam) | -1 f | 4 → 4 f | 0.07 → 0.13 m | 1.8 → 1.7 m/s | 0.93 → 0.90 s (kit 0.91) |
-| Tarek RMB tap slam (breah_slam_land) | +3 f | 5 → 4 f | 0.10 → 0.29 m | 3.2 → 2.2 m/s | 0.90 → 0.73 s (kit 0.75) |
+| Tarek RMB tap slam (breah_slam_land) | +3 f | 5 → 5 f | 0.10 → 0.31 m | 3.2 → 2.2 m/s | 0.90 → 0.73 s (kit 0.75) |
 | Grimble Anchor Drop (dr_anchor) | +0 f | 9 → 6 f | 0.34 → 0.31 m | 3.8 → 5.2 m/s | 0.77 → 0.60 s (kit 0.62) |
 | Grimble air Anchor landing (dr_quake) | +3 f | 13 → 3 f | 0.36 → 0.29 m | 2.7 → 2.6 m/s | 0.90 → 0.73 s (kit 0.75) |
 | Albert charged swing (bul_smash) | +3 f | 2 → 5 f | 2.52 → 0.67 m | 37.4 → 5.7 m/s | 0.67 → 0.50 s (kit 0.50) |
