@@ -33,8 +33,7 @@ hatch shield kept on `x_shield` (`keep`).
 - **Fish:** hangs from his left mast on `x_fish`; the spring chain `spring_hangfish_*` moved there with it (`move_bones`).
 - **Face (11-18, ext/hunter-picks-1118):** the porthole glass is `eyes-v95` (since 28d0f88bc3 the baked paint shows, not
   WardenMood's drawn glass face). The owner picked face A of ~/meshy/face-albert-1118 (`final_A.glb` = FhapS_1: fat cyan
-  crescent eyes, modest smile) as the default, keeping the old angry eyes in game. `v95` here = the old game image +
-  resize(final_A albedo) - resize(i1 master albedo) at 4096, masked to the two glass islands (q92); the old image is kept
+  crescent eyes, modest smile) as the default, keeping the old angry eyes in game. `v95` here = the happy face A embedded by ext/faces-ship-1118 (tools/art1/face_swap.py, main's glb kept at the merge); the pre-face image is kept the old image is kept
   as `breaker_v95_angry.jpg` (import size limit 2048: 2.7 MB of VRAM). The master's new normal/roughness maps are not
   ported (this glb has albedo only). WardenMood's `tex_faces` (warden_anim/breaker.json "mood") puts the angry texture
   on the glass for angry/determined/sad and for `combat`: 4 s after he swings, casts or is hit; the smile otherwise.
