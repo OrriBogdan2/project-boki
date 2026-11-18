@@ -22,6 +22,11 @@ Re-keying clips on the swapped model (there is no ostra.blend with its mesh): ke
     blender -b --factory-startup --python tools/art1/ostra_anim.py -- walk_f,orb --from art/wardens/ostra/ostra.glb --export /tmp/keyed.glb
     python3 tools/art1/glb_add_clips.py art/wardens/ostra/ostra.glb /tmp/keyed.glb walk_f,orb
 
+`x_breath` (the idle's rib cage, 11-18) went on the v95 glb the same way, with no re-export (once; a later glb swap needs it again):
+
+    blender -b --factory-startup --python tools/art1/ostra_anim.py -- idle,stance --from art/wardens/ostra/ostra.glb --export /tmp/keyed.glb
+    python3 tools/art1/glb_add_bone.py art/wardens/ostra/ostra.glb /tmp/keyed.glb x_breath --zone 1.06,1.40,0.21 --clips idle,stance
+
 **Appeal swap (2026-11-11, owner-approved):** the mesh is now the appeal3 master, body b with the new starry face (`~/meshy/v95/Motley/r2/appeal3/cand_b.glb`),
 put on this rig, its clips and anchors by the v95 swap (`art/wardens/src/ostra_v95.json`, docs/art/wardens/V95_SWAP.md). It replaces the
 build above's mesh (the build scripts still make the rig and clips): one 2048 atlas (`ostra_atlas.jpg`) and a baked `ostra_normal.jpg`, slots
