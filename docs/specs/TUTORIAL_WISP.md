@@ -80,3 +80,8 @@ wisps on: `gkey` is skipped; `wisp` and `summon` come right after `shoot`, on th
 (`camps.summon`, 2 skitters, pays no XP: `pick_kin` tops the level up to 3). Not at gkey's place: its camp walks under the
 lookout, where neither the hunter's shots nor a 6 s summon reach it. `steal` comes after `ranks`, before `wayout`. That is
 25 steps with wisps, 23 without (+2: decision taken here, not by the owner; the alternative is folding `wisp` into `summon`'s first line).
+
+## After the re-merge with main (2026-11-18)
+Main's `TutorialSummon` (summon and pack steps, after gkey's place) covers beats 3-5, so `TutorialWisp` is only `wisp` (placed
+right before `summon`) and `steal` (before `wayout`). Order with wisps: ... crouch, wisp, summon, pack, pick_kin ... ranks, steal,
+wayout; `gkey` is skipped. Decision taken here, not by the owner; the alternative is dropping `wisp` into `summon`'s first line.
