@@ -354,6 +354,33 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she draws a red thread taut between two fingers and lets it go.
 - **Target stance (6 s):**
   - The same feet. The bow comes up loosely across the body and an arrow is nocked, not drawn.
+- **Done (ext/idle-archer):**
+  - hem_clips.py bakes the idle and the stance at 6 s on the READY feet; `_stand` is what both share: the weight goes
+    onto the front-left foot and back once a loop (6.5 cm across, 4.5 cm forward) with the pelvis leading and the chest,
+    head and hands 3, 6 and 9 frames behind (`LAG`), a pelvis dip at the middle of the shift (soft knees) and the free
+    knee turned in (`FLk`/`FRk`).
+  - Idle: holds, then one head turn of 29 deg from 2.4 to 2.9 s that the shoulders follow 4 frames later, back from
+    4.8 s. Fidget at 3.1 to 4.8 s: still looking away, she lifts the bow a hand's width, takes its string between two
+    fingers, pulls it taut (the draw target `dr` at 0.07) and lets it go; the hand returns to the hip. Two blinks.
+  - Stance: the bow up loosely across her (`NOCKED`), an arrow on the string, not drawn, brows down. A slower weight
+    shift, a 25 deg head scan the shoulders and then the bow follow, and at 3.4 to 4.3 s she takes up the string a
+    little and lets it settle.
+  - Breathing: a new leaf bone, `x_breath` under hips (posekit `add_breath`, 291 verts of the rib cage), 2 % with two
+    breaths per loop; the chest pitch, the head and the bow hand breathe with it a few frames apart.
+  - Every curve is a `_beat` (out, hold, back) or a whole number of sine periods, and lags wrap through `_at`, so the
+    seam closes: clip-check reads 0.0x the limit on both loops.
+  - Shots (jobq out): before 20261108-112239-02892 (a worktree at the base commit: the first before job,
+    20261108-105004-15029, was claimed after the new .glb was in the tree), after 20261108-110549-06393.
+    - idle_front: f000 and f012 match; f005 to f006 hold the head turn; f008 has the bow lifted and the hand on the
+      string, f009 the hand coming back to the hip.
+    - stance_front: the bow across her with the arrow nocked from f000; f005 to f007 the head scan the bow follows.
+    - live: the feet stay planted through f019; the idle hands the stance over between f012 and f013 with no pop.
+  - Alternative, not done: a thread between the fingers as its own mesh. The string of the bow is the thread.
+  - Ported onto the v95 model (ext/idle-archer-rebased-port): `glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`
+    (not `--hold-moved-rest`: that held her hips and legs at rest, the feet sank 5 cm and the weight shift was lost).
+    The v95 rig has no `x_breath` bone, so its track is dropped; the chest breath is the chest pitch only. `hem_clips.py`
+    still adds the bone on the next re-bake from a blend (posekit `add_breath`). The feet slide about 2 cm over the shift
+    (the v95 legs are longer than the keys were made for); a re-bake from the v95 blend would plant them.
 
 ### 12. Grimble the Scrap King (`dredge`, art `dredge`)
 
@@ -367,6 +394,11 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The hook taps his leg.
 - **Target stance (6 s):**
   - The same feet. He pulls a coin, squints at it through the loupe, bites it, and pockets it.
+- **Done (ext/idle-dredge-rebased-port):** tools/art1/grimble_clips.py `idle` and `stance` on READY's feet.
+  - Idle: the weight goes from foot to foot, with the chest, head, hands and hoard trailing it by 0.1 to 0.4 s. Once a loop he taps the hook on his thigh three times with a grin.
+  - Stance: he digs into the hoard over his left shoulder, holds the coin up and turns his loupe to it, bites it, grins, then pockets it at his hip with a pat.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 135 of 138 tracks): the v95 rig has no `x_breath` bone, so the breath is not in the game build (the script still adds it when it bakes a blend).
+  - The scrap hand is rigid on `hand.L` (its fingers have no skin), so the claw tips hold the "coin", and the hand is kept beside the face rather than in front of the snout. Alternative: a coin prop.
 
 ## The check
 

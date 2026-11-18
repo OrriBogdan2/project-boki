@@ -90,8 +90,7 @@ Both runs below use `--bot-kit-use=<arch>` (seeds 3, 5, 9, 120 s, both fighters 
 | Tenzo Quakefall | 25 hits / 14 slams | 35 hits / 18 slams |
 | Tenzo Stone Row | 0 rock hits / 10 rocks raised, 7 launched | 4 rock hits / 31 raised, 27 launched |
 
-The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). The audit's other claims stand: Cinder's flamethrower and Meeko's R are not in this change.
-## Ultimate and Boki in a match
+The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). Cinder's flamethrower and Meeko's R are in the bullets above (ext/bot-kit-cinder-meeko).
 
 ## The landing gate (ext/bot-kit-lands)
 
@@ -107,6 +106,8 @@ The Snap did not change: the bots' general aim already leads the target by the w
 | Tenzo Quakefall hits | 30 | 32 |
 
 Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. The one red left is Gil's `rmb press` (above), red on origin/main too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.
+
+## Ultimate and Boki in a match
 
 The duels above count presses; they don't say whether a bot fires its ultimate when it matters or brings its Boki to a fight. `--bot-kit-use --kit-use-match` (tools/bot_ult_use.gd) plays **one seeded 10-trio match per seed (3 and 5, 300 s each, bot difficulty "medium", every Hunter a bot)** with every Hunter raised to level 6 at the start, so the ultimate is open from the first fight. It takes about 3.5 minutes a seed.
 
@@ -175,4 +176,4 @@ No failures. Runs differ (the bots roll unseeded random numbers), so a row can m
 - **Gil** (`gil_kit.gd`): aims the Tidal Wave at the rival (it rolled along whatever the bot was facing).
 - **Albert** (`bulwark_kit.gd`): the Faultline before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
 - **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
-- Meeko's Hearth Call is unchanged (it waits for a hurt teammate); Lace, Kael, Cinder, Neve, Sable were already on time.
+- Meeko's Hearth Call is unchanged by this pass (see ext/bot-kit-cinder-meeko above); Lace, Kael, Cinder, Neve, Sable were already on time.

@@ -189,7 +189,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
 		inp["aim_y"] = tgt.hit_y()      # someone below a lip: their balloon, not their body
 		var los := los_to(m, h, tgt, dt)
-		# fast guns fire in bursts with a beat between them (to reposition); slow ones on cooldown
+		# fast guns fire in bursts, a beat between to reposition (longer on easier bots); slow ones on cooldown
 		a["burst"] = float(a.get("burst", 0.0)) - dt
 		var duty := float(df.get("fire", 0.8))
 		if a["burst"] < -randf_range(0.35, 0.6) / maxf(0.25, duty) * (1.0 if duty >= 0.99 else 1.4):

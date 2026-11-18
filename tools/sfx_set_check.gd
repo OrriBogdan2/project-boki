@@ -983,7 +983,8 @@ func _held_fire(main: Node) -> void:
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
 		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run.has(0)
 		var others := _distinct(run)
-		ok(opens and repeats == 0 and others >= 3,
+		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
+		ok(opens and repeats == 0 and others >= want_others,
 			"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)" % [
 				sname, others, str(takes.slice(0, 8))])
 		await main.get_tree().create_timer(1.0).timeout
