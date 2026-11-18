@@ -4,6 +4,6 @@
  "script": "tools/gen_sfx_carry.py",
  "sounds": {"carry_swap_out": "boki", "carry_swap_in": "boki", "carry_claim": "ui", "carry_stolen": "cast", "carry_take": "cast"},
  "signature": [],
- "reach": {"carry_take": 30},
+ "reach": {"carry_take": 34},
  "replaces": []
 }

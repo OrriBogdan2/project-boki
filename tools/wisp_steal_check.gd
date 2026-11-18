@@ -1,7 +1,8 @@
 extends RefCounted
 ## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A downed hunter's wisp
-## breaks loose (one boki_downed) and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief gets its
-## carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the window; at most
+## breaks loose (one boki_downed) and floats; holding interact beside it grabs it
+## (the prompt shows the key cap); the thief gets its carry passive at half strength (clamped) and the owner loses
+## it; one stolen summon at half the window; at most
 ## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
 ## ungrabbed wisp goes home and stays; match end sends every stolen wisp home; the kin snapshot carries the
 ## carrier. The passive rows are the carry-passive stacking (own Boki 100 %, stolen at passive_k, clamped at the
