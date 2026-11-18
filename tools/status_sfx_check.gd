@@ -119,7 +119,8 @@ func _body_statuses() -> void:
 	var other := sounding("st_stun", mine)
 	var other_db := other.volume_db if other else 99.0
 	var gain := mine_db - other_db
-	ok(absf(gain - float(rules["mine_db"])) < 0.5, "yours is %.1f dB louder (rules %.1f)" % [gain, float(rules["mine_db"])])
+	var rule_db := float(rules["mine_db"])
+	ok(absf(gain - rule_db) < 0.5, "yours is %.1f dB louder (rules %.1f)" % [gain, rule_db])
 	await _free(m)
 
 func _kit_statuses() -> void:
