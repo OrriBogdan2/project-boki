@@ -10220,3 +10220,4 @@ READY ext/faces-ship-1118 7acaed12d1cd0f85b2ed079b0c52b4bc555d7c2e (PR pending v
 READY ext/merge-lane-vfx1-1117 ed2364c39e (vfx1 lane train PR #263: 6 sound/impact branches + main e82475425a; full suite NEW-RED 0, export 865 MB)
 READY ext/sable-face-game-1118 4e4fbb9577 (Sable new painted face texture swap, candidate A; texture-only, PR #284 also touches sable.glb: re-apply the 2 jpgs on whichever lands second; do not merge until owner OKs the face)
 READY ext/merge-lane-hunters8-1117 06340533ad (merge lane hunters8: 6 hunter/kit branches ported onto main; 16 archived, 7 HARD; PR via gh-outbox)
+READY ext/merge-lane-uihud-1117 29725dcac9 (uihud lane 1117: 5 branches incl. rest of PR #104, ui-overload, hud-g-armor, fsm-check; gate fixes; 11 HARD listed in lanes/uihud-RESULT.md)
