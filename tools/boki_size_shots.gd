@@ -26,6 +26,8 @@ func run(main_node: Node) -> void:
 			no_fit = true
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
+	m.hud.visible = false      # no name tag or health bar over the Boki
+	cam_at = P.pos + Vector3(GAP * 0.5, 0, 0)
 	for sp in species:
 		if no_fit:
 			Unique.base_size(String(sp))["fit"] = 1.0
@@ -37,7 +39,7 @@ func run(main_node: Node) -> void:
 		var k: Kin = m.spawn_wild(rec, P.pos + Vector3(GAP, 0, 0))
 		await _go(0.6)
 		var img := main.get_viewport().get_texture().get_image()
-		var mid := (P.pos + k.global_position) * 0.5 + Vector3(0, 0.9, 0)
+		var mid := (P.pos + k.global_position) * 0.5 + Vector3(0, 0.7, 0)
 		_crop(img, mid, CROP_PX, ZOOM).save_png(dir.path_join("size_%s.png" % sp))
 		m.kins.erase(k)
 		k.queue_free()
