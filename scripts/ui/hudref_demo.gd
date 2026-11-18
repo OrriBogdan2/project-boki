@@ -25,6 +25,10 @@ static func tick(m) -> void:
 	if mode == "" or m.player == null or m.time < 0.05:
 		return
 	var P: Hunter = m.player
+	if mode == "plates" and m.has_meta("hudref_set"):
+		# face the row every frame: the 120 degree sight cone hides plates of rivals behind you, and a headless run
+		# has no pointer to aim with (the windowed picture gets the same aim from the pointer at the bottom edge)
+		P.inp["aim"] = P.pos + Vector3(0, 0.9, 4.4)
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
