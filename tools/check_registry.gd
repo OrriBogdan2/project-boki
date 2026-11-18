@@ -334,6 +334,7 @@ const CHECKS := {
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],  # hold poses need the key
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
+	"--play-probe": ["res://tools/play_probe.gd", "play_probe", null],  # automated player: physics and controls
 	"--duel-sim": ["res://tools/duel_sim.gd", "duel_sim", null],      # 12x12 bot duels (docs/BALANCE_1111.md)
 	"--boss-focus-check": ["res://tools/boss_focus_check.gd", "boss_focus_check", null],      # decision 0061
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
