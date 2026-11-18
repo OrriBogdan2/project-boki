@@ -69,7 +69,8 @@ func run(mn: Node) -> void:
 func _off() -> void:
 	var p := _ready_player()
 	ok(not KinMerge.ready(p) and KinMerge.plan(p) == "" and not KinMerge.can_cast(p), "off: a full meter is not ready")
-	ok(not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p), "off: press, cast and surge start nothing")
+	ok(not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p),
+			"off: press, cast and surge start nothing")
 	p.inp["ult"] = true
 	_run_for(0.5)
 	ok(p.merge_st.is_empty() and KinMerge.deny_text(p) == "", "off: the X input does nothing and says nothing")
@@ -104,15 +105,18 @@ func _off_match() -> void:
 
 
 func _off_text() -> void:
-	ok(not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"), "off: the Boki tip is silent")
+	ok(not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"),
+			"off: the Boki tip is silent")
 	var tips_seen := {}
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []
 		tips_seen[TipPick.pick(["no_summon"])] = true
-	ok(not tips_seen.keys().any(func(t): return String(t).contains("fuses you")), "off: no loading tip about the bond fuse")
+	ok(not tips_seen.keys().any(func(t): return String(t).contains("fuses you")),
+			"off: no loading tip about the bond fuse")
 	Save.d["matches"] = 20
 	ok(not WordsView.visible().any(func(w): return w["term"] == "Fusion"), "off: the Words page has no Fusion")
-	ok(not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"), "off: the kit card has no Fusion row")
+	ok(not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"),
+			"off: the kit card has no Fusion row")
 	ok(not ClassCard.kit_tip("bulwark").contains("Fusion"), "off: the class tooltip has no Fusion")
 	ok(not _controls_text().contains("ultimate"), "off: the controls card has no Fusion row")
 	ok(not _has_action_row("ultimate"), "off: the keybind list has no Fusion row")
@@ -120,8 +124,10 @@ func _off_text() -> void:
 
 func _off_tutorial() -> void:
 	var tu := _tutorial()
-	ok(not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"), "off: the tutorial skips its Fusion steps")
-	ok(TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"), "off: no tutorial point goes to Fusion")
+	ok(not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
+			"off: the tutorial skips its Fusion steps")
+	ok(TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
+			"off: no tutorial point goes to Fusion")
 
 
 # ------------------------------------------------------------------ 3. on
@@ -141,7 +147,8 @@ func _on() -> void:
 	p.lvl = 9
 	ok(p.can_level("ult"), "on: a skill point can go into the Fusion slot")
 	Save.d["matches"] = 20
-	ok(TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"), "on: tip and word are back")
+	ok(TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"),
+			"on: tip and word are back")
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
 	var tu := _tutorial()

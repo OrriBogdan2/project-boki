@@ -1,6 +1,6 @@
 class_name KinBond
 extends RefCounted
-## The one place the bond meter (Hunter.ult, 0..1) is filled (never while Fusion is off, MergeForm.enabled). Fighting fills it through Bond (hits, combos, the
+## The one place the bond meter (Hunter.ult, 0..1) is filled. Fighting fills it through Bond (hits, combos, the
 ## passive trickle); a hero's own ultimate fills it through from_ult(), so ult -> Merge is a combo and Merge is never
 ## locked behind the ult. Owner-side only: a remote hunter's meter comes from its own game.
 ## Numbers: content/rules/boki_system.json `bond_from_ult` (a share of the bar per kind of ult event).
@@ -14,8 +14,11 @@ static func rules() -> Dictionary:
 ## Adds `amount` (a share of the bar, clamped to a full bar). `reason` is "fight" (Bond, keeps today's rules) or
 ## anything else ("ult_hit", ...): those are also blocked while merged (the bar is spent) and while the Boki cannot
 ## fight (downed, resting, away), like normal fill. Returns the share actually added.
+## Fusion off: nothing is added.
 static func add(h: Hunter, amount: float, reason: String) -> float:
-	if not MergeForm.enabled() or h == null or not is_instance_valid(h) or h.out or h.remote or amount <= 0.0 or h.ult >= 1.0:
+	if not MergeForm.enabled() or h == null or not is_instance_valid(h) or h.out or h.remote:
+		return 0.0
+	if amount <= 0.0 or h.ult >= 1.0:
 		return 0.0
 	if reason != FIGHT and (KinMerge.active(h) or h.downed or not h.has_kin_ready()):
 		return 0.0

@@ -40,7 +40,9 @@ static func transforming(h: Hunter) -> bool:
 ## Is the meter full and the slot ready (not counting where the Boki is)? Never while Fusion is off
 ## (MergeForm.enabled): every start (X, bots, the Boki's own call, the tutorial) goes through here.
 static func ready(h: Hunter) -> bool:
-	if not MergeForm.enabled() or h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping or active(h) or h.merge_cd > 0.0:
+	if not MergeForm.enabled() or h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping:
+		return false
+	if active(h) or h.merge_cd > 0.0:
 		return false
 	return int(h.slot_lv.get("ult", 0)) > 0
 

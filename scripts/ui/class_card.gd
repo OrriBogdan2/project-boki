@@ -100,7 +100,7 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
 	return row
 
-## A Hunter's kit in one tooltip: its name, then dash, passive, and the right click and signature keys (and fusion while it is on).
+## A Hunter's kit in one tooltip: name, dash, passive, right click, signature, and fusion while it is on.
 static func kit_tip(id: String) -> String:
 	var adf := Arch.def(id)
 	var nm := func(slot: String) -> String: return String(adf[slot]["name"])
