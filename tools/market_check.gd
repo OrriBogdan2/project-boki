@@ -98,6 +98,10 @@ func _levels() -> void:
 	var hm := HomeMarket.new(null, Callable())
 	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Relics", "Exchange"],
 		"L1: the vendor (and the Exchange) only: %s" % str(hm.tabs()))
+	FarmUnlocks.rules()["base_mode"] = true
+	ok(hm.tabs() == ["Vendor", "Relics", "Shelter"] and Shelter.open(),
+		"base_mode: the Shelter is open at L1 (no Upgrades tab there), no Exchange: %s" % str(hm.tabs()))
+	FarmUnlocks.rules()["base_mode"] = false
 	var keys := func(tab: String) -> Array:
 		hm.vendor_tab = tab
 		var out: Array = []
