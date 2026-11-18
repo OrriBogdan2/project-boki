@@ -78,7 +78,8 @@ skirt hangs and trails instead of being skinned to the legs. The skeleton's modi
 camera: no cost in a match).
 `tools/art1/glb_cloth_bones.py <glb> art/wardens/src/<art>_cloth.json` adds the chains to a built .glb and re-skins the
 named materials' vertices (those mostly skinned to the thighs, plus small strand pieces in other colour slots: `loose`) to
-them by angle and height: no Blender, mesh, UVs, textures
+them by angle and height (`hug`: cloth lying on the front and sides of the legs keeps its leg weights, blended to the
+chains with distance from the leg: hybrid weights; `legs`: chain joints start outside the leg capsules): no Blender, mesh, UVs, textures
 and clips stay byte-identical. Lace (`hem`) is the first: 8 panels x 5 joints + tip.
 `--cloth-shots` (tools/cloth_shots.gd) renders a Warden moving (idle, run, dash, lmb; game and orbit cameras) and benches 8 copies.
 
