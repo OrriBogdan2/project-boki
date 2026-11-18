@@ -136,6 +136,7 @@ var start_bones: Array = []  # [bone index, rotation]: loco "start_blend" bones,
 var start_s := 0.0           # s those bones take to ease from that pose into the clips
 var start_t := 0.0           # s since he set off
 var stride: WardenStride
+var knock: WardenKnockLean   # the hips tipped where a knock sends him
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -171,6 +172,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
+	c.knock = WardenKnockLean.new(sk, c.d["loco"])
 	return c
 
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
@@ -743,6 +745,7 @@ func step(dt: float) -> void:
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	knock.step(s, not proc, dt)
 	stride.step(dt, s, self)
 	_air_tilt()
 	if turn:
