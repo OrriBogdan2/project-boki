@@ -24,8 +24,8 @@ const WARDENS := {
 	"mage": {"height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
 	"thief": {"height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
-	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
-	"dolm": {"height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
+	# (lean; height_3d: re-measured on the 11-18 r2 A model, the locs stand over the head)
+	"dolm": {"height": 1.09, "height_3d": 1.19, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
 	# (height_3d: the appeal3 model's cap points flop out to the sides, not up over his crown; was 1.26)
@@ -36,8 +36,8 @@ const WARDENS := {
 	"ashwick": {"height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
 	"juggernaut": {"height": 1.24, "height_3d": 1.28, "width": [1.0, 2.0], "moves": "jug"},
-	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
-	"dredge": {"height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
+	# (Grimble: the head at his old height; height_3d re-measured on the 11-18 r2 A model, its hoard stands higher)
+	"dredge": {"height": 1.48, "height_3d": 1.58, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears; the appeal3 v95 swap's ears stand lower: 0.71)
 	"tender": {"height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
