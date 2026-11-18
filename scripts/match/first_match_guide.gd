@@ -176,7 +176,8 @@ func draw(h, sz: Vector2) -> void:
 static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
 	if text == "":
 		return
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, t, _below(h.m)), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+	var shown := TutorialStrip.shown(sz, t, _below(h.m))
+	TutorialStrip.paint(h.c, h.big, shown, {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
 
 ## Where the line's strip ends (0 with no line up): the message column starts under it, never behind it.
 func bottom(sz: Vector2) -> float:
