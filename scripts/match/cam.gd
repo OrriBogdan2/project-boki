@@ -300,7 +300,9 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
 	# never reads as sliding back on screen and a landing doesn't drift on; recording mode has its own rates
 	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y
-	var y_rate := float(rr[1]) if Record.clean() else (FOLLOW_Y_TIGHT if tight else FOLLOW_Y)
+	var y_rate := FOLLOW_Y_TIGHT if tight else FOLLOW_Y
+	if Record.clean():
+		y_rate = float(rr[1])
 	var ky := 1.0 - exp(-y_rate * delta)
 	var flat := Vector2(base.x, base.z)
 	if Record.clean():
